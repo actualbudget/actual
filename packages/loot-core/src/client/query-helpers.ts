@@ -1,7 +1,7 @@
+// @ts-strict-ignore
 import { listen, send } from '../platform/client/fetch';
 import { once } from '../shared/async';
-import q, { getPrimaryOrderBy } from '../shared/query';
-export default q;
+import { getPrimaryOrderBy } from '../shared/query';
 
 export async function runQuery(query) {
   return send('query', query.serialize());

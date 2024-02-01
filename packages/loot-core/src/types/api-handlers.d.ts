@@ -54,12 +54,18 @@ export interface ApiHandlers {
     payees;
   }) => Promise<unknown>;
 
-  'api/transactions-import': (arg: {
+  'api/transactions-import': (arg: { accountId; transactions }) => Promise<{
+    errors?: { message: string }[];
+    added;
+    updated;
+  }>;
+
+  'api/transactions-add': (arg: {
     accountId;
     transactions;
-  }) => Promise<unknown>;
-
-  'api/transactions-add': (arg: { accountId; transactions }) => Promise<'ok'>;
+    runTransfers?: boolean;
+    learnCategories?: boolean;
+  }) => Promise<'ok'>;
 
   'api/transactions-get': (arg: {
     accountId;
@@ -67,16 +73,15 @@ export interface ApiHandlers {
     endDate;
   }) => Promise<unknown>;
 
-  /** @deprecated `filterTransactions` is deprecated, use `runQuery` instead' */
-  'api/transactions-filter': (arg: { text; accountId }) => Promise<void>;
-
   'api/transaction-update': (arg: { id; fields }) => Promise<unknown>;
 
   'api/transaction-delete': (arg: { id }) => Promise<unknown>;
 
-  'api/accounts-get': () => Promise<unknown>;
+  'api/sync': () => Promise<unknown>;
 
-  'api/account-create': (arg: { account; initialBalance }) => Promise<unknown>;
+  'api/accounts-get': () => Promise<AccountEntity[]>;
+
+  'api/account-create': (arg: { account; initialBalance? }) => Promise<string>;
 
   'api/account-update': (arg: { id; fields }) => Promise<unknown>;
 
@@ -90,9 +95,11 @@ export interface ApiHandlers {
 
   'api/account-delete': (arg: { id }) => Promise<unknown>;
 
-  'api/categories-get': (arg: { grouped }) => Promise<unknown>;
+  'api/categories-get': (arg: {
+    grouped;
+  }) => Promise<Array<CategoryGroupEntity> | Array<CategoryEntity>>;
 
-  'api/category-group-create': (arg: { group }) => Promise<unknown>;
+  'api/category-group-create': (arg: { group }) => Promise<string>;
 
   'api/category-group-update': (arg: { id; fields }) => Promise<unknown>;
 
@@ -101,15 +108,15 @@ export interface ApiHandlers {
     transferCategoryId;
   }) => Promise<unknown>;
 
-  'api/category-create': (arg: { category }) => Promise<unknown>;
+  'api/category-create': (arg: { category }) => Promise<string>;
 
   'api/category-update': (arg: { id; fields }) => Promise<unknown>;
 
   'api/category-delete': (arg: { id; transferCategoryId }) => Promise<unknown>;
 
-  'api/payees-get': () => Promise<unknown>;
+  'api/payees-get': () => Promise<PayeeEntity[]>;
 
-  'api/payee-create': (arg: { payee }) => Promise<unknown>;
+  'api/payee-create': (arg: { payee }) => Promise<string>;
 
   'api/payee-update': (arg: { id; fields }) => Promise<unknown>;
 

@@ -13,7 +13,7 @@ type ExternalLinkProps = {
   linkColor?: keyof typeof externalLinkColors;
 };
 
-const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
+export const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
   ({ children, to, linkColor = 'blue' }, ref) => (
     // we can’t use <ExternalLink /> here for obvious reasons
     // eslint-disable-next-line no-restricted-syntax
@@ -28,5 +28,3 @@ const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
     </a>
   ),
 );
-
-export default ExternalLink;

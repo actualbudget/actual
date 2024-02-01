@@ -1,11 +1,11 @@
+// @ts-strict-ignore
 import { type ChangeEvent, type Ref } from 'react';
 
-import SvgRemove from '../../icons/v2/Remove';
-import SearchAlternate from '../../icons/v2/SearchAlternate';
+import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
 
-import Button from './Button';
-import InputWithContent from './InputWithContent';
+import { Button } from './Button';
+import { InputWithContent } from './InputWithContent';
 
 type SearchProps = {
   inputRef?: Ref<HTMLInputElement>;
@@ -16,7 +16,7 @@ type SearchProps = {
   width?: number;
 };
 
-export default function Search({
+export function Search({
   inputRef,
   value,
   onChange,
@@ -42,7 +42,7 @@ export default function Search({
             }
       }
       leftContent={
-        <SearchAlternate
+        <SvgSearchAlternate
           style={{
             width: 13,
             height: 13,

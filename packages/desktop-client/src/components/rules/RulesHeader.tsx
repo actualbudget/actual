@@ -3,12 +3,12 @@ import React from 'react';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import { SelectCell, Cell, TableHeader } from '../table';
 
-export default function RulesHeader() {
+export function RulesHeader() {
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
 
   return (
-    <TableHeader version="v2" style={{}}>
+    <TableHeader style={{}}>
       <SelectCell
         exposed={true}
         focused={false}

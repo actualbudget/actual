@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
@@ -7,14 +8,14 @@ import { getTestKeyError } from 'loot-core/src/shared/errors';
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import Button, { ButtonWithLoading } from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import InitialFocus from '../common/InitialFocus';
-import Input from '../common/Input';
-import Modal, { ModalButtons } from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button, ButtonWithLoading } from '../common/Button';
+import { ExternalLink } from '../common/ExternalLink';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
+import { Modal, ModalButtons } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 type FixEncryptionKeyProps = {
   modalProps: CommonModalProps;
@@ -22,7 +23,7 @@ type FixEncryptionKeyProps = {
   options: FinanceModals['fix-encryption-key'];
 };
 
-export default function FixEncryptionKey({
+export function FixEncryptionKey({
   modalProps,
   actions,
   options = {},

@@ -27,7 +27,7 @@ import {
   getPayeesById,
   getCategoriesById,
 } from 'loot-core/src/client/reducers/queries';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
@@ -43,25 +43,24 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
-import usePrevious from '../../hooks/usePrevious';
+import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
-import LeftArrow2 from '../../icons/v0/LeftArrow2';
-import RightArrow2 from '../../icons/v0/RightArrow2';
-import ArrowDown from '../../icons/v1/ArrowDown';
-import ArrowUp from '../../icons/v1/ArrowUp';
-import CheveronDown from '../../icons/v1/CheveronDown';
-import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
-import CalendarIcon from '../../icons/v2/Calendar';
-import Hyperlink2 from '../../icons/v2/Hyperlink2';
+import { SvgLeftArrow2, SvgRightArrow2 } from '../../icons/v0';
+import { SvgArrowDown, SvgArrowUp, SvgCheveronDown } from '../../icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar,
+  SvgHyperlink2,
+} from '../../icons/v2';
 import { styles, theme } from '../../style';
-import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
+import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
-import DateSelect from '../select/DateSelect';
+import { DateSelect } from '../select/DateSelect';
 import {
   Cell,
   Field,
@@ -169,54 +168,57 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   const cachedState = useSelector(state => state.app.lastSplitState);
   const reduxDispatch = useDispatch();
 
-  const [state, dispatch] = useReducer((state, action) => {
-    switch (action.type) {
-      case 'toggle-split': {
-        const ids = new Set([...state.ids]);
-        const { id } = action;
-        if (ids.has(id)) {
-          ids.delete(id);
-        } else {
-          ids.add(id);
+  const [state, dispatch] = useReducer(
+    (state, action) => {
+      switch (action.type) {
+        case 'toggle-split': {
+          const ids = new Set([...state.ids]);
+          const { id } = action;
+          if (ids.has(id)) {
+            ids.delete(id);
+          } else {
+            ids.add(id);
+          }
+          return { ...state, ids };
         }
-        return { ...state, ids };
-      }
-      case 'open-split': {
-        const ids = new Set([...state.ids]);
-        const { id } = action;
-        if (state.mode === 'collapse') {
-          ids.delete(id);
-        } else {
-          ids.add(id);
+        case 'open-split': {
+          const ids = new Set([...state.ids]);
+          const { id } = action;
+          if (state.mode === 'collapse') {
+            ids.delete(id);
+          } else {
+            ids.add(id);
+          }
+          return { ...state, ids };
         }
-        return { ...state, ids };
-      }
-      case 'set-mode': {
-        return {
-          ...state,
-          mode: action.mode,
-          ids: new Set(),
-          transitionId: null,
-        };
-      }
-      case 'switch-mode':
-        if (state.transitionId != null) {
-          // You can only transition once at a time
-          return state;
+        case 'set-mode': {
+          return {
+            ...state,
+            mode: action.mode,
+            ids: new Set(),
+            transitionId: null,
+          };
         }
+        case 'switch-mode':
+          if (state.transitionId != null) {
+            // You can only transition once at a time
+            return state;
+          }
 
-        return {
-          ...state,
-          mode: state.mode === 'expand' ? 'collapse' : 'expand',
-          transitionId: action.id,
-          ids: new Set(),
-        };
-      case 'finish-switch-mode':
-        return { ...state, transitionId: null };
-      default:
-        throw new Error('Unknown action type: ' + action.type);
-    }
-  }, cachedState.current || { ids: new Set(), mode: initialMode });
+          return {
+            ...state,
+            mode: state.mode === 'expand' ? 'collapse' : 'expand',
+            transitionId: action.id,
+            ids: new Set(),
+          };
+        case 'finish-switch-mode':
+          return { ...state, transitionId: null };
+        default:
+          throw new Error('Unknown action type: ' + action.type);
+      }
+    },
+    cachedState.current || { ids: new Set(), mode: initialMode },
+  );
 
   useEffect(() => {
     if (state.transitionId != null) {
@@ -367,7 +369,7 @@ const TransactionHeader = memo(
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
         {showCleared && <Field width={23} truncate={false} />}
-        <Cell value="" width={5 + scrollWidth ?? 0} />
+        <Cell value="" width={5 + (scrollWidth ?? 0)} />
       </Row>
     );
   },
@@ -420,14 +422,14 @@ function StatusCell({
     status === 'cleared'
       ? theme.noticeTextLight
       : status === 'reconciled'
-      ? theme.noticeTextLight
-      : status === 'missed'
-      ? theme.errorText
-      : status === 'due'
-      ? theme.warningText
-      : selected
-      ? theme.pageTextLinkLight
-      : theme.pageTextSubdued;
+        ? theme.noticeTextLight
+        : status === 'missed'
+          ? theme.errorText
+          : status === 'due'
+            ? theme.warningText
+            : selected
+              ? theme.pageTextLinkLight
+              : theme.pageTextSubdued;
 
   function onSelect() {
     if (isClearedField) {
@@ -503,10 +505,10 @@ function HeaderCell({
         >
           <UnexposedCellContent value={value} />
           {icon === 'asc' && (
-            <ArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
+            <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
           )}
           {icon === 'desc' && (
-            <ArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+            <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
           )}
         </Button>
       }
@@ -655,9 +657,9 @@ function PayeeIcons({
           }}
         >
           {recurring ? (
-            <ArrowsSynchronize style={scheduleIconStyle} />
+            <SvgArrowsSynchronize style={scheduleIconStyle} />
           ) : (
-            <CalendarIcon style={scheduleIconStyle} />
+            <SvgCalendar style={scheduleIconStyle} />
           )}
         </Button>
       )}
@@ -674,9 +676,9 @@ function PayeeIcons({
           }}
         >
           {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
-            <LeftArrow2 style={transferIconStyle} />
+            <SvgLeftArrow2 style={transferIconStyle} />
           ) : (
-            <RightArrow2 style={transferIconStyle} />
+            <SvgRightArrow2 style={transferIconStyle} />
           )}
         </Button>
       )}
@@ -754,7 +756,8 @@ const Transaction = memo(function Transaction(props) {
         (name === 'credit' ||
           name === 'debit' ||
           name === 'payee' ||
-          name === 'account')
+          name === 'account' ||
+          name === 'date')
       ) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
@@ -769,6 +772,16 @@ const Transaction = memo(function Transaction(props) {
       } else {
         onUpdateAfterConfirm(name, value);
       }
+    }
+
+    // Allow un-reconciling (unlocking) transactions
+    if (name === 'cleared' && transaction.reconciled) {
+      props.pushModal('confirm-transaction-edit', {
+        onConfirm: () => {
+          onUpdateAfterConfirm('reconciled', false);
+        },
+        confirmReason: 'unlockReconciled',
+      });
     }
   }
 
@@ -869,8 +882,8 @@ const Transaction = memo(function Transaction(props) {
         backgroundColor: selected
           ? theme.tableRowBackgroundHighlight
           : backgroundFocus
-          ? theme.tableRowBackgroundHover
-          : theme.tableBackground,
+            ? theme.tableRowBackgroundHover
+            : theme.tableBackground,
         ':hover': !(backgroundFocus || selected) && {
           backgroundColor: theme.tableRowBackgroundHover,
         },
@@ -943,7 +956,9 @@ const Transaction = memo(function Transaction(props) {
           style={{ ...(isChild && { borderLeftWidth: 1 }) }}
           value={
             matched && (
-              <Hyperlink2 style={{ width: 13, height: 13, color: 'inherit' }} />
+              <SvgHyperlink2
+                style={{ width: 13, height: 13, color: 'inherit' }}
+              />
             )
           }
         />
@@ -1088,18 +1103,18 @@ const Transaction = memo(function Transaction(props) {
                   notes === 'missed'
                     ? theme.errorText
                     : notes === 'due'
-                    ? theme.warningText
-                    : selected
-                    ? theme.formLabelText
-                    : theme.upcomingText,
+                      ? theme.warningText
+                      : selected
+                        ? theme.formLabelText
+                        : theme.upcomingText,
                 backgroundColor:
                   notes === 'missed'
                     ? theme.errorBackground
                     : notes === 'due'
-                    ? theme.warningBackground
-                    : selected
-                    ? theme.formLabelBackground
-                    : theme.upcomingBackground,
+                      ? theme.warningBackground
+                      : selected
+                        ? theme.formLabelBackground
+                        : theme.upcomingBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
@@ -1143,7 +1158,7 @@ const Transaction = memo(function Transaction(props) {
               }}
             >
               {isParent && (
-                <CheveronDown
+                <SvgCheveronDown
                   style={{
                     color: 'inherit',
                     width: 14,
@@ -1172,10 +1187,10 @@ const Transaction = memo(function Transaction(props) {
             isParent
               ? 'Split'
               : isOffBudget
-              ? 'Off Budget'
-              : isBudgetTransfer
-              ? 'Transfer'
-              : ''
+                ? 'Off Budget'
+                : isBudgetTransfer
+                  ? 'Transfer'
+                  : ''
           }
           valueStyle={valueStyle}
           style={{
@@ -1202,8 +1217,8 @@ const Transaction = memo(function Transaction(props) {
                   'name',
                 )
               : transaction.id
-              ? 'Categorize'
-              : ''
+                ? 'Categorize'
+                : ''
           }
           exposed={focusedField === 'category'}
           onExpose={name => onEdit(id, name)}
@@ -1331,10 +1346,10 @@ const Transaction = memo(function Transaction(props) {
             isPreview
               ? notes
               : reconciled
-              ? 'reconciled'
-              : cleared
-              ? 'cleared'
-              : null
+                ? 'reconciled'
+                : cleared
+                  ? 'cleared'
+                  : null
           }
           isChild={isChild}
           onEdit={onEdit}
@@ -1347,7 +1362,14 @@ const Transaction = memo(function Transaction(props) {
   );
 });
 
-function TransactionError({ error, isDeposit, onAddSplit, style }) {
+function TransactionError({
+  error,
+  isDeposit,
+  onAddSplit,
+  onDistributeRemainder,
+  style,
+  canDistributeRemainder,
+}) {
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
@@ -1371,9 +1393,19 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
             </Text>
             <View style={{ flex: 1 }} />
             <Button
+              type="normal"
+              style={{ marginLeft: 15 }}
+              onClick={onDistributeRemainder}
+              data-testid="distribute-split-button"
+              disabled={!canDistributeRemainder}
+            >
+              Distribute
+            </Button>
+            <Button
               type="primary"
-              style={{ marginLeft: 15, padding: '4px 10px' }}
+              style={{ marginLeft: 10, padding: '4px 10px' }}
               onClick={onAddSplit}
+              data-testid="add-split-button"
             >
               Add Split
             </Button>
@@ -1431,6 +1463,7 @@ function NewTransaction({
   onSave,
   onAdd,
   onAddSplit,
+  onDistributeRemainder,
   onManagePayees,
   onCreatePayee,
   onNavigateToTransferAccount,
@@ -1439,6 +1472,10 @@ function NewTransaction({
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
+
+  const emptyChildTransactions = transactions.filter(
+    t => t.parent_id === transactions[0].id && t.amount === 0,
+  );
 
   return (
     <View
@@ -1506,6 +1543,10 @@ function NewTransaction({
             error={error}
             isDeposit={isDeposit}
             onAddSplit={() => onAddSplit(transactions[0].id)}
+            onDistributeRemainder={() =>
+              onDistributeRemainder(transactions[0].id)
+            }
+            canDistributeRemainder={emptyChildTransactions.length > 0}
           />
         ) : (
           <Button
@@ -1595,25 +1636,38 @@ function TransactionTableInner({
       ? (parent && parent.error) || trans.error
       : trans.error;
 
+    const hasSplitError =
+      (!expanded || isLastChild(transactions, index)) &&
+      error &&
+      error.type === 'SplitTransactionError';
+
+    const emptyChildTransactions = transactions.filter(
+      t =>
+        t.parent_id === (trans.is_parent ? trans.id : trans.parent_id) &&
+        t.amount === 0,
+    );
+
     return (
       <>
-        {(!expanded || isLastChild(transactions, index)) &&
-          error &&
-          error.type === 'SplitTransactionError' && (
-            <Tooltip
-              position="bottom-right"
-              width={250}
-              forceTop={position}
-              forceLayout={true}
-              style={{ transform: 'translate(-5px, 2px)' }}
-            >
-              <TransactionError
-                error={error}
-                isDeposit={isChildDeposit}
-                onAddSplit={() => props.onAddSplit(trans.id)}
-              />
-            </Tooltip>
-          )}
+        {hasSplitError && (
+          <Tooltip
+            position="bottom-right"
+            width={350}
+            forceTop={position}
+            forceLayout={true}
+            style={{ transform: 'translate(-5px, 2px)' }}
+          >
+            <TransactionError
+              error={error}
+              isDeposit={isChildDeposit}
+              onAddSplit={() => props.onAddSplit(trans.id)}
+              onDistributeRemainder={() =>
+                props.onDistributeRemainder(trans.id)
+              }
+              canDistributeRemainder={emptyChildTransactions.length > 0}
+            />
+          </Tooltip>
+        )}
         <Transaction
           editing={editing}
           transaction={trans}
@@ -1704,6 +1758,7 @@ function TransactionTableInner({
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
+              onDistributeRemainder={props.onDistributeRemainder}
               balance={
                 props.transactions?.length > 0
                   ? props.balances?.[props.transactions[0]?.id]?.balance
@@ -1722,7 +1777,7 @@ function TransactionTableInner({
       >
         <Table
           navigator={tableNavigator}
-          tableRef={tableRef}
+          ref={tableRef}
           items={props.transactions}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
@@ -1967,7 +2022,9 @@ export const TransactionTable = forwardRef((props, ref) => {
       afterSave(() => {
         const transactions = latestState.current.transactions;
         const idx = transactions.findIndex(t => t.id === id);
-        const parent = transactionMap.get(transactions[idx]?.parent_id);
+        const parent = transactions.find(
+          t => t.id === transactions[idx]?.parent_id,
+        );
 
         if (
           isLastChild(transactions, idx) &&
@@ -2079,6 +2136,65 @@ export const TransactionTable = forwardRef((props, ref) => {
     [props.onAddSplit],
   );
 
+  const onDistributeRemainder = useCallback(
+    async id => {
+      const { transactions, tableNavigator, newTransactions } =
+        latestState.current;
+
+      const targetTransactions = isTemporaryId(id)
+        ? newTransactions
+        : transactions;
+      const transaction = targetTransactions.find(t => t.id === id);
+
+      const parentTransaction = transaction.is_parent
+        ? transaction
+        : targetTransactions.find(t => t.id === transaction.parent_id);
+
+      const siblingTransactions = targetTransactions.filter(
+        t =>
+          t.parent_id ===
+          (transaction.is_parent ? transaction.id : transaction.parent_id),
+      );
+
+      const emptyTransactions = siblingTransactions.filter(t => t.amount === 0);
+
+      const remainingAmount =
+        parentTransaction.amount -
+        siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
+
+      const amountPerTransaction = Math.floor(
+        remainingAmount / emptyTransactions.length,
+      );
+      let remainingCents =
+        remainingAmount - amountPerTransaction * emptyTransactions.length;
+
+      const amounts = new Array(emptyTransactions.length).fill(
+        amountPerTransaction,
+      );
+
+      for (const amountIndex in amounts) {
+        if (remainingCents === 0) break;
+
+        amounts[amountIndex] += 1;
+        remainingCents--;
+      }
+
+      if (isTemporaryId(id)) {
+        newNavigator.onEdit(null);
+      } else {
+        tableNavigator.onEdit(null);
+      }
+
+      for (const transactionIndex in emptyTransactions) {
+        await onSave({
+          ...emptyTransactions[transactionIndex],
+          amount: amounts[transactionIndex],
+        });
+      }
+    },
+    [latestState],
+  );
+
   function onCloseAddTransaction() {
     setNewTransactions(
       makeTemporaryTransactions(
@@ -2109,6 +2225,7 @@ export const TransactionTable = forwardRef((props, ref) => {
       onCheckEnter={onCheckEnter}
       onAddTemporary={onAddTemporary}
       onAddSplit={onAddSplit}
+      onDistributeRemainder={onDistributeRemainder}
       onCloseAddTransaction={onCloseAddTransaction}
       onToggleSplit={onToggleSplit}
       newTransactions={newTransactions}

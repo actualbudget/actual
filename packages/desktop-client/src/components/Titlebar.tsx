@@ -15,30 +15,32 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
-import useFeatureFlag from '../hooks/useFeatureFlag';
-import useNavigate from '../hooks/useNavigate';
-import ArrowLeft from '../icons/v1/ArrowLeft';
-import AlertTriangle from '../icons/v2/AlertTriangle';
-import NavigationMenu from '../icons/v2/NavigationMenu';
-import ViewHide from '../icons/v2/ViewHide';
-import ViewShow from '../icons/v2/ViewShow';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { useNavigate } from '../hooks/useNavigate';
+import { SvgArrowLeft } from '../icons/v1';
+import {
+  SvgAlertTriangle,
+  SvgNavigationMenu,
+  SvgViewHide,
+  SvgViewShow,
+} from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, type CSSProperties, styles } from '../style';
 
-import AccountSyncCheck from './accounts/AccountSyncCheck';
-import AnimatedRefresh from './AnimatedRefresh';
+import { AccountSyncCheck } from './accounts/AccountSyncCheck';
+import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import Button, { ButtonWithLoading } from './common/Button';
-import ExternalLink from './common/ExternalLink';
-import Link from './common/Link';
-import Paragraph from './common/Paragraph';
-import Text from './common/Text';
-import View from './common/View';
+import { Button, ButtonWithLoading } from './common/Button';
+import { ExternalLink } from './common/ExternalLink';
+import { Link } from './common/Link';
+import { Paragraph } from './common/Paragraph';
+import { Text } from './common/Text';
+import { View } from './common/View';
 import { KeyHandlers } from './KeyHandlers';
-import LoggedInUser from './LoggedInUser';
+import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar';
-import useSheetValue from './spreadsheet/useSheetValue';
+import { useSheetValue } from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
 
@@ -58,7 +60,14 @@ export type TitlebarContextValue = {
   subscribe: (listener: Listener) => () => void;
 };
 
-export const TitlebarContext = createContext<TitlebarContextValue>(null);
+export const TitlebarContext = createContext<TitlebarContextValue>({
+  sendEvent() {
+    throw new Error('TitlebarContext not initialized');
+  },
+  subscribe() {
+    throw new Error('TitlebarContext not initialized');
+  },
+});
 
 type TitlebarProviderProps = {
   children?: ReactNode;
@@ -85,26 +94,32 @@ export function TitlebarProvider({ children }: TitlebarProviderProps) {
 }
 
 function UncategorizedButton() {
-  const count = useSheetValue(queries.uncategorizedCount());
+  const count: number | null = useSheetValue(queries.uncategorizedCount());
+  if (count === null || count <= 0) {
+    return null;
+  }
+
   return (
-    count !== 0 && (
-      <Link
-        variant="button"
-        type="bare"
-        to="/accounts/uncategorized"
-        style={{
-          color: theme.errorText,
-        }}
-      >
-        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
-      </Link>
-    )
+    <Link
+      variant="button"
+      type="bare"
+      to="/accounts/uncategorized"
+      style={{
+        color: theme.errorText,
+      }}
+    >
+      {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+    </Link>
   );
 }
 
-function PrivacyButton({ style }) {
+type PrivacyButtonProps = {
+  style?: CSSProperties;
+};
+
+function PrivacyButton({ style }: PrivacyButtonProps) {
   const isPrivacyEnabled = useSelector(
-    state => state.prefs.local.isPrivacyEnabled,
+    state => state.prefs.local?.isPrivacyEnabled,
   );
   const { savePrefs } = useActions();
 
@@ -118,9 +133,9 @@ function PrivacyButton({ style }) {
       style={style}
     >
       {isPrivacyEnabled ? (
-        <ViewHide style={privacyIconStyle} />
+        <SvgViewHide style={privacyIconStyle} />
       ) : (
-        <ViewShow style={privacyIconStyle} />
+        <SvgViewShow style={privacyIconStyle} />
       )}
     </Button>
   );
@@ -131,11 +146,13 @@ type SyncButtonProps = {
   isMobile?: boolean;
 };
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
-  const cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
+  const cloudFileId = useSelector(state => state.prefs.local?.cloudFileId);
   const { sync } = useActions();
 
   const [syncing, setSyncing] = useState(false);
-  const [syncState, setSyncState] = useState(null);
+  const [syncState, setSyncState] = useState<
+    null | 'offline' | 'local' | 'disabled' | 'error'
+  >(null);
 
   useEffect(() => {
     const unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
@@ -174,18 +191,18 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     syncState === 'error'
       ? theme.errorText
       : syncState === 'disabled' ||
-        syncState === 'offline' ||
-        syncState === 'local'
-      ? theme.mobileHeaderTextSubdued
-      : theme.mobileHeaderText;
+          syncState === 'offline' ||
+          syncState === 'local'
+        ? theme.mobileHeaderTextSubdued
+        : theme.mobileHeaderText;
   const desktopColor =
     syncState === 'error'
       ? theme.errorTextDark
       : syncState === 'disabled' ||
-        syncState === 'offline' ||
-        syncState === 'local'
-      ? theme.tableTextLight
-      : 'inherit';
+          syncState === 'offline' ||
+          syncState === 'local'
+        ? theme.tableTextLight
+        : 'inherit';
 
   const activeStyle = isMobile
     ? {
@@ -247,12 +264,12 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       >
         {isMobile ? (
           syncState === 'error' ? (
-            <AlertTriangle width={14} height={14} />
+            <SvgAlertTriangle width={14} height={14} />
           ) : (
             <AnimatedRefresh width={18} height={18} animating={syncing} />
           )
         ) : syncState === 'error' ? (
-          <AlertTriangle width={13} />
+          <SvgAlertTriangle width={13} />
         ) : (
           <AnimatedRefresh animating={syncing} />
         )}
@@ -260,8 +277,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
           {syncState === 'disabled'
             ? 'Disabled'
             : syncState === 'offline'
-            ? 'Offline'
-            : 'Sync'}
+              ? 'Offline'
+              : 'Sync'}
         </Text>
       </Button>
     </>
@@ -269,8 +286,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 }
 
 function BudgetTitlebar() {
-  const maxMonths = useSelector(state => state.prefs.global.maxMonths);
-  const budgetType = useSelector(state => state.prefs.local.budgetType);
+  const maxMonths = useSelector(state => state.prefs.global?.maxMonths);
+  const budgetType = useSelector(state => state.prefs.local?.budgetType);
   const { saveGlobalPrefs } = useActions();
   const { sendEvent } = useContext(TitlebarContext);
 
@@ -363,14 +380,18 @@ function BudgetTitlebar() {
   );
 }
 
-export default function Titlebar({ style }) {
+type TitlebarProps = {
+  style?: CSSProperties;
+};
+
+export function Titlebar({ style }: TitlebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
   const floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
+    state => state.prefs.global?.floatingSidebar,
   );
 
   return isNarrowWidth ? null : (
@@ -410,7 +431,7 @@ export default function Titlebar({ style }) {
             }
           }}
         >
-          <NavigationMenu
+          <SvgNavigationMenu
             className="menu"
             style={{ width: 15, height: 15, color: theme.pageText, left: 0 }}
           />
@@ -423,7 +444,7 @@ export default function Titlebar({ style }) {
           element={
             location.state?.goBack ? (
               <Button type="bare" onClick={() => navigate(-1)}>
-                <ArrowLeft
+                <SvgArrowLeft
                   width={10}
                   height={10}
                   style={{ marginRight: 5, color: 'currentColor' }}

@@ -1,3 +1,6 @@
+// @ts-strict-ignore
+import { SchemaConfig } from '../compiler';
+
 function f(type: string, opts?: Record<string, unknown>) {
   return { type, ...opts };
 }
@@ -66,6 +69,7 @@ export const schema = {
     closed: f('boolean'),
     sort_order: f('float'),
     tombstone: f('boolean'),
+    account_sync_source: f('string'),
   },
   categories: {
     id: f('id'),
@@ -122,6 +126,26 @@ export const schema = {
     conditions: f('json'),
     tombstone: f('boolean'),
   },
+  custom_reports: {
+    id: f('id'),
+    name: f('string'),
+    start_date: f('string', { default: '2023-06' }),
+    end_date: f('string', { default: '2023-09' }),
+    mode: f('string', { default: 'total' }),
+    group_by: f('string', { default: 'Category' }),
+    balance_type: f('string', { default: 'Expense' }),
+    interval: f('string', { default: 'Monthly' }),
+    show_empty: f('integer', { default: 0 }),
+    show_offbudgethidden: f('integer', { default: 0 }),
+    show_uncategorized: f('integer', { default: 0 }),
+    selected_categories: f('json'),
+    graph_type: f('string', { default: 'BarGraph' }),
+    conditions: f('json'),
+    conditions_op: f('string'),
+    metadata: f('json'),
+    color_scheme: f('json'),
+    tombstone: f('boolean'),
+  },
   reflect_budgets: {
     id: f('id'),
     month: f('integer'),
@@ -140,7 +164,7 @@ export const schema = {
   },
 };
 
-export const schemaConfig = {
+export const schemaConfig: SchemaConfig = {
   // Note: these views *must* represent the underlying table that we
   // are mapping here. The compiler makes optimizations with this
   // assumption

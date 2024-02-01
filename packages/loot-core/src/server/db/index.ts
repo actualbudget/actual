@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   makeClock,
   setClock,
@@ -12,7 +13,11 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import { groupById } from '../../shared/util';
-import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import {
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+} from '../../types/models';
 import {
   schema,
   schemaConfig,
@@ -478,9 +483,10 @@ export function updatePayee(payee) {
   return update('payees', payee);
 }
 
-export async function mergePayees(target, ids) {
+export async function mergePayees(target: string, ids: string[]) {
   // Load in payees so we can check some stuff
-  const payees = groupById(await all('SELECT * FROM payees'));
+  const dbPayees: PayeeEntity[] = await all('SELECT * FROM payees');
+  const payees = groupById(dbPayees);
 
   // Filter out any transfer payees
   if (payees[target].transfer_acct != null) {
@@ -610,15 +616,6 @@ export async function getTransaction(id) {
     [id],
   );
   return rows[0];
-}
-
-export async function getTransactionsByDate(
-  accountId,
-  startDate,
-  endDate,
-  options = {},
-) {
-  throw new Error('`getTransactionsByDate` is deprecated');
 }
 
 export async function getTransactions(accountId) {

@@ -1,14 +1,15 @@
+// @ts-strict-ignore
 import React, { type CSSProperties, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 
-import ExpandArrow from '../../icons/v0/ExpandArrow';
-import CheveronDown from '../../icons/v1/CheveronDown';
+import { SvgExpandArrow } from '../../icons/v0';
+import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
-import Text from '../common/Text';
-import View from '../common/View';
-import NotesButton from '../NotesButton';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
+import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
 
@@ -26,7 +27,6 @@ type SidebarGroupProps = {
   collapsed: boolean;
   dragPreview?: boolean;
   innerRef?: ConnectDragSource;
-  borderColor?: string;
   style?: CSSProperties;
   onEdit?: (id: string) => void;
   onSave?: (group: object) => Promise<void>;
@@ -36,14 +36,13 @@ type SidebarGroupProps = {
   onToggleCollapse?: (id: string) => void;
 };
 
-function SidebarGroup({
+export function SidebarGroup({
   group,
   editing,
   collapsed,
   dragPreview,
   innerRef,
   style,
-  borderColor = theme.tableBorder,
   onEdit,
   onSave,
   onDelete,
@@ -62,12 +61,12 @@ function SidebarGroup({
         userSelect: 'none',
         WebkitUserSelect: 'none',
       }}
-      onClick={e => {
+      onClick={() => {
         onToggleCollapse(group.id);
       }}
     >
       {!dragPreview && (
-        <ExpandArrow
+        <SvgExpandArrow
           width={8}
           height={8}
           style={{
@@ -102,7 +101,7 @@ function SidebarGroup({
               }}
               style={{ padding: 3 }}
             >
-              <CheveronDown width={14} height={14} />
+              <SvgCheveronDown width={14} height={14} />
             </Button>
             {menuOpen && (
               <Tooltip
@@ -180,7 +179,7 @@ function SidebarGroup({
     >
       <InputCell
         value={group.name}
-        formatter={value => displayed}
+        formatter={() => displayed}
         width="flex"
         exposed={editing}
         onUpdate={value => {
@@ -204,5 +203,3 @@ function SidebarGroup({
     </View>
   );
 }
-
-export default SidebarGroup;

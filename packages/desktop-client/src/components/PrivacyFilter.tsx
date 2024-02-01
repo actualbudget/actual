@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useCallback,
@@ -6,13 +7,13 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import usePrivacyMode from 'loot-core/src/client/privacy';
+import { usePrivacyMode } from 'loot-core/src/client/privacy';
 
 import { useResponsive } from '../ResponsiveProvider';
 
-import View from './common/View';
+import { View } from './common/View';
 
-export type ConditionalPrivacyFilterProps = {
+type ConditionalPrivacyFilterProps = {
   children: ReactNode;
   privacyFilter?: boolean | PrivacyFilterProps;
   defaultPrivacyFilterProps?: PrivacyFilterProps;
@@ -46,7 +47,7 @@ type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
   activationFilters?: (boolean | (() => boolean))[];
   blurIntensity?: number;
 };
-export default function PrivacyFilter({
+export function PrivacyFilter({
   activationFilters,
   blurIntensity,
   children,

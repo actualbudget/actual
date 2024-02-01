@@ -1,20 +1,21 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import { type BoundActions } from '../../hooks/useActions';
-import useNavigate from '../../hooks/useNavigate';
+import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import FormError from '../common/FormError';
-import InitialFocus from '../common/InitialFocus';
-import InlineField from '../common/InlineField';
-import Input from '../common/Input';
-import Modal, { ModalButtons } from '../common/Modal';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { ExternalLink } from '../common/ExternalLink';
+import { FormError } from '../common/FormError';
+import { InitialFocus } from '../common/InitialFocus';
+import { InlineField } from '../common/InlineField';
+import { Input } from '../common/Input';
+import { Modal, ModalButtons } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 type CreateLocalAccountProps = {
@@ -22,7 +23,10 @@ type CreateLocalAccountProps = {
   actions: BoundActions;
 };
 
-function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
+export function CreateLocalAccount({
+  modalProps,
+  actions,
+}: CreateLocalAccountProps) {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
@@ -166,5 +170,3 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
     </Modal>
   );
 }
-
-export default CreateLocalAccount;

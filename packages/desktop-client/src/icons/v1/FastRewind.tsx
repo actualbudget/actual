@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgFastRewind = (props: SVGProps<SVGSVGElement>) => (
+export const SvgFastRewind = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -13,4 +13,3 @@ const SvgFastRewind = (props: SVGProps<SVGSVGElement>) => (
     <path d="M19 5v10l-9-5 9-5zm-9 0v10l-9-5 9-5z" fill="currentColor" />
   </svg>
 );
-export default SvgFastRewind;

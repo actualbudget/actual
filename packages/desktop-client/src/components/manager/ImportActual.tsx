@@ -1,14 +1,15 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, theme } from '../../style';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
-import Modal, { type ModalProps } from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import View from '../common/View';
+import { Modal, type ModalProps } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { View } from '../common/View';
 
 function getErrorMessage(error: string): string {
   switch (error) {
@@ -31,7 +32,7 @@ type ImportProps = {
   modalProps?: ModalProps;
 };
 
-function Import({ modalProps }: ImportProps) {
+export function ImportActual({ modalProps }: ImportProps) {
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
@@ -95,5 +96,3 @@ function Import({ modalProps }: ImportProps) {
     </Modal>
   );
 }
-
-export default Import;

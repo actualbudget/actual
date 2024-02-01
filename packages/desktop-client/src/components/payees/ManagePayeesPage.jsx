@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import { Page } from '../Page';
 
-import ManagePayeesWithData from './ManagePayeesWithData';
+import { ManagePayeesWithData } from './ManagePayeesWithData';
 
 export function ManagePayeesPage() {
   const location = useLocation();

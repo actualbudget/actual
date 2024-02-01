@@ -1,42 +1,37 @@
-import React, { type ReactNode, useEffect, useRef } from 'react';
+// @ts-strict-ignore
+import React, { type ReactNode, type UIEvent, useRef } from 'react';
 
 import { type CSSProperties } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 type SimpleTableProps = {
-  data: unknown;
   loadMore?: () => void;
   style?: CSSProperties;
   onHoverLeave?: () => void;
   children: ReactNode;
 };
 
-export default function SimpleTable({
-  data,
+export function SimpleTable({
   loadMore,
   style,
   onHoverLeave,
   children,
 }: SimpleTableProps) {
   const contentRef = useRef<HTMLDivElement>();
-  const contentHeight = useRef<number>();
   const scrollRef = useRef<HTMLDivElement>();
 
-  function onScroll(e) {
-    if (contentHeight.current != null) {
-      if (loadMore && e.target.scrollTop > contentHeight.current - 750) {
-        loadMore();
-      }
+  function onScroll(e: UIEvent<HTMLElement>) {
+    if (
+      loadMore &&
+      Math.abs(
+        e.currentTarget.scrollHeight -
+          e.currentTarget.clientHeight -
+          e.currentTarget.scrollTop,
+      ) < 1
+    ) {
+      loadMore();
     }
   }
-
-  useEffect(() => {
-    if (contentRef.current) {
-      contentHeight.current = contentRef.current.getBoundingClientRect().height;
-    } else {
-      contentHeight.current = null;
-    }
-  }, [contentRef.current, data]);
 
   return (
     <View

@@ -1,7 +1,8 @@
+// @ts-strict-ignore
 import { generateTransaction } from '../../mocks';
 import * as db from '../db';
 
-import Spreadsheet from './spreadsheet';
+import { Spreadsheet } from './spreadsheet';
 
 beforeEach(global.emptyDatabase());
 

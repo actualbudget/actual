@@ -1,19 +1,19 @@
 import React from 'react';
 
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import q from 'loot-core/src/client/query-helpers';
+import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 
 import { useSelectedItems } from '../../hooks/useSelected';
-import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
+import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
-import CellValue from '../spreadsheet/CellValue';
-import useFormat from '../spreadsheet/useFormat';
-import useSheetValue from '../spreadsheet/useSheetValue';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
+import { PrivacyFilter } from '../PrivacyFilter';
+import { CellValue } from '../spreadsheet/CellValue';
+import { useFormat } from '../spreadsheet/useFormat';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
 
 function DetailedBalance({ name, balance, isExactBalance = true }) {
@@ -159,15 +159,15 @@ export function Balances({
               value < 0
                 ? theme.errorText
                 : value > 0
-                ? theme.noticeTextLight
-                : theme.pageTextSubdued,
+                  ? theme.noticeTextLight
+                  : theme.pageTextSubdued,
           })}
           privacyFilter={{
             blurIntensity: 5,
           }}
         />
 
-        <ArrowButtonRight1
+        <SvgArrowButtonRight1
           style={{
             width: 10,
             height: 10,

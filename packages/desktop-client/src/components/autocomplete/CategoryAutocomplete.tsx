@@ -14,19 +14,21 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import Split from '../../icons/v0/Split';
+import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
-import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
+import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 
 export type CategoryListProps = {
   items: Array<CategoryEntity & { group?: CategoryGroupEntity }>;
-  getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
+  getItemProps?: (arg: {
+    item: CategoryEntity;
+  }) => Partial<ComponentProps<typeof View>>;
   highlightedIndex: number;
-  embedded: boolean;
+  embedded?: boolean;
   footer?: ReactNode;
   renderSplitTransactionButton?: (
     props: SplitTransactionButtonProps,
@@ -46,7 +48,7 @@ function CategoryList({
   renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
 }: CategoryListProps) {
-  let lastGroup = null;
+  let lastGroup: string | undefined | null = null;
 
   return (
     <View>
@@ -71,10 +73,10 @@ function CategoryList({
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
-              {showGroup && (
-                <Fragment key={item.group?.name}>
+              {showGroup && item.group?.name && (
+                <Fragment key={item.group.name}>
                   {renderCategoryItemGroupHeader({
-                    title: item.group?.name,
+                    title: item.group.name,
                   })}
                 </Fragment>
               )}
@@ -107,7 +109,7 @@ type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
 
-export default function CategoryAutocomplete({
+export function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,
   embedded,
@@ -124,7 +126,7 @@ export default function CategoryAutocomplete({
       categoryGroups.reduce(
         (list, group) =>
           list.concat(
-            group.categories
+            (group.categories || [])
               .filter(category => category.cat_group === group.id)
               .map(category => ({
                 ...category,
@@ -213,8 +215,7 @@ type SplitTransactionButtonProps = {
   style?: CSSProperties;
 };
 
-// eslint-disable-next-line import/no-unused-modules
-export function SplitTransactionButton({
+function SplitTransactionButton({
   Icon,
   highlighted,
   embedded,
@@ -272,7 +273,7 @@ export function SplitTransactionButton({
         {Icon ? (
           <Icon style={{ marginRight: 5 }} />
         ) : (
-          <Split width={10} height={10} style={{ marginRight: 5 }} />
+          <SvgSplit width={10} height={10} style={{ marginRight: 5 }} />
         )}
       </Text>
       Split Transaction

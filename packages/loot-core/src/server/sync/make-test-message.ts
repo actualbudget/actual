@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { SyncProtoBuf } from '@actual-app/crdt';
 
 import * as encryption from '../encryption';
@@ -6,7 +7,7 @@ async function randomString() {
   return (await encryption.randomBytes(12)).toString();
 }
 
-export default async function makeTestMessage(keyId) {
+export async function makeTestMessage(keyId) {
   const messagePb = new SyncProtoBuf.Message();
   messagePb.setDataset(await randomString());
   messagePb.setRow(await randomString());

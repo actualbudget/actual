@@ -1,9 +1,10 @@
+// @ts-strict-ignore
 import React, { createContext, useEffect, useState, useContext } from 'react';
 
-import { type Query } from '../../shared/query';
+import { q, type Query } from '../../shared/query';
 import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
 import { type ScheduleEntity } from '../../types/models';
-import q, { liveQuery } from '../query-helpers';
+import { liveQuery } from '../query-helpers';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { Fragment, type ComponentProps, type ReactNode } from 'react';
 
 import { css } from 'glamor';
@@ -7,9 +8,9 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
-import Autocomplete from './Autocomplete';
+import { Autocomplete } from './Autocomplete';
 
 function AccountList({
   items,
@@ -40,8 +41,8 @@ function AccountList({
             item.closed
               ? 'Closed Accounts'
               : item.offbudget
-              ? 'Off Budget'
-              : 'For Budget'
+                ? 'Off Budget'
+                : 'For Budget'
           }`;
 
           lastItem = item;
@@ -77,7 +78,7 @@ type AccountAutoCompleteProps = {
   closeOnBlur?: boolean;
 } & ComponentProps<typeof Autocomplete>;
 
-export default function AccountAutocomplete({
+export function AccountAutocomplete({
   embedded,
   includeClosedAccounts = true,
   renderAccountItemGroupHeader,

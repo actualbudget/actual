@@ -1,17 +1,18 @@
 import React, { useState, useMemo } from 'react';
 
 import { useActions } from '../../hooks/useActions';
-import Add from '../../icons/v1/Add';
-import SearchAlternate from '../../icons/v2/SearchAlternate';
+import { SvgAdd } from '../../icons/v1';
+import { SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
-import ButtonLink from '../common/ButtonLink';
-import InputWithContent from '../common/InputWithContent';
-import Label from '../common/Label';
-import View from '../common/View';
-import MobileBackButton from '../MobileBackButton';
+import { ButtonLink } from '../common/ButtonLink';
+import { InputWithContent } from '../common/InputWithContent';
+import { Label } from '../common/Label';
+import { View } from '../common/View';
+import { MobileBackButton } from '../MobileBackButton';
 import { Page } from '../Page';
-import PullToRefresh from '../responsive/PullToRefresh';
-import CellValue from '../spreadsheet/CellValue';
+import { PullToRefresh } from '../responsive/PullToRefresh';
+import { CellValue } from '../spreadsheet/CellValue';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { TransactionList } from '../transactions/MobileTransaction';
 
 function TransactionSearchInput({ accountName, onSearch }) {
@@ -30,7 +31,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
     >
       <InputWithContent
         leftContent={
-          <SearchAlternate
+          <SvgSearchAlternate
             style={{
               width: 13,
               height: 13,
@@ -61,7 +62,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
   );
 }
 
-export default function AccountDetails({
+export function AccountDetails({
   account,
   prependTransactions,
   transactions,
@@ -69,6 +70,8 @@ export default function AccountDetails({
   categories,
   payees,
   balance,
+  balanceCleared,
+  balanceUncleared,
   isNewTransaction,
   onLoadMore,
   onSearch,
@@ -104,7 +107,7 @@ export default function AccountDetails({
           }}
           activeStyle={{ background: 'transparent' }}
         >
-          <Add width={20} height={20} />
+          <SvgAdd width={20} height={20} />
         </ButtonLink>
       }
       padding={0}
@@ -120,19 +123,75 @@ export default function AccountDetails({
           marginTop: 10,
         }}
       >
-        <Label title="BALANCE" />
-        <CellValue
-          binding={balance}
-          type="financial"
+        <View
           style={{
-            fontSize: 18,
-            fontWeight: '500',
+            flexDirection: 'row',
+            boxSizing: 'content-box',
+            width: '100%',
+            justifyContent: 'space-evenly',
           }}
-          getStyle={value => ({
-            color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
-          })}
-          data-testid="account-balance"
-        />
+        >
+          <View
+            style={{
+              visibility:
+                useSheetValue(balanceUncleared) === 0 ? 'hidden' : 'visible',
+              width: '33%',
+            }}
+          >
+            <Label
+              title="CLEARED"
+              style={{ textAlign: 'center', fontSize: 12 }}
+            />
+            <CellValue
+              binding={balanceCleared}
+              type="financial"
+              style={{
+                fontSize: 12,
+                textAlign: 'center',
+                fontWeight: '500',
+              }}
+              data-testid="account-balance-cleared"
+            />
+          </View>
+          <View style={{ width: '33%' }}>
+            <Label title="BALANCE" style={{ textAlign: 'center' }} />
+            <CellValue
+              binding={balance}
+              type="financial"
+              style={{
+                fontSize: 18,
+                textAlign: 'center',
+                fontWeight: '500',
+              }}
+              getStyle={value => ({
+                color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
+              })}
+              data-testid="account-balance"
+            />
+          </View>
+          <View
+            style={{
+              visibility:
+                useSheetValue(balanceUncleared) === 0 ? 'hidden' : 'visible',
+              width: '33%',
+            }}
+          >
+            <Label
+              title="UNCLEARED"
+              style={{ textAlign: 'center', fontSize: 12 }}
+            />
+            <CellValue
+              binding={balanceUncleared}
+              type="financial"
+              style={{
+                fontSize: 12,
+                textAlign: 'center',
+                fontWeight: '500',
+              }}
+              data-testid="account-balance-uncleared"
+            />
+          </View>
+        </View>
         <TransactionSearchInput
           accountName={account.name}
           onSearch={onSearch}
@@ -140,11 +199,11 @@ export default function AccountDetails({
       </View>
       <PullToRefresh onRefresh={onRefresh}>
         <TransactionList
+          account={account}
           transactions={allTransactions}
           categories={categories}
           accounts={accounts}
           payees={payees}
-          showCategory={!account.offbudget}
           isNew={isNewTransaction}
           onLoadMore={onLoadMore}
           onSelect={onSelectTransaction}

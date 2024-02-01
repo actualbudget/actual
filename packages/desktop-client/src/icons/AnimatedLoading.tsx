@@ -2,14 +2,14 @@ import React, { type SVGProps } from 'react';
 
 import { css, keyframes } from 'glamor';
 
-import Loading from './Loading';
+import { SvgLoading } from './Loading';
 
 const rotation = keyframes({
   '0%': { transform: 'rotate(-90deg)' },
   '100%': { transform: 'rotate(666deg)' },
 });
 
-function AnimatedLoading(props: SVGProps<SVGSVGElement>) {
+export function AnimatedLoading(props: SVGProps<SVGSVGElement>) {
   return (
     <span
       className={`${css({
@@ -20,9 +20,7 @@ function AnimatedLoading(props: SVGProps<SVGSVGElement>) {
         lineHeight: 0,
       })}`}
     >
-      <Loading {...props} />
+      <SvgLoading {...props} />
     </span>
   );
 }
-
-export default AnimatedLoading;

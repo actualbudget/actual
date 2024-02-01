@@ -86,5 +86,8 @@ const prepositions = [
   'without',
 ];
 
-const dictionary = new Set([...conjunctions, ...articles, ...prepositions]);
-export default dictionary;
+export const lowerCaseSet = new Set([
+  ...conjunctions,
+  ...articles,
+  ...prepositions,
+]);

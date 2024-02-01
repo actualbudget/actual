@@ -1,8 +1,9 @@
+// @ts-strict-ignore
 import { setClock } from '@actual-app/crdt';
 import fc from 'fast-check';
 
 import * as arbs from '../../../mocks/arbitrary-schema';
-import query from '../../../shared/query';
+import { q } from '../../../shared/query';
 import { groupById } from '../../../shared/util';
 import * as db from '../../db';
 import { batchMessages, setSyncingMode } from '../../sync/index';
@@ -139,7 +140,7 @@ describe('transaction executors', () => {
           await insertTransactions(arr);
 
           const { data } = await runQuery(
-            query('transactions')
+            q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
               .options({ splits: 'inline' })
@@ -150,7 +151,7 @@ describe('transaction executors', () => {
           expect(data.filter(t => t.tombstone).length).toBe(0);
 
           const { data: defaultData } = await runQuery(
-            query('transactions')
+            q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
               .serialize(),
@@ -176,7 +177,7 @@ describe('transaction executors', () => {
           await insertTransactions(arr);
 
           const { data } = await runQuery(
-            query('transactions')
+            q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
               .options({ splits: 'none' })
@@ -200,7 +201,7 @@ describe('transaction executors', () => {
           async arr => {
             await insertTransactions(arr, payeeIds);
 
-            const aggQuery = query('transactions')
+            const aggQuery = q('transactions')
               .filter({
                 $or: [{ amount: { $lt: -5 } }, { amount: { $gt: -2 } }],
                 'payee.name': { $gt: '' },
@@ -346,7 +347,7 @@ describe('transaction executors', () => {
       // Even though we're applying some filters, these are always
       // guaranteed to return the full split transaction so they
       // should take the optimized path
-      const happyQuery = query('transactions')
+      const happyQuery = q('transactions')
         .filter({
           date: { $gt: '2017-01-01' },
         })
@@ -395,7 +396,7 @@ describe('transaction executors', () => {
       // Because why not? It should deduplicate them
       ids = repeat(ids, 100);
 
-      const unhappyQuery = query('transactions')
+      const unhappyQuery = q('transactions')
         .filter({
           id: [{ $oneof: ids }],
           payee: { $gt: '' },

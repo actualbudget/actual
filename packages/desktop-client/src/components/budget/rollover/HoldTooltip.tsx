@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useContext,
@@ -7,20 +8,20 @@ import React, {
 } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import Button from '../../common/Button';
-import InitialFocus from '../../common/InitialFocus';
-import Input from '../../common/Input';
-import View from '../../common/View';
-import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import { Button } from '../../common/Button';
+import { InitialFocus } from '../../common/InitialFocus';
+import { Input } from '../../common/Input';
+import { View } from '../../common/View';
+import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../tooltips';
 
 type HoldTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
   onSubmit: (amount: number) => void;
 };
-export default function HoldTooltip({
+export function HoldTooltip({
   onSubmit,
   onClose,
   position = 'bottom-right',

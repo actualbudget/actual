@@ -5,20 +5,20 @@ import * as actions from 'loot-core/src/client/actions';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
-import Loading from '../../icons/AnimatedLoading';
-import CloudCheck from '../../icons/v1/CloudCheck';
-import CloudDownload from '../../icons/v1/CloudDownload';
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import FileDouble from '../../icons/v1/FileDouble';
-import CloudUnknown from '../../icons/v2/CloudUnknown';
-import Key from '../../icons/v2/Key';
-import RefreshArrow from '../../icons/v2/RefreshArrow';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import {
+  SvgCloudCheck,
+  SvgCloudDownload,
+  SvgDotsHorizontalTriple,
+  SvgFileDouble,
+} from '../../icons/v1';
+import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
 import { styles, theme } from '../../style';
-import tokens from '../../tokens';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
-import Text from '../common/Text';
-import View from '../common/View';
+import { tokens } from '../../tokens';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 function getFileDescription(file) {
@@ -69,7 +69,7 @@ function DetailButton({ state, onDelete }) {
           setMenuOpen(true);
         }}
       >
-        <DotsHorizontalTriple style={{ width: 16, height: 16 }} />
+        <SvgDotsHorizontalTriple style={{ width: 16, height: 16 }} />
       </Button>
       {menuOpen && (
         <Tooltip
@@ -95,21 +95,21 @@ function FileState({ file }) {
 
   switch (file.state) {
     case 'unknown':
-      Icon = CloudUnknown;
+      Icon = SvgCloudUnknown;
       status = 'Network unavailable';
       color = theme.buttonNormalDisabledText;
       break;
     case 'remote':
-      Icon = CloudDownload;
+      Icon = SvgCloudDownload;
       status = 'Available for download';
       break;
     case 'local':
     case 'broken':
-      Icon = FileDouble;
+      Icon = SvgFileDouble;
       status = 'Local';
       break;
     default:
-      Icon = CloudCheck;
+      Icon = SvgCloudCheck;
       status = 'Syncing';
       break;
   }
@@ -179,7 +179,7 @@ function File({ file, onSelect, onDelete }) {
         style={{ flex: '0 0 auto', flexDirection: 'row', alignItems: 'center' }}
       >
         {file.encryptKeyId && (
-          <Key
+          <SvgKey
             style={{
               width: 13,
               height: 13,
@@ -231,7 +231,7 @@ function RefreshButton({ onRefresh }) {
     setLoading(false);
   }
 
-  const Icon = loading ? Loading : RefreshArrow;
+  const Icon = loading ? AnimatedLoading : SvgRefreshArrow;
 
   return (
     <Button
@@ -245,7 +245,7 @@ function RefreshButton({ onRefresh }) {
   );
 }
 
-export default function BudgetList() {
+export function BudgetList() {
   const files = useSelector(state => state.budgets.allFiles || []);
 
   const {

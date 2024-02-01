@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   forwardRef,
   useState,
@@ -26,8 +27,8 @@ import {
 import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { type CSSProperties, theme } from '../../style';
-import Input, { type InputProps } from '../common/Input';
-import View, { type ViewProps } from '../common/View';
+import { Input, type InputProps } from '../common/Input';
+import { View, type ViewProps } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';
@@ -184,7 +185,7 @@ type DateSelectProps = {
   onSelect: (selectedDate: string) => void;
 };
 
-export default function DateSelect({
+export function DateSelect({
   containerProps,
   inputProps,
   tooltipStyle,
@@ -343,7 +344,7 @@ export default function DateSelect({
         {...inputProps}
         inputRef={inputRef}
         value={value}
-        onPointerUp={e => {
+        onPointerUp={() => {
           if (!embedded) {
             setOpen(true);
           }

@@ -6,10 +6,11 @@ import {
   getNumberFormat,
 } from 'loot-core/src/shared/util';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 const AmountInput = memo(function AmountInput({
   focused,
@@ -21,6 +22,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef();
+  const mergedInputRef = useMergedRefs(props.inputRef, inputRef);
 
   const getInitialValue = () => Math.abs(props.value);
 
@@ -29,10 +31,6 @@ const AmountInput = memo(function AmountInput({
       focus();
     }
   }, []);
-
-  useEffect(() => {
-    setEditing(text !== '');
-  }, [text]);
 
   useEffect(() => {
     if (focused) {
@@ -72,12 +70,18 @@ const AmountInput = memo(function AmountInput({
     return newValue;
   };
 
-  const onBlur = () => {
+  const onFocus = e => {
+    props.onFocus?.(e);
+  };
+
+  const onBlur = e => {
     const value = applyText();
     props.onUpdate?.(value);
+    props.onBlur?.(e);
   };
 
   const onChangeText = text => {
+    setEditing(true);
     setText(text);
     props.onChange?.(text);
   };
@@ -85,11 +89,12 @@ const AmountInput = memo(function AmountInput({
   const input = (
     <input
       type="text"
-      ref={inputRef}
+      ref={mergedInputRef}
       value={text}
       inputMode="decimal"
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}
+      onFocus={onFocus}
       onBlur={onBlur}
       onKeyUp={onKeyPress}
       data-testid="amount-input"
@@ -131,6 +136,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   focusedStyle,
   buttonProps,
   onFocus,
+  onBlur,
   ...props
 }) {
   const [isNegative, setIsNegative] = useState(true);
@@ -166,6 +172,8 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
       <AmountInput
         {...props}
         value={value}
+        onFocus={onFocus}
+        onBlur={onBlur}
         onChange={onChange}
         onUpdate={onUpdate}
         focused={focused}

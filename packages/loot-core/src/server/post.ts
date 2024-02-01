@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { fetch } from '../platform/server/fetch';
 
 import { PostError } from './errors';

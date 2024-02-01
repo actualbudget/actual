@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import './polyfills';
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
@@ -8,11 +9,11 @@ import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
-import logger from '../platform/server/log';
+import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
-import q, { Query } from '../shared/query';
+import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { Handlers } from '../types/handlers';
 
@@ -23,7 +24,7 @@ import { getStartingBalancePayee } from './accounts/payees';
 import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
 import { batchUpdateTransactions } from './accounts/transactions';
-import installAPI from './api';
+import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
 import {
   getAvailableBackups,
@@ -32,23 +33,24 @@ import {
   startBackupService,
   stopBackupService,
 } from './backups';
-import budgetApp from './budget/app';
+import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
 import * as cloudStorage from './cloud-storage';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
 import { APIError, TransactionError, PostError } from './errors';
-import filtersApp from './filters/app';
+import { app as filtersApp } from './filters/app';
 import { handleBudgetImport } from './importers';
-import app from './main-app';
+import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
-import notesApp from './notes/app';
+import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
 import * as prefs from './prefs';
-import rulesApp from './rules/app';
-import schedulesApp from './schedules/app';
+import { app as reportsApp } from './reports/app';
+import { app as rulesApp } from './rules/app';
+import { app as schedulesApp } from './schedules/app';
 import { getServer, setServer } from './server-config';
 import * as sheet from './sheet';
 import { resolveName, unresolveName } from './spreadsheet/util';
@@ -63,7 +65,7 @@ import {
   repairSync,
 } from './sync';
 import * as syncMigrations from './sync/migrate';
-import toolsApp from './tools/app';
+import { app as toolsApp } from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
@@ -669,6 +671,7 @@ handlers['gocardless-accounts-link'] = async function ({
       id,
       account_id: account.account_id,
       bank: bank.id,
+      account_sync_source: 'goCardless',
     });
   } else {
     id = uuidv4();
@@ -679,6 +682,7 @@ handlers['gocardless-accounts-link'] = async function ({
       name: account.name,
       official_name: account.official_name,
       bank: bank.id,
+      account_sync_source: 'goCardless',
     });
     await db.insertPayee({
       name: '',
@@ -686,7 +690,7 @@ handlers['gocardless-accounts-link'] = async function ({
     });
   }
 
-  await bankSync.syncGoCardlessAccount(
+  await bankSync.syncExternalAccount(
     undefined,
     undefined,
     id,
@@ -695,6 +699,64 @@ handlers['gocardless-accounts-link'] = async function ({
   );
 
   connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+};
+
+handlers['simplefin-accounts-link'] = async function ({
+  externalAccount,
+  upgradingId,
+}) {
+  let id;
+
+  const institution = {
+    name: externalAccount.institution ?? 'Unknown',
+  };
+
+  const bank = await link.findOrCreateBank(
+    institution,
+    externalAccount.orgDomain,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+      upgradingId,
+    ]);
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'simpleFin',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      account_sync_source: 'simpleFin',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncExternalAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+  );
+
+  await connection.send('sync-event', {
     type: 'success',
     tables: ['transactions'],
   });
@@ -1117,6 +1179,38 @@ handlers['gocardless-status'] = async function () {
   );
 };
 
+handlers['simplefin-status'] = async function () {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  return post(
+    getServer().SIMPLEFIN_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+};
+
+handlers['simplefin-accounts'] = async function () {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  return post(
+    getServer().SIMPLEFIN_SERVER + '/accounts',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+};
+
 handlers['gocardless-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1193,7 +1287,7 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncGoCardlessAccount(
+        const res = await bankSync.syncExternalAccount(
           userId,
           userKey,
           acct.id,
@@ -1279,6 +1373,10 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     return 'ok';
   }
 
+  const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [id]);
+
+  const isGoCardless = accRow.account_sync_source === 'goCardless';
+
   await db.updateAccount({
     id,
     account_id: null,
@@ -1286,7 +1384,12 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     balance_current: null,
     balance_available: null,
     balance_limit: null,
+    account_sync_source: null,
   });
+
+  if (isGoCardless === false) {
+    return;
+  }
 
   const { count } = await db.first(
     'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
@@ -1348,7 +1451,10 @@ handlers['save-global-prefs'] = async function (prefs) {
   }
   if ('autoUpdate' in prefs) {
     await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
-    process.send({ type: 'shouldAutoUpdate', flag: prefs.autoUpdate });
+    process.parentPort.postMessage({
+      type: 'shouldAutoUpdate',
+      flag: prefs.autoUpdate,
+    });
   }
   if ('documentDir' in prefs) {
     if (await fs.exists(prefs.documentDir)) {
@@ -1670,14 +1776,11 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
 
     if (validate) {
       // Validate the server is running
-      const { error } = await runHandler(
-        handlers['subscribe-needs-bootstrap'],
-        {
-          url,
-        },
-      );
-      if (error) {
-        return { error };
+      const result = await runHandler(handlers['subscribe-needs-bootstrap'], {
+        url,
+      });
+      if ('error' in result) {
+        return { error: result.error };
       }
     }
   }
@@ -1866,7 +1969,7 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
-    await cloudStorage.removeFile(cloudFileId).catch(err => {});
+    await cloudStorage.removeFile(cloudFileId).catch(() => {});
   }
 
   // If a local file exists, you can delete it by passing its local id
@@ -2146,7 +2249,15 @@ injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 
 // A hack for now until we clean up everything
 app.handlers = handlers;
-app.combine(schedulesApp, budgetApp, notesApp, toolsApp, filtersApp, rulesApp);
+app.combine(
+  schedulesApp,
+  budgetApp,
+  notesApp,
+  toolsApp,
+  filtersApp,
+  reportsApp,
+  rulesApp,
+);
 
 function getDefaultDocumentDir() {
   if (Platform.isMobile) {
@@ -2235,7 +2346,7 @@ export async function initApp(isDev, socketName) {
 
   if (!isDev && !Platform.isMobile && !Platform.isWeb) {
     const autoUpdate = await asyncStorage.getItem('auto-update');
-    process.send({
+    process.parentPort.postMessage({
       type: 'shouldAutoUpdate',
       flag: autoUpdate == null || autoUpdate === 'true',
     });
@@ -2250,8 +2361,14 @@ export async function initApp(isDev, socketName) {
   }
 }
 
+export type InitConfig = {
+  dataDir?: string;
+  serverURL?: string;
+  password?: string;
+};
+
 // eslint-disable-next-line import/no-unused-modules
-export async function init(config) {
+export async function init(config: InitConfig) {
   // Get from build
 
   let dataDir, serverURL;
@@ -2293,7 +2410,10 @@ export async function init(config) {
 export const lib = {
   getDataDir: fs.getDataDir,
   sendMessage: (msg, args) => connection.send(msg, args),
-  send: async (name, args) => {
+  send: async <K extends keyof Handlers, T extends Handlers[K]>(
+    name: K,
+    args?: Parameters<T>[0],
+  ): Promise<Awaited<ReturnType<T>>> => {
     const res = await runHandler(app.handlers[name], args);
     return res;
   },

@@ -1,14 +1,15 @@
+// @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import q from 'loot-core/src/shared/query';
+import { q } from 'loot-core/src/shared/query';
 
-import Check from '../../icons/v2/Check';
+import { SvgCheck } from '../../icons/v2';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
-import Modal from '../common/Modal';
-import View from '../common/View';
-import NotesComponent from '../Notes';
+import { Button } from '../common/Button';
+import { Modal } from '../common/Modal';
+import { View } from '../common/View';
+import { Notes as NotesComponent } from '../Notes';
 
 type NotesProps = {
   modalProps: CommonModalProps;
@@ -17,7 +18,7 @@ type NotesProps = {
   onSave: (id: string, notes: string) => void;
 };
 
-export default function Notes({ modalProps, id, name, onSave }: NotesProps) {
+export function Notes({ modalProps, id, name, onSave }: NotesProps) {
   const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
@@ -62,7 +63,7 @@ export default function Notes({ modalProps, id, name, onSave }: NotesProps) {
             notes={notes}
             editable={true}
             focused={true}
-            getStyle={editable => ({
+            getStyle={() => ({
               borderRadius: 6,
               flex: 1,
               minWidth: 0,
@@ -88,7 +89,7 @@ export default function Notes({ modalProps, id, name, onSave }: NotesProps) {
               }}
               onClick={_onSave}
             >
-              <Check width={17} height={17} style={{ paddingRight: 5 }} />
+              <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />
               Save notes
             </Button>
           </View>

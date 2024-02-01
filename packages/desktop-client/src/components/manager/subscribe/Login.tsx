@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ChangeEvent, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -6,14 +7,14 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../../style';
-import Button, { ButtonWithLoading } from '../../common/Button';
+import { Button, ButtonWithLoading } from '../../common/Button';
 import { BigInput } from '../../common/Input';
-import Text from '../../common/Text';
-import View from '../../common/View';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 
-export default function Login() {
+export function Login() {
   const dispatch = useDispatch();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

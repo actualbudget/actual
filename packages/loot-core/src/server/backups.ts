@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -213,10 +214,13 @@ export function startBackupService(id: string) {
   }
 
   // Make a backup every 15 minutes
-  serviceInterval = setInterval(async () => {
-    console.log('Making backup');
-    await makeBackup(id);
-  }, 1000 * 60 * 15);
+  serviceInterval = setInterval(
+    async () => {
+      console.log('Making backup');
+      await makeBackup(id);
+    },
+    1000 * 60 * 15,
+  );
 }
 
 export function stopBackupService() {

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import { integerToAmount } from '../../shared/util';
@@ -258,9 +259,8 @@ async function processTemplate(
               t.type === 'schedule' ||
               t.type === 'by',
           );
-          const { lowPriority, errorNotice } = await checkScheduleTemplates(
-            template_lines,
-          );
+          const { lowPriority, errorNotice } =
+            await checkScheduleTemplates(template_lines);
           priorityCheck = lowPriority;
           skipSchedule = priorityCheck !== priority ? true : false;
           isScheduleOrBy = true;
@@ -590,6 +590,7 @@ async function applyCategoryTemplate(
           last_month_balance,
           to_budget,
           errors,
+          category,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;

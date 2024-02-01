@@ -1,5 +1,4 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
@@ -11,6 +10,7 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
+import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 
 import { TransactionTable } from './TransactionsTable';
@@ -54,7 +54,7 @@ async function saveDiffAndApply(diff, changes, onChange) {
   );
 }
 
-export default function TransactionList({
+export function TransactionList({
   tableRef,
   transactions,
   allTransactions,

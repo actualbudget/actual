@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, type ComponentPropsWithoutRef } from 'react';
 
 import { css } from 'glamor';
@@ -5,19 +6,19 @@ import { css } from 'glamor';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
 import { theme, styles, type CSSProperties } from '../../../../style';
-import Block from '../../../common/Block';
-import HoverTarget from '../../../common/HoverTarget';
-import Menu from '../../../common/Menu';
-import View from '../../../common/View';
-import PrivacyFilter from '../../../PrivacyFilter';
-import useFormat from '../../../spreadsheet/useFormat';
-import useSheetName from '../../../spreadsheet/useSheetName';
-import useSheetValue from '../../../spreadsheet/useSheetValue';
+import { Block } from '../../../common/Block';
+import { HoverTarget } from '../../../common/HoverTarget';
+import { Menu } from '../../../common/Menu';
+import { View } from '../../../common/View';
+import { PrivacyFilter } from '../../../PrivacyFilter';
+import { useFormat } from '../../../spreadsheet/useFormat';
+import { useSheetName } from '../../../spreadsheet/useSheetName';
+import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../../tooltips';
-import HoldTooltip from '../HoldTooltip';
-import TransferTooltip from '../TransferTooltip';
+import { HoldTooltip } from '../HoldTooltip';
+import { TransferTooltip } from '../TransferTooltip';
 
-import TotalsList from './TotalsList';
+import { TotalsList } from './TotalsList';
 
 type ToBudgetProps = {
   month: string | number;
@@ -31,7 +32,7 @@ type ToBudgetProps = {
   holdTooltipProps?: ComponentPropsWithoutRef<typeof HoldTooltip>;
   transferTooltipProps?: ComponentPropsWithoutRef<typeof TransferTooltip>;
 };
-export default function ToBudget({
+export function ToBudget({
   month,
   prevMonthName,
   showTotalsTooltipOnHover,

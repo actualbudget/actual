@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 import { v4 as uuidv4 } from 'uuid';
@@ -5,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
-import q from '../../shared/query';
+import { q } from '../../shared/query';
 import {
   extractScheduleConds,
   recurConfigToRSchedule,
@@ -543,7 +544,7 @@ async function advanceSchedulesService(syncSuccess) {
 }
 
 // Expose functions to the client
-const app = createApp<SchedulesHandlers>();
+export const app = createApp<SchedulesHandlers>();
 
 app.method('schedule/create', mutator(undoable(createSchedule)));
 app.method('schedule/update', mutator(undoable(updateSchedule)));
@@ -562,7 +563,7 @@ app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
 app.service(trackJSONPaths);
 
-app.events.on('sync', ({ type, subtype }) => {
+app.events.on('sync', ({ type }) => {
   const completeEvent =
     type === 'success' || type === 'error' || type === 'unauthorized';
 
@@ -592,5 +593,3 @@ export function getDateWithSkippedWeekend(
   }
   return date;
 }
-
-export default app;

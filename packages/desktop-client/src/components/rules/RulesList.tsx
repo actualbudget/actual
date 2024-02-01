@@ -1,10 +1,11 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { type RuleEntity } from 'loot-core/src/types/models';
 
-import View from '../common/View';
+import { View } from '../common/View';
 
-import RuleRow from './RuleRow';
+import { RuleRow } from './RuleRow';
 
 type RulesListProps = {
   rules: RuleEntity[];
@@ -14,7 +15,7 @@ type RulesListProps = {
   onEditRule?: (rule: RuleEntity) => void;
 };
 
-export default function RulesList({
+export function RulesList({
   rules,
   selectedItems,
   hoveredRule,

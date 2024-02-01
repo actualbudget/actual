@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { SQLiteFS } from 'absurd-sql';
 import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
@@ -5,7 +6,7 @@ import * as connection from '../connection';
 import * as idb from '../indexeddb';
 import { _getModule } from '../sqlite';
 
-import join from './path-join';
+import { join } from './path-join';
 
 let FS = null;
 let BFS = null;
@@ -312,7 +313,7 @@ export const removeDirRecursively = async function (dirpath) {
   }
 };
 
-export const getModifiedTime = async function (filepath) {
+export const getModifiedTime = async function () {
   throw new Error(
     'getModifiedTime not supported on the web (only used for backups)',
   );

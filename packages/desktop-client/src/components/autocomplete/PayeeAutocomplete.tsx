@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   Fragment,
   useState,
@@ -20,13 +21,14 @@ import {
   type PayeeEntity,
 } from 'loot-core/src/types/models';
 
-import Add from '../../icons/v1/Add';
+import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
-import Button from '../common/Button';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { View } from '../common/View';
 
-import Autocomplete, {
+import {
+  Autocomplete,
   defaultFilterSuggestion,
   AutocompleteFooter,
 } from './Autocomplete';
@@ -167,7 +169,7 @@ type PayeeAutocompleteProps = {
   payees?: PayeeEntity[];
 };
 
-export default function PayeeAutocomplete({
+export function PayeeAutocomplete({
   value,
   inputProps,
   showMakeTransfer = true,
@@ -403,7 +405,7 @@ export function CreatePayeeButton({
       {Icon ? (
         <Icon style={{ marginRight: 5, display: 'inline-block' }} />
       ) : (
-        <Add
+        <SvgAdd
           width={8}
           height={8}
           style={{ marginRight: 5, display: 'inline-block' }}

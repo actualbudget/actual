@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
 
 import {
@@ -6,18 +7,18 @@ import {
 } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
-import useNavigate from '../../hooks/useNavigate';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
-import Button, { ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button';
 import { BigInput } from '../common/Input';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
 
-export default function ConfigServer() {
+export function ConfigServer() {
   useSetThemeColor(theme.mobileConfigServerViewTheme);
   const { createBudget, signOut, loggedIn } = useActions();
   const navigate = useNavigate();

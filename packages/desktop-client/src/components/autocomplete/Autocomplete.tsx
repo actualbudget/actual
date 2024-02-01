@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useRef,
@@ -13,11 +14,11 @@ import React, {
 import Downshift, { type StateChangeTypes } from 'downshift';
 import { css } from 'glamor';
 
-import Remove from '../../icons/v2/Remove';
+import { SvgRemove } from '../../icons/v2';
 import { theme, type CSSProperties } from '../../style';
-import Button from '../common/Button';
-import Input from '../common/Input';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 type Item = {
@@ -31,14 +32,10 @@ function findItem<T extends Item>(
   strict: boolean,
   suggestions: T[],
   value: T | T['id'],
-): T | null {
+): T | T['id'] | null {
   if (strict) {
     const idx = suggestions.findIndex(item => item.id === value);
     return idx === -1 ? null : suggestions[idx];
-  }
-
-  if (typeof value === 'string') {
-    throw new Error('value can be string only if strict = false');
   }
 
   return value;
@@ -302,7 +299,7 @@ function SingleAutocomplete<T extends Item>({
         }
       }}
       highlightedIndex={highlightedIndex}
-      selectedItem={selectedItem || null}
+      selectedItem={selectedItem instanceof Object ? selectedItem : null}
       itemToString={itemToString}
       inputValue={value}
       isOpen={isOpen}
@@ -575,7 +572,7 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
     >
       {name}
       <Button type="bare" style={{ marginLeft: 1 }} onClick={onRemove}>
-        <Remove style={{ width: 8, height: 8 }} />
+        <SvgRemove style={{ width: 8, height: 8 }} />
       </Button>
     </View>
   );
@@ -694,7 +691,7 @@ function MultiAutocomplete<T extends Item>({
 
 type AutocompleteFooterProps = {
   show?: boolean;
-  embedded: boolean;
+  embedded?: boolean;
   children: ReactNode;
 };
 export function AutocompleteFooter({
@@ -702,18 +699,20 @@ export function AutocompleteFooter({
   embedded,
   children,
 }: AutocompleteFooterProps) {
+  if (!show) {
+    return null;
+  }
+
   return (
-    show && (
-      <View
-        style={{
-          flexShrink: 0,
-          ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
-        }}
-        onMouseDown={e => e.preventDefault()}
-      >
-        {children}
-      </View>
-    )
+    <View
+      style={{
+        flexShrink: 0,
+        ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
+      }}
+      onMouseDown={e => e.preventDefault()}
+    >
+      {children}
+    </View>
   );
 }
 
@@ -728,7 +727,7 @@ function isMultiAutocomplete<T extends Item>(
   return multi;
 }
 
-export default function Autocomplete<T extends Item>({
+export function Autocomplete<T extends Item>({
   multi,
   ...props
 }: AutocompleteProps<T> & { multi?: boolean }) {

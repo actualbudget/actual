@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useEffect,
   useRef,
@@ -9,15 +10,15 @@ import ReactModal from 'react-modal';
 
 import hotkeys from 'hotkeys-js';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
-import Delete from '../../icons/v0/Delete';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, styles, theme } from '../../style';
-import tokens from '../../tokens';
+import { tokens } from '../../tokens';
 
-import Button from './Button';
-import Input from './Input';
-import Text from './Text';
-import View from './View';
+import { Button } from './Button';
+import { Input } from './Input';
+import { Text } from './Text';
+import { View } from './View';
 
 type ModalChildrenProps = {
   isEditingTitle: boolean;
@@ -49,7 +50,7 @@ export type ModalProps = {
   onTitleUpdate?: (title: string) => void;
 };
 
-const Modal = ({
+export const Modal = ({
   title,
   isCurrent,
   isHidden,
@@ -268,7 +269,7 @@ const Modal = ({
                     style={{ padding: '10px 10px' }}
                     aria-label="Close"
                   >
-                    <Delete width={10} style={{ color: 'inherit' }} />
+                    <SvgDelete width={10} style={{ color: 'inherit' }} />
                   </Button>
                 )}
               </View>
@@ -427,5 +428,3 @@ export const ModalButtons = ({
     </View>
   );
 };
-
-export default Modal;

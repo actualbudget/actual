@@ -19,12 +19,15 @@ import {
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
-import useCategories from '../../hooks/useCategories';
-import useNavigate from '../../hooks/useNavigate';
+import { useCategories } from '../../hooks/useCategories';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { theme } from '../../style';
+import { theme, styles } from '../../style';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
-import AccountDetails from './MobileAccountDetails';
+import { AccountDetails } from './MobileAccountDetails';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
@@ -40,7 +43,7 @@ const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   };
 });
 
-function PreviewTransactions({ accountId, children }) {
+function PreviewTransactions({ children }) {
   const scheduleData = useCachedSchedules();
 
   if (scheduleData == null) {
@@ -68,7 +71,7 @@ function PreviewTransactions({ accountId, children }) {
 
 let paged;
 
-export default function Account(props) {
+export function Account(props) {
   const accounts = useSelector(state => state.queries.accounts);
 
   const navigate = useNavigate();
@@ -171,6 +174,27 @@ export default function Account(props) {
     return null;
   }
 
+  if (
+    accountId === 'budgeted' ||
+    accountId === 'offbudget' ||
+    accountId === 'uncategorized'
+  ) {
+    return (
+      <View style={{ flex: 1, padding: 30 }}>
+        <Text style={(styles.text, { textAlign: 'center' })}>
+          There is no Mobile View at the moment
+        </Text>
+        <Button
+          type="normal"
+          style={{ fontSize: 15, marginLeft: 10, marginTop: 10 }}
+          onClick={() => navigate('/accounts')}
+        >
+          Go back to Mobile Accounts
+        </Button>
+      </View>
+    );
+  }
+
   const account = accounts.find(acct => acct.id === accountId);
 
   const isNewTransaction = id => {
@@ -190,6 +214,8 @@ export default function Account(props) {
   };
 
   const balance = queries.accountBalance(account);
+  const balanceCleared = queries.accountBalanceCleared(account);
+  const balanceUncleared = queries.accountBalanceUncleared(account);
   const numberFormat = state.prefs.numberFormat || 'comma-dot';
   const hideFraction = state.prefs.hideFraction || false;
 
@@ -213,6 +239,8 @@ export default function Account(props) {
               transactions={transactions}
               prependTransactions={prependTransactions || []}
               balance={balance}
+              balanceCleared={balanceCleared}
+              balanceUncleared={balanceUncleared}
               isNewTransaction={isNewTransaction}
               onLoadMore={() => {
                 paged?.fetchNext();

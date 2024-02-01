@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getDatabase } from '../indexeddb';
 
 import * as T from '.';
@@ -33,7 +34,7 @@ export const setItem: T.SetItem = async function (key, value) {
   new Promise((resolve, reject) => {
     const req = objectStore.put(value, key);
     req.onerror = e => reject(e);
-    req.onsuccess = e => resolve(undefined);
+    req.onsuccess = () => resolve(undefined);
     commit(transaction);
   });
 };
@@ -47,7 +48,7 @@ export const removeItem: T.RemoveItem = async function (key) {
   return new Promise((resolve, reject) => {
     const req = objectStore.delete(key);
     req.onerror = e => reject(e);
-    req.onsuccess = e => resolve(undefined);
+    req.onsuccess = () => resolve(undefined);
     commit(transaction);
   });
 };
@@ -83,7 +84,7 @@ export const multiSet: T.MultiSet = async function (keyValues) {
       return new Promise((resolve, reject) => {
         const req = objectStore.put(value, key);
         req.onerror = e => reject(e);
-        req.onsuccess = e => resolve(undefined);
+        req.onsuccess = () => resolve(undefined);
       });
     }),
   );
@@ -103,7 +104,7 @@ export const multiRemove: T.MultiRemove = async function (keys) {
       return new Promise((resolve, reject) => {
         const req = objectStore.delete(key);
         req.onerror = e => reject(e);
-        req.onsuccess = e => resolve(undefined);
+        req.onsuccess = () => resolve(undefined);
       });
     }),
   );

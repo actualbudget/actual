@@ -1,9 +1,9 @@
 import { theme } from '../style';
 
-import ExternalLink from './common/ExternalLink';
-import View from './common/View';
+import { ExternalLink } from './common/ExternalLink';
+import { View } from './common/View';
 
-export default function DevelopmentTopBar() {
+export function DevelopmentTopBar() {
   return (
     <View
       style={{

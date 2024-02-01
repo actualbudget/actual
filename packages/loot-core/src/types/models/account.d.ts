@@ -15,4 +15,7 @@ type _SyncFields<T> = {
   balance_current: T extends true ? number : null;
   balance_available: T extends true ? number : null;
   balance_limit: T extends true ? number : null;
+  account_sync_source: T extends true ? AccountSyncSource : null;
 };
+
+export type AccountSyncSource = 'simpleFin' | 'goCardless';

@@ -2,12 +2,12 @@ import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import ArrowLeft from '../../icons/v1/ArrowLeft';
+import { SvgArrowLeft } from '../../icons/v1';
 import { styles } from '../../style';
-import Button from '../common/Button';
-import ButtonLink from '../common/ButtonLink';
-import Select from '../common/Select';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { ButtonLink } from '../common/ButtonLink';
+import { Select } from '../common/Select';
+import { View } from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 export function validateStart(allMonths, start, end) {
@@ -61,7 +61,7 @@ export function getFullRange(allMonths) {
   return [start, end];
 }
 
-function Header({
+export function Header({
   title,
   start,
   end,
@@ -75,7 +75,6 @@ function Header({
   onDeleteFilter,
   onCondOpChange,
   headerPrefixItems,
-  selectGraph,
 }) {
   const location = useLocation();
   const path = location.pathname;
@@ -93,7 +92,7 @@ function Header({
         to="/reports"
         style={{ marginBottom: '15', alignSelf: 'flex-start' }}
       >
-        <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
+        <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
       </ButtonLink>
       <View style={styles.veryLargeText}>{title}</View>
 
@@ -190,5 +189,3 @@ function Header({
     </View>
   );
 }
-
-export default Header;

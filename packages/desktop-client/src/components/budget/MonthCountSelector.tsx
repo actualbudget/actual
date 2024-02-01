@@ -1,8 +1,8 @@
 import React from 'react';
 
-import CalendarIcon from '../../icons/v2/Calendar';
+import { SvgCalendar } from '../../icons/v2';
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 
@@ -13,7 +13,7 @@ type CalendarProps = {
 
 function Calendar({ color, onClick }: CalendarProps) {
   return (
-    <CalendarIcon
+    <SvgCalendar
       style={{ width: 13, height: 13, color, marginRight: 5 }}
       onClick={onClick}
     />

@@ -1,15 +1,15 @@
 import React from 'react';
 
 import { theme, styles } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 type ReportLegendProps = {
   legend?: Array<{ name: string; color: string }>;
   groupBy: string;
 };
 
-function ReportLegend({ legend, groupBy }: ReportLegendProps) {
+export function ReportLegend({ legend, groupBy }: ReportLegendProps) {
   return (
     <View
       style={{
@@ -67,5 +67,3 @@ function ReportLegend({ legend, groupBy }: ReportLegendProps) {
     </View>
   );
 }
-
-export default ReportLegend;

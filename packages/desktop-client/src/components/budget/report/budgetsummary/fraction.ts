@@ -1,4 +1,5 @@
-export default function fraction(num, denom) {
+// @ts-strict-ignore
+export function fraction(num, denom) {
   if (denom === 0) {
     if (num > 0) {
       return 1;

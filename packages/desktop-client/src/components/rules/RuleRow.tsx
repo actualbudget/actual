@@ -1,19 +1,20 @@
+// @ts-strict-ignore
 import React, { memo } from 'react';
 
 import { friendlyOp } from 'loot-core/src/shared/rules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import ArrowRight from '../../icons/v0/RightArrow2';
+import { SvgRightArrow2 } from '../../icons/v0';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { SelectCell, Row, Field, Cell, CellButton } from '../table';
 
-import ActionExpression from './ActionExpression';
-import ConditionExpression from './ConditionExpression';
+import { ActionExpression } from './ActionExpression';
+import { ConditionExpression } from './ConditionExpression';
 
 type RuleRowProps = {
   rule: RuleEntity;
@@ -23,7 +24,7 @@ type RuleRowProps = {
   onEditRule?: (rule: RuleEntity) => void;
 };
 
-const RuleRow = memo(
+export const RuleRow = memo(
   ({ rule, hovered, selected, onHover, onEditRule }: RuleRowProps) => {
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
@@ -39,8 +40,8 @@ const RuleRow = memo(
           backgroundColor: selected
             ? theme.tableRowBackgroundHighlight
             : backgroundFocus
-            ? theme.tableRowBackgroundHover
-            : theme.tableBackground,
+              ? theme.tableRowBackgroundHover
+              : theme.tableBackground,
         }}
         collapsed={true}
         onMouseEnter={() => onHover && onHover(rule.id)}
@@ -93,7 +94,7 @@ const RuleRow = memo(
             </View>
 
             <Text>
-              <ArrowRight
+              <SvgRightArrow2
                 style={{ width: 12, height: 12, color: theme.tableText }}
               />
             </Text>
@@ -123,5 +124,3 @@ const RuleRow = memo(
     );
   },
 );
-
-export default RuleRow;

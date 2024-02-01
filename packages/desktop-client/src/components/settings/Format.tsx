@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -5,11 +6,11 @@ import { numberFormats } from 'loot-core/src/shared/util';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
-import tokens from '../../tokens';
-import Button from '../common/Button';
-import Select from '../common/Select';
-import Text from '../common/Text';
-import View from '../common/View';
+import { tokens } from '../../tokens';
+import { Button } from '../common/Button';
+import { Select } from '../common/Select';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar';
 
@@ -52,7 +53,7 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export default function FormatSettings() {
+export function FormatSettings() {
   const { savePrefs } = useActions();
 
   const sidebar = useSidebar();

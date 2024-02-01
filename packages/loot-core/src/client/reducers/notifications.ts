@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { NotificationsState } from '../state-types/notifications';
@@ -6,7 +7,7 @@ const initialState = {
   notifications: [],
 };
 
-export default function update(
+export function update(
   state = initialState,
   action: Action,
 ): NotificationsState {

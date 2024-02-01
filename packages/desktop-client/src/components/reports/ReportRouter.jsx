@@ -1,12 +1,12 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import Overview from './Overview';
-import CashFlow from './reports/CashFlow';
-import CategorySpending from './reports/CategorySpending';
-import CustomReport from './reports/CustomReport';
-import NetWorth from './reports/NetWorth';
-import Sankey from './reports/Sankey';
+import { Overview } from './Overview';
+import { CashFlow } from './reports/CashFlow';
+import { CategorySpending } from './reports/CategorySpending';
+import { CustomReport } from './reports/CustomReport';
+import { NetWorth } from './reports/NetWorth';
+import { Sankey } from './reports/Sankey';
 
 export function ReportRouter() {
   return (

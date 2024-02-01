@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { css } from 'glamor';
@@ -14,10 +15,10 @@ import {
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
-import AlignedText from '../../common/AlignedText';
-import PrivacyFilter from '../../PrivacyFilter';
-import Container from '../Container';
-import numberFormatterTooltip from '../numberFormatter';
+import { AlignedText } from '../../common/AlignedText';
+import { PrivacyFilter } from '../../PrivacyFilter';
+import { Container } from '../Container';
+import { numberFormatterTooltip } from '../numberFormatter';
 
 type PayloadItem = {
   payload: {
@@ -32,10 +33,9 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  label?: string;
 };
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -75,7 +75,7 @@ type BarLineGraphProps = {
   compact?: boolean;
 };
 
-function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
+export function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -87,7 +87,7 @@ function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         graphData && (
           <ResponsiveContainer>
             <div>
@@ -103,9 +103,13 @@ function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                {!compact && (
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="x" />
+                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                  </>
+                )}
                 <Bar type="monotone" dataKey="y" fill="#8884d8" />
                 <Line type="monotone" dataKey="y" stroke="#8884d8" />
               </ComposedChart>
@@ -116,5 +120,3 @@ function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
     </Container>
   );
 }
-
-export default BarLineGraph;

@@ -1,20 +1,20 @@
 import React, { memo, useState, useMemo } from 'react';
 
 import { theme, styles } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { DropHighlightPosContext } from '../sort';
 import { Row } from '../table';
 
-import ExpenseCategory from './ExpenseCategory';
-import ExpenseGroup from './ExpenseGroup';
-import IncomeCategory from './IncomeCategory';
-import IncomeGroup from './IncomeGroup';
-import IncomeHeader from './IncomeHeader';
-import SidebarCategory from './SidebarCategory';
-import SidebarGroup from './SidebarGroup';
+import { ExpenseCategory } from './ExpenseCategory';
+import { ExpenseGroup } from './ExpenseGroup';
+import { IncomeCategory } from './IncomeCategory';
+import { IncomeGroup } from './IncomeGroup';
+import { IncomeHeader } from './IncomeHeader';
+import { SidebarCategory } from './SidebarCategory';
+import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
 
-const BudgetCategories = memo(
+export const BudgetCategories = memo(
   ({
     categoryGroups,
     newCategoryForGroup,
@@ -292,8 +292,8 @@ const BudgetCategories = memo(
                 item.value
                   ? item.value.id
                   : item.type === 'income-separator'
-                  ? 'separator'
-                  : idx
+                    ? 'separator'
+                    : idx
               }
               value={pos}
             >
@@ -313,5 +313,3 @@ const BudgetCategories = memo(
     );
   },
 );
-
-export default BudgetCategories;

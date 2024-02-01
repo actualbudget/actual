@@ -1,8 +1,10 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import {
   integerToCurrency,
   integerToAmount,
@@ -11,7 +13,7 @@ import {
 
 import { index } from '../util';
 
-export default function createSpreadsheet(
+export function createSpreadsheet(
   start,
   end,
   accounts,

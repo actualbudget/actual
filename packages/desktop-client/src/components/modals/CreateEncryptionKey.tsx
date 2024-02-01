@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { css } from 'glamor';
@@ -9,13 +10,13 @@ import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import InitialFocus from '../common/InitialFocus';
-import Input from '../common/Input';
-import Modal, { ModalButtons } from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
-import View from '../common/View';
+import { ExternalLink } from '../common/ExternalLink';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
+import { Modal, ModalButtons } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 type CreateEncryptionKeyProps = {
   modalProps: CommonModalProps;
@@ -25,7 +26,7 @@ type CreateEncryptionKeyProps = {
   };
 };
 
-export default function CreateEncryptionKey({
+export function CreateEncryptionKey({
   modalProps,
   actions,
   options = {},

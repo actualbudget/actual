@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -8,17 +9,17 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
-import useNavigate from '../../hooks/useNavigate';
-import ExpandArrow from '../../icons/v0/ExpandArrow';
+import { useNavigate } from '../../hooks/useNavigate';
+import { SvgExpandArrow } from '../../icons/v0';
 import { styles, theme } from '../../style';
-import Button from '../common/Button';
-import InitialFocus from '../common/InitialFocus';
-import Input from '../common/Input';
-import Menu from '../common/Menu';
-import Text from '../common/Text';
+import { Button } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
+import { Menu } from '../common/Menu';
+import { Text } from '../common/Text';
 import { Tooltip } from '../tooltips';
 
-import Sidebar from './Sidebar';
+import { Sidebar } from './Sidebar';
 
 type EditableBudgetNameProps = {
   prefs: LocalPrefs;
@@ -98,7 +99,7 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           {prefs.budgetName || 'A budget has no name'}
         </Text>
-        <ExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
+        <SvgExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
         {menuOpen && (
           <Tooltip
             position="bottom-left"
@@ -113,7 +114,7 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
   }
 }
 
-function SidebarWithData() {
+export function SidebarWithData() {
   const accounts = useSelector(state => state.queries.accounts);
   const failedAccounts = useSelector(state => state.account.failedAccounts);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
@@ -164,5 +165,3 @@ function SidebarWithData() {
     />
   );
 }
-
-export default SidebarWithData;

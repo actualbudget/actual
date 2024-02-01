@@ -5,11 +5,11 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { applyChanges } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 
 import { ManagePayees } from './ManagePayees';
 
-export default function ManagePayeesWithData({ initialSelectedIds }) {
+export function ManagePayeesWithData({ initialSelectedIds }) {
   const initialPayees = useSelector(state => state.queries.payees);
   const lastUndoState = useSelector(state => state.app.lastUndoState);
   const { grouped: categoryGroups } = useCategories();
@@ -63,7 +63,7 @@ export default function ManagePayeesWithData({ initialSelectedIds }) {
     };
   }, []);
 
-  async function onUndo({ tables, messages, meta, url }, scroll = false) {
+  async function onUndo({ tables, messages, meta }) {
     if (!tables.includes('payees') && !tables.includes('payee_mapping')) {
       return;
     }
@@ -83,7 +83,7 @@ export default function ManagePayeesWithData({ initialSelectedIds }) {
 
   useEffect(() => {
     if (lastUndoState.current) {
-      onUndo(lastUndoState.current, true);
+      onUndo(lastUndoState.current);
     }
 
     return listen('undo-event', onUndo);

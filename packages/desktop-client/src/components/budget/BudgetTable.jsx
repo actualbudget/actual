@@ -3,16 +3,16 @@ import React, { createRef, Component } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme, styles } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { IntersectionBoundary } from '../tooltips';
 
-import BudgetCategories from './BudgetCategories';
-import BudgetSummaries from './BudgetSummaries';
-import BudgetTotals from './BudgetTotals';
+import { BudgetCategories } from './BudgetCategories';
+import { BudgetSummaries } from './BudgetSummaries';
+import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
 import { findSortDown, findSortUp, getScrollbarWidth } from './util';
 
-class BudgetTable extends Component {
+export class BudgetTable extends Component {
   constructor(props) {
     super(props);
     this.budgetCategoriesRef = createRef();
@@ -285,5 +285,3 @@ class BudgetTable extends Component {
     );
   }
 }
-
-export default BudgetTable;

@@ -1,13 +1,14 @@
+// @ts-strict-ignore
 import React, { type CSSProperties, type Ref, useState } from 'react';
 
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
-import CheveronDown from '../../icons/v1/CheveronDown';
+import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
-import View from '../common/View';
-import NotesButton from '../NotesButton';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
+import { View } from '../common/View';
+import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
 
@@ -26,7 +27,7 @@ type SidebarCategoryProps = {
   onHideNewCategory?: () => void;
 };
 
-function SidebarCategory({
+export function SidebarCategory({
   innerRef,
   category,
   dragPreview,
@@ -73,7 +74,7 @@ function SidebarCategory({
           }}
           style={{ color: 'currentColor', padding: 3 }}
         >
-          <CheveronDown
+          <SvgCheveronDown
             width={14}
             height={14}
             style={{ color: 'currentColor' }}
@@ -153,7 +154,7 @@ function SidebarCategory({
     >
       <InputCell
         value={category.name}
-        formatter={value => displayed}
+        formatter={() => displayed}
         width="flex"
         exposed={editing || temporary}
         onUpdate={value => {
@@ -178,5 +179,3 @@ function SidebarCategory({
     </View>
   );
 }
-
-export default SidebarCategory;

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -271,5 +272,118 @@ describe('API CRUD operations', () => {
         }),
       ]),
     );
+  });
+
+  // apis: createPayee, getPayees, updatePayee, deletePayee
+  test('Payees: successfully update payees', async () => {
+    const payeeId1 = await api.createPayee({ name: 'test-payee1' });
+    const payeeId2 = await api.createPayee({ name: 'test-payee2' });
+    let payees = await api.getPayees();
+
+    // payees successfully created
+    expect(payees).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: payeeId1,
+          name: 'test-payee1',
+        }),
+        expect.objectContaining({
+          id: payeeId2,
+          name: 'test-payee2',
+        }),
+      ]),
+    );
+
+    await api.updatePayee(payeeId1, { name: 'test-updated-payee' });
+    await api.deletePayee(payeeId2);
+
+    // confirm update and delete were successful
+    payees = await api.getPayees();
+    expect(payees).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: payeeId1,
+          name: 'test-updated-payee',
+        }),
+        expect.not.objectContaining({
+          name: 'test-payee1',
+        }),
+        expect.not.objectContaining({
+          id: payeeId2,
+        }),
+      ]),
+    );
+  });
+
+  // apis: addTransactions, getTransactions, importTransactions, updateTransaction, deleteTransaction
+  test('Transactions: successfully update transactions', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+
+    let newTransaction = [
+      { date: '2023-11-03', imported_id: '11', amount: 100 },
+      { date: '2023-11-03', imported_id: '11', amount: 100 },
+    ];
+
+    const addResult = await api.addTransactions(accountId, newTransaction, {
+      learnCategories: true,
+      runTransfers: true,
+    });
+    expect(addResult).toBe('ok');
+
+    // confirm added transactions exist
+    let transactions = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    expect(transactions).toEqual(
+      expect.arrayContaining(
+        newTransaction.map(trans => expect.objectContaining(trans)),
+      ),
+    );
+    expect(transactions).toHaveLength(2);
+
+    newTransaction = [
+      { date: '2023-12-03', imported_id: '11', amount: 100 },
+      { date: '2023-12-03', imported_id: '22', amount: 200 },
+    ];
+
+    const reconciled = await api.importTransactions(accountId, newTransaction);
+
+    // Expect it to reconcile and to have updated one of the previous transactions
+    expect(reconciled.added).toHaveLength(1);
+    expect(reconciled.updated).toHaveLength(1);
+
+    // confirm imported transactions exist
+    transactions = await api.getTransactions(
+      accountId,
+      '2023-12-01',
+      '2023-12-31',
+    );
+    expect(transactions).toEqual(
+      expect.arrayContaining(
+        newTransaction.map(trans => expect.objectContaining(trans)),
+      ),
+    );
+    expect(transactions).toHaveLength(2);
+
+    const idToUpdate = reconciled.added[0];
+    const idToDelete = reconciled.updated[0];
+    await api.updateTransaction(idToUpdate, { amount: 500 });
+    await api.deleteTransaction(idToDelete);
+
+    // confirm updates and deletions work
+    transactions = await api.getTransactions(
+      accountId,
+      '2023-12-01',
+      '2023-12-31',
+    );
+    expect(transactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: idToUpdate, amount: 500 }),
+        expect.not.objectContaining({ id: idToDelete }),
+      ]),
+    );
+    expect(transactions).toHaveLength(1);
   });
 });

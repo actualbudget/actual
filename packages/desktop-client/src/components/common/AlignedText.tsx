@@ -1,9 +1,10 @@
+// @ts-strict-ignore
 import { type ComponentProps } from 'react';
 
 import { type CSSProperties } from '../../style';
 
-import Block from './Block';
-import View from './View';
+import { Block } from './Block';
+import { View } from './View';
 
 type AlignedTextProps = ComponentProps<typeof View> & {
   left;
@@ -13,7 +14,7 @@ type AlignedTextProps = ComponentProps<typeof View> & {
   rightStyle?: CSSProperties;
   truncate?: 'left' | 'right';
 };
-export default function AlignedText({
+export function AlignedText({
   left,
   right,
   style,

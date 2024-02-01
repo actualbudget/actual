@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -9,15 +10,15 @@ import {
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import Button from '../common/Button';
-import FormError from '../common/FormError';
-import LinkButton from '../common/LinkButton';
-import Modal from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
-import View from '../common/View';
+import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { Button } from '../common/Button';
+import { FormError } from '../common/FormError';
+import { LinkButton } from '../common/LinkButton';
+import { Modal } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 function needsCategory(
   account: AccountEntity,
@@ -42,7 +43,7 @@ type CloseAccountProps = {
   modalProps: CommonModalProps;
 };
 
-function CloseAccount({
+export function CloseAccount({
   account,
   accounts,
   categoryGroups,
@@ -203,5 +204,3 @@ function CloseAccount({
     </Modal>
   );
 }
-
-export default CloseAccount;

@@ -6,11 +6,7 @@ import { styles, theme } from '../../style';
 
 type LinkProps = HTMLAttributes<HTMLButtonElement>;
 
-export default function LinkButton({
-  style,
-  children,
-  ...nativeProps
-}: LinkProps) {
+export function LinkButton({ style, children, ...nativeProps }: LinkProps) {
   return (
     <button
       type="button"

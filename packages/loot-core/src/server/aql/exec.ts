@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as db from '../db';
 
 import { compileQuery, defaultConstructQuery } from './compiler';

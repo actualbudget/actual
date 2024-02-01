@@ -1,15 +1,16 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import Block from '../common/Block';
-import Button from '../common/Button';
-import Modal from '../common/Modal';
-import Text from '../common/Text';
-import View from '../common/View';
+import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { Block } from '../common/Block';
+import { Button } from '../common/Button';
+import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 type ConfirmCategoryDeleteProps = {
   modalProps: CommonModalProps;
@@ -19,7 +20,7 @@ type ConfirmCategoryDeleteProps = {
   onDelete: (categoryId: string) => void;
 };
 
-export default function ConfirmCategoryDelete({
+export function ConfirmCategoryDelete({
   modalProps,
   category,
   group,

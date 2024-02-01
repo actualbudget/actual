@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ReactElement, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
@@ -5,7 +6,6 @@ import {
   Route,
   Routes,
   Navigate,
-  useNavigate,
   BrowserRouter,
   useLocation,
   useHref,
@@ -16,30 +16,31 @@ import hotkeys from 'hotkeys-js';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
-import checkForUpdateNotification from 'loot-core/src/client/update-notification';
+import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useActions } from '../hooks/useActions';
+import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
-import BankSyncStatus from './BankSyncStatus';
+import { BankSyncStatus } from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import View from './common/View';
-import GlobalKeys from './GlobalKeys';
+import { View } from './common/View';
+import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
-import MobileNavTabs from './mobile/MobileNavTabs';
-import Modals from './Modals';
-import Notifications from './Notifications';
+import { MobileNavTabs } from './mobile/MobileNavTabs';
+import { Modals } from './Modals';
+import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
-import Reports from './reports';
+import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
-import ScrollProvider from './ScrollProvider';
-import Settings from './settings';
-import FloatableSidebar, { SidebarProvider } from './sidebar';
-import Titlebar, { TitlebarProvider } from './Titlebar';
+import { ScrollProvider } from './ScrollProvider';
+import { Settings } from './settings';
+import { FloatableSidebar, SidebarProvider } from './sidebar';
+import { Titlebar, TitlebarProvider } from './Titlebar';
 import { TransactionEdit } from './transactions/MobileTransaction';
 
 function NarrowNotSupported({
@@ -92,7 +93,7 @@ function RouterBehaviors({ getAccounts }) {
   return null;
 }
 
-function FinancesApp() {
+function FinancesAppWithoutContext() {
   const actions = useActions();
   useEffect(() => {
     // The default key handler scope
@@ -256,8 +257,8 @@ function FinancesApp() {
   );
 }
 
-export default function FinancesAppWithContext() {
-  const app = useMemo(() => <FinancesApp />, []);
+export function FinancesApp() {
+  const app = useMemo(() => <FinancesAppWithoutContext />, []);
 
   return (
     <SpreadsheetProvider>

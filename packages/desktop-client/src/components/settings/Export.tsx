@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -6,13 +7,13 @@ import { format } from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../style';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 
-export default function ExportBudget() {
+export function ExportBudget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const budgetId = useSelector(state => state.prefs.local.id);

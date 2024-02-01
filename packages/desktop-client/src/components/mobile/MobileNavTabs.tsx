@@ -1,26 +1,29 @@
+// @ts-strict-ignore
 import React, { type ComponentType, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';
 
 import { useDrag } from '@use-gesture/react';
 
-import usePrevious from '../../hooks/usePrevious';
-import Add from '../../icons/v1/Add';
-import Cog from '../../icons/v1/Cog';
-import PiggyBank from '../../icons/v1/PiggyBank';
-import StoreFront from '../../icons/v1/StoreFront';
-import Tuning from '../../icons/v1/Tuning';
-import Wallet from '../../icons/v1/Wallet';
-import Calendar from '../../icons/v2/Calendar';
+import { usePrevious } from '../../hooks/usePrevious';
+import {
+  SvgAdd,
+  SvgCog,
+  SvgPiggyBank,
+  SvgStoreFront,
+  SvgTuning,
+  SvgWallet,
+} from '../../icons/v1';
+import { SvgCalendar } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { useScroll } from '../ScrollProvider';
 
 const ROW_HEIGHT = 70;
 const COLUMN_COUNT = 3;
 
-export default function MobileNavTabs() {
+export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
   const { scrollY } = useScroll();
 
@@ -35,43 +38,43 @@ export default function MobileNavTabs() {
       name: 'Budget',
       path: '/budget',
       style: navTabStyle,
-      Icon: Wallet,
+      Icon: SvgWallet,
     },
     {
       name: 'Transaction',
       path: '/transactions/new',
       style: navTabStyle,
-      Icon: Add,
+      Icon: SvgAdd,
     },
     {
       name: 'Accounts',
       path: '/accounts',
       style: navTabStyle,
-      Icon: PiggyBank,
+      Icon: SvgPiggyBank,
     },
     {
       name: 'Schedules (Soon)',
       path: '/schedules/soon',
       style: navTabStyle,
-      Icon: Calendar,
+      Icon: SvgCalendar,
     },
     {
       name: 'Payees (Soon)',
       path: '/payees/soon',
       style: navTabStyle,
-      Icon: StoreFront,
+      Icon: SvgStoreFront,
     },
     {
       name: 'Rules (Soon)',
       path: '/rules/soon',
       style: navTabStyle,
-      Icon: Tuning,
+      Icon: SvgTuning,
     },
     {
       name: 'Settings',
       path: '/settings',
       style: navTabStyle,
-      Icon: Cog,
+      Icon: SvgCog,
     },
   ].map(tab => <NavTab key={tab.path} {...tab} />);
 

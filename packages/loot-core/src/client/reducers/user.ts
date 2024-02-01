@@ -5,10 +5,7 @@ const initialState: UserState = {
   data: null,
 };
 
-export default function update(
-  state = initialState,
-  action: UserActions,
-): UserState {
+export function update(state = initialState, action: UserActions): UserState {
   switch (action.type) {
     case constants.GET_USER_DATA:
       return { ...state, data: action.data };

@@ -6,7 +6,7 @@ type PieProgressProps = {
   color: string;
   backgroundColor: string;
 };
-export default function PieProgress({
+export function PieProgress({
   style,
   progress,
   color,

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useEffect,
@@ -9,16 +10,16 @@ import { useSelector } from 'react-redux';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
-import AnimatedLoading from '../icons/AnimatedLoading';
-import Delete from '../icons/v0/Delete';
+import { AnimatedLoading } from '../icons/AnimatedLoading';
+import { SvgDelete } from '../icons/v0';
 import { styles, theme, type CSSProperties } from '../style';
 
-import Button, { ButtonWithLoading } from './common/Button';
-import ExternalLink from './common/ExternalLink';
-import LinkButton from './common/LinkButton';
-import Stack from './common/Stack';
-import Text from './common/Text';
-import View from './common/View';
+import { Button, ButtonWithLoading } from './common/Button';
+import { ExternalLink } from './common/ExternalLink';
+import { LinkButton } from './common/LinkButton';
+import { Stack } from './common/Stack';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
 function compileMessage(
   message: string,
@@ -118,8 +119,8 @@ function Notification({
         color: positive
           ? theme.noticeText
           : error
-          ? theme.errorTextDark
-          : theme.warningTextDark,
+            ? theme.errorTextDark
+            : theme.warningTextDark,
       }}
     >
       <Stack
@@ -131,14 +132,14 @@ function Notification({
           backgroundColor: positive
             ? theme.noticeBackgroundLight
             : error
-            ? theme.errorBackground
-            : theme.warningBackground,
+              ? theme.errorBackground
+              : theme.warningBackground,
           borderTop: `3px solid ${
             positive
               ? theme.noticeBorder
               : error
-              ? theme.errorBorder
-              : theme.warningBorder
+                ? theme.errorBorder
+                : theme.warningBorder
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
@@ -183,8 +184,8 @@ function Notification({
                   positive
                     ? theme.noticeBorder
                     : error
-                    ? theme.errorBorder
-                    : theme.warningBorder
+                      ? theme.errorBorder
+                      : theme.warningBorder
                 }`,
                 color: 'currentColor',
                 fontSize: 14,
@@ -193,8 +194,8 @@ function Notification({
                   backgroundColor: positive
                     ? theme.noticeBackground
                     : error
-                    ? theme.errorBackground
-                    : theme.warningBackground,
+                      ? theme.errorBackground
+                      : theme.warningBackground,
                 },
               }}
             >
@@ -209,7 +210,7 @@ function Notification({
             style={{ flexShrink: 0, color: 'currentColor' }}
             onClick={onRemove}
           >
-            <Delete style={{ width: 9, height: 9, color: 'currentColor' }} />
+            <SvgDelete style={{ width: 9, height: 9, color: 'currentColor' }} />
           </Button>
         )}
       </Stack>
@@ -235,7 +236,7 @@ function Notification({
   );
 }
 
-export default function Notifications({ style }: { style?: CSSProperties }) {
+export function Notifications({ style }: { style?: CSSProperties }) {
   const { removeNotification } = useActions();
   const notifications = useSelector(state => state.notifications.notifications);
   return (

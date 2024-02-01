@@ -7,19 +7,19 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import useFilters from '../../../hooks/useFilters';
+import { useFilters } from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
-import Paragraph from '../../common/Paragraph';
-import View from '../../common/View';
-import PrivacyFilter from '../../PrivacyFilter';
-import Change from '../Change';
-import NetWorthGraph from '../graphs/NetWorthGraph';
-import Header from '../Header';
-import netWorthSpreadsheet from '../spreadsheets/net-worth-spreadsheet';
-import useReport from '../useReport';
+import { Paragraph } from '../../common/Paragraph';
+import { View } from '../../common/View';
+import { PrivacyFilter } from '../../PrivacyFilter';
+import { Change } from '../Change';
+import { NetWorthGraph } from '../graphs/NetWorthGraph';
+import { Header } from '../Header';
+import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
+import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
-function NetWorth() {
+export function NetWorth() {
   const accounts = useSelector(state => state.queries.accounts);
   const {
     filters,
@@ -152,5 +152,3 @@ function NetWorth() {
     </View>
   );
 }
-
-export default NetWorth;

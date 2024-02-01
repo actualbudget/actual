@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgArrowThickRight = (props: SVGProps<SVGSVGElement>) => (
+export const SvgArrowThickRight = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -13,4 +13,3 @@ const SvgArrowThickRight = (props: SVGProps<SVGSVGElement>) => (
     <path d="M10 7H2v6h8v5l8-8-8-8v5z" fill="currentColor" />
   </svg>
 );
-export default SvgArrowThickRight;

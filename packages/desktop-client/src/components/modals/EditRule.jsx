@@ -6,9 +6,10 @@ import {
   setUndoEnabled,
 } from 'loot-core/src/client/actions/queries';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import {
   mapField,
   friendlyOp,
@@ -25,23 +26,22 @@ import {
   amountToInteger,
 } from 'loot-core/src/shared/util';
 
-import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import AddIcon from '../../icons/v0/Add';
-import SubtractIcon from '../../icons/v0/Subtract';
-import InformationOutline from '../../icons/v1/InformationOutline';
+import { useSelected, SelectedProvider } from '../../hooks/useSelected';
+import { SvgAdd, SvgSubtract } from '../../icons/v0';
+import { SvgInformationOutline } from '../../icons/v1';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Modal from '../common/Modal';
-import Select from '../common/Select';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Modal } from '../common/Modal';
+import { Select } from '../common/Select';
+import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { StatusBadge } from '../schedules/StatusBadge';
 import { Tooltip } from '../tooltips';
-import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
+import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
-import DisplayId from '../util/DisplayId';
-import GenericInput from '../util/GenericInput';
+import { DisplayId } from '../util/DisplayId';
+import { GenericInput } from '../util/GenericInput';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -122,7 +122,7 @@ export function OpSelect({
   );
 }
 
-function EditorButtons({ onAdd, onDelete, style }) {
+function EditorButtons({ onAdd, onDelete }) {
   return (
     <>
       {onDelete && (
@@ -132,7 +132,7 @@ function EditorButtons({ onAdd, onDelete, style }) {
           style={{ padding: 7 }}
           aria-label="Delete entry"
         >
-          <SubtractIcon style={{ width: 8, height: 8, color: 'inherit' }} />
+          <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
         </Button>
       )}
       {onAdd && (
@@ -142,7 +142,7 @@ function EditorButtons({ onAdd, onDelete, style }) {
           style={{ padding: 7 }}
           aria-label="Add entry"
         >
-          <AddIcon style={{ width: 10, height: 10, color: 'inherit' }} />
+          <SvgAdd style={{ width: 10, height: 10, color: 'inherit' }} />
         </Button>
       )}
     </>
@@ -310,7 +310,7 @@ const actionFields = [
   'date',
   'amount',
 ].map(field => [field, mapField(field)]);
-function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
+function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
   const { field, op, value, type, error, inputKey = 'initial' } = action;
 
   return (
@@ -373,7 +373,7 @@ function StageInfo() {
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
       >
-        <InformationOutline
+        <SvgInformationOutline
           style={{ width: 11, height: 11, color: theme.pageTextLight }}
         />
       </View>
@@ -605,11 +605,7 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export default function EditRule({
-  modalProps,
-  defaultRule,
-  onSave: originalOnSave,
-}) {
+export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse),
   );

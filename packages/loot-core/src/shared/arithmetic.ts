@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getNumberFormat } from './util';
 
 function fail(state, msg) {
@@ -123,7 +124,7 @@ function evaluate(ast) {
   }
 }
 
-export default function evalArithmetic(expression, defaultValue = null) {
+export function evalArithmetic(expression, defaultValue = null) {
   // An empty expression always evals to the default
   if (expression === '') {
     return defaultValue;

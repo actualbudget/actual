@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgCheckmark = (props: SVGProps<SVGSVGElement>) => (
+export const SvgCheckmark = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -13,4 +13,3 @@ const SvgCheckmark = (props: SVGProps<SVGSVGElement>) => (
     <path d="m0 11 2-2 5 5L18 3l2 2L7 18z" fill="currentColor" />
   </svg>
 );
-export default SvgCheckmark;

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { Fragment, useMemo, useState } from 'react';
 
 import {
@@ -5,16 +6,19 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import { CheckAll, UncheckAll } from '../../icons/v2';
-import ViewHide from '../../icons/v2/ViewHide';
-import ViewShow from '../../icons/v2/ViewShow';
+import {
+  SvgCheckAll,
+  SvgUncheckAll,
+  SvgViewHide,
+  SvgViewShow,
+} from '../../icons/v2';
 import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
-import GraphButton from './GraphButton';
+import { GraphButton } from './GraphButton';
 
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;
@@ -23,7 +27,7 @@ type CategorySelectorProps = {
   setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
 };
 
-export default function CategorySelector({
+export function CategorySelector({
   categoryGroups,
   categories,
   selectedCategories,
@@ -66,12 +70,20 @@ export default function CategorySelector({
           <View>
             {uncheckedHidden ? (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <ViewShow width={15} height={15} style={{ marginRight: 5 }} />
+                <SvgViewShow
+                  width={15}
+                  height={15}
+                  style={{ marginRight: 5 }}
+                />
                 <Text>Show unchecked</Text>
               </View>
             ) : (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <ViewHide width={15} height={15} style={{ marginRight: 5 }} />
+                <SvgViewHide
+                  width={15}
+                  height={15}
+                  style={{ marginRight: 5 }}
+                />
                 <Text>Hide unchecked</Text>
               </View>
             )}
@@ -87,7 +99,7 @@ export default function CategorySelector({
             }}
             style={{ marginRight: 5, padding: 8 }}
           >
-            <CheckAll width={15} height={15} />
+            <SvgCheckAll width={15} height={15} />
           </GraphButton>
           <GraphButton
             selected={allCategoriesUnselected}
@@ -97,7 +109,7 @@ export default function CategorySelector({
             }}
             style={{ padding: 8 }}
           >
-            <UncheckAll width={15} height={15} />
+            <SvgUncheckAll width={15} height={15} />
           </GraphButton>
         </View>
       </View>
@@ -139,7 +151,7 @@ export default function CategorySelector({
                   <Checkbox
                     id={`form_${categoryGroup.id}`}
                     checked={allCategoriesInGroupSelected}
-                    onChange={e => {
+                    onChange={() => {
                       const selectedCategoriesExcludingGroupCategories =
                         selectedCategories.filter(
                           selectedCategory =>
@@ -177,7 +189,7 @@ export default function CategorySelector({
                       paddingLeft: 10,
                     }}
                   >
-                    {categoryGroup.categories.map((category, index) => {
+                    {categoryGroup.categories.map(category => {
                       const isChecked = selectedCategories.some(
                         selectedCategory => selectedCategory.id === category.id,
                       );
@@ -194,7 +206,7 @@ export default function CategorySelector({
                           <Checkbox
                             id={`form_${category.id}`}
                             checked={isChecked}
-                            onChange={e => {
+                            onChange={() => {
                               if (isChecked) {
                                 setSelectedCategories(
                                   selectedCategories.filter(

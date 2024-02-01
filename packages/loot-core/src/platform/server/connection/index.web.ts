@@ -1,3 +1,5 @@
+// @ts-strict-ignore
+import { APIError } from '../../../server/errors';
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
@@ -8,8 +10,8 @@ function getGlobalObject() {
     typeof window !== 'undefined'
       ? window
       : typeof self !== 'undefined'
-      ? self
-      : null;
+        ? self
+        : null;
   if (!obj) {
     throw new Error('Cannot get global object');
   }
@@ -47,14 +49,10 @@ export const init: T.Init = function (serverChn, handlers) {
       if (handlers[name]) {
         runHandler(handlers[name], args, { undoTag, name }).then(
           result => {
-            if (catchErrors) {
-              result = { data: result, error: null };
-            }
-
             serverChannel.postMessage({
               type: 'reply',
               id,
-              result,
+              result: catchErrors ? { data: result, error: null } : result,
               mutated: isMutating(handlers[name]),
               undoTag,
             });
@@ -93,7 +91,7 @@ export const init: T.Init = function (serverChn, handlers) {
           type: 'reply',
           id,
           result: null,
-          error: { type: 'APIError', message: 'Unknown method: ' + name },
+          error: APIError('Unknown method: ' + name),
         });
       }
     },

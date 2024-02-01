@@ -5,19 +5,18 @@ import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
-import AddIcon from '../../icons/v0/Add';
-import SubtractIcon from '../../icons/v0/Subtract';
+import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Input from '../common/Input';
-import Select from '../common/Select';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
+import { Select } from '../common/Select';
+import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { useTooltip, Tooltip } from '../tooltips';
 
-import DateSelect from './DateSelect';
+import { DateSelect } from './DateSelect';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -256,7 +255,7 @@ function MonthlyPatterns({ config, dispatch }) {
               })
             }
           >
-            <SubtractIcon style={{ width: 8, height: 8 }} />
+            <SvgSubtract style={{ width: 8, height: 8 }} />
           </Button>
           <Button
             type="bare"
@@ -264,7 +263,7 @@ function MonthlyPatterns({ config, dispatch }) {
             style={{ padding: 7, marginLeft: 5 }}
             onClick={() => dispatch({ type: 'add-recurrence' })}
           >
-            <AddIcon style={{ width: 10, height: 10 }} />
+            <SvgAdd style={{ width: 10, height: 10 }} />
           </Button>
         </View>
       ))}
@@ -449,6 +448,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
             onChange={value => dispatch({ type: 'set-weekend-solve', value })}
             disabled={!skipWeekend}
             style={{
+              backgroundColor: theme.tableBackground,
               minHeight: '1px',
               width: '5rem',
             }}
@@ -479,11 +479,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   );
 }
 
-export default function RecurringSchedulePicker({
-  value,
-  buttonStyle,
-  onChange,
-}) {
+export function RecurringSchedulePicker({ value, buttonStyle, onChange }) {
   const { isOpen, close, getOpenEvents } = useTooltip();
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',

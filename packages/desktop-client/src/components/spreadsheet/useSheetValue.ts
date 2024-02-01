@@ -1,15 +1,13 @@
+// @ts-strict-ignore
 import { useState, useRef, useLayoutEffect } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
-import useSheetName from './useSheetName';
+import { useSheetName } from './useSheetName';
 
 import { type Binding } from '.';
 
-export default function useSheetValue(
-  binding: Binding,
-  onChange?: (result) => void,
-) {
+export function useSheetValue(binding: Binding, onChange?: (result) => void) {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
   const bindingObj =

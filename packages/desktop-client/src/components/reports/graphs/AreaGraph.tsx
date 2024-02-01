@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { css } from 'glamor';
@@ -8,19 +9,26 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  LabelList,
   ResponsiveContainer,
 } from 'recharts';
 
-import usePrivacyMode from 'loot-core/src/client/privacy';
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import { usePrivacyMode } from 'loot-core/src/client/privacy';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
-import AlignedText from '../../common/AlignedText';
-import PrivacyFilter from '../../PrivacyFilter';
-import Container from '../Container';
-import { type DataEntity } from '../entities';
-import numberFormatterTooltip from '../numberFormatter';
+import { AlignedText } from '../../common/AlignedText';
+import { PrivacyFilter } from '../../PrivacyFilter';
+import { Container } from '../Container';
+import { numberFormatterTooltip } from '../numberFormatter';
+
+import { adjustTextSize } from './adjustTextSize';
+import { renderCustomLabel } from './renderCustomLabel';
 
 type PayloadItem = {
   payload: {
@@ -91,15 +99,54 @@ const CustomTooltip = ({
   }
 };
 
-type AreaGraphProps = {
-  style?: CSSProperties;
-  data: DataEntity;
-  balanceTypeOp: string;
-  compact?: boolean;
+const customLabel = (props, width, end) => {
+  //Add margin to first and last object
+  const calcX =
+    props.x + (props.index === end ? -10 : props.index === 0 ? 5 : 0);
+  const calcY = props.y - (props.value > 0 ? 10 : -10);
+  const textAnchor = props.index === 0 ? 'left' : 'middle';
+  const display =
+    props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
+  const textSize = adjustTextSize(width, 'area');
+
+  return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
-function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
+type AreaGraphProps = {
+  style?: CSSProperties;
+  data: GroupedEntity;
+  balanceTypeOp: string;
+  compact?: boolean;
+  viewLabels: boolean;
+};
+
+export function AreaGraph({
+  style,
+  data,
+  balanceTypeOp,
+  compact,
+  viewLabels,
+}: AreaGraphProps) {
   const privacyMode = usePrivacyMode();
+  const dataMax = Math.max(...data.monthData.map(i => i[balanceTypeOp]));
+  const dataMin = Math.min(...data.monthData.map(i => i[balanceTypeOp]));
+
+  const labelsMargin = viewLabels ? 30 : 0;
+  const dataDiff = dataMax - dataMin;
+  //Calculate how much to add to max and min values for graph range
+  const extendRangeAmount = Math.floor(dataDiff / 20);
+  const labelsMin =
+    //If min is zero or graph range passes zero then set it to zero
+    dataMin === 0 || Math.abs(dataMin) <= extendRangeAmount
+      ? 0
+      : //Else add the range and round to nearest 100s
+        Math.floor((dataMin - extendRangeAmount) / 100) * 100;
+  //Same as above but for max
+  const labelsMax =
+    dataMax === 0 || Math.abs(dataMax) <= extendRangeAmount
+      ? 0
+      : Math.ceil((dataMax + extendRangeAmount) / 100) * 100;
+  const lastLabel = data.monthData.length - 1;
 
   const tickFormatter = tick => {
     if (!privacyMode) return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
@@ -107,9 +154,6 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
   };
 
   const gradientOffset = () => {
-    const dataMax = Math.max(...data.monthData.map(i => i[balanceTypeOp]));
-    const dataMin = Math.min(...data.monthData.map(i => i[balanceTypeOp]));
-
     if (dataMax <= 0) {
       return 0;
     }
@@ -129,7 +173,7 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data.monthData && (
           <ResponsiveContainer>
             <div>
@@ -138,7 +182,7 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
                 width={width}
                 height={height}
                 data={data.monthData}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                margin={{ top: 0, right: labelsMargin, left: 0, bottom: 0 }}
               >
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -153,7 +197,10 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
                 {compact ? null : (
                   <YAxis
                     dataKey={balanceTypeOp}
-                    domain={['auto', 'auto']}
+                    domain={[
+                      viewLabels ? labelsMin : 'auto',
+                      viewLabels ? labelsMax : 'auto',
+                    ]}
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}
@@ -188,7 +235,14 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
                   stroke={theme.reportsBlue}
                   fill="url(#splitColor)"
                   fillOpacity={1}
-                />
+                >
+                  {viewLabels && (
+                    <LabelList
+                      dataKey={balanceTypeOp}
+                      content={e => customLabel(e, width, lastLabel)}
+                    />
+                  )}
+                </Area>
               </AreaChart>
             </div>
           </ResponsiveContainer>
@@ -197,5 +251,3 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
     </Container>
   );
 }
-
-export default AreaGraph;

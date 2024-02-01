@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 let _uid = 0;
 function resetUid() {
   _uid = 0;
@@ -989,10 +990,21 @@ export function isAggregateQuery(queryState) {
   });
 }
 
-type SchemaConfig = {
-  tableViews?: Record<string, unknown> | ((...args: unknown[]) => unknown);
+export type SchemaConfig = {
+  tableViews?:
+    | Record<string, unknown>
+    | ((name: string, config: { withDead; isJoin; tableOptions }) => unknown);
   tableFilters?: (name: string) => unknown[];
-  customizeQuery?: <T>(queryString: T) => T;
+  customizeQuery?: <T extends { table: string; orderExpressions: unknown[] }>(
+    queryString: T,
+  ) => T;
+  views?: Record<
+    string,
+    {
+      fields?: Record<string, string>;
+      [key: `v_${string}`]: string | ((internalFields, publicFields) => string);
+    }
+  >;
 };
 export function compileQuery(
   queryState,
@@ -1003,7 +1015,7 @@ export function compileQuery(
 
   const {
     tableViews = {},
-    tableFilters = name => [],
+    tableFilters = () => [],
     customizeQuery = queryState => queryState,
   } = schemaConfig;
 

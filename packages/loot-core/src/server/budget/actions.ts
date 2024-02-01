@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { safeNumber } from '../../shared/util';
 import * as db from '../db';
@@ -15,7 +16,7 @@ export async function getSheetValue(
 
 // We want to only allow the positive movement of money back and
 // forth. buffered should never be allowed to go into the negative,
-// and you shouldn't be allowed to pull non-existant money from
+// and you shouldn't be allowed to pull non-existent money from
 // leftover.
 function calcBufferedAmount(
   toBudget: number,
@@ -126,7 +127,9 @@ export function setGoal({ month, category, goal }): Promise<void> {
     });
   }
   return db.insert(table, {
-    id: month,
+    id: `${dbMonth(month)}-${category}`,
+    month: dbMonth(month),
+    category,
     goal,
   });
 }

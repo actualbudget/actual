@@ -1,9 +1,9 @@
-export { default as Add } from './Add';
-export { default as Delete } from './Delete';
-export { default as ExpandArrow } from './ExpandArrow';
-export { default as LeftArrow2 } from './LeftArrow2';
-export { default as Math } from './Math';
-export { default as RightArrow2 } from './RightArrow2';
-export { default as Subtract } from './Subtract';
-export { default as Merge } from './Merge';
-export { default as Split } from './Split';
+export { SvgAdd } from './Add';
+export { SvgDelete } from './Delete';
+export { SvgExpandArrow } from './ExpandArrow';
+export { SvgLeftArrow2 } from './LeftArrow2';
+export { SvgMath } from './Math';
+export { SvgRightArrow2 } from './RightArrow2';
+export { SvgSubtract } from './Subtract';
+export { SvgMerge } from './Merge';
+export { SvgSplit } from './Split';

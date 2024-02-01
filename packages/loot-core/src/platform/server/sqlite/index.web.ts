@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import initSqlJS, { type SqlJsStatic, type Database } from '@jlongster/sql.js';
 
 let SQL: SqlJsStatic | null = null;

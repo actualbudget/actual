@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -6,16 +7,16 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../../style';
-import Button from '../../common/Button';
-import ExternalLink from '../../common/ExternalLink';
-import Paragraph from '../../common/Paragraph';
-import Text from '../../common/Text';
-import View from '../../common/View';
+import { Button } from '../../common/Button';
+import { ExternalLink } from '../../common/ExternalLink';
+import { Paragraph } from '../../common/Paragraph';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
-export default function Bootstrap() {
+export function Bootstrap() {
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
 

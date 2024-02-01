@@ -2,14 +2,14 @@ import { type ReactNode } from 'react';
 
 import { type CSSProperties, theme, styles } from '../../style';
 
-import Text from './Text';
+import { Text } from './Text';
 
 type LabelProps = {
   title: ReactNode;
   style?: CSSProperties;
 };
 
-export default function Label({ title, style }: LabelProps) {
+export function Label({ title, style }: LabelProps) {
   return (
     <Text
       style={{

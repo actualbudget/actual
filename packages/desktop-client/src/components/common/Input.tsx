@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useRef,
   type KeyboardEvent,
@@ -29,7 +30,7 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   focused?: boolean;
 };
 
-export default function Input({
+export function Input({
   style,
   inputRef,
   onEnter,

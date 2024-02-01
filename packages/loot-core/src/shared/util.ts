@@ -1,13 +1,18 @@
+// @ts-strict-ignore
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
 
-export function getChangedValues(obj1, obj2) {
-  // Keep the id field because this is mostly used to diff database
-  // objects
-  const diff = obj1.id ? { id: obj1.id } : {};
+export function getChangedValues<T extends { id?: string }>(obj1: T, obj2: T) {
+  const diff: Partial<T> = {};
   const keys = Object.keys(obj2);
   let hasChanged = false;
+
+  // Keep the id field because this is mostly used to diff database
+  // objects
+  if (obj1.id) {
+    diff.id = obj1.id;
+  }
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
@@ -21,7 +26,11 @@ export function getChangedValues(obj1, obj2) {
   return hasChanged ? diff : null;
 }
 
-export function hasFieldsChanged(obj1, obj2, fields) {
+export function hasFieldsChanged<T extends object>(
+  obj1: T,
+  obj2: T,
+  fields: Array<keyof T>,
+) {
   let changed = false;
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
@@ -101,7 +110,7 @@ export function groupBy<T, K extends keyof T>(data: T[], field: K) {
 // different API and we need to go through and update everywhere that
 // uses it.
 function _groupById<T extends { id: string }>(data: T[]) {
-  const res = new Map();
+  const res = new Map<string, T>();
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
     res.set(item.id, item);
@@ -112,8 +121,8 @@ function _groupById<T extends { id: string }>(data: T[]) {
 export function diffItems<T extends { id: string }>(items: T[], newItems: T[]) {
   const grouped = _groupById(items);
   const newGrouped = _groupById(newItems);
-  const added = [];
-  const updated = [];
+  const added: T[] = [];
+  const updated: Partial<T>[] = [];
 
   const deleted = items
     .filter(item => !newGrouped.has(item.id))
@@ -135,7 +144,7 @@ export function diffItems<T extends { id: string }>(items: T[], newItems: T[]) {
 }
 
 export function groupById<T extends { id: string }>(data: T[]) {
-  const res = {};
+  const res: { [key: string]: T } = {};
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
     res[item.id] = item;
@@ -225,7 +234,7 @@ export function getNumberFormat({
   format,
   hideFraction,
 }: {
-  format: NumberFormats;
+  format?: NumberFormats;
   hideFraction: boolean;
 } = numberFormatConfig) {
   let locale, regex, separator;
@@ -310,6 +319,10 @@ export function amountToCurrency(n) {
   return getNumberFormat().formatter.format(n);
 }
 
+export function amountToCurrencyNoDecimal(n) {
+  return getNumberFormat({ hideFraction: true }).formatter.format(n);
+}
+
 export function currencyToAmount(str: string) {
   const amount = parseFloat(
     str
@@ -358,7 +371,7 @@ export function looselyParseAmount(amount: string) {
   }
 
   const m = amount.match(/[.,][^.,]*$/);
-  if (!m || m.index === 0) {
+  if (!m || m.index === undefined || m.index === 0) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
 

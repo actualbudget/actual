@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   type ReactElement,
   type Ref,
@@ -10,7 +11,7 @@ type InitialFocusProps = {
   children?: ReactElement | ((node: Ref<HTMLInputElement>) => ReactElement);
 };
 
-export default function InitialFocus({ children }: InitialFocusProps) {
+export function InitialFocus({ children }: InitialFocusProps) {
   const node = useRef(null);
 
   useEffect(() => {

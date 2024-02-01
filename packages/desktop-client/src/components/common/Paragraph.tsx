@@ -9,7 +9,7 @@ type ParagraphProps = HTMLProps<HTMLDivElement> & {
   isLast?: boolean;
 };
 
-export default function Paragraph({
+export function Paragraph({
   style,
   isLast,
   children,

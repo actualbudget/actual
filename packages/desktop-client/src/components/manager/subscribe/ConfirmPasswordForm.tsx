@@ -1,8 +1,9 @@
+// @ts-strict-ignore
 import React, { type ChangeEvent, useState } from 'react';
 
 import { ButtonWithLoading } from '../../common/Button';
 import { BigInput } from '../../common/Input';
-import View from '../../common/View';
+import { View } from '../../common/View';
 
 export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
   const [password1, setPassword1] = useState('');
