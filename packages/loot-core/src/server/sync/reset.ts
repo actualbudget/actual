@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';

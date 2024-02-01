@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 
 import * as fs from '../platform/server/fs';

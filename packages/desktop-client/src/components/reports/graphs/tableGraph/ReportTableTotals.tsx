@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type UIEventHandler, useLayoutEffect, useState } from 'react';
 import { type RefProp } from 'react-spring';
 
@@ -6,30 +7,30 @@ import {
   amountToInteger,
   integerToCurrency,
 } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { styles, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
-import { type DataEntity } from '../../entities';
 
 type ReportTableTotalsProps = {
-  data: DataEntity;
-  scrollWidth?: number;
+  data: GroupedEntity;
   balanceTypeOp: string;
   mode: string;
   monthsCount: number;
   totalScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
+  compact: boolean;
 };
 
 export function ReportTableTotals({
   data,
-  scrollWidth,
   balanceTypeOp,
   mode,
   monthsCount,
   totalScrollRef,
   handleScroll,
+  compact,
 }: ReportTableTotalsProps) {
   const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 
@@ -82,14 +83,15 @@ export function ReportTableTotals({
               return (
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   key={amountToCurrency(item[balanceTypeOp])}
                   value={amountToCurrency(item[balanceTypeOp])}
                   title={
-                    Math.abs(item[balanceTypeOp]) > 100000 &&
-                    amountToCurrency(item[balanceTypeOp])
+                    Math.abs(item[balanceTypeOp]) > 100000
+                      ? amountToCurrency(item[balanceTypeOp])
+                      : undefined
                   }
                   width="flex"
                   privacyFilter
@@ -100,52 +102,58 @@ export function ReportTableTotals({
               <>
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value={amountToCurrency(data.totalAssets)}
                   title={
-                    Math.abs(data.totalAssets) > 100000 &&
-                    amountToCurrency(data.totalAssets)
+                    Math.abs(data.totalAssets) > 100000
+                      ? amountToCurrency(data.totalAssets)
+                      : undefined
                   }
                   width="flex"
+                  privacyFilter
                 />
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value={amountToCurrency(data.totalDebts)}
                   title={
-                    Math.abs(data.totalDebts) > 100000 &&
-                    amountToCurrency(data.totalDebts)
+                    Math.abs(data.totalDebts) > 100000
+                      ? amountToCurrency(data.totalDebts)
+                      : undefined
                   }
                   width="flex"
+                  privacyFilter
                 />
               </>
             )}
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value={amountToCurrency(data[balanceTypeOp])}
           title={
-            Math.abs(data[balanceTypeOp]) > 100000 &&
-            amountToCurrency(data[balanceTypeOp])
+            Math.abs(data[balanceTypeOp]) > 100000
+              ? amountToCurrency(data[balanceTypeOp])
+              : undefined
           }
           width="flex"
           privacyFilter
         />
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value={integerToCurrency(Math.round(average))}
           title={
-            Math.abs(Math.round(average / 100)) > 100000 &&
-            integerToCurrency(Math.round(average))
+            Math.abs(Math.round(average / 100)) > 100000
+              ? integerToCurrency(Math.round(average))
+              : undefined
           }
           width="flex"
           privacyFilter

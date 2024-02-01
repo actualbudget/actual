@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useEffect,
@@ -118,8 +119,8 @@ function Notification({
         color: positive
           ? theme.noticeText
           : error
-          ? theme.errorTextDark
-          : theme.warningTextDark,
+            ? theme.errorTextDark
+            : theme.warningTextDark,
       }}
     >
       <Stack
@@ -131,14 +132,14 @@ function Notification({
           backgroundColor: positive
             ? theme.noticeBackgroundLight
             : error
-            ? theme.errorBackground
-            : theme.warningBackground,
+              ? theme.errorBackground
+              : theme.warningBackground,
           borderTop: `3px solid ${
             positive
               ? theme.noticeBorder
               : error
-              ? theme.errorBorder
-              : theme.warningBorder
+                ? theme.errorBorder
+                : theme.warningBorder
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
@@ -183,8 +184,8 @@ function Notification({
                   positive
                     ? theme.noticeBorder
                     : error
-                    ? theme.errorBorder
-                    : theme.warningBorder
+                      ? theme.errorBorder
+                      : theme.warningBorder
                 }`,
                 color: 'currentColor',
                 fontSize: 14,
@@ -193,8 +194,8 @@ function Notification({
                   backgroundColor: positive
                     ? theme.noticeBackground
                     : error
-                    ? theme.errorBackground
-                    : theme.warningBackground,
+                      ? theme.errorBackground
+                      : theme.warningBackground,
                 },
               }}
             >

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useContext } from 'react';
 
 import { NamespaceContext } from './NamespaceContext';

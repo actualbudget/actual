@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import crypto from 'crypto';
 
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm' as const;

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
@@ -62,7 +63,7 @@ export function Notes({ modalProps, id, name, onSave }: NotesProps) {
             notes={notes}
             editable={true}
             focused={true}
-            getStyle={editable => ({
+            getStyle={() => ({
               borderRadius: 6,
               flex: 1,
               minWidth: 0,

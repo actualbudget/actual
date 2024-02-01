@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export async function checkForUpdateNotification(
   addNotification,
   getIsOutdated,

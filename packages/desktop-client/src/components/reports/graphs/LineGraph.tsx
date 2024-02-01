@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { css } from 'glamor';
@@ -31,10 +32,9 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  label?: string;
 };
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -86,7 +86,7 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         graphData && (
           <ResponsiveContainer>
             <div>
@@ -102,9 +102,13 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                {!compact && (
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="x" />
+                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                  </>
+                )}
                 <Line type="monotone" dataKey="y" stroke="#8884d8" />
               </LineChart>
             </div>

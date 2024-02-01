@@ -11,7 +11,6 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
 import { Input } from '../common/Input';
@@ -133,7 +132,7 @@ function getFileType(filepath) {
   return rawType;
 }
 
-function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
+function ParsedDate({ parseDateFormat, dateFormat, date }) {
   const parsed =
     date &&
     formatDate(
@@ -185,29 +184,29 @@ function getInitialMappings(transactions) {
   }
 
   const dateField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('date')) ||
-      fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
+    fields.find(([name]) => name.toLowerCase().includes('date')) ||
+      fields.find(([, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
   );
 
   const amountField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([name, value]) => value.match(/^-?[.,\d]+$/)),
+    fields.find(([name]) => name.toLowerCase().includes('amount')) ||
+      fields.find(([, value]) => value.match(/^-?[.,\d]+$/)),
   );
 
   const categoryField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('category')),
+    fields.find(([name]) => name.toLowerCase().includes('category')),
   );
 
   const payeeField = key(
     fields.find(
-      ([name, value]) =>
+      ([name]) =>
         name !== dateField && name !== amountField && name !== categoryField,
     ),
   );
 
   const notesField = key(
     fields.find(
-      ([name, value]) =>
+      ([name]) =>
         name !== dateField &&
         name !== amountField &&
         name !== categoryField &&
@@ -217,7 +216,7 @@ function getInitialMappings(transactions) {
 
   const inOutField = key(
     fields.find(
-      ([name, value]) =>
+      ([name]) =>
         name !== dateField &&
         name !== amountField &&
         name !== payeeField &&
@@ -377,7 +376,9 @@ function Transaction({
       <Field
         width="flex"
         title={
-          categoryList.includes(transaction.category) && transaction.category
+          categoryList.includes(transaction.category)
+            ? transaction.category
+            : undefined
         }
       >
         {categoryList.includes(transaction.category) && transaction.category}
@@ -743,19 +744,12 @@ export function ImportTransactions({ modalProps, options }) {
 
   const [clearOnImport, setClearOnImport] = useState(true);
 
-  const enableExperimentalOfxParser = useFeatureFlag('experimentalOfxParser');
-
   async function parse(filename, options) {
     setLoadingState('parsing');
 
     const filetype = getFileType(filename);
     setFilename(filename);
     setFileType(filetype);
-
-    options = {
-      ...options,
-      enableExperimentalOfxParser,
-    };
 
     const { errors, transactions } = await parseTransactions(filename, options);
     setLoadingState(null);
@@ -1027,7 +1021,7 @@ export function ImportTransactions({ modalProps, options }) {
                 </View>
               );
             }}
-            renderItem={({ key, style, item, editing, focusedField }) => (
+            renderItem={({ key, style, item }) => (
               <View key={key} style={style}>
                 <Transaction
                   transaction={item}

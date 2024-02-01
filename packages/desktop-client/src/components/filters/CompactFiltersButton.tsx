@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { SvgFilter } from '../../icons/v1';

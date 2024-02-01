@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ComponentProps, memo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';

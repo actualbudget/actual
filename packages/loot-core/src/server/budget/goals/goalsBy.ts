@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as monthUtils from '../../../shared/months';
 import { amountToInteger } from '../../../shared/util';
 import { isReflectBudget } from '../actions';

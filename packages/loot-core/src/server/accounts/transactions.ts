@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as connection from '../../platform/server/connection';
 import { TransactionEntity } from '../../types/models';
 import * as db from '../db';

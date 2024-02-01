@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as nativeFs from 'fs';
 
 import * as fetchClient from '../platform/client/fetch';

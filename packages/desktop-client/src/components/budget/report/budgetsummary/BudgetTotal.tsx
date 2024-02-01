@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   type CSSProperties,
   type ComponentProps,

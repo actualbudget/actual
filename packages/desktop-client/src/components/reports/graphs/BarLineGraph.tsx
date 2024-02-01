@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { css } from 'glamor';
@@ -32,10 +33,9 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  label?: string;
 };
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -87,7 +87,7 @@ export function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         graphData && (
           <ResponsiveContainer>
             <div>
@@ -103,9 +103,13 @@ export function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                {!compact && (
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="x" />
+                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                  </>
+                )}
                 <Bar type="monotone" dataKey="y" fill="#8884d8" />
                 <Line type="monotone" dataKey="y" stroke="#8884d8" />
               </ComposedChart>

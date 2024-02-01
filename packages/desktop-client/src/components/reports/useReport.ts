@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useState, useEffect, type SetStateAction } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { FIELD_TYPES as ruleFieldTypes } from '../../shared/rules';
 import { type RuleEntity } from '../../types/models';
 import { Condition, Action, rankRules } from '../accounts/rules';

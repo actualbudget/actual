@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 let _uid = 0;
 function resetUid() {
   _uid = 0;
@@ -1014,7 +1015,7 @@ export function compileQuery(
 
   const {
     tableViews = {},
-    tableFilters = name => [],
+    tableFilters = () => [],
     customizeQuery = queryState => queryState,
   } = schemaConfig;
 

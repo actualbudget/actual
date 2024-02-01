@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ComponentProps, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
@@ -136,7 +137,7 @@ export function CategoryGroupMenu({
               notes={notes?.length > 0 ? notes : 'No notes'}
               editable={false}
               focused={false}
-              getStyle={editable => ({
+              getStyle={() => ({
                 ...styles.mediumText,
                 borderRadius: 6,
                 ...((!notes || notes.length === 0) && {

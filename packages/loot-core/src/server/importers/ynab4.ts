@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // This is a special usage of the API because this package is embedded
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
@@ -198,7 +199,7 @@ async function importTransactions(
 
             subtransactions:
               transaction.subTransactions &&
-              transaction.subTransactions.map((t, i) => {
+              transaction.subTransactions.map(t => {
                 return {
                   id: entityIdMap.get(t.entityId),
                   amount: amountToInteger(t.amount),
@@ -345,7 +346,7 @@ export async function doImport(data: YNAB4.YFull) {
   console.log('Setting up...');
 }
 
-export function getBudgetName(filepath, _data) {
+export function getBudgetName(filepath) {
   let unixFilepath = normalizePathSep(filepath);
 
   if (!/\.zip/.test(unixFilepath)) {
@@ -376,9 +377,12 @@ function getFile(entries: AdmZip.IZipEntry[], path: string) {
 }
 
 function join(...paths: string[]): string {
-  return paths.slice(1).reduce((full, path) => {
-    return full + '/' + path.replace(/^\//, '');
-  }, paths[0].replace(/\/$/, ''));
+  return paths.slice(1).reduce(
+    (full, path) => {
+      return full + '/' + path.replace(/^\//, '');
+    },
+    paths[0].replace(/\/$/, ''),
+  );
 }
 
 export function parseFile(buffer: Buffer): YNAB4.YFull {

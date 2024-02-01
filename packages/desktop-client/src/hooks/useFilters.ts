@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useCallback, useMemo, useState } from 'react';
 
 export function useFilters<T>(initialFilters: T[] = []) {
@@ -7,7 +8,10 @@ export function useFilters<T>(initialFilters: T[] = []) {
 
   const onApply = useCallback(
     newFilter => {
-      if (newFilter.conditions) {
+      if (newFilter === null) {
+        setFilters([]);
+        setSaved(null);
+      } else if (newFilter.conditions) {
         setFilters([...newFilter.conditions]);
         setConditionsOp(newFilter.conditionsOp);
         setSaved(newFilter.id);

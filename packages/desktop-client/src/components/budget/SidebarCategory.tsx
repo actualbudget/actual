@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type CSSProperties, type Ref, useState } from 'react';
 
 import { type CategoryEntity } from 'loot-core/src/types/models';
@@ -153,7 +154,7 @@ export function SidebarCategory({
     >
       <InputCell
         value={category.name}
-        formatter={value => displayed}
+        formatter={() => displayed}
         width="flex"
         exposed={editing || temporary}
         onUpdate={value => {

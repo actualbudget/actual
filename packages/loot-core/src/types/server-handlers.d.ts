@@ -14,6 +14,7 @@ import {
   CategoryGroupEntity,
   GoCardlessToken,
   GoCardlessInstitution,
+  SimpleFinAccount,
   PayeeEntity,
 } from './models';
 import { EmptyObject } from './util';
@@ -78,20 +79,20 @@ export interface ServerHandlers {
   'category-create': (arg: {
     name;
     groupId;
-    isIncome;
-    hidden: boolean;
-  }) => Promise<unknown>;
+    isIncome?;
+    hidden?: boolean;
+  }) => Promise<string>;
 
   'category-update': (category) => Promise<unknown>;
 
   'category-move': (arg: { id; groupId; targetId }) => Promise<unknown>;
 
-  'category-delete': (arg: { id; transferId }) => Promise<{ error?: string }>;
+  'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
 
   'category-group-create': (arg: {
     name;
     isIncome?: boolean;
-  }) => Promise<unknown>;
+  }) => Promise<string>;
 
   'category-group-update': (group) => Promise<unknown>;
 
@@ -101,7 +102,7 @@ export interface ServerHandlers {
 
   'must-category-transfer': (arg: { id }) => Promise<unknown>;
 
-  'payee-create': (arg: { name }) => Promise<unknown>;
+  'payee-create': (arg: { name }) => Promise<string>;
 
   'payees-get': () => Promise<PayeeEntity[]>;
 
@@ -161,11 +162,16 @@ export interface ServerHandlers {
     upgradingId;
   }) => Promise<'ok'>;
 
+  'simplefin-accounts-link': (arg: {
+    externalAccount;
+    upgradingId;
+  }) => Promise<'ok'>;
+
   'accounts-connect': (arg: {
     institution;
     publicToken;
     accountIds;
-    offbudgetIds;
+    offbudgetIds?;
   }) => Promise<unknown>;
 
   'gocardless-accounts-connect': (arg: {
@@ -177,7 +183,7 @@ export interface ServerHandlers {
 
   'account-create': (arg: {
     name: string;
-    balance: number;
+    balance?: number;
     offBudget?: boolean;
     closed?: 0 | 1;
   }) => Promise<string>;
@@ -197,7 +203,7 @@ export interface ServerHandlers {
 
   'poll-web-token-stop': () => Promise<'ok'>;
 
-  'accounts-sync': (arg: { id }) => Promise<{
+  'accounts-sync': (arg: { id? }) => Promise<{
     errors: unknown;
     newTransactions: unknown;
     matchedTransactions: unknown;
@@ -215,6 +221,10 @@ export interface ServerHandlers {
   >;
 
   'gocardless-status': () => Promise<{ configured: boolean }>;
+
+  'simplefin-status': () => Promise<{ configured: boolean }>;
+
+  'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
 
   'gocardless-get-banks': (country: string) => Promise<{
     data: GoCardlessInstitution[];

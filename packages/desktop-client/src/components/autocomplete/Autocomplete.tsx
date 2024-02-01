@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useRef,
@@ -31,14 +32,10 @@ function findItem<T extends Item>(
   strict: boolean,
   suggestions: T[],
   value: T | T['id'],
-): T | null {
+): T | T['id'] | null {
   if (strict) {
     const idx = suggestions.findIndex(item => item.id === value);
     return idx === -1 ? null : suggestions[idx];
-  }
-
-  if (typeof value === 'string') {
-    throw new Error('value can be string only if strict = false');
   }
 
   return value;
@@ -302,7 +299,7 @@ function SingleAutocomplete<T extends Item>({
         }
       }}
       highlightedIndex={highlightedIndex}
-      selectedItem={selectedItem || null}
+      selectedItem={selectedItem instanceof Object ? selectedItem : null}
       itemToString={itemToString}
       inputValue={value}
       isOpen={isOpen}
@@ -694,7 +691,7 @@ function MultiAutocomplete<T extends Item>({
 
 type AutocompleteFooterProps = {
   show?: boolean;
-  embedded: boolean;
+  embedded?: boolean;
   children: ReactNode;
 };
 export function AutocompleteFooter({
@@ -702,18 +699,20 @@ export function AutocompleteFooter({
   embedded,
   children,
 }: AutocompleteFooterProps) {
+  if (!show) {
+    return null;
+  }
+
   return (
-    show && (
-      <View
-        style={{
-          flexShrink: 0,
-          ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
-        }}
-        onMouseDown={e => e.preventDefault()}
-      >
-        {children}
-      </View>
-    )
+    <View
+      style={{
+        flexShrink: 0,
+        ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
+      }}
+      onMouseDown={e => e.preventDefault()}
+    >
+      {children}
+    </View>
   );
 }
 

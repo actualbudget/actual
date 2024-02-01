@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, useEffect, useMemo } from 'react';
 
 import * as d from 'date-fns';
@@ -109,7 +110,6 @@ export function CashFlow(): JSX.Element {
         conditionsOp={conditionsOp}
         onCondOpChange={onCondOpChange}
         headerPrefixItems={undefined}
-        selectGraph={undefined}
       />
       <View
         style={{

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { forwardRef, useEffect, type ComponentProps } from 'react';
 import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';

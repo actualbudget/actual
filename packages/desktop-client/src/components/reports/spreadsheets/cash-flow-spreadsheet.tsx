@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import * as d from 'date-fns';
@@ -57,7 +58,7 @@ export function cashFlowByDate(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    function makeQuery(where) {
+    function makeQuery() {
       const query = q('transactions')
         .filter({
           [conditionsOpKey]: filters,
@@ -98,8 +99,8 @@ export function cashFlowByDate(
             'account.offbudget': false,
           })
           .calculate({ $sum: '$amount' }),
-        makeQuery('amount > 0').filter({ amount: { $gt: 0 } }),
-        makeQuery('amount < 0').filter({ amount: { $lt: 0 } }),
+        makeQuery().filter({ amount: { $gt: 0 } }),
+        makeQuery().filter({ amount: { $lt: 0 } }),
       ],
       data => {
         setData(recalculate(data, start, end, isConcise));
@@ -179,6 +180,10 @@ function recalculate(data, start, end, isConcise) {
 
       res.income.push({ x, y: integerToAmount(income) });
       res.expenses.push({ x, y: integerToAmount(expense) });
+      res.transfers.push({
+        x,
+        y: integerToAmount(creditTransfers + debitTransfers),
+      });
       res.balances.push({
         x,
         y: integerToAmount(balance),
@@ -187,7 +192,7 @@ function recalculate(data, start, end, isConcise) {
       });
       return res;
     },
-    { expenses: [], income: [], balances: [] },
+    { expenses: [], income: [], transfers: [], balances: [] },
   );
 
   const { balances } = graphData;

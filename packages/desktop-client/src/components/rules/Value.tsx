@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -48,10 +49,10 @@ export function Value<T>({
     (field === 'payee'
       ? payees
       : field === 'category'
-      ? categories
-      : field === 'account'
-      ? accounts
-      : []);
+        ? categories
+        : field === 'account'
+          ? accounts
+          : []);
 
   const [expanded, setExpanded] = useState(false);
 

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type * as T from './path-join';
 
 // This code is pulled from

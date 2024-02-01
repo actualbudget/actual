@@ -1,6 +1,8 @@
+// @ts-strict-ignore
 import memoizeOne from 'memoize-one';
 
 import { groupById } from '../../shared/util';
+import { type AccountEntity, type PayeeEntity } from '../../types/models';
 import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { QueriesState } from '../state-types/queries';
@@ -59,9 +61,7 @@ export function update(state = initialState, action: Action): QueriesState {
       return {
         ...state,
         accounts: state.accounts.map(account => {
-          // @ts-expect-error Not typed yet
           if (account.id === action.account.id) {
-            // @ts-expect-error Not typed yet
             return { ...account, ...action.account };
           }
           return account;
@@ -83,8 +83,12 @@ export function update(state = initialState, action: Action): QueriesState {
   return state;
 }
 
-export const getAccountsById = memoizeOne(accounts => groupById(accounts));
-export const getPayeesById = memoizeOne(payees => groupById(payees));
+export const getAccountsById = memoizeOne((accounts: AccountEntity[]) =>
+  groupById(accounts),
+);
+export const getPayeesById = memoizeOne((payees: PayeeEntity[]) =>
+  groupById(payees),
+);
 export const getCategoriesById = memoizeOne(categoryGroups => {
   const res = {};
   categoryGroups.forEach(group => {
@@ -95,14 +99,16 @@ export const getCategoriesById = memoizeOne(categoryGroups => {
   return res;
 });
 
-export const getActivePayees = memoizeOne((payees, accounts) => {
-  const accountsById = getAccountsById(accounts);
+export const getActivePayees = memoizeOne(
+  (payees: PayeeEntity[], accounts: AccountEntity[]) => {
+    const accountsById = getAccountsById(accounts);
 
-  return payees.filter(payee => {
-    if (payee.transfer_acct) {
-      const account = accountsById[payee.transfer_acct];
-      return account != null && !account.closed;
-    }
-    return true;
-  });
-});
+    return payees.filter(payee => {
+      if (payee.transfer_acct) {
+        const account = accountsById[payee.transfer_acct];
+        return account != null && !account.closed;
+      }
+      return true;
+    });
+  },
+);

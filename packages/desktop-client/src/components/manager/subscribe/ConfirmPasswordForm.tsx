@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ChangeEvent, useState } from 'react';
 
 import { ButtonWithLoading } from '../../common/Button';

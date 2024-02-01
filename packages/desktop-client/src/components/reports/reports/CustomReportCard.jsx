@@ -10,10 +10,10 @@ import { DateRange } from '../DateRange';
 import { BarGraph } from '../graphs/BarGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
-import { createSpreadsheet as defaultSpreadsheet } from '../spreadsheets/default-spreadsheet';
+import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { useReport } from '../useReport';
 
-export function CustomReportCard() {
+export function CustomReportCard(reports) {
   const categories = useCategories();
 
   const endDate = monthUtils.currentMonth();
@@ -21,7 +21,7 @@ export function CustomReportCard() {
   const groupBy = 'Category';
 
   const getGraphData = useMemo(() => {
-    return defaultSpreadsheet({
+    return createCustomSpreadsheet({
       startDate,
       endDate,
       groupBy,
@@ -32,7 +32,7 @@ export function CustomReportCard() {
   const data = useReport('default', getGraphData);
 
   return (
-    <ReportCard flex={1} to="/reports/custom">
+    <ReportCard flex={1} to="/reports/custom" reports={reports}>
       <View>
         <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
           <View style={{ flex: 1 }}>

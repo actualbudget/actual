@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { batchUpdateTransactions } from '../accounts/transactions';
 import { createApp } from '../app';
 import * as db from '../db';

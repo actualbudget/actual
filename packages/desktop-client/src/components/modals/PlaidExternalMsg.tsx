@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, useRef } from 'react';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -91,8 +92,8 @@ export function PlaidExternalMsg({
                 {waiting === 'browser'
                   ? 'Waiting on browser...'
                   : waiting === 'accounts'
-                  ? 'Loading accounts...'
-                  : null}
+                    ? 'Loading accounts...'
+                    : null}
               </View>
             </View>
           ) : success ? (

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { parseStringPromise } from 'xml2js';
 
 import { dayFromDate } from '../../shared/months';

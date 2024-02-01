@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useEffect,
@@ -229,7 +230,7 @@ function ManageRulesContent({
     dispatch(
       pushModal('edit-rule', {
         rule,
-        onSave: async newRule => {
+        onSave: async () => {
           await loadRules();
           setLoading(false);
         },
@@ -240,10 +241,6 @@ function ManageRulesContent({
   const onHover = useCallback(id => {
     setHoveredRule(id);
   }, []);
-
-  if (allRules.length === 0) {
-    return null;
-  }
 
   return (
     <SelectedProvider instance={selectedInst}>
@@ -288,13 +285,17 @@ function ManageRulesContent({
             // Hide the last border of the item in the table
             style={{ marginBottom: -1 }}
           >
-            <RulesList
-              rules={filteredRules}
-              selectedItems={selectedInst.items}
-              hoveredRule={hoveredRule}
-              onHover={onHover}
-              onEditRule={onEditRule}
-            />
+            {filteredRules.length === 0 ? (
+              <EmptyMessage text="No rules" style={{ marginTop: 15 }} />
+            ) : (
+              <RulesList
+                rules={filteredRules}
+                selectedItems={selectedInst.items}
+                hoveredRule={hoveredRule}
+                onHover={onHover}
+                onEditRule={onEditRule}
+              />
+            )}
           </SimpleTable>
         </View>
         <View
@@ -318,6 +319,23 @@ function ManageRulesContent({
         </View>
       </View>
     </SelectedProvider>
+  );
+}
+
+function EmptyMessage({ text, style }) {
+  return (
+    <View
+      style={{
+        textAlign: 'center',
+        color: theme.pageTextSubdued,
+        fontStyle: 'italic',
+        fontSize: 13,
+        marginTop: 5,
+        style,
+      }}
+    >
+      {text}
+    </View>
   );
 }
 

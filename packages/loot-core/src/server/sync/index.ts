@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   serializeClock,
   deserializeClock,
@@ -130,7 +131,7 @@ async function fetchAll(table, ids) {
     }
 
     sql += ` WHERE `;
-    sql += partIds.map(id => `${column} = ?`).join(' OR ');
+    sql += partIds.map(() => `${column} = ?`).join(' OR ');
 
     try {
       const rows = await db.runQuery(sql, partIds, true);
@@ -141,8 +142,7 @@ async function fetchAll(table, ids) {
           message: error.message,
           stack: error.stack,
         },
-        sql,
-        params: partIds,
+        query: { sql, params: partIds },
       });
     }
   }

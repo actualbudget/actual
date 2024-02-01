@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
 import type {
@@ -68,6 +69,17 @@ export function linkAccount(requisitionId, account, upgradingId) {
     await send('gocardless-accounts-link', {
       requisitionId,
       account,
+      upgradingId,
+    });
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
+  };
+}
+
+export function linkAccountSimpleFin(externalAccount, upgradingId) {
+  return async (dispatch: Dispatch) => {
+    await send('simplefin-accounts-link', {
+      externalAccount,
       upgradingId,
     });
     await dispatch(getPayees());
@@ -199,7 +211,7 @@ export function setLastTransaction(
 }
 
 export function parseTransactions(filepath, options) {
-  return async (dispatch: Dispatch) => {
+  return async () => {
     return await send('transactions-parse-file', {
       filepath,
       options,

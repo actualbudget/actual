@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import { amountToInteger } from '../../shared/util';
@@ -35,12 +36,8 @@ async function importFileWithRealTime(
 ) {
   // Emscripten requires a real Date.now!
   global.restoreDateNow();
-  const { errors, transactions: originalTransactions } = await parseFile(
-    filepath,
-    {
-      enableExperimentalOfxParser: true,
-    },
-  );
+  const { errors, transactions: originalTransactions } =
+    await parseFile(filepath);
   global.restoreFakeDateNow();
 
   let transactions = originalTransactions;

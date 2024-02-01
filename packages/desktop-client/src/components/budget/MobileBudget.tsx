@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -20,9 +21,6 @@ import { SyncRefresh } from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';
 import { prewarmMonth, switchBudgetType } from './util';
-
-const CATEGORY_BUDGET_EDIT_ACTION = 'category-budget';
-const BALANCE_MENU_OPEN_ACTION = 'balance-menu';
 
 type BudgetInnerProps = {
   categories: CategoryEntity[];
@@ -75,8 +73,6 @@ function BudgetInner(props: BudgetInnerProps) {
   const [currentMonth, setCurrentMonth] = useState(currMonth);
   const [initialized, setInitialized] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editingBudgetCategoryId, setEditingBudgetCategoryId] = useState(null);
-  const [openBalanceActionMenuId, setOpenBalanceActionMenuId] = useState(null);
 
   useEffect(() => {
     async function init() {
@@ -359,29 +355,6 @@ function BudgetInner(props: BudgetInnerProps) {
     });
   };
 
-  const onEditCategoryBudget = id => {
-    onEdit(CATEGORY_BUDGET_EDIT_ACTION, id);
-  };
-
-  const onOpenBalanceActionMenu = id => {
-    onEdit(BALANCE_MENU_OPEN_ACTION, id);
-  };
-
-  const onEdit = (action, id) => {
-    // Do not allow editing if another field is currently being edited.
-    // Cancel the currently editing field in that case.
-    const currentlyEditing = editingBudgetCategoryId || openBalanceActionMenuId;
-
-    setEditingBudgetCategoryId(
-      action === CATEGORY_BUDGET_EDIT_ACTION && !currentlyEditing ? id : null,
-    );
-    setOpenBalanceActionMenuId(
-      action === BALANCE_MENU_OPEN_ACTION && !currentlyEditing ? id : null,
-    );
-
-    return { action, editingId: !currentlyEditing ? id : null };
-  };
-
   const numberFormat = prefs?.numberFormat || 'comma-dot';
   const hideFraction = prefs?.hideFraction || false;
 
@@ -407,19 +380,15 @@ function BudgetInner(props: BudgetInnerProps) {
         await sync();
       }}
     >
-      {({ refreshing, onRefresh }) => (
+      {({ onRefresh }) => (
         <BudgetTable
           // This key forces the whole table rerender when the number
           // format changes
           key={numberFormat + hideFraction}
           categoryGroups={categoryGroups}
-          categories={categories}
           type={budgetType}
           month={currentMonth}
           monthBounds={bounds}
-          //   refreshControl={
-          //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          //   }
           editMode={editMode}
           onEditMode={flag => setEditMode(flag)}
           onShowBudgetSummary={onShowBudgetSummary}
@@ -437,17 +406,10 @@ function BudgetInner(props: BudgetInnerProps) {
           onBudgetAction={applyBudgetAction}
           onRefresh={onRefresh}
           onSwitchBudgetType={onSwitchBudgetType}
-          onSaveNotes={onSaveNotes}
-          onEditGroupNotes={onEditGroupNotes}
-          onEditCategoryNotes={onEditCategoryNotes}
           savePrefs={savePrefs}
           pushModal={pushModal}
           onEditGroup={onEditGroup}
           onEditCategory={onEditCategory}
-          editingBudgetCategoryId={editingBudgetCategoryId}
-          onEditCategoryBudget={onEditCategoryBudget}
-          openBalanceActionMenuId={openBalanceActionMenuId}
-          onOpenBalanceActionMenu={onOpenBalanceActionMenu}
         />
       )}
     </SyncRefresh>

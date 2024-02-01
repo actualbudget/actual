@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, type ComponentPropsWithoutRef } from 'react';
 
 import { css } from 'glamor';

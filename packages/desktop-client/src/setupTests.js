@@ -7,12 +7,11 @@ installPolyfills();
 global.IS_TESTING = true;
 global.Actual = {};
 
-jest.mock(
-  'react-virtualized-auto-sizer',
-  () =>
-    ({ children }) =>
-      children({ height: 1000, width: 600 }),
-);
+vi.mock('react-virtualized-auto-sizer', () => ({
+  default: props => {
+    return props.children({ height: 1000, width: 600 });
+  },
+}));
 
 global.Date.now = () => 123456789;
 

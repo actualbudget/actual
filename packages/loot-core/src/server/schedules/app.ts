@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 import { v4 as uuidv4 } from 'uuid';
@@ -562,7 +563,7 @@ app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
 app.service(trackJSONPaths);
 
-app.events.on('sync', ({ type, subtype }) => {
+app.events.on('sync', ({ type }) => {
   const completeEvent =
     type === 'success' || type === 'error' || type === 'unauthorized';
 
