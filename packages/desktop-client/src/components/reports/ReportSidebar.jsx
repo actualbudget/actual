@@ -44,6 +44,7 @@ export function ReportSidebar({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
+    onReportChange(null, 'modify');
     setDateRange(cond);
     switch (cond) {
       case 'All time':
@@ -77,6 +78,7 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
+    onReportChange(null, 'modify');
     setMode(cond);
     if (cond === 'time') {
       if (customReportItems.graphType === 'TableGraph') {
@@ -107,6 +109,7 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
+    onReportChange(null, 'modify');
     setGroupBy(cond);
     if (customReportItems.mode === 'total') {
       if (customReportItems.graphType !== 'TableGraph') {
@@ -124,7 +127,7 @@ export function ReportSidebar({
   };
 
   const onChangeBalanceType = cond => {
-    onReportChange('modify');
+    onReportChange(null, 'modify');
     setBalanceType(cond);
   };
 

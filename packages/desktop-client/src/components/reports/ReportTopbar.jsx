@@ -18,6 +18,7 @@ import { SaveReportMenuButton } from './SaveReport';
 
 export function ReportTopbar({
   customReportItems,
+  savedStatus,
   setGraphType,
   setTypeDisabled,
   setBalanceType,
@@ -169,7 +170,7 @@ export function ReportTopbar({
         }}
       />
       <View style={{ flex: 1 }} />
-      <SaveReportMenuButton />
+      <SaveReportMenuButton savedStatus={savedStatus} />
     </View>
   );
 }

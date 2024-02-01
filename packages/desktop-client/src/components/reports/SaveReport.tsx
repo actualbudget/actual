@@ -38,7 +38,7 @@ function SaveReportMenu({ setMenuOpen }) {
   );
 }
 
-export function SaveReportMenuButton() {
+export function SaveReportMenuButton(savedStatus: string) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -65,6 +65,7 @@ export function SaveReportMenuButton() {
         >
           Unsaved Report&nbsp;
         </Text>
+        {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
       {menuOpen && <SaveReportMenu setMenuOpen={setMenuOpen} />}

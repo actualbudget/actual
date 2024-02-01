@@ -82,6 +82,9 @@ export function CustomReport() {
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
   const [report, setReport] = useState(loadReport);
+  const [savedStatus, setSavedStatus] = useState(
+    location.state ? (location.state.report ? 'saved' : 'new') : 'new',
+  );
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
@@ -221,6 +224,7 @@ export function CustomReport() {
   const onChangeDates = (startDate, endDate) => {
     setStartDate(startDate);
     setEndDate(endDate);
+    setSavedStatus('modified');
   };
 
   const onChangeViews = (viewType, status) => {
@@ -236,26 +240,26 @@ export function CustomReport() {
   };
 
   const onChangeAppliedFilter = (filter, changedElement) => {
-    onReportChange('reload');
+    onReportChange(null, 'modify');
     return changedElement(filter);
   };
 
-  const onReportChange = type => {
+  const onReportChange = (savedReport, type) => {
     switch (type) {
+      case 'add-update':
+        setSavedStatus('saved');
+        setReport(savedReport);
+        break;
+      case 'rename':
+        setReport({ ...report, name: savedReport.name });
+        break;
       case 'modify':
         if (report.name) {
-          if (report.name.substr(report.name.length - 10) !== '(modified)') {
-            setReport({ ...report, name: report.name + ' (modified)' });
-          }
+          setSavedStatus('modified');
         }
         break;
       case 'reload':
-        if (report.name.substr(report.name.length - 10) === '(modified)') {
-          setReport({
-            ...report,
-            name: report.name.substr(0, report.name.length - 11),
-          });
-        }
+        setSavedStatus('saved');
 
         setStartDate(report.startDate);
         setEndDate(report.endDate);
@@ -317,6 +321,7 @@ export function CustomReport() {
         >
           <ReportTopbar
             customReportItems={customReportItems}
+            savedStatus={savedStatus}
             setGraphType={setGraphType}
             setTypeDisabled={setTypeDisabled}
             setBalanceType={setBalanceType}
