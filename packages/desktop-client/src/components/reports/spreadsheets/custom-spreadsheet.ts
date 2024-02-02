@@ -16,6 +16,7 @@ import {
 import { categoryLists, groupBySelections } from '../ReportOptions';
 
 import { calculateLegend } from './calculateLegend';
+import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
@@ -29,13 +30,14 @@ export type createCustomSpreadsheetProps = {
   conditionsOp: string;
   showEmpty: boolean;
   showOffBudget: boolean;
+  showHiddenCategories: boolean;
   showUncategorized: boolean;
   groupBy?: string;
   balanceTypeOp?: string;
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   setDataCheck?: (value: boolean) => void;
-  graphType: string;
+  graphType?: string;
 };
 
 export function createCustomSpreadsheet({
@@ -47,6 +49,7 @@ export function createCustomSpreadsheet({
   conditionsOp,
   showEmpty,
   showOffBudget,
+  showHiddenCategories,
   showUncategorized,
   groupBy,
   balanceTypeOp,
@@ -61,9 +64,8 @@ export function createCustomSpreadsheet({
     categories,
   );
 
-  const categoryFilter = (categoryList || []).filter(
+  const categoryFilter = (categories.list || []).filter(
     category =>
-      !category.hidden &&
       selectedCategories &&
       selectedCategories.some(
         selectedCategory => selectedCategory.id === category.id,
@@ -128,15 +130,31 @@ export function createCustomSpreadsheet({
       groupByList.map(item => {
         let stackAmounts = 0;
 
-        const monthAssets = filterHiddenItems(item, assets)
+        const monthAssets = filterHiddenItems(
+          item,
+          assets,
+          showOffBudget,
+          showHiddenCategories,
+          showUncategorized,
+        )
           .filter(
-            asset => asset.date === month && asset[groupByLabel] === item.id,
+            asset =>
+              asset.date === month && asset[groupByLabel] === (item.id ?? null),
           )
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthAssets += monthAssets;
 
-        const monthDebts = filterHiddenItems(item, debts)
-          .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
+        const monthDebts = filterHiddenItems(
+          item,
+          debts,
+          showOffBudget,
+          showHiddenCategories,
+          showUncategorized,
+        )
+          .filter(
+            debt =>
+              debt.date === month && debt[groupByLabel] === (item.id ?? null),
+          )
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthDebts += monthDebts;
 
@@ -168,11 +186,20 @@ export function createCustomSpreadsheet({
     }, []);
 
     const calcData = groupByList.map(item => {
-      const calc = recalculate({ item, months, assets, debts, groupByLabel });
+      const calc = recalculate({
+        item,
+        months,
+        assets,
+        debts,
+        groupByLabel,
+        showOffBudget,
+        showHiddenCategories,
+        showUncategorized,
+      });
       return { ...calc };
     });
     const calcDataFiltered = calcData.filter(i =>
-      !showEmpty ? i[balanceTypeOp] !== 0 : true,
+      filterEmptyRows(showEmpty, i, balanceTypeOp),
     );
 
     const legend = calculateLegend(

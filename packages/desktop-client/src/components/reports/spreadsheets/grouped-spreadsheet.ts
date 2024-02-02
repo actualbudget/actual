@@ -3,10 +3,12 @@ import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/types/models/reports';
 
 import { categoryLists } from '../ReportOptions';
 
 import { type createCustomSpreadsheetProps } from './custom-spreadsheet';
+import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
@@ -29,9 +31,8 @@ export function createGroupedSpreadsheet({
     categories,
   );
 
-  const categoryFilter = (categoryList || []).filter(
+  const categoryFilter = (categories.list || []).filter(
     category =>
-      !category.hidden &&
       selectedCategories &&
       selectedCategories.some(
         selectedCategory => selectedCategory.id === category.id,
@@ -77,7 +78,7 @@ export function createGroupedSpreadsheet({
 
     const months = monthUtils.rangeInclusive(startDate, endDate);
 
-    const groupedData = categoryGroup.map(
+    const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {
         let totalAssets = 0;
         let totalDebts = 0;
@@ -87,16 +88,30 @@ export function createGroupedSpreadsheet({
           let groupedDebts = 0;
 
           group.categories.forEach(item => {
-            const monthAssets = filterHiddenItems(item, assets)
+            const monthAssets = filterHiddenItems(
+              item,
+              assets,
+              showOffBudget,
+              showHiddenCategories,
+              showUncategorized,
+            )
               .filter(
-                asset => asset.date === month && asset.category === item.id,
+                asset =>
+                  asset.date === month && asset.category === (item.id ?? null),
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedAssets += monthAssets;
 
-            const monthDebts = filterHiddenItems(item, debts)
+            const monthDebts = filterHiddenItems(
+              item,
+              debts,
+              showOffBudget,
+              showHiddenCategories,
+              showUncategorized,
+            )
               .filter(
-                debts => debts.date === month && debts.category === item.id,
+                debts =>
+                  debts.date === month && debts.category === (item.id ?? null),
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedDebts += monthDebts;
@@ -122,6 +137,9 @@ export function createGroupedSpreadsheet({
             assets,
             debts,
             groupByLabel: 'category',
+            showOffBudget,
+            showHiddenCategories,
+            showUncategorized,
           });
           return { ...calc };
         });
@@ -134,14 +152,14 @@ export function createGroupedSpreadsheet({
           totalTotals: integerToAmount(totalAssets + totalDebts),
           monthData,
           categories: stackedCategories.filter(i =>
-            !showEmpty ? i[balanceTypeOp] !== 0 : true,
+            filterEmptyRows(showEmpty, i, balanceTypeOp),
           ),
         };
       },
       [startDate, endDate],
     );
     setData(
-      groupedData.filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true)),
+      groupedData.filter(i => filterEmptyRows(showEmpty, i, balanceTypeOp)),
     );
   };
 }
