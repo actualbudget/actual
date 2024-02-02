@@ -35,7 +35,8 @@ export function ReportSidebar({
   setMode,
   setIsDateStatic,
   setShowEmpty,
-  setShowOffBudgetHidden,
+  setShowOffBudget,
+  setShowHiddenCategories,
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
@@ -266,10 +267,12 @@ export function ReportSidebar({
                 <Menu
                   onMenuSelect={type => {
                     if (type === 'show-hidden-categories') {
-                      setShowOffBudgetHidden(
-                        !customReportItems.showOffBudgetHidden,
+                      setShowHiddenCategories(
+                        !customReportItems.showHiddenCategories,
                       );
-                    } else if (type === 'show-empty-rows') {
+                    } else if (type === 'show-off-budget') {
+                      setShowOffBudget(!customReportItems.showOffBudget);
+                    } else if (type === 'show-empty-items') {
                       setShowEmpty(!customReportItems.showEmpty);
                     } else if (type === 'show-uncategorized') {
                       setShowUncategorized(
@@ -279,20 +282,26 @@ export function ReportSidebar({
                   }}
                   items={[
                     {
-                      name: 'show-empty-rows',
-                      text: 'Show Empty Rows',
+                      name: 'show-hidden-categories',
+                      text: 'Show hidden categories',
+                      tooltip: 'Show hidden categories',
+                      toggle: customReportItems.showHiddenCategories,
+                    },
+                    {
+                      name: 'show-empty-items',
+                      text: 'Show empty rows',
                       tooltip: 'Show rows that are zero or blank',
                       toggle: customReportItems.showEmpty,
                     },
                     {
-                      name: 'show-hidden-categories',
-                      text: 'Show Off Budget',
-                      tooltip: 'Show off budget accounts and hidden categories',
-                      toggle: customReportItems.showOffBudgetHidden,
+                      name: 'show-off-budget',
+                      text: 'Show off budget',
+                      tooltip: 'Show off budget accounts',
+                      toggle: customReportItems.showOffBudget,
                     },
                     {
                       name: 'show-uncategorized',
-                      text: 'Show Uncategorized',
+                      text: 'Show uncategorized',
                       tooltip: 'Show uncategorized transactions',
                       toggle: customReportItems.showUncategorized,
                     },
@@ -440,10 +449,14 @@ export function ReportSidebar({
           }}
         >
           <CategorySelector
-            categoryGroups={categories.grouped}
-            categories={categories.list}
+            categoryGroups={categories.grouped.filter(f => {
+              return customReportItems.showHiddenCategories || !f.hidden
+                ? true
+                : false;
+            })}
             selectedCategories={customReportItems.selectedCategories}
             setSelectedCategories={setSelectedCategories}
+            showHiddenCategories={customReportItems.showHiddenCategories}
           />
         </View>
       )}
