@@ -22,34 +22,39 @@ import { GraphButton } from './GraphButton';
 
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;
-  categories: Array<CategoryEntity>;
   selectedCategories: CategoryListProps['items'];
   setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
+  showHiddenCategories?: boolean;
 };
 
 export function CategorySelector({
   categoryGroups,
-  categories,
   selectedCategories,
   setSelectedCategories,
+  showHiddenCategories = true,
 }: CategorySelectorProps) {
   const [uncheckedHidden, setUncheckedHidden] = useState(false);
+  const filteredGroup = (categoryGroup: CategoryGroupEntity) => {
+    return categoryGroup.categories.filter(f => {
+      return showHiddenCategories || !f.hidden ? true : false;
+    });
+  };
+
+  const selectAll: CategoryEntity[] = [];
+  categoryGroups.map(categoryGroup =>
+    filteredGroup(categoryGroup).map(category => selectAll.push(category)),
+  );
 
   const selectedCategoryMap = useMemo(
     () => selectedCategories.map(selected => selected.id),
     [selectedCategories],
   );
-  const allCategoriesSelected = categories.every(category =>
+  const allCategoriesSelected = selectAll.every(category =>
     selectedCategoryMap.includes(category.id),
   );
 
-  const allCategoriesUnselected = !categories.some(category =>
+  const allCategoriesUnselected = !selectAll.some(category =>
     selectedCategoryMap.includes(category.id),
-  );
-
-  const selectAll: CategoryEntity[] = [];
-  categoryGroups.map(categoryGroup =>
-    categoryGroup.categories.map(category => selectAll.push(category)),
   );
 
   return (
@@ -126,13 +131,14 @@ export function CategorySelector({
       >
         {categoryGroups &&
           categoryGroups.map(categoryGroup => {
-            const allCategoriesInGroupSelected = categoryGroup.categories.every(
-              category =>
-                selectedCategories.some(
-                  selectedCategory => selectedCategory.id === category.id,
-                ),
+            const allCategoriesInGroupSelected = filteredGroup(
+              categoryGroup,
+            ).every(category =>
+              selectedCategories.some(
+                selectedCategory => selectedCategory.id === category.id,
+              ),
             );
-            const noCategorySelected = categoryGroup.categories.every(
+            const noCategorySelected = filteredGroup(categoryGroup).every(
               category =>
                 !selectedCategories.some(
                   selectedCategory => selectedCategory.id === category.id,
@@ -155,7 +161,7 @@ export function CategorySelector({
                       const selectedCategoriesExcludingGroupCategories =
                         selectedCategories.filter(
                           selectedCategory =>
-                            !categoryGroup.categories.some(
+                            !filteredGroup(categoryGroup).some(
                               groupCategory =>
                                 groupCategory.id === selectedCategory.id,
                             ),
@@ -167,7 +173,7 @@ export function CategorySelector({
                       } else {
                         setSelectedCategories(
                           selectedCategoriesExcludingGroupCategories.concat(
-                            categoryGroup.categories,
+                            filteredGroup(categoryGroup),
                           ),
                         );
                       }
@@ -189,7 +195,7 @@ export function CategorySelector({
                       paddingLeft: 10,
                     }}
                   >
-                    {categoryGroup.categories.map(category => {
+                    {filteredGroup(categoryGroup).map(category => {
                       const isChecked = selectedCategories.some(
                         selectedCategory => selectedCategory.id === category.id,
                       );

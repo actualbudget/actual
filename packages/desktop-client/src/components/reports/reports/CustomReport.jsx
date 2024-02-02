@@ -69,8 +69,9 @@ export function CustomReport() {
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
-  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(
-    loadReport.showOffBudgetHidden,
+  const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
+  const [showHiddenCategories, setShowHiddenCategories] = useState(
+    loadReport.showHiddenCategories,
   );
   const [showUncategorized, setShowUncategorized] = useState(
     loadReport.showUncategorized,
@@ -131,7 +132,8 @@ export function CustomReport() {
       conditions: filters,
       conditionsOp,
       showEmpty,
-      showOffBudgetHidden,
+      showOffBudget,
+      showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
     });
@@ -147,7 +149,8 @@ export function CustomReport() {
     filters,
     conditionsOp,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
   ]);
@@ -162,7 +165,8 @@ export function CustomReport() {
       conditions: filters,
       conditionsOp,
       showEmpty,
-      showOffBudgetHidden,
+      showOffBudget,
+      showHiddenCategories,
       showUncategorized,
       groupBy,
       balanceTypeOp,
@@ -183,7 +187,8 @@ export function CustomReport() {
     filters,
     conditionsOp,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
   ]);
@@ -198,7 +203,8 @@ export function CustomReport() {
     groupBy,
     balanceType,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
     startDate,
@@ -259,7 +265,8 @@ export function CustomReport() {
           setMode={setMode}
           setIsDateStatic={setIsDateStatic}
           setShowEmpty={setShowEmpty}
-          setShowOffBudgetHidden={setShowOffBudgetHidden}
+          setShowOffBudget={setShowOffBudget}
+          setShowHiddenCategories={setShowHiddenCategories}
           setShowUncategorized={setShowUncategorized}
           setSelectedCategories={setSelectedCategories}
           onChangeDates={onChangeDates}
