@@ -5,7 +5,6 @@ export function makeQuery(
   name: string,
   startDate: string,
   endDate: string,
-  showOffBudget: boolean,
   selectedCategories: CategoryEntity[],
   categoryFilter: CategoryEntity[],
   conditionsOpKey: string,

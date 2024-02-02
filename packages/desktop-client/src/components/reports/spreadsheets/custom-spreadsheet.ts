@@ -58,11 +58,7 @@ export function createCustomSpreadsheet({
   setDataCheck,
   graphType,
 }: createCustomSpreadsheetProps) {
-  const [categoryList, categoryGroup] = categoryLists(
-    showOffBudget,
-    showUncategorized,
-    categories,
-  );
+  const [categoryList, categoryGroup] = categoryLists(categories);
 
   const categoryFilter = (categories.list || []).filter(
     category =>
@@ -96,7 +92,6 @@ export function createCustomSpreadsheet({
           'assets',
           startDate,
           endDate,
-          showOffBudget,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -108,7 +103,6 @@ export function createCustomSpreadsheet({
           'debts',
           startDate,
           endDate,
-          showOffBudget,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,

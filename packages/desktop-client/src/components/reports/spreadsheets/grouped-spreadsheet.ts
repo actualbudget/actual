@@ -22,14 +22,11 @@ export function createGroupedSpreadsheet({
   conditionsOp,
   showEmpty,
   showOffBudget,
+  showHiddenCategories,
   showUncategorized,
   balanceTypeOp,
 }: createCustomSpreadsheetProps) {
-  const [categoryList, categoryGroup] = categoryLists(
-    showOffBudget,
-    showUncategorized,
-    categories,
-  );
+  const [categoryList, categoryGroup] = categoryLists(categories);
 
   const categoryFilter = (categories.list || []).filter(
     category =>
@@ -55,7 +52,6 @@ export function createGroupedSpreadsheet({
           'assets',
           startDate,
           endDate,
-          showOffBudget,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -67,7 +63,6 @@ export function createGroupedSpreadsheet({
           'debts',
           startDate,
           endDate,
-          showOffBudget,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
