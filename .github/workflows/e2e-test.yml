@@ -46,6 +46,7 @@ jobs:
           name: desktop-client-test-results
           path: packages/desktop-client/test-results/
           retention-days: 30
+          overwrite: true
   vrt:
     name: Visual regression
     needs: netlify
@@ -66,3 +67,4 @@ jobs:
           name: desktop-client-test-results
           path: packages/desktop-client/test-results/
           retention-days: 30
+          overwrite: true
