@@ -1493,7 +1493,11 @@ handlers['load-global-prefs'] = async function () {
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
     theme:
-      theme === 'light' || theme === 'dark' || theme === 'auto'
+      theme === 'light' ||
+      theme === 'dark' ||
+      theme === 'auto' ||
+      theme === 'development' ||
+      theme === 'midnight'
         ? theme
         : 'light',
   };
