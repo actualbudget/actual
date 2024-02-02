@@ -151,7 +151,7 @@ export const errorTextDark = colorPalette.red150;
 export const errorTextDarker = errorTextDark;
 export const errorTextMenu = colorPalette.red500;
 export const errorBorder = colorPalette.red500;
-export const upcomingBackground = colorPalette.purple300;
+export const upcomingBackground = colorPalette.purple700;
 export const upcomingText = colorPalette.purple100;
 export const upcomingBorder = tableBorder;
 
