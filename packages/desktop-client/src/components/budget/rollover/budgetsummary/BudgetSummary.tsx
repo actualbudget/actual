@@ -191,7 +191,7 @@ export function BudgetSummary({
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: theme.tableHeaderBackground,
+              backgroundColor: theme.tableBackground,
               borderTop: '1px solid ' + theme.tableBorder,
             }}
           >

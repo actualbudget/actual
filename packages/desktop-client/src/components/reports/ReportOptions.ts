@@ -16,7 +16,8 @@ export const defaultState: CustomReportEntity = {
   groupBy: 'Category',
   balanceType: 'Payment',
   showEmpty: false,
-  showOffBudgetHidden: false,
+  showOffBudget: false,
+  showHiddenCategories: false,
   showUncategorized: false,
   graphType: 'BarGraph',
   startDate,
@@ -77,7 +78,9 @@ const intervalOptions = [
 export type QueryDataEntity = {
   date: string;
   category: string;
+  categoryHidden: boolean;
   categoryGroup: string;
+  categoryGroupHidden: boolean;
   account: string;
   accountOffBudget: boolean;
   payee: string;
@@ -85,10 +88,7 @@ export type QueryDataEntity = {
   amount: number;
 };
 
-export type UncategorizedEntity = Pick<
-  CategoryEntity,
-  'name' | 'id' | 'hidden'
-> & {
+export type UncategorizedEntity = Pick<CategoryEntity, 'name' | 'hidden'> & {
   /*
     When looking at uncategorized and hidden transactions we
     need a way to group them. To do this we give them a unique
@@ -104,7 +104,6 @@ export type UncategorizedEntity = Pick<
 
 const uncategorizedCategory: UncategorizedEntity = {
   name: 'Uncategorized',
-  id: undefined,
   uncategorized_id: '1',
   hidden: false,
   is_off_budget: false,
@@ -113,7 +112,6 @@ const uncategorizedCategory: UncategorizedEntity = {
 };
 const transferCategory: UncategorizedEntity = {
   name: 'Transfers',
-  id: undefined,
   uncategorized_id: '2',
   hidden: false,
   is_off_budget: false,
@@ -122,7 +120,6 @@ const transferCategory: UncategorizedEntity = {
 };
 const offBudgetCategory: UncategorizedEntity = {
   name: 'Off Budget',
-  id: undefined,
   uncategorized_id: '3',
   hidden: false,
   is_off_budget: true,
@@ -144,26 +141,19 @@ const uncategorizedGroup: UncategorizedGroupEntity = {
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };
 
-export const categoryLists = (
-  showOffBudgetHidden: boolean,
-  showUncategorized: boolean,
-  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
-) => {
-  const categoryList = showUncategorized
-    ? [
-        ...categories.list.filter(f => showOffBudgetHidden || !f.hidden),
-        uncategorizedCategory,
-        transferCategory,
-        offBudgetCategory,
-      ]
-    : categories.list;
-  const categoryGroup = showUncategorized
-    ? [
-        ...categories.grouped.filter(f => showOffBudgetHidden || !f.hidden),
-        uncategorizedGroup,
-      ]
-    : categories.grouped;
-  return [categoryList, categoryGroup] as const;
+export const categoryLists = (categories: {
+  list: CategoryEntity[];
+  grouped: CategoryGroupEntity[];
+}) => {
+  const categoryList = [
+    ...categories.list,
+    uncategorizedCategory,
+    offBudgetCategory,
+    transferCategory,
+  ];
+
+  const categoryGroup = [...categories.grouped, uncategorizedGroup];
+  return [categoryList, categoryGroup.filter(group => group !== null)] as const;
 };
 
 export const groupBySelections = (
