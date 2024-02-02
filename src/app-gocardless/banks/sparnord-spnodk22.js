@@ -16,7 +16,11 @@ const SORTED_BALANCE_TYPE_LIST = [
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: ['SPARNORD_SPNODK22', 'LAGERNES_BANK_LAPNDKK1'],
+  institutionIds: [
+    'SPARNORD_SPNODK22',
+    'LAGERNES_BANK_LAPNDKK1',
+    'ANDELSKASSEN_FALLESKASSEN_FAELDKK1',
+  ],
 
   normalizeAccount(account) {
     return {
