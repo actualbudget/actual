@@ -8,6 +8,8 @@ services:
   actual-development:
     build: .
     image: actual-development
+    environment:
+      - HTTPS
     ports:
       - '3001:3001'
     volumes:
