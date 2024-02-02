@@ -15,20 +15,20 @@ export function CondOpMenu({
   onCondOpChange: (value: string, filters: RuleConditionEntity[]) => void;
   filters: RuleConditionEntity[];
 }) {
-  return (
-    filters.length > 1 && (
-      <Text style={{ color: theme.pageText, marginTop: 11, marginRight: 5 }}>
-        <FieldSelect
-          style={{ display: 'inline-flex' }}
-          fields={[
-            ['and', 'all'],
-            ['or', 'any'],
-          ]}
-          value={conditionsOp}
-          onChange={(value: string) => onCondOpChange(value, filters)}
-        />
-        of:
-      </Text>
-    )
+  return filters.length > 1 ? (
+    <Text style={{ color: theme.pageText, marginTop: 11, marginRight: 5 }}>
+      <FieldSelect
+        style={{ display: 'inline-flex' }}
+        fields={[
+          ['and', 'all'],
+          ['or', 'any'],
+        ]}
+        value={conditionsOp}
+        onChange={(value: string) => onCondOpChange(value, filters)}
+      />
+      of:
+    </Text>
+  ) : (
+    <Text />
   );
 }

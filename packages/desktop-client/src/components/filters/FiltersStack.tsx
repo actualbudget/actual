@@ -5,7 +5,7 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 
-import { AppliedFilters } from './FiltersMenu';
+import { AppliedFilters } from './AppliedFilters';
 import {
   type SavedFilter,
   SavedFilterMenuButton,

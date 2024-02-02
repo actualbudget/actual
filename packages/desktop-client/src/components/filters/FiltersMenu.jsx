@@ -33,7 +33,6 @@ import { Tooltip } from '../tooltips';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
-import { CondOpMenu } from './CondOpMenu';
 import { FiltersButton } from './FiltersButton';
 import { OpButton } from './OpButton';
 import { subfieldFromFilter } from './subfieldFromFilter';

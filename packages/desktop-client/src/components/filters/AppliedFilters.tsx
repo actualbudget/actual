@@ -4,8 +4,8 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { View } from '../common/View';
 
+import { CondOpMenu } from './CondOpMenu';
 import { FilterExpression } from './FilterExpression';
-import { CondOpMenu } from './SavedFilters';
 
 type AppliedFiltersProps = {
   filters: RuleConditionEntity[];
