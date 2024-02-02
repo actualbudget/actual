@@ -18,7 +18,7 @@ import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { AppliedFilters } from '../../filters/FiltersMenu';
+import { AppliedFilters } from '../../filters/AppliedFilters';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import { Header } from '../Header';
