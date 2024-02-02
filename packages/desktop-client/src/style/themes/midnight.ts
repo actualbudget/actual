@@ -16,7 +16,7 @@ export const pageTextLink = colorPalette.purple400;
 export const pageTextLinkLight = colorPalette.purple300;
 
 export const cardBackground = colorPalette.gray800;
-export const cardBorder = colorPalette.purple400;
+export const cardBorder = colorPalette.purple300;
 export const cardShadow = colorPalette.gray900;
 
 export const tableBackground = colorPalette.gray800; //Desktop and mobile budget background, Mobile New Transaction input box background
@@ -54,7 +54,7 @@ export const menuItemTextHover = colorPalette.gray50;
 export const menuItemTextSelected = colorPalette.purple400;
 export const menuItemTextHeader = colorPalette.purple200; //mobile autocomplete text
 export const menuBorder = colorPalette.gray800;
-export const menuBorderHover = colorPalette.purple400;
+export const menuBorderHover = colorPalette.purple300;
 export const menuKeybindingText = colorPalette.gray500;
 export const menuAutoCompleteBackground = colorPalette.gray600; //desktop autocomplete
 export const menuAutoCompleteBackgroundHover = colorPalette.gray400; //desktop autocomplete
@@ -162,7 +162,7 @@ export const formInputBackgroundSelected = colorPalette.gray700;
 export const formInputBackgroundSelection = colorPalette.purple400;
 export const formInputBorder = colorPalette.gray600;
 export const formInputTextReadOnlySelection = colorPalette.gray800;
-export const formInputBorderSelected = colorPalette.purple400;
+export const formInputBorderSelected = colorPalette.purple300;
 export const formInputText = colorPalette.gray150;
 export const formInputTextSelected = colorPalette.black;
 export const formInputTextPlaceholder = colorPalette.gray150;
@@ -183,7 +183,7 @@ export const pillBorder = colorPalette.gray700;
 export const pillBorderDark = pillBorder;
 export const pillBackgroundSelected = colorPalette.purple600;
 export const pillTextSelected = colorPalette.gray150;
-export const pillBorderSelected = colorPalette.purple400;
+export const pillBorderSelected = colorPalette.purple300;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
