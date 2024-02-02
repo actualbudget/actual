@@ -11,8 +11,8 @@ export const pageText = colorPalette.gray100;
 export const pageTextLight = colorPalette.gray200;
 export const pageTextSubdued = colorPalette.gray400;
 export const pageTextDark = colorPalette.gray100;
-export const pageTextPositive = colorPalette.purple300;
-export const pageTextLink = colorPalette.purple400;
+export const pageTextPositive = colorPalette.purple200;
+export const pageTextLink = colorPalette.purple300;
 export const pageTextLinkLight = colorPalette.purple300;
 
 export const cardBackground = colorPalette.gray800;
