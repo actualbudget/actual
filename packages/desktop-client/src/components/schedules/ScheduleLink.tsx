@@ -23,12 +23,12 @@ type ModalParams = {
 };
 
 export function ScheduleLink({
-                               modalProps,
-                               actions,
-                               transactionIds: ids,
-                               getTransaction,
-                               pushModal,
-                             }: {
+  modalProps,
+  actions,
+  transactionIds: ids,
+  getTransaction,
+  pushModal,
+}: {
   actions: BoundActions;
   modalProps?: CommonModalProps;
   transactionIds: string[];
@@ -90,8 +90,7 @@ export function ScheduleLink({
           value={filter}
           onChange={setFilter}
         />
-        {
-          ids.length === 1 &&
+        {ids.length === 1 && (
           <Button
             type="primary"
             style={{ marginLeft: 15, padding: '4px 10px' }}
@@ -100,7 +99,7 @@ export function ScheduleLink({
             <SvgAdd style={{ width: '20px', padding: '3px' }} />
             Create New
           </Button>
-        }
+        )}
       </View>
 
       <View
@@ -116,8 +115,7 @@ export function ScheduleLink({
           allowCompleted={false}
           filter={filter}
           minimal={true}
-          onAction={() => {
-          }}
+          onAction={() => {}}
           onSelect={onSelect}
           schedules={schedules}
           statuses={statuses}
