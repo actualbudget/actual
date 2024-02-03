@@ -11,7 +11,7 @@ import {
 } from '../../icons/v1';
 import { theme } from '../../style';
 import { View } from '../common/View';
-import { FilterButton } from '../filters/FilterButton';
+import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
@@ -45,7 +45,7 @@ export function ReportTopbar({
         selected={customReportItems.graphType === 'TableGraph'}
         title="Data Table"
         onSelect={() => {
-          onReportChange(null, 'modify');
+          onReportChange({ type: 'modify' });
           setGraphType('TableGraph');
           onChangeViews('viewLegend', false);
           setTypeDisabled([]);
@@ -63,7 +63,7 @@ export function ReportTopbar({
           customReportItems.graphType === 'StackedBarGraph'
         }
         onSelect={() => {
-          onReportChange(null, 'modify');
+          onReportChange({ type: 'modify' });
           if (customReportItems.mode === 'total') {
             setGraphType('BarGraph');
             if (['Net'].includes(customReportItems.balanceType)) {
@@ -88,7 +88,7 @@ export function ReportTopbar({
         title="Area Graph"
         selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
-          onReportChange(null, 'modify');
+          onReportChange({ type: 'modify' });
           setGraphType('AreaGraph');
           setGroupBy('Month');
           onChangeViews('viewLegend', false);
@@ -103,7 +103,7 @@ export function ReportTopbar({
         title="Donut Graph"
         selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
-          onReportChange(null, 'modify');
+          onReportChange({ type: 'modify' });
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
           setBalanceType('Payment');
@@ -125,7 +125,7 @@ export function ReportTopbar({
       <GraphButton
         selected={viewLegend}
         onSelect={() => {
-          onReportChange(null, 'modify');
+          onReportChange({ type: 'modify' });
           onChangeViews('viewLegend');
         }}
         style={{ marginRight: 15 }}
@@ -173,15 +173,7 @@ export function ReportTopbar({
         hover
         onApply={e => {
           onApplyFilter(e);
-          onReportChange(null, 'modify');
-        }}
-      />
-      <FilterButton
-        compact
-        hover
-        onApply={e => {
-          onApplyFilter(e);
-          onReportChange(null, 'modify');
+          onReportChange({ type: 'modify' });
         }}
       />
       <View style={{ flex: 1 }} />

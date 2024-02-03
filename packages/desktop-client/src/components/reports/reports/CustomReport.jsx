@@ -276,7 +276,7 @@ export function CustomReport() {
     return changedElement(filter);
   };
 
-  const onReportChange = (savedReport, type) => {
+  const onReportChange = ({ savedReport, type }) => {
     switch (type) {
       case 'add-update':
         setSavedStatus('saved');

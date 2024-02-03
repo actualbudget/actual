@@ -62,10 +62,12 @@ export function SaveReportName({
           </Stack>
         </form>
       )}
-      {err && (
+      {err !== '' ? (
         <Stack direction="row" align="center" style={{ padding: 10 }}>
           <Text style={{ color: theme.errorText }}>{err}</Text>
         </Stack>
+      ) : (
+        <Text />
       )}
     </MenuTooltip>
   );

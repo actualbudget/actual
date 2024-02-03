@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { createRef, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -18,7 +17,13 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;
   report: CustomReportEntity;
   savedStatus: string;
-  onReportChange: (savedReport: T, type: string) => void;
+  onReportChange: ({
+    savedReport,
+    type,
+  }: {
+    savedReport?: T;
+    type: string;
+  }) => void;
   onResetReports: () => void;
 };
 
@@ -31,14 +36,14 @@ export function SaveReport({
 }: SaveReportProps) {
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [menuItem, setMenuItem] = useState(null);
-  const [err, setErr] = useState(null);
+  const [menuItem, setMenuItem] = useState('');
+  const [err, setErr] = useState('');
+  const [res, setRes] = useState('');
   const [name, setName] = useState(report.name);
   const inputRef = createRef<HTMLInputElement>();
 
   const onAddUpdate = async () => {
     let savedReport: CustomReportEntity;
-    let res;
     //save existing states
     savedReport = {
       ...report,
@@ -46,6 +51,7 @@ export function SaveReport({
     };
 
     if (menuItem === 'save-report') {
+      setRes('');
       //create new flow
       /*
       res = await sendCatch('report/create', {
@@ -79,27 +85,27 @@ export function SaveReport({
       });
       */
     }
-    if (res) {
-      setErr(res.error.message);
+    if (res !== '') {
+      setErr(res);
       setNameMenuOpen(true);
     } else {
       setNameMenuOpen(false);
-      onReportChange(
+      onReportChange({
         savedReport,
-        menuItem === 'rename-report' ? 'rename' : 'add-update',
-      );
+        type: menuItem === 'rename-report' ? 'rename' : 'add-update',
+      });
     }
   };
 
-  const onNameChange = cond => {
+  const onNameChange = (cond: string) => {
     setName(cond);
   };
 
-  const onMenuSelect = async item => {
+  const onMenuSelect = async (item: string) => {
     setMenuItem(item);
     switch (item) {
       case 'rename-report':
-        setErr(null);
+        setErr('');
         setMenuOpen(false);
         setNameMenuOpen(true);
         break;
@@ -109,18 +115,18 @@ export function SaveReport({
         onResetReports();
         break;
       case 'update-report':
-        setErr(null);
+        setErr('');
         setMenuOpen(false);
         onAddUpdate();
         break;
       case 'save-report':
-        setErr(null);
+        setErr('');
         setMenuOpen(false);
         setNameMenuOpen(true);
         break;
       case 'reload-report':
         setMenuOpen(false);
-        onReportChange(null, 'reload');
+        onReportChange({ type: 'reload' });
         break;
       case 'reset-report':
         setMenuOpen(false);
