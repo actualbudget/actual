@@ -2102,7 +2102,6 @@ export const TransactionTable = forwardRef((props, ref) => {
         const { newNavigator } = latestState.current;
         const newTrans = latestState.current.newTransactions;
         const { data, diff } = splitTransaction(newTrans, id);
-        console.log('splitting', data);
         setNewTransactions(data);
 
         // Jump next to "debit" field if it is empty
