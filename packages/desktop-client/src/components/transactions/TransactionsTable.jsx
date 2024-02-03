@@ -1502,7 +1502,7 @@ function NewTransaction({
           key={transaction.id}
           editing={editingTransaction === transaction.id}
           transaction={transaction}
-          subtransactions={childTransactions.length ? childTransactions : null}
+          subtransactions={transaction.is_parent ? childTransactions : null}
           showAccount={showAccount}
           showCategory={showCategory}
           showBalance={showBalance}

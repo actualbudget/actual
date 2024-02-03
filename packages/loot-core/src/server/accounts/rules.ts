@@ -509,7 +509,7 @@ export function execActions(actions: Action[], transaction) {
     ) + 1;
 
   let update = execNonSplitActions(parentActions, transaction);
-  if (!prefs.getPrefs()['flags.splitsInRules'] || totalSplitCount === 1) {
+  if (!prefs.getPrefs()?.['flags.splitsInRules'] || totalSplitCount === 1) {
     return update;
   }
 
