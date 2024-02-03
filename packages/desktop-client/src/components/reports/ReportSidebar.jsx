@@ -45,7 +45,7 @@ export function ReportSidebar({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
-    onReportChange({type: 'modify'});
+    onReportChange({ type: 'modify' });
     setDateRange(cond);
     switch (cond) {
       case 'All time':
@@ -79,7 +79,7 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
-    onReportChange({type: 'modify'});
+    onReportChange({ type: 'modify' });
     setMode(cond);
     if (cond === 'time') {
       if (customReportItems.graphType === 'TableGraph') {
@@ -110,7 +110,7 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
-    onReportChange({type: 'modify'});
+    onReportChange({ type: 'modify' });
     setGroupBy(cond);
     if (customReportItems.mode === 'total') {
       if (customReportItems.graphType !== 'TableGraph') {
@@ -128,7 +128,7 @@ export function ReportSidebar({
   };
 
   const onChangeBalanceType = cond => {
-    onReportChange({type: 'modify'});
+    onReportChange({ type: 'modify' });
     setBalanceType(cond);
   };
 
@@ -279,18 +279,18 @@ export function ReportSidebar({
                       setShowHiddenCategories(
                         !customReportItems.showHiddenCategories,
                       );
-                      onReportChange({type: 'modify'});
+                      onReportChange({ type: 'modify' });
                     } else if (type === 'show-off-budget') {
                       setShowOffBudget(!customReportItems.showOffBudget);
-                      onReportChange({type: 'modify'});
+                      onReportChange({ type: 'modify' });
                     } else if (type === 'show-empty-items') {
                       setShowEmpty(!customReportItems.showEmpty);
-                      onReportChange({type: 'modify'});
+                      onReportChange({ type: 'modify' });
                     } else if (type === 'show-uncategorized') {
                       setShowUncategorized(
                         !customReportItems.showUncategorized,
                       );
-                      onReportChange({type: 'modify'});
+                      onReportChange({ type: 'modify' });
                     }
                   }}
                   items={[
@@ -361,7 +361,7 @@ export function ReportSidebar({
                 customReportItems.startDate,
                 customReportItems.endDate,
               );
-              onReportChange({type: 'modify'});
+              onReportChange({ type: 'modify' });
             }}
           >
             Static
@@ -411,7 +411,7 @@ export function ReportSidebar({
                       customReportItems.endDate,
                     ),
                   );
-                  onReportChange({type: 'modify'});
+                  onReportChange({ type: 'modify' });
                 }}
                 value={customReportItems.startDate}
                 defaultLabel={monthUtils.format(
@@ -440,7 +440,7 @@ export function ReportSidebar({
                       newValue,
                     ),
                   );
-                  onReportChange({type: 'modify'});
+                  onReportChange({ type: 'modify' });
                 }}
                 value={customReportItems.endDate}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
