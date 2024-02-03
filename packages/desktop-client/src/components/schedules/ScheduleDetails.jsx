@@ -143,11 +143,10 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
             fields: { ...state.fields, ...fields },
           };
         case 'set-transactions':
-          if (fromTrans) {
-            action.transactions = action.transactions.filter(
-              x => x.id !== transaction.id,
-            );
-            action.transactions.unshift(transaction);
+          if (fromTrans && action.transactions) {
+            action.transactions.sort(a => {
+              return transaction.id === a.id ? -1 : 1;
+            });
           }
           return { ...state, transactions: action.transactions };
         case 'set-repeats':
@@ -216,24 +215,30 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
           endOccurrences: '1',
           endDate: monthUtils.currentDay(),
         };
-        const schedule = {
-          posts_transaction: false,
-          _date: date,
-          _conditions: [{ op: 'isapprox', field: 'date', value: date }],
-          _actions: [],
-        };
-        if (fromTrans) {
-          schedule._account = transaction.account;
-          schedule._amount = transaction.amount;
-          schedule._amountOp = 'is';
-          schedule._date = {
-            frequency: 'monthly',
-            start: transaction.date,
-            patterns: [],
-          };
-          schedule.name = payees[transaction.payee].name;
-          schedule._payee = transaction.payee;
-        }
+
+        const schedule = fromTrans
+          ? {
+              posts_transaction: false,
+              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
+              _actions: [],
+              _account: transaction.account,
+              _amount: transaction.amount,
+              _amountOp: 'is',
+              name: transaction.payee ? payees[transaction.payee].name : '',
+              _payee: transaction.payee ? transaction.payee : '',
+              _date: {
+                ...date,
+                frequency: 'monthly',
+                start: transaction.date,
+                patterns: [],
+              },
+            }
+          : {
+              posts_transaction: false,
+              _date: date,
+              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
+              _actions: [],
+            };
 
         dispatch({ type: 'set-schedule', schedule });
       } else {
@@ -340,9 +345,11 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
     };
   }, [state.schedule, state.transactionsMode, state.fields]);
 
-  const selectedInst = useSelected('transactions', state.transactions, [
-    transaction ? transaction.id : null,
-  ]);
+  const selectedInst = useSelected(
+    'transactions',
+    state.transactions,
+    transaction ? [transaction.id] : [],
+  );
 
   async function onSave() {
     dispatch({ type: 'form-error', error: null });

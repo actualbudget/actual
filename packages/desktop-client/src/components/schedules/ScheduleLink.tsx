@@ -32,7 +32,7 @@ export function ScheduleLink({
   actions: BoundActions;
   modalProps?: CommonModalProps;
   transactionIds: string[];
-  getTransaction: (tranID: string) => TransactionEntity;
+  getTransaction: (transactionId: string) => TransactionEntity;
   pushModal: (name: string, params: ModalParams) => void;
 }) {
   const [filter, setFilter] = useState('');
@@ -96,7 +96,7 @@ export function ScheduleLink({
             style={{ marginLeft: 15, padding: '4px 10px' }}
             onClick={onCreate}
           >
-            <SvgAdd style={{ width: '20px', padding: '3px' }} />
+            <SvgAdd style={{ width: '20', padding: '3' }} />
             Create New
           </Button>
         )}
