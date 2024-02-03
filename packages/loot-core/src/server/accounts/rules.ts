@@ -572,7 +572,6 @@ export function execActions(actions: Action[], transaction) {
     const amountToDistribute =
       (transaction.amount ?? totalFixedAmount) - totalFixedAmount;
     let remainingAmount = amountToDistribute;
-    let lastNonFixedIndex = 0;
 
     // First distribute the fixed percentages.
     splitAmountActions
@@ -583,26 +582,44 @@ export function execActions(actions: Action[], transaction) {
         const amount = Math.round(amountToDistribute * percent);
         update.subtransactions[splitIndex].amount = amount;
         remainingAmount -= amount;
-        lastNonFixedIndex = Math.max(lastNonFixedIndex, splitIndex);
       });
 
     // Then distribute the remainder.
     const remainderSplitAmountActions = splitAmountActions.filter(
       action => action.options.method === 'remainder',
     );
-    const amountPerRemainderSplit = Math.round(
-      remainingAmount / remainderSplitAmountActions.length,
-    );
-    remainderSplitAmountActions.forEach(action => {
-      const splitIndex = action.options.splitIndex;
-      update.subtransactions[splitIndex].amount = amountPerRemainderSplit;
-      remainingAmount -= amountPerRemainderSplit;
-      lastNonFixedIndex = Math.max(lastNonFixedIndex, splitIndex);
-    });
 
-    // The last non-fixed split will be adjusted for the remainder.
-    update.subtransactions[lastNonFixedIndex].amount -= remainingAmount;
-    update = recalculateSplit(update);
+    // Check if there is any value left to distribute after all fixed
+    // (percentage and amount) splits have been distributed.
+    if (remainingAmount !== 0) {
+      // If there are no remainder splits explicitly added by the user,
+      // distribute the remainder to a virtual split that will be
+      // adjusted for the remainder.
+      if (remainderSplitAmountActions.length === 0) {
+        const splitIndex = totalSplitCount;
+        const { newTransaction } = addSplitTransaction(
+          newTransactions,
+          transaction.id,
+        );
+        update = recalculateSplit(newTransaction);
+        update.subtransactions[splitIndex].amount = remainingAmount;
+      } else {
+        const amountPerRemainderSplit = Math.round(
+          remainingAmount / remainderSplitAmountActions.length,
+        );
+        let lastNonFixedIndex = -1;
+        remainderSplitAmountActions.forEach(action => {
+          const splitIndex = action.options.splitIndex;
+          update.subtransactions[splitIndex].amount = amountPerRemainderSplit;
+          remainingAmount -= amountPerRemainderSplit;
+          lastNonFixedIndex = Math.max(lastNonFixedIndex, splitIndex);
+        });
+
+        // The last non-fixed split will be adjusted for the remainder.
+        update.subtransactions[lastNonFixedIndex].amount -= remainingAmount;
+        update = recalculateSplit(update);
+      }
+    }
   }
 
   // The split index 0 is reserved for "Before split" actions.
