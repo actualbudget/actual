@@ -35,6 +35,8 @@ import {
   updateTransaction,
   deleteTransaction,
   addSplitTransaction,
+  groupTransaction,
+  ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 import {
   integerToCurrency,
@@ -829,8 +831,7 @@ const Transaction = memo(function Transaction(props) {
       // it's always showing the formatted result
       setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
 
-      deserialized.subtransactions = subtransactions;
-      onSave(deserialized);
+      onSave(deserialized, subtransactions);
     }
   }
 
@@ -2053,18 +2054,28 @@ export const TransactionTable = forwardRef((props, ref) => {
   }, [props.onAdd, newNavigator.onEdit]);
 
   const onSave = useCallback(
-    async transaction => {
+    async (transaction, subtransactions = null) => {
       savePending.current = true;
+
+      let groupedTransaction = subtransactions
+        ? groupTransaction([transaction, ...subtransactions])
+        : transaction;
 
       if (isTemporaryId(transaction.id)) {
         if (props.onApplyRules) {
-          transaction = await props.onApplyRules(transaction);
+          groupedTransaction = await props.onApplyRules(groupedTransaction);
         }
 
         const newTrans = latestState.current.newTransactions;
-        setNewTransactions(updateTransaction(newTrans, transaction).data);
+        // Future refactor: we shouldn't need to iterate through the entire
+        // transaction list to ungroup, just the new transactions.
+        setNewTransactions(
+          ungroupTransactions(
+            updateTransaction(newTrans, groupedTransaction).data,
+          ),
+        );
       } else {
-        props.onSave(transaction);
+        props.onSave(groupedTransaction);
       }
     },
     [props.onSave],
@@ -2091,6 +2102,7 @@ export const TransactionTable = forwardRef((props, ref) => {
         const { newNavigator } = latestState.current;
         const newTrans = latestState.current.newTransactions;
         const { data, diff } = splitTransaction(newTrans, id);
+        console.log('splitting', data);
         setNewTransactions(data);
 
         // Jump next to "debit" field if it is empty
