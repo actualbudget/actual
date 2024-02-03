@@ -9,24 +9,31 @@ export interface RuleEntity {
   tombstone?: boolean;
 }
 
+export type RuleConditionOp =
+  | 'is'
+  | 'isNot'
+  | 'oneOf'
+  | 'notOneOf'
+  | 'isapprox'
+  | 'isbetween'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'contains'
+  | 'doesNotContain';
+
 export interface RuleConditionEntity {
-  field: unknown;
-  op:
-    | 'is'
-    | 'isNot'
-    | 'oneOf'
-    | 'notOneOf'
-    | 'isapprox'
-    | 'isbetween'
-    | 'gt'
-    | 'gte'
-    | 'lt'
-    | 'lte'
-    | 'contains'
-    | 'doesNotContain';
-  value: unknown;
-  options?: unknown;
-  conditionsOp?: unknown;
+  field?: string;
+  op?: RuleConditionOp;
+  value?: string | string[] | number | boolean;
+  options?: {
+    inflow?: boolean;
+    outflow?: boolean;
+    month?: boolean;
+    year?: boolean;
+  };
+  conditionsOp?: string;
   type?: string;
   customName?: string;
 }

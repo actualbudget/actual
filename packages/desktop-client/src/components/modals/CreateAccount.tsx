@@ -10,13 +10,13 @@ import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { Button, ButtonWithLoading } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;

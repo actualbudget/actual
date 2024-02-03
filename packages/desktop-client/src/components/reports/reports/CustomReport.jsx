@@ -18,13 +18,13 @@ import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { AppliedFilters } from '../../filters/FiltersMenu';
+import { AppliedFilters } from '../../filters/AppliedFilters';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportLegend } from '../ReportLegend';
-import { ReportOptions, defaultState } from '../ReportOptions';
+import { ReportOptions, defaultReport } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
@@ -54,7 +54,9 @@ export function CustomReport() {
   } = useFilters();
 
   const location = useLocation();
-  const loadReport = location.state && (location.state.report ?? defaultState);
+  const loadReport = location.state
+    ? location.state.report ?? defaultReport
+    : defaultReport;
 
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
@@ -69,22 +71,27 @@ export function CustomReport() {
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
-  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(
-    loadReport.showOffBudgetHidden,
+  const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
+  const [showHiddenCategories, setShowHiddenCategories] = useState(
+    loadReport.showHiddenCategories,
   );
   const [showUncategorized, setShowUncategorized] = useState(
     loadReport.showUncategorized,
   );
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
-  const [dateRange, setDateRange] = useState('Last 6 months');
+  const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
+  const [report, setReport] = useState(loadReport);
+  const [savedStatus, setSavedStatus] = useState(
+    location.state ? (location.state.report ? 'saved' : 'new') : 'new',
+  );
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
-    if (selectedCategories === null && categories.list.length !== 0) {
+    if (selectedCategories.length === 0 && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
   }, [categories, selectedCategories]);
@@ -131,7 +138,8 @@ export function CustomReport() {
       conditions: filters,
       conditionsOp,
       showEmpty,
-      showOffBudgetHidden,
+      showOffBudget,
+      showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
     });
@@ -147,7 +155,8 @@ export function CustomReport() {
     filters,
     conditionsOp,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
   ]);
@@ -162,7 +171,8 @@ export function CustomReport() {
       conditions: filters,
       conditionsOp,
       showEmpty,
-      showOffBudgetHidden,
+      showOffBudget,
+      showHiddenCategories,
       showUncategorized,
       groupBy,
       balanceTypeOp,
@@ -183,7 +193,8 @@ export function CustomReport() {
     filters,
     conditionsOp,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
   ]);
@@ -191,25 +202,27 @@ export function CustomReport() {
   const groupedData = useReport('grouped', getGroupData);
 
   const data = { ...graphData, groupedData };
-
   const customReportItems = {
-    id: null,
+    id: undefined,
+    name: undefined,
+    startDate,
+    endDate,
+    isDateStatic,
+    dateRange,
     mode,
     groupBy,
     balanceType,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
-    graphType,
-    startDate,
-    endDate,
     selectedCategories,
-    isDateStatic,
-    dateRange,
-    filters,
+    graphType,
+    conditions: filters,
     conditionsOp,
     data,
   };
+
   const [scrollWidth, setScrollWidth] = useState(0);
 
   if (!allMonths || !data) {
@@ -219,6 +232,7 @@ export function CustomReport() {
   const onChangeDates = (startDate, endDate) => {
     setStartDate(startDate);
     setEndDate(endDate);
+    setSavedStatus('modified');
   };
 
   const onChangeViews = (viewType, status) => {
@@ -230,6 +244,48 @@ export function CustomReport() {
     }
     if (viewType === 'viewLabels') {
       savePrefs({ reportsViewLabel: !viewLabels });
+    }
+  };
+
+  const onChangeAppliedFilter = (filter, changedElement) => {
+    onReportChange(null, 'modify');
+    return changedElement(filter);
+  };
+
+  const onReportChange = (savedReport, type) => {
+    switch (type) {
+      case 'add-update':
+        setSavedStatus('saved');
+        setReport(savedReport);
+        break;
+      case 'rename':
+        setReport({ ...report, name: savedReport.name });
+        break;
+      case 'modify':
+        if (report.name) {
+          setSavedStatus('modified');
+        }
+        break;
+      case 'reload':
+        setSavedStatus('saved');
+
+        setStartDate(report.startDate);
+        setEndDate(report.endDate);
+        setIsDateStatic(report.isDateStatic);
+        setDateRange(report.dateRange);
+        setMode(report.mode);
+        setGroupBy(report.groupBy);
+        setBalanceType(report.balanceType);
+        setShowEmpty(report.showEmpty);
+        setShowOffBudget(report.showOffBudget);
+        setShowUncategorized(report.showUncategorized);
+        setSelectedCategories(report.selectedCategories);
+        setGraphType(report.graphType);
+        onApplyFilter(null);
+        report.conditions.forEach(condition => onApplyFilter(condition));
+        onCondOpChange(report.conditionsOp);
+        break;
+      default:
     }
   };
 
@@ -259,11 +315,13 @@ export function CustomReport() {
           setMode={setMode}
           setIsDateStatic={setIsDateStatic}
           setShowEmpty={setShowEmpty}
-          setShowOffBudgetHidden={setShowOffBudgetHidden}
+          setShowOffBudget={setShowOffBudget}
+          setShowHiddenCategories={setShowHiddenCategories}
           setShowUncategorized={setShowUncategorized}
           setSelectedCategories={setSelectedCategories}
           onChangeDates={onChangeDates}
           onChangeViews={onChangeViews}
+          onReportChange={onReportChange}
         />
         <View
           style={{
@@ -272,6 +330,7 @@ export function CustomReport() {
         >
           <ReportTopbar
             customReportItems={customReportItems}
+            savedStatus={savedStatus}
             setGraphType={setGraphType}
             setTypeDisabled={setTypeDisabled}
             setBalanceType={setBalanceType}
@@ -281,6 +340,7 @@ export function CustomReport() {
             viewLabels={viewLabels}
             onApplyFilter={onApplyFilter}
             onChangeViews={onChangeViews}
+            onReportChange={onReportChange}
           />
           {filters && filters.length > 0 && (
             <View
@@ -293,9 +353,14 @@ export function CustomReport() {
               <AppliedFilters
                 filters={filters}
                 onUpdate={onUpdateFilter}
-                onDelete={onDeleteFilter}
+                onDelete={filter =>
+                  onChangeAppliedFilter(filter, onDeleteFilter)
+                }
                 conditionsOp={conditionsOp}
-                onCondOpChange={onCondOpChange}
+                onCondOpChange={filter =>
+                  onChangeAppliedFilter(filter, onCondOpChange)
+                }
+                onUpdateChange={onReportChange}
               />
             </View>
           )}
