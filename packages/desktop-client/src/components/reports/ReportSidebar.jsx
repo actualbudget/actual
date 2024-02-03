@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Checkbox } from '../forms';
+import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
 import {
@@ -34,12 +36,14 @@ export function ReportSidebar({
   setIsDateStatic,
   setShowEmpty,
   setShowOffBudget,
+  setShowHiddenCategories,
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
   onChangeViews,
   onReportChange,
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
     onReportChange(null, 'modify');
     setDateRange(cond);
@@ -251,75 +255,74 @@ export function ReportSidebar({
           }}
         >
           <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-empty-columns"
-            checked={customReportItems.showEmpty}
-            value={customReportItems.showEmpty}
-            onChange={() => {
-              setShowEmpty(!customReportItems.showEmpty);
-              onReportChange(null, 'modify');
+          <Button
+            onClick={() => {
+              setMenuOpen(true);
             }}
-          />
-          <label
-            htmlFor="show-empty-columns"
-            title="Show rows that are zero or blank"
-            style={{ fontSize: 12 }}
-          >
-            Show Empty Rows
-          </label>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-hidden-columns"
-            checked={customReportItems.showOffBudget}
-            value={customReportItems.showOffBudget}
-            onChange={() => {
-              setShowOffBudget(!customReportItems.showOffBudget);
-              onReportChange(null, 'modify');
+            style={{
+              color: 'currentColor',
+              padding: '5px 10px',
             }}
-          />
-          <label
-            htmlFor="show-hidden-columns"
-            title="Show off budget accounts and hidden categories"
-            style={{ fontSize: 12 }}
           >
-            Off Budget Items
-          </label>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-uncategorized"
-            checked={customReportItems.showUncategorized}
-            value={customReportItems.showUncategorized}
-            onChange={() => {
-              setShowUncategorized(!customReportItems.showUncategorized);
-              onReportChange(null, 'modify');
-            }}
-          />
-          <label
-            htmlFor="show-uncategorized"
-            title="Show uncategorized transactions"
-            style={{ fontSize: 12 }}
-          >
-            Uncategorized
-          </label>
+            Options
+            {menuOpen && (
+              <Tooltip
+                position="bottom-left"
+                style={{ padding: 0 }}
+                onClose={() => {
+                  setMenuOpen(false);
+                }}
+              >
+                <Menu
+                  onMenuSelect={type => {
+                    if (type === 'show-hidden-categories') {
+                      setShowHiddenCategories(
+                        !customReportItems.showHiddenCategories,
+                      );
+					  onReportChange(null, 'modify');
+                    } else if (type === 'show-off-budget') {
+                      setShowOffBudget(!customReportItems.showOffBudget);
+					  onReportChange(null, 'modify');
+                    } else if (type === 'show-empty-items') {
+                      setShowEmpty(!customReportItems.showEmpty);
+					  onReportChange(null, 'modify');
+                    } else if (type === 'show-uncategorized') {
+                      setShowUncategorized(
+                        !customReportItems.showUncategorized,
+                      );
+					  onReportChange(null, 'modify');
+                    }
+                  }}
+                  items={[
+                    {
+                      name: 'show-hidden-categories',
+                      text: 'Show hidden categories',
+                      tooltip: 'Show hidden categories',
+                      toggle: customReportItems.showHiddenCategories,
+                    },
+                    {
+                      name: 'show-empty-items',
+                      text: 'Show empty rows',
+                      tooltip: 'Show rows that are zero or blank',
+                      toggle: customReportItems.showEmpty,
+                    },
+                    {
+                      name: 'show-off-budget',
+                      text: 'Show off budget',
+                      tooltip: 'Show off budget accounts',
+                      toggle: customReportItems.showOffBudget,
+                    },
+                    {
+                      name: 'show-uncategorized',
+                      text: 'Show uncategorized',
+                      tooltip: 'Show uncategorized transactions',
+                      toggle: customReportItems.showUncategorized,
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+          </Button>
         </View>
         <View
           style={{
@@ -462,10 +465,14 @@ export function ReportSidebar({
           }}
         >
           <CategorySelector
-            categoryGroups={categories.grouped}
-            categories={categories.list}
+            categoryGroups={categories.grouped.filter(f => {
+              return customReportItems.showHiddenCategories || !f.hidden
+                ? true
+                : false;
+            })}
             selectedCategories={customReportItems.selectedCategories}
             setSelectedCategories={setSelectedCategories}
+            showHiddenCategories={customReportItems.showHiddenCategories}
           />
         </View>
       )}

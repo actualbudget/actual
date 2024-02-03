@@ -3,7 +3,7 @@ import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
   id: string | undefined;
-  name: string | undefined;
+  name: string;
   startDate: string;
   endDate: string;
   isDateStatic: boolean;
@@ -11,10 +11,9 @@ export interface CustomReportEntity {
   mode: string;
   groupBy: string;
   balanceType: string;
-  //interval: string;
   showEmpty: boolean;
   showOffBudget: boolean;
-  showHidden?: boolean;
+  showHiddenCategories: boolean;
   showUncategorized: boolean;
   selectedCategories: CategoryEntity[];
   graphType: string;
@@ -25,12 +24,12 @@ export interface CustomReportEntity {
 }
 
 export interface GroupedEntity {
-  data: DataEntity[];
+  data?: DataEntity[];
   monthData: DataEntity[];
-  groupedData: DataEntity[];
-  legend: LegendEntity[];
-  startDate: string;
-  endDate: string;
+  groupedData?: DataEntity[];
+  legend?: LegendEntity[];
+  startDate?: string;
+  endDate?: string;
   totalDebts: number;
   totalAssets: number;
   totalTotals: number;

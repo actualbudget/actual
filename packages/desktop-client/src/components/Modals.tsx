@@ -3,12 +3,12 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { type PopModalAction } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import { useCategories } from '../hooks/useCategories';
 import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
-import { type CommonModalProps } from '../types/modals';
 
 import { CategoryGroupMenu } from './modals/CategoryGroupMenu';
 import { CategoryMenu } from './modals/CategoryMenu';
@@ -39,6 +39,15 @@ import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
+
+export type CommonModalProps = {
+  onClose: () => PopModalAction;
+  onBack: () => PopModalAction;
+  showBack: boolean;
+  isCurrent: boolean;
+  isHidden: boolean;
+  stackIndex: number;
+};
 
 export function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);

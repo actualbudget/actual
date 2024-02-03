@@ -11,7 +11,7 @@ import {
 } from '../../icons/v1';
 import { theme } from '../../style';
 import { View } from '../common/View';
-import { FilterButton } from '../filters/FiltersMenu';
+import { FilterButton } from '../filters/FilterButton';
 
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
@@ -166,6 +166,14 @@ export function ReportTopbar({
           backgroundColor: theme.pillBorderDark,
           marginRight: 15,
           flexShrink: 0,
+        }}
+      />{' '}
+      <FilterButton
+        compact
+        hover
+        onApply={e => {
+          onApplyFilter(e);
+          onReportChange(null, 'modify');
         }}
       />
       <FilterButton

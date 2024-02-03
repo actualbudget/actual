@@ -848,13 +848,14 @@ type TableHandleRef<T extends TableItem = TableItem> = {
 type TableWithNavigatorProps = TableProps & {
   fields;
 };
-export const TableWithNavigator = forwardRef<
-  TableHandleRef<TableItem>,
-  TableWithNavigatorProps
->(({ fields, ...props }) => {
+
+export function TableWithNavigator({
+  fields,
+  ...props
+}: TableWithNavigatorProps) {
   const navigator = useTableNavigator(props.items, fields);
   return <Table {...props} navigator={navigator} />;
-});
+}
 
 type TableItem = { id: number | string };
 

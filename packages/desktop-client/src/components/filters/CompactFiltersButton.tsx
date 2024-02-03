@@ -1,14 +1,9 @@
-// @ts-strict-ignore
 import React from 'react';
 
 import { SvgFilter } from '../../icons/v1';
 import { Button } from '../common/Button';
 
-type CompactFiltersButtonProps = {
-  onClick: (newValue) => void;
-};
-
-export function CompactFiltersButton({ onClick }: CompactFiltersButtonProps) {
+export function CompactFiltersButton({ onClick }: { onClick: () => void }) {
   return (
     <Button type="bare" onClick={onClick}>
       <SvgFilter width={15} height={15} />

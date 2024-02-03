@@ -18,7 +18,7 @@ import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { AppliedFilters } from '../../filters/FiltersMenu';
+import { AppliedFilters } from '../../filters/AppliedFilters';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import { Header } from '../Header';
@@ -72,6 +72,9 @@ export function CustomReport() {
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
+  const [showHiddenCategories, setShowHiddenCategories] = useState(
+    loadReport.showHiddenCategories,
+  );
   const [showUncategorized, setShowUncategorized] = useState(
     loadReport.showUncategorized,
   );
@@ -88,7 +91,7 @@ export function CustomReport() {
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
-    if (selectedCategories === null && categories.list.length !== 0) {
+    if (selectedCategories.length === 0 && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
   }, [categories, selectedCategories]);
@@ -136,6 +139,7 @@ export function CustomReport() {
       conditionsOp,
       showEmpty,
       showOffBudget,
+      showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
     });
@@ -152,6 +156,7 @@ export function CustomReport() {
     conditionsOp,
     showEmpty,
     showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
   ]);
@@ -167,6 +172,7 @@ export function CustomReport() {
       conditionsOp,
       showEmpty,
       showOffBudget,
+      showHiddenCategories,
       showUncategorized,
       groupBy,
       balanceTypeOp,
@@ -188,6 +194,7 @@ export function CustomReport() {
     conditionsOp,
     showEmpty,
     showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
   ]);
@@ -207,6 +214,7 @@ export function CustomReport() {
     balanceType,
     showEmpty,
     showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     selectedCategories,
     graphType,
@@ -224,7 +232,7 @@ export function CustomReport() {
   const onChangeDates = (startDate, endDate) => {
     setStartDate(startDate);
     setEndDate(endDate);
-    setSavedStatus('changed');
+    setSavedStatus('modified');
   };
 
   const onChangeViews = (viewType, status) => {
@@ -275,28 +283,15 @@ export function CustomReport() {
         setReport(savedReport);
         break;
       case 'rename':
-        if (report.name.substr(report.name.length - 10) === '(modified)') {
-          setReport({ ...report, name: savedReport.name + ' (modified)' });
-        } else {
-          setReport({ ...report, name: savedReport.name });
-        }
+        setReport({ ...report, name: savedReport.name });
         break;
       case 'modify':
         if (report.name) {
-          setSavedStatus('changed');
-          if (report.name.substr(report.name.length - 10) !== '(modified)') {
-            setReport({ ...report, name: report.name + ' (modified)' });
-          }
+          setSavedStatus('modified');
         }
         break;
       case 'reload':
         setSavedStatus('saved');
-        if (report.name.substr(report.name.length - 10) === '(modified)') {
-          setReport({
-            ...report,
-            name: report.name.substr(0, report.name.length - 11),
-          });
-        }
 
         setStartDate(report.startDate);
         setEndDate(report.endDate);
@@ -345,6 +340,7 @@ export function CustomReport() {
           setIsDateStatic={setIsDateStatic}
           setShowEmpty={setShowEmpty}
           setShowOffBudget={setShowOffBudget}
+          setShowHiddenCategories={setShowHiddenCategories}
           setShowUncategorized={setShowUncategorized}
           setSelectedCategories={setSelectedCategories}
           onChangeDates={onChangeDates}

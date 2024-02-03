@@ -156,6 +156,7 @@ export function SaveReport({
         >
           {!report.id ? 'Unsaved report' : report.name}&nbsp;
         </Text>
+        {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
       {menuOpen && (
