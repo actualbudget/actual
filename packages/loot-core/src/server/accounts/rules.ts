@@ -617,8 +617,8 @@ export function execActions(actions: Action[], transaction) {
 
         // The last non-fixed split will be adjusted for the remainder.
         update.subtransactions[lastNonFixedIndex].amount -= remainingAmount;
-        update = recalculateSplit(update);
       }
+      update = recalculateSplit(update);
     }
   }
 
