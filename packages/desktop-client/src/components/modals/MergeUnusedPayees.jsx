@@ -14,11 +14,7 @@ import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
-export function MergeUnusedPayees({
-  modalProps,
-  payeeIds,
-  targetPayeeId,
-}) {
+export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
   const { payees: allPayees, modalStack } = useSelector(state => ({
     payees: state.queries.payees,
     modalStack: state.modals.modalStack,

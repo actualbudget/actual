@@ -104,10 +104,10 @@ export const PayeeTableRow = memo(
           backgroundColor: hovered
             ? theme.tableRowBackgroundHover
             : selected
-            ? theme.tableRowBackgroundHighlight
-            : backgroundFocus
-            ? theme.tableRowBackgroundHover
-            : theme.tableBackground,
+              ? theme.tableRowBackgroundHighlight
+              : backgroundFocus
+                ? theme.tableRowBackgroundHover
+                : theme.tableBackground,
           ...(selected && {
             backgroundColor: theme.tableRowBackgroundHighlight,
             zIndex: 100,

@@ -81,8 +81,8 @@ export function Saved({ projected, style }: SavedProps) {
               color: projected
                 ? theme.warningText
                 : isNegative
-                ? theme.errorTextDark
-                : theme.upcomingText,
+                  ? theme.errorTextDark
+                  : theme.upcomingText,
             },
           ])}`}
         >

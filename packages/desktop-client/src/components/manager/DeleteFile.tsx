@@ -4,11 +4,11 @@ import { type File } from 'loot-core/src/types/file';
 
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 
 type DeleteFileProps = {
   modalProps: CommonModalProps;
@@ -25,17 +25,6 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,
   );
-
-  async function onDelete() {
-    setLoadingState(isCloudFile ? 'cloud' : 'local');
-    await actions.deleteBudget(
-      'id' in file ? file.id : undefined,
-      isCloudFile ? file.cloudFileId : undefined,
-    );
-    setLoadingState(null);
-
-    modalProps.onBack();
-  }
 
   return (
     <Modal
@@ -75,7 +64,16 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
                   padding: '10px 30px',
                   fontSize: 14,
                 }}
-                onClick={onDelete}
+                onClick={async () => {
+                  setLoadingState('cloud');
+                  await actions.deleteBudget(
+                    'id' in file ? file.id : undefined,
+                    file.cloudFileId,
+                  );
+                  setLoadingState(null);
+
+                  modalProps.onBack();
+                }}
               >
                 Delete file from all devices
               </ButtonWithLoading>
@@ -125,7 +123,13 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
                         backgroundColor: theme.errorText,
                       }),
                 }}
-                onClick={onDelete}
+                onClick={async () => {
+                  setLoadingState('local');
+                  await actions.deleteBudget(file.id);
+                  setLoadingState(null);
+
+                  modalProps.onBack();
+                }}
               >
                 Delete file locally
               </ButtonWithLoading>

@@ -9,7 +9,6 @@ import {
 
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button';
@@ -19,6 +18,7 @@ import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 
 function needsCategory(
   account: AccountEntity,

@@ -146,8 +146,8 @@ async function importTransactions(
   );
 
   const payeesByTransferAcct = payees
-    .filter((payee: YNAB5.Payee) => payee?.transfer_acct)
-    .map((payee: YNAB5.Payee) => [payee.transfer_acct, payee]);
+    .filter(payee => payee?.transfer_acct)
+    .map(payee => [payee.transfer_acct, payee] as [string, YNAB5.Payee]);
   const payeeTransferAcctHashMap = new Map<string, YNAB5.Payee>(
     payeesByTransferAcct,
   );

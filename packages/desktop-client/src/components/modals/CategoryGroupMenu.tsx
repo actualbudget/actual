@@ -9,11 +9,11 @@ import { useCategories } from '../../hooks/useCategories';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
 
@@ -137,7 +137,7 @@ export function CategoryGroupMenu({
               notes={notes?.length > 0 ? notes : 'No notes'}
               editable={false}
               focused={false}
-              getStyle={editable => ({
+              getStyle={() => ({
                 ...styles.mediumText,
                 borderRadius: 6,
                 ...((!notes || notes.length === 0) && {

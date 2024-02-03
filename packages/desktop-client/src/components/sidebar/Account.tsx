@@ -63,8 +63,8 @@ export function Account({
     ? account.closed
       ? 'account-closed'
       : account.offbudget
-      ? 'account-offbudget'
-      : 'account-onbudget'
+        ? 'account-offbudget'
+        : 'account-onbudget'
     : 'title';
 
   const { dragRef } = useDraggable({

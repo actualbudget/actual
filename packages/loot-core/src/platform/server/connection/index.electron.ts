@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { APIError } from '../../../server/errors';
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
@@ -70,7 +71,7 @@ export const init: T.Init = function (_socketName, handlers) {
         type: 'reply',
         id,
         result: null,
-        error: { type: 'APIError', message: 'Unknown method: ' + name },
+        error: APIError('Unknown method: ' + name),
       });
     }
   });

@@ -144,7 +144,6 @@ export function CategorySpending() {
       >
         <View style={{ width: 200 }}>
           <CategorySelector
-            categories={categories.list}
             categoryGroups={categories.grouped.filter(
               categoryGroup => !categoryGroup.is_income,
             )}

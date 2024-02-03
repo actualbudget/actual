@@ -3,12 +3,12 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { type PopModalAction } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import { useCategories } from '../hooks/useCategories';
 import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
-import { type CommonModalProps } from '../types/modals';
 
 import { CategoryGroupMenu } from './modals/CategoryGroupMenu';
 import { CategoryMenu } from './modals/CategoryMenu';
@@ -32,12 +32,22 @@ import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
 import { ReportBudgetSummary } from './modals/ReportBudgetSummary';
 import { RolloverBudgetSummary } from './modals/RolloverBudgetSummary';
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
+import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInput } from './modals/SingleInput';
 import { SwitchBudgetType } from './modals/SwitchBudgetType';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
+
+export type CommonModalProps = {
+  onClose: () => PopModalAction;
+  onBack: () => PopModalAction;
+  showBack: boolean;
+  isCurrent: boolean;
+  isHidden: boolean;
+  stackIndex: number;
+};
 
 export function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);
@@ -80,6 +90,7 @@ export function Modals() {
             <CreateAccount
               modalProps={modalProps}
               syncServerStatus={syncServerStatus}
+              upgradingAccountId={options?.upgradingAccountId}
             />
           );
 
@@ -109,6 +120,7 @@ export function Modals() {
               requisitionId={options.requisitionId}
               localAccounts={accounts.filter(acct => acct.closed === 0)}
               actions={actions}
+              syncSource={options.syncSource}
             />
           );
 
@@ -191,6 +203,14 @@ export function Modals() {
         case 'gocardless-init':
           return (
             <GoCardlessInitialise
+              modalProps={modalProps}
+              onSuccess={options.onSuccess}
+            />
+          );
+
+        case 'simplefin-init':
+          return (
+            <SimpleFinInitialise
               modalProps={modalProps}
               onSuccess={options.onSuccess}
             />

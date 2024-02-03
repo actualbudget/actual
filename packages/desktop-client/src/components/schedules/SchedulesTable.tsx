@@ -346,7 +346,7 @@ export function SchedulesTable({
 
   return (
     <View style={{ flex: 1, ...tableStyle }}>
-      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+      <TableHeader height={ROW_HEIGHT} inset={15}>
         <Field width="flex">Name</Field>
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
@@ -365,7 +365,6 @@ export function SchedulesTable({
       <Table
         rowHeight={ROW_HEIGHT}
         backgroundColor="transparent"
-        version="v2"
         style={{ flex: 1, backgroundColor: 'transparent', ...style }}
         items={items as ScheduleEntity[]}
         renderItem={renderItem}

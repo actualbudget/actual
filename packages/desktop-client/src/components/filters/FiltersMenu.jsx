@@ -13,17 +13,14 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import {
   mapField,
-  friendlyOp,
   deserializeField,
   getFieldError,
   unparse,
-  makeValue,
   FIELD_TYPES,
   TYPE_INFO,
 } from 'loot-core/src/shared/rules';
-import { titleFirst, integerToCurrency } from 'loot-core/src/shared/util';
+import { titleFirst } from 'loot-core/src/shared/util';
 
-import { SvgDelete } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { HoverTarget } from '../common/HoverTarget';
@@ -32,13 +29,15 @@ import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Value } from '../rules/Value';
 import { Tooltip } from '../tooltips';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';
-import { CondOpMenu } from './SavedFilters';
+import { OpButton } from './OpButton';
+import { subfieldFromFilter } from './subfieldFromFilter';
+import { subfieldToOptions } from './subfieldToOptions';
+import { updateFilterReducer } from './updateFilterReducer';
 
 const filterFields = [
   'date',
@@ -51,100 +50,6 @@ const filterFields = [
   'reconciled',
   'saved',
 ].map(field => [field, mapField(field)]);
-
-function subfieldFromFilter({ field, options, value }) {
-  if (field === 'date') {
-    if (value.length === 7) {
-      return 'month';
-    } else if (value.length === 4) {
-      return 'year';
-    }
-  } else if (field === 'amount') {
-    if (options && options.inflow) {
-      return 'amount-inflow';
-    } else if (options && options.outflow) {
-      return 'amount-outflow';
-    }
-  }
-  return field;
-}
-
-function subfieldToOptions(field, subfield) {
-  switch (field) {
-    case 'amount':
-      switch (subfield) {
-        case 'amount-inflow':
-          return { inflow: true };
-        case 'amount-outflow':
-          return { outflow: true };
-        default:
-          return null;
-      }
-    case 'date':
-      switch (subfield) {
-        case 'month':
-          return { month: true };
-        case 'year':
-          return { year: true };
-        default:
-          return null;
-      }
-    default:
-      return null;
-  }
-}
-
-function OpButton({ op, selected, style, onClick }) {
-  return (
-    <Button
-      type="bare"
-      style={{
-        backgroundColor: theme.pillBackground,
-        marginBottom: 5,
-        ...style,
-        ...(selected && {
-          color: theme.buttonNormalSelectedText,
-          '&,:hover,:active': {
-            backgroundColor: theme.buttonNormalSelectedBackground,
-            color: theme.buttonNormalSelectedText,
-          },
-        }),
-      }}
-      onClick={onClick}
-    >
-      {friendlyOp(op)}
-    </Button>
-  );
-}
-
-function updateFilterReducer(state, action) {
-  switch (action.type) {
-    case 'set-op': {
-      const type = FIELD_TYPES.get(state.field);
-      let value = state.value;
-      if (
-        (type === 'id' || type === 'string') &&
-        (action.op === 'contains' ||
-          action.op === 'is' ||
-          action.op === 'doesNotContain' ||
-          action.op === 'isNot')
-      ) {
-        // Clear out the value if switching between contains or
-        // is/oneof for the id or string type
-        value = null;
-      }
-      return { ...state, op: action.op, value };
-    }
-    case 'set-value': {
-      const { value } = makeValue(action.value, {
-        type: FIELD_TYPES.get(state.field),
-      });
-      return { ...state, value };
-    }
-    default:
-      throw new Error(`Unhandled action type: ${action.type}`);
-  }
-}
 
 function ConfigureField({
   field,
@@ -196,12 +101,12 @@ function ConfigureField({
                         ['amount-outflow', 'Amount (outflow)'],
                       ]
                     : field === 'date'
-                    ? [
-                        ['date', 'Date'],
-                        ['month', 'Month'],
-                        ['year', 'Year'],
-                      ]
-                    : null
+                      ? [
+                          ['date', 'Date'],
+                          ['month', 'Month'],
+                          ['year', 'Year'],
+                        ]
+                      : null
                 }
                 value={subfield}
                 onChange={sub => {
@@ -478,7 +383,7 @@ export function FilterButton({ onApply, compact, hover }) {
   );
 }
 
-function FilterEditor({ field, op, value, options, onSave, onClose }) {
+export function FilterEditor({ field, op, value, options, onSave, onClose }) {
   const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
@@ -506,121 +411,5 @@ function FilterEditor({ field, op, value, options, onSave, onClose }) {
         onClose();
       }}
     />
-  );
-}
-
-function FilterExpression({
-  field: originalField,
-  customName,
-  op,
-  value,
-  options,
-  stage,
-  style,
-  onChange,
-  onDelete,
-}) {
-  const [editing, setEditing] = useState(false);
-
-  const field = subfieldFromFilter({ field: originalField, value });
-
-  return (
-    <View
-      style={{
-        backgroundColor: theme.pillBackground,
-        borderRadius: 4,
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 10,
-        marginTop: 10,
-        ...style,
-      }}
-    >
-      <Button
-        type="bare"
-        disabled={customName != null}
-        onClick={() => setEditing(true)}
-        style={{ marginRight: -7 }}
-      >
-        <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
-          {customName ? (
-            <Text style={{ color: theme.pageTextPositive }}>{customName}</Text>
-          ) : (
-            <>
-              <Text style={{ color: theme.pageTextPositive }}>
-                {mapField(field, options)}
-              </Text>{' '}
-              <Text>{friendlyOp(op, null)}</Text>{' '}
-              <Value
-                value={value}
-                field={field}
-                inline={true}
-                valueIsRaw={op === 'contains' || op === 'doesNotContain'}
-              />
-            </>
-          )}
-        </div>
-      </Button>
-      <Button type="bare" onClick={onDelete} aria-label="Delete filter">
-        <SvgDelete
-          style={{
-            width: 8,
-            height: 8,
-            margin: 5,
-            marginLeft: 3,
-          }}
-        />
-      </Button>
-      {editing && (
-        <FilterEditor
-          field={originalField}
-          customName={customName}
-          op={op}
-          value={field === 'amount' ? integerToCurrency(value) : value}
-          options={options}
-          stage={stage}
-          onSave={onChange}
-          onClose={() => setEditing(false)}
-        />
-      )}
-    </View>
-  );
-}
-
-export function AppliedFilters({
-  filters,
-  editingFilter,
-  onUpdate,
-  onDelete,
-  conditionsOp,
-  onCondOpChange,
-}) {
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-      }}
-    >
-      <CondOpMenu
-        conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
-        filters={filters}
-      />
-      {filters.map((filter, i) => (
-        <FilterExpression
-          key={i}
-          customName={filter.customName}
-          field={filter.field}
-          op={filter.op}
-          value={filter.value}
-          options={filter.options}
-          editing={editingFilter === filter}
-          onChange={newFilter => onUpdate(filter, newFilter)}
-          onDelete={() => onDelete(filter)}
-        />
-      ))}
-    </View>
   );
 }

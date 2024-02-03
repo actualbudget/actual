@@ -16,7 +16,7 @@ jobs:
     outputs:
       netlify_url: ${{ steps.netlify.outputs.url }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Wait for Netlify build to finish
@@ -31,38 +31,40 @@ jobs:
     needs: netlify
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.37.0-jammy
+      image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: desktop-client-test-results
           path: packages/desktop-client/test-results/
           retention-days: 30
+          overwrite: true
   vrt:
     name: Visual regression
     needs: netlify
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.37.0-jammy
+      image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Run VRT Tests on Netlify URL
         run: yarn vrt
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: desktop-client-test-results
           path: packages/desktop-client/test-results/
           retention-days: 30
+          overwrite: true

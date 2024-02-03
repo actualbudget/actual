@@ -9,9 +9,9 @@ export const isPlaywright = false;
 export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   ? 'windows'
   : isMac
-  ? 'mac'
-  : isLinux
-  ? 'linux'
-  : 'unknown';
+    ? 'mac'
+    : isLinux
+      ? 'linux'
+      : 'unknown';
 export const env: 'web' | 'mobile' | 'unknown' = 'unknown';
 export const isBrowser = false;

@@ -134,7 +134,7 @@ export const unlisten: T.Unlisten = function (name) {
 };
 
 async function closeSocket(onClose) {
-  socketClient.onclose = event => {
+  socketClient.onclose = () => {
     socketClient = null;
     onClose();
   };

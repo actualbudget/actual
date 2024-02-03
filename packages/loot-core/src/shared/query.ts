@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 export type QueryState = {
-  filterExpressions: Array<unknown>;
+  filterExpressions: Array<string>;
   selectExpressions: Array<unknown>;
   groupExpressions: Array<unknown>;
   orderExpressions: Array<unknown>;

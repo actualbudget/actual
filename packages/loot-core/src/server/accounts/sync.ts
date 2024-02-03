@@ -216,6 +216,38 @@ async function downloadGoCardlessTransactions(
   };
 }
 
+async function downloadSimpleFinTransactions(acctId, since) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  const res = await post(
+    getServer().SIMPLEFIN_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  }
+
+  const {
+    transactions: { all },
+    balances,
+    startingBalance,
+  } = res;
+
+  return {
+    transactions: all,
+    accountBalance: balances,
+    startingBalance,
+  };
+}
+
 async function resolvePayee(trans, payeeName, payeesToCreate) {
   if (trans.payee == null && payeeName) {
     // First check our registry of new payees (to avoid a db access)
@@ -288,7 +320,7 @@ async function normalizeTransactions(
   return { normalized, payeesToCreate };
 }
 
-async function normalizeGoCardlessTransactions(transactions, acctId) {
+async function normalizeExternalTransactions(transactions, acctId) {
   const payeesToCreate = new Map();
 
   const normalized = [];
@@ -309,14 +341,15 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
     // that it matters whether the amount is a positive or negative zero.
     if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
       const nameParts = [];
-      nameParts.push(
-        title(
-          trans.debtorName ||
-            trans.remittanceInformationUnstructured ||
-            (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
-            trans.additionalInformation,
-        ),
-      );
+      const name =
+        trans.debtorName ||
+        trans.remittanceInformationUnstructured ||
+        (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
+        trans.additionalInformation;
+
+      if (name) {
+        nameParts.push(title(name));
+      }
       if (trans.debtorAccount && trans.debtorAccount.iban) {
         nameParts.push(
           '(' +
@@ -329,14 +362,15 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
       payee_name = nameParts.join(' ');
     } else {
       const nameParts = [];
-      nameParts.push(
-        title(
-          trans.creditorName ||
-            trans.remittanceInformationUnstructured ||
-            (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
-            trans.additionalInformation,
-        ),
-      );
+      const name =
+        trans.creditorName ||
+        trans.remittanceInformationUnstructured ||
+        (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
+        trans.additionalInformation;
+
+      if (name) {
+        nameParts.push(title(name));
+      }
       if (trans.creditorAccount && trans.creditorAccount.iban) {
         nameParts.push(
           '(' +
@@ -395,12 +429,12 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
   });
 }
 
-export async function reconcileGoCardlessTransactions(acctId, transactions) {
+export async function reconcileExternalTransactions(acctId, transactions) {
   const hasMatched = new Set();
   const updated = [];
   const added = [];
 
-  const { normalized, payeesToCreate } = await normalizeGoCardlessTransactions(
+  const { normalized, payeesToCreate } = await normalizeExternalTransactions(
     transactions,
     acctId,
   );
@@ -440,7 +474,7 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
       // fields.
       fuzzyDataset = await db.all(
         `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
-           WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
+           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
           db.toDateRepr(monthUtils.addDays(trans.date, 1)),
@@ -603,7 +637,7 @@ export async function reconcileTransactions(acctId, transactions) {
       // fields.
       fuzzyDataset = await db.all(
         `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
-           WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
+           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
           db.toDateRepr(monthUtils.addDays(trans.date, 1)),
@@ -776,13 +810,7 @@ export async function addTransactions(
   return newTransactions;
 }
 
-export async function syncGoCardlessAccount(
-  userId,
-  userKey,
-  id,
-  acctId,
-  bankId,
-) {
+export async function syncExternalAccount(userId, userKey, id, acctId, bankId) {
   // TODO: Handle the case where transactions exist in the future
   // (that will make start date after end date)
   const latestTransaction = await db.first(
@@ -812,14 +840,21 @@ export async function syncGoCardlessAccount(
       ]),
     );
 
-    const { transactions: originalTransactions, accountBalance } =
-      await downloadGoCardlessTransactions(
+    let download;
+
+    if (acctRow.account_sync_source === 'simpleFin') {
+      download = await downloadSimpleFinTransactions(acctId, startDate);
+    } else if (acctRow.account_sync_source === 'goCardless') {
+      download = await downloadGoCardlessTransactions(
         userId,
         userKey,
         acctId,
         bankId,
         startDate,
       );
+    }
+
+    const { transactions: originalTransactions, accountBalance } = download;
 
     if (originalTransactions.length === 0) {
       return { added: [], updated: [] };
@@ -831,7 +866,7 @@ export async function syncGoCardlessAccount(
     }));
 
     return runMutator(async () => {
-      const result = await reconcileGoCardlessTransactions(id, transactions);
+      const result = await reconcileExternalTransactions(id, transactions);
       await updateAccountBalance(id, accountBalance);
       return result;
     });
@@ -839,20 +874,33 @@ export async function syncGoCardlessAccount(
     // Otherwise, download transaction for the past 90 days
     const startingDay = monthUtils.subDays(monthUtils.currentDay(), 90);
 
-    const { transactions, startingBalance } =
-      await downloadGoCardlessTransactions(
+    let download;
+
+    if (acctRow.account_sync_source === 'simpleFin') {
+      download = await downloadSimpleFinTransactions(acctId, startingDay);
+    } else if (acctRow.account_sync_source === 'goCardless') {
+      download = await downloadGoCardlessTransactions(
         userId,
         userKey,
         acctId,
         bankId,
         startingDay,
       );
+    }
 
-    // We need to add a transaction that represents the starting
-    // balance for everything to balance out. In order to get balance
-    // before the first imported transaction, we need to get the
-    // current balance from the accounts table and subtract all the
-    // imported transactions.
+    const { transactions, startingBalance } = download;
+
+    let balanceToUse = startingBalance;
+
+    if (acctRow.account_sync_source === 'simpleFin') {
+      const currentBalance = startingBalance;
+      const previousBalance = transactions.reduce((total, trans) => {
+        return (
+          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
+        );
+      }, currentBalance);
+      balanceToUse = previousBalance;
+    }
 
     const oldestTransaction = transactions[transactions.length - 1];
 
@@ -866,7 +914,7 @@ export async function syncGoCardlessAccount(
     return runMutator(async () => {
       const initialId = await db.insertTransaction({
         account: id,
-        amount: startingBalance,
+        amount: balanceToUse,
         category: acctRow.offbudget === 0 ? payee.category : null,
         payee: payee.id,
         date: oldestDate,
@@ -874,7 +922,7 @@ export async function syncGoCardlessAccount(
         starting_balance_flag: true,
       });
 
-      const result = await reconcileGoCardlessTransactions(id, transactions);
+      const result = await reconcileExternalTransactions(id, transactions);
       return {
         ...result,
         added: [initialId, ...result.added],

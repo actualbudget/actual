@@ -64,8 +64,8 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
             i === 0
               ? null
               : i === 1
-              ? usualGroup.categories[1].id
-              : usualGroup.categories[0].id,
+                ? usualGroup.categories[1].id
+                : usualGroup.categories[0].id,
           amount: isSplit ? 50 : undefined,
           sort_order: i,
         },
@@ -765,7 +765,7 @@ describe('Transactions', () => {
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions) {
-      transactions.forEach((transaction, idx) => {
+      transactions.forEach(transaction => {
         expect(transaction.error).toBeFalsy();
       });
     }
@@ -817,7 +817,9 @@ describe('Transactions', () => {
 
     // Add another split transaction and make sure everything is
     // updated properly
-    await userEvent.click(toolbar.querySelector('[data-testid="add-split-button"]'));
+    await userEvent.click(
+      toolbar.querySelector('[data-testid="add-split-button"]'),
+    );
     expect(getTransactions().length).toBe(7);
     expect(getTransactions()[2].amount).toBe(0);
     expectErrorToExist(getTransactions().slice(0, 3));

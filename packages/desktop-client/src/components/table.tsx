@@ -552,25 +552,25 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
           backgroundColor: bare
             ? 'transparent'
             : disabled // always use disabled before primary since we can have a disabled primary button
-            ? theme.buttonNormalDisabledBackground
-            : primary
-            ? theme.buttonPrimaryBackground
-            : theme.buttonNormalBackground,
+              ? theme.buttonNormalDisabledBackground
+              : primary
+                ? theme.buttonPrimaryBackground
+                : theme.buttonNormalBackground,
           border: bare
             ? 'none'
             : '1px solid ' +
               (disabled
                 ? theme.buttonNormalDisabledBorder
                 : primary
-                ? theme.buttonPrimaryBorder
-                : theme.buttonNormalBorder),
+                  ? theme.buttonPrimaryBorder
+                  : theme.buttonNormalBorder),
           color: bare
             ? 'inherit'
             : disabled
-            ? theme.buttonNormalDisabledText
-            : primary
-            ? theme.buttonPrimaryText
-            : theme.buttonNormalText,
+              ? theme.buttonNormalDisabledText
+              : primary
+                ? theme.buttonPrimaryText
+                : theme.buttonNormalText,
           ':focus': bare
             ? null
             : {
@@ -717,8 +717,8 @@ export function SheetCell({
         privacyFilter != null
           ? privacyFilter
           : type === 'financial'
-          ? true
-          : undefined
+            ? true
+            : undefined
       }
       data-cellname={sheetValue}
     >
@@ -740,12 +740,10 @@ export function SheetCell({
 
 type TableHeaderProps = ComponentProps<typeof Row> & {
   headers?: Array<ComponentProps<typeof Cell>>;
-  version?: string;
 };
 export function TableHeader({
   headers,
   children,
-  version,
   ...rowProps
 }: TableHeaderProps) {
   return (
@@ -850,13 +848,14 @@ type TableHandleRef<T extends TableItem = TableItem> = {
 type TableWithNavigatorProps = TableProps & {
   fields;
 };
-export const TableWithNavigator = forwardRef<
-  TableHandleRef<TableItem>,
-  TableWithNavigatorProps
->(({ fields, ...props }, ref) => {
+
+export function TableWithNavigator({
+  fields,
+  ...props
+}: TableWithNavigatorProps) {
   const navigator = useTableNavigator(props.items, fields);
   return <Table {...props} navigator={navigator} />;
-});
+}
 
 type TableItem = { id: number | string };
 
@@ -883,7 +882,6 @@ type TableProps<T extends TableItem = TableItem> = {
   navigator?: ReturnType<typeof useTableNavigator<T>>;
   listRef?: unknown;
   onScroll?: () => void;
-  version?: string;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
@@ -906,7 +904,6 @@ export const Table = forwardRef(
       style,
       navigator,
       onScroll,
-      version = 'v1',
       allowPopupsEscape,
       isSelected,
       saveScrollWidth,
@@ -1045,7 +1042,7 @@ export const Table = forwardRef(
       );
     }
 
-    function onItemsRendered({ overscanStartIndex, overscanStopIndex }) {
+    function onItemsRendered({ overscanStopIndex }) {
       if (loadMore && overscanStopIndex > items.length - 100) {
         loadMore();
       }
@@ -1327,8 +1324,8 @@ export function useTableNavigator<T extends TableItem>(
                   ? 'up'
                   : 'down'
                 : e.shiftKey
-                ? 'left'
-                : 'right',
+                  ? 'left'
+                  : 'right',
             );
             break;
           default:

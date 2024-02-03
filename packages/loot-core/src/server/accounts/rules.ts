@@ -88,8 +88,8 @@ const CONDITION_TYPES = {
         typeof value === 'string'
           ? parseDateString(value)
           : value.frequency != null
-          ? parseRecurDate(value)
-          : null;
+            ? parseRecurDate(value)
+            : null;
       assert(
         parsed,
         'date-format',
@@ -520,7 +520,7 @@ export class Rule {
     });
   }
 
-  execActions(object) {
+  execActions() {
     const changes = {};
     this.actions.forEach(action => action.exec(changes));
     return changes;
@@ -528,7 +528,7 @@ export class Rule {
 
   exec(object) {
     if (this.evalConditions(object)) {
-      return this.execActions(object);
+      return this.execActions();
     }
     return null;
   }
