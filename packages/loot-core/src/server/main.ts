@@ -2352,10 +2352,12 @@ export async function initApp(isDev, socketName) {
     });
   }
 
+  // Allow running DB queries locally
+  global.$query = aqlQuery;
+  global.$q = q;
+
   if (isDev) {
     global.$send = (name, args) => runHandler(app.handlers[name], args);
-    global.$query = aqlQuery;
-    global.$q = q;
     global.$db = db;
     global.$setSyncingMode = setSyncingMode;
   }
