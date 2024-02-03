@@ -76,6 +76,7 @@ export function Header({
   onDeleteFilter,
   onCondOpChange,
   headerPrefixItems,
+  children,
 }) {
   const location = useLocation();
   const path = location.pathname;
@@ -167,7 +168,8 @@ export function Header({
           >
             All Time
           </Button>
-          <View style={{ flex: 1 }} />
+
+          {children || <View style={{ flex: 1 }} />}
         </View>
       )}
       {filters && filters.length > 0 && (
