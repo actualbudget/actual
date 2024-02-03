@@ -153,10 +153,7 @@ export function SimpleTransactionsTable({
   const memoFields = useMemo(() => fields, [JSON.stringify(fields)]);
 
   const serializedTransactions = useMemo(() => {
-    transactions = transactions.map(trans =>
-      serializeTransaction(trans, dateFormat),
-    );
-    return transactions;
+    return transactions.map(trans => serializeTransaction(trans, dateFormat));
   }, [transactions]);
 
   const renderItem = useCallback(
