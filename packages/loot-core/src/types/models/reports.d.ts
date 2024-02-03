@@ -3,7 +3,7 @@ import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
   id: string | undefined;
-  name: string;
+  name: string | undefined;
   startDate: string;
   endDate: string;
   isDateStatic: boolean;

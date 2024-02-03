@@ -3,7 +3,7 @@ import React, { createRef, useState } from 'react';
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
+//import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
 import { SvgExpandArrow } from '../../icons/v0';
@@ -35,7 +35,6 @@ export function SaveReport({
   const [err, setErr] = useState(null);
   const [name, setName] = useState(report.name);
   const inputRef = createRef<HTMLInputElement>();
-  const id = report.id;
 
   const onAddUpdate = async () => {
     let savedReport: CustomReportEntity;
@@ -61,7 +60,6 @@ export function SaveReport({
     }
 
     if (menuItem === 'rename-report') {
-      //rename or update flow
       //rename
       savedReport = {
         ...report,

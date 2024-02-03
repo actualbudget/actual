@@ -1,4 +1,4 @@
-import React, { RefObject, useEffect } from 'react';
+import React, { type RefObject, useEffect } from 'react';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button';

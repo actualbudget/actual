@@ -279,18 +279,18 @@ export function ReportSidebar({
                       setShowHiddenCategories(
                         !customReportItems.showHiddenCategories,
                       );
-					  onReportChange(null, 'modify');
+                      onReportChange(null, 'modify');
                     } else if (type === 'show-off-budget') {
                       setShowOffBudget(!customReportItems.showOffBudget);
-					  onReportChange(null, 'modify');
+                      onReportChange(null, 'modify');
                     } else if (type === 'show-empty-items') {
                       setShowEmpty(!customReportItems.showEmpty);
-					  onReportChange(null, 'modify');
+                      onReportChange(null, 'modify');
                     } else if (type === 'show-uncategorized') {
                       setShowUncategorized(
                         !customReportItems.showUncategorized,
                       );
-					  onReportChange(null, 'modify');
+                      onReportChange(null, 'modify');
                     }
                   }}
                   items={[
