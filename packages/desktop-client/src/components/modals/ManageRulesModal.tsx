@@ -4,9 +4,9 @@ import { useLocation } from 'react-router-dom';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
-import { type CommonModalProps } from '../../types/modals';
 import { Modal } from '../common/Modal';
 import { ManageRules } from '../ManageRules';
+import { type CommonModalProps } from '../Modals';
 
 type ManageRulesModalProps = {
   modalProps: CommonModalProps;

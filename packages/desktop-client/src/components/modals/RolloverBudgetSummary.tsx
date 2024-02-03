@@ -3,10 +3,10 @@ import React from 'react';
 import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
 import { styles } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { ToBudget } from '../budget/rollover/budgetsummary/ToBudget';
 import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
 import { Modal } from '../common/Modal';
+import { type CommonModalProps } from '../Modals';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type RolloverBudgetSummaryProps = {
