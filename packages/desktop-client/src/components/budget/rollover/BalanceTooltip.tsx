@@ -25,8 +25,10 @@ export function BalanceTooltip({
   onClose,
   ...tooltipProps
 }: BalanceTooltipProps) {
-  const carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
-  const balance = useSheetValue(rolloverBudget.catBalance(categoryId));
+  const carryover = useSheetValue<boolean>(
+    rolloverBudget.catCarryover(categoryId),
+  );
+  const balance = useSheetValue<number>(rolloverBudget.catBalance(categoryId));
   const [menu, setMenu] = useState('menu');
 
   const _onClose = () => {

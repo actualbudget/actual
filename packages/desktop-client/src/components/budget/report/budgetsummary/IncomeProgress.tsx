@@ -12,8 +12,8 @@ type IncomeProgressProps = {
   target: ComponentProps<typeof CellValue>['binding'];
 };
 export function IncomeProgress({ current, target }: IncomeProgressProps) {
-  let totalIncome = useSheetValue(current) || 0;
-  const totalBudgeted = useSheetValue(target) || 0;
+  let totalIncome = useSheetValue<number>(current) || 0;
+  const totalBudgeted = useSheetValue<number>(target) || 0;
 
   let over = false;
 

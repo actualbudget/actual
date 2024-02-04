@@ -3,6 +3,7 @@ import React from 'react';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { q, type Query } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
@@ -15,9 +16,8 @@ import { CellValue } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
-import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
-export type BalanceQuery = {
+type BalanceQuery = {
   name: string;
   query: Query;
 };
@@ -63,7 +63,7 @@ type SelectedBalanceProps = {
 function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
-  const rows = useSheetValue({
+  const rows = useSheetValue<Pick<TransactionEntity, 'id'>[]>({
     name,
     query: q('transactions')
       .filter({
@@ -75,7 +75,7 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
   const ids = new Set((rows || []).map(r => r.id));
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
-  let balance = useSheetValue({
+  let balance = useSheetValue<number>({
     name: name + '-sum',
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
@@ -126,11 +126,11 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
 }
 
 function MoreBalances({ balanceQuery }: { balanceQuery: BalanceQuery }) {
-  const cleared = useSheetValue({
+  const cleared = useSheetValue<number>({
     name: balanceQuery.name + '-cleared',
     query: balanceQuery.query.filter({ cleared: true }),
   });
-  const uncleared = useSheetValue({
+  const uncleared = useSheetValue<number>({
     name: balanceQuery.name + '-uncleared',
     query: balanceQuery.query.filter({ cleared: false }),
   });
