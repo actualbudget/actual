@@ -2321,21 +2321,7 @@ export async function initApp(isDev, socketName) {
     }
   }
 
-  // if (isDev) {
-  // const lastBudget = await asyncStorage.getItem('lastBudget');
-  // if (lastBudget) {
-  //   loadBudget(lastBudget);
-  // }
-  // }
-
-  let url = await asyncStorage.getItem('server-url');
-
-  // TODO: remove this if statement after a few releases
-  if (url === 'https://not-configured/') {
-    url = null;
-    await asyncStorage.setItem('server-url', null);
-    await asyncStorage.setItem('did-bootstrap', true);
-  }
+  const url = await asyncStorage.getItem('server-url');
 
   if (!url) {
     await asyncStorage.removeItem('user-token');
