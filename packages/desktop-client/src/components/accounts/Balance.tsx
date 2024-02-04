@@ -98,6 +98,7 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
         isExactBalance = false;
       }
 
+      scheduleBalance ??= 0;
       if (!account || account.id === s._account) {
         scheduleBalance += getScheduledAmount(s._amount);
       } else {
@@ -126,14 +127,16 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
 }
 
 function MoreBalances({ balanceQuery }: { balanceQuery: BalanceQuery }) {
-  const cleared = useSheetValue<number>({
-    name: balanceQuery.name + '-cleared',
-    query: balanceQuery.query.filter({ cleared: true }),
-  });
-  const uncleared = useSheetValue<number>({
-    name: balanceQuery.name + '-uncleared',
-    query: balanceQuery.query.filter({ cleared: false }),
-  });
+  const cleared =
+    useSheetValue<number>({
+      name: balanceQuery.name + '-cleared',
+      query: balanceQuery.query.filter({ cleared: true }),
+    }) ?? 0;
+  const uncleared =
+    useSheetValue<number>({
+      name: balanceQuery.name + '-uncleared',
+      query: balanceQuery.query.filter({ cleared: false }),
+    }) ?? 0;
 
   return (
     <View style={{ flexDirection: 'row' }}>
