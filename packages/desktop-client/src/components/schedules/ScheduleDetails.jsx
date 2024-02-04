@@ -67,14 +67,14 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export function ScheduleDetails({ modalProps, actions, id }) {
+export function ScheduleDetails({ modalProps, actions, id, transaction }) {
   const adding = id == null;
+  const fromTrans = transaction != null;
   const payees = useCachedPayees({ idKey: true });
   const globalDispatch = useDispatch();
   const dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
-
   const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
@@ -143,6 +143,11 @@ export function ScheduleDetails({ modalProps, actions, id }) {
             fields: { ...state.fields, ...fields },
           };
         case 'set-transactions':
+          if (fromTrans && action.transactions) {
+            action.transactions.sort(a => {
+              return transaction.id === a.id ? -1 : 1;
+            });
+          }
           return { ...state, transactions: action.transactions };
         case 'set-repeats':
           return {
@@ -210,12 +215,30 @@ export function ScheduleDetails({ modalProps, actions, id }) {
           endOccurrences: '1',
           endDate: monthUtils.currentDay(),
         };
-        const schedule = {
-          posts_transaction: false,
-          _date: date,
-          _conditions: [{ op: 'isapprox', field: 'date', value: date }],
-          _actions: [],
-        };
+
+        const schedule = fromTrans
+          ? {
+              posts_transaction: false,
+              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
+              _actions: [],
+              _account: transaction.account,
+              _amount: transaction.amount,
+              _amountOp: 'is',
+              name: transaction.payee ? payees[transaction.payee].name : '',
+              _payee: transaction.payee ? transaction.payee : '',
+              _date: {
+                ...date,
+                frequency: 'monthly',
+                start: transaction.date,
+                patterns: [],
+              },
+            }
+          : {
+              posts_transaction: false,
+              _date: date,
+              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
+              _actions: [],
+            };
 
         dispatch({ type: 'set-schedule', schedule });
       } else {
@@ -226,6 +249,7 @@ export function ScheduleDetails({ modalProps, actions, id }) {
         }
       }
     }
+
     run();
   }, []);
 
@@ -321,7 +345,11 @@ export function ScheduleDetails({ modalProps, actions, id }) {
     };
   }, [state.schedule, state.transactionsMode, state.fields]);
 
-  const selectedInst = useSelected('transactions', state.transactions, []);
+  const selectedInst = useSelected(
+    'transactions',
+    state.transactions,
+    transaction ? [transaction.id] : [],
+  );
 
   async function onSave() {
     dispatch({ type: 'form-error', error: null });
@@ -415,7 +443,6 @@ export function ScheduleDetails({ modalProps, actions, id }) {
   }
 
   const payee = payees ? payees[state.fields.payee] : null;
-
   // This is derived from the date
   const repeats = state.fields.date ? !!state.fields.date.frequency : false;
   return (
