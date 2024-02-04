@@ -26,6 +26,7 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   style?: CSSProperties;
   inputRef?: Ref<HTMLInputElement>;
   onEnter?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  onEscape?: (event: KeyboardEvent<HTMLInputElement>) => void;
   onUpdate?: (newValue: string) => void;
   focused?: boolean;
 };
@@ -34,6 +35,7 @@ export function Input({
   style,
   inputRef,
   onEnter,
+  onEscape,
   onUpdate,
   focused,
   ...nativeProps
@@ -63,6 +65,10 @@ export function Input({
       onKeyDown={e => {
         if (e.key === 'Enter' && onEnter) {
           onEnter(e);
+        }
+
+        if (e.key === 'Escape' && onEscape) {
+          onEscape(e);
         }
 
         nativeProps.onKeyDown?.(e);
