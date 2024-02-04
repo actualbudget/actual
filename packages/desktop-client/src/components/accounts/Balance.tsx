@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { q } from 'loot-core/src/shared/query';
+import { q, type Query } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 
 import { useSelectedItems } from '../../hooks/useSelected';
@@ -15,8 +15,24 @@ import { CellValue } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
+import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
-function DetailedBalance({ name, balance, isExactBalance = true }) {
+export type BalanceQuery = {
+  name: string;
+  query: Query;
+};
+
+type DetailedBalanceProps = {
+  name: string;
+  balance: number;
+  isExactBalance?: boolean;
+};
+
+function DetailedBalance({
+  name,
+  balance,
+  isExactBalance = true,
+}: DetailedBalanceProps) {
   const format = useFormat();
   return (
     <Text
@@ -39,7 +55,12 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
   );
 }
 
-function SelectedBalance({ selectedItems, account }) {
+type SelectedBalanceProps = {
+  selectedItems: Set<string>;
+  account: AccountEntity;
+};
+
+function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
   const rows = useSheetValue({
@@ -104,7 +125,7 @@ function SelectedBalance({ selectedItems, account }) {
   );
 }
 
-function MoreBalances({ balanceQuery }) {
+function MoreBalances({ balanceQuery }: { balanceQuery: BalanceQuery }) {
   const cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
     query: balanceQuery.query.filter({ cleared: true }),
@@ -122,13 +143,20 @@ function MoreBalances({ balanceQuery }) {
   );
 }
 
+type BalancesProps = {
+  balanceQuery: BalanceQuery;
+  showExtraBalances: boolean;
+  onToggleExtraBalances: () => void;
+  account: AccountEntity;
+};
+
 export function Balances({
   balanceQuery,
   showExtraBalances,
   onToggleExtraBalances,
   account,
-}) {
-  const selectedItems = useSelectedItems();
+}: BalancesProps) {
+  const selectedItems = useSelectedItems<string>();
 
   return (
     <View
