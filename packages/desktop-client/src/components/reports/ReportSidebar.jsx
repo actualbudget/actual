@@ -275,22 +275,20 @@ export function ReportSidebar({
               >
                 <Menu
                   onMenuSelect={type => {
+                    onReportChange({ type: 'modify' });
+
                     if (type === 'show-hidden-categories') {
                       setShowHiddenCategories(
                         !customReportItems.showHiddenCategories,
                       );
-                      onReportChange({ type: 'modify' });
                     } else if (type === 'show-off-budget') {
                       setShowOffBudget(!customReportItems.showOffBudget);
-                      onReportChange({ type: 'modify' });
                     } else if (type === 'show-empty-items') {
                       setShowEmpty(!customReportItems.showEmpty);
-                      onReportChange({ type: 'modify' });
                     } else if (type === 'show-uncategorized') {
                       setShowUncategorized(
                         !customReportItems.showUncategorized,
                       );
-                      onReportChange({ type: 'modify' });
                     }
                   }}
                   items={[
@@ -402,15 +400,15 @@ export function ReportSidebar({
                 From:
               </Text>
               <Select
-                onChange={newValue => {
+                onChange={newValue =>
                   onChangeDates(
                     ...validateStart(
                       allMonths,
                       newValue,
                       customReportItems.endDate,
                     ),
-                  );
-                }}
+                  )
+                }
                 value={customReportItems.startDate}
                 defaultLabel={monthUtils.format(
                   customReportItems.startDate,
@@ -430,15 +428,15 @@ export function ReportSidebar({
                 To:
               </Text>
               <Select
-                onChange={newValue => {
+                onChange={newValue =>
                   onChangeDates(
                     ...validateEnd(
                       allMonths,
                       customReportItems.startDate,
                       newValue,
                     ),
-                  );
-                }}
+                  )
+                }
                 value={customReportItems.endDate}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
@@ -454,26 +452,28 @@ export function ReportSidebar({
           }}
         />
       </View>
-      <View
-        style={{
-          marginTop: 10,
-          minHeight: 200,
-        }}
-      >
-        <CategorySelector
-          categoryGroups={categories.grouped.filter(f => {
-            return customReportItems.showHiddenCategories || !f.hidden
-              ? true
-              : false;
-          })}
-          selectedCategories={customReportItems.selectedCategories}
-          setSelectedCategories={e => {
-            setSelectedCategories(e);
-            onReportChange({ type: 'modify' });
+      {['Category', 'Group'].includes(customReportItems.groupBy) && (
+        <View
+          style={{
+            marginTop: 10,
+            minHeight: 200,
           }}
-          showHiddenCategories={customReportItems.showHiddenCategories}
-        />
-      </View>
+        >
+          <CategorySelector
+            categoryGroups={categories.grouped.filter(f => {
+              return customReportItems.showHiddenCategories || !f.hidden
+                ? true
+                : false;
+            })}
+            selectedCategories={customReportItems.selectedCategories}
+            setSelectedCategories={e => {
+              setSelectedCategories(e);
+              onReportChange({ type: 'modify' });
+            }}
+            showHiddenCategories={customReportItems.showHiddenCategories}
+          />
+        </View>
+      )}
     </View>
   );
 }

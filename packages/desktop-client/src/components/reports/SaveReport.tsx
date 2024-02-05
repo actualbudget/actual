@@ -93,10 +93,6 @@ export function SaveReport({
     }
   };
 
-  const onNameChange = (cond: string) => {
-    setName(cond);
-  };
-
   const onMenuSelect = async (item: string) => {
     setMenuItem(item);
     switch (item) {
@@ -171,7 +167,7 @@ export function SaveReport({
         <SaveReportName
           onClose={() => setNameMenuOpen(false)}
           menuItem={menuItem}
-          onNameChange={onNameChange}
+          setName={setName}
           inputRef={inputRef}
           onAddUpdate={onAddUpdate}
           err={err}

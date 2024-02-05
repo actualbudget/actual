@@ -11,7 +11,7 @@ import { FormField, FormLabel } from '../forms';
 type SaveReportNameProps = {
   onClose: () => void;
   menuItem: string;
-  onNameChange: (name: string) => void;
+  setName: (name: string) => void;
   inputRef: RefObject<HTMLInputElement>;
   onAddUpdate: (menuItem: string) => void;
   err: string;
@@ -20,7 +20,7 @@ type SaveReportNameProps = {
 export function SaveReportName({
   onClose,
   menuItem,
-  onNameChange,
+  setName,
   inputRef,
   onAddUpdate,
   err,
@@ -47,7 +47,7 @@ export function SaveReportName({
                 htmlFor="name-field"
                 style={{ userSelect: 'none' }}
               />
-              <Input inputRef={inputRef} onUpdate={e => onNameChange(e)} />
+              <Input inputRef={inputRef} onUpdate={setName} />
             </FormField>
             <Button
               type="primary"
