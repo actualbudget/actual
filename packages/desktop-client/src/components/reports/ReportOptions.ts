@@ -10,8 +10,13 @@ import {
 const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
 const endDate = monthUtils.currentMonth();
 
-export const defaultState: CustomReportEntity = {
+export const defaultReport: CustomReportEntity = {
   id: undefined,
+  name: 'Default',
+  startDate,
+  endDate,
+  isDateStatic: false,
+  dateRange: 'Last 6 months',
   mode: 'total',
   groupBy: 'Category',
   balanceType: 'Payment',
@@ -19,13 +24,10 @@ export const defaultState: CustomReportEntity = {
   showOffBudget: false,
   showHiddenCategories: false,
   showUncategorized: false,
+  selectedCategories: [],
   graphType: 'BarGraph',
-  startDate,
-  endDate,
-  selectedCategories: null,
-  isDateStatic: false,
+  conditions: [],
   conditionsOp: 'and',
-  name: 'Default',
 };
 
 const balanceTypeOptions = [
