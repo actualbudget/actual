@@ -42,7 +42,7 @@ export function SaveReport({
   const [name, setName] = useState(report.name);
   const inputRef = createRef<HTMLInputElement>();
 
-  const onAddUpdate = async () => {
+  const onAddUpdate = async (menuChoice: string) => {
     let savedReport: CustomReportEntity;
     //save existing states
     savedReport = {
@@ -50,7 +50,7 @@ export function SaveReport({
       ...customReportItems,
     };
 
-    if (menuItem === 'save-report') {
+    if (menuChoice === 'save-report') {
       setRes('');
       //create new flow
       /*
@@ -65,19 +65,15 @@ export function SaveReport({
       };
     }
 
-    if (menuItem === 'rename-report') {
+    if (menuChoice === 'rename-report') {
       //rename
       savedReport = {
-        ...report,
+        ...savedReport,
         name,
       };
     }
 
-    if (menuItem === 'update-report') {
-      savedReport = {
-        ...savedReport,
-        name: report.name,
-      };
+    if (menuChoice === 'update-report') {
       //send update and rename to DB
       /*
       res = await sendCatch('report/update', {
@@ -92,7 +88,7 @@ export function SaveReport({
       setNameMenuOpen(false);
       onReportChange({
         savedReport,
-        type: menuItem === 'rename-report' ? 'rename' : 'add-update',
+        type: menuChoice === 'rename-report' ? 'rename' : 'add-update',
       });
     }
   };
@@ -117,7 +113,7 @@ export function SaveReport({
       case 'update-report':
         setErr('');
         setMenuOpen(false);
-        onAddUpdate();
+        onAddUpdate(item);
         break;
       case 'save-report':
         setErr('');

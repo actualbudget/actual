@@ -91,7 +91,7 @@ export function CustomReport() {
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
-    if (selectedCategories.length === 0 && categories.list.length !== 0) {
+    if (selectedCategories === undefined && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
   }, [categories, selectedCategories]);
@@ -203,8 +203,6 @@ export function CustomReport() {
 
   const data = { ...graphData, groupedData };
   const customReportItems = {
-    id: undefined,
-    name: undefined,
     startDate,
     endDate,
     isDateStatic,
@@ -232,7 +230,7 @@ export function CustomReport() {
   const onChangeDates = (startDate, endDate) => {
     setStartDate(startDate);
     setEndDate(endDate);
-    setSavedStatus('modified');
+    onReportChange({ type: 'modify' });
   };
 
   const onChangeViews = (viewType, status) => {
@@ -262,6 +260,7 @@ export function CustomReport() {
     setBalanceType(defaultReport.balanceType);
     setShowEmpty(defaultReport.showEmpty);
     setShowOffBudget(defaultReport.showOffBudget);
+    setShowHiddenCategories(defaultReport.showHiddenCategories);
     setShowUncategorized(defaultReport.showUncategorized);
     setSelectedCategories(selectAll);
     setGraphType(defaultReport.graphType);
@@ -272,7 +271,7 @@ export function CustomReport() {
   };
 
   const onChangeAppliedFilter = (filter, changedElement) => {
-    onReportChange(null, 'modify');
+    onReportChange({ type: 'modify' });
     return changedElement(filter);
   };
 
@@ -302,6 +301,7 @@ export function CustomReport() {
         setBalanceType(report.balanceType);
         setShowEmpty(report.showEmpty);
         setShowOffBudget(report.showOffBudget);
+        setShowHiddenCategories(report.showHiddenCategories);
         setShowUncategorized(report.showUncategorized);
         setSelectedCategories(report.selectedCategories);
         setGraphType(report.graphType);

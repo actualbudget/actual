@@ -125,7 +125,6 @@ export function ReportTopbar({
       <GraphButton
         selected={viewLegend}
         onSelect={() => {
-          onReportChange({ type: 'modify' });
           onChangeViews('viewLegend');
         }}
         style={{ marginRight: 15 }}

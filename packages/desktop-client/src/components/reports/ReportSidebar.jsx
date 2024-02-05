@@ -361,7 +361,6 @@ export function ReportSidebar({
                 customReportItems.startDate,
                 customReportItems.endDate,
               );
-              onReportChange({ type: 'modify' });
             }}
           >
             Static
@@ -411,7 +410,6 @@ export function ReportSidebar({
                       customReportItems.endDate,
                     ),
                   );
-                  onReportChange({ type: 'modify' });
                 }}
                 value={customReportItems.startDate}
                 defaultLabel={monthUtils.format(
@@ -440,7 +438,6 @@ export function ReportSidebar({
                       newValue,
                     ),
                   );
-                  onReportChange({ type: 'modify' });
                 }}
                 value={customReportItems.endDate}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
@@ -457,25 +454,26 @@ export function ReportSidebar({
           }}
         />
       </View>
-      {['Category', 'Group'].includes(customReportItems.groupBy) && (
-        <View
-          style={{
-            marginTop: 10,
-            minHeight: 200,
+      <View
+        style={{
+          marginTop: 10,
+          minHeight: 200,
+        }}
+      >
+        <CategorySelector
+          categoryGroups={categories.grouped.filter(f => {
+            return customReportItems.showHiddenCategories || !f.hidden
+              ? true
+              : false;
+          })}
+          selectedCategories={customReportItems.selectedCategories}
+          setSelectedCategories={e => {
+            setSelectedCategories(e);
+            onReportChange({ type: 'modify' });
           }}
-        >
-          <CategorySelector
-            categoryGroups={categories.grouped.filter(f => {
-              return customReportItems.showHiddenCategories || !f.hidden
-                ? true
-                : false;
-            })}
-            selectedCategories={customReportItems.selectedCategories}
-            setSelectedCategories={setSelectedCategories}
-            showHiddenCategories={customReportItems.showHiddenCategories}
-          />
-        </View>
-      )}
+          showHiddenCategories={customReportItems.showHiddenCategories}
+        />
+      </View>
     </View>
   );
 }

@@ -13,7 +13,7 @@ type SaveReportNameProps = {
   menuItem: string;
   onNameChange: (name: string) => void;
   inputRef: RefObject<HTMLInputElement>;
-  onAddUpdate: () => void;
+  onAddUpdate: (menuItem: string) => void;
   err: string;
 };
 
@@ -54,7 +54,7 @@ export function SaveReportName({
               style={{ marginTop: 18 }}
               onClick={e => {
                 e.preventDefault();
-                onAddUpdate();
+                onAddUpdate(menuItem);
               }}
             >
               {menuItem === 'save-report' ? 'Add' : 'Update'}
