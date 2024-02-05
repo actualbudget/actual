@@ -45,7 +45,7 @@ export function ReportSidebar({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
-    onReportChange(null, 'modify');
+    onReportChange({ type: 'modify' });
     setDateRange(cond);
     switch (cond) {
       case 'All time':
@@ -79,7 +79,7 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
-    onReportChange(null, 'modify');
+    onReportChange({ type: 'modify' });
     setMode(cond);
     if (cond === 'time') {
       if (customReportItems.graphType === 'TableGraph') {
@@ -110,7 +110,7 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
-    onReportChange(null, 'modify');
+    onReportChange({ type: 'modify' });
     setGroupBy(cond);
     if (customReportItems.mode === 'total') {
       if (customReportItems.graphType !== 'TableGraph') {
@@ -128,7 +128,7 @@ export function ReportSidebar({
   };
 
   const onChangeBalanceType = cond => {
-    onReportChange(null, 'modify');
+    onReportChange({ type: 'modify' });
     setBalanceType(cond);
   };
 
@@ -275,6 +275,8 @@ export function ReportSidebar({
               >
                 <Menu
                   onMenuSelect={type => {
+                    onReportChange({ type: 'modify' });
+
                     if (type === 'show-hidden-categories') {
                       setShowHiddenCategories(
                         !customReportItems.showHiddenCategories,
@@ -464,7 +466,10 @@ export function ReportSidebar({
                 : false;
             })}
             selectedCategories={customReportItems.selectedCategories}
-            setSelectedCategories={setSelectedCategories}
+            setSelectedCategories={e => {
+              setSelectedCategories(e);
+              onReportChange({ type: 'modify' });
+            }}
             showHiddenCategories={customReportItems.showHiddenCategories}
           />
         </View>
