@@ -1,3 +1,4 @@
+/*
 BEGIN TRANSACTION;
 
 CREATE TABLE custom_reports
@@ -22,3 +23,5 @@ CREATE TABLE custom_reports
    tombstone INTEGER DEFAULT 0);
 
 COMMIT;
+
+*/
