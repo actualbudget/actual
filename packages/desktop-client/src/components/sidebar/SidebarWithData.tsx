@@ -59,6 +59,17 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
     { name: 'close', text: 'Close file' },
   ];
 
+  const onSaveChanges = async e => {
+    const inputEl = e.target;
+    const newBudgetName = inputEl.value;
+    if (newBudgetName.trim() !== '') {
+      await savePrefs({
+        budgetName: inputEl.value,
+      });
+      setEditing(false);
+    }
+  };
+
   if (editing) {
     return (
       <InitialFocus>
@@ -69,17 +80,9 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
             fontWeight: 500,
           }}
           defaultValue={prefs.budgetName}
-          onEnter={async e => {
-            const inputEl = e.target as HTMLInputElement;
-            const newBudgetName = inputEl.value;
-            if (newBudgetName.trim() !== '') {
-              await savePrefs({
-                budgetName: inputEl.value,
-              });
-              setEditing(false);
-            }
-          }}
-          onBlur={() => setEditing(false)}
+          onEnter={onSaveChanges}
+          onBlur={onSaveChanges}
+          onEscape={() => setEditing(false)}
         />
       </InitialFocus>
     );
