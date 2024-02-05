@@ -91,7 +91,7 @@ export function CustomReport() {
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
-    if (selectedCategories.length === 0 && categories.list.length !== 0) {
+    if (selectedCategories === undefined && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
   }, [categories, selectedCategories]);
@@ -203,8 +203,6 @@ export function CustomReport() {
 
   const data = { ...graphData, groupedData };
   const customReportItems = {
-    id: undefined,
-    name: undefined,
     startDate,
     endDate,
     isDateStatic,
@@ -232,7 +230,7 @@ export function CustomReport() {
   const onChangeDates = (startDate, endDate) => {
     setStartDate(startDate);
     setEndDate(endDate);
-    setSavedStatus('modified');
+    onReportChange({ type: 'modify' });
   };
 
   const onChangeViews = (viewType, status) => {
@@ -247,12 +245,37 @@ export function CustomReport() {
     }
   };
 
+  const onResetReports = () => {
+    const selectAll = [];
+    categories.grouped.map(categoryGroup =>
+      categoryGroup.categories.map(category => selectAll.push(category)),
+    );
+
+    setStartDate(defaultReport.startDate);
+    setEndDate(defaultReport.endDate);
+    setIsDateStatic(defaultReport.isDateStatic);
+    setDateRange(defaultReport.dateRange);
+    setMode(defaultReport.mode);
+    setGroupBy(defaultReport.groupBy);
+    setBalanceType(defaultReport.balanceType);
+    setShowEmpty(defaultReport.showEmpty);
+    setShowOffBudget(defaultReport.showOffBudget);
+    setShowHiddenCategories(defaultReport.showHiddenCategories);
+    setShowUncategorized(defaultReport.showUncategorized);
+    setSelectedCategories(selectAll);
+    setGraphType(defaultReport.graphType);
+    onApplyFilter(null);
+    onCondOpChange(defaultReport.conditionsOp);
+    setReport(defaultReport);
+    setSavedStatus('new');
+  };
+
   const onChangeAppliedFilter = (filter, changedElement) => {
-    onReportChange(null, 'modify');
+    onReportChange({ type: 'modify' });
     return changedElement(filter);
   };
 
-  const onReportChange = (savedReport, type) => {
+  const onReportChange = ({ savedReport, type }) => {
     switch (type) {
       case 'add-update':
         setSavedStatus('saved');
@@ -278,6 +301,7 @@ export function CustomReport() {
         setBalanceType(report.balanceType);
         setShowEmpty(report.showEmpty);
         setShowOffBudget(report.showOffBudget);
+        setShowHiddenCategories(report.showHiddenCategories);
         setShowUncategorized(report.showUncategorized);
         setSelectedCategories(report.selectedCategories);
         setGraphType(report.graphType);
@@ -330,6 +354,7 @@ export function CustomReport() {
         >
           <ReportTopbar
             customReportItems={customReportItems}
+            report={report}
             savedStatus={savedStatus}
             setGraphType={setGraphType}
             setTypeDisabled={setTypeDisabled}
@@ -341,6 +366,7 @@ export function CustomReport() {
             onApplyFilter={onApplyFilter}
             onChangeViews={onChangeViews}
             onReportChange={onReportChange}
+            onResetReports={onResetReports}
           />
           {filters && filters.length > 0 && (
             <View

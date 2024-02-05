@@ -2,8 +2,8 @@ import { CategoryEntity } from './category';
 import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
-  id: string | undefined;
-  name: string;
+  id?: string;
+  name?: string;
   startDate: string;
   endDate: string;
   isDateStatic: boolean;
@@ -15,7 +15,7 @@ export interface CustomReportEntity {
   showOffBudget: boolean;
   showHiddenCategories: boolean;
   showUncategorized: boolean;
-  selectedCategories: CategoryEntity[];
+  selectedCategories?: CategoryEntity[];
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: string;

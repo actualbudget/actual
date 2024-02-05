@@ -14,10 +14,11 @@ import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
-import { SaveReportMenuButton } from './SaveReport';
+import { SaveReport } from './SaveReport';
 
 export function ReportTopbar({
   customReportItems,
+  report,
   savedStatus,
   setGraphType,
   setTypeDisabled,
@@ -29,6 +30,7 @@ export function ReportTopbar({
   onApplyFilter,
   onChangeViews,
   onReportChange,
+  onResetReports,
 }) {
   return (
     <View
@@ -43,6 +45,7 @@ export function ReportTopbar({
         selected={customReportItems.graphType === 'TableGraph'}
         title="Data Table"
         onSelect={() => {
+          onReportChange({ type: 'modify' });
           setGraphType('TableGraph');
           onChangeViews('viewLegend', false);
           setTypeDisabled([]);
@@ -60,6 +63,7 @@ export function ReportTopbar({
           customReportItems.graphType === 'StackedBarGraph'
         }
         onSelect={() => {
+          onReportChange({ type: 'modify' });
           if (customReportItems.mode === 'total') {
             setGraphType('BarGraph');
             if (['Net'].includes(customReportItems.balanceType)) {
@@ -84,6 +88,7 @@ export function ReportTopbar({
         title="Area Graph"
         selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
+          onReportChange({ type: 'modify' });
           setGraphType('AreaGraph');
           setGroupBy('Month');
           onChangeViews('viewLegend', false);
@@ -98,6 +103,7 @@ export function ReportTopbar({
         title="Donut Graph"
         selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
+          onReportChange({ type: 'modify' });
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
           setBalanceType('Payment');
@@ -166,11 +172,17 @@ export function ReportTopbar({
         hover
         onApply={e => {
           onApplyFilter(e);
-          onReportChange(null, 'modify');
+          onReportChange({ type: 'modify' });
         }}
       />
       <View style={{ flex: 1 }} />
-      <SaveReportMenuButton savedStatus={savedStatus} />
+      <SaveReport
+        customReportItems={customReportItems}
+        report={report}
+        savedStatus={savedStatus}
+        onReportChange={onReportChange}
+        onResetReports={onResetReports}
+      />
     </View>
   );
 }

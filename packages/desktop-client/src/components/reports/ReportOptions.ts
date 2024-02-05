@@ -11,8 +11,6 @@ const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
 const endDate = monthUtils.currentMonth();
 
 export const defaultReport: CustomReportEntity = {
-  id: undefined,
-  name: 'Default',
   startDate,
   endDate,
   isDateStatic: false,
@@ -24,7 +22,6 @@ export const defaultReport: CustomReportEntity = {
   showOffBudget: false,
   showHiddenCategories: false,
   showUncategorized: false,
-  selectedCategories: [],
   graphType: 'BarGraph',
   conditions: [],
   conditionsOp: 'and',
