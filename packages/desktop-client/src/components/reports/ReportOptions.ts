@@ -1,30 +1,31 @@
-// @ts-strict-ignore
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
+  type CustomReportEntity,
   type AccountEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
   type PayeeEntity,
 } from 'loot-core/src/types/models';
 
-export function defaultState() {
-  const start = monthUtils.subMonths(monthUtils.currentMonth(), 5);
-  const end = monthUtils.currentMonth();
-  return {
-    reportId: [],
-    mode: 'total',
-    groupBy: 'Category',
-    balanceType: 'Expense',
-    showEmpty: false,
-    showOffBudgetHidden: false,
-    showUncategorized: false,
-    graphType: 'BarGraph',
-    startDate: start,
-    endDate: end,
-    selectedCategories: null,
-    isDateStatic: false,
-  };
-}
+const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
+const endDate = monthUtils.currentMonth();
+
+export const defaultReport: CustomReportEntity = {
+  startDate,
+  endDate,
+  isDateStatic: false,
+  dateRange: 'Last 6 months',
+  mode: 'total',
+  groupBy: 'Category',
+  balanceType: 'Payment',
+  showEmpty: false,
+  showOffBudget: false,
+  showHiddenCategories: false,
+  showUncategorized: false,
+  graphType: 'BarGraph',
+  conditions: [],
+  conditionsOp: 'and',
+};
 
 const balanceTypeOptions = [
   { description: 'Payment', format: 'totalDebts' as const },
@@ -76,7 +77,9 @@ const intervalOptions = [
 export type QueryDataEntity = {
   date: string;
   category: string;
+  categoryHidden: boolean;
   categoryGroup: string;
+  categoryGroupHidden: boolean;
   account: string;
   accountOffBudget: boolean;
   payee: string;
@@ -84,10 +87,7 @@ export type QueryDataEntity = {
   amount: number;
 };
 
-export type UncategorizedEntity = Pick<
-  CategoryEntity,
-  'name' | 'id' | 'hidden'
-> & {
+export type UncategorizedEntity = Pick<CategoryEntity, 'name' | 'hidden'> & {
   /*
     When looking at uncategorized and hidden transactions we
     need a way to group them. To do this we give them a unique
@@ -103,7 +103,6 @@ export type UncategorizedEntity = Pick<
 
 const uncategorizedCategory: UncategorizedEntity = {
   name: 'Uncategorized',
-  id: null,
   uncategorized_id: '1',
   hidden: false,
   is_off_budget: false,
@@ -112,7 +111,6 @@ const uncategorizedCategory: UncategorizedEntity = {
 };
 const transferCategory: UncategorizedEntity = {
   name: 'Transfers',
-  id: null,
   uncategorized_id: '2',
   hidden: false,
   is_off_budget: false,
@@ -121,7 +119,6 @@ const transferCategory: UncategorizedEntity = {
 };
 const offBudgetCategory: UncategorizedEntity = {
   name: 'Off Budget',
-  id: null,
   uncategorized_id: '3',
   hidden: false,
   is_off_budget: true,
@@ -138,31 +135,24 @@ type UncategorizedGroupEntity = Pick<
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
   name: 'Uncategorized & Off Budget',
-  id: null,
+  id: undefined,
   hidden: false,
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };
 
-export const categoryLists = (
-  showOffBudgetHidden: boolean,
-  showUncategorized: boolean,
-  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
-) => {
-  const categoryList = showUncategorized
-    ? [
-        ...categories.list.filter(f => showOffBudgetHidden || !f.hidden),
-        uncategorizedCategory,
-        transferCategory,
-        offBudgetCategory,
-      ]
-    : categories.list;
-  const categoryGroup = showUncategorized
-    ? [
-        ...categories.grouped.filter(f => showOffBudgetHidden || !f.hidden),
-        uncategorizedGroup,
-      ]
-    : categories.grouped;
-  return [categoryList, categoryGroup] as const;
+export const categoryLists = (categories: {
+  list: CategoryEntity[];
+  grouped: CategoryGroupEntity[];
+}) => {
+  const categoryList = [
+    ...categories.list,
+    uncategorizedCategory,
+    offBudgetCategory,
+    transferCategory,
+  ];
+
+  const categoryGroup = [...categories.grouped, uncategorizedGroup];
+  return [categoryList, categoryGroup.filter(group => group !== null)] as const;
 };
 
 export const groupBySelections = (

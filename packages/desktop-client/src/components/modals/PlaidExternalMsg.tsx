@@ -3,13 +3,13 @@ import React, { useState, useRef } from 'react';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { Error } from '../alerts';
 import { Button } from '../common/Button';
 import { Modal, ModalButtons } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 
 function renderError(error) {
   return (
@@ -92,8 +92,8 @@ export function PlaidExternalMsg({
                 {waiting === 'browser'
                   ? 'Waiting on browser...'
                   : waiting === 'accounts'
-                  ? 'Loading accounts...'
-                  : null}
+                    ? 'Loading accounts...'
+                    : null}
               </View>
             </View>
           ) : success ? (

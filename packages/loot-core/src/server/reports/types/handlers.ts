@@ -1,7 +1,9 @@
+import { type CustomReportEntity } from '../../../types/models';
+
 export interface ReportsHandlers {
-  'report-create': (arg: { state: object }) => Promise<string>;
+  'report/create': (report: CustomReportEntity) => Promise<string>;
 
-  'report-update': (report: object) => Promise<void>;
+  'report/update': (report: CustomReportEntity) => Promise<void>;
 
-  'report-delete': (id: string) => Promise<void>;
+  'report/delete': (id: string) => Promise<void>;
 }

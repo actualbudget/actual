@@ -473,8 +473,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
     return isOffBudget
       ? 'Off Budget'
       : isBudgetTransfer(trans)
-      ? 'Transfer'
-      : lookupName(categories, trans.category);
+        ? 'Transfer'
+        : lookupName(categories, trans.category);
   };
 
   const onTotalAmountEdit = () => {
@@ -1131,10 +1131,10 @@ export const TransactionEdit = props => {
 
 const Transaction = memo(function Transaction({
   transaction,
+  account,
   accounts,
   categories,
   payees,
-  showCategory,
   added,
   onSelect,
   style,
@@ -1169,11 +1169,15 @@ const Transaction = memo(function Transaction({
     payee,
     transferAcct,
   );
-  const prettyCategory = transferAcct
-    ? 'Transfer'
-    : isParent
-    ? 'Split'
-    : categoryName;
+  const specialCategory = account?.offbudget
+    ? 'Off Budget'
+    : transferAcct
+      ? 'Transfer'
+      : isParent
+        ? 'Split'
+        : null;
+
+  const prettyCategory = specialCategory || categoryName;
 
   const isPreview = isPreviewId(id);
   const isReconciled = transaction.reconciled;
@@ -1260,22 +1264,21 @@ const Transaction = memo(function Transaction({
                   }}
                 />
               )}
-              {showCategory && (
-                <TextOneLine
-                  style={{
-                    fontSize: 11,
-                    marginTop: 1,
-                    fontWeight: '400',
-                    color: prettyCategory
-                      ? theme.tableTextSelected
-                      : theme.menuItemTextSelected,
-                    fontStyle: prettyCategory ? null : 'italic',
-                    textAlign: 'left',
-                  }}
-                >
-                  {prettyCategory || 'Uncategorized'}
-                </TextOneLine>
-              )}
+              <TextOneLine
+                style={{
+                  fontSize: 11,
+                  marginTop: 1,
+                  fontWeight: '400',
+                  color: prettyCategory
+                    ? theme.tableTextSelected
+                    : theme.menuItemTextSelected,
+                  fontStyle:
+                    specialCategory || !prettyCategory ? 'italic' : undefined,
+                  textAlign: 'left',
+                }}
+              >
+                {prettyCategory || 'Uncategorized'}
+              </TextOneLine>
             </View>
           )}
         </View>
@@ -1296,11 +1299,11 @@ const Transaction = memo(function Transaction({
 });
 
 export function TransactionList({
+  account,
   accounts,
   categories,
   payees,
   transactions,
-  showCategory,
   isNew,
   onSelect,
   scrollProps = {},
@@ -1384,10 +1387,10 @@ export function TransactionList({
                   >
                     <Transaction
                       transaction={transaction}
+                      account={account}
                       categories={categories}
                       accounts={accounts}
                       payees={payees}
-                      showCategory={showCategory}
                       added={isNew(transaction.id)}
                       onSelect={onSelect} // onSelect(transaction)}
                     />

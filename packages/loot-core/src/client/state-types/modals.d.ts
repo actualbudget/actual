@@ -39,6 +39,7 @@ type FinanceModals = {
     accounts: unknown[];
     requisitionId: string;
     upgradingAccountId?: string;
+    syncSource?: AccountSyncSource;
   };
 
   'confirm-category-delete': { onDelete: () => void } & (
@@ -67,6 +68,10 @@ type FinanceModals = {
   'gocardless-init': {
     onSuccess: () => void;
   };
+  'simplefin-init': {
+    onSuccess: () => void;
+  };
+
   'gocardless-external-msg': {
     onMoveExternal: (arg: {
       institutionId: string;

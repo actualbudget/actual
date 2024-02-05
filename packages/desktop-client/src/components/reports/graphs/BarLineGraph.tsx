@@ -33,10 +33,9 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  label?: string;
 };
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -88,7 +87,7 @@ export function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         graphData && (
           <ResponsiveContainer>
             <div>

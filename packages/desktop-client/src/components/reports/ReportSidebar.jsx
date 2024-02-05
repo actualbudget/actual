@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Checkbox } from '../forms';
+import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
 import {
@@ -20,37 +22,30 @@ import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
 
 export function ReportSidebar({
-  startDate,
-  endDate,
-  onChangeDates,
-  dateRange,
-  setDateRange,
+  customReportItems,
+  categories,
   dateRangeLine,
   allMonths,
-  graphType,
-  setGraphType,
+  setDateRange,
   typeDisabled,
   setTypeDisabled,
-  groupBy,
+  setGraphType,
   setGroupBy,
-  balanceType,
   setBalanceType,
-  mode,
   setMode,
-  isDateStatic,
   setIsDateStatic,
-  showEmpty,
   setShowEmpty,
-  showOffBudgetHidden,
-  setShowOffBudgetHidden,
-  showUncategorized,
+  setShowOffBudget,
+  setShowHiddenCategories,
   setShowUncategorized,
-  categories,
-  selectedCategories,
   setSelectedCategories,
+  onChangeDates,
   onChangeViews,
+  onReportChange,
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
+    onReportChange({ type: 'modify' });
     setDateRange(cond);
     switch (cond) {
       case 'All time':
@@ -84,28 +79,29 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
+    onReportChange({ type: 'modify' });
     setMode(cond);
     if (cond === 'time') {
-      if (graphType === 'TableGraph') {
+      if (customReportItems.graphType === 'TableGraph') {
         setTypeDisabled([]);
       } else {
         setTypeDisabled(['Net']);
-        if (['Net'].includes(balanceType)) {
+        if (['Net'].includes(customReportItems.balanceType)) {
           setBalanceType('Payment');
         }
       }
-      if (graphType === 'BarGraph') {
+      if (customReportItems.graphType === 'BarGraph') {
         setGraphType('StackedBarGraph');
       }
-      if (['AreaGraph', 'DonutGraph'].includes(graphType)) {
+      if (['AreaGraph', 'DonutGraph'].includes(customReportItems.graphType)) {
         setGraphType('TableGraph');
         onChangeViews('viewLegend', false);
       }
-      if (['Month', 'Year'].includes(groupBy)) {
+      if (['Month', 'Year'].includes(customReportItems.groupBy)) {
         setGroupBy('Category');
       }
     } else {
-      if (graphType === 'StackedBarGraph') {
+      if (customReportItems.graphType === 'StackedBarGraph') {
         setGraphType('BarGraph');
       } else {
         setTypeDisabled([]);
@@ -114,15 +110,26 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
+    onReportChange({ type: 'modify' });
     setGroupBy(cond);
-    if (mode === 'total') {
-      if (graphType !== 'TableGraph') {
-        setTypeDisabled(!['Month', 'Year'].includes(groupBy) ? [] : ['Net']);
+    if (customReportItems.mode === 'total') {
+      if (customReportItems.graphType !== 'TableGraph') {
+        setTypeDisabled(
+          !['Month', 'Year'].includes(customReportItems.groupBy) ? [] : ['Net'],
+        );
       }
     }
-    if (['Net'].includes(balanceType) && graphType !== 'TableGraph') {
+    if (
+      ['Net'].includes(customReportItems.balanceType) &&
+      customReportItems.graphType !== 'TableGraph'
+    ) {
       setBalanceType('Payment');
     }
+  };
+
+  const onChangeBalanceType = cond => {
+    onReportChange({ type: 'modify' });
+    setBalanceType(cond);
   };
 
   return (
@@ -158,13 +165,13 @@ export function ReportSidebar({
             Mode:
           </Text>
           <ModeButton
-            selected={mode === 'total'}
+            selected={customReportItems.mode === 'total'}
             onSelect={() => onChangeMode('total')}
           >
             Total
           </ModeButton>
           <ModeButton
-            selected={mode === 'time'}
+            selected={customReportItems.mode === 'time'}
             onSelect={() => onChangeMode('time')}
           >
             Time
@@ -181,18 +188,18 @@ export function ReportSidebar({
             Split:
           </Text>
           <Select
-            value={groupBy}
+            value={customReportItems.groupBy}
             onChange={e => onChangeSplit(e)}
             options={ReportOptions.groupBy.map(option => [
               option.description,
               option.description,
             ])}
             disabledKeys={
-              mode === 'time'
+              customReportItems.mode === 'time'
                 ? ['Month', 'Year']
-                : graphType === 'AreaGraph'
-                ? ['Category', 'Group', 'Payee', 'Account', 'Year']
-                : ['Year']
+                : customReportItems.graphType === 'AreaGraph'
+                  ? ['Category', 'Group', 'Payee', 'Account', 'Year']
+                  : ['Year']
             }
           />
         </View>
@@ -207,8 +214,8 @@ export function ReportSidebar({
             Type:
           </Text>
           <Select
-            value={balanceType}
-            onChange={setBalanceType}
+            value={customReportItems.balanceType}
+            onChange={e => onChangeBalanceType(e)}
             options={ReportOptions.balanceType.map(option => [
               option.description,
               option.description,
@@ -248,66 +255,72 @@ export function ReportSidebar({
           }}
         >
           <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-empty-columns"
-            checked={showEmpty}
-            value={showEmpty}
-            onChange={() => setShowEmpty(!showEmpty)}
-          />
-          <label
-            htmlFor="show-empty-columns"
-            title="Show rows that are zero or blank"
-            style={{ fontSize: 12 }}
+          <Button
+            onClick={() => {
+              setMenuOpen(true);
+            }}
+            style={{
+              color: 'currentColor',
+              padding: '5px 10px',
+            }}
           >
-            Show Empty Rows
-          </label>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+            Options
+            {menuOpen && (
+              <Tooltip
+                position="bottom-left"
+                style={{ padding: 0 }}
+                onClose={() => {
+                  setMenuOpen(false);
+                }}
+              >
+                <Menu
+                  onMenuSelect={type => {
+                    onReportChange({ type: 'modify' });
 
-          <Checkbox
-            id="show-hidden-columns"
-            checked={showOffBudgetHidden}
-            value={showOffBudgetHidden}
-            onChange={() => setShowOffBudgetHidden(!showOffBudgetHidden)}
-          />
-          <label
-            htmlFor="show-hidden-columns"
-            title="Show off budget accounts and hidden categories"
-            style={{ fontSize: 12 }}
-          >
-            Off Budget Items
-          </label>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-uncategorized"
-            checked={showUncategorized}
-            value={showUncategorized}
-            onChange={() => setShowUncategorized(!showUncategorized)}
-          />
-          <label
-            htmlFor="show-uncategorized"
-            title="Show uncategorized transactions"
-            style={{ fontSize: 12 }}
-          >
-            Uncategorized
-          </label>
+                    if (type === 'show-hidden-categories') {
+                      setShowHiddenCategories(
+                        !customReportItems.showHiddenCategories,
+                      );
+                    } else if (type === 'show-off-budget') {
+                      setShowOffBudget(!customReportItems.showOffBudget);
+                    } else if (type === 'show-empty-items') {
+                      setShowEmpty(!customReportItems.showEmpty);
+                    } else if (type === 'show-uncategorized') {
+                      setShowUncategorized(
+                        !customReportItems.showUncategorized,
+                      );
+                    }
+                  }}
+                  items={[
+                    {
+                      name: 'show-hidden-categories',
+                      text: 'Show hidden categories',
+                      tooltip: 'Show hidden categories',
+                      toggle: customReportItems.showHiddenCategories,
+                    },
+                    {
+                      name: 'show-empty-items',
+                      text: 'Show empty rows',
+                      tooltip: 'Show rows that are zero or blank',
+                      toggle: customReportItems.showEmpty,
+                    },
+                    {
+                      name: 'show-off-budget',
+                      text: 'Show off budget',
+                      tooltip: 'Show off budget accounts',
+                      toggle: customReportItems.showOffBudget,
+                    },
+                    {
+                      name: 'show-uncategorized',
+                      text: 'Show uncategorized',
+                      tooltip: 'Show uncategorized transactions',
+                      toggle: customReportItems.showUncategorized,
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+          </Button>
         </View>
         <View
           style={{
@@ -330,25 +343,28 @@ export function ReportSidebar({
           </Text>
           <View style={{ flex: 1 }} />
           <ModeButton
-            selected={!isDateStatic}
+            selected={!customReportItems.isDateStatic}
             onSelect={() => {
               setIsDateStatic(false);
-              onSelectRange(dateRange);
+              onSelectRange(customReportItems.dateRange);
             }}
           >
             Live
           </ModeButton>
           <ModeButton
-            selected={isDateStatic}
+            selected={customReportItems.isDateStatic}
             onSelect={() => {
               setIsDateStatic(true);
-              onChangeDates(startDate, endDate);
+              onChangeDates(
+                customReportItems.startDate,
+                customReportItems.endDate,
+              );
             }}
           >
             Static
           </ModeButton>
         </View>
-        {!isDateStatic ? (
+        {!customReportItems.isDateStatic ? (
           <View
             style={{
               flexDirection: 'row',
@@ -360,7 +376,7 @@ export function ReportSidebar({
               Range:
             </Text>
             <Select
-              value={dateRange}
+              value={customReportItems.dateRange}
               onChange={e => {
                 onSelectRange(e);
               }}
@@ -385,10 +401,19 @@ export function ReportSidebar({
               </Text>
               <Select
                 onChange={newValue =>
-                  onChangeDates(...validateStart(allMonths, newValue, endDate))
+                  onChangeDates(
+                    ...validateStart(
+                      allMonths,
+                      newValue,
+                      customReportItems.endDate,
+                    ),
+                  )
                 }
-                value={startDate}
-                defaultLabel={monthUtils.format(startDate, 'MMMM, yyyy')}
+                value={customReportItems.startDate}
+                defaultLabel={monthUtils.format(
+                  customReportItems.startDate,
+                  'MMMM, yyyy',
+                )}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
@@ -404,9 +429,15 @@ export function ReportSidebar({
               </Text>
               <Select
                 onChange={newValue =>
-                  onChangeDates(...validateEnd(allMonths, startDate, newValue))
+                  onChangeDates(
+                    ...validateEnd(
+                      allMonths,
+                      customReportItems.startDate,
+                      newValue,
+                    ),
+                  )
                 }
-                value={endDate}
+                value={customReportItems.endDate}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
@@ -421,7 +452,7 @@ export function ReportSidebar({
           }}
         />
       </View>
-      {['Category', 'Group'].includes(groupBy) && (
+      {['Category', 'Group'].includes(customReportItems.groupBy) && (
         <View
           style={{
             marginTop: 10,
@@ -429,10 +460,17 @@ export function ReportSidebar({
           }}
         >
           <CategorySelector
-            categoryGroups={categories.grouped}
-            categories={categories.list}
-            selectedCategories={selectedCategories}
-            setSelectedCategories={setSelectedCategories}
+            categoryGroups={categories.grouped.filter(f => {
+              return customReportItems.showHiddenCategories || !f.hidden
+                ? true
+                : false;
+            })}
+            selectedCategories={customReportItems.selectedCategories}
+            setSelectedCategories={e => {
+              setSelectedCategories(e);
+              onReportChange({ type: 'modify' });
+            }}
+            showHiddenCategories={customReportItems.showHiddenCategories}
           />
         </View>
       )}

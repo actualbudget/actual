@@ -83,11 +83,14 @@ export function AccountHeader({
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
   const splitsExpanded = useSplitsExpanded();
+  const syncServerStatus = useSyncServerStatus();
+  const isUsingServer = syncServerStatus !== 'no-server';
+  const isServerOffline = syncServerStatus === 'offline';
 
-  let canSync = account && account.account_id;
+  let canSync = account && account.account_id && isUsingServer;
   if (!account) {
     // All accounts - check for any syncable account
-    canSync = !!accounts.find(account => !!account.account_id);
+    canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
   }
 
   function onToggleSplits() {
@@ -123,7 +126,8 @@ export function AccountHeader({
                 <Input
                   defaultValue={accountName}
                   onEnter={e => onSaveName(e.target.value)}
-                  onBlur={() => onExposeName(false)}
+                  onBlur={e => onSaveName(e.target.value)}
+                  onEscape={() => onExposeName(false)}
                   style={{
                     fontSize: 25,
                     fontWeight: 500,
@@ -210,7 +214,11 @@ export function AccountHeader({
           style={{ marginTop: 12 }}
         >
           {((account && !account.closed) || canSync) && (
-            <Button type="bare" onClick={canSync ? onSync : onImport}>
+            <Button
+              type="bare"
+              onClick={canSync ? onSync : onImport}
+              disabled={canSync && isServerOffline}
+            >
               {canSync ? (
                 <>
                   <AnimatedRefresh
@@ -222,7 +230,7 @@ export function AccountHeader({
                     }
                     style={{ marginRight: 4 }}
                   />{' '}
-                  Sync
+                  {isServerOffline ? 'Sync offline' : 'Sync'}
                 </>
               ) : (
                 <>

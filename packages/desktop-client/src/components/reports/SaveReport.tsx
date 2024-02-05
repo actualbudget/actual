@@ -1,152 +1,124 @@
-// @ts-strict-ignore
 import React, { createRef, useState } from 'react';
 
-import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
+import { v4 as uuidv4 } from 'uuid';
+
+//import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
+import { type CustomReportEntity } from 'loot-core/src/types/models';
 
 import { SvgExpandArrow } from '../../icons/v0';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-import { type DataEntity } from './entities';
 import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
-type SaveReportProps = {
-  reportId;
-  startDate: string;
-  endDate: string;
-  mode: string;
-  groupBy: string;
-  balanceType: string;
-  showEmpty: boolean;
-  showOffBudgetHidden: boolean;
-  showUncategorized: boolean;
-  graphType: string;
-  filters;
-  conditionsOp: string;
-  selectedCategories;
-  onReportChange;
-  onResetReports;
-  data: DataEntity;
+type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
+  customReportItems: T;
+  report: CustomReportEntity;
+  savedStatus: string;
+  onReportChange: ({
+    savedReport,
+    type,
+  }: {
+    savedReport?: T;
+    type: string;
+  }) => void;
+  onResetReports: () => void;
 };
 
 export function SaveReport({
-  reportId,
-  startDate,
-  endDate,
-  mode,
-  groupBy,
-  balanceType,
-  showEmpty,
-  showOffBudgetHidden,
-  showUncategorized,
-  graphType,
-  filters,
-  conditionsOp,
-  selectedCategories,
+  customReportItems,
+  report,
+  savedStatus,
   onReportChange,
   onResetReports,
-  data,
 }: SaveReportProps) {
-  const [nameOpen, setNameOpen] = useState(false);
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [menuItem, setMenuItem] = useState(null);
-  const [err, setErr] = useState(null);
-  const [name, setName] = useState(reportId.name);
+  const [menuItem, setMenuItem] = useState('');
+  const [err, setErr] = useState('');
+  const [res, setRes] = useState('');
+  const [name, setName] = useState(report.name);
   const inputRef = createRef<HTMLInputElement>();
-  const id = reportId.id;
-  let savedReport;
 
-  const onAddUpdate = async () => {
-    let savedReport;
-    let res;
+  const onAddUpdate = async (menuChoice: string) => {
+    let savedReport: CustomReportEntity;
     //save existing states
     savedReport = {
-      ...reportId,
-      mode,
-      group_by: groupBy,
-      balance_type: balanceType,
-      show_empty: showEmpty ? 1 : 0,
-      show_offbudgethidden: showOffBudgetHidden ? 1 : 0,
-      show_uncategorized: showUncategorized ? 1 : 0,
-      graph_type: graphType,
-      selected_categories: selectedCategories,
-      conditions: filters,
-      conditions_op: conditionsOp,
-      name,
-      start_date: startDate,
-      end_date: endDate,
-      data,
-      status: 'saved',
+      ...report,
+      ...customReportItems,
     };
-    if (menuItem === 'save-report') {
+
+    if (menuChoice === 'save-report') {
+      setRes('');
       //create new flow
-      const { status, ...sendSaved } = savedReport;
-      res = await sendCatch('report-create', {
-        state: sendSaved,
+      /*
+      res = await sendCatch('report/create', {
+        ...savedReport,
       });
+      */
       savedReport = {
         ...savedReport,
-        id: res.data,
+        id: uuidv4(),
+        name,
       };
-    } else {
-      //rename or update flow
-      if (menuItem === 'rename-report') {
-        //rename
-        savedReport = {
-          ...reportId,
-          name,
-        };
-      }
+    }
+
+    if (menuChoice === 'rename-report') {
+      //rename
+      savedReport = {
+        ...savedReport,
+        name,
+      };
+    }
+
+    if (menuChoice === 'update-report') {
       //send update and rename to DB
-      const { status, ...sendSaved } = savedReport;
-      res = await sendCatch('report-update', {
-        state: sendSaved,
+      /*
+      res = await sendCatch('report/update', {
+        ...savedReport,
+      });
+      */
+    }
+    if (res !== '') {
+      setErr(res);
+      setNameMenuOpen(true);
+    } else {
+      setNameMenuOpen(false);
+      onReportChange({
+        savedReport,
+        type: menuChoice === 'rename-report' ? 'rename' : 'add-update',
       });
     }
-    if (res.error) {
-      setErr(res.error.message);
-      setNameOpen(true);
-    } else {
-      setNameOpen(false);
-      onReportChange(savedReport, 'add-update');
-    }
   };
 
-  const onNameChange = cond => {
-    setName(cond);
-  };
-
-  const onMenuSelect = async item => {
+  const onMenuSelect = async (item: string) => {
     setMenuItem(item);
     switch (item) {
       case 'rename-report':
-        setErr(null);
+        setErr('');
         setMenuOpen(false);
-        setNameOpen(true);
+        setNameMenuOpen(true);
         break;
       case 'delete-report':
         setMenuOpen(false);
-        await send('report-delete', id);
+        //await send('report/delete', id);
         onResetReports();
         break;
       case 'update-report':
-        setErr(null);
+        setErr('');
         setMenuOpen(false);
-        onAddUpdate();
+        onAddUpdate(item);
         break;
       case 'save-report':
-        setErr(null);
+        setErr('');
         setMenuOpen(false);
-        setNameOpen(true);
+        setNameMenuOpen(true);
         break;
       case 'reload-report':
         setMenuOpen(false);
-        savedReport = {
-          status: 'saved',
-        };
-        onReportChange(savedReport, 'reload');
+        onReportChange({ type: 'reload' });
         break;
       case 'reset-report':
         setMenuOpen(false);
@@ -178,22 +150,24 @@ export function SaveReport({
             flexShrink: 0,
           }}
         >
-          {!reportId.id ? 'Unsaved filter' : reportId.name}&nbsp;
+          {!report.id ? 'Unsaved report' : report.name}&nbsp;
         </Text>
+        {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
       {menuOpen && (
         <SaveReportMenu
           onClose={() => setMenuOpen(false)}
-          reportId={reportId}
+          report={report}
           onMenuSelect={onMenuSelect}
+          savedStatus={savedStatus}
         />
       )}
-      {nameOpen && (
+      {nameMenuOpen && (
         <SaveReportName
-          onClose={() => setNameOpen(false)}
+          onClose={() => setNameMenuOpen(false)}
           menuItem={menuItem}
-          onNameChange={onNameChange}
+          setName={setName}
           inputRef={inputRef}
           onAddUpdate={onAddUpdate}
           err={err}

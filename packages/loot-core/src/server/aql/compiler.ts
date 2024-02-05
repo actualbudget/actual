@@ -1015,7 +1015,7 @@ export function compileQuery(
 
   const {
     tableViews = {},
-    tableFilters = name => [],
+    tableFilters = () => [],
     customizeQuery = queryState => queryState,
   } = schemaConfig;
 

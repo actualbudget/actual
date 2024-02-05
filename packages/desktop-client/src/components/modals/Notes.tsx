@@ -5,10 +5,10 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
 
 import { SvgCheck } from '../../icons/v2';
-import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 import { Notes as NotesComponent } from '../Notes';
 
 type NotesProps = {
@@ -63,7 +63,7 @@ export function Notes({ modalProps, id, name, onSave }: NotesProps) {
             notes={notes}
             editable={true}
             focused={true}
-            getStyle={editable => ({
+            getStyle={() => ({
               borderRadius: 6,
               flex: 1,
               minWidth: 0,

@@ -81,8 +81,8 @@ export function ReportSummary({
           {balanceTypeOp === 'totalDebts'
             ? 'TOTAL SPENDING'
             : balanceTypeOp === 'totalAssets'
-            ? 'TOTAL DEPOSITS'
-            : 'NET ' + net}
+              ? 'TOTAL DEPOSITS'
+              : 'NET ' + net}
         </Text>
         <Text
           style={{
@@ -118,8 +118,8 @@ export function ReportSummary({
           {balanceTypeOp === 'totalDebts'
             ? 'AVERAGE SPENDING'
             : balanceTypeOp === 'totalAssets'
-            ? 'AVERAGE DEPOSIT'
-            : 'AVERAGE NET'}
+              ? 'AVERAGE DEPOSIT'
+              : 'AVERAGE NET'}
         </Text>
         <Text
           style={{

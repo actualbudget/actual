@@ -8,7 +8,8 @@ import { Button } from '../common/Button';
 import { ButtonLink } from '../common/ButtonLink';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
-import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
+import { AppliedFilters } from '../filters/AppliedFilters';
+import { FilterButton } from '../filters/FiltersMenu';
 
 export function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
@@ -75,7 +76,6 @@ export function Header({
   onDeleteFilter,
   onCondOpChange,
   headerPrefixItems,
-  selectGraph,
 }) {
   const location = useLocation();
   const path = location.pathname;

@@ -15,7 +15,7 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 
 export function Overview() {
-  const reports = useReports();
+  const customReports = useReports();
   const categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
@@ -55,7 +55,7 @@ export function Overview() {
         {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
         {sankeyFeatureFlag && <SankeyCard />}
         {customReportsFeatureFlag ? (
-          <CustomReportCard />
+          <CustomReportCard reports={customReports} />
         ) : (
           <div style={{ flex: 1 }} />
         )}
@@ -77,7 +77,7 @@ export function Overview() {
               flexShrink: 0,
             }}
           />
-          <CustomReportListCards reports={reports} />
+          <CustomReportListCards reports={customReports} />
         </>
       )}
     </View>

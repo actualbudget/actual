@@ -1,5 +1,4 @@
-// @ts-strict-ignore
-import React, { useEffect } from 'react';
+import React, { type RefObject, useEffect } from 'react';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button';
@@ -9,14 +8,23 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { FormField, FormLabel } from '../forms';
 
+type SaveReportNameProps = {
+  onClose: () => void;
+  menuItem: string;
+  setName: (name: string) => void;
+  inputRef: RefObject<HTMLInputElement>;
+  onAddUpdate: (menuItem: string) => void;
+  err: string;
+};
+
 export function SaveReportName({
   onClose,
   menuItem,
-  onNameChange,
+  setName,
   inputRef,
   onAddUpdate,
   err,
-}) {
+}: SaveReportNameProps) {
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -35,18 +43,18 @@ export function SaveReportName({
           >
             <FormField style={{ flex: 1 }}>
               <FormLabel
-                title="Filter Name"
+                title="Report Name"
                 htmlFor="name-field"
                 style={{ userSelect: 'none' }}
               />
-              <Input inputRef={inputRef} onUpdate={e => onNameChange(e)} />
+              <Input inputRef={inputRef} onUpdate={setName} />
             </FormField>
             <Button
               type="primary"
               style={{ marginTop: 18 }}
               onClick={e => {
                 e.preventDefault();
-                onAddUpdate();
+                onAddUpdate(menuItem);
               }}
             >
               {menuItem === 'save-report' ? 'Add' : 'Update'}
@@ -54,10 +62,12 @@ export function SaveReportName({
           </Stack>
         </form>
       )}
-      {err && (
+      {err !== '' ? (
         <Stack direction="row" align="center" style={{ padding: 10 }}>
           <Text style={{ color: theme.errorText }}>{err}</Text>
         </Stack>
+      ) : (
+        <Text />
       )}
     </MenuTooltip>
   );

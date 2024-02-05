@@ -17,31 +17,20 @@ import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 
 export function ReportTopbar({
-  startDate,
-  endDate,
-  showEmpty,
-  showOffBudgetHidden,
-  showUncategorized,
-  graphType,
+  customReportItems,
+  report,
+  savedStatus,
   setGraphType,
-  mode,
-  viewLegend,
   setTypeDisabled,
-  balanceType,
   setBalanceType,
-  groupBy,
   setGroupBy,
+  viewLegend,
   viewSummary,
   viewLabels,
   onApplyFilter,
   onChangeViews,
-  filters,
-  conditionsOp,
-  selectedCategories,
-  reportId,
   onReportChange,
   onResetReports,
-  data,
 }) {
   return (
     <View
@@ -53,9 +42,10 @@ export function ReportTopbar({
       }}
     >
       <GraphButton
-        selected={graphType === 'TableGraph'}
+        selected={customReportItems.graphType === 'TableGraph'}
         title="Data Table"
         onSelect={() => {
+          onReportChange({ type: 'modify' });
           setGraphType('TableGraph');
           onChangeViews('viewLegend', false);
           setTypeDisabled([]);
@@ -65,15 +55,25 @@ export function ReportTopbar({
         <SvgQueue width={15} height={15} />
       </GraphButton>
       <GraphButton
-        title={mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'}
-        selected={graphType === 'BarGraph' || graphType === 'StackedBarGraph'}
+        title={
+          customReportItems.mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'
+        }
+        selected={
+          customReportItems.graphType === 'BarGraph' ||
+          customReportItems.graphType === 'StackedBarGraph'
+        }
         onSelect={() => {
-          if (mode === 'total') {
+          onReportChange({ type: 'modify' });
+          if (customReportItems.mode === 'total') {
             setGraphType('BarGraph');
-            if (['Net'].includes(balanceType)) {
+            if (['Net'].includes(customReportItems.balanceType)) {
               setBalanceType('Payment');
             }
-            setTypeDisabled(['Month', 'Year'].includes(groupBy) ? [] : ['Net']);
+            setTypeDisabled(
+              ['Month', 'Year'].includes(customReportItems.groupBy)
+                ? []
+                : ['Net'],
+            );
           } else {
             setGraphType('StackedBarGraph');
             setTypeDisabled(['Net']);
@@ -86,28 +86,30 @@ export function ReportTopbar({
       </GraphButton>
       <GraphButton
         title="Area Graph"
-        selected={graphType === 'AreaGraph'}
+        selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
+          onReportChange({ type: 'modify' });
           setGraphType('AreaGraph');
           setGroupBy('Month');
           onChangeViews('viewLegend', false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
-        disabled={mode === 'total' ? false : true}
+        disabled={customReportItems.mode === 'total' ? false : true}
       >
         <SvgChart width={15} height={15} />
       </GraphButton>
       <GraphButton
         title="Donut Graph"
-        selected={graphType === 'DonutGraph'}
+        selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
+          onReportChange({ type: 'modify' });
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
           setBalanceType('Payment');
         }}
         style={{ marginRight: 15 }}
-        disabled={mode === 'total' ? false : true}
+        disabled={customReportItems.mode === 'total' ? false : true}
       >
         <SvgChartPie width={15} height={15} />
       </GraphButton>
@@ -128,7 +130,10 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         title="Show Legend"
         disabled={
-          graphType === 'TableGraph' || graphType === 'AreaGraph' ? true : false
+          customReportItems.graphType === 'TableGraph' ||
+          customReportItems.graphType === 'AreaGraph'
+            ? true
+            : false
         }
       >
         <SvgListBullet width={15} height={15} />
@@ -161,29 +166,22 @@ export function ReportTopbar({
           marginRight: 15,
           flexShrink: 0,
         }}
+      />{' '}
+      <FilterButton
+        compact
+        hover
+        onApply={e => {
+          onApplyFilter(e);
+          onReportChange({ type: 'modify' });
+        }}
       />
-      <FilterButton onApply={onApplyFilter} compact hover />
       <View style={{ flex: 1 }} />
       <SaveReport
-        reportId={reportId}
-        startDate={startDate}
-        endDate={endDate}
-        filters={filters}
-        conditionsOp={conditionsOp}
-        selectedCategories={selectedCategories}
+        customReportItems={customReportItems}
+        report={report}
+        savedStatus={savedStatus}
         onReportChange={onReportChange}
         onResetReports={onResetReports}
-        mode={mode}
-        groupBy={groupBy}
-        balanceType={balanceType}
-        showEmpty={showEmpty}
-        showOffBudgetHidden={showOffBudgetHidden}
-        showUncategorized={showUncategorized}
-        graphType={graphType}
-        viewLabels={viewLabels}
-        viewLegend={viewLegend}
-        viewSummary={viewSummary}
-        data={data}
       />
     </View>
   );

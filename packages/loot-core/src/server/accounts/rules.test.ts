@@ -490,7 +490,7 @@ describe('Rule', () => {
     ];
 
     const foundRules = [];
-    iterateIds(rules, 'description', (rule, value) => {
+    iterateIds(rules, 'description', rule => {
       foundRules.push(rule.getId());
     });
     expect(foundRules).toEqual(['first', 'second', 'second', 'third']);

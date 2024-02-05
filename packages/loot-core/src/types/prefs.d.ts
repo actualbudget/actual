@@ -5,7 +5,8 @@ export type FeatureFlag =
   | 'sankeyReport'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'customReports';
+  | 'customReports'
+  | 'simpleFinSync';
 
 export type LocalPrefs = Partial<
   {

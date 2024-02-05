@@ -3,6 +3,8 @@ import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from 'glamor';
 
+import { type CustomReportEntity } from 'loot-core/src/types/models';
+
 import { type CSSProperties, styles } from '../../style';
 
 type AnchorLinkProps = {
@@ -10,7 +12,7 @@ type AnchorLinkProps = {
   style?: CSSProperties;
   activeStyle?: CSSProperties;
   children?: ReactNode;
-  report?: [];
+  report?: CustomReportEntity;
 };
 
 export function AnchorLink({

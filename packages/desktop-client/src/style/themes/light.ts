@@ -99,7 +99,7 @@ export const buttonMenuSelectedBorder = buttonMenuSelectedBackground;
 export const buttonPrimaryText = colorPalette.white;
 export const buttonPrimaryTextHover = buttonPrimaryText;
 export const buttonPrimaryBackground = colorPalette.purple500;
-export const buttonPrimaryBackgroundHover = buttonPrimaryBackground;
+export const buttonPrimaryBackgroundHover = colorPalette.purple300;
 export const buttonPrimaryBorder = buttonPrimaryBackground;
 export const buttonPrimaryShadow = 'rgba(0, 0, 0, 0.3)';
 export const buttonPrimaryDisabledText = colorPalette.white;
@@ -174,6 +174,7 @@ export const checkboxText = tableBackground;
 export const checkboxBackgroundSelected = colorPalette.blue500;
 export const checkboxBorderSelected = colorPalette.blue500;
 export const checkboxShadowSelected = colorPalette.blue300;
+export const checkboxToggleBackground = colorPalette.gray400;
 
 export const pillBackground = colorPalette.navy150;
 export const pillBackgroundLight = colorPalette.navy100;

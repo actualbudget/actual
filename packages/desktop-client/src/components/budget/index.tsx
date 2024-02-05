@@ -313,7 +313,24 @@ function BudgetInner(props: BudgetProps) {
     }
   };
 
+  const groupNameAlreadyExistsNotification = group => {
+    props.addNotification({
+      type: 'error',
+      message: `A ${group.hidden ? 'hidden ' : ''}’${group.name}’ category group already exists.`,
+    });
+  };
+
   const onSaveGroup = async group => {
+    const categories = await props.getCategories();
+    const matchingGroups = categories.grouped
+      .filter(g => g.name.toUpperCase() === group.name.toUpperCase())
+      .filter(g => group.id === 'new' || group.id !== g.id);
+
+    if (matchingGroups.length > 0) {
+      groupNameAlreadyExistsNotification(matchingGroups[0]);
+      return;
+    }
+
     if (group.id === 'new') {
       const id = await props.createGroup(group.name);
       setIsAddingGroup(false);
@@ -533,7 +550,7 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
   );
 });
 
-export function Budget(props) {
+export function Budget() {
   const startMonth = useSelector(
     state => state.prefs.local['budget.startMonth'],
   );

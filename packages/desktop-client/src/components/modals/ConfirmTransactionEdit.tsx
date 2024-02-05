@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import React from 'react';
 
-import { type CommonModalProps } from '../../types/modals';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 
 type ConfirmTransactionEditProps = {
   modalProps: Partial<CommonModalProps>;
@@ -41,6 +41,12 @@ export function ConfirmTransactionEdit({
             <Block>
               Saving your changes to this reconciled transaction may bring your
               reconciliation out of balance.
+            </Block>
+          ) : confirmReason === 'unlockReconciled' ? (
+            <Block>
+              Unlocking this transaction means you won‘t be warned about changes
+              that can impact your reconciled balance. (Changes to amount,
+              account, payee, etc).
             </Block>
           ) : confirmReason === 'deleteReconciled' ? (
             <Block>

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 
 import { type BoundActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 
 function getErrorMessage(error: 'not-ynab4' | boolean) {
   switch (error) {

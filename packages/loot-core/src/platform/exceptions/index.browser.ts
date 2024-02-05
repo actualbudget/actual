@@ -4,4 +4,4 @@ export const captureException: T.CaptureException = function (exc) {
   console.log('[Exception]', exc);
 };
 
-export const captureBreadcrumb: T.CaptureBreadcrumb = function (breadcrumb) {};
+export const captureBreadcrumb: T.CaptureBreadcrumb = function () {};

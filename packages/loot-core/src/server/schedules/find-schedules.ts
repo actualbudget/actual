@@ -53,7 +53,7 @@ function getRank(day1, day2) {
   return 1 / (dayDiff + 1);
 }
 
-function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
+function matchSchedules(allOccurs, config) {
   allOccurs = [...allOccurs].reverse();
   const baseOccur = allOccurs[0];
   const occurs = allOccurs.slice(1);
@@ -107,13 +107,7 @@ function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
   return schedules;
 }
 
-async function schedulesForPattern(
-  baseStart,
-  numDays,
-  baseConfig,
-  accountId,
-  partialMatchRank?: number,
-) {
+async function schedulesForPattern(baseStart, numDays, baseConfig, accountId) {
   let schedules = [];
 
   for (let i = 0; i < numDays; i++) {
@@ -142,9 +136,7 @@ async function schedulesForPattern(
       });
     }
 
-    schedules = schedules.concat(
-      matchSchedules(data, config, partialMatchRank),
-    );
+    schedules = schedules.concat(matchSchedules(data, config));
   }
   return schedules;
 }
@@ -196,9 +188,6 @@ async function monthlyLastDay(startDate, accountId) {
     1,
     { frequency: 'monthly', patterns: [{ type: 'day', value: -1 }] },
     accountId,
-    // Last day patterns should win over day-specific ones that just
-    // happen to match
-    0.75,
   );
 
   const s2 = await schedulesForPattern(
@@ -206,7 +195,6 @@ async function monthlyLastDay(startDate, accountId) {
     1,
     { frequency: 'monthly', patterns: [{ type: 'day', value: -1 }] },
     accountId,
-    0.75,
   );
 
   return s1.concat(s2);
@@ -368,7 +356,7 @@ export async function findSchedules() {
   }
 
   const schedules = [...groupBy(allSchedules, 'payee').entries()].map(
-    ([payeeId, schedules]) => {
+    ([, schedules]) => {
       schedules.sort((s1, s2) => s2.rank - s1.rank);
       const winner = schedules[0];
 

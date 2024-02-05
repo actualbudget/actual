@@ -25,10 +25,10 @@ export function calculateLegend(
         graphType === 'DonutGraph'
           ? colorScale[index % colorScale.length]
           : ['Month', 'Year'].includes(groupBy)
-          ? balanceTypeOp === 'totalDebts'
-            ? theme.reportsRed
-            : theme.reportsBlue
-          : colorScale[index % colorScale.length],
+            ? balanceTypeOp === 'totalDebts'
+              ? theme.reportsRed
+              : theme.reportsBlue
+            : colorScale[index % colorScale.length],
     };
   });
 }

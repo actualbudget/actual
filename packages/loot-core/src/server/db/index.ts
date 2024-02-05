@@ -304,6 +304,17 @@ export async function getCategoriesGrouped(): Promise<
 }
 
 export async function insertCategoryGroup(group) {
+  // Don't allow duplicate group
+  const existingGroup = await first(
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase()],
+  );
+  if (existingGroup) {
+    throw new Error(
+      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
+    );
+  }
+
   const lastGroup = await first(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
@@ -616,15 +627,6 @@ export async function getTransaction(id) {
     [id],
   );
   return rows[0];
-}
-
-export async function getTransactionsByDate(
-  accountId,
-  startDate,
-  endDate,
-  options = {},
-) {
-  throw new Error('`getTransactionsByDate` is deprecated');
 }
 
 export async function getTransactions(accountId) {

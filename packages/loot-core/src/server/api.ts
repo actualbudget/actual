@@ -28,17 +28,13 @@ import {
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
 import * as db from './db';
+import { APIError } from './errors';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
 
 let IMPORT_MODE = false;
-
-// This is duplicate from main.js...
-function APIError(msg, meta?) {
-  return { type: 'APIError', message: msg, meta };
-}
 
 // The API is different in two ways: we never want undo enabled, and
 // we also need to notify the UI manually if stuff has changed (if
@@ -253,7 +249,7 @@ handlers['api/finish-import'] = async function () {
   await handlers['get-budget-bounds']();
   await sheet.waitOnSpreadsheet();
 
-  await cloudStorage.upload().catch(err => {});
+  await cloudStorage.upload().catch(() => {});
 
   connection.send('finish-import');
   IMPORT_MODE = false;
@@ -424,10 +420,6 @@ handlers['api/transactions-get'] = async function ({
       .options({ splits: 'grouped' }),
   );
   return data;
-};
-
-handlers['api/transactions-filter'] = async function ({ text, accountId }) {
-  throw new Error('`filterTransactions` is deprecated, use `runQuery` instead');
 };
 
 handlers['api/transaction-update'] = withMutation(async function ({

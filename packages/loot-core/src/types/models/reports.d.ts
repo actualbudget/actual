@@ -1,32 +1,35 @@
+import { CategoryEntity } from './category';
 import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
-  reportId?: string;
+  id?: string;
+  name?: string;
+  startDate: string;
+  endDate: string;
+  isDateStatic: boolean;
+  dateRange: string;
   mode: string;
   groupBy: string;
   balanceType: string;
   showEmpty: boolean;
-  showOffBudgetHidden: boolean;
+  showOffBudget: boolean;
+  showHiddenCategories: boolean;
   showUncategorized: boolean;
+  selectedCategories?: CategoryEntity[];
   graphType: string;
-  selectedCategories;
-  filters: RuleConditionEntity;
+  conditions?: RuleConditionEntity[];
   conditionsOp: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  isDateStatic: boolean;
-  data: GroupedEntity;
+  data?: GroupedEntity;
   tombstone?: boolean;
 }
 
 export interface GroupedEntity {
-  data: DataEntity[];
+  data?: DataEntity[];
   monthData: DataEntity[];
-  groupedData: DataEntity[];
-  legend: LegendEntity[];
-  startDate: string;
-  endDate: string;
+  groupedData?: DataEntity[];
+  legend?: LegendEntity[];
+  startDate?: string;
+  endDate?: string;
   totalDebts: number;
   totalAssets: number;
   totalTotals: number;
@@ -67,3 +70,8 @@ export interface DataEntity {
 export type Month = {
   month: string;
 };
+
+export interface CustomReportData extends CustomReportEntity {
+  conditions_op?: string;
+  conditions?: RuleConditionEntity[];
+}

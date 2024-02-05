@@ -7,7 +7,7 @@ export const adjustTextSize = (
   let source;
   switch (type) {
     case 'variable':
-      source = variableLookup.find(({ value }) => values > value).arr;
+      source = variableLookup.find(({ value }) => values >= value).arr;
       break;
     case 'donut':
       source = donutLookup;
