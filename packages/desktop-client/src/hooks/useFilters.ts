@@ -7,7 +7,6 @@ export function useFilters<T>(initialFilters: T[] = []) {
   const [saved, setSaved] = useState<T[]>(null);
 
   const onApply = useCallback(
-    //flag
     newFilter => {
       if (newFilter === null) {
         setFilters([]);

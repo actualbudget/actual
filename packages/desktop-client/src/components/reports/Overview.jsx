@@ -10,7 +10,7 @@ import { View } from '../common/View';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CategorySpendingCard } from './reports/CategorySpendingCard';
 import { CustomReportCard } from './reports/CustomReportCard';
-import {CustomReportListCards} from './reports/CustomReportListCards';
+import { CustomReportListCards } from './reports/CustomReportListCards';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 
@@ -22,12 +22,15 @@ export function Overview() {
   const sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
-  
+
   const featureCount =
-  3 -
-  categorySpendingReportFeatureFlag ? 1 : 0 -
-  sankeyFeatureFlag ? 1 : 0 -
-  customReportsFeatureFlag ? 1 : 0;
+    3 - categorySpendingReportFeatureFlag
+      ? 1
+      : 0 - sankeyFeatureFlag
+        ? 1
+        : 0 - customReportsFeatureFlag
+          ? 1
+          : 0;
 
   const accounts = useSelector(state => state.queries.accounts);
   return (

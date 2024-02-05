@@ -22,7 +22,7 @@ function toJS(rows: CustomReportData[]) {
 export function useReports() {
   const reports = toJS(useLiveQuery(() => q('reports').select('*'), []) || []);
 
-  /** Sort reports by alphabetical order */
+  // Sort reports by alphabetical order
   function sort(reports) {
     return reports.sort((a, b) =>
       a.name.trim().localeCompare(b.name.trim(), { ignorePunctuation: true }),
@@ -42,7 +42,7 @@ export function useReports(): CustomReportEntity[] {
     useLiveQuery(() => q('transaction_filters').select('*'), []) || [],
   );
 
-  /** Sort reports by alphabetical order */
+  // Sort reports by alphabetical order
   function sort(reports: CustomReportEntity[]) {
     return reports.sort((a, b) =>
       a.name && b.name
