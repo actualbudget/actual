@@ -18,6 +18,7 @@ import { SaveReportMenuButton } from './SaveReport';
 
 export function ReportTopbar({
   customReportItems,
+  savedStatus,
   setGraphType,
   setTypeDisabled,
   setBalanceType,
@@ -27,6 +28,7 @@ export function ReportTopbar({
   viewLabels,
   onApplyFilter,
   onChangeViews,
+  onReportChange,
 }) {
   return (
     <View
@@ -158,10 +160,17 @@ export function ReportTopbar({
           marginRight: 15,
           flexShrink: 0,
         }}
+      />{' '}
+      <FilterButton
+        compact
+        hover
+        onApply={e => {
+          onApplyFilter(e);
+          onReportChange(null, 'modify');
+        }}
       />
-      <FilterButton onApply={onApplyFilter} compact hover />
       <View style={{ flex: 1 }} />
-      <SaveReportMenuButton />
+      <SaveReportMenuButton savedStatus={savedStatus} />
     </View>
   );
 }

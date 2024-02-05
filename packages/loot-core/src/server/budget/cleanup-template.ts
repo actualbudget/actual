@@ -3,7 +3,7 @@ import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
-import { setBudget, getSheetValue } from './actions';
+import { setBudget, getSheetValue, setGoal } from './actions';
 import { parse } from './cleanup-template.pegjs';
 
 export function cleanupTemplate({ month }: { month: string }) {
@@ -39,10 +39,19 @@ async function processCleanup(month: string): Promise<Notification> {
           `budget-${category.id}`,
         );
         if (balance >= 0) {
+          const spent = await getSheetValue(
+            sheetName,
+            `sum-amount-${category.id}`,
+          );
           await setBudget({
             category: category.id,
             month,
             amount: budgeted - balance,
+          });
+          await setGoal({
+            category: category.id,
+            month,
+            goal: -spent,
           });
           num_sources += 1;
         } else {

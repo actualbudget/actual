@@ -27,6 +27,10 @@ export function CustomReportCard(reports) {
       groupBy,
       balanceTypeOp: 'totalDebts',
       categories,
+      showEmpty: false,
+      showOffBudget: false,
+      showHiddenCategories: false,
+      showUncategorized: false,
     });
   }, [startDate, endDate, categories]);
   const data = useReport('default', getGraphData);

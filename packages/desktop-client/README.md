@@ -37,6 +37,12 @@ First start a dev instance:
 ```sh
 HTTPS=true yarn start
 ```
+
+or using the dev container:
+```
+HTTPS=true docker compose up --build
+```
+
 Note the network IP address and port the dev instance is listening on.
 
 Next, navigate to the root of your project folder, run the standartised docker container, and launch the visual regression tests from within it.
