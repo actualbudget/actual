@@ -12,7 +12,6 @@ function toJS(rows: CustomReportData[]) {
     const test: CustomReportEntity = {
       ...row,
       conditionsOp: row.conditions_op ?? 'and',
-      filters: row.conditions,
     };
     return test;
   });
@@ -32,9 +31,11 @@ export function useReports(): CustomReportEntity[] {
   /** Sort reports by alphabetical order */
   function sort(reports: CustomReportEntity[]) {
     return reports.sort((a, b) =>
-      a.name
-        .trim()
-        .localeCompare(b.name.trim(), undefined, { ignorePunctuation: true }),
+      a.name && b.name
+        ? a.name.trim().localeCompare(b.name.trim(), undefined, {
+            ignorePunctuation: true,
+          })
+        : 0,
     );
   }
 

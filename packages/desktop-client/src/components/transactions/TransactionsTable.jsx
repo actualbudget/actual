@@ -368,7 +368,23 @@ const TransactionHeader = memo(
           }
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
-        {showCleared && <Field width={23} truncate={false} />}
+
+        {showCleared && (
+          <HeaderCell
+            value="✓"
+            width={23}
+            alignItems="center"
+            id="cleared"
+            icon={field === 'cleared' ? ascDesc : 'clickable'}
+            onClick={() => {
+              onSort(
+                'cleared',
+                selectAscDesc(field, ascDesc, 'cleared', 'asc'),
+              );
+            }}
+          />
+        )}
+
         <Cell value="" width={5 + (scrollWidth ?? 0)} />
       </Row>
     );

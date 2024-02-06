@@ -320,7 +320,7 @@ async function normalizeTransactions(
   return { normalized, payeesToCreate };
 }
 
-async function normalizeGoCardlessTransactions(transactions, acctId) {
+async function normalizeExternalTransactions(transactions, acctId) {
   const payeesToCreate = new Map();
 
   const normalized = [];
@@ -429,12 +429,12 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
   });
 }
 
-export async function reconcileGoCardlessTransactions(acctId, transactions) {
+export async function reconcileExternalTransactions(acctId, transactions) {
   const hasMatched = new Set();
   const updated = [];
   const added = [];
 
-  const { normalized, payeesToCreate } = await normalizeGoCardlessTransactions(
+  const { normalized, payeesToCreate } = await normalizeExternalTransactions(
     transactions,
     acctId,
   );
@@ -468,16 +468,16 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
 
     // If it didn't match, query data needed for fuzzy matching
     if (!match) {
-      // Look 1 day ahead and 4 days back when fuzzy matching. This
+      // Look 7 days ahead and 7 days back when fuzzy matching. This
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
         `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
-           WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
+           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
         [
-          db.toDateRepr(monthUtils.subDays(trans.date, 4)),
-          db.toDateRepr(monthUtils.addDays(trans.date, 1)),
+          db.toDateRepr(monthUtils.subDays(trans.date, 7)),
+          db.toDateRepr(monthUtils.addDays(trans.date, 7)),
           trans.amount || 0,
           acctId,
         ],
@@ -631,16 +631,16 @@ export async function reconcileTransactions(acctId, transactions) {
 
     // If it didn't match, query data needed for fuzzy matching
     if (!match) {
-      // Look 1 day ahead and 4 days back when fuzzy matching. This
+      // Look 7 days ahead and 7 days back when fuzzy matching. This
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
         `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
-           WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
+           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
         [
-          db.toDateRepr(monthUtils.subDays(trans.date, 4)),
-          db.toDateRepr(monthUtils.addDays(trans.date, 1)),
+          db.toDateRepr(monthUtils.subDays(trans.date, 7)),
+          db.toDateRepr(monthUtils.addDays(trans.date, 7)),
           trans.amount || 0,
           acctId,
         ],
@@ -866,7 +866,7 @@ export async function syncExternalAccount(userId, userKey, id, acctId, bankId) {
     }));
 
     return runMutator(async () => {
-      const result = await reconcileGoCardlessTransactions(id, transactions);
+      const result = await reconcileExternalTransactions(id, transactions);
       await updateAccountBalance(id, accountBalance);
       return result;
     });
@@ -922,7 +922,7 @@ export async function syncExternalAccount(userId, userKey, id, acctId, bankId) {
         starting_balance_flag: true,
       });
 
-      const result = await reconcileGoCardlessTransactions(id, transactions);
+      const result = await reconcileExternalTransactions(id, transactions);
       return {
         ...result,
         added: [initialId, ...result.added],

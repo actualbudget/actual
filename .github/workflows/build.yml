@@ -21,7 +21,7 @@ jobs:
   api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build API
@@ -29,7 +29,7 @@ jobs:
       - name: Create package tgz
         run: cd packages/api && yarn pack && mv package.tgz actual-api.tgz
       - name: Upload Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: actual-api
           path: packages/api/actual-api.tgz
@@ -37,7 +37,7 @@ jobs:
   crdt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build CRDT
@@ -45,7 +45,7 @@ jobs:
       - name: Create package tgz
         run: cd packages/crdt && yarn pack && mv package.tgz actual-crdt.tgz
       - name: Upload Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: actual-crdt
           path: packages/crdt/actual-crdt.tgz
@@ -53,18 +53,18 @@ jobs:
   web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
         run: ./bin/package-browser
       - name: Upload Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: actual-web
           path: packages/desktop-client/build
       - name: Upload Build Stats
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-stats
           path: packages/desktop-client/build-stats
