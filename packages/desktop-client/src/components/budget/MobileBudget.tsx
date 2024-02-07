@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -418,10 +419,12 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const budgetType = useSelector(
+  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
     state => state.prefs.local?.budgetType || 'rollover',
   );
-  const prefs = useSelector(state => state.prefs.local);
+  const prefs = useSelector<State, PrefsState['local']>(
+    state => state.prefs.local,
+  );
 
   const actions = useActions();
   const spreadsheet = useSpreadsheet();

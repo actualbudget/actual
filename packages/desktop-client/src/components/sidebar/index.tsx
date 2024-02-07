@@ -10,6 +10,9 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
+
 import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
 
@@ -30,9 +33,10 @@ type SidebarProviderProps = {
 };
 
 export function SidebarProvider({ children }: SidebarProviderProps) {
-  const floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
-  );
+  const floatingSidebar = useSelector<
+    State,
+    PrefsState['global']['floatingSidebar']
+  >(state => state.prefs.global.floatingSidebar);
   const [hidden, setHidden] = useState(true);
   const { width } = useResponsive();
   const alwaysFloats = width < 668;
@@ -58,9 +62,10 @@ export function useSidebar() {
 }
 
 export function FloatableSidebar() {
-  const floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
-  );
+  const floatingSidebar = useSelector<
+    State,
+    PrefsState['global']['floatingSidebar']
+  >(state => state.prefs.global.floatingSidebar);
 
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();

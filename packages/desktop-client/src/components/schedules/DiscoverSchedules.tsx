@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
@@ -39,7 +41,7 @@ function DiscoverSchedulesTable({
 }) {
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
-  const dateFormat = useSelector(
+  const dateFormat = useSelector<State, PrefsState['local']['dateFormat']>(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
 
