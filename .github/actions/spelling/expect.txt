@@ -2,7 +2,6 @@ AESUDEF
 Belfius
 Biedenkopf
 BNP
-caddy
 Caddyfile
 cashflow
 crt
@@ -21,6 +20,7 @@ overbudgeting
 Paribas
 prefs
 qfx
+simplefin
 Sparkasse
 statestore
 SVGR
