@@ -2,6 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type AccountState } from 'loot-core/client/state-types/account';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
+import { type QueriesState } from 'loot-core/client/state-types/queries';
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
@@ -118,13 +122,20 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
 }
 
 export function SidebarWithData() {
-  const accounts = useSelector(state => state.queries.accounts);
-  const failedAccounts = useSelector(state => state.account.failedAccounts);
-  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  const prefs = useSelector(state => state.prefs.local);
-  const floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
+  const accounts = useSelector<State, QueriesState['accounts']>(
+    state => state.queries.accounts,
   );
+  const failedAccounts = useSelector<State, AccountState['failedAccounts']>(
+    state => state.account.failedAccounts,
+  );
+  const updatedAccounts = useSelector<State, QueriesState['updatedAccounts']>(
+    state => state.queries.updatedAccounts,
+  );
+  const prefs = useSelector<State, LocalPrefs>(state => state.prefs.local);
+  const floatingSidebar = useSelector<
+    State,
+    PrefsState['global']['floatingSidebar']
+  >(state => state.prefs.global.floatingSidebar);
 
   const { getAccounts, replaceModal, savePrefs, saveGlobalPrefs } =
     useActions();

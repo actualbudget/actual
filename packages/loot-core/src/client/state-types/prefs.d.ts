@@ -2,8 +2,8 @@ import type { LocalPrefs, GlobalPrefs } from '../../types/prefs';
 import type * as constants from '../constants';
 
 export type PrefsState = {
-  local: LocalPrefs | null;
-  global: GlobalPrefs | null;
+  local: LocalPrefs;
+  global: GlobalPrefs;
 };
 
 export type SetPrefsAction = {

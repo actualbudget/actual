@@ -2,6 +2,9 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
+import { type State } from 'loot-core/client/state-types';
+import { type AccountState } from 'loot-core/client/state-types/account';
+
 import { theme, styles } from '../style';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
@@ -9,7 +12,9 @@ import { Text } from './common/Text';
 import { View } from './common/View';
 
 export function BankSyncStatus() {
-  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const accountsSyncing = useSelector<State, AccountState['accountsSyncing']>(
+    state => state.account.accountsSyncing,
+  );
 
   const name = accountsSyncing
     ? accountsSyncing === '__all'
