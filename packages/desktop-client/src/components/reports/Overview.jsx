@@ -24,13 +24,10 @@ export function Overview() {
   const customReportsFeatureFlag = useFeatureFlag('customReports');
 
   const featureCount =
-    3 - categorySpendingReportFeatureFlag
-      ? 1
-      : 0 - sankeyFeatureFlag
-        ? 1
-        : 0 - customReportsFeatureFlag
-          ? 1
-          : 0;
+    3 -
+    (categorySpendingReportFeatureFlag ? 1 : 0) -
+    (sankeyFeatureFlag ? 1 : 0) -
+    (customReportsFeatureFlag ? 1 : 0);
 
   const accounts = useSelector(state => state.queries.accounts);
   return (
@@ -57,13 +54,6 @@ export function Overview() {
       >
         {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
         {sankeyFeatureFlag && <SankeyCard />}
-        {customReportsFeatureFlag ? (
-          <CustomReportCard reports={customReports} />
-        ) : (
-          <div style={{ flex: 1 }} />
-        )}
-        {!categorySpendingReportFeatureFlag && <div style={{ flex: 1 }} />}
-        {!sankeyFeatureFlag && <div style={{ flex: 1 }} />}
         {customReportsFeatureFlag && <CustomReportCard />}
         {featureCount !== 3 &&
           [...Array(featureCount)].map((e, i) => (

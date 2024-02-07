@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -59,7 +60,7 @@ export function CustomReportListCards({ reports }) {
   const onMenuSelect = async (item, reportId) => {
     if (item === 'delete') {
       onMenuOpen(reportId, false);
-      await send('report-delete', reportId);
+      await send('report/delete', reportId);
     }
   };
 
@@ -70,7 +71,7 @@ export function CustomReportListCards({ reports }) {
   const ReportGrid = slice => {
     const pack = [];
 
-    slice?.map((item, i) => {
+    slice?.map(item => {
       pack.push({ data: item });
       return null;
     });
@@ -96,15 +97,13 @@ export function CustomReportListCards({ reports }) {
             {data.map((report, id) => (
               <View key={id} style={{ position: 'relative', flex: '1' }}>
                 <View style={{ width: '100%', height: '100%' }}>
-                  <ReportCard to="/reports/custom" report={report.props.data}>
+                  <ReportCard to="/reports/custom" report={report.data}>
                     <View
                       style={{ flex: 1, padding: 20 }}
-                      onMouseEnter={() =>
-                        setIsCardHovered(report.props.data.id)
-                      }
+                      onMouseEnter={() => setIsCardHovered(report.data.id)}
                       onMouseLeave={() => {
                         setIsCardHovered(null);
-                        onMenuOpen(report.props.data.id, false);
+                        onMenuOpen(report.data.id, false);
                       }}
                     >
                       <View
@@ -123,28 +122,25 @@ export function CustomReportListCards({ reports }) {
                             }}
                             role="heading"
                           >
-                            {report.props.data.name}
+                            {report.data.name}
                           </Block>
                           <DateRange
-                            start={report.props.data.start_date}
-                            end={report.props.data.end_date}
+                            start={report.data.startDate}
+                            end={report.data.endDate}
                           />
                         </View>
                       </View>
 
-                      {report.props.data.data ? (
+                      {report.data.data ? (
                         <ChooseGraph
-                          mode={report.props.data.mode}
-                          graphType={report.props.data.graph_type}
-                          startDate={report.props.data.start_date}
-                          endDate={report.props.data.end_date}
-                          data={report.props.data.data}
+                          startDate={report.data.startDate}
+                          endDate={report.data.endDate}
+                          data={report.data.data}
+                          mode={report.data.mode}
+                          graphType={report.data.graphType}
+                          balanceType={report.data.balanceType}
+                          groupBy={report.data.groupBy}
                           compact={true}
-                          groupBy={report.props.data.group_by}
-                          showEmpty={
-                            report.props.data.show_empty ? true : false
-                          }
-                          balanceType={report.props.data.balance_type}
                           style={{ height: 'auto', flex: 1 }}
                         />
                       ) : (
@@ -162,19 +158,19 @@ export function CustomReportListCards({ reports }) {
                   }}
                 >
                   <MenuButton
-                    onClick={() => onMenuOpen(report.props.data.id, true)}
+                    onClick={() => onMenuOpen(report.data.id, true)}
                     style={{
                       color:
-                        isCardHovered === report.props.data.id
+                        isCardHovered === report.data.id
                           ? 'inherit'
                           : 'transparent',
                     }}
                   />
-                  {reportMenu[report.props.data.id] && (
+                  {reportMenu[report.data.id] && (
                     <CardMenu
                       onMenuSelect={onMenuSelect}
-                      onClose={() => onMenuOpen(report.props.data.id, false)}
-                      reportId={report.props.data.id}
+                      onClose={() => onMenuOpen(report.data.id, false)}
+                      reportId={report.data.id}
                     />
                   )}
                 </View>

@@ -1,10 +1,8 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
-import {
-  type GroupedEntity,
-  type Month,
-} from 'loot-core/src/types/models/reports';
+import * as monthUtils from 'loot-core/src/shared/months';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
@@ -29,7 +27,6 @@ type ChooseGraphProps = {
   balanceType: string;
   groupBy: string;
   setScrollWidth?: (value: number) => void;
-  months?: Month[];
   viewLabels?: boolean;
   compact?: boolean;
   style?: CSSProperties;
@@ -44,11 +41,11 @@ export function ChooseGraph({
   balanceType,
   groupBy,
   setScrollWidth,
-  months,
   viewLabels,
   compact,
   style,
 }: ChooseGraphProps) {
+  const months: string[] = monthUtils.rangeInclusive(startDate, endDate);
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const groupByData =
