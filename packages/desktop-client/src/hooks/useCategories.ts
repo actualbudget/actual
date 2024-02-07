@@ -13,7 +13,5 @@ export function useCategories() {
     }
   }, []);
 
-  return useSelector<State, QueriesState['categories']>(
-    state => state.queries.categories,
-  );
+  return useSelector(state => state.queries.categories);
 }
