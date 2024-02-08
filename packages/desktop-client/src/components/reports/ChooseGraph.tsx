@@ -5,6 +5,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties } from '../../style';
+import { styles } from '../../style/styles';
 import { View } from '../common/View';
 
 import { AreaGraph } from './graphs/AreaGraph';
@@ -58,6 +59,9 @@ export function ChooseGraph({
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
   };
+
+  const rowStyle = compact && { flex: '0 0 20px', height: 20 };
+  const compactStyle = compact && { ...styles.tinyText };
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<HTMLDivElement>(null);
@@ -141,6 +145,8 @@ export function ChooseGraph({
           groupBy={groupBy}
           balanceType={balanceType}
           compact={compact}
+          style={rowStyle}
+          compactStyle={compactStyle}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}
@@ -152,6 +158,8 @@ export function ChooseGraph({
           mode={mode}
           monthsCount={months.length}
           compact={compact}
+          style={rowStyle}
+          compactStyle={compactStyle}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -161,6 +169,8 @@ export function ChooseGraph({
           balanceTypeOp={balanceTypeOp}
           monthsCount={months.length}
           compact={compact}
+          style={rowStyle}
+          compactStyle={compactStyle}
         />
       </View>
     );

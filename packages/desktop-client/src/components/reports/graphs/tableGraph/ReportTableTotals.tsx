@@ -9,7 +9,8 @@ import {
 } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
-import { styles, theme } from '../../../../style';
+import { theme } from '../../../../style';
+import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 
@@ -21,6 +22,8 @@ type ReportTableTotalsProps = {
   totalScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
 };
 
 export function ReportTableTotals({
@@ -31,6 +34,8 @@ export function ReportTableTotals({
   totalScrollRef,
   handleScroll,
   compact,
+  style,
+  compactStyle,
 }: ReportTableTotalsProps) {
   const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 
@@ -58,6 +63,7 @@ export function ReportTableTotals({
         color: theme.tableHeaderText,
         backgroundColor: theme.tableHeaderBackground,
         fontWeight: 600,
+        ...style,
       }}
     >
       <View
@@ -72,9 +78,9 @@ export function ReportTableTotals({
       >
         <Cell
           style={{
-            width: 120,
+            width: compact ? 80 : 125,
             flexShrink: 0,
-            ...styles.tnum,
+            ...compactStyle,
           }}
           value="Totals"
         />
@@ -83,8 +89,8 @@ export function ReportTableTotals({
               return (
                 <Cell
                   style={{
-                    minWidth: compact ? 80 : 125,
-                    ...styles.tnum,
+                    minWidth: compact ? 50 : 85,
+                    ...compactStyle,
                   }}
                   key={amountToCurrency(item[balanceTypeOp])}
                   value={amountToCurrency(item[balanceTypeOp])}
@@ -102,8 +108,8 @@ export function ReportTableTotals({
               <>
                 <Cell
                   style={{
-                    minWidth: compact ? 80 : 125,
-                    ...styles.tnum,
+                    minWidth: compact ? 50 : 85,
+                    ...compactStyle,
                   }}
                   value={amountToCurrency(data.totalAssets)}
                   title={
@@ -116,8 +122,8 @@ export function ReportTableTotals({
                 />
                 <Cell
                   style={{
-                    minWidth: compact ? 80 : 125,
-                    ...styles.tnum,
+                    minWidth: compact ? 50 : 85,
+                    ...compactStyle,
                   }}
                   value={amountToCurrency(data.totalDebts)}
                   title={
@@ -132,8 +138,8 @@ export function ReportTableTotals({
             )}
         <Cell
           style={{
-            minWidth: compact ? 80 : 125,
-            ...styles.tnum,
+            minWidth: compact ? 50 : 85,
+            ...compactStyle,
           }}
           value={amountToCurrency(data[balanceTypeOp])}
           title={
@@ -146,8 +152,8 @@ export function ReportTableTotals({
         />
         <Cell
           style={{
-            minWidth: compact ? 80 : 125,
-            ...styles.tnum,
+            minWidth: compact ? 50 : 85,
+            ...compactStyle,
           }}
           value={integerToCurrency(Math.round(average))}
           title={

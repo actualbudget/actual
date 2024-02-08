@@ -14,6 +14,8 @@ type ReportTableListProps = {
   groupBy: string;
   renderItem;
   compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
 };
 
 export function ReportTableList({
@@ -23,16 +25,25 @@ export function ReportTableList({
   groupBy,
   renderItem,
   compact,
+  style,
+  compactStyle,
 }: ReportTableListProps) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
 
   type RenderRowProps = {
     index: number;
     parent_index?: number;
-    style?: CSSProperties;
     compact: boolean;
+    style?: CSSProperties;
+    compactStyle?: CSSProperties;
   };
-  function RenderRow({ index, parent_index, style, compact }: RenderRowProps) {
+  function RenderRow({
+    index,
+    parent_index,
+    compact,
+    style,
+    compactStyle,
+  }: RenderRowProps) {
     const item =
       parent_index === undefined
         ? data[index]
@@ -42,9 +53,10 @@ export function ReportTableList({
       item,
       groupByItem,
       mode,
-      style,
       monthsCount,
       compact,
+      style,
+      compactStyle,
     });
   }
 
@@ -58,13 +70,15 @@ export function ReportTableList({
                 <RenderRow
                   index={index}
                   compact={compact}
-                  style={
-                    item.categories && {
+                  style={{
+                    ...(item.categories && {
                       color: theme.tableRowHeaderText,
                       backgroundColor: theme.tableRowHeaderBackground,
                       fontWeight: 600,
-                    }
-                  }
+                    }),
+                    ...style,
+                  }}
+                  compactStyle={compactStyle}
                 />
                 {item.categories && (
                   <>
@@ -76,6 +90,8 @@ export function ReportTableList({
                             index={i}
                             compact={compact}
                             parent_index={index}
+                            style={style}
+                            compactStyle={compactStyle}
                           />
                         );
                       })}
