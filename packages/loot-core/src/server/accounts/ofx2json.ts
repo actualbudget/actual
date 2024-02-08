@@ -87,7 +87,7 @@ function getInvStmtTrn(ofx) {
 }
 
 function getAsArray(value) {
-  return Array.isArray(value) ? value : [value];
+  return Array.isArray(value) ? value : value === undefined ? [] : [value];
 }
 
 function mapOfxTransaction(stmtTrn): OFXTransaction {
