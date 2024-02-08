@@ -40,52 +40,50 @@ export function SaveReport({
   const inputRef = createRef<HTMLInputElement>();
 
   const onAddUpdate = async (menuChoice: string) => {
-    let savedReport: CustomReportEntity = report;
-
     if (menuChoice === 'save-report') {
-      savedReport = {
+      const newSavedReport = {
         ...report,
         ...customReportItems,
         name,
       };
-    } else {
-      if (menuChoice === 'rename-report') {
-        savedReport = {
-          ...report,
-          name,
-        };
-      }
 
-      if (menuChoice === 'update-report') {
-        savedReport = {
-          ...report,
-          ...customReportItems,
-        };
-      }
-    }
+      const response = await sendCatch('report/create', newSavedReport);
 
-    const res = await sendCatch(
-      menuChoice === 'save-report' ? 'report/create' : 'report/update',
-      savedReport,
-    );
-
-    if (res.error) {
-      setErr(res.error.message);
-      setNameMenuOpen(true);
-    } else {
-      if (menuChoice === 'save-report') {
-        savedReport = {
-          ...savedReport,
-          id: res.data,
-        };
+      if (response.error) {
+        setErr(response.error.message);
+        setNameMenuOpen(true);
+        return;
       }
 
       setNameMenuOpen(false);
       onReportChange({
-        savedReport,
-        type: menuChoice === 'rename-report' ? 'rename' : 'add-update',
+        savedReport: {
+          ...newSavedReport,
+          id: response.data,
+        },
+        type: 'add-update',
       });
+      return;
     }
+
+    const updatedReport = {
+      ...report,
+      ...(menuChoice === 'rename-report' ? { name } : customReportItems),
+    };
+
+    const response = await sendCatch('report/update', updatedReport);
+
+    if (response.error) {
+      setErr(response.error.message);
+      setNameMenuOpen(true);
+      return;
+    }
+
+    setNameMenuOpen(false);
+    onReportChange({
+      savedReport: updatedReport,
+      type: menuChoice === 'rename-report' ? 'rename' : 'add-update',
+    });
   };
 
   const onMenuSelect = async (item: string) => {
