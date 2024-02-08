@@ -35,6 +35,8 @@ import {
   updateTransaction,
   deleteTransaction,
   addSplitTransaction,
+  groupTransaction,
+  ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 import {
   integerToCurrency,
@@ -705,6 +707,7 @@ function PayeeIcons({
 const Transaction = memo(function Transaction(props) {
   const {
     transaction: originalTransaction,
+    subtransactions,
     editing,
     showAccount,
     showBalance,
@@ -843,7 +846,8 @@ const Transaction = memo(function Transaction(props) {
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
       setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
-      onSave(deserialized);
+
+      onSave(deserialized, subtransactions);
     }
   }
 
@@ -1489,9 +1493,10 @@ function NewTransaction({
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
 
-  const emptyChildTransactions = transactions.filter(
-    t => t.parent_id === transactions[0].id && t.amount === 0,
+  const childTransactions = transactions.filter(
+    t => t.parent_id === transactions[0].id,
   );
+  const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
   return (
     <View
@@ -1513,6 +1518,7 @@ function NewTransaction({
           key={transaction.id}
           editing={editingTransaction === transaction.id}
           transaction={transaction}
+          subtransactions={transaction.is_parent ? childTransactions : null}
           showAccount={showAccount}
           showCategory={showCategory}
           showBalance={showBalance}
@@ -2064,18 +2070,28 @@ export const TransactionTable = forwardRef((props, ref) => {
   }, [props.onAdd, newNavigator.onEdit]);
 
   const onSave = useCallback(
-    async transaction => {
+    async (transaction, subtransactions = null) => {
       savePending.current = true;
+
+      let groupedTransaction = subtransactions
+        ? groupTransaction([transaction, ...subtransactions])
+        : transaction;
 
       if (isTemporaryId(transaction.id)) {
         if (props.onApplyRules) {
-          transaction = await props.onApplyRules(transaction);
+          groupedTransaction = await props.onApplyRules(groupedTransaction);
         }
 
         const newTrans = latestState.current.newTransactions;
-        setNewTransactions(updateTransaction(newTrans, transaction).data);
+        // Future refactor: we shouldn't need to iterate through the entire
+        // transaction list to ungroup, just the new transactions.
+        setNewTransactions(
+          ungroupTransactions(
+            updateTransaction(newTrans, groupedTransaction).data,
+          ),
+        );
       } else {
-        props.onSave(transaction);
+        props.onSave(groupedTransaction);
       }
     },
     [props.onSave],
