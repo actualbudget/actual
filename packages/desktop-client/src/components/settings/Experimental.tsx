@@ -1,8 +1,8 @@
 import { type ReactNode, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
+import { type State } from 'loot-core/src/client/state-types';
+import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
