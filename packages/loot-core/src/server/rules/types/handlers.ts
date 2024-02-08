@@ -31,7 +31,7 @@ export interface RulesHandlers {
   ) => Promise<{ someDeletionsFailed: boolean }>;
 
   'rule-apply-actions': (arg: {
-    transactionIds: string[];
+    transactions: TransactionEntity[];
     actions: Array<Action | RuleActionEntity>;
   }) => Promise<null | { added: TransactionEntity[]; updated: unknown[] }>;
 
