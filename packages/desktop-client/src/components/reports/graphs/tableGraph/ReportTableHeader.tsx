@@ -59,8 +59,8 @@ export function ReportTableHeader({
           style={{
             width: compact ? 80 : 125,
             flexShrink: 0,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
           value={groupBy}
         />
         {interval
@@ -69,8 +69,8 @@ export function ReportTableHeader({
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                   key={index}
                   value={header.date}
                   width="flex"
@@ -82,16 +82,16 @@ export function ReportTableHeader({
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                   value="Deposits"
                   width="flex"
                 />
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                   value="Payments"
                   width="flex"
                 />
@@ -100,16 +100,16 @@ export function ReportTableHeader({
         <Cell
           style={{
             minWidth: compact ? 50 : 85,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
           value="Totals"
           width="flex"
         />
         <Cell
           style={{
             minWidth: compact ? 50 : 85,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
           value="Average"
           width="flex"
         />

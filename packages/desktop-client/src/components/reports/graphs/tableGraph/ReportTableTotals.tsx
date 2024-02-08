@@ -80,8 +80,8 @@ export function ReportTableTotals({
           style={{
             width: compact ? 80 : 125,
             flexShrink: 0,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
           value="Totals"
         />
         {mode === 'time'
@@ -90,8 +90,8 @@ export function ReportTableTotals({
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                   key={amountToCurrency(item[balanceTypeOp])}
                   value={amountToCurrency(item[balanceTypeOp])}
                   title={
@@ -109,8 +109,8 @@ export function ReportTableTotals({
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                   value={amountToCurrency(data.totalAssets)}
                   title={
                     Math.abs(data.totalAssets) > 100000
@@ -123,8 +123,8 @@ export function ReportTableTotals({
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                   value={amountToCurrency(data.totalDebts)}
                   title={
                     Math.abs(data.totalDebts) > 100000
@@ -139,8 +139,8 @@ export function ReportTableTotals({
         <Cell
           style={{
             minWidth: compact ? 50 : 85,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
           value={amountToCurrency(data[balanceTypeOp])}
           title={
             Math.abs(data[balanceTypeOp]) > 100000
@@ -153,8 +153,8 @@ export function ReportTableTotals({
         <Cell
           style={{
             minWidth: compact ? 50 : 85,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
           value={integerToCurrency(Math.round(average))}
           title={
             Math.abs(Math.round(average / 100)) > 100000

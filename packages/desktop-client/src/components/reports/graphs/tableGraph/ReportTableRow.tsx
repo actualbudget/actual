@@ -49,8 +49,8 @@ export const ReportTableRow = memo(
           style={{
             width: compact ? 80 : 125,
             flexShrink: 0,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
         />
         {item.monthData && mode === 'time'
           ? item.monthData.map(month => {
@@ -59,8 +59,8 @@ export const ReportTableRow = memo(
                   key={amountToCurrency(month[balanceTypeOp])}
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                   value={amountToCurrency(month[balanceTypeOp])}
                   title={
                     Math.abs(month[balanceTypeOp]) > 100000
@@ -85,8 +85,8 @@ export const ReportTableRow = memo(
                   privacyFilter
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                 />
                 <Cell
                   value={amountToCurrency(item.totalDebts)}
@@ -99,8 +99,8 @@ export const ReportTableRow = memo(
                   privacyFilter
                   style={{
                     minWidth: compact ? 50 : 85,
-                    ...compactStyle,
                   }}
+                  valueStyle={compactStyle}
                 />
               </>
             )}
@@ -114,8 +114,8 @@ export const ReportTableRow = memo(
           style={{
             fontWeight: 600,
             minWidth: compact ? 50 : 85,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
           width="flex"
           privacyFilter
         />
@@ -129,8 +129,8 @@ export const ReportTableRow = memo(
           style={{
             fontWeight: 600,
             minWidth: compact ? 50 : 85,
-            ...compactStyle,
           }}
+          valueStyle={compactStyle}
           width="flex"
           privacyFilter
         />
