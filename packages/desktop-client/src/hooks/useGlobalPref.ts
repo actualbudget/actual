@@ -5,16 +5,16 @@ import { saveGlobalPrefs } from 'loot-core/src/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 import { type GlobalPrefs } from 'loot-core/src/types/prefs';
 
-type SetGlobalPrefActon<K extends keyof GlobalPrefs> = (
+type SetGlobalPrefAction<K extends keyof GlobalPrefs> = (
   value: GlobalPrefs[K],
 ) => void;
 
 export function useGlobalPref<K extends keyof GlobalPrefs>(
   prefName: K,
   defaultValue?: GlobalPrefs[K],
-): [GlobalPrefs[K], SetGlobalPrefActon<K>] {
+): [GlobalPrefs[K], SetGlobalPrefAction<K>] {
   const dispatch = useDispatch();
-  const setGlobalPref: SetGlobalPrefActon<K> = useCallback(
+  const setGlobalPref: SetGlobalPrefAction<K> = useCallback(
     value => {
       dispatch(saveGlobalPrefs({ [prefName]: value }));
     },
