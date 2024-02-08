@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
+
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { Information } from '../alerts';
@@ -12,7 +15,9 @@ import { View } from '../common/View';
 import { Setting } from './UI';
 
 export function GlobalSettings() {
-  const documentDir = useSelector(state => state.prefs.global.documentDir);
+  const documentDir = useSelector<State, PrefsState['global']['documentDir']>(
+    state => state.prefs.global.documentDir,
+  );
   const { saveGlobalPrefs } = useActions();
 
   const [documentDirChanged, setDirChanged] = useState(false);

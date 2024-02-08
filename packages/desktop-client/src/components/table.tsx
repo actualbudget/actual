@@ -40,7 +40,7 @@ import {
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import { type Binding } from './spreadsheet';
-import { useFormat } from './spreadsheet/useFormat';
+import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 import { Tooltip, IntersectionBoundary } from './tooltips';
 
@@ -661,7 +661,7 @@ export function SelectCell({
 
 type SheetCellValueProps = {
   binding: Binding;
-  type: string;
+  type: FormatType;
   getValueStyle?: (value: string | number) => CSSProperties;
   formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;

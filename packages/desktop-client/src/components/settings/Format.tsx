@@ -2,6 +2,8 @@
 import React, { type ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
@@ -57,16 +59,21 @@ export function FormatSettings() {
   const { savePrefs } = useActions();
 
   const sidebar = useSidebar();
-  const firstDayOfWeekIdx = useSelector(
+  const firstDayOfWeekIdx = useSelector<
+    State,
+    PrefsState['local']['firstDayOfWeekIdx']
+  >(
     state => state.prefs.local.firstDayOfWeekIdx || '0', // Sunday
   );
-  const dateFormat = useSelector(
+  const dateFormat = useSelector<State, PrefsState['local']['dateFormat']>(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  const numberFormat = useSelector(
+  const numberFormat = useSelector<State, PrefsState['local']['numberFormat']>(
     state => state.prefs.local.numberFormat || 'comma-dot',
   );
-  const hideFraction = useSelector(state => state.prefs.local.hideFraction);
+  const hideFraction = useSelector<State, PrefsState['local']['hideFraction']>(
+    state => state.prefs.local.hideFraction,
+  );
 
   return (
     <Setting

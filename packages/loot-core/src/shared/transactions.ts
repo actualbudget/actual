@@ -97,7 +97,7 @@ export function ungroupTransactions(transactions: TransactionEntity[]) {
   }, []);
 }
 
-function groupTransaction(split) {
+export function groupTransaction(split) {
   return { ...split[0], subtransactions: split.slice(1) };
 }
 

@@ -129,8 +129,8 @@ app.method(
 app.method(
   'rule-apply-actions',
   mutator(
-    undoable(async function ({ transactionIds, actions }) {
-      return rules.applyActions(transactionIds, actions);
+    undoable(async function ({ transactions, actions }) {
+      return rules.applyActions(transactions, actions);
     }),
   ),
 );

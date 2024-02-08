@@ -5,7 +5,7 @@ import { type CSSProperties, styles } from '../../style';
 import { Text } from '../common/Text';
 import { ConditionalPrivacyFilter } from '../PrivacyFilter';
 
-import { useFormat } from './useFormat';
+import { type FormatType, useFormat } from './useFormat';
 import { useSheetName } from './useSheetName';
 import { useSheetValue } from './useSheetValue';
 
@@ -13,7 +13,7 @@ import { type Binding } from '.';
 
 type CellValueProps = {
   binding: string | Binding;
-  type?: string;
+  type?: FormatType;
   formatter?: (value) => ReactNode;
   style?: CSSProperties;
   getStyle?: (value) => CSSProperties;

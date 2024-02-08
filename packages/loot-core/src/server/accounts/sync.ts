@@ -487,7 +487,7 @@ export async function reconcileExternalTransactions(acctId, transactions) {
     transactionsStep1.push({
       payee_name,
       trans,
-      subtransactions,
+      subtransactions: trans.subtransactions || subtransactions,
       match,
       fuzzyDataset,
     });
@@ -650,7 +650,7 @@ export async function reconcileTransactions(acctId, transactions) {
     transactionsStep1.push({
       payee_name,
       trans,
-      subtransactions,
+      subtransactions: trans.subtransactions || subtransactions,
       match,
       fuzzyDataset,
     });
@@ -783,8 +783,12 @@ export async function addTransactions(
     };
 
     // Add split transactions if they are given
-    if (subtransactions && subtransactions.length > 0) {
-      added.push(...makeSplitTransaction(finalTransaction, subtransactions));
+    const updatedSubtransactions =
+      finalTransaction.subtransactions || subtransactions;
+    if (updatedSubtransactions && updatedSubtransactions.length > 0) {
+      added.push(
+        ...makeSplitTransaction(finalTransaction, updatedSubtransactions),
+      );
     } else {
       added.push(finalTransaction);
     }

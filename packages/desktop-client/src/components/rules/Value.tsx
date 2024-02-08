@@ -4,6 +4,9 @@ import { useSelector } from 'react-redux';
 
 import { format as formatDate, parseISO } from 'date-fns';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
+import { type QueriesState } from 'loot-core/client/state-types/queries';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -33,12 +36,16 @@ export function Value<T>({
   describe = x => x.name,
   style,
 }: ValueProps<T>) {
-  const dateFormat = useSelector(
+  const dateFormat = useSelector<State, PrefsState['local']['dateFormat']>(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  const payees = useSelector(state => state.queries.payees);
+  const payees = useSelector<State, QueriesState['payees']>(
+    state => state.queries.payees,
+  );
   const { list: categories } = useCategories();
-  const accounts = useSelector(state => state.queries.accounts);
+  const accounts = useSelector<State, QueriesState['accounts']>(
+    state => state.queries.accounts,
+  );
   const valueStyle = {
     color: theme.pageTextPositive,
     ...style,
