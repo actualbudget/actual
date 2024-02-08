@@ -78,7 +78,6 @@ export const init: T.Init = async function () {
   return new Promise(connectSocket);
 };
 
-// @ts-expect-error Figure out why typechecker is suddenly breaking here
 export const send: T.Send = function (
   name,
   args,
