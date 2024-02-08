@@ -7,6 +7,14 @@ export type Init = typeof init;
 export function send<K extends keyof Handlers>(
   name: K,
   args?: Parameters<Handlers[K]>[0],
+  options?: { catchErrors: true },
+): ReturnType<
+  | { data: Handlers[K] }
+  | { error: { type: 'APIError' | 'InternalError'; message: string } }
+>;
+export function send<K extends keyof Handlers>(
+  name: K,
+  args?: Parameters<Handlers[K]>[0],
   options?: { catchErrors?: boolean },
 ): ReturnType<Handlers[K]>;
 export type Send = typeof send;
