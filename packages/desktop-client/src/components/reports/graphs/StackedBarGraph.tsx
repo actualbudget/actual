@@ -159,14 +159,14 @@ export function StackedBarGraph({
                   isAnimationActive={false}
                   cursor={{ fill: 'transparent' }}
                 />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fill: theme.pageText }}
-                      tickLine={{ stroke: theme.pageText }}
-                    />
                     <YAxis
                       tickFormatter={value => getCustomTick(value, privacyMode)}
                       tick={{ fill: theme.pageText }}
