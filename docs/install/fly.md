@@ -160,6 +160,11 @@ Now that you’ve gotten the CLI set up, you’re ready to deploy your app to Fl
     interval = "15s"
     restart_limit = 0
     timeout = "2s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256 
 ```
 
 </details>
