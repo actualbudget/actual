@@ -14,7 +14,7 @@ export function useLocalPref<K extends keyof LocalPrefs>(
   defaultValue?: LocalPrefs[K],
 ): [LocalPrefs[K], SetLocalPrefAction<K>] {
   const dispatch = useDispatch();
-  const setLocalPref = useCallback(
+  const setLocalPref: SetLocalPrefAction<K> = useCallback(
     value => {
       dispatch(savePrefs({ [prefName]: value }));
     },

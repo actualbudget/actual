@@ -14,7 +14,7 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
   defaultValue?: GlobalPrefs[K],
 ): [GlobalPrefs[K], SetGlobalPrefActon<K>] {
   const dispatch = useDispatch();
-  const setGlobalPref = useCallback(
+  const setGlobalPref: SetGlobalPrefActon<K> = useCallback(
     value => {
       dispatch(saveGlobalPrefs({ [prefName]: value }));
     },
