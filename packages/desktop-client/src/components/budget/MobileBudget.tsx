@@ -48,7 +48,6 @@ function BudgetInner(props: BudgetInnerProps) {
     categoryGroups,
     categories,
     loadPrefs,
-    savePrefs,
     budgetType,
     spreadsheet,
     applyBudgetAction,
