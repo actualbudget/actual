@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { savePrefs } from 'loot-core/src/client/actions';
+import { type State } from 'loot-core/src/client/state-types';
+import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
 
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles } from '../style';
@@ -14,7 +16,10 @@ import { Checkbox } from './forms';
 const buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
 export function MobileWebMessage() {
-  const hideMobileMessagePref = useSelector(state => {
+  const hideMobileMessagePref = useSelector<
+    State,
+    PrefsState['local']['hideMobileMessage']
+  >(state => {
     return (state.prefs.local && state.prefs.local.hideMobileMessage) || true;
   });
 

@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 export function useFilters<T>(initialFilters: T[] = []) {
   const [filters, setFilters] = useState<T[]>(initialFilters);
-  const [conditionsOp, setConditionsOp] = useState('and');
+  const [conditionsOp, setConditionsOp] = useState<'and' | 'or'>('and');
   const [saved, setSaved] = useState<T[]>(null);
 
   const onApply = useCallback(

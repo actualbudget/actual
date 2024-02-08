@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 
 import { media } from 'glamor';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
@@ -89,8 +91,12 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  const budgetId = useSelector(state => state.prefs.local.id);
-  const groupId = useSelector(state => state.prefs.local.groupId);
+  const budgetId = useSelector<State, PrefsState['local']['id']>(
+    state => state.prefs.local.id,
+  );
+  const groupId = useSelector<State, PrefsState['local']['groupId']>(
+    state => state.prefs.local.groupId,
+  );
 
   return (
     <Setting>
@@ -118,10 +124,13 @@ function AdvancedAbout() {
 }
 
 export function Settings() {
-  const floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
+  const floatingSidebar = useSelector<
+    State,
+    PrefsState['global']['floatingSidebar']
+  >(state => state.prefs.global.floatingSidebar);
+  const budgetName = useSelector<State, PrefsState['local']['budgetName']>(
+    state => state.prefs.local.budgetName,
   );
-  const budgetName = useSelector(state => state.prefs.local.budgetName);
 
   const { loadPrefs, closeBudget } = useActions();
 

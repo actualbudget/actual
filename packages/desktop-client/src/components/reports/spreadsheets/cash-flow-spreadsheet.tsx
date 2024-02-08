@@ -7,6 +7,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
+import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
@@ -46,11 +47,11 @@ export function simpleCashFlow(start, end) {
 }
 
 export function cashFlowByDate(
-  start,
-  end,
-  isConcise,
-  conditions = [],
-  conditionsOp,
+  start: string,
+  end: string,
+  isConcise: boolean,
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or',
 ) {
   return async (spreadsheet, setData) => {
     const { filters } = await send('make-filters-from-conditions', {
