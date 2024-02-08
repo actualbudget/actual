@@ -39,7 +39,8 @@ export function ResetCache() {
 }
 
 export function ResetSync() {
-  const isEnabled = !!useLocalPref('groupId');
+  const [groupId] = useLocalPref('groupId');
+  const isEnabled = !!groupId;
   const { resetSync } = useActions();
 
   const [resetting, setResetting] = useState(false);

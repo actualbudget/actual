@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { replaceModal, syncAndDownload } from 'loot-core/client/actions';
+import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -222,8 +222,8 @@ export function Accounts() {
   const accounts = useAccounts();
   const newTransactions = useSelector(state => state.queries.newTransactions);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  const numberFormat = useLocalPref('numberFormat') || 'comma-dot';
-  const hideFraction = useLocalPref('hideFraction') || false;
+  const [numberFormat] = useLocalPref('numberFormat', 'comma-dot');
+  const [hideFraction] = useLocalPref('hideFraction', false);
 
   const { list: categories } = useCategories();
 

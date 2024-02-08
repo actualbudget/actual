@@ -1,7 +1,4 @@
 import React, { memo, useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
-
-import { savePrefs } from 'loot-core/client/actions';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
@@ -35,10 +32,9 @@ export const BudgetCategories = memo(
     onReorderCategory,
     onReorderGroup,
   }) => {
-    const dispatch = useDispatch();
-    const collapsed = useLocalPref('budget.collapsed') || [];
+    const [collapsed, setCollapsedPref] = useLocalPref('budget.collapsed', []);
     function onCollapse(value) {
-      dispatch(savePrefs({ 'budget.collapsed': value }));
+      setCollapsedPref(value);
     }
 
     const [isAddingGroup, setIsAddingGroup] = useState(false);

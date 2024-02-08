@@ -56,7 +56,7 @@ export function LoadBackup({
   modalProps,
 }) {
   const [backups, setBackups] = useState([]);
-  const prefsBudgetId = useLocalPref('id');
+  const [prefsBudgetId] = useLocalPref('id');
   const budgetIdToLoad = budgetId || prefsBudgetId;
 
   useEffect(() => {

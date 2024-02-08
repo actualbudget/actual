@@ -4,7 +4,6 @@ import React, { type ReactNode } from 'react';
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
-import { useActions } from '../../hooks/useActions';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { tokens } from '../../tokens';
@@ -55,13 +54,18 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export function FormatSettings() {
-  const { savePrefs } = useActions();
-
   const sidebar = useSidebar();
-  const firstDayOfWeekIdx = useLocalPref('firstDayOfWeekIdx') || '0'; // Sunday;
+  const [firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] = useLocalPref(
+    'firstDayOfWeekIdx',
+    '0',
+  ); // Sunday;
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const numberFormat = useLocalPref('numberFormat') || 'comma-dot';
-  const hideFraction = useLocalPref('hideFraction');
+  const [, setDateFormatPref] = useLocalPref('dateFormat');
+  const [numberFormat, setNumberFormatPref] = useLocalPref(
+    'numberFormat',
+    'comma-dot',
+  );
+  const [hideFraction, setHideFractionPref] = useLocalPref('hideFraction');
 
   return (
     <Setting
@@ -86,7 +90,7 @@ export function FormatSettings() {
                 bare
                 key={String(hideFraction)} // needed because label does not update
                 value={numberFormat}
-                onChange={format => savePrefs({ numberFormat: format })}
+                onChange={format => setNumberFormatPref(format)}
                 options={numberFormats.map(f => [
                   f.value,
                   hideFraction ? f.labelNoFraction : f.label,
@@ -99,9 +103,7 @@ export function FormatSettings() {
               <Checkbox
                 id="settings-textDecimal"
                 checked={!!hideFraction}
-                onChange={e =>
-                  savePrefs({ hideFraction: e.currentTarget.checked })
-                }
+                onChange={e => setHideFractionPref(e.currentTarget.checked)}
               />
               <label htmlFor="settings-textDecimal">Hide decimal places</label>
             </Text>
@@ -112,7 +114,7 @@ export function FormatSettings() {
               <Select
                 bare
                 value={dateFormat}
-                onChange={format => savePrefs({ dateFormat: format })}
+                onChange={format => setDateFormatPref(format)}
                 options={dateFormats.map(f => [f.value, f.label])}
                 style={{ padding: '2px 10px', fontSize: 15 }}
               />
@@ -124,7 +126,7 @@ export function FormatSettings() {
               <Select
                 bare
                 value={firstDayOfWeekIdx}
-                onChange={idx => savePrefs({ firstDayOfWeekIdx: idx })}
+                onChange={idx => setFirstDayOfWeekIdxPref(idx)}
                 options={daysOfWeek.map(f => [f.value, f.label])}
                 style={{ padding: '2px 10px', fontSize: 15 }}
               />

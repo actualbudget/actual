@@ -9,7 +9,6 @@ import React, {
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
-import { usePrivacyMode } from 'loot-core/src/client/privacy';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
@@ -120,8 +119,8 @@ type PrivacyButtonProps = {
 };
 
 function PrivacyButton({ style }: PrivacyButtonProps) {
-  const isPrivacyEnabled = usePrivacyMode();
-  const { savePrefs } = useActions();
+  const [isPrivacyEnabled, setPrivacyEnabledPref] =
+    useLocalPref('isPrivacyEnabled');
 
   const privacyIconStyle = { width: 15, height: 15 };
 
@@ -129,7 +128,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
     <Button
       type="bare"
       aria-label={`${isPrivacyEnabled ? 'Disable' : 'Enable'} privacy mode`}
-      onClick={() => savePrefs({ isPrivacyEnabled: !isPrivacyEnabled })}
+      onClick={() => setPrivacyEnabledPref(!isPrivacyEnabled)}
       style={style}
     >
       {isPrivacyEnabled ? (
@@ -146,7 +145,7 @@ type SyncButtonProps = {
   isMobile?: boolean;
 };
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
-  const cloudFileId = useLocalPref('cloudFileId');
+  const [cloudFileId] = useLocalPref('cloudFileId');
   const { sync } = useActions();
 
   const [syncing, setSyncing] = useState(false);
@@ -286,8 +285,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 }
 
 function BudgetTitlebar() {
-  const maxMonths = useGlobalPref('maxMonths');
-  const budgetType = useLocalPref('budgetType');
+  const [maxMonths] = useGlobalPref('maxMonths');
+  const [budgetType] = useLocalPref('budgetType');
   const { saveGlobalPrefs } = useActions();
   const { sendEvent } = useContext(TitlebarContext);
 
@@ -390,7 +389,7 @@ export function Titlebar({ style }: TitlebarProps) {
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
-  const floatingSidebar = useGlobalPref('floatingSidebar');
+  const [floatingSidebar] = useGlobalPref('floatingSidebar');
 
   return isNarrowWidth ? null : (
     <View

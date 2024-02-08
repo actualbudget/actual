@@ -90,8 +90,8 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  const budgetId = useLocalPref('id');
-  const groupId = useLocalPref('groupId');
+  const [budgetId] = useLocalPref('id');
+  const [groupId] = useLocalPref('groupId');
 
   return (
     <Setting>
@@ -119,8 +119,8 @@ function AdvancedAbout() {
 }
 
 export function Settings() {
-  const floatingSidebar = useGlobalPref('floatingSidebar');
-  const budgetName = useLocalPref('budgetName');
+  const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const [budgetName] = useLocalPref('budgetName');
 
   const { loadPrefs, closeBudget } = useActions();
 

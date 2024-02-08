@@ -14,7 +14,7 @@ import { Setting } from './UI';
 export function EncryptionSettings() {
   const { pushModal } = useActions();
   const serverURL = useServerURL();
-  const encryptKeyId = useLocalPref('encryptKeyId');
+  const [encryptKeyId] = useLocalPref('encryptKeyId');
 
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 

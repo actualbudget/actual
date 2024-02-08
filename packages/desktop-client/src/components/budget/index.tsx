@@ -21,7 +21,6 @@ import {
   moveCategory,
   moveCategoryGroup,
   pushModal,
-  savePrefs,
   updateCategory,
   updateGroup,
 } from 'loot-core/src/client/actions';
@@ -83,10 +82,15 @@ function BudgetInner(props: BudgetProps) {
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const startMonth = useLocalPref('budget.startMonth') || currentMonth;
-  const summaryCollapsed = useLocalPref('budget.summaryCollapsed');
-  const budgetType = useLocalPref('budgetType') || 'rollover';
-  const maxMonths = useGlobalPref('maxMonths') || 1;
+  const [startMonth, setBudgetStartMonthPref] = useLocalPref(
+    'budget.startMonth',
+    currentMonth,
+  );
+  const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
+    'budget.summaryCollapsed',
+  );
+  const [budgetType] = useLocalPref('budgetType', 'rollover');
+  const [maxMonths] = useGlobalPref('maxMonths', 1);
 
   const [initialized, setInitialized] = useState(false);
   const [bounds, setBounds] = useState({
@@ -166,7 +170,7 @@ function BudgetInner(props: BudgetProps) {
   }, [props.accountId]);
 
   const onMonthSelect = async (month, numDisplayed) => {
-    dispatch(savePrefs({ 'budget.startMonth': month }));
+    setBudgetStartMonthPref(month);
 
     const warmingMonth = month;
 
@@ -193,7 +197,7 @@ function BudgetInner(props: BudgetProps) {
     }
 
     if (warmingMonth === month) {
-      dispatch(savePrefs({ 'budget.startMonth': month }));
+      setBudgetStartMonthPref(month);
     }
   };
 
@@ -332,7 +336,7 @@ function BudgetInner(props: BudgetProps) {
   };
 
   const onToggleCollapse = () => {
-    dispatch(savePrefs({ 'budget.summaryCollapsed': !summaryCollapsed }));
+    setSummaryCollapsedPref(!summaryCollapsed);
   };
 
   const onTitlebarEvent = async ({ type, payload }: TitlebarMessage) => {

@@ -54,6 +54,7 @@ export type LocalPrefs = Partial<
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
+    'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 

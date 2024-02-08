@@ -8,7 +8,7 @@ import { SIDEBAR_WIDTH, Sidebar } from './Sidebar';
 import { useSidebar } from './SidebarProvider';
 
 export function FloatableSidebar() {
-  const floatingSidebar = useGlobalPref('floatingSidebar');
+  const [floatingSidebar] = useGlobalPref('floatingSidebar');
 
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();

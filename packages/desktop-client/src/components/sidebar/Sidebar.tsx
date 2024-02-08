@@ -5,9 +5,7 @@ import {
   closeBudget,
   moveAccount,
   replaceModal,
-  saveGlobalPrefs,
-  savePrefs,
-} from 'loot-core/client/actions';
+} from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -40,8 +38,13 @@ export function Sidebar() {
   const dispatch = useDispatch();
   const sidebar = useSidebar();
   const accounts = useAccounts();
-  const showClosedAccounts = useLocalPref('ui.showClosedAccounts');
-  const isFloating = useGlobalPref('floatingSidebar') || false;
+  const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
+    'ui.showClosedAccounts',
+  );
+  const [isFloating, setFloatingSidebarPref] = useGlobalPref(
+    'floatingSidebar',
+    false,
+  );
 
   async function onReorder(
     id: string,
@@ -58,7 +61,7 @@ export function Sidebar() {
   }
 
   const onFloat = () => {
-    dispatch(saveGlobalPrefs({ floatingSidebar: !isFloating }));
+    setFloatingSidebarPref(!isFloating);
   };
 
   const onAddAccount = () => {
@@ -66,11 +69,7 @@ export function Sidebar() {
   };
 
   const onToggleClosedAccounts = () => {
-    dispatch(
-      savePrefs({
-        'ui.showClosedAccounts': !showClosedAccounts,
-      }),
-    );
+    setShowClosedAccountsPref(!showClosedAccounts);
   };
 
   return (
@@ -145,7 +144,7 @@ export function Sidebar() {
 function EditableBudgetName() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const budgetName = useLocalPref('budgetName');
+  const [budgetName, setBudgetNamePref] = useLocalPref('budgetName');
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -190,11 +189,7 @@ function EditableBudgetName() {
             const inputEl = e.target as HTMLInputElement;
             const newBudgetName = inputEl.value;
             if (newBudgetName.trim() !== '') {
-              await dispatch(
-                savePrefs({
-                  budgetName: inputEl.value,
-                }),
-              );
+              setBudgetNamePref(inputEl.name);
               setEditing(false);
             }
           }}

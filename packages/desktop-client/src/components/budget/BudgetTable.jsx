@@ -1,7 +1,7 @@
 import React, { createRef, Component } from 'react';
 import { connect } from 'react-redux';
 
-import { savePrefs } from 'loot-core/client/actions';
+import { savePrefs } from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme, styles } from '../../style';

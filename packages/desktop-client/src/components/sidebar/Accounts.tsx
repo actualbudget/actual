@@ -38,7 +38,7 @@ export function Accounts({
 
   const getAccountPath = account => `/accounts/${account.id}`;
 
-  const showClosedAccounts = useLocalPref('ui.showClosedAccounts');
+  const [showClosedAccounts] = useLocalPref('ui.showClosedAccounts');
 
   function onDragChange(drag) {
     setIsDragging(drag.state === 'start');

@@ -16,8 +16,8 @@ import { Setting } from './UI';
 export function ExportBudget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const budgetId = useLocalPref('id');
-  const encryptKeyId = useLocalPref('encryptKeyId');
+  const [budgetId] = useLocalPref('id');
+  const [encryptKeyId] = useLocalPref('encryptKeyId');
 
   async function onExport() {
     setIsLoading(true);

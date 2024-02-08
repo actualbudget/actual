@@ -15,6 +15,7 @@ import {
 import hotkeys from 'hotkeys-js';
 
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
+import { type State } from 'loot-core/src/client/state-types';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
@@ -75,7 +76,9 @@ function WideNotSupported({ children, redirectTo = '/budget' }) {
 function RouterBehaviors() {
   const navigate = useNavigate();
   const accounts = useAccounts();
-  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
+  const accountsLoaded = useSelector(
+    (state: State) => state.queries.accountsLoaded,
+  );
   useEffect(() => {
     // If there are no accounts, we want to redirect the user to
     // the All Accounts screen which will prompt them to add an account

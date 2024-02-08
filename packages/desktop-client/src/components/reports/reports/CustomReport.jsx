@@ -8,7 +8,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
-import { useActions } from '../../../hooks/useActions';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
@@ -36,10 +35,18 @@ import { fromDateRepr } from '../util';
 export function CustomReport() {
   const categories = useCategories();
 
-  const viewLegend = useLocalPref('reportsViewLegend') || false;
-  const viewSummary = useLocalPref('reportsViewSummary') || false;
-  const viewLabels = useLocalPref('reportsViewLabel') || false;
-  const { savePrefs } = useActions();
+  const [viewLegend, setViewLegendPref] = useLocalPref(
+    'reportsViewLegend',
+    false,
+  );
+  const [viewSummary, setViewSummaryPref] = useLocalPref(
+    'reportsViewSummary',
+    false,
+  );
+  const [viewLabels, setViewLabelsPref] = useLocalPref(
+    'reportsViewLabel',
+    false,
+  );
 
   const {
     filters,
@@ -232,13 +239,13 @@ export function CustomReport() {
 
   const onChangeViews = (viewType, status) => {
     if (viewType === 'viewLegend') {
-      savePrefs({ reportsViewLegend: status ?? !viewLegend });
+      setViewLegendPref(status ?? !viewLegend);
     }
     if (viewType === 'viewSummary') {
-      savePrefs({ reportsViewSummary: !viewSummary });
+      setViewSummaryPref(!viewSummary);
     }
     if (viewType === 'viewLabels') {
-      savePrefs({ reportsViewLabel: !viewLabels });
+      setViewLabelsPref(!viewLabels);
     }
   };
 

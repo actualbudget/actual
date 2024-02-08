@@ -44,6 +44,7 @@ import {
 } from '../transactions/TransactionsTable';
 
 import { AccountHeader } from './Header';
+
 function EmptyMessage({ onAdd }) {
   return (
     <View
@@ -1544,11 +1545,11 @@ export function Account() {
   const payees = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat();
-  const hideFraction = useLocalPref('hideFraction') || false;
-  const expandSplits = useLocalPref('expand-splits');
-  const showBalances = useLocalPref(`show-balances-${params.id}`);
-  const showCleared = !useLocalPref(`hide-cleared-${params.id}`);
-  const showExtraBalances = useLocalPref(
+  const [hideFraction] = useLocalPref('hideFraction', false);
+  const [expandSplits] = useLocalPref('expand-splits');
+  const [showBalances] = useLocalPref(`show-balances-${params.id}`);
+  const [hideCleared] = useLocalPref(`hide-cleared-${params.id}`);
+  const [showExtraBalances] = useLocalPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
@@ -1564,7 +1565,7 @@ export function Account() {
     hideFraction,
     expandSplits,
     showBalances,
-    showCleared,
+    showCleared: !hideCleared,
     showExtraBalances,
     payees,
     modalShowing,

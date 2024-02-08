@@ -71,8 +71,8 @@ function BudgetInner(props: BudgetInnerProps) {
   const [initialized, setInitialized] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
-  const numberFormat = useLocalPref('numberFormat') || 'comma-dot';
-  const hideFraction = useLocalPref('hideFraction') || false;
+  const [numberFormat] = useLocalPref('numberFormat', 'comma-dot');
+  const [hideFraction] = useLocalPref('hideFraction', false);
 
   useEffect(() => {
     async function init() {
@@ -381,7 +381,7 @@ function BudgetInner(props: BudgetInnerProps) {
         <BudgetTable
           // This key forces the whole table rerender when the number
           // format changes
-          key={numberFormat + hideFraction}
+          key={`${numberFormat}${hideFraction}`}
           categoryGroups={categoryGroups}
           type={budgetType}
           month={currentMonth}
@@ -403,7 +403,6 @@ function BudgetInner(props: BudgetInnerProps) {
           onBudgetAction={applyBudgetAction}
           onRefresh={onRefresh}
           onSwitchBudgetType={onSwitchBudgetType}
-          savePrefs={savePrefs}
           pushModal={pushModal}
           onEditGroup={onEditGroup}
           onEditCategory={onEditCategory}
@@ -415,7 +414,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const budgetType = useLocalPref('budgetType') || 'rollover';
+  const [budgetType] = useLocalPref('budgetType', 'rollover');
 
   const actions = useActions();
   const spreadsheet = useSpreadsheet();

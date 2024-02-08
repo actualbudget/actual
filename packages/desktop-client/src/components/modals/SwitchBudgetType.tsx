@@ -18,7 +18,7 @@ export function SwitchBudgetType({
   modalProps,
   onSwitch,
 }: SwitchBudgetTypeProps) {
-  const budgetType = useLocalPref('budgetType');
+  const [budgetType] = useLocalPref('budgetType');
   return (
     <Modal title="Switch budget type?" {...modalProps}>
       {() => (

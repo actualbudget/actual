@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { type State } from 'loot-core/src/client/state-types';
 import { type PopModalAction } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -49,8 +50,8 @@ export type CommonModalProps = {
 };
 
 export function Modals() {
-  const modalStack = useSelector(state => state.modals.modalStack);
-  const isHidden = useSelector(state => state.modals.isHidden);
+  const modalStack = useSelector((state: State) => state.modals.modalStack);
+  const isHidden = useSelector((state: State) => state.modals.isHidden);
   const actions = useActions();
   const location = useLocation();
 

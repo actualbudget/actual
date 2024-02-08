@@ -8,6 +8,7 @@ import {
 import { useSelector } from 'react-redux';
 
 import * as Platform from 'loot-core/src/client/platform';
+import { type State } from 'loot-core/src/client/state-types';
 import {
   init as initConnection,
   send,
@@ -36,7 +37,7 @@ type AppInnerProps = {
 function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   const [initializing, setInitializing] = useState(true);
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
-  const loadingText = useSelector(state => state.app.loadingText);
+  const loadingText = useSelector((state: State) => state.app.loadingText);
   const { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
 
   async function init() {
@@ -110,8 +111,8 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 export function App() {
-  const budgetId = useLocalPref('id');
-  const cloudFileId = useLocalPref('cloudFileId');
+  const [budgetId] = useLocalPref('id');
+  const [cloudFileId] = useLocalPref('cloudFileId');
   const { sync } = useActions();
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),

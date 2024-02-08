@@ -24,7 +24,8 @@ export const themeOptions = Object.entries(themes).map(
 );
 
 export function useTheme() {
-  return useGlobalPref('theme') || 'light';
+  const [theme] = useGlobalPref('theme', 'light');
+  return theme;
 }
 
 export function ThemeStyle() {

@@ -12,7 +12,7 @@ import { View } from '../common/View';
 import { Setting } from './UI';
 
 export function GlobalSettings() {
-  const documentDir = useGlobalPref('documentDir');
+  const [documentDir] = useGlobalPref('documentDir');
   const { saveGlobalPrefs } = useActions();
 
   const [documentDirChanged, setDirChanged] = useState(false);

@@ -2,7 +2,6 @@ import { type ReactNode, useState } from 'react';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
-import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
@@ -21,23 +20,20 @@ type FeatureToggleProps = {
 };
 
 function FeatureToggle({
-  flag,
+  flag: flagName,
   disableToggle = false,
   error,
   children,
 }: FeatureToggleProps) {
-  const { savePrefs } = useActions();
-  const enabled = useFeatureFlag(flag);
+  const enabled = useFeatureFlag(flagName);
+  const [_, setFlagPref] = useLocalPref(`flags.${flagName}`);
 
   return (
     <label style={{ display: 'flex' }}>
       <Checkbox
         checked={enabled}
         onChange={() => {
-          // @ts-expect-error key type is not correctly inferred
-          savePrefs({
-            [`flags.${flag}`]: !enabled,
-          });
+          setFlagPref(!enabled);
         }}
         disabled={disableToggle}
       />
@@ -61,7 +57,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  const budgetType = useLocalPref('budgetType');
+  const [budgetType] = useLocalPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (
