@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState, useEffect, useMemo } from 'react';
 
 import * as d from 'date-fns';
@@ -6,11 +5,13 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
+import { Button } from '../../common/Button';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -21,7 +22,7 @@ import { Header } from '../Header';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
-export function CashFlow(): JSX.Element {
+export function CashFlow() {
   const {
     filters,
     conditionsOp,
@@ -29,13 +30,17 @@ export function CashFlow(): JSX.Element {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onCondOpChange,
-  } = useFilters();
+  } = useFilters<RuleConditionEntity>();
 
-  const [allMonths, setAllMonths] = useState(null);
+  const [allMonths, setAllMonths] = useState<null | Array<{
+    name: string;
+    pretty: string;
+  }>>(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
+  const [showBalance, setShowBalance] = useState(true);
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -71,7 +76,7 @@ export function CashFlow(): JSX.Element {
     run();
   }, []);
 
-  function onChangeDates(start, end) {
+  function onChangeDates(start: string, end: string) {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
       d.parseISO(start),
@@ -110,7 +115,19 @@ export function CashFlow(): JSX.Element {
         conditionsOp={conditionsOp}
         onCondOpChange={onCondOpChange}
         headerPrefixItems={undefined}
-      />
+      >
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <Button onClick={() => setShowBalance(state => !state)}>
+            {showBalance ? 'Hide balance' : 'Show balance'}
+          </Button>
+        </View>
+      </Header>
       <View
         style={{
           backgroundColor: theme.tableBackground,
@@ -168,7 +185,11 @@ export function CashFlow(): JSX.Element {
           </Text>
         </View>
 
-        <CashFlowGraph graphData={graphData} isConcise={isConcise} />
+        <CashFlowGraph
+          graphData={graphData}
+          isConcise={isConcise}
+          showBalance={showBalance}
+        />
 
         <View style={{ marginTop: 30 }}>
           <Paragraph>

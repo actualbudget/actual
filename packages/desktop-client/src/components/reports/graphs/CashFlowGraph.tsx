@@ -89,8 +89,13 @@ type CashFlowGraphProps = {
     transfers: { x: Date; y: number }[];
   };
   isConcise: boolean;
+  showBalance?: boolean;
 };
-export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
+export function CashFlowGraph({
+  graphData,
+  isConcise,
+  showBalance = true,
+}: CashFlowGraphProps) {
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
 
@@ -154,6 +159,7 @@ export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
           type="monotone"
           dataKey="balance"
           dot={false}
+          hide={!showBalance}
           stroke={theme.pageTextLight}
           strokeWidth={2}
           animationDuration={ANIMATION_DURATION}
