@@ -103,7 +103,7 @@ async function reportNameExists(
 }
 
 async function createReport(report: CustomReportEntity) {
-  const reportId = uuidv4();
+  const reportId = uuidv4() || report?.id;
   const item: CustomReportEntity = {
     ...report,
     id: reportId,
@@ -138,8 +138,6 @@ async function updateReport(item: CustomReportEntity) {
   }
 
   await db.insertWithSchema('custom_reports', reportModel.fromJS(item));
-
-  return item.id;
 }
 
 async function deleteReport(id: string) {

@@ -41,24 +41,12 @@ export function SaveReport({
 
   const onAddUpdate = async (menuChoice: string) => {
     let savedReport: CustomReportEntity = report;
-    let reportId: string;
-    let error: { message: string; type: string };
 
     if (menuChoice === 'save-report') {
       savedReport = {
         ...report,
         ...customReportItems,
         name,
-      };
-
-      //create new flow
-      const test = await sendCatch('report/create', savedReport);
-      reportId = test.data;
-      error = test.error;
-
-      savedReport = {
-        ...savedReport,
-        id: reportId,
       };
     } else {
       if (menuChoice === 'rename-report') {
@@ -74,16 +62,24 @@ export function SaveReport({
           ...customReportItems,
         };
       }
-
-      const test = await sendCatch('report/update', savedReport);
-      reportId = test.data;
-      error = test.error;
     }
 
-    if (error) {
-      setErr(error.message);
+    const res = await sendCatch(
+      menuChoice === 'save-report' ? 'report/create' : 'report/update',
+      savedReport,
+    );
+
+    if (res.error) {
+      setErr(res.error.message);
       setNameMenuOpen(true);
     } else {
+      if (menuChoice === 'save-report') {
+        savedReport = {
+          ...savedReport,
+          id: res.data,
+        };
+      }
+
       setNameMenuOpen(false);
       onReportChange({
         savedReport,

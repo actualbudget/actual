@@ -5,7 +5,7 @@ import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
-import { Cell, Row } from '../../../table';
+import { Row } from '../../../table';
 
 type ReportTableListProps = {
   data: DataEntity[];
@@ -50,11 +50,11 @@ export function ReportTableList({
 
   return (
     <View>
-      {data.map((item, index) => {
-        return (
-          <View key={item.id}>
-            {data ? (
-              <>
+      {data ? (
+        <View>
+          {data.map((item, index) => {
+            return (
+              <View key={item.id}>
                 <RenderRow
                   index={index}
                   compact={compact}
@@ -83,13 +83,13 @@ export function ReportTableList({
                     <Row height={20} />
                   </>
                 )}
-              </>
-            ) : (
-              <Cell width="flex" />
-            )}
-          </View>
-        );
-      })}
+              </View>
+            );
+          })}
+        </View>
+      ) : (
+        <View width="flex" />
+      )}
     </View>
   );
 }
