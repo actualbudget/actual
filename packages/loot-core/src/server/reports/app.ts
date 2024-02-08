@@ -103,7 +103,7 @@ async function reportNameExists(
 }
 
 async function createReport(report: CustomReportEntity) {
-  const reportId = uuidv4() || report?.id;
+  const reportId = uuidv4();
   const item: CustomReportEntity = {
     ...report,
     id: reportId,
