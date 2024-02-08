@@ -117,12 +117,6 @@ function FinancesAppWithoutContext() {
     }, 100);
   }, []);
 
-  useEffect(() => {
-    actions.getAccounts();
-    actions.getCategories();
-    actions.getPayees();
-  }, []);
-
   return (
     <BrowserRouter>
       <RouterBehaviors />
