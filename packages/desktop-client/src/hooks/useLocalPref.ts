@@ -20,9 +20,13 @@ export function useLocalPref<K extends keyof LocalPrefs>(
     },
     [prefName, dispatch],
   );
-  const localPref =
-    useSelector(
-      (state: State) => state.prefs.local?.[prefName] as LocalPrefs[K],
-    ) || defaultValue;
+  const localPref = useSelector(
+    (state: State) => state.prefs.local?.[prefName] as LocalPrefs[K],
+  );
+
+  if (!localPref) {
+    return [defaultValue, setLocalPref];
+  }
+
   return [localPref, setLocalPref];
 }

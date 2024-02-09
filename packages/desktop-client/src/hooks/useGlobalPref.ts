@@ -20,9 +20,13 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
     },
     [prefName, dispatch],
   );
-  const globalPref =
-    useSelector(
-      (state: State) => state.prefs.global?.[prefName] as GlobalPrefs[K],
-    ) || defaultValue;
+  const globalPref = useSelector(
+    (state: State) => state.prefs.global?.[prefName] as GlobalPrefs[K],
+  );
+
+  if (!globalPref) {
+    return [defaultValue, setGlobalPref];
+  }
+
   return [globalPref, setGlobalPref];
 }
