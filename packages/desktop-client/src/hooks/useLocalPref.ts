@@ -14,14 +14,15 @@ export function useLocalPref<K extends keyof LocalPrefs>(
   defaultValue?: LocalPrefs[K],
 ): [LocalPrefs[K], SetLocalPrefAction<K>] {
   const dispatch = useDispatch();
-  const setLocalPref: SetLocalPrefAction<K> = useCallback(
+  const setLocalPref = useCallback<SetLocalPrefAction<K>>(
     value => {
-      dispatch(savePrefs({ [prefName]: value }));
+      dispatch(savePrefs({ [prefName]: value } as LocalPrefs));
     },
     [prefName, dispatch],
   );
   const localPref =
-    useSelector((state: State) => state.prefs.local?.[prefName]) ||
-    defaultValue;
+    useSelector(
+      (state: State) => state.prefs.local?.[prefName] as LocalPrefs[K],
+    ) || defaultValue;
   return [localPref, setLocalPref];
 }
