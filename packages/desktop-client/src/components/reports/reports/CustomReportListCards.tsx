@@ -22,7 +22,7 @@ type CardMenuProps = {
 
 function CardMenu({ onClose, onMenuSelect, reportId }: CardMenuProps) {
   return (
-    <MenuTooltip onClose={onClose} width={100}>
+    <MenuTooltip onClose={onClose} width={120}>
       <Menu
         onMenuSelect={item => {
           onMenuSelect(item, reportId);
