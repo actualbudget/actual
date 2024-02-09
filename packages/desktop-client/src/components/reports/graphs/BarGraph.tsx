@@ -160,6 +160,11 @@ export function BarGraph({
     .map(c => c[yAxis])
     .reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
 
+  const largestValue = data[splitData]
+    .map(c => c[balanceTypeOp])
+    .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
+
+  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
   return (
     <Container
       style={{
@@ -177,7 +182,12 @@ export function BarGraph({
                 height={height}
                 stackOffset="sign"
                 data={data[splitData]}
-                margin={{ top: labelsMargin, right: 0, left: 0, bottom: 0 }}
+                margin={{
+                  top: labelsMargin,
+                  right: 0,
+                  left: leftMargin,
+                  bottom: 0,
+                }}
               >
                 <Tooltip
                   cursor={{ fill: 'transparent' }}
@@ -202,9 +212,15 @@ export function BarGraph({
                       tickLine={{ stroke: theme.pageText }}
                     />
                     <YAxis
-                      tickFormatter={value => getCustomTick(value, privacyMode)}
+                      tickFormatter={value =>
+                        getCustomTick(
+                          amountToCurrencyNoDecimal(value),
+                          privacyMode,
+                        )
+                      }
                       tick={{ fill: theme.pageText }}
                       tickLine={{ stroke: theme.pageText }}
+                      tickSize={0}
                     />
                     <ReferenceLine y={0} stroke={theme.pageTextLight} />
                   </>
