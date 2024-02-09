@@ -11,7 +11,7 @@ type SetGlobalPrefAction<K extends keyof GlobalPrefs> = (
 
 export function useGlobalPref<K extends keyof GlobalPrefs>(
   prefName: K,
-  defaultValue?: GlobalPrefs[K],
+  defaultValue: GlobalPrefs[K] = undefined,
 ): [GlobalPrefs[K], SetGlobalPrefAction<K>] {
   const dispatch = useDispatch();
   const setGlobalPref = useCallback<SetGlobalPrefAction<K>>(

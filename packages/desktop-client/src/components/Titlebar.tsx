@@ -285,9 +285,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 }
 
 function BudgetTitlebar() {
-  const [maxMonths] = useGlobalPref('maxMonths');
+  const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
   const [budgetType] = useLocalPref('budgetType');
-  const { saveGlobalPrefs } = useActions();
   const { sendEvent } = useContext(TitlebarContext);
 
   const [loading, setLoading] = useState(false);
@@ -316,7 +315,7 @@ function BudgetTitlebar() {
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <MonthCountSelector
         maxMonths={maxMonths || 1}
-        onChange={value => saveGlobalPrefs({ maxMonths: value })}
+        onChange={value => setMaxMonthsPref(value)}
       />
       {reportBudgetEnabled && (
         <View style={{ marginLeft: -5 }}>

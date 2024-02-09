@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { type Theme } from 'loot-core/types/prefs';
+
 import { themeOptions, useTheme } from '../../style';
 import { Button } from '../common/Button';
 import { Select } from '../common/Select';
@@ -14,7 +16,7 @@ export function ThemeSettings() {
     <Setting
       primaryAction={
         <Button bounce={false} style={{ padding: 0 }}>
-          <Select
+          <Select<Theme>
             bare
             onChange={value => {
               switchTheme(value);

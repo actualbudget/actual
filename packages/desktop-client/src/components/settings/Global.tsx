@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useEffect, useRef } from 'react';
 
-import { useActions } from '../../hooks/useActions';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { theme } from '../../style';
 import { Information } from '../alerts';
@@ -12,8 +11,7 @@ import { View } from '../common/View';
 import { Setting } from './UI';
 
 export function GlobalSettings() {
-  const [documentDir] = useGlobalPref('documentDir');
-  const { saveGlobalPrefs } = useActions();
+  const [documentDir, setDocumentDirPref] = useGlobalPref('documentDir');
 
   const [documentDirChanged, setDirChanged] = useState(false);
   const dirScrolled = useRef<HTMLSpanElement>(null);
@@ -29,7 +27,7 @@ export function GlobalSettings() {
       properties: ['openDirectory'],
     });
     if (res) {
-      saveGlobalPrefs({ documentDir: res[0] });
+      setDocumentDirPref(res[0]);
       setDirChanged(true);
     }
   }
