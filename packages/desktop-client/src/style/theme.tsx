@@ -24,12 +24,11 @@ export const themeOptions = Object.entries(themes).map(
 );
 
 export function useTheme() {
-  const [theme] = useGlobalPref('theme', 'light');
-  return theme;
+  return useGlobalPref('theme', 'light');
 }
 
 export function ThemeStyle() {
-  const theme = useTheme();
+  const [theme] = useTheme();
   const [themeColors, setThemeColors] = useState<
     typeof lightTheme | typeof darkTheme | undefined
   >(undefined);
