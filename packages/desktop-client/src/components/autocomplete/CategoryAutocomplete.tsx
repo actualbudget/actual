@@ -21,6 +21,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
+import { ItemHeader, type ItemHeaderProps } from './ItemHeader';
 
 export type CategoryListProps = {
   items: Array<CategoryEntity & { group?: CategoryGroupEntity }>;
@@ -34,7 +35,7 @@ export type CategoryListProps = {
     props: SplitTransactionButtonProps,
   ) => ReactNode;
   renderCategoryItemGroupHeader?: (
-    props: CategoryItemGroupHeaderProps,
+    props: ItemHeaderProps,
   ) => ReactNode;
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
@@ -104,7 +105,7 @@ type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
     props: SplitTransactionButtonProps,
   ) => ReactNode;
   renderCategoryItemGroupHeader?: (
-    props: CategoryItemGroupHeaderProps,
+    props: ItemHeaderProps,
   ) => ReactNode;
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
@@ -177,35 +178,10 @@ export function CategoryAutocomplete({
   );
 }
 
-type CategoryItemGroupHeaderProps = {
-  title: string;
-  style?: CSSProperties;
-};
-
-export function CategoryItemGroupHeader({
-  title,
-  style,
-  ...props
-}: CategoryItemGroupHeaderProps) {
-  return (
-    <div
-      style={{
-        color: theme.menuAutoCompleteTextHeader,
-        padding: '4px 9px',
-        ...style,
-      }}
-      data-testid={`${title}-category-item-group`}
-      {...props}
-    >
-      {title}
-    </div>
-  );
-}
-
 function defaultRenderCategoryItemGroupHeader(
-  props: CategoryItemGroupHeaderProps,
+  props: ItemHeaderProps,
 ) {
-  return <CategoryItemGroupHeader {...props} />;
+  return <ItemHeader {...props} />;
 }
 
 type SplitTransactionButtonProps = {

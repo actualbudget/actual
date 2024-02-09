@@ -11,6 +11,7 @@ import { type CSSProperties, theme } from '../../style';
 import { View } from '../common/View';
 
 import { Autocomplete } from './Autocomplete';
+import { ItemHeader, type ItemHeaderProps } from './ItemHeader';
 
 function AccountList({
   items,
@@ -72,7 +73,7 @@ type AccountAutoCompleteProps = {
   embedded?: boolean;
   includeClosedAccounts: boolean;
   renderAccountItemGroupHeader?: (
-    props: AccountItemGroupHeaderProps,
+    props: ItemHeaderProps,
   ) => ReactNode;
   renderAccountItem?: (props: AccountItemProps) => ReactNode;
   closeOnBlur?: boolean;
@@ -124,35 +125,10 @@ export function AccountAutocomplete({
   );
 }
 
-type AccountItemGroupHeaderProps = {
-  title: string;
-  style?: CSSProperties;
-};
-
-export function AccountItemGroupHeader({
-  title,
-  style,
-  ...props
-}: AccountItemGroupHeaderProps) {
-  return (
-    <div
-      style={{
-        color: theme.menuAutoCompleteTextHeader,
-        padding: '4px 9px',
-        ...style,
-      }}
-      data-testid={`${title}-account-item-group`}
-      {...props}
-    >
-      {title}
-    </div>
-  );
-}
-
 function defaultRenderAccountItemGroupHeader(
-  props: AccountItemGroupHeaderProps,
+  props: ItemHeaderProps,
 ): ReactNode {
-  return <AccountItemGroupHeader {...props} />;
+  return <ItemHeader {...props} />;
 }
 
 type AccountItemProps = {

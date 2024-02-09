@@ -32,6 +32,7 @@ import {
   defaultFilterSuggestion,
   AutocompleteFooter,
 } from './Autocomplete';
+import { ItemHeader, type ItemHeaderProps } from './ItemHeader';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
@@ -163,7 +164,7 @@ type PayeeAutocompleteProps = {
   onSelect?: (value: string) => void;
   onManagePayees: () => void;
   renderCreatePayeeButton?: (props: CreatePayeeButtonProps) => ReactNode;
-  renderPayeeItemGroupHeader?: (props: PayeeItemGroupHeaderProps) => ReactNode;
+  renderPayeeItemGroupHeader?: (props: ItemHeaderProps) => ReactNode;
   renderPayeeItem?: (props: PayeeItemProps) => ReactNode;
   accounts?: AccountEntity[];
   payees?: PayeeEntity[];
@@ -422,35 +423,10 @@ function defaultRenderCreatePayeeButton(
   return <CreatePayeeButton {...props} />;
 }
 
-type PayeeItemGroupHeaderProps = {
-  title: string;
-  style?: CSSProperties;
-};
-
-export function PayeeItemGroupHeader({
-  title,
-  style,
-  ...props
-}: PayeeItemGroupHeaderProps) {
-  return (
-    <div
-      style={{
-        color: theme.menuAutoCompleteTextHeader,
-        padding: '4px 9px',
-        ...style,
-      }}
-      data-testid={`${title}-payee-item-group`}
-      {...props}
-    >
-      {title}
-    </div>
-  );
-}
-
 function defaultRenderPayeeItemGroupHeader(
-  props: PayeeItemGroupHeaderProps,
+  props: ItemHeaderProps,
 ): ReactNode {
-  return <PayeeItemGroupHeader {...props} />;
+  return <ItemHeader {...props} />;
 }
 
 type PayeeItemProps = {
