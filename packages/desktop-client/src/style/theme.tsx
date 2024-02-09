@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 import type { Theme } from 'loot-core/src/types/prefs';
 
@@ -24,8 +26,12 @@ export const themeOptions = Object.entries(themes).map(
   ([key, { name }]) => [key, name] as [Theme, string],
 );
 
-export function useTheme() {
-  return useSelector(state => state.prefs.global?.theme) || 'light';
+export function useTheme(): Theme {
+  return (
+    useSelector<State, PrefsState['global']['theme']>(
+      state => state.prefs.global?.theme,
+    ) || 'light'
+  );
 }
 
 export function ThemeStyle() {

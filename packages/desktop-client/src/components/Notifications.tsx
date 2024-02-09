@@ -7,7 +7,11 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
-import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
+import { type State } from 'loot-core/client/state-types';
+import type {
+  NotificationWithId,
+  NotificationsState,
+} from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
 import { AnimatedLoading } from '../icons/AnimatedLoading';
@@ -238,7 +242,9 @@ function Notification({
 
 export function Notifications({ style }: { style?: CSSProperties }) {
   const { removeNotification } = useActions();
-  const notifications = useSelector(state => state.notifications.notifications);
+  const notifications = useSelector<State, NotificationsState['notifications']>(
+    state => state.notifications.notifications,
+  );
   return (
     <View
       style={{

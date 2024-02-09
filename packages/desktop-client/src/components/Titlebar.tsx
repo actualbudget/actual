@@ -9,6 +9,8 @@ import React, {
 import { useSelector } from 'react-redux';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
@@ -118,9 +120,10 @@ type PrivacyButtonProps = {
 };
 
 function PrivacyButton({ style }: PrivacyButtonProps) {
-  const isPrivacyEnabled = useSelector(
-    state => state.prefs.local?.isPrivacyEnabled,
-  );
+  const isPrivacyEnabled = useSelector<
+    State,
+    PrefsState['local']['isPrivacyEnabled']
+  >(state => state.prefs.local?.isPrivacyEnabled);
   const { savePrefs } = useActions();
 
   const privacyIconStyle = { width: 15, height: 15 };
@@ -146,7 +149,9 @@ type SyncButtonProps = {
   isMobile?: boolean;
 };
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
-  const cloudFileId = useSelector(state => state.prefs.local?.cloudFileId);
+  const cloudFileId = useSelector<State, PrefsState['local']['cloudFileId']>(
+    state => state.prefs.local?.cloudFileId,
+  );
   const { sync } = useActions();
 
   const [syncing, setSyncing] = useState(false);
@@ -286,8 +291,12 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 }
 
 function BudgetTitlebar() {
-  const maxMonths = useSelector(state => state.prefs.global?.maxMonths);
-  const budgetType = useSelector(state => state.prefs.local?.budgetType);
+  const maxMonths = useSelector<State, PrefsState['global']['maxMonths']>(
+    state => state.prefs.global?.maxMonths,
+  );
+  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
+    state => state.prefs.local?.budgetType,
+  );
   const { saveGlobalPrefs } = useActions();
   const { sendEvent } = useContext(TitlebarContext);
 
@@ -390,9 +399,10 @@ export function Titlebar({ style }: TitlebarProps) {
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
-  const floatingSidebar = useSelector(
-    state => state.prefs.global?.floatingSidebar,
-  );
+  const floatingSidebar = useSelector<
+    State,
+    PrefsState['global']['floatingSidebar']
+  >(state => state.prefs.global?.floatingSidebar);
 
   return isNarrowWidth ? null : (
     <View

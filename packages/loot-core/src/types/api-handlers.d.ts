@@ -1,3 +1,5 @@
+import { type batchUpdateTransactions } from '../server/accounts/transactions';
+
 import { type ServerHandlers } from './server-handlers';
 
 export interface ApiHandlers {
@@ -9,20 +11,23 @@ export interface ApiHandlers {
     ...args: Parameters<ServerHandlers['load-budget']>
   ) => Promise<void>;
 
-  'api/download-budget': (arg: { syncId; password }) => Promise<unknown>;
+  'api/download-budget': (arg: {
+    syncId: string;
+    password?: string;
+  }) => Promise<void>;
 
-  'api/start-import': (arg: { budgetName }) => Promise<unknown>;
+  'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 
-  'api/finish-import': () => Promise<unknown>;
+  'api/finish-import': () => Promise<void>;
 
-  'api/abort-import': () => Promise<unknown>;
+  'api/abort-import': () => Promise<void>;
 
   'api/query': (arg: { query }) => Promise<unknown>;
 
-  'api/budget-months': () => Promise<unknown>;
+  'api/budget-months': () => Promise<string[]>;
 
   'api/budget-month': (arg: { month }) => Promise<{
-    month;
+    month: string;
     incomeAvailable: number;
     lastMonthOverspent: number;
     forNextMonth: number;
@@ -37,16 +42,16 @@ export interface ApiHandlers {
   }>;
 
   'api/budget-set-amount': (arg: {
-    month;
-    categoryId;
-    amount;
-  }) => Promise<unknown>;
+    month: string;
+    categoryId: string;
+    amount: number;
+  }) => Promise<void>;
 
   'api/budget-set-carryover': (arg: {
-    month;
-    categoryId;
-    flag;
-  }) => Promise<unknown>;
+    month: string;
+    categoryId: string;
+    flag: boolean;
+  }) => Promise<void>;
 
   'api/transactions-export': (arg: {
     transactions;
@@ -68,22 +73,27 @@ export interface ApiHandlers {
   }) => Promise<'ok'>;
 
   'api/transactions-get': (arg: {
-    accountId;
-    startDate;
-    endDate;
-  }) => Promise<unknown>;
+    accountId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) => Promise<TransactionEntity[]>;
 
-  'api/transaction-update': (arg: { id; fields }) => Promise<unknown>;
+  'api/transaction-update': (arg: {
+    id;
+    fields;
+  }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
 
-  'api/transaction-delete': (arg: { id }) => Promise<unknown>;
+  'api/transaction-delete': (arg: {
+    id;
+  }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
 
-  'api/sync': () => Promise<unknown>;
+  'api/sync': () => Promise<void>;
 
   'api/accounts-get': () => Promise<AccountEntity[]>;
 
   'api/account-create': (arg: { account; initialBalance? }) => Promise<string>;
 
-  'api/account-update': (arg: { id; fields }) => Promise<unknown>;
+  'api/account-update': (arg: { id; fields }) => Promise<void>;
 
   'api/account-close': (arg: {
     id;
@@ -112,7 +122,10 @@ export interface ApiHandlers {
 
   'api/category-update': (arg: { id; fields }) => Promise<unknown>;
 
-  'api/category-delete': (arg: { id; transferCategoryId }) => Promise<unknown>;
+  'api/category-delete': (arg: {
+    id;
+    transferCategoryId?;
+  }) => Promise<{ error?: string }>;
 
   'api/payees-get': () => Promise<PayeeEntity[]>;
 

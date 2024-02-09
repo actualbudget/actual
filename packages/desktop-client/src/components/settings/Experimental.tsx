@@ -1,6 +1,8 @@
 import { type ReactNode, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/src/client/state-types';
+import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
@@ -61,7 +63,9 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  const budgetType = useSelector(state => state.prefs.local?.budgetType);
+  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
+    state => state.prefs.local?.budgetType,
+  );
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (
@@ -95,6 +99,7 @@ export function ExperimentalFeatures() {
               Goal templates
             </FeatureToggle>
             <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
+            <FeatureToggle flag="splitsInRules">Splits in rules</FeatureToggle>
           </View>
         ) : (
           <LinkButton

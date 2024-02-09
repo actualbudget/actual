@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.1.0",
+  "version": "24.2.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -50,7 +50,7 @@
     "electron-log": "4.4.8",
     "electron-updater": "6.1.7",
     "loot-core": "*",
-    "node-fetch": "^2.6.9",
+    "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {

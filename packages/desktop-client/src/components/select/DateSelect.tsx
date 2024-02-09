@@ -17,6 +17,8 @@ import Pikaday from 'pikaday';
 
 import 'pikaday/css/pikaday.css';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import {
   getDayMonthFormat,
   getDayMonthRegex,
@@ -231,7 +233,10 @@ export function DateSelect({
   const [selectedValue, setSelectedValue] = useState(value);
   const userSelectedValue = useRef(selectedValue);
 
-  const firstDayOfWeekIdx = useSelector(state =>
+  const firstDayOfWeekIdx = useSelector<
+    State,
+    PrefsState['local']['firstDayOfWeekIdx']
+  >(state =>
     state.prefs.local?.firstDayOfWeekIdx
       ? state.prefs.local.firstDayOfWeekIdx
       : '0',

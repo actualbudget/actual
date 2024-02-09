@@ -12,9 +12,16 @@ import {
 } from '../../shared/months';
 import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
+import {
+  addSplitTransaction,
+  recalculateSplit,
+  splitTransaction,
+  ungroupTransaction,
+} from '../../shared/transactions';
 import { fastSetMerge } from '../../shared/util';
 import { RuleConditionEntity } from '../../types/models';
 import { RuleError } from '../errors';
+import * as prefs from '../prefs';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 function assert(test, type, msg) {
@@ -418,9 +425,8 @@ export class Condition {
   }
 }
 
-type ActionOperator = 'set' | 'link-schedule';
-
-const ACTION_OPS: ActionOperator[] = ['set', 'link-schedule'];
+const ACTION_OPS = ['set', 'set-split-amount', 'link-schedule'] as const;
+type ActionOperator = (typeof ACTION_OPS)[number];
 
 export class Action {
   field;
@@ -442,6 +448,9 @@ export class Action {
       assert(typeName, 'internal', `Invalid field for action: ${field}`);
       this.field = field;
       this.type = typeName;
+    } else if (op === 'set-split-amount') {
+      this.field = null;
+      this.type = 'number';
     } else if (op === 'link-schedule') {
       this.field = null;
       this.type = 'id';
@@ -457,6 +466,14 @@ export class Action {
     switch (this.op) {
       case 'set':
         object[this.field] = this.value;
+        break;
+      case 'set-split-amount':
+        switch (this.options.method) {
+          case 'fixed-amount':
+            object.amount = this.value;
+            break;
+          default:
+        }
         break;
       case 'link-schedule':
         object.schedule = this.value;
@@ -474,6 +491,142 @@ export class Action {
       ...(this.options ? { options: this.options } : null),
     };
   }
+}
+
+function execNonSplitActions(actions: Action[], transaction) {
+  const update = transaction;
+  actions.forEach(action => action.exec(update));
+  return update;
+}
+
+export function execActions(actions: Action[], transaction) {
+  const parentActions = actions.filter(action => !action.options?.splitIndex);
+  const childActions = actions.filter(action => action.options?.splitIndex);
+  const totalSplitCount =
+    actions.reduce(
+      (prev, cur) => Math.max(prev, cur.options?.splitIndex ?? 0),
+      0,
+    ) + 1;
+
+  let update = execNonSplitActions(parentActions, transaction);
+  if (!prefs.getPrefs()?.['flags.splitsInRules'] || totalSplitCount === 1) {
+    return update;
+  }
+
+  if (update.is_child) {
+    // Rules with splits can't be applied to child transactions.
+    return update;
+  }
+
+  const splitAmountActions = childActions.filter(
+    action => action.op === 'set-split-amount',
+  );
+  const fixedSplitAmountActions = splitAmountActions.filter(
+    action => action.options.method === 'fixed-amount',
+  );
+  const fixedAmountsBySplit: Record<number, number> = {};
+  fixedSplitAmountActions.forEach(action => {
+    const splitIndex = action.options.splitIndex ?? 0;
+    fixedAmountsBySplit[splitIndex] = action.value;
+  });
+  const fixedAmountSplitCount = Object.keys(fixedAmountsBySplit).length;
+  const totalFixedAmount = Object.values(fixedAmountsBySplit).reduce<number>(
+    (prev, cur: number) => prev + cur,
+    0,
+  );
+  if (
+    fixedAmountSplitCount === totalSplitCount &&
+    totalFixedAmount !== (transaction.amount ?? totalFixedAmount)
+  ) {
+    // Not all value would be distributed to a split.
+    return transaction;
+  }
+
+  const { data, newTransaction } = splitTransaction(
+    ungroupTransaction(update),
+    transaction.id,
+  );
+  update = recalculateSplit(newTransaction);
+  data[0] = update;
+  let newTransactions = data;
+
+  for (const action of childActions) {
+    const splitIndex = action.options?.splitIndex ?? 0;
+    if (splitIndex >= update.subtransactions.length) {
+      const { data, newTransaction } = addSplitTransaction(
+        newTransactions,
+        transaction.id,
+      );
+      update = recalculateSplit(newTransaction);
+      data[0] = update;
+      newTransactions = data;
+    }
+    action.exec(update.subtransactions[splitIndex]);
+  }
+
+  // Make sure every transaction has an amount.
+  if (fixedAmountSplitCount !== totalSplitCount) {
+    // This is the amount that will be distributed to the splits that
+    // don't have a fixed amount. The last split will get the remainder.
+    // The amount will be zero if the parent transaction has no amount.
+    const amountToDistribute =
+      (transaction.amount ?? totalFixedAmount) - totalFixedAmount;
+    let remainingAmount = amountToDistribute;
+
+    // First distribute the fixed percentages.
+    splitAmountActions
+      .filter(action => action.options.method === 'fixed-percent')
+      .forEach(action => {
+        const splitIndex = action.options.splitIndex;
+        const percent = action.value / 100;
+        const amount = Math.round(amountToDistribute * percent);
+        update.subtransactions[splitIndex].amount = amount;
+        remainingAmount -= amount;
+      });
+
+    // Then distribute the remainder.
+    const remainderSplitAmountActions = splitAmountActions.filter(
+      action => action.options.method === 'remainder',
+    );
+
+    // Check if there is any value left to distribute after all fixed
+    // (percentage and amount) splits have been distributed.
+    if (remainingAmount !== 0) {
+      // If there are no remainder splits explicitly added by the user,
+      // distribute the remainder to a virtual split that will be
+      // adjusted for the remainder.
+      if (remainderSplitAmountActions.length === 0) {
+        const splitIndex = totalSplitCount;
+        const { newTransaction } = addSplitTransaction(
+          newTransactions,
+          transaction.id,
+        );
+        update = recalculateSplit(newTransaction);
+        update.subtransactions[splitIndex].amount = remainingAmount;
+      } else {
+        const amountPerRemainderSplit = Math.round(
+          remainingAmount / remainderSplitAmountActions.length,
+        );
+        let lastNonFixedIndex = -1;
+        remainderSplitAmountActions.forEach(action => {
+          const splitIndex = action.options.splitIndex;
+          update.subtransactions[splitIndex].amount = amountPerRemainderSplit;
+          remainingAmount -= amountPerRemainderSplit;
+          lastNonFixedIndex = Math.max(lastNonFixedIndex, splitIndex);
+        });
+
+        // The last non-fixed split will be adjusted for the remainder.
+        update.subtransactions[lastNonFixedIndex].amount -= remainingAmount;
+      }
+      update = recalculateSplit(update);
+    }
+  }
+
+  // The split index 0 is reserved for "Before split" actions.
+  // Remove that entry from the subtransactions.
+  update.subtransactions = update.subtransactions.slice(1);
+
+  return update;
 }
 
 export class Rule {
@@ -520,15 +673,23 @@ export class Rule {
     });
   }
 
-  execActions() {
-    const changes = {};
-    this.actions.forEach(action => action.exec(changes));
+  execActions(object) {
+    const result = execActions(this.actions, {
+      ...object,
+      subtransactions: object.subtransactions,
+    });
+    const changes = Object.keys(result).reduce((prev, cur) => {
+      if (result[cur] !== object[cur]) {
+        prev[cur] = result[cur];
+      }
+      return prev;
+    }, {});
     return changes;
   }
 
   exec(object) {
     if (this.evalConditions(object)) {
-      return this.execActions();
+      return this.execActions(object);
     }
     return null;
   }

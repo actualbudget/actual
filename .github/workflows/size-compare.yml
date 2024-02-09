@@ -46,7 +46,7 @@ jobs:
           echo "Build failed on PR branch or ${{github.base_ref}}"
           exit 1
       - name: Download build artifact from ${{github.base_ref}}
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         id: pr-build
         with:
           branch: ${{github.base_ref}}
@@ -55,7 +55,7 @@ jobs:
           path: base
 
       - name: Download build artifact from PR
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml

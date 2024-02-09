@@ -3,12 +3,18 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
+import { type State } from 'loot-core/src/client/state-types';
+import {
+  type ModalsState,
+  type PopModalAction,
+} from 'loot-core/src/client/state-types/modals';
+import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
+import { type QueriesState } from 'loot-core/src/client/state-types/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import { useCategories } from '../hooks/useCategories';
 import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
-import { type CommonModalProps } from '../types/modals';
 
 import { CategoryGroupMenu } from './modals/CategoryGroupMenu';
 import { CategoryMenu } from './modals/CategoryMenu';
@@ -40,12 +46,27 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 
+export type CommonModalProps = {
+  onClose: () => PopModalAction;
+  onBack: () => PopModalAction;
+  showBack: boolean;
+  isCurrent: boolean;
+  isHidden: boolean;
+  stackIndex: number;
+};
+
 export function Modals() {
-  const modalStack = useSelector(state => state.modals.modalStack);
-  const isHidden = useSelector(state => state.modals.isHidden);
-  const accounts = useSelector(state => state.queries.accounts);
+  const modalStack = useSelector<State, ModalsState['modalStack']>(
+    state => state.modals.modalStack,
+  );
+  const isHidden = useSelector<State, ModalsState['isHidden']>(
+    state => state.modals.isHidden,
+  );
+  const accounts = useSelector<State, QueriesState['accounts']>(
+    state => state.queries.accounts,
+  );
   const { grouped: categoryGroups, list: categories } = useCategories();
-  const budgetId = useSelector(
+  const budgetId = useSelector<State, PrefsState['local']['id']>(
     state => state.prefs.local && state.prefs.local.id,
   );
   const actions = useActions();
@@ -301,6 +322,7 @@ export function Modals() {
               modalProps={modalProps}
               id={options?.id || null}
               actions={actions}
+              transaction={options?.transaction || null}
             />
           );
 
@@ -311,6 +333,8 @@ export function Modals() {
               modalProps={modalProps}
               actions={actions}
               transactionIds={options?.transactionIds}
+              getTransaction={options?.getTransaction}
+              pushModal={options?.pushModal}
             />
           );
 

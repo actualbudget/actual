@@ -6,7 +6,8 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'customReports'
-  | 'simpleFinSync';
+  | 'simpleFinSync'
+  | 'splitsInRules';
 
 export type LocalPrefs = Partial<
   {

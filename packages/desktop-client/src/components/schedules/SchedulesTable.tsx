@@ -2,6 +2,8 @@
 import React, { useState, useMemo, type CSSProperties } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import {
@@ -194,9 +196,11 @@ export function SchedulesTable({
   onAction,
   tableStyle,
 }: SchedulesTableProps) {
-  const dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
+  const dateFormat = useSelector<State, PrefsState['local']['dateFormat']>(
+    state => {
+      return state.prefs.local.dateFormat || 'MM/dd/yyyy';
+    },
+  );
 
   const [showCompleted, setShowCompleted] = useState(false);
 

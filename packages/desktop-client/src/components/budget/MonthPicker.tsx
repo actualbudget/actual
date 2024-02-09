@@ -126,7 +126,7 @@ export const MonthPicker = ({
                 }),
                 ...(hovered &&
                   !selected && {
-                    backgroundColor: 'rgba(100, 100, 100, .15)',
+                    backgroundColor: theme.buttonBareBackgroundHover,
                   }),
                 ...(hovered &&
                   selected && {
