@@ -1,5 +1,6 @@
 import React, { createRef, useState } from 'react';
 
+import { useReports } from 'loot-core/client/data-hooks/reports';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
@@ -8,6 +9,7 @@ import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
@@ -32,12 +34,20 @@ export function SaveReport({
   onReportChange,
   onResetReports,
 }: SaveReportProps) {
+  const listReports = useReports();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [chooseMenuOpen, setChooseMenuOpen] = useState(false);
   const [menuItem, setMenuItem] = useState('');
   const [err, setErr] = useState('');
   const [name, setName] = useState(report.name ?? '');
   const inputRef = createRef<HTMLInputElement>();
+
+  async function onApply(cond: string) {
+    const chooseSavedReport = listReports.find(r => cond === r.id);
+    onReportChange({ savedReport: chooseSavedReport, type: 'choose' });
+    setChooseMenuOpen(false);
+  }
 
   const onAddUpdate = async (menuChoice: string) => {
     if (menuChoice === 'save-report') {
@@ -119,6 +129,11 @@ export function SaveReport({
         setName('');
         onResetReports();
         break;
+      case 'choose-report':
+        setErr('');
+        setMenuOpen(false);
+        setChooseMenuOpen(true);
+        break;
       default:
     }
   };
@@ -145,7 +160,7 @@ export function SaveReport({
             flexShrink: 0,
           }}
         >
-          {!report.id ? 'Unsaved report' : report.name}&nbsp;
+          {report.id === '' ? 'Unsaved report' : report.name}&nbsp;
         </Text>
         {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
@@ -153,7 +168,6 @@ export function SaveReport({
       {menuOpen && (
         <SaveReportMenu
           onClose={() => setMenuOpen(false)}
-          report={report}
           onMenuSelect={onMenuSelect}
           savedStatus={savedStatus}
         />
@@ -167,6 +181,12 @@ export function SaveReport({
           inputRef={inputRef}
           onAddUpdate={onAddUpdate}
           err={err}
+        />
+      )}
+      {chooseMenuOpen && (
+        <SaveReportChoose
+          onApply={onApply}
+          onClose={() => setChooseMenuOpen(false)}
         />
       )}
     </View>

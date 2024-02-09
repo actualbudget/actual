@@ -11,6 +11,8 @@ const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
 const endDate = monthUtils.currentMonth();
 
 export const defaultReport: CustomReportEntity = {
+  id: '',
+  name: '',
   startDate,
   endDate,
   isDateStatic: false,

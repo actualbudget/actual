@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { useReports } from 'loot-core/client/data-hooks/reports';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -8,6 +9,7 @@ import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
+import { ReportAutocomplete } from '../autocomplete/ReportAutocomplete';
 import { SavedFilterAutocomplete } from '../autocomplete/SavedFilterAutocomplete';
 import { Input } from '../common/Input';
 import { View } from '../common/View';
@@ -26,6 +28,7 @@ export function GenericInput({
   onChange,
 }) {
   const { grouped: categoryGroups } = useCategories();
+  const savedReports = useReports();
   const saved = useSelector(state => state.queries.saved);
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
@@ -101,6 +104,21 @@ export function GenericInput({
           content = (
             <SavedFilterAutocomplete
               saved={saved}
+              value={value}
+              multi={multi}
+              openOnFocus={true}
+              onSelect={onChange}
+              inputProps={{
+                inputRef,
+                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+              }}
+            />
+          );
+          break;
+        case 'report':
+          content = (
+            <ReportAutocomplete
+              saved={savedReports}
               value={value}
               multi={multi}
               openOnFocus={true}

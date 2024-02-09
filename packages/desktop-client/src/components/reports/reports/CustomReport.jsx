@@ -309,6 +309,27 @@ export function CustomReport() {
         report.conditions.forEach(condition => onApplyFilter(condition));
         onCondOpChange(report.conditionsOp);
         break;
+      case 'choose':
+        setSavedStatus('saved');
+        setReport(savedReport);
+
+        setStartDate(savedReport.startDate);
+        setEndDate(savedReport.endDate);
+        setIsDateStatic(savedReport.isDateStatic);
+        setDateRange(savedReport.dateRange);
+        setMode(savedReport.mode);
+        setGroupBy(savedReport.groupBy);
+        setBalanceType(savedReport.balanceType);
+        setShowEmpty(savedReport.showEmpty);
+        setShowOffBudget(savedReport.showOffBudget);
+        setShowHiddenCategories(savedReport.showHiddenCategories);
+        setShowUncategorized(savedReport.showUncategorized);
+        setSelectedCategories(savedReport.selectedCategories);
+        setGraphType(savedReport.graphType);
+        onApplyFilter(null);
+        savedReport.conditions.forEach(condition => onApplyFilter(condition));
+        onCondOpChange(savedReport.conditionsOp);
+        break;
       default:
     }
   };
