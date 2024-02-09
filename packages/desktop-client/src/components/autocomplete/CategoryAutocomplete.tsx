@@ -34,9 +34,7 @@ export type CategoryListProps = {
   renderSplitTransactionButton?: (
     props: SplitTransactionButtonProps,
   ) => ReactNode;
-  renderCategoryItemGroupHeader?: (
-    props: ItemHeaderProps,
-  ) => ReactNode;
+  renderCategoryItemGroupHeader?: (props: ItemHeaderProps) => ReactNode;
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
 function CategoryList({
@@ -104,9 +102,7 @@ type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   renderSplitTransactionButton?: (
     props: SplitTransactionButtonProps,
   ) => ReactNode;
-  renderCategoryItemGroupHeader?: (
-    props: ItemHeaderProps,
-  ) => ReactNode;
+  renderCategoryItemGroupHeader?: (props: ItemHeaderProps) => ReactNode;
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
 
@@ -178,9 +174,7 @@ export function CategoryAutocomplete({
   );
 }
 
-function defaultRenderCategoryItemGroupHeader(
-  props: ItemHeaderProps,
-) {
+function defaultRenderCategoryItemGroupHeader(props: ItemHeaderProps) {
   return <ItemHeader {...props} />;
 }
 

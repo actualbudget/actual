@@ -19,6 +19,7 @@ import {
   CategoryAutocomplete,
   CategoryItem,
 } from '../autocomplete/CategoryAutocomplete';
+import { ItemHeader } from '../autocomplete/ItemHeader';
 import {
   PayeeAutocomplete,
   CreatePayeeButton,
@@ -29,7 +30,6 @@ import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
-import { ItemHeader } from '../autocomplete/ItemHeader';
 
 function CreatePayeeIcon(props) {
   return <SvgAdd {...props} width={14} height={14} />;

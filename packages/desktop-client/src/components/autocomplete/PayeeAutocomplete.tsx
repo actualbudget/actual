@@ -423,9 +423,7 @@ function defaultRenderCreatePayeeButton(
   return <CreatePayeeButton {...props} />;
 }
 
-function defaultRenderPayeeItemGroupHeader(
-  props: ItemHeaderProps,
-): ReactNode {
+function defaultRenderPayeeItemGroupHeader(props: ItemHeaderProps): ReactNode {
   return <ItemHeader {...props} />;
 }
 
