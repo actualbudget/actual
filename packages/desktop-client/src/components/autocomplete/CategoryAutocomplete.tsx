@@ -175,7 +175,7 @@ export function CategoryAutocomplete({
 }
 
 function defaultRenderCategoryItemGroupHeader(props: ItemHeaderProps) {
-  return <ItemHeader {...props} />;
+  return <ItemHeader {...props} type="category" />;
 }
 
 type SplitTransactionButtonProps = {

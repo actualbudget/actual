@@ -126,7 +126,7 @@ export function AccountAutocomplete({
 function defaultRenderAccountItemGroupHeader(
   props: ItemHeaderProps,
 ): ReactNode {
-  return <ItemHeader {...props} />;
+  return <ItemHeader {...props} type="account" />;
 }
 
 type AccountItemProps = {

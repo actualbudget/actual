@@ -6,9 +6,10 @@ import { type CSSProperties } from '../../style/types';
 export type ItemHeaderProps = {
   title: string;
   style?: CSSProperties;
+  type?: string;
 };
 
-export function ItemHeader({ title, style, ...props }: ItemHeaderProps) {
+export function ItemHeader({ title, style, type, ...props }: ItemHeaderProps) {
   return (
     <div
       style={{
@@ -16,6 +17,7 @@ export function ItemHeader({ title, style, ...props }: ItemHeaderProps) {
         padding: '4px 9px',
         ...style,
       }}
+      data-testid={`${title}-${type}-item-group`}
       {...props}
     >
       {title}
