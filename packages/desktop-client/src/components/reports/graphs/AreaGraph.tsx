@@ -133,6 +133,7 @@ export function AreaGraph({
 
   const labelsMargin = viewLabels ? 30 : 0;
   const dataDiff = dataMax - dataMin;
+  const absDataMax = Math.max(Math.abs(dataMax), Math.abs(dataMin));
   //Calculate how much to add to max and min values for graph range
   const extendRangeAmount = Math.floor(dataDiff / 20);
   const labelsMin =
@@ -149,7 +150,7 @@ export function AreaGraph({
   const lastLabel = data.monthData.length - 1;
 
   const tickFormatter = tick => {
-    if (!privacyMode) return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
     return '...';
   };
 
@@ -166,6 +167,7 @@ export function AreaGraph({
 
   const off = gradientOffset();
 
+  const leftMargin = Math.abs(absDataMax) > 1000000 ? 20 : 0;
   return (
     <Container
       style={{
@@ -182,7 +184,12 @@ export function AreaGraph({
                 width={width}
                 height={height}
                 data={data.monthData}
-                margin={{ top: 0, right: labelsMargin, left: 0, bottom: 0 }}
+                margin={{
+                  top: 0,
+                  right: labelsMargin,
+                  left: leftMargin,
+                  bottom: 0,
+                }}
               >
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -204,6 +211,7 @@ export function AreaGraph({
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}
+                    tickSize={0}
                   />
                 )}
                 <Tooltip

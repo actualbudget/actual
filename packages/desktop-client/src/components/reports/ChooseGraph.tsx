@@ -127,6 +127,7 @@ export function ChooseGraph({
         compact={compact}
         data={data}
         viewLabels={viewLabels}
+        balanceTypeOp={balanceTypeOp}
       />
     );
   }
