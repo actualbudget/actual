@@ -2,6 +2,7 @@
 import React from 'react';
 
 import { theme } from '../../../style';
+import { PrivacyFilter } from '../../PrivacyFilter';
 
 export const renderCustomLabel = (
   calcX: number,
@@ -22,7 +23,7 @@ export const renderCustomLabel = (
       dominantBaseline="middle"
       fontSize={textSize}
     >
-      {display}
+      <PrivacyFilter>{display}</PrivacyFilter>
     </text>
   ) : (
     <text />
