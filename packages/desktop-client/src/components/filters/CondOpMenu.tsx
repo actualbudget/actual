@@ -4,6 +4,7 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { theme } from '../../style';
 import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { FieldSelect } from '../modals/EditRule';
 
 export function CondOpMenu({
@@ -24,11 +25,13 @@ export function CondOpMenu({
           ['or', 'any'],
         ]}
         value={conditionsOp}
-        onChange={(value: string) => onCondOpChange(value, filters)}
+        onChange={(name: string, value: string) =>
+          onCondOpChange(value, filters)
+        }
       />
       of:
     </Text>
   ) : (
-    <Text />
+    <View />
   );
 }

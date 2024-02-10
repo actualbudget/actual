@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useRef, useEffect } from 'react';
 
 import { theme } from '../../style';
@@ -26,11 +25,11 @@ export function NameFilter({
   onAddUpdate: () => void;
   err: string | null;
 }) {
-  const inputRef = useRef<HTMLInputElement>();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (inputRef.current) {
-      inputRef.current?.focus();
+      inputRef.current.focus();
     }
   }, []);
 
@@ -54,7 +53,7 @@ export function NameFilter({
                 id="name-field"
                 inputRef={inputRef}
                 defaultValue={name || ''}
-                onUpdate={(item: string) => setName(item)}
+                onUpdate={setName}
               />
             </FormField>
             <Button

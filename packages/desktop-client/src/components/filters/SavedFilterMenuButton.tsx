@@ -98,36 +98,52 @@ export function SavedFilterMenuButton({
 
   async function onAddUpdate() {
     if (adding) {
-      //create new flow
-      savedFilter = {
+      const newSavedFilter = {
         conditions: filters,
         conditionsOp,
         name,
         status: 'saved',
       };
-      const res: string = await sendCatch('filter-create', {
-        state: savedFilter,
+
+      const response = await sendCatch('filter-create', {
+        state: newSavedFilter,
         filters: [...filtersList],
       });
-      savedFilter = {
-        ...savedFilter,
-        id: res,
-      };
-    } else {
-      //rename flow
-      savedFilter = {
-        conditions: filterId.conditions,
-        conditionsOp: filterId.conditionsOp,
-        id: filterId.id,
-        name,
-      };
-      await sendCatch('filter-update', {
-        state: savedFilter,
-        filters: [...filtersList],
+
+      if (response.error) {
+        setErr(response.error.message);
+        setNameOpen(true);
+        return;
+      }
+
+      setNameOpen(false);
+      onReloadSavedFilter({
+        ...newSavedFilter,
+        id: response.data,
       });
+      return;
     }
+
+    const updatedFilter = {
+      conditions: filterId.conditions,
+      conditionsOp: filterId.conditionsOp,
+      id: filterId.id,
+      name,
+    };
+
+    const response = await sendCatch('filter-update', {
+      state: updatedFilter,
+      filters: [...filtersList],
+    });
+
+    if (response.error) {
+      setErr(response.error.message);
+      setNameOpen(true);
+      return;
+    }
+
     setNameOpen(false);
-    onReloadSavedFilter(savedFilter);
+    onReloadSavedFilter(updatedFilter);
   }
 
   return (

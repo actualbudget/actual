@@ -30,7 +30,7 @@ export function FiltersStack({
   ) => RuleConditionEntity;
   onDeleteFilter: (filter: RuleConditionEntity) => void;
   onClearFilters: () => void;
-  onReloadSavedFilter: () => void;
+  onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
   filterId: SavedFilter;
   filtersList: RuleConditionEntity[];
   onCondOpChange: () => void;
