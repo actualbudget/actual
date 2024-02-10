@@ -24,7 +24,7 @@ export function useLocalPref<K extends keyof LocalPrefs>(
     (state: State) => state.prefs.local?.[prefName] as LocalPrefs[K],
   );
 
-  if (!localPref) {
+  if (!localPref && defaultValue) {
     return [defaultValue, setLocalPref];
   }
 
