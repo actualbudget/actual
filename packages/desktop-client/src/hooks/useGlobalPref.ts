@@ -24,7 +24,7 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
     (state: State) => state.prefs.global?.[prefName] as GlobalPrefs[K],
   );
 
-  if (!globalPref && defaultValue) {
+  if (globalPref === undefined && defaultValue !== undefined) {
     return [defaultValue, setGlobalPref];
   }
 

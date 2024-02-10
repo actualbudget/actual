@@ -6,12 +6,12 @@ import { type State } from 'loot-core/src/client/state-types';
 
 export function useAccounts() {
   const dispatch = useDispatch();
-  const accountLoaded = useSelector(
+  const accountsLoaded = useSelector(
     (state: State) => state.queries.accountsLoaded,
   );
 
   useEffect(() => {
-    if (!accountLoaded) {
+    if (!accountsLoaded) {
       dispatch(getAccounts());
     }
   }, []);
