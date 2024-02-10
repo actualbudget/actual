@@ -82,15 +82,13 @@ function BudgetInner(props: BudgetProps) {
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [startMonth, setBudgetStartMonthPref] = useLocalPref(
-    'budget.startMonth',
-    currentMonth,
-  );
+  const [startMonth = currentMonth, setBudgetStartMonthPref] =
+    useLocalPref('budget.startMonth');
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
-  const [budgetType] = useLocalPref('budgetType', 'rollover');
-  const [maxMonths] = useGlobalPref('maxMonths', 1);
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [maxMonths = 1] = useGlobalPref('maxMonths');
 
   const [initialized, setInitialized] = useState(false);
   const [bounds, setBounds] = useState({

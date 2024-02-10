@@ -41,10 +41,8 @@ export function Sidebar() {
   const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
     'ui.showClosedAccounts',
   );
-  const [isFloating, setFloatingSidebarPref] = useGlobalPref(
-    'floatingSidebar',
-    false,
-  );
+  const [isFloating = false, setFloatingSidebarPref] =
+    useGlobalPref('floatingSidebar');
 
   async function onReorder(
     id: string,

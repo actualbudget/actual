@@ -12,10 +12,8 @@ import { Checkbox } from './forms';
 const buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
 export function MobileWebMessage() {
-  const [hideMobileMessage, setHideMobileMessagePref] = useLocalPref(
-    'hideMobileMessage',
-    true,
-  );
+  const [hideMobileMessage = true, setHideMobileMessagePref] =
+    useLocalPref('hideMobileMessage');
 
   const { isNarrowWidth } = useResponsive();
 

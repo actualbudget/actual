@@ -32,7 +32,7 @@ export const BudgetCategories = memo(
     onReorderCategory,
     onReorderGroup,
   }) => {
-    const [collapsed, setCollapsedPref] = useLocalPref('budget.collapsed', []);
+    const [collapsed = [], setCollapsedPref] = useLocalPref('budget.collapsed');
     function onCollapse(value) {
       setCollapsedPref(value);
     }

@@ -11,7 +11,6 @@ type SetLocalPrefAction<K extends keyof LocalPrefs> = (
 
 export function useLocalPref<K extends keyof LocalPrefs>(
   prefName: K,
-  defaultValue: LocalPrefs[K] = undefined,
 ): [LocalPrefs[K], SetLocalPrefAction<K>] {
   const dispatch = useDispatch();
   const setLocalPref = useCallback<SetLocalPrefAction<K>>(
@@ -23,10 +22,6 @@ export function useLocalPref<K extends keyof LocalPrefs>(
   const localPref = useSelector(
     (state: State) => state.prefs.local?.[prefName] as LocalPrefs[K],
   );
-
-  if (localPref === undefined && defaultValue !== undefined) {
-    return [defaultValue, setLocalPref];
-  }
 
   return [localPref, setLocalPref];
 }

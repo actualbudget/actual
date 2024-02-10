@@ -88,8 +88,8 @@ export function Account(props) {
   const newTransactions = useSelector(state => state.queries.newTransactions);
   const prefs = useLocalPrefs();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [numberFormat] = useLocalPref('numberFormat', 'comma-dot');
-  const [hideFraction] = useLocalPref('hideFraction', false);
+  const [numberFormat = 'comma-dot'] = useLocalPref('numberFormat');
+  const [hideFraction = false] = useLocalPref('hideFraction');
 
   const state = {
     payees,

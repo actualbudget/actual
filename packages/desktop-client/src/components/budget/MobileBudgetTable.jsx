@@ -1142,15 +1142,12 @@ export function BudgetTable({
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
   const format = useFormat();
 
-  const [showSpentColumn, setShowSpentColumnPref] = useLocalPref(
+  const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
-    false,
   );
 
-  const [showHiddenCategories, setShowHiddenCategoriesPref] = useLocalPref(
-    'budget.showHiddenCategories',
-    false,
-  );
+  const [showHiddenCategories = false, setShowHiddenCategoriesPref] =
+    useLocalPref('budget.showHiddenCategories');
 
   function toggleDisplay() {
     setShowSpentColumnPref(!showSpentColumn);

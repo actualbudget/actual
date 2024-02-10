@@ -1545,7 +1545,7 @@ export function Account() {
   const payees = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat();
-  const [hideFraction] = useLocalPref('hideFraction', false);
+  const [hideFraction = false] = useLocalPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showBalances] = useLocalPref(`show-balances-${params.id}`);
   const [hideCleared] = useLocalPref(`hide-cleared-${params.id}`);

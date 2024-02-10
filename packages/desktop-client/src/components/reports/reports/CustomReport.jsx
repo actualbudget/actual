@@ -35,18 +35,12 @@ import { fromDateRepr } from '../util';
 export function CustomReport() {
   const categories = useCategories();
 
-  const [viewLegend, setViewLegendPref] = useLocalPref(
-    'reportsViewLegend',
-    false,
-  );
-  const [viewSummary, setViewSummaryPref] = useLocalPref(
-    'reportsViewSummary',
-    false,
-  );
-  const [viewLabels, setViewLabelsPref] = useLocalPref(
-    'reportsViewLabel',
-    false,
-  );
+  const [viewLegend = false, setViewLegendPref] =
+    useLocalPref('reportsViewLegend');
+  const [viewSummary = false, setViewSummaryPref] =
+    useLocalPref('reportsViewSummary');
+  const [viewLabels = false, setViewLabelsPref] =
+    useLocalPref('reportsViewLabel');
 
   const {
     filters,

@@ -26,9 +26,9 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     auto: SvgSystem,
   } as const;
 
-  async function onMenuSelect(newTheme: string) {
+  function onMenuSelect(newTheme: Theme) {
     setMenuOpen(false);
-    switchTheme(newTheme as Theme);
+    switchTheme(newTheme);
   }
 
   const Icon = themeIcons[theme] || SvgSun;
