@@ -6,6 +6,7 @@ import { Input } from '../common/Input';
 import { MenuTooltip } from '../common/MenuTooltip';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type SaveReportNameProps = {
@@ -74,7 +75,7 @@ export function SaveReportName({
           <Text style={{ color: theme.errorText }}>{err}</Text>
         </Stack>
       ) : (
-        <Text />
+        <View />
       )}
     </MenuTooltip>
   );

@@ -3,6 +3,7 @@ import React, { createRef, useState } from 'react';
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button';
 import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 import { GenericInput } from '../util/GenericInput';
@@ -14,6 +15,7 @@ type SaveReportChooseProps = {
 
 export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
   const inputRef = createRef<HTMLInputElement>();
+  const [err, setErr] = useState('');
   const [value, setValue] = useState('');
 
   return (
@@ -47,6 +49,11 @@ export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
             type="primary"
             onClick={e => {
               e.preventDefault();
+              if (value === '') {
+                setErr('Invalid report entered');
+                return;
+              }
+
               onApply(value);
             }}
           >
@@ -54,6 +61,13 @@ export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
           </Button>
         </Stack>
       </form>
+      {err !== '' ? (
+        <Stack direction="row" align="center" style={{ padding: 10 }}>
+          <Text style={{ color: theme.errorText }}>{err}</Text>
+        </Stack>
+      ) : (
+        <View />
+      )}
     </Tooltip>
   );
 }
