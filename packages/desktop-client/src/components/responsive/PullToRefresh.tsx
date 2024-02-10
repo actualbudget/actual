@@ -1,8 +1,6 @@
 import React, { type ComponentProps } from 'react';
 import BasePullToRefresh from 'react-simple-pull-to-refresh';
 
-import { ROW_HEIGHT as MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-
 import { css } from 'glamor';
 
 type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh>;
@@ -20,7 +18,6 @@ export function PullToRefresh(props: PullToRefreshProps) {
             },
             '& .ptr__children': {
               overflow: 'hidden auto',
-              paddingBottom: MOBILE_NAV_HEIGHT,
             },
           }),
         )}
