@@ -125,6 +125,7 @@ type StackedBarGraphProps = {
   data: GroupedEntity;
   compact?: boolean;
   viewLabels: boolean;
+  balanceTypeOp: string;
 };
 
 export function StackedBarGraph({
@@ -132,9 +133,15 @@ export function StackedBarGraph({
   data,
   compact,
   viewLabels,
+  balanceTypeOp,
 }: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();
 
+  const largestValue = data.monthData
+    .map(c => c[balanceTypeOp])
+    .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
+
+  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
   return (
     <Container
       style={{
@@ -151,7 +158,7 @@ export function StackedBarGraph({
                 width={width}
                 height={height}
                 data={data.monthData}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                margin={{ top: 0, right: 0, left: leftMargin, bottom: 0 }}
               >
                 <Tooltip
                   content={<CustomTooltip />}
@@ -168,9 +175,15 @@ export function StackedBarGraph({
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
                     <YAxis
-                      tickFormatter={value => getCustomTick(value, privacyMode)}
+                      tickFormatter={value =>
+                        getCustomTick(
+                          amountToCurrencyNoDecimal(value),
+                          privacyMode,
+                        )
+                      }
                       tick={{ fill: theme.pageText }}
                       tickLine={{ stroke: theme.pageText }}
+                      tickSize={0}
                     />
                   </>
                 )}
