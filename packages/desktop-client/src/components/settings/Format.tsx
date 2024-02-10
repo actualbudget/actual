@@ -55,12 +55,13 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 
 export function FormatSettings() {
   const sidebar = useSidebar();
-  const [firstDayOfWeekIdx = '0', setFirstDayOfWeekIdxPref] =
+  const [_firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
     useLocalPref('firstDayOfWeekIdx'); // Sunday;
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [, setDateFormatPref] = useLocalPref('dateFormat');
-  const [numberFormat = 'comma-dot', setNumberFormatPref] =
-    useLocalPref('numberFormat');
+  const [_numberFormat, setNumberFormatPref] = useLocalPref('numberFormat');
+  const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useLocalPref('hideFraction');
 
   return (

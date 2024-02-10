@@ -231,7 +231,8 @@ export function DateSelect({
   const [selectedValue, setSelectedValue] = useState(value);
   const userSelectedValue = useRef(selectedValue);
 
-  const [firstDayOfWeekIdx = '0'] = useLocalPref('firstDayOfWeekIdx');
+  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   useEffect(() => {
     userSelectedValue.current = value;

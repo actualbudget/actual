@@ -18,7 +18,6 @@ import { separateGroups } from './util';
 export const BudgetCategories = memo(
   ({
     categoryGroups,
-    showHiddenCategories,
     editingCell,
     dataComponents,
     onBudgetAction,
@@ -32,7 +31,9 @@ export const BudgetCategories = memo(
     onReorderCategory,
     onReorderGroup,
   }) => {
-    const [collapsed = [], setCollapsedPref] = useLocalPref('budget.collapsed');
+    const [_collapsed, setCollapsedPref] = useLocalPref('budget.collapsed');
+    const collapsed = _collapsed || [];
+    const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
     function onCollapse(value) {
       setCollapsedPref(value);
     }

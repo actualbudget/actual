@@ -222,7 +222,8 @@ export function Accounts() {
   const accounts = useAccounts();
   const newTransactions = useSelector(state => state.queries.newTransactions);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  const [numberFormat = 'comma-dot'] = useLocalPref('numberFormat');
+  const [_numberFormat] = useLocalPref('numberFormat');
+  const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false] = useLocalPref('hideFraction');
 
   const { list: categories } = useCategories();

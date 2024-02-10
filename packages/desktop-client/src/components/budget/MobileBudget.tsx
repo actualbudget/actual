@@ -70,7 +70,8 @@ function BudgetInner(props: BudgetInnerProps) {
   const [initialized, setInitialized] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
-  const [numberFormat = 'comma-dot'] = useLocalPref('numberFormat');
+  const [_numberFormat] = useLocalPref('numberFormat');
+  const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false] = useLocalPref('hideFraction');
 
   useEffect(() => {
@@ -413,7 +414,8 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [_budgetType] = useLocalPref('budgetType');
+  const budgetType = _budgetType || 'rollover';
 
   const actions = useActions();
   const spreadsheet = useSpreadsheet();
