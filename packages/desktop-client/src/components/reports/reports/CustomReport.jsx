@@ -440,6 +440,8 @@ export function CustomReport() {
 
                 {dataCheck ? (
                   <ChooseGraph
+                    startDate={startDate}
+                    endDate={endDate}
                     data={data}
                     mode={mode}
                     graphType={graphType}
@@ -448,7 +450,6 @@ export function CustomReport() {
                     showEmpty={showEmpty}
                     scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
-                    months={months}
                     viewLabels={viewLabels}
                     compact={false}
                   />

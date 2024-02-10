@@ -220,7 +220,13 @@ export function AreaGraph({
                   isAnimationActive={false}
                 />
                 <defs>
-                  <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id={`fill${balanceTypeOp}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop
                       offset={off}
                       stopColor={theme.reportsBlue}
@@ -232,6 +238,24 @@ export function AreaGraph({
                       stopOpacity={0.2}
                     />
                   </linearGradient>
+                  <linearGradient
+                    id={`stroke${balanceTypeOp}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsBlue}
+                      stopOpacity={1}
+                    />
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsRed}
+                      stopOpacity={1}
+                    />
+                  </linearGradient>
                 </defs>
 
                 <Area
@@ -240,11 +264,11 @@ export function AreaGraph({
                   activeDot={false}
                   animationDuration={0}
                   dataKey={balanceTypeOp}
-                  stroke={theme.reportsBlue}
-                  fill="url(#splitColor)"
+                  stroke={`url(#stroke${balanceTypeOp})`}
+                  fill={`url(#fill${balanceTypeOp})`}
                   fillOpacity={1}
                 >
-                  {viewLabels && (
+                  {viewLabels && !compact && (
                     <LabelList
                       dataKey={balanceTypeOp}
                       content={e => customLabel(e, width, lastLabel)}

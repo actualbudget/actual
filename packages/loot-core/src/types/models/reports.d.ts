@@ -71,7 +71,25 @@ export type Month = {
   month: string;
 };
 
-export interface CustomReportData extends CustomReportEntity {
-  conditions_op?: string;
+export interface CustomReportData {
+  id?: string;
+  name?: string;
+  start_date: string;
+  end_date: string;
+  date_static: number;
+  date_range: string;
+  mode: string;
+  group_by: string;
+  balance_type: string;
+  show_empty: number;
+  show_offbudget: number;
+  show_hidden: number;
+  show_uncategorized: number;
+  selected_categories?: CategoryEntity[];
+  graph_type: string;
   conditions?: RuleConditionEntity[];
+  conditions_op: string;
+  metadata?: GroupedEntity;
+  interval?: string;
+  color_scheme?: string;
 }
