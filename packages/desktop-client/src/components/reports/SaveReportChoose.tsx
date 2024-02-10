@@ -1,4 +1,4 @@
-import React, { createRef, useState } from 'react';
+import React, { createRef, useEffect, useState } from 'react';
 
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button';
@@ -18,6 +18,12 @@ export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
   const [err, setErr] = useState('');
   const [value, setValue] = useState('');
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <Tooltip
       position="bottom-right"
@@ -25,8 +31,11 @@ export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
       width={275}
       onClose={onClose}
     >
-      <View style={{ marginBottom: 10 }} />
-      <form action="#">
+      <form>
+        <View style={{ flexDirection: 'row', align: 'center' }}>
+          <Text style={{ userSelect: 'none', flex: 1 }}>Choose Report</Text>
+          <View style={{ flex: 1 }} />
+        </View>
         <GenericInput
           inputRef={inputRef}
           field="report"
@@ -49,7 +58,7 @@ export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
             type="primary"
             onClick={e => {
               e.preventDefault();
-              if (value === '') {
+              if (!value) {
                 setErr('Invalid report entered');
                 return;
               }
