@@ -62,7 +62,8 @@ export function FormatSettings() {
   const [, setDateFormatPref] = useLocalPref('dateFormat');
   const [_numberFormat, setNumberFormatPref] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false, setHideFractionPref] = useLocalPref('hideFraction');
+  const [hideFraction = false, setHideFractionPref] =
+    useLocalPref('hideFraction');
 
   return (
     <Setting
