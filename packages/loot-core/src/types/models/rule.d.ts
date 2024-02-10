@@ -46,8 +46,19 @@ export interface SetRuleActionEntity {
   field: string;
   op: 'set';
   value: unknown;
-  options?: unknown;
+  options?: {
+    splitIndex?: number;
+  };
   type?: string;
+}
+
+export interface SetSplitAmountRuleActionEntity {
+  op: 'set-split-amount';
+  value: number;
+  options?: {
+    splitIndex?: number;
+    method: 'fixed-amount' | 'fixed-percent' | 'remainder';
+  };
 }
 
 export interface LinkScheduleRuleActionEntity {

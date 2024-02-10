@@ -6,7 +6,6 @@ import { toRelaxedNumber } from 'loot-core/src/shared/util';
 import { type BoundActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
 import { FormError } from '../common/FormError';
@@ -17,6 +16,7 @@ import { Modal, ModalButtons } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
+import { type CommonModalProps } from '../Modals';
 
 type CreateLocalAccountProps = {
   modalProps: CommonModalProps;

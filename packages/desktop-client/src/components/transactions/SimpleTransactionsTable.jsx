@@ -1,10 +1,10 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import {
   format as formatDate,
-  parseISO,
   isValid as isDateValid,
+  parseISO,
 } from 'date-fns';
 
 import {
@@ -14,10 +14,10 @@ import {
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
+import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowsSynchronize } from '../../icons/v2';
-import { theme, styles } from '../../style';
-import { Table, Row, Field, Cell, SelectCell } from '../table';
+import { styles, theme } from '../../style';
+import { Cell, Field, Row, SelectCell, Table } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {

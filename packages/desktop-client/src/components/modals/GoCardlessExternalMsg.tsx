@@ -13,7 +13,6 @@ import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
@@ -24,6 +23,7 @@ import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { type CommonModalProps } from '../Modals';
 import { Tooltip } from '../tooltips';
 
 import { COUNTRY_OPTIONS } from './countries';

@@ -126,7 +126,8 @@ export function AccountHeader({
                 <Input
                   defaultValue={accountName}
                   onEnter={e => onSaveName(e.target.value)}
-                  onBlur={() => onExposeName(false)}
+                  onBlur={e => onSaveName(e.target.value)}
+                  onEscape={() => onExposeName(false)}
                   style={{
                     fontSize: 25,
                     fontWeight: 500,

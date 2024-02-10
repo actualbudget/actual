@@ -1199,6 +1199,7 @@ class AccountInternal extends PureComponent {
 
   applySort = (field, ascDesc, prevField, prevAscDesc) => {
     const filters = this.state.filters;
+    const isFiltered = filters.length > 0;
     const sortField = getField(!field ? this.state.sort.field : field);
     const sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
     const sortPrevField = getField(
@@ -1208,34 +1209,78 @@ class AccountInternal extends PureComponent {
       ? this.state.sort.prevAscDesc
       : prevAscDesc;
 
-    if (!field) {
-      //no sort was made (called by applyFilters)
-      this.currentQuery = this.currentQuery.orderBy({
+    const sortCurrentQuery = function (that, sortField, sortAscDesc) {
+      if (sortField === 'cleared') {
+        that.currentQuery = that.currentQuery.orderBy({
+          reconciled: sortAscDesc,
+        });
+      }
+
+      that.currentQuery = that.currentQuery.orderBy({
         [sortField]: sortAscDesc,
       });
-    } else {
-      //sort called directly
-      if (filters.length > 0) {
-        //if filters already exist then apply them
-        this.applyFilters([...filters]);
-        this.currentQuery = this.currentQuery.orderBy({
-          [sortField]: sortAscDesc,
+    };
+
+    const sortRootQuery = function (that, sortField, sortAscDesc) {
+      if (sortField === 'cleared') {
+        that.currentQuery = that.rootQuery.orderBy({
+          reconciled: sortAscDesc,
+        });
+        that.currentQuery = that.currentQuery.orderBy({
+          cleared: sortAscDesc,
         });
       } else {
-        //no filters exist make new rootquery
-        this.currentQuery = this.rootQuery.orderBy({
+        that.currentQuery = that.rootQuery.orderBy({
           [sortField]: sortAscDesc,
         });
       }
-    }
-    if (sortPrevField) {
-      //apply previos sort if it exists
-      this.currentQuery = this.currentQuery.orderBy({
+    };
+
+    // sort by previously used sort field, if any
+    const maybeSortByPreviousField = function (
+      that,
+      sortPrevField,
+      sortPrevAscDesc,
+    ) {
+      if (!sortPrevField) {
+        return;
+      }
+
+      if (sortPrevField === 'cleared') {
+        that.currentQuery = that.currentQuery.orderBy({
+          reconciled: sortPrevAscDesc,
+        });
+      }
+
+      that.currentQuery = that.currentQuery.orderBy({
         [sortPrevField]: sortPrevAscDesc,
       });
+    };
+
+    switch (true) {
+      // called by applyFilters to sort an already filtered result
+      case !field:
+        sortCurrentQuery(this, sortField, sortAscDesc);
+        break;
+
+      // called directly from UI by sorting a column.
+      // active filters need to be applied before sorting
+      case isFiltered:
+        this.applyFilters([...filters]);
+        sortCurrentQuery(this, sortField, sortAscDesc);
+        break;
+
+      // called directly from UI by sorting a column.
+      // no active filters, start a new root query.
+      case !isFiltered:
+        sortRootQuery(this, sortField, sortAscDesc);
+        break;
+
+      default:
     }
 
-    this.updateQuery(this.currentQuery, this.state.filters.length > 0);
+    maybeSortByPreviousField(this, sortPrevField, sortPrevAscDesc);
+    this.updateQuery(this.currentQuery, isFiltered);
   };
 
   onSort = (headerClicked, ascDesc) => {

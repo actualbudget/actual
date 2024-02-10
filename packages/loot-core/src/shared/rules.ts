@@ -159,6 +159,13 @@ export function sortNumbers(num1, num2) {
 }
 
 export function parse(item) {
+  if (item.op === 'set-split-amount') {
+    if (item.options.method === 'fixed-amount') {
+      return { ...item, value: item.value && integerToAmount(item.value) };
+    }
+    return item;
+  }
+
   switch (item.type) {
     case 'number': {
       let parsed = item.value;
@@ -186,6 +193,22 @@ export function parse(item) {
 }
 
 export function unparse({ error, inputKey, ...item }) {
+  if (item.op === 'set-split-amount') {
+    if (item.options.method === 'fixed-amount') {
+      return {
+        ...item,
+        value: item.value && amountToInteger(item.value),
+      };
+    }
+    if (item.options.method === 'fixed-percent') {
+      return {
+        ...item,
+        value: item.value && parseFloat(item.value),
+      };
+    }
+    return item;
+  }
+
   switch (item.type) {
     case 'number': {
       let unparsed = item.value;

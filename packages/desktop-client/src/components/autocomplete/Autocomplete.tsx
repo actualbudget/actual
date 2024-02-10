@@ -359,6 +359,7 @@ function SingleAutocomplete<T extends Item>({
 
         setValue(value);
         setIsChanged(true);
+        setIsOpen(true);
       }}
       onStateChange={changes => {
         if (

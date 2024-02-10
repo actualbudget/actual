@@ -9,6 +9,8 @@ import React, {
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type QueriesState } from 'loot-core/client/state-types/queries';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -103,7 +105,14 @@ function ManageRulesContent({
 
   const { data: schedules } = SchedulesQuery.useQuery();
   const { list: categories } = useCategories();
-  const state = useSelector(state => ({
+  const state = useSelector<
+    State,
+    {
+      payees: QueriesState['payees'];
+      accounts: QueriesState['accounts'];
+      schedules: ReturnType<(typeof SchedulesQuery)['useQuery']>;
+    }
+  >(state => ({
     payees: state.queries.payees,
     accounts: state.queries.accounts,
     schedules,

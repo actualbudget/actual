@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type UserState } from 'loot-core/client/state-types/user';
+
 import { useActions } from '../hooks/useActions';
 import { theme, styles, type CSSProperties } from '../style';
 
@@ -22,7 +25,9 @@ export function LoggedInUser({
   style,
   color,
 }: LoggedInUserProps) {
-  const userData = useSelector(state => state.user.data);
+  const userData = useSelector<State, UserState['data']>(
+    state => state.user.data,
+  );
   const { getUserData, signOut, closeBudget } = useActions();
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
