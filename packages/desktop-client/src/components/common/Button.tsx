@@ -204,6 +204,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 
+Button.displayName = 'Button';
+
 type ButtonWithLoadingProps = ButtonProps & {
   loading?: boolean;
 };
@@ -246,3 +248,5 @@ export const ButtonWithLoading = forwardRef<
     </Button>
   );
 });
+
+ButtonWithLoading.displayName = 'ButtonWithLoading';

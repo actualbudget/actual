@@ -426,6 +426,8 @@ const ChildTransactionEdit = forwardRef(
   },
 );
 
+ChildTransactionEdit.displayName = 'ChildTransactionEdit';
+
 const TransactionEditInner = memo(function TransactionEditInner({
   adding,
   accounts,
@@ -1552,3 +1554,5 @@ const ListItem = forwardRef(({ children, style, ...props }, ref) => {
     </View>
   );
 });
+
+ListItem.displayName = 'ListItem';

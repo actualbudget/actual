@@ -106,6 +106,8 @@ const DynamicBudgetTableInner = forwardRef<
   },
 );
 
+DynamicBudgetTableInner.displayName = 'DynamicBudgetTableInner';
+
 export const DynamicBudgetTable = forwardRef<
   BudgetTable,
   DynamicBudgetTableInnerProps
@@ -123,3 +125,5 @@ export const DynamicBudgetTable = forwardRef<
     </AutoSizer>
   );
 });
+
+DynamicBudgetTable.displayName = 'DynamicBudgetTable';

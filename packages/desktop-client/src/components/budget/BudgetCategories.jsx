@@ -313,3 +313,5 @@ export const BudgetCategories = memo(
     );
   },
 );
+
+BudgetCategories.displayName = 'BudgetCategories';

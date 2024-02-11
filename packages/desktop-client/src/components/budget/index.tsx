@@ -552,6 +552,8 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
   );
 });
 
+RolloverBudgetSummary.displayName = 'RolloverBudgetSummary';
+
 export function Budget() {
   const startMonth = useSelector<
     State,

@@ -151,3 +151,5 @@ export const PayeeTableRow = memo(
     );
   },
 );
+
+PayeeTableRow.displayName = 'PayeeTableRow';

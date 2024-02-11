@@ -598,6 +598,8 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
   },
 );
 
+CellButton.displayName = 'CellButton';
+
 type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   partial?: boolean;
   onEdit?: () => void;
@@ -1162,6 +1164,8 @@ export const Table = forwardRef(
 ) as <T extends TableItem>(
   props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
 ) => ReactElement;
+
+Table.displayName = 'Table';
 
 export type TableNavigator<T extends TableItem> = {
   onEdit: (id: T['id'], field?: string) => void;
