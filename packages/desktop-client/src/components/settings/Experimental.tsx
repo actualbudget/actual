@@ -87,9 +87,6 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <FeatureToggle flag="categorySpendingReport">
-              Category spending report
-            </FeatureToggle>
             <FeatureToggle flag="customReports">Custom reports</FeatureToggle>
             <FeatureToggle flag="sankeyReport">Sankey report</FeatureToggle>
 
