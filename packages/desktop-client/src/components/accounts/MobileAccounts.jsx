@@ -13,6 +13,7 @@ import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
+import { ROW_HEIGHT as MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { PullToRefresh } from '../responsive/PullToRefresh';
 import { CellValue } from '../spreadsheet/CellValue';
@@ -175,7 +176,11 @@ function AccountList({
         </Button>
       }
       padding={0}
-      style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}
+      style={{
+        flex: 1,
+        backgroundColor: theme.mobilePageBackground,
+        paddingBottom: MOBILE_NAV_HEIGHT,
+      }}
     >
       {accounts.length === 0 && <EmptyMessage />}
       <PullToRefresh onRefresh={onSync}>
