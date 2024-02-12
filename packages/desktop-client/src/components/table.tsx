@@ -1165,6 +1165,7 @@ export const Table = forwardRef(
   props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
 ) => ReactElement;
 
+// @ts-expect-error fix me
 Table.displayName = 'Table';
 
 export type TableNavigator<T extends TableItem> = {
