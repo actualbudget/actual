@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
-import { savePrefs } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
-import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
-
+import { useLocalPref } from '../hooks/useLocalPref';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles } from '../style';
 
@@ -16,30 +12,24 @@ import { Checkbox } from './forms';
 const buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
 export function MobileWebMessage() {
-  const hideMobileMessagePref = useSelector<
-    State,
-    PrefsState['local']['hideMobileMessage']
-  >(state => {
-    return (state.prefs.local && state.prefs.local.hideMobileMessage) || true;
-  });
+  const [hideMobileMessage = true, setHideMobileMessagePref] =
+    useLocalPref('hideMobileMessage');
 
   const { isNarrowWidth } = useResponsive();
 
   const [show, setShow] = useState(
     isNarrowWidth &&
-      !hideMobileMessagePref &&
+      !hideMobileMessage &&
       !document.cookie.match(/hideMobileMessage=true/),
   );
   const [requestDontRemindMe, setRequestDontRemindMe] = useState(false);
-
-  const dispatch = useDispatch();
 
   function onTry() {
     setShow(false);
 
     if (requestDontRemindMe) {
       // remember the pref indefinitely
-      dispatch(savePrefs({ hideMobileMessage: true }));
+      setHideMobileMessagePref(true);
     } else {
       // Set a cookie for 5 minutes
       const d = new Date();

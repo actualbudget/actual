@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
@@ -7,6 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import { Paragraph } from '../../common/Paragraph';
@@ -20,7 +20,7 @@ import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
 export function NetWorth() {
-  const accounts = useSelector(state => state.queries.accounts);
+  const accounts = useAccounts();
   const {
     filters,
     saved,

@@ -1,10 +1,7 @@
 // @ts-strict-ignore
 import React from 'react';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
-import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
-
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
 import { Modal } from '../common/Modal';
@@ -21,9 +18,7 @@ export function SwitchBudgetType({
   modalProps,
   onSwitch,
 }: SwitchBudgetTypeProps) {
-  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
-    state => state.prefs.local.budgetType,
-  );
+  const [budgetType] = useLocalPref('budgetType');
   return (
     <Modal title="Switch budget type?" {...modalProps}>
       {() => (

@@ -1,9 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
@@ -11,6 +8,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/src/types/models';
 
 import type { BoundActions } from '../../hooks/useActions';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   useSelected,
   useSelectedDispatch,
@@ -41,9 +39,7 @@ function DiscoverSchedulesTable({
 }) {
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
-  const dateFormat = useSelector<State, PrefsState['local']['dateFormat']>(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   function renderItem({ item }: { item: DiscoverScheduleEntity }) {
     const selected = selectedItems.has(item.id);
