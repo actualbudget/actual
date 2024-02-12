@@ -2,12 +2,11 @@
 import React, { useState } from 'react';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import {
-  type AccountEntity,
-  type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
+import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { type BoundActions } from '../../hooks/useActions';
+import { useCategories } from '../../hooks/useCategories';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -35,8 +34,6 @@ function needsCategory(
 
 type CloseAccountProps = {
   account: AccountEntity;
-  accounts: AccountEntity[];
-  categoryGroups: CategoryGroupEntity[];
   balance: number;
   canDelete: boolean;
   actions: BoundActions;
@@ -45,8 +42,6 @@ type CloseAccountProps = {
 
 export function CloseAccount({
   account,
-  accounts,
-  categoryGroups,
   balance,
   canDelete,
   actions,
@@ -58,6 +53,8 @@ export function CloseAccount({
 
   const [transferError, setTransferError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
+  const accounts = useAccounts().filter(a => a.closed === 0);
+  const { grouped: categoryGroups } = useCategories();
 
   return (
     <Modal

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { authorizeBank } from '../../gocardless';
+import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
 import { SvgExclamationOutline } from '../../icons/v1';
 import { theme } from '../../style';
@@ -49,7 +50,7 @@ function getErrorMessage(type, code) {
 }
 
 export function AccountSyncCheck() {
-  const accounts = useSelector(state => state.queries.accounts);
+  const accounts = useAccounts();
   const failedAccounts = useSelector(state => state.account.failedAccounts);
   const { unlinkAccount, pushModal } = useActions();
 

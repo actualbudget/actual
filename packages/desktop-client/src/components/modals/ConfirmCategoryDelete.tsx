@@ -1,8 +1,7 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
-
+import { useCategories } from '../../hooks/useCategories';
 import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Block } from '../common/Block';
@@ -14,21 +13,22 @@ import { type CommonModalProps } from '../Modals';
 
 type ConfirmCategoryDeleteProps = {
   modalProps: CommonModalProps;
-  category: CategoryGroupEntity;
-  group: CategoryGroupEntity;
-  categoryGroups: CategoryGroupEntity[];
+  category: string;
+  group: string;
   onDelete: (categoryId: string) => void;
 };
 
 export function ConfirmCategoryDelete({
   modalProps,
-  category,
-  group,
-  categoryGroups,
+  group: groupId,
+  category: categoryId,
   onDelete,
 }: ConfirmCategoryDeleteProps) {
   const [transferCategory, setTransferCategory] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { grouped: categoryGroups, list: categories } = useCategories();
+  const group = categoryGroups.find(g => g.id === groupId);
+  const category = categories.find(c => c.id === categoryId);
 
   const renderError = (error: string) => {
     let msg: string;

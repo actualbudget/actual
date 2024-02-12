@@ -1,5 +1,4 @@
 import React, { memo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
 
@@ -7,6 +6,7 @@ import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
@@ -1133,7 +1133,6 @@ export function BudgetTable({
   onBudgetAction,
   onRefresh,
   onSwitchBudgetType,
-  savePrefs,
   pushModal,
   onEditGroup,
   onEditCategory,
@@ -1144,24 +1143,15 @@ export function BudgetTable({
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
   const format = useFormat();
 
-  const mobileShowBudgetedColPref = useSelector(state => {
-    return state.prefs?.local?.toggleMobileDisplayPref || true;
-  });
-
-  const showHiddenCategories = useSelector(state => {
-    return state.prefs?.local?.['budget.showHiddenCategories'] || false;
-  });
-
-  const [showBudgetedCol, setShowBudgetedCol] = useState(
-    !mobileShowBudgetedColPref &&
-      !document.cookie.match(/mobileShowBudgetedColPref=true/),
+  const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
+    'mobile.showSpentColumn',
   );
 
+  const [showHiddenCategories = false, setShowHiddenCategoriesPref] =
+    useLocalPref('budget.showHiddenCategories');
+
   function toggleDisplay() {
-    setShowBudgetedCol(!showBudgetedCol);
-    if (!showBudgetedCol) {
-      savePrefs({ mobileShowBudgetedColPref: true });
-    }
+    setShowSpentColumnPref(!showSpentColumn);
   }
 
   const buttonStyle = {
@@ -1177,9 +1167,7 @@ export function BudgetTable({
   };
 
   const onToggleHiddenCategories = () => {
-    savePrefs({
-      'budget.showHiddenCategories': !showHiddenCategories,
-    });
+    setShowHiddenCategoriesPref(!showHiddenCategories);
   };
 
   return (
@@ -1245,7 +1233,7 @@ export function BudgetTable({
             />
           )}
           <View style={{ flex: 1 }} />
-          {(show3Cols || showBudgetedCol) && (
+          {(show3Cols || !showSpentColumn) && (
             <Button
               type="bare"
               disabled={show3Cols}
@@ -1255,7 +1243,7 @@ export function BudgetTable({
                 padding: '0 8px',
                 margin: '0 -8px',
                 background:
-                  showBudgetedCol && !show3Cols
+                  !showSpentColumn && !show3Cols
                     ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
                     : null,
               }}
@@ -1292,7 +1280,7 @@ export function BudgetTable({
               </View>
             </Button>
           )}
-          {(show3Cols || !showBudgetedCol) && (
+          {(show3Cols || showSpentColumn) && (
             <Button
               type="bare"
               disabled={show3Cols}
@@ -1300,7 +1288,7 @@ export function BudgetTable({
               style={{
                 ...buttonStyle,
                 background:
-                  !showBudgetedCol && !show3Cols
+                  showSpentColumn && !show3Cols
                     ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
                     : null,
               }}
@@ -1372,7 +1360,7 @@ export function BudgetTable({
               <BudgetGroups
                 type={type}
                 categoryGroups={categoryGroups}
-                showBudgetedCol={showBudgetedCol}
+                showBudgetedCol={!showSpentColumn}
                 show3Cols={show3Cols}
                 showHiddenCategories={showHiddenCategories}
                 // gestures={gestures}
@@ -1407,7 +1395,7 @@ export function BudgetTable({
               <BudgetGroups
                 type={type}
                 categoryGroups={categoryGroups}
-                showBudgetedCol={showBudgetedCol}
+                showBudgetedCol={!showSpentColumn}
                 show3Cols={show3Cols}
                 showHiddenCategories={showHiddenCategories}
                 // gestures={gestures}

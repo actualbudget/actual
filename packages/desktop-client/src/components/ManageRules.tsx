@@ -7,10 +7,8 @@ import React, {
   type SetStateAction,
   type Dispatch,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type QueriesState } from 'loot-core/client/state-types/queries';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -19,7 +17,9 @@ import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
+import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
+import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
@@ -105,18 +105,13 @@ function ManageRulesContent({
 
   const { data: schedules } = SchedulesQuery.useQuery();
   const { list: categories } = useCategories();
-  const state = useSelector<
-    State,
-    {
-      payees: QueriesState['payees'];
-      accounts: QueriesState['accounts'];
-      schedules: ReturnType<(typeof SchedulesQuery)['useQuery']>;
-    }
-  >(state => ({
-    payees: state.queries.payees,
-    accounts: state.queries.accounts,
+  const payees = usePayees();
+  const accounts = useAccounts();
+  const state = {
+    payees,
+    accounts,
     schedules,
-  }));
+  };
   const filterData = useMemo(
     () => ({
       ...state,

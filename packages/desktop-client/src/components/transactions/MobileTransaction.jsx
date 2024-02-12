@@ -46,9 +46,12 @@ import {
   groupById,
 } from 'loot-core/src/shared/util';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { useNavigate } from '../../hooks/useNavigate';
+import { usePayees } from '../../hooks/usePayees';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import {
   SingleActiveEditFormProvider,
@@ -941,11 +944,6 @@ function TransactionEditUnconnected(props) {
   useSetThemeColor(theme.mobileViewTheme);
 
   useEffect(() => {
-    // May as well update categories / accounts when transaction ID changes
-    props.getCategories();
-    props.getAccounts();
-    props.getPayees();
-
     async function fetchTransaction() {
       // Query for the transaction based on the ID with grouped splits.
       //
@@ -1112,12 +1110,10 @@ function TransactionEditUnconnected(props) {
 
 export const TransactionEdit = props => {
   const { list: categories } = useCategories();
-  const payees = useSelector(state => state.queries.payees);
+  const payees = usePayees();
   const lastTransaction = useSelector(state => state.queries.lastTransaction);
-  const accounts = useSelector(state => state.queries.accounts);
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
+  const accounts = useAccounts();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const actions = useActions();
 
   return (

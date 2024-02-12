@@ -22,7 +22,7 @@ function Calendar({ color, onClick }: CalendarProps) {
 
 type MonthCountSelectorProps = {
   maxMonths: number;
-  onChange: (value: number) => Promise<void>;
+  onChange: (value: number) => void;
 };
 
 export function MonthCountSelector({
