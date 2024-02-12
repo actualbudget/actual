@@ -44,8 +44,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 
 ### Notes
 
-- $ sign is optional, `#template $50` and `#template 50` are the same.
-- Other currency symbols are not supported.
+- Currency symbol is optional, `#template $50` and `#template 50` are the same.
 - Number formats that use comma for the decimal separator are not supported (eg, 123,45). You must use 123.45.
 - Thousands separators are not supported (eg, 1,234). You must use 1234.
 - {SCHEDULE NAME} is defined in the **Schedules** editor.
