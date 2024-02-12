@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
@@ -14,10 +15,10 @@ export function SelectLinkedAccounts({
   modalProps,
   requisitionId,
   externalAccounts,
-  localAccounts,
   actions,
   syncSource,
 }) {
+  const localAccounts = useAccounts().filter(a => a.closed === 0);
   const [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(
       localAccounts

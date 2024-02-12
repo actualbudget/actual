@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
-import { useActions } from '../../hooks/useActions';
+import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { SvgAdd } from '../../icons/v1';
@@ -221,25 +223,18 @@ function AccountList({
 }
 
 export function Accounts() {
-  const accounts = useSelector(state => state.queries.accounts);
+  const dispatch = useDispatch();
+  const accounts = useAccounts();
   const newTransactions = useSelector(state => state.queries.newTransactions);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  const numberFormat = useSelector(
-    state => state.prefs.local.numberFormat || 'comma-dot',
-  );
-  const hideFraction = useSelector(
-    state => state.prefs.local.hideFraction || false,
-  );
+  const [_numberFormat] = useLocalPref('numberFormat');
+  const numberFormat = _numberFormat || 'comma-dot';
+  const [hideFraction = false] = useLocalPref('hideFraction');
 
   const { list: categories } = useCategories();
-  const { getAccounts, replaceModal, syncAndDownload } = useActions();
 
   const transactions = useState({});
   const navigate = useNavigate();
-
-  useEffect(() => {
-    (async () => getAccounts())();
-  }, []);
 
   const onSelectAccount = id => {
     navigate(`/accounts/${id}`);
@@ -247,6 +242,14 @@ export function Accounts() {
 
   const onSelectTransaction = transaction => {
     navigate(`/transaction/${transaction}`);
+  };
+
+  const onAddAccount = () => {
+    dispatch(replaceModal('add-account'));
+  };
+
+  const onSync = () => {
+    dispatch(syncAndDownload());
   };
 
   useSetThemeColor(theme.mobileViewTheme);
@@ -265,10 +268,10 @@ export function Accounts() {
         getBalanceQuery={queries.accountBalance}
         getOnBudgetBalance={queries.budgetedAccountBalance}
         getOffBudgetBalance={queries.offbudgetAccountBalance}
-        onAddAccount={() => replaceModal('add-account')}
+        onAddAccount={onAddAccount}
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
-        onSync={syncAndDownload}
+        onSync={onSync}
       />
     </View>
   );

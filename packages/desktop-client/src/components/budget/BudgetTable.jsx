@@ -1,5 +1,7 @@
 import React, { createRef, Component } from 'react';
+import { connect } from 'react-redux';
 
+import { savePrefs } from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme, styles } from '../../style';
@@ -12,7 +14,7 @@ import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
 import { findSortDown, findSortUp, getScrollbarWidth } from './util';
 
-export class BudgetTable extends Component {
+class BudgetTableInner extends Component {
   constructor(props) {
     super(props);
     this.budgetCategoriesRef = createRef();
@@ -20,7 +22,6 @@ export class BudgetTable extends Component {
     this.state = {
       editing: null,
       draggingState: null,
-      showHiddenCategories: props.prefs['budget.showHiddenCategories'] ?? false,
     };
   }
 
@@ -137,26 +138,22 @@ export class BudgetTable extends Component {
     return monthUtils.addMonths(this.props.startMonth, monthIndex);
   };
 
+  // This is called via ref.
   clearEditing() {
     this.setState({ editing: null });
   }
 
   toggleHiddenCategories = () => {
-    this.setState(prevState => ({
-      showHiddenCategories: !prevState.showHiddenCategories,
-    }));
-    this.props.savePrefs({
-      'budget.showHiddenCategories': !this.state.showHiddenCategories,
-    });
+    this.props.onToggleHiddenCategories();
   };
 
   expandAllCategories = () => {
-    this.props.setCollapsed([]);
+    this.props.onCollapse([]);
   };
 
   collapseAllCategories = () => {
-    const { setCollapsed, categoryGroups } = this.props;
-    setCollapsed(categoryGroups.map(g => g.id));
+    const { onCollapse, categoryGroups } = this.props;
+    onCollapse(categoryGroups.map(g => g.id));
   };
 
   render() {
@@ -167,21 +164,13 @@ export class BudgetTable extends Component {
       startMonth,
       numMonths,
       monthBounds,
-      collapsed,
-      setCollapsed,
-      newCategoryForGroup,
       dataComponents,
-      isAddingGroup,
       onSaveCategory,
       onSaveGroup,
       onDeleteCategory,
       onDeleteGroup,
-      onShowNewCategory,
-      onHideNewCategory,
-      onShowNewGroup,
-      onHideNewGroup,
     } = this.props;
-    const { editing, draggingState, showHiddenCategories } = this.state;
+    const { editing, draggingState } = this.state;
 
     return (
       <View
@@ -254,13 +243,8 @@ export class BudgetTable extends Component {
                 innerRef={el => (this.budgetDataNode = el)}
               >
                 <BudgetCategories
-                  showHiddenCategories={showHiddenCategories}
                   categoryGroups={categoryGroups}
-                  newCategoryForGroup={newCategoryForGroup}
-                  isAddingGroup={isAddingGroup}
                   editingCell={editing}
-                  collapsed={collapsed}
-                  setCollapsed={setCollapsed}
                   dataComponents={dataComponents}
                   onEditMonth={this.onEditMonth}
                   onEditName={this.onEditName}
@@ -270,10 +254,6 @@ export class BudgetTable extends Component {
                   onDeleteGroup={onDeleteGroup}
                   onReorderCategory={this.onReorderCategory}
                   onReorderGroup={this.onReorderGroup}
-                  onShowNewCategory={onShowNewCategory}
-                  onHideNewCategory={onHideNewCategory}
-                  onShowNewGroup={onShowNewGroup}
-                  onHideNewGroup={onHideNewGroup}
                   onBudgetAction={this.onBudgetAction}
                   onShowActivity={this.onShowActivity}
                 />
@@ -285,3 +265,35 @@ export class BudgetTable extends Component {
     );
   }
 }
+
+const mapStateToProps = state => {
+  const { grouped: categoryGroups } = state.queries.categories;
+  return {
+    categoryGroups,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  const onCollapse = collapsedIds => {
+    dispatch(savePrefs({ 'budget.collapsed': collapsedIds }));
+  };
+
+  const onToggleHiddenCategories = () =>
+    dispatch((innerDispatch, getState) => {
+      const { prefs } = getState();
+      const showHiddenCategories = prefs.local['budget.showHiddenCategories'];
+      innerDispatch(
+        savePrefs({
+          'budget.showHiddenCategories': !showHiddenCategories,
+        }),
+      );
+    });
+  return {
+    onCollapse,
+    onToggleHiddenCategories,
+  };
+};
+
+export const BudgetTable = connect(mapStateToProps, mapDispatchToProps, null, {
+  forwardRef: true,
+})(BudgetTableInner);

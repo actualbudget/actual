@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { useActions } from '../../hooks/useActions';
+import { type Theme } from 'loot-core/types/prefs';
+
 import { themeOptions, useTheme } from '../../style';
 import { Button } from '../common/Button';
 import { Select } from '../common/Select';
@@ -9,17 +10,16 @@ import { Text } from '../common/Text';
 import { Setting } from './UI';
 
 export function ThemeSettings() {
-  const theme = useTheme();
-  const { saveGlobalPrefs } = useActions();
+  const [theme, switchTheme] = useTheme();
 
   return (
     <Setting
       primaryAction={
         <Button bounce={false} style={{ padding: 0 }}>
-          <Select
+          <Select<Theme>
             bare
             onChange={value => {
-              saveGlobalPrefs({ theme: value });
+              switchTheme(value);
             }}
             value={theme}
             options={themeOptions}

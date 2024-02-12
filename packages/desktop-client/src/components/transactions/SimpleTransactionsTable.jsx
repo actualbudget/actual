@@ -1,5 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import React, { memo, useMemo, useCallback } from 'react';
 
 import {
   format as formatDate,
@@ -13,8 +12,11 @@ import {
 } from 'loot-core/src/client/reducers/queries';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
-import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePayees } from '../../hooks/usePayees';
+import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowsSynchronize } from '../../icons/v2';
 import { styles, theme } from '../../style';
 import { Cell, Field, Row, SelectCell, Table } from '../table';
@@ -141,13 +143,9 @@ export function SimpleTransactionsTable({
   style,
 }) {
   const { grouped: categories } = useCategories();
-  const { payees, accounts, dateFormat } = useSelector(state => {
-    return {
-      payees: state.queries.payees,
-      accounts: state.queries.accounts,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    };
-  });
+  const payees = usePayees();
+  const accounts = useAccounts();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
   const memoFields = useMemo(() => fields, [JSON.stringify(fields)]);
