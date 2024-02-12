@@ -8,7 +8,6 @@ import { theme, styles } from '../../style';
 import { View } from '../common/View';
 
 import { CashFlowCard } from './reports/CashFlowCard';
-import { CategorySpendingCard } from './reports/CategorySpendingCard';
 import { CustomReportCard } from './reports/CustomReportCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { NetWorthCard } from './reports/NetWorthCard';
@@ -16,9 +15,6 @@ import { SankeyCard } from './reports/SankeyCard';
 
 export function Overview() {
   const customReports = useReports();
-  const categorySpendingReportFeatureFlag = useFeatureFlag(
-    'categorySpendingReport',
-  );
   const sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
@@ -52,8 +48,7 @@ export function Overview() {
           flexDirection: 'row',
         }}
       >
-        {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
-        {sankeyFeatureFlag && <SankeyCard />}
+        {sankeyFeatureFlag && <SankeyCard />
         {customReportsFeatureFlag && <CustomReportCard />}
         {featureCount !== 3 &&
           [...Array(featureCount)].map((e, i) => (
