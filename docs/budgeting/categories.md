@@ -67,6 +67,8 @@ Click the paper icon and type in your note.
 
 ![](/static/img/categories/CategoryAddNote.png)
 
+Notes support Markdown syntax for formatted notes.
+
 ## Viewing Category Notes
 
 Once a Category has been given a note it is possible to view it in one of two way.
@@ -78,15 +80,3 @@ Once a Category has been given a note it is possible to view it in one of two wa
 2. Click the paper icon, this will open the edit box where you can see the note content and also edit the note should you wish.
 
 ![](/static/img/categories/CategoryEditNote.png)
-
-## Tips for new users
-
-If you don't have much experience tracking your finances yet, we recommend starting simple. For this reason, Actual only comes with a few basic categories by default. Don't worry about tracking things super closely. Tracking a few basic areas of your life will still give you profound insights on your spending.
-
-The basic categories are:
-
-- **Food:** all grocery and restaurant spending.
-- **General:** everything else (you probably want to split this up over time, but having a general category is nice for a lot of miscellaneous expenses).
-- **Bills:** all bills that charge that same amount each month. Some people like to split this up too, but we think reports will eventually make this clearer.
-- **Bills (Flexible):** All bills that charge various amounts (power, water, bi-monthly bills, etc).
-- **Savings:** any transfers to savings accounts. These are treated as expenses because it's moving money out of the budget, but if you add your savings account on the budget you'll want to budget all that money accordingly instead.

@@ -98,19 +98,3 @@ Sometimes you want to keep a negative balance in a category across months. The m
 1. Click an amount in the **Balance** column for a category.
 2. Select **Rollover overspending**
 3. For all future months, a negative balance will stay in the category
-
-## Recommended workflow for new users
-
-This might sound complex, but it's really not! You can get as detailed as you want, but it's still very effective if you keep it simple. If you're not sure where to start, we recommend this simple workflow:
-
-1. We recommend opening a savings account if you don't have one. Add it in Actual as an off-budget account.
-2. Stick with the basic categories (you will probably add a few more, but don't overdo it).
-3. Try to budget less than what you are making so that you are saving money each month.
-4. When the month ends, copy last month's budget. Whatever is leftover in **To budget** is the amount of money that you saved.
-5. Note that this automatically will cover overspending from last month by taking it out of the leftover **To budget** amount. You're effectively taking out of savings.
-6. Budget the leftover **To budget** amount to the **Savings** category
-7. Transfer the leftover amount to your savings account and categorize the transactions with the **Savings** category
-
-If you don't have a savings account, you can simply skip step 7. The **Savings** category will build up a balance and represent the savings that you are keeping in your account.
-
-This also assumes you have enough income to cover a full month plus any overspending. If you don't, you need to watch your budget more carefully and make sure to cover overspending from other categories.

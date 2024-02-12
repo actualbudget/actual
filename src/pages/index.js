@@ -195,8 +195,7 @@ export default function Hello() {
             learnMore="/docs/advanced/bank-sync"
           >
             Actual has built in support for bank syncing using goCardless 
-            (EU/UK).  Community importers are also available for Plaid and
-            SimpleFIN (US/Canada).
+            (EU/UK) and SimpleFIN (US/Canada).  Community importers are also available for Plaid.
           </SmallFeature>
           <SmallFeature
             title="Budgeting"
