@@ -2,6 +2,7 @@
 import React, { type ReactElement, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
+import { useSelector } from 'react-redux';
 import {
   Route,
   Routes,
@@ -13,12 +14,12 @@ import {
 
 import hotkeys from 'hotkeys-js';
 
-import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
-import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
+import { type State } from 'loot-core/src/client/state-types';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import { useAccounts } from '../hooks/useAccounts';
 import { useActions } from '../hooks/useActions';
 import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
@@ -39,7 +40,8 @@ import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { ScrollProvider } from './ScrollProvider';
 import { Settings } from './settings';
-import { FloatableSidebar, SidebarProvider } from './sidebar';
+import { FloatableSidebar } from './sidebar';
+import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar, TitlebarProvider } from './Titlebar';
 import { TransactionEdit } from './transactions/MobileTransaction';
 
@@ -71,18 +73,19 @@ function WideNotSupported({ children, redirectTo = '/budget' }) {
   return isNarrowWidth ? children : null;
 }
 
-function RouterBehaviors({ getAccounts }) {
+function RouterBehaviors() {
   const navigate = useNavigate();
+  const accounts = useAccounts();
+  const accountsLoaded = useSelector(
+    (state: State) => state.queries.accountsLoaded,
+  );
   useEffect(() => {
-    // Get the accounts and check if any exist. If there are no
-    // accounts, we want to redirect the user to the All Accounts
-    // screen which will prompt them to add an account
-    getAccounts().then(accounts => {
-      if (accounts.length === 0) {
-        navigate('/accounts');
-      }
-    });
-  }, []);
+    // If there are no accounts, we want to redirect the user to
+    // the All Accounts screen which will prompt them to add an account
+    if (accountsLoaded && accounts.length === 0) {
+      navigate('/accounts');
+    }
+  }, [accountsLoaded, accounts]);
 
   const location = useLocation();
   const href = useHref(location);
@@ -116,7 +119,7 @@ function FinancesAppWithoutContext() {
 
   return (
     <BrowserRouter>
-      <RouterBehaviors getAccounts={actions.getAccounts} />
+      <RouterBehaviors />
       <ExposeNavigate />
 
       <View style={{ height: '100%' }}>
@@ -265,13 +268,9 @@ export function FinancesApp() {
       <TitlebarProvider>
         <SidebarProvider>
           <BudgetMonthCountProvider>
-            <PayeesProvider>
-              <AccountsProvider>
-                <DndProvider backend={Backend}>
-                  <ScrollProvider>{app}</ScrollProvider>
-                </DndProvider>
-              </AccountsProvider>
-            </PayeesProvider>
+            <DndProvider backend={Backend}>
+              <ScrollProvider>{app}</ScrollProvider>
+            </DndProvider>
           </BudgetMonthCountProvider>
         </SidebarProvider>
       </TitlebarProvider>

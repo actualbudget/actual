@@ -26,7 +26,7 @@ export function loadPrefs() {
   };
 }
 
-export function savePrefs(prefs: Partial<prefs.LocalPrefs>) {
+export function savePrefs(prefs: prefs.LocalPrefs) {
   return async (dispatch: Dispatch) => {
     await send('save-prefs', prefs);
     dispatch({
@@ -48,7 +48,7 @@ export function loadGlobalPrefs() {
   };
 }
 
-export function saveGlobalPrefs(prefs: Partial<prefs.GlobalPrefs>) {
+export function saveGlobalPrefs(prefs: prefs.GlobalPrefs) {
   return async (dispatch: Dispatch) => {
     await send('save-global-prefs', prefs);
     dispatch({

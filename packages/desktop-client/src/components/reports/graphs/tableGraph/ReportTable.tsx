@@ -20,26 +20,28 @@ type ReportTableProps = {
   saveScrollWidth: (value: number) => void;
   listScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
-  style?: CSSProperties;
   groupBy: string;
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
   data: DataEntity[];
   mode: string;
   monthsCount: number;
   compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
 };
 
 export function ReportTable({
   saveScrollWidth,
   listScrollRef,
   handleScroll,
-  style,
   groupBy,
   balanceTypeOp,
   data,
   mode,
   monthsCount,
   compact,
+  style,
+  compactStyle,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -50,16 +52,25 @@ export function ReportTable({
   });
 
   const renderItem = useCallback(
-    ({ item, groupByItem, mode, style, monthsCount, compact }) => {
+    ({
+      item,
+      groupByItem,
+      mode,
+      monthsCount,
+      compact,
+      style,
+      compactStyle,
+    }) => {
       return (
         <ReportTableRow
           item={item}
           balanceTypeOp={balanceTypeOp}
           groupByItem={groupByItem}
           mode={mode}
-          style={style}
           monthsCount={monthsCount}
           compact={compact}
+          style={style}
+          compactStyle={compactStyle}
         />
       );
     },
@@ -73,7 +84,6 @@ export function ReportTable({
         flexDirection: 'row',
         outline: 'none',
         '& .animated .animated-row': { transition: '.25s transform' },
-        ...style,
       }}
       tabIndex={1}
     >
@@ -88,7 +98,6 @@ export function ReportTable({
           flex: 1,
           outline: 'none',
           '& .animated .animated-row': { transition: '.25s transform' },
-          ...style,
         }}
       >
         <ReportTableList
@@ -98,6 +107,8 @@ export function ReportTable({
           groupBy={groupBy}
           renderItem={renderItem}
           compact={compact}
+          style={style}
+          compactStyle={compactStyle}
         />
       </Block>
     </View>

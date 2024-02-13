@@ -19,8 +19,13 @@ import {
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { useLocalPrefs } from '../../hooks/useLocalPrefs';
 import { useNavigate } from '../../hooks/useNavigate';
+import { usePayees } from '../../hooks/usePayees';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
@@ -72,19 +77,27 @@ function PreviewTransactions({ children }) {
 let paged;
 
 export function Account(props) {
-  const accounts = useSelector(state => state.queries.accounts);
+  const accounts = useAccounts();
+  const payees = usePayees();
 
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [currentQuery, setCurrentQuery] = useState();
 
-  const state = useSelector(state => ({
-    payees: state.queries.payees,
-    newTransactions: state.queries.newTransactions,
-    prefs: state.prefs.local,
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  }));
+  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const prefs = useLocalPrefs();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const [_numberFormat] = useLocalPref('numberFormat');
+  const numberFormat = _numberFormat || 'comma-dot';
+  const [hideFraction = false] = useLocalPref('hideFraction');
+
+  const state = {
+    payees,
+    newTransactions,
+    prefs,
+    dateFormat,
+  };
 
   const dispatch = useDispatch();
   const actionCreators = useMemo(
@@ -134,11 +147,6 @@ export function Account(props) {
         }
       });
 
-      if (accounts.length === 0) {
-        await actionCreators.getAccounts();
-      }
-
-      await actionCreators.initiallyLoadPayees();
       await fetchTransactions();
 
       actionCreators.markAccountRead(accountId);
@@ -216,8 +224,6 @@ export function Account(props) {
   const balance = queries.accountBalance(account);
   const balanceCleared = queries.accountBalanceCleared(account);
   const balanceUncleared = queries.accountBalanceUncleared(account);
-  const numberFormat = state.prefs.numberFormat || 'comma-dot';
-  const hideFraction = state.prefs.hideFraction || false;
 
   return (
     <SchedulesProvider

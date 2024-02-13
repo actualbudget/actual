@@ -1,12 +1,11 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
-import {
-  type GroupedEntity,
-  type Month,
-} from 'loot-core/src/types/models/reports';
+import * as monthUtils from 'loot-core/src/shared/months';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties } from '../../style';
+import { styles } from '../../style/styles';
 import { View } from '../common/View';
 
 import { AreaGraph } from './graphs/AreaGraph';
@@ -21,30 +20,33 @@ import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
+  startDate: string;
+  endDate: string;
   data: GroupedEntity;
   mode: string;
   graphType: string;
   balanceType: string;
   groupBy: string;
   setScrollWidth?: (value: number) => void;
-  months?: Month[];
   viewLabels?: boolean;
   compact?: boolean;
   style?: CSSProperties;
 };
 
 export function ChooseGraph({
+  startDate,
+  endDate,
   data,
   mode,
   graphType,
   balanceType,
   groupBy,
   setScrollWidth,
-  months,
   viewLabels,
   compact,
   style,
 }: ChooseGraphProps) {
+  const months: string[] = monthUtils.rangeInclusive(startDate, endDate);
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const groupByData =
@@ -57,6 +59,9 @@ export function ChooseGraph({
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
   };
+
+  const rowStyle = compact && { flex: '0 0 20px', height: 20 };
+  const compactStyle = compact && { ...styles.tinyText };
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<HTMLDivElement>(null);
@@ -141,6 +146,8 @@ export function ChooseGraph({
           groupBy={groupBy}
           balanceType={balanceType}
           compact={compact}
+          style={rowStyle}
+          compactStyle={compactStyle}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}
@@ -152,6 +159,8 @@ export function ChooseGraph({
           mode={mode}
           monthsCount={months.length}
           compact={compact}
+          style={rowStyle}
+          compactStyle={compactStyle}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -161,6 +170,8 @@ export function ChooseGraph({
           balanceTypeOp={balanceTypeOp}
           monthsCount={months.length}
           compact={compact}
+          style={rowStyle}
+          compactStyle={compactStyle}
         />
       </View>
     );
