@@ -261,7 +261,7 @@ export const goCardlessService = {
     await goCardlessService.setToken();
 
     const response = await client.initSession({
-      redirectUrl: host + '/nordigen/link',
+      redirectUrl: host + '/gocardless/link',
       institutionId,
       referenceId: uuid.v4(),
       accessValidForDays,
