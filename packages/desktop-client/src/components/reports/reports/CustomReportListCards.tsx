@@ -99,7 +99,7 @@ export function CustomReportListCards({ reports }) {
                 <View style={{ width: '100%', height: '100%' }}>
                   <ReportCard to="/reports/custom" report={report.data}>
                     <View
-                      style={{ flex: 1, padding: 20 }}
+                      style={{ flex: 1, padding: 10 }}
                       onMouseEnter={() => setIsCardHovered(report.data.id)}
                       onMouseLeave={() => {
                         setIsCardHovered(null);

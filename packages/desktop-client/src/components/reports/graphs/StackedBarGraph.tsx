@@ -23,7 +23,6 @@ import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
-import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
@@ -41,12 +40,18 @@ type PayloadItem = {
 };
 
 type CustomTooltipProps = {
+  compact: boolean;
   active?: boolean;
   payload?: PayloadItem[];
   label?: string;
 };
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({
+  compact,
+  active,
+  payload,
+  label,
+}: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     let sumTotals = 0;
     return (
@@ -65,32 +70,32 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           <div style={{ marginBottom: 10 }}>
             <strong>{label}</strong>
           </div>
-          <div style={{ lineHeight: 1.5 }}>
-            <PrivacyFilter>
-              {payload
-                .slice(0)
-                .reverse()
-                .map(pay => {
-                  sumTotals += pay.value;
-                  return (
-                    pay.value !== 0 && (
-                      <AlignedText
-                        key={pay.name}
-                        left={pay.name}
-                        right={amountToCurrency(pay.value)}
-                        style={{ color: pay.color }}
-                      />
-                    )
-                  );
-                })}
-              <AlignedText
-                left="Total"
-                right={amountToCurrency(sumTotals)}
-                style={{
-                  fontWeight: 600,
-                }}
-              />
-            </PrivacyFilter>
+          <div style={{ lineHeight: 1.4 }}>
+            {payload
+              .slice(0)
+              .reverse()
+              .map((pay, i) => {
+                sumTotals += pay.value;
+                return (
+                  pay.value !== 0 &&
+                  (compact ? i < 5 : true) && (
+                    <AlignedText
+                      key={pay.name}
+                      left={pay.name}
+                      right={amountToCurrency(pay.value)}
+                      style={{ color: pay.color }}
+                    />
+                  )
+                );
+              })}
+            {payload.length > 5 && compact && '...'}
+            <AlignedText
+              left="Total"
+              right={amountToCurrency(sumTotals)}
+              style={{
+                fontWeight: 600,
+              }}
+            />
           </div>
         </div>
       </div>
@@ -161,7 +166,7 @@ export function StackedBarGraph({
                 margin={{ top: 0, right: 0, left: leftMargin, bottom: 0 }}
               >
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={<CustomTooltip compact={compact} />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                   cursor={{ fill: 'transparent' }}
