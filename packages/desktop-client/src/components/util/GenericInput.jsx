@@ -5,6 +5,7 @@ import { useReports } from 'loot-core/client/data-hooks/reports';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -30,9 +31,7 @@ export function GenericInput({
   const { grouped: categoryGroups } = useCategories();
   const savedReports = useReports();
   const saved = useSelector(state => state.queries.saved);
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   // This makes the UI more resilient in case of faulty data
   if (multi && !Array.isArray(value)) {

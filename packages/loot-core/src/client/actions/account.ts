@@ -263,3 +263,10 @@ export function markAccountRead(accountId): MarkAccountReadAction {
     accountId,
   };
 }
+
+export function moveAccount(id, targetId) {
+  return async (dispatch: Dispatch) => {
+    await send('account-move', { id, targetId });
+    dispatch(getAccounts());
+  };
+}

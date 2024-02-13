@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
-import { useActions } from '../../../hooks/useActions';
+import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocalPref } from '../../../hooks/useLocalPref';
+import { usePayees } from '../../../hooks/usePayees';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -36,13 +35,12 @@ import { fromDateRepr } from '../util';
 export function CustomReport() {
   const categories = useCategories();
 
-  const viewLegend =
-    useSelector(state => state.prefs.local?.reportsViewLegend) || false;
-  const viewSummary =
-    useSelector(state => state.prefs.local?.reportsViewSummary) || false;
-  const viewLabels =
-    useSelector(state => state.prefs.local?.reportsViewLabel) || false;
-  const { savePrefs } = useActions();
+  const [viewLegend = false, setViewLegendPref] =
+    useLocalPref('reportsViewLegend');
+  const [viewSummary = false, setViewSummaryPref] =
+    useLocalPref('reportsViewSummary');
+  const [viewLabels = false, setViewLabelsPref] =
+    useLocalPref('reportsViewLabel');
 
   const {
     filters,
@@ -98,6 +96,7 @@ export function CustomReport() {
 
   useEffect(() => {
     async function run() {
+      report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = trans
@@ -126,8 +125,8 @@ export function CustomReport() {
   }, []);
 
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
-  const payees = useCachedPayees();
-  const accounts = useCachedAccounts();
+  const payees = usePayees();
+  const accounts = useAccounts();
 
   const getGroupData = useMemo(() => {
     return createGroupedSpreadsheet({
@@ -235,13 +234,13 @@ export function CustomReport() {
 
   const onChangeViews = (viewType, status) => {
     if (viewType === 'viewLegend') {
-      savePrefs({ reportsViewLegend: status ?? !viewLegend });
+      setViewLegendPref(status ?? !viewLegend);
     }
     if (viewType === 'viewSummary') {
-      savePrefs({ reportsViewSummary: !viewSummary });
+      setViewSummaryPref(!viewSummary);
     }
     if (viewType === 'viewLabels') {
-      savePrefs({ reportsViewLabel: !viewLabels });
+      setViewLabelsPref(!viewLabels);
     }
   };
 

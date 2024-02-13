@@ -13,17 +13,16 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import { usePrivacyMode } from 'loot-core/src/client/privacy';
 import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
+import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
-import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
@@ -68,30 +67,28 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            <PrivacyFilter>
-              {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Assets:"
-                  right={amountToCurrency(payload[0].payload.totalAssets)}
-                />
-              )}
-              {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Debt:"
-                  right={amountToCurrency(payload[0].payload.totalDebts)}
-                />
-              )}
-              {['totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Net:"
-                  right={
-                    <strong>
-                      {amountToCurrency(payload[0].payload.totalTotals)}
-                    </strong>
-                  }
-                />
-              )}
-            </PrivacyFilter>
+            {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Assets:"
+                right={amountToCurrency(payload[0].payload.totalAssets)}
+              />
+            )}
+            {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Debt:"
+                right={amountToCurrency(payload[0].payload.totalDebts)}
+              />
+            )}
+            {['totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net:"
+                right={
+                  <strong>
+                    {amountToCurrency(payload[0].payload.totalTotals)}
+                  </strong>
+                }
+              />
+            )}
           </div>
         </div>
       </div>
@@ -133,6 +130,7 @@ export function AreaGraph({
 
   const labelsMargin = viewLabels ? 30 : 0;
   const dataDiff = dataMax - dataMin;
+  const absDataMax = Math.max(Math.abs(dataMax), Math.abs(dataMin));
   //Calculate how much to add to max and min values for graph range
   const extendRangeAmount = Math.floor(dataDiff / 20);
   const labelsMin =
@@ -149,7 +147,7 @@ export function AreaGraph({
   const lastLabel = data.monthData.length - 1;
 
   const tickFormatter = tick => {
-    if (!privacyMode) return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
     return '...';
   };
 
@@ -166,6 +164,7 @@ export function AreaGraph({
 
   const off = gradientOffset();
 
+  const leftMargin = Math.abs(absDataMax) > 1000000 ? 20 : 0;
   return (
     <Container
       style={{
@@ -182,7 +181,12 @@ export function AreaGraph({
                 width={width}
                 height={height}
                 data={data.monthData}
-                margin={{ top: 0, right: labelsMargin, left: 0, bottom: 0 }}
+                margin={{
+                  top: 0,
+                  right: labelsMargin,
+                  left: leftMargin,
+                  bottom: 0,
+                }}
               >
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -204,6 +208,7 @@ export function AreaGraph({
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}
+                    tickSize={0}
                   />
                 )}
                 <Tooltip
@@ -212,7 +217,13 @@ export function AreaGraph({
                   isAnimationActive={false}
                 />
                 <defs>
-                  <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id={`fill${balanceTypeOp}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop
                       offset={off}
                       stopColor={theme.reportsBlue}
@@ -224,6 +235,24 @@ export function AreaGraph({
                       stopOpacity={0.2}
                     />
                   </linearGradient>
+                  <linearGradient
+                    id={`stroke${balanceTypeOp}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsBlue}
+                      stopOpacity={1}
+                    />
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsRed}
+                      stopOpacity={1}
+                    />
+                  </linearGradient>
                 </defs>
 
                 <Area
@@ -232,11 +261,11 @@ export function AreaGraph({
                   activeDot={false}
                   animationDuration={0}
                   dataKey={balanceTypeOp}
-                  stroke={theme.reportsBlue}
-                  fill="url(#splitColor)"
+                  stroke={`url(#stroke${balanceTypeOp})`}
+                  fill={`url(#fill${balanceTypeOp})`}
                   fillOpacity={1}
                 >
-                  {viewLabels && (
+                  {viewLabels && !compact && (
                     <LabelList
                       dataKey={balanceTypeOp}
                       content={e => customLabel(e, width, lastLabel)}

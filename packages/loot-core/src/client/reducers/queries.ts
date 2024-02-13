@@ -13,11 +13,14 @@ const initialState: QueriesState = {
   lastTransaction: null,
   updatedAccounts: [],
   accounts: [],
+  accountsLoaded: false,
   categories: {
     grouped: [],
     list: [],
   },
+  categoriesLoaded: false,
   payees: [],
+  payeesLoaded: false,
   earliestTransaction: null,
 };
 
@@ -56,6 +59,7 @@ export function update(state = initialState, action: Action): QueriesState {
       return {
         ...state,
         accounts: action.accounts,
+        accountsLoaded: true,
       };
     case constants.UPDATE_ACCOUNT: {
       return {
@@ -72,11 +76,13 @@ export function update(state = initialState, action: Action): QueriesState {
       return {
         ...state,
         categories: action.categories,
+        categoriesLoaded: true,
       };
     case constants.LOAD_PAYEES:
       return {
         ...state,
         payees: action.payees,
+        payeesLoaded: true,
       };
     default:
   }

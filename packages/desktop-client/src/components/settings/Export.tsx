@@ -1,13 +1,11 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { format } from 'date-fns';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
@@ -18,12 +16,8 @@ import { Setting } from './UI';
 export function ExportBudget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const budgetId = useSelector<State, PrefsState['local']['id']>(
-    state => state.prefs.local.id,
-  );
-  const encryptKeyId = useSelector<State, PrefsState['local']['encryptKeyId']>(
-    state => state.prefs.local.encryptKeyId,
-  );
+  const [budgetId] = useLocalPref('id');
+  const [encryptKeyId] = useLocalPref('encryptKeyId');
 
   async function onExport() {
     setIsLoading(true);

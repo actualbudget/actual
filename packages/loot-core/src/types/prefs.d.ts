@@ -1,7 +1,6 @@
 import { type numberFormats } from '../shared/util';
 
 export type FeatureFlag =
-  | 'categorySpendingReport'
   | 'sankeyReport'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
@@ -54,6 +53,7 @@ export type LocalPrefs = Partial<
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
+    'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
