@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
@@ -11,6 +10,8 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocalPrefs } from '../../hooks/useLocalPrefs';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
 import { Input } from '../common/Input';
@@ -703,10 +704,8 @@ function FieldMappings({
 }
 
 export function ImportTransactions({ modalProps, options }) {
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
-  const prefs = useSelector(state => state.prefs.local);
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const prefs = useLocalPrefs();
   const { parseTransactions, importTransactions, getPayees, savePrefs } =
     useActions();
 

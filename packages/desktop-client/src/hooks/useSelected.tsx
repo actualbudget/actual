@@ -12,8 +12,7 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type AppState } from 'loot-core/client/state-types/app';
+import { type State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type UndoState } from 'loot-core/src/server/undo';
@@ -210,9 +209,7 @@ export function useSelected<T extends Item>(
     return () => undo.setUndoState('selectedItems', prevState);
   }, [state.selectedItems]);
 
-  const lastUndoState = useSelector<State, AppState['lastUndoState']>(
-    state => state.app.lastUndoState,
-  );
+  const lastUndoState = useSelector((state: State) => state.app.lastUndoState);
 
   useEffect(() => {
     function onUndo({ messages, undoTag }: UndoState) {

@@ -1,9 +1,8 @@
 // @ts-strict-ignore
 import React from 'react';
 
-import { CachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
-
+import { useAccount } from '../../hooks/useAccount';
+import { usePayee } from '../../hooks/usePayee';
 import { theme } from '../../style';
 import { Text } from '../common/Text';
 
@@ -18,33 +17,33 @@ export function DisplayId({
   id,
   noneColor = theme.pageTextSubdued,
 }: DisplayIdProps) {
-  let DataComponent;
+  return type === 'accounts' ? (
+    <AccountDisplayId id={id} noneColor={noneColor} />
+  ) : (
+    <PayeeDisplayId id={id} noneColor={noneColor} />
+  );
+}
 
-  switch (type) {
-    case 'payees':
-      DataComponent = CachedPayees;
-      break;
-    case 'accounts':
-      DataComponent = CachedAccounts;
-      break;
-    default:
-      throw new Error('DisplayId: unknown object type: ' + type);
-  }
-
+function AccountDisplayId({ id, noneColor }) {
+  const account = useAccount(id);
   return (
-    <DataComponent idKey={true}>
-      {data => {
-        const item = data[id];
+    <Text
+      style={account == null ? { color: noneColor } : null}
+      title={account ? account.name : 'None'}
+    >
+      {account ? account.name : 'None'}
+    </Text>
+  );
+}
 
-        return (
-          <Text
-            style={item == null ? { color: noneColor } : null}
-            title={item ? item.name : 'None'}
-          >
-            {item ? item.name : 'None'}
-          </Text>
-        );
-      }}
-    </DataComponent>
+function PayeeDisplayId({ id, noneColor }) {
+  const payee = usePayee(id);
+  return (
+    <Text
+      style={payee == null ? { color: noneColor } : null}
+      title={payee ? payee.name : 'None'}
+    >
+      {payee ? payee.name : 'None'}
+    </Text>
   );
 }

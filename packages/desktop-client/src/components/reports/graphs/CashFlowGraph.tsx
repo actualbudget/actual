@@ -15,12 +15,12 @@ import {
   type TooltipProps,
 } from 'recharts';
 
-import { usePrivacyMode } from 'loot-core/src/client/privacy';
 import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
 
+import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { chartTheme } from '../chart-theme';

@@ -1,10 +1,7 @@
 // @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
@@ -14,6 +11,7 @@ import {
 
 import { type BoundActions, useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
@@ -26,7 +24,6 @@ import { prewarmMonth, switchBudgetType } from './util';
 type BudgetInnerProps = {
   categories: CategoryEntity[];
   categoryGroups: CategoryGroupEntity[];
-  prefs: PrefsState['local'];
   loadPrefs: BoundActions['loadPrefs'];
   savePrefs: BoundActions['savePrefs'];
   budgetType: 'rollover' | 'report';
@@ -50,9 +47,7 @@ function BudgetInner(props: BudgetInnerProps) {
   const {
     categoryGroups,
     categories,
-    prefs,
     loadPrefs,
-    savePrefs,
     budgetType,
     spreadsheet,
     applyBudgetAction,
@@ -74,6 +69,10 @@ function BudgetInner(props: BudgetInnerProps) {
   const [currentMonth, setCurrentMonth] = useState(currMonth);
   const [initialized, setInitialized] = useState(false);
   const [editMode, setEditMode] = useState(false);
+
+  const [_numberFormat] = useLocalPref('numberFormat');
+  const numberFormat = _numberFormat || 'comma-dot';
+  const [hideFraction = false] = useLocalPref('hideFraction');
 
   useEffect(() => {
     async function init() {
@@ -356,9 +355,6 @@ function BudgetInner(props: BudgetInnerProps) {
     });
   };
 
-  const numberFormat = prefs?.numberFormat || 'comma-dot';
-  const hideFraction = prefs?.hideFraction || false;
-
   if (!categoryGroups || !initialized) {
     return (
       <View
@@ -385,7 +381,7 @@ function BudgetInner(props: BudgetInnerProps) {
         <BudgetTable
           // This key forces the whole table rerender when the number
           // format changes
-          key={numberFormat + hideFraction}
+          key={`${numberFormat}${hideFraction}`}
           categoryGroups={categoryGroups}
           type={budgetType}
           month={currentMonth}
@@ -407,7 +403,6 @@ function BudgetInner(props: BudgetInnerProps) {
           onBudgetAction={applyBudgetAction}
           onRefresh={onRefresh}
           onSwitchBudgetType={onSwitchBudgetType}
-          savePrefs={savePrefs}
           pushModal={pushModal}
           onEditGroup={onEditGroup}
           onEditCategory={onEditCategory}
@@ -419,12 +414,8 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
-    state => state.prefs.local?.budgetType || 'rollover',
-  );
-  const prefs = useSelector<State, PrefsState['local']>(
-    state => state.prefs.local,
-  );
+  const [_budgetType] = useLocalPref('budgetType');
+  const budgetType = _budgetType || 'rollover';
 
   const actions = useActions();
   const spreadsheet = useSpreadsheet();
@@ -434,7 +425,6 @@ export function Budget() {
       categoryGroups={categoryGroups}
       categories={categories}
       budgetType={budgetType}
-      prefs={prefs}
       {...actions}
       spreadsheet={spreadsheet}
     />
