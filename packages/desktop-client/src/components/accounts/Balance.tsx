@@ -1,8 +1,9 @@
 import React from 'react';
 
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import { q } from 'loot-core/src/shared/query';
+import { q, type Query } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
+import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
@@ -16,7 +17,22 @@ import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
 
-function DetailedBalance({ name, balance, isExactBalance = true }) {
+type BalanceQuery = {
+  name: string;
+  query: Query;
+};
+
+type DetailedBalanceProps = {
+  name: string;
+  balance: number;
+  isExactBalance?: boolean;
+};
+
+function DetailedBalance({
+  name,
+  balance,
+  isExactBalance = true,
+}: DetailedBalanceProps) {
   const format = useFormat();
   return (
     <Text
@@ -39,10 +55,15 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
   );
 }
 
-function SelectedBalance({ selectedItems, account }) {
+type SelectedBalanceProps = {
+  selectedItems: Set<string>;
+  account: AccountEntity;
+};
+
+function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
-  const rows = useSheetValue({
+  const rows = useSheetValue<Pick<TransactionEntity, 'id'>[]>({
     name,
     query: q('transactions')
       .filter({
@@ -54,7 +75,7 @@ function SelectedBalance({ selectedItems, account }) {
   const ids = new Set((rows || []).map(r => r.id));
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
-  let balance = useSheetValue({
+  let balance = useSheetValue<number>({
     name: name + '-sum',
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
@@ -77,6 +98,7 @@ function SelectedBalance({ selectedItems, account }) {
         isExactBalance = false;
       }
 
+      scheduleBalance ??= 0;
       if (!account || account.id === s._account) {
         scheduleBalance += getScheduledAmount(s._amount);
       } else {
@@ -104,15 +126,17 @@ function SelectedBalance({ selectedItems, account }) {
   );
 }
 
-function MoreBalances({ balanceQuery }) {
-  const cleared = useSheetValue({
-    name: balanceQuery.name + '-cleared',
-    query: balanceQuery.query.filter({ cleared: true }),
-  });
-  const uncleared = useSheetValue({
-    name: balanceQuery.name + '-uncleared',
-    query: balanceQuery.query.filter({ cleared: false }),
-  });
+function MoreBalances({ balanceQuery }: { balanceQuery: BalanceQuery }) {
+  const cleared =
+    useSheetValue<number>({
+      name: balanceQuery.name + '-cleared',
+      query: balanceQuery.query.filter({ cleared: true }),
+    }) ?? 0;
+  const uncleared =
+    useSheetValue<number>({
+      name: balanceQuery.name + '-uncleared',
+      query: balanceQuery.query.filter({ cleared: false }),
+    }) ?? 0;
 
   return (
     <View style={{ flexDirection: 'row' }}>
@@ -122,13 +146,20 @@ function MoreBalances({ balanceQuery }) {
   );
 }
 
+type BalancesProps = {
+  balanceQuery: BalanceQuery;
+  showExtraBalances: boolean;
+  onToggleExtraBalances: () => void;
+  account: AccountEntity;
+};
+
 export function Balances({
   balanceQuery,
   showExtraBalances,
   onToggleExtraBalances,
   account,
-}) {
-  const selectedItems = useSelectedItems();
+}: BalancesProps) {
+  const selectedItems = useSelectedItems<string>();
 
   return (
     <View

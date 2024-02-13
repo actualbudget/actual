@@ -1,5 +1,11 @@
 // @ts-strict-ignore
-import React, { createContext, useEffect, useState, useContext } from 'react';
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  useContext,
+  type ReactNode,
+} from 'react';
 
 import { q, type Query } from '../../shared/query';
 import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
@@ -66,9 +72,16 @@ export function useSchedules({
   return data;
 }
 
-const SchedulesContext = createContext(null);
+const SchedulesContext = createContext<UseSchedulesReturnType>(null);
 
-export function SchedulesProvider({ transform, children }) {
+type SchedulesProviderProps = UseSchedulesArgs & {
+  children: ReactNode;
+};
+
+export function SchedulesProvider({
+  transform,
+  children,
+}: SchedulesProviderProps) {
   const data = useSchedules({ transform });
   return (
     <SchedulesContext.Provider value={data}>

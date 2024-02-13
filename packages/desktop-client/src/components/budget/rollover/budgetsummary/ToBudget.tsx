@@ -46,7 +46,7 @@ export function ToBudget({
 }: ToBudgetProps) {
   const [menuOpen, setMenuOpen] = useState(null);
   const sheetName = useSheetName(rolloverBudget.toBudget);
-  const sheetValue = useSheetValue({
+  const sheetValue = useSheetValue<string>({
     name: rolloverBudget.toBudget,
     value: 0,
   });

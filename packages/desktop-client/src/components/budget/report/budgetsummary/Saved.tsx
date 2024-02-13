@@ -20,8 +20,9 @@ type SavedProps = {
   style?: CSSProperties;
 };
 export function Saved({ projected, style }: SavedProps) {
-  const budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
-  const totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
+  const budgetedSaved =
+    useSheetValue<number>(reportBudget.totalBudgetedSaved) || 0;
+  const totalSaved = useSheetValue<number>(reportBudget.totalSaved) || 0;
   const format = useFormat();
   const saved = projected ? budgetedSaved : totalSaved;
   const isNegative = saved < 0;

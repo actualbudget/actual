@@ -692,7 +692,7 @@ export function SheetCell({
     privacyFilter,
   } = valueProps;
 
-  const sheetValue = useSheetValue(binding, e => {
+  const sheetValue = useSheetValue<string>(binding, e => {
     // "close" the cell if it's editing
     if (props.exposed && inputProps && inputProps.onBlur) {
       inputProps.onBlur(e);

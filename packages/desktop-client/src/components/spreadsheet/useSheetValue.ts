@@ -7,7 +7,10 @@ import { useSheetName } from './useSheetName';
 
 import { type Binding } from '.';
 
-export function useSheetValue(binding: Binding, onChange?: (result) => void) {
+export function useSheetValue<T>(
+  binding: Binding,
+  onChange?: (result) => void,
+): T | null {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
   const bindingObj =

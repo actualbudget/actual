@@ -31,9 +31,9 @@ export function BalanceWithCarryover({
   carryoverStyle,
 }: BalanceWithCarryoverProps) {
   const carryoverValue = useSheetValue(carryover);
-  const balanceValue = useSheetValue(balance);
-  const goalValue = useSheetValue(goal);
-  const budgetedValue = useSheetValue(budgeted);
+  const balanceValue = useSheetValue<number>(balance);
+  const goalValue = useSheetValue<number>(goal);
+  const budgetedValue = useSheetValue<number>(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   return (
     <View style={style}>
