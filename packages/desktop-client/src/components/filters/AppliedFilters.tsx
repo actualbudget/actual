@@ -4,8 +4,8 @@ import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
 import { View } from '../common/View';
 
+import { CondOpMenu } from './CondOpMenu';
 import { FilterExpression } from './FilterExpression';
-import { CondOpMenu } from './SavedFilters';
 
 type AppliedFiltersProps = {
   filters: RuleConditionEntity[];
@@ -15,7 +15,7 @@ type AppliedFiltersProps = {
   ) => RuleConditionEntity;
   onDelete: (filter: RuleConditionEntity) => void;
   conditionsOp: string;
-  onCondOpChange: () => void;
+  onCondOpChange: (value: string, filters: RuleConditionEntity[]) => void;
 };
 
 export function AppliedFilters({
