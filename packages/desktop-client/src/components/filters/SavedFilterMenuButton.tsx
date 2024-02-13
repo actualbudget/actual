@@ -68,10 +68,17 @@ export function SavedFilterMenuButton({
           name: filterId.name,
           status: 'saved',
         };
-        await sendCatch('filter-update', {
+        const response = await sendCatch('filter-update', {
           state: savedFilter,
           filters: [...filtersList],
         });
+
+        if (response.error) {
+          setErr(response.error.message);
+          setNameOpen(true);
+          return;
+        }
+
         onReloadSavedFilter(savedFilter, 'update');
         break;
       case 'save-filter':
