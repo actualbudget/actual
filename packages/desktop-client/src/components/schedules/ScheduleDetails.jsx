@@ -95,7 +95,8 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
             fields: {
               payee: schedule._payee,
               account: schedule._account,
-              amount: schedule._amount || 0,
+              // defalut to a non-zero value so the sign can be changed before the value
+              amount: schedule._amount || -1000,
               amountOp: schedule._amountOp || 'isapprox',
               date: schedule._date,
               posts_transaction: action.schedule.posts_transaction,
