@@ -1,11 +1,10 @@
 // @ts-strict-ignore
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 import type { Theme } from 'loot-core/src/types/prefs';
+
+import { useGlobalPref } from '../hooks/useGlobalPref';
 
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
@@ -26,16 +25,13 @@ export const themeOptions = Object.entries(themes).map(
   ([key, { name }]) => [key, name] as [Theme, string],
 );
 
-export function useTheme(): Theme {
-  return (
-    useSelector<State, PrefsState['global']['theme']>(
-      state => state.prefs.global?.theme,
-    ) || 'light'
-  );
+export function useTheme() {
+  const [theme = 'light', setThemePref] = useGlobalPref('theme');
+  return [theme, setThemePref] as const;
 }
 
 export function ThemeStyle() {
-  const theme = useTheme();
+  const [theme] = useTheme();
   const [themeColors, setThemeColors] = useState<
     typeof lightTheme | typeof darkTheme | typeof midnightTheme | undefined
   >(undefined);

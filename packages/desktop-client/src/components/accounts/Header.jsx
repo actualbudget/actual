@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgAdd } from '../../icons/v1';
@@ -21,7 +22,7 @@ import { Search } from '../common/Search';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
-import { FiltersStack } from '../filters/SavedFilters';
+import { FiltersStack } from '../filters/FiltersStack';
 import { KeyHandlers } from '../KeyHandlers';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
@@ -53,7 +54,6 @@ export function AccountHeader({
   search,
   filters,
   conditionsOp,
-  savePrefs,
   pushModal,
   onSearch,
   onAddTransaction,
@@ -86,6 +86,7 @@ export function AccountHeader({
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
+  const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
 
   let canSync = account && account.account_id && isUsingServer;
   if (!account) {
@@ -100,9 +101,7 @@ export function AccountHeader({
         id: tableRef.current.getScrolledItem(),
       });
 
-      savePrefs({
-        'expand-splits': !(splitsExpanded.state.mode === 'expand'),
-      });
+      setExpandSplitsPref(!(splitsExpanded.state.mode === 'expand'));
     }
   }
 

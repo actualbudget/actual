@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import type { Theme } from 'loot-core/src/types/prefs';
 
-import { useActions } from '../hooks/useActions';
 import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
 import { type CSSProperties, themeOptions, useTheme } from '../style';
@@ -16,8 +15,7 @@ type ThemeSelectorProps = {
 };
 
 export function ThemeSelector({ style }: ThemeSelectorProps) {
-  const theme = useTheme();
-  const { saveGlobalPrefs } = useActions();
+  const [theme, switchTheme] = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const { isNarrowWidth } = useResponsive();
@@ -29,12 +27,9 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     midnight: SvgMoonStars,
   } as const;
 
-  async function onMenuSelect(newTheme: string) {
+  function onMenuSelect(newTheme: Theme) {
     setMenuOpen(false);
-
-    saveGlobalPrefs({
-      theme: newTheme as Theme,
-    });
+    switchTheme(newTheme);
   }
 
   const Icon = themeIcons[theme] || SvgSun;

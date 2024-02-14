@@ -20,7 +20,7 @@ import { theme, styles, type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { useScroll } from '../ScrollProvider';
 
-const ROW_HEIGHT = 70;
+export const ROW_HEIGHT = 70;
 const COLUMN_COUNT = 3;
 
 export function MobileNavTabs() {

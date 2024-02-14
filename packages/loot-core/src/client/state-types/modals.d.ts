@@ -42,7 +42,7 @@ type FinanceModals = {
     syncSource?: AccountSyncSource;
   };
 
-  'confirm-category-delete': { onDelete: () => void } & (
+  'confirm-category-delete': { onDelete: (categoryId: string) => void } & (
     | { category: string }
     | { group: string }
   );

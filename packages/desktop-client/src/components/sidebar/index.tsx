@@ -1,71 +1,14 @@
-// @ts-strict-ignore
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useMemo,
-  type ReactNode,
-  type Dispatch,
-  type SetStateAction,
-} from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
-
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
 
-import { SIDEBAR_WIDTH } from './Sidebar';
-import { SidebarWithData } from './SidebarWithData';
-
-type SidebarContextValue = {
-  hidden: boolean;
-  setHidden: Dispatch<SetStateAction<boolean>>;
-  floating: boolean;
-  alwaysFloats: boolean;
-};
-
-const SidebarContext = createContext<SidebarContextValue>(null);
-
-type SidebarProviderProps = {
-  children: ReactNode;
-};
-
-export function SidebarProvider({ children }: SidebarProviderProps) {
-  const floatingSidebar = useSelector<
-    State,
-    PrefsState['global']['floatingSidebar']
-  >(state => state.prefs.global.floatingSidebar);
-  const [hidden, setHidden] = useState(true);
-  const { width } = useResponsive();
-  const alwaysFloats = width < 668;
-  const floating = floatingSidebar || alwaysFloats;
-
-  return (
-    <SidebarContext.Provider
-      value={{ hidden, setHidden, floating, alwaysFloats }}
-    >
-      {children}
-    </SidebarContext.Provider>
-  );
-}
-
-export function useSidebar() {
-  const { hidden, setHidden, floating, alwaysFloats } =
-    useContext(SidebarContext);
-
-  return useMemo(
-    () => ({ hidden, setHidden, floating, alwaysFloats }),
-    [hidden, setHidden, floating, alwaysFloats],
-  );
-}
+import { SIDEBAR_WIDTH, Sidebar } from './Sidebar';
+import { useSidebar } from './SidebarProvider';
 
 export function FloatableSidebar() {
-  const floatingSidebar = useSelector<
-    State,
-    PrefsState['global']['floatingSidebar']
-  >(state => state.prefs.global.floatingSidebar);
+  const [floatingSidebar] = useGlobalPref('floatingSidebar');
 
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();
@@ -80,11 +23,13 @@ export function FloatableSidebar() {
               e.stopPropagation();
               sidebar.setHidden(false);
             }
-          : null
+          : undefined
       }
-      onMouseLeave={sidebarShouldFloat ? () => sidebar.setHidden(true) : null}
+      onMouseLeave={
+        sidebarShouldFloat ? () => sidebar.setHidden(true) : undefined
+      }
       style={{
-        position: sidebarShouldFloat ? 'absolute' : null,
+        position: sidebarShouldFloat ? 'absolute' : undefined,
         top: 12,
         // If not floating, the -50 takes into account the transform below
         bottom: sidebarShouldFloat ? 12 : -50,
@@ -105,7 +50,7 @@ export function FloatableSidebar() {
           'transform .5s, box-shadow .5s, border-radius .5s, bottom .5s',
       }}
     >
-      <SidebarWithData />
+      <Sidebar />
     </View>
   );
 }

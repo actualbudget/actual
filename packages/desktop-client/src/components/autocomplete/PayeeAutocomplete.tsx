@@ -13,14 +13,14 @@ import { useDispatch } from 'react-redux';
 import { css } from 'glamor';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 import {
   type AccountEntity,
   type PayeeEntity,
 } from 'loot-core/src/types/models';
 
+import { useAccounts } from '../../hooks/useAccounts';
+import { usePayees } from '../../hooks/usePayees';
 import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
@@ -187,12 +187,12 @@ export function PayeeAutocomplete({
   payees,
   ...props
 }: PayeeAutocompleteProps) {
-  const cachedPayees = useCachedPayees();
+  const retrievedPayees = usePayees();
   if (!payees) {
-    payees = cachedPayees;
+    payees = retrievedPayees;
   }
 
-  const cachedAccounts = useCachedAccounts();
+  const cachedAccounts = useAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
   }

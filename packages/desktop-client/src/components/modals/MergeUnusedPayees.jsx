@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { usePayees } from '../../hooks/usePayees';
 import { theme } from '../../style';
 import { Information } from '../alerts';
 import { Button } from '../common/Button';
@@ -15,10 +16,8 @@ import { View } from '../common/View';
 const highlightStyle = { color: theme.pageTextPositive };
 
 export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
-  const { payees: allPayees, modalStack } = useSelector(state => ({
-    payees: state.queries.payees,
-    modalStack: state.modals.modalStack,
-  }));
+  const allPayees = usePayees();
+  const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
   const dispatch = useDispatch();
   const [shouldCreateRule, setShouldCreateRule] = useState(true);

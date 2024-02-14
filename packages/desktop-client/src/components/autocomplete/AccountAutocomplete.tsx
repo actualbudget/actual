@@ -3,9 +3,9 @@ import React, { Fragment, type ComponentProps, type ReactNode } from 'react';
 
 import { css } from 'glamor';
 
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import { View } from '../common/View';
@@ -86,7 +86,7 @@ export function AccountAutocomplete({
   closeOnBlur,
   ...props
 }: AccountAutoCompleteProps) {
-  let accounts = useCachedAccounts() || [];
+  let accounts = useAccounts() || [];
 
   //remove closed accounts if needed
   //then sort by closed, then offbudget
