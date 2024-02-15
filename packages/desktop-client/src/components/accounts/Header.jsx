@@ -135,6 +135,8 @@ export function AccountHeader({
                     marginTop: -5,
                     marginBottom: -2,
                     marginLeft: -5,
+                    paddingTop: 2,
+                    paddingBottom: 2,
                   }}
                 />
               </InitialFocus>
@@ -158,7 +160,7 @@ export function AccountHeader({
                     fontSize: 25,
                     fontWeight: 500,
                     marginRight: 5,
-                    marginBottom: 5,
+                    marginBottom: -1,
                   }}
                   data-testid="account-name"
                 >
@@ -190,7 +192,7 @@ export function AccountHeader({
               </View>
             ) : (
               <View
-                style={{ fontSize: 25, fontWeight: 500, marginBottom: 5 }}
+                style={{ fontSize: 25, fontWeight: 500, marginBottom: -1 }}
                 data-testid="account-name"
               >
                 {account && account.closed
