@@ -19,6 +19,7 @@ import { useSetServerURL } from '../../ServerContext';
 // do any checks.
 export function useBootstrapped() {
   const [checked, setChecked] = useState(false);
+  const [loginMethod, setLoginMethod] = useState('password');
   const navigate = useNavigate();
   const location = useLocation();
   const setServerURL = useSetServerURL();
@@ -59,6 +60,7 @@ export function useBootstrapped() {
         if ('error' in result) {
           navigate('/error', { state: { error: result.error } });
         } else if (result.bootstrapped) {
+          setLoginMethod(result.loginMethod);
           ensure('/login');
         } else {
           ensure('/bootstrap');
@@ -68,7 +70,7 @@ export function useBootstrapped() {
     run();
   }, [location]);
 
-  return { checked };
+  return { checked, loginMethod };
 }
 
 type TitleProps = {
