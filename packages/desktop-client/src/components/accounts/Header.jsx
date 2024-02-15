@@ -22,7 +22,7 @@ import { Search } from '../common/Search';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
-import { FiltersStack } from '../filters/SavedFilters';
+import { FiltersStack } from '../filters/FiltersStack';
 import { KeyHandlers } from '../KeyHandlers';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
