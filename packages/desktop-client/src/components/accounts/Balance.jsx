@@ -148,6 +148,8 @@ export function Balances({
             opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0,
           },
           '&:hover svg': { opacity: 1 },
+          paddingTop: 1,
+          paddingBottom: 1,
         }}
       >
         <CellValue
