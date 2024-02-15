@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ChangeEvent, useState } from 'react';
+import React, { type ChangeEvent, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
@@ -20,7 +20,15 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const { checked } = useBootstrapped();
+  const { checked, loginMethod } = useBootstrapped();
+
+  useEffect(() => {
+    (async () => {
+      if (loginMethod === 'header') {
+        await onSubmit(null);
+      }
+    })();
+  }, [loginMethod]);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -86,27 +94,41 @@ export function Login() {
         </Text>
       )}
 
-      <form
-        style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-        onSubmit={onSubmit}
-      >
-        <BigInput
-          autoFocus={true}
-          placeholder="Password"
-          type="password"
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setPassword(e.target.value)
-          }
-          style={{ flex: 1, marginRight: 10 }}
-        />
-        <ButtonWithLoading
-          type="primary"
-          loading={loading}
-          style={{ fontSize: 15 }}
+      {loginMethod === 'password' && (
+        <form
+          style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
+          onSubmit={onSubmit}
         >
-          Sign in
-        </ButtonWithLoading>
-      </form>
+          <BigInput
+            autoFocus={true}
+            placeholder="Password"
+            type="password"
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
+            style={{ flex: 1, marginRight: 10 }}
+          />
+          <ButtonWithLoading
+            type="primary"
+            loading={loading}
+            style={{ fontSize: 15 }}
+          >
+            Sign in
+          </ButtonWithLoading>
+        </form>
+      )}
+      {loginMethod === 'header' && (
+        <div style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
+          <ButtonWithLoading
+            type="primary"
+            loading={true}
+            style={{ fontSize: 15 }}
+            disabled={true}
+          >
+            Checking Header Token Login
+          </ButtonWithLoading>
+        </div>
+      )}
       <View
         style={{
           flexDirection: 'row',

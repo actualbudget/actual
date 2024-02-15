@@ -1410,7 +1410,11 @@ handlers['subscribe-needs-bootstrap'] = async function ({
     return { error: res.reason };
   }
 
-  return { bootstrapped: res.data.bootstrapped, hasServer: true };
+  return {
+    bootstrapped: res.data.bootstrapped,
+    loginMethod: res.data.loginMethod,
+    hasServer: true,
+  };
 };
 
 handlers['subscribe-bootstrap'] = async function ({ password }) {
