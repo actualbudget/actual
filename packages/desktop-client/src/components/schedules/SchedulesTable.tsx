@@ -65,12 +65,10 @@ function OverflowMenu({
   const getMenuItems = () => {
     const menuItems: { name: ScheduleItemAction; text: string }[] = [];
 
-    if (status === 'due') {
-      menuItems.push({
-        name: 'post-transaction',
-        text: 'Post transaction',
-      });
-    }
+    menuItems.push({
+      name: 'post-transaction',
+      text: 'Post transaction',
+    });
 
     if (status === 'completed') {
       menuItems.push({
