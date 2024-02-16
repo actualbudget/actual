@@ -1,4 +1,4 @@
-import React, { Fragment, type ComponentProps } from 'react';
+import React, { type ComponentProps } from 'react';
 
 import { theme } from '../../style/theme';
 import { View } from '../common/View';
@@ -25,7 +25,7 @@ export function FilterList<T extends { id: string; name: string }>({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        <Fragment>{ItemHeader({ title: 'Saved Filters' })}</Fragment>
+        <ItemHeader title="Saved Filters" />
         {items.map((item, idx) => {
           return [
             <div
