@@ -393,6 +393,8 @@ const TransactionHeader = memo(
   },
 );
 
+TransactionHeader.displayName = 'TransactionHeader';
+
 function getPayeePretty(transaction, payee, transferAcct) {
   const { payee: payeeId } = transaction;
 
@@ -2266,3 +2268,5 @@ export const TransactionTable = forwardRef((props, ref) => {
     />
   );
 });
+
+TransactionTable.displayName = 'TransactionTable';

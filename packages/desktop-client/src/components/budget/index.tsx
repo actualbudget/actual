@@ -434,6 +434,8 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
   );
 });
 
+RolloverBudgetSummary.displayName = 'RolloverBudgetSummary';
+
 export function Budget() {
   const titlebar = useContext(TitlebarContext);
 
