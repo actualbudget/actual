@@ -58,6 +58,9 @@
     "typescript": "^5.0.2",
     "typescript-strict-plugin": "^2.2.2-beta.2"
   },
+  "resolutions": {
+    "rollup": "4.9.4"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
