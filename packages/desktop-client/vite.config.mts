@@ -152,8 +152,9 @@ export default defineConfig(async ({ mode }) => {
         registerType: 'autoUpdate',
         workbox: {
           globPatterns: [
-            '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2}',
+            '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
           ],
+          ignoreURLParametersMatching: [/^v$/],
         },
       }),
       injectShims(),
