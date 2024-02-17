@@ -21,6 +21,7 @@ import {
   makeValue,
   FIELD_TYPES,
   TYPE_INFO,
+  ALLOCATION_METHODS,
 } from 'loot-core/src/shared/rules';
 import {
   integerToCurrency,
@@ -329,11 +330,7 @@ const parentOnlyFields = ['amount', 'cleared', 'account', 'date'];
 const splitActionFields = actionFields.filter(
   ([field]) => !parentOnlyFields.includes(field),
 );
-const splitAmountTypes = [
-  ['fixed-amount', 'a fixed amount'],
-  ['fixed-percent', 'a fixed percentage'],
-  ['remainder', 'an equal portion of the remainder'],
-];
+const allocationMethodOptions = Object.entries(ALLOCATION_METHODS);
 function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
   const {
     field,
@@ -379,7 +376,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           </View>
 
           <SplitAmountMethodSelect
-            options={splitAmountTypes}
+            options={allocationMethodOptions}
             value={options.method}
             onChange={onChange}
           />
