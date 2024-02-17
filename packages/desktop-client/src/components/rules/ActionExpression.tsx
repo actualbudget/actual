@@ -75,17 +75,20 @@ function SetSplitAmountActionExpression({
   value,
   options,
 }: SetSplitAmountRuleActionEntity) {
+  const method = options?.method;
+  if (!method) {
+    return null;
+  }
+
   return (
     <>
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Text style={valueStyle}>{ALLOCATION_METHODS[options.method]}</Text>
-      {options.method !== 'remainder' && ': '}
-      {options.method === 'fixed-amount' && (
+      <Text style={valueStyle}>{ALLOCATION_METHODS[method]}</Text>
+      {method !== 'remainder' && ': '}
+      {method === 'fixed-amount' && (
         <Value style={valueStyle} value={value} field="amount" />
       )}
-      {options.method === 'fixed-percent' && (
-        <Text style={valueStyle}>{value}%</Text>
-      )}
+      {method === 'fixed-percent' && <Text style={valueStyle}>{value}%</Text>}
     </>
   );
 }
