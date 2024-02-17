@@ -148,7 +148,14 @@ export default defineConfig(async ({ mode }) => {
       extensions: resolveExtensions,
     },
     plugins: [
-      VitePWA(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        workbox: {
+          globPatterns: [
+            '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2}',
+          ],
+        },
+      }),
       injectShims(),
       addWatchers(),
       react({
