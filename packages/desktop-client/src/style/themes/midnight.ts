@@ -61,7 +61,7 @@ export const menuAutoCompleteBackgroundHover = colorPalette.gray400; //desktop a
 export const menuAutoCompleteText = colorPalette.gray100; //desktop autocomplete
 export const menuAutoCompleteTextHeader = colorPalette.purple200; //desktop autocomplete
 
-export const modalBackground = colorPalette.gray600; //controls desktop modals and mobile autocomplete background
+export const modalBackground = colorPalette.gray700; //controls desktop modals and mobile autocomplete background
 export const modalBorder = colorPalette.gray200; //?? Not used
 export const mobileHeaderBackground = colorPalette.gray800;
 export const mobileHeaderText = colorPalette.purple200;
@@ -102,7 +102,7 @@ export const buttonPrimaryBackground = colorPalette.gray400;
 export const buttonPrimaryBackgroundHover = buttonPrimaryBackground;
 export const buttonPrimaryBorder = buttonPrimaryBackground;
 export const buttonPrimaryShadow = 'rgba(0, 0, 0, 0.6)';
-export const buttonPrimaryDisabledText = colorPalette.gray700;
+export const buttonPrimaryDisabledText = colorPalette.gray400; //Mobile Add transaction text color
 export const buttonPrimaryDisabledBackground = colorPalette.gray700;
 export const buttonPrimaryDisabledBorder = buttonPrimaryDisabledBackground;
 
@@ -180,7 +180,7 @@ export const pillBackground = colorPalette.gray700; //settings background
 export const pillBackgroundLight = colorPalette.gray900;
 export const pillText = colorPalette.gray200;
 export const pillTextHighlighted = colorPalette.purple200;
-export const pillBorder = colorPalette.gray700;
+export const pillBorder = colorPalette.gray500; //mobile underlines
 export const pillBorderDark = pillBorder;
 export const pillBackgroundSelected = colorPalette.purple600;
 export const pillTextSelected = colorPalette.gray150;
