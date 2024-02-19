@@ -321,3 +321,5 @@ export const ManagePayees = forwardRef(
     );
   },
 );
+
+ManagePayees.displayName = 'ManagePayees';
