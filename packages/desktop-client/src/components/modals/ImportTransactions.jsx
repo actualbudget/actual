@@ -544,7 +544,7 @@ function MultiplierOption({
         style={{ display: multiplierEnabled ? 'inherit' : 'none' }}
         value={multiplierAmount}
         placeholder="Multiplier"
-        onUpdate={onChangeAmount}
+        onChangeValue={onChangeAmount}
       />
     </View>
   );
@@ -573,7 +573,7 @@ function InOutOption({
         <Input
           type="text"
           value={outValue}
-          onUpdate={onChangeText}
+          onChangeValue={onChangeText}
           placeholder="Value for out rows, i.e. Credit"
         />
       )}

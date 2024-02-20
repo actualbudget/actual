@@ -83,7 +83,7 @@ export function Search({
       onKeyDown={e => {
         if (e.key === 'Escape') onChange('');
       }}
-      onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+      onChangeValue={value => onChange(value)}
     />
   );
 }

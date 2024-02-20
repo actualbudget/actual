@@ -47,9 +47,7 @@ export const InputField = forwardRef(function InputField(
       autoCorrect="false"
       autoCapitalize="none"
       disabled={disabled}
-      onBlur={e => {
-        onUpdate?.(e.target.value);
-      }}
+      onUpdate={onUpdate}
       style={{
         ...valueStyle,
         ...style,

@@ -23,7 +23,7 @@ type AmountInputProps = {
   inputRef?: Ref<HTMLInputElement>;
   value: number;
   zeroSign?: '-' | '+';
-  onChange?: (value: string) => void;
+  onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
   onUpdate?: (amount: number) => void;
@@ -40,7 +40,7 @@ export function AmountInput({
   zeroSign = '-', // + or -
   onFocus,
   onBlur,
-  onChange,
+  onChangeValue,
   onUpdate,
   style,
   textStyle,
@@ -77,7 +77,7 @@ export function AmountInput({
 
   function onInputTextChange(val) {
     setValue(val ? val : '');
-    onChange?.(val);
+    onChangeValue?.(val);
   }
 
   function fireUpdate(negate) {
@@ -123,7 +123,7 @@ export function AmountInput({
           fireUpdate(negative);
         }
       }}
-      onUpdate={onInputTextChange}
+      onChangeValue={onInputTextChange}
       onBlur={onInputAmountBlur}
       onFocus={onFocus}
     />
