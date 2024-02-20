@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type ChangeEvent, type Ref } from 'react';
+import { type Ref } from 'react';
 
 import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
