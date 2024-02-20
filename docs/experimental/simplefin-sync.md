@@ -77,7 +77,14 @@ All functionality described here may not be available in the latest stable relea
 
 5. When you've mapped all your accounts that you wish to, click the "Link Account" button.
 
-6. To sync all accounts, click on "All Accounts" in the side menu, and then click "Sync", below the "All Accounts" header.
+### Retrieve transactions
+
+Actual does not automatically perform syncs.
+You will need to manually request a sync to pull new transactions from SimpleFIN.
+To sync all accounts, click on "All Accounts" in the side menu, and then click "Sync", below the "All Accounts" header.  
+If you wish to only sync one account, view the desired account and click the sync button.
+
+  ![](/static/img/connecting-your-bank/connecting-your-bank-simplefin-10.png)
 
 ### SimpleFIN Considerations
 
