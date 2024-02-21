@@ -44,3 +44,5 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
     );
   },
 );
+
+BudgetPageHeader.displayName = 'BudgetPageHeader';

@@ -56,7 +56,7 @@ export function Overview() {
           <View
             style={{
               height: 1,
-              backgroundColor: theme.sidebarBackground,
+              backgroundColor: theme.pillBorderDark,
               marginTop: 10,
               flexShrink: 0,
             }}

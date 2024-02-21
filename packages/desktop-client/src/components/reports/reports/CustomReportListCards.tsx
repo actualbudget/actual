@@ -1,7 +1,8 @@
-// @ts-strict-ignore
-import React, { useState } from 'react';
+
+import React, { useMemo, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
@@ -42,68 +43,80 @@ function CardMenu({ onClose, onMenuSelect, reportId }: CardMenuProps) {
     </MenuTooltip>
   );
 }
+function index(data: CustomReportEntity[]): { [key: string]: boolean }[] {
+  return data.reduce((carry, report) => {
+    const reportId: string = report.id === undefined ? '' : report.id;
 
-function index(data) {
-  const result = {};
-  data.forEach(report => {
-    result[report.id] = false;
-  });
-  return result;
+    return {
+      ...carry,
+      [reportId]: false,
+    };
+  }, []);
 }
 
-export function CustomReportListCards({ reports }) {
-  const result = index(reports);
+export function CustomReportListCards({
+  reports,
+}: {
+  reports: CustomReportEntity[];
+}) {
+  const result: { [key: string]: boolean }[] = index(reports);
   const [reportMenu, setReportMenu] = useState(result);
 
-  const [isCardHovered, setIsCardHovered] = useState(null);
+  const [isCardHovered, setIsCardHovered] = useState('');
 
-  const onMenuSelect = async (item, reportId) => {
+  const onMenuSelect = async (item: string, reportId: string) => {
     if (item === 'delete') {
       onMenuOpen(reportId, false);
       await send('report/delete', reportId);
     }
   };
-
-  const onMenuOpen = (item, state) => {
+  const onMenuOpen = (item: string, state: boolean) => {
     setReportMenu({ ...reportMenu, [item]: state });
   };
 
-  const ReportGrid = slice => {
-    const pack = [];
+  const chunkSize = 3;
 
-    slice?.map(item => {
-      pack.push({ data: item });
-      return null;
-    });
+  const groups = useMemo(() => {
+    return reports
+      .map((report: CustomReportEntity, i: number) => {
+        return i % chunkSize === 0 ? reports.slice(i, i + chunkSize) : null;
+      })
+      .filter(e => {
+        return e;
+      });
+  }, [reports]);
 
-    const data2 = [...pack];
-    const remainder = 3 - (data2.length % 3);
-    const groupedData = [];
+  const remainder = 3 - (reports.length % 3);
 
-    while (data2.length) {
-      groupedData.push(data2.splice(0, 3));
-    }
-
-    return (
-      <>
-        {groupedData.map((data, i) => (
-          <View
-            key={i}
-            style={{
-              flex: '0 0 auto',
-              flexDirection: 'row',
-            }}
-          >
-            {data.map((report, id) => (
+  if (reports.length === 0) return null;
+  return (
+    <View>
+      {groups.map((group, i) => (
+        <View
+          key={i}
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+          }}
+        >
+          {group &&
+            group.map((report, id) => (
               <View key={id} style={{ position: 'relative', flex: '1' }}>
                 <View style={{ width: '100%', height: '100%' }}>
-                  <ReportCard to="/reports/custom" report={report.data}>
+                  <ReportCard to="/reports/custom" report={report}>
                     <View
                       style={{ flex: 1, padding: 10 }}
-                      onMouseEnter={() => setIsCardHovered(report.data.id)}
+                      onMouseEnter={() =>
+                        setIsCardHovered(
+                          report.id === undefined ? '' : report.id,
+                        )
+                      }
                       onMouseLeave={() => {
-                        setIsCardHovered(null);
-                        onMenuOpen(report.data.id, false);
+                        setIsCardHovered('');
+                        onMenuOpen(
+                          report.id === undefined ? '' : report.id,
+                          false,
+                        );
                       }}
                     >
                       <View
@@ -122,24 +135,24 @@ export function CustomReportListCards({ reports }) {
                             }}
                             role="heading"
                           >
-                            {report.data.name}
+                            {report.name}
                           </Block>
                           <DateRange
-                            start={report.data.startDate}
-                            end={report.data.endDate}
+                            start={report.startDate}
+                            end={report.endDate}
                           />
                         </View>
                       </View>
 
-                      {report.data.data ? (
+                      {report.data ? (
                         <ChooseGraph
-                          startDate={report.data.startDate}
-                          endDate={report.data.endDate}
-                          data={report.data.data}
-                          mode={report.data.mode}
-                          graphType={report.data.graphType}
-                          balanceType={report.data.balanceType}
-                          groupBy={report.data.groupBy}
+                          startDate={report.startDate}
+                          endDate={report.endDate}
+                          data={report.data}
+                          mode={report.mode}
+                          graphType={report.graphType}
+                          balanceType={report.balanceType}
+                          groupBy={report.groupBy}
                           compact={true}
                           style={{ height: 'auto', flex: 1 }}
                         />
@@ -158,34 +171,38 @@ export function CustomReportListCards({ reports }) {
                   }}
                 >
                   <MenuButton
-                    onClick={() => onMenuOpen(report.data.id, true)}
+                    onClick={() =>
+                      onMenuOpen(report.id === undefined ? '' : report.id, true)
+                    }
                     style={{
                       color:
-                        isCardHovered === report.data.id
-                          ? 'inherit'
-                          : 'transparent',
+                        isCardHovered === report.id ? 'inherit' : 'transparent',
                     }}
                   />
-                  {reportMenu[report.data.id] && (
-                    <CardMenu
-                      onMenuSelect={onMenuSelect}
-                      onClose={() => onMenuOpen(report.data.id, false)}
-                      reportId={report.data.id}
-                    />
-                  )}
+                  {report.id === undefined
+                    ? null
+                    : reportMenu[report.id as keyof typeof reportMenu] && (
+                        <CardMenu
+                          onMenuSelect={onMenuSelect}
+                          onClose={() =>
+                            onMenuOpen(
+                              report.id === undefined ? '' : report.id,
+                              false,
+                            )
+                          }
+                          reportId={report.id}
+                        />
+                      )}
                 </View>
               </View>
             ))}
-            {remainder !== 3 &&
-              i + 1 === groupedData.length &&
-              [...Array(remainder)].map((e, i) => (
-                <View key={i} style={{ flex: 1 }} />
-              ))}
-          </View>
-        ))}
-      </>
-    );
-  };
-
-  return reports.length > 0 && ReportGrid(reports);
+          {remainder !== 3 &&
+            i + 1 === groups.length &&
+            [...Array(remainder)].map((e, i) => (
+              <View key={i} style={{ flex: 1 }} />
+            ))}
+        </View>
+      ))}
+    </View>
+  );
 }

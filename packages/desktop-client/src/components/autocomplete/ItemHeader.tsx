@@ -18,6 +18,7 @@ export function ItemHeader({
         padding: '4px 9px',
         ...style,
       }}
+      data-testid={`${title}-${type}-item-group`}
       {...props}
     >
       {title}

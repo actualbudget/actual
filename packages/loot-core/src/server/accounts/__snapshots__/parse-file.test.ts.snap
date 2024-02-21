@@ -1,5 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`File import handles html escaped plaintext 1`] = `
+Array [
+  Object {
+    "acct": "one",
+    "amount": -100,
+    "category": null,
+    "cleared": 1,
+    "date": 20230509,
+    "description": "id2",
+    "error": null,
+    "financial_id": "23129130032333396279270000",
+    "id": "id4",
+    "imported_description": "000000000000000",
+    "isChild": 0,
+    "isParent": 0,
+    "location": null,
+    "notes": "PREAUTHORIZED DEBIT;B.C. HYDRO & POWER AUTHORITY;Electronic Funds Transfer",
+    "parent_id": null,
+    "pending": 0,
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transferred_id": null,
+    "type": null,
+  },
+  Object {
+    "acct": "one",
+    "amount": -100,
+    "category": null,
+    "cleared": 1,
+    "date": 20230301,
+    "description": "id3",
+    "error": null,
+    "financial_id": "23060061032549554596530000",
+    "id": "id5",
+    "imported_description": "TPAY <DEFTPYMT>",
+    "isChild": 0,
+    "isParent": 0,
+    "location": null,
+    "notes": "PREAUTHORIZED DEBIT;LUXMORE REALTY PPTY MGMT;Electronic Funds Transfer",
+    "parent_id": null,
+    "pending": 0,
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transferred_id": null,
+    "type": null,
+  },
+]
+`;
+
 exports[`File import handles non-ASCII characters 1`] = `
 Array [
   Object {

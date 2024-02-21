@@ -9,6 +9,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { FilterAutocomplete } from '../autocomplete/FilterAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '../autocomplete/ReportAutocomplete';
 import { SavedFilterAutocomplete } from '../autocomplete/SavedFilterAutocomplete';
@@ -101,7 +102,7 @@ export function GenericInput({
       switch (field) {
         case 'saved':
           content = (
-            <SavedFilterAutocomplete
+            <FilterAutocomplete
               saved={saved}
               value={value}
               multi={multi}

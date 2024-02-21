@@ -28,3 +28,5 @@ export const ExternalLink = forwardRef<HTMLAnchorElement, ExternalLinkProps>(
     </a>
   ),
 );
+
+ExternalLink.displayName = 'ExternalLink';

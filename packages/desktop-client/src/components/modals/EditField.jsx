@@ -15,18 +15,16 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import {
   AccountAutocomplete,
-  AccountItemGroupHeader,
   AccountItem,
 } from '../autocomplete/AccountAutocomplete';
 import {
   CategoryAutocomplete,
-  CategoryItemGroupHeader,
   CategoryItem,
 } from '../autocomplete/CategoryAutocomplete';
+import { ItemHeader } from '../autocomplete/ItemHeader';
 import {
   PayeeAutocomplete,
   CreatePayeeButton,
-  PayeeItemGroupHeader,
   PayeeItem,
 } from '../autocomplete/PayeeAutocomplete';
 import { Input } from '../common/Input';
@@ -118,7 +116,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
           }}
           {...(isNarrowWidth && {
             renderAccountItemGroupHeader: props => (
-              <AccountItemGroupHeader
+              <ItemHeader
                 {...props}
                 style={{
                   ...styles.largeText,
@@ -174,7 +172,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
               />
             ),
             renderPayeeItemGroupHeader: props => (
-              <PayeeItemGroupHeader
+              <ItemHeader
                 {...props}
                 style={{
                   ...styles.largeText,
@@ -228,7 +226,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
           }}
           {...(isNarrowWidth && {
             renderCategoryItemGroupHeader: props => (
-              <CategoryItemGroupHeader
+              <ItemHeader
                 {...props}
                 style={{
                   ...styles.largeText,

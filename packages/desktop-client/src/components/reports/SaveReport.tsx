@@ -48,7 +48,7 @@ export function SaveReport({
     onReportChange({ savedReport: chooseSavedReport, type: 'choose' });
     setChooseMenuOpen(false);
   }
-
+  
   const onAddUpdate = async (menuChoice: string) => {
     if (menuChoice === 'save-report') {
       const newSavedReport = {
@@ -88,7 +88,6 @@ export function SaveReport({
       setNameMenuOpen(true);
       return;
     }
-
     setNameMenuOpen(false);
     onReportChange({
       savedReport: updatedReport,

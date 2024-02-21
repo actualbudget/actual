@@ -22,7 +22,7 @@ import { Search } from '../common/Search';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
-import { FiltersStack } from '../filters/SavedFilters';
+import { FiltersStack } from '../filters/FiltersStack';
 import { KeyHandlers } from '../KeyHandlers';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
@@ -118,7 +118,9 @@ export function AccountHeader({
       />
 
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
-        <View style={{ marginTop: 2, alignItems: 'flex-start' }}>
+        <View
+          style={{ marginTop: 2, marginBottom: 10, alignItems: 'flex-start' }}
+        >
           <View>
             {editingName ? (
               <InitialFocus>
@@ -133,6 +135,8 @@ export function AccountHeader({
                     marginTop: -5,
                     marginBottom: -2,
                     marginLeft: -5,
+                    paddingTop: 2,
+                    paddingBottom: 2,
                   }}
                 />
               </InitialFocus>
@@ -156,7 +160,7 @@ export function AccountHeader({
                     fontSize: 25,
                     fontWeight: 500,
                     marginRight: 5,
-                    marginBottom: 5,
+                    marginBottom: -1,
                   }}
                   data-testid="account-name"
                 >
@@ -188,7 +192,7 @@ export function AccountHeader({
               </View>
             ) : (
               <View
-                style={{ fontSize: 25, fontWeight: 500, marginBottom: 5 }}
+                style={{ fontSize: 25, fontWeight: 500, marginBottom: -1 }}
                 data-testid="account-name"
               >
                 {account && account.closed

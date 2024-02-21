@@ -1,12 +1,14 @@
 // @ts-strict-ignore
 import React, { memo } from 'react';
 
+import { v4 as uuid } from 'uuid';
+
 import { friendlyOp } from 'loot-core/src/shared/rules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgRightArrow2 } from '../../icons/v0';
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -29,6 +31,17 @@ export const RuleRow = memo(
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
     const backgroundFocus = hovered;
+
+    const actionSplits = rule.actions.reduce(
+      (acc, action) => {
+        const splitIndex = action['options']?.splitIndex ?? 0;
+        acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
+        acc[splitIndex].actions.push(action);
+        return acc;
+      },
+      [] as { id: string; actions: RuleEntity['actions'] }[],
+    );
+    const hasSplits = actionSplits.length > 1;
 
     return (
       <Row
@@ -103,13 +116,47 @@ export const RuleRow = memo(
               style={{ flex: 1, alignItems: 'flex-start' }}
               data-testid="actions"
             >
-              {rule.actions.map((action, i) => (
-                <ActionExpression
-                  key={i}
-                  {...action}
-                  style={i !== 0 && { marginTop: 3 }}
-                />
-              ))}
+              {hasSplits
+                ? actionSplits.map((split, i) => (
+                    <View
+                      key={split.id}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        marginTop: i > 0 ? 3 : 0,
+                        padding: '5px',
+                        borderColor: theme.tableBorder,
+                        borderWidth: '1px',
+                        borderRadius: '5px',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          ...styles.verySmallText,
+                          color: theme.pageTextLight,
+                          marginBottom: 6,
+                        }}
+                      >
+                        {i ? `Split ${i}` : 'Before split'}
+                      </Text>
+                      {split.actions.map((action, j) => (
+                        <ActionExpression
+                          key={j}
+                          {...action}
+                          style={j !== 0 && { marginTop: 3 }}
+                        />
+                      ))}
+                    </View>
+                  ))
+                : rule.actions.map((action, i) => (
+                    <ActionExpression
+                      key={i}
+                      {...action}
+                      style={i !== 0 && { marginTop: 3 }}
+                    />
+                  ))}
             </View>
           </Stack>
         </Field>
@@ -124,3 +171,5 @@ export const RuleRow = memo(
     );
   },
 );
+
+RuleRow.displayName = 'RuleRow';
