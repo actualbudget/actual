@@ -5,7 +5,7 @@ import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
-import { Cell, Row } from '../../../table';
+import { Row } from '../../../table';
 
 type ReportTableListProps = {
   data: DataEntity[];
@@ -14,6 +14,8 @@ type ReportTableListProps = {
   groupBy: string;
   renderItem;
   compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
 };
 
 export function ReportTableList({
@@ -23,16 +25,25 @@ export function ReportTableList({
   groupBy,
   renderItem,
   compact,
+  style,
+  compactStyle,
 }: ReportTableListProps) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
 
   type RenderRowProps = {
     index: number;
     parent_index?: number;
-    style?: CSSProperties;
     compact: boolean;
+    style?: CSSProperties;
+    compactStyle?: CSSProperties;
   };
-  function RenderRow({ index, parent_index, style, compact }: RenderRowProps) {
+  function RenderRow({
+    index,
+    parent_index,
+    compact,
+    style,
+    compactStyle,
+  }: RenderRowProps) {
     const item =
       parent_index === undefined
         ? data[index]
@@ -42,29 +53,32 @@ export function ReportTableList({
       item,
       groupByItem,
       mode,
-      style,
       monthsCount,
       compact,
+      style,
+      compactStyle,
     });
   }
 
   return (
     <View>
-      {data.map((item, index) => {
-        return (
-          <View key={item.id}>
-            {data ? (
-              <>
+      {data ? (
+        <View>
+          {data.map((item, index) => {
+            return (
+              <View key={item.id}>
                 <RenderRow
                   index={index}
                   compact={compact}
-                  style={
-                    item.categories && {
+                  style={{
+                    ...(item.categories && {
                       color: theme.tableRowHeaderText,
                       backgroundColor: theme.tableRowHeaderBackground,
                       fontWeight: 600,
-                    }
-                  }
+                    }),
+                    ...style,
+                  }}
+                  compactStyle={compactStyle}
                 />
                 {item.categories && (
                   <>
@@ -76,6 +90,8 @@ export function ReportTableList({
                             index={i}
                             compact={compact}
                             parent_index={index}
+                            style={style}
+                            compactStyle={compactStyle}
                           />
                         );
                       })}
@@ -83,13 +99,13 @@ export function ReportTableList({
                     <Row height={20} />
                   </>
                 )}
-              </>
-            ) : (
-              <Cell width="flex" />
-            )}
-          </View>
-        );
-      })}
+              </View>
+            );
+          })}
+        </View>
+      ) : (
+        <View width="flex" />
+      )}
     </View>
   );
 }

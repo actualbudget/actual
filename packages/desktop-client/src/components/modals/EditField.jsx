@@ -1,13 +1,15 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePayees } from '../../hooks/usePayees';
 import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
@@ -36,12 +38,10 @@ function CreatePayeeIcon(props) {
 }
 
 export function EditField({ modalProps, name, onSubmit, onClose }) {
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { grouped: categoryGroups } = useCategories();
-  const accounts = useSelector(state => state.queries.accounts);
-  const payees = useSelector(state => state.queries.payees);
+  const accounts = useAccounts();
+  const payees = usePayees();
 
   const { createPayee } = useActions();
 

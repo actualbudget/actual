@@ -124,3 +124,5 @@ export const RuleRow = memo(
     );
   },
 );
+
+RuleRow.displayName = 'RuleRow';

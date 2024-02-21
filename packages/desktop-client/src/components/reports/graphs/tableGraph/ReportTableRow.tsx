@@ -7,7 +7,7 @@ import {
 } from 'loot-core/src/shared/util';
 import { type DataEntity } from 'loot-core/src/types/models/reports';
 
-import { type CSSProperties, styles, theme } from '../../../../style';
+import { type CSSProperties, theme } from '../../../../style';
 import { Row, Cell } from '../../../table';
 
 type ReportTableRowProps = {
@@ -15,9 +15,10 @@ type ReportTableRowProps = {
   balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   groupByItem: 'id' | 'name';
   mode: string;
-  style?: CSSProperties;
   monthsCount: number;
   compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
 };
 
 export const ReportTableRow = memo(
@@ -26,9 +27,10 @@ export const ReportTableRow = memo(
     balanceTypeOp,
     groupByItem,
     mode,
-    style,
     monthsCount,
     compact,
+    style,
+    compactStyle,
   }: ReportTableRowProps) => {
     const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
     return (
@@ -45,10 +47,10 @@ export const ReportTableRow = memo(
           value={item[groupByItem]}
           title={item[groupByItem].length > 12 ? item[groupByItem] : undefined}
           style={{
-            width: 120,
+            width: compact ? 80 : 125,
             flexShrink: 0,
-            ...styles.tnum,
           }}
+          valueStyle={compactStyle}
         />
         {item.monthData && mode === 'time'
           ? item.monthData.map(month => {
@@ -56,9 +58,9 @@ export const ReportTableRow = memo(
                 <Cell
                   key={amountToCurrency(month[balanceTypeOp])}
                   style={{
-                    minWidth: compact ? 80 : 125,
-                    ...styles.tnum,
+                    minWidth: compact ? 50 : 85,
                   }}
+                  valueStyle={compactStyle}
                   value={amountToCurrency(month[balanceTypeOp])}
                   title={
                     Math.abs(month[balanceTypeOp]) > 100000
@@ -82,9 +84,9 @@ export const ReportTableRow = memo(
                   width="flex"
                   privacyFilter
                   style={{
-                    minWidth: compact ? 80 : 125,
-                    ...styles.tnum,
+                    minWidth: compact ? 50 : 85,
                   }}
+                  valueStyle={compactStyle}
                 />
                 <Cell
                   value={amountToCurrency(item.totalDebts)}
@@ -96,9 +98,9 @@ export const ReportTableRow = memo(
                   width="flex"
                   privacyFilter
                   style={{
-                    minWidth: compact ? 80 : 125,
-                    ...styles.tnum,
+                    minWidth: compact ? 50 : 85,
                   }}
+                  valueStyle={compactStyle}
                 />
               </>
             )}
@@ -111,9 +113,9 @@ export const ReportTableRow = memo(
           }
           style={{
             fontWeight: 600,
-            minWidth: compact ? 80 : 125,
-            ...styles.tnum,
+            minWidth: compact ? 50 : 85,
           }}
+          valueStyle={compactStyle}
           width="flex"
           privacyFilter
         />
@@ -126,9 +128,9 @@ export const ReportTableRow = memo(
           }
           style={{
             fontWeight: 600,
-            minWidth: compact ? 80 : 125,
-            ...styles.tnum,
+            minWidth: compact ? 50 : 85,
           }}
+          valueStyle={compactStyle}
           width="flex"
           privacyFilter
         />
@@ -136,3 +138,5 @@ export const ReportTableRow = memo(
     );
   },
 );
+
+ReportTableRow.displayName = 'ReportTableRow';

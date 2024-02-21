@@ -1,68 +1,74 @@
-import React, { type ReactNode } from 'react';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
+import {
+  closeBudget,
+  moveAccount,
+  replaceModal,
+} from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
-import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useAccounts } from '../../hooks/useAccounts';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { useNavigate } from '../../hooks/useNavigate';
+import { SvgExpandArrow } from '../../icons/v0';
 import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
-import { type CSSProperties, theme } from '../../style';
+import { styles, theme } from '../../style';
+import { Button } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
+import { Menu } from '../common/Menu';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type OnDropCallback } from '../sort';
-import { type Binding } from '../spreadsheet';
+import { Tooltip } from '../tooltips';
 
 import { Accounts } from './Accounts';
 import { Item } from './Item';
+import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
 import { Tools } from './Tools';
 
-import { useSidebar } from '.';
-
 export const SIDEBAR_WIDTH = 240;
 
-type SidebarProps = {
-  style: CSSProperties;
-  budgetName: ReactNode;
-  accounts: AccountEntity[];
-  failedAccounts: Map<
-    string,
-    {
-      type: string;
-      code: string;
-    }
-  >;
-  updatedAccounts: string[];
-  getBalanceQuery: (account: AccountEntity) => Binding;
-  getAllAccountBalance: () => Binding;
-  getOnBudgetBalance: () => Binding;
-  getOffBudgetBalance: () => Binding;
-  showClosedAccounts: boolean;
-  isFloating: boolean;
-  onFloat: () => void;
-  onAddAccount: () => void;
-  onToggleClosedAccounts: () => void;
-  onReorder: OnDropCallback;
-};
-
-export function Sidebar({
-  style,
-  budgetName,
-  accounts,
-  failedAccounts,
-  updatedAccounts,
-  getBalanceQuery,
-  getAllAccountBalance,
-  getOnBudgetBalance,
-  getOffBudgetBalance,
-  showClosedAccounts,
-  isFloating,
-  onFloat,
-  onAddAccount,
-  onToggleClosedAccounts,
-  onReorder,
-}: SidebarProps) {
+export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
+  const dispatch = useDispatch();
   const sidebar = useSidebar();
+  const accounts = useAccounts();
+  const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
+    'ui.showClosedAccounts',
+  );
+  const [isFloating = false, setFloatingSidebarPref] =
+    useGlobalPref('floatingSidebar');
+
+  async function onReorder(
+    id: string,
+    dropPos: 'top' | 'bottom',
+    targetId: unknown,
+  ) {
+    let targetIdToMove = targetId;
+    if (dropPos === 'bottom') {
+      const idx = accounts.findIndex(a => a.id === targetId) + 1;
+      targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
+    }
+
+    dispatch(moveAccount(id, targetIdToMove));
+  }
+
+  const onFloat = () => {
+    setFloatingSidebarPref(!isFloating);
+  };
+
+  const onAddAccount = () => {
+    dispatch(replaceModal('add-account'));
+  };
+
+  const onToggleClosedAccounts = () => {
+    setShowClosedAccountsPref(!showClosedAccounts);
+  };
 
   return (
     <View
@@ -79,7 +85,8 @@ export function Sidebar({
           opacity: 1,
           width: hasWindowButtons ? null : 'auto',
         },
-        ...style,
+        flex: 1,
+        ...styles.darkScrollbar,
       }}
     >
       <View
@@ -96,7 +103,7 @@ export function Sidebar({
           }),
         }}
       >
-        {budgetName}
+        <EditableBudgetName />
 
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
@@ -123,18 +130,6 @@ export function Sidebar({
         />
 
         <Accounts
-          accounts={accounts}
-          failedAccounts={failedAccounts}
-          updatedAccounts={updatedAccounts}
-          getAccountPath={account => `/accounts/${account.id}`}
-          allAccountsPath="/accounts"
-          budgetedAccountPath="/accounts/budgeted"
-          offBudgetAccountPath="/accounts/offbudget"
-          getBalanceQuery={getBalanceQuery}
-          getAllAccountBalance={getAllAccountBalance}
-          getOnBudgetBalance={getOnBudgetBalance}
-          getOffBudgetBalance={getOffBudgetBalance}
-          showClosedAccounts={showClosedAccounts}
           onAddAccount={onAddAccount}
           onToggleClosedAccounts={onToggleClosedAccounts}
           onReorder={onReorder}
@@ -142,4 +137,91 @@ export function Sidebar({
       </View>
     </View>
   );
+}
+
+function EditableBudgetName() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [budgetName, setBudgetNamePref] = useLocalPref('budgetName');
+  const [editing, setEditing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  function onMenuSelect(type: string) {
+    setMenuOpen(false);
+
+    switch (type) {
+      case 'rename':
+        setEditing(true);
+        break;
+      case 'settings':
+        navigate('/settings');
+        break;
+      case 'help':
+        window.open('https://actualbudget.org/docs/', '_blank');
+        break;
+      case 'close':
+        dispatch(closeBudget());
+        break;
+      default:
+    }
+  }
+
+  const items = [
+    { name: 'rename', text: 'Rename budget' },
+    { name: 'settings', text: 'Settings' },
+    ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
+    { name: 'close', text: 'Close file' },
+  ];
+
+  if (editing) {
+    return (
+      <InitialFocus>
+        <Input
+          style={{
+            width: 160,
+            fontSize: 16,
+            fontWeight: 500,
+          }}
+          defaultValue={budgetName}
+          onEnter={async e => {
+            const inputEl = e.target as HTMLInputElement;
+            const newBudgetName = inputEl.value;
+            if (newBudgetName.trim() !== '') {
+              setBudgetNamePref(newBudgetName);
+              setEditing(false);
+            }
+          }}
+          onBlur={() => setEditing(false)}
+        />
+      </InitialFocus>
+    );
+  } else {
+    return (
+      <Button
+        type="bare"
+        color={theme.buttonNormalBorder}
+        style={{
+          fontSize: 16,
+          fontWeight: 500,
+          marginLeft: -5,
+          flex: '0 auto',
+        }}
+        onClick={() => setMenuOpen(true)}
+      >
+        <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+          {budgetName || 'A budget has no name'}
+        </Text>
+        <SvgExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
+        {menuOpen && (
+          <Tooltip
+            position="bottom-left"
+            style={{ padding: 0 }}
+            onClose={() => setMenuOpen(false)}
+          >
+            <Menu onMenuSelect={onMenuSelect} items={items} />
+          </Tooltip>
+        )}
+      </Button>
+    );
+  }
 }

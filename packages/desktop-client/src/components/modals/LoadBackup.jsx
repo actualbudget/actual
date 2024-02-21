@@ -2,6 +2,7 @@ import React, { Component, useState, useEffect } from 'react';
 
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button';
@@ -55,10 +56,12 @@ export function LoadBackup({
   modalProps,
 }) {
   const [backups, setBackups] = useState([]);
+  const [prefsBudgetId] = useLocalPref('id');
+  const budgetIdToLoad = budgetId || prefsBudgetId;
 
   useEffect(() => {
-    send('backups-get', { id: budgetId }).then(setBackups);
-  }, [budgetId]);
+    send('backups-get', { id: budgetIdToLoad }).then(setBackups);
+  }, [budgetIdToLoad]);
 
   useEffect(() => {
     if (watchUpdates) {
@@ -93,7 +96,9 @@ export function LoadBackup({
                 </Block>
                 <Button
                   type="primary"
-                  onClick={() => actions.loadBackup(budgetId, latestBackup.id)}
+                  onClick={() =>
+                    actions.loadBackup(budgetIdToLoad, latestBackup.id)
+                  }
                 >
                   Revert to original version
                 </Button>
@@ -125,7 +130,7 @@ export function LoadBackup({
           ) : (
             <BackupTable
               backups={previousBackups}
-              onSelect={id => actions.loadBackup(budgetId, id)}
+              onSelect={id => actions.loadBackup(budgetIdToLoad, id)}
             />
           )}
         </View>

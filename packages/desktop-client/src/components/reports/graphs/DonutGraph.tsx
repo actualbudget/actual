@@ -7,12 +7,62 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { theme, type CSSProperties } from '../../../style';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
 const RADIAN = Math.PI / 180;
+
+const ActiveShapeMobile = props => {
+  const {
+    cx,
+    cy,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+    percent,
+    value,
+  } = props;
+  const yAxis = payload.name ?? payload.date;
+
+  return (
+    <g>
+      <text x={cx} y={cy + 65} dy={-8} textAnchor="middle" fill={fill}>
+        {`${yAxis}`}
+      </text>
+      <text x={cx - 30} y={cy + 40} dy={0} textAnchor="end" fill={fill}>
+        {`${amountToCurrency(value)}`}
+      </text>
+      <text x={cx + 30} y={cy + 40} dy={0} textAnchor="start" fill="#999">
+        {`${(percent * 100).toFixed(2)}%`}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={innerRadius - 8}
+        outerRadius={innerRadius - 6}
+        fill={fill}
+      />
+    </g>
+  );
+};
+
 const ActiveShape = props => {
   const {
     cx,
@@ -70,22 +120,24 @@ const ActiveShape = props => {
         textAnchor={textAnchor}
         fill={fill}
       >{`${yAxis}`}</text>
-      <text
-        x={ex + (cos <= 0 ? 1 : -1) * 16}
-        y={ey}
-        dy={18}
-        textAnchor={textAnchor}
-        fill={fill}
-      >{`${amountToCurrency(value)}`}</text>
-      <text
-        x={ex + (cos <= 0 ? 1 : -1) * 16}
-        y={ey}
-        dy={36}
-        textAnchor={textAnchor}
-        fill="#999"
-      >
-        {`(${(percent * 100).toFixed(2)}%)`}
-      </text>
+      <PrivacyFilter>
+        <text
+          x={ex + (cos <= 0 ? 1 : -1) * 16}
+          y={ey}
+          dy={18}
+          textAnchor={textAnchor}
+          fill={fill}
+        >{`${amountToCurrency(value)}`}</text>
+        <text
+          x={ex + (cos <= 0 ? 1 : -1) * 16}
+          y={ey}
+          dy={36}
+          textAnchor={textAnchor}
+          fill="#999"
+        >
+          {`(${(percent * 100).toFixed(2)}%)`}
+        </text>
+      </PrivacyFilter>
     </g>
   );
 };
@@ -165,7 +217,7 @@ export function DonutGraph({
               <PieChart width={width} height={height}>
                 <Pie
                   activeIndex={activeIndex}
-                  activeShape={ActiveShape}
+                  activeShape={compact ? ActiveShapeMobile : ActiveShape}
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   isAnimationActive={false}

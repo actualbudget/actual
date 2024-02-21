@@ -1,16 +1,15 @@
 // @ts-strict-ignore
 import React, { type ReactNode, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 
 import { media } from 'glamor';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
@@ -91,12 +90,8 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  const budgetId = useSelector<State, PrefsState['local']['id']>(
-    state => state.prefs.local.id,
-  );
-  const groupId = useSelector<State, PrefsState['local']['groupId']>(
-    state => state.prefs.local.groupId,
-  );
+  const [budgetId] = useLocalPref('id');
+  const [groupId] = useLocalPref('groupId');
 
   return (
     <Setting>
@@ -124,13 +119,8 @@ function AdvancedAbout() {
 }
 
 export function Settings() {
-  const floatingSidebar = useSelector<
-    State,
-    PrefsState['global']['floatingSidebar']
-  >(state => state.prefs.global.floatingSidebar);
-  const budgetName = useSelector<State, PrefsState['local']['budgetName']>(
-    state => state.prefs.local.budgetName,
-  );
+  const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const [budgetName] = useLocalPref('budgetName');
 
   const { loadPrefs, closeBudget } = useActions();
 

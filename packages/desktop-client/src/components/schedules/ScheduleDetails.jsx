@@ -1,14 +1,15 @@
 import React, { useEffect, useReducer } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
@@ -70,11 +71,10 @@ function updateScheduleConditions(schedule, fields) {
 export function ScheduleDetails({ modalProps, actions, id, transaction }) {
   const adding = id == null;
   const fromTrans = transaction != null;
-  const payees = useCachedPayees({ idKey: true });
+  const payees = usePayees({ idKey: true });
   const globalDispatch = useDispatch();
-  const dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
   const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
@@ -95,7 +95,8 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
             fields: {
               payee: schedule._payee,
               account: schedule._account,
-              amount: schedule._amount || 0,
+              // defalut to a non-zero value so the sign can be changed before the value
+              amount: schedule._amount || -1000,
               amountOp: schedule._amountOp || 'isapprox',
               date: schedule._date,
               posts_transaction: action.schedule.posts_transaction,

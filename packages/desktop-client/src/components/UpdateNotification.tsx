@@ -1,8 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type AppState } from 'loot-core/client/state-types/app';
+import { type State } from 'loot-core/src/client/state-types';
 
 import { useActions } from '../hooks/useActions';
 import { SvgClose } from '../icons/v1';
@@ -14,13 +13,10 @@ import { Text } from './common/Text';
 import { View } from './common/View';
 
 export function UpdateNotification() {
-  const updateInfo = useSelector<State, AppState['updateInfo']>(
-    state => state.app.updateInfo,
+  const updateInfo = useSelector((state: State) => state.app.updateInfo);
+  const showUpdateNotification = useSelector(
+    (state: State) => state.app.showUpdateNotification,
   );
-  const showUpdateNotification = useSelector<
-    State,
-    AppState['showUpdateNotification']
-  >(state => state.app.showUpdateNotification);
 
   const { updateApp, setAppState } = useActions();
 

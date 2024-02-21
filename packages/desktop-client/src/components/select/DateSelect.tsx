@@ -10,15 +10,12 @@ import React, {
   type MutableRefObject,
   type KeyboardEvent,
 } from 'react';
-import { useSelector } from 'react-redux';
 
 import { parse, parseISO, format, subDays, addDays, isValid } from 'date-fns';
 import Pikaday from 'pikaday';
 
 import 'pikaday/css/pikaday.css';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import {
   getDayMonthFormat,
   getDayMonthRegex,
@@ -28,6 +25,7 @@ import {
 } from 'loot-core/src/shared/months';
 import { stringToInteger } from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme } from '../../style';
 import { Input, type InputProps } from '../common/Input';
 import { View, type ViewProps } from '../common/View';
@@ -166,6 +164,8 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   },
 );
 
+DatePicker.displayName = 'DatePicker';
+
 function defaultShouldSaveFromKey(e) {
   return e.key === 'Enter';
 }
@@ -233,14 +233,8 @@ export function DateSelect({
   const [selectedValue, setSelectedValue] = useState(value);
   const userSelectedValue = useRef(selectedValue);
 
-  const firstDayOfWeekIdx = useSelector<
-    State,
-    PrefsState['local']['firstDayOfWeekIdx']
-  >(state =>
-    state.prefs.local?.firstDayOfWeekIdx
-      ? state.prefs.local.firstDayOfWeekIdx
-      : '0',
-  );
+  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   useEffect(() => {
     userSelectedValue.current = value;
