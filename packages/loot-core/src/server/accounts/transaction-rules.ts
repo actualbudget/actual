@@ -505,7 +505,15 @@ export async function applyActions(
       }
 
       try {
-        if (action.op === 'link-schedule') {
+        if (action.op === 'set-split-amount') {
+          return new Action(
+            action.op,
+            null,
+            action.value,
+            action.options,
+            FIELD_TYPES,
+          );
+        } else if (action.op === 'link-schedule') {
           return new Action(action.op, null, action.value, null, FIELD_TYPES);
         }
 

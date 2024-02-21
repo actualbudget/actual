@@ -47,6 +47,12 @@ export const FIELD_TYPES = new Map(
   }),
 );
 
+export const ALLOCATION_METHODS = {
+  'fixed-amount': 'a fixed amount',
+  'fixed-percent': 'a fixed percent',
+  remainder: 'an equal portion of the remainder',
+};
+
 export function mapField(field, opts?) {
   opts = opts || {};
 
@@ -113,6 +119,8 @@ export function friendlyOp(op, type?) {
       return 'is false';
     case 'set':
       return 'set';
+    case 'set-split-amount':
+      return 'allocate';
     case 'link-schedule':
       return 'link schedule';
     case 'and':
