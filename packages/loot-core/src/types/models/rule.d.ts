@@ -40,6 +40,7 @@ export interface RuleConditionEntity {
 
 export type RuleActionEntity =
   | SetRuleActionEntity
+  | SetSplitAmountRuleActionEntity
   | LinkScheduleRuleActionEntity;
 
 export interface SetRuleActionEntity {
