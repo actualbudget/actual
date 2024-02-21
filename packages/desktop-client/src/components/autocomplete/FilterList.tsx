@@ -25,7 +25,7 @@ export function FilterList<T extends { id: string; name: string }>({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        <ItemHeader title="Saved Filters" />
+        <ItemHeader title="Saved Filters" type="filter" />
         {items.map((item, idx) => {
           return [
             <div
