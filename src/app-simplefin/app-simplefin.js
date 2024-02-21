@@ -88,32 +88,48 @@ app.post('/transactions', async (req, res) => {
     response.startingBalance = balance; // could be named differently in this use case.
 
     let allTransactions = [];
+    let bookedTransactions = [];
+    let pendingTransactions = [];
 
     for (let trans of account.transactions) {
       let newTrans = {};
 
-      //newTrans.bankTransactionCode = don't have compared to GoCardless
-      newTrans.booked = true;
-      newTrans.bookingDate = new Date(trans.posted * 1000)
+      let dateToUse = 0;
+
+      if (trans.posted == 0) {
+        newTrans.booked = false;
+        dateToUse = trans.transacted_at;
+      } else {
+        newTrans.booked = true;
+        dateToUse = trans.posted;
+      }
+
+      newTrans.bookingDate = new Date(dateToUse * 1000)
         .toISOString()
         .split('T')[0];
-      newTrans.date = new Date(trans.posted * 1000).toISOString().split('T')[0];
+
+      newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
       newTrans.debtorName = trans.payee;
       //newTrans.debtorAccount = don't have compared to GoCardless
       newTrans.remittanceInformationUnstructured = trans.description;
       newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
       newTrans.transactionId = trans.id;
-      newTrans.valueDate = new Date(trans.posted * 1000)
+      newTrans.valueDate = new Date(dateToUse * 1000)
         .toISOString()
         .split('T')[0];
 
+      if (newTrans.booked) {
+        bookedTransactions.push(newTrans);
+      } else {
+        pendingTransactions.push(newTrans);
+      }
       allTransactions.push(newTrans);
     }
 
     response.transactions = {
       all: allTransactions,
-      booked: allTransactions,
-      pending: [],
+      booked: bookedTransactions,
+      pending: pendingTransactions,
     };
 
     res.send({
@@ -202,6 +218,9 @@ async function getAccounts(accessKey, startDate, endDate) {
   if (endDate) {
     params.push(`end-date=${normalizeDate(endDate)}`);
   }
+
+  params.push(`pending=1`);
+
   if (params.length > 0) {
     queryString += '?' + params.join('&');
   }
