@@ -1,8 +1,6 @@
 import React, { createRef, useState } from 'react';
 
-import { v4 as uuidv4 } from 'uuid';
-
-//import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
 import { SvgExpandArrow } from '../../icons/v0';
@@ -38,59 +36,54 @@ export function SaveReport({
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuItem, setMenuItem] = useState('');
   const [err, setErr] = useState('');
-  const [res, setRes] = useState('');
   const [name, setName] = useState(report.name ?? '');
   const inputRef = createRef<HTMLInputElement>();
 
   const onAddUpdate = async (menuChoice: string) => {
-    let savedReport: CustomReportEntity;
-    //save existing states
-    savedReport = {
-      ...report,
-      ...customReportItems,
-    };
-
     if (menuChoice === 'save-report') {
-      setRes('');
-      //create new flow
-      /*
-      res = await sendCatch('report/create', {
-        ...savedReport,
-      });
-      */
-      savedReport = {
-        ...savedReport,
-        id: uuidv4(),
+      const newSavedReport = {
+        ...report,
+        ...customReportItems,
         name,
       };
-    }
 
-    if (menuChoice === 'rename-report') {
-      //rename
-      savedReport = {
-        ...savedReport,
-        name,
-      };
-    }
+      const response = await sendCatch('report/create', newSavedReport);
 
-    if (menuChoice === 'update-report') {
-      //send update and rename to DB
-      /*
-      res = await sendCatch('report/update', {
-        ...savedReport,
-      });
-      */
-    }
-    if (res !== '') {
-      setErr(res);
-      setNameMenuOpen(true);
-    } else {
+      if (response.error) {
+        setErr(response.error.message);
+        setNameMenuOpen(true);
+        return;
+      }
+
       setNameMenuOpen(false);
       onReportChange({
-        savedReport,
-        type: menuChoice === 'rename-report' ? 'rename' : 'add-update',
+        savedReport: {
+          ...newSavedReport,
+          id: response.data,
+        },
+        type: 'add-update',
       });
+      return;
     }
+
+    const updatedReport = {
+      ...report,
+      ...(menuChoice === 'rename-report' ? { name } : customReportItems),
+    };
+
+    const response = await sendCatch('report/update', updatedReport);
+
+    if (response.error) {
+      setErr(response.error.message);
+      setNameMenuOpen(true);
+      return;
+    }
+
+    setNameMenuOpen(false);
+    onReportChange({
+      savedReport: updatedReport,
+      type: menuChoice === 'rename-report' ? 'rename' : 'add-update',
+    });
   };
 
   const onMenuSelect = async (item: string) => {
@@ -103,7 +96,8 @@ export function SaveReport({
         break;
       case 'delete-report':
         setMenuOpen(false);
-        //await send('report/delete', id);
+        setName('');
+        await send('report/delete', report.id);
         onResetReports();
         break;
       case 'update-report':
@@ -122,6 +116,7 @@ export function SaveReport({
         break;
       case 'reset-report':
         setMenuOpen(false);
+        setName('');
         onResetReports();
         break;
       default:

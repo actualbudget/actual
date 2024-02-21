@@ -32,15 +32,17 @@ const ActiveShapeMobile = props => {
 
   return (
     <g>
-      <text x={cx} y={cy + 65} dy={-8} textAnchor="middle" fill={fill}>
+      <text x={cx} y={cy + 70} dy={-8} textAnchor="middle" fill={fill}>
         {`${yAxis}`}
       </text>
-      <text x={cx - 30} y={cy + 40} dy={0} textAnchor="end" fill={fill}>
-        {`${amountToCurrency(value)}`}
-      </text>
-      <text x={cx + 30} y={cy + 40} dy={0} textAnchor="start" fill="#999">
-        {`${(percent * 100).toFixed(2)}%`}
-      </text>
+      <PrivacyFilter>
+        <text x={cx - 40} y={cy + 40} dy={0} textAnchor="end" fill={fill}>
+          {`${amountToCurrency(value)}`}
+        </text>
+        <text x={cx + 45} y={cy + 40} dy={0} textAnchor="start" fill="#999">
+          {`${(percent * 100).toFixed(2)}%`}
+        </text>
+      </PrivacyFilter>
       <Sector
         cx={cx}
         cy={cy}

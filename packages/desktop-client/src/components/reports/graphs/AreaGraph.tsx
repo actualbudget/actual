@@ -23,7 +23,6 @@ import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
-import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
@@ -68,30 +67,28 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            <PrivacyFilter>
-              {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Assets:"
-                  right={amountToCurrency(payload[0].payload.totalAssets)}
-                />
-              )}
-              {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Debt:"
-                  right={amountToCurrency(payload[0].payload.totalDebts)}
-                />
-              )}
-              {['totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Net:"
-                  right={
-                    <strong>
-                      {amountToCurrency(payload[0].payload.totalTotals)}
-                    </strong>
-                  }
-                />
-              )}
-            </PrivacyFilter>
+            {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Assets:"
+                right={amountToCurrency(payload[0].payload.totalAssets)}
+              />
+            )}
+            {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Debt:"
+                right={amountToCurrency(payload[0].payload.totalDebts)}
+              />
+            )}
+            {['totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net:"
+                right={
+                  <strong>
+                    {amountToCurrency(payload[0].payload.totalTotals)}
+                  </strong>
+                }
+              />
+            )}
           </div>
         </div>
       </div>

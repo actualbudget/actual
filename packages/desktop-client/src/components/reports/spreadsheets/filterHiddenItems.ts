@@ -27,11 +27,10 @@ export function filterHiddenItems(
             f.transferAccount !== null
         : showUncategorized
           ? //false, true
-            f.accountOffBudget === false && f.transferAccount === null
-          : //false false
-            f.category !== null &&
             f.accountOffBudget === false &&
-            f.transferAccount === null,
+            (f.transferAccount === null || f.category !== null)
+          : //false false
+            f.category !== null && f.accountOffBudget === false,
     );
 
   return showHide.filter(query => {

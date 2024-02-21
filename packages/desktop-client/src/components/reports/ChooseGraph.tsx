@@ -176,4 +176,5 @@ export function ChooseGraph({
       </View>
     );
   }
+  return null;
 }

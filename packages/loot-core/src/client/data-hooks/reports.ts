@@ -34,17 +34,12 @@ function toJS(rows: CustomReportData[]) {
   return reports;
 }
 
-/*
-leaving as a placeholder for saved reports implementation return an 
-empty array because "reports" db table doesn't exist yet
-*/
 export function useReports(): CustomReportEntity[] {
   const reports: CustomReportEntity[] = toJS(
-    //useLiveQuery(() => q('reports').select('*'), []) || [],
-    useLiveQuery(() => q('transaction_filters').select('*'), []) || [],
+    useLiveQuery(() => q('custom_reports').select('*'), []) || [],
   );
 
-  /** Sort reports by alphabetical order */
+  // Sort reports by alphabetical order
   function sort(reports: CustomReportEntity[]) {
     return reports.sort((a, b) =>
       a.name && b.name
@@ -55,11 +50,5 @@ export function useReports(): CustomReportEntity[] {
     );
   }
 
-  //return useMemo(() => sort(reports), [reports]);
-
-  //everything below this line will be removed once db table is created
-  const order: CustomReportEntity[] = useMemo(() => sort(reports), [reports]);
-  const flag = true;
-  const emptyReports: CustomReportEntity[] = flag ? [] : order;
-  return emptyReports;
+  return useMemo(() => sort(reports), [reports]);
 }
