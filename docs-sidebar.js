@@ -278,6 +278,7 @@ const sidebars = {
           items: [
             'contributing/project-details/database',
             'contributing/project-details/architecture',
+            'contributing/project-details/feature-flags',
             'contributing/project-details/electron',
             'contributing/project-details/migrations',
             'contributing/project-details/advice',
