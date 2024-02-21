@@ -8,8 +8,8 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { FilterAutocomplete } from '../autocomplete/FilterAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { SavedFilterAutocomplete } from '../autocomplete/SavedFilterAutocomplete';
 import { Input } from '../common/Input';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
@@ -98,7 +98,7 @@ export function GenericInput({
       switch (field) {
         case 'saved':
           content = (
-            <SavedFilterAutocomplete
+            <FilterAutocomplete
               saved={saved}
               value={value}
               multi={multi}
