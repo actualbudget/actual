@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -44,11 +44,7 @@ function CardMenu({ onClose, onMenuSelect, reportId }: CardMenuProps) {
 }
 
 function index(data) {
-  const result = {};
-  data.forEach(report => {
-    result[report.id] = false;
-  });
-  return result;
+  return data.reduce((carry, report) => ({ ...carry, [report.id]: false }), []);
 }
 
 export function CustomReportListCards({ reports }) {
@@ -68,124 +64,118 @@ export function CustomReportListCards({ reports }) {
     setReportMenu({ ...reportMenu, [item]: state });
   };
 
-  const ReportGrid = slice => {
-    const pack = [];
+  const chunkSize = 3;
 
-    slice?.map(item => {
-      pack.push({ data: item });
-      return null;
-    });
+  const groups = useMemo(() => {
+    return reports
+      .map((e, i) => {
+        return i % chunkSize === 0 ? reports.slice(i, i + chunkSize) : null;
+      })
+      .filter(e => {
+        return e;
+      });
+  }, [reports]);
 
-    const data2 = [...pack];
-    const remainder = 3 - (data2.length % 3);
-    const groupedData = [];
+  const remainder = 3 - (reports.length % 3);
 
-    while (data2.length) {
-      groupedData.push(data2.splice(0, 3));
-    }
-
-    return (
-      <>
-        {groupedData.map((data, i) => (
-          <View
-            key={i}
-            style={{
-              flex: '0 0 auto',
-              flexDirection: 'row',
-            }}
-          >
-            {data.map((report, id) => (
-              <View key={id} style={{ position: 'relative', flex: '1' }}>
-                <View style={{ width: '100%', height: '100%' }}>
-                  <ReportCard to="/reports/custom" report={report.data}>
+  if (reports.length === 0) return null;
+  return (
+    <View>
+      {groups.map((group, i) => (
+        <View
+          key={i}
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+          }}
+        >
+          {group.map((report, id) => (
+            <View key={id} style={{ position: 'relative', flex: '1' }}>
+              <View style={{ width: '100%', height: '100%' }}>
+                <ReportCard to="/reports/custom" report={report}>
+                  <View
+                    style={{ flex: 1, padding: 10 }}
+                    onMouseEnter={() => setIsCardHovered(report.id)}
+                    onMouseLeave={() => {
+                      setIsCardHovered(null);
+                      onMenuOpen(report.id, false);
+                    }}
+                  >
                     <View
-                      style={{ flex: 1, padding: 10 }}
-                      onMouseEnter={() => setIsCardHovered(report.data.id)}
-                      onMouseLeave={() => {
-                        setIsCardHovered(null);
-                        onMenuOpen(report.data.id, false);
+                      style={{
+                        flexDirection: 'row',
+                        flexShrink: 0,
+                        paddingBottom: 5,
                       }}
                     >
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          flexShrink: 0,
-                          paddingBottom: 5,
-                        }}
-                      >
-                        <View style={{ flex: 1 }}>
-                          <Block
-                            style={{
-                              ...styles.mediumText,
-                              fontWeight: 500,
-                              marginBottom: 5,
-                            }}
-                            role="heading"
-                          >
-                            {report.data.name}
-                          </Block>
-                          <DateRange
-                            start={report.data.startDate}
-                            end={report.data.endDate}
-                          />
-                        </View>
-                      </View>
-
-                      {report.data.data ? (
-                        <ChooseGraph
-                          startDate={report.data.startDate}
-                          endDate={report.data.endDate}
-                          data={report.data.data}
-                          mode={report.data.mode}
-                          graphType={report.data.graphType}
-                          balanceType={report.data.balanceType}
-                          groupBy={report.data.groupBy}
-                          compact={true}
-                          style={{ height: 'auto', flex: 1 }}
+                      <View style={{ flex: 1 }}>
+                        <Block
+                          style={{
+                            ...styles.mediumText,
+                            fontWeight: 500,
+                            marginBottom: 5,
+                          }}
+                          role="heading"
+                        >
+                          {report.name}
+                        </Block>
+                        <DateRange
+                          start={report.startDate}
+                          end={report.endDate}
                         />
-                      ) : (
-                        <LoadingIndicator />
-                      )}
+                      </View>
                     </View>
-                  </ReportCard>
-                </View>
-                <View
-                  style={{
-                    textAlign: 'right',
-                    position: 'absolute',
-                    right: 25,
-                    top: 25,
-                  }}
-                >
-                  <MenuButton
-                    onClick={() => onMenuOpen(report.data.id, true)}
-                    style={{
-                      color:
-                        isCardHovered === report.data.id
-                          ? 'inherit'
-                          : 'transparent',
-                    }}
-                  />
-                  {reportMenu[report.data.id] && (
-                    <CardMenu
-                      onMenuSelect={onMenuSelect}
-                      onClose={() => onMenuOpen(report.data.id, false)}
-                      reportId={report.data.id}
-                    />
-                  )}
-                </View>
-              </View>
-            ))}
-            {remainder !== 3 &&
-              i + 1 === groupedData.length &&
-              [...Array(remainder)].map((e, i) => (
-                <View key={i} style={{ flex: 1 }} />
-              ))}
-          </View>
-        ))}
-      </>
-    );
-  };
 
-  return reports.length > 0 && ReportGrid(reports);
+                    {report.data ? (
+                      <ChooseGraph
+                        startDate={report.startDate}
+                        endDate={report.endDate}
+                        data={report.data}
+                        mode={report.mode}
+                        graphType={report.graphType}
+                        balanceType={report.balanceType}
+                        groupBy={report.groupBy}
+                        compact={true}
+                        style={{ height: 'auto', flex: 1 }}
+                      />
+                    ) : (
+                      <LoadingIndicator />
+                    )}
+                  </View>
+                </ReportCard>
+              </View>
+              <View
+                style={{
+                  textAlign: 'right',
+                  position: 'absolute',
+                  right: 25,
+                  top: 25,
+                }}
+              >
+                <MenuButton
+                  onClick={() => onMenuOpen(report.id, true)}
+                  style={{
+                    color:
+                      isCardHovered === report.id ? 'inherit' : 'transparent',
+                  }}
+                />
+                {reportMenu[report.id] && (
+                  <CardMenu
+                    onMenuSelect={onMenuSelect}
+                    onClose={() => onMenuOpen(report.id, false)}
+                    reportId={report.id}
+                  />
+                )}
+              </View>
+            </View>
+          ))}
+          {remainder !== 3 &&
+            i + 1 === groups.length &&
+            [...Array(remainder)].map((e, i) => (
+              <View key={i} style={{ flex: 1 }} />
+            ))}
+        </View>
+      ))}
+    </View>
+  );
 }
