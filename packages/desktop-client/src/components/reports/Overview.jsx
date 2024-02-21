@@ -19,8 +19,6 @@ export function Overview() {
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
 
-  const featureCount =
-    3 - (sankeyFeatureFlag ? 1 : 0) - (customReportsFeatureFlag ? 1 : 0);
   const accounts = useAccounts();
   return (
     <View
@@ -45,11 +43,6 @@ export function Overview() {
         }}
       >
         {sankeyFeatureFlag && <SankeyCard />}
-        {customReportsFeatureFlag && <CustomReportCard />}
-        {featureCount !== 3 &&
-          [...Array(featureCount)].map((e, i) => (
-            <View key={i} style={{ padding: 15, flex: 1 }} />
-          ))}
       </View>
       {customReportsFeatureFlag && (
         <>
@@ -58,9 +51,11 @@ export function Overview() {
               height: 1,
               backgroundColor: theme.pillBorderDark,
               marginTop: 10,
+              marginBottom: 10,
               flexShrink: 0,
             }}
           />
+          <CustomReportCard />
           <CustomReportListCards reports={customReports} />
         </>
       )}

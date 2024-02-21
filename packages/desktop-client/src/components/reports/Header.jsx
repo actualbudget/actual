@@ -50,9 +50,13 @@ function boundedRange(earliest, start, end) {
   return [start, end];
 }
 
-export function getLatestRange(offset) {
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, offset);
+export function getLatestRange(offset, addNumber) {
+  const currMonth = monthUtils.currentMonth();
+  const start = monthUtils.subMonths(currMonth, offset);
+  const end = monthUtils.addMonths(
+    start,
+    addNumber === null ? offset : addNumber,
+  );
   return [start, end];
 }
 

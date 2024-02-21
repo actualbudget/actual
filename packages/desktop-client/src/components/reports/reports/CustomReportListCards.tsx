@@ -4,10 +4,12 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { styles } from '../../../style';
+import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { Menu } from '../../common/Menu';
 import { MenuButton } from '../../common/MenuButton';
 import { MenuTooltip } from '../../common/MenuTooltip';
+import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { ChooseGraph } from '../ChooseGraph';
 import { DateRange } from '../DateRange';
@@ -138,10 +140,16 @@ export function CustomReportListCards({
                           >
                             {report.name}
                           </Block>
-                          <DateRange
-                            start={report.startDate}
-                            end={report.endDate}
-                          />
+                          {report.isDateStatic ? (
+                            <DateRange
+                              start={report.startDate}
+                              end={report.endDate}
+                            />
+                          ) : (
+                            <Text style={{ color: theme.pageTextSubdued }}>
+                              {report.dateRange}
+                            </Text>
+                          )}
                         </View>
                       </View>
 

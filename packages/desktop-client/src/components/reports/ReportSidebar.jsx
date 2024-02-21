@@ -74,7 +74,12 @@ export function ReportSidebar({
         );
         break;
       default:
-        onChangeDates(...getLatestRange(ReportOptions.dateRangeMap.get(cond)));
+        onChangeDates(
+          ...getLatestRange(
+            ReportOptions.dateRangeMap.get(cond),
+            cond === 'Last month' ? 0 : null,
+          ),
+        );
     }
   };
 
