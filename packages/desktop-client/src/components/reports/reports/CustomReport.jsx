@@ -96,6 +96,7 @@ export function CustomReport() {
 
   useEffect(() => {
     async function run() {
+      report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = trans
