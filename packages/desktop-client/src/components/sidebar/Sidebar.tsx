@@ -187,7 +187,7 @@ function EditableBudgetName() {
             const inputEl = e.target as HTMLInputElement;
             const newBudgetName = inputEl.value;
             if (newBudgetName.trim() !== '') {
-              setBudgetNamePref(inputEl.name);
+              setBudgetNamePref(newBudgetName);
               setEditing(false);
             }
           }}

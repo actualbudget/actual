@@ -164,6 +164,8 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   },
 );
 
+DatePicker.displayName = 'DatePicker';
+
 function defaultShouldSaveFromKey(e) {
   return e.key === 'Enter';
 }

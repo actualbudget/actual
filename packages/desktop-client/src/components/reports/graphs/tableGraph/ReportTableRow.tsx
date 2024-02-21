@@ -138,3 +138,5 @@ export const ReportTableRow = memo(
     );
   },
 );
+
+ReportTableRow.displayName = 'ReportTableRow';

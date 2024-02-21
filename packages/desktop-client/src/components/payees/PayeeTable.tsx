@@ -80,3 +80,5 @@ export const PayeeTable = forwardRef<
     );
   },
 );
+
+PayeeTable.displayName = 'PayeeTable';

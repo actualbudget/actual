@@ -142,4 +142,17 @@ describe('File import', () => {
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
   });
+
+  test('handles html escaped plaintext', async () => {
+    prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../mocks/files/html-vals.qfx',
+      'yyyy-MM-dd',
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
 });

@@ -24,6 +24,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     light: SvgSun,
     dark: SvgMoonStars,
     auto: SvgSystem,
+    midnight: SvgMoonStars,
   } as const;
 
   function onMenuSelect(newTheme: Theme) {
