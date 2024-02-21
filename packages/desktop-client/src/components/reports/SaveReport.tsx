@@ -47,7 +47,7 @@ export function SaveReport({
     const chooseSavedReport = listReports.find(r => cond === r.id);
     onReportChange({ savedReport: chooseSavedReport, type: 'choose' });
     setChooseMenuOpen(false);
-    setName(chooseSavedReport.name);
+    setName(chooseSavedReport === undefined ? '' : chooseSavedReport.name);
   }
 
   const onAddUpdate = async (menuChoice: string) => {
