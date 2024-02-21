@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';

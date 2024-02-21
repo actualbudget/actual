@@ -3,14 +3,13 @@ import React from 'react';
 import { theme } from '../../style/theme';
 import { type CSSProperties } from '../../style/types';
 
-export function ItemHeader({
-  title,
-  style,
-  ...props
-}: {
+export type ItemHeaderProps = {
   title: string;
   style?: CSSProperties;
-}) {
+  type?: string;
+};
+
+export function ItemHeader({ title, style, type, ...props }: ItemHeaderProps) {
   return (
     <div
       style={{
