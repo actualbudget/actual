@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { createRef, useMemo, useState } from 'react';
 
-import { send } from 'loot-core/src/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { styles } from '../../../style';
@@ -15,6 +15,7 @@ import { ChooseGraph } from '../ChooseGraph';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
+import { SaveReportName } from '../SaveReportName';
 
 type CardMenuProps = {
   onClose: () => void;
@@ -33,7 +34,6 @@ function CardMenu({ onClose, onMenuSelect, reportId }: CardMenuProps) {
           {
             name: 'rename',
             text: 'Rename report',
-            disabled: true,
           },
           {
             name: 'delete',
@@ -63,18 +63,55 @@ export function CustomReportListCards({
 }) {
   const result: { [key: string]: boolean }[] = index(reports);
   const [reportMenu, setReportMenu] = useState(result);
+  const [nameMenuOpen, setNameMenuOpen] = useState(result);
+  const [err, setErr] = useState('');
+  const [name, setName] = useState('');
+  const inputRef = createRef<HTMLInputElement>();
 
   const [isCardHovered, setIsCardHovered] = useState('');
+
+  const onAddUpdate = async ({
+    reportData,
+  }: {
+    reportData?: CustomReportEntity;
+  }) => {
+    if (!reportData) {
+      return null;
+    }
+
+    const updatedReport = {
+      ...reportData,
+      name,
+    };
+
+    const response = await sendCatch('report/update', updatedReport);
+
+    if (response.error) {
+      setErr(response.error.message);
+      onNameMenuOpen(reportData.id === undefined ? '' : reportData.id, true);
+      return;
+    }
+
+    onNameMenuOpen(reportData.id === undefined ? '' : reportData.id, false);
+  };
 
   const onMenuSelect = async (item: string, reportId: string) => {
     if (item === 'delete') {
       onMenuOpen(reportId, false);
       await send('report/delete', reportId);
     }
+    if (item === 'rename') {
+      onMenuOpen(reportId, false);
+      onNameMenuOpen(reportId, true);
+    }
   };
 
   const onMenuOpen = (item: string, state: boolean) => {
     setReportMenu({ ...reportMenu, [item]: state });
+  };
+
+  const onNameMenuOpen = (item: string, state: boolean) => {
+    setNameMenuOpen({ ...nameMenuOpen, [item]: state });
   };
 
   const chunkSize = 3;
@@ -200,6 +237,25 @@ export function CustomReportListCards({
                             )
                           }
                           reportId={report.id}
+                        />
+                      )}
+                  {report.id === undefined
+                    ? null
+                    : nameMenuOpen[report.id as keyof typeof nameMenuOpen] && (
+                        <SaveReportName
+                          onClose={() =>
+                            onNameMenuOpen(
+                              report.id === undefined ? '' : report.id,
+                              false,
+                            )
+                          }
+                          menuItem="rename"
+                          name={name}
+                          setName={setName}
+                          inputRef={inputRef}
+                          onAddUpdate={onAddUpdate}
+                          err={err}
+                          report={report}
                         />
                       )}
                 </View>

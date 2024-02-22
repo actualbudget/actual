@@ -39,7 +39,11 @@ export function SaveReport({
   const [name, setName] = useState(report.name ?? '');
   const inputRef = createRef<HTMLInputElement>();
 
-  const onAddUpdate = async (menuChoice: string) => {
+  const onAddUpdate = async ({ menuChoice }: { menuChoice?: string }) => {
+    if (!menuChoice) {
+      return null;
+    }
+
     if (menuChoice === 'save-report') {
       const newSavedReport = {
         ...report,
@@ -103,7 +107,7 @@ export function SaveReport({
       case 'update-report':
         setErr('');
         setMenuOpen(false);
-        onAddUpdate(item);
+        onAddUpdate({ menuChoice: item });
         break;
       case 'save-report':
         setErr('');
