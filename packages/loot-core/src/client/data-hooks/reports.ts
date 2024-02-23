@@ -18,6 +18,7 @@ function toJS(rows: CustomReportData[]) {
       dateRange: row.date_range,
       mode: row.mode,
       groupBy: row.group_by,
+      interval: row.interval,
       balanceType: row.balance_type,
       showEmpty: row.show_empty === 1,
       showOffBudget: row.show_offbudget === 1,

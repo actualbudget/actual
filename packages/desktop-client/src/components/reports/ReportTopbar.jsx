@@ -70,9 +70,7 @@ export function ReportTopbar({
               setBalanceType('Payment');
             }
             setTypeDisabled(
-              ['Month', 'Year'].includes(customReportItems.groupBy)
-                ? []
-                : ['Net'],
+              ['Interval'].includes(customReportItems.groupBy) ? [] : ['Net'],
             );
           } else {
             setGraphType('StackedBarGraph');
@@ -90,7 +88,7 @@ export function ReportTopbar({
         onSelect={() => {
           onReportChange({ type: 'modify' });
           setGraphType('AreaGraph');
-          setGroupBy('Month');
+          setGroupBy('Interval');
           onChangeViews('viewLegend', false);
           setTypeDisabled([]);
         }}
