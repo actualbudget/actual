@@ -149,9 +149,9 @@ export const categoryLists = (categories: {
       const catGroupA = categories.grouped.find(f => f.id === a.cat_group);
       const catGroupB = categories.grouped.find(f => f.id === b.cat_group);
       return a.sort_order && b.sort_order && catGroupA && catGroupB
-        ? 2 * (catGroupA.sort_order ?? 0) +
-            a.sort_order -
-            (2 * (catGroupB.sort_order ?? 0) + b.sort_order)
+        ? Number(catGroupA.is_income) - Number(catGroupB.is_income) ||
+            (catGroupA.sort_order ?? 0) - (catGroupB.sort_order ?? 0) ||
+            a.sort_order - b.sort_order
         : 0;
     }),
     uncategorizedCategory,
