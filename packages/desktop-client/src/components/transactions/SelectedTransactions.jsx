@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 
+import { validForTransfer } from 'loot-core/src/client/transfer';
+
 import { useSelectedItems } from '../../hooks/useSelected';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
@@ -54,18 +56,7 @@ export function SelectedTransactionsButton({
     const fromTrans = getTransaction(transactions[0]);
     const toTrans = getTransaction(transactions[1]);
 
-    if (
-      // no subtransactions
-      // not already a transfer
-      [fromTrans, toTrans].every(tran => {
-        return tran.transfer_id == null && tran.is_child === false;
-      }) &&
-      fromTrans.account !== toTrans.account && // belong to different accounts
-      fromTrans.amount + toTrans.amount === 0 // amount must zero each other out
-    ) {
-      return true;
-    }
-    return false;
+    return validForTransfer(fromTrans, toTrans);
   }, [selectedItems, getTransaction]);
 
   return (

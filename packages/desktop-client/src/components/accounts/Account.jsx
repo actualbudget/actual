@@ -5,6 +5,7 @@ import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
 
+import { validForTransfer } from 'loot-core/client/transfer';
 import * as actions from 'loot-core/src/client/actions';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
@@ -1064,25 +1065,14 @@ class AccountInternal extends PureComponent {
       this.setState({ workingHard: true });
 
       const payees = await this.props.getPayees();
-
-      // not already a transfer
-      // no subtransactions, parent or singles only
       const { data: transactions } = await runQuery(
         q('transactions')
-          .filter({ id: { $oneof: ids }, is_child: false, transfer_id: null })
+          .filter({ id: { $oneof: ids } })
           .select('*'),
       );
-
       const [fromTrans, toTrans] = transactions;
 
-      // only two selected
-      // belong to two different accounts
-      // amount must zero each other out
-      if (
-        transactions.length === 2 &&
-        fromTrans.account !== toTrans.account &&
-        fromTrans.amount + toTrans.amount === 0
-      ) {
+      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
         const fromPayee = payees.find(
           p => p.transfer_acct === fromTrans.account,
         );
