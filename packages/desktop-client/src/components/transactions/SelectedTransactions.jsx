@@ -14,8 +14,10 @@ export function SelectedTransactionsButton({
   onEdit,
   onUnlink,
   onCreateRule,
+  onSetTransfer,
   onScheduleAction,
   pushModal,
+  showMakeTransfer,
 }) {
   const selectedItems = useSelectedItems();
 
@@ -42,6 +44,29 @@ export function SelectedTransactionsButton({
       })
     );
   }, [types.preview, selectedItems, getTransaction]);
+
+  const canBeTransfer = useMemo(() => {
+    // only two selected
+    if (selectedItems.size !== 2) {
+      return false;
+    }
+    const transactions = [...selectedItems];
+    const fromTrans = getTransaction(transactions[0]);
+    const toTrans = getTransaction(transactions[1]);
+
+    if (
+      // no subtransactions
+      // not already a transfer
+      [fromTrans, toTrans].every(tran => {
+        return tran.transfer_id == null && tran.is_child === false;
+      }) &&
+      fromTrans.account !== toTrans.account && // belong to different accounts
+      fromTrans.amount + toTrans.amount === 0 // amount must zero each other out
+    ) {
+      return true;
+    }
+    return false;
+  }, [selectedItems, getTransaction]);
 
   return (
     <SelectedItemsButton
@@ -91,6 +116,15 @@ export function SelectedTransactionsButton({
                       text: 'Create rule',
                     },
                   ]),
+              ...(showMakeTransfer
+                ? [
+                    {
+                      name: 'set-transfer',
+                      text: 'Make transfer',
+                      disabled: !canBeTransfer,
+                    },
+                  ]
+                : []),
               Menu.line,
               { type: Menu.label, name: 'Edit field' },
               { name: 'date', text: 'Date' },
@@ -144,6 +178,9 @@ export function SelectedTransactionsButton({
             break;
           case 'create-rule':
             onCreateRule([...selectedItems]);
+            break;
+          case 'set-transfer':
+            onSetTransfer([...selectedItems]);
             break;
           default:
             onEdit(name, [...selectedItems]);

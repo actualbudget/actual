@@ -1059,6 +1059,63 @@ class AccountInternal extends PureComponent {
     this.props.pushModal('edit-rule', { rule });
   };
 
+  onSetTransfer = async ids => {
+    const onConfirmTransfer = async ids => {
+      this.setState({ workingHard: true });
+
+      const payees = await this.props.getPayees();
+
+      // not already a transfer
+      // no subtransactions, parent or singles only
+      const { data: transactions } = await runQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids }, is_child: false, transfer_id: null })
+          .select('*'),
+      );
+
+      const [fromTrans, toTrans] = transactions;
+
+      // only two selected
+      // belong to two different accounts
+      // amount must zero each other out
+      if (
+        transactions.length === 2 &&
+        fromTrans.account !== toTrans.account &&
+        fromTrans.amount + toTrans.amount === 0
+      ) {
+        const fromPayee = payees.find(
+          p => p.transfer_acct === fromTrans.account,
+        );
+        const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+
+        const changes = {
+          updated: [
+            {
+              ...fromTrans,
+              payee: toPayee.id,
+              transfer_id: toTrans.id,
+            },
+            {
+              ...toTrans,
+              payee: fromPayee.id,
+              transfer_id: fromTrans.id,
+            },
+          ],
+        };
+
+        await send('transactions-batch-update', changes);
+      }
+
+      await this.refetchTransactions();
+    };
+
+    await this.checkForReconciledTransactions(
+      ids,
+      'batchEditWithReconciled',
+      onConfirmTransfer,
+    );
+  };
+
   onCondOpChange = (value, filters) => {
     this.setState({ conditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
@@ -1443,6 +1500,7 @@ class AccountInternal extends PureComponent {
                 onDeleteFilter={this.onDeleteFilter}
                 onApplyFilter={this.onApplyFilter}
                 onScheduleAction={this.onScheduleAction}
+                onSetTransfer={this.onSetTransfer}
               />
 
               <View style={{ flex: 1 }}>
