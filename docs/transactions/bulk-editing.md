@@ -51,3 +51,7 @@ Here is another example. This time to bulk change a Category.
 To duplicate transactions (one or more), simply navigate to the Accounts page as described above, and select the tick box in the left hand column. Once selected, go to the drop down menu on the top right of the page, above the table header. Open the menu and select “Duplicate”. Your newly duplicated transactions will appear in the transactions table!
 
 ![](/img/bulk-edit/duplicate-transactions.png)
+
+
+
+
