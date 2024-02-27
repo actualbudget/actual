@@ -56,6 +56,11 @@ export function SelectedTransactionsButton({
     const fromTrans = getTransaction(transactions[0]);
     const toTrans = getTransaction(transactions[1]);
 
+    // previously selected transactions aren't always present in current transaction list
+    if (!fromTrans || !toTrans) {
+      return false;
+    }
+
     return validForTransfer(fromTrans, toTrans);
   }, [selectedItems, getTransaction]);
 
