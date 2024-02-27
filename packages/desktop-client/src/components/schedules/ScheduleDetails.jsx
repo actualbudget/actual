@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { getPayeesById } from 'loot-core/client/reducers/queries';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
@@ -71,7 +72,7 @@ function updateScheduleConditions(schedule, fields) {
 export function ScheduleDetails({ modalProps, actions, id, transaction }) {
   const adding = id == null;
   const fromTrans = transaction != null;
-  const payees = usePayees({ idKey: true });
+  const payees = getPayeesById(usePayees());
   const globalDispatch = useDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
