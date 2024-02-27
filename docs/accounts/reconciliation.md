@@ -26,6 +26,14 @@ When the cleared amount of the Actual account ledger and the value you entered i
 
 ![](/img/reconcile/reconcile-4.png)
 
+Upon pressing done, all cleared transactions will receive a lock icon.  This represents the fact that they were included in a reconciliation and makes it harder to accidentally change.  
+
+![](/img/reconcile/reconcile-9.png)
+
+Of course, there's always the possibility you need to change a locked transaction.  You can click on the lock of any transaction to open a dialog to unlock it.
+
+![](/img/reconcile/reconcile-10.png)
+
 ## Using the Reconciliation tool for Off-Budget Asset tracking
 
 Some use off-budget accounts to track values of assets such as vehicles, real estate, retirement accounts, or other investment accounts or property. The reconciliation tool is useful to update these values as well. Let's say we have a house that was valued at 358,700 but with current changes in the market it is now valued at 385,000. We go to the ledger for the house, choose the reconciliation tool, and enter 385,000 as the new value into the tool.
