@@ -225,7 +225,9 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
               _account: transaction.account,
               _amount: transaction.amount,
               _amountOp: 'is',
-              name: transaction.payee ? payees[transaction.payee].name : '',
+              name: transaction.payee
+                ? payees[payees.findIndex(e => e.id === transaction.payee)].name
+                : '',
               _payee: transaction.payee ? transaction.payee : '',
               _date: {
                 ...date,
