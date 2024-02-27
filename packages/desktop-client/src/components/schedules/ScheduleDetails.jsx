@@ -27,6 +27,7 @@ import { SelectedItemsButton } from '../table';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import { GenericInput } from '../util/GenericInput';
+import { getPayeesById } from 'loot-core/client/reducers/queries';
 
 function updateScheduleConditions(schedule, fields) {
   const conds = extractScheduleConds(schedule._conditions);
@@ -71,7 +72,7 @@ function updateScheduleConditions(schedule, fields) {
 export function ScheduleDetails({ modalProps, actions, id, transaction }) {
   const adding = id == null;
   const fromTrans = transaction != null;
-  const payees = usePayees({ idKey: true });
+  const payees = getPayeesById(usePayees());
   const globalDispatch = useDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
@@ -225,9 +226,7 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
               _account: transaction.account,
               _amount: transaction.amount,
               _amountOp: 'is',
-              name: transaction.payee
-                ? payees[payees.findIndex(e => e.id === transaction.payee)].name
-                : '',
+              name: transaction.payee ? payees[transaction.payee].name : '',
               _payee: transaction.payee ? transaction.payee : '',
               _date: {
                 ...date,
