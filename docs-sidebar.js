@@ -93,7 +93,6 @@ const sidebars = {
             id: 'migration/index',
           },
           items: [
-            'migration/simple-sync',
             {
               type: 'category',
               label: 'Migrating From Other Apps',

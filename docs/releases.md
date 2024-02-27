@@ -1732,7 +1732,7 @@ Builds with Actual 22.12.03 and API 4.1.5.
 **Docker tag: 22.10.25**
 
 :::warning
-This release includes a breaking change to the sync component that requires manual migration ([migration guide](./migration/simple-sync.md)). Ensure your budget is [backed up](./backup-restore/backup.md) before you update to avoid data loss
+This release includes a breaking change to the sync component that requires manual migration. Ensure your budget is [backed up](./backup-restore/backup.md) before you update to avoid data loss.
 :::
 
 This release of Actual does not include any of the following
