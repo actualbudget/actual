@@ -154,6 +154,7 @@ export function CustomReportListCards({
                           graphType={report.graphType}
                           balanceType={report.balanceType}
                           groupBy={report.groupBy}
+                          interval={report.interval}
                           compact={true}
                           style={{ height: 'auto', flex: 1 }}
                         />

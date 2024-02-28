@@ -28,7 +28,7 @@ export function ReportTableList({
   style,
   compactStyle,
 }: ReportTableListProps) {
-  const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
+  const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
 
   type RenderRowProps = {
     index: number;

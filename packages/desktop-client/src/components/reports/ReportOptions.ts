@@ -17,6 +17,7 @@ export const defaultReport: CustomReportEntity = {
   dateRange: 'Last 6 months',
   mode: 'total',
   groupBy: 'Category',
+  interval: 'Monthly',
   balanceType: 'Payment',
   showEmpty: false,
   showOffBudget: false,
@@ -38,8 +39,7 @@ const groupByOptions = [
   { description: 'Group' },
   { description: 'Payee' },
   { description: 'Account' },
-  { description: 'Month' },
-  { description: 'Year' },
+  { description: 'Interval' },
 ];
 
 const dateRangeOptions = [
@@ -53,6 +53,14 @@ const dateRangeOptions = [
   { description: 'All time', name: 'allMonths' },
 ];
 
+const intervalOptions = [
+  //{ value: 1, description: 'Daily', name: 'Day'},
+  //{ value: 2, description: 'Weekly', name: 'Week'},
+  //{ value: 3, description: 'Fortnightly', name: 3},
+  { value: 4, description: 'Monthly', name: 'Month' },
+  { value: 5, description: 'Yearly', name: 'Year' },
+];
+
 export const ReportOptions = {
   groupBy: groupByOptions,
   balanceType: balanceTypeOptions,
@@ -63,17 +71,12 @@ export const ReportOptions = {
   dateRangeMap: new Map(
     dateRangeOptions.map(item => [item.description, item.name]),
   ),
+  interval: intervalOptions,
+  intervalMap: new Map(
+    intervalOptions.map(item => [item.description, item.name]),
+  ),
 };
 
-/*
-const intervalOptions = [
-{ value: 1, description: 'Daily', name: 1,
-{ value: 2, description: 'Weekly', name: 2,
-{ value: 3, description: 'Fortnightly', name: 3,
-{ value: 4, description: 'Monthly', name: 4,
-{ value: 5, description: 'Yearly', name: 5,
-];
-*/
 export type QueryDataEntity = {
   date: string;
   category: string;
@@ -181,11 +184,7 @@ export const groupBySelections = (
       groupByList = accounts;
       groupByLabel = 'account';
       break;
-    case 'Month':
-      groupByList = categoryList;
-      groupByLabel = 'category';
-      break;
-    case 'Year':
+    case 'Interval':
       groupByList = categoryList;
       groupByLabel = 'category';
       break;
