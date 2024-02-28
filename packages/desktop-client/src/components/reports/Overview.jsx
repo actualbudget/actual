@@ -4,11 +4,12 @@ import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { theme, styles } from '../../style';
+import { styles } from '../../style';
+import { ButtonLink } from '../common/ButtonLink';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { CashFlowCard } from './reports/CashFlowCard';
-import { CustomReportCard } from './reports/CustomReportCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
@@ -29,6 +30,18 @@ export function Overview() {
     >
       <View
         style={{
+          flex: '0 0 auto',
+          alignItems: 'flex-end',
+          marginRight: 15,
+          marginTop: 10,
+        }}
+      >
+        <ButtonLink to="/reports/custom" type="primary">
+          <Text>Create new custom report</Text>
+        </ButtonLink>
+      </View>
+      <View
+        style={{
           flexDirection: 'row',
           flex: '0 0 auto',
         }}
@@ -45,19 +58,7 @@ export function Overview() {
         {sankeyFeatureFlag && <SankeyCard />}
       </View>
       {customReportsFeatureFlag && (
-        <>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: theme.pillBorderDark,
-              marginTop: 10,
-              marginBottom: 10,
-              flexShrink: 0,
-            }}
-          />
-          <CustomReportCard />
-          <CustomReportListCards reports={customReports} />
-        </>
+        <CustomReportListCards reports={customReports} />
       )}
     </View>
   );

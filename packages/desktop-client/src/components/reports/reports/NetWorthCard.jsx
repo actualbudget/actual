@@ -29,7 +29,7 @@ export function NetWorthCard({ accounts }) {
   const data = useReport('net_worth', params);
 
   return (
-    <ReportCard flex={2} to="/reports/net-worth">
+    <ReportCard flex={2} to="/reports/net-worth" style={{ marginRight: -10 }}>
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}
