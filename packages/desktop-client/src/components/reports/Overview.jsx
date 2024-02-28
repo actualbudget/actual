@@ -28,18 +28,20 @@ export function Overview() {
         ...{ paddingLeft: 40, paddingRight: 40, minWidth: 700 },
       }}
     >
-      <View
-        style={{
-          flex: '0 0 auto',
-          alignItems: 'flex-end',
-          marginRight: 15,
-          marginTop: 10,
-        }}
-      >
-        <ButtonLink to="/reports/custom" type="primary">
-          <Text>Create new custom report</Text>
-        </ButtonLink>
-      </View>
+      {customReportsFeatureFlag && (
+        <View
+          style={{
+            flex: '0 0 auto',
+            alignItems: 'flex-end',
+            marginRight: 15,
+            marginTop: 10,
+          }}
+        >
+          <ButtonLink to="/reports/custom" type="primary">
+            <Text>Create new custom report</Text>
+          </ButtonLink>
+        </View>
+      )}
       <View
         style={{
           flexDirection: 'row',
