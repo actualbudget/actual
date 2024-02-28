@@ -2,8 +2,8 @@ import { CategoryEntity } from './category';
 import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
-  id?: string;
-  name?: string;
+  id: string;
+  name: string;
   startDate: string;
   endDate: string;
   isDateStatic: boolean;
@@ -73,8 +73,8 @@ export type Month = {
 };
 
 export interface CustomReportData {
-  id?: string;
-  name?: string;
+  id: string;
+  name: string;
   start_date: string;
   end_date: string;
   date_static: number;

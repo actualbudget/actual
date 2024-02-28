@@ -38,11 +38,11 @@ type MenuItem = {
   tooltip?: string;
 };
 
-type MenuProps<T extends MenuItem = MenuItem> = {
+export type MenuProps<T extends MenuItem = MenuItem> = {
   header?: ReactNode;
   footer?: ReactNode;
   items: Array<T | typeof Menu.line>;
-  onMenuSelect: (itemName: T['name']) => void;
+  onMenuSelect?: (itemName: T['name']) => void;
   style?: CSSProperties;
 };
 
