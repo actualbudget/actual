@@ -370,7 +370,7 @@ export function looselyParseAmount(amount: string) {
     amount = amount.replace('(', '-').replace(')', '');
   }
 
-  const m = amount.match(/[.,][^.,]*$/);
+  const m = amount.match(/[.,][^.,]{1,2}$/);
   if (!m || m.index === undefined || m.index === 0) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
