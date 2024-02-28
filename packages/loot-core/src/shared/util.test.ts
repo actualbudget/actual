@@ -5,15 +5,16 @@ describe('utility functions', () => {
     expect(looselyParseAmount('3')).toBe(3);
     expect(looselyParseAmount('3.45')).toBe(3.45);
 
-    // Right now it doesn't actually parse an "amount", it just parses
-    // a number. An "amount" is a valid transaction amount, usually a
-    // number with 2 decimal places.
-    expect(looselyParseAmount('3.456')).toBe(3.456);
+    // Parsing is currently limited to 2 decimal places.
+    // Only <. ,> and 2 other chars counts as decimal places
+    // Proper parsing would include format settings,
+    // but currently we are format agnostic
+    expect(looselyParseAmount('3.456')).toBe(3456);
   });
 
   test('looseParseAmount works with alternate formats', () => {
     expect(looselyParseAmount('3,45')).toBe(3.45);
-    expect(looselyParseAmount('3,456')).toBe(3.456);
+    expect(looselyParseAmount('3,456')).toBe(3456);
   });
 
   test('looseParseAmount works with negative numbers', () => {

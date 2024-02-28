@@ -8,10 +8,12 @@ import { theme } from '../../../../style';
 import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
+import { ReportOptions } from '../../ReportOptions';
 
 type ReportTableHeaderProps = {
   groupBy: string;
-  interval?: DataEntity[];
+  interval?: string;
+  data?: DataEntity[];
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
@@ -23,6 +25,7 @@ type ReportTableHeaderProps = {
 export function ReportTableHeader({
   groupBy,
   interval,
+  data,
   balanceType,
   headerScrollRef,
   handleScroll,
@@ -61,10 +64,14 @@ export function ReportTableHeader({
             flexShrink: 0,
           }}
           valueStyle={compactStyle}
-          value={groupBy}
+          value={
+            groupBy === 'Interval'
+              ? ReportOptions.intervalMap.get(interval)
+              : groupBy
+          }
         />
-        {interval
-          ? interval.map((header, index) => {
+        {data
+          ? data.map((header, index) => {
               return (
                 <Cell
                   style={{

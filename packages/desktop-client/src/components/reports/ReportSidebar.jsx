@@ -31,6 +31,7 @@ export function ReportSidebar({
   setTypeDisabled,
   setGraphType,
   setGroupBy,
+  setInterval,
   setBalanceType,
   setMode,
   setIsDateStatic,
@@ -102,7 +103,7 @@ export function ReportSidebar({
         setGraphType('TableGraph');
         onChangeViews('viewLegend', false);
       }
-      if (['Month', 'Year'].includes(customReportItems.groupBy)) {
+      if (customReportItems.groupBy === 'Interval') {
         setGroupBy('Category');
       }
     } else {
@@ -120,7 +121,7 @@ export function ReportSidebar({
     if (customReportItems.mode === 'total') {
       if (customReportItems.graphType !== 'TableGraph') {
         setTypeDisabled(
-          !['Month', 'Year'].includes(customReportItems.groupBy) ? [] : ['Net'],
+          customReportItems.groupBy !== 'Interval' ? [] : ['Net'],
         );
       }
     }
@@ -166,7 +167,7 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
             Mode:
           </Text>
           <ModeButton
@@ -189,7 +190,7 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
             Split:
           </Text>
           <Select
@@ -201,10 +202,10 @@ export function ReportSidebar({
             ])}
             disabledKeys={
               customReportItems.mode === 'time'
-                ? ['Month', 'Year']
+                ? ['Interval']
                 : customReportItems.graphType === 'AreaGraph'
-                  ? ['Category', 'Group', 'Payee', 'Account', 'Year']
-                  : ['Year']
+                  ? ['Category', 'Group', 'Payee', 'Account']
+                  : []
             }
           />
         </View>
@@ -215,7 +216,7 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
             Type:
           </Text>
           <Select
@@ -228,30 +229,6 @@ export function ReportSidebar({
             disabledKeys={typeDisabled}
           />
         </View>
-        {/* //It would be nice to retain this for future usage
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5, paddingLeft: -10 }}>
-                Interval:
-              </Text>
-              <Select
-                value={interval}
-                onChange={setInterval}
-                options={intervalOptions.map(option => [
-                  option.value,
-                  option.description,
-                ])}
-                disabledKeys={
-                  [1,2,3,4,5]
-                }
-              />
-            </View>
-            */}
         <View
           style={{
             flexDirection: 'row',
@@ -259,7 +236,34 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            Interval:
+          </Text>
+          <Select
+            value={customReportItems.interval}
+            onChange={e => {
+              setInterval(e);
+              onReportChange({ type: 'modify' });
+            }}
+            options={ReportOptions.interval.map(option => [
+              option.description,
+              option.description,
+            ])}
+            disabledKeys={
+              customReportItems.mode === 'time'
+                ? ['Monthly', 'Yearly']
+                : ['Yearly']
+            }
+          />
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            padding: 5,
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }} />
           <Button
             onClick={() => {
               setMenuOpen(true);
@@ -377,7 +381,7 @@ export function ReportSidebar({
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
               Range:
             </Text>
             <Select
@@ -401,7 +405,7 @@ export function ReportSidebar({
                 alignItems: 'center',
               }}
             >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+              <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
                 From:
               </Text>
               <Select
@@ -429,7 +433,7 @@ export function ReportSidebar({
                 alignItems: 'center',
               }}
             >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+              <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
                 To:
               </Text>
               <Select

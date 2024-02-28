@@ -15,16 +15,14 @@ export function calculateLegend(
   balanceTypeOp: string,
 ) {
   const colorScale = getColorScale('qualitative');
-  const chooseData = ['Month', 'Year'].includes(groupBy)
-    ? monthData
-    : calcDataFiltered;
+  const chooseData = groupBy === 'Interval' ? monthData : calcDataFiltered;
   return chooseData.map((c, index) => {
     return {
-      name: ['Month', 'Year'].includes(groupBy) ? c.date : c.name,
+      name: groupBy === 'Interval' ? c.date : c.name,
       color:
         graphType === 'DonutGraph'
           ? colorScale[index % colorScale.length]
-          : ['Month', 'Year'].includes(groupBy)
+          : groupBy === 'Interval'
             ? balanceTypeOp === 'totalDebts'
               ? theme.reportsRed
               : theme.reportsBlue
