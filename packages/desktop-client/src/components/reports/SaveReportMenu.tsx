@@ -7,10 +7,12 @@ export function SaveReportMenu({
   onClose,
   onMenuSelect,
   savedStatus,
+  listReports,
 }: {
   onClose: () => void;
   onMenuSelect: (item: string) => void;
   savedStatus: string;
+  listReports: number;
 }) {
   const savedMenu: MenuProps =
     savedStatus === 'saved'
@@ -60,6 +62,7 @@ export function SaveReportMenu({
       {
         name: 'choose-report',
         text: 'Choose Report',
+        disabled: listReports > 0 ? false : true,
       },
     ],
   };

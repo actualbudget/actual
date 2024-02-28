@@ -42,6 +42,7 @@ function CardMenu({ onClose, onMenuSelect, reportId }: CardMenuProps) {
     </MenuTooltip>
   );
 }
+
 function index(data: CustomReportEntity[]): { [key: string]: boolean }[] {
   return data.reduce((carry, report) => {
     const reportId: string = report.id === undefined ? '' : report.id;
@@ -69,6 +70,7 @@ export function CustomReportListCards({
       await send('report/delete', reportId);
     }
   };
+
   const onMenuOpen = (item: string, state: boolean) => {
     setReportMenu({ ...reportMenu, [item]: state });
   };

@@ -24,7 +24,6 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
     savedReport?: T;
     type: string;
   }) => void;
-  onResetReports: () => void;
 };
 
 export function SaveReport({
@@ -32,7 +31,6 @@ export function SaveReport({
   report,
   savedStatus,
   onReportChange,
-  onResetReports,
 }: SaveReportProps) {
   const listReports = useReports();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -108,7 +106,7 @@ export function SaveReport({
         setMenuOpen(false);
         setName('');
         await send('report/delete', report.id);
-        onResetReports();
+        onReportChange({ type: 'reset' });
         break;
       case 'update-report':
         setErr('');
@@ -127,7 +125,7 @@ export function SaveReport({
       case 'reset-report':
         setMenuOpen(false);
         setName('');
-        onResetReports();
+        onReportChange({ type: 'reset' });
         break;
       case 'choose-report':
         setErr('');
@@ -160,7 +158,7 @@ export function SaveReport({
             flexShrink: 0,
           }}
         >
-          {report.id === '' ? 'Unsaved report' : report.name}&nbsp;
+          {!report.id ? 'Unsaved report' : report.name}&nbsp;
         </Text>
         {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
@@ -170,6 +168,7 @@ export function SaveReport({
           onClose={() => setMenuOpen(false)}
           onMenuSelect={onMenuSelect}
           savedStatus={savedStatus}
+          listReports={listReports && listReports.length}
         />
       )}
       {nameMenuOpen && (
