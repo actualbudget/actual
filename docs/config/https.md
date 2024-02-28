@@ -28,3 +28,5 @@ Once you have the certificate, you’ll need to configure Actual to use it. Ther
    }
    ```
 2. **Configuring with environment variables**: If you can’t easily create new files, you can also configure HTTPS using environment variables. Set the `ACTUAL_HTTPS_KEY` and `ACTUAL_HTTPS_CERT` environment variables to the contents of the `.key` and `.crt` files, respectively. If you’re unable to include newlines in the environment variable values, you can replace any newlines with `\n` and Actual will automatically convert them back to newlines.
+
+Once one of the above configuration methods have been applied, make sure to access your instance using `https` instead of refreshing the web page.
