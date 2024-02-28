@@ -6,6 +6,7 @@ import { Input } from '../common/Input';
 import { MenuTooltip } from '../common/MenuTooltip';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type SaveReportNameProps = {
@@ -41,7 +42,7 @@ export function SaveReportName({
             direction="row"
             justify="flex-end"
             align="center"
-            style={{ padding: 10 }}
+            style={{ padding: 15 }}
           >
             <FormField style={{ flex: 1 }}>
               <FormLabel
@@ -54,11 +55,12 @@ export function SaveReportName({
                 id="name-field"
                 inputRef={inputRef}
                 onUpdate={setName}
+                style={{ marginTop: 10 }}
               />
             </FormField>
             <Button
               type="primary"
-              style={{ marginTop: 18 }}
+              style={{ marginTop: 30 }}
               onClick={e => {
                 e.preventDefault();
                 onAddUpdate(menuItem);
@@ -74,7 +76,7 @@ export function SaveReportName({
           <Text style={{ color: theme.errorText }}>{err}</Text>
         </Stack>
       ) : (
-        <Text />
+        <View />
       )}
     </MenuTooltip>
   );
