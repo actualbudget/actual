@@ -314,7 +314,22 @@ export function CustomReport() {
 
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
-      <Header title={`Custom Reports: ${report.name ?? 'Unsaved report'}`} />
+      <View
+        style={{
+          flexDirection: 'row',
+        }}
+      >
+        <Header title={`Custom Reports:`} />
+        <Text 
+          style={{
+            ...styles.veryLargeText,
+            marginTop: 40,
+            color: theme.pageTextPositive
+          }}
+        >
+          {report.name ?? 'Unsaved report'}
+        </Text>
+      </View>
       <View
         style={{
           display: 'flex',
