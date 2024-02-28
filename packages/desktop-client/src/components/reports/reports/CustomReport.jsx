@@ -319,12 +319,12 @@ export function CustomReport() {
           flexDirection: 'row',
         }}
       >
-        <Header title={`Custom Reports:`} />
-        <Text 
+        <Header title="Custom Reports:" />
+        <Text
           style={{
             ...styles.veryLargeText,
             marginTop: 40,
-            color: theme.pageTextPositive
+            color: theme.pageTextPositive,
           }}
         >
           {report.name ?? 'Unsaved report'}

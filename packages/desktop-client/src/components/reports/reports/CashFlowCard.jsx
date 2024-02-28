@@ -58,7 +58,7 @@ export function CashFlowCard() {
   const income = graphData?.income || 0;
 
   return (
-    <ReportCard flex={1} to="/reports/cash-flow" style={{ marginLeft: 10 }}>
+    <ReportCard flex={1} to="/reports/cash-flow">
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}
