@@ -67,6 +67,7 @@ export function CustomReport() {
   const [mode, setMode] = useState(loadReport.mode);
   const [isDateStatic, setIsDateStatic] = useState(loadReport.isDateStatic);
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
+  const [interval, setInterval] = useState(loadReport.interval);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
@@ -146,6 +147,7 @@ export function CustomReport() {
     startDate,
     endDate,
     groupBy,
+    interval,
     balanceType,
     categories,
     selectedCategories,
@@ -184,6 +186,7 @@ export function CustomReport() {
     startDate,
     endDate,
     groupBy,
+    interval,
     balanceType,
     categories,
     selectedCategories,
@@ -208,6 +211,7 @@ export function CustomReport() {
     dateRange,
     mode,
     groupBy,
+    interval,
     balanceType,
     showEmpty,
     showOffBudget,
@@ -256,6 +260,7 @@ export function CustomReport() {
     setDateRange(defaultReport.dateRange);
     setMode(defaultReport.mode);
     setGroupBy(defaultReport.groupBy);
+    setInterval(defaultReport.interval);
     setBalanceType(defaultReport.balanceType);
     setShowEmpty(defaultReport.showEmpty);
     setShowOffBudget(defaultReport.showOffBudget);
@@ -297,6 +302,7 @@ export function CustomReport() {
         setDateRange(report.dateRange);
         setMode(report.mode);
         setGroupBy(report.groupBy);
+        setInterval(report.interval);
         setBalanceType(report.balanceType);
         setShowEmpty(report.showEmpty);
         setShowOffBudget(report.showOffBudget);
@@ -355,6 +361,7 @@ export function CustomReport() {
           setTypeDisabled={setTypeDisabled}
           setGraphType={setGraphType}
           setGroupBy={setGroupBy}
+          setInterval={setInterval}
           setBalanceType={setBalanceType}
           setMode={setMode}
           setIsDateStatic={setIsDateStatic}
@@ -467,6 +474,7 @@ export function CustomReport() {
                     graphType={graphType}
                     balanceType={balanceType}
                     groupBy={groupBy}
+                    interval={interval}
                     showEmpty={showEmpty}
                     scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
@@ -498,7 +506,11 @@ export function CustomReport() {
                     />
                   )}
                   {viewLegend && (
-                    <ReportLegend legend={data.legend} groupBy={groupBy} />
+                    <ReportLegend
+                      legend={data.legend}
+                      groupBy={groupBy}
+                      interval={interval}
+                    />
                   )}
                 </View>
               )}

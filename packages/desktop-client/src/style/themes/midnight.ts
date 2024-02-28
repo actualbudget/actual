@@ -24,17 +24,17 @@ export const tableRowBackgroundHover = colorPalette.gray500;
 export const tableText = colorPalette.gray150;
 export const tableTextLight = tableText;
 export const tableTextSubdued = colorPalette.gray500;
-export const tableTextSelected = colorPalette.gray150;
+export const tableTextSelected = colorPalette.gray800;
 export const tableTextHover = colorPalette.gray400;
 export const tableTextInactive = colorPalette.gray400;
 export const tableHeaderText = colorPalette.gray200;
 export const tableHeaderBackground = colorPalette.gray900;
-export const tableBorder = colorPalette.gray500;
+export const tableBorder = colorPalette.gray600;
 export const tableBorderSelected = colorPalette.purple400;
 export const tableBorderHover = colorPalette.purple300;
 export const tableBorderSeparator = colorPalette.gray400;
 export const tableRowBackgroundHighlight = colorPalette.purple150;
-export const tableRowBackgroundHighlightText = colorPalette.gray600;
+export const tableRowBackgroundHighlightText = colorPalette.gray800;
 export const tableRowHeaderBackground = colorPalette.gray700;
 export const tableRowHeaderText = colorPalette.gray150;
 
@@ -63,7 +63,7 @@ export const menuAutoCompleteTextHeader = colorPalette.purple200;
 
 export const modalBackground = colorPalette.gray700;
 export const modalBorder = colorPalette.gray200;
-export const mobileHeaderBackground = colorPalette.gray800;
+export const mobileHeaderBackground = colorPalette.gray900;
 export const mobileHeaderText = colorPalette.purple200;
 export const mobileHeaderTextSubdued = colorPalette.gray200;
 export const mobileHeaderTextHover = 'rgba(200, 200, 200, .15)';
@@ -98,7 +98,7 @@ export const buttonMenuSelectedBorder = buttonMenuSelectedBackground;
 
 export const buttonPrimaryText = colorPalette.white;
 export const buttonPrimaryTextHover = buttonPrimaryText;
-export const buttonPrimaryBackground = colorPalette.gray400;
+export const buttonPrimaryBackground = colorPalette.purple300;
 export const buttonPrimaryBackgroundHover = buttonPrimaryBackground;
 export const buttonPrimaryBorder = buttonPrimaryBackground;
 export const buttonPrimaryShadow = 'rgba(0, 0, 0, 0.6)';
@@ -176,7 +176,7 @@ export const checkboxBackgroundSelected = colorPalette.purple300;
 export const checkboxBorderSelected = colorPalette.purple300;
 export const checkboxShadowSelected = colorPalette.purple500;
 
-export const pillBackground = colorPalette.gray700;
+export const pillBackground = colorPalette.gray500;
 export const pillBackgroundLight = colorPalette.gray900;
 export const pillText = colorPalette.gray200;
 export const pillTextHighlighted = colorPalette.purple200;

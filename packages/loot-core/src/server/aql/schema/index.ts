@@ -145,7 +145,7 @@ export const schema = {
     conditions: f('json'),
     conditions_op: f('string'),
     metadata: f('json'),
-    interval: f('string'),
+    interval: f('string', { default: 'Monthly' }),
     color_scheme: f('json'),
     tombstone: f('boolean'),
   },

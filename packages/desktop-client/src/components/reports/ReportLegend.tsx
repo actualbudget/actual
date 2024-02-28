@@ -4,12 +4,15 @@ import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+import { ReportOptions } from './ReportOptions';
+
 type ReportLegendProps = {
   legend?: Array<{ name: string; color: string }>;
   groupBy: string;
+  interval: string;
 };
 
-export function ReportLegend({ legend, groupBy }: ReportLegendProps) {
+export function ReportLegend({ legend, groupBy, interval }: ReportLegendProps) {
   return (
     <View
       style={{
@@ -28,7 +31,9 @@ export function ReportLegend({ legend, groupBy }: ReportLegendProps) {
           paddingTop: 10,
         }}
       >
-        {groupBy}
+        {groupBy === 'Interval'
+          ? ReportOptions.intervalMap.get(interval)
+          : groupBy}
       </Text>
       <View>
         {legend &&
