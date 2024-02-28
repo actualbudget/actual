@@ -6,7 +6,7 @@ describe('utility functions', () => {
     expect(looselyParseAmount('3.45')).toBe(3.45);
 
     // Parsing is currently limited to 2 decimal places.
-    // Anything other than <. ,> and 2 other chars doesn't count decimal amounts
+    // Only <. ,> and 2 other chars counts as decimal places
     // Proper parsing would include format settings,
     // but currently we are format agnostic
     expect(looselyParseAmount('3.456')).toBe(3456);
