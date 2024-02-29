@@ -50,6 +50,13 @@ export function Overview() {
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
+      </View>
+      <View
+        style={{
+          flex: '0 0 auto',
+          flexDirection: 'row',
+        }}
+      >
         {sankeyFeatureFlag && <SankeyCard />}
       </View>
       {customReportsFeatureFlag && (

@@ -315,6 +315,7 @@ export function CustomReport() {
       <View
         style={{
           flexDirection: 'row',
+          flexShrink: 0,
         }}
       >
         <Header title="Custom Reports:" />
