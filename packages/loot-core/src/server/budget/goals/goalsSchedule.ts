@@ -186,46 +186,28 @@ export async function goalsSchedule(
     const t = await createScheduleList(template, current_month, category);
     errors = errors.concat(t.errors);
 
-    console.log('There are ' + template.length + ' schedule templates found.');
-    template.forEach(template => console.log(template));
+    const isPayMonthOf = c =>
+      c.full ||
+      (c.target_frequency === 'monthly' &&
+        c.target_interval === 1 &&
+        c.num_months === 0) ||
+      (c.target_frequency === 'weekly' &&
+        c.target_interval >= 0 &&
+        c.num_months === 0) ||
+      c.target_frequency === 'daily' ||
+      isReflectBudget();
 
-    console.log('There are ' + t.t.length + ' matched schedules.');
-    t.t.forEach(template => console.log(template.name));
+    const t_payMonthOf = t.t.filter(isPayMonthOf);
 
-    const t_payMonthOf = t.t.filter(
-      c =>
-        c.full ||
-        (c.target_frequency === 'monthly' &&
-          c.target_interval === 1 &&
-          c.num_months === 0) ||
-        (c.target_frequency === 'weekly' &&
-          c.target_interval >= 0 &&
-          c.num_months === 0) ||
-        c.target_frequency === 'daily' ||
-        isReflectBudget(),
-    );
+    const t_sinking = t.t
+      .filter(c => !isPayMonthOf(c))
+      .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
 
     console.log(
       'There are ' +
         t_payMonthOf.length +
         ' templates that are simple schedules.',
     );
-
-    const t_sinking = t.t
-      .filter(
-        c =>
-          (!c.full &&
-            c.target_frequency === 'monthly' &&
-            c.target_interval > 1) ||
-          (!c.full &&
-            c.target_frequency === 'monthly' &&
-            c.num_months > 0 &&
-            c.target_interval === 1) ||
-          (!c.full && c.target_frequency === 'yearly') ||
-          (!c.full && c.target_frequency === undefined),
-      )
-      .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
-
     console.log('There are ' + t_sinking.length + ' sinking fund templates.');
 
     const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
