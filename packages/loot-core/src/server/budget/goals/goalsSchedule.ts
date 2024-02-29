@@ -186,7 +186,10 @@ export async function goalsSchedule(
     const t = await createScheduleList(template, current_month, category);
     errors = errors.concat(t.errors);
 
-    console.log('There are ' + t.t.length + ' templates.');
+    console.log('There are ' + template.length + ' schedule templates found.');
+    template.forEach(template => console.log(template));
+
+    console.log('There are ' + t.t.length + ' matched schedules.');
     t.t.forEach(template => console.log(template.name));
 
     const t_payMonthOf = t.t.filter(
