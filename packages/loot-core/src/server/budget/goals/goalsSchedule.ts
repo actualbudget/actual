@@ -186,6 +186,8 @@ export async function goalsSchedule(
     const t = await createScheduleList(template, current_month, category);
     errors = errors.concat(t.errors);
 
+    console.log('There are ' + t.t.length + ' templates.');
+
     const t_payMonthOf = t.t.filter(
       c =>
         c.full ||
@@ -197,6 +199,12 @@ export async function goalsSchedule(
           c.num_months === 0) ||
         c.target_frequency === 'daily' ||
         isReflectBudget(),
+    );
+
+    console.log(
+      'There are ' +
+        t_payMonthOf.length +
+        ' templates that are simple schedules.',
     );
 
     const t_sinking = t.t
@@ -213,6 +221,8 @@ export async function goalsSchedule(
           (!c.full && c.target_frequency === undefined),
       )
       .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
+
+    console.log('There are ' + t_sinking.length + ' sinking fund templates.');
 
     const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
 
