@@ -187,6 +187,7 @@ export async function goalsSchedule(
     errors = errors.concat(t.errors);
 
     console.log('There are ' + t.t.length + ' templates.');
+    t.t.forEach(template => console.log(template.name));
 
     const t_payMonthOf = t.t.filter(
       c =>
