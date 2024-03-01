@@ -81,7 +81,6 @@ export interface CustomReportData {
   date_range: string;
   mode: string;
   group_by: string;
-  interval: string;
   balance_type: string;
   show_empty: number;
   show_offbudget: number;
