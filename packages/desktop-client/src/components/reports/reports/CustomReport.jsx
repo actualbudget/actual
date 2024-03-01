@@ -318,7 +318,7 @@ export function CustomReport() {
           flexShrink: 0,
         }}
       >
-        <Header title="Custom Reports:" />
+        <Header title="Custom Report:" />
         <Text
           style={{
             ...styles.veryLargeText,
