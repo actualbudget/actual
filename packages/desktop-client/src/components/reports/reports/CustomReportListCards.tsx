@@ -19,16 +19,16 @@ import { SaveReportName } from '../SaveReportName';
 
 type CardMenuProps = {
   onClose: () => void;
-  onMenuSelect: (item: string, reportId: string) => void;
-  reportId: string;
+  onMenuSelect: (item: string, report: CustomReportEntity) => void;
+  report: CustomReportEntity;
 };
 
-function CardMenu({ onClose, onMenuSelect, reportId }: CardMenuProps) {
+function CardMenu({ onClose, onMenuSelect, report }: CardMenuProps) {
   return (
     <MenuTooltip onClose={onClose} width={120}>
       <Menu
         onMenuSelect={item => {
-          onMenuSelect(item, reportId);
+          onMenuSelect(item, report);
         }}
         items={[
           {
@@ -95,14 +95,16 @@ export function CustomReportListCards({
     onNameMenuOpen(reportData.id === undefined ? '' : reportData.id, false);
   };
 
-  const onMenuSelect = async (item: string, reportId: string) => {
+  const onMenuSelect = async (item: string, report: CustomReportEntity) => {
     if (item === 'delete') {
-      onMenuOpen(reportId, false);
-      await send('report/delete', reportId);
+      onMenuOpen(report.id, false);
+      await send('report/delete', report.id);
     }
     if (item === 'rename') {
-      onMenuOpen(reportId, false);
-      onNameMenuOpen(reportId, true);
+      onMenuOpen(report.id, false);
+      onNameMenuOpen(report.id, true);
+      setName(report.name);
+      setErr('');
     }
   };
 
@@ -237,7 +239,7 @@ export function CustomReportListCards({
                               false,
                             )
                           }
-                          reportId={report.id}
+                          report={report}
                         />
                       )}
                   {report.id === undefined

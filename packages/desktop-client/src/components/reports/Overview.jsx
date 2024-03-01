@@ -5,7 +5,8 @@ import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
-import { ButtonLink } from '../common/ButtonLink';
+import { AnchorLink } from '../common/AnchorLink';
+import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -37,9 +38,11 @@ export function Overview() {
             marginTop: 10,
           }}
         >
-          <ButtonLink to="/reports/custom" type="primary">
-            <Text>Create new custom report</Text>
-          </ButtonLink>
+          <AnchorLink to="/reports/custom" style={{ textDecoration: 'none' }}>
+            <Button type="primary">
+              <Text>Create new custom report</Text>
+            </Button>
+          </AnchorLink>
         </View>
       )}
       <View
