@@ -276,6 +276,8 @@ class AccountInternal extends PureComponent {
     this.unlisten = () => {
       unlistens.forEach(unlisten => unlisten());
     };
+    
+    this.applyFilters(this.state.conditions);
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
@@ -287,7 +289,6 @@ class AccountInternal extends PureComponent {
     if (this.props.lastUndoState && this.props.lastUndoState.current) {
       onUndo(this.props.lastUndoState.current);
     }
-    this.applyFilters(this.state.conditions);
   }
 
   componentDidUpdate(prevProps) {
