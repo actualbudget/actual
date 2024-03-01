@@ -147,7 +147,7 @@ type CategoryMonthProps = {
   editing: boolean;
   onEdit: (id: string | null, idx?: number) => void;
   onBudgetAction: (idx: number, action: string, arg: unknown) => void;
-  onShowActivity: (name: string, id: string, idx: number) => void;
+  onShowActivity: (id: string, idx: number) => void;
 };
 export const CategoryMonth = memo(function CategoryMonth({
   monthIndex,
@@ -301,7 +301,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
           data-testid="category-month-spent"
-          onClick={() => onShowActivity(category.name, category.id, monthIndex)}
+          onClick={() => onShowActivity(category.id, monthIndex)}
         >
           <CellValue
             binding={reportBudget.catSumAmount(category.id)}

@@ -297,18 +297,21 @@ function BudgetInner(props: BudgetProps) {
     dispatch(applyBudgetAction(month, type, args));
   };
 
-  const onShowActivity = (categoryName, categoryId, month) => {
+  const onShowActivity = (categoryId, month) => {
+    const conditions = [
+      { field: 'category', op: 'is', value: categoryId, type: 'id' },
+      {
+        field: 'date',
+        op: 'is',
+        value: month,
+        options: { month: true },
+        type: 'date',
+      },
+    ];
     navigate('/accounts', {
       state: {
         goBack: true,
-        filterName: `${categoryName} (${monthUtils.format(
-          month,
-          'MMMM yyyy',
-        )})`,
-        filter: {
-          category: categoryId,
-          date: { $transform: '$month', $eq: month },
-        },
+        conditions,
       },
     });
   };

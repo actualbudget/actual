@@ -204,6 +204,7 @@ class AccountInternal extends PureComponent {
     this.state = {
       search: '',
       filters: [],
+      conditions: props.conditions,
       loading: true,
       workingHard: false,
       reconcileAmount: null,
@@ -286,6 +287,7 @@ class AccountInternal extends PureComponent {
     if (this.props.lastUndoState && this.props.lastUndoState.current) {
       onUndo(this.props.lastUndoState.current);
     }
+    this.applyFilters(this.state.conditions);
   }
 
   componentDidUpdate(prevProps) {
@@ -347,17 +349,7 @@ class AccountInternal extends PureComponent {
   };
 
   makeRootQuery = () => {
-    const locationState = this.props.location.state;
     const accountId = this.props.accountId;
-
-    if (locationState && locationState.filter) {
-      return q('transactions')
-        .options({ splits: 'grouped' })
-        .filter({
-          'account.offbudget': false,
-          ...locationState.filter,
-        });
-    }
 
     return queries.makeTransactionsQuery(accountId);
   };
@@ -1555,6 +1547,10 @@ export function Account() {
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const lastUndoState = useSelector(state => state.app.lastUndoState);
+  const conditions =
+    location.state && location.state.conditions
+      ? location.state.conditions
+      : [];
 
   const state = {
     newTransactions,
@@ -1571,6 +1567,7 @@ export function Account() {
     modalShowing,
     accountsSyncing,
     lastUndoState,
+    conditions,
   };
 
   const dispatch = useDispatch();
@@ -1581,20 +1578,11 @@ export function Account() {
   );
 
   const transform = useMemo(() => {
-    let filterByAccount = queries.getAccountFilter(params.id, '_account');
-    let filterByPayee = queries.getAccountFilter(
+    const filterByAccount = queries.getAccountFilter(params.id, '_account');
+    const filterByPayee = queries.getAccountFilter(
       params.id,
       '_payee.transfer_acct',
     );
-
-    // Never show schedules on these pages
-    if (
-      (location.state && location.state.filter) ||
-      params.id === 'uncategorized'
-    ) {
-      filterByAccount = { id: null };
-      filterByPayee = { id: null };
-    }
 
     return q => {
       q = q.filter({
