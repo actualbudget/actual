@@ -4,11 +4,13 @@ import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { theme, styles } from '../../style';
+import { styles } from '../../style';
+import { AnchorLink } from '../common/AnchorLink';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { CashFlowCard } from './reports/CashFlowCard';
-import { CustomReportCard } from './reports/CustomReportCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
@@ -19,8 +21,6 @@ export function Overview() {
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
 
-  const featureCount =
-    3 - (sankeyFeatureFlag ? 1 : 0) - (customReportsFeatureFlag ? 1 : 0);
   const accounts = useAccounts();
   return (
     <View
@@ -29,6 +29,22 @@ export function Overview() {
         ...{ paddingLeft: 40, paddingRight: 40, minWidth: 700 },
       }}
     >
+      {customReportsFeatureFlag && (
+        <View
+          style={{
+            flex: '0 0 auto',
+            alignItems: 'flex-end',
+            marginRight: 15,
+            marginTop: 10,
+          }}
+        >
+          <AnchorLink to="/reports/custom" style={{ textDecoration: 'none' }}>
+            <Button type="primary">
+              <Text>Create new custom report</Text>
+            </Button>
+          </AnchorLink>
+        </View>
+      )}
       <View
         style={{
           flexDirection: 'row',
@@ -45,24 +61,9 @@ export function Overview() {
         }}
       >
         {sankeyFeatureFlag && <SankeyCard />}
-        {customReportsFeatureFlag && <CustomReportCard />}
-        {featureCount !== 3 &&
-          [...Array(featureCount)].map((e, i) => (
-            <View key={i} style={{ padding: 15, flex: 1 }} />
-          ))}
       </View>
       {customReportsFeatureFlag && (
-        <>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: theme.pillBorderDark,
-              marginTop: 10,
-              flexShrink: 0,
-            }}
-          />
-          <CustomReportListCards reports={customReports} />
-        </>
+        <CustomReportListCards reports={customReports} />
       )}
     </View>
   );

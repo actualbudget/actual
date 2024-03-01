@@ -1,5 +1,7 @@
 import React, { type RefObject, useEffect } from 'react';
 
+import { type CustomReportEntity } from 'loot-core/types/models/reports';
+
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
@@ -15,8 +17,15 @@ type SaveReportNameProps = {
   name: string;
   setName: (name: string) => void;
   inputRef: RefObject<HTMLInputElement>;
-  onAddUpdate: (menuItem: string) => void;
+  onAddUpdate: ({
+    menuChoice,
+    reportData,
+  }: {
+    menuChoice?: string;
+    reportData?: CustomReportEntity;
+  }) => void;
   err: string;
+  report?: CustomReportEntity;
 };
 
 export function SaveReportName({
@@ -27,6 +36,7 @@ export function SaveReportName({
   inputRef,
   onAddUpdate,
   err,
+  report,
 }: SaveReportNameProps) {
   useEffect(() => {
     if (inputRef.current) {
@@ -63,7 +73,10 @@ export function SaveReportName({
               style={{ marginTop: 30 }}
               onClick={e => {
                 e.preventDefault();
-                onAddUpdate(menuItem);
+                onAddUpdate({
+                  menuChoice: menuItem ?? undefined,
+                  reportData: report ?? undefined,
+                });
               }}
             >
               {menuItem === 'save-report' ? 'Add' : 'Update'}

@@ -81,7 +81,6 @@ export interface CustomReportData {
   date_range: string;
   mode: string;
   group_by: string;
-  interval: string;
   balance_type: string;
   show_empty: number;
   show_offbudget: number;
@@ -92,6 +91,6 @@ export interface CustomReportData {
   conditions?: RuleConditionEntity[];
   conditions_op: string;
   metadata?: GroupedEntity;
-  interval?: string;
+  interval: string;
   color_scheme?: string;
 }
