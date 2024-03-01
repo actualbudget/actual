@@ -22,17 +22,17 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template up to $150|Budget up to $150 each month, and remove extra funds over $150|Variable expenses, such as petrol and groceries|
 |#template up to $150 hold|Budget up to $150 each month, but retain any funds over $150 |Variable expenses that may get refunds or reimbursements|
 |#template $50 up to $300|Budget $50 each month up to a maximum of $300|Funding rainy day categories, such as replacement shoes and bicycle repairs
-|#template $500 by 2022-03|Break down large, less-frequent expenses into manageable monthly expenses|Saving for a replacement car in a few years
-|#template $500 by 2021-03 repeat every 6 months|Break down large, less-frequent expenses into manageable monthly expenses|Biannual credit card fees
-|#template $500 by 2021-03 repeat every year|Break down large, less-frequent expenses into manageable monthly expenses|Annual insurance premium
-|#template $500 by 2021-03 repeat every 2 years|Break down large, less-frequent expenses into manageable monthly expenses|Domain name renewal|
-|#template $500 by 2021-12 spend from 2021-03|Budget $500 by December. Any spending between March and December is OK.|Christmas presents, overseas holiday, or any other expenses that I will be partially paying for before the target period ends.|
-|#template $500 by 2021-12 spend from 2021-03 repeat every year| |	
-|#template $500 by 2021-12 spend from 2021-03 repeat every 2 years| |	
-|#template $10 repeat every week starting 2022-01-03|Budget $10 a week|
-|#template $10 repeat every week starting 2022-01-03 up to 80|Budget $10 a week, up to a maximum of $80|
-|#template $10 repeat every 2 weeks starting 2022-01-04|Budget $10 fortnightly|
-|#template $10 repeat every 9 weeks starting 2022-01-04 up to 30|Budget $10 every 9 weeks, up to a maximum of $30|
+|#template $500 by 2025-03|Break down large, less-frequent expenses into manageable monthly expenses|Saving for a replacement car in a few years
+|#template $500 by 2025-03 repeat every 6 months|Break down large, less-frequent expenses into manageable monthly expenses|Biannual credit card fees
+|#template $500 by 2025-03 repeat every year|Break down large, less-frequent expenses into manageable monthly expenses|Annual insurance premium
+|#template $500 by 2025-03 repeat every 2 years|Break down large, less-frequent expenses into manageable monthly expenses|Domain name renewal|
+|#template $500 by 2024-12 spend from 2024-03|Budget $500 by December. Any spending between March and December is OK.|Christmas presents, overseas holiday, or any other expenses that I will be partially paying for before the target period ends.|
+|#template $500 by 2024-12 spend from 2024-03 repeat every year| |	
+|#template $500 by 2024-12 spend from 2024-03 repeat every 2 years| |	
+|#template $10 repeat every week starting 2025-01-03|Budget $10 a week|
+|#template $10 repeat every week starting 2025-01-03 up to 80|Budget $10 a week, up to a maximum of $80|
+|#template $10 repeat every 2 weeks starting 2025-01-04|Budget $10 fortnightly|
+|#template $10 repeat every 9 weeks starting 2025-01-04 up to 30|Budget $10 every 9 weeks, up to a maximum of $30|
 |#template 15% of all income|Budget 15% of all income categories| Using a "pay yourself first" strategy|
 |#template 10% of Paycheck|Budget 10% of the "Paycheck" income category| Using a "pay yourself first" strategy, but have income categories you want to ignore|
 |#template 15% of previous all income|Budget 15% of all income categories using last month's income|Using a "pay yourself first" strategy in conjunction with a "month ahead" strategy |
@@ -47,7 +47,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 - Currency symbol is optional, `#template $50` and `#template 50` are the same.
 - Number formats that use comma for the decimal separator are not supported (eg, 123,45). You must use 123.45.
 - Thousands separators are not supported (eg, 1,234). You must use 1234.
-- {SCHEDULE NAME} is defined in the **Schedules** editor.
+- {SCHEDULE NAME} is defined in the **Schedules** editor.**Take great care to copy across these schedule names EXACTLY**
 - By default templates do not consider available funds when being applied. Use template priorities to not budget more than is available.
 - The `hold` flag can be added to any goal that uses the `up to` key word.
 - A single category with two templates that use `up to` is not supported.
@@ -61,9 +61,9 @@ For examples:
 
 **Budget $200/month for 3 months and $400/month for the next 3 months**
 
-    #template $600 by 2021-03 repeat every 6 months
+    #template $600 by 2024-06 repeat every 6 months
 
-    #template $1200 by 2021-06 repeat every 6 months
+    #template $1200 by 2024-09 repeat every 6 months
 
 **Streaming Services: $42.97**
 
@@ -74,9 +74,9 @@ For examples:
     Amazon Prime
     #template $7.99
 
-**$120 in February 2022, $130 in March 2022**
+**$120 in February 2022, $130 in March 2025**
 
-    #template $10 repeat every 2 weeks starting 2022-01-04
+    #template $10 repeat every 2 weeks starting 2025-01-04
     #template $100
 
 ### Template Priorities
