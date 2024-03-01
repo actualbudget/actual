@@ -326,7 +326,7 @@ export function CustomReport() {
             color: theme.pageTextPositive,
           }}
         >
-          {report.name ?? 'Unsaved report'}
+          {report.name || 'Unsaved report'}
         </Text>
       </View>
       <View
