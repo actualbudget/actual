@@ -198,20 +198,10 @@ export async function goalsSchedule(
       isReflectBudget();
 
     const t_payMonthOf = t.t.filter(isPayMonthOf);
-
     const t_sinking = t.t
       .filter(c => !isPayMonthOf(c))
       .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
-
-    console.log(
-      'There are ' +
-        t_payMonthOf.length +
-        ' templates that are simple schedules.',
-    );
-    console.log('There are ' + t_sinking.length + ' sinking fund templates.');
-
     const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
-
     const totalSinking = await getSinkingTotal(t_sinking);
     const totalSinkingBaseContribution =
       await getSinkingBaseContributionTotal(t_sinking);
@@ -224,7 +214,13 @@ export async function goalsSchedule(
         remainder,
         last_month_balance,
       );
-      to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
+      if (t_sinking.length === 0) {
+        to_budget +=
+          Math.round(totalPayMonthOf + totalSinkingContribution) -
+          last_month_balance;
+      } else {
+        to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
+      }
     }
   }
   return { to_budget, errors, remainder, scheduleFlag };
