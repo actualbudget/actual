@@ -27,7 +27,6 @@ export function ReportTopbar({
   onApplyFilter,
   onChangeViews,
   onReportChange,
-  onResetReports,
   disabledItems,
   defaultItems,
 }) {
@@ -168,7 +167,6 @@ export function ReportTopbar({
         report={report}
         savedStatus={savedStatus}
         onReportChange={onReportChange}
-        onResetReports={onResetReports}
       />
     </View>
   );

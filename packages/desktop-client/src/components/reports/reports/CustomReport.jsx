@@ -312,30 +312,29 @@ export function CustomReport() {
     }
   };
 
-  const onResetReports = () => {
+  const setReportData = input => {
     const selectAll = [];
     categories.grouped.map(categoryGroup =>
       categoryGroup.categories.map(category => selectAll.push(category)),
     );
 
-    setStartDate(defaultReport.startDate);
-    setEndDate(defaultReport.endDate);
-    setIsDateStatic(defaultReport.isDateStatic);
-    setDateRange(defaultReport.dateRange);
-    setMode(defaultReport.mode);
-    setGroupBy(defaultReport.groupBy);
-    setInterval(defaultReport.interval);
-    setBalanceType(defaultReport.balanceType);
-    setShowEmpty(defaultReport.showEmpty);
-    setShowOffBudget(defaultReport.showOffBudget);
-    setShowHiddenCategories(defaultReport.showHiddenCategories);
-    setShowUncategorized(defaultReport.showUncategorized);
-    setSelectedCategories(selectAll);
-    setGraphType(defaultReport.graphType);
+    setStartDate(input.startDate);
+    setEndDate(input.endDate);
+    setIsDateStatic(input.isDateStatic);
+    setDateRange(input.dateRange);
+    setMode(input.mode);
+    setGroupBy(input.groupBy);
+    setInterval(input.interval);
+    setBalanceType(input.balanceType);
+    setShowEmpty(input.showEmpty);
+    setShowOffBudget(input.showOffBudget);
+    setShowHiddenCategories(input.showHiddenCategories);
+    setShowUncategorized(input.showUncategorized);
+    setSelectedCategories(input.selectedCategories ?? selectAll);
+    setGraphType(input.graphType);
     onApplyFilter(null);
-    onCondOpChange(defaultReport.conditionsOp);
-    setReport(defaultReport);
-    setSavedStatus('new');
+    input.conditions.forEach(condition => onApplyFilter(condition));
+    onCondOpChange(input.conditionsOp);
   };
 
   const onChangeAppliedFilter = (filter, changedElement) => {
@@ -359,24 +358,17 @@ export function CustomReport() {
         break;
       case 'reload':
         setSavedStatus('saved');
-
-        setStartDate(report.startDate);
-        setEndDate(report.endDate);
-        setIsDateStatic(report.isDateStatic);
-        setDateRange(report.dateRange);
-        setMode(report.mode);
-        setGroupBy(report.groupBy);
-        setInterval(report.interval);
-        setBalanceType(report.balanceType);
-        setShowEmpty(report.showEmpty);
-        setShowOffBudget(report.showOffBudget);
-        setShowHiddenCategories(report.showHiddenCategories);
-        setShowUncategorized(report.showUncategorized);
-        setSelectedCategories(report.selectedCategories);
-        setGraphType(report.graphType);
-        onApplyFilter(null);
-        report.conditions.forEach(condition => onApplyFilter(condition));
-        onCondOpChange(report.conditionsOp);
+        setReportData(report);
+        break;
+      case 'reset':
+        setSavedStatus('new');
+        setReport(defaultReport);
+        setReportData(defaultReport);
+        break;
+      case 'choose':
+        setSavedStatus('saved');
+        setReport(savedReport);
+        setReportData(savedReport);
         break;
       default:
     }
@@ -384,7 +376,23 @@ export function CustomReport() {
 
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
-      <Header title="Custom Reports" />
+      <View
+        style={{
+          flexDirection: 'row',
+          flexShrink: 0,
+        }}
+      >
+        <Header title="Custom Report:" />
+        <Text
+          style={{
+            ...styles.veryLargeText,
+            marginTop: 40,
+            color: theme.pageTextPositive,
+          }}
+        >
+          {report.name || 'Unsaved report'}
+        </Text>
+      </View>
       <View
         style={{
           display: 'flex',
@@ -432,7 +440,6 @@ export function CustomReport() {
             onApplyFilter={onApplyFilter}
             onChangeViews={onChangeViews}
             onReportChange={onReportChange}
-            onResetReports={onResetReports}
             disabledItems={disabledItems}
             defaultItems={defaultItems}
           />

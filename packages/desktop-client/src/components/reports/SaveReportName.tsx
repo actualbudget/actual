@@ -1,11 +1,14 @@
 import React, { type RefObject, useEffect } from 'react';
 
+import { type CustomReportEntity } from 'loot-core/types/models/reports';
+
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { MenuTooltip } from '../common/MenuTooltip';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type SaveReportNameProps = {
@@ -14,8 +17,15 @@ type SaveReportNameProps = {
   name: string;
   setName: (name: string) => void;
   inputRef: RefObject<HTMLInputElement>;
-  onAddUpdate: (menuItem: string) => void;
+  onAddUpdate: ({
+    menuChoice,
+    reportData,
+  }: {
+    menuChoice?: string;
+    reportData?: CustomReportEntity;
+  }) => void;
   err: string;
+  report?: CustomReportEntity;
 };
 
 export function SaveReportName({
@@ -26,6 +36,7 @@ export function SaveReportName({
   inputRef,
   onAddUpdate,
   err,
+  report,
 }: SaveReportNameProps) {
   useEffect(() => {
     if (inputRef.current) {
@@ -41,7 +52,7 @@ export function SaveReportName({
             direction="row"
             justify="flex-end"
             align="center"
-            style={{ padding: 10 }}
+            style={{ padding: 15 }}
           >
             <FormField style={{ flex: 1 }}>
               <FormLabel
@@ -54,14 +65,18 @@ export function SaveReportName({
                 id="name-field"
                 inputRef={inputRef}
                 onUpdate={setName}
+                style={{ marginTop: 10 }}
               />
             </FormField>
             <Button
               type="primary"
-              style={{ marginTop: 18 }}
+              style={{ marginTop: 30 }}
               onClick={e => {
                 e.preventDefault();
-                onAddUpdate(menuItem);
+                onAddUpdate({
+                  menuChoice: menuItem ?? undefined,
+                  reportData: report ?? undefined,
+                });
               }}
             >
               {menuItem === 'save-report' ? 'Add' : 'Update'}
@@ -74,7 +89,7 @@ export function SaveReportName({
           <Text style={{ color: theme.errorText }}>{err}</Text>
         </Stack>
       ) : (
-        <Text />
+        <View />
       )}
     </MenuTooltip>
   );
