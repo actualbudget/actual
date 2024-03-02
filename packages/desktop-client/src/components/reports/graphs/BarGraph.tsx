@@ -111,13 +111,17 @@ const CustomTooltip = ({
   }
 };
 
-const customLabel = props => {
+const customLabel = (props, typeOp) => {
   const calcX = props.x + props.width / 2;
   const calcY = props.y - (props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
   const display =
     props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
-  const textSize = adjustTextSize(props.width, 'variable', props.value);
+  const textSize = adjustTextSize(
+    props.width,
+    typeOp === 'totalTotals' ? 'default' : 'variable',
+    props.value,
+  );
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
@@ -226,7 +230,7 @@ export function BarGraph({
                   {viewLabels && !compact && (
                     <LabelList
                       dataKey={val => getVal(val)}
-                      content={customLabel}
+                      content={e => customLabel(e, balanceTypeOp)}
                     />
                   )}
                   {data.legend.map((entry, index) => (
@@ -240,7 +244,10 @@ export function BarGraph({
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey="totalDebts" stackId="a">
                     {viewLabels && !compact && (
-                      <LabelList dataKey="totalDebts" content={customLabel} />
+                      <LabelList
+                        dataKey="totalDebts"
+                        content={e => customLabel(e, balanceTypeOp)}
+                      />
                     )}
                     {data[splitData].map((entry, index) => (
                       <Cell
