@@ -4,7 +4,7 @@ import type { AccountState } from '../state-types/account';
 
 const initialState: AccountState = {
   failedAccounts: new Map(),
-  accountsSyncing: null,
+  accountsSyncing: [],
 };
 
 export function update(state = initialState, action: Action): AccountState {
@@ -12,7 +12,7 @@ export function update(state = initialState, action: Action): AccountState {
     case constants.SET_ACCOUNTS_SYNCING:
       return {
         ...state,
-        accountsSyncing: action.name,
+        accountsSyncing: action.ids,
       };
     case constants.ACCOUNT_SYNC_STATUS: {
       const failedAccounts = new Map(state.failedAccounts);

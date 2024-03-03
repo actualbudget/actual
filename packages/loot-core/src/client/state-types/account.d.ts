@@ -2,12 +2,12 @@ import type * as constants from '../constants';
 
 export type AccountState = {
   failedAccounts: Map<string, { type: string; code: string }>;
-  accountsSyncing: string | null;
+  accountsSyncing: string[];
 };
 
 export type SetAccountsSyncingAction = {
   type: typeof constants.SET_ACCOUNTS_SYNCING;
-  name: string | null;
+  ids: string[];
 };
 
 export type AccountSyncStatusAction = {
