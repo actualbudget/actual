@@ -276,13 +276,12 @@ class AccountInternal extends PureComponent {
     this.unlisten = () => {
       unlistens.forEach(unlisten => unlisten());
     };
-    
-    this.applyFilters(this.state.conditions);
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
     await this.props.initiallyLoadPayees();
     await this.fetchTransactions();
+    this.applyFilters(this.state.conditions);
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
