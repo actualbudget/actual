@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -54,7 +53,7 @@ function renderResults(results: Results) {
 
 export function FixSplits() {
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<Results>(null);
+  const [results, setResults] = useState<Results | null>(null);
 
   async function onFix() {
     setLoading(true);

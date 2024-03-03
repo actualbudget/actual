@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
