@@ -2,7 +2,6 @@
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
 import type {
-  AccountSyncFailuresAction,
   AccountSyncStatusAction,
   SetAccountsSyncingAction,
 } from '../state-types/account';
@@ -45,14 +44,6 @@ export function markAccountSuccess(
     type: 'ACCOUNT_SYNC_STATUS',
     id,
     failed: false,
-  };
-}
-export function setFailedAccounts(
-  syncErrors: AccountSyncFailuresAction['syncErrors'],
-): AccountSyncFailuresAction {
-  return {
-    type: constants.ACCOUNT_SYNC_FAILURES,
-    syncErrors,
   };
 }
 

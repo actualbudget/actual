@@ -27,17 +27,6 @@ export function update(state = initialState, action: Action): AccountState {
 
       return { ...state, failedAccounts };
     }
-    case constants.ACCOUNT_SYNC_FAILURES: {
-      const failures = new Map();
-      action.syncErrors.forEach(error => {
-        failures.set(error.id, {
-          type: error.type,
-          code: error.code,
-        });
-      });
-
-      return { ...state, failedAccounts: failures };
-    }
     default:
   }
   return state;

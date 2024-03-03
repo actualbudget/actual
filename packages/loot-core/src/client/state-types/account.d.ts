@@ -24,16 +24,4 @@ export type AccountSyncStatusAction = {
     }
 );
 
-export type AccountSyncFailuresAction = {
-  type: typeof constants.ACCOUNT_SYNC_FAILURES;
-  syncErrors: Array<{
-    id: string;
-    type: string;
-    code: string;
-  }>;
-};
-
-export type AccountActions =
-  | SetAccountsSyncingAction
-  | AccountSyncStatusAction
-  | AccountSyncFailuresAction;
+export type AccountActions = SetAccountsSyncingAction | AccountSyncStatusAction;
