@@ -1,8 +1,9 @@
 actualbudget
 addtransactions
 AMZN
-Authelia
+Andelskassen
 AQL
+Authelia
 autocompletes
 Blix
 caniuse
@@ -23,8 +24,8 @@ expando
 Firefox
 flyctl
 Formik
-htpasswd
 HSA
+htpasswd
 IBANs
 iex
 importtransactions
@@ -41,6 +42,7 @@ ldaplogin
 letsencrypt
 libofx
 linting
+lleskassen
 lte
 minimalistic
 monkeypatch
