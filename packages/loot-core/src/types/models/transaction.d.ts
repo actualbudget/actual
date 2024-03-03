@@ -4,6 +4,7 @@ import type { PayeeEntity } from './payee';
 import type { ScheduleEntity } from './schedule';
 
 export interface NewTransactionEntity {
+  id?: string;
   is_parent?: boolean;
   is_child?: boolean;
   parent_id?: string;
