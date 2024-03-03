@@ -30,7 +30,7 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
     const json = await response.json();
     const tags = json
       .map(t => t.name)
-      .concat([`v${window.Actual.ACTUAL_VERSION}`]);
+      .concat([`v${window.Actual?.ACTUAL_VERSION}`]);
     tags.sort(cmpSemanticVersion);
 
     return tags[tags.length - 1];
@@ -41,7 +41,7 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
 }
 
 export async function getIsOutdated(latestVersion: string): Promise<boolean> {
-  const clientVersion = window.Actual.ACTUAL_VERSION;
+  const clientVersion = window.Actual?.ACTUAL_VERSION;
   if (latestVersion === 'unknown') {
     return Promise.resolve(false);
   }

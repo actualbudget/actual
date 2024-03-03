@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 enum BreakpointNames {
   small = 'small',
   medium = 'medium',
@@ -27,7 +26,10 @@ type BreakpointsPx = {
 // }
 export const tokens: BreakpointsPx = Object.entries(
   breakpoints,
-).reduce<BreakpointsPx>((acc, [key, val]) => {
-  acc[`breakpoint_${key}`] = `${val}px`;
-  return acc;
-}, {} as BreakpointsPx);
+).reduce<BreakpointsPx>(
+  (acc, [key, val]) => ({
+    ...acc,
+    [`breakpoint_${key}`]: `${val}px`,
+  }),
+  {} as BreakpointsPx,
+);

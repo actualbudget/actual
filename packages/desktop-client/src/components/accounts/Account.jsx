@@ -470,7 +470,7 @@ class AccountInternal extends PureComponent {
     const categories = await this.props.getCategories();
 
     if (account) {
-      const res = await window.Actual.openFileDialog({
+      const res = await window.Actual?.openFileDialog({
         filters: [
           {
             name: 'Financial Files',
@@ -502,7 +502,7 @@ class AccountInternal extends PureComponent {
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
     const filename = `${normalizedName || 'transactions'}.csv`;
 
-    window.Actual.saveFile(
+    window.Actual?.saveFile(
       exportedTransactions,
       filename,
       'Export Transactions',

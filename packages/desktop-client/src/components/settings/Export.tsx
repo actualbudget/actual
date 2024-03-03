@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { format } from 'date-fns';
@@ -32,7 +31,7 @@ export function ExportBudget() {
       return;
     }
 
-    window.Actual.saveFile(
+    window.Actual?.saveFile(
       response.data,
       `${format(new Date(), 'yyyy-MM-dd')}-${budgetId}.zip`,
       'Export budget',
