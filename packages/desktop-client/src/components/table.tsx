@@ -801,6 +801,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         type="bare"
         style={{ color: theme.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
+        data-testid={name + '-select-button'}
       >
         <SvgExpandArrow
           width={8}
@@ -816,6 +817,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
           width={200}
           style={{ padding: 0, backgroundColor: theme.menuBackground }}
           onClose={() => setMenuOpen(false)}
+          data-testid={name + '-select-tooltip'}
         >
           <Menu
             onMenuSelect={name => {

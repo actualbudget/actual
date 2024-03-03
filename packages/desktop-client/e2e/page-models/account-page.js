@@ -25,6 +25,9 @@ export class AccountPage {
 
     this.filterButton = this.page.getByRole('button', { name: 'Filter' });
     this.filterSelectTooltip = this.page.getByTestId('filters-select-tooltip');
+
+    this.selectButton = this.page.getByTestId('transactions-select-button');
+    this.selectTooltip = this.page.getByTestId('transactions-select-tooltip');
   }
 
   /**
@@ -68,20 +71,32 @@ export class AccountPage {
     await this.cancelTransactionButton.click();
   }
 
+  async selectNthTransaction(index) {
+    const row = this.transactionTableRow.nth(index);
+    await row.getByTestId('select').click();
+  }
+
   /**
    * Retrieve the data for the nth-transaction.
    * 0-based index
    */
   getNthTransaction(index) {
     const row = this.transactionTableRow.nth(index);
+    const account = row.getByTestId('account');
 
     return {
+      ...(account ? { account } : {}),
       payee: row.getByTestId('payee'),
       notes: row.getByTestId('notes'),
       category: row.getByTestId('category'),
       debit: row.getByTestId('debit'),
       credit: row.getByTestId('credit'),
     };
+  }
+
+  async clickSelectAction(action) {
+    await this.selectButton.click();
+    await this.selectTooltip.getByRole('button', { name: action }).click();
   }
 
   /**
@@ -107,6 +122,15 @@ export class AccountPage {
   }
 
   /**
+   * Filter to a specific note
+   */
+  async filterByNote(note) {
+    const filterTooltip = await this.filterBy('Note');
+    await this.page.keyboard.type(note);
+    await filterTooltip.applyButton.click();
+  }
+
+  /**
    * Remove the nth filter
    */
   async removeFilter(idx) {
@@ -117,6 +141,12 @@ export class AccountPage {
   }
 
   async _fillTransactionFields(transactionRow, transaction) {
+    if (transaction.account) {
+      await transactionRow.getByTestId('account').click();
+      await this.page.keyboard.type(transaction.account);
+      await this.page.keyboard.press('Tab');
+    }
+
     if (transaction.payee) {
       await transactionRow.getByTestId('payee').click();
       await this.page.keyboard.type(transaction.payee);
