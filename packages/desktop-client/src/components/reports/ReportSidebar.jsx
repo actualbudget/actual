@@ -14,9 +14,9 @@ import { CategorySelector } from './CategorySelector';
 import {
   validateStart,
   validateEnd,
-  getLatestRange,
   getFullRange,
   validateRange,
+  getSpecificRange,
 } from './Header';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
@@ -75,7 +75,12 @@ export function ReportSidebar({
         );
         break;
       default:
-        onChangeDates(...getLatestRange(ReportOptions.dateRangeMap.get(cond)));
+        onChangeDates(
+          ...getSpecificRange(
+            ReportOptions.dateRangeMap.get(cond),
+            cond === 'Last month' ? 0 : null,
+          ),
+        );
     }
   };
 

@@ -166,7 +166,9 @@ export function FatalError({ buttonText, error }: FatalErrorProps) {
       >
         {showSimpleRender ? <RenderSimple error={error} /> : <RenderUIError />}
         <Paragraph>
-          <Button onClick={() => window.Actual.relaunch()}>{buttonText}</Button>
+          <Button onClick={() => window.Actual?.relaunch()}>
+            {buttonText}
+          </Button>
         </Paragraph>
         <Paragraph isLast={true} style={{ fontSize: 11 }}>
           <LinkButton onClick={() => setShowError(true)}>Show Error</LinkButton>

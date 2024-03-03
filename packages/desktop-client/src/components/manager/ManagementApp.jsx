@@ -42,7 +42,7 @@ function Version() {
         },
       }}
     >
-      {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
+      {`App: v${window.Actual?.ACTUAL_VERSION} | Server: ${version}`}
     </Text>
   );
 }

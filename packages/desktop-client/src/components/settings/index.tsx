@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { type ReactNode, useEffect } from 'react';
 
 import { media } from 'glamor';
@@ -58,7 +57,7 @@ function About() {
         })}`}
         data-vrt-mask
       >
-        <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
+        <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>
         {isOutdated ? (
           <ExternalLink
@@ -140,7 +139,7 @@ export function Settings() {
     <Page
       title="Settings"
       style={{
-        backgroundColor: isNarrowWidth && theme.mobilePageBackground,
+        backgroundColor: isNarrowWidth ? theme.mobilePageBackground : undefined,
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >

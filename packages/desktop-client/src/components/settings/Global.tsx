@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState, useEffect, useRef } from 'react';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
@@ -23,7 +22,7 @@ export function GlobalSettings() {
   }, []);
 
   async function onChooseDocumentDir() {
-    const res = await window.Actual.openFileDialog({
+    const res = await window.Actual?.openFileDialog({
       properties: ['openDirectory'],
     });
     if (res) {
