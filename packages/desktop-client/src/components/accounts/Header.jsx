@@ -79,6 +79,7 @@ export function AccountHeader({
   onCondOpChange,
   onDeleteFilter,
   onScheduleAction,
+  onSetTransfer,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
@@ -93,6 +94,9 @@ export function AccountHeader({
     // All accounts - check for any syncable account
     canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
   }
+
+  // Only show the ability to make linked transfers on multi-account views.
+  const showMakeTransfer = !account;
 
   function onToggleSplits() {
     if (tableRef.current) {
@@ -276,8 +280,10 @@ export function AccountHeader({
               onEdit={onBatchEdit}
               onUnlink={onBatchUnlink}
               onCreateRule={onCreateRule}
+              onSetTransfer={onSetTransfer}
               onScheduleAction={onScheduleAction}
               pushModal={pushModal}
+              showMakeTransfer={showMakeTransfer}
             />
           )}
           <Button

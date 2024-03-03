@@ -849,7 +849,7 @@ export function ImportTransactions({ modalProps, options }) {
   }
 
   async function onNewFile() {
-    const res = await window.Actual.openFileDialog({
+    const res = await window.Actual?.openFileDialog({
       filters: [
         {
           name: 'Financial Files',

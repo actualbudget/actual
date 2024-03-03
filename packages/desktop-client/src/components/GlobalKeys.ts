@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { useEffect } from 'react';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -8,7 +7,7 @@ import { useNavigate } from '../hooks/useNavigate';
 export function GlobalKeys() {
   const navigate = useNavigate();
   useEffect(() => {
-    const handleKeys = e => {
+    const handleKeys = (e: KeyboardEvent) => {
       if (Platform.isBrowser) {
         return;
       }
