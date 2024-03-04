@@ -101,8 +101,15 @@ GoCardless
 
 ### Frequently Asked Questions
 
-**Automatic Bank Sync**
+**Does Actual sync automatically with your Bank?**
 
 At this moment, it is not yet possible for Actual to automatically sync with your bank. You need to do this manually by going to "All Accounts" and pressing "Sync".
 
 ![](/static/img/connecting-your-bank/syncing-with-your-bank.png)
+
+**The best way to start from scratch in Actual with Go Cardless?**
+
+If you are setting up Actual for the first time, it is much easier not to try to pull in historic data. This has caused some users a lot of headaches with subsequent reconciliation. The following process may be more helpful:
+1. Set up your account in Actual specifying a correct opening account balance at a recent date.
+2. Link the account to Go Cardless as above
+3. Sync the account with Go Cardless. You should find that only transactions subsequent to the opening account balance entry are imported, making reconciliation easy.
