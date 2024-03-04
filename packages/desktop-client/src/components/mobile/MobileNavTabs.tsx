@@ -20,9 +20,10 @@ import { theme, styles, type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { useScroll } from '../ScrollProvider';
 
-export const ROW_HEIGHT = 70;
 const COLUMN_COUNT = 3;
-const PILL_HEIGHT=15;
+const PILL_HEIGHT = 15;
+export const ROW_HEIGHT = 70;
+export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT
 
 export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
@@ -193,7 +194,7 @@ export function MobileNavTabs() {
           style={{
             background: theme.mobileHeaderTextSubdued,
             borderRadius: 10,
-            width: 50,
+            width: 30,
             marginTop: 5,
             marginBottom: 5,
             padding: 2,

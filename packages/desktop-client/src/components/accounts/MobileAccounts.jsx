@@ -15,7 +15,7 @@ import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
-import { ROW_HEIGHT as MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
+import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { PullToRefresh } from '../responsive/PullToRefresh';
 import { CellValue } from '../spreadsheet/CellValue';
