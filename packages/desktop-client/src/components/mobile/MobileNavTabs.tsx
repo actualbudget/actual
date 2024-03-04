@@ -22,6 +22,7 @@ import { useScroll } from '../ScrollProvider';
 
 export const ROW_HEIGHT = 70;
 const COLUMN_COUNT = 3;
+const PILL_HEIGHT=15;
 
 export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
@@ -179,7 +180,7 @@ export function MobileNavTabs() {
         backgroundColor: theme.mobileNavBackground,
         borderTop: `1px solid ${theme.menuBorder}`,
         ...styles.shadow,
-        height: totalHeight,
+        height: totalHeight + PILL_HEIGHT,
         width: '100%',
         position: 'fixed',
         zIndex: 100,
@@ -190,14 +191,13 @@ export function MobileNavTabs() {
       <View>
         <div
           style={{
-            background: theme.mobileNavItem,
-            borderRadius: 4,
+            background: theme.mobileHeaderTextSubdued,
+            borderRadius: 10,
             width: 50,
             marginTop: 5,
             marginBottom: 5,
             padding: 2,
             alignSelf: 'center',
-            textAlign: 'center',
           }}
         />
         <View
