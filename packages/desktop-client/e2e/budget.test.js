@@ -59,7 +59,11 @@ test.describe('Budget', () => {
   });
 
   test('clicking on spent amounts opens a transaction page', async () => {
+    const accountPage = await budgetPage.clickOnSpentAmountForRow(1);
     expect(page.url()).toContain('/accounts');
+    expect(await accountPage.accountName.textContent()).toMatch(
+      'All Accounts',
+    );
     await page.getByRole('button', { name: 'Back' }).click();
   });
 });
