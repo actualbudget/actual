@@ -32,8 +32,7 @@ The feature works sequentially in the following manner after pressing the **End 
 1.  Any `#cleanup source` entries will be found and all extra money in those categories will be returned to **To Budget**.
     - A source category that has a negative balance will be ignored.
 2.  **Overspent** categories that do NOT use **Rollover Overspending** will be found and will attempt to cover the overspending from **To Budget**.
-3.  **Overspent** categories that DO use **Rollover Overspending** will be found and will attempt to cover the overspending from **To Budget**.
-4.  Any `#cleanup sink` entries will be found and redistribute the remaining **To Budget** amounts based on the weight given.
+3.  Any `#cleanup sink` entries will be found and redistribute the remaining **To Budget** amounts based on the weight given.
 
 ## Calculating the weights of 'sink' categories
 
