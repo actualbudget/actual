@@ -187,15 +187,29 @@ export function MobileNavTabs() {
         ...(!isNarrowWidth && { display: 'none' }),
       }}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          height: totalHeight,
-          width: '100%',
-        }}
-      >
-        {[navTabs, bufferTabs]}
+      <View>
+        <div
+          style={{
+            background: theme.mobileNavItem,
+            borderRadius: 4,
+            width: 50,
+            marginTop: 5,
+            marginBottom: 5,
+            padding: 2,
+            alignSelf: 'center',
+            textAlign: 'center',
+          }}
+        />
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            height: totalHeight,
+            width: '100%',
+          }}
+        >
+          {[navTabs, bufferTabs]}
+        </View>
       </View>
     </animated.div>
   );
