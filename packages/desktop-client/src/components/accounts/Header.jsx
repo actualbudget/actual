@@ -232,8 +232,9 @@ export function AccountHeader({
                     width={13}
                     height={13}
                     animating={
-                      (account && accountsSyncing === account.name) ||
-                      accountsSyncing === '__all'
+                      account
+                        ? accountsSyncing.includes(account.id)
+                        : accountsSyncing.length > 0
                     }
                     style={{ marginRight: 4 }}
                   />{' '}
