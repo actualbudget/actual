@@ -39,6 +39,7 @@ export const tableRowHeaderBackground = colorPalette.gray700;
 export const tableRowHeaderText = colorPalette.gray150;
 
 export const sidebarBackground = colorPalette.gray900;
+export const sidebarItemBackgroundPending = colorPalette.orange200;
 export const sidebarItemBackgroundPositive = colorPalette.green400;
 export const sidebarItemBackgroundFailed = colorPalette.red300;
 export const sidebarItemAccentSelected = colorPalette.purple200;
