@@ -1,7 +1,9 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as queries from 'loot-core/src/client/queries';
+import { type State } from 'loot-core/src/client/state-types';
 
 import { useBudgetedAccounts } from '../../hooks/useBudgetedAccounts';
 import { useClosedAccounts } from '../../hooks/useClosedAccounts';
@@ -35,6 +37,9 @@ export function Accounts({
   const offbudgetAccounts = useOffBudgetAccounts();
   const budgetedAccounts = useBudgetedAccounts();
   const closedAccounts = useClosedAccounts();
+  const syncingAccountIds = useSelector(
+    (state: State) => state.account.accountsSyncing,
+  );
 
   const getAccountPath = account => `/accounts/${account.id}`;
 
@@ -78,6 +83,7 @@ export function Accounts({
           name={account.name}
           account={account}
           connected={!!account.bank}
+          pending={syncingAccountIds.includes(account.id)}
           failed={failedAccounts && failedAccounts.has(account.id)}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
           to={getAccountPath(account)}
@@ -103,6 +109,7 @@ export function Accounts({
           name={account.name}
           account={account}
           connected={!!account.bank}
+          pending={syncingAccountIds.includes(account.id)}
           failed={failedAccounts && failedAccounts.has(account.id)}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
           to={getAccountPath(account)}

@@ -1266,17 +1266,13 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
     'user-id',
     'user-key',
   ]);
-  let accounts = await db.runQuery(
+  const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0`,
-    [],
+         WHERE a.tombstone = 0 AND a.closed = 0 AND a.id = ?`,
+    [id],
     true,
   );
-
-  if (id) {
-    accounts = accounts.filter(acct => acct.id === id);
-  }
 
   const errors = [];
   let newTransactions = [];

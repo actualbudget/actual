@@ -38,6 +38,7 @@ type AccountProps = {
   query: Binding;
   account?: AccountEntity;
   connected?: boolean;
+  pending?: boolean;
   failed?: boolean;
   updated?: boolean;
   style?: CSSProperties;
@@ -50,6 +51,7 @@ export function Account({
   name,
   account,
   connected,
+  pending = false,
   failed,
   updated,
   to,
@@ -125,9 +127,11 @@ export function Account({
                   width: 5,
                   height: 5,
                   borderRadius: 5,
-                  backgroundColor: failed
-                    ? theme.sidebarItemBackgroundFailed
-                    : theme.sidebarItemBackgroundPositive,
+                  backgroundColor: pending
+                    ? theme.sidebarItemBackgroundPending
+                    : failed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
                   marginLeft: 2,
                   transition: 'transform .3s',
                   opacity: connected ? 1 : 0,
