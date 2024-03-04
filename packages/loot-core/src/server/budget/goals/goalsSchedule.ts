@@ -186,36 +186,22 @@ export async function goalsSchedule(
     const t = await createScheduleList(template, current_month, category);
     errors = errors.concat(t.errors);
 
-    const t_payMonthOf = t.t.filter(
-      c =>
-        c.full ||
-        (c.target_frequency === 'monthly' &&
-          c.target_interval === 1 &&
-          c.num_months === 0) ||
-        (c.target_frequency === 'weekly' &&
-          c.target_interval >= 0 &&
-          c.num_months === 0) ||
-        c.target_frequency === 'daily' ||
-        isReflectBudget(),
-    );
+    const isPayMonthOf = c =>
+      c.full ||
+      (c.target_frequency === 'monthly' &&
+        c.target_interval === 1 &&
+        c.num_months === 0) ||
+      (c.target_frequency === 'weekly' &&
+        c.target_interval >= 0 &&
+        c.num_months === 0) ||
+      c.target_frequency === 'daily' ||
+      isReflectBudget();
 
+    const t_payMonthOf = t.t.filter(isPayMonthOf);
     const t_sinking = t.t
-      .filter(
-        c =>
-          (!c.full &&
-            c.target_frequency === 'monthly' &&
-            c.target_interval > 1) ||
-          (!c.full &&
-            c.target_frequency === 'monthly' &&
-            c.num_months > 0 &&
-            c.target_interval === 1) ||
-          (!c.full && c.target_frequency === 'yearly') ||
-          (!c.full && c.target_frequency === undefined),
-      )
+      .filter(c => !isPayMonthOf(c))
       .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
-
     const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
-
     const totalSinking = await getSinkingTotal(t_sinking);
     const totalSinkingBaseContribution =
       await getSinkingBaseContributionTotal(t_sinking);
@@ -228,7 +214,13 @@ export async function goalsSchedule(
         remainder,
         last_month_balance,
       );
-      to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
+      if (t_sinking.length === 0) {
+        to_budget +=
+          Math.round(totalPayMonthOf + totalSinkingContribution) -
+          last_month_balance;
+      } else {
+        to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
+      }
     }
   }
   return { to_budget, errors, remainder, scheduleFlag };
