@@ -15,7 +15,7 @@ import {
 import * as queries from 'loot-core/src/client/queries';
 import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
-import { currentDay } from 'loot-core/src/shared/months';
+import { currentDay, currentDate } from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
@@ -31,6 +31,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
@@ -678,10 +679,16 @@ class AccountInternal extends PureComponent {
     return account.name;
   }
 
-  getBalanceQuery(account, id) {
+  getBalanceQuery(account, id, excludeFutureTransactions = false) {
+    let q = this.makeRootQuery()
+
+    if (excludeFutureTransactions) {
+      q = q.filter({ date: { $lte: currentDate() }})
+    }
+
     return {
       name: `balance-query-${id}`,
-      query: this.makeRootQuery().calculate({ $sum: '$amount' }),
+      query: q.calculate({ $sum: '$amount' }),
     };
   }
 
@@ -1415,7 +1422,7 @@ class AccountInternal extends PureComponent {
       accountId !== 'offbudget' &&
       accountId !== 'uncategorized';
 
-    const balanceQuery = this.getBalanceQuery(account, accountId);
+    const balanceQuery = this.getBalanceQuery(account, accountId, this.props.excludeFutureTransactions);
 
     return (
       <AllTransactions
@@ -1567,9 +1574,14 @@ function AccountHack(props) {
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
   const match = useMatch(props.location.pathname);
 
+  const _props = {
+    ...props,
+    excludeFutureTransactions: useFeatureFlag('excludeFutureTransactions'),
+  };
+
   return (
     <AccountInternal
-      {...props}
+      {..._props}
       match={match}
       splitsExpandedDispatch={splitsExpandedDispatch}
     />

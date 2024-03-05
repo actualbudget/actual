@@ -6,6 +6,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { useSheetName } from './useSheetName';
 
 import { type Binding } from '.';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 
 export function useSheetValue(binding: Binding, onChange?: (result) => void) {
   const { sheetName, fullSheetName } = useSheetName(binding);
@@ -21,6 +22,7 @@ export function useSheetValue(binding: Binding, onChange?: (result) => void) {
   });
   const latestOnChange = useRef(onChange);
   const latestValue = useRef(result.value);
+  const excludeFutureTransactions = useFeatureFlag('excludeFutureTransactions');
 
   useLayoutEffect(() => {
     latestOnChange.current = onChange;
@@ -41,7 +43,7 @@ export function useSheetValue(binding: Binding, onChange?: (result) => void) {
         setResult(newResult);
       }
     });
-  }, [sheetName, bindingObj.name]);
+  }, [sheetName, bindingObj.name, excludeFutureTransactions]);
 
   return result.value;
 }

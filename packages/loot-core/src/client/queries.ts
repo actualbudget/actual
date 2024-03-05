@@ -2,6 +2,7 @@
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
 import {
+  currentDate,
   dayFromDate,
   getDayMonthRegex,
   getDayMonthFormat,
@@ -94,85 +95,96 @@ export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
   });
 }
 
-export function accountBalance(acct) {
+function transactionsSummaryQuery(excludeFutureTransactions: boolean) {
+  let filters = {}
+
+  if (excludeFutureTransactions) {
+    filters['date'] = { $lte: currentDate() }
+  }
+
+  return q('transactions').filter(filters)
+}
+
+export function accountBalance(acct, excludeFutureTransactions: boolean) {
   return {
     name: `balance-${acct.id}`,
-    query: q('transactions')
+    query: transactionsSummaryQuery(excludeFutureTransactions)
       .filter({ account: acct.id })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
   };
 }
 
-export function accountBalanceCleared(acct) {
+export function accountBalanceCleared(acct, excludeFutureTransactions: boolean) {
   return {
     name: `balanceCleared-${acct.id}`,
-    query: q('transactions')
+    query: transactionsSummaryQuery(excludeFutureTransactions)
       .filter({ account: acct.id, cleared: true })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
   };
 }
 
-export function accountBalanceUncleared(acct) {
+export function accountBalanceUncleared(acct, excludeFutureTransactions: boolean) {
   return {
     name: `balanceUncleared-${acct.id}`,
-    query: q('transactions')
+    query: transactionsSummaryQuery(excludeFutureTransactions)
       .filter({ account: acct.id, cleared: false })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
   };
 }
 
-export function allAccountBalance() {
+export function allAccountBalance(excludeFutureTransactions: boolean) {
   return {
-    query: q('transactions')
+    query: transactionsSummaryQuery(excludeFutureTransactions)
       .filter({ 'account.closed': false })
       .calculate({ $sum: '$amount' }),
     name: 'accounts-balance',
   };
 }
 
-export function budgetedAccountBalance() {
+export function budgetedAccountBalance(excludeFutureTransactions: boolean) {
   return {
     name: `budgeted-accounts-balance`,
-    query: q('transactions')
+    query: transactionsSummaryQuery(excludeFutureTransactions)
       .filter({ 'account.offbudget': false, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
   };
 }
 
-export function offbudgetAccountBalance() {
+export function offbudgetAccountBalance(excludeFutureTransactions) {
   return {
     name: `offbudget-accounts-balance`,
-    query: q('transactions')
+    query: transactionsSummaryQuery(excludeFutureTransactions)
       .filter({ 'account.offbudget': true, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
   };
 }
 
-const uncategorizedQuery = q('transactions').filter({
-  'account.offbudget': false,
-  category: null,
-  $or: [
-    {
-      'payee.transfer_acct.offbudget': true,
-      'payee.transfer_acct': null,
-    },
-  ],
-});
+const uncategorizedQuery = (excludeFutureTransactions: boolean) =>
+  transactionsSummaryQuery(excludeFutureTransactions).filter({
+    'account.offbudget': false,
+    category: null,
+    $or: [
+      {
+        'payee.transfer_acct.offbudget': true,
+        'payee.transfer_acct': null,
+      },
+    ],
+  });
 
-export function uncategorizedBalance() {
+export function uncategorizedBalance(excludeFutureTransactions) {
   return {
     name: 'uncategorized-balance',
-    query: uncategorizedQuery.calculate({ $sum: '$amount' }),
+    query: uncategorizedQuery(excludeFutureTransactions).calculate({ $sum: '$amount' }),
   };
 }
 
-export function uncategorizedCount() {
+export function uncategorizedCount(excludeFutureTransactions) {
   return {
     name: 'uncategorized-amount',
-    query: uncategorizedQuery.calculate({ $count: '$id' }),
+    query: uncategorizedQuery(excludeFutureTransactions).calculate({ $count: '$id' }),
   };
 }
 
