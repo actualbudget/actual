@@ -204,8 +204,7 @@ class AccountInternal extends PureComponent {
 
     this.state = {
       search: '',
-      filters: [],
-      conditions: props.conditions,
+      filters: props.conditions || [],
       loading: true,
       workingHard: false,
       reconcileAmount: null,
@@ -282,7 +281,7 @@ class AccountInternal extends PureComponent {
     // listeners are set up synchronously
     await this.props.initiallyLoadPayees();
     await this.fetchTransactions();
-    this.applyFilters(this.state.conditions);
+    this.applyFilters(this.state.filters);
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)

@@ -104,6 +104,21 @@ function SelectedBalance({ selectedItems, account }) {
   );
 }
 
+function FilteredBalance({ selectedItems }) {
+  const test = selectedItems.filter(
+    item => !item._unmatched && !item.is_parent,
+  );
+  const balance = test.reduce((sum, product) => sum + product.amount, 0);
+
+  return (
+    <DetailedBalance
+      name="Filtered balance:"
+      balance={balance}
+      isExactBalance={true}
+    />
+  );
+}
+
 function MoreBalances({ balanceQuery }) {
   const cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
@@ -127,8 +142,11 @@ export function Balances({
   showExtraBalances,
   onToggleExtraBalances,
   account,
+  filteredItems,
+  transactions,
 }) {
   const selectedItems = useSelectedItems();
+  //const filteredItems = useFilters();
 
   return (
     <View
@@ -183,6 +201,9 @@ export function Balances({
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
+      )}
+      {filteredItems.length > 0 && (
+        <FilteredBalance selectedItems={transactions} />
       )}
     </View>
   );
