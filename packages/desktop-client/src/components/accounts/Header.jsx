@@ -26,7 +26,7 @@ import { FiltersStack } from '../filters/FiltersStack';
 import { KeyHandlers } from '../KeyHandlers';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
-import { useSplitsExpanded } from '../transactions/TransactionsTable';
+import { useSplitsExpanded } from "../../hooks/useSplitsExpanded";
 
 import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileTooltip } from './Reconcile';

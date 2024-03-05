@@ -9,17 +9,17 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import { type BoundActions, useActions } from '../../hooks/useActions';
-import { useCategories } from '../../hooks/useCategories';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { theme } from '../../style';
-import { View } from '../common/View';
-import { SyncRefresh } from '../SyncRefresh';
+import { type BoundActions, useActions } from '../../../hooks/useActions';
+import { useCategories } from '../../../hooks/useCategories';
+import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { AnimatedLoading } from '../../../icons/AnimatedLoading';
+import { theme } from '../../../style';
+import { prewarmMonth, switchBudgetType } from '../../budget/util';
+import { View } from '../../common/View';
+import { SyncRefresh } from '../../SyncRefresh';
 
-import { BudgetTable } from './MobileBudgetTable';
-import { prewarmMonth, switchBudgetType } from './util';
+import { BudgetTable } from './BudgetTable';
 
 type BudgetInnerProps = {
   categories: CategoryEntity[];
@@ -99,7 +99,7 @@ function BudgetInner(props: BudgetInnerProps) {
     });
 
     return () => unlisten();
-  }, []);
+  }, [currentMonth, props]);
 
   const onShowBudgetSummary = () => {
     if (budgetType === 'report') {

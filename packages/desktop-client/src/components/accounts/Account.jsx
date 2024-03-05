@@ -34,15 +34,15 @@ import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import {
+  SplitsExpandedProvider,
+  useSplitsExpanded,
+} from '../../hooks/useSplitsExpanded';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
-import {
-  SplitsExpandedProvider,
-  useSplitsExpanded,
-} from '../transactions/TransactionsTable';
 
 import { AccountHeader } from './Header';
 

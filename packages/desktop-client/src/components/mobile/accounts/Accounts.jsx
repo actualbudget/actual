@@ -4,21 +4,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useNavigate } from '../../hooks/useNavigate';
-import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { SvgAdd } from '../../icons/v1';
-import { theme, styles } from '../../style';
-import { Button } from '../common/Button';
-import { Text } from '../common/Text';
-import { TextOneLine } from '../common/TextOneLine';
-import { View } from '../common/View';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { Page } from '../Page';
-import { PullToRefresh } from '../responsive/PullToRefresh';
-import { CellValue } from '../spreadsheet/CellValue';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { SvgAdd } from '../../../icons/v1';
+import { theme, styles } from '../../../style';
+import { Button } from '../../common/Button';
+import { Text } from '../../common/Text';
+import { TextOneLine } from '../../common/TextOneLine';
+import { View } from '../../common/View';
+import { Page } from '../../Page';
+import { CellValue } from '../../spreadsheet/CellValue';
+import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
+import { PullToRefresh } from '../PullToRefresh';
 
 function AccountHeader({ name, amount, style = {} }) {
   return (

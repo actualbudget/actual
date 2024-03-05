@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
@@ -19,20 +19,20 @@ import {
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useLocalPrefs } from '../../hooks/useLocalPrefs';
-import { useNavigate } from '../../hooks/useNavigate';
-import { usePayees } from '../../hooks/usePayees';
-import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { theme, styles } from '../../style';
-import { Button } from '../common/Button';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useLocalPrefs } from '../../../hooks/useLocalPrefs';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { usePayees } from '../../../hooks/usePayees';
+import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { theme, styles } from '../../../style';
+import { Button } from '../../common/Button';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
-import { AccountDetails } from './MobileAccountDetails';
+import { AccountDetails } from './AccountDetails';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
@@ -107,7 +107,10 @@ export function Account(props) {
 
   const { id: accountId } = useParams();
 
-  const makeRootQuery = () => queries.makeTransactionsQuery(accountId);
+  const makeRootQuery = useCallback(
+    () => queries.makeTransactionsQuery(accountId),
+    [accountId],
+  );
 
   const updateQuery = query => {
     if (paged) {
@@ -121,11 +124,11 @@ export function Account(props) {
     );
   };
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     const query = makeRootQuery();
     setCurrentQuery(query);
     updateQuery(query);
-  };
+  }, [makeRootQuery]);
 
   useEffect(() => {
     let unlisten;
@@ -155,12 +158,12 @@ export function Account(props) {
     setUpAccount();
 
     return () => unlisten();
-  }, []);
+  }, [accountId, actionCreators, fetchTransactions]);
 
   // Load categories if necessary.
   const categories = useCategories();
 
-  const updateSearchQuery = debounce(() => {
+  const updateSearchQuery = debounce((searchText, currentQuery, dateFormat) => {
     if (searchText === '' && currentQuery) {
       updateQuery(currentQuery);
     } else if (searchText && currentQuery) {
@@ -168,13 +171,16 @@ export function Account(props) {
         queries.makeTransactionSearchQuery(
           currentQuery,
           searchText,
-          state.dateFormat,
+          dateFormat,
         ),
       );
     }
   }, 150);
 
-  useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
+  useEffect(() => {
+    updateSearchQuery(searchText, currentQuery, state.dateFormat);
+    return () => updateSearchQuery.clear();
+  }, [searchText, currentQuery, state.dateFormat, updateSearchQuery]);
 
   useSetThemeColor(theme.mobileViewTheme);
 

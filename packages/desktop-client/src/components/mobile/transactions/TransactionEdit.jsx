@@ -9,26 +9,18 @@ import React, {
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import { useFocusRing } from '@react-aria/focus';
-import { useListBox, useListBoxSection, useOption } from '@react-aria/listbox';
-import { mergeProps } from '@react-aria/utils';
-import { Item, Section } from '@react-stately/collections';
-import { useListState } from '@react-stately/list';
 import {
   format as formatDate,
   parse as parseDate,
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
-import { css } from 'glamor';
 
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
-import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
-  isPreviewId,
   ungroupTransactions,
   updateTransaction,
   realizeTempTransactions,
@@ -46,48 +38,36 @@ import {
   groupById,
 } from 'loot-core/src/shared/util';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useActions } from '../../hooks/useActions';
-import { useCategories } from '../../hooks/useCategories';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useNavigate } from '../../hooks/useNavigate';
-import { usePayees } from '../../hooks/usePayees';
-import { useSetThemeColor } from '../../hooks/useSetThemeColor';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useActions } from '../../../hooks/useActions';
+import { useCategories } from '../../../hooks/useCategories';
+import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { usePayees } from '../../../hooks/usePayees';
+import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
-} from '../../hooks/useSingleActiveEditForm';
-import { SvgSplit } from '../../icons/v0';
-import { SvgAdd, SvgTrash } from '../../icons/v1';
-import {
-  SvgArrowsSynchronize,
-  SvgCheckCircle1,
-  SvgLockClosed,
-  SvgPencilWriteAlternate,
-} from '../../icons/v2';
-import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
-import { Text } from '../common/Text';
-import { TextOneLine } from '../common/TextOneLine';
-import { View } from '../common/View';
-import { FocusableAmountInput } from '../mobile/MobileAmountInput';
-import {
-  FieldLabel,
-  TapField,
-  InputField,
-  BooleanField,
-} from '../mobile/MobileForms';
-import { MobileBackButton } from '../MobileBackButton';
-import { Page } from '../Page';
-import { AmountInput } from '../util/AmountInput';
+} from '../../../hooks/useSingleActiveEditForm';
+import { SvgSplit } from '../../../icons/v0';
+import { SvgAdd, SvgTrash } from '../../../icons/v1';
+import { SvgPencilWriteAlternate } from '../../../icons/v2';
+import { styles, theme } from '../../../style';
+import { Button } from '../../common/Button';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
+import { MobileBackButton } from '../../MobileBackButton';
+import { Page } from '../../Page';
+import { AmountInput } from '../../util/AmountInput';
+import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
-const zIndices = { SECTION_HEADING: 10 };
+import { FocusableAmountInput } from './FocusableAmountInput';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
 }
 
-function getDescriptionPretty(transaction, payee, transferAcct) {
+export function getDescriptionPretty(transaction, payee, transferAcct) {
   const { amount } = transaction;
 
   if (transferAcct) {
@@ -144,14 +124,14 @@ function deserializeTransaction(transaction, originalTransaction, dateFormat) {
   return { ...realTransaction, date, amount: amountToInteger(amount || 0) };
 }
 
-function lookupName(items, id) {
+export function lookupName(items, id) {
   if (!id) {
     return null;
   }
   return items.find(item => item.id === id)?.name;
 }
 
-function Status({ status }) {
+export function Status({ status }) {
   let color;
 
   switch (status) {
@@ -442,6 +422,15 @@ const TransactionEditInner = memo(function TransactionEditInner({
   pushModal,
   ...props
 }) {
+  const transactions = useMemo(
+    () =>
+      unserializedTransactions.map(t => serializeTransaction(t, dateFormat)) ||
+      [],
+    [unserializedTransactions, dateFormat],
+  );
+
+  const [transaction, ...childTransactions] = transactions;
+
   const { editingField, onRequestActiveEdit, onClearActiveEdit } =
     useSingleActiveEditForm();
   const [totalAmountFocused, setTotalAmountFocused] = useState(false);
@@ -449,6 +438,20 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const payeesById = useMemo(() => groupById(payees), [payees]);
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
+
+  const onTotalAmountEdit = () => {
+    onRequestActiveEdit?.(getFieldName(transaction.id, 'amount'), () => {
+      setTotalAmountFocused(true);
+      return () => setTotalAmountFocused(false);
+    });
+  };
+
+  useEffect(() => {
+    if (adding) {
+      onTotalAmountEdit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getAccount = trans => {
     return trans?.account && accountsById?.[trans.account];
@@ -481,19 +484,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
         ? 'Transfer'
         : lookupName(categories, trans.category);
   };
-
-  const onTotalAmountEdit = () => {
-    onRequestActiveEdit?.(getFieldName(transaction.id, 'amount'), () => {
-      setTotalAmountFocused(true);
-      return () => setTotalAmountFocused(false);
-    });
-  };
-
-  useEffect(() => {
-    if (adding) {
-      onTotalAmountEdit();
-    }
-  }, []);
 
   const onTotalAmountUpdate = value => {
     if (transaction.amount !== value) {
@@ -618,15 +608,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const onEmptySplitFound = id => {
     scrollChildTransactionIntoView(id);
   };
-
-  const transactions = useMemo(
-    () =>
-      unserializedTransactions.map(t => serializeTransaction(t, dateFormat)) ||
-      [],
-    [unserializedTransactions, dateFormat],
-  );
-
-  const [transaction, ...childTransactions] = transactions;
 
   useEffect(() => {
     const noAmountTransaction = childTransactions.find(t => t.amount === 0);
@@ -960,7 +941,9 @@ function TransactionEditUnconnected(props) {
           .select('*')
           .options({ splits: 'grouped' }),
       );
-      setFetchedTransactions(ungroupTransactions(data));
+      const fetchedTransactions = ungroupTransactions(data);
+      setTransactions(fetchedTransactions);
+      setFetchedTransactions(fetchedTransactions);
     }
     if (transactionId) {
       fetchTransaction();
@@ -968,10 +951,6 @@ function TransactionEditUnconnected(props) {
       adding.current = true;
     }
   }, [transactionId]);
-
-  useEffect(() => {
-    setTransactions(fetchedTransactions);
-  }, [fetchedTransactions]);
 
   useEffect(() => {
     if (adding.current) {
@@ -982,7 +961,7 @@ function TransactionEditUnconnected(props) {
         ),
       );
     }
-  }, [adding.current, accountId, lastTransaction]);
+  }, [accountId, lastTransaction]);
 
   if (
     categories.length === 0 ||
@@ -1130,425 +1109,3 @@ export const TransactionEdit = props => {
     </SingleActiveEditFormProvider>
   );
 };
-
-const Transaction = memo(function Transaction({
-  transaction,
-  account,
-  accounts,
-  categories,
-  payees,
-  added,
-  onSelect,
-  style,
-}) {
-  const accountsById = useMemo(() => groupById(accounts), [accounts]);
-  const payeesById = useMemo(() => groupById(payees), [payees]);
-
-  const {
-    id,
-    payee: payeeId,
-    amount: originalAmount,
-    category: categoryId,
-    cleared,
-    is_parent: isParent,
-    notes,
-    schedule,
-  } = transaction;
-
-  let amount = originalAmount;
-  if (isPreviewId(id)) {
-    amount = getScheduledAmount(amount);
-  }
-
-  const categoryName = lookupName(categories, categoryId);
-
-  const payee = payeesById && payeeId && payeesById[payeeId];
-  const transferAcct =
-    payee && payee.transfer_acct && accountsById[payee.transfer_acct];
-
-  const prettyDescription = getDescriptionPretty(
-    transaction,
-    payee,
-    transferAcct,
-  );
-  const specialCategory = account?.offbudget
-    ? 'Off Budget'
-    : transferAcct
-      ? 'Transfer'
-      : isParent
-        ? 'Split'
-        : null;
-
-  const prettyCategory = specialCategory || categoryName;
-
-  const isPreview = isPreviewId(id);
-  const isReconciled = transaction.reconciled;
-  const textStyle = isPreview && {
-    fontStyle: 'italic',
-    color: theme.pageTextLight,
-  };
-
-  return (
-    <Button
-      onClick={() => onSelect(transaction)}
-      style={{
-        backgroundColor: theme.tableBackground,
-        border: 'none',
-        width: '100%',
-      }}
-    >
-      <ListItem
-        style={{
-          flex: 1,
-          height: 60,
-          padding: '5px 10px', // remove padding when Button is back
-          ...(isPreview && {
-            backgroundColor: theme.tableRowHeaderBackground,
-          }),
-          ...style,
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {schedule && (
-              <SvgArrowsSynchronize
-                style={{
-                  width: 12,
-                  height: 12,
-                  marginRight: 5,
-                  color: textStyle.color || theme.menuItemText,
-                }}
-              />
-            )}
-            <TextOneLine
-              style={{
-                ...styles.text,
-                ...textStyle,
-                fontSize: 14,
-                fontWeight: added ? '600' : '400',
-                ...(prettyDescription === '' && {
-                  color: theme.tableTextLight,
-                  fontStyle: 'italic',
-                }),
-              }}
-            >
-              {prettyDescription || 'Empty'}
-            </TextOneLine>
-          </View>
-          {isPreview ? (
-            <Status status={notes} />
-          ) : (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: 3,
-              }}
-            >
-              {isReconciled ? (
-                <SvgLockClosed
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: theme.noticeTextLight,
-                    marginRight: 5,
-                  }}
-                />
-              ) : (
-                <SvgCheckCircle1
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: cleared
-                      ? theme.noticeTextLight
-                      : theme.pageTextSubdued,
-                    marginRight: 5,
-                  }}
-                />
-              )}
-              <TextOneLine
-                style={{
-                  fontSize: 11,
-                  marginTop: 1,
-                  fontWeight: '400',
-                  color: prettyCategory
-                    ? theme.tableText
-                    : theme.menuItemTextSelected,
-                  fontStyle:
-                    specialCategory || !prettyCategory ? 'italic' : undefined,
-                  textAlign: 'left',
-                }}
-              >
-                {prettyCategory || 'Uncategorized'}
-              </TextOneLine>
-            </View>
-          )}
-        </View>
-        <Text
-          style={{
-            ...styles.text,
-            ...textStyle,
-            marginLeft: 25,
-            marginRight: 5,
-            fontSize: 14,
-          }}
-        >
-          {integerToCurrency(amount)}
-        </Text>
-      </ListItem>
-    </Button>
-  );
-});
-
-export function TransactionList({
-  account,
-  accounts,
-  categories,
-  payees,
-  transactions,
-  isNew,
-  onSelect,
-  scrollProps = {},
-  onLoadMore,
-}) {
-  const sections = useMemo(() => {
-    // Group by date. We can assume transactions is ordered
-    const sections = [];
-    transactions.forEach(transaction => {
-      if (
-        sections.length === 0 ||
-        transaction.date !== sections[sections.length - 1].date
-      ) {
-        // Mark the last transaction in the section so it can render
-        // with a different border
-        const lastSection = sections[sections.length - 1];
-        if (lastSection && lastSection.data.length > 0) {
-          const lastData = lastSection.data;
-          lastData[lastData.length - 1].isLast = true;
-        }
-
-        sections.push({
-          id: `${isPreviewId(transaction.id) ? 'preview/' : ''}${
-            transaction.date
-          }`,
-          date: transaction.date,
-          data: [],
-        });
-      }
-
-      if (!transaction.is_child) {
-        sections[sections.length - 1].data.push(transaction);
-      }
-    });
-    return sections;
-  }, [transactions]);
-
-  return (
-    <>
-      {scrollProps.ListHeaderComponent}
-      <ListBox
-        {...scrollProps}
-        aria-label="transaction list"
-        label=""
-        loadMore={onLoadMore}
-        selectionMode="none"
-      >
-        {sections.length === 0 ? (
-          <Section>
-            <Item textValue="No transactions">
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  width: '100%',
-                  backgroundColor: theme.mobilePageBackground,
-                }}
-              >
-                <Text style={{ fontSize: 15 }}>No transactions</Text>
-              </div>
-            </Item>
-          </Section>
-        ) : null}
-        {sections.map(section => {
-          return (
-            <Section
-              title={
-                <span>{monthUtils.format(section.date, 'MMMM dd, yyyy')}</span>
-              }
-              key={section.id}
-            >
-              {section.data.map((transaction, index, transactions) => {
-                return (
-                  <Item
-                    key={transaction.id}
-                    style={{
-                      fontSize:
-                        index === transactions.length - 1 ? 98 : 'inherit',
-                    }}
-                    textValue={transaction.id}
-                  >
-                    <Transaction
-                      transaction={transaction}
-                      account={account}
-                      categories={categories}
-                      accounts={accounts}
-                      payees={payees}
-                      added={isNew(transaction.id)}
-                      onSelect={onSelect} // onSelect(transaction)}
-                    />
-                  </Item>
-                );
-              })}
-            </Section>
-          );
-        })}
-      </ListBox>
-    </>
-  );
-}
-
-function ListBox(props) {
-  const state = useListState(props);
-  const listBoxRef = useRef();
-  const { listBoxProps, labelProps } = useListBox(props, state, listBoxRef);
-
-  useEffect(() => {
-    function loadMoreTransactions() {
-      if (
-        Math.abs(
-          listBoxRef.current.scrollHeight -
-            listBoxRef.current.clientHeight -
-            listBoxRef.current.scrollTop,
-        ) < listBoxRef.current.clientHeight // load more when we're one screen height from the end
-      ) {
-        props.loadMore();
-      }
-    }
-
-    listBoxRef.current.addEventListener('scroll', loadMoreTransactions);
-
-    return () => {
-      listBoxRef.current?.removeEventListener('scroll', loadMoreTransactions);
-    };
-  }, [state.collection]);
-
-  return (
-    <>
-      <div {...labelProps}>{props.label}</div>
-      <ul
-        {...listBoxProps}
-        ref={listBoxRef}
-        style={{
-          padding: 0,
-          listStyle: 'none',
-          margin: 0,
-          width: '100%',
-        }}
-      >
-        {[...state.collection].map(item => (
-          <ListBoxSection key={item.key} section={item} state={state} />
-        ))}
-      </ul>
-    </>
-  );
-}
-
-function ListBoxSection({ section, state }) {
-  const { itemProps, headingProps, groupProps } = useListBoxSection({
-    heading: section.rendered,
-    'aria-label': section['aria-label'],
-  });
-
-  // The heading is rendered inside an <li> element, which contains
-  // a <ul> with the child items.
-  return (
-    <li {...itemProps} style={{ width: '100%' }}>
-      {section.rendered && (
-        <div
-          {...headingProps}
-          className={`${css(styles.smallText, {
-            backgroundColor: theme.pageBackground,
-            borderBottom: `1px solid ${theme.tableBorder}`,
-            borderTop: `1px solid ${theme.tableBorder}`,
-            color: theme.tableHeaderText,
-            display: 'flex',
-            justifyContent: 'center',
-            paddingBottom: 4,
-            paddingTop: 4,
-            position: 'sticky',
-            top: '0',
-            width: '100%',
-            zIndex: zIndices.SECTION_HEADING,
-          })}`}
-        >
-          {section.rendered}
-        </div>
-      )}
-      <ul
-        {...groupProps}
-        style={{
-          padding: 0,
-          listStyle: 'none',
-        }}
-      >
-        {[...section.childNodes].map((node, index, nodes) => (
-          <Option
-            key={node.key}
-            item={node}
-            state={state}
-            isLast={index === nodes.length - 1}
-          />
-        ))}
-      </ul>
-    </li>
-  );
-}
-
-function Option({ isLast, item, state }) {
-  // Get props for the option element
-  const ref = useRef();
-  const { optionProps, isSelected } = useOption({ key: item.key }, state, ref);
-
-  // Determine whether we should show a keyboard
-  const { isFocusVisible, focusProps } = useFocusRing();
-
-  return (
-    <li
-      {...mergeProps(optionProps, focusProps)}
-      ref={ref}
-      style={{
-        background: isSelected
-          ? theme.tableRowBackgroundHighlight
-          : theme.tableBackground,
-        color: isSelected ? theme.mobileModalText : null,
-        outline: isFocusVisible ? '2px solid orange' : 'none',
-        ...(!isLast && { borderBottom: `1px solid ${theme.tableBorder}` }),
-      }}
-    >
-      {item.rendered}
-    </li>
-  );
-}
-
-const ROW_HEIGHT = 50;
-
-const ListItem = forwardRef(({ children, style, ...props }, ref) => {
-  return (
-    <View
-      style={{
-        height: ROW_HEIGHT,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingLeft: 10,
-        paddingRight: 10,
-        ...style,
-      }}
-      ref={ref}
-      {...props}
-    >
-      {children}
-    </View>
-  );
-});
-
-ListItem.displayName = 'ListItem';
