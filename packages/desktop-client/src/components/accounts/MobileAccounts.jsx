@@ -167,7 +167,7 @@ function AccountList({
         <Button
           type="bare"
           style={{
-            ...noBackgroundColorStyle,
+            color: theme.mobileHeaderText,
             margin: 10,
           }}
           activeStyle={noBackgroundColorStyle}
