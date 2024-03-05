@@ -105,10 +105,9 @@ function SelectedBalance({ selectedItems, account }) {
 }
 
 function FilteredBalance({ selectedItems }) {
-  const test = selectedItems.filter(
-    item => !item._unmatched && !item.is_parent,
-  );
-  const balance = test.reduce((sum, product) => sum + product.amount, 0);
+  const balance = selectedItems
+    .filter(item => !item._unmatched && !item.is_parent)
+    .reduce((sum, product) => sum + product.amount, 0);
 
   return (
     <DetailedBalance
@@ -146,7 +145,6 @@ export function Balances({
   transactions,
 }) {
   const selectedItems = useSelectedItems();
-  //const filteredItems = useFilters();
 
   return (
     <View
