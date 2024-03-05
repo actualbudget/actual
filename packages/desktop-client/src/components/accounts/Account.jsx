@@ -280,8 +280,7 @@ class AccountInternal extends PureComponent {
     // Important that any async work happens last so that the
     // listeners are set up synchronously
     await this.props.initiallyLoadPayees();
-    await this.fetchTransactions();
-    this.applyFilters(this.state.filters);
+    await this.fetchTransactions(this.state.filters);
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
@@ -338,10 +337,11 @@ class AccountInternal extends PureComponent {
     this.paged?.run();
   };
 
-  fetchTransactions = () => {
+  fetchTransactions = filters => {
     const query = this.makeRootQuery();
     this.rootQuery = this.currentQuery = query;
-    this.updateQuery(query);
+    if (filters) this.applyFilters(filters);
+    else this.updateQuery(query);
 
     if (this.props.accountId) {
       this.props.markAccountRead(this.props.accountId);
