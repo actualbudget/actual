@@ -1272,7 +1272,7 @@ const Transaction = memo(function Transaction({
                   marginTop: 1,
                   fontWeight: '400',
                   color: prettyCategory
-                    ? theme.tableTextSelected
+                    ? theme.tableText
                     : theme.menuItemTextSelected,
                   fontStyle:
                     specialCategory || !prettyCategory ? 'italic' : undefined,

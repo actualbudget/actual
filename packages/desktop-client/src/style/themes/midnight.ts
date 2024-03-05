@@ -115,7 +115,7 @@ export const buttonNormalBorder = colorPalette.gray300;
 export const buttonNormalShadow = 'rgba(0, 0, 0, 0.4)';
 export const buttonNormalSelectedText = colorPalette.white;
 export const buttonNormalSelectedBackground = colorPalette.purple500;
-export const buttonNormalDisabledText = colorPalette.gray500;
+export const buttonNormalDisabledText = colorPalette.gray400;
 export const buttonNormalDisabledBackground = colorPalette.gray700;
 export const buttonNormalDisabledBorder = colorPalette.gray500;
 
