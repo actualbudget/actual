@@ -13,11 +13,9 @@ import { View } from '../common/View';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { NetWorthCard } from './reports/NetWorthCard';
-import { SankeyCard } from './reports/SankeyCard';
 
 export function Overview() {
   const customReports = useReports();
-  const sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
 
@@ -53,14 +51,6 @@ export function Overview() {
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
-      </View>
-      <View
-        style={{
-          flex: '0 0 auto',
-          flexDirection: 'row',
-        }}
-      >
-        {sankeyFeatureFlag && <SankeyCard />}
       </View>
       {customReportsFeatureFlag && (
         <CustomReportListCards reports={customReports} />
