@@ -192,7 +192,7 @@ export function MobileNavTabs() {
       <View>
         <div
           style={{
-            background: theme.mobileHeaderTextSubdued,
+            background: theme.pillBorder,
             borderRadius: 10,
             width: 30,
             marginTop: 5,
