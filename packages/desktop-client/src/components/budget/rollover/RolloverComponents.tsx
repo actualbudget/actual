@@ -143,7 +143,7 @@ type ExpenseCategoryMonthProps = {
   editing: boolean;
   onEdit: (id: string | null, idx?: number) => void;
   onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
-  onShowActivity: (name: string, id: string, idx: number) => void;
+  onShowActivity: (id: string, idx: number) => void;
 };
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   monthIndex,
@@ -297,7 +297,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
           data-testid="category-month-spent"
-          onClick={() => onShowActivity(category.name, category.id, monthIndex)}
+          onClick={() => onShowActivity(category.id, monthIndex)}
         >
           <CellValue
             binding={rolloverBudget.catSumAmount(category.id)}
@@ -367,7 +367,7 @@ type IncomeCategoryMonthProps = {
   category: { id: string; name: string };
   isLast: boolean;
   monthIndex: number;
-  onShowActivity: (name: string, id: string, idx: number) => void;
+  onShowActivity: (id: string, idx: number) => void;
 };
 export function IncomeCategoryMonth({
   category,
@@ -386,9 +386,7 @@ export function IncomeCategoryMonth({
           ...(isLast && { borderBottomWidth: 0 }),
         }}
       >
-        <span
-          onClick={() => onShowActivity(category.name, category.id, monthIndex)}
-        >
+        <span onClick={() => onShowActivity(category.id, monthIndex)}>
           <CellValue
             binding={rolloverBudget.catSumAmount(category.id)}
             type="financial"

@@ -27,7 +27,7 @@ type IncomeCategoryProps = {
   onDragChange: OnDragChangeCallback<CategoryEntity>;
   onBudgetAction: (idx: number, action: string, arg: unknown) => void;
   onReorder: OnDropCallback;
-  onShowActivity: (name: string, id: string, idx: number) => void;
+  onShowActivity: (id: string, idx: number) => void;
 };
 
 export function IncomeCategory({

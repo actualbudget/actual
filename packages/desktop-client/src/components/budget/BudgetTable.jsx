@@ -126,8 +126,8 @@ class BudgetTableInner extends Component {
     }
   };
 
-  onShowActivity = (catName, catId, monthIndex) => {
-    this.props.onShowActivity(catName, catId, this.resolveMonth(monthIndex));
+  onShowActivity = (catId, monthIndex) => {
+    this.props.onShowActivity(catId, this.resolveMonth(monthIndex));
   };
 
   onBudgetAction = (monthIndex, type, args) => {
