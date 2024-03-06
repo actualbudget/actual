@@ -20,8 +20,10 @@ import { theme, styles, type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { useScroll } from '../ScrollProvider';
 
-export const ROW_HEIGHT = 70;
 const COLUMN_COUNT = 3;
+const PILL_HEIGHT = 15;
+const ROW_HEIGHT = 70;
+export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 
 export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
@@ -179,7 +181,7 @@ export function MobileNavTabs() {
         backgroundColor: theme.mobileNavBackground,
         borderTop: `1px solid ${theme.menuBorder}`,
         ...styles.shadow,
-        height: totalHeight,
+        height: totalHeight + PILL_HEIGHT,
         width: '100%',
         position: 'fixed',
         zIndex: 100,
@@ -187,15 +189,28 @@ export function MobileNavTabs() {
         ...(!isNarrowWidth && { display: 'none' }),
       }}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          height: totalHeight,
-          width: '100%',
-        }}
-      >
-        {[navTabs, bufferTabs]}
+      <View>
+        <div
+          style={{
+            background: theme.pillBorder,
+            borderRadius: 10,
+            width: 30,
+            marginTop: 5,
+            marginBottom: 5,
+            padding: 2,
+            alignSelf: 'center',
+          }}
+        />
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            height: totalHeight,
+            width: '100%',
+          }}
+        >
+          {[navTabs, bufferTabs]}
+        </View>
       </View>
     </animated.div>
   );
