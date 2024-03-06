@@ -1651,7 +1651,7 @@ export function Account() {
           {...actionCreators}
           modalShowing={state.modalShowing}
           accountId={params.id}
-          categoryId={conditions[0]?.value}
+          categoryId={location?.state?.categoryId}
           location={location}
           filtersList={filtersList}
         />

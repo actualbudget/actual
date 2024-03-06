@@ -312,6 +312,7 @@ function BudgetInner(props: BudgetProps) {
       state: {
         goBack: true,
         conditions,
+        categoryId,
       },
     });
   };
