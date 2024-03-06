@@ -212,6 +212,8 @@ export function AccountHeader({
           showExtraBalances={showExtraBalances}
           onToggleExtraBalances={onToggleExtraBalances}
           account={account}
+          filteredItems={filters}
+          transactions={transactions}
         />
 
         <Stack
