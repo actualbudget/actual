@@ -50,7 +50,7 @@ export function sync() {
   };
 }
 
-export function syncAndDownload(accountId) {
+export function syncAndDownload(accountId?: string) {
   return async (dispatch: Dispatch) => {
     // It is *critical* that we sync first because of transaction
     // reconciliation. We want to get all transactions that other

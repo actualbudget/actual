@@ -1,7 +1,6 @@
 import { type numberFormats } from '../shared/util';
 
 export type FeatureFlag =
-  | 'sankeyReport'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'customReports'
