@@ -23,7 +23,7 @@ import { useScroll } from '../ScrollProvider';
 const COLUMN_COUNT = 3;
 const PILL_HEIGHT = 15;
 const ROW_HEIGHT = 70;
-export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT
+export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 
 export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
