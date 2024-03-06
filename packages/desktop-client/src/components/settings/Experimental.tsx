@@ -80,7 +80,6 @@ export function ExperimentalFeatures() {
         expanded ? (
           <View style={{ gap: '1em' }}>
             <FeatureToggle flag="customReports">Custom reports</FeatureToggle>
-            <FeatureToggle flag="sankeyReport">Sankey report</FeatureToggle>
 
             <ReportBudgetFeature />
 
