@@ -15,8 +15,29 @@ import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 
-import { ListItem } from './ListItem';
 import { lookupName, getDescriptionPretty, Status } from './TransactionEdit';
+
+const ROW_HEIGHT = 50;
+
+const ListItem = ({ children, style, ...props }) => {
+  return (
+    <View
+      style={{
+        height: ROW_HEIGHT,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        ...style,
+      }}
+      {...props}
+    >
+      {children}
+    </View>
+  );
+};
+
+ListItem.displayName = 'ListItem';
 
 export const Transaction = memo(function Transaction({
   transaction,
