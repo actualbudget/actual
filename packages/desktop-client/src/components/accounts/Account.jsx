@@ -453,7 +453,7 @@ class AccountInternal extends PureComponent {
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
-    await this.props.syncAndDownload(account ? account.id : null);
+    await this.props.syncAndDownload(account ? account.id : undefined);
   };
 
   onImport = async () => {
