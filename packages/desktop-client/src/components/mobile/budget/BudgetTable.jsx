@@ -1,7 +1,9 @@
 import React, { memo, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
 
+import { pushModal } from 'loot-core/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -1034,7 +1036,6 @@ function BudgetGroups({
   showBudgetedCol,
   show3Cols,
   showHiddenCategories,
-  pushModal,
 }) {
   const separateGroups = memoizeOne(groups => {
     return {
@@ -1073,7 +1074,6 @@ function BudgetGroups({
                 onBudgetAction={onBudgetAction}
                 show3Cols={show3Cols}
                 showHiddenCategories={showHiddenCategories}
-                pushModal={pushModal}
               />
             );
           })}
@@ -1102,7 +1102,6 @@ function BudgetGroups({
             onEditGroup={onEditGroup}
             onEditCategory={onEditCategory}
             onBudgetAction={onBudgetAction}
-            pushModal={pushModal}
           />
         )}
       </View>
@@ -1133,7 +1132,6 @@ export function BudgetTable({
   onBudgetAction,
   onRefresh,
   onSwitchBudgetType,
-  pushModal,
   onEditGroup,
   onEditCategory,
 }) {
@@ -1142,6 +1140,7 @@ export function BudgetTable({
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
   const format = useFormat();
+  const dispatch = useDispatch();
 
   const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
@@ -1161,9 +1160,11 @@ export function BudgetTable({
   };
 
   const _onSwitchBudgetType = () => {
-    pushModal('switch-budget-type', {
-      onSwitch: onSwitchBudgetType,
-    });
+    dispatch(
+      pushModal('switch-budget-type', {
+        onSwitch: onSwitchBudgetType,
+      }),
+    );
   };
 
   const onToggleHiddenCategories = () => {
@@ -1378,7 +1379,6 @@ export function BudgetTable({
                 onReorderGroup={onReorderGroup}
                 onOpenMonthActionMenu={onOpenMonthActionMenu}
                 onBudgetAction={onBudgetAction}
-                pushModal={pushModal}
               />
             </View>
           ) : (
@@ -1412,7 +1412,6 @@ export function BudgetTable({
                 onReorderGroup={onReorderGroup}
                 onOpenMonthActionMenu={onOpenMonthActionMenu}
                 onBudgetAction={onBudgetAction}
-                pushModal={pushModal}
               />
             </View>
 

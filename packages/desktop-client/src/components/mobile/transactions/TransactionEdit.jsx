@@ -6,7 +6,7 @@ import React, {
   memo,
   useMemo,
 } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import {
@@ -16,6 +16,7 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 
+import { pushModal, setLastTransaction } from 'loot-core/client/actions';
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -39,7 +40,6 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
-import { useActions } from '../../../hooks/useActions';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -419,9 +419,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
   dateFormat,
   transactions: unserializedTransactions,
   navigate,
-  pushModal,
   ...props
 }) {
+  const dispatch = useDispatch();
   const transactions = useMemo(
     () =>
       unserializedTransactions.map(t => serializeTransaction(t, dateFormat)) ||
@@ -520,10 +520,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
       // On the web only certain changes trigger a warning.
       // Should we bring that here as well? Or does the nature of the editing form
       // make this more appropriate?
-      pushModal('confirm-transaction-edit', {
-        onConfirm: onConfirmSave,
-        confirmReason: 'editReconciled',
-      });
+      dispatch(
+        pushModal('confirm-transaction-edit', {
+          onConfirm: onConfirmSave,
+          confirmReason: 'editReconciled',
+        }),
+      );
     } else {
       onConfirmSave();
     }
@@ -541,21 +543,23 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const onClick = (transactionId, name) => {
     onRequestActiveEdit?.(getFieldName(transaction.id, 'payee'), () => {
-      pushModal('edit-field', {
-        name,
-        onSubmit: (name, value) => {
-          const transaction = unserializedTransactions.find(
-            t => t.id === transactionId,
-          );
-          // This is a deficiency of this API, need to fix. It
-          // assumes that it receives a serialized transaction,
-          // but we only have access to the raw transaction
-          onEdit(serializeTransaction(transaction, dateFormat), name, value);
-        },
-        onClose: () => {
-          onClearActiveEdit();
-        },
-      });
+      dispatch(
+        pushModal('edit-field', {
+          name,
+          onSubmit: (name, value) => {
+            const transaction = unserializedTransactions.find(
+              t => t.id === transactionId,
+            );
+            // This is a deficiency of this API, need to fix. It
+            // assumes that it receives a serialized transaction,
+            // but we only have access to the raw transaction
+            onEdit(serializeTransaction(transaction, dateFormat), name, value);
+          },
+          onClose: () => {
+            onClearActiveEdit();
+          },
+        }),
+      );
     });
   };
 
@@ -580,10 +584,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
     };
 
     if (transaction.reconciled) {
-      pushModal('confirm-transaction-edit', {
-        onConfirm: onConfirmDelete,
-        confirmReason: 'deleteReconciled',
-      });
+      dispatch(
+        pushModal('confirm-transaction-edit', {
+          onConfirm: onConfirmDelete,
+          confirmReason: 'deleteReconciled',
+        }),
+      );
     } else {
       onConfirmDelete();
     }
@@ -918,6 +924,7 @@ function TransactionEditUnconnected(props) {
   const { categories, accounts, payees, lastTransaction, dateFormat } = props;
   const { id: accountId, transactionId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [transactions, setTransactions] = useState([]);
   const [fetchedTransactions, setFetchedTransactions] = useState([]);
   const adding = useRef(false);
@@ -1028,7 +1035,7 @@ function TransactionEditUnconnected(props) {
     if (adding.current) {
       // The first one is always the "parent" and the only one we care
       // about
-      props.setLastTransaction(newTransactions[0]);
+      dispatch(setLastTransaction(newTransactions[0]));
     }
   };
 
@@ -1074,7 +1081,6 @@ function TransactionEditUnconnected(props) {
         categories={categories}
         accounts={accounts}
         payees={payees}
-        pushModal={props.pushModal}
         navigate={navigate}
         dateFormat={dateFormat}
         onEdit={onEdit}
@@ -1093,13 +1099,11 @@ export const TransactionEdit = props => {
   const lastTransaction = useSelector(state => state.queries.lastTransaction);
   const accounts = useAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const actions = useActions();
 
   return (
     <SingleActiveEditFormProvider formName="mobile-transaction">
       <TransactionEditUnconnected
         {...props}
-        {...actions}
         categories={categories}
         payees={payees}
         lastTransaction={lastTransaction}
