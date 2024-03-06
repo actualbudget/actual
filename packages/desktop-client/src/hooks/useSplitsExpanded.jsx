@@ -94,7 +94,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
     if (state.transitionId == null) {
       reduxDispatch({ type: 'SET_LAST_SPLIT_STATE', splitState: state });
     }
-  }, [state]);
+  }, [reduxDispatch, state]);
 
   const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
 
