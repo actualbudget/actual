@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import debounce from 'debounce';
 import memoizeOne from 'memoize-one';
-import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import {
@@ -74,8 +73,6 @@ function PreviewTransactions({ children }) {
   );
 }
 
-let paged;
-
 export function Account(props) {
   const accounts = useAccounts();
   const payees = usePayees();
@@ -100,10 +97,6 @@ export function Account(props) {
   };
 
   const dispatch = useDispatch();
-  const actionCreators = useMemo(
-    () => bindActionCreators(actions, dispatch),
-    [dispatch],
-  );
 
   const { id: accountId } = useParams();
 
@@ -112,23 +105,22 @@ export function Account(props) {
     [accountId],
   );
 
-  const updateQuery = query => {
-    if (paged) {
-      paged.unsubscribe();
-    }
+  const paged = useRef(null);
 
-    paged = pagedQuery(
+  const updateQuery = useCallback(query => {
+    paged.current?.unsubscribe();
+    paged.current = pagedQuery(
       query.options({ splits: 'grouped' }).select('*'),
       data => setTransactions(data),
-      { pageCount: 150, mapper: ungroupTransactions },
+      { pageCount: 10, mapper: ungroupTransactions },
     );
-  };
+  }, []);
 
   const fetchTransactions = useCallback(async () => {
     const query = makeRootQuery();
     setCurrentQuery(query);
     updateQuery(query);
-  }, [makeRootQuery]);
+  }, [makeRootQuery, updateQuery]);
 
   useEffect(() => {
     let unlisten;
@@ -141,41 +133,45 @@ export function Account(props) {
             tables.includes('category_mapping') ||
             tables.includes('payee_mapping')
           ) {
-            paged?.run();
+            paged.current?.run();
           }
 
           if (tables.includes('payees') || tables.includes('payee_mapping')) {
-            actionCreators.getPayees();
+            dispatch(actions.getPayees());
           }
         }
       });
 
       await fetchTransactions();
 
-      actionCreators.markAccountRead(accountId);
+      dispatch(actions.markAccountRead(accountId));
     }
 
     setUpAccount();
 
     return () => unlisten();
-  }, [accountId, actionCreators, fetchTransactions]);
+  }, [accountId, dispatch, fetchTransactions]);
 
   // Load categories if necessary.
   const categories = useCategories();
 
-  const updateSearchQuery = debounce((searchText, currentQuery, dateFormat) => {
-    if (searchText === '' && currentQuery) {
-      updateQuery(currentQuery);
-    } else if (searchText && currentQuery) {
-      updateQuery(
-        queries.makeTransactionSearchQuery(
-          currentQuery,
-          searchText,
-          dateFormat,
-        ),
-      );
-    }
-  }, 150);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateSearchQuery = useCallback(
+    debounce((searchText, currentQuery, dateFormat) => {
+      if (searchText === '' && currentQuery) {
+        updateQuery(currentQuery);
+      } else if (searchText && currentQuery) {
+        updateQuery(
+          queries.makeTransactionSearchQuery(
+            currentQuery,
+            searchText,
+            dateFormat,
+          ),
+        );
+      }
+    }, 150),
+    [updateQuery],
+  );
 
   useEffect(() => {
     updateSearchQuery(searchText, currentQuery, state.dateFormat);
@@ -216,7 +212,7 @@ export function Account(props) {
   };
 
   const onSearch = async text => {
-    paged.unsubscribe();
+    paged.current?.unsubscribe();
     setSearchText(text);
   };
 
@@ -242,7 +238,6 @@ export function Account(props) {
               // This key forces the whole table rerender when the number
               // format changes
               {...state}
-              {...actionCreators}
               key={numberFormat + hideFraction}
               account={account}
               accounts={accounts}
@@ -255,7 +250,7 @@ export function Account(props) {
               balanceUncleared={balanceUncleared}
               isNewTransaction={isNewTransaction}
               onLoadMore={() => {
-                paged?.fetchNext();
+                paged.current?.fetchNext();
               }}
               onSearch={onSearch}
               onSelectTransaction={onSelectTransaction}

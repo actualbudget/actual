@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { useActions } from '../../../hooks/useActions';
+import { syncAndDownload } from 'loot-core/client/actions';
+
 import { SvgAdd } from '../../../icons/v1';
 import { SvgSearchAlternate } from '../../../icons/v2';
 import { theme } from '../../../style';
@@ -76,15 +78,14 @@ export function AccountDetails({
   onLoadMore,
   onSearch,
   onSelectTransaction,
-  pushModal,
 }) {
   const allTransactions = useMemo(() => {
     return prependTransactions.concat(transactions);
   }, [prependTransactions, transactions]);
 
-  const { syncAndDownload } = useActions();
+  const dispatch = useDispatch();
   const onRefresh = async () => {
-    await syncAndDownload(account.id);
+    await dispatch(syncAndDownload(account.id));
   };
 
   return (
@@ -207,7 +208,6 @@ export function AccountDetails({
           isNew={isNewTransaction}
           onLoadMore={onLoadMore}
           onSelect={onSelectTransaction}
-          pushModal={pushModal}
         />
       </PullToRefresh>
     </Page>
