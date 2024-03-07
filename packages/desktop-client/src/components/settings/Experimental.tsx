@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -106,6 +107,16 @@ function ReportBudgetFeature() {
 export function ExperimentalFeatures() {
   const [expanded, setExpanded] = useState(false);
 
+  const [resetting, setResetting] = useState(true);
+
+  async function onResetCache() {
+    setResetting(true);
+    console.log('Resetting...');
+    await send('reset-budget-cache');
+    console.log('Done!');
+    setResetting(false);
+  }
+
   return (
     <Setting
       primaryAction={
@@ -120,7 +131,13 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
             <FeatureToggle flag="splitsInRules">Splits in rules</FeatureToggle>
-            <FeatureToggle flag="excludeFutureTransactions">Exclude future transactions from calculations</FeatureToggle>
+            <FeatureToggle
+              flag="excludeFutureTransactions"
+              loading={resetting}
+              afterChange={onResetCache}
+            >
+              Exclude future transactions from calculations
+            </FeatureToggle>
           </View>
         ) : (
           <LinkButton
