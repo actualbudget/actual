@@ -275,10 +275,10 @@ function BudgetInner(props: BudgetProps) {
       .filter(g => g.name.toUpperCase() === group.name.toUpperCase())
       .filter(g => group.id === 'new' || group.id !== g.id);
 
-    /*if (matchingGroups.length > 0) {
+    if (matchingGroups.length > 0) {
       groupNameAlreadyExistsNotification(matchingGroups[0]);
       return;
-    }*/
+    }
 
     if (group.id === 'new') {
       dispatch(createGroup(group.name));
