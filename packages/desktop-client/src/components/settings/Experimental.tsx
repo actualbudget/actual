@@ -22,10 +22,6 @@ type FeatureToggleProps = {
   afterChange?: (newValue: boolean) => void;
 };
 
-type FeatureToggleWithLoadingProps = FeatureToggleProps & {
-  loading?: boolean;
-};
-
 function FeatureToggle({
   flag: flagName,
   disableToggle = false,
@@ -65,30 +61,6 @@ function FeatureToggle({
   );
 }
 
-function FeatureToggleWithLoading({
-  children,
-  loading,
-  ...featureToggleProps
-}: FeatureToggleWithLoadingProps) {
-  return (
-    <FeatureToggle {...featureToggleProps}>
-      {children}
-      {loading && (
-        <View
-          style={{
-            position: 'absolute',
-            alignSelf: 'flex-end',
-            alignItems: 'flex-end',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <AnimatedLoading style={{ width: 20, height: 20 }} />
-        </View>
-      )}
-    </FeatureToggle>
-  );
-}
-
 function ReportBudgetFeature() {
   const [budgetType] = useLocalPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
@@ -104,18 +76,38 @@ function ReportBudgetFeature() {
   );
 }
 
-export function ExperimentalFeatures() {
-  const [expanded, setExpanded] = useState(false);
-
-  const [resetting, setResetting] = useState(true);
+function ExcludeFutureTransactionsFeature() {
+  const [resetting, setResetting] = useState(false);
 
   async function onResetCache() {
     setResetting(true);
-    console.log('Resetting...');
     await send('reset-budget-cache');
-    console.log('Done!');
     setResetting(false);
   }
+
+  return (
+    <FeatureToggle flag="excludeFutureTransactions" afterChange={onResetCache}>
+      Exclude future transactions from calculations
+      {resetting && (
+        <View
+          style={{
+            position: 'absolute',
+            alignSelf: 'flex-end',
+            width: 20,
+            height: 20,
+            marginTop: -3,
+            marginRight: -25,
+          }}
+        >
+          <AnimatedLoading />
+        </View>
+      )}
+    </FeatureToggle>
+  );
+}
+
+export function ExperimentalFeatures() {
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <Setting
@@ -131,13 +123,8 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
             <FeatureToggle flag="splitsInRules">Splits in rules</FeatureToggle>
-            <FeatureToggle
-              flag="excludeFutureTransactions"
-              loading={resetting}
-              afterChange={onResetCache}
-            >
-              Exclude future transactions from calculations
-            </FeatureToggle>
+
+            <ExcludeFutureTransactionsFeature />
           </View>
         ) : (
           <LinkButton
