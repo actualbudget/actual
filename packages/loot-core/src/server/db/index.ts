@@ -327,7 +327,18 @@ export async function insertCategoryGroup(group) {
   return insertWithUUID('category_groups', group);
 }
 
-export function updateCategoryGroup(group) {
+export async function updateCategoryGroup(group) {
+  // Don't allow duplicate group
+  const existingGroup = await first(
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase()],
+  );
+  if (existingGroup) {
+    throw new Error(
+      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
+    );
+  }
+
   group = categoryGroupModel.validate(group, { update: true });
   return update('category_groups', group);
 }
