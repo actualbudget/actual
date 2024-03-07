@@ -4,6 +4,7 @@ import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
 import { LinkButton } from '../common/LinkButton';
 import { Text } from '../common/Text';
@@ -17,6 +18,10 @@ type FeatureToggleProps = {
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;
+};
+
+type FeatureToggleWithLoadingProps = FeatureToggleProps & {
+  loading?: boolean;
 };
 
 function FeatureToggle({
@@ -53,6 +58,30 @@ function FeatureToggle({
         )}
       </View>
     </label>
+  );
+}
+
+function FeatureToggleWithLoading({
+  children,
+  loading,
+  ...featureToggleProps
+}: FeatureToggleWithLoadingProps) {
+  return (
+    <FeatureToggle {...featureToggleProps}>
+      {children}
+      {loading && (
+        <View
+          style={{
+            position: 'absolute',
+            alignSelf: 'flex-end',
+            alignItems: 'flex-end',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <AnimatedLoading style={{ width: 20, height: 20 }} />
+        </View>
+      )}
+    </FeatureToggle>
   );
 }
 
