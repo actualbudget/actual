@@ -18,6 +18,7 @@ type FeatureToggleProps = {
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;
+  afterChange?: (newValue: boolean) => void;
 };
 
 type FeatureToggleWithLoadingProps = FeatureToggleProps & {
@@ -29,6 +30,7 @@ function FeatureToggle({
   disableToggle = false,
   error,
   children,
+  afterChange,
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
   const [_, setFlagPref] = useLocalPref(`flags.${flagName}`);
@@ -39,6 +41,7 @@ function FeatureToggle({
         checked={enabled}
         onChange={() => {
           setFlagPref(!enabled);
+          afterChange?.(!enabled);
         }}
         disabled={disableToggle}
       />
