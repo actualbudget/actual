@@ -9,6 +9,7 @@ import * as budgetActions from './actions';
 import * as report from './report';
 import * as rollover from './rollover';
 import { sumAmounts } from './util';
+import * as prefs from '../prefs';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();
@@ -37,6 +38,8 @@ export function getBudgetRange(start: string, end: string) {
 }
 
 function createCategory(cat, sheetName, prevSheetName, start, end) {
+  const exclFutureTx = prefs.getPrefs()?.['flags.excludeFutureTransactions'];
+
   sheet.get().createDynamic(sheetName, 'sum-amount-' + cat.id, {
     initialValue: 0,
     run: () => {
@@ -45,6 +48,7 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
         `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
+           ${exclFutureTx ? `AND t.date <= CAST(strftime('%Y%m%d', 'now') AS INTEGER)` : ''}
            AND category = '${cat.id}' AND a.offbudget = 0`,
         [],
         true,
