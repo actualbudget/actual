@@ -1635,10 +1635,11 @@ export function Account() {
       q = q.filter({
         $and: [{ '_account.closed': false }],
       });
-      if (params.id)
+      if (params.id) {
         q = q.filter({
           $or: [filterByAccount, filterByPayee],
         });
+      }
       return q.orderBy({ next_date: 'desc' });
     };
   }, [params.id]);
