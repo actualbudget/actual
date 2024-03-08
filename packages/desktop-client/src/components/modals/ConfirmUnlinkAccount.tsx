@@ -9,7 +9,7 @@ import { type CommonModalProps } from '../Modals';
 
 type ConfirmUnlinkAccountProps = {
   modalProps: CommonModalProps;
-  accountName: string,
+  accountName: string;
   onUnlink: () => void;
 };
 
@@ -27,8 +27,8 @@ export function ConfirmUnlinkAccount({
           </Paragraph>
 
           <Paragraph>
-            Transactions will no longer be synchronized with this account
-            and must be manually entered.
+            Transactions will no longer be synchronized with this account and
+            must be manually entered.
           </Paragraph>
 
           <View
