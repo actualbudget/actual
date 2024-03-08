@@ -113,6 +113,7 @@ export function ConfirmCategoryDelete({
                   placeholder: 'Select category...',
                 }}
                 onSelect={category => setTransferCategory(category)}
+                showHiddenItems={true}
               />
             </View>
 
