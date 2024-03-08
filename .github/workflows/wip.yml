@@ -1,0 +1,18 @@
+name: Add WIP
+
+on:
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+    - name : Add WIP
+      env:
+          TITLE: ${{ github.event.pull_request.title }}
+      with:
+        pr_title: echo [WIP] $TITLE
