@@ -590,7 +590,12 @@ class AccountInternal extends PureComponent {
         });
         break;
       case 'unlink':
-        this.props.unlinkAccount(accountId);
+        this.props.pushModal('confirm-unlink-account', {
+          accountName: account.name,
+          onUnlink: () => {
+            this.props.unlinkAccount(accountId);
+          },
+        });
         break;
       case 'close':
         this.props.openAccountCloseModal(accountId);
