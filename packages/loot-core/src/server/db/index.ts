@@ -330,8 +330,8 @@ export async function insertCategoryGroup(group) {
 export async function updateCategoryGroup(group) {
   // Don't allow duplicate group
   const existingGroup = await first(
-    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
-    [group.name.toUpperCase()],
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND tombstone = 0 AND id <> ? LIMIT 1`,
+    [group.name.toUpperCase(), group.id],
   );
   if (existingGroup) {
     throw new Error(
