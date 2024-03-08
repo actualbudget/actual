@@ -230,52 +230,39 @@ export function CustomReport() {
     return null;
   }
 
-  const defaultItems = (type, item) => {
-    const graph =
-      type === 'mode' && graphType === 'BarGraph'
-        ? 'StackedBarGraph'
-        : graphType === 'StackedBarGraph' && 'BarGraph';
-    const chooseGraph = type === 'graph' ? item : graph || graphType;
-    const typeCheck = type === 'mode' ? item : mode;
+  const defaultModeItems = (graph, item) => {
+    const chooseGraph = graph || graphType;
     const newGraph = disabledList.modeGraphsMap
-      .get(typeCheck)
+      .get(item)
       .includes(graph || graphType)
-      ? defaultsList.modeGraphsMap.get(typeCheck)
+      ? defaultsList.modeGraphsMap.get(item)
       : chooseGraph;
-    if (type === 'mode') {
-      if (disabledList.modeGraphsMap.get(item).includes(graphType)) {
-        setGraphType(newGraph);
-      }
-      if (
-        disabledList.graphSplitMap
-          .get(typeCheck)
-          .get(newGraph)
-          .includes(groupBy)
-      ) {
-        setGroupBy(defaultsList.graphSplitMap.get(typeCheck).get(newGraph));
-      }
-      if (
-        disabledList.graphTypeMap
-          .get(typeCheck)
-          .get(newGraph)
-          .includes(balanceType)
-      ) {
-        setBalanceType(defaultsList.graphTypeMap.get(typeCheck).get(newGraph));
-      }
-    } else {
-      if (
-        disabledList.graphSplitMap.get(mode).get(chooseGraph).includes(groupBy)
-      ) {
-        setGroupBy(defaultsList.graphSplitMap.get(mode).get(chooseGraph));
-      }
-      if (
-        disabledList.graphTypeMap
-          .get(mode)
-          .get(chooseGraph)
-          .includes(balanceType)
-      ) {
-        setBalanceType(defaultsList.graphTypeMap.get(mode).get(chooseGraph));
-      }
+    if (disabledList.modeGraphsMap.get(item).includes(graphType)) {
+      setGraphType(newGraph);
+    }
+
+    if (disabledList.graphSplitMap.get(item).get(newGraph).includes(groupBy)) {
+      setGroupBy(defaultsList.graphSplitMap.get(item).get(newGraph));
+    }
+
+    if (
+      disabledList.graphTypeMap.get(item).get(newGraph).includes(balanceType)
+    ) {
+      setBalanceType(defaultsList.graphTypeMap.get(item).get(newGraph));
+    }
+  };
+
+  const defaultItems = item => {
+    const chooseGraph = ReportOptions.groupBy.includes(item) ? graphType : item;
+    if (
+      disabledList.graphSplitMap.get(mode).get(chooseGraph).includes(groupBy)
+    ) {
+      setGroupBy(defaultsList.graphSplitMap.get(mode).get(chooseGraph));
+    }
+    if (
+      disabledList.graphTypeMap.get(mode).get(chooseGraph).includes(balanceType)
+    ) {
+      setBalanceType(defaultsList.graphTypeMap.get(mode).get(chooseGraph));
     }
   };
 
@@ -433,6 +420,7 @@ export function CustomReport() {
           onReportChange={onReportChange}
           disabledItems={disabledItems}
           defaultItems={defaultItems}
+          defaultModeItems={defaultModeItems}
         />
         <View
           style={{

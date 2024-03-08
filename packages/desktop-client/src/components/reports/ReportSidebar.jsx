@@ -42,6 +42,7 @@ export function ReportSidebar({
   onReportChange,
   disabledItems,
   defaultItems,
+  defaultModeItems,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
@@ -86,22 +87,25 @@ export function ReportSidebar({
   const onChangeMode = cond => {
     onReportChange({ type: 'modify' });
     setMode(cond);
-    defaultItems('mode', cond);
+    let graph;
     if (cond === 'time') {
       if (customReportItems.graphType === 'BarGraph') {
         setGraphType('StackedBarGraph');
+        graph = 'StackedBarGraph';
       }
     } else {
       if (customReportItems.graphType === 'StackedBarGraph') {
         setGraphType('BarGraph');
+        graph = 'BarGraph';
       }
     }
+    defaultModeItems(graph, cond);
   };
 
   const onChangeSplit = cond => {
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
-    defaultItems('split', cond);
+    defaultItems(cond);
   };
 
   const onChangeBalanceType = cond => {

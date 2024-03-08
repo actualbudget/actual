@@ -45,7 +45,7 @@ export function ReportTopbar({
         onSelect={() => {
           onReportChange({ type: 'modify' });
           setGraphType('TableGraph');
-          defaultItems('graph', 'TableGraph');
+          defaultItems('TableGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('TableGraph')}
@@ -66,7 +66,6 @@ export function ReportTopbar({
             customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
           );
           defaultItems(
-            'graph',
             customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
           );
         }}
@@ -83,7 +82,7 @@ export function ReportTopbar({
         onSelect={() => {
           onReportChange({ type: 'modify' });
           setGraphType('AreaGraph');
-          defaultItems('graph', 'AreaGraph');
+          defaultItems('AreaGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('AreaGraph')}
@@ -96,7 +95,7 @@ export function ReportTopbar({
         onSelect={() => {
           onReportChange({ type: 'modify' });
           setGraphType('DonutGraph');
-          defaultItems('graph', 'DonutGraph');
+          defaultItems('DonutGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('DonutGraph')}
