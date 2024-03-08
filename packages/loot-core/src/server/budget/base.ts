@@ -59,6 +59,27 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
     },
   });
 
+  if (exclFutureTx) {
+    sheet.get().createDynamic(sheetName, 'sum-amount-future-' + cat.id, {
+      initialValue: 0,
+      run: () => {
+        // Making this sync is faster!
+        const rows = db.runQuery(
+          `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
+           LEFT JOIN accounts a ON a.id = t.account
+         WHERE t.date >= ${start} AND t.date <= ${end}
+           ${exclFutureTx ? `AND t.date > CAST(strftime('%Y%m%d', 'now') AS INTEGER)` : ''}
+           AND category = '${cat.id}' AND a.offbudget = 0`,
+          [],
+          true,
+        );
+        const row = rows[0];
+        const amount = row ? row.amount : 0;
+        return amount || 0;
+      },
+    });
+  }
+
   if (getBudgetType() === 'rollover') {
     rollover.createCategory(cat, sheetName, prevSheetName);
   } else {
@@ -124,10 +145,17 @@ function handleTransactionChange(transaction, changedFields) {
   ) {
     const month = monthUtils.monthFromDate(db.fromDateRepr(transaction.date));
     const sheetName = monthUtils.sheetForMonth(month);
+    const exclFutureTx = prefs.getPrefs()?.['flags.excludeFutureTransactions'];
 
     sheet
       .get()
       .recompute(resolveName(sheetName, 'sum-amount-' + transaction.category));
+
+    if (exclFutureTx) {
+      sheet
+        .get()
+        .recompute(resolveName(sheetName, 'sum-amount-future-' + transaction.category));
+    }
   }
 }
 

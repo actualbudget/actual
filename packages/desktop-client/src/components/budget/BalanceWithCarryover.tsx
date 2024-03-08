@@ -9,12 +9,14 @@ import { CellValue } from '../spreadsheet/CellValue';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { makeAmountStyle } from './util';
+import { UnbudgetedFutureExpenses } from './UnbudgetedFutureExpenses';
 
 type BalanceWithCarryoverProps = {
   carryover: ComponentProps<typeof CellValue>['binding'];
   balance: ComponentProps<typeof CellValue>['binding'];
   goal?: ComponentProps<typeof CellValue>['binding'];
   budgeted?: ComponentProps<typeof CellValue>['binding'];
+  futureSpent?: ComponentProps<typeof CellValue>['binding'];
   disabled?: boolean;
   style?: CSSProperties;
   balanceStyle?: CSSProperties;
@@ -25,6 +27,7 @@ export function BalanceWithCarryover({
   balance,
   goal,
   budgeted,
+  futureSpent,
   disabled,
   style,
   balanceStyle,
@@ -35,8 +38,16 @@ export function BalanceWithCarryover({
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const excludeFutureTransactions = useFeatureFlag('excludeFutureTransactions');
+
   return (
-    <View style={style}>
+    <View style={{...style, flexDirection: 'row', alignItems: 'end' }}>
+      {excludeFutureTransactions && (
+        <UnbudgetedFutureExpenses
+          futureSpent={futureSpent}
+          balance={balance}
+        />
+      )}
       <CellValue
         binding={balance}
         type="financial"

@@ -208,6 +208,7 @@ export const rolloverBudget = {
 
   catBudgeted: id => `budget-${id}`,
   catSumAmount: id => `sum-amount-${id}`,
+  catSumAmountFuture: id => `sum-amount-future-${id}`,
   catBalance: id => `leftover-${id}`,
   catCarryover: id => `carryover-${id}`,
   catGoal: id => `goal-${id}`,
@@ -231,6 +232,7 @@ export const reportBudget = {
 
   catBudgeted: id => `budget-${id}`,
   catSumAmount: id => `sum-amount-${id}`,
+  catSumAmountFuture: id => `sum-amount-future-${id}`,
   catBalance: id => `leftover-${id}`,
   catCarryover: id => `carryover-${id}`,
   catGoal: id => `goal-${id}`,
