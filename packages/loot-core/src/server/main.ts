@@ -361,6 +361,10 @@ handlers['category-delete'] = mutator(async function ({ id, transferId }) {
   });
 });
 
+handlers['get-category-groups'] = async function () {
+  return await db.getCategoriesGrouped();
+};
+
 handlers['category-group-create'] = mutator(async function ({
   name,
   isIncome,

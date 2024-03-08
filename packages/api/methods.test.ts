@@ -58,10 +58,41 @@ describe('API CRUD operations', () => {
     await api.loadBudget(budgetName);
   });
 
-  // apis: createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
+  // apis: getCategoryGroups, createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
   test('CategoryGroups: successfully update category groups', async () => {
     const month = '2023-10';
     global.currentMonth = month;
+
+    // get existing category groups
+    const groups = await api.getCategoryGroups();
+    expect(groups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          'hidden': 0,
+          'id': 'fc3825fd-b982-4b72-b768-5b30844cf832',
+          'is_income': 0,
+          'name': 'Usual Expenses',
+          'sort_order': 16384,
+          'tombstone': 0,
+        }),
+        expect.objectContaining({
+          'hidden': 0,
+          'id': 'a137772f-cf2f-4089-9432-822d2ddc1466',
+          'is_income': 0,
+          'name': 'Investments and Savings',
+          'sort_order': 32768,
+          'tombstone': 0,
+        }),
+        expect.objectContaining({
+          'hidden': 0,
+          'id': '2E1F5BDB-209B-43F9-AF2C-3CE28E380C00',
+          'is_income': 1,
+          'name': 'Income',
+          'sort_order': 32768,
+          'tombstone': 0,
+        }),
+      ]),
+    );
 
     // create our test category group
     const mainGroupId = await api.createCategoryGroup({
