@@ -43,7 +43,12 @@ import {
   amountToInteger,
   titleFirst,
 } from 'loot-core/src/shared/util';
+import {
+  parseDate,
+  currentDate
+} from 'loot-core/src/shared/months';
 
+import { useFeatureFlag } from "../../hooks/useFeatureFlag";
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
@@ -55,6 +60,7 @@ import {
   SvgHyperlink2,
 } from '../../icons/v2';
 import { styles, theme } from '../../style';
+
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
@@ -77,6 +83,8 @@ import {
   UnexposedCellContent,
 } from '../table';
 import { Tooltip } from '../tooltips';
+
+import { FutureTransactions } from "./FutureTransactions";
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -1730,6 +1738,25 @@ function TransactionTableInner({
     );
   };
 
+  let futureTransactions = [];
+  let presentTransactions = [];
+
+  const excludeFutureTransactions = useFeatureFlag('excludeFutureTransactions');
+
+  const regroupTransactions = () => {
+    futureTransactions = excludeFutureTransactions ? props.transactions.filter((t) => {
+      return parseDate(t.date) > currentDate();
+    }) : [];
+
+    presentTransactions = excludeFutureTransactions ? props.transactions.filter((t) => {
+      return parseDate(t.date) <= currentDate();
+    }) : props.transactions;
+  }
+
+  regroupTransactions();
+
+  useEffect(regroupTransactions, [excludeFutureTransactions]);
+
   return (
     <View
       innerRef={containerRef}
@@ -1795,6 +1822,25 @@ function TransactionTableInner({
       {/*// * On Windows, makes the scrollbar always appear
          //   the full height of the container ??? */}
 
+      {excludeFutureTransactions && futureTransactions.length > 0 && (
+        <View
+          style={{ flex: '0 1 auto', overflow: 'hidden' }}
+          data-testid="future-transaction-table"
+        >
+          <FutureTransactions>
+            <Table
+              items={futureTransactions}
+              renderItem={renderRow}
+              renderEmpty={renderEmpty}
+              loadMore={props.loadMoreTransactions}
+              isSelected={id => props.selectedItems.has(id)}
+              onScroll={onScroll}
+              saveScrollWidth={saveScrollWidth}
+            />
+          </FutureTransactions>
+        </View>
+      )}
+
       <View
         style={{ flex: 1, overflow: 'hidden' }}
         data-testid="transaction-table"
@@ -1802,7 +1848,7 @@ function TransactionTableInner({
         <Table
           navigator={tableNavigator}
           ref={tableRef}
-          items={props.transactions}
+          items={presentTransactions}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={props.loadMoreTransactions}
