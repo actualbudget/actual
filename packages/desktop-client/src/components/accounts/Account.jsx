@@ -204,7 +204,7 @@ class AccountInternal extends PureComponent {
 
     this.state = {
       search: '',
-      filters: [],
+      filters: props.conditions || [],
       loading: true,
       workingHard: false,
       reconcileAmount: null,
@@ -280,7 +280,7 @@ class AccountInternal extends PureComponent {
     // Important that any async work happens last so that the
     // listeners are set up synchronously
     await this.props.initiallyLoadPayees();
-    await this.fetchTransactions();
+    await this.fetchTransactions(this.state.filters);
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
@@ -337,10 +337,11 @@ class AccountInternal extends PureComponent {
     this.paged?.run();
   };
 
-  fetchTransactions = () => {
+  fetchTransactions = filters => {
     const query = this.makeRootQuery();
     this.rootQuery = this.currentQuery = query;
-    this.updateQuery(query);
+    if (filters) this.applyFilters(filters);
+    else this.updateQuery(query);
 
     if (this.props.accountId) {
       this.props.markAccountRead(this.props.accountId);
@@ -348,17 +349,7 @@ class AccountInternal extends PureComponent {
   };
 
   makeRootQuery = () => {
-    const locationState = this.props.location.state;
     const accountId = this.props.accountId;
-
-    if (locationState && locationState.filter) {
-      return q('transactions')
-        .options({ splits: 'grouped' })
-        .filter({
-          'account.offbudget': false,
-          ...locationState.filter,
-        });
-    }
 
     return queries.makeTransactionsQuery(accountId);
   };
@@ -462,7 +453,7 @@ class AccountInternal extends PureComponent {
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
-    await this.props.syncAndDownload(account ? account.id : null);
+    await this.props.syncAndDownload(account ? account.id : undefined);
   };
 
   onImport = async () => {
@@ -1603,6 +1594,10 @@ export function Account() {
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const lastUndoState = useSelector(state => state.app.lastUndoState);
+  const conditions =
+    location.state && location.state.conditions
+      ? location.state.conditions
+      : [];
 
   const state = {
     newTransactions,
@@ -1619,6 +1614,7 @@ export function Account() {
     modalShowing,
     accountsSyncing,
     lastUndoState,
+    conditions,
   };
 
   const dispatch = useDispatch();
@@ -1629,20 +1625,11 @@ export function Account() {
   );
 
   const transform = useMemo(() => {
-    let filterByAccount = queries.getAccountFilter(params.id, '_account');
-    let filterByPayee = queries.getAccountFilter(
+    const filterByAccount = queries.getAccountFilter(params.id, '_account');
+    const filterByPayee = queries.getAccountFilter(
       params.id,
       '_payee.transfer_acct',
     );
-
-    // Never show schedules on these pages
-    if (
-      (location.state && location.state.filter) ||
-      params.id === 'uncategorized'
-    ) {
-      filterByAccount = { id: null };
-      filterByPayee = { id: null };
-    }
 
     return q => {
       q = q.filter({
@@ -1664,7 +1651,7 @@ export function Account() {
           {...actionCreators}
           modalShowing={state.modalShowing}
           accountId={params.id}
-          categoryId={location?.state?.filter?.category}
+          categoryId={location?.state?.categoryId}
           location={location}
           filtersList={filtersList}
         />
