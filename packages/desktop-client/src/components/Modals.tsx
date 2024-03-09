@@ -15,6 +15,7 @@ import { CategoryMenu } from './modals/CategoryMenu';
 import { CloseAccount } from './modals/CloseAccount';
 import { ConfirmCategoryDelete } from './modals/ConfirmCategoryDelete';
 import { ConfirmTransactionEdit } from './modals/ConfirmTransactionEdit';
+import { ConfirmUnlinkAccount } from './modals/ConfirmUnlinkAccount';
 import { CreateAccount } from './modals/CreateAccount';
 import { CreateEncryptionKey } from './modals/CreateEncryptionKey';
 import { CreateLocalAccount } from './modals/CreateLocalAccount';
@@ -123,6 +124,15 @@ export function Modals() {
               category={options.category}
               group={options.group}
               onDelete={options.onDelete}
+            />
+          );
+
+        case 'confirm-unlink-account':
+          return (
+            <ConfirmUnlinkAccount
+              modalProps={modalProps}
+              accountName={options.accountName}
+              onUnlink={options.onUnlink}
             />
           );
 
