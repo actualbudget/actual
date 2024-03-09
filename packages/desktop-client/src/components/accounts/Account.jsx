@@ -1634,8 +1634,12 @@ export function Account() {
     return q => {
       q = q.filter({
         $and: [{ '_account.closed': false }],
-        $or: [filterByAccount, filterByPayee],
       });
+      if (params.id) {
+        q = q.filter({
+          $or: [filterByAccount, filterByPayee],
+        });
+      }
       return q.orderBy({ next_date: 'desc' });
     };
   }, [params.id]);
