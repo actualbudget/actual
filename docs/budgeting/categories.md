@@ -42,7 +42,7 @@ Hover over the category and select the drop down that appears and select `Delete
 
 ![](/img/categories/RenameCategoryOptions.png)
 
-If the category your deleting has a positive balance **OR** has been used for existing transactions you will be presented with a box to select which category the balance and or transactions should be moved to.
+If the category you're deleting has a positive balance **OR** has been used for existing transactions you will be presented with a box to select which category the balance and/or transactions should be moved to.
 
 ![](/img/categories/CategoryDeleteConfirmation.png)
 
@@ -59,7 +59,7 @@ Updates, in June and July 2023, added the ability to (a) *expand or collapse cat
 
 ## Category Notes
 
-It is possible to add notes to Categories, to do this hover over the category that you would like to add a note to, a paper icon will appear.
+It is possible to add notes to Categories. To do this, hover over the category that you would like to add a note to. A paper icon will appear.
 
 ![](/static/img/categories/CategoryGroupRename.png)
 
@@ -71,12 +71,12 @@ Notes support Markdown syntax for formatted notes.
 
 ## Viewing Category Notes
 
-Once a Category has been given a note it is possible to view it in one of two way.
+Once a Category has been given a note it is possible to view it in one of two ways.
 
 1. Hover over the paper icon on the category and the note contents will appear for you to view.
 
 ![](/static/img/categories/CategoryViewNoteHover.png)
 
-2. Click the paper icon, this will open the edit box where you can see the note content and also edit the note should you wish.
+2. Click the paper icon. This will open the edit box where you can see the note content and also edit the note, should you wish.
 
 ![](/static/img/categories/CategoryEditNote.png)
