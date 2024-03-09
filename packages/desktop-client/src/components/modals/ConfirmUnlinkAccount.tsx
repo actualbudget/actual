@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React from 'react';
 
 import { Button } from '../common/Button';
