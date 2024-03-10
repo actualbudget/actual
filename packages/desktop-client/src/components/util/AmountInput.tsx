@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { amountToInteger } from 'loot-core/src/shared/util';
+import { amountToInteger, stringToInteger } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
@@ -70,7 +70,9 @@ export function AmountInput({
 
   function getAmount(negate) {
     const valueOrInitial = Math.abs(
-      amountToInteger(evalArithmetic(value, initialValueAbsolute)),
+      amountToInteger(
+        evalArithmetic(value, stringToInteger(initialValueAbsolute)),
+      ),
     );
     return negate ? valueOrInitial * -1 : valueOrInitial;
   }
