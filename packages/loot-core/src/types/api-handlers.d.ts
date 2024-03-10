@@ -109,6 +109,8 @@ export interface ApiHandlers {
     grouped;
   }) => Promise<Array<CategoryGroupEntity> | Array<CategoryEntity>>;
 
+  'api/category-groups-get': () => Promise<CategoryGroupEntity[]>;
+
   'api/category-group-create': (arg: { group }) => Promise<string>;
 
   'api/category-group-update': (arg: { id; fields }) => Promise<unknown>;

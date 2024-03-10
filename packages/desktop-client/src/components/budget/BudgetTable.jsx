@@ -126,8 +126,8 @@ class BudgetTableInner extends Component {
     }
   };
 
-  onShowActivity = (catName, catId, monthIndex) => {
-    this.props.onShowActivity(catName, catId, this.resolveMonth(monthIndex));
+  onShowActivity = (catId, monthIndex) => {
+    this.props.onShowActivity(catId, this.resolveMonth(monthIndex));
   };
 
   onBudgetAction = (monthIndex, type, args) => {
@@ -268,8 +268,10 @@ class BudgetTableInner extends Component {
 
 const mapStateToProps = state => {
   const { grouped: categoryGroups } = state.queries.categories;
+  const collapsed = state.prefs.local?.['budget.collapsed'] || [];
   return {
     categoryGroups,
+    collapsed,
   };
 };
 

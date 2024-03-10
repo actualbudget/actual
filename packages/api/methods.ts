@@ -121,6 +121,10 @@ export function deleteAccount(id) {
   return send('api/account-delete', { id });
 }
 
+export function getCategoryGroups() {
+  return send('api/category-groups-get');
+}
+
 export function createCategoryGroup(group) {
   return send('api/category-group-create', { group });
 }
