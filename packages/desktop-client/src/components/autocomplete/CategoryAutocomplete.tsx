@@ -36,6 +36,7 @@ export type CategoryListProps = {
   ) => ReactNode;
   renderCategoryItemGroupHeader?: (props: ItemHeaderProps) => ReactNode;
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
+  showHiddenItems?: boolean;
 };
 function CategoryList({
   items,
@@ -46,6 +47,7 @@ function CategoryList({
   renderSplitTransactionButton = defaultRenderSplitTransactionButton,
   renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
+  showHiddenItems,
 }: CategoryListProps) {
   let lastGroup: string | undefined | null = null;
 
@@ -68,6 +70,10 @@ function CategoryList({
             });
           }
 
+          if ((item.hidden || item.group?.hidden) && !showHiddenItems) {
+            return <Fragment key={item.id} />;
+          }
+
           const showGroup = item.cat_group !== lastGroup;
           lastGroup = item.cat_group;
           return (
@@ -76,6 +82,13 @@ function CategoryList({
                 <Fragment key={item.group.name}>
                   {renderCategoryItemGroupHeader({
                     title: item.group.name,
+                    style: {
+                      color:
+                        showHiddenItems && item.group?.hidden
+                          ? theme.pageTextSubdued
+                          : theme.menuAutoCompleteTextHeader,
+                    },
+                    item: item.group,
                   })}
                 </Fragment>
               )}
@@ -85,6 +98,12 @@ function CategoryList({
                   item,
                   highlighted: highlightedIndex === idx,
                   embedded,
+                  style: {
+                    color:
+                      showHiddenItems && item.hidden
+                        ? theme.pageTextSubdued
+                        : 'inherit',
+                  },
                 })}
               </Fragment>
             </Fragment>
@@ -104,6 +123,7 @@ type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   ) => ReactNode;
   renderCategoryItemGroupHeader?: (props: ItemHeaderProps) => ReactNode;
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
+  showHiddenItems?: boolean;
 };
 
 export function CategoryAutocomplete({
@@ -114,6 +134,7 @@ export function CategoryAutocomplete({
   renderSplitTransactionButton,
   renderCategoryItemGroupHeader,
   renderCategoryItem,
+  showHiddenItems,
   ...props
 }: CategoryAutocompleteProps) {
   const categorySuggestions: Array<
@@ -167,6 +188,7 @@ export function CategoryAutocomplete({
           renderSplitTransactionButton={renderSplitTransactionButton}
           renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
           renderCategoryItem={renderCategoryItem}
+          showHiddenItems={showHiddenItems}
         />
       )}
       {...props}
@@ -268,6 +290,7 @@ type CategoryItemProps = {
 export function CategoryItem({
   item,
   className,
+  style,
   highlighted,
   embedded,
   ...props
@@ -275,6 +298,7 @@ export function CategoryItem({
   const { isNarrowWidth } = useResponsive();
   return (
     <div
+      style={style}
       // See comment above.
       role="button"
       className={`${className} ${css([
@@ -294,6 +318,7 @@ export function CategoryItem({
       {...props}
     >
       {item.name}
+      {item.hidden ? ' (hidden)' : null}
     </div>
   );
 }
