@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import debounce from 'debounce';
 import memoizeOne from 'memoize-one';
+import { useDebounceCallback } from 'usehooks-ts';
 
 import * as actions from 'loot-core/src/client/actions';
 import {
@@ -79,7 +79,7 @@ export function Account(props) {
 
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
-  const [searchText, setSearchText] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [currentQuery, setCurrentQuery] = useState();
 
   const newTransactions = useSelector(state => state.queries.newTransactions);
@@ -155,28 +155,27 @@ export function Account(props) {
   // Load categories if necessary.
   const categories = useCategories();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateSearchQuery = useCallback(
-    debounce((searchText, currentQuery, dateFormat) => {
-      if (searchText === '' && currentQuery) {
-        updateQuery(currentQuery);
-      } else if (searchText && currentQuery) {
-        updateQuery(
-          queries.makeTransactionSearchQuery(
-            currentQuery,
-            searchText,
-            dateFormat,
-          ),
-        );
-      }
-    }, 150),
-    [updateQuery],
-  );
+  const updateSearchQuery = useDebounceCallback(
+    useCallback(
+      searchText => {
+        if (searchText === '' && currentQuery) {
+          updateQuery(currentQuery);
+        } else if (searchText && currentQuery) {
+          updateQuery(
+            queries.makeTransactionSearchQuery(
+              currentQuery,
+              searchText,
+              dateFormat,
+            ),
+          );
+        }
 
-  useEffect(() => {
-    updateSearchQuery(searchText, currentQuery, state.dateFormat);
-    return () => updateSearchQuery.clear();
-  }, [searchText, currentQuery, state.dateFormat, updateSearchQuery]);
+        setIsSearching(searchText !== '');
+      },
+      [currentQuery, dateFormat, updateQuery],
+    ),
+    150,
+  );
 
   useSetThemeColor(theme.mobileViewTheme);
 
@@ -211,9 +210,8 @@ export function Account(props) {
     return state.newTransactions.includes(id);
   };
 
-  const onSearch = async text => {
-    paged.current?.unsubscribe();
-    setSearchText(text);
+  const onSearch = text => {
+    updateSearchQuery(text);
   };
 
   const onSelectTransaction = transaction => {
@@ -229,7 +227,7 @@ export function Account(props) {
 
   return (
     <SchedulesProvider
-      transform={getSchedulesTransform(accountId, searchText !== '')}
+      transform={getSchedulesTransform(accountId, isSearching)}
     >
       <PreviewTransactions accountId={props.accountId}>
         {prependTransactions =>
