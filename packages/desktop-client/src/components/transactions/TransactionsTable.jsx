@@ -1281,6 +1281,7 @@ const Transaction = memo(function Transaction(props) {
               onUpdate={onUpdate}
               onSelect={onSave}
               menuPortalTarget={undefined}
+              showHiddenItems={false}
             />
           )}
         </CustomCell>

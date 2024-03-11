@@ -151,6 +151,7 @@ export function CloseAccount({
                           setCategoryError(false);
                         }
                       }}
+                      showHiddenItems={true}
                     />
 
                     {categoryError && (
