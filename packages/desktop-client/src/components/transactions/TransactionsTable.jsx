@@ -374,7 +374,7 @@ const TransactionHeader = memo(
         {showCleared && (
           <HeaderCell
             value="✓"
-            width={23}
+            width={38}
             alignItems="center"
             id="cleared"
             icon={field === 'cleared' ? ascDesc : 'clickable'}
@@ -460,7 +460,8 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width={23}
+      width={38}
+      alignItems="center"
       focused={focused}
       style={{ padding: 1 }}
       plain
