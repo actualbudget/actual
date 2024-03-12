@@ -590,7 +590,12 @@ class AccountInternal extends PureComponent {
         });
         break;
       case 'unlink':
-        this.props.unlinkAccount(accountId);
+        this.props.pushModal('confirm-unlink-account', {
+          accountName: account.name,
+          onUnlink: () => {
+            this.props.unlinkAccount(accountId);
+          },
+        });
         break;
       case 'close':
         this.props.openAccountCloseModal(accountId);
@@ -1634,8 +1639,12 @@ export function Account() {
     return q => {
       q = q.filter({
         $and: [{ '_account.closed': false }],
-        $or: [filterByAccount, filterByPayee],
       });
+      if (params.id) {
+        q = q.filter({
+          $or: [filterByAccount, filterByPayee],
+        });
+      }
       return q.orderBy({ next_date: 'desc' });
     };
   }, [params.id]);

@@ -80,6 +80,8 @@ test.describe('Accounts', () => {
         credit: '34.56',
       });
 
+      await page.waitForTimeout(100); // Give time for the previous transaction to be rendered
+
       await accountPage.selectNthTransaction(0);
       await accountPage.selectNthTransaction(1);
       await accountPage.clickSelectAction('Make transfer');

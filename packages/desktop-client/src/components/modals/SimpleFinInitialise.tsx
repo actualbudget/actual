@@ -66,8 +66,10 @@ export const SimpleFinInitialise = ({
             id="token-field"
             type="password"
             value={token}
-            onUpdate={setToken}
-            onChange={() => setIsValid(true)}
+            onChangeValue={value => {
+              setToken(value);
+              setIsValid(true);
+            }}
           />
         </FormField>
 

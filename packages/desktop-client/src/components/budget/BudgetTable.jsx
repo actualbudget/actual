@@ -268,8 +268,10 @@ class BudgetTableInner extends Component {
 
 const mapStateToProps = state => {
   const { grouped: categoryGroups } = state.queries.categories;
+  const collapsed = state.prefs.local?.['budget.collapsed'] || [];
   return {
     categoryGroups,
+    collapsed,
   };
 };
 

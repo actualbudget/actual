@@ -64,7 +64,7 @@ export function SaveReportName({
                 value={name}
                 id="name-field"
                 inputRef={inputRef}
-                onUpdate={setName}
+                onChangeValue={setName}
                 style={{ marginTop: 10 }}
               />
             </FormField>

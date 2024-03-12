@@ -514,6 +514,11 @@ handlers['api/categories-get'] = async function ({
     : result.list.map(categoryModel.toExternal);
 };
 
+handlers['api/category-groups-get'] = async function () {
+  checkFileOpen();
+  return handlers['get-category-groups']();
+};
+
 handlers['api/category-group-create'] = withMutation(async function ({
   group,
 }) {

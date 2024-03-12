@@ -163,10 +163,6 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
     props.onUpdate?.(maybeApplyNegative(val, isNegative));
   };
 
-  const onChange = val => {
-    props.onChange?.(maybeApplyNegative(val, isNegative));
-  };
-
   return (
     <View>
       <AmountInput
@@ -174,7 +170,6 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         value={value}
         onFocus={onFocus}
         onBlur={onBlur}
-        onChange={onChange}
         onUpdate={onUpdate}
         focused={focused}
         style={{
