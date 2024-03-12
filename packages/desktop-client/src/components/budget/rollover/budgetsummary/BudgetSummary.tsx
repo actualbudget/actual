@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { css } from 'glamor';
@@ -161,22 +160,26 @@ export function BudgetSummary({
                         name: 'set-3-avg',
                         text: 'Set budgets to 3 month average',
                       },
-                      isGoalTemplatesEnabled && {
-                        name: 'check-templates',
-                        text: 'Check templates',
-                      },
-                      isGoalTemplatesEnabled && {
-                        name: 'apply-goal-template',
-                        text: 'Apply budget template',
-                      },
-                      isGoalTemplatesEnabled && {
-                        name: 'overwrite-goal-template',
-                        text: 'Overwrite with budget template',
-                      },
-                      isGoalTemplatesEnabled && {
-                        name: 'cleanup-goal-template',
-                        text: 'End of month cleanup',
-                      },
+                      ...(isGoalTemplatesEnabled
+                        ? [
+                            {
+                              name: 'check-templates',
+                              text: 'Check templates',
+                            },
+                            {
+                              name: 'apply-goal-template',
+                              text: 'Apply budget template',
+                            },
+                            {
+                              name: 'overwrite-goal-template',
+                              text: 'Overwrite with budget template',
+                            },
+                            {
+                              name: 'cleanup-goal-template',
+                              text: 'End of month cleanup',
+                            },
+                          ]
+                        : []),
                     ]}
                   />
                 </Tooltip>
@@ -216,7 +219,11 @@ export function BudgetSummary({
               }}
             />
             <View style={{ margin: '23px 0' }}>
-              <ToBudget month={month} onBudgetAction={onBudgetAction} />
+              <ToBudget
+                prevMonthName={prevMonthName}
+                month={month}
+                onBudgetAction={onBudgetAction}
+              />
             </View>
           </>
         )}

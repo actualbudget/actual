@@ -115,7 +115,9 @@ function CategoryList({
   );
 }
 
-type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
+type CategoryAutocompleteProps = ComponentProps<
+  typeof Autocomplete<CategoryGroupEntity>
+> & {
   categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
   renderSplitTransactionButton?: (
