@@ -75,20 +75,20 @@ function CategoryList({
           }
 
           const showGroup = item.cat_group !== lastGroup;
+          const title = `${item.group.name}${item.group.hidden ? ' (hidden)' : ''}`;
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
               {showGroup && item.group?.name && (
                 <Fragment key={item.group.name}>
                   {renderCategoryItemGroupHeader({
-                    title: item.group.name,
+                    title,
                     style: {
                       color:
                         showHiddenItems && item.group?.hidden
                           ? theme.pageTextSubdued
                           : theme.menuAutoCompleteTextHeader,
                     },
-                    item: item.group,
                   })}
                 </Fragment>
               )}

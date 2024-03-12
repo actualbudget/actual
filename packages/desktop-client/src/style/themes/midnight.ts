@@ -58,7 +58,7 @@ export const menuBorder = colorPalette.gray800;
 export const menuBorderHover = colorPalette.purple300;
 export const menuKeybindingText = colorPalette.gray500;
 export const menuAutoCompleteBackground = colorPalette.gray600;
-export const menuAutoCompleteBackgroundHover = colorPalette.gray400;
+export const menuAutoCompleteBackgroundHover = colorPalette.gray300;
 export const menuAutoCompleteText = colorPalette.gray100;
 export const menuAutoCompleteTextHeader = colorPalette.purple200;
 
