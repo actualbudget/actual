@@ -1,49 +1,51 @@
 import React, { memo, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
 
+import { pushModal } from 'loot-core/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
-} from '../../hooks/useSingleActiveEditForm';
+} from '../../../hooks/useSingleActiveEditForm';
 import {
   SvgArrowThinLeft,
   SvgArrowThinRight,
   SvgDotsHorizontalTriple,
-} from '../../icons/v1';
-import { useResponsive } from '../../ResponsiveProvider';
-import { theme, styles } from '../../style';
-import { Button } from '../common/Button';
-import { Card } from '../common/Card';
-import { Label } from '../common/Label';
-import { Menu } from '../common/Menu';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { Page } from '../Page';
-import { PullToRefresh } from '../responsive/PullToRefresh';
-import { CellValue } from '../spreadsheet/CellValue';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
-import { useFormat } from '../spreadsheet/useFormat';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
-import { Tooltip, useTooltip } from '../tooltips';
-import { AmountInput } from '../util/AmountInput';
+} from '../../../icons/v1';
+import { useResponsive } from '../../../ResponsiveProvider';
+import { theme, styles } from '../../../style';
+import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
+import { BalanceTooltip as ReportBudgetBalanceTooltip } from '../../budget/report/BalanceTooltip';
+import { BalanceTooltip as RolloverBudgetBalanceTooltip } from '../../budget/rollover/BalanceTooltip';
+import { makeAmountGrey } from '../../budget/util';
+import { Button } from '../../common/Button';
+import { Card } from '../../common/Card';
+import { Label } from '../../common/Label';
+import { Menu } from '../../common/Menu';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
+import { Page } from '../../Page';
+import { CellValue } from '../../spreadsheet/CellValue';
+import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
+import { useFormat } from '../../spreadsheet/useFormat';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
+import { Tooltip, useTooltip } from '../../tooltips';
+import { AmountInput } from '../../util/AmountInput';
+import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
+import { PullToRefresh } from '../PullToRefresh';
 // import {
 //   AmountAccessoryContext,
 //   MathOperations
 // } from '../mobile/AmountInput';
 
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
-import { BalanceWithCarryover } from './BalanceWithCarryover';
-import { ListItem, ROW_HEIGHT } from './MobileTable';
-import { BalanceTooltip as ReportBudgetBalanceTooltip } from './report/BalanceTooltip';
-import { BalanceTooltip as RolloverBudgetBalanceTooltip } from './rollover/BalanceTooltip';
-import { makeAmountGrey } from './util';
+import { ListItem, ROW_HEIGHT } from './ListItem';
 
 function ToBudget({ toBudget, onClick }) {
   const amount = useSheetValue(toBudget);
@@ -1034,7 +1036,6 @@ function BudgetGroups({
   showBudgetedCol,
   show3Cols,
   showHiddenCategories,
-  pushModal,
 }) {
   const separateGroups = memoizeOne(groups => {
     return {
@@ -1073,7 +1074,6 @@ function BudgetGroups({
                 onBudgetAction={onBudgetAction}
                 show3Cols={show3Cols}
                 showHiddenCategories={showHiddenCategories}
-                pushModal={pushModal}
               />
             );
           })}
@@ -1102,7 +1102,6 @@ function BudgetGroups({
             onEditGroup={onEditGroup}
             onEditCategory={onEditCategory}
             onBudgetAction={onBudgetAction}
-            pushModal={pushModal}
           />
         )}
       </View>
@@ -1133,7 +1132,6 @@ export function BudgetTable({
   onBudgetAction,
   onRefresh,
   onSwitchBudgetType,
-  pushModal,
   onEditGroup,
   onEditCategory,
 }) {
@@ -1142,6 +1140,7 @@ export function BudgetTable({
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
   const format = useFormat();
+  const dispatch = useDispatch();
 
   const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
@@ -1161,9 +1160,11 @@ export function BudgetTable({
   };
 
   const _onSwitchBudgetType = () => {
-    pushModal('switch-budget-type', {
-      onSwitch: onSwitchBudgetType,
-    });
+    dispatch(
+      pushModal('switch-budget-type', {
+        onSwitch: onSwitchBudgetType,
+      }),
+    );
   };
 
   const onToggleHiddenCategories = () => {
@@ -1378,7 +1379,6 @@ export function BudgetTable({
                 onReorderGroup={onReorderGroup}
                 onOpenMonthActionMenu={onOpenMonthActionMenu}
                 onBudgetAction={onBudgetAction}
-                pushModal={pushModal}
               />
             </View>
           ) : (
@@ -1412,7 +1412,6 @@ export function BudgetTable({
                 onReorderGroup={onReorderGroup}
                 onOpenMonthActionMenu={onOpenMonthActionMenu}
                 onBudgetAction={onBudgetAction}
-                pushModal={pushModal}
               />
             </View>
 

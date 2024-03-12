@@ -33,6 +33,7 @@ import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
+import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Modals } from './Modals';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
@@ -43,7 +44,6 @@ import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar, TitlebarProvider } from './Titlebar';
-import { TransactionEdit } from './transactions/MobileTransaction';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

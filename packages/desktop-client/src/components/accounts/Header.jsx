@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgAdd } from '../../icons/v1';
@@ -26,7 +27,6 @@ import { FiltersStack } from '../filters/FiltersStack';
 import { KeyHandlers } from '../KeyHandlers';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
-import { useSplitsExpanded } from '../transactions/TransactionsTable';
 
 import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileTooltip } from './Reconcile';
