@@ -319,7 +319,6 @@ function InputValue({
   const [value, setValue] = useState(defaultValue);
 
   function onBlur_(e) {
-    onUpdate?.(value);
     if (onBlur) {
       fireBlur(onBlur, e);
     }
@@ -345,8 +344,9 @@ function InputValue({
     <Input
       {...props}
       value={value}
-      onUpdate={text => setValue(text)}
+      onChangeValue={text => setValue(text)}
       onBlur={onBlur_}
+      onUpdate={onUpdate}
       onKeyDown={onKeyDown}
       style={{
         ...inputCellStyle,
@@ -358,8 +358,8 @@ function InputValue({
 }
 
 type InputCellProps = ComponentProps<typeof Cell> & {
-  inputProps: ComponentProps<typeof InputValue>;
-  onUpdate: ComponentProps<typeof InputValue>['onUpdate'];
+  inputProps?: ComponentProps<typeof InputValue>;
+  onUpdate?: ComponentProps<typeof InputValue>['onUpdate'];
   onBlur?: ComponentProps<typeof InputValue>['onBlur'];
   textAlign?: CSSProperties['textAlign'];
   error?: ReactNode;
