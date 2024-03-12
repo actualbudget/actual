@@ -1,10 +1,6 @@
-import React, {
-  useRef,
-  useState,
-  useImperativeHandle,
-  forwardRef,
-} from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
+import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -18,8 +14,6 @@ import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
 import { findSortDown, findSortUp, getScrollbarWidth } from './util';
-import { useEffect } from 'react';
-import { listen } from 'loot-core/platform/client/fetch';
 
 export function BudgetTable(props) {
   const {
@@ -48,17 +42,16 @@ export function BudgetTable(props) {
   const [editing, setEditing] = useState(null);
 
   useEffect(() => {
-    const unlisten =
-      listen('undo-event', () => {
-        // g dammit
-        // We need to clear the editing cell, otherwise when
-        // the user navigates away from the page they will
-        // accidentally clear the undo stack if they have pressed
-        // undo, since the cell will save itself on blur (worst case:
-        // undo takes you to another screen and then you can't redo
-        // any of the budget changes)
-        setEditing(null);
-      });
+    const unlisten = listen('undo-event', () => {
+      // g dammit
+      // We need to clear the editing cell, otherwise when
+      // the user navigates away from the page they will
+      // accidentally clear the undo stack if they have pressed
+      // undo, since the cell will save itself on blur (worst case:
+      // undo takes you to another screen and then you can't redo
+      // any of the budget changes)
+      setEditing(null);
+    });
 
     return () => unlisten();
   }, []);
