@@ -1,9 +1,14 @@
-import React, { createRef, Component } from 'react';
-import { connect } from 'react-redux';
+import React, {
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from 'react';
 
-import { savePrefs } from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useCategories } from '../../hooks/useCategories';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
 import { IntersectionBoundary } from '../tooltips';
@@ -13,29 +18,60 @@ import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
 import { findSortDown, findSortUp, getScrollbarWidth } from './util';
+import { useEffect } from 'react';
+import { listen } from 'loot-core/platform/client/fetch';
 
-class BudgetTableInner extends Component {
-  constructor(props) {
-    super(props);
-    this.budgetCategoriesRef = createRef();
+export function BudgetTable(props) {
+  const {
+    type,
+    prewarmStartMonth,
+    startMonth,
+    numMonths,
+    monthBounds,
+    dataComponents,
+    onSaveCategory,
+    onDeleteCategory,
+    onSaveGroup,
+    onDeleteGroup,
+    onReorderCategory,
+    onReorderGroup,
+    onShowActivity,
+    onBudgetAction,
+  } = props;
 
-    this.state = {
-      editing: null,
-      draggingState: null,
-    };
-  }
+  const budgetCategoriesRef = useRef();
+  const { grouped: categoryGroups } = useCategories();
+  const [collapsed = [], setCollapsedPref] = useLocalPref('budget.collapsed');
+  const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
+    'budget.showHiddenCategories',
+  );
+  const [editing, setEditing] = useState(null);
 
-  onEditMonth = (id, monthIndex) => {
-    this.setState({ editing: id ? { id, cell: monthIndex } : null });
+  useEffect(() => {
+    const unlisten =
+      listen('undo-event', () => {
+        // g dammit
+        // We need to clear the editing cell, otherwise when
+        // the user navigates away from the page they will
+        // accidentally clear the undo stack if they have pressed
+        // undo, since the cell will save itself on blur (worst case:
+        // undo takes you to another screen and then you can't redo
+        // any of the budget changes)
+        setEditing(null);
+      });
+
+    return () => unlisten();
+  }, []);
+
+  const onEditMonth = (id, monthIndex) => {
+    setEditing(id ? { id, cell: monthIndex } : null);
   };
 
-  onEditName = id => {
-    this.setState({ editing: id ? { id, cell: 'name' } : null });
+  const onEditName = id => {
+    setEditing(id ? { id, cell: 'name' } : null);
   };
 
-  onReorderCategory = (id, dropPos, targetId) => {
-    const { categoryGroups } = this.props;
-
+  const _onReorderCategory = (id, dropPos, targetId) => {
     const isGroup = !!categoryGroups.find(g => g.id === targetId);
 
     if (isGroup) {
@@ -48,7 +84,7 @@ class BudgetTableInner extends Component {
 
       if (group) {
         const { categories } = group;
-        this.props.onReorderCategory({
+        onReorderCategory({
           id,
           groupId: group.id,
           targetId:
@@ -67,7 +103,7 @@ class BudgetTableInner extends Component {
         }
       }
 
-      this.props.onReorderCategory({
+      onReorderCategory({
         id,
         groupId: targetGroup.id,
         ...findSortDown(targetGroup.categories, dropPos, targetId),
@@ -75,19 +111,14 @@ class BudgetTableInner extends Component {
     }
   };
 
-  onReorderGroup = (id, dropPos, targetId) => {
-    const { categoryGroups } = this.props;
-
-    this.props.onReorderGroup({
+  const _onReorderGroup = (id, dropPos, targetId) => {
+    onReorderGroup({
       id,
       ...findSortDown(categoryGroups, dropPos, targetId),
     });
   };
 
-  moveVertically = dir => {
-    const { editing } = this.state;
-    const { type, categoryGroups, collapsed } = this.props;
-
+  const moveVertically = dir => {
     const flattened = categoryGroups.reduce((all, group) => {
       if (collapsed.includes(group.id)) {
         return all.concat({ id: group.id, isGroup: true });
@@ -106,7 +137,7 @@ class BudgetTableInner extends Component {
           nextIdx += dir;
           continue;
         } else if (type === 'report' || !next.is_income) {
-          this.onEditMonth(next.id, editing.cell);
+          onEditMonth(next.id, editing.cell);
           return;
         } else {
           break;
@@ -115,187 +146,136 @@ class BudgetTableInner extends Component {
     }
   };
 
-  onKeyDown = e => {
-    if (!this.state.editing) {
+  const onKeyDown = e => {
+    if (!editing) {
       return null;
     }
 
     if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
-      this.moveVertically(e.shiftKey ? -1 : 1);
+      moveVertically(e.shiftKey ? -1 : 1);
     }
   };
 
-  onShowActivity = (catId, monthIndex) => {
-    this.props.onShowActivity(catId, this.resolveMonth(monthIndex));
+  const resolveMonth = monthIndex => {
+    return monthUtils.addMonths(startMonth, monthIndex);
   };
 
-  onBudgetAction = (monthIndex, type, args) => {
-    this.props.onBudgetAction(this.resolveMonth(monthIndex), type, args);
+  const _onShowActivity = (catId, monthIndex) => {
+    onShowActivity(catId, resolveMonth(monthIndex));
   };
 
-  resolveMonth = monthIndex => {
-    return monthUtils.addMonths(this.props.startMonth, monthIndex);
+  const _onBudgetAction = (monthIndex, type, args) => {
+    onBudgetAction(resolveMonth(monthIndex), type, args);
   };
 
-  // This is called via ref.
-  clearEditing() {
-    this.setState({ editing: null });
-  }
-
-  toggleHiddenCategories = () => {
-    this.props.onToggleHiddenCategories();
+  const onCollapse = collapsedIds => {
+    setCollapsedPref(collapsedIds);
   };
 
-  expandAllCategories = () => {
-    this.props.onCollapse([]);
+  const onToggleHiddenCategories = () => {
+    setShowHiddenCategoriesPef(!showHiddenCategories);
   };
 
-  collapseAllCategories = () => {
-    const { onCollapse, categoryGroups } = this.props;
+  const toggleHiddenCategories = () => {
+    onToggleHiddenCategories();
+  };
+
+  const expandAllCategories = () => {
+    onCollapse([]);
+  };
+
+  const collapseAllCategories = () => {
     onCollapse(categoryGroups.map(g => g.id));
   };
 
-  render() {
-    const {
-      type,
-      categoryGroups,
-      prewarmStartMonth,
-      startMonth,
-      numMonths,
-      monthBounds,
-      dataComponents,
-      onSaveCategory,
-      onSaveGroup,
-      onDeleteCategory,
-      onDeleteGroup,
-    } = this.props;
-    const { editing, draggingState } = this.state;
-
-    return (
+  return (
+    <View
+      data-testid="budget-table"
+      style={{
+        flex: 1,
+        ...(styles.lightScrollbar && {
+          '& ::-webkit-scrollbar': {
+            backgroundColor: 'transparent',
+          },
+          '& ::-webkit-scrollbar-thumb:vertical': {
+            backgroundColor: theme.tableHeaderBackground,
+          },
+        }),
+      }}
+    >
       <View
-        data-testid="budget-table"
         style={{
-          flex: 1,
-          ...(styles.lightScrollbar && {
-            '& ::-webkit-scrollbar': {
-              backgroundColor: 'transparent',
-            },
-            '& ::-webkit-scrollbar-thumb:vertical': {
-              backgroundColor: theme.tableHeaderBackground,
-            },
-          }),
+          flexDirection: 'row',
+          overflow: 'hidden',
+          flexShrink: 0,
+          // This is necessary to align with the table because the
+          // table has this padding to allow the shadow to show
+          paddingLeft: 5,
+          paddingRight: 5 + getScrollbarWidth(),
         }}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            overflow: 'hidden',
-            flexShrink: 0,
-            // This is necessary to align with the table because the
-            // table has this padding to allow the shadow to show
-            paddingLeft: 5,
-            paddingRight: 5 + getScrollbarWidth(),
-          }}
-        >
-          <View style={{ width: 200 }} />
-          <MonthsProvider
-            startMonth={prewarmStartMonth}
-            numMonths={numMonths}
-            monthBounds={monthBounds}
-            type={type}
-          >
-            <BudgetSummaries
-              SummaryComponent={dataComponents.SummaryComponent}
-            />
-          </MonthsProvider>
-        </View>
-
+        <View style={{ width: 200 }} />
         <MonthsProvider
-          startMonth={startMonth}
+          startMonth={prewarmStartMonth}
           numMonths={numMonths}
           monthBounds={monthBounds}
           type={type}
         >
-          <BudgetTotals
-            MonthComponent={dataComponents.BudgetTotalsComponent}
-            toggleHiddenCategories={this.toggleHiddenCategories}
-            expandAllCategories={this.expandAllCategories}
-            collapseAllCategories={this.collapseAllCategories}
-          />
-          <IntersectionBoundary.Provider value={this.budgetCategoriesRef}>
-            <View
-              style={{
-                overflowY: 'scroll',
-                overflowAnchor: 'none',
-                flex: 1,
-                paddingLeft: 5,
-                paddingRight: 5,
-              }}
-              innerRef={this.budgetCategoriesRef}
-            >
-              <View
-                style={{
-                  opacity: draggingState ? 0.5 : 1,
-                  flexShrink: 0,
-                }}
-                onKeyDown={this.onKeyDown}
-                innerRef={el => (this.budgetDataNode = el)}
-              >
-                <BudgetCategories
-                  categoryGroups={categoryGroups}
-                  editingCell={editing}
-                  dataComponents={dataComponents}
-                  onEditMonth={this.onEditMonth}
-                  onEditName={this.onEditName}
-                  onSaveCategory={onSaveCategory}
-                  onSaveGroup={onSaveGroup}
-                  onDeleteCategory={onDeleteCategory}
-                  onDeleteGroup={onDeleteGroup}
-                  onReorderCategory={this.onReorderCategory}
-                  onReorderGroup={this.onReorderGroup}
-                  onBudgetAction={this.onBudgetAction}
-                  onShowActivity={this.onShowActivity}
-                />
-              </View>
-            </View>
-          </IntersectionBoundary.Provider>
+          <BudgetSummaries SummaryComponent={dataComponents.SummaryComponent} />
         </MonthsProvider>
       </View>
-    );
-  }
+
+      <MonthsProvider
+        startMonth={startMonth}
+        numMonths={numMonths}
+        monthBounds={monthBounds}
+        type={type}
+      >
+        <BudgetTotals
+          MonthComponent={dataComponents.BudgetTotalsComponent}
+          toggleHiddenCategories={toggleHiddenCategories}
+          expandAllCategories={expandAllCategories}
+          collapseAllCategories={collapseAllCategories}
+        />
+        <IntersectionBoundary.Provider value={budgetCategoriesRef}>
+          <View
+            style={{
+              overflowY: 'scroll',
+              overflowAnchor: 'none',
+              flex: 1,
+              paddingLeft: 5,
+              paddingRight: 5,
+            }}
+            innerRef={budgetCategoriesRef}
+          >
+            <View
+              style={{
+                flexShrink: 0,
+              }}
+              onKeyDown={onKeyDown}
+            >
+              <BudgetCategories
+                categoryGroups={categoryGroups}
+                editingCell={editing}
+                dataComponents={dataComponents}
+                onEditMonth={onEditMonth}
+                onEditName={onEditName}
+                onSaveCategory={onSaveCategory}
+                onSaveGroup={onSaveGroup}
+                onDeleteCategory={onDeleteCategory}
+                onDeleteGroup={onDeleteGroup}
+                onReorderCategory={_onReorderCategory}
+                onReorderGroup={_onReorderGroup}
+                onBudgetAction={_onBudgetAction}
+                onShowActivity={_onShowActivity}
+              />
+            </View>
+          </View>
+        </IntersectionBoundary.Provider>
+      </MonthsProvider>
+    </View>
+  );
 }
 
-const mapStateToProps = state => {
-  const { grouped: categoryGroups } = state.queries.categories;
-  const collapsed = state.prefs.local?.['budget.collapsed'] || [];
-  return {
-    categoryGroups,
-    collapsed,
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  const onCollapse = collapsedIds => {
-    dispatch(savePrefs({ 'budget.collapsed': collapsedIds }));
-  };
-
-  const onToggleHiddenCategories = () =>
-    dispatch((innerDispatch, getState) => {
-      const { prefs } = getState();
-      const showHiddenCategories = prefs.local['budget.showHiddenCategories'];
-      innerDispatch(
-        savePrefs({
-          'budget.showHiddenCategories': !showHiddenCategories,
-        }),
-      );
-    });
-  return {
-    onCollapse,
-    onToggleHiddenCategories,
-  };
-};
-
-export const BudgetTable = connect(mapStateToProps, mapDispatchToProps, null, {
-  forwardRef: true,
-})(BudgetTableInner);
+BudgetTable.displayName = 'BudgetTable';
