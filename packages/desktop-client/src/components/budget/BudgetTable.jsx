@@ -1,6 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 
-import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -40,21 +39,6 @@ export function BudgetTable(props) {
     'budget.showHiddenCategories',
   );
   const [editing, setEditing] = useState(null);
-
-  useEffect(() => {
-    const unlisten = listen('undo-event', () => {
-      // g dammit
-      // We need to clear the editing cell, otherwise when
-      // the user navigates away from the page they will
-      // accidentally clear the undo stack if they have pressed
-      // undo, since the cell will save itself on blur (worst case:
-      // undo takes you to another screen and then you can't redo
-      // any of the budget changes)
-      setEditing(null);
-    });
-
-    return () => unlisten();
-  }, []);
 
   const onEditMonth = (id, monthIndex) => {
     setEditing(id ? { id, cell: monthIndex } : null);
