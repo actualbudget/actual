@@ -75,7 +75,7 @@ function CategoryList({
           }
 
           const showGroup = item.cat_group !== lastGroup;
-          const groupName = `${item.group.name}${item.group.hidden ? ' (hidden)' : ''}`;
+          const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
