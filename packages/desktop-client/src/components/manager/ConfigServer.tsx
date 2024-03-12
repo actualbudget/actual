@@ -138,7 +138,7 @@ export function ConfigServer() {
           autoFocus={true}
           placeholder="https://example.com"
           value={url || ''}
-          onUpdate={setUrl}
+          onChangeValue={setUrl}
           style={{ flex: 1, marginRight: 10 }}
         />
         <ButtonWithLoading

@@ -100,6 +100,7 @@ export function TransferTooltip({
         onUpdate={() => {}}
         onSelect={(id: string | undefined) => setCategory(id || null)}
         inputProps={{ onEnter: () => submit(amount), placeholder: '(none)' }}
+        showHiddenItems={true}
       />
 
       <View

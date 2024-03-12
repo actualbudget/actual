@@ -57,6 +57,7 @@ export function CoverTooltip({
                 }
               },
             }}
+            showHiddenItems={false}
           />
         )}
       </InitialFocus>

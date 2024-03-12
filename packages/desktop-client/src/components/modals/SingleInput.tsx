@@ -56,7 +56,8 @@ export function SingleInput({
                 <Input
                   placeholder={inputPlaceholder}
                   style={{ ...styles.mediumText }}
-                  onUpdate={setValue}
+                  value={value}
+                  onChangeValue={setValue}
                   onEnter={e => _onSubmit(e.currentTarget.value)}
                 />
               </InitialFocus>

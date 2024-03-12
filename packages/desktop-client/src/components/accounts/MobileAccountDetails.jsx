@@ -43,7 +43,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
           />
         }
         value={text}
-        onUpdate={text => {
+        onChangeValue={text => {
           setText(text);
           onSearch(text);
         }}
