@@ -194,7 +194,10 @@ async function importTransactions(
               : getCategory(transaction.categoryId),
             date: transaction.date,
             notes: transaction.memo || null,
-            cleared: transaction.cleared === 'Cleared',
+            cleared:
+              transaction.cleared === 'Cleared' ||
+              transaction.cleared === 'Reconciled',
+            reconciled: transaction.cleared === 'Reconciled',
             ...transferProperties(transaction),
 
             subtransactions:
