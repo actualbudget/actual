@@ -488,8 +488,18 @@ export async function reconcileExternalTransactions(acctId, transactions) {
       // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
       // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
       fuzzyDataset = fuzzyDataset.sort((a, b) => {
-        const aDistance = Math.abs(db.toDateRepr(trans.date) - a.date);
-        const bDistance = Math.abs(db.toDateRepr(trans.date) - b.date);
+        const aDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(a.date)),
+          ),
+        );
+        const bDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(b.date)),
+          ),
+        );
         return aDistance > bDistance ? 1 : -1;
       });
     }
@@ -661,8 +671,18 @@ export async function reconcileTransactions(acctId, transactions) {
       // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
       // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
       fuzzyDataset = fuzzyDataset.sort((a, b) => {
-        const aDistance = Math.abs(db.toDateRepr(trans.date) - a.date);
-        const bDistance = Math.abs(db.toDateRepr(trans.date) - b.date);
+        const aDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(a.date)),
+          ),
+        );
+        const bDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(b.date)),
+          ),
+        );
         return aDistance > bDistance ? 1 : -1;
       });
     }
