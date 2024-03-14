@@ -637,7 +637,7 @@ export async function reconcileTransactions(acctId, transactions) {
       // fields.
       fuzzyDataset = await db.all(
         `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
-             WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
+           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 7)),
           db.toDateRepr(monthUtils.addDays(trans.date, 7)),
