@@ -21,15 +21,14 @@ export function ReportTopbar({
   report,
   savedStatus,
   setGraphType,
-  setTypeDisabled,
-  setBalanceType,
-  setGroupBy,
   viewLegend,
   viewSummary,
   viewLabels,
   onApplyFilter,
   onChangeViews,
   onReportChange,
+  disabledItems,
+  defaultItems,
 }) {
   return (
     <View
@@ -46,10 +45,10 @@ export function ReportTopbar({
         onSelect={() => {
           onReportChange({ type: 'modify' });
           setGraphType('TableGraph');
-          onChangeViews('viewLegend', false);
-          setTypeDisabled([]);
+          defaultItems('TableGraph');
         }}
         style={{ marginRight: 15 }}
+        disabled={disabledItems('TableGraph')}
       >
         <SvgQueue width={15} height={15} />
       </GraphButton>
@@ -63,21 +62,17 @@ export function ReportTopbar({
         }
         onSelect={() => {
           onReportChange({ type: 'modify' });
-          if (customReportItems.mode === 'total') {
-            setGraphType('BarGraph');
-            if (['Net'].includes(customReportItems.balanceType)) {
-              setBalanceType('Payment');
-            }
-            setTypeDisabled(
-              ['Interval'].includes(customReportItems.groupBy) ? [] : ['Net'],
-            );
-          } else {
-            setGraphType('StackedBarGraph');
-            setTypeDisabled(['Net']);
-            setBalanceType('Payment');
-          }
+          setGraphType(
+            customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
+          );
+          defaultItems(
+            customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
+          );
         }}
         style={{ marginRight: 15 }}
+        disabled={disabledItems(
+          customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
+        )}
       >
         <SvgChartBar width={15} height={15} />
       </GraphButton>
@@ -87,12 +82,10 @@ export function ReportTopbar({
         onSelect={() => {
           onReportChange({ type: 'modify' });
           setGraphType('AreaGraph');
-          setGroupBy('Interval');
-          onChangeViews('viewLegend', false);
-          setTypeDisabled([]);
+          defaultItems('AreaGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={customReportItems.mode === 'total' ? false : true}
+        disabled={disabledItems('AreaGraph')}
       >
         <SvgChart width={15} height={15} />
       </GraphButton>
@@ -102,11 +95,10 @@ export function ReportTopbar({
         onSelect={() => {
           onReportChange({ type: 'modify' });
           setGraphType('DonutGraph');
-          setTypeDisabled(['Net']);
-          setBalanceType('Payment');
+          defaultItems('DonutGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={customReportItems.mode === 'total' ? false : true}
+        disabled={disabledItems('DonutGraph')}
       >
         <SvgChartPie width={15} height={15} />
       </GraphButton>
@@ -126,12 +118,7 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
         title="Show Legend"
-        disabled={
-          customReportItems.graphType === 'TableGraph' ||
-          customReportItems.graphType === 'AreaGraph'
-            ? true
-            : false
-        }
+        disabled={disabledItems('ShowLegend')}
       >
         <SvgListBullet width={15} height={15} />
       </GraphButton>
@@ -152,6 +139,7 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
         title="Show Labels"
+        disabled={disabledItems('ShowLabels')}
       >
         <SvgTag width={15} height={15} />
       </GraphButton>
