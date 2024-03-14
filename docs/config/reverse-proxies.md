@@ -34,11 +34,10 @@ services:
     image: actualbudget/actual-server:latest
     container_name: actual_server
     restart: unless-stopped
-    volumes:
-      - ./actual-data:/data
-    restart: unless-stopped
     ports:
       - '5006:5006'
+    volumes:
+      - ./actual-data:/data
 ```
 Caddyfile:
 ```
