@@ -64,7 +64,7 @@ const intervalOptions = [
 ];
 
 export const ReportOptions = {
-  groupBy: groupByOptions,
+  groupBy: groupByOptions.map(item => item.description),
   balanceType: balanceTypeOptions,
   balanceTypeMap: new Map(
     balanceTypeOptions.map(item => [item.description, item.format]),

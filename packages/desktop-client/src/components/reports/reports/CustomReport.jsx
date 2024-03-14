@@ -232,9 +232,7 @@ export function CustomReport() {
 
   const defaultModeItems = (graph, item) => {
     const chooseGraph = graph || graphType;
-    const newGraph = disabledList.modeGraphsMap
-      .get(item)
-      .includes(graph || graphType)
+    const newGraph = disabledList.modeGraphsMap.get(item).includes(chooseGraph)
       ? defaultsList.modeGraphsMap.get(item)
       : chooseGraph;
     if (disabledList.modeGraphsMap.get(item).includes(graphType)) {

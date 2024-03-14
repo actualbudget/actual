@@ -171,10 +171,7 @@ export function ReportSidebar({
           <Select
             value={customReportItems.groupBy}
             onChange={e => onChangeSplit(e)}
-            options={ReportOptions.groupBy.map(option => [
-              option.description,
-              option.description,
-            ])}
+            options={ReportOptions.groupBy.map(option => [option, option])}
             disabledKeys={disabledItems('split')}
           />
         </View>
