@@ -83,11 +83,32 @@ export function CustomReport() {
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
+  const [months, setMonths] = useState(
+    monthUtils.yearRangeInclusive(startDate, endDate),
+  );
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
     location.state ? (location.state.report ? 'saved' : 'new') : 'new',
   );
-  const months = monthUtils.rangeInclusive(startDate, endDate);
+
+  useEffect(() => {
+    const rangeInc =
+      interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
+    setMonths(monthUtils[rangeInc](startDate, endDate));
+
+    let start;
+    let end;
+    if (interval === 'Monthly') {
+      start = monthUtils.subMonths(monthUtils.currentMonth(), 5);
+      end = monthUtils.currentMonth();
+    } else {
+      start = monthUtils.subYears(monthUtils.currentYear(), 3);
+      end = monthUtils.currentYear();
+    }
+
+    setStartDate(start);
+    setEndDate(end);
+  }, [interval]);
 
   useEffect(() => {
     if (selectedCategories === undefined && categories.list.length !== 0) {
@@ -99,7 +120,10 @@ export function CustomReport() {
     async function run() {
       report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
-      const currentMonth = monthUtils.currentMonth();
+      const currentMonth =
+        interval === 'Monthly'
+          ? monthUtils.currentMonth()
+          : monthUtils.currentYear();
       let earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
         : currentMonth;
@@ -107,23 +131,31 @@ export function CustomReport() {
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      const rangeInc =
+        interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
+      const sub = interval === 'Monthly' ? 'subMonths' : 'subYears';
+      const yearAgo = monthUtils[sub](
+        currentMonth,
+        interval === 'Monthly' ? 12 : 1,
+      );
       if (earliestMonth > yearAgo) {
         earliestMonth = yearAgo;
       }
 
-      const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+      const allMonths = monthUtils[rangeInc](earliestMonth, currentMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+          pretty:
+            interval === 'Monthly'
+              ? monthUtils.format(month, 'MMMM, yyyy')
+              : month,
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
     run();
-  }, []);
+  }, [interval]);
 
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = usePayees();
@@ -134,6 +166,7 @@ export function CustomReport() {
       startDate,
       endDate,
       categories,
+      interval,
       selectedCategories,
       conditions: filters,
       conditionsOp,
@@ -147,7 +180,6 @@ export function CustomReport() {
     startDate,
     endDate,
     groupBy,
-    interval,
     balanceType,
     categories,
     selectedCategories,
@@ -168,6 +200,7 @@ export function CustomReport() {
       startDate,
       endDate,
       categories,
+      interval,
       selectedCategories,
       conditions: filters,
       conditionsOp,
@@ -186,7 +219,6 @@ export function CustomReport() {
     startDate,
     endDate,
     groupBy,
-    interval,
     balanceType,
     categories,
     selectedCategories,

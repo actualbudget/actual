@@ -87,6 +87,10 @@ export function monthFromDate(date: DateLike): string {
   return d.format(_parse(date), 'yyyy-MM');
 }
 
+export function weekFromDate(date: DateLike): string {
+  return d.format(_parse(date), 'yyyy-ww');
+}
+
 export function dayFromDate(date: DateLike): string {
   return d.format(_parse(date), 'yyyy-MM-dd');
 }
@@ -96,6 +100,14 @@ export function currentMonth(): string {
     return global.currentMonth || '2017-01';
   } else {
     return d.format(new Date(), 'yyyy-MM');
+  }
+}
+
+export function currentYear(): string {
+  if (global.IS_TESTING || Platform.isPlaywright) {
+    return global.currentMonth || '2017';
+  } else {
+    return d.format(new Date(), 'yyyy');
   }
 }
 
@@ -127,6 +139,10 @@ export function prevMonth(month: DateLike): string {
   return d.format(d.subMonths(_parse(month), 1), 'yyyy-MM');
 }
 
+export function addYears(year: DateLike, n: number): string {
+  return d.format(d.addYears(_parse(year), n), 'yyyy');
+}
+
 export function addMonths(month: DateLike, n: number): string {
   return d.format(d.addMonths(_parse(month), n), 'yyyy-MM');
 }
@@ -153,6 +169,10 @@ export function subMonths(month: string | Date, n: number) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
+export function subYears(year: string | Date, n: number) {
+  return d.format(d.subYears(_parse(year), n), 'yyyy');
+}
+
 export function addDays(day: DateLike, n: number): string {
   return d.format(d.addDays(_parse(day), n), 'yyyy-MM-dd');
 }
@@ -176,6 +196,29 @@ export function bounds(month: DateLike): { start: number; end: number } {
     start: parseInt(d.format(d.startOfMonth(_parse(month)), 'yyyyMMdd')),
     end: parseInt(d.format(d.endOfMonth(_parse(month)), 'yyyyMMdd')),
   };
+}
+
+export function _yearRange(
+  start: DateLike,
+  end: DateLike,
+  inclusive = false,
+): string[] {
+  const years: string[] = [];
+  let year = yearFromDate(start);
+  while (d.isBefore(_parse(year), _parse(end))) {
+    years.push(year);
+    year = addYears(year, 1);
+  }
+
+  if (inclusive) {
+    years.push(year);
+  }
+
+  return years;
+}
+
+export function yearRangeInclusive(start: DateLike, end: DateLike): string[] {
+  return _yearRange(start, end, true);
 }
 
 export function _range(

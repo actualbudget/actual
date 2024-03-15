@@ -215,11 +215,7 @@ export function ReportSidebar({
               option.description,
               option.description,
             ])}
-            disabledKeys={
-              customReportItems.mode === 'time'
-                ? ['Monthly', 'Yearly']
-                : ['Yearly']
-            }
+            disabledKeys={[]}
           />
         </View>
         <View
@@ -355,11 +351,10 @@ export function ReportSidebar({
               onChange={e => {
                 onSelectRange(e);
               }}
-              options={ReportOptions.dateRange.map(option => [
-                option.description,
-                option.description,
-              ])}
-              line={dateRangeLine}
+              options={ReportOptions.dateRange
+                .filter(f => f[customReportItems.interval])
+                .map(option => [option.description, option.description])}
+              line={customReportItems.interval === 'Monthly' && dateRangeLine}
             />
           </View>
         ) : (
@@ -385,10 +380,6 @@ export function ReportSidebar({
                   )
                 }
                 value={customReportItems.startDate}
-                defaultLabel={monthUtils.format(
-                  customReportItems.startDate,
-                  'MMMM, yyyy',
-                )}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
             </View>

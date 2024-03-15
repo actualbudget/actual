@@ -1,6 +1,4 @@
 // @ts-strict-ignore
-import * as d from 'date-fns';
-
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
 
 import { type QueryDataEntity } from '../ReportOptions';
@@ -60,20 +58,15 @@ export function recalculate({
       .reduce((a, v) => (a = a + v.amount), 0);
     totalDebts += monthDebts;
 
-    const dateParse = d.parseISO(`${month}-01`);
-
     const change = last
       ? monthAssets + monthDebts - amountToInteger(last.totalTotals)
       : 0;
 
     arr.push({
-      dateParse,
       totalAssets: integerToAmount(monthAssets),
       totalDebts: integerToAmount(monthDebts),
       totalTotals: integerToAmount(monthAssets + monthDebts),
       change,
-      // eslint-disable-next-line rulesdir/typography
-      date: d.format(dateParse, "MMM ''yy"),
       dateLookup: month,
     });
 

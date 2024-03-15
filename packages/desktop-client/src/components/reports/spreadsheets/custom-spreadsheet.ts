@@ -25,6 +25,7 @@ export type createCustomSpreadsheetProps = {
   startDate: string;
   endDate: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  interval: string;
   selectedCategories: CategoryEntity[];
   conditions: RuleConditionEntity[];
   conditionsOp: string;
@@ -44,6 +45,7 @@ export function createCustomSpreadsheet({
   startDate,
   endDate,
   categories,
+  interval,
   selectedCategories,
   conditions = [],
   conditionsOp,
@@ -96,6 +98,7 @@ export function createCustomSpreadsheet({
           categoryFilter,
           conditionsOpKey,
           filters,
+          interval,
         ),
       ).then(({ data }) => data),
       runQuery(
@@ -107,11 +110,14 @@ export function createCustomSpreadsheet({
           categoryFilter,
           conditionsOpKey,
           filters,
+          interval,
         ),
       ).then(({ data }) => data),
     ]);
 
-    const months = monthUtils.rangeInclusive(startDate, endDate);
+    const rangeInc =
+      interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
+    const months = monthUtils[rangeInc](startDate, endDate);
 
     let totalAssets = 0;
     let totalDebts = 0;
@@ -168,8 +174,11 @@ export function createCustomSpreadsheet({
       totalDebts += perMonthDebts;
 
       arr.push({
-        // eslint-disable-next-line rulesdir/typography
-        date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
+        date:
+          interval === 'Monthly'
+            ? // eslint-disable-next-line rulesdir/typography
+              d.format(d.parseISO(`${month}-01`), "MMM ''yy")
+            : month,
         ...stacked,
         totalDebts: integerToAmount(perMonthDebts),
         totalAssets: integerToAmount(perMonthAssets),

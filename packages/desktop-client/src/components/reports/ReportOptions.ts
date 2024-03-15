@@ -45,14 +45,14 @@ const groupByOptions = [
 ];
 
 const dateRangeOptions = [
-  { description: 'This month', name: 0 },
-  { description: 'Last month', name: 1 },
-  { description: 'Last 3 months', name: 2 },
-  { description: 'Last 6 months', name: 5 },
-  { description: 'Last 12 months', name: 11 },
-  { description: 'Year to date', name: 'yearToDate' },
-  { description: 'Last year', name: 'lastYear' },
-  { description: 'All time', name: 'allMonths' },
+  { description: 'This month', name: 0, Yearly: false, Monthly: true },
+  { description: 'Last month', name: 1, Yearly: false, Monthly: true },
+  { description: 'Last 3 months', name: 2, Yearly: false, Monthly: true },
+  { description: 'Last 6 months', name: 5, Yearly: false, Monthly: true },
+  { description: 'Last 12 months', name: 11, Yearly: false, Monthly: true },
+  { description: 'Year to date', name: 'yearToDate', Yearly: true, Monthly: true },
+  { description: 'Last year', name: 'lastYear', Yearly: true, Monthly: true },
+  { description: 'All time', name: 'allMonths', Yearly: true, Monthly: true},
 ];
 
 const intervalOptions = [
