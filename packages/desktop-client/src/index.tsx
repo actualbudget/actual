@@ -37,6 +37,8 @@ import { type BoundActions } from './hooks/useActions';
 // focus outline appear from keyboard events.
 import 'focus-visible';
 
+console.log('wip MR');
+
 const appReducer = combineReducers(reducers);
 function rootReducer(state, action) {
   if (action.type === constants.CLOSE_BUDGET) {
