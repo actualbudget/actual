@@ -31,6 +31,7 @@ import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
+import { ModeButton } from '../reports/ModeButton';
 import { DateSelect } from '../select/DateSelect';
 
 function CreatePayeeIcon(props) {
@@ -49,6 +50,13 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
     modalProps.onClose();
     onClose?.();
   };
+
+  function onSelectNote(value, mode) {
+    if (value != null) {
+      onSubmit(name, value, mode);
+    }
+    onCloseInner();
+  }
 
   function onSelect(value) {
     if (value != null) {
@@ -78,6 +86,18 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
   const autocompleteProps = {
     inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
+  };
+
+  let noteAmend = 'replace';
+  const onChangeMode = cond => {
+    noteAmend = cond;
+    if (cond === 'prepend') {
+      console.log(noteAmend);
+    } else if (cond === 'replace') {
+      console.log(noteAmend);
+    } else if (cond === 'append') {
+      console.log(noteAmend);
+    }
   };
 
   switch (name) {
@@ -201,12 +221,49 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
     case 'notes':
       label = 'Notes';
+
       editor = (
-        <Input
-          focused={true}
-          onEnter={e => onSelect(e.target.value)}
-          style={inputStyle}
-        />
+        <>
+          <Input
+            focused={true}
+            onEnter={e => onSelectNote(e.target.value, noteAmend)}
+            style={inputStyle}
+          />
+          <View
+            style={{
+              flexGrow: 1,
+              flexDirection: 'row',
+              marginTop: 5,
+              marginBottom: 5,
+              alignItems: 'center',
+            }}
+          >
+            <ModeButton
+              selected={noteAmend === 'prepend'}
+              style={{ padding: 5 }}
+              onSelect={() => onChangeMode('prepend')}
+              onUpdate={() => {}}
+            >
+              Prepend to Note
+            </ModeButton>
+            <ModeButton
+              selected={noteAmend === 'replace'}
+              style={{ padding: 5 }}
+              onSelect={() => onChangeMode('replace')}
+              onUpdate={() => {}}
+            >
+              Replace Note
+            </ModeButton>
+            <ModeButton
+              selected={noteAmend === 'append'}
+              style={{ padding: 5 }}
+              onSelect={() => onChangeMode('append')}
+              onUpdate={() => {}}
+            >
+              Append to Note
+            </ModeButton>
+          </View>
+        </>
       );
       break;
 
