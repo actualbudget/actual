@@ -50,9 +50,14 @@ const dateRangeOptions = [
   { description: 'Last 3 months', name: 2, Yearly: false, Monthly: true },
   { description: 'Last 6 months', name: 5, Yearly: false, Monthly: true },
   { description: 'Last 12 months', name: 11, Yearly: false, Monthly: true },
-  { description: 'Year to date', name: 'yearToDate', Yearly: true, Monthly: true },
+  {
+    description: 'Year to date',
+    name: 'yearToDate',
+    Yearly: true,
+    Monthly: true,
+  },
   { description: 'Last year', name: 'lastYear', Yearly: true, Monthly: true },
-  { description: 'All time', name: 'allMonths', Yearly: true, Monthly: true},
+  { description: 'All time', name: 'allMonths', Yearly: true, Monthly: true },
 ];
 
 const intervalOptions = [
