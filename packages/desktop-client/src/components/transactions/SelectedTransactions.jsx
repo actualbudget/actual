@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 
+import { isPreviewId } from 'loot-core/shared/transactions';
+import { validForTransfer } from 'loot-core/src/client/transfer';
+
 import { useSelectedItems } from '../../hooks/useSelected';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
-
-import { isPreviewId } from './TransactionsTable';
 
 export function SelectedTransactionsButton({
   getTransaction,
@@ -14,8 +15,10 @@ export function SelectedTransactionsButton({
   onEdit,
   onUnlink,
   onCreateRule,
+  onSetTransfer,
   onScheduleAction,
   pushModal,
+  showMakeTransfer,
 }) {
   const selectedItems = useSelectedItems();
 
@@ -42,6 +45,23 @@ export function SelectedTransactionsButton({
       })
     );
   }, [types.preview, selectedItems, getTransaction]);
+
+  const canBeTransfer = useMemo(() => {
+    // only two selected
+    if (selectedItems.size !== 2) {
+      return false;
+    }
+    const transactions = [...selectedItems];
+    const fromTrans = getTransaction(transactions[0]);
+    const toTrans = getTransaction(transactions[1]);
+
+    // previously selected transactions aren't always present in current transaction list
+    if (!fromTrans || !toTrans) {
+      return false;
+    }
+
+    return validForTransfer(fromTrans, toTrans);
+  }, [selectedItems, getTransaction]);
 
   return (
     <SelectedItemsButton
@@ -91,6 +111,15 @@ export function SelectedTransactionsButton({
                       text: 'Create rule',
                     },
                   ]),
+              ...(showMakeTransfer
+                ? [
+                    {
+                      name: 'set-transfer',
+                      text: 'Make transfer',
+                      disabled: !canBeTransfer,
+                    },
+                  ]
+                : []),
               Menu.line,
               { type: Menu.label, name: 'Edit field' },
               { name: 'date', text: 'Date' },
@@ -144,6 +173,9 @@ export function SelectedTransactionsButton({
             break;
           case 'create-rule':
             onCreateRule([...selectedItems]);
+            break;
+          case 'set-transfer':
+            onSetTransfer([...selectedItems]);
             break;
           default:
             onEdit(name, [...selectedItems]);

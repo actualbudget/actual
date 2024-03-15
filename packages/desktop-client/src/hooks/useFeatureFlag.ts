@@ -1,11 +1,9 @@
-// @ts-strict-ignore
 import { useSelector } from 'react-redux';
 
 import { type State } from 'loot-core/src/client/state-types';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
-  sankeyReport: false,
   reportBudget: false,
   goalTemplatesEnabled: false,
   customReports: false,

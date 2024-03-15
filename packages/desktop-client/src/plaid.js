@@ -10,7 +10,7 @@ function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
       if (plaidToken) {
         url = url + '&plaidToken=' + plaidToken;
       }
-      window.Actual.openURLInBrowser(url);
+      window.Actual?.openURLInBrowser(url);
 
       const { error, data } = await send('poll-web-token', { token });
 

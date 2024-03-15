@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgAdd } from '../../icons/v1';
@@ -26,7 +27,6 @@ import { FiltersStack } from '../filters/FiltersStack';
 import { KeyHandlers } from '../KeyHandlers';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
-import { useSplitsExpanded } from '../transactions/TransactionsTable';
 
 import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileTooltip } from './Reconcile';
@@ -79,6 +79,7 @@ export function AccountHeader({
   onCondOpChange,
   onDeleteFilter,
   onScheduleAction,
+  onSetTransfer,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
@@ -93,6 +94,9 @@ export function AccountHeader({
     // All accounts - check for any syncable account
     canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
   }
+
+  // Only show the ability to make linked transfers on multi-account views.
+  const showMakeTransfer = !account;
 
   function onToggleSplits() {
     if (tableRef.current) {
@@ -208,6 +212,8 @@ export function AccountHeader({
           showExtraBalances={showExtraBalances}
           onToggleExtraBalances={onToggleExtraBalances}
           account={account}
+          filteredItems={filters}
+          transactions={transactions}
         />
 
         <Stack
@@ -228,8 +234,9 @@ export function AccountHeader({
                     width={13}
                     height={13}
                     animating={
-                      (account && accountsSyncing === account.name) ||
-                      accountsSyncing === '__all'
+                      account
+                        ? accountsSyncing.includes(account.id)
+                        : accountsSyncing.length > 0
                     }
                     style={{ marginRight: 4 }}
                   />{' '}
@@ -276,8 +283,10 @@ export function AccountHeader({
               onEdit={onBatchEdit}
               onUnlink={onBatchUnlink}
               onCreateRule={onCreateRule}
+              onSetTransfer={onSetTransfer}
               onScheduleAction={onScheduleAction}
               pushModal={pushModal}
+              showMakeTransfer={showMakeTransfer}
             />
           )}
           <Button

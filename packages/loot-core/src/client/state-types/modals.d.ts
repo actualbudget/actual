@@ -116,15 +116,14 @@ type FinanceModals = {
   'schedule-posts-offline-notification': null;
   'switch-budget-type': { onSwitch: () => void };
   'category-menu': {
-    category: CategoryEntity;
+    categoryId: string;
     onSave: (category: CategoryEntity) => void;
     onEditNotes: (id: string) => void;
-    onSaveNotes: (id: string, notes: string) => void;
     onDelete: (categoryId: string) => void;
     onClose?: () => void;
   };
   'category-group-menu': {
-    group: CategoryGroupEntity;
+    groupId: string;
     onSave: (group: CategoryGroupEntity) => void;
     onAddCategory: (groupId: string, isIncome: boolean) => void;
     onEditNotes: (id: string) => void;

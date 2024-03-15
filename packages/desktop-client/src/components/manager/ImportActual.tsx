@@ -38,7 +38,7 @@ export function ImportActual({ modalProps }: ImportProps) {
   const [importing, setImporting] = useState(false);
 
   async function onImport() {
-    const res = await window.Actual.openFileDialog({
+    const res = await window.Actual?.openFileDialog({
       properties: ['openFile'],
       filters: [{ name: 'actual', extensions: ['zip', 'blob'] }],
     });

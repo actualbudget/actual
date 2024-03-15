@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { type ComponentProps, useState } from 'react';
 
 import { useCategories } from '../../../hooks/useCategories';
@@ -19,11 +18,11 @@ export function CoverTooltip({
   onSubmit,
   onClose,
 }: CoverTooltipProps) {
-  let { grouped: categoryGroups } = useCategories();
-  categoryGroups = addToBeBudgetedGroup(
-    categoryGroups.filter(g => !g.is_income),
+  const { grouped } = useCategories();
+  const categoryGroups = addToBeBudgetedGroup(
+    grouped.filter(g => !g.is_income),
   );
-  const [category, setCategory] = useState(null);
+  const [category, setCategory] = useState<string | null>(null);
 
   function submit() {
     if (category) {
@@ -49,7 +48,7 @@ export function CoverTooltip({
             value={null}
             openOnFocus={true}
             onUpdate={() => {}}
-            onSelect={id => setCategory(id)}
+            onSelect={(id: string | undefined) => setCategory(id || null)}
             inputProps={{
               inputRef: node,
               onKeyDown: e => {
@@ -58,6 +57,7 @@ export function CoverTooltip({
                 }
               },
             }}
+            showHiddenItems={false}
           />
         )}
       </InitialFocus>

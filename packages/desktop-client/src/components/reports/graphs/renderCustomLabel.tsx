@@ -16,6 +16,7 @@ export const renderCustomLabel = (
 ) => {
   return !showLabel || Math.abs(showLabel) > showLabelThreshold ? (
     <text
+      key={fill + display}
       x={calcX}
       y={calcY}
       fill={fill}

@@ -21,9 +21,10 @@ import {
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../../ResponsiveProvider';
 
-import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
+import { TransactionTable } from './TransactionsTable';
 
 vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => vi.fn().mockReturnValue(false));

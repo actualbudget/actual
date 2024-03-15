@@ -96,12 +96,12 @@ function makeOperatorParser(...ops) {
 // These operators go from high to low order of precedence
 const parseOperator = makeOperatorParser('^', '/', '*', '-', '+');
 
-function parse(expression) {
+function parse(expression: string) {
   const state = { str: expression.replace(/\s/g, ''), index: 0 };
   return parseOperator(state);
 }
 
-function evaluate(ast) {
+function evaluate(ast): number {
   if (typeof ast === 'number') {
     return ast;
   }
@@ -124,13 +124,16 @@ function evaluate(ast) {
   }
 }
 
-export function evalArithmetic(expression, defaultValue = null) {
+export function evalArithmetic(
+  expression: string,
+  defaultValue: number = null,
+) {
   // An empty expression always evals to the default
   if (expression === '') {
     return defaultValue;
   }
 
-  let result;
+  let result: number;
   try {
     result = evaluate(parse(expression));
   } catch (e) {

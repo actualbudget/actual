@@ -64,7 +64,7 @@ const intervalOptions = [
 ];
 
 export const ReportOptions = {
-  groupBy: groupByOptions,
+  groupBy: groupByOptions.map(item => item.description),
   balanceType: balanceTypeOptions,
   balanceTypeMap: new Map(
     balanceTypeOptions.map(item => [item.description, item.format]),
@@ -151,11 +151,17 @@ export const categoryLists = (categories: {
 }) => {
   const categoryList = [
     ...categories.list.sort((a, b) => {
+      //The point of this sorting is to make the graphs match the "budget" page
       const catGroupA = categories.grouped.find(f => f.id === a.cat_group);
       const catGroupB = categories.grouped.find(f => f.id === b.cat_group);
+      //initial check that both a and b have a sort_order and category group
       return a.sort_order && b.sort_order && catGroupA && catGroupB
-        ? Number(catGroupA.is_income) - Number(catGroupB.is_income) ||
+        ? /*sorting by "is_income" because sort_order for this group is 
+        separate from other groups*/
+          Number(catGroupA.is_income) - Number(catGroupB.is_income) ||
+            //Next, sorting by group sort_order
             (catGroupA.sort_order ?? 0) - (catGroupB.sort_order ?? 0) ||
+            //Finally, sorting by category within each group
             a.sort_order - b.sort_order
         : 0;
     }),

@@ -53,7 +53,7 @@ export function NameFilter({
                 id="name-field"
                 inputRef={inputRef}
                 defaultValue={name || ''}
-                onUpdate={setName}
+                onChangeValue={setName}
               />
             </FormField>
             <Button

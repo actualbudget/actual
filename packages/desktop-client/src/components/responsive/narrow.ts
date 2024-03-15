@@ -1,4 +1,4 @@
-export { Budget } from '../budget/MobileBudget';
+export { Budget } from '../mobile/budget';
 
-export { Accounts } from '../accounts/MobileAccounts';
-export { Account } from '../accounts/MobileAccount';
+export { Accounts } from '../mobile/accounts/Accounts';
+export { Account } from '../mobile/accounts/Account';

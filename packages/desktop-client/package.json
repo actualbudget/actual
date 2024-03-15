@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "24.2.0",
+  "version": "24.3.0",
   "license": "MIT",
   "files": [
     "build"
@@ -65,6 +65,7 @@
     "sass": "^1.70.0",
     "swc-loader": "^0.2.3",
     "terser-webpack-plugin": "^5.3.10",
+    "usehooks-ts": "^3.0.1",
     "uuid": "^9.0.1",
     "vite": "^5.0.12",
     "vite-plugin-pwa": "^0.19.0",

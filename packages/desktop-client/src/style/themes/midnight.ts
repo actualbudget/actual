@@ -39,6 +39,7 @@ export const tableRowHeaderBackground = colorPalette.gray700;
 export const tableRowHeaderText = colorPalette.gray150;
 
 export const sidebarBackground = colorPalette.gray900;
+export const sidebarItemBackgroundPending = colorPalette.orange200;
 export const sidebarItemBackgroundPositive = colorPalette.green400;
 export const sidebarItemBackgroundFailed = colorPalette.red300;
 export const sidebarItemAccentSelected = colorPalette.purple200;
@@ -57,7 +58,7 @@ export const menuBorder = colorPalette.gray800;
 export const menuBorderHover = colorPalette.purple300;
 export const menuKeybindingText = colorPalette.gray500;
 export const menuAutoCompleteBackground = colorPalette.gray600;
-export const menuAutoCompleteBackgroundHover = colorPalette.gray400;
+export const menuAutoCompleteBackgroundHover = colorPalette.gray300;
 export const menuAutoCompleteText = colorPalette.gray100;
 export const menuAutoCompleteTextHeader = colorPalette.purple200;
 
@@ -73,7 +74,7 @@ export const mobileNavItem = colorPalette.gray150;
 export const mobileNavItemSelected = colorPalette.purple200;
 export const mobileAccountShadow = cardShadow;
 export const mobileAccountText = colorPalette.blue800;
-export const mobileModalBackground = colorPalette.gray100;
+export const mobileModalBackground = menuAutoCompleteBackground;
 export const mobileModalText = colorPalette.white;
 
 // Mobile view themes (for the top bar)
@@ -114,7 +115,7 @@ export const buttonNormalBorder = colorPalette.gray300;
 export const buttonNormalShadow = 'rgba(0, 0, 0, 0.4)';
 export const buttonNormalSelectedText = colorPalette.white;
 export const buttonNormalSelectedBackground = colorPalette.purple500;
-export const buttonNormalDisabledText = colorPalette.gray500;
+export const buttonNormalDisabledText = colorPalette.gray400;
 export const buttonNormalDisabledBackground = colorPalette.gray700;
 export const buttonNormalDisabledBorder = colorPalette.gray500;
 

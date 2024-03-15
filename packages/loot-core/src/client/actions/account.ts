@@ -2,7 +2,6 @@
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
 import type {
-  AccountSyncFailuresAction,
   AccountSyncStatusAction,
   SetAccountsSyncingAction,
 } from '../state-types/account';
@@ -17,11 +16,11 @@ import { getPayees, getAccounts } from './queries';
 import type { Dispatch, GetState } from './types';
 
 export function setAccountsSyncing(
-  name: SetAccountsSyncingAction['name'],
+  ids: SetAccountsSyncingAction['ids'],
 ): SetAccountsSyncingAction {
   return {
     type: constants.SET_ACCOUNTS_SYNCING,
-    name,
+    ids,
   };
 }
 
@@ -45,14 +44,6 @@ export function markAccountSuccess(
     type: 'ACCOUNT_SYNC_STATUS',
     id,
     failed: false,
-  };
-}
-export function setFailedAccounts(
-  syncErrors: AccountSyncFailuresAction['syncErrors'],
-): AccountSyncFailuresAction {
-  return {
-    type: constants.ACCOUNT_SYNC_FAILURES,
-    syncErrors,
   };
 }
 
@@ -107,96 +98,89 @@ export function connectAccounts(
   };
 }
 
-// TODO: type correctly or remove (unused)
-export function connectGoCardlessAccounts(
-  institution,
-  publicToken,
-  accountIds,
-  offbudgetIds,
-) {
-  return async (dispatch: Dispatch) => {
-    const ids = await send('gocardless-accounts-connect', {
-      institution,
-      publicToken,
-      accountIds,
-      offbudgetIds,
-    });
-    await dispatch(getPayees());
-    await dispatch(getAccounts());
-    return ids;
-  };
-}
-
-export function syncAccounts(id: string) {
+export function syncAccounts(id?: string) {
   return async (dispatch: Dispatch, getState: GetState) => {
-    if (getState().account.accountsSyncing) {
+    // Disallow two parallel sync operations
+    if (getState().account.accountsSyncing.length > 0) {
       return false;
     }
 
-    if (id) {
-      const account = getState().queries.accounts.find(a => a.id === id);
-      dispatch(setAccountsSyncing(account.name));
-    } else {
-      dispatch(setAccountsSyncing('__all'));
-    }
+    // Build an array of IDs for accounts to sync.. if no `id` provided
+    // then we assume that all accounts should be synced
+    const accountIdsToSync = id
+      ? [id]
+      : getState()
+          .queries.accounts.filter(
+            ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
+          )
+          .map(({ id }) => id);
 
-    const { errors, newTransactions, matchedTransactions, updatedAccounts } =
-      await send('gocardless-accounts-sync', { id });
-    dispatch(setAccountsSyncing(null));
+    dispatch(setAccountsSyncing(accountIdsToSync));
 
-    if (id) {
-      const error = errors.find(error => error.accountId === id);
+    let isSyncSuccess = false;
 
+    // Loop through the accounts and perform sync operation.. one by one
+    for (let idx = 0; idx < accountIdsToSync.length; idx++) {
+      const accountId = accountIdsToSync[idx];
+
+      // Perform sync operation
+      const { errors, newTransactions, matchedTransactions, updatedAccounts } =
+        await send('gocardless-accounts-sync', {
+          id: accountId,
+        });
+
+      // Mark the account as failed or succeeded (depending on sync output)
+      const [error] = errors;
       if (error) {
         // We only want to mark the account as having problem if it
         // was a real syncing error.
         if (error.type === 'SyncError') {
-          dispatch(markAccountFailed(id, error.category, error.code));
+          dispatch(markAccountFailed(accountId, error.category, error.code));
         }
       } else {
-        dispatch(markAccountSuccess(id));
+        dispatch(markAccountSuccess(accountId));
       }
-    } else {
-      dispatch(
-        setFailedAccounts(
-          errors
-            .filter(error => error.type === 'SyncError')
-            .map(error => ({
-              id: error.accountId,
-              type: error.category,
-              code: error.code,
-            })),
-        ),
-      );
+
+      // Dispatch errors (if any)
+      errors.forEach(error => {
+        if (error.type === 'SyncError') {
+          dispatch(
+            addNotification({
+              type: 'error',
+              message: error.message,
+            }),
+          );
+        } else {
+          dispatch(
+            addNotification({
+              type: 'error',
+              message: error.message,
+              internal: error.internal,
+            }),
+          );
+        }
+      });
+
+      // Set new transactions
+      dispatch({
+        type: constants.SET_NEW_TRANSACTIONS,
+        newTransactions,
+        matchedTransactions,
+        updatedAccounts,
+      });
+
+      // Dispatch the ids for the accounts that are yet to be synced
+      dispatch(setAccountsSyncing(accountIdsToSync.slice(idx + 1)));
+
+      if (newTransactions.length > 0 || matchedTransactions.length > 0) {
+        isSyncSuccess = true;
+      }
     }
 
-    errors.forEach(error => {
-      if (error.type === 'SyncError') {
-        dispatch(
-          addNotification({
-            type: 'error',
-            message: error.message,
-          }),
-        );
-      } else {
-        dispatch(
-          addNotification({
-            type: 'error',
-            message: error.message,
-            internal: error.internal,
-          }),
-        );
-      }
-    });
-
-    dispatch({
-      type: constants.SET_NEW_TRANSACTIONS,
-      newTransactions,
-      matchedTransactions,
-      updatedAccounts,
-    });
-
-    return newTransactions.length > 0 || matchedTransactions.length > 0;
+    // Rest the sync state back to empty (fallback in case something breaks
+    // in the logic above)
+    dispatch(setAccountsSyncing([]));
+    return isSyncSuccess;
   };
 }
 

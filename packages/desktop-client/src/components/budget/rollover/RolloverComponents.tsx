@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { memo, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
@@ -143,7 +142,7 @@ type ExpenseCategoryMonthProps = {
   editing: boolean;
   onEdit: (id: string | null, idx?: number) => void;
   onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
-  onShowActivity: (name: string, id: string, idx: number) => void;
+  onShowActivity: (id: string, idx: number) => void;
 };
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   monthIndex,
@@ -207,7 +206,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 width={14}
                 height={14}
                 className="hover-visible"
-                style={menuOpen && { opacity: 1 }}
+                style={menuOpen ? { opacity: 1 } : {}}
               />
             </Button>
             {menuOpen && (
@@ -239,10 +238,14 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                       name: 'set-single-12-avg',
                       text: 'Set to yearly average',
                     },
-                    isGoalTemplatesEnabled && {
-                      name: 'apply-single-category-template',
-                      text: 'Apply budget template',
-                    },
+                    ...(isGoalTemplatesEnabled
+                      ? [
+                          {
+                            name: 'apply-single-category-template',
+                            text: 'Apply budget template',
+                          },
+                        ]
+                      : []),
                   ]}
                 />
               </Tooltip>
@@ -297,7 +300,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
           data-testid="category-month-spent"
-          onClick={() => onShowActivity(category.name, category.id, monthIndex)}
+          onClick={() => onShowActivity(category.id, monthIndex)}
         >
           <CellValue
             binding={rolloverBudget.catSumAmount(category.id)}
@@ -367,7 +370,7 @@ type IncomeCategoryMonthProps = {
   category: { id: string; name: string };
   isLast: boolean;
   monthIndex: number;
-  onShowActivity: (name: string, id: string, idx: number) => void;
+  onShowActivity: (id: string, idx: number) => void;
 };
 export function IncomeCategoryMonth({
   category,
@@ -386,9 +389,7 @@ export function IncomeCategoryMonth({
           ...(isLast && { borderBottomWidth: 0 }),
         }}
       >
-        <span
-          onClick={() => onShowActivity(category.name, category.id, monthIndex)}
-        >
+        <span onClick={() => onShowActivity(category.id, monthIndex)}>
           <CellValue
             binding={rolloverBudget.catSumAmount(category.id)}
             type="financial"

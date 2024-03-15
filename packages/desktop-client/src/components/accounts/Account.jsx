@@ -5,6 +5,7 @@ import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
 import { debounce } from 'debounce';
 import { bindActionCreators } from 'redux';
 
+import { validForTransfer } from 'loot-core/client/transfer';
 import * as actions from 'loot-core/src/client/actions';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import {
@@ -33,15 +34,15 @@ import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import {
+  SplitsExpandedProvider,
+  useSplitsExpanded,
+} from '../../hooks/useSplitsExpanded';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
-import {
-  SplitsExpandedProvider,
-  useSplitsExpanded,
-} from '../transactions/TransactionsTable';
 
 import { AccountHeader } from './Header';
 
@@ -203,7 +204,7 @@ class AccountInternal extends PureComponent {
 
     this.state = {
       search: '',
-      filters: [],
+      filters: props.conditions || [],
       loading: true,
       workingHard: false,
       reconcileAmount: null,
@@ -279,7 +280,7 @@ class AccountInternal extends PureComponent {
     // Important that any async work happens last so that the
     // listeners are set up synchronously
     await this.props.initiallyLoadPayees();
-    await this.fetchTransactions();
+    await this.fetchTransactions(this.state.filters);
 
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
@@ -336,10 +337,11 @@ class AccountInternal extends PureComponent {
     this.paged?.run();
   };
 
-  fetchTransactions = () => {
+  fetchTransactions = filters => {
     const query = this.makeRootQuery();
     this.rootQuery = this.currentQuery = query;
-    this.updateQuery(query);
+    if (filters) this.applyFilters(filters);
+    else this.updateQuery(query);
 
     if (this.props.accountId) {
       this.props.markAccountRead(this.props.accountId);
@@ -347,17 +349,7 @@ class AccountInternal extends PureComponent {
   };
 
   makeRootQuery = () => {
-    const locationState = this.props.location.state;
     const accountId = this.props.accountId;
-
-    if (locationState && locationState.filter) {
-      return q('transactions')
-        .options({ splits: 'grouped' })
-        .filter({
-          'account.offbudget': false,
-          ...locationState.filter,
-        });
-    }
 
     return queries.makeTransactionsQuery(accountId);
   };
@@ -461,7 +453,7 @@ class AccountInternal extends PureComponent {
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
-    await this.props.syncAndDownload(account ? account.id : null);
+    await this.props.syncAndDownload(account ? account.id : undefined);
   };
 
   onImport = async () => {
@@ -470,7 +462,7 @@ class AccountInternal extends PureComponent {
     const categories = await this.props.getCategories();
 
     if (account) {
-      const res = await window.Actual.openFileDialog({
+      const res = await window.Actual?.openFileDialog({
         filters: [
           {
             name: 'Financial Files',
@@ -502,7 +494,7 @@ class AccountInternal extends PureComponent {
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
     const filename = `${normalizedName || 'transactions'}.csv`;
 
-    window.Actual.saveFile(
+    window.Actual?.saveFile(
       exportedTransactions,
       filename,
       'Export Transactions',
@@ -598,7 +590,12 @@ class AccountInternal extends PureComponent {
         });
         break;
       case 'unlink':
-        this.props.unlinkAccount(accountId);
+        this.props.pushModal('confirm-unlink-account', {
+          accountName: account.name,
+          onUnlink: () => {
+            this.props.unlinkAccount(accountId);
+          },
+        });
         break;
       case 'close':
         this.props.openAccountCloseModal(accountId);
@@ -1059,6 +1056,52 @@ class AccountInternal extends PureComponent {
     this.props.pushModal('edit-rule', { rule });
   };
 
+  onSetTransfer = async ids => {
+    const onConfirmTransfer = async ids => {
+      this.setState({ workingHard: true });
+
+      const payees = await this.props.getPayees();
+      const { data: transactions } = await runQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*'),
+      );
+      const [fromTrans, toTrans] = transactions;
+
+      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
+        const fromPayee = payees.find(
+          p => p.transfer_acct === fromTrans.account,
+        );
+        const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+
+        const changes = {
+          updated: [
+            {
+              ...fromTrans,
+              payee: toPayee.id,
+              transfer_id: toTrans.id,
+            },
+            {
+              ...toTrans,
+              payee: fromPayee.id,
+              transfer_id: fromTrans.id,
+            },
+          ],
+        };
+
+        await send('transactions-batch-update', changes);
+      }
+
+      await this.refetchTransactions();
+    };
+
+    await this.checkForReconciledTransactions(
+      ids,
+      'batchEditWithReconciled',
+      onConfirmTransfer,
+    );
+  };
+
   onCondOpChange = (value, filters) => {
     this.setState({ conditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
@@ -1443,6 +1486,7 @@ class AccountInternal extends PureComponent {
                 onDeleteFilter={this.onDeleteFilter}
                 onApplyFilter={this.onApplyFilter}
                 onScheduleAction={this.onScheduleAction}
+                onSetTransfer={this.onSetTransfer}
               />
 
               <View style={{ flex: 1 }}>
@@ -1555,6 +1599,10 @@ export function Account() {
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const lastUndoState = useSelector(state => state.app.lastUndoState);
+  const conditions =
+    location.state && location.state.conditions
+      ? location.state.conditions
+      : [];
 
   const state = {
     newTransactions,
@@ -1571,6 +1619,7 @@ export function Account() {
     modalShowing,
     accountsSyncing,
     lastUndoState,
+    conditions,
   };
 
   const dispatch = useDispatch();
@@ -1581,26 +1630,21 @@ export function Account() {
   );
 
   const transform = useMemo(() => {
-    let filterByAccount = queries.getAccountFilter(params.id, '_account');
-    let filterByPayee = queries.getAccountFilter(
+    const filterByAccount = queries.getAccountFilter(params.id, '_account');
+    const filterByPayee = queries.getAccountFilter(
       params.id,
       '_payee.transfer_acct',
     );
 
-    // Never show schedules on these pages
-    if (
-      (location.state && location.state.filter) ||
-      params.id === 'uncategorized'
-    ) {
-      filterByAccount = { id: null };
-      filterByPayee = { id: null };
-    }
-
     return q => {
       q = q.filter({
         $and: [{ '_account.closed': false }],
-        $or: [filterByAccount, filterByPayee],
       });
+      if (params.id) {
+        q = q.filter({
+          $or: [filterByAccount, filterByPayee],
+        });
+      }
       return q.orderBy({ next_date: 'desc' });
     };
   }, [params.id]);
@@ -1616,7 +1660,7 @@ export function Account() {
           {...actionCreators}
           modalShowing={state.modalShowing}
           accountId={params.id}
-          categoryId={location?.state?.filter?.category}
+          categoryId={location?.state?.categoryId}
           location={location}
           filtersList={filtersList}
         />
