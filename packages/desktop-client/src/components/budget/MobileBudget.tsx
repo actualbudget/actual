@@ -20,8 +20,6 @@ import { SyncRefresh } from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';
 import { prewarmMonth, switchBudgetType } from './util';
-import { addNotification } from 'loot-core/client/actions';
-import { useDispatch } from 'react-redux';
 
 type BudgetInnerProps = {
   categories: CategoryEntity[];
@@ -76,8 +74,6 @@ function BudgetInner(props: BudgetInnerProps) {
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false] = useLocalPref('hideFraction');
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
     async function init() {
       const { start, end } = await send('get-budget-bounds');
@@ -130,8 +126,10 @@ function BudgetInner(props: BudgetInnerProps) {
         }
 
         const lowerName = name.toLowerCase();
-        if (categoryGroups.some(g => g.name.toLocaleLowerCase() === lowerName)) {
-          return `Error group with name '${name}' already exists.`
+        if (
+          categoryGroups.some(g => g.name.toLocaleLowerCase() === lowerName)
+        ) {
+          return `Error group with name ‘${name}’ already exists.`;
         }
         return null;
       },
@@ -152,8 +150,8 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onSaveGroup = group => {
-           updateGroup(group);
-      };
+    updateGroup(group);
+  };
 
   const onDeleteGroup = async groupId => {
     const group = categoryGroups?.find(g => g.id === groupId);
@@ -358,7 +356,7 @@ function BudgetInner(props: BudgetInnerProps) {
       onDelete: onDeleteGroup,
       onValidate: name => {
         console.log(name);
-      }
+      },
     });
   };
 
