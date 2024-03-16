@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
@@ -67,11 +66,15 @@ export function BalanceTooltip({
                   ? 'Remove overspending rollover'
                   : 'Rollover overspending',
               },
-              balance < 0 && {
-                name: 'cover',
-                text: 'Cover overspending',
-              },
-            ].filter(x => x)}
+              ...(balance < 0
+                ? [
+                    {
+                      name: 'cover',
+                      text: 'Cover overspending',
+                    },
+                  ]
+                : []),
+            ]}
           />
         </Tooltip>
       )}

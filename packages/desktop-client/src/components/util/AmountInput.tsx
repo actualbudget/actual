@@ -69,9 +69,7 @@ export function AmountInput({
   }
 
   function getAmount(negate) {
-    const valueOrInitial = Math.abs(
-      amountToInteger(evalArithmetic(value, initialValueAbsolute)),
-    );
+    const valueOrInitial = Math.abs(amountToInteger(evalArithmetic(value)));
     return negate ? valueOrInitial * -1 : valueOrInitial;
   }
 

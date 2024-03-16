@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import debounce from 'debounce';
 import memoizeOne from 'memoize-one';
-import { bindActionCreators } from 'redux';
+import { useDebounceCallback } from 'usehooks-ts';
 
 import * as actions from 'loot-core/src/client/actions';
 import {
@@ -19,20 +18,20 @@ import {
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useLocalPrefs } from '../../hooks/useLocalPrefs';
-import { useNavigate } from '../../hooks/useNavigate';
-import { usePayees } from '../../hooks/usePayees';
-import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { theme, styles } from '../../style';
-import { Button } from '../common/Button';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useLocalPrefs } from '../../../hooks/useLocalPrefs';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { usePayees } from '../../../hooks/usePayees';
+import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { theme, styles } from '../../../style';
+import { Button } from '../../common/Button';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
-import { AccountDetails } from './MobileAccountDetails';
+import { AccountDetails } from './AccountDetails';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
@@ -74,15 +73,13 @@ function PreviewTransactions({ children }) {
   );
 }
 
-let paged;
-
 export function Account(props) {
   const accounts = useAccounts();
   const payees = usePayees();
 
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
-  const [searchText, setSearchText] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [currentQuery, setCurrentQuery] = useState();
 
   const newTransactions = useSelector(state => state.queries.newTransactions);
@@ -100,32 +97,30 @@ export function Account(props) {
   };
 
   const dispatch = useDispatch();
-  const actionCreators = useMemo(
-    () => bindActionCreators(actions, dispatch),
-    [dispatch],
-  );
 
   const { id: accountId } = useParams();
 
-  const makeRootQuery = () => queries.makeTransactionsQuery(accountId);
+  const makeRootQuery = useCallback(
+    () => queries.makeTransactionsQuery(accountId),
+    [accountId],
+  );
 
-  const updateQuery = query => {
-    if (paged) {
-      paged.unsubscribe();
-    }
+  const paged = useRef(null);
 
-    paged = pagedQuery(
+  const updateQuery = useCallback(query => {
+    paged.current?.unsubscribe();
+    paged.current = pagedQuery(
       query.options({ splits: 'grouped' }).select('*'),
       data => setTransactions(data),
-      { pageCount: 150, mapper: ungroupTransactions },
+      { pageCount: 10, mapper: ungroupTransactions },
     );
-  };
+  }, []);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     const query = makeRootQuery();
     setCurrentQuery(query);
     updateQuery(query);
-  };
+  }, [makeRootQuery, updateQuery]);
 
   useEffect(() => {
     let unlisten;
@@ -138,43 +133,49 @@ export function Account(props) {
             tables.includes('category_mapping') ||
             tables.includes('payee_mapping')
           ) {
-            paged?.run();
+            paged.current?.run();
           }
 
           if (tables.includes('payees') || tables.includes('payee_mapping')) {
-            actionCreators.getPayees();
+            dispatch(actions.getPayees());
           }
         }
       });
 
       await fetchTransactions();
 
-      actionCreators.markAccountRead(accountId);
+      dispatch(actions.markAccountRead(accountId));
     }
 
     setUpAccount();
 
     return () => unlisten();
-  }, []);
+  }, [accountId, dispatch, fetchTransactions]);
 
   // Load categories if necessary.
   const categories = useCategories();
 
-  const updateSearchQuery = debounce(() => {
-    if (searchText === '' && currentQuery) {
-      updateQuery(currentQuery);
-    } else if (searchText && currentQuery) {
-      updateQuery(
-        queries.makeTransactionSearchQuery(
-          currentQuery,
-          searchText,
-          state.dateFormat,
-        ),
-      );
-    }
-  }, 150);
+  const updateSearchQuery = useDebounceCallback(
+    useCallback(
+      searchText => {
+        if (searchText === '' && currentQuery) {
+          updateQuery(currentQuery);
+        } else if (searchText && currentQuery) {
+          updateQuery(
+            queries.makeTransactionSearchQuery(
+              currentQuery,
+              searchText,
+              dateFormat,
+            ),
+          );
+        }
 
-  useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
+        setIsSearching(searchText !== '');
+      },
+      [currentQuery, dateFormat, updateQuery],
+    ),
+    150,
+  );
 
   useSetThemeColor(theme.mobileViewTheme);
 
@@ -209,9 +210,8 @@ export function Account(props) {
     return state.newTransactions.includes(id);
   };
 
-  const onSearch = async text => {
-    paged.unsubscribe();
-    setSearchText(text);
+  const onSearch = text => {
+    updateSearchQuery(text);
   };
 
   const onSelectTransaction = transaction => {
@@ -227,7 +227,7 @@ export function Account(props) {
 
   return (
     <SchedulesProvider
-      transform={getSchedulesTransform(accountId, searchText !== '')}
+      transform={getSchedulesTransform(accountId, isSearching)}
     >
       <PreviewTransactions accountId={props.accountId}>
         {prependTransactions =>
@@ -236,7 +236,6 @@ export function Account(props) {
               // This key forces the whole table rerender when the number
               // format changes
               {...state}
-              {...actionCreators}
               key={numberFormat + hideFraction}
               account={account}
               accounts={accounts}
@@ -249,7 +248,7 @@ export function Account(props) {
               balanceUncleared={balanceUncleared}
               isNewTransaction={isNewTransaction}
               onLoadMore={() => {
-                paged?.fetchNext();
+                paged.current?.fetchNext();
               }}
               onSearch={onSearch}
               onSelectTransaction={onSelectTransaction}

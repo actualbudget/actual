@@ -1,5 +1,4 @@
 import React, {
-  createContext,
   createElement,
   createRef,
   forwardRef,
@@ -10,10 +9,7 @@ import React, {
   useCallback,
   useLayoutEffect,
   useEffect,
-  useContext,
-  useReducer,
 } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 
 import {
   format as formatDate,
@@ -37,6 +33,8 @@ import {
   addSplitTransaction,
   groupTransaction,
   ungroupTransactions,
+  isTemporaryId,
+  isPreviewId,
 } from 'loot-core/src/shared/transactions';
 import {
   integerToCurrency,
@@ -47,6 +45,7 @@ import {
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
+import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { SvgLeftArrow2, SvgRightArrow2 } from '../../icons/v0';
 import { SvgArrowDown, SvgArrowUp, SvgCheveronDown } from '../../icons/v1';
 import {
@@ -146,104 +145,6 @@ function isLastChild(transactions, index) {
     trans.is_child &&
     (transactions[index + 1] == null ||
       transactions[index + 1].parent_id !== trans.parent_id)
-  );
-}
-
-const SplitsExpandedContext = createContext(null);
-
-export function useSplitsExpanded() {
-  const data = useContext(SplitsExpandedContext);
-
-  return useMemo(
-    () => ({
-      ...data,
-      expanded: id =>
-        data.state.mode === 'collapse'
-          ? !data.state.ids.has(id)
-          : data.state.ids.has(id),
-    }),
-    [data],
-  );
-}
-
-export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
-  const cachedState = useSelector(state => state.app.lastSplitState);
-  const reduxDispatch = useDispatch();
-
-  const [state, dispatch] = useReducer(
-    (state, action) => {
-      switch (action.type) {
-        case 'toggle-split': {
-          const ids = new Set([...state.ids]);
-          const { id } = action;
-          if (ids.has(id)) {
-            ids.delete(id);
-          } else {
-            ids.add(id);
-          }
-          return { ...state, ids };
-        }
-        case 'open-split': {
-          const ids = new Set([...state.ids]);
-          const { id } = action;
-          if (state.mode === 'collapse') {
-            ids.delete(id);
-          } else {
-            ids.add(id);
-          }
-          return { ...state, ids };
-        }
-        case 'set-mode': {
-          return {
-            ...state,
-            mode: action.mode,
-            ids: new Set(),
-            transitionId: null,
-          };
-        }
-        case 'switch-mode':
-          if (state.transitionId != null) {
-            // You can only transition once at a time
-            return state;
-          }
-
-          return {
-            ...state,
-            mode: state.mode === 'expand' ? 'collapse' : 'expand',
-            transitionId: action.id,
-            ids: new Set(),
-          };
-        case 'finish-switch-mode':
-          return { ...state, transitionId: null };
-        default:
-          throw new Error('Unknown action type: ' + action.type);
-      }
-    },
-    cachedState.current || { ids: new Set(), mode: initialMode },
-  );
-
-  useEffect(() => {
-    if (state.transitionId != null) {
-      // This timeout allows animations to finish
-      setTimeout(() => {
-        dispatch({ type: 'finish-switch-mode' });
-      }, 250);
-    }
-  }, [state.transitionId]);
-
-  useEffect(() => {
-    // In a finished state, cache the state
-    if (state.transitionId == null) {
-      reduxDispatch({ type: 'SET_LAST_SPLIT_STATE', splitState: state });
-    }
-  }, [state]);
-
-  const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
-
-  return (
-    <SplitsExpandedContext.Provider value={value}>
-      {children}
-    </SplitsExpandedContext.Provider>
   );
 }
 
@@ -1457,14 +1358,6 @@ function makeTemporaryTransactions(
       amount: null,
     },
   ];
-}
-
-function isTemporaryId(id) {
-  return id.indexOf('temp') !== -1;
-}
-
-export function isPreviewId(id) {
-  return id.indexOf('preview/') !== -1;
 }
 
 function NewTransaction({

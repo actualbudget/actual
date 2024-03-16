@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { memo, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
@@ -207,7 +206,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 width={14}
                 height={14}
                 className="hover-visible"
-                style={menuOpen && { opacity: 1 }}
+                style={menuOpen ? { opacity: 1 } : {}}
               />
             </Button>
             {menuOpen && (
@@ -239,10 +238,14 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                       name: 'set-single-12-avg',
                       text: 'Set to yearly average',
                     },
-                    isGoalTemplatesEnabled && {
-                      name: 'apply-single-category-template',
-                      text: 'Apply budget template',
-                    },
+                    ...(isGoalTemplatesEnabled
+                      ? [
+                          {
+                            name: 'apply-single-category-template',
+                            text: 'Apply budget template',
+                          },
+                        ]
+                      : []),
                   ]}
                 />
               </Tooltip>

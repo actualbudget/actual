@@ -27,8 +27,6 @@ export function ReportSidebar({
   dateRangeLine,
   allMonths,
   setDateRange,
-  typeDisabled,
-  setTypeDisabled,
   setGraphType,
   setGroupBy,
   setInterval,
@@ -41,8 +39,10 @@ export function ReportSidebar({
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
-  onChangeViews,
   onReportChange,
+  disabledItems,
+  defaultItems,
+  defaultModeItems,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
@@ -87,50 +87,25 @@ export function ReportSidebar({
   const onChangeMode = cond => {
     onReportChange({ type: 'modify' });
     setMode(cond);
+    let graph;
     if (cond === 'time') {
-      if (customReportItems.graphType === 'TableGraph') {
-        setTypeDisabled([]);
-      } else {
-        setTypeDisabled(['Net']);
-        if (['Net'].includes(customReportItems.balanceType)) {
-          setBalanceType('Payment');
-        }
-      }
       if (customReportItems.graphType === 'BarGraph') {
         setGraphType('StackedBarGraph');
-      }
-      if (['AreaGraph', 'DonutGraph'].includes(customReportItems.graphType)) {
-        setGraphType('TableGraph');
-        onChangeViews('viewLegend', false);
-      }
-      if (customReportItems.groupBy === 'Interval') {
-        setGroupBy('Category');
+        graph = 'StackedBarGraph';
       }
     } else {
       if (customReportItems.graphType === 'StackedBarGraph') {
         setGraphType('BarGraph');
-      } else {
-        setTypeDisabled([]);
+        graph = 'BarGraph';
       }
     }
+    defaultModeItems(graph, cond);
   };
 
   const onChangeSplit = cond => {
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
-    if (customReportItems.mode === 'total') {
-      if (customReportItems.graphType !== 'TableGraph') {
-        setTypeDisabled(
-          customReportItems.groupBy !== 'Interval' ? [] : ['Net'],
-        );
-      }
-    }
-    if (
-      ['Net'].includes(customReportItems.balanceType) &&
-      customReportItems.graphType !== 'TableGraph'
-    ) {
-      setBalanceType('Payment');
-    }
+    defaultItems(cond);
   };
 
   const onChangeBalanceType = cond => {
@@ -196,17 +171,8 @@ export function ReportSidebar({
           <Select
             value={customReportItems.groupBy}
             onChange={e => onChangeSplit(e)}
-            options={ReportOptions.groupBy.map(option => [
-              option.description,
-              option.description,
-            ])}
-            disabledKeys={
-              customReportItems.mode === 'time'
-                ? ['Interval']
-                : customReportItems.graphType === 'AreaGraph'
-                  ? ['Category', 'Group', 'Payee', 'Account']
-                  : []
-            }
+            options={ReportOptions.groupBy.map(option => [option, option])}
+            disabledKeys={disabledItems('split')}
           />
         </View>
         <View
@@ -226,7 +192,7 @@ export function ReportSidebar({
               option.description,
               option.description,
             ])}
-            disabledKeys={typeDisabled}
+            disabledKeys={disabledItems('type')}
           />
         </View>
         <View

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, {
   useState,
   useContext,
@@ -30,7 +29,7 @@ export function HoldTooltip({
   const spreadsheet = useSpreadsheet();
   const sheetName = useContext(NamespaceContext);
 
-  const [amount, setAmount] = useState(null);
+  const [amount, setAmount] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -39,8 +38,8 @@ export function HoldTooltip({
     })();
   }, []);
 
-  function submit() {
-    const parsedAmount = evalArithmetic(amount, null);
+  function submit(newAmount: string) {
+    const parsedAmount = evalArithmetic(newAmount);
     if (parsedAmount) {
       onSubmit(amountToInteger(parsedAmount));
     }
@@ -68,7 +67,7 @@ export function HoldTooltip({
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setAmount(e.target.value)
             }
-            onEnter={submit}
+            onEnter={() => submit(amount)}
           />
         </InitialFocus>
       </View>
@@ -85,7 +84,7 @@ export function HoldTooltip({
             paddingTop: 3,
             paddingBottom: 3,
           }}
-          onClick={submit}
+          onClick={() => submit(amount)}
         >
           Hold
         </Button>

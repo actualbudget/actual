@@ -75,20 +75,20 @@ function CategoryList({
           }
 
           const showGroup = item.cat_group !== lastGroup;
+          const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
               {showGroup && item.group?.name && (
                 <Fragment key={item.group.name}>
                   {renderCategoryItemGroupHeader({
-                    title: item.group.name,
+                    title: groupName,
                     style: {
                       color:
                         showHiddenItems && item.group?.hidden
                           ? theme.pageTextSubdued
                           : theme.menuAutoCompleteTextHeader,
                     },
-                    item: item.group,
                   })}
                 </Fragment>
               )}
@@ -115,7 +115,9 @@ function CategoryList({
   );
 }
 
-type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
+type CategoryAutocompleteProps = ComponentProps<
+  typeof Autocomplete<CategoryGroupEntity>
+> & {
   categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
   renderSplitTransactionButton?: (

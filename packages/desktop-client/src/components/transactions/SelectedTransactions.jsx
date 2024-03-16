@@ -1,12 +1,11 @@
 import React, { useMemo } from 'react';
 
+import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
-
-import { isPreviewId } from './TransactionsTable';
 
 export function SelectedTransactionsButton({
   getTransaction,

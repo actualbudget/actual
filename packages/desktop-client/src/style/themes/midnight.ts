@@ -58,7 +58,7 @@ export const menuBorder = colorPalette.gray800;
 export const menuBorderHover = colorPalette.purple300;
 export const menuKeybindingText = colorPalette.gray500;
 export const menuAutoCompleteBackground = colorPalette.gray600;
-export const menuAutoCompleteBackgroundHover = colorPalette.gray400;
+export const menuAutoCompleteBackgroundHover = colorPalette.gray300;
 export const menuAutoCompleteText = colorPalette.gray100;
 export const menuAutoCompleteTextHeader = colorPalette.purple200;
 
@@ -74,7 +74,7 @@ export const mobileNavItem = colorPalette.gray150;
 export const mobileNavItemSelected = colorPalette.purple200;
 export const mobileAccountShadow = cardShadow;
 export const mobileAccountText = colorPalette.blue800;
-export const mobileModalBackground = colorPalette.gray100;
+export const mobileModalBackground = menuAutoCompleteBackground;
 export const mobileModalText = colorPalette.white;
 
 // Mobile view themes (for the top bar)

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState, type ComponentPropsWithoutRef } from 'react';
 
 import { css } from 'glamor';
@@ -21,9 +20,9 @@ import { TransferTooltip } from '../TransferTooltip';
 import { TotalsList } from './TotalsList';
 
 type ToBudgetProps = {
-  month: string | number;
-  onBudgetAction: (idx: string | number, action: string, arg?: unknown) => void;
-  prevMonthName?: string;
+  month: string;
+  onBudgetAction: (idx: string, action: string, arg?: unknown) => void;
+  prevMonthName: string;
   showTotalsTooltipOnHover?: boolean;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
@@ -44,7 +43,7 @@ export function ToBudget({
   holdTooltipProps,
   transferTooltipProps,
 }: ToBudgetProps) {
-  const [menuOpen, setMenuOpen] = useState(null);
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const sheetName = useSheetName(rolloverBudget.toBudget);
   const sheetValue = useSheetValue({
     name: rolloverBudget.toBudget,
@@ -60,7 +59,7 @@ export function ToBudget({
       <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
       <View>
         <HoverTarget
-          disabled={!showTotalsTooltipOnHover || menuOpen}
+          disabled={!showTotalsTooltipOnHover || !!menuOpen}
           renderContent={() => (
             <Tooltip position="bottom-center" {...totalsTooltipProps}>
               <TotalsList

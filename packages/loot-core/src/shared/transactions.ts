@@ -12,6 +12,10 @@ interface TransactionEntityWithError extends TransactionEntity {
   _deleted?: boolean;
 }
 
+export function isTemporaryId(id: string) {
+  return id.indexOf('temp') !== -1;
+}
+
 export function isPreviewId(id: string) {
   return id.indexOf('preview/') !== -1;
 }

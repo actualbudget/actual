@@ -197,7 +197,7 @@ type SingleAutocompleteProps<T extends Item> = {
   onSelect: (id: T['id'], value: string) => void;
   tableBehavior?: boolean;
   closeOnBlur?: boolean;
-  value: T | T['id'];
+  value: null | T | T['id'];
   isMulti?: boolean;
 };
 function SingleAutocomplete<T extends Item>({
