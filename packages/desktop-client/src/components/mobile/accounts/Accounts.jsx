@@ -5,6 +5,7 @@ import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
+import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -54,7 +55,7 @@ function AccountHeader({ name, amount, style = {} }) {
   );
 }
 
-function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
+function AccountCard({ account, updated, connected, pending, failed, getBalanceQuery, onSelect }) {
   return (
     <View
       style={{
@@ -97,11 +98,16 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             {account.bankId && (
               <View
                 style={{
-                  backgroundColor: theme.noticeBackgroundDark,
+                  backgroundColor: pending
+                    ? theme.sidebarItemBackgroundPending
+                    : failed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
                   marginRight: '8px',
                   width: 8,
                   height: 8,
                   borderRadius: 8,
+                  opacity: connected ? 1 : 0,
                 }}
               />
             )}
@@ -153,6 +159,10 @@ function AccountList({
   onSelectAccount,
   onSync,
 }) {
+  const failedAccounts = useFailedAccounts();
+  const syncingAccountIds = useSelector(
+    (state) => state.account.accountsSyncing,
+  );
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
   const noBackgroundColorStyle = {
@@ -194,7 +204,10 @@ function AccountList({
             <AccountCard
               account={acct}
               key={acct.id}
-              updated={updatedAccounts.includes(acct.id)}
+              updated={updatedAccounts && updatedAccounts.includes(acct.id)}
+              connected={!!acct.bank}
+              pending={syncingAccountIds.includes(acct.id)}
+              failed={failedAccounts && failedAccounts.has(acct.id)}
               getBalanceQuery={getBalanceQuery}
               onSelect={onSelectAccount}
             />
@@ -211,7 +224,10 @@ function AccountList({
             <AccountCard
               account={acct}
               key={acct.id}
-              updated={updatedAccounts.includes(acct.id)}
+              updated={updatedAccounts && updatedAccounts.includes(acct.id)}
+              connected={!!acct.bank}
+              pending={syncingAccountIds.includes(acct.id)}
+              failed={failedAccounts && failedAccounts.has(acct.id)}
               getBalanceQuery={getBalanceQuery}
               onSelect={onSelectAccount}
             />
