@@ -78,6 +78,9 @@ export function Account(props) {
   const accounts = useAccounts();
   const payees = usePayees();
 
+  const failedAccounts = useFailedAccounts();
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -225,11 +228,6 @@ export function Account(props) {
   const balance = queries.accountBalance(account);
   const balanceCleared = queries.accountBalanceCleared(account);
   const balanceUncleared = queries.accountBalanceUncleared(account);
-
-  const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(
-    (state) => state.account.accountsSyncing,
-  );
 
   return (
     <SchedulesProvider

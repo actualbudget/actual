@@ -5,8 +5,8 @@ import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
-import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
@@ -55,7 +55,15 @@ function AccountHeader({ name, amount, style = {} }) {
   );
 }
 
-function AccountCard({ account, updated, connected, pending, failed, getBalanceQuery, onSelect }) {
+function AccountCard({
+  account,
+  updated,
+  connected,
+  pending,
+  failed,
+  getBalanceQuery,
+  onSelect,
+}) {
   return (
     <View
       style={{
@@ -160,9 +168,7 @@ function AccountList({
   onSync,
 }) {
   const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(
-    (state) => state.account.accountsSyncing,
-  );
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
   const noBackgroundColorStyle = {
