@@ -19,7 +19,7 @@ import { Tooltip } from '../tooltips';
 
 const BUTTON_HEIGHT = 40;
 
-type CategoryGroupMenuProps = {
+type CategoryGroupMenuModalProps = {
   modalProps: CommonModalProps;
   groupId: string;
   onSave: (group: CategoryGroupEntity) => void;
@@ -30,7 +30,7 @@ type CategoryGroupMenuProps = {
   onClose?: () => void;
 };
 
-export function CategoryGroupMenu({
+export function CategoryGroupMenuModal({
   modalProps,
   groupId,
   onSave,
@@ -38,7 +38,7 @@ export function CategoryGroupMenu({
   onEditNotes,
   onDelete,
   onClose,
-}: CategoryGroupMenuProps) {
+}: CategoryGroupMenuModalProps) {
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
   const data = useLiveQuery(
@@ -224,6 +224,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                 ...styles.mediumText,
                 color: theme.formLabelText,
               }}
+              getItemStyle={() => itemStyle}
               items={
                 [
                   {
@@ -231,7 +232,6 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                     text: group.hidden ? 'Show' : 'Hide',
                     icon: group.hidden ? SvgViewShow : SvgViewHide,
                     iconSize: 16,
-                    style: itemStyle,
                   },
                   ...(!group.is_income && [
                     Menu.line,
@@ -240,7 +240,6 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                       text: 'Delete',
                       icon: SvgTrash,
                       iconSize: 15,
-                      style: itemStyle,
                     },
                   ]),
                 ].filter(i => i != null) as ComponentProps<typeof Menu>['items']

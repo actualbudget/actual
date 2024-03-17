@@ -33,6 +33,7 @@ import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
 import { prewarmMonth, switchBudgetType } from '../../budget/util';
 import { View } from '../../common/View';
+import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
 
 import { BudgetTable } from './BudgetTable';
@@ -369,42 +370,44 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   return (
-    <SyncRefresh
-      onSync={async () => {
-        dispatch(sync());
-      }}
-    >
-      {({ onRefresh }) => (
-        <BudgetTable
-          // This key forces the whole table rerender when the number
-          // format changes
-          key={`${numberFormat}${hideFraction}`}
-          categoryGroups={categoryGroups}
-          type={budgetType}
-          month={currentMonth}
-          monthBounds={bounds}
-          editMode={editMode}
-          onEditMode={flag => setEditMode(flag)}
-          onShowBudgetSummary={onShowBudgetSummary}
-          onPrevMonth={onPrevMonth}
-          onNextMonth={onNextMonth}
-          onSaveGroup={onSaveGroup}
-          onDeleteGroup={onDeleteGroup}
-          onAddGroup={onAddGroup}
-          onAddCategory={onAddCategory}
-          onSaveCategory={onSaveCategory}
-          onDeleteCategory={onDeleteCategory}
-          onReorderCategory={onReorderCategory}
-          onReorderGroup={onReorderGroup}
-          onOpenMonthActionMenu={() => {}} //onOpenMonthActionMenu}
-          onBudgetAction={onBudgetAction}
-          onRefresh={onRefresh}
-          onSwitchBudgetType={onSwitchBudgetType}
-          onEditGroup={onEditGroup}
-          onEditCategory={onEditCategory}
-        />
-      )}
-    </SyncRefresh>
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(currentMonth)}>
+      <SyncRefresh
+        onSync={async () => {
+          dispatch(sync());
+        }}
+      >
+        {({ onRefresh }) => (
+          <BudgetTable
+            // This key forces the whole table rerender when the number
+            // format changes
+            key={`${numberFormat}${hideFraction}`}
+            categoryGroups={categoryGroups}
+            type={budgetType}
+            month={currentMonth}
+            monthBounds={bounds}
+            editMode={editMode}
+            onEditMode={flag => setEditMode(flag)}
+            onShowBudgetSummary={onShowBudgetSummary}
+            onPrevMonth={onPrevMonth}
+            onNextMonth={onNextMonth}
+            onSaveGroup={onSaveGroup}
+            onDeleteGroup={onDeleteGroup}
+            onAddGroup={onAddGroup}
+            onAddCategory={onAddCategory}
+            onSaveCategory={onSaveCategory}
+            onDeleteCategory={onDeleteCategory}
+            onReorderCategory={onReorderCategory}
+            onReorderGroup={onReorderGroup}
+            onOpenMonthActionMenu={() => {}} //onOpenMonthActionMenu}
+            onBudgetAction={onBudgetAction}
+            onRefresh={onRefresh}
+            onSwitchBudgetType={onSwitchBudgetType}
+            onEditGroup={onEditGroup}
+            onEditCategory={onEditCategory}
+          />
+        )}
+      </SyncRefresh>
+    </NamespaceContext.Provider>
   );
 }
 
