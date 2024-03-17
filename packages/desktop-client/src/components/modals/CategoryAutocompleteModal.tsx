@@ -30,10 +30,10 @@ export function CategoryAutocompleteModal({
     onClose?.();
   };
 
-  function _onSelect(id: string, value: string) {
+  const _onSelect = (id, value) => {
     onSelect?.(id, value);
     _onClose();
-  }
+  };
 
   const itemStyle = {
     fontSize: 17,
@@ -92,7 +92,6 @@ export function CategoryAutocompleteModal({
               embedded={true}
               closeOnBlur={false}
               showSplitOption={false}
-              onUpdate={() => {}}
               onSelect={_onSelect}
               {...(isNarrowWidth && {
                 renderCategoryItemGroupHeader: props => (

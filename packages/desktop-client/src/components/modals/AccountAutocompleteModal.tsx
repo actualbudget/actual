@@ -32,10 +32,10 @@ export function AccountAutocompleteModal({
     onClose?.();
   };
 
-  function _onSelect(accountId: string, accountName: string) {
+  const _onSelect = (accountId, accountName) => {
     onSelect?.(accountId, accountName);
     _onClose();
-  }
+  };
 
   const itemStyle = {
     fontSize: 17,

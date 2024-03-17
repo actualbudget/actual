@@ -4,6 +4,7 @@ import { createPayee } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { usePayees } from '../../hooks/usePayees';
+import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { ItemHeader } from '../autocomplete/ItemHeader';
@@ -34,10 +35,10 @@ export function PayeeAutocompleteModal({
     onClose?.();
   };
 
-  function _onSelect(payeeId: string) {
+  const _onSelect = payeeId => {
     onSelect?.(payeeId);
     _onClose();
-  }
+  };
 
   const itemStyle = {
     fontSize: 17,
@@ -93,7 +94,6 @@ export function PayeeAutocompleteModal({
 
             _onSelect?.(value);
           }}
-          isCreatable
           {...(isNarrowWidth && {
             renderCreatePayeeButton: props => (
               <CreatePayeeButton
@@ -130,4 +130,8 @@ export function PayeeAutocompleteModal({
       )}
     </Modal>
   );
+}
+
+function CreatePayeeIcon(props) {
+  return <SvgAdd {...props} width={14} height={14} />;
 }
