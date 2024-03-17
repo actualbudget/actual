@@ -6,16 +6,20 @@ import { useLocation } from 'react-router-dom';
 import { type State } from 'loot-core/src/client/state-types';
 import { type PopModalAction } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
+import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useActions } from '../hooks/useActions';
 import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 
-import { CategoryGroupMenu } from './modals/CategoryGroupMenu';
-import { CategoryMenu } from './modals/CategoryMenu';
+import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
+import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
+import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
+import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccount } from './modals/CloseAccount';
 import { ConfirmCategoryDelete } from './modals/ConfirmCategoryDelete';
 import { ConfirmTransactionEdit } from './modals/ConfirmTransactionEdit';
 import { ConfirmUnlinkAccount } from './modals/ConfirmUnlinkAccount';
+import { CoverModal } from './modals/CoverModal';
 import { CreateAccount } from './modals/CreateAccount';
 import { CreateEncryptionKey } from './modals/CreateEncryptionKey';
 import { CreateLocalAccount } from './modals/CreateLocalAccount';
@@ -29,17 +33,22 @@ import { LoadBackup } from './modals/LoadBackup';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
 import { Notes } from './modals/Notes';
+import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
+import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetSummary } from './modals/ReportBudgetSummary';
+import { RolloverBalanceMenuModal } from './modals/RolloverBalanceMenuModal';
 import { RolloverBudgetSummary } from './modals/RolloverBudgetSummary';
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInput } from './modals/SingleInput';
 import { SwitchBudgetType } from './modals/SwitchBudgetType';
+import { TransferModal } from './modals/TransferModal';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
+import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
 export type CommonModalProps = {
   onClose: () => PopModalAction;
@@ -255,6 +264,39 @@ export function Modals() {
             />
           );
 
+        case 'category-autocomplete':
+          return (
+            <CategoryAutocompleteModal
+              key={name}
+              modalProps={modalProps}
+              categoryGroups={options.categoryGroups}
+              onSelect={options.onSelect}
+              showHiddenCategories={options.showHiddenCategories}
+              onClose={options.onClose}
+            />
+          );
+
+        case 'account-autocomplete':
+          return (
+            <AccountAutocompleteModal
+              key={name}
+              modalProps={modalProps}
+              onSelect={options.onSelect}
+              includeClosedAccounts={options.includeClosedAccounts}
+              onClose={options.onClose}
+            />
+          );
+
+        case 'payee-autocomplete':
+          return (
+            <PayeeAutocompleteModal
+              key={name}
+              modalProps={modalProps}
+              onSelect={options.onSelect}
+              onClose={options.onClose}
+            />
+          );
+
         case 'new-category':
           return (
             <SingleInput
@@ -350,7 +392,7 @@ export function Modals() {
 
         case 'category-menu':
           return (
-            <CategoryMenu
+            <CategoryMenuModal
               key={name}
               modalProps={modalProps}
               categoryId={options.categoryId}
@@ -363,7 +405,7 @@ export function Modals() {
 
         case 'category-group-menu':
           return (
-            <CategoryGroupMenu
+            <CategoryGroupMenuModal
               key={name}
               modalProps={modalProps}
               groupId={options.groupId}
@@ -384,6 +426,56 @@ export function Modals() {
               id={options.id}
               name={options.name}
               onSave={options.onSave}
+            />
+          );
+
+        case 'rollover-balance-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <RolloverBalanceMenuModal
+                modalProps={modalProps}
+                categoryId={options.categoryId}
+                onCarryover={options.onCarryover}
+                onTransfer={options.onTransfer}
+                onCover={options.onCover}
+              />
+            </NamespaceContext.Provider>
+          );
+
+        case 'report-balance-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <ReportBalanceMenuModal
+                modalProps={modalProps}
+                categoryId={options.categoryId}
+                onCarryover={options.onCarryover}
+              />
+            </NamespaceContext.Provider>
+          );
+
+        case 'transfer':
+          return (
+            <TransferModal
+              modalProps={modalProps}
+              categoryId={options.categoryId}
+              amount={options.amount}
+              onSubmit={options.onSubmit}
+              showToBeBudgeted={options.showToBeBudgeted}
+            />
+          );
+
+        case 'cover':
+          return (
+            <CoverModal
+              modalProps={modalProps}
+              categoryId={options.categoryId}
+              onSubmit={options.onSubmit}
             />
           );
 

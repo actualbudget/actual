@@ -369,7 +369,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
             ),
           })}
           {...autocompleteProps}
-          showHiddenItems={false}
+          showHiddenCategories={false}
         />
       );
       break;

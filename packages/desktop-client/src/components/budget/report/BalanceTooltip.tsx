@@ -40,7 +40,6 @@ export function BalanceTooltip({
             category: categoryId,
             flag: carryover,
           });
-          _onClose();
         }}
       />
     </Tooltip>
