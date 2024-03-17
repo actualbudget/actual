@@ -1642,7 +1642,7 @@ export function Account() {
       });
       if (params.id) {
         if (params.id === 'uncategorized') {
-          q = q.filter({ 'next_date': null });
+          q = q.filter({ next_date: null });
         } else {
           q = q.filter({
             $or: [filterByAccount, filterByPayee],
