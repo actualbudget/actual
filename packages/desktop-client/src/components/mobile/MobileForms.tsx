@@ -1,16 +1,22 @@
-import { forwardRef } from 'react';
+import { forwardRef, type ReactNode } from 'react';
 
 import { css } from 'glamor';
 
-import { theme, styles } from '../../style';
-import { Button } from '../common/Button';
-import { Input } from '../common/Input';
+import { theme, styles, type CSSProperties } from '../../style';
+import { Button, type ButtonProps } from '../common/Button';
+import { Input, type InputProps } from '../common/Input';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
+import { type View } from '../common/View';
 
 const FIELD_HEIGHT = 40;
 
-export function FieldLabel({ title, flush, style }) {
+type FieldLabelProps = {
+  title: string;
+  flush?: boolean;
+  style?: CSSProperties;
+};
+
+export function FieldLabel({ title, flush, style }: FieldLabelProps) {
   return (
     <Text
       style={{
@@ -37,29 +43,37 @@ const valueStyle = {
   height: FIELD_HEIGHT,
 };
 
-export const InputField = forwardRef(function InputField(
-  { disabled, style, onUpdate, ...props },
-  ref,
-) {
-  return (
-    <Input
-      inputRef={ref}
-      autoCorrect="false"
-      autoCapitalize="none"
-      disabled={disabled}
-      onUpdate={onUpdate}
-      style={{
-        ...valueStyle,
-        ...style,
-        color: disabled ? theme.tableTextInactive : theme.tableText,
-        backgroundColor: disabled
-          ? theme.formInputTextReadOnlySelection
-          : theme.tableBackground,
-      }}
-      {...props}
-    />
-  );
-});
+type InputFieldProps = InputProps;
+
+export const InputField = forwardRef<typeof HTMLInputElement, InputFieldProps>(
+  function InputField(
+    { disabled, style, onUpdate, ...props }: InputFieldProps,
+    ref,
+  ) {
+    return (
+      <Input
+        inputRef={ref}
+        autoCorrect="false"
+        autoCapitalize="none"
+        disabled={disabled}
+        onUpdate={onUpdate}
+        style={{
+          ...valueStyle,
+          ...style,
+          color: disabled ? theme.tableTextInactive : theme.tableText,
+          backgroundColor: disabled
+            ? theme.formInputTextReadOnlySelection
+            : theme.tableBackground,
+        }}
+        {...props}
+      />
+    );
+  },
+);
+
+type TapFieldProps = ButtonProps & {
+  rightContent?: ReactNode;
+};
 
 export function TapField({
   value,
@@ -70,7 +84,7 @@ export function TapField({
   textStyle,
   onClick,
   ...props
-}) {
+}: TapFieldProps) {
   return (
     <Button
       as={View}
@@ -108,7 +122,19 @@ export function TapField({
   );
 }
 
-export function BooleanField({ checked, onUpdate, style, disabled = false }) {
+type BooleanFieldProps = {
+  checked: boolean;
+  disabled?: boolean;
+  onUpdate?: (checked: boolean) => void;
+  style?: CSSProperties;
+};
+
+export function BooleanField({
+  checked,
+  onUpdate,
+  style,
+  disabled = false,
+}: BooleanFieldProps) {
   return (
     <input
       disabled={disabled ? true : undefined}
