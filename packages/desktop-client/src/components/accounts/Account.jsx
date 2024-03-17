@@ -801,7 +801,7 @@ class AccountInternal extends PureComponent {
 
   onBatchEdit = async (name, ids) => {
     const onChange = async (name, value, mode) => {
-      const newValue = value;
+      const newValue = value === null ? '' : value;
       this.setState({ workingHard: true });
 
       const { data } = await runQuery(
@@ -837,9 +837,9 @@ class AccountInternal extends PureComponent {
 
         if (name === 'notes') {
           if (mode === 'prepend') {
-            value = newValue + ',' + trans.notes;
+            value = newValue + ' ' + trans.notes;
           } else if (mode === 'append') {
-            value = trans.notes + ',' + newValue;
+            value = trans.notes + ' ' + newValue;
           } else if (mode === 'replace') {
             value = newValue;
           }

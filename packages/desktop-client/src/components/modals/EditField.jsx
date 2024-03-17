@@ -45,7 +45,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
   const payees = usePayees();
 
   const { createPayee } = useActions();
-
+  let noteAmend = null;
   const onCloseInner = () => {
     modalProps.onClose();
     onClose?.();
@@ -88,7 +88,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
-  let noteAmend = 'replace';
   const onChangeMode = cond => {
     noteAmend = cond;
     if (cond === 'prepend') {
@@ -224,11 +223,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
       editor = (
         <>
-          <Input
-            focused={true}
-            onEnter={e => onSelectNote(e.target.value, noteAmend)}
-            style={inputStyle}
-          />
           <View
             style={{
               flexGrow: 1,
@@ -263,6 +257,11 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
               Append to Note
             </ModeButton>
           </View>
+          <Input
+            focused={true}
+            onEnter={e => onSelectNote(e.target.value, noteAmend)}
+            style={inputStyle}
+          />
         </>
       );
       break;
