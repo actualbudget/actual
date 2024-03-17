@@ -94,6 +94,17 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
               alignItems: 'center',
             }}
           >
+            {account.bankId && (
+              <View
+                style={{
+                  backgroundColor: theme.noticeBackgroundDark,
+                  marginRight: '8px',
+                  width: 8,
+                  height: 8,
+                  borderRadius: 8,
+                }}
+              />
+            )}
             <TextOneLine
               style={{
                 ...styles.text,
@@ -106,17 +117,6 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             >
               {account.name}
             </TextOneLine>
-            {account.bankId && (
-              <View
-                style={{
-                  backgroundColor: theme.noticeBackgroundDark,
-                  marginLeft: '-23px',
-                  width: 8,
-                  height: 8,
-                  borderRadius: 8,
-                }}
-              />
-            )}
           </View>
         </View>
         <CellValue
