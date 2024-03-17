@@ -66,6 +66,8 @@ function TransactionSearchInput({ accountName, onSearch }) {
 
 export function AccountDetails({
   account,
+  pending,
+  failed,
   prependTransactions,
   transactions,
   accounts,
@@ -90,7 +92,30 @@ export function AccountDetails({
 
   return (
     <Page
-      title={account.name}
+      title={
+          !account.bankId ? account.name :
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
+              <div
+                style={{
+                  margin: 'auto',
+                  marginRight: 3,
+                  width: 8,
+                  height: 8,
+                  borderRadius: 8,
+                  backgroundColor: pending
+                    ? theme.sidebarItemBackgroundPending
+                    : failed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
+                  transition: 'transform .3s',
+                }}
+              />
+              {account.name}
+            </View>
+      }
       headerLeftContent={<MobileBackButton />}
       headerRightContent={
         <ButtonLink
