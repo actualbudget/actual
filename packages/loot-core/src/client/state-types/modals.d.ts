@@ -103,6 +103,24 @@ type FinanceModals = {
     onClose: () => void;
   };
 
+  'category-autocomplete': {
+    categoryGroups: CategoryGroupEntity[];
+    onSelect: (categoryId: string, categoryName: string) => void;
+    showHiddenCategories?: boolean;
+    onClose?: () => void;
+  };
+
+  'account-autocomplete': {
+    onSelect: (accountId: string, accountName: string) => void;
+    includeClosedAccounts?: boolean;
+    onClose?: () => void;
+  };
+
+  'payee-autocomplete': {
+    onSelect: (payeeId: string) => void;
+    onClose?: () => void;
+  };
+
   'budget-summary': {
     month: string;
   };
@@ -151,6 +169,28 @@ type FinanceModals = {
   'new-category': {
     onValidate?: (value: string) => string;
     onSubmit: (value: string) => Promise<void>;
+  };
+  'rollover-balance-menu': {
+    categoryId: string;
+    month: string;
+    onCarryover: (carryover: boolean) => void;
+    onTransfer: () => void;
+    onCover: () => void;
+  };
+  'report-balance-menu': {
+    categoryId: string;
+    month: string;
+    onCarryover: (carryover: boolean) => void;
+  };
+  transfer: {
+    categoryId: string;
+    amount: number;
+    onSubmit: (amount: number, toCategoryId: string) => void;
+    showToBeBudgeted?: boolean;
+  };
+  cover: {
+    categoryId: string;
+    onSubmit: (fromCategoryId: string) => void;
   };
 };
 

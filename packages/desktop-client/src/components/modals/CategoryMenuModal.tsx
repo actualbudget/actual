@@ -19,7 +19,7 @@ import { Tooltip } from '../tooltips';
 
 const BUTTON_HEIGHT = 40;
 
-type CategoryMenuProps = {
+type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
   onSave: (category: CategoryEntity) => void;
@@ -28,14 +28,14 @@ type CategoryMenuProps = {
   onClose?: () => void;
 };
 
-export function CategoryMenu({
+export function CategoryMenuModal({
   modalProps,
   categoryId,
   onSave,
   onEditNotes,
   onDelete,
   onClose,
-}: CategoryMenuProps) {
+}: CategoryMenuModalProps) {
   const { list: categories } = useCategories();
   const category = categories.find(c => c.id === categoryId);
   const data = useLiveQuery(
@@ -198,13 +198,13 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
             }}
           >
             <Menu
+              getItemStyle={() => itemStyle}
               items={[
                 {
                   name: 'toggleVisibility',
                   text: category.hidden ? 'Show' : 'Hide',
                   icon: category.hidden ? SvgViewShow : SvgViewHide,
                   iconSize: 16,
-                  style: itemStyle,
                 },
                 Menu.line,
                 {
@@ -212,7 +212,6 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
                   text: 'Delete',
                   icon: SvgTrash,
                   iconSize: 15,
-                  style: itemStyle,
                 },
               ]}
               onMenuSelect={itemName => {
