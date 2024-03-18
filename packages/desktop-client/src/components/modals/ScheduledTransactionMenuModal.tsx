@@ -1,11 +1,9 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { styles, type CSSProperties, theme } from '../../style';
+import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
-
-const MENU_ITEM_HEIGHT = 40;
 
 type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps & {
   modalProps: CommonModalProps;
@@ -18,18 +16,15 @@ export function ScheduledTransactionMenuModal({
   onPost,
 }: ScheduledTransactionMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: MENU_ITEM_HEIGHT,
+    ...styles.mobileMenuItem,
     color: theme.menuItemText,
-    paddingTop: 8,
-    paddingBottom: 8,
     borderRadius: 0,
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
   return (
     <Modal
-      title="Scheduled transaction menu"
+      title="Actions"
       showHeader
       focusAfterClose={false}
       {...modalProps}
