@@ -30,7 +30,7 @@ export function PayeeAutocompleteModal({
   const payees = usePayees() || [];
   const accounts = useAccounts() || [];
 
-  const { value, onSelect, ...restAutocompleteProps } = autocompleteProps;
+  const { onSelect, ...restAutocompleteProps } = autocompleteProps;
 
   const _onClose = () => {
     modalProps.onClose();
@@ -83,7 +83,7 @@ export function PayeeAutocompleteModal({
         <PayeeAutocomplete
           payees={payees}
           accounts={accounts}
-          value={value}
+          value={null}
           focused={true}
           embedded={true}
           closeOnBlur={false}

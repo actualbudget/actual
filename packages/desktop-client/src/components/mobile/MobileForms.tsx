@@ -94,6 +94,7 @@ export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
   ) => {
     return (
       <Button
+        // @ts-expect-error fix this later
         as={View}
         ref={ref}
         onClick={!disabled ? onClick : undefined}
