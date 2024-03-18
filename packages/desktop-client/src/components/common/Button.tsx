@@ -7,7 +7,7 @@ import { type CSSProperties, styles, theme } from '../../style';
 
 import { View } from './View';
 
-export type ButtonProps = HTMLProps<HTMLButtonElement> & {
+type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
   hover?: boolean;
   type?: ButtonType;

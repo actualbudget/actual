@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { createPayee } from 'loot-core/client/actions';
 
@@ -10,25 +10,27 @@ import { styles, theme } from '../../style';
 import { ItemHeader } from '../autocomplete/ItemHeader';
 import {
   PayeeAutocomplete,
-  type PayeeAutocompleteProps,
   PayeeItem,
   CreatePayeeButton,
 } from '../autocomplete/PayeeAutocomplete';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
-type PayeeAutocompleteModalProps = Partial<PayeeAutocompleteProps> & {
+type PayeeAutocompleteModalProps = {
   modalProps: CommonModalProps;
+  autocompleteProps?: ComponentPropsWithoutRef<typeof PayeeAutocomplete>;
   onClose: () => void;
 };
 
 export function PayeeAutocompleteModal({
   modalProps,
-  onSelect,
+  autocompleteProps,
   onClose,
 }: PayeeAutocompleteModalProps) {
   const payees = usePayees() || [];
   const accounts = useAccounts() || [];
+
+  const { value, onSelect, ...restAutocompleteProps } = autocompleteProps;
 
   const _onClose = () => {
     modalProps.onClose();
@@ -52,7 +54,7 @@ export function PayeeAutocompleteModal({
     ':focus': { boxShadow: 0 },
     ...(isNarrowWidth && itemStyle),
   };
-  const autocompleteProps = {
+  const defaultAutocompleteProps = {
     inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
@@ -81,7 +83,7 @@ export function PayeeAutocompleteModal({
         <PayeeAutocomplete
           payees={payees}
           accounts={accounts}
-          value={null}
+          value={value}
           focused={true}
           embedded={true}
           closeOnBlur={false}
@@ -125,7 +127,8 @@ export function PayeeAutocompleteModal({
               />
             ),
           })}
-          {...autocompleteProps}
+          {...defaultAutocompleteProps}
+          {...restAutocompleteProps}
         />
       )}
     </Modal>
