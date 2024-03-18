@@ -192,6 +192,11 @@ type FinanceModals = {
     categoryId: string;
     onSubmit: (fromCategoryId: string) => void;
   };
+  'scheduled-transaction-menu': {
+    transactionId: string;
+    onPost: (transactionId: string) => void;
+    onSkip: (transactionId: string) => void;
+  };
 };
 
 export type PushModalAction = {
