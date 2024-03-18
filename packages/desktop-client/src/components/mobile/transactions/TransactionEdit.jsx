@@ -544,15 +544,15 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const onClick = (transactionId, name) => {
     onRequestActiveEdit?.(getFieldName(transaction.id, name), () => {
+      const transaction = unserializedTransactions.find(
+        t => t.id === transactionId,
+      );
       switch (name) {
         case 'category':
           dispatch(
             pushModal('category-autocomplete', {
               categoryGroups,
               onSelect: categoryId => {
-                const transaction = unserializedTransactions.find(
-                  t => t.id === transactionId,
-                );
                 // This is a deficiency of this API, need to fix. It
                 // assumes that it receives a serialized transaction,
                 // but we only have access to the raw transaction
@@ -572,9 +572,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('account-autocomplete', {
               onSelect: accountId => {
-                const transaction = unserializedTransactions.find(
-                  t => t.id === transactionId,
-                );
                 // This is a deficiency of this API, need to fix. It
                 // assumes that it receives a serialized transaction,
                 // but we only have access to the raw transaction
@@ -594,9 +591,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('payee-autocomplete', {
               onSelect: payeeId => {
-                const transaction = unserializedTransactions.find(
-                  t => t.id === transactionId,
-                );
                 // This is a deficiency of this API, need to fix. It
                 // assumes that it receives a serialized transaction,
                 // but we only have access to the raw transaction
@@ -617,9 +611,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
             pushModal('edit-field', {
               name,
               onSubmit: (name, value) => {
-                const transaction = unserializedTransactions.find(
-                  t => t.id === transactionId,
-                );
                 // This is a deficiency of this API, need to fix. It
                 // assumes that it receives a serialized transaction,
                 // but we only have access to the raw transaction
