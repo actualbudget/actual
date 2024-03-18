@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { styles, type CSSProperties, theme } from '../../style';
 import { Menu } from '../common/Menu';
@@ -52,7 +52,10 @@ export function ScheduledTransactionMenuModal({
   );
 }
 
-type ScheduledTransactionMenuProps = {
+type ScheduledTransactionMenuProps = Omit<
+  ComponentPropsWithoutRef<typeof Menu>,
+  'onMenuSelect' | 'items'
+> & {
   transactionId: string;
   onSkip: (transactionId: string) => void;
   onPost: (transactionId: string) => void;
