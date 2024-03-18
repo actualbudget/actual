@@ -1,12 +1,16 @@
-import { forwardRef, type ReactNode } from 'react';
+import {
+  type ComponentPropsWithoutRef,
+  forwardRef,
+  type ReactNode,
+} from 'react';
 
 import { css } from 'glamor';
 
 import { theme, styles, type CSSProperties } from '../../style';
-import { Button, type ButtonProps } from '../common/Button';
-import { Input, type InputProps } from '../common/Input';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
 import { Text } from '../common/Text';
-import { type View } from '../common/View';
+import { View } from '../common/View';
 
 const FIELD_HEIGHT = 40;
 
@@ -43,13 +47,10 @@ const valueStyle = {
   height: FIELD_HEIGHT,
 };
 
-type InputFieldProps = InputProps;
+type InputFieldProps = ComponentPropsWithoutRef<typeof Input>;
 
-export const InputField = forwardRef<typeof HTMLInputElement, InputFieldProps>(
-  function InputField(
-    { disabled, style, onUpdate, ...props }: InputFieldProps,
-    ref,
-  ) {
+export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
+  ({ disabled, style, onUpdate, ...props }, ref) => {
     return (
       <Input
         inputRef={ref}
@@ -71,56 +72,66 @@ export const InputField = forwardRef<typeof HTMLInputElement, InputFieldProps>(
   },
 );
 
-type TapFieldProps = ButtonProps & {
+InputField.displayName = 'InputField';
+
+type TapFieldProps = ComponentPropsWithoutRef<typeof Button> & {
   rightContent?: ReactNode;
 };
 
-export function TapField({
-  value,
-  children,
-  disabled,
-  rightContent,
-  style,
-  textStyle,
-  onClick,
-  ...props
-}: TapFieldProps) {
-  return (
-    <Button
-      as={View}
-      onClick={!disabled ? onClick : undefined}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        ...style,
-        ...valueStyle,
-        backgroundColor: theme.tableBackground,
-        ...(disabled && {
-          backgroundColor: theme.formInputTextReadOnlySelection,
-        }),
-      }}
-      bounce={false}
-      activeStyle={{
-        opacity: 0.5,
-        boxShadow: 'none',
-      }}
-      hoveredStyle={{
-        boxShadow: 'none',
-      }}
-      // activeOpacity={0.05}
-      {...props}
-    >
-      {children ? (
-        children
-      ) : (
-        <Text style={{ flex: 1, userSelect: 'none', ...textStyle }}>
-          {value}
-        </Text>
-      )}
-      {!disabled && rightContent}
-    </Button>
-  );
-}
+export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
+  (
+    {
+      value,
+      children,
+      disabled,
+      rightContent,
+      style,
+      textStyle,
+      onClick,
+      ...props
+    },
+    ref,
+  ) => {
+    return (
+      <Button
+        as={View}
+        ref={ref}
+        onClick={!disabled ? onClick : undefined}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          ...style,
+          ...valueStyle,
+          backgroundColor: theme.tableBackground,
+          ...(disabled && {
+            backgroundColor: theme.formInputTextReadOnlySelection,
+          }),
+        }}
+        bounce={false}
+        activeStyle={{
+          opacity: 0.5,
+          boxShadow: 'none',
+        }}
+        hoveredStyle={{
+          boxShadow: 'none',
+        }}
+        // activeOpacity={0.05}
+        {...props}
+      >
+        {children ? (
+          children
+        ) : (
+          <Text style={{ flex: 1, userSelect: 'none', ...textStyle }}>
+            {value}
+          </Text>
+        )}
+        {!disabled && rightContent}
+      </Button>
+    );
+  },
+);
+
+TapField.displayName = 'TapField';
 
 type BooleanFieldProps = {
   checked: boolean;
@@ -140,7 +151,7 @@ export function BooleanField({
       disabled={disabled ? true : undefined}
       type="checkbox"
       checked={checked}
-      onChange={e => onUpdate(e.target.checked)}
+      onChange={e => onUpdate?.(e.target.checked)}
       className={`${css([
         {
           marginInline: styles.mobileEditingPadding,

@@ -269,9 +269,12 @@ export function Modals() {
             <CategoryAutocompleteModal
               key={name}
               modalProps={modalProps}
-              categoryGroups={options.categoryGroups}
-              onSelect={options.onSelect}
-              showHiddenCategories={options.showHiddenCategories}
+              autocompleteProps={{
+                value: null,
+                categoryGroups: options.categoryGroups,
+                onSelect: options.onSelect,
+                showHiddenCategories: options.showHiddenCategories,
+              }}
               onClose={options.onClose}
             />
           );
@@ -281,8 +284,11 @@ export function Modals() {
             <AccountAutocompleteModal
               key={name}
               modalProps={modalProps}
-              onSelect={options.onSelect}
-              includeClosedAccounts={options.includeClosedAccounts}
+              autocompleteProps={{
+                value: null,
+                onSelect: options.onSelect,
+                includeClosedAccounts: options.includeClosedAccounts,
+              }}
               onClose={options.onClose}
             />
           );
@@ -292,7 +298,10 @@ export function Modals() {
             <PayeeAutocompleteModal
               key={name}
               modalProps={modalProps}
-              onSelect={options.onSelect}
+              autocompleteProps={{
+                value: null,
+                onSelect: options.onSelect,
+              }}
               onClose={options.onClose}
             />
           );

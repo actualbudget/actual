@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import {
   CategoryAutocomplete,
-  type CategoryAutocompleteProps,
   CategoryItem,
 } from '../autocomplete/CategoryAutocomplete';
 import { ItemHeader } from '../autocomplete/ItemHeader';
@@ -13,18 +12,20 @@ import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { type CommonModalProps } from '../Modals';
 
-type CategoryAutocompleteModalProps = Partial<CategoryAutocompleteProps> & {
+type CategoryAutocompleteModalProps = {
   modalProps: CommonModalProps;
+  autocompleteProps?: ComponentPropsWithoutRef<typeof CategoryAutocomplete>;
   onClose: () => void;
 };
 
 export function CategoryAutocompleteModal({
   modalProps,
-  categoryGroups,
-  onSelect,
+  autocompleteProps,
   onClose,
-  ...props
 }: CategoryAutocompleteModalProps) {
+  const { value, categoryGroups, onSelect, ...restAutocompleteProps } =
+    autocompleteProps;
+
   const _onClose = () => {
     modalProps.onClose();
     onClose?.();
@@ -47,7 +48,7 @@ export function CategoryAutocompleteModal({
     ':focus': { boxShadow: 0 },
     ...(isNarrowWidth && itemStyle),
   };
-  const autocompleteProps = {
+  const defaultAutocompleteProps = {
     inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
@@ -87,7 +88,7 @@ export function CategoryAutocompleteModal({
           <View style={{ flex: 1 }}>
             <CategoryAutocomplete
               categoryGroups={categoryGroups}
-              value={null}
+              value={value}
               focused={true}
               embedded={true}
               closeOnBlur={false}
@@ -117,9 +118,9 @@ export function CategoryAutocompleteModal({
                   />
                 ),
               })}
-              {...autocompleteProps}
               showHiddenCategories={false}
-              {...props}
+              {...defaultAutocompleteProps}
+              {...restAutocompleteProps}
             />
           </View>
         </View>
