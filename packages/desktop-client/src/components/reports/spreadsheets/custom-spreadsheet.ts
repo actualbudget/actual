@@ -117,20 +117,20 @@ export function createCustomSpreadsheet({
 
     const rangeInc =
       interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
-    const months = monthUtils[rangeInc](startDate, endDate);
+    const intervals = monthUtils[rangeInc](startDate, endDate);
 
     let totalAssets = 0;
     let totalDebts = 0;
 
-    const monthData = months.reduce((arr, month) => {
-      let perMonthAssets = 0;
-      let perMonthDebts = 0;
+    const monthData = intervals.reduce((arr, inter) => {
+      let perIntervalAssets = 0;
+      let perIntervalDebts = 0;
       const stacked = {};
 
       groupByList.map(item => {
         let stackAmounts = 0;
 
-        const monthAssets = filterHiddenItems(
+        const intervalAssets = filterHiddenItems(
           item,
           assets,
           showOffBudget,
@@ -139,12 +139,12 @@ export function createCustomSpreadsheet({
         )
           .filter(
             asset =>
-              asset.date === month && asset[groupByLabel] === (item.id ?? null),
+              asset.date === inter && asset[groupByLabel] === (item.id ?? null),
           )
           .reduce((a, v) => (a = a + v.amount), 0);
-        perMonthAssets += monthAssets;
+        perIntervalAssets += intervalAssets;
 
-        const monthDebts = filterHiddenItems(
+        const intervalDebts = filterHiddenItems(
           item,
           debts,
           showOffBudget,
@@ -153,16 +153,16 @@ export function createCustomSpreadsheet({
         )
           .filter(
             debt =>
-              debt.date === month && debt[groupByLabel] === (item.id ?? null),
+              debt.date === inter && debt[groupByLabel] === (item.id ?? null),
           )
           .reduce((a, v) => (a = a + v.amount), 0);
-        perMonthDebts += monthDebts;
+        perIntervalDebts += intervalDebts;
 
         if (balanceTypeOp === 'totalAssets') {
-          stackAmounts += monthAssets;
+          stackAmounts += intervalAssets;
         }
         if (balanceTypeOp === 'totalDebts') {
-          stackAmounts += monthDebts;
+          stackAmounts += intervalDebts;
         }
         if (stackAmounts !== 0) {
           stacked[item.name] = integerToAmount(Math.abs(stackAmounts));
@@ -170,19 +170,19 @@ export function createCustomSpreadsheet({
 
         return null;
       });
-      totalAssets += perMonthAssets;
-      totalDebts += perMonthDebts;
+      totalAssets += perIntervalAssets;
+      totalDebts += perIntervalDebts;
 
       arr.push({
         date:
           interval === 'Monthly'
             ? // eslint-disable-next-line rulesdir/typography
-              d.format(d.parseISO(`${month}-01`), "MMM ''yy")
-            : month,
+              d.format(d.parseISO(`${inter}-01`), "MMM ''yy")
+            : inter,
         ...stacked,
-        totalDebts: integerToAmount(perMonthDebts),
-        totalAssets: integerToAmount(perMonthAssets),
-        totalTotals: integerToAmount(perMonthDebts + perMonthAssets),
+        totalDebts: integerToAmount(perIntervalDebts),
+        totalAssets: integerToAmount(perIntervalAssets),
+        totalTotals: integerToAmount(perIntervalDebts + perIntervalAssets),
       });
 
       return arr;
@@ -191,7 +191,7 @@ export function createCustomSpreadsheet({
     const calcData = groupByList.map(item => {
       const calc = recalculate({
         item,
-        months,
+        intervals,
         assets,
         debts,
         groupByLabel,

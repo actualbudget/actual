@@ -92,19 +92,22 @@ export function CustomReport() {
   );
 
   useEffect(() => {
-    const rangeInc =
-      interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
-    setMonths(monthUtils[rangeInc](startDate, endDate));
-
     let start;
     let end;
+
     if (interval === 'Monthly') {
       start = monthUtils.subMonths(monthUtils.currentMonth(), 5);
       end = monthUtils.currentMonth();
-    } else {
-      start = monthUtils.subYears(monthUtils.currentYear(), 3);
-      end = monthUtils.currentYear();
     }
+
+    if (interval === 'Yearly') {
+      start = monthUtils.yearFromMonth(startDate);
+      end = monthUtils.yearFromMonth(endDate);
+    }
+
+    const rangeInc =
+      interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
+    setMonths(monthUtils[rangeInc](start, end));
 
     setStartDate(start);
     setEndDate(end);
@@ -321,9 +324,9 @@ export function CustomReport() {
     }
   };
 
-  const onChangeDates = (startDate, endDate) => {
-    setStartDate(startDate);
-    setEndDate(endDate);
+  const onChangeDates = (dateStart, dateEnd) => {
+    setStartDate(dateStart);
+    setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
   };
 

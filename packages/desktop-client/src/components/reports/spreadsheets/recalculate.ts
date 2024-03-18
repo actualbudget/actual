@@ -7,7 +7,7 @@ import { filterHiddenItems } from './filterHiddenItems';
 
 type recalculateProps = {
   item;
-  months: Array<string>;
+  intervals: Array<string>;
   assets: QueryDataEntity[];
   debts: QueryDataEntity[];
   groupByLabel: string;
@@ -18,7 +18,7 @@ type recalculateProps = {
 
 export function recalculate({
   item,
-  months,
+  intervals,
   assets,
   debts,
   groupByLabel,
@@ -28,10 +28,10 @@ export function recalculate({
 }: recalculateProps) {
   let totalAssets = 0;
   let totalDebts = 0;
-  const monthData = months.reduce((arr, month) => {
+  const intervalData = intervals.reduce((arr, interval) => {
     const last = arr.length === 0 ? null : arr[arr.length - 1];
 
-    const monthAssets = filterHiddenItems(
+    const intervalAssets = filterHiddenItems(
       item,
       assets,
       showOffBudget,
@@ -40,12 +40,12 @@ export function recalculate({
     )
       .filter(
         asset =>
-          asset.date === month && asset[groupByLabel] === (item.id ?? null),
+          asset.date === interval && asset[groupByLabel] === (item.id ?? null),
       )
       .reduce((a, v) => (a = a + v.amount), 0);
-    totalAssets += monthAssets;
+    totalAssets += intervalAssets;
 
-    const monthDebts = filterHiddenItems(
+    const intervalDebts = filterHiddenItems(
       item,
       debts,
       showOffBudget,
@@ -53,21 +53,22 @@ export function recalculate({
       showUncategorized,
     )
       .filter(
-        debt => debt.date === month && debt[groupByLabel] === (item.id ?? null),
+        debt =>
+          debt.date === interval && debt[groupByLabel] === (item.id ?? null),
       )
       .reduce((a, v) => (a = a + v.amount), 0);
-    totalDebts += monthDebts;
+    totalDebts += intervalDebts;
 
     const change = last
-      ? monthAssets + monthDebts - amountToInteger(last.totalTotals)
+      ? intervalAssets + intervalDebts - amountToInteger(last.totalTotals)
       : 0;
 
     arr.push({
-      totalAssets: integerToAmount(monthAssets),
-      totalDebts: integerToAmount(monthDebts),
-      totalTotals: integerToAmount(monthAssets + monthDebts),
+      totalAssets: integerToAmount(intervalAssets),
+      totalDebts: integerToAmount(intervalDebts),
+      totalTotals: integerToAmount(intervalAssets + intervalDebts),
       change,
-      dateLookup: month,
+      dateLookup: interval,
     });
 
     return arr;
@@ -79,6 +80,6 @@ export function recalculate({
     totalAssets: integerToAmount(totalAssets),
     totalDebts: integerToAmount(totalDebts),
     totalTotals: integerToAmount(totalAssets + totalDebts),
-    monthData,
+    monthData: intervalData,
   };
 }

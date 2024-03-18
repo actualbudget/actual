@@ -210,6 +210,14 @@ export function ReportSidebar({
             onChange={e => {
               setInterval(e);
               onReportChange({ type: 'modify' });
+              if (
+                ReportOptions.dateRange
+                  .filter(int => !int[e])
+                  .map(int => int.description)
+                  .includes(customReportItems.dateRange)
+              ) {
+                setDateRange('Year to date');
+              }
             }}
             options={ReportOptions.interval.map(option => [
               option.description,
