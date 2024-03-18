@@ -39,6 +39,7 @@ import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetSummary } from './modals/ReportBudgetSummary';
 import { RolloverBalanceMenuModal } from './modals/RolloverBalanceMenuModal';
 import { RolloverBudgetSummary } from './modals/RolloverBudgetSummary';
+import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInput } from './modals/SingleInput';
@@ -485,6 +486,16 @@ export function Modals() {
               modalProps={modalProps}
               categoryId={options.categoryId}
               onSubmit={options.onSubmit}
+            />
+          );
+
+        case 'scheduled-transaction-menu':
+          return (
+            <ScheduledTransactionMenuModal
+              modalProps={modalProps}
+              transactionId={options.transactionId}
+              onPost={options.onPost}
+              onSkip={options.onSkip}
             />
           );
 

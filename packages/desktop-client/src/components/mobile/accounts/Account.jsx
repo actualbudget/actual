@@ -12,7 +12,7 @@ import {
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
-import { listen } from 'loot-core/src/platform/client/fetch';
+import { listen, send } from 'loot-core/src/platform/client/fetch';
 import {
   isPreviewId,
   ungroupTransactions,
@@ -122,6 +122,10 @@ export function Account(props) {
     updateQuery(query);
   }, [makeRootQuery, updateQuery]);
 
+  const refetchTransactions = () => {
+    paged.current?.run();
+  };
+
   useEffect(() => {
     let unlisten;
 
@@ -133,7 +137,7 @@ export function Account(props) {
             tables.includes('category_mapping') ||
             tables.includes('payee_mapping')
           ) {
-            paged.current?.run();
+            refetchTransactions();
           }
 
           if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -218,6 +222,23 @@ export function Account(props) {
     // details of how the native app used to handle preview transactions here can be found at commit 05e58279
     if (!isPreviewId(transaction.id)) {
       navigate(`transactions/${transaction.id}`);
+    } else {
+      dispatch(
+        actions.pushModal('scheduled-transaction-menu', {
+          transactionId: transaction.id,
+          onPost: async transactionId => {
+            const parts = transactionId.split('/');
+            await send('schedule/post-transaction', { id: parts[1] });
+            refetchTransactions();
+            dispatch(actions.collapseModals('scheduled-transaction-menu'));
+          },
+          onSkip: async transactionId => {
+            const parts = transactionId.split('/');
+            await send('schedule/skip-next-date', { id: parts[1] });
+            dispatch(actions.collapseModals('scheduled-transaction-menu'));
+          },
+        }),
+      );
     }
   };
 
