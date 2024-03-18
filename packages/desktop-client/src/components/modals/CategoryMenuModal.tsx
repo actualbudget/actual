@@ -17,8 +17,6 @@ import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
 
-const BUTTON_HEIGHT = 40;
-
 type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
@@ -80,7 +78,7 @@ export function CategoryMenuModal({
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
-    height: BUTTON_HEIGHT,
+    height: styles.mobileMinHeight,
     color: theme.formLabelText,
     // Adjust based on desired number of buttons per row.
     flexBasis: '100%',
@@ -172,7 +170,7 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
-    height: BUTTON_HEIGHT,
+    height: styles.mobileMinHeight,
   };
 
   return (

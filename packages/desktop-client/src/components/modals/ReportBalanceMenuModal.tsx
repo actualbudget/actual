@@ -1,14 +1,12 @@
 import React from 'react';
 
-import { styles, type CSSProperties, theme } from '../../style';
+import { type CSSProperties, theme, styles } from '../../style';
 import {
   BalanceMenu,
   type BalanceMenuProps,
 } from '../budget/report/BalanceMenu';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
-
-const MENU_ITEM_HEIGHT = 40;
 
 type ReportBalanceMenuModalProps = BalanceMenuProps & {
   modalProps: CommonModalProps;
@@ -20,18 +18,15 @@ export function ReportBalanceMenuModal({
   onCarryover,
 }: ReportBalanceMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: MENU_ITEM_HEIGHT,
+    ...styles.mobileMenuItem,
     color: theme.menuItemText,
-    paddingTop: 8,
-    paddingBottom: 8,
     borderRadius: 0,
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
   return (
     <Modal
-      title="Balance menu"
+      title="Actions"
       showHeader
       focusAfterClose={false}
       {...modalProps}

@@ -36,10 +36,7 @@ export function AccountAutocompleteModal({
   };
 
   const itemStyle = {
-    fontSize: 17,
-    fontWeight: 400,
-    paddingTop: 8,
-    paddingBottom: 8,
+    ...styles.mobileMenuItem,
   };
 
   const { isNarrowWidth } = useResponsive();

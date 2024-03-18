@@ -17,8 +17,6 @@ import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
 
-const BUTTON_HEIGHT = 40;
-
 type CategoryGroupMenuModalProps = {
   modalProps: CommonModalProps;
   groupId: string;
@@ -87,7 +85,7 @@ export function CategoryGroupMenuModal({
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
-    height: BUTTON_HEIGHT,
+    height: styles.mobileMinHeight,
     color: theme.formLabelText,
     // Adjust based on desired number of buttons per row.
     flexBasis: '48%',
@@ -194,7 +192,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
-    height: BUTTON_HEIGHT,
+    height: styles.mobileMinHeight,
   };
 
   return (
