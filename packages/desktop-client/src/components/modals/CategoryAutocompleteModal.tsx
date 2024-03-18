@@ -23,7 +23,7 @@ export function CategoryAutocompleteModal({
   autocompleteProps,
   onClose,
 }: CategoryAutocompleteModalProps) {
-  const { value, categoryGroups, onSelect, ...restAutocompleteProps } =
+  const { categoryGroups, onSelect, ...restAutocompleteProps } =
     autocompleteProps;
 
   const _onClose = () => {
@@ -88,7 +88,7 @@ export function CategoryAutocompleteModal({
           <View style={{ flex: 1 }}>
             <CategoryAutocomplete
               categoryGroups={categoryGroups}
-              value={value}
+              value={null}
               focused={true}
               embedded={true}
               closeOnBlur={false}
