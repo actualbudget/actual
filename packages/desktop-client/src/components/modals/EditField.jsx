@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
@@ -27,6 +27,7 @@ import {
   CreatePayeeButton,
   PayeeItem,
 } from '../autocomplete/PayeeAutocomplete';
+import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
@@ -45,7 +46,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
   const payees = usePayees();
 
   const { createPayee } = useActions();
-  let noteAmend = null;
   const onCloseInner = () => {
     modalProps.onClose();
     onClose?.();
@@ -88,16 +88,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
-  const onChangeMode = cond => {
-    noteAmend = cond;
-    if (cond === 'prepend') {
-      console.log(noteAmend);
-    } else if (cond === 'replace') {
-      console.log(noteAmend);
-    } else if (cond === 'append') {
-      console.log(noteAmend);
-    }
-  };
+  const [noteAmend, onChangeMode] = useState('replace');
 
   switch (name) {
     case 'date': {
@@ -220,44 +211,62 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
     case 'notes':
       label = 'Notes';
-
       editor = (
         <>
           <View
             style={{
-              flexGrow: 1,
               flexDirection: 'row',
               marginTop: 5,
               marginBottom: 5,
+              marginLeft: 8,
+              marginRight: 4,
               alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <ModeButton
               selected={noteAmend === 'prepend'}
-              style={{ padding: 5 }}
-              onSelect={() => onChangeMode('prepend')}
-              onUpdate={() => {}}
+              style={{
+                padding: 5,
+                width: '33.33%',
+              }}
+              onSelect={() => {
+                onChangeMode('prepend');
+                document.getElementById('noteInput').focus();
+              }}
             >
-              Prepend to Note
+              Prepend
             </ModeButton>
             <ModeButton
               selected={noteAmend === 'replace'}
-              style={{ padding: 5 }}
-              onSelect={() => onChangeMode('replace')}
-              onUpdate={() => {}}
+              style={{
+                padding: 5,
+                width: '33.34%',
+              }}
+              onSelect={() => {
+                onChangeMode('replace');
+                document.getElementById('noteInput').focus();
+              }}
             >
-              Replace Note
+              Replace
             </ModeButton>
             <ModeButton
               selected={noteAmend === 'append'}
-              style={{ padding: 5 }}
-              onSelect={() => onChangeMode('append')}
-              onUpdate={() => {}}
+              style={{
+                padding: 5,
+                width: '33.33%',
+              }}
+              onSelect={() => {
+                onChangeMode('append');
+                document.getElementById('noteInput').focus();
+              }}
             >
-              Append to Note
+              Append
             </ModeButton>
           </View>
           <Input
+            id="noteInput"
+            autoFocus
             focused={true}
             onEnter={e => onSelectNote(e.target.value, noteAmend)}
             style={inputStyle}
