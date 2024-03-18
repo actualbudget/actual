@@ -25,7 +25,7 @@ export function ReportSidebar({
   customReportItems,
   categories,
   dateRangeLine,
-  allMonths,
+  allIntervals,
   setDateRange,
   setGraphType,
   setGroupBy,
@@ -48,39 +48,37 @@ export function ReportSidebar({
   const onSelectRange = cond => {
     onReportChange({ type: 'modify' });
     setDateRange(cond);
+    let dateStart;
+    let dateEnd;
     switch (cond) {
       case 'All time':
-        onChangeDates(...getFullRange(allMonths));
+        [dateStart, dateEnd] = getFullRange(allIntervals);
+        onChangeDates(dateStart + '-01', dateEnd + '-01');
         break;
       case 'Year to date':
-        onChangeDates(
-          ...validateRange(
-            allMonths,
-            monthUtils.getYearStart(monthUtils.currentMonth()),
-            monthUtils.currentMonth(),
-          ),
+        [dateStart, dateEnd] = validateRange(
+          allIntervals,
+          monthUtils.getYearStart(monthUtils.currentMonth()),
+          monthUtils.currentMonth(),
         );
+        onChangeDates(dateStart + '-01', dateEnd + '-01');
         break;
       case 'Last year':
-        onChangeDates(
-          ...validateRange(
-            allMonths,
-            monthUtils.getYearStart(
-              monthUtils.prevYear(monthUtils.currentMonth()),
-            ),
-            monthUtils.getYearEnd(
-              monthUtils.prevYear(monthUtils.currentDate()),
-            ),
+        [dateStart, dateEnd] = validateRange(
+          allIntervals,
+          monthUtils.getYearStart(
+            monthUtils.prevYear(monthUtils.currentMonth()),
           ),
+          monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())),
         );
+        onChangeDates(dateStart + '-01', dateEnd + '-01');
         break;
       default:
-        onChangeDates(
-          ...getSpecificRange(
-            ReportOptions.dateRangeMap.get(cond),
-            cond === 'Last month' ? 0 : null,
-          ),
+        [dateStart, dateEnd] = getSpecificRange(
+          ReportOptions.dateRangeMap.get(cond),
+          cond === 'Last month' ? 0 : null,
         );
+        onChangeDates(dateStart + '-01', dateEnd + '-01');
     }
   };
 
@@ -378,7 +376,7 @@ export function ReportSidebar({
                 onChange={newValue =>
                   onChangeDates(
                     ...validateStart(
-                      allMonths,
+                      allIntervals,
                       newValue,
                       customReportItems.endDate,
                     ),
@@ -389,7 +387,7 @@ export function ReportSidebar({
                   customReportItems.startDate,
                   'MMMM, yyyy',
                 )}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
             <View
@@ -406,14 +404,18 @@ export function ReportSidebar({
                 onChange={newValue =>
                   onChangeDates(
                     ...validateEnd(
-                      allMonths,
+                      allIntervals,
                       customReportItems.startDate,
                       newValue,
                     ),
                   )
                 }
                 value={customReportItems.endDate}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                defaultLabel={monthUtils.format(
+                  customReportItems.endDate,
+                  'MMMM, yyyy',
+                )}
+                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
           </>

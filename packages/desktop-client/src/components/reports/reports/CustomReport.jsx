@@ -57,7 +57,7 @@ export function CustomReport() {
     ? location.state.report ?? defaultReport
     : defaultReport;
 
-  const [allMonths, setAllMonths] = useState(null);
+  const [allIntervals, setAllIntervals] = useState(null);
 
   const [selectedCategories, setSelectedCategories] = useState(
     loadReport.selectedCategories,
@@ -87,7 +87,7 @@ export function CustomReport() {
   const [savedStatus, setSavedStatus] = useState(
     location.state ? (location.state.report ? 'saved' : 'new') : 'new',
   );
-  const months = monthUtils.rangeInclusive(startDate, endDate);
+  const intervals = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
     if (selectedCategories === undefined && categories.list.length !== 0) {
@@ -112,7 +112,7 @@ export function CustomReport() {
         earliestMonth = yearAgo;
       }
 
-      const allMonths = monthUtils
+      const allInter = monthUtils
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
@@ -120,7 +120,7 @@ export function CustomReport() {
         }))
         .reverse();
 
-      setAllMonths(allMonths);
+      setAllIntervals(allInter);
     }
     run();
   }, []);
@@ -133,6 +133,7 @@ export function CustomReport() {
     return createGroupedSpreadsheet({
       startDate,
       endDate,
+      interval,
       categories,
       selectedCategories,
       conditions: filters,
@@ -167,6 +168,7 @@ export function CustomReport() {
     return createCustomSpreadsheet({
       startDate,
       endDate,
+      interval,
       categories,
       selectedCategories,
       conditions: filters,
@@ -226,7 +228,7 @@ export function CustomReport() {
 
   const [scrollWidth, setScrollWidth] = useState(0);
 
-  if (!allMonths || !data) {
+  if (!allIntervals || !data) {
     return null;
   }
 
@@ -289,9 +291,9 @@ export function CustomReport() {
     }
   };
 
-  const onChangeDates = (startDate, endDate) => {
-    setStartDate(startDate);
-    setEndDate(endDate);
+  const onChangeDates = (dateStart, dateEnd) => {
+    setStartDate(dateStart);
+    setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
   };
 
@@ -401,7 +403,7 @@ export function CustomReport() {
           customReportItems={customReportItems}
           categories={categories}
           dateRangeLine={dateRangeLine}
-          allMonths={allMonths}
+          allIntervals={allIntervals}
           setDateRange={setDateRange}
           setGraphType={setGraphType}
           setGroupBy={setGroupBy}
@@ -546,7 +548,8 @@ export function CustomReport() {
                       endDate={endDate}
                       balanceTypeOp={balanceTypeOp}
                       data={data}
-                      monthsCount={months.length}
+                      interval={interval}
+                      intervalsCount={intervals.length}
                     />
                   )}
                   {viewLegend && (

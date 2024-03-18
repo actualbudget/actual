@@ -142,7 +142,7 @@ export function StackedBarGraph({
 }: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();
 
-  const largestValue = data.monthData
+  const largestValue = data.intervalData
     .map(c => c[balanceTypeOp])
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
@@ -155,14 +155,14 @@ export function StackedBarGraph({
       }}
     >
       {(width, height) =>
-        data.monthData && (
+        data.intervalData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <BarChart
                 width={width}
                 height={height}
-                data={data.monthData}
+                data={data.intervalData}
                 margin={{ top: 0, right: 0, left: leftMargin, bottom: 0 }}
               >
                 <Tooltip

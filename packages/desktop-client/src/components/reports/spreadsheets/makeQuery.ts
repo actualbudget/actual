@@ -1,3 +1,4 @@
+import { monthFromDate } from 'loot-core/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
@@ -5,11 +6,15 @@ export function makeQuery(
   name: string,
   startDate: string,
   endDate: string,
+  interval: string,
   selectedCategories: CategoryEntity[],
   categoryFilter: CategoryEntity[],
   conditionsOpKey: string,
   filters: unknown[],
 ) {
+  const dateStart =
+    interval === 'Monthly' ? monthFromDate(startDate) : startDate;
+  const dateEnd = interval === 'Monthly' ? monthFromDate(endDate) : endDate;
   const query = q('transactions')
     //Apply Category_Selector
     .filter(
@@ -31,8 +36,8 @@ export function makeQuery(
     //Apply month range filters
     .filter({
       $and: [
-        { date: { $transform: '$month', $gte: startDate } },
-        { date: { $transform: '$month', $lte: endDate } },
+        { date: { $transform: '$month', $gte: dateStart } },
+        { date: { $transform: '$month', $lte: dateEnd } },
       ],
     })
     //Show assets or debts

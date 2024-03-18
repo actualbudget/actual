@@ -16,6 +16,7 @@ import { recalculate } from './recalculate';
 export function createGroupedSpreadsheet({
   startDate,
   endDate,
+  interval,
   categories,
   selectedCategories,
   conditions = [],
@@ -52,6 +53,7 @@ export function createGroupedSpreadsheet({
           'assets',
           startDate,
           endDate,
+          interval,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -63,6 +65,7 @@ export function createGroupedSpreadsheet({
           'debts',
           startDate,
           endDate,
+          interval,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -71,19 +74,19 @@ export function createGroupedSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
-    const months = monthUtils.rangeInclusive(startDate, endDate);
+    const intervals = monthUtils.rangeInclusive(startDate, endDate);
 
     const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {
         let totalAssets = 0;
         let totalDebts = 0;
 
-        const monthData = months.reduce((arr, month) => {
+        const intervalData = intervals.reduce((arr, inter) => {
           let groupedAssets = 0;
           let groupedDebts = 0;
 
           group.categories.forEach(item => {
-            const monthAssets = filterHiddenItems(
+            const intervalAssets = filterHiddenItems(
               item,
               assets,
               showOffBudget,
@@ -92,12 +95,12 @@ export function createGroupedSpreadsheet({
             )
               .filter(
                 asset =>
-                  asset.date === month && asset.category === (item.id ?? null),
+                  asset.date === inter && asset.category === (item.id ?? null),
               )
               .reduce((a, v) => (a = a + v.amount), 0);
-            groupedAssets += monthAssets;
+            groupedAssets += intervalAssets;
 
-            const monthDebts = filterHiddenItems(
+            const intervalDebts = filterHiddenItems(
               item,
               debts,
               showOffBudget,
@@ -106,17 +109,17 @@ export function createGroupedSpreadsheet({
             )
               .filter(
                 debts =>
-                  debts.date === month && debts.category === (item.id ?? null),
+                  debts.date === inter && debts.category === (item.id ?? null),
               )
               .reduce((a, v) => (a = a + v.amount), 0);
-            groupedDebts += monthDebts;
+            groupedDebts += intervalDebts;
           });
 
           totalAssets += groupedAssets;
           totalDebts += groupedDebts;
 
           arr.push({
-            date: month,
+            date: inter,
             totalAssets: integerToAmount(groupedAssets),
             totalDebts: integerToAmount(groupedDebts),
             totalTotals: integerToAmount(groupedDebts + groupedAssets),
@@ -128,7 +131,7 @@ export function createGroupedSpreadsheet({
         const stackedCategories = group.categories.map(item => {
           const calc = recalculate({
             item,
-            months,
+            intervals,
             assets,
             debts,
             groupByLabel: 'category',
@@ -145,7 +148,7 @@ export function createGroupedSpreadsheet({
           totalAssets: integerToAmount(totalAssets),
           totalDebts: integerToAmount(totalDebts),
           totalTotals: integerToAmount(totalAssets + totalDebts),
-          monthData,
+          intervalData,
           categories: stackedCategories.filter(i =>
             filterEmptyRows(showEmpty, i, balanceTypeOp),
           ),

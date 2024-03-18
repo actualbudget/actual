@@ -7,8 +7,8 @@ import {
   type PayeeEntity,
 } from 'loot-core/src/types/models';
 
-const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
-const endDate = monthUtils.currentMonth();
+const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5) + '-01';
+const endDate = monthUtils.currentMonth() + '-01';
 
 export const defaultReport: CustomReportEntity = {
   id: '',
