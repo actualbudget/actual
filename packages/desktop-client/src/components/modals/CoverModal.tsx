@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useInitialMount } from '../../hooks/useInitialMount';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
 import { Button } from '../common/Button';
-import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
@@ -34,7 +34,7 @@ export function CoverModal({
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
-  const onCategoryClick = () => {
+  const onCategoryClick = useCallback(() => {
     dispatch(
       pushModal('category-autocomplete', {
         categoryGroups,
@@ -43,7 +43,7 @@ export function CoverModal({
         },
       }),
     );
-  };
+  }, [categoryGroups, dispatch]);
 
   const _onSubmit = (categoryId: string) => {
     if (categoryId) {
@@ -52,6 +52,14 @@ export function CoverModal({
 
     modalProps.onClose();
   };
+
+  const initialMount = useInitialMount();
+
+  useEffect(() => {
+    if (initialMount) {
+      onCategoryClick();
+    }
+  }, [initialMount, onCategoryClick]);
 
   return (
     <Modal
@@ -70,12 +78,10 @@ export function CoverModal({
         <>
           <View>
             <FieldLabel title="Cover from category:" />
-            <InitialFocus>
-              <TapField
-                value={categories.find(c => c.id === fromCategoryId)?.name}
-                onClick={onCategoryClick}
-              />
-            </InitialFocus>
+            <TapField
+              value={categories.find(c => c.id === fromCategoryId)?.name}
+              onClick={onCategoryClick}
+            />
           </View>
 
           <View

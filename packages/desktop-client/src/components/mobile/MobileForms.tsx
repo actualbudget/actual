@@ -12,8 +12,6 @@ import { Input } from '../common/Input';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-const FIELD_HEIGHT = 40;
-
 type FieldLabelProps = {
   title: string;
   flush?: boolean;
@@ -44,7 +42,7 @@ const valueStyle = {
   borderColor: theme.formInputBorder,
   marginLeft: 8,
   marginRight: 8,
-  height: FIELD_HEIGHT,
+  height: styles.mobileMinHeight,
 };
 
 type InputFieldProps = ComponentPropsWithoutRef<typeof Input>;
