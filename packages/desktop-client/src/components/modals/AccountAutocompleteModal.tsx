@@ -23,7 +23,7 @@ export function AccountAutocompleteModal({
   autocompleteProps,
   onClose,
 }: AccountAutocompleteModalProps) {
-  const { value, onSelect, ...restAutocompleteProps } = autocompleteProps;
+  const { onSelect, ...restAutocompleteProps } = autocompleteProps;
 
   const _onClose = () => {
     modalProps.onClose();
@@ -86,7 +86,7 @@ export function AccountAutocompleteModal({
           )}
           <View style={{ flex: 1 }}>
             <AccountAutocomplete
-              value={value}
+              value={null}
               focused={true}
               embedded={true}
               closeOnBlur={false}
