@@ -24,6 +24,7 @@ import { recalculate } from './recalculate';
 export type createCustomSpreadsheetProps = {
   startDate: string;
   endDate: string;
+  interval: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   interval: string;
   selectedCategories: CategoryEntity[];
@@ -44,6 +45,7 @@ export type createCustomSpreadsheetProps = {
 export function createCustomSpreadsheet({
   startDate,
   endDate,
+  interval,
   categories,
   interval,
   selectedCategories,
@@ -94,6 +96,7 @@ export function createCustomSpreadsheet({
           'assets',
           startDate,
           endDate,
+          interval,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -106,6 +109,7 @@ export function createCustomSpreadsheet({
           'debts',
           startDate,
           endDate,
+          interval,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -122,7 +126,7 @@ export function createCustomSpreadsheet({
     let totalAssets = 0;
     let totalDebts = 0;
 
-    const monthData = intervals.reduce((arr, inter) => {
+    const intervalData = intervals.reduce((arr, inter) => {
       let perIntervalAssets = 0;
       let perIntervalDebts = 0;
       const stacked = {};
@@ -206,7 +210,7 @@ export function createCustomSpreadsheet({
     );
 
     const legend = calculateLegend(
-      monthData,
+      intervalData,
       calcDataFiltered,
       groupBy,
       graphType,
@@ -215,7 +219,7 @@ export function createCustomSpreadsheet({
 
     setData({
       data: calcDataFiltered,
-      monthData,
+      intervalData,
       legend,
       startDate,
       endDate,

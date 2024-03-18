@@ -1,21 +1,21 @@
 // @ts-strict-ignore
 import {
+  type IntervalData,
   type ItemEntity,
-  type MonthData,
 } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';
 import { getColorScale } from '../chart-theme';
 
 export function calculateLegend(
-  monthData: MonthData[],
+  intervalData: IntervalData[],
   calcDataFiltered: ItemEntity[],
   groupBy: string,
   graphType: string,
   balanceTypeOp: string,
 ) {
   const colorScale = getColorScale('qualitative');
-  const chooseData = groupBy === 'Interval' ? monthData : calcDataFiltered;
+  const chooseData = groupBy === 'Interval' ? intervalData : calcDataFiltered;
   return chooseData.map((c, index) => {
     return {
       name: groupBy === 'Interval' ? c.date : c.name,

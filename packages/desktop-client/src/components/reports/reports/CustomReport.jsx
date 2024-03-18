@@ -57,7 +57,7 @@ export function CustomReport() {
     ? location.state.report ?? defaultReport
     : defaultReport;
 
-  const [allMonths, setAllMonths] = useState(null);
+  const [allIntervals, setAllIntervals] = useState(null);
 
   const [selectedCategories, setSelectedCategories] = useState(
     loadReport.selectedCategories,
@@ -145,7 +145,8 @@ export function CustomReport() {
         earliestMonth = yearAgo;
       }
 
-      const allMonths = monthUtils[rangeInc](earliestMonth, currentMonth)
+      const allInter = monthUtils
+        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
           pretty:
@@ -155,7 +156,7 @@ export function CustomReport() {
         }))
         .reverse();
 
-      setAllMonths(allMonths);
+      setAllIntervals(allInter);
     }
     run();
   }, [interval]);
@@ -168,6 +169,7 @@ export function CustomReport() {
     return createGroupedSpreadsheet({
       startDate,
       endDate,
+      interval,
       categories,
       interval,
       selectedCategories,
@@ -202,6 +204,7 @@ export function CustomReport() {
     return createCustomSpreadsheet({
       startDate,
       endDate,
+      interval,
       categories,
       interval,
       selectedCategories,
@@ -261,7 +264,7 @@ export function CustomReport() {
 
   const [scrollWidth, setScrollWidth] = useState(0);
 
-  if (!allMonths || !data) {
+  if (!allIntervals || !data) {
     return null;
   }
 
@@ -436,7 +439,7 @@ export function CustomReport() {
           customReportItems={customReportItems}
           categories={categories}
           dateRangeLine={dateRangeLine}
-          allMonths={allMonths}
+          allIntervals={allIntervals}
           setDateRange={setDateRange}
           setGraphType={setGraphType}
           setGroupBy={setGroupBy}
@@ -581,7 +584,8 @@ export function CustomReport() {
                       endDate={endDate}
                       balanceTypeOp={balanceTypeOp}
                       data={data}
-                      monthsCount={months.length}
+                      interval={interval}
+                      intervalsCount={intervals.length}
                     />
                   )}
                   {viewLegend && (

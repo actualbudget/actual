@@ -188,7 +188,7 @@ export function DonutGraph({
   viewLabels,
 }: DonutGraphProps) {
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
-  const splitData = groupBy === 'Interval' ? 'monthData' : 'data';
+  const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
 
   const getVal = obj => {
     if (balanceTypeOp === 'totalDebts') {

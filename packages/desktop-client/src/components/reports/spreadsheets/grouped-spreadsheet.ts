@@ -16,6 +16,7 @@ import { recalculate } from './recalculate';
 export function createGroupedSpreadsheet({
   startDate,
   endDate,
+  interval,
   categories,
   interval,
   selectedCategories,
@@ -53,6 +54,7 @@ export function createGroupedSpreadsheet({
           'assets',
           startDate,
           endDate,
+          interval,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -65,6 +67,7 @@ export function createGroupedSpreadsheet({
           'debts',
           startDate,
           endDate,
+          interval,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -83,7 +86,7 @@ export function createGroupedSpreadsheet({
         let totalAssets = 0;
         let totalDebts = 0;
 
-        const monthData = intervals.reduce((arr, inter) => {
+        const intervalData = intervals.reduce((arr, inter) => {
           let groupedAssets = 0;
           let groupedDebts = 0;
 
@@ -150,7 +153,7 @@ export function createGroupedSpreadsheet({
           totalAssets: integerToAmount(totalAssets),
           totalDebts: integerToAmount(totalDebts),
           totalTotals: integerToAmount(totalAssets + totalDebts),
-          monthData,
+          intervalData,
           categories: stackedCategories.filter(i =>
             filterEmptyRows(showEmpty, i, balanceTypeOp),
           ),
