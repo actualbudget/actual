@@ -32,7 +32,6 @@ import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
-import { ModeButton } from '../reports/ModeButton';
 import { DateSelect } from '../select/DateSelect';
 
 function CreatePayeeIcon(props) {
@@ -224,45 +223,102 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
               justifyContent: 'center',
             }}
           >
-            <ModeButton
+            <Button
               selected={noteAmend === 'prepend'}
               style={{
-                padding: 5,
+                padding: '5px 10px',
                 width: '33.33%',
+                backgroundColor: theme.menuBackground,
+                marginRight: 5,
+                fontSize: 'inherit',
+                ...(noteAmend === 'prepend' && {
+                  backgroundColor: theme.buttonPrimaryBackground,
+                  color: theme.buttonPrimaryText,
+                  ':hover': {
+                    backgroundColor: theme.buttonPrimaryBackgroundHover,
+                    color: theme.buttonPrimaryTextHover,
+                  },
+                }),
+                ...(noteAmend !== 'prepend' && {
+                  backgroundColor: theme.buttonNormalBackground,
+                  color: theme.buttonNormalText,
+                  ':hover': {
+                    backgroundColor: theme.buttonNormalBackgroundHover,
+                    color: theme.buttonNormalTextHover,
+                  },
+                }),
               }}
-              onSelect={() => {
+              onClick={() => {
                 onChangeMode('prepend');
                 document.getElementById('noteInput').focus();
               }}
             >
               Prepend
-            </ModeButton>
-            <ModeButton
+            </Button>
+            <Button
               selected={noteAmend === 'replace'}
               style={{
-                padding: 5,
+                padding: '5px 10px',
                 width: '33.34%',
+                backgroundColor: theme.menuBackground,
+                marginRight: 5,
+                fontSize: 'inherit',
+                ...(noteAmend === 'replace' && {
+                  backgroundColor: theme.buttonPrimaryBackground,
+                  color: theme.buttonPrimaryText,
+                  ':hover': {
+                    backgroundColor: theme.buttonPrimaryBackgroundHover,
+                    color: theme.buttonPrimaryTextHover,
+                  },
+                }),
+                ...(noteAmend !== 'replace' && {
+                  backgroundColor: theme.buttonNormalBackground,
+                  color: theme.buttonNormalText,
+                  ':hover': {
+                    backgroundColor: theme.buttonNormalBackgroundHover,
+                    color: theme.buttonNormalTextHover,
+                  },
+                }),
               }}
-              onSelect={() => {
+              onClick={() => {
                 onChangeMode('replace');
                 document.getElementById('noteInput').focus();
               }}
             >
               Replace
-            </ModeButton>
-            <ModeButton
+            </Button>
+            <Button
               selected={noteAmend === 'append'}
               style={{
-                padding: 5,
+                padding: '5px 10px',
                 width: '33.33%',
+                backgroundColor: theme.menuBackground,
+                marginRight: 5,
+                fontSize: 'inherit',
+                ...(noteAmend === 'append' && {
+                  backgroundColor: theme.buttonPrimaryBackground,
+                  color: theme.buttonPrimaryText,
+                  ':hover': {
+                    backgroundColor: theme.buttonPrimaryBackgroundHover,
+                    color: theme.buttonPrimaryTextHover,
+                  },
+                }),
+                ...(noteAmend !== 'append' && {
+                  backgroundColor: theme.buttonNormalBackground,
+                  color: theme.buttonNormalText,
+                  ':hover': {
+                    backgroundColor: theme.buttonNormalBackgroundHover,
+                    color: theme.buttonNormalTextHover,
+                  },
+                }),
               }}
-              onSelect={() => {
+              onClick={() => {
                 onChangeMode('append');
                 document.getElementById('noteInput').focus();
               }}
             >
               Append
-            </ModeButton>
+            </Button>
           </View>
           <Input
             id="noteInput"
