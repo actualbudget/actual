@@ -1,11 +1,9 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { useAccounts } from '../../hooks/useAccounts';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import {
   AccountAutocomplete,
-  type AccountAutocompleteProps,
   AccountItem,
 } from '../autocomplete/AccountAutocomplete';
 import { ItemHeader } from '../autocomplete/ItemHeader';
@@ -14,18 +12,18 @@ import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { type CommonModalProps } from '../Modals';
 
-type AccountAutocompleteModalProps = Partial<AccountAutocompleteProps> & {
+type AccountAutocompleteModalProps = {
   modalProps: CommonModalProps;
+  autocompleteProps?: ComponentPropsWithoutRef<typeof AccountAutocomplete>;
   onClose: () => void;
 };
 
 export function AccountAutocompleteModal({
   modalProps,
-  onSelect,
+  autocompleteProps,
   onClose,
-  ...props
 }: AccountAutocompleteModalProps) {
-  const accounts = useAccounts() || [];
+  const { value, onSelect, ...restAutocompleteProps } = autocompleteProps;
 
   const _onClose = () => {
     modalProps.onClose();
@@ -49,7 +47,7 @@ export function AccountAutocompleteModal({
     ':focus': { boxShadow: 0 },
     ...(isNarrowWidth && itemStyle),
   };
-  const autocompleteProps = {
+  const defaultAutocompleteProps = {
     inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
@@ -88,8 +86,7 @@ export function AccountAutocompleteModal({
           )}
           <View style={{ flex: 1 }}>
             <AccountAutocomplete
-              value={null}
-              accounts={accounts}
+              value={value}
               focused={true}
               embedded={true}
               closeOnBlur={false}
@@ -118,8 +115,8 @@ export function AccountAutocompleteModal({
                   />
                 ),
               })}
-              {...autocompleteProps}
-              {...props}
+              {...defaultAutocompleteProps}
+              {...restAutocompleteProps}
             />
           </View>
         </View>
