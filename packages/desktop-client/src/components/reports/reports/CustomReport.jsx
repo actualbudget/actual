@@ -83,6 +83,7 @@ export function CustomReport() {
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
+  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
     location.state ? (location.state.report ? 'saved' : 'new') : 'new',
@@ -99,6 +100,7 @@ export function CustomReport() {
     async function run() {
       report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
+      setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
@@ -421,6 +423,7 @@ export function CustomReport() {
           disabledItems={disabledItems}
           defaultItems={defaultItems}
           defaultModeItems={defaultModeItems}
+          earliestTransaction={earliestTransaction}
         />
         <View
           style={{

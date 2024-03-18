@@ -115,7 +115,13 @@ export function createCustomSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
-    const intervals = monthUtils.rangeInclusive(startDate, endDate);
+    const rangeInc =
+      interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
+    const format = interval === 'Monthly' ? 'monthFromDate' : 'yearFromDate';
+    const intervals = monthUtils[rangeInc](
+      monthUtils[format](startDate),
+      monthUtils[format](endDate),
+    );
 
     let totalAssets = 0;
     let totalDebts = 0;

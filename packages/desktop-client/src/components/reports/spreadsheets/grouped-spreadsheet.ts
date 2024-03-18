@@ -74,7 +74,13 @@ export function createGroupedSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
-    const intervals = monthUtils.rangeInclusive(startDate, endDate);
+    const rangeInc =
+      interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
+    const format = interval === 'Monthly' ? 'monthFromDate' : 'yearFromDate';
+    const intervals = monthUtils[rangeInc](
+      monthUtils[format](startDate),
+      monthUtils[format](endDate),
+    );
 
     const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {

@@ -1,4 +1,3 @@
-import { monthFromDate } from 'loot-core/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
@@ -12,9 +11,10 @@ export function makeQuery(
   conditionsOpKey: string,
   filters: unknown[],
 ) {
-  const dateStart =
-    interval === 'Monthly' ? monthFromDate(startDate) : startDate;
-  const dateEnd = interval === 'Monthly' ? monthFromDate(endDate) : endDate;
+  const intervalGroup =
+    interval === 'Monthly' ? { $month: '$date' } : { $year: '$date' };
+  const intervalFilter = interval === 'Monthly' ? '$month' : '$year';
+
   const query = q('transactions')
     //Apply Category_Selector
     .filter(
@@ -36,8 +36,8 @@ export function makeQuery(
     //Apply month range filters
     .filter({
       $and: [
-        { date: { $transform: '$month', $gte: dateStart } },
-        { date: { $transform: '$month', $lte: dateEnd } },
+        { date: { $transform: intervalFilter, $gte: startDate } },
+        { date: { $transform: intervalFilter, $lte: endDate } },
       ],
     })
     //Show assets or debts
@@ -47,14 +47,14 @@ export function makeQuery(
 
   return query
     .groupBy([
-      { $month: '$date' },
+      intervalGroup,
       { $id: '$account' },
       { $id: '$payee' },
       { $id: '$category' },
       { $id: '$payee.transfer_acct.id' },
     ])
     .select([
-      { date: { $month: '$date' } },
+      { date: intervalGroup },
       { category: { $id: '$category.id' } },
       { categoryHidden: { $id: '$category.hidden' } },
       { categoryGroup: { $id: '$category.group.id' } },
