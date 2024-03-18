@@ -64,8 +64,8 @@ const intervalOptions = [
   //{ value: 1, description: 'Daily', name: 'Day'},
   //{ value: 2, description: 'Weekly', name: 'Week'},
   //{ value: 3, description: 'Fortnightly', name: 3},
-  { value: 4, description: 'Monthly', name: 'Month' },
-  { value: 5, description: 'Yearly', name: 'Year' },
+  { description: 'Monthly', name: 'Month', format: 'MMMM, yyyy' },
+  { description: 'Yearly', name: 'Year', format: 'yyyy' },
 ];
 
 export const ReportOptions = {
@@ -81,6 +81,9 @@ export const ReportOptions = {
   interval: intervalOptions,
   intervalMap: new Map(
     intervalOptions.map(item => [item.description, item.name]),
+  ),
+  intervalFormat: new Map(
+    intervalOptions.map(item => [item.description, item.format]),
   ),
 };
 

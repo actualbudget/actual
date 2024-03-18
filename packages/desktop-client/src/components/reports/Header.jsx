@@ -11,7 +11,7 @@ import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
 
-export function validateStart(allMonths, start, end) {
+function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
   if (end < start) {
     end = monthUtils.addMonths(start, 6);
@@ -19,24 +19,12 @@ export function validateStart(allMonths, start, end) {
   return boundedRange(earliest, start, end);
 }
 
-export function validateEnd(allMonths, start, end) {
+function validateEnd(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
   if (start > end) {
     start = monthUtils.subMonths(end, 6);
   }
   return boundedRange(earliest, start, end);
-}
-
-export function validateRange(allMonths, start, end) {
-  const latest = monthUtils.currentMonth();
-  const earliest = allMonths[allMonths.length - 1].name;
-  if (end > latest) {
-    end = latest;
-  }
-  if (start < earliest) {
-    start = earliest;
-  }
-  return [start, end];
 }
 
 function boundedRange(earliest, start, end) {
@@ -56,17 +44,7 @@ function getLatestRange(offset) {
   return [start, end];
 }
 
-export function getSpecificRange(offset, addNumber) {
-  const currMonth = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(currMonth, offset);
-  const end = monthUtils.addMonths(
-    start,
-    addNumber === null ? offset : addNumber,
-  );
-  return [start, end];
-}
-
-export function getFullRange(allMonths) {
+function getFullRange(allMonths) {
   const start = allMonths[allMonths.length - 1].name;
   const end = monthUtils.currentMonth();
   return [start, end];

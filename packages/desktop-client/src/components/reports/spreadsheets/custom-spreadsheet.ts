@@ -26,7 +26,6 @@ export type createCustomSpreadsheetProps = {
   endDate: string;
   interval: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
-  interval: string;
   selectedCategories: CategoryEntity[];
   conditions: RuleConditionEntity[];
   conditionsOp: string;
@@ -47,7 +46,6 @@ export function createCustomSpreadsheet({
   endDate,
   interval,
   categories,
-  interval,
   selectedCategories,
   conditions = [],
   conditionsOp,
@@ -101,7 +99,6 @@ export function createCustomSpreadsheet({
           categoryFilter,
           conditionsOpKey,
           filters,
-          interval,
         ),
       ).then(({ data }) => data),
       runQuery(
@@ -114,14 +111,17 @@ export function createCustomSpreadsheet({
           categoryFilter,
           conditionsOpKey,
           filters,
-          interval,
         ),
       ).then(({ data }) => data),
     ]);
 
     const rangeInc =
       interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
-    const intervals = monthUtils[rangeInc](startDate, endDate);
+    const format = interval === 'Monthly' ? 'monthFromDate' : 'yearFromDate';
+    const intervals = monthUtils[rangeInc](
+      monthUtils[format](startDate),
+      monthUtils[format](endDate),
+    );
 
     let totalAssets = 0;
     let totalDebts = 0;

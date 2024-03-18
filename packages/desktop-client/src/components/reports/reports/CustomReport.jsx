@@ -83,9 +83,10 @@ export function CustomReport() {
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
-  const [months, setMonths] = useState(
-    monthUtils.yearRangeInclusive(startDate, endDate),
+  const [intervals, setIntervals] = useState(
+    monthUtils.rangeInclusive(startDate, endDate),
   );
+  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
     location.state ? (location.state.report ? 'saved' : 'new') : 'new',
@@ -96,22 +97,19 @@ export function CustomReport() {
     let end;
 
     if (interval === 'Monthly') {
-      start = monthUtils.subMonths(monthUtils.currentMonth(), 5);
-      end = monthUtils.currentMonth();
+      start = monthUtils.monthFromDate(startDate);
+      end = monthUtils.monthFromDate(endDate);
     }
 
     if (interval === 'Yearly') {
-      start = monthUtils.yearFromMonth(startDate);
-      end = monthUtils.yearFromMonth(endDate);
+      start = monthUtils.yearFromDate(startDate);
+      end = monthUtils.yearFromDate(endDate);
     }
 
     const rangeInc =
       interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
-    setMonths(monthUtils[rangeInc](start, end));
-
-    setStartDate(start);
-    setEndDate(end);
-  }, [interval]);
+    setIntervals(monthUtils[rangeInc](start, end));
+  }, [interval, startDate, endDate]);
 
   useEffect(() => {
     if (selectedCategories === undefined && categories.list.length !== 0) {
@@ -123,36 +121,40 @@ export function CustomReport() {
     async function run() {
       report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
-      const currentMonth =
-        interval === 'Monthly'
-          ? monthUtils.currentMonth()
-          : monthUtils.currentYear();
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : currentMonth;
-
-      // Make sure the month selects are at least populates with a
-      // year's worth of months. We can undo this when we have fancier
-      // date selects.
-      const rangeInc =
-        interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
-      const sub = interval === 'Monthly' ? 'subMonths' : 'subYears';
-      const yearAgo = monthUtils[sub](
-        currentMonth,
-        interval === 'Monthly' ? 12 : 1,
-      );
-      if (earliestMonth > yearAgo) {
-        earliestMonth = yearAgo;
+      setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
+      let rangeInc;
+      let currentInterval;
+      let earliestInterval;
+      switch (interval) {
+        case 'Monthly':
+          currentInterval = monthUtils.currentMonth();
+          earliestInterval = trans
+            ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
+            : currentInterval;
+          rangeInc = 'rangeInclusive';
+          break;
+        case 'Yearly':
+          currentInterval = monthUtils.currentYear();
+          earliestInterval = trans
+            ? monthUtils.yearFromDate(d.parseISO(fromDateRepr(trans.date)))
+            : currentInterval;
+          rangeInc = 'yearRangeInclusive';
+          break;
+        default:
+          currentInterval = monthUtils.currentDay();
+          earliestInterval = trans
+            ? monthUtils.dayFromDate(d.parseISO(fromDateRepr(trans.date)))
+            : currentInterval;
+          rangeInc = 'dayRangeInclusive';
       }
 
-      const allInter = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
-        .map(month => ({
-          name: month,
-          pretty:
-            interval === 'Monthly'
-              ? monthUtils.format(month, 'MMMM, yyyy')
-              : month,
+      const allInter = monthUtils[rangeInc](earliestInterval, currentInterval)
+        .map(inter => ({
+          name: inter,
+          pretty: monthUtils.format(
+            inter,
+            ReportOptions.intervalFormat.get(interval),
+          ),
         }))
         .reverse();
 
@@ -171,7 +173,6 @@ export function CustomReport() {
       endDate,
       interval,
       categories,
-      interval,
       selectedCategories,
       conditions: filters,
       conditionsOp,
@@ -184,6 +185,7 @@ export function CustomReport() {
   }, [
     startDate,
     endDate,
+    interval,
     groupBy,
     balanceType,
     categories,
@@ -206,7 +208,6 @@ export function CustomReport() {
       endDate,
       interval,
       categories,
-      interval,
       selectedCategories,
       conditions: filters,
       conditionsOp,
@@ -224,6 +225,7 @@ export function CustomReport() {
   }, [
     startDate,
     endDate,
+    interval,
     groupBy,
     balanceType,
     categories,
@@ -457,6 +459,7 @@ export function CustomReport() {
           disabledItems={disabledItems}
           defaultItems={defaultItems}
           defaultModeItems={defaultModeItems}
+          earliestTransaction={earliestTransaction}
         />
         <View
           style={{

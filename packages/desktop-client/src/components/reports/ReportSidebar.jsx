@@ -11,15 +11,14 @@ import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
-import {
-  validateStart,
-  validateEnd,
-  getFullRange,
-  validateRange,
-  getSpecificRange,
-} from './Header';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
+import {
+  getSpecificRange,
+  validateEnd,
+  validateRange,
+  validateStart,
+} from './reportRanges';
 
 export function ReportSidebar({
   customReportItems,
@@ -43,6 +42,7 @@ export function ReportSidebar({
   disabledItems,
   defaultItems,
   defaultModeItems,
+  earliestTransaction,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
@@ -52,33 +52,34 @@ export function ReportSidebar({
     let dateEnd;
     switch (cond) {
       case 'All time':
-        [dateStart, dateEnd] = getFullRange(allIntervals);
-        onChangeDates(dateStart + '-01', dateEnd + '-01');
+        onChangeDates(earliestTransaction, monthUtils.currentDay());
         break;
       case 'Year to date':
         [dateStart, dateEnd] = validateRange(
-          allIntervals,
-          monthUtils.getYearStart(monthUtils.currentMonth()),
-          monthUtils.currentMonth(),
+          earliestTransaction,
+          monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
+          monthUtils.currentDay(),
         );
-        onChangeDates(dateStart + '-01', dateEnd + '-01');
+        onChangeDates(dateStart, dateEnd);
         break;
       case 'Last year':
         [dateStart, dateEnd] = validateRange(
-          allIntervals,
+          earliestTransaction,
           monthUtils.getYearStart(
             monthUtils.prevYear(monthUtils.currentMonth()),
-          ),
-          monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())),
+          ) + '-01',
+          monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())) +
+            '-31',
         );
-        onChangeDates(dateStart + '-01', dateEnd + '-01');
+        onChangeDates(dateStart, dateEnd);
         break;
       default:
         [dateStart, dateEnd] = getSpecificRange(
           ReportOptions.dateRangeMap.get(cond),
           cond === 'Last month' ? 0 : null,
+          customReportItems.interval,
         );
-        onChangeDates(dateStart + '-01', dateEnd + '-01');
+        onChangeDates(dateStart, dateEnd);
     }
   };
 
@@ -214,7 +215,7 @@ export function ReportSidebar({
                   .map(int => int.description)
                   .includes(customReportItems.dateRange)
               ) {
-                setDateRange('Year to date');
+                onSelectRange('Year to date');
               }
             }}
             options={ReportOptions.interval.map(option => [
@@ -379,16 +380,17 @@ export function ReportSidebar({
                 onChange={newValue =>
                   onChangeDates(
                     ...validateStart(
-                      allIntervals,
+                      earliestTransaction,
                       newValue,
                       customReportItems.endDate,
+                      customReportItems.interval,
                     ),
                   )
                 }
                 value={customReportItems.startDate}
                 defaultLabel={monthUtils.format(
                   customReportItems.startDate,
-                  'MMMM, yyyy',
+                  ReportOptions.intervalFormat.get(customReportItems.interval),
                 )}
                 options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
@@ -407,16 +409,17 @@ export function ReportSidebar({
                 onChange={newValue =>
                   onChangeDates(
                     ...validateEnd(
-                      allIntervals,
+                      earliestTransaction,
                       customReportItems.startDate,
                       newValue,
+                      customReportItems.interval,
                     ),
                   )
                 }
                 value={customReportItems.endDate}
                 defaultLabel={monthUtils.format(
                   customReportItems.endDate,
-                  'MMMM, yyyy',
+                  ReportOptions.intervalFormat.get(customReportItems.interval),
                 )}
                 options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
