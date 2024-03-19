@@ -30,8 +30,8 @@ export function AccountAutocompleteModal({
     onClose?.();
   };
 
-  const _onSelect = (accountId, accountName) => {
-    onSelect?.(accountId, accountName);
+  const _onSelect = (accountId, value) => {
+    onSelect?.(accountId, value);
     _onClose();
   };
 
@@ -83,7 +83,6 @@ export function AccountAutocompleteModal({
           )}
           <View style={{ flex: 1 }}>
             <AccountAutocomplete
-              value={null}
               focused={true}
               embedded={true}
               closeOnBlur={false}
