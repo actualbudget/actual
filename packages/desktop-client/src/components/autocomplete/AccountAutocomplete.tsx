@@ -131,7 +131,7 @@ export function AccountAutocomplete({
     });
 
   return (
-    <Autocomplete
+    <Autocomplete<AccountEntity>
       strict={true}
       highlightFirst={true}
       embedded={embedded}

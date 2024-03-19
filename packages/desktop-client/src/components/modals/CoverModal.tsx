@@ -29,8 +29,6 @@ export function CoverModal({
     originalCategoryGroups.filter(g => !g.is_income),
   );
 
-  const category = categories.find(c => c.id === categoryId);
-
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
@@ -60,6 +58,12 @@ export function CoverModal({
       onCategoryClick();
     }
   }, [initialMount, onCategoryClick]);
+
+  const category = categories.find(c => c.id === categoryId);
+
+  if (category == null) {
+    return null;
+  }
 
   return (
     <Modal
@@ -95,7 +99,7 @@ export function CoverModal({
             <Button
               type="primary"
               style={{
-                height: 40,
+                height: styles.mobileMinHeight,
                 marginLeft: styles.mobileEditingPadding,
                 marginRight: styles.mobileEditingPadding,
               }}

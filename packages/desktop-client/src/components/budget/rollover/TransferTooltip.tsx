@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useState, type ComponentPropsWithoutRef, useEffect } from 'react';
+import { useState, type ComponentPropsWithoutRef } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
@@ -27,7 +27,7 @@ export function TransferTooltip({
   position = 'bottom-right',
   ...props
 }: TransferTooltipProps) {
-  const _onSubmit = (amount, categoryId) => {
+  const _onSubmit = (amount: number, categoryId: string) => {
     onSubmit?.(amount, categoryId);
     onClose?.();
   };
@@ -65,15 +65,9 @@ function Transfer({
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
   const [amount, setAmount] = useState<string | null>();
 
-  useEffect(() => {
-    if (amount !== _initialAmount) {
-      setAmount(_initialAmount);
-    }
-  }, [_initialAmount]);
-
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
-  const _onSubmit = (newAmount: string, categoryId: string) => {
+  const _onSubmit = (newAmount: string | null, categoryId: string | null) => {
     const parsedAmount = evalArithmetic(newAmount);
     if (parsedAmount && categoryId) {
       onSubmit?.(amountToInteger(parsedAmount), categoryId);
@@ -94,8 +88,8 @@ function Transfer({
       <View>
         <InitialFocus>
           <Input
-            value={amount}
-            onChange={e => setAmount(e.target.value)}
+            defaultValue={_initialAmount}
+            onUpdate={value => setAmount(value)}
             onEnter={() => _onSubmit(amount, categoryId)}
           />
         </InitialFocus>
