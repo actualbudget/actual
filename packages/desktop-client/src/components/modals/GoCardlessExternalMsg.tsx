@@ -156,6 +156,7 @@ export function GoCardlessExternalMsg({
         <FormField>
           <FormLabel title="Choose your country:" htmlFor="country-field" />
           <Autocomplete
+            type="single"
             strict
             highlightFirst
             suggestions={COUNTRY_OPTIONS}
@@ -185,6 +186,7 @@ export function GoCardlessExternalMsg({
             <FormField>
               <FormLabel title="Choose your bank:" htmlFor="bank-field" />
               <Autocomplete
+                type="single"
                 focused
                 strict
                 highlightFirst
