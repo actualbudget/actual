@@ -87,7 +87,7 @@ export function createGroupedSpreadsheet({
         let totalAssets = 0;
         let totalDebts = 0;
 
-        const intervalData = intervals.reduce((arr, inter) => {
+        const intervalData = intervals.reduce((arr, intervalItem) => {
           let groupedAssets = 0;
           let groupedDebts = 0;
 
@@ -101,7 +101,8 @@ export function createGroupedSpreadsheet({
             )
               .filter(
                 asset =>
-                  asset.date === inter && asset.category === (item.id ?? null),
+                  asset.date === intervalItem &&
+                  asset.category === (item.id ?? null),
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedAssets += intervalAssets;
@@ -115,7 +116,8 @@ export function createGroupedSpreadsheet({
             )
               .filter(
                 debts =>
-                  debts.date === inter && debts.category === (item.id ?? null),
+                  debts.date === intervalItem &&
+                  debts.category === (item.id ?? null),
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedDebts += intervalDebts;
@@ -125,7 +127,7 @@ export function createGroupedSpreadsheet({
           totalDebts += groupedDebts;
 
           arr.push({
-            date: inter,
+            date: intervalItem,
             totalAssets: integerToAmount(groupedAssets),
             totalDebts: integerToAmount(groupedDebts),
             totalTotals: integerToAmount(groupedDebts + groupedAssets),

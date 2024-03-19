@@ -53,18 +53,18 @@ export const ReportTableRow = memo(
           valueStyle={compactStyle}
         />
         {item.intervalData && mode === 'time'
-          ? item.intervalData.map(inter => {
+          ? item.intervalData.map(intervalItem => {
               return (
                 <Cell
-                  key={amountToCurrency(inter[balanceTypeOp])}
+                  key={amountToCurrency(intervalItem[balanceTypeOp])}
                   style={{
                     minWidth: compact ? 50 : 85,
                   }}
                   valueStyle={compactStyle}
-                  value={amountToCurrency(inter[balanceTypeOp])}
+                  value={amountToCurrency(intervalItem[balanceTypeOp])}
                   title={
-                    Math.abs(inter[balanceTypeOp]) > 100000
-                      ? amountToCurrency(inter[balanceTypeOp])
+                    Math.abs(intervalItem[balanceTypeOp]) > 100000
+                      ? amountToCurrency(intervalItem[balanceTypeOp])
                       : undefined
                   }
                   width="flex"
