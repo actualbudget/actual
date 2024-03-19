@@ -36,8 +36,6 @@ export function TransferModal({
     categoryGroups = addToBeBudgetedGroup(categoryGroups);
   }
 
-  const fromCategory = categories.find(c => c.id === fromCategoryId);
-
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
   const [amount, setAmount] = useState<string | null>();
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
@@ -54,7 +52,7 @@ export function TransferModal({
     );
   };
 
-  const _onSubmit = (newAmount: string, categoryId: string) => {
+  const _onSubmit = (newAmount: string | null, categoryId: string | null) => {
     const parsedAmount = evalArithmetic(newAmount);
     if (parsedAmount && categoryId) {
       onSubmit?.(amountToInteger(parsedAmount), categoryId);
@@ -63,7 +61,10 @@ export function TransferModal({
     modalProps.onClose();
   };
 
-  if (amount === null) {
+  const fromCategory = categories.find(c => c.id === fromCategoryId);
+
+  if (amount === null || !fromCategory) {
+    // Don't render anything if from category is invalid.
     // Don't render anything until we have the amount to show. This
     // ensures that the amount field is focused and fully selected
     // when it's initially rendered (instead of being updated
@@ -90,17 +91,19 @@ export function TransferModal({
             <FieldLabel title="Transfer this amount:" />
             <InitialFocus>
               <InputField
+                tabIndex={1}
                 defaultValue={_initialAmount}
                 onUpdate={value => setAmount(value)}
-                onEnter={() => _onSubmit(amount, toCategoryId)}
               />
             </InitialFocus>
           </View>
 
           <FieldLabel title="To:" />
           <TapField
+            tabIndex={2}
             value={categories.find(c => c.id === toCategoryId)?.name}
             onClick={onCategoryClick}
+            onFocus={onCategoryClick}
           />
 
           <View
@@ -113,6 +116,7 @@ export function TransferModal({
           >
             <Button
               type="primary"
+              tabIndex={3}
               style={{
                 height: 40,
                 marginLeft: styles.mobileEditingPadding,

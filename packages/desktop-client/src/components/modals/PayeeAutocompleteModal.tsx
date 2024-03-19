@@ -80,7 +80,6 @@ export function PayeeAutocompleteModal({
         <PayeeAutocomplete
           payees={payees}
           accounts={accounts}
-          value={null}
           focused={true}
           embedded={true}
           closeOnBlur={false}
@@ -94,14 +93,18 @@ export function PayeeAutocompleteModal({
             _onSelect?.(value);
           }}
           {...(isNarrowWidth && {
-            renderCreatePayeeButton: props => (
+            renderCreatePayeeButton: (
+              props: ComponentPropsWithoutRef<typeof CreatePayeeButton>,
+            ) => (
               <CreatePayeeButton
                 {...props}
                 Icon={CreatePayeeIcon}
                 style={itemStyle}
               />
             ),
-            renderPayeeItemGroupHeader: props => (
+            renderPayeeItemGroupHeader: (
+              props: ComponentPropsWithoutRef<typeof ItemHeader>,
+            ) => (
               <ItemHeader
                 {...props}
                 style={{
@@ -112,7 +115,9 @@ export function PayeeAutocompleteModal({
                 }}
               />
             ),
-            renderPayeeItem: props => (
+            renderPayeeItem: (
+              props: ComponentPropsWithoutRef<typeof PayeeItem>,
+            ) => (
               <PayeeItem
                 {...props}
                 style={{

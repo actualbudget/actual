@@ -168,7 +168,7 @@ export function CategoryAutocomplete({
   );
 
   return (
-    <Autocomplete
+    <Autocomplete<CategoryAutocompleteItem>
       strict={true}
       highlightFirst={true}
       embedded={embedded}

@@ -23,16 +23,15 @@ export function CategoryAutocompleteModal({
   autocompleteProps,
   onClose,
 }: CategoryAutocompleteModalProps) {
-  const { categoryGroups, onSelect, ...restAutocompleteProps } =
-    autocompleteProps;
+  const { onSelect, ...restAutocompleteProps } = autocompleteProps;
 
   const _onClose = () => {
     modalProps.onClose();
     onClose?.();
   };
 
-  const _onSelect = (id, value) => {
-    onSelect?.(id, value);
+  const _onSelect = (categoryId, value) => {
+    onSelect?.(categoryId, value);
     _onClose();
   };
 
@@ -84,15 +83,15 @@ export function CategoryAutocompleteModal({
           )}
           <View style={{ flex: 1 }}>
             <CategoryAutocomplete
-              categoryGroups={categoryGroups}
-              value={null}
               focused={true}
               embedded={true}
               closeOnBlur={false}
               showSplitOption={false}
               onSelect={_onSelect}
               {...(isNarrowWidth && {
-                renderCategoryItemGroupHeader: props => (
+                renderCategoryItemGroupHeader: (
+                  props: ComponentPropsWithoutRef<typeof ItemHeader>,
+                ) => (
                   <ItemHeader
                     {...props}
                     style={{
@@ -103,7 +102,9 @@ export function CategoryAutocompleteModal({
                     }}
                   />
                 ),
-                renderCategoryItem: props => (
+                renderCategoryItem: (
+                  props: ComponentPropsWithoutRef<typeof CategoryItem>,
+                ) => (
                   <CategoryItem
                     {...props}
                     style={{
