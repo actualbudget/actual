@@ -12,6 +12,7 @@ export function cleanupTemplate({ month }: { month: string }) {
 
 async function applyGroupCleanups(month: string, sourceGroups, sinkGroups) {
   const sheetName = monthUtils.sheetForMonth(month);
+  const warnings = [];
   let groupLength = sourceGroups.length;
   while (groupLength > 0) {
     //function for each unique group
@@ -56,10 +57,12 @@ async function applyGroupCleanups(month: string, sourceGroups, sinkGroups) {
         });
       }
     } else {
+      warnings.push(groupName + ' has no matching sink categories.');
     }
     sourceGroups = sourceGroups.filter(c => c.group !== groupName);
     groupLength = sourceGroups.length;
   }
+  return warnings;
 }
 
 async function processCleanup(month: string): Promise<Notification> {
@@ -79,6 +82,8 @@ async function processCleanup(month: string): Promise<Notification> {
   const sheetName = monthUtils.sheetForMonth(month);
   const groupSource = [];
   const groupSink = [];
+
+  //filter out category groups
   for (let c = 0; c < categories.length; c++) {
     const category = categories[c];
     const template = category_templates[category.id];
@@ -102,8 +107,9 @@ async function processCleanup(month: string): Promise<Notification> {
       }
     }
   }
-
-  await applyGroupCleanups(month, groupSource, groupSink);
+  //run category groups
+  const newWarnings = await applyGroupCleanups(month, groupSource, groupSink);
+  warnings.splice(1, 0, ...newWarnings);
 
   for (let c = 0; c < categories.length; c++) {
     const category = categories[c];
@@ -207,6 +213,7 @@ async function processCleanup(month: string): Promise<Notification> {
     warnings.push('No funds are available to reallocate.');
   }
 
+  //fill sinking categories
   for (let c = 0; c < sinkCategory.length; c++) {
     const budgeted = await getSheetValue(
       sheetName,
@@ -262,6 +269,12 @@ async function processCleanup(month: string): Promise<Notification> {
         sticky: true,
         message: `${applied} There were errors interpreting some templates:`,
         pre: errors.join('\n\n'),
+      };
+    } else if (warnings.length) {
+      return {
+        type: 'warning',
+        message: 'Funds not available:',
+        pre: warnings.join('\n\n'),
       };
     } else {
       return {
