@@ -4,7 +4,7 @@ export function validateStart(
   earliest: string,
   start: string,
   end: string,
-  interval: string,
+  interval?: string,
 ) {
   let addDays;
   let dateStart;
@@ -17,23 +17,32 @@ export function validateStart(
       dateStart = start + '-01-01';
       addDays = 1095;
       break;
-    default:
+    case 'Daily':
       dateStart = start;
       addDays = 6;
+      break;
+    default:
+      dateStart = start;
+      addDays = 180;
       break;
   }
 
   if (end < start) {
     end = monthUtils.addDays(dateStart, addDays);
   }
-  return boundedRange(earliest, dateStart, end, interval);
+  return boundedRange(
+    earliest,
+    dateStart,
+    interval ? end : monthUtils.monthFromDate(end),
+    interval,
+  );
 }
 
 export function validateEnd(
   earliest: string,
   start: string,
   end: string,
-  interval: string,
+  interval?: string,
 ) {
   let subDays;
   let dateEnd;
@@ -46,16 +55,25 @@ export function validateEnd(
       dateEnd = end + '-12-31';
       subDays = 1095;
       break;
-    default:
+    case 'Daily':
       dateEnd = end;
       subDays = 6;
+      break;
+    default:
+      dateEnd = end;
+      subDays = 180;
       break;
   }
 
   if (start > end) {
     start = monthUtils.subDays(dateEnd, subDays);
   }
-  return boundedRange(earliest, start, dateEnd, interval);
+  return boundedRange(
+    earliest,
+    interval ? start : monthUtils.monthFromDate(start),
+    dateEnd,
+    interval,
+  );
 }
 
 export function validateRange(earliest: string, start: string, end: string) {
@@ -73,7 +91,7 @@ function boundedRange(
   earliest: string,
   start: string,
   end: string,
-  interval: string,
+  interval?: string,
 ) {
   let latest;
   switch (interval) {
@@ -81,10 +99,10 @@ function boundedRange(
       latest = monthUtils.currentMonth() + '-31';
       break;
     case 'Yearly':
-      latest = monthUtils.currentYear() + '-12-31';
+      latest = monthUtils.currentDay();
       break;
     default:
-      latest = monthUtils.currentDay();
+      latest = monthUtils.currentMonth();
       break;
   }
 
@@ -96,14 +114,6 @@ function boundedRange(
   }
   return [start, end];
 }
-
-/*
-function getLatestRange(offset) {
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, offset);
-  return [start, end];
-}
-*/
 
 export function getSpecificRange(
   offset: number,
@@ -123,14 +133,6 @@ export function getSpecificRange(
         addNumber === null ? offset : addNumber,
       );
       break;
-    case 'Yearly':
-      currInterval = monthUtils.yearFromDate(currentDay);
-      dateStart = monthUtils.subYears(currInterval, offset);
-      dateEnd = monthUtils.addYears(
-        dateStart,
-        addNumber === null ? offset : addNumber,
-      );
-      break;
     default:
       currInterval = currentDay;
       dateStart = monthUtils.subDays(currInterval, offset);
@@ -141,4 +143,15 @@ export function getSpecificRange(
       break;
   }
   return [dateStart, dateEnd];
+}
+
+export function getFullRange(start: string) {
+  const end = monthUtils.currentMonth();
+  return [start, end];
+}
+
+export function getLatestRange(offset: number) {
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.subMonths(end, offset);
+  return [start, end];
 }

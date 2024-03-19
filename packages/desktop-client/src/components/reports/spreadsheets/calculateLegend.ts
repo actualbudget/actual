@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import {
   type IntervalData,
   type ItemEntity,
@@ -15,10 +14,13 @@ export function calculateLegend(
   balanceTypeOp: string,
 ) {
   const colorScale = getColorScale('qualitative');
-  const chooseData = groupBy === 'Interval' ? intervalData : calcDataFiltered;
-  return chooseData.map((c, index) => {
+  const chooseData =
+    groupBy === 'Interval'
+      ? intervalData.map(c => c.date)
+      : calcDataFiltered.map(c => c.name);
+  return chooseData.map((name, index) => {
     return {
-      name: groupBy === 'Interval' ? c.date : c.name,
+      name,
       color:
         graphType === 'DonutGraph'
           ? colorScale[index % colorScale.length]
