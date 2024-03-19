@@ -14,7 +14,10 @@ export function calculateLegend(
   balanceTypeOp: string,
 ) {
   const colorScale = getColorScale('qualitative');
-  const chooseData = groupBy === 'Interval' ? intervalData.map(c => c.date) : calcDataFiltered.map(c => c.name);
+  const chooseData =
+    groupBy === 'Interval'
+      ? intervalData.map(c => c.date)
+      : calcDataFiltered.map(c => c.name);
   return chooseData.map((name, index) => {
     return {
       name,
