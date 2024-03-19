@@ -1,9 +1,14 @@
-// @ts-strict-ignore
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 import { Tooltip } from '../tooltips';
 
-export function MenuTooltip({ width, onClose, children }) {
+type MenuTooltipProps = {
+  width: number;
+  onClose: () => void;
+  children: ReactNode;
+};
+
+export function MenuTooltip({ width, onClose, children }: MenuTooltipProps) {
   return (
     <Tooltip
       position="bottom-right"
