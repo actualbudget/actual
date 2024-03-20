@@ -106,7 +106,7 @@ export function AccountAutocompleteModal({
               {...defaultAutocompleteProps}
               {...autocompleteProps}
               onSelect={(...args) => {
-                autocompleteProps?.onSelect?.apply(null, args);
+                autocompleteProps?.onSelect?.apply(this, args);
                 _onClose();
               }}
             />
