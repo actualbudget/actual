@@ -515,7 +515,7 @@ export async function reconcileExternalTransactions(acctId, transactions) {
 
   // The final fuzzy matching pass. This is the lowest fidelity
   // matching: it just find the first transaction that hasn't been
-  // matched yet. Remember the the dataset only contains transactions
+  // matched yet. Remember the dataset only contains transactions
   // around the same date with the same amount.
   const transactionsStep3 = transactionsStep2.map(data => {
     if (!data.match && data.fuzzyDataset) {
@@ -678,7 +678,7 @@ export async function reconcileTransactions(acctId, transactions) {
 
   // The final fuzzy matching pass. This is the lowest fidelity
   // matching: it just find the first transaction that hasn't been
-  // matched yet. Remember the the dataset only contains transactions
+  // matched yet. Remember the dataset only contains transactions
   // around the same date with the same amount.
   const transactionsStep3 = transactionsStep2.map(data => {
     if (!data.match && data.fuzzyDataset) {
