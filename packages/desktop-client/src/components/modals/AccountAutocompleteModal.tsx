@@ -79,6 +79,7 @@ export function AccountAutocompleteModal({
               focused={true}
               embedded={true}
               closeOnBlur={false}
+              onClose={_onClose}
               {...(isNarrowWidth && {
                 renderAccountItemGroupHeader: props => (
                   <ItemHeader
@@ -105,11 +106,6 @@ export function AccountAutocompleteModal({
               })}
               {...defaultAutocompleteProps}
               {...autocompleteProps}
-              onSelect={(...args) => {
-                // @ts-ignore Hands up. Figure out a way to properly type this.
-                autocompleteProps.onSelect?.(...args);
-                _onClose();
-              }}
             />
           </View>
         </View>
