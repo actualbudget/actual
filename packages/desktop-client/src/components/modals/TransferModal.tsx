@@ -37,7 +37,7 @@ export function TransferModal({
   }
 
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
-  const [amount, setAmount] = useState<string | null>();
+  const [amount, setAmount] = useState<string | null>(null);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
@@ -62,19 +62,9 @@ export function TransferModal({
   };
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
-
-  if (amount === null || !fromCategory) {
-    // Don't render anything if from category is invalid.
-    // Don't render anything until we have the amount to show. This
-    // ensures that the amount field is focused and fully selected
-    // when it's initially rendered (instead of being updated
-    // afterwards and losing selection)
-    return null;
-  }
-
   return (
     <Modal
-      title={`Transfer from ${fromCategory.name}`}
+      title={`Transfer from ${fromCategory?.name}`}
       showHeader
       focusAfterClose={false}
       {...modalProps}

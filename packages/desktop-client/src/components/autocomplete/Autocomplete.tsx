@@ -625,6 +625,7 @@ function MultiAutocomplete<T extends Item>({
   clearOnBlur = true,
   ...props
 }: MultiAutocompleteProps<T>) {
+  selectedItems = selectedItems || [];
   const [focused, setFocused] = useState(false);
   const lastSelectedItems = useRef<typeof selectedItems>();
   const selectedItemIds = selectedItems.map(getItemId);

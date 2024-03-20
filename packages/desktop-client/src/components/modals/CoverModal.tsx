@@ -43,7 +43,7 @@ export function CoverModal({
     );
   }, [categoryGroups, dispatch]);
 
-  const _onSubmit = (categoryId: string) => {
+  const _onSubmit = (categoryId: string | null) => {
     if (categoryId) {
       onSubmit?.(categoryId);
     }

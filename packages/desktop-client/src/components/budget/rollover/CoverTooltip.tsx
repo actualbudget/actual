@@ -18,7 +18,7 @@ export function CoverTooltip({
   onSubmit,
   onClose,
 }: CoverTooltipProps) {
-  const _onSubmit = categoryId => {
+  const _onSubmit = (categoryId: string) => {
     onSubmit?.(categoryId);
     onClose?.();
   };

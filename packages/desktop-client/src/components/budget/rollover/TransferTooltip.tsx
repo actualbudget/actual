@@ -63,8 +63,7 @@ function Transfer({
   }
 
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
-  const [amount, setAmount] = useState<string | null>();
-
+  const [amount, setAmount] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   const _onSubmit = (newAmount: string | null, categoryId: string | null) => {
@@ -73,14 +72,6 @@ function Transfer({
       onSubmit?.(amountToInteger(parsedAmount), categoryId);
     }
   };
-
-  if (amount === null) {
-    // Don't render anything until we have the amount to show. This
-    // ensures that the amount field is focused and fully selected
-    // when it's initially rendered (instead of being updated
-    // afterwards and losing selection)
-    return null;
-  }
 
   return (
     <>
