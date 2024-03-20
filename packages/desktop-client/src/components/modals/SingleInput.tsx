@@ -41,21 +41,36 @@ export function SingleInput({
     modalProps.onClose();
   };
   return (
-    <Modal title={title} {...modalProps}>
+    <Modal
+      title={title}
+      {...modalProps}
+      padding={0}
+      style={{
+        flex: 1,
+        padding: '0 10px',
+        paddingBottom: 10,
+        borderRadius: '6px',
+      }}
+    >
       {() => (
         <>
           <View
             style={{
               flexDirection: 'row',
               justifyContent: 'center',
-              paddingBottom: 15,
+              alignItems: 'center',
             }}
           >
             <View style={{ flexDirection: 'column', flex: 1 }}>
               <InitialFocus>
                 <Input
                   placeholder={inputPlaceholder}
-                  style={{ ...styles.mediumText }}
+                  style={{
+                    height: styles.mobileMinHeight,
+                    marginLeft: styles.mobileEditingPadding,
+                    marginRight: styles.mobileEditingPadding,
+                    ...styles.mediumText,
+                  }}
                   value={value}
                   onChangeValue={setValue}
                   onEnter={e => _onSubmit(e.currentTarget.value)}
@@ -68,19 +83,19 @@ export function SingleInput({
               )}
             </View>
           </View>
-
           <View
             style={{
-              flexDirection: 'row',
               alignContent: 'center',
               justifyContent: 'center',
+              marginTop: 10,
             }}
           >
             <Button
               type="primary"
               style={{
-                ...styles.mediumText,
-                flexBasis: '50%',
+                height: styles.mobileMinHeight,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
               }}
               onPointerUp={() => _onSubmit(value)}
             >

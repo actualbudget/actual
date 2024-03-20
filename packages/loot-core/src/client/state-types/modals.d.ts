@@ -177,13 +177,19 @@ type FinanceModals = {
     onTransfer: () => void;
     onCover: () => void;
   };
+  'rollover-to-budget-menu': {
+    month: string;
+    onTransfer: () => void;
+    onHoldBuffer: () => void;
+    onResetHoldBuffer: () => void;
+  };
   'report-balance-menu': {
     categoryId: string;
     month: string;
     onCarryover: (carryover: boolean) => void;
   };
   transfer: {
-    categoryId: string;
+    title: string;
     amount: number;
     onSubmit: (amount: number, toCategoryId: string) => void;
     showToBeBudgeted?: boolean;
@@ -191,6 +197,10 @@ type FinanceModals = {
   cover: {
     categoryId: string;
     onSubmit: (fromCategoryId: string) => void;
+  };
+  'hold-buffer': {
+    month: string;
+    onSubmit: (amount: number) => void;
   };
   'scheduled-transaction-menu': {
     transactionId: string;

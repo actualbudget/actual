@@ -17,15 +17,15 @@ import { type CommonModalProps } from '../Modals';
 
 type TransferModalProps = {
   modalProps: CommonModalProps;
-  categoryId: string;
+  title: string;
   amount: number;
   showToBeBudgeted: boolean;
-  onSubmit: (amount: number, categoryId: string) => void;
+  onSubmit: (amount: number, toCategoryId: string) => void;
 };
 
 export function TransferModal({
   modalProps,
-  categoryId: fromCategoryId,
+  title,
   amount: initialAmount,
   showToBeBudgeted,
   onSubmit,
@@ -61,10 +61,9 @@ export function TransferModal({
     modalProps.onClose();
   };
 
-  const fromCategory = categories.find(c => c.id === fromCategoryId);
   return (
     <Modal
-      title={`Transfer from ${fromCategory?.name}`}
+      title={title}
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -72,6 +71,7 @@ export function TransferModal({
       style={{
         flex: 1,
         padding: '0 10px',
+        paddingBottom: 10,
         borderRadius: '6px',
       }}
     >
@@ -106,14 +106,13 @@ export function TransferModal({
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 10,
-              marginBottom: 10,
             }}
           >
             <Button
               type="primary"
               tabIndex={3}
               style={{
-                height: 40,
+                height: styles.mobileMinHeight,
                 marginLeft: styles.mobileEditingPadding,
                 marginRight: styles.mobileEditingPadding,
               }}

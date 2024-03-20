@@ -75,6 +75,7 @@ export function CoverModal({
       style={{
         flex: 1,
         padding: '0 10px',
+        paddingBottom: 10,
         borderRadius: '6px',
       }}
     >
@@ -93,7 +94,6 @@ export function CoverModal({
               justifyContent: 'center',
               alignItems: 'center',
               marginTop: 10,
-              marginBottom: 10,
             }}
           >
             <Button

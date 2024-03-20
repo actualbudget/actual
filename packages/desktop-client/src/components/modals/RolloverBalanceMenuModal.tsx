@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { type CSSProperties, theme, styles } from '../../style';
-import {
-  BalanceMenu,
-  type BalanceMenuProps,
-} from '../budget/rollover/BalanceMenu';
+import { BalanceMenu } from '../budget/rollover/BalanceMenu';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
-type RolloverBalanceMenuModalProps = BalanceMenuProps & {
+type RolloverBalanceMenuModalProps = ComponentPropsWithoutRef<
+  typeof BalanceMenu
+> & {
   modalProps: CommonModalProps;
 };
 
@@ -36,6 +35,7 @@ export function RolloverBalanceMenuModal({
       style={{
         flex: 1,
         padding: '0 10px',
+        paddingBottom: 10,
         borderRadius: '6px',
       }}
     >

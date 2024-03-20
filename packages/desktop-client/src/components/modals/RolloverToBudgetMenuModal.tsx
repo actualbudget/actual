@@ -1,22 +1,22 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { type CSSProperties, theme, styles } from '../../style';
-import {
-  BalanceMenu,
-  type BalanceMenuProps,
-} from '../budget/report/BalanceMenu';
+import { ToBudgetMenu } from '../budget/rollover/budgetsummary/ToBudgetMenu';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
-type ReportBalanceMenuModalProps = BalanceMenuProps & {
+type RolloverToBudgetMenuModalProps = ComponentPropsWithoutRef<
+  typeof ToBudgetMenu
+> & {
   modalProps: CommonModalProps;
 };
 
-export function ReportBalanceMenuModal({
+export function RolloverToBudgetMenuModal({
   modalProps,
-  categoryId,
-  onCarryover,
-}: ReportBalanceMenuModalProps) {
+  onTransfer,
+  onHoldBuffer,
+  onResetHoldBuffer,
+}: RolloverToBudgetMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -39,10 +39,11 @@ export function ReportBalanceMenuModal({
       }}
     >
       {() => (
-        <BalanceMenu
-          categoryId={categoryId}
+        <ToBudgetMenu
           getItemStyle={() => defaultMenuItemStyle}
-          onCarryover={onCarryover}
+          onTransfer={onTransfer}
+          onHoldBuffer={onHoldBuffer}
+          onResetHoldBuffer={onResetHoldBuffer}
         />
       )}
     </Modal>

@@ -12,15 +12,15 @@ import { Stack } from '../common/Stack';
 import { type CommonModalProps } from '../Modals';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
-type ReportBudgetSummaryProps = {
+type ReportBudgetSummaryModalProps = {
   modalProps: CommonModalProps;
   month: string;
 };
 
-export function ReportBudgetSummary({
+export function ReportBudgetSummaryModal({
   month,
   modalProps,
-}: ReportBudgetSummaryProps) {
+}: ReportBudgetSummaryModalProps) {
   const currentMonth = monthUtils.currentMonth();
   return (
     <Modal title="Budget Summary" {...modalProps}>

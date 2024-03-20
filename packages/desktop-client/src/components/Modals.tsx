@@ -28,6 +28,7 @@ import { EditRule } from './modals/EditRule';
 import { FixEncryptionKey } from './modals/FixEncryptionKey';
 import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
 import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
+import { HoldBufferModal } from './modals/HoldBufferModal';
 import { ImportTransactions } from './modals/ImportTransactions';
 import { LoadBackup } from './modals/LoadBackup';
 import { ManageRulesModal } from './modals/ManageRulesModal';
@@ -36,9 +37,10 @@ import { Notes } from './modals/Notes';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
-import { ReportBudgetSummary } from './modals/ReportBudgetSummary';
+import { ReportBudgetSummaryModal } from './modals/ReportBudgetSummaryModal';
 import { RolloverBalanceMenuModal } from './modals/RolloverBalanceMenuModal';
-import { RolloverBudgetSummary } from './modals/RolloverBudgetSummary';
+import { RolloverBudgetSummaryModal } from './modals/RolloverBudgetSummaryModal';
+import { RolloverToBudgetMenuModal } from './modals/RolloverToBudgetMenuModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
@@ -333,17 +335,22 @@ export function Modals() {
 
         case 'rollover-budget-summary':
           return (
-            <RolloverBudgetSummary
+            <NamespaceContext.Provider
               key={name}
-              modalProps={modalProps}
-              month={options.month}
-              onBudgetAction={options.onBudgetAction}
-            />
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <RolloverBudgetSummaryModal
+                key={name}
+                modalProps={modalProps}
+                month={options.month}
+                onBudgetAction={options.onBudgetAction}
+              />
+            </NamespaceContext.Provider>
           );
 
         case 'report-budget-summary':
           return (
-            <ReportBudgetSummary
+            <ReportBudgetSummaryModal
               key={name}
               modalProps={modalProps}
               month={options.month}
@@ -455,6 +462,35 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
+        case 'rollover-to-budget-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <RolloverToBudgetMenuModal
+                modalProps={modalProps}
+                onTransfer={options.onTransfer}
+                onHoldBuffer={options.onHoldBuffer}
+                onResetHoldBuffer={options.onResetHoldBuffer}
+              />
+            </NamespaceContext.Provider>
+          );
+
+        case 'hold-buffer':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <HoldBufferModal
+                modalProps={modalProps}
+                month={options.month}
+                onSubmit={options.onSubmit}
+              />
+            </NamespaceContext.Provider>
+          );
+
         case 'report-balance-menu':
           return (
             <NamespaceContext.Provider
@@ -473,7 +509,7 @@ export function Modals() {
           return (
             <TransferModal
               modalProps={modalProps}
-              categoryId={options.categoryId}
+              title={options.title}
               amount={options.amount}
               onSubmit={options.onSubmit}
               showToBeBudgeted={options.showToBeBudgeted}
