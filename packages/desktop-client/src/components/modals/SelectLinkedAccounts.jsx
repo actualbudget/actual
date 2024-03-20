@@ -181,7 +181,6 @@ function TableRow({
       >
         {focusedField === 'account' ? (
           <Autocomplete
-            type="single"
             focused
             strict
             highlightFirst
