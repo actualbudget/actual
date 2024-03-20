@@ -112,7 +112,7 @@ export function CategoryAutocompleteModal({
               {...defaultAutocompleteProps}
               {...autocompleteProps}
               onSelect={(...args) => {
-                autocompleteProps?.onSelect?.apply(this, args);
+                autocompleteProps?.onSelect?.bind(this)(...args);
                 _onClose();
               }}
             />
