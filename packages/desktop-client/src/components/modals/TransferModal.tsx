@@ -41,7 +41,7 @@ export function TransferModal({
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
-  const onCategoryClick = () => {
+  const openCategoryModal = () => {
     dispatch(
       pushModal('category-autocomplete', {
         categoryGroups,
@@ -84,6 +84,11 @@ export function TransferModal({
                 tabIndex={1}
                 defaultValue={_initialAmount}
                 onUpdate={value => setAmount(value)}
+                onEnter={() => {
+                  if (!toCategoryId) {
+                    openCategoryModal();
+                  }
+                }}
               />
             </InitialFocus>
           </View>
@@ -92,8 +97,8 @@ export function TransferModal({
           <TapField
             tabIndex={2}
             value={categories.find(c => c.id === toCategoryId)?.name}
-            onClick={onCategoryClick}
-            onFocus={onCategoryClick}
+            onClick={openCategoryModal}
+            onFocus={openCategoryModal}
           />
 
           <View
