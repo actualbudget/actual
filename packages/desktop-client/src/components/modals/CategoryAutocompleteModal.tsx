@@ -112,17 +112,8 @@ export function CategoryAutocompleteModal({
               {...defaultAutocompleteProps}
               {...autocompleteProps}
               onSelect={(...args) => {
-                const { type, onSelect } = autocompleteProps;
-
-                if (type === 'multi') {
-                  const ids: Parameters<typeof onSelect>[0] = args[0];
-                  const value: Parameters<typeof onSelect>[1] = args[1];
-                  autocompleteProps?.onSelect?.(ids, value);
-                } else {
-                  const id: Parameters<typeof onSelect>[0] = args[0];
-                  const value: Parameters<typeof onSelect>[1] = args[1];
-                  autocompleteProps?.onSelect?.(id, value);
-                }
+                // @ts-ignore Hands up. Figure out a way to properly type this.
+                autocompleteProps.onSelect?.(...args);
                 _onClose();
               }}
             />
