@@ -28,7 +28,7 @@ export function recalculate({
 }: recalculateProps) {
   let totalAssets = 0;
   let totalDebts = 0;
-  const intervalData = intervals.reduce((arr, inter) => {
+  const intervalData = intervals.reduce((arr, intervalItem) => {
     const last = arr.length === 0 ? null : arr[arr.length - 1];
 
     const intervalAssets = filterHiddenItems(
@@ -40,7 +40,8 @@ export function recalculate({
     )
       .filter(
         asset =>
-          asset.date === inter && asset[groupByLabel] === (item.id ?? null),
+          asset.date === intervalItem &&
+          asset[groupByLabel] === (item.id ?? null),
       )
       .reduce((a, v) => (a = a + v.amount), 0);
     totalAssets += intervalAssets;
@@ -53,7 +54,9 @@ export function recalculate({
       showUncategorized,
     )
       .filter(
-        debt => debt.date === inter && debt[groupByLabel] === (item.id ?? null),
+        debt =>
+          debt.date === intervalItem &&
+          debt[groupByLabel] === (item.id ?? null),
       )
       .reduce((a, v) => (a = a + v.amount), 0);
     totalDebts += intervalDebts;
@@ -67,7 +70,7 @@ export function recalculate({
       totalDebts: integerToAmount(intervalDebts),
       totalTotals: integerToAmount(intervalAssets + intervalDebts),
       change,
-      dateLookup: inter,
+      dateLookup: intervalItem,
     });
 
     return arr;

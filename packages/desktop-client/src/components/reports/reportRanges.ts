@@ -155,4 +155,3 @@ export function getLatestRange(offset: number) {
   const start = monthUtils.subMonths(end, offset);
   return [start, end];
 }
- 

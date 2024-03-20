@@ -126,7 +126,7 @@ export function createCustomSpreadsheet({
     let totalAssets = 0;
     let totalDebts = 0;
 
-    const intervalData = intervals.reduce((arr, inter) => {
+    const intervalData = intervals.reduce((arr, intervalItem) => {
       let perIntervalAssets = 0;
       let perIntervalDebts = 0;
       const stacked = {};
@@ -143,7 +143,8 @@ export function createCustomSpreadsheet({
         )
           .filter(
             asset =>
-              asset.date === inter && asset[groupByLabel] === (item.id ?? null),
+              asset.date === intervalItem &&
+              asset[groupByLabel] === (item.id ?? null),
           )
           .reduce((a, v) => (a = a + v.amount), 0);
         perIntervalAssets += intervalAssets;
@@ -157,7 +158,8 @@ export function createCustomSpreadsheet({
         )
           .filter(
             debt =>
-              debt.date === inter && debt[groupByLabel] === (item.id ?? null),
+              debt.date === intervalItem &&
+              debt[groupByLabel] === (item.id ?? null),
           )
           .reduce((a, v) => (a = a + v.amount), 0);
         perIntervalDebts += intervalDebts;
@@ -181,8 +183,8 @@ export function createCustomSpreadsheet({
         date:
           interval === 'Monthly'
             ? // eslint-disable-next-line rulesdir/typography
-              d.format(d.parseISO(`${inter}-01`), "MMM ''yy")
-            : inter,
+              d.format(d.parseISO(`${intervalItem}-01`), "MMM ''yy")
+            : intervalItem,
         ...stacked,
         totalDebts: integerToAmount(perIntervalDebts),
         totalAssets: integerToAmount(perIntervalAssets),
