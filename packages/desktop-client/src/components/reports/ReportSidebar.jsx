@@ -77,7 +77,6 @@ export function ReportSidebar({
         [dateStart, dateEnd] = getSpecificRange(
           ReportOptions.dateRangeMap.get(cond),
           cond === 'Last month' ? 0 : null,
-          customReportItems.interval,
         );
         onChangeDates(dateStart, dateEnd);
     }

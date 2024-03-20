@@ -81,7 +81,8 @@ export function CustomReport() {
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const [dataCheck, setDataCheck] = useState(false);
-  const dateRangeLine = ReportOptions.dateRange.length - 3;
+  const dateRangeLine =
+    ReportOptions.dateRange.filter(f => f[interval]).length - 3;
 
   const [intervals, setIntervals] = useState(
     monthUtils.rangeInclusive(startDate, endDate),
@@ -93,22 +94,15 @@ export function CustomReport() {
   );
 
   useEffect(() => {
-    let start;
-    let end;
+    const format =
+      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
 
-    if (interval === 'Monthly') {
-      start = monthUtils.monthFromDate(startDate);
-      end = monthUtils.monthFromDate(endDate);
-    }
+    const dateStart = monthUtils[format](startDate);
+    const dateEnd = monthUtils[format](endDate);
 
-    if (interval === 'Yearly') {
-      start = monthUtils.yearFromDate(startDate);
-      end = monthUtils.yearFromDate(endDate);
-    }
-
-    const rangeInc =
-      interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
-    setIntervals(monthUtils[rangeInc](start, end));
+    setIntervals(
+      monthUtils[ReportOptions.intervalRange.get(interval)](dateStart, dateEnd),
+    );
   }, [interval, startDate, endDate]);
 
   useEffect(() => {
@@ -122,33 +116,18 @@ export function CustomReport() {
       report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
       setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
-      let rangeInc;
-      let currentInterval;
-      let earliestInterval;
-      switch (interval) {
-        case 'Monthly':
-          currentInterval = monthUtils.currentMonth();
-          earliestInterval = trans
-            ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-            : currentInterval;
-          rangeInc = 'rangeInclusive';
-          break;
-        case 'Yearly':
-          currentInterval = monthUtils.currentYear();
-          earliestInterval = trans
-            ? monthUtils.yearFromDate(d.parseISO(fromDateRepr(trans.date)))
-            : currentInterval;
-          rangeInc = 'yearRangeInclusive';
-          break;
-        default:
-          currentInterval = monthUtils.currentDay();
-          earliestInterval = trans
-            ? monthUtils.dayFromDate(d.parseISO(fromDateRepr(trans.date)))
-            : currentInterval;
-          rangeInc = 'dayRangeInclusive';
-      }
+      const format =
+        ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+      const currentInterval =
+        monthUtils['current' + ReportOptions.intervalMap.get(interval)]();
+      const earliestInterval = trans
+        ? monthUtils[format](d.parseISO(fromDateRepr(trans.date)))
+        : currentInterval;
 
-      const allInter = monthUtils[rangeInc](earliestInterval, currentInterval)
+      const allInter = monthUtils[ReportOptions.intervalRange.get(interval)](
+        earliestInterval,
+        currentInterval,
+      )
         .map(inter => ({
           name: inter,
           pretty: monthUtils.format(

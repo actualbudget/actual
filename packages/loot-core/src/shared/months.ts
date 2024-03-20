@@ -292,6 +292,10 @@ export function getMonth(day: string): string {
   return day.slice(0, 7);
 }
 
+export function getMonthEnd(day: string): string {
+  return subDays(nextMonth(day.slice(0, 7)) + '-01', 1);
+}
+
 export function getYearStart(month: string): string {
   return getYear(month) + '-01';
 }

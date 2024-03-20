@@ -64,8 +64,18 @@ const intervalOptions = [
   //{ value: 1, description: 'Daily', name: 'Day'},
   //{ value: 2, description: 'Weekly', name: 'Week'},
   //{ value: 3, description: 'Fortnightly', name: 3},
-  { description: 'Monthly', name: 'Month', format: 'MMMM, yyyy' },
-  { description: 'Yearly', name: 'Year', format: 'yyyy' },
+  {
+    description: 'Monthly',
+    name: 'Month',
+    format: 'MMMM, yyyy',
+    range: 'rangeInclusive',
+  },
+  {
+    description: 'Yearly',
+    name: 'Year',
+    format: 'yyyy',
+    range: 'yearRangeInclusive',
+  },
 ];
 
 export const ReportOptions = {
@@ -84,6 +94,9 @@ export const ReportOptions = {
   ),
   intervalFormat: new Map(
     intervalOptions.map(item => [item.description, item.format]),
+  ),
+  intervalRange: new Map(
+    intervalOptions.map(item => [item.description, item.range]),
   ),
 };
 
