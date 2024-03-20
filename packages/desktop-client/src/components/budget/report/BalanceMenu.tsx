@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 
-import { Menu, type MenuProps } from '../../common/Menu';
+import { Menu } from '../../common/Menu';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
-export type BalanceMenuProps = Omit<MenuProps, 'onMenuSelect' | 'items'> & {
+export type BalanceMenuProps = Omit<
+  ComponentPropsWithoutRef<typeof Menu>,
+  'onMenuSelect' | 'items'
+> & {
   categoryId: string;
   onCarryover: (carryover: boolean) => void;
 };
