@@ -53,7 +53,7 @@ export function TransferModal({
   };
 
   const _onSubmit = (newAmount: string | null, categoryId: string | null) => {
-    const parsedAmount = evalArithmetic(newAmount);
+    const parsedAmount = evalArithmetic(newAmount || '');
     if (parsedAmount && categoryId) {
       onSubmit?.(amountToInteger(parsedAmount), categoryId);
     }
