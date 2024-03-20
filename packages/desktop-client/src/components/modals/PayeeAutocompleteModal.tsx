@@ -1,6 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
+// import { useDispatch } from 'react-redux';
 
-import { createPayee } from 'loot-core/client/actions';
+// import { createPayee } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { usePayees } from '../../hooks/usePayees';
@@ -30,16 +31,9 @@ export function PayeeAutocompleteModal({
   const payees = usePayees() || [];
   const accounts = useAccounts() || [];
 
-  const { onSelect, ...restAutocompleteProps } = autocompleteProps;
-
   const _onClose = () => {
     modalProps.onClose();
     onClose?.();
-  };
-
-  const _onSelect = payeeId => {
-    onSelect?.(payeeId);
-    _onClose();
   };
 
   const itemStyle = {
@@ -85,13 +79,6 @@ export function PayeeAutocompleteModal({
           closeOnBlur={false}
           showManagePayees={false}
           showMakeTransfer={!isNarrowWidth}
-          onSelect={async value => {
-            if (value && value.startsWith('new:')) {
-              value = await createPayee(value.slice('new:'.length));
-            }
-
-            _onSelect?.(value);
-          }}
           {...(isNarrowWidth && {
             renderCreatePayeeButton: (
               props: ComponentPropsWithoutRef<typeof CreatePayeeButton>,
@@ -130,13 +117,17 @@ export function PayeeAutocompleteModal({
             ),
           })}
           {...defaultAutocompleteProps}
-          {...restAutocompleteProps}
+          {...autocompleteProps}
+          onSelect={(idOrIds, value) => {
+            autocompleteProps?.onSelect?.(idOrIds, value);
+            _onClose();
+          }}
         />
       )}
     </Modal>
   );
 }
 
-function CreatePayeeIcon(props) {
+function CreatePayeeIcon(props: ComponentPropsWithoutRef<typeof SvgAdd>) {
   return <SvgAdd {...props} width={14} height={14} />;
 }

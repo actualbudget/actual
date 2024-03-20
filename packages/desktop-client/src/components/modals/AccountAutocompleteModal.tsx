@@ -23,16 +23,9 @@ export function AccountAutocompleteModal({
   autocompleteProps,
   onClose,
 }: AccountAutocompleteModalProps) {
-  const { onSelect, ...restAutocompleteProps } = autocompleteProps;
-
   const _onClose = () => {
     modalProps.onClose();
     onClose?.();
-  };
-
-  const _onSelect = (accountId, value) => {
-    onSelect?.(accountId, value);
-    _onClose();
   };
 
   const itemStyle = {
@@ -86,7 +79,6 @@ export function AccountAutocompleteModal({
               focused={true}
               embedded={true}
               closeOnBlur={false}
-              onSelect={_onSelect}
               {...(isNarrowWidth && {
                 renderAccountItemGroupHeader: props => (
                   <ItemHeader
@@ -112,7 +104,11 @@ export function AccountAutocompleteModal({
                 ),
               })}
               {...defaultAutocompleteProps}
-              {...restAutocompleteProps}
+              {...autocompleteProps}
+              onSelect={(idOrIds, value) => {
+                autocompleteProps?.onSelect?.(idOrIds, value);
+                _onClose();
+              }}
             />
           </View>
         </View>
