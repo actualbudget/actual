@@ -15,7 +15,7 @@ type ReportTableRowProps = {
   balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   groupByItem: 'id' | 'name';
   mode: string;
-  monthsCount: number;
+  intervalsCount: number;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
@@ -27,12 +27,12 @@ export const ReportTableRow = memo(
     balanceTypeOp,
     groupByItem,
     mode,
-    monthsCount,
+    intervalsCount,
     compact,
     style,
     compactStyle,
   }: ReportTableRowProps) => {
-    const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
+    const average = amountToInteger(item[balanceTypeOp]) / intervalsCount;
     return (
       <Row
         key={item.id}
@@ -52,19 +52,19 @@ export const ReportTableRow = memo(
           }}
           valueStyle={compactStyle}
         />
-        {item.monthData && mode === 'time'
-          ? item.monthData.map(month => {
+        {item.intervalData && mode === 'time'
+          ? item.intervalData.map(intervalItem => {
               return (
                 <Cell
-                  key={amountToCurrency(month[balanceTypeOp])}
+                  key={amountToCurrency(intervalItem[balanceTypeOp])}
                   style={{
                     minWidth: compact ? 50 : 85,
                   }}
                   valueStyle={compactStyle}
-                  value={amountToCurrency(month[balanceTypeOp])}
+                  value={amountToCurrency(intervalItem[balanceTypeOp])}
                   title={
-                    Math.abs(month[balanceTypeOp]) > 100000
-                      ? amountToCurrency(month[balanceTypeOp])
+                    Math.abs(intervalItem[balanceTypeOp]) > 100000
+                      ? amountToCurrency(intervalItem[balanceTypeOp])
                       : undefined
                   }
                   width="flex"
