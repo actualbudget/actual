@@ -14,7 +14,7 @@ import { type CommonModalProps } from '../Modals';
 
 type CategoryAutocompleteModalProps = {
   modalProps: CommonModalProps;
-  autocompleteProps?: ComponentPropsWithoutRef<typeof CategoryAutocomplete>;
+  autocompleteProps: ComponentPropsWithoutRef<typeof CategoryAutocomplete>;
   onClose: () => void;
 };
 
@@ -112,7 +112,17 @@ export function CategoryAutocompleteModal({
               {...defaultAutocompleteProps}
               {...autocompleteProps}
               onSelect={(...args) => {
-                autocompleteProps?.onSelect?.bind(this)(...args);
+                const { type, onSelect } = autocompleteProps;
+
+                if (type === 'multi') {
+                  const ids: Parameters<typeof onSelect>[0] = args[0];
+                  const value: Parameters<typeof onSelect>[1] = args[1];
+                  autocompleteProps?.onSelect?.(ids, value);
+                } else {
+                  const id: Parameters<typeof onSelect>[0] = args[0];
+                  const value: Parameters<typeof onSelect>[1] = args[1];
+                  autocompleteProps?.onSelect?.(id, value);
+                }
                 _onClose();
               }}
             />
