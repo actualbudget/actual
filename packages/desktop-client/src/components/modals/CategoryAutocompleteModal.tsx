@@ -80,6 +80,7 @@ export function CategoryAutocompleteModal({
               embedded={true}
               closeOnBlur={false}
               showSplitOption={false}
+              onClose={_onClose}
               {...(isNarrowWidth && {
                 renderCategoryItemGroupHeader: (
                   props: ComponentPropsWithoutRef<typeof ItemHeader>,
@@ -111,11 +112,6 @@ export function CategoryAutocompleteModal({
               showHiddenCategories={false}
               {...defaultAutocompleteProps}
               {...autocompleteProps}
-              onSelect={(...args) => {
-                // @ts-ignore Hands up. Figure out a way to properly type this.
-                autocompleteProps.onSelect?.(...args);
-                _onClose();
-              }}
             />
           </View>
         </View>

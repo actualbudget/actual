@@ -77,6 +77,7 @@ export function PayeeAutocompleteModal({
           focused={true}
           embedded={true}
           closeOnBlur={false}
+          onClose={_onClose}
           showManagePayees={false}
           showMakeTransfer={!isNarrowWidth}
           {...(isNarrowWidth && {
@@ -118,11 +119,6 @@ export function PayeeAutocompleteModal({
           })}
           {...defaultAutocompleteProps}
           {...autocompleteProps}
-          onSelect={(...args) => {
-            // @ts-ignore Hands up. Figure out a way to properly type this.
-            autocompleteProps.onSelect?.(...args);
-            _onClose();
-          }}
         />
       )}
     </Modal>
