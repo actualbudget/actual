@@ -268,6 +268,12 @@ function SingleAutocomplete<T extends Item>({
     },
   };
 
+  useEffect(() => {
+    if (!isOpen) {
+      onClose?.();
+    }
+  }, [isOpen, onClose]);
+
   // Update the selected item if the suggestion list or initial
   // input value has changed
   useEffect(() => {
