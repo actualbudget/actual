@@ -22,6 +22,10 @@ export function PullToRefresh(props: PullToRefreshProps) {
           }),
         )}
         {...props}
+        // Force async because the library errors out when a sync onRefresh method is provided.
+        onRefresh={async () => {
+          await props.onRefresh?.();
+        }}
       />
     </div>
   );
