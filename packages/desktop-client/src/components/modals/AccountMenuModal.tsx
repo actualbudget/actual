@@ -187,13 +187,13 @@ function AdditionalAccountMenu({ account, onClose, onReopen }) {
                 account.closed
                   ? {
                       name: 'reopen',
-                      text: 'Reopen',
+                      text: 'Reopen account',
                       icon: SvgLockOpen,
                       iconSize: 15,
                     }
                   : {
                       name: 'close',
-                      text: 'Close',
+                      text: 'Close account',
                       icon: SvgClose,
                       iconSize: 15,
                     },
