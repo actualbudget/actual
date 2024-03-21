@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { dayFromDate } from '../../shared/months';
+import { dayFromDate, weekFromDate } from '../../shared/months';
 import { toDateRepr, fromDateRepr } from '../models';
 
 function isRequired(name, fieldDesc) {
@@ -31,6 +31,8 @@ export function convertInputType(value, type) {
       }
 
       return toDateRepr(value);
+    case 'date-week':
+      return toDateRepr(weekFromDate(value));
     case 'date-month':
       return toDateRepr(value.slice(0, 7));
     case 'date-year':
@@ -65,6 +67,8 @@ export function convertOutputType(value, type) {
 
   switch (type) {
     case 'date':
+      return fromDateRepr(value);
+    case 'date-week':
       return fromDateRepr(value);
     case 'date-month':
       return fromDateRepr(value).slice(0, 7);

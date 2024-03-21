@@ -11,6 +11,7 @@ import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
+import { defaultsList } from './disabledList';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
 import {
@@ -76,7 +77,8 @@ export function ReportSidebar({
       default:
         [dateStart, dateEnd] = getSpecificRange(
           ReportOptions.dateRangeMap.get(cond),
-          cond === 'Last month' ? 0 : null,
+          cond === 'Last month' || cond === 'Last week' ? 0 : null,
+          ReportOptions.dateRangeType.get(cond),
         );
         onChangeDates(dateStart, dateEnd);
     }
@@ -214,7 +216,7 @@ export function ReportSidebar({
                   .map(int => int.description)
                   .includes(customReportItems.dateRange)
               ) {
-                onSelectRange('Year to date');
+                onSelectRange(defaultsList.intervalRange.get(e));
               }
             }}
             options={ReportOptions.interval.map(option => [
@@ -360,7 +362,7 @@ export function ReportSidebar({
               options={ReportOptions.dateRange
                 .filter(f => f[customReportItems.interval])
                 .map(option => [option.description, option.description])}
-              line={customReportItems.interval === 'Monthly' && dateRangeLine}
+              line={dateRangeLine > 0 && dateRangeLine}
             />
           </View>
         ) : (

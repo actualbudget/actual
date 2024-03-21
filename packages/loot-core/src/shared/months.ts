@@ -88,7 +88,7 @@ export function monthFromDate(date: DateLike): string {
 }
 
 export function weekFromDate(date: DateLike): string {
-  return d.format(_parse(date), 'yyyy-ww');
+  return d.format(d.startOfISOWeek(_parse(date)), 'yyyy-MM-dd');
 }
 
 export function dayFromDate(date: DateLike): string {
@@ -100,6 +100,14 @@ export function currentMonth(): string {
     return global.currentMonth || '2017-01';
   } else {
     return d.format(new Date(), 'yyyy-MM');
+  }
+}
+
+export function currentWeek(): string {
+  if (global.IS_TESTING || Platform.isPlaywright) {
+    return global.currentWeek || '2017-01';
+  } else {
+    return d.format(d.startOfISOWeek(new Date()), 'yyyy-MM-dd');
   }
 }
 
@@ -148,7 +156,7 @@ export function addMonths(month: DateLike, n: number): string {
 }
 
 export function addWeeks(date: DateLike, n: number): string {
-  return d.format(d.addWeeks(_parse(date), n), 'yyyy-MM-dd');
+  return d.format(d.addWeeks(d.startOfISOWeek(_parse(date)), n), 'yyyy-MM-dd');
 }
 
 export function differenceInCalendarMonths(
@@ -167,6 +175,10 @@ export function differenceInCalendarDays(
 
 export function subMonths(month: string | Date, n: number) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
+}
+
+export function subWeeks(date: DateLike, n: number): string {
+  return d.format(d.subWeeks(d.startOfISOWeek(_parse(date)), n), 'yyyy-MM-dd');
 }
 
 export function subYears(year: string | Date, n: number) {
@@ -219,6 +231,29 @@ export function _yearRange(
 
 export function yearRangeInclusive(start: DateLike, end: DateLike): string[] {
   return _yearRange(start, end, true);
+}
+
+export function _weekRange(
+  start: DateLike,
+  end: DateLike,
+  inclusive = false,
+): string[] {
+  const weeks: string[] = [];
+  let week = weekFromDate(start);
+  while (d.isBefore(_parse(week), _parse(end))) {
+    weeks.push(week);
+    week = addWeeks(week, 1);
+  }
+
+  if (inclusive) {
+    weeks.push(week);
+  }
+
+  return weeks;
+}
+
+export function weekRangeInclusive(start: DateLike, end: DateLike): string[] {
+  return _weekRange(start, end, true);
 }
 
 export function _range(
@@ -294,6 +329,10 @@ export function getMonth(day: string): string {
 
 export function getMonthEnd(day: string): string {
   return subDays(nextMonth(day.slice(0, 7)) + '-01', 1);
+}
+
+export function getWeekEnd(date: DateLike): string {
+  return d.format(d.endOfISOWeek(_parse(date)), 'yyyy-MM-dd');
 }
 
 export function getYearStart(month: string): string {

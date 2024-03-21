@@ -14,7 +14,13 @@ export function makeQuery(
   filters: unknown[],
 ) {
   const intervalGroup =
-    interval === 'Monthly' ? { $month: '$date' } : { $year: '$date' };
+    interval === 'Weekly'
+      ? { $week: '$date' }
+      : interval === 'Daily'
+        ? { $day: '$date' }
+        : interval === 'Monthly'
+          ? { $month: '$date' }
+          : { $year: '$date' };
   const intervalFilter =
     '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
 
