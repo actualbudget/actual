@@ -3,7 +3,6 @@ import React from 'react';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
 import { AnchorLink } from '../common/AnchorLink';
 import { Button } from '../common/Button';
@@ -17,8 +16,6 @@ import { NetWorthCard } from './reports/NetWorthCard';
 export function Overview() {
   const customReports = useReports();
 
-  const customReportsFeatureFlag = useFeatureFlag('customReports');
-
   const accounts = useAccounts();
   return (
     <View
@@ -27,22 +24,20 @@ export function Overview() {
         ...{ paddingLeft: 40, paddingRight: 40, minWidth: 700 },
       }}
     >
-      {customReportsFeatureFlag && (
-        <View
-          style={{
-            flex: '0 0 auto',
-            alignItems: 'flex-end',
-            marginRight: 15,
-            marginTop: 10,
-          }}
-        >
-          <AnchorLink to="/reports/custom" style={{ textDecoration: 'none' }}>
-            <Button type="primary">
-              <Text>Create new custom report</Text>
-            </Button>
-          </AnchorLink>
-        </View>
-      )}
+      <View
+        style={{
+          flex: '0 0 auto',
+          alignItems: 'flex-end',
+          marginRight: 15,
+          marginTop: 10,
+        }}
+      >
+        <AnchorLink to="/reports/custom" style={{ textDecoration: 'none' }}>
+          <Button type="primary">
+            <Text>Create new custom report</Text>
+          </Button>
+        </AnchorLink>
+      </View>
       <View
         style={{
           flexDirection: 'row',
@@ -52,9 +47,7 @@ export function Overview() {
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
       </View>
-      {customReportsFeatureFlag && (
-        <CustomReportListCards reports={customReports} />
-      )}
+      <CustomReportListCards reports={customReports} />
     </View>
   );
 }
