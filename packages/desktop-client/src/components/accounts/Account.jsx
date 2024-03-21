@@ -1653,9 +1653,13 @@ export function Account() {
         $and: [{ '_account.closed': false }],
       });
       if (params.id) {
-        q = q.filter({
-          $or: [filterByAccount, filterByPayee],
-        });
+        if (params.id === 'uncategorized') {
+          q = q.filter({ next_date: null });
+        } else {
+          q = q.filter({
+            $or: [filterByAccount, filterByPayee],
+          });
+        }
       }
       return q.orderBy({ next_date: 'desc' });
     };

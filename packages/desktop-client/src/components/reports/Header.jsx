@@ -11,66 +11,12 @@ import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
 
-export function validateStart(allMonths, start, end) {
-  const earliest = allMonths[allMonths.length - 1].name;
-  if (end < start) {
-    end = monthUtils.addMonths(start, 6);
-  }
-  return boundedRange(earliest, start, end);
-}
-
-export function validateEnd(allMonths, start, end) {
-  const earliest = allMonths[allMonths.length - 1].name;
-  if (start > end) {
-    start = monthUtils.subMonths(end, 6);
-  }
-  return boundedRange(earliest, start, end);
-}
-
-export function validateRange(allMonths, start, end) {
-  const latest = monthUtils.currentMonth();
-  const earliest = allMonths[allMonths.length - 1].name;
-  if (end > latest) {
-    end = latest;
-  }
-  if (start < earliest) {
-    start = earliest;
-  }
-  return [start, end];
-}
-
-function boundedRange(earliest, start, end) {
-  const latest = monthUtils.currentMonth();
-  if (end > latest) {
-    end = latest;
-  }
-  if (start < earliest) {
-    start = earliest;
-  }
-  return [start, end];
-}
-
-function getLatestRange(offset) {
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, offset);
-  return [start, end];
-}
-
-export function getSpecificRange(offset, addNumber) {
-  const currMonth = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(currMonth, offset);
-  const end = monthUtils.addMonths(
-    start,
-    addNumber === null ? offset : addNumber,
-  );
-  return [start, end];
-}
-
-export function getFullRange(allMonths) {
-  const start = allMonths[allMonths.length - 1].name;
-  const end = monthUtils.currentMonth();
-  return [start, end];
-}
+import {
+  getFullRange,
+  getLatestRange,
+  validateEnd,
+  validateStart,
+} from './reportRanges';
 
 export function Header({
   title,
@@ -128,7 +74,13 @@ export function Header({
           >
             <Select
               onChange={newValue =>
-                onChangeDates(...validateStart(allMonths, newValue, end))
+                onChangeDates(
+                  ...validateStart(
+                    allMonths[allMonths.length - 1].name,
+                    newValue,
+                    end,
+                  ),
+                )
               }
               value={start}
               defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
@@ -137,7 +89,13 @@ export function Header({
             <View>to</View>
             <Select
               onChange={newValue =>
-                onChangeDates(...validateEnd(allMonths, start, newValue))
+                onChangeDates(
+                  ...validateEnd(
+                    allMonths[allMonths.length - 1].name,
+                    start,
+                    newValue,
+                  ),
+                )
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
@@ -174,7 +132,11 @@ export function Header({
           </Button>
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getFullRange(allMonths))}
+            onClick={() =>
+              onChangeDates(
+                ...getFullRange(allMonths[allMonths.length - 1].name),
+              )
+            }
           >
             All Time
           </Button>
