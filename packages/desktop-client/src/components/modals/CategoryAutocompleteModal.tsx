@@ -1,12 +1,8 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { useResponsive } from '../../ResponsiveProvider';
-import { styles, theme } from '../../style';
-import {
-  CategoryAutocomplete,
-  CategoryItem,
-} from '../autocomplete/CategoryAutocomplete';
-import { ItemHeader } from '../autocomplete/ItemHeader';
+import { theme } from '../../style';
+import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
@@ -28,17 +24,9 @@ export function CategoryAutocompleteModal({
     onClose?.();
   };
 
-  const itemStyle = {
-    ...styles.mobileMenuItem,
-  };
-
   const { isNarrowWidth } = useResponsive();
-  const inputStyle = {
-    ':focus': { boxShadow: 0 },
-    ...(isNarrowWidth && itemStyle),
-  };
+
   const defaultAutocompleteProps = {
-    inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
@@ -81,34 +69,6 @@ export function CategoryAutocompleteModal({
               closeOnBlur={false}
               showSplitOption={false}
               onClose={_onClose}
-              {...(isNarrowWidth && {
-                renderCategoryItemGroupHeader: (
-                  props: ComponentPropsWithoutRef<typeof ItemHeader>,
-                ) => (
-                  <ItemHeader
-                    {...props}
-                    style={{
-                      ...styles.largeText,
-                      color: theme.menuItemTextHeader,
-                      paddingTop: 10,
-                      paddingBottom: 10,
-                    }}
-                  />
-                ),
-                renderCategoryItem: (
-                  props: ComponentPropsWithoutRef<typeof CategoryItem>,
-                ) => (
-                  <CategoryItem
-                    {...props}
-                    style={{
-                      ...itemStyle,
-                      color: theme.menuItemText,
-                      borderRadius: 0,
-                      borderTop: `1px solid ${theme.pillBorder}`,
-                    }}
-                  />
-                ),
-              })}
               showHiddenCategories={false}
               {...defaultAutocompleteProps}
               {...autocompleteProps}

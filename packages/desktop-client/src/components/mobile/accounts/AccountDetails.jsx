@@ -1,7 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { syncAndDownload } from 'loot-core/client/actions';
+import {
+  openAccountCloseModal,
+  pushModal,
+  reopenAccount,
+  syncAndDownload,
+  updateAccount,
+} from 'loot-core/client/actions';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { SvgAdd } from '../../../icons/v1';
 import { SvgSearchAlternate } from '../../../icons/v2';
@@ -9,6 +16,7 @@ import { styles, theme } from '../../../style';
 import { ButtonLink } from '../../common/ButtonLink';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
+import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobileBackButton } from '../../MobileBackButton';
 import { Page } from '../../Page';
@@ -60,6 +68,57 @@ function TransactionSearchInput({ accountName, onSearch }) {
   );
 }
 
+function AccountName({ account }) {
+  const dispatch = useDispatch();
+
+  const onSave = account => {
+    dispatch(updateAccount(account));
+  };
+
+  const onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  const onEditNotes = () => {
+    dispatch(
+      pushModal('notes', {
+        id: account.id,
+        name: account.name,
+        onSave: onSaveNotes,
+      }),
+    );
+  };
+
+  const onCloseAccount = () => {
+    dispatch(openAccountCloseModal(account.id));
+  };
+
+  const onReopenAccount = () => {
+    dispatch(reopenAccount(account.id));
+  };
+
+  const onClick = () => {
+    dispatch(
+      pushModal('account-menu', {
+        accountId: account.id,
+        onSave,
+        onEditNotes,
+        onCloseAccount,
+        onReopenAccount,
+      }),
+    );
+  };
+
+  return (
+    <Text
+      style={{ ...styles.underlinedText, ...styles.lineClamp(2) }}
+      onClick={onClick}
+    >
+      {`${account.closed ? 'Closed: ' : ''}${account.name}`}
+    </Text>
+  );
+}
+
 export function AccountDetails({
   account,
   prependTransactions,
@@ -86,7 +145,7 @@ export function AccountDetails({
 
   return (
     <Page
-      title={account.name}
+      title={<AccountName account={account} />}
       headerLeftContent={<MobileBackButton />}
       headerRightContent={
         <ButtonLink

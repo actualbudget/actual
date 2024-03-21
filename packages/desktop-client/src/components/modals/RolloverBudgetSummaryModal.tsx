@@ -15,7 +15,7 @@ import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type RolloverBudgetSummaryModalProps = {
   modalProps: CommonModalProps;
-  onBudgetAction: (idx: string | number, action: string, arg: unknown) => void;
+  onBudgetAction: (idx: string | number, action: string, arg?: unknown) => void;
   month: string;
 };
 
@@ -94,9 +94,6 @@ export function RolloverBudgetSummaryModal({
             }}
             amountStyle={{
               ...styles.underlinedText,
-            }}
-            totalsTooltipProps={{
-              position: 'bottom-center',
             }}
             onClick={onClick}
           />

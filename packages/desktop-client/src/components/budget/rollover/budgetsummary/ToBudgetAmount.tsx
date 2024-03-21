@@ -19,7 +19,7 @@ import { TotalsList } from './TotalsList';
 type ToBudgetAmountProps = {
   prevMonthName: string;
   showTotalsTooltipOnHover?: boolean;
-  totalTooltipProps?: ComponentPropsWithoutRef<typeof Tooltip>;
+  totalsTooltipProps?: ComponentPropsWithoutRef<typeof Tooltip>;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
   onClick: () => void;
@@ -28,6 +28,7 @@ type ToBudgetAmountProps = {
 export function ToBudgetAmount({
   prevMonthName,
   showTotalsTooltipOnHover,
+  totalsTooltipProps,
   style,
   amountStyle,
   onClick,
@@ -47,7 +48,7 @@ export function ToBudgetAmount({
       <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
       <View>
         <HoverTarget
-          disabled={!showTotalsTooltipOnHover || !!menuOpen}
+          disabled={!showTotalsTooltipOnHover}
           renderContent={() => (
             <Tooltip position="bottom-center" {...totalsTooltipProps}>
               <TotalsList
