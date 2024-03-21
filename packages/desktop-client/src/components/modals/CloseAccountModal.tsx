@@ -1,28 +1,28 @@
 // @ts-strict-ignore
-import React, { type ComponentPropsWithoutRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { pushModal } from 'loot-core/client/actions';
+import {
+  closeAccount,
+  forceCloseAccount,
+  pushModal,
+} from 'loot-core/client/actions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { type BoundActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
-import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
-import { CSSProperties, styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button';
 import { FormError } from '../common/FormError';
-import { type Input } from '../common/Input';
 import { LinkButton } from '../common/LinkButton';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { TapField } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
 
 function needsCategory(
@@ -38,21 +38,19 @@ function needsCategory(
   return account.offbudget === 0 && isOffBudget;
 }
 
-type CloseAccountProps = {
+type CloseAccountModalProps = {
   account: AccountEntity;
   balance: number;
   canDelete: boolean;
-  actions: BoundActions;
   modalProps: CommonModalProps;
 };
 
-export function CloseAccount({
+export function CloseAccountModal({
   account,
   balance,
   canDelete,
-  actions,
   modalProps,
-}: CloseAccountProps) {
+}: CloseAccountModalProps) {
   const accounts = useAccounts().filter(a => a.closed === 0);
   const { grouped: categoryGroups, list: categories } = useCategories();
   const [loading, setLoading] = useState(false);
@@ -64,7 +62,6 @@ export function CloseAccount({
   const [transferError, setTransferError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
   const onSelectAccount = accId => {
@@ -126,16 +123,14 @@ export function CloseAccount({
               if (!transferError && !categoryError) {
                 setLoading(true);
 
-                actions
-                  .closeAccount(
+                dispatch(
+                  closeAccount(
                     account.id,
                     transferAccountId || null,
                     categoryId || null,
-                  )
-                  .then(() => {
-                    modalProps.onClose();
-                    navigate(`accounts/${transferAccountId}`);
-                  });
+                  ),
+                );
+                modalProps.onClose();
               }
             }}
           >
@@ -169,7 +164,6 @@ export function CloseAccount({
                         },
                       }),
                     }}
-
                     onSelect={onSelectAccount}
                   />
                 </View>
@@ -228,9 +222,8 @@ export function CloseAccount({
                     onClick={() => {
                       setLoading(true);
 
-                      actions
-                        .forceCloseAccount(account.id)
-                        .then(() => modalProps.onClose());
+                      dispatch(forceCloseAccount(account.id));
+                      modalProps.onClose();
                     }}
                     style={{ color: theme.errorText }}
                   >

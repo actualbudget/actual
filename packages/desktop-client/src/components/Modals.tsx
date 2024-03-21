@@ -16,7 +16,7 @@ import { AccountMenuModal } from './modals/AccountMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
-import { CloseAccount } from './modals/CloseAccount';
+import { CloseAccountModal } from './modals/CloseAccountModal';
 import { ConfirmCategoryDelete } from './modals/ConfirmCategoryDelete';
 import { ConfirmTransactionEdit } from './modals/ConfirmTransactionEdit';
 import { ConfirmUnlinkAccount } from './modals/ConfirmUnlinkAccount';
@@ -110,12 +110,11 @@ export function Modals() {
 
         case 'close-account':
           return (
-            <CloseAccount
+            <CloseAccountModal
               modalProps={modalProps}
               account={options.account}
               balance={options.balance}
               canDelete={options.canDelete}
-              actions={actions}
             />
           );
 
