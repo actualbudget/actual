@@ -26,7 +26,7 @@ export interface CustomReportEntity {
 
 export interface GroupedEntity {
   data?: DataEntity[];
-  monthData: DataEntity[];
+  intervalData: DataEntity[];
   groupedData?: DataEntity[];
   legend?: LegendEntity[];
   startDate?: string;
@@ -44,13 +44,13 @@ type LegendEntity = {
 export type ItemEntity = {
   id: string;
   name: string;
-  monthData: MonthData[];
+  intervalData: IntervalData[];
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
 };
 
-export type MonthData = {
+export type IntervalData = {
   date: string;
   totalAssets: number;
   totalDebts: number;
@@ -61,15 +61,15 @@ export interface DataEntity {
   id: string;
   name: string;
   date?: string;
-  monthData: MonthData[];
+  intervalData: IntervalData[];
   categories?: ItemEntity[];
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
 }
 
-export type Month = {
-  month: string;
+export type Interval = {
+  interval: string;
 };
 
 export interface CustomReportData {

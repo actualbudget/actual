@@ -11,21 +11,20 @@ import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
-import {
-  validateStart,
-  validateEnd,
-  getFullRange,
-  validateRange,
-  getSpecificRange,
-} from './Header';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
+import {
+  getSpecificRange,
+  validateEnd,
+  validateRange,
+  validateStart,
+} from './reportRanges';
 
 export function ReportSidebar({
   customReportItems,
   categories,
   dateRangeLine,
-  allMonths,
+  allIntervals,
   setDateRange,
   setGraphType,
   setGroupBy,
@@ -43,44 +42,44 @@ export function ReportSidebar({
   disabledItems,
   defaultItems,
   defaultModeItems,
+  earliestTransaction,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
     onReportChange({ type: 'modify' });
     setDateRange(cond);
+    let dateStart;
+    let dateEnd;
     switch (cond) {
       case 'All time':
-        onChangeDates(...getFullRange(allMonths));
+        onChangeDates(earliestTransaction, monthUtils.currentDay());
         break;
       case 'Year to date':
-        onChangeDates(
-          ...validateRange(
-            allMonths,
-            monthUtils.getYearStart(monthUtils.currentMonth()),
-            monthUtils.currentMonth(),
-          ),
+        [dateStart, dateEnd] = validateRange(
+          earliestTransaction,
+          monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
+          monthUtils.currentDay(),
         );
+        onChangeDates(dateStart, dateEnd);
         break;
       case 'Last year':
-        onChangeDates(
-          ...validateRange(
-            allMonths,
-            monthUtils.getYearStart(
-              monthUtils.prevYear(monthUtils.currentMonth()),
-            ),
-            monthUtils.getYearEnd(
-              monthUtils.prevYear(monthUtils.currentDate()),
-            ),
-          ),
+        [dateStart, dateEnd] = validateRange(
+          earliestTransaction,
+          monthUtils.getYearStart(
+            monthUtils.prevYear(monthUtils.currentMonth()),
+          ) + '-01',
+          monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())) +
+            '-31',
         );
+        onChangeDates(dateStart, dateEnd);
         break;
       default:
-        onChangeDates(
-          ...getSpecificRange(
-            ReportOptions.dateRangeMap.get(cond),
-            cond === 'Last month' ? 0 : null,
-          ),
+        [dateStart, dateEnd] = getSpecificRange(
+          ReportOptions.dateRangeMap.get(cond),
+          cond === 'Last month' ? 0 : null,
+          customReportItems.interval,
         );
+        onChangeDates(dateStart, dateEnd);
     }
   };
 
@@ -378,9 +377,10 @@ export function ReportSidebar({
                 onChange={newValue =>
                   onChangeDates(
                     ...validateStart(
-                      allMonths,
+                      earliestTransaction,
                       newValue,
                       customReportItems.endDate,
+                      customReportItems.interval,
                     ),
                   )
                 }
@@ -389,7 +389,7 @@ export function ReportSidebar({
                   customReportItems.startDate,
                   'MMMM, yyyy',
                 )}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
             <View
@@ -406,14 +406,19 @@ export function ReportSidebar({
                 onChange={newValue =>
                   onChangeDates(
                     ...validateEnd(
-                      allMonths,
+                      earliestTransaction,
                       customReportItems.startDate,
                       newValue,
+                      customReportItems.interval,
                     ),
                   )
                 }
                 value={customReportItems.endDate}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                defaultLabel={monthUtils.format(
+                  customReportItems.endDate,
+                  'MMMM, yyyy',
+                )}
+                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
           </>

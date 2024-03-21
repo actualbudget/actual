@@ -10,7 +10,7 @@ import { Row } from '../../../table';
 type ReportTableListProps = {
   data: DataEntity[];
   mode?: string;
-  monthsCount?: number;
+  intervalsCount?: number;
   groupBy: string;
   renderItem;
   compact: boolean;
@@ -20,7 +20,7 @@ type ReportTableListProps = {
 
 export function ReportTableList({
   data,
-  monthsCount,
+  intervalsCount,
   mode,
   groupBy,
   renderItem,
@@ -53,7 +53,7 @@ export function ReportTableList({
       item,
       groupByItem,
       mode,
-      monthsCount,
+      intervalsCount,
       compact,
       style,
       compactStyle,

@@ -19,7 +19,8 @@ type ReportSummaryProps = {
   endDate: string;
   data: GroupedEntity;
   balanceTypeOp: string;
-  monthsCount: number;
+  interval: string;
+  intervalsCount: number;
 };
 
 export function ReportSummary({
@@ -27,13 +28,14 @@ export function ReportSummary({
   endDate,
   data,
   balanceTypeOp,
-  monthsCount,
+  interval,
+  intervalsCount,
 }: ReportSummaryProps) {
   const net =
     Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
       ? 'PAYMENT'
       : 'DEPOSIT';
-  const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
+  const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;
   return (
     <View
       style={{
@@ -133,7 +135,9 @@ export function ReportSummary({
             {!isNaN(average) && integerToCurrency(Math.round(average))}
           </PrivacyFilter>
         </Text>
-        <Text style={{ fontWeight: 600 }}>Per month</Text>
+        <Text style={{ fontWeight: 600 }}>
+          Per {interval === 'Monthly' ? 'month' : 'year'}
+        </Text>
       </View>
     </View>
   );

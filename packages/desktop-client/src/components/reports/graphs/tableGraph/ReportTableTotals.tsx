@@ -18,7 +18,7 @@ type ReportTableTotalsProps = {
   data: GroupedEntity;
   balanceTypeOp: string;
   mode: string;
-  monthsCount: number;
+  intervalsCount: number;
   totalScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   compact: boolean;
@@ -30,7 +30,7 @@ export function ReportTableTotals({
   data,
   balanceTypeOp,
   mode,
-  monthsCount,
+  intervalsCount,
   totalScrollRef,
   handleScroll,
   compact,
@@ -51,7 +51,7 @@ export function ReportTableTotals({
     }
   });
 
-  const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
+  const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;
   return (
     <Row
       collapsed={true}
@@ -85,7 +85,7 @@ export function ReportTableTotals({
           value="Totals"
         />
         {mode === 'time'
-          ? data.monthData.map(item => {
+          ? data.intervalData.map(item => {
               return (
                 <Cell
                   style={{

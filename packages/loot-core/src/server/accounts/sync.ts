@@ -482,6 +482,26 @@ export async function reconcileExternalTransactions(acctId, transactions) {
           acctId,
         ],
       );
+
+      // Sort the matched transactions according to the distance from the original
+      // transactions date. i.e. if the original transaction is in 21-02-2024 and
+      // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
+      // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
+      fuzzyDataset = fuzzyDataset.sort((a, b) => {
+        const aDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(a.date)),
+          ),
+        );
+        const bDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(b.date)),
+          ),
+        );
+        return aDistance > bDistance ? 1 : -1;
+      });
     }
 
     transactionsStep1.push({
@@ -645,6 +665,26 @@ export async function reconcileTransactions(acctId, transactions) {
           acctId,
         ],
       );
+
+      // Sort the matched transactions according to the distance from the original
+      // transactions date. i.e. if the original transaction is in 21-02-2024 and
+      // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
+      // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
+      fuzzyDataset = fuzzyDataset.sort((a, b) => {
+        const aDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(a.date)),
+          ),
+        );
+        const bDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(b.date)),
+          ),
+        );
+        return aDistance > bDistance ? 1 : -1;
+      });
     }
 
     transactionsStep1.push({
