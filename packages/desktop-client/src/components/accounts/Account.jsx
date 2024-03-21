@@ -837,9 +837,11 @@ class AccountInternal extends PureComponent {
 
         if (name === 'notes') {
           if (mode === 'prepend') {
-            value = newValue + ' ' + trans.notes;
+            value =
+              trans.notes === null ? newValue : newValue + ' ' + trans.notes;
           } else if (mode === 'append') {
-            value = trans.notes + ' ' + newValue;
+            value =
+              trans.notes === null ? newValue : trans.notes + ' ' + newValue;
           } else if (mode === 'replace') {
             value = newValue;
           }
