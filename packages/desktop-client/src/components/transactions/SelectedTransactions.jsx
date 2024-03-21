@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { Menu } from '../common/Menu';
@@ -63,20 +64,39 @@ export function SelectedTransactionsButton({
     return validForTransfer(fromTrans, toTrans);
   }, [selectedItems, getTransaction]);
 
+  const hotKeyOptions = { enabled: types.trans };
+  useHotkeys('f', () => onShow([...selectedItems]), hotKeyOptions, [
+    onShow,
+    selectedItems,
+  ]);
+  useHotkeys('d', () => onDelete([...selectedItems]), hotKeyOptions, [
+    onDelete,
+    selectedItems,
+  ]);
+  useHotkeys('a', () => onEdit('account', [...selectedItems]), hotKeyOptions, [
+    onEdit,
+    selectedItems,
+  ]);
+  useHotkeys('p', () => onEdit('payee', [...selectedItems]), hotKeyOptions, [
+    onEdit,
+    selectedItems,
+  ]);
+  useHotkeys('n', () => onEdit('notes', [...selectedItems]), hotKeyOptions, [
+    onEdit,
+    selectedItems,
+  ]);
+  useHotkeys('c', () => onEdit('category', [...selectedItems]), hotKeyOptions, [
+    onEdit,
+    selectedItems,
+  ]);
+  useHotkeys('l', () => onEdit('cleared', [...selectedItems]), hotKeyOptions, [
+    onEdit,
+    selectedItems,
+  ]);
+
   return (
     <SelectedItemsButton
       name="transactions"
-      keyHandlers={
-        types.trans && {
-          f: () => onShow([...selectedItems]),
-          d: () => onDelete([...selectedItems]),
-          a: () => onEdit('account', [...selectedItems]),
-          p: () => onEdit('payee', [...selectedItems]),
-          n: () => onEdit('notes', [...selectedItems]),
-          c: () => onEdit('category', [...selectedItems]),
-          l: () => onEdit('cleared', [...selectedItems]),
-        }
-      }
       items={[
         ...(!types.trans
           ? [

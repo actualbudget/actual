@@ -8,8 +8,6 @@ import React, {
 } from 'react';
 import ReactModal from 'react-modal';
 
-import hotkeys from 'hotkeys-js';
-
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -75,15 +73,6 @@ export const Modal = ({
   onClose,
   onTitleUpdate,
 }: ModalProps) => {
-  useEffect(() => {
-    // This deactivates any key handlers in the "app" scope. Ideally
-    // each modal would have a name so they could each have their own
-    // key handlers, but we'll do that later
-    const prevScope = hotkeys.getScope();
-    hotkeys.setScope('modal');
-    return () => hotkeys.setScope(prevScope);
-  }, []);
-
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [_title, setTitle] = useState(title);
 
