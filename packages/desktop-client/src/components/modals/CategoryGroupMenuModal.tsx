@@ -45,43 +45,39 @@ export function CategoryGroupMenuModal({
   );
   const notes = data && data.length > 0 ? data[0].note : null;
 
-  function _onClose() {
+  const _onClose = () => {
     modalProps?.onClose();
     onClose?.();
-  }
+  };
 
-  function _onRename(newName) {
+  const onRename = newName => {
     if (newName !== group.name) {
       onSave?.({
         ...group,
         name: newName,
       });
     }
-  }
+  };
 
-  function _onAddCategory() {
+  const _onAddCategory = () => {
     onAddCategory?.(group.id, group.is_income);
-  }
+  };
 
-  function _onEditNotes() {
+  const _onEditNotes = () => {
     onEditNotes?.(group.id);
-  }
+  };
 
-  function _onToggleVisibility() {
+  const _onToggleVisibility = () => {
     onSave?.({
       ...group,
       hidden: !!!group.hidden,
     });
     _onClose();
-  }
+  };
 
-  function _onDelete() {
+  const _onDelete = () => {
     onDelete?.(group.id);
-  }
-
-  function onNameUpdate(newName) {
-    _onRename(newName);
-  }
+  };
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
@@ -109,7 +105,7 @@ export function CategoryGroupMenuModal({
       }}
       editableTitle={true}
       titleStyle={styles.underlinedText}
-      onTitleUpdate={onNameUpdate}
+      onTitleUpdate={onRename}
       leftHeaderContent={
         <AdditionalCategoryGroupMenu
           group={group}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { Menu } from '../../../common/Menu';
 

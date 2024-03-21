@@ -1,19 +1,10 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
-// import { useDispatch } from 'react-redux';
-
-// import { createPayee } from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { usePayees } from '../../hooks/usePayees';
-import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
-import { styles, theme } from '../../style';
-import { ItemHeader } from '../autocomplete/ItemHeader';
-import {
-  PayeeAutocomplete,
-  PayeeItem,
-  CreatePayeeButton,
-} from '../autocomplete/PayeeAutocomplete';
+import { theme } from '../../style';
+import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
@@ -36,17 +27,8 @@ export function PayeeAutocompleteModal({
     onClose?.();
   };
 
-  const itemStyle = {
-    ...styles.mobileMenuItem,
-  };
-
   const { isNarrowWidth } = useResponsive();
-  const inputStyle = {
-    ':focus': { boxShadow: 0 },
-    ...(isNarrowWidth && itemStyle),
-  };
   const defaultAutocompleteProps = {
-    inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
@@ -80,51 +62,10 @@ export function PayeeAutocompleteModal({
           onClose={_onClose}
           showManagePayees={false}
           showMakeTransfer={!isNarrowWidth}
-          {...(isNarrowWidth && {
-            renderCreatePayeeButton: (
-              props: ComponentPropsWithoutRef<typeof CreatePayeeButton>,
-            ) => (
-              <CreatePayeeButton
-                {...props}
-                Icon={CreatePayeeIcon}
-                style={itemStyle}
-              />
-            ),
-            renderPayeeItemGroupHeader: (
-              props: ComponentPropsWithoutRef<typeof ItemHeader>,
-            ) => (
-              <ItemHeader
-                {...props}
-                style={{
-                  ...styles.largeText,
-                  color: theme.menuItemTextHeader,
-                  paddingTop: 10,
-                  paddingBottom: 10,
-                }}
-              />
-            ),
-            renderPayeeItem: (
-              props: ComponentPropsWithoutRef<typeof PayeeItem>,
-            ) => (
-              <PayeeItem
-                {...props}
-                style={{
-                  ...itemStyle,
-                  color: theme.menuItemText,
-                  borderRadius: 0,
-                  borderTop: `1px solid ${theme.pillBorder}`,
-                }}
-              />
-            ),
-          })}
           {...defaultAutocompleteProps}
           {...autocompleteProps}
         />
       )}
     </Modal>
   );
-}
-
-function CreatePayeeIcon(props: ComponentPropsWithoutRef<typeof SvgAdd>) {
-  return <SvgAdd {...props} width={14} height={14} />;
 }

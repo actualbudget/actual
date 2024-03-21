@@ -1,12 +1,8 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { useResponsive } from '../../ResponsiveProvider';
-import { styles, theme } from '../../style';
-import {
-  AccountAutocomplete,
-  AccountItem,
-} from '../autocomplete/AccountAutocomplete';
-import { ItemHeader } from '../autocomplete/ItemHeader';
+import { theme } from '../../style';
+import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
@@ -28,17 +24,8 @@ export function AccountAutocompleteModal({
     onClose?.();
   };
 
-  const itemStyle = {
-    ...styles.mobileMenuItem,
-  };
-
   const { isNarrowWidth } = useResponsive();
-  const inputStyle = {
-    ':focus': { boxShadow: 0 },
-    ...(isNarrowWidth && itemStyle),
-  };
   const defaultAutocompleteProps = {
-    inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
@@ -80,30 +67,6 @@ export function AccountAutocompleteModal({
               embedded={true}
               closeOnBlur={false}
               onClose={_onClose}
-              {...(isNarrowWidth && {
-                renderAccountItemGroupHeader: props => (
-                  <ItemHeader
-                    {...props}
-                    style={{
-                      ...styles.largeText,
-                      color: theme.menuItemTextHeader,
-                      paddingTop: 10,
-                      paddingBottom: 10,
-                    }}
-                  />
-                ),
-                renderAccountItem: props => (
-                  <AccountItem
-                    {...props}
-                    style={{
-                      ...itemStyle,
-                      color: theme.menuItemText,
-                      borderRadius: 0,
-                      borderTop: `1px solid ${theme.pillBorder}`,
-                    }}
-                  />
-                ),
-              })}
               {...defaultAutocompleteProps}
               {...autocompleteProps}
             />
