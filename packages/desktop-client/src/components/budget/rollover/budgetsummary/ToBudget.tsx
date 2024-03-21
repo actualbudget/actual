@@ -48,7 +48,7 @@ export function ToBudget({
         onClick={() => setMenuOpen('actions')}
         prevMonthName={prevMonthName}
         showTotalsTooltipOnHover={showTotalsTooltipOnHover}
-        totalTooltipProps={totalsTooltipProps}
+        totalsTooltipProps={totalsTooltipProps}
         style={style}
         amountStyle={amountStyle}
       />
