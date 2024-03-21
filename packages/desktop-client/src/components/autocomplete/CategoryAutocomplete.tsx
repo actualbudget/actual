@@ -300,6 +300,7 @@ type CategoryItemProps = {
   embedded?: boolean;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export function CategoryItem({
   item,
   className,
