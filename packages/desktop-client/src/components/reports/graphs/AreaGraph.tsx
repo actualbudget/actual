@@ -125,8 +125,8 @@ export function AreaGraph({
   viewLabels,
 }: AreaGraphProps) {
   const privacyMode = usePrivacyMode();
-  const dataMax = Math.max(...data.monthData.map(i => i[balanceTypeOp]));
-  const dataMin = Math.min(...data.monthData.map(i => i[balanceTypeOp]));
+  const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
+  const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
 
   const labelsMargin = viewLabels ? 30 : 0;
   const dataDiff = dataMax - dataMin;
@@ -144,7 +144,7 @@ export function AreaGraph({
     dataMax === 0 || Math.abs(dataMax) <= extendRangeAmount
       ? 0
       : Math.ceil((dataMax + extendRangeAmount) / 100) * 100;
-  const lastLabel = data.monthData.length - 1;
+  const lastLabel = data.intervalData.length - 1;
 
   const tickFormatter = tick => {
     if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
@@ -173,14 +173,14 @@ export function AreaGraph({
       }}
     >
       {(width, height) =>
-        data.monthData && (
+        data.intervalData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <AreaChart
                 width={width}
                 height={height}
-                data={data.monthData}
+                data={data.intervalData}
                 margin={{
                   top: 0,
                   right: labelsMargin,
