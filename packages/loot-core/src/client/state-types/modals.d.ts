@@ -133,6 +133,14 @@ type FinanceModals = {
 
   'schedule-posts-offline-notification': null;
   'switch-budget-type': { onSwitch: () => void };
+  'account-menu': {
+    accountId: string;
+    onSave: (account: AccountEntity) => void;
+    onCloseAccount: (accountId: string) => void;
+    onReopenAccount: (accountId: string) => void;
+    onEditNotes: (id: string) => void;
+    onClose?: () => void;
+  };
   'category-menu': {
     categoryId: string;
     onSave: (category: CategoryEntity) => void;

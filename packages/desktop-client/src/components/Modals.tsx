@@ -12,6 +12,7 @@ import { useActions } from '../hooks/useActions';
 import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
+import { AccountMenuModal } from './modals/AccountMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
@@ -404,6 +405,20 @@ export function Modals() {
               key={name}
               modalProps={modalProps}
               onSwitch={options?.onSwitch}
+            />
+          );
+
+        case 'account-menu':
+          return (
+            <AccountMenuModal
+              key={name}
+              modalProps={modalProps}
+              accountId={options.accountId}
+              onSave={options.onSave}
+              onEditNotes={options.onEditNotes}
+              onCloseAccount={options.onCloseAccount}
+              onReopenAccount={options.onReopenAccount}
+              onClose={options.onClose}
             />
           );
 
