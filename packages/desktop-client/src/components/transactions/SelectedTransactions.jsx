@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
-import { useHotkeys } from 'react-hotkeys-hook';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { Menu } from '../common/Menu';
