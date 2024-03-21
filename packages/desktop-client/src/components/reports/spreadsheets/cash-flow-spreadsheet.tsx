@@ -19,12 +19,7 @@ export function simpleCashFlow(start, end) {
         .filter({
           $and: [{ date: { $gte: start } }, { date: { $lte: end } }],
           'account.offbudget': false,
-          $or: [
-            {
-              'payee.transfer_acct.offbudget': true,
-              'payee.transfer_acct': null,
-            },
-          ],
+          'payee.transfer_acct': null,
         })
         .calculate({ $sum: '$amount' });
     }
