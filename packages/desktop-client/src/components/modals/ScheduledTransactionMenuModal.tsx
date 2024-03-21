@@ -32,6 +32,7 @@ export function ScheduledTransactionMenuModal({
       style={{
         flex: 1,
         padding: '0 10px',
+        paddingBottom: 10,
         borderRadius: '6px',
       }}
     >
