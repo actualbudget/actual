@@ -181,6 +181,7 @@ async function importTransactions(
             amount: amountFromYnab(transaction.amount),
             category: entityIdMap.get(transaction.category_id) || null,
             cleared: ['cleared', 'reconciled'].includes(transaction.cleared),
+            reconciled: transaction.cleared === 'reconciled',
             notes: transaction.memo || null,
             imported_id: transaction.import_id || null,
             transfer_id:
