@@ -7,8 +7,8 @@ import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { InputField } from '../mobile/MobileForms';
+import { type CommonModalProps } from '../Modals';
 
 type SingleInputModalProps = {
   modalProps: Partial<CommonModalProps>;
