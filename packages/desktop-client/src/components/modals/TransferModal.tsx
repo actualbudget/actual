@@ -83,7 +83,7 @@ export function TransferModal({
               <InputField
                 tabIndex={1}
                 defaultValue={_initialAmount}
-                onUpdate={value => setAmount(value)}
+                onUpdate={setAmount}
                 onEnter={() => {
                   if (!toCategoryId) {
                     openCategoryModal();
