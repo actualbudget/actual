@@ -73,8 +73,10 @@ export const GoCardlessInitialise = ({
             id="secret-id-field"
             type="password"
             value={secretId}
-            onUpdate={setSecretId}
-            onChange={() => setIsValid(true)}
+            onChangeValue={value => {
+              setSecretId(value);
+              setIsValid(true);
+            }}
           />
         </FormField>
 
@@ -84,8 +86,10 @@ export const GoCardlessInitialise = ({
             id="secret-key-field"
             type="password"
             value={secretKey}
-            onUpdate={setSecretKey}
-            onChange={() => setIsValid(true)}
+            onChangeValue={value => {
+              setSecretKey(value);
+              setIsValid(true);
+            }}
           />
         </FormField>
 

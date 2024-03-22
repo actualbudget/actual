@@ -6,11 +6,11 @@ import {
   getNumberFormat,
 } from 'loot-core/src/shared/util';
 
-import { useMergedRefs } from '../../hooks/useMergedRefs';
-import { theme } from '../../style';
-import { Button } from '../common/Button';
-import { Text } from '../common/Text';
-import { View } from '../common/View';
+import { useMergedRefs } from '../../../hooks/useMergedRefs';
+import { theme } from '../../../style';
+import { Button } from '../../common/Button';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 const AmountInput = memo(function AmountInput({
   focused,
@@ -24,25 +24,19 @@ const AmountInput = memo(function AmountInput({
   const inputRef = useRef();
   const mergedInputRef = useMergedRefs(props.inputRef, inputRef);
 
-  const getInitialValue = () => Math.abs(props.value);
+  const initialValue = Math.abs(props.value);
 
   useEffect(() => {
     if (focused) {
-      focus();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (focused) {
-      focus();
+      inputRef.current?.focus();
     }
   }, [focused]);
 
   useEffect(() => {
     setEditing(false);
     setText('');
-    setValue(getInitialValue());
-  }, [props.value]);
+    setValue(initialValue);
+  }, [initialValue]);
 
   const parseText = () => {
     return toRelaxedNumber(text.replace(/[,.]/, getNumberFormat().separator));
@@ -53,12 +47,6 @@ const AmountInput = memo(function AmountInput({
       setEditing(true);
     }
   };
-
-  const focus = () => {
-    inputRef.current?.focus();
-    setValue(getInitialValue());
-  };
-
   const applyText = () => {
     const parsed = parseText();
     const newValue = editing ? parsed : value;
@@ -147,7 +135,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
     } else if (value > 0 || (zeroSign !== '-' && value === 0)) {
       setIsNegative(false);
     }
-  }, []);
+  }, [sign, value, zeroSign]);
 
   const toggleIsNegative = () => {
     setIsNegative(!isNegative);
@@ -163,10 +151,6 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
     props.onUpdate?.(maybeApplyNegative(val, isNegative));
   };
 
-  const onChange = val => {
-    props.onChange?.(maybeApplyNegative(val, isNegative));
-  };
-
   return (
     <View>
       <AmountInput
@@ -174,7 +158,6 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         value={value}
         onFocus={onFocus}
         onBlur={onBlur}
-        onChange={onChange}
         onUpdate={onUpdate}
         focused={focused}
         style={{

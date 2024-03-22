@@ -1,12 +1,5 @@
 // @ts-strict-ignore
-import React, {
-  memo,
-  useContext,
-  useMemo,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
+import React, { memo, useContext, useMemo, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -69,16 +62,15 @@ type RolloverComponents = {
   IncomeHeaderComponent: typeof rollover.IncomeHeaderMonth;
 };
 
-type BudgetProps = {
+type BudgetInnerProps = {
   accountId?: string;
   reportComponents: ReportComponents;
   rolloverComponents: RolloverComponents;
   titlebar: TitlebarContextValue;
 };
 
-function BudgetInner(props: BudgetProps) {
+function BudgetInner(props: BudgetInnerProps) {
   const currentMonth = monthUtils.currentMonth();
-  const tableRef = useRef(null);
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -138,17 +130,6 @@ function BudgetInner(props: BudgetProps) {
       }),
 
       listen('undo-event', ({ tables }) => {
-        if (tableRef.current) {
-          // g dammit
-          // We need to clear the editing cell, otherwise when
-          // the user navigates away from the page they will
-          // accidentally clear the undo stack if they have pressed
-          // undo, since the cell will save itself on blur (worst case:
-          // undo takes you to another screen and then you can't redo
-          // any of the budget changes)
-          tableRef.current.clearEditing();
-        }
-
         if (tables.includes('categories')) {
           loadCategories();
         }
@@ -377,7 +358,6 @@ function BudgetInner(props: BudgetProps) {
         onToggleSummaryCollapse={onToggleCollapse}
       >
         <DynamicBudgetTable
-          ref={tableRef}
           type={budgetType}
           prewarmStartMonth={startMonth}
           startMonth={startMonth}
@@ -404,7 +384,6 @@ function BudgetInner(props: BudgetProps) {
         onToggleSummaryCollapse={onToggleCollapse}
       >
         <DynamicBudgetTable
-          ref={tableRef}
           type={budgetType}
           prewarmStartMonth={startMonth}
           startMonth={startMonth}

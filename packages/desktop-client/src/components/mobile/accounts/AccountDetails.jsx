@@ -1,19 +1,21 @@
 import React, { useState, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { useActions } from '../../hooks/useActions';
-import { SvgAdd } from '../../icons/v1';
-import { SvgSearchAlternate } from '../../icons/v2';
-import { theme } from '../../style';
-import { ButtonLink } from '../common/ButtonLink';
-import { InputWithContent } from '../common/InputWithContent';
-import { Label } from '../common/Label';
-import { View } from '../common/View';
-import { MobileBackButton } from '../MobileBackButton';
-import { Page } from '../Page';
-import { PullToRefresh } from '../responsive/PullToRefresh';
-import { CellValue } from '../spreadsheet/CellValue';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
-import { TransactionList } from '../transactions/MobileTransaction';
+import { syncAndDownload } from 'loot-core/client/actions';
+
+import { SvgAdd } from '../../../icons/v1';
+import { SvgSearchAlternate } from '../../../icons/v2';
+import { theme } from '../../../style';
+import { ButtonLink } from '../../common/ButtonLink';
+import { InputWithContent } from '../../common/InputWithContent';
+import { Label } from '../../common/Label';
+import { View } from '../../common/View';
+import { MobileBackButton } from '../../MobileBackButton';
+import { Page } from '../../Page';
+import { CellValue } from '../../spreadsheet/CellValue';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
+import { PullToRefresh } from '../PullToRefresh';
+import { TransactionList } from '../transactions/TransactionList';
 
 function TransactionSearchInput({ accountName, onSearch }) {
   const [text, setText] = useState('');
@@ -43,7 +45,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
           />
         }
         value={text}
-        onUpdate={text => {
+        onChangeValue={text => {
           setText(text);
           onSearch(text);
         }}
@@ -76,15 +78,14 @@ export function AccountDetails({
   onLoadMore,
   onSearch,
   onSelectTransaction,
-  pushModal,
 }) {
   const allTransactions = useMemo(() => {
     return prependTransactions.concat(transactions);
   }, [prependTransactions, transactions]);
 
-  const { syncAndDownload } = useActions();
+  const dispatch = useDispatch();
   const onRefresh = async () => {
-    await syncAndDownload(account.id);
+    await dispatch(syncAndDownload(account.id));
   };
 
   return (
@@ -207,7 +208,6 @@ export function AccountDetails({
           isNew={isNewTransaction}
           onLoadMore={onLoadMore}
           onSelect={onSelectTransaction}
-          pushModal={pushModal}
         />
       </PullToRefresh>
     </Page>

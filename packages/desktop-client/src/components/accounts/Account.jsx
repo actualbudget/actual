@@ -34,15 +34,15 @@ import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import {
+  SplitsExpandedProvider,
+  useSplitsExpanded,
+} from '../../hooks/useSplitsExpanded';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
-import {
-  SplitsExpandedProvider,
-  useSplitsExpanded,
-} from '../transactions/TransactionsTable';
 
 import { AccountHeader } from './Header';
 
@@ -590,7 +590,12 @@ class AccountInternal extends PureComponent {
         });
         break;
       case 'unlink':
-        this.props.unlinkAccount(accountId);
+        this.props.pushModal('confirm-unlink-account', {
+          accountName: account.name,
+          onUnlink: () => {
+            this.props.unlinkAccount(accountId);
+          },
+        });
         break;
       case 'close':
         this.props.openAccountCloseModal(accountId);
@@ -1634,8 +1639,16 @@ export function Account() {
     return q => {
       q = q.filter({
         $and: [{ '_account.closed': false }],
-        $or: [filterByAccount, filterByPayee],
       });
+      if (params.id) {
+        if (params.id === 'uncategorized') {
+          q = q.filter({ next_date: null });
+        } else {
+          q = q.filter({
+            $or: [filterByAccount, filterByPayee],
+          });
+        }
+      }
       return q.orderBy({ next_date: 'desc' });
     };
   }, [params.id]);

@@ -11,24 +11,21 @@ import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
-import {
-  validateStart,
-  validateEnd,
-  getFullRange,
-  validateRange,
-  getSpecificRange,
-} from './Header';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
+import {
+  getSpecificRange,
+  validateEnd,
+  validateRange,
+  validateStart,
+} from './reportRanges';
 
 export function ReportSidebar({
   customReportItems,
   categories,
   dateRangeLine,
-  allMonths,
+  allIntervals,
   setDateRange,
-  typeDisabled,
-  setTypeDisabled,
   setGraphType,
   setGroupBy,
   setInterval,
@@ -41,96 +38,73 @@ export function ReportSidebar({
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
-  onChangeViews,
   onReportChange,
+  disabledItems,
+  defaultItems,
+  defaultModeItems,
+  earliestTransaction,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
     onReportChange({ type: 'modify' });
     setDateRange(cond);
+    let dateStart;
+    let dateEnd;
     switch (cond) {
       case 'All time':
-        onChangeDates(...getFullRange(allMonths));
+        onChangeDates(earliestTransaction, monthUtils.currentDay());
         break;
       case 'Year to date':
-        onChangeDates(
-          ...validateRange(
-            allMonths,
-            monthUtils.getYearStart(monthUtils.currentMonth()),
-            monthUtils.currentMonth(),
-          ),
+        [dateStart, dateEnd] = validateRange(
+          earliestTransaction,
+          monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
+          monthUtils.currentDay(),
         );
+        onChangeDates(dateStart, dateEnd);
         break;
       case 'Last year':
-        onChangeDates(
-          ...validateRange(
-            allMonths,
-            monthUtils.getYearStart(
-              monthUtils.prevYear(monthUtils.currentMonth()),
-            ),
-            monthUtils.getYearEnd(
-              monthUtils.prevYear(monthUtils.currentDate()),
-            ),
-          ),
+        [dateStart, dateEnd] = validateRange(
+          earliestTransaction,
+          monthUtils.getYearStart(
+            monthUtils.prevYear(monthUtils.currentMonth()),
+          ) + '-01',
+          monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())) +
+            '-31',
         );
+        onChangeDates(dateStart, dateEnd);
         break;
       default:
-        onChangeDates(
-          ...getSpecificRange(
-            ReportOptions.dateRangeMap.get(cond),
-            cond === 'Last month' ? 0 : null,
-          ),
+        [dateStart, dateEnd] = getSpecificRange(
+          ReportOptions.dateRangeMap.get(cond),
+          cond === 'Last month' ? 0 : null,
+          customReportItems.interval,
         );
+        onChangeDates(dateStart, dateEnd);
     }
   };
 
   const onChangeMode = cond => {
     onReportChange({ type: 'modify' });
     setMode(cond);
+    let graph;
     if (cond === 'time') {
-      if (customReportItems.graphType === 'TableGraph') {
-        setTypeDisabled([]);
-      } else {
-        setTypeDisabled(['Net']);
-        if (['Net'].includes(customReportItems.balanceType)) {
-          setBalanceType('Payment');
-        }
-      }
       if (customReportItems.graphType === 'BarGraph') {
         setGraphType('StackedBarGraph');
-      }
-      if (['AreaGraph', 'DonutGraph'].includes(customReportItems.graphType)) {
-        setGraphType('TableGraph');
-        onChangeViews('viewLegend', false);
-      }
-      if (customReportItems.groupBy === 'Interval') {
-        setGroupBy('Category');
+        graph = 'StackedBarGraph';
       }
     } else {
       if (customReportItems.graphType === 'StackedBarGraph') {
         setGraphType('BarGraph');
-      } else {
-        setTypeDisabled([]);
+        graph = 'BarGraph';
       }
     }
+    defaultModeItems(graph, cond);
   };
 
   const onChangeSplit = cond => {
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
-    if (customReportItems.mode === 'total') {
-      if (customReportItems.graphType !== 'TableGraph') {
-        setTypeDisabled(
-          customReportItems.groupBy !== 'Interval' ? [] : ['Net'],
-        );
-      }
-    }
-    if (
-      ['Net'].includes(customReportItems.balanceType) &&
-      customReportItems.graphType !== 'TableGraph'
-    ) {
-      setBalanceType('Payment');
-    }
+    defaultItems(cond);
   };
 
   const onChangeBalanceType = cond => {
@@ -196,17 +170,8 @@ export function ReportSidebar({
           <Select
             value={customReportItems.groupBy}
             onChange={e => onChangeSplit(e)}
-            options={ReportOptions.groupBy.map(option => [
-              option.description,
-              option.description,
-            ])}
-            disabledKeys={
-              customReportItems.mode === 'time'
-                ? ['Interval']
-                : customReportItems.graphType === 'AreaGraph'
-                  ? ['Category', 'Group', 'Payee', 'Account']
-                  : []
-            }
+            options={ReportOptions.groupBy.map(option => [option, option])}
+            disabledKeys={disabledItems('split')}
           />
         </View>
         <View
@@ -226,7 +191,7 @@ export function ReportSidebar({
               option.description,
               option.description,
             ])}
-            disabledKeys={typeDisabled}
+            disabledKeys={disabledItems('type')}
           />
         </View>
         <View
@@ -412,9 +377,10 @@ export function ReportSidebar({
                 onChange={newValue =>
                   onChangeDates(
                     ...validateStart(
-                      allMonths,
+                      earliestTransaction,
                       newValue,
                       customReportItems.endDate,
+                      customReportItems.interval,
                     ),
                   )
                 }
@@ -423,7 +389,7 @@ export function ReportSidebar({
                   customReportItems.startDate,
                   'MMMM, yyyy',
                 )}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
             <View
@@ -440,14 +406,19 @@ export function ReportSidebar({
                 onChange={newValue =>
                   onChangeDates(
                     ...validateEnd(
-                      allMonths,
+                      earliestTransaction,
                       customReportItems.startDate,
                       newValue,
+                      customReportItems.interval,
                     ),
                   )
                 }
                 value={customReportItems.endDate}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                defaultLabel={monthUtils.format(
+                  customReportItems.endDate,
+                  'MMMM, yyyy',
+                )}
+                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
           </>

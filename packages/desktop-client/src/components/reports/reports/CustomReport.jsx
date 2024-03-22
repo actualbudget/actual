@@ -20,6 +20,7 @@ import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
+import { defaultsList, disabledList } from '../disabledList';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportLegend } from '../ReportLegend';
@@ -56,8 +57,7 @@ export function CustomReport() {
     ? location.state.report ?? defaultReport
     : defaultReport;
 
-  const [allMonths, setAllMonths] = useState(null);
-  const [typeDisabled, setTypeDisabled] = useState(['Net']);
+  const [allIntervals, setAllIntervals] = useState(null);
 
   const [selectedCategories, setSelectedCategories] = useState(
     loadReport.selectedCategories,
@@ -83,11 +83,12 @@ export function CustomReport() {
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
+  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
     location.state ? (location.state.report ? 'saved' : 'new') : 'new',
   );
-  const months = monthUtils.rangeInclusive(startDate, endDate);
+  const intervals = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
     if (selectedCategories === undefined && categories.list.length !== 0) {
@@ -99,6 +100,7 @@ export function CustomReport() {
     async function run() {
       report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
+      setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
@@ -112,7 +114,7 @@ export function CustomReport() {
         earliestMonth = yearAgo;
       }
 
-      const allMonths = monthUtils
+      const allInter = monthUtils
         .rangeInclusive(earliestMonth, monthUtils.currentMonth())
         .map(month => ({
           name: month,
@@ -120,7 +122,7 @@ export function CustomReport() {
         }))
         .reverse();
 
-      setAllMonths(allMonths);
+      setAllIntervals(allInter);
     }
     run();
   }, []);
@@ -133,6 +135,7 @@ export function CustomReport() {
     return createGroupedSpreadsheet({
       startDate,
       endDate,
+      interval,
       categories,
       selectedCategories,
       conditions: filters,
@@ -167,6 +170,7 @@ export function CustomReport() {
     return createCustomSpreadsheet({
       startDate,
       endDate,
+      interval,
       categories,
       selectedCategories,
       conditions: filters,
@@ -226,13 +230,72 @@ export function CustomReport() {
 
   const [scrollWidth, setScrollWidth] = useState(0);
 
-  if (!allMonths || !data) {
+  if (!allIntervals || !data) {
     return null;
   }
 
-  const onChangeDates = (startDate, endDate) => {
-    setStartDate(startDate);
-    setEndDate(endDate);
+  const defaultModeItems = (graph, item) => {
+    const chooseGraph = graph || graphType;
+    const newGraph = disabledList.modeGraphsMap.get(item).includes(chooseGraph)
+      ? defaultsList.modeGraphsMap.get(item)
+      : chooseGraph;
+    if (disabledList.modeGraphsMap.get(item).includes(graphType)) {
+      setGraphType(newGraph);
+    }
+
+    if (disabledList.graphSplitMap.get(item).get(newGraph).includes(groupBy)) {
+      setGroupBy(defaultsList.graphSplitMap.get(item).get(newGraph));
+    }
+
+    if (
+      disabledList.graphTypeMap.get(item).get(newGraph).includes(balanceType)
+    ) {
+      setBalanceType(defaultsList.graphTypeMap.get(item).get(newGraph));
+    }
+  };
+
+  const defaultItems = item => {
+    const chooseGraph = ReportOptions.groupBy.includes(item) ? graphType : item;
+    if (
+      disabledList.graphSplitMap.get(mode).get(chooseGraph).includes(groupBy)
+    ) {
+      setGroupBy(defaultsList.graphSplitMap.get(mode).get(chooseGraph));
+    }
+    if (
+      disabledList.graphTypeMap.get(mode).get(chooseGraph).includes(balanceType)
+    ) {
+      setBalanceType(defaultsList.graphTypeMap.get(mode).get(chooseGraph));
+    }
+  };
+
+  const disabledItems = type => {
+    switch (type) {
+      case 'split':
+        return disabledList.graphSplitMap.get(mode).get(graphType);
+      case 'type':
+        return graphType === 'BarGraph' && groupBy === 'Interval'
+          ? []
+          : disabledList.graphTypeMap.get(mode).get(graphType);
+      case 'ShowLegend': {
+        if (disabledList.graphLegendMap.get(mode).get(graphType)) {
+          setViewLegendPref(false);
+        }
+        return disabledList.graphLegendMap.get(mode).get(graphType);
+      }
+      case 'ShowLabels': {
+        if (disabledList.graphLabelsMap.get(mode).get(graphType)) {
+          setViewLabelsPref(false);
+        }
+        return disabledList.graphLabelsMap.get(mode).get(graphType);
+      }
+      default:
+        return disabledList.modeGraphsMap.get(mode).includes(type);
+    }
+  };
+
+  const onChangeDates = (dateStart, dateEnd) => {
+    setStartDate(dateStart);
+    setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
   };
 
@@ -342,10 +405,8 @@ export function CustomReport() {
           customReportItems={customReportItems}
           categories={categories}
           dateRangeLine={dateRangeLine}
-          allMonths={allMonths}
+          allIntervals={allIntervals}
           setDateRange={setDateRange}
-          typeDisabled={typeDisabled}
-          setTypeDisabled={setTypeDisabled}
           setGraphType={setGraphType}
           setGroupBy={setGroupBy}
           setInterval={setInterval}
@@ -358,8 +419,11 @@ export function CustomReport() {
           setShowUncategorized={setShowUncategorized}
           setSelectedCategories={setSelectedCategories}
           onChangeDates={onChangeDates}
-          onChangeViews={onChangeViews}
           onReportChange={onReportChange}
+          disabledItems={disabledItems}
+          defaultItems={defaultItems}
+          defaultModeItems={defaultModeItems}
+          earliestTransaction={earliestTransaction}
         />
         <View
           style={{
@@ -371,15 +435,14 @@ export function CustomReport() {
             report={report}
             savedStatus={savedStatus}
             setGraphType={setGraphType}
-            setTypeDisabled={setTypeDisabled}
-            setBalanceType={setBalanceType}
-            setGroupBy={setGroupBy}
             viewLegend={viewLegend}
             viewSummary={viewSummary}
             viewLabels={viewLabels}
             onApplyFilter={onApplyFilter}
             onChangeViews={onChangeViews}
             onReportChange={onReportChange}
+            disabledItems={disabledItems}
+            defaultItems={defaultItems}
           />
           {filters && filters.length > 0 && (
             <View
@@ -488,7 +551,8 @@ export function CustomReport() {
                       endDate={endDate}
                       balanceTypeOp={balanceTypeOp}
                       data={data}
-                      monthsCount={months.length}
+                      interval={interval}
+                      intervalsCount={intervals.length}
                     />
                   )}
                   {viewLegend && (

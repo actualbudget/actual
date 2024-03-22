@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type ChangeEvent, type Ref } from 'react';
+import { type Ref } from 'react';
 
 import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
@@ -83,7 +83,7 @@ export function Search({
       onKeyDown={e => {
         if (e.key === 'Escape') onChange('');
       }}
-      onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+      onChangeValue={value => onChange(value)}
     />
   );
 }

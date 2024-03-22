@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, {
   useState,
   useContext,
@@ -24,10 +23,10 @@ type TransferTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
   initialAmount?: number;
   initialAmountName?: string;
   showToBeBudgeted?: boolean;
-  onSubmit: (amount: number, category: unknown) => void;
+  onSubmit: (amount: number, category: string) => void;
 };
 export function TransferTooltip({
-  initialAmount,
+  initialAmount = 0,
   initialAmountName,
   showToBeBudgeted,
   onSubmit,
@@ -44,8 +43,8 @@ export function TransferTooltip({
     categoryGroups = addToBeBudgetedGroup(categoryGroups);
   }
 
-  const [amount, setAmount] = useState(null);
-  const [category, setCategory] = useState(null);
+  const [amount, setAmount] = useState<string | null>(null);
+  const [category, setCategory] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -58,8 +57,8 @@ export function TransferTooltip({
     })();
   }, []);
 
-  function submit() {
-    const parsedAmount = evalArithmetic(amount, null);
+  function submit(newAmount: string) {
+    const parsedAmount = evalArithmetic(newAmount);
     if (parsedAmount && category) {
       onSubmit(amountToInteger(parsedAmount), category);
       onClose();
@@ -88,7 +87,7 @@ export function TransferTooltip({
           <Input
             value={amount}
             onChange={e => setAmount(e.target['value'])}
-            onEnter={submit}
+            onEnter={() => submit(amount)}
           />
         </InitialFocus>
       </View>
@@ -99,8 +98,9 @@ export function TransferTooltip({
         value={null}
         openOnFocus={true}
         onUpdate={() => {}}
-        onSelect={id => setCategory(id)}
-        inputProps={{ onEnter: submit, placeholder: '(none)' }}
+        onSelect={(id: string | undefined) => setCategory(id || null)}
+        inputProps={{ onEnter: () => submit(amount), placeholder: '(none)' }}
+        showHiddenItems={true}
       />
 
       <View
@@ -116,7 +116,7 @@ export function TransferTooltip({
             paddingTop: 3,
             paddingBottom: 3,
           }}
-          onClick={submit}
+          onClick={() => submit(amount)}
         >
           Transfer
         </Button>

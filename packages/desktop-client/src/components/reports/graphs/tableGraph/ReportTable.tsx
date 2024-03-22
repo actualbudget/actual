@@ -24,7 +24,7 @@ type ReportTableProps = {
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
   data: DataEntity[];
   mode: string;
-  monthsCount: number;
+  intervalsCount: number;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
@@ -38,7 +38,7 @@ export function ReportTable({
   balanceTypeOp,
   data,
   mode,
-  monthsCount,
+  intervalsCount,
   compact,
   style,
   compactStyle,
@@ -56,7 +56,7 @@ export function ReportTable({
       item,
       groupByItem,
       mode,
-      monthsCount,
+      intervalsCount,
       compact,
       style,
       compactStyle,
@@ -67,7 +67,7 @@ export function ReportTable({
           balanceTypeOp={balanceTypeOp}
           groupByItem={groupByItem}
           mode={mode}
-          monthsCount={monthsCount}
+          intervalsCount={intervalsCount}
           compact={compact}
           style={style}
           compactStyle={compactStyle}
@@ -102,7 +102,7 @@ export function ReportTable({
       >
         <ReportTableList
           data={data}
-          monthsCount={monthsCount}
+          intervalsCount={intervalsCount}
           mode={mode}
           groupBy={groupBy}
           renderItem={renderItem}

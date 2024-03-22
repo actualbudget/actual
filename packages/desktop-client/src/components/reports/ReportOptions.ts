@@ -7,8 +7,8 @@ import {
   type PayeeEntity,
 } from 'loot-core/src/types/models';
 
-const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
-const endDate = monthUtils.currentMonth();
+const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5) + '-01';
+const endDate = monthUtils.currentDay();
 
 export const defaultReport: CustomReportEntity = {
   id: '',
@@ -64,7 +64,7 @@ const intervalOptions = [
 ];
 
 export const ReportOptions = {
-  groupBy: groupByOptions,
+  groupBy: groupByOptions.map(item => item.description),
   balanceType: balanceTypeOptions,
   balanceTypeMap: new Map(
     balanceTypeOptions.map(item => [item.description, item.format]),

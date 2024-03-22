@@ -5,11 +5,16 @@ export function makeQuery(
   name: string,
   startDate: string,
   endDate: string,
+  interval: string,
   selectedCategories: CategoryEntity[],
   categoryFilter: CategoryEntity[],
   conditionsOpKey: string,
   filters: unknown[],
 ) {
+  const intervalGroup =
+    interval === 'Monthly' ? { $month: '$date' } : { $year: '$date' };
+  const intervalFilter = interval === 'Monthly' ? '$month' : '$year';
+
   const query = q('transactions')
     //Apply Category_Selector
     .filter(
@@ -31,8 +36,8 @@ export function makeQuery(
     //Apply month range filters
     .filter({
       $and: [
-        { date: { $transform: '$month', $gte: startDate } },
-        { date: { $transform: '$month', $lte: endDate } },
+        { date: { $transform: intervalFilter, $gte: startDate } },
+        { date: { $transform: intervalFilter, $lte: endDate } },
       ],
     })
     //Show assets or debts
@@ -42,14 +47,14 @@ export function makeQuery(
 
   return query
     .groupBy([
-      { $month: '$date' },
+      intervalGroup,
       { $id: '$account' },
       { $id: '$payee' },
       { $id: '$category' },
       { $id: '$payee.transfer_acct.id' },
     ])
     .select([
-      { date: { $month: '$date' } },
+      { date: intervalGroup },
       { category: { $id: '$category.id' } },
       { categoryHidden: { $id: '$category.hidden' } },
       { categoryGroup: { $id: '$category.group.id' } },
