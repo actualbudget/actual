@@ -45,6 +45,7 @@ export function TransferModal({
     dispatch(
       pushModal('category-autocomplete', {
         categoryGroups,
+        showHiddenCategories: true,
         onSelect: categoryId => {
           setToCategoryId(categoryId);
         },
