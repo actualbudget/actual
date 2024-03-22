@@ -45,7 +45,7 @@ import { RolloverToBudgetMenuModal } from './modals/RolloverToBudgetMenuModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
-import { SingleInput } from './modals/SingleInput';
+import { SingleInputModal } from './modals/SingleInputModal';
 import { SwitchBudgetType } from './modals/SwitchBudgetType';
 import { TransferModal } from './modals/TransferModal';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
@@ -311,7 +311,7 @@ export function Modals() {
 
         case 'new-category':
           return (
-            <SingleInput
+            <SingleInputModal
               modalProps={modalProps}
               title="New Category"
               inputPlaceholder="Category name"
@@ -323,7 +323,7 @@ export function Modals() {
 
         case 'new-category-group':
           return (
-            <SingleInput
+            <SingleInputModal
               modalProps={modalProps}
               title="New Category Group"
               inputPlaceholder="Category group name"
