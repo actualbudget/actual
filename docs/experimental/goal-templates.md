@@ -47,7 +47,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 - Currency symbol is optional, `#template $50` and `#template 50` are the same.
 - Number formats that use comma for the decimal separator are not supported (eg, 123,45). You must use 123.45.
 - Thousands separators are not supported (eg, 1,234). You must use 1234.
-- {SCHEDULE NAME} is defined in the **Schedules** editor.**Take great care to copy across these schedule names EXACTLY**
+- {SCHEDULE NAME} is defined in the **Schedules** editor. **Take great care to copy across these schedule names EXACTLY**, without braces.
 - By default templates do not consider available funds when being applied. Use template priorities to not budget more than is available.
 - The `hold` flag can be added to any goal that uses the `up to` key word.
 - A single category with two templates that use `up to` is not supported.
