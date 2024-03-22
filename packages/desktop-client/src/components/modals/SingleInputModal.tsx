@@ -9,7 +9,6 @@ import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { InputField } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
-import { InputField } from '../mobile/MobileForms';
 
 type SingleInputModalProps = {
   modalProps: Partial<CommonModalProps>;
