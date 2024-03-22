@@ -7,6 +7,7 @@ import React, {
   useLayoutEffect,
   useImperativeHandle,
   useMemo,
+  type ComponentProps,
   type MutableRefObject,
   type KeyboardEvent,
 } from 'react';
@@ -28,7 +29,7 @@ import { stringToInteger } from 'loot-core/src/shared/util';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme } from '../../style';
 import { Input, type InputProps } from '../common/Input';
-import { View, type ViewProps } from '../common/View';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';
@@ -171,7 +172,7 @@ function defaultShouldSaveFromKey(e) {
 }
 
 type DateSelectProps = {
-  containerProps?: ViewProps;
+  containerProps?: ComponentProps<typeof View>;
   inputProps?: InputProps;
   tooltipStyle?: CSSProperties;
   value: string;
