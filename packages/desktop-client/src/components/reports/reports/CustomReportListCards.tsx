@@ -1,12 +1,9 @@
 import React, { createRef, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
-import {
-  ErrorBoundary,
-  type FallbackProps,
-} from 'react-error-boundary';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
@@ -60,35 +57,17 @@ function index(data: CustomReportEntity[]): { [key: string]: boolean }[] {
   }, []);
 }
 
-function ErrorFallback({ error }: FallbackProps) {
+function ErrorFallback() {
   return (
     <>
-      <div><br/></div>
-      <Text style={{ ...styles.mediumText, color: theme.errorText}}>There was a problem loading your report</Text>
-      <div><br/></div>
-      <Text>{error.message}</Text>
+      <div>
+        <br />
+      </div>
+      <Text style={{ ...styles.mediumText, color: theme.errorText }}>
+        There was a problem loading your report
+      </Text>
     </>
   );
-}
-
-function catchError (report){
-  return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <ChooseGraph
-        startDate={report.startDate}
-        endDate={report.endDate}
-        data={report.data}
-        mode={report.mode}
-        graphType={report.graphType}
-        balanceType={report.balanceType}
-        groupBy={report.groupBy}
-        interval={report.interval}
-        compact={true}
-        style={{ height: 'auto', flex: 1 }}
-      /> 
-    </ErrorBoundary>
-  );
-
 }
 
 export function CustomReportListCards({
@@ -227,7 +206,22 @@ export function CustomReportListCards({
                         </View>
                       </View>
 
-                      {report.data ?  catchError(report) : (
+                      {report.data ? (
+                        <ErrorBoundary FallbackComponent={ErrorFallback}>
+                          <ChooseGraph
+                            startDate={report.startDate}
+                            endDate={report.endDate}
+                            data={report.data}
+                            mode={report.mode}
+                            graphType={report.graphType}
+                            balanceType={report.balanceType}
+                            groupBy={report.groupBy}
+                            interval={report.interval}
+                            compact={true}
+                            style={{ height: 'auto', flex: 1 }}
+                          />
+                        </ErrorBoundary>
+                      ) : (
                         <LoadingIndicator />
                       )}
                     </View>
