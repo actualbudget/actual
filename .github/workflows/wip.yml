@@ -24,4 +24,4 @@ jobs:
       shell: bash
       run: |
         echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
-        gh pr edit ${{ github.event.pull_request.number }} -t "WIP: ${TITLE}"
+        gh pr edit ${{ github.event.pull_request.number }} -t "[WIP] ${TITLE}"
