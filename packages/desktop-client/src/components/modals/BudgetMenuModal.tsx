@@ -12,6 +12,7 @@ type BudgetMenuModalProps = ComponentPropsWithoutRef<typeof BudgetMenu> & {
 
 export function BudgetMenuModal({
   modalProps,
+  month,
   onToggleHiddenCategories,
   onSwitchBudgetType,
 }: BudgetMenuModalProps) {
@@ -39,6 +40,7 @@ export function BudgetMenuModal({
       {() => (
         <BudgetMenu
           getItemStyle={() => defaultMenuItemStyle}
+          month={month}
           onToggleHiddenCategories={onToggleHiddenCategories}
           onSwitchBudgetType={onSwitchBudgetType}
         />

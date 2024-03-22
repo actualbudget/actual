@@ -1,15 +1,15 @@
 // @ts-strict-ignore
 import React from 'react';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { useResponsive } from '../../ResponsiveProvider';
+import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { type CommonModalProps } from '../Modals';
-import { useResponsive } from '../../ResponsiveProvider';
-import { styles } from '../../style';
-import { useLocalPref } from '../../hooks/useLocalPref';
 
 type SwitchBudgetTypeModalProps = {
   modalProps: CommonModalProps;
@@ -22,9 +22,11 @@ export function SwitchBudgetTypeModal({
 }: SwitchBudgetTypeModalProps) {
   const [budgetType] = useLocalPref('budgetType');
   const { isNarrowWidth } = useResponsive();
-  const narrowStyle = isNarrowWidth ? {
-    height: styles.mobileMinHeight
-  } : {};
+  const narrowStyle = isNarrowWidth
+    ? {
+        height: styles.mobileMinHeight,
+      }
+    : {};
   return (
     <Modal title="Switch budget type?" {...modalProps}>
       {() => (
