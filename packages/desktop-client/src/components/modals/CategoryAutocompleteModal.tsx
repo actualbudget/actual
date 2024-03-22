@@ -69,7 +69,6 @@ export function CategoryAutocompleteModal({
               closeOnBlur={false}
               showSplitOption={false}
               onClose={_onClose}
-              showHiddenCategories={false}
               {...defaultAutocompleteProps}
               {...autocompleteProps}
             />
