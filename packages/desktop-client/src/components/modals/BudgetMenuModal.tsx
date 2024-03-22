@@ -94,12 +94,14 @@ function BudgetMenu({
           name: 'toggle-hidden-categories',
           text: 'Toggle hidden categories',
         },
-        isReportBudgetEnabled
-          ? {
-              name: 'switch-budget-type',
-              text: 'Switch budget type',
-            }
-          : undefined,
+        ...(isReportBudgetEnabled
+          ? [
+              {
+                name: 'switch-budget-type',
+                text: 'Switch budget type',
+              },
+            ]
+          : []),
       ]}
     />
   );
