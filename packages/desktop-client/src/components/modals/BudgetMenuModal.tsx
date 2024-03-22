@@ -67,7 +67,7 @@ function BudgetMenu({
 }: BudgetMenuProps) {
   const isReportBudgetEnabled = useFeatureFlag('reportBudget');
 
-  const onMenuSelect = name => {
+  const onMenuSelect = (name: string) => {
     switch (name) {
       // case 'edit-mode':
       //   onEditMode?.(true);
@@ -94,10 +94,12 @@ function BudgetMenu({
           name: 'toggle-hidden-categories',
           text: 'Toggle hidden categories',
         },
-        isReportBudgetEnabled && {
-          name: 'switch-budget-type',
-          text: 'Switch budget type',
-        },
+        isReportBudgetEnabled
+          ? {
+              name: 'switch-budget-type',
+              text: 'Switch budget type',
+            }
+          : undefined,
       ]}
     />
   );
