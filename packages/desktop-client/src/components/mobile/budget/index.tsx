@@ -53,7 +53,7 @@ function BudgetInner(props: BudgetInnerProps) {
   const [bounds, setBounds] = useState({ start: currMonth, end: currMonth });
   const [currentMonth, setCurrentMonth] = useState(currMonth);
   const [initialized, setInitialized] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  // const [editMode, setEditMode] = useState(false);
 
   const [_numberFormat] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
@@ -353,6 +353,36 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   };
 
+  const _onSwitchBudgetType = () => {
+    dispatch(
+      pushModal('switch-budget-type', {
+        onSwitch: () => {
+          onSwitchBudgetType?.();
+          dispatch(collapseModals('budget-menu'));
+        },
+      }),
+    );
+  };
+
+  const [showHiddenCategories, setShowHiddenCategoriesPref] = useLocalPref(
+    'budget.showHiddenCategories',
+  );
+
+  const onToggleHiddenCategories = () => {
+    setShowHiddenCategoriesPref(!showHiddenCategories);
+    dispatch(collapseModals('budget-menu'));
+  };
+
+  const onOpenBudgetActionMenu = month => {
+    dispatch(
+      pushModal('budget-menu', {
+        month,
+        onToggleHiddenCategories,
+        onSwitchBudgetType: _onSwitchBudgetType,
+      }),
+    );
+  };
+
   if (!categoryGroups || !initialized) {
     return (
       <View
@@ -385,8 +415,7 @@ function BudgetInner(props: BudgetInnerProps) {
             type={budgetType}
             month={currentMonth}
             monthBounds={bounds}
-            editMode={editMode}
-            onEditMode={flag => setEditMode(flag)}
+            // editMode={editMode}
             onShowBudgetSummary={onShowBudgetSummary}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
@@ -398,12 +427,11 @@ function BudgetInner(props: BudgetInnerProps) {
             onDeleteCategory={onDeleteCategory}
             onReorderCategory={onReorderCategory}
             onReorderGroup={onReorderGroup}
-            onOpenMonthActionMenu={() => {}} //onOpenMonthActionMenu}
             onBudgetAction={onBudgetAction}
             onRefresh={onRefresh}
-            onSwitchBudgetType={onSwitchBudgetType}
             onEditGroup={onEditGroup}
             onEditCategory={onEditCategory}
+            onOpenBudgetActionMenu={onOpenBudgetActionMenu}
           />
         )}
       </SyncRefresh>
