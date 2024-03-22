@@ -215,6 +215,11 @@ type FinanceModals = {
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
   };
+  'budget-menu': {
+    month: string;
+    onToggleHiddenCategories: () => void;
+    onSwitchBudgetType: () => void;
+  };
 };
 
 export type PushModalAction = {
