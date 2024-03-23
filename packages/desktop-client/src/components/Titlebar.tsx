@@ -237,6 +237,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     {
       enableOnFormTags: true,
       preventDefault: true,
+      scopes: ['app'],
     },
     [sync],
   );

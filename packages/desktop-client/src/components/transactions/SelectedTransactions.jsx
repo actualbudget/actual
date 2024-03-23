@@ -64,7 +64,10 @@ export function SelectedTransactionsButton({
     return validForTransfer(fromTrans, toTrans);
   }, [selectedItems, getTransaction]);
 
-  const hotKeyOptions = { enabled: types.trans };
+  const hotKeyOptions = {
+    enabled: types.trans,
+    scopes: ['app'],
+  };
   useHotkeys('f', () => onShow([...selectedItems]), hotKeyOptions, [
     onShow,
     selectedItems,

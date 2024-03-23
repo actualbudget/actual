@@ -119,6 +119,7 @@ export function AccountHeader({
     {
       enableOnFormTags: true,
       preventDefault: true,
+      scopes: ['app'],
     },
     [searchInput],
   );

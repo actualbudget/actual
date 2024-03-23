@@ -6,6 +6,7 @@ import React, {
   type ReactNode,
   useState,
 } from 'react';
+import { useHotkeysContext } from 'react-hotkeys-hook';
 import ReactModal from 'react-modal';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -73,6 +74,15 @@ export const Modal = ({
   onClose,
   onTitleUpdate,
 }: ModalProps) => {
+  const { enableScope, disableScope } = useHotkeysContext();
+
+  // This deactivates any key handlers in the "app" scope
+  const scopeId = `modal-${stackIndex}-${title}`;
+  useEffect(() => {
+    enableScope(scopeId);
+    return () => disableScope(scopeId);
+  }, [enableScope, disableScope, scopeId]);
+
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [_title, setTitle] = useState(title);
 
