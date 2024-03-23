@@ -103,7 +103,7 @@ export const Modal = ({
       isOpen={true}
       onRequestClose={onClose}
       shouldCloseOnOverlayClick={true}
-      shouldFocusAfterRender={!global.IS_DESIGN_MODE}
+      shouldFocusAfterRender
       shouldReturnFocusAfterClose={focusAfterClose}
       appElement={document.querySelector('#root') as HTMLElement}
       parentSelector={parent && (() => parent)}

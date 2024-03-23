@@ -77,7 +77,7 @@ export function AvoidRefocusScrollProvider({
 
 export function useProperFocus(
   ref: RefObject<HTMLElement>,
-  shouldFocus: boolean,
+  shouldFocus = false,
 ): void {
   const context = useContext(AvoidRefocusScrollContext);
   const prevShouldFocus = useRef(null);
