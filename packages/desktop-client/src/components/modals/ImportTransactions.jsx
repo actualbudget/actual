@@ -397,10 +397,12 @@ function Transaction({
             contentStyle={{
               textAlign: 'right',
               ...styles.tnum,
-              ...(outflow === null ? { color: theme.errorText } : {}),
+              ...(inflow === null && outflow === null
+                ? { color: theme.errorText }
+                : {}),
             }}
             title={
-              outflow === null
+              inflow === null && outflow === null
                 ? 'Invalid: unable to parse the value'
                 : amountToCurrency(outflow)
             }
@@ -412,10 +414,12 @@ function Transaction({
             contentStyle={{
               textAlign: 'right',
               ...styles.tnum,
-              ...(inflow === null ? { color: theme.errorText } : {}),
+              ...(inflow === null && outflow === null
+                ? { color: theme.errorText }
+                : {}),
             }}
             title={
-              inflow === null
+              inflow === null && outflow === null
                 ? 'Invalid: unable to parse the value'
                 : amountToCurrency(inflow)
             }
