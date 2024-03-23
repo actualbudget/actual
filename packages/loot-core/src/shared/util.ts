@@ -290,14 +290,6 @@ export function getNumberFormat({
 const MAX_SAFE_NUMBER = 2 ** 51 - 1;
 const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 
-export function isSafeNumber(value: number): boolean {
-  try {
-    safeNumber(value);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
 export function safeNumber(value: number) {
   if (!Number.isInteger(value)) {
     throw new Error(
@@ -367,8 +359,16 @@ export function integerToAmount(n) {
 // currencies. We extract out the numbers and just ignore separators.
 export function looselyParseAmount(amount: string) {
   function safeNumber(v: number): null | number {
-    if (isSafeNumber(v)) return v;
-    return null;
+    if (isNaN(v)) {
+      return null;
+    }
+
+    const value = v * 100;
+    if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
+      return null;
+    }
+
+    return v;
   }
 
   function extractNumbers(v: string): string {

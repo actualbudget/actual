@@ -6,7 +6,6 @@ import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
   amountToInteger,
-  isSafeNumber,
   looselyParseAmount,
 } from 'loot-core/src/shared/util';
 
