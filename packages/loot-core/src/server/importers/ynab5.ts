@@ -162,6 +162,129 @@ async function importTransactions(
     entityIdMap.set(transaction.id, uuidv4());
   }
 
+  // Compute link between subtransaction transfers and orphaned transaction
+  // transfers. The goal is to match each transfer subtransaction to the related
+  // transfer transaction according to the accounts, date, amount and memo.
+  const orphanTransferMap = data.transactions
+    .filter(
+      transaction =>
+        transaction.transfer_account_id && !transaction.transfer_transaction_id,
+    )
+    .reduce((map, transaction) => {
+      const key =
+        transaction.account_id + '#' + transaction.transfer_account_id;
+      if (!map.has(key)) {
+        map.set(key, [transaction]);
+      } else {
+        map.get(key).push(transaction);
+      }
+      return map;
+    }, new Map<string, YNAB5.Transaction[]>());
+
+  const orphanSubtransfer = data.subtransactions.filter(
+    subtransaction => subtransaction.transfer_account_id,
+  );
+  const orphanSubtransferTrxId = orphanSubtransfer.map(
+    subtransaction => subtransaction.transaction_id,
+  );
+  const orphanSubtransferAcctIdByTrxId = data.transactions
+    .filter(transaction => orphanSubtransferTrxId.includes(transaction.id))
+    .map(
+      transaction =>
+        [transaction.id, transaction.account_id] as [string, string],
+    );
+  const orphanSubtransferAcctIdByTrxIdMap = new Map<string, string>(
+    orphanSubtransferAcctIdByTrxId,
+  );
+  const orphanSubtransferDateByTrxId = data.transactions
+    .filter(transaction => orphanSubtransferTrxId.includes(transaction.id))
+    .map(transaction => [transaction.id, transaction.date] as [string, string]);
+  const orphanSubtransferDateByTrxIdMap = new Map<string, string>(
+    orphanSubtransferDateByTrxId,
+  );
+
+  const orphanSubtransferMap = orphanSubtransfer.reduce(
+    (map, subtransaction) => {
+      const key =
+        subtransaction.transfer_account_id +
+        '#' +
+        orphanSubtransferAcctIdByTrxIdMap.get(subtransaction.transaction_id);
+      if (!map.has(key)) {
+        map.set(key, [subtransaction]);
+      } else {
+        map.get(key).push(subtransaction);
+      }
+      return map;
+    },
+    new Map<string, YNAB5.Subtransaction[]>(),
+  );
+
+  const orphanTransferComparator = (
+    a: YNAB5.Transaction | YNAB5.Subtransaction,
+    b: YNAB5.Transaction | YNAB5.Subtransaction,
+  ) => {
+    const date_a =
+      'date' in a
+        ? a.date
+        : orphanSubtransferDateByTrxIdMap.get(a.transaction_id);
+    const date_b =
+      'date' in b
+        ? b.date
+        : orphanSubtransferDateByTrxIdMap.get(b.transaction_id);
+    const amount_a = 'date' in a ? a.amount : -a.amount;
+    const amount_b = 'date' in b ? b.amount : -b.amount;
+
+    if (date_a > date_b) return 1;
+    if (date_a < date_b) return -1;
+    if (amount_a > amount_b) return 1;
+    if (amount_a < amount_b) return -1;
+    if (a.memo > b.memo) return 1;
+    if (a.memo < b.memo) return -1;
+    return 0;
+  };
+
+  const orphanTrxIdSubtrxIdMap = new Map<string, string>();
+  orphanTransferMap.forEach((transactions, key) => {
+    const subtransactions = orphanSubtransferMap.get(key);
+    if (subtransactions) {
+      transactions.sort(orphanTransferComparator);
+      subtransactions.sort(orphanTransferComparator);
+
+      let transactionIdx = 0;
+      let subtransactionIdx = 0;
+      do {
+        switch (
+          orphanTransferComparator(
+            transactions[transactionIdx],
+            subtransactions[subtransactionIdx],
+          )
+        ) {
+          case 0:
+            orphanTrxIdSubtrxIdMap.set(
+              transactions[transactionIdx].id,
+              entityIdMap.get(subtransactions[subtransactionIdx].id),
+            );
+            orphanTrxIdSubtrxIdMap.set(
+              subtransactions[subtransactionIdx].id,
+              entityIdMap.get(transactions[transactionIdx].id),
+            );
+            transactionIdx++;
+            subtransactionIdx++;
+            break;
+          case 1:
+            transactionIdx++;
+            break;
+          case -1:
+            subtransactionIdx++;
+            break;
+        }
+      } while (
+        transactionIdx < transactions.length &&
+        subtransactionIdx < subtransactions.length
+      );
+    }
+  });
+
   await Promise.all(
     [...transactionsGrouped.keys()].map(async accountId => {
       const transactions = transactionsGrouped.get(accountId);
@@ -186,25 +309,20 @@ async function importTransactions(
             notes: transaction.memo || null,
             imported_id: transaction.import_id || null,
             transfer_id:
-              entityIdMap.get(transaction.transfer_transaction_id) || null,
+              entityIdMap.get(transaction.transfer_transaction_id) ||
+              orphanTrxIdSubtrxIdMap.get(transaction.id) ||
+              null,
             subtransactions: subtransactions
               ? subtransactions.map(subtrans => {
-                  let payee = null;
-                  if (subtrans.transfer_account_id) {
-                    const mappedTransferAccountId = entityIdMap.get(
-                      subtrans.transfer_account_id,
-                    );
-                    payee = payeeTransferAcctHashMap.get(
-                      mappedTransferAccountId,
-                    )?.id;
-                  }
-
                   return {
                     id: entityIdMap.get(subtrans.id),
                     amount: amountFromYnab(subtrans.amount),
                     category: entityIdMap.get(subtrans.category_id) || null,
                     notes: subtrans.memo,
-                    payee,
+                    transfer_id:
+                      orphanTrxIdSubtrxIdMap.get(subtrans.id) || null,
+                    payee: null,
+                    imported_payee: null,
                   };
                 })
               : null,
@@ -212,18 +330,34 @@ async function importTransactions(
             imported_payee: null,
           };
 
-          // Handle transfer payee
-          if (transaction.transfer_account_id) {
-            newTransaction.payee = payees.find(
-              p =>
-                p.transfer_acct ===
-                entityIdMap.get(transaction.transfer_account_id),
-            ).id;
-          } else {
-            newTransaction.payee = entityIdMap.get(transaction.payee_id);
-            newTransaction.imported_payee = data.payees.find(
-              p => !p.deleted && p.id === transaction.payee_id,
-            )?.name;
+          // Handle transactions and subtransactions payee
+          const transactionPayeeUpdate = (
+            trx: YNAB5.Transaction | YNAB5.Subtransaction,
+            newTrx,
+          ) => {
+            if (trx.transfer_account_id) {
+              const mappedTransferAccountId = entityIdMap.get(
+                trx.transfer_account_id,
+              );
+              newTrx.payee = payeeTransferAcctHashMap.get(
+                mappedTransferAccountId,
+              )?.id;
+            } else {
+              newTrx.payee = entityIdMap.get(trx.payee_id);
+              newTrx.imported_payee = data.payees.find(
+                p => !p.deleted && p.id === trx.payee_id,
+              )?.name;
+            }
+          };
+
+          transactionPayeeUpdate(transaction, newTransaction);
+          if (newTransaction.subtransactions) {
+            subtransactions.forEach(subtrans => {
+              const newSubtransaction = newTransaction.subtransactions.find(
+                newSubtrans => newSubtrans.id === entityIdMap.get(subtrans.id),
+              );
+              transactionPayeeUpdate(subtrans, newSubtransaction);
+            });
           }
 
           // Handle starting balances
