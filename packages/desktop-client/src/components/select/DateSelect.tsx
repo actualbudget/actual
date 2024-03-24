@@ -182,7 +182,7 @@ type DateSelectProps = {
   openOnFocus?: boolean;
   inputRef?: MutableRefObject<HTMLInputElement>;
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
-  tableBehavior?: boolean;
+  clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
   onSelect: (selectedDate: string) => void;
 };
@@ -199,7 +199,7 @@ export function DateSelect({
   openOnFocus = true,
   inputRef: originalInputRef,
   shouldSaveFromKey = defaultShouldSaveFromKey,
-  tableBehavior,
+  clearOnBlur = true,
   onUpdate,
   onSelect,
 }: DateSelectProps) {
@@ -362,7 +362,7 @@ export function DateSelect({
           }
           inputProps?.onBlur?.(e);
 
-          if (!tableBehavior) {
+          if (clearOnBlur) {
             // If value is empty, that drives what gets selected.
             // Otherwise the input is reset to whatever is already
             // selected

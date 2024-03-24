@@ -1,5 +1,10 @@
 // @ts-strict-ignore
-import React, { Fragment, type ComponentProps, type ReactNode } from 'react';
+import React, {
+  Fragment,
+  type ComponentProps,
+  type ComponentPropsWithoutRef,
+  type ReactElement,
+} from 'react';
 
 import { css } from 'glamor';
 
@@ -7,11 +12,29 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme } from '../../style';
+import { type CSSProperties, theme, styles } from '../../style';
+import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
 
 import { Autocomplete } from './Autocomplete';
-import { ItemHeader, type ItemHeaderProps } from './ItemHeader';
+import { ItemHeader } from './ItemHeader';
+
+type AccountAutocompleteItem = AccountEntity;
+
+type AccountListProps = {
+  items: AccountAutocompleteItem[];
+  getItemProps: (arg: {
+    item: AccountAutocompleteItem;
+  }) => ComponentProps<typeof View>;
+  highlightedIndex: number;
+  embedded: boolean;
+  renderAccountItemGroupHeader?: (
+    props: ComponentPropsWithoutRef<typeof ItemHeader>,
+  ) => ReactElement<typeof ItemHeader>;
+  renderAccountItem?: (
+    props: ComponentPropsWithoutRef<typeof AccountItem>,
+  ) => ReactElement<typeof AccountItem>;
+};
 
 function AccountList({
   items,
@@ -20,7 +43,7 @@ function AccountList({
   embedded,
   renderAccountItemGroupHeader = defaultRenderAccountItemGroupHeader,
   renderAccountItem = defaultRenderAccountItem,
-}) {
+}: AccountListProps) {
   let lastItem = null;
 
   return (
@@ -69,13 +92,19 @@ function AccountList({
   );
 }
 
-type AccountAutoCompleteProps = {
+type AccountAutocompleteProps = ComponentProps<
+  typeof Autocomplete<AccountAutocompleteItem>
+> & {
   embedded?: boolean;
-  includeClosedAccounts: boolean;
-  renderAccountItemGroupHeader?: (props: ItemHeaderProps) => ReactNode;
-  renderAccountItem?: (props: AccountItemProps) => ReactNode;
+  includeClosedAccounts?: boolean;
+  renderAccountItemGroupHeader?: (
+    props: ComponentPropsWithoutRef<typeof ItemHeader>,
+  ) => ReactElement<typeof ItemHeader>;
+  renderAccountItem?: (
+    props: ComponentPropsWithoutRef<typeof AccountItem>,
+  ) => ReactElement<typeof AccountItem>;
   closeOnBlur?: boolean;
-} & ComponentProps<typeof Autocomplete>;
+};
 
 export function AccountAutocomplete({
   embedded,
@@ -84,12 +113,12 @@ export function AccountAutocomplete({
   renderAccountItem,
   closeOnBlur,
   ...props
-}: AccountAutoCompleteProps) {
-  let accounts = useAccounts() || [];
+}: AccountAutocompleteProps) {
+  const accounts = useAccounts() || [];
 
   //remove closed accounts if needed
   //then sort by closed, then offbudget
-  accounts = accounts
+  const accountSuggestions: AccountAutocompleteItem[] = accounts
     .filter(item => {
       return includeClosedAccounts ? item : !item.closed;
     })
@@ -102,12 +131,12 @@ export function AccountAutocomplete({
     });
 
   return (
-    <Autocomplete
+    <Autocomplete<AccountAutocompleteItem>
       strict={true}
       highlightFirst={true}
       embedded={embedded}
       closeOnBlur={closeOnBlur}
-      suggestions={accounts}
+      suggestions={accountSuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <AccountList
           items={items}
@@ -124,13 +153,13 @@ export function AccountAutocomplete({
 }
 
 function defaultRenderAccountItemGroupHeader(
-  props: ItemHeaderProps,
-): ReactNode {
+  props: ComponentPropsWithoutRef<typeof ItemHeader>,
+): ReactElement<typeof ItemHeader> {
   return <ItemHeader {...props} type="account" />;
 }
 
 type AccountItemProps = {
-  item: AccountEntity;
+  item: AccountAutocompleteItem;
   className?: string;
   style?: CSSProperties;
   highlighted?: boolean;
@@ -145,6 +174,15 @@ export function AccountItem({
   ...props
 }: AccountItemProps) {
   const { isNarrowWidth } = useResponsive();
+  const narrowStyle = isNarrowWidth
+    ? {
+        ...styles.mobileMenuItem,
+        color: theme.menuItemText,
+        borderRadius: 0,
+        borderTop: `1px solid ${theme.pillBorder}`,
+      }
+    : {};
+
   return (
     <div
       // List each account up to a max
@@ -180,17 +218,20 @@ export function AccountItem({
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
+          ...narrowStyle,
         },
       ])}`}
       data-testid={`${item.name}-account-item`}
       data-highlighted={highlighted || undefined}
       {...props}
     >
-      {item.name}
+      <TextOneLine>{item.name}</TextOneLine>
     </div>
   );
 }
 
-function defaultRenderAccountItem(props: AccountItemProps): ReactNode {
+function defaultRenderAccountItem(
+  props: ComponentPropsWithoutRef<typeof AccountItem>,
+): ReactElement<typeof AccountItem> {
   return <AccountItem {...props} />;
 }
