@@ -9,6 +9,7 @@ import React, {
   useMemo,
   type MutableRefObject,
   type KeyboardEvent,
+  type ComponentProps,
 } from 'react';
 
 import { parse, parseISO, format, subDays, addDays, isValid } from 'date-fns';
@@ -27,7 +28,7 @@ import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme } from '../../style';
-import { Input, type InputProps } from '../common/Input';
+import { Input } from '../common/Input';
 import { View, type ViewProps } from '../common/View';
 import { Tooltip } from '../tooltips';
 
@@ -172,7 +173,7 @@ function defaultShouldSaveFromKey(e) {
 
 type DateSelectProps = {
   containerProps?: ViewProps;
-  inputProps?: InputProps;
+  inputProps?: ComponentProps<typeof Input>;
   tooltipStyle?: CSSProperties;
   value: string;
   isOpen?: boolean;
