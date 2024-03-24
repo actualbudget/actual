@@ -52,7 +52,7 @@ export function CategoryMenuModal({
     [category.id],
   );
   const originalNotes = data && data.length > 0 ? data[0].note : null;
-  const [budgetType] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const dispatch = useDispatch();
 
   const _onClose = () => {
@@ -85,14 +85,16 @@ export function CategoryMenuModal({
     onDelete?.(category.id);
   };
 
+  const categoryBudgetModal: `${typeof budgetType}-category-budget-menu` = `${budgetType}-category-budget-menu`;
+
   const _onBudgetAction = (month, action, args) => {
     onBudgetAction?.(month, action, args);
-    dispatch(collapseModals(`${budgetType}-category-budget-menu`));
+    dispatch(collapseModals(categoryBudgetModal));
   };
 
   const onOpenBudgetActions = () => {
     dispatch(
-      pushModal(`${budgetType}-category-budget-menu`, {
+      pushModal(categoryBudgetModal, {
         categoryId: category.id,
         month,
         onUpdateBudget: amount => {
