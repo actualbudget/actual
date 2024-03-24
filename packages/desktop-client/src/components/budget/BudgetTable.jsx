@@ -1,7 +1,5 @@
 import React, { useRef, useState } from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
-
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
@@ -40,8 +38,8 @@ export function BudgetTable(props) {
   );
   const [editing, setEditing] = useState(null);
 
-  const onEditMonth = (id, monthIndex) => {
-    setEditing(id ? { id, cell: monthIndex } : null);
+  const onEditMonth = (id, month) => {
+    setEditing(id ? { id, cell: month } : null);
   };
 
   const onEditName = id => {
@@ -132,18 +130,6 @@ export function BudgetTable(props) {
       e.preventDefault();
       moveVertically(e.shiftKey ? -1 : 1);
     }
-  };
-
-  const resolveMonth = monthIndex => {
-    return monthUtils.addMonths(startMonth, monthIndex);
-  };
-
-  const _onShowActivity = (catId, monthIndex) => {
-    onShowActivity(catId, resolveMonth(monthIndex));
-  };
-
-  const _onBudgetAction = (monthIndex, type, args) => {
-    onBudgetAction(resolveMonth(monthIndex), type, args);
   };
 
   const onCollapse = collapsedIds => {
@@ -244,8 +230,8 @@ export function BudgetTable(props) {
                 onDeleteGroup={onDeleteGroup}
                 onReorderCategory={_onReorderCategory}
                 onReorderGroup={_onReorderGroup}
-                onBudgetAction={_onBudgetAction}
-                onShowActivity={_onShowActivity}
+                onBudgetAction={onBudgetAction}
+                onShowActivity={onShowActivity}
               />
             </View>
           </View>

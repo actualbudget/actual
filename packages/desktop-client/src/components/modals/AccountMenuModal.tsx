@@ -126,7 +126,8 @@ export function AccountMenuModal({
             flexWrap: 'wrap',
             justifyContent: 'space-between',
             alignContent: 'space-between',
-            margin: '10px 0',
+            paddingTop: 10,
+            paddingBottom: 10,
           }}
         >
           <Button style={buttonStyle} onClick={_onEditNotes}>
@@ -145,6 +146,11 @@ function AdditionalAccountMenu({ account, onClose, onReopen }) {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
   };
+
+  const getItemStyle = item => ({
+    ...itemStyle,
+    ...(item.name === 'close' && { color: theme.errorTextMenu }),
+  });
 
   return (
     <View>
@@ -169,7 +175,7 @@ function AdditionalAccountMenu({ account, onClose, onReopen }) {
             }}
           >
             <Menu
-              getItemStyle={() => itemStyle}
+              getItemStyle={getItemStyle}
               items={[
                 account.closed
                   ? {
@@ -195,7 +201,7 @@ function AdditionalAccountMenu({ account, onClose, onReopen }) {
                     onReopen?.(account.id);
                     break;
                   default:
-                    throw new Error(`Unsupported item: ${name}`);
+                    throw new Error(`Unrecognized menu item: ${name}`);
                 }
               }}
             />

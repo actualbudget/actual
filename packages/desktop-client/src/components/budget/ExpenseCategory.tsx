@@ -24,12 +24,12 @@ type ExpenseCategoryProps = {
   dragState: DragState<CategoryEntity>;
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
   onEditName?: ComponentProps<typeof SidebarCategory>['onEditName'];
-  onEditMonth?: (id: string, monthIndex: number) => void;
+  onEditMonth?: (id: string, month: string) => void;
   onSave?: ComponentProps<typeof SidebarCategory>['onSave'];
   onDelete?: ComponentProps<typeof SidebarCategory>['onDelete'];
   onDragChange: OnDragChangeCallback<CategoryEntity>;
-  onBudgetAction: (idx: number, action: string, arg: unknown) => void;
-  onShowActivity: (id: string, idx: number) => void;
+  onBudgetAction: (month: number, action: string, arg: unknown) => void;
+  onShowActivity: (id: string, month: string) => void;
   onReorder: OnDropCallback;
 };
 
@@ -95,7 +95,7 @@ export function ExpenseCategory({
 
         <RenderMonths
           component={MonthComponent}
-          editingIndex={
+          editingMonth={
             editingCell && editingCell.id === cat.id && editingCell.cell
           }
           args={{

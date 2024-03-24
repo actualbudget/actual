@@ -346,9 +346,11 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(
       pushModal('category-menu', {
         categoryId: category.id,
+        month: currentMonth,
         onSave: onSaveCategory,
         onEditNotes: onEditCategoryNotes,
         onDelete: onDeleteCategory,
+        onBudgetAction,
       }),
     );
   };

@@ -5,7 +5,7 @@ import { reportBudget } from 'loot-core/src/client/queries';
 import { Menu } from '../../common/Menu';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
-export type BalanceMenuProps = Omit<
+type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
@@ -28,7 +28,7 @@ export function BalanceMenu({
             onCarryover?.(!carryover);
             break;
           default:
-            throw new Error(`Unsupported item: ${name}`);
+            throw new Error(`Unrecognized menu item: ${name}`);
         }
       }}
       items={[

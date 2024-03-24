@@ -171,6 +171,11 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
     height: styles.mobileMinHeight,
   };
 
+  const getItemStyle = item => ({
+    ...itemStyle,
+    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  });
+
   return (
     <View>
       <Button
@@ -198,7 +203,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                 ...styles.mediumText,
                 color: theme.formLabelText,
               }}
-              getItemStyle={() => itemStyle}
+              getItemStyle={getItemStyle}
               items={
                 [
                   {
