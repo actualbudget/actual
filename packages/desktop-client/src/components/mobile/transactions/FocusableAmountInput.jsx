@@ -111,6 +111,7 @@ const AmountInput = memo(function AmountInput({
         borderRadius: 4,
         padding: 5,
         backgroundColor: theme.tableBackground,
+        maxWidth: 'calc(100% - 40px)',
         ...style,
       }}
     >
@@ -131,6 +132,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   sign, // + or -
   zeroSign, // + or -
   focused,
+  disabled,
   textStyle,
   style,
   focusedStyle,
@@ -150,6 +152,10 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   }, [sign, value, zeroSign]);
 
   const toggleIsNegative = () => {
+    if (disabled) {
+      return;
+    }
+
     setIsNegative(!isNegative);
     props.onUpdate?.(maybeApplyNegative(value, !isNegative));
   };
@@ -171,7 +177,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         onFocus={onFocus}
         onBlur={onBlur}
         onUpdate={onUpdate}
-        focused={focused}
+        focused={focused && !disabled}
         style={{
           width: 80,
           justifyContent: 'center',

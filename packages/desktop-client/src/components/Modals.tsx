@@ -41,8 +41,10 @@ import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetSummaryModal } from './modals/ReportBudgetSummaryModal';
+import { ReportCategoryBudgetMenuModal } from './modals/ReportCategoryBudgetMenuModal';
 import { RolloverBalanceMenuModal } from './modals/RolloverBalanceMenuModal';
 import { RolloverBudgetSummaryModal } from './modals/RolloverBudgetSummaryModal';
+import { RolloverCategoryBudgetMenuModal } from './modals/RolloverCategoryBudgetMenuModal';
 import { RolloverToBudgetMenuModal } from './modals/RolloverToBudgetMenuModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
@@ -429,12 +431,47 @@ export function Modals() {
               key={name}
               modalProps={modalProps}
               categoryId={options.categoryId}
-              categoryGroup={options.categoryGroup}
+              month={options.month}
               onSave={options.onSave}
               onEditNotes={options.onEditNotes}
               onDelete={options.onDelete}
+              onBudgetAction={options.onBudgetAction}
               onClose={options.onClose}
             />
+          );
+
+        case 'rollover-category-budget-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <RolloverCategoryBudgetMenuModal
+                modalProps={modalProps}
+                categoryId={options.categoryId}
+                onUpdateBudget={options.onUpdateBudget}
+                onCopyLastMonthAverage={options.onCopyLastMonthAverage}
+                onSetMonthsAverage={options.onSetMonthsAverage}
+                onApplyBudgetTemplate={options.onApplyBudgetTemplate}
+              />
+            </NamespaceContext.Provider>
+          );
+
+        case 'report-category-budget-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <ReportCategoryBudgetMenuModal
+                modalProps={modalProps}
+                categoryId={options.categoryId}
+                onUpdateBudget={options.onUpdateBudget}
+                onCopyLastMonthAverage={options.onCopyLastMonthAverage}
+                onSetMonthsAverage={options.onSetMonthsAverage}
+                onApplyBudgetTemplate={options.onApplyBudgetTemplate}
+              />
+            </NamespaceContext.Provider>
           );
 
         case 'category-group-menu':
