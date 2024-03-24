@@ -1,9 +1,8 @@
-// @ts-strict-ignore
 import React, {
-  useRef,
+  type InputHTMLAttributes,
   type KeyboardEvent,
   type Ref,
-  type InputHTMLAttributes,
+  useRef,
 } from 'react';
 import mergeRefs from 'react-merge-refs';
 
@@ -42,7 +41,7 @@ export function Input({
   focused,
   ...nativeProps
 }: InputProps) {
-  const ref = useRef();
+  const ref = useRef<HTMLInputElement>(null);
   useProperFocus(ref, focused);
 
   return (

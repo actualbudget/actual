@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { useMemo } from 'react';
 import type { MutableRefObject, Ref, RefCallback } from 'react';
 
@@ -7,7 +6,7 @@ export function useMergedRefs<T>(
   ref2: RefCallback<T> | MutableRefObject<T>,
 ): Ref<T> {
   return useMemo(() => {
-    function ref(value) {
+    function ref(value: T) {
       [ref1, ref2].forEach(ref => {
         if (typeof ref === 'function') {
           ref(value);

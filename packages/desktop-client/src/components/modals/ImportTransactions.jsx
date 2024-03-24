@@ -248,14 +248,19 @@ function applyFieldMappings(transaction, mappings) {
   return result;
 }
 
-function parseAmount(amount, mapper) {
+function parseAmount(amount, mapper, multiplier) {
   if (amount == null) {
     return null;
   }
+
   const parsed =
     typeof amount === 'string' ? looselyParseAmount(amount) : amount;
-  const value = mapper(parsed);
-  return value;
+
+  if (parsed === null) {
+    return null;
+  }
+
+  return mapper(parsed) * multiplier;
 }
 
 function parseAmountFields(
@@ -272,10 +277,10 @@ function parseAmountFields(
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    const outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * multiplier;
+    const outflow = parseAmount(trans.outflow, n => -Math.abs(n), multiplier);
     const inflow = outflow
       ? 0
-      : parseAmount(trans.inflow, n => Math.abs(n)) * multiplier;
+      : parseAmount(trans.inflow, n => Math.abs(n), multiplier);
 
     return {
       amount: outflow || inflow,
@@ -285,17 +290,21 @@ function parseAmountFields(
   }
   if (inOutMode) {
     return {
-      amount:
-        parseAmount(trans.amount, n =>
-          trans.inOut === outValue ? Math.abs(n) * -1 : Math.abs(n),
-        ) * multiplier,
+      amount: parseAmount(
+        trans.amount,
+        n => (trans.inOut === outValue ? Math.abs(n) * -1 : Math.abs(n)),
+        multiplier,
+      ),
       outflow: null,
       inflow: null,
     };
   }
   return {
-    amount:
-      parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * multiplier,
+    amount: parseAmount(
+      trans.amount,
+      n => (flipAmount ? n * -1 : n),
+      multiplier,
+    ),
     outflow: null,
     inflow: null,
   };
@@ -336,7 +345,7 @@ function Transaction({
     [rawTransaction, fieldMappings],
   );
 
-  let { amount, outflow, inflow } = parseAmountFields(
+  const { amount, outflow, inflow } = parseAmountFields(
     transaction,
     splitMode,
     inOutMode,
@@ -344,9 +353,6 @@ function Transaction({
     flipAmount,
     multiplierAmount,
   );
-  amount = amountToCurrency(amount);
-  outflow = amountToCurrency(outflow);
-  inflow = amountToCurrency(inflow);
 
   return (
     <Row
@@ -388,17 +394,37 @@ function Transaction({
         <>
           <Field
             width={90}
-            contentStyle={{ textAlign: 'right', ...styles.tnum }}
-            title={outflow}
+            contentStyle={{
+              textAlign: 'right',
+              ...styles.tnum,
+              ...(inflow === null && outflow === null
+                ? { color: theme.errorText }
+                : {}),
+            }}
+            title={
+              inflow === null && outflow === null
+                ? 'Invalid: unable to parse the value'
+                : amountToCurrency(outflow)
+            }
           >
-            {outflow}
+            {amountToCurrency(outflow)}
           </Field>
           <Field
             width={90}
-            contentStyle={{ textAlign: 'right', ...styles.tnum }}
-            title={inflow}
+            contentStyle={{
+              textAlign: 'right',
+              ...styles.tnum,
+              ...(inflow === null && outflow === null
+                ? { color: theme.errorText }
+                : {}),
+            }}
+            title={
+              inflow === null && outflow === null
+                ? 'Invalid: unable to parse the value'
+                : amountToCurrency(inflow)
+            }
           >
-            {inflow}
+            {amountToCurrency(inflow)}
           </Field>
         </>
       ) : (
@@ -414,10 +440,18 @@ function Transaction({
           )}
           <Field
             width={90}
-            contentStyle={{ textAlign: 'right', ...styles.tnum }}
-            title={amount}
+            contentStyle={{
+              textAlign: 'right',
+              ...styles.tnum,
+              ...(amount === null ? { color: theme.errorText } : {}),
+            }}
+            title={
+              amount === null
+                ? `Invalid: unable to parse the value (${transaction.amount})`
+                : amountToCurrency(amount)
+            }
           >
-            {amount}
+            {amountToCurrency(amount)}
           </Field>
         </>
       )}

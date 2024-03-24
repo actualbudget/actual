@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import {
   type ReactElement,
   type Ref,
@@ -8,14 +7,16 @@ import {
 } from 'react';
 
 type InitialFocusProps = {
-  children?: ReactElement | ((node: Ref<HTMLInputElement>) => ReactElement);
+  children:
+    | ReactElement<{ inputRef: Ref<HTMLInputElement> }>
+    | ((node: Ref<HTMLInputElement>) => ReactElement);
 };
 
 export function InitialFocus({ children }: InitialFocusProps) {
-  const node = useRef(null);
+  const node = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (node.current && !global.IS_DESIGN_MODE) {
+    if (node.current) {
       // This is needed to avoid a strange interaction with
       // `ScopeTab`, which doesn't allow it to be focused at first for
       // some reason. Need to look into it.

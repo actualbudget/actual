@@ -55,7 +55,7 @@ export function AmountInput({
   useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
 
   const buttonRef = useRef();
-  const ref = useRef<HTMLInputElement>();
+  const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
 
   useEffect(() => {
