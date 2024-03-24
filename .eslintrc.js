@@ -287,7 +287,6 @@ module.exports = {
         './packages/desktop-client/src/components/common/Menu.tsx',
         './packages/desktop-client/src/components/FinancesApp.tsx',
         './packages/desktop-client/src/components/GlobalKeys.ts',
-        './packages/desktop-client/src/components/KeyHandlers.tsx',
         './packages/desktop-client/src/components/LoggedInUser.tsx',
         './packages/desktop-client/src/components/manager/ManagementApp.jsx',
         './packages/desktop-client/src/components/manager/subscribe/common.tsx',

@@ -34,7 +34,6 @@ import { Menu } from './common/Menu';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { FixedSizeList } from './FixedSizeList';
-import { KeyHandlers } from './KeyHandlers';
 import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
@@ -785,7 +784,7 @@ export function TableHeader({
   );
 }
 
-export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
+export function SelectedItemsButton({ name, items, onSelect }) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(null);
 
@@ -795,8 +794,6 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
   return (
     <View style={{ marginLeft: 10, flexShrink: 0 }}>
-      <KeyHandlers keys={keyHandlers || {}} />
-
       <Button
         type="bare"
         style={{ color: theme.pageTextPositive }}

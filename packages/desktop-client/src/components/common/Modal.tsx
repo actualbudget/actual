@@ -6,9 +6,8 @@ import React, {
   type ReactNode,
   useState,
 } from 'react';
+import { useHotkeysContext } from 'react-hotkeys-hook';
 import ReactModal from 'react-modal';
-
-import hotkeys from 'hotkeys-js';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgDelete } from '../../icons/v0';
@@ -75,14 +74,14 @@ export const Modal = ({
   onClose,
   onTitleUpdate,
 }: ModalProps) => {
+  const { enableScope, disableScope } = useHotkeysContext();
+
+  // This deactivates any key handlers in the "app" scope
+  const scopeId = `modal-${stackIndex}-${title}`;
   useEffect(() => {
-    // This deactivates any key handlers in the "app" scope. Ideally
-    // each modal would have a name so they could each have their own
-    // key handlers, but we'll do that later
-    const prevScope = hotkeys.getScope();
-    hotkeys.setScope('modal');
-    return () => hotkeys.setScope(prevScope);
-  }, []);
+    enableScope(scopeId);
+    return () => disableScope(scopeId);
+  }, [enableScope, disableScope, scopeId]);
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [_title, setTitle] = useState(title);
