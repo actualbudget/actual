@@ -269,7 +269,7 @@ export function PayeeAutocomplete({
   const [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
 
   return (
-    <Autocomplete<PayeeAutocompleteItem>
+    <Autocomplete
       key={focusTransferPayees ? 'transfers' : 'all'}
       strict={true}
       embedded={embedded}
