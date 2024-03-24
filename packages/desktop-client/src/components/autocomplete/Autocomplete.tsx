@@ -268,12 +268,6 @@ function SingleAutocomplete<T extends Item>({
     },
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      onClose?.();
-    }
-  }, [isOpen, onClose]);
-
   // Update the selected item if the suggestion list or initial
   // input value has changed
   useEffect(() => {
@@ -631,7 +625,6 @@ function MultiAutocomplete<T extends Item>({
   clearOnBlur = true,
   ...props
 }: MultiAutocompleteProps<T>) {
-  selectedItems = selectedItems || [];
   const [focused, setFocused] = useState(false);
   const lastSelectedItems = useRef<typeof selectedItems>();
   const selectedItemIds = selectedItems.map(getItemId);
