@@ -24,7 +24,6 @@ export function ScheduledTransactionMenuModal({
 
   return (
     <Modal
-      title="Actions"
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -36,14 +35,12 @@ export function ScheduledTransactionMenuModal({
         borderRadius: '6px',
       }}
     >
-      {() => (
-        <ScheduledTransactionMenu
-          transactionId={transactionId}
-          onPost={onPost}
-          onSkip={onSkip}
-          getItemStyle={() => defaultMenuItemStyle}
-        />
-      )}
+      <ScheduledTransactionMenu
+        transactionId={transactionId}
+        onPost={onPost}
+        onSkip={onSkip}
+        getItemStyle={() => defaultMenuItemStyle}
+      />
     </Modal>
   );
 }
