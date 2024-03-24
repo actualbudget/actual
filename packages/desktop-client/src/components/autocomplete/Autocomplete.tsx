@@ -74,7 +74,7 @@ function findItem<T extends Item>(
   return value;
 }
 
-function getItemName<T extends Item>(item: T | T['name']): string {
+function getItemName<T extends Item>(item: T | T['name'] | null): string {
   if (item == null) {
     return '';
   } else if (typeof item === 'string') {
@@ -247,6 +247,12 @@ function SingleAutocomplete<T extends Item>({
   );
   const [highlightedIndex, setHighlightedIndex] = useState(null);
   const [isOpen, setIsOpen] = useState(embedded);
+  const open = () => setIsOpen(true);
+  const close = () => {
+    setIsOpen(false);
+    onClose?.();
+  };
+
   const { isNarrowWidth } = useResponsive();
   const narrowInputStyle = isNarrowWidth
     ? {
@@ -261,12 +267,6 @@ function SingleAutocomplete<T extends Item>({
       ...inputProps.style,
     },
   };
-
-  useEffect(() => {
-    if (!isOpen) {
-      onClose?.();
-    }
-  }, [isOpen, onClose]);
 
   // Update the selected item if the suggestion list or initial
   // input value has changed
@@ -304,7 +304,7 @@ function SingleAutocomplete<T extends Item>({
         if (clearOnSelect) {
           setValue('');
         } else {
-          setIsOpen(false);
+          close();
         }
 
         if (onSelect) {
@@ -387,7 +387,7 @@ function SingleAutocomplete<T extends Item>({
 
         setValue(value);
         setIsChanged(true);
-        setIsOpen(true);
+        open();
       }}
       onStateChange={changes => {
         if (
@@ -450,7 +450,7 @@ function SingleAutocomplete<T extends Item>({
                 inputProps.onFocus?.(e);
 
                 if (openOnFocus) {
-                  setIsOpen(true);
+                  open();
                 }
               },
               onBlur: e => {
@@ -464,7 +464,7 @@ function SingleAutocomplete<T extends Item>({
                   if (e.target.value === '') {
                     onSelect?.(null, e.target.value);
                     setSelectedItem(null);
-                    setIsOpen(false);
+                    close();
                     return;
                   }
 
@@ -474,7 +474,7 @@ function SingleAutocomplete<T extends Item>({
 
                   resetState(value);
                 } else {
-                  setIsOpen(false);
+                  close();
                 }
               },
               onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
@@ -534,7 +534,11 @@ function SingleAutocomplete<T extends Item>({
                   setValue(getItemName(originalItem));
                   setSelectedItem(findItem(strict, suggestions, originalItem));
                   setHighlightedIndex(null);
-                  setIsOpen(embedded ? true : false);
+                  if (embedded) {
+                    open();
+                  } else {
+                    close();
+                  }
                 }
               },
               onChange: (e: ChangeEvent<HTMLInputElement>) => {
@@ -614,14 +618,13 @@ type MultiAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
 };
 
 function MultiAutocomplete<T extends Item>({
-  value: selectedItems,
+  value: selectedItems = [],
   onSelect,
   suggestions,
   strict,
   clearOnBlur = true,
   ...props
 }: MultiAutocompleteProps<T>) {
-  selectedItems = selectedItems || [];
   const [focused, setFocused] = useState(false);
   const lastSelectedItems = useRef<typeof selectedItems>();
   const selectedItemIds = selectedItems.map(getItemId);
