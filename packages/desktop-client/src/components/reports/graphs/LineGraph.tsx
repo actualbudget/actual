@@ -20,13 +20,12 @@ import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
 type PayloadItem = {
+  dataKey: string;
+  value: number;
+  date: string;
   payload: {
     date: string;
-    assets: number | string;
-    debt: number | string;
-    networth: number | string;
-    change: number | string;
-  };
+  }
 };
 
 type CustomTooltipProps = {
@@ -54,12 +53,9 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
           </div>
           <div style={{ lineHeight: 1.5 }}>
             <PrivacyFilter>
-              <AlignedText left="Assets:" right={payload[0].payload.assets} />
-              <AlignedText left="Debt:" right={payload[0].payload.debt} />
-              <AlignedText
-                left="Change:"
-                right={<strong>{payload[0].payload.change}</strong>}
-              />
+              {payload.map((p: PayloadItem) => {
+                return <AlignedText left={p.dataKey} right={p.value} />
+              })}
             </PrivacyFilter>
           </div>
         </div>
@@ -94,22 +90,24 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
               <LineChart
                 width={width}
                 height={height}
-                data={graphData.data}
+                data={graphData.intervalData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                <Tooltip
+                {<Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
-                />
+                />}
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="x" />
-                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                    <XAxis dataKey="date" />
+                    <YAxis name="Value" tickFormatter={tickFormatter} />
                   </>
                 )}
-                <Line type="monotone" dataKey="y" stroke="#8884d8" />
+                {graphData.legend.map((legendItem) => {
+                  return <Line type="monotone" dataKey={legendItem.name} stroke={legendItem.color} />
+                })}
               </LineChart>
             </div>
           </ResponsiveContainer>

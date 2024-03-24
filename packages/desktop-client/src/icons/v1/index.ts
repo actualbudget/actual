@@ -69,6 +69,7 @@ export { SvgCalculator } from './Calculator';
 export { SvgCalendar } from './Calendar';
 export { SvgCamera } from './Camera';
 export { SvgChartBar } from './ChartBar';
+export { SvgChartAnalytics } from './ChartAnalytics';
 export { SvgChartPie } from './ChartPie';
 export { SvgChart } from './Chart';
 export { SvgChatBubbleDots } from './ChatBubbleDots';
