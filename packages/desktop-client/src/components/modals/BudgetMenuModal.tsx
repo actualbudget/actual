@@ -25,7 +25,6 @@ export function BudgetMenuModal({
 
   return (
     <Modal
-      title="Budget actions"
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -37,14 +36,12 @@ export function BudgetMenuModal({
         borderRadius: '6px',
       }}
     >
-      {() => (
-        <BudgetMenu
-          getItemStyle={() => defaultMenuItemStyle}
-          month={month}
-          onToggleHiddenCategories={onToggleHiddenCategories}
-          onSwitchBudgetType={onSwitchBudgetType}
-        />
-      )}
+      <BudgetMenu
+        getItemStyle={() => defaultMenuItemStyle}
+        month={month}
+        onToggleHiddenCategories={onToggleHiddenCategories}
+        onSwitchBudgetType={onSwitchBudgetType}
+      />
     </Modal>
   );
 }
