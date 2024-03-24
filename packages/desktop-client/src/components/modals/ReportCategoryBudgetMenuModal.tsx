@@ -1,7 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { reportBudget } from 'loot-core/client/queries';
-import { amountToInteger } from 'loot-core/shared/util';
+import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
