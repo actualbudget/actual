@@ -7,6 +7,8 @@ import React, {
 } from 'react';
 import { Tooltip as AriaTooltip, TooltipTrigger } from 'react-aria-components';
 
+import { useDebounceCallback } from 'usehooks-ts';
+
 import { styles } from '../../style';
 
 import { View } from './View';
@@ -25,6 +27,10 @@ export const Tooltip = ({
 }: TooltipProps) => {
   const triggerRef = useRef(null);
   const [hover, setHover] = useState(false);
+  const debouncedSetHover = useDebounceCallback(
+    setHover,
+    triggerProps.delay ?? 300,
+  );
 
   // Force closing the tooltip whenever the disablement state changes
   useEffect(() => {
@@ -32,22 +38,21 @@ export const Tooltip = ({
   }, [triggerProps.isDisabled]);
 
   return (
-    <TooltipTrigger
-      isOpen={hover && !triggerProps.isDisabled}
-      delay={300}
-      {...triggerProps}
+    <View
+      ref={triggerRef}
+      onMouseEnter={() => debouncedSetHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
-      <View
-        ref={triggerRef}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+      <TooltipTrigger
+        isOpen={hover && !triggerProps.isDisabled}
+        {...triggerProps}
       >
         {children}
-      </View>
 
-      <AriaTooltip triggerRef={triggerRef} style={styles.tooltip} {...props}>
-        {content}
-      </AriaTooltip>
-    </TooltipTrigger>
+        <AriaTooltip triggerRef={triggerRef} style={styles.tooltip} {...props}>
+          {content}
+        </AriaTooltip>
+      </TooltipTrigger>
+    </View>
   );
 };
