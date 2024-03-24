@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { type CSSProperties, theme, styles } from '../../style';
-import {
-  BalanceMenu,
-  type BalanceMenuProps,
-} from '../budget/report/BalanceMenu';
+import { BalanceMenu } from '../budget/report/BalanceMenu';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
-type ReportBalanceMenuModalProps = BalanceMenuProps & {
+type ReportBalanceMenuModalProps = ComponentPropsWithoutRef<
+  typeof BalanceMenu
+> & {
   modalProps: CommonModalProps;
 };
 
