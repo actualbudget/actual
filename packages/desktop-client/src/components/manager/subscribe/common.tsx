@@ -51,6 +51,7 @@ export function useBootstrapped() {
         await setServerURL(serverURL, { validate: false });
 
         if (result.bootstrapped) {
+          setLoginMethod(result.loginMethod);
           ensure('/login');
         } else {
           ensure('/bootstrap');

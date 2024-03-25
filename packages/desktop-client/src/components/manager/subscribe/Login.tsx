@@ -23,12 +23,14 @@ export function Login() {
   const { checked, loginMethod } = useBootstrapped();
 
   useEffect(() => {
-    (async () => {
-      if (loginMethod === 'header') {
-        await onSubmit(null);
-      }
-    })();
-  }, [loginMethod]);
+    if (checked) {
+      (async () => {
+        if (loginMethod === 'header') {
+          await onSubmit();
+        }
+      })();
+    }
+  }, [checked, loginMethod]);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -41,9 +43,14 @@ export function Login() {
     }
   }
 
-  async function onSubmit(e) {
-    e.preventDefault();
-    if (password === '' || loading) {
+  async function onSubmit(e?: React.FormEvent<HTMLFormElement>) {
+    if (typeof (e) !== "undefined" && e !== null) {
+      e.preventDefault();
+    }
+    if(loginMethod === "password" && password === '') {
+        return;
+    }
+    if(loading){
       return;
     }
 
