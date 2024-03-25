@@ -80,9 +80,10 @@ export function GetCardData({
   const graphData = useReport('default' + report.name, getGraphData);
   const groupedData = useReport('grouped' + report.name, getGroupData);
 
-  const data = { ...graphData, groupedData };
+  const data =
+    graphData && groupedData ? { ...graphData, groupedData } : graphData;
 
-  return data.data ? (
+  return data?.data ? (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <ChooseGraph
         startDate={report.startDate}
