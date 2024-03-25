@@ -477,7 +477,6 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
             }
-            isCreatable
           />
         </FormField>
 
