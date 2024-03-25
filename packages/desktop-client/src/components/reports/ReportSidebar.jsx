@@ -38,6 +38,7 @@ export function ReportSidebar({
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
+  onChangeViews,
   onReportChange,
   disabledItems,
   defaultItems,

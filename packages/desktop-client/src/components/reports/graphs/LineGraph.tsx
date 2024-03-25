@@ -25,7 +25,7 @@ type PayloadItem = {
   date: string;
   payload: {
     date: string;
-  }
+  };
 };
 
 type CustomTooltipProps = {
@@ -53,9 +53,9 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
           </div>
           <div style={{ lineHeight: 1.5 }}>
             <PrivacyFilter>
-              {payload.map((p: PayloadItem) => {
-                return <AlignedText left={p.dataKey} right={p.value} />
-              })}
+              {payload.map((p: PayloadItem, index: number) => (
+                <AlignedText key={index} left={p.dataKey} right={p.value} />
+              ))}
             </PrivacyFilter>
           </div>
         </div>
@@ -93,11 +93,11 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
                 data={graphData.intervalData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {<Tooltip
+                <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
-                />}
+                />
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -105,8 +105,15 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
                     <YAxis name="Value" tickFormatter={tickFormatter} />
                   </>
                 )}
-                {graphData.legend.map((legendItem) => {
-                  return <Line type="monotone" dataKey={legendItem.name} stroke={legendItem.color} />
+                {graphData.legend.map((legendItem, index) => {
+                  return (
+                    <Line
+                      key={index}
+                      type="monotone"
+                      dataKey={legendItem.name}
+                      stroke={legendItem.color}
+                    />
+                  );
                 })}
               </LineChart>
             </div>

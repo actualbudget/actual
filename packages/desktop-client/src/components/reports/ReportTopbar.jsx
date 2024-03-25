@@ -22,6 +22,8 @@ export function ReportTopbar({
   report,
   savedStatus,
   setGraphType,
+  setGroupBy,
+  setTypeDisabled,
   viewLegend,
   viewSummary,
   viewLabels,
