@@ -162,7 +162,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
             onSelect(value);
           }}
-          isCreatable
           {...(isNarrowWidth && {
             renderCreatePayeeButton: props => (
               <CreatePayeeButton
