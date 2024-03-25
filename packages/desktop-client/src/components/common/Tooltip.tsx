@@ -1,4 +1,5 @@
 import React, {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -6,8 +7,6 @@ import React, {
   type ReactNode,
 } from 'react';
 import { Tooltip as AriaTooltip, TooltipTrigger } from 'react-aria-components';
-
-import { useDebounceCallback } from 'usehooks-ts';
 
 import { styles } from '../../style';
 
@@ -27,10 +26,29 @@ export const Tooltip = ({
 }: TooltipProps) => {
   const triggerRef = useRef(null);
   const [hover, setHover] = useState(false);
-  const debouncedSetHover = useDebounceCallback(
-    setHover,
-    triggerProps.delay ?? 300,
-  );
+
+  const [delayHandler, setDelayHandler] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    const timeout = setTimeout(() => {
+      setHover(true);
+    }, triggerProps.delay ?? 300);
+
+    setDelayHandler(timeout);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [triggerProps.delay]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (delayHandler) {
+      clearTimeout(delayHandler);
+    }
+
+    setHover(false);
+  }, [delayHandler]);
 
   // Force closing the tooltip whenever the disablement state changes
   useEffect(() => {
@@ -40,8 +58,8 @@ export const Tooltip = ({
   return (
     <View
       ref={triggerRef}
-      onMouseEnter={() => debouncedSetHover(true)}
-      onMouseLeave={() => setHover(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <TooltipTrigger
         isOpen={hover && !triggerProps.isDisabled}
