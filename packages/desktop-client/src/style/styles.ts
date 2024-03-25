@@ -8,11 +8,21 @@ import { tokens } from '../tokens';
 import { theme } from './theme';
 import { type CSSProperties } from './types';
 
+const MOBILE_MIN_HEIGHT = 40;
+
 export const styles = {
   incomeHeaderHeight: 70,
   cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
   monthRightPadding: 5,
   menuBorderRadius: 4,
+  mobileMinHeight: MOBILE_MIN_HEIGHT,
+  mobileMenuItem: {
+    fontSize: 17,
+    fontWeight: 400,
+    paddingTop: 8,
+    paddingBottom: 8,
+    height: MOBILE_MIN_HEIGHT,
+  },
   mobileEditingPadding: 12,
   altMenuMaxHeight: 250,
   altMenuText: {

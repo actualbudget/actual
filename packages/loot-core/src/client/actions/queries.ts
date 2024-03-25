@@ -249,8 +249,10 @@ export function initiallyLoadPayees() {
 }
 
 export function createPayee(name: string) {
-  return async () => {
-    return send('payee-create', { name: name.trim() });
+  return async (dispatch: Dispatch) => {
+    const id = await send('payee-create', { name: name.trim() });
+    dispatch(getPayees());
+    return id;
   };
 }
 

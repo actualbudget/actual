@@ -1,7 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 
 import { useListBox } from '@react-aria/listbox';
 import { useListState } from '@react-stately/list';
+
+import { usePrevious } from '../../../hooks/usePrevious';
+import { useScroll } from '../../ScrollProvider';
 
 import { ListBoxSection } from './ListBoxSection';
 
@@ -11,25 +14,13 @@ export function ListBox(props) {
   const { listBoxProps, labelProps } = useListBox(props, state, listBoxRef);
   const { loadMore } = props;
 
-  useEffect(() => {
-    function loadMoreTransactions() {
-      if (
-        Math.abs(
-          listBoxRef.current.scrollHeight -
-            listBoxRef.current.clientHeight -
-            listBoxRef.current.scrollTop,
-        ) < listBoxRef.current.clientHeight // load more when we're one screen height from the end
-      ) {
-        loadMore?.();
-      }
-    }
-    const currentListBoxRef = listBoxRef.current;
-    currentListBoxRef?.addEventListener('scroll', loadMoreTransactions);
+  const { hasScrolledToBottom } = useScroll();
+  const scrolledToBottom = hasScrolledToBottom();
+  const prevScrolledToBottom = usePrevious(scrolledToBottom);
 
-    return () => {
-      currentListBoxRef?.removeEventListener('scroll', loadMoreTransactions);
-    };
-  }, [loadMore, state.collection]);
+  if (!prevScrolledToBottom && scrolledToBottom) {
+    loadMore?.();
+  }
 
   return (
     <>

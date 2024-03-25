@@ -6,12 +6,14 @@ import { type CustomReportEntity } from 'loot-core/src/types/models/reports';
 import { Autocomplete } from './Autocomplete';
 import { ReportList } from './ReportList';
 
+type ReportAutocompleteProps = {
+  embedded?: boolean;
+} & ComponentProps<typeof Autocomplete<CustomReportEntity>>;
+
 export function ReportAutocomplete({
   embedded,
   ...props
-}: {
-  embedded?: boolean;
-} & ComponentProps<typeof Autocomplete<CustomReportEntity>>) {
+}: ReportAutocompleteProps) {
   const reports = useReports() || [];
 
   return (
