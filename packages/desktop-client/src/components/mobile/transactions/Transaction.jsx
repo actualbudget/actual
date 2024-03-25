@@ -63,8 +63,9 @@ export const Transaction = memo(function Transaction({
     schedule,
   } = transaction;
 
+  const isPreview = isPreviewId(id);
   let amount = originalAmount;
-  if (isPreviewId(id)) {
+  if (isPreview) {
     amount = getScheduledAmount(amount);
   }
 
@@ -89,7 +90,6 @@ export const Transaction = memo(function Transaction({
 
   const prettyCategory = specialCategory || categoryName;
 
-  const isPreview = isPreviewId(id);
   const isReconciled = transaction.reconciled;
   const textStyle = isPreview && {
     fontStyle: 'italic',
@@ -103,16 +103,15 @@ export const Transaction = memo(function Transaction({
         backgroundColor: theme.tableBackground,
         border: 'none',
         width: '100%',
+        height: 60,
+        ...(isPreview && {
+          backgroundColor: theme.tableRowHeaderBackground,
+        }),
       }}
     >
       <ListItem
         style={{
           flex: 1,
-          height: 60,
-          padding: '5px 10px', // remove padding when Button is back
-          ...(isPreview && {
-            backgroundColor: theme.tableRowHeaderBackground,
-          }),
           ...style,
         }}
       >

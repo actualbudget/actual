@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { Menu, type MenuProps } from '../common/Menu';
+import { Menu } from '../common/Menu';
 import { MenuTooltip } from '../common/MenuTooltip';
 
 export function SaveReportMenu({
@@ -14,7 +14,7 @@ export function SaveReportMenu({
   savedStatus: string;
   listReports: number;
 }) {
-  const savedMenu: MenuProps =
+  const savedMenu: ComponentPropsWithoutRef<typeof Menu> =
     savedStatus === 'saved'
       ? {
           items: [
@@ -27,7 +27,7 @@ export function SaveReportMenu({
           items: [],
         };
 
-  const modifiedMenu: MenuProps =
+  const modifiedMenu: ComponentPropsWithoutRef<typeof Menu> =
     savedStatus === 'modified'
       ? {
           items: [
@@ -48,7 +48,7 @@ export function SaveReportMenu({
           items: [],
         };
 
-  const unsavedMenu: MenuProps = {
+  const unsavedMenu: ComponentPropsWithoutRef<typeof Menu> = {
     items: [
       {
         name: 'save-report',

@@ -48,7 +48,7 @@ type MenuItem = {
   tooltip?: string;
 };
 
-export type MenuProps<T extends MenuItem = MenuItem> = {
+type MenuProps<T extends MenuItem = MenuItem> = {
   header?: ReactNode;
   footer?: ReactNode;
   items: Array<T | typeof Menu.line>;
