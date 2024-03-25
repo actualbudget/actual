@@ -236,8 +236,10 @@ type FinanceModals = {
   'budget-menu': {
     month: string;
     onToggleHiddenCategories: () => void;
+    onSwitchBudgetFile: () => void;
     onSwitchBudgetType: () => void;
   };
+  'budget-list';
 };
 
 export type PushModalAction = {
