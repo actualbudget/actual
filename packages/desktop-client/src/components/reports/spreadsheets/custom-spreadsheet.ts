@@ -37,8 +37,8 @@ export type createCustomSpreadsheetProps = {
   balanceTypeOp?: string;
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
-  setDataCheck?: (value: boolean) => void;
   graphType?: string;
+  setDataCheck?: (value: boolean) => void;
 };
 
 export function createCustomSpreadsheet({
@@ -57,8 +57,8 @@ export function createCustomSpreadsheet({
   balanceTypeOp,
   payees,
   accounts,
-  setDataCheck,
   graphType,
+  setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
 
