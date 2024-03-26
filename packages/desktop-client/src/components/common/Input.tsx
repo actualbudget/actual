@@ -7,9 +7,9 @@ import React, {
 
 import { css } from 'glamor';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useProperFocus } from '../../hooks/useProperFocus';
 import { type CSSProperties, styles, theme } from '../../style';
-import { useMergedRefs } from '../../hooks/useMergedRefs';
 
 export const defaultInputStyle = {
   outline: 0,
