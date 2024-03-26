@@ -95,6 +95,12 @@ function boundedRange(
 ) {
   let latest;
   switch (interval) {
+    case 'Daily':
+      latest = monthUtils.currentDay();
+      break;
+    case 'Weekly':
+      latest = monthUtils.currentWeek();
+      break;
     case 'Monthly':
       latest = monthUtils.currentMonth() + '-31';
       break;
@@ -118,30 +124,27 @@ function boundedRange(
 export function getSpecificRange(
   offset: number,
   addNumber: number,
-  interval: string,
+  type: string,
 ) {
   const currentDay = monthUtils.currentDay();
-  let currInterval;
+
   let dateStart;
   let dateEnd;
-  switch (interval) {
-    case 'Monthly':
-      currInterval = monthUtils.monthFromDate(currentDay);
-      dateStart = monthUtils.subMonths(currInterval, offset);
-      dateEnd = monthUtils.addMonths(
-        dateStart,
-        addNumber === null ? offset : addNumber,
-      );
-      break;
-    default:
-      currInterval = currentDay;
-      dateStart = monthUtils.subDays(currInterval, offset);
-      dateEnd = monthUtils.addDays(
-        dateStart,
-        addNumber === null ? offset : addNumber,
-      );
-      break;
+  if (type === 'Months') {
+    dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
+    dateEnd = monthUtils.getMonthEnd(
+      monthUtils.addMonths(dateStart, addNumber === null ? offset : addNumber) +
+        '-01',
+    );
   }
+
+  if (type === 'Weeks') {
+    dateStart = monthUtils.subWeeks(currentDay, offset);
+    dateEnd = monthUtils.getWeekEnd(
+      monthUtils.addWeeks(dateStart, addNumber === null ? offset : addNumber),
+    );
+  }
+
   return [dateStart, dateEnd];
 }
 

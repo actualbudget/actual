@@ -1,3 +1,22 @@
+const intervalOptions = [
+  {
+    description: 'Daily',
+    defaultRange: 'This month',
+  },
+  {
+    description: 'Weekly',
+    defaultRange: 'Last 3 months',
+  },
+  {
+    description: 'Monthly',
+    defaultRange: 'Last 6 months',
+  },
+  {
+    description: 'Yearly',
+    defaultRange: 'Year to date',
+  },
+];
+
 const totalGraphOptions = [
   {
     description: 'TableGraph',
@@ -113,5 +132,8 @@ export const defaultsList = {
       item.description,
       new Map([...item.graphs].map(f => [f.description, f.defaultType])),
     ]),
+  ),
+  intervalRange: new Map(
+    intervalOptions.map(item => [item.description, item.defaultRange]),
   ),
 };

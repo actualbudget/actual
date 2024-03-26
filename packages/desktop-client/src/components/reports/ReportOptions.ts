@@ -45,22 +45,119 @@ const groupByOptions = [
 ];
 
 const dateRangeOptions = [
-  { description: 'This month', name: 0 },
-  { description: 'Last month', name: 1 },
-  { description: 'Last 3 months', name: 2 },
-  { description: 'Last 6 months', name: 5 },
-  { description: 'Last 12 months', name: 11 },
-  { description: 'Year to date', name: 'yearToDate' },
-  { description: 'Last year', name: 'lastYear' },
-  { description: 'All time', name: 'allMonths' },
+  {
+    description: 'This week',
+    type: 'Weeks',
+    name: 0,
+    Yearly: false,
+    Monthly: false,
+    Daily: true,
+    Weekly: true,
+  },
+  {
+    description: 'Last week',
+    type: 'Weeks',
+    name: 1,
+    Yearly: false,
+    Monthly: false,
+    Daily: true,
+    Weekly: true,
+  },
+  {
+    description: 'This month',
+    type: 'Months',
+    name: 0,
+    Yearly: false,
+    Monthly: true,
+    Daily: true,
+    Weekly: true,
+  },
+  {
+    description: 'Last month',
+    type: 'Months',
+    name: 1,
+    Yearly: false,
+    Monthly: true,
+    Daily: true,
+    Weekly: true,
+  },
+  {
+    description: 'Last 3 months',
+    type: 'Months',
+    name: 2,
+    Yearly: false,
+    Monthly: true,
+    Daily: true,
+    Weekly: true,
+  },
+  {
+    description: 'Last 6 months',
+    type: 'Months',
+    name: 5,
+    Yearly: false,
+    Monthly: true,
+    Daily: false,
+  },
+  {
+    description: 'Last 12 months',
+    type: 'Months',
+    name: 11,
+    Yearly: false,
+    Monthly: true,
+    Daily: false,
+  },
+  {
+    description: 'Year to date',
+    name: 'yearToDate',
+    Yearly: true,
+    Monthly: true,
+    Daily: true,
+    Weekly: true,
+  },
+  {
+    description: 'Last year',
+    name: 'lastYear',
+    Yearly: true,
+    Monthly: true,
+    Daily: true,
+    Weekly: true,
+  },
+  {
+    description: 'All time',
+    name: 'allTime',
+    Yearly: true,
+    Monthly: true,
+    Daily: true,
+    Weekly: true,
+  },
 ];
 
 const intervalOptions = [
-  //{ value: 1, description: 'Daily', name: 'Day'},
-  //{ value: 2, description: 'Weekly', name: 'Week'},
+  {
+    description: 'Daily',
+    name: 'Day',
+    format: 'yyyy-MM-dd',
+    range: 'dayRangeInclusive',
+  },
+  {
+    description: 'Weekly',
+    name: 'Week',
+    format: 'yyyy-MM-dd',
+    range: 'weekRangeInclusive',
+  },
   //{ value: 3, description: 'Fortnightly', name: 3},
-  { value: 4, description: 'Monthly', name: 'Month' },
-  { value: 5, description: 'Yearly', name: 'Year' },
+  {
+    description: 'Monthly',
+    name: 'Month',
+    format: 'MMMM, yyyy',
+    range: 'rangeInclusive',
+  },
+  {
+    description: 'Yearly',
+    name: 'Year',
+    format: 'yyyy',
+    range: 'yearRangeInclusive',
+  },
 ];
 
 export const ReportOptions = {
@@ -73,9 +170,18 @@ export const ReportOptions = {
   dateRangeMap: new Map(
     dateRangeOptions.map(item => [item.description, item.name]),
   ),
+  dateRangeType: new Map(
+    dateRangeOptions.map(item => [item.description, item.type]),
+  ),
   interval: intervalOptions,
   intervalMap: new Map(
     intervalOptions.map(item => [item.description, item.name]),
+  ),
+  intervalFormat: new Map(
+    intervalOptions.map(item => [item.description, item.format]),
+  ),
+  intervalRange: new Map(
+    intervalOptions.map(item => [item.description, item.range]),
   ),
 };
 

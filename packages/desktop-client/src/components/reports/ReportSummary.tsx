@@ -14,6 +14,8 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 
+import { ReportOptions } from './ReportOptions';
+
 type ReportSummaryProps = {
   startDate: string;
   endDate: string;
@@ -59,8 +61,23 @@ export function ReportSummary({
             fontWeight: 600,
           }}
         >
-          {monthUtils.format(startDate, 'MMM yyyy')} -{' '}
-          {monthUtils.format(endDate, 'MMM yyyy')}
+          {monthUtils.format(
+            startDate,
+            ReportOptions.intervalFormat.get(interval),
+          )}
+          {monthUtils.format(
+            startDate,
+            ReportOptions.intervalFormat.get(interval),
+          ) !==
+            monthUtils.format(
+              endDate,
+              ReportOptions.intervalFormat.get(interval),
+            ) &&
+            ' to ' +
+              monthUtils.format(
+                endDate,
+                ReportOptions.intervalFormat.get(interval),
+              )}
         </Text>
       </View>
       <View
@@ -136,7 +153,7 @@ export function ReportSummary({
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>
-          Per {interval === 'Monthly' ? 'month' : 'year'}
+          Per {ReportOptions.intervalMap.get(interval).toLowerCase()}
         </Text>
       </View>
     </View>
