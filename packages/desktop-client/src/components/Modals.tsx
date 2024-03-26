@@ -13,6 +13,7 @@ import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { BudgetListModal } from './modals/BudgetListModal';
 import { BudgetMenuModal } from './modals/BudgetMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
@@ -597,11 +598,15 @@ export function Modals() {
               <BudgetMenuModal
                 modalProps={modalProps}
                 month={options.month}
+                onSwitchBudgetFile={options.onSwitchBudgetFile}
                 onToggleHiddenCategories={options.onToggleHiddenCategories}
                 onSwitchBudgetType={options.onSwitchBudgetType}
               />
             </NamespaceContext.Provider>
           );
+
+        case 'budget-list':
+          return <BudgetListModal key={name} modalProps={modalProps} />;
 
         default:
           console.error('Unknown modal:', name);
