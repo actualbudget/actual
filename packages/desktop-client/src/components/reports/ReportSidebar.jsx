@@ -96,6 +96,9 @@ export function ReportSidebar({
       if (customReportItems.graphType === 'StackedBarGraph') {
         setGraphType('BarGraph');
         graph = 'BarGraph';
+      } else if (['LineGraph'].includes(customReportItems.graphType)) {
+        setGraphType('TableGraph');
+        onChangeViews('viewLegend', false);
       }
     }
     defaultModeItems(graph, cond);
