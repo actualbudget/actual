@@ -1,4 +1,5 @@
 import React, {
+  forwardRef,
   type HTMLProps,
   type Ref,
   type StyleHTMLAttributes,
@@ -8,14 +9,14 @@ import { css } from 'glamor';
 
 import { type CSSProperties } from '../../style';
 
-export type ViewProps = HTMLProps<HTMLDivElement> & {
+type ViewProps = HTMLProps<HTMLDivElement> & {
   className?: string;
   style?: CSSProperties;
   nativeStyle?: StyleHTMLAttributes<HTMLDivElement>;
   innerRef?: Ref<HTMLDivElement>;
 };
 
-export const View = (props: ViewProps) => {
+export const View = forwardRef<HTMLDivElement, ViewProps>((props, ref) => {
   // The default styles are special-cased and pulled out into static
   // styles, and hardcode the class name here. View is used almost
   // everywhere and we can avoid any perf penalty that glamor would
@@ -25,9 +26,11 @@ export const View = (props: ViewProps) => {
   return (
     <div
       {...restProps}
-      ref={innerRef}
+      ref={innerRef ?? ref}
       style={nativeStyle}
       className={`view ${className} ${css(style)}`}
     />
   );
-};
+});
+
+View.displayName = 'View';

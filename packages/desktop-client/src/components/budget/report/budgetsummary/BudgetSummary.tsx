@@ -127,7 +127,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 id={`budget-${month}`}
                 width={15}
                 height={15}
-                tooltipPosition="bottom-right"
+                tooltipPosition="bottom right"
                 defaultColor={theme.pageTextLight}
               />
             </View>

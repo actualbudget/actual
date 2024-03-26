@@ -129,7 +129,7 @@ export function BudgetSummary({
                 id={`budget-${month}`}
                 width={15}
                 height={15}
-                tooltipPosition="bottom-right"
+                tooltipPosition="bottom right"
                 defaultColor={theme.tableTextLight}
               />
             </View>

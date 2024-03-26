@@ -70,7 +70,10 @@ export function liveQueryContext(query, opts?) {
   return makeContext(query, opts, LiveQuery);
 }
 
-export function useLiveQuery(makeQuery: () => Query, deps: DependencyList) {
+export function useLiveQuery<Response = unknown>(
+  makeQuery: () => Query,
+  deps: DependencyList,
+): Response {
   const [data, setData] = useState(null);
   const query = useMemo(makeQuery, deps);
 
