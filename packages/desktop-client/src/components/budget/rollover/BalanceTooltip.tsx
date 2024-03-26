@@ -12,15 +12,15 @@ import { TransferTooltip } from './TransferTooltip';
 type BalanceTooltipProps = {
   categoryId: string;
   tooltip: { close: () => void };
-  monthIndex: number;
-  onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
+  month: string;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onClose?: () => void;
 };
 
 export function BalanceTooltip({
   categoryId,
   tooltip,
-  monthIndex,
+  month,
   onBudgetAction,
   onClose,
   ...tooltipProps
@@ -46,7 +46,7 @@ export function BalanceTooltip({
           <BalanceMenu
             categoryId={categoryId}
             onCarryover={carryover => {
-              onBudgetAction(monthIndex, 'carryover', {
+              onBudgetAction(month, 'carryover', {
                 category: categoryId,
                 flag: carryover,
               });
@@ -64,7 +64,7 @@ export function BalanceTooltip({
           showToBeBudgeted={true}
           onClose={_onClose}
           onSubmit={(amount, toCategoryId) => {
-            onBudgetAction(monthIndex, 'transfer-category', {
+            onBudgetAction(month, 'transfer-category', {
               amount,
               from: categoryId,
               to: toCategoryId,
@@ -77,7 +77,7 @@ export function BalanceTooltip({
         <CoverTooltip
           onClose={_onClose}
           onSubmit={fromCategoryId => {
-            onBudgetAction(monthIndex, 'cover', {
+            onBudgetAction(month, 'cover', {
               to: categoryId,
               from: fromCategoryId,
             });

@@ -754,10 +754,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
               padding: '5px',
               paddingLeft: '20px',
               paddingRight: '20px',
-              minWidth: 120,
-              transform: [{ translateY: -0.5 }],
+              minWidth: '100%',
             }}
-            textStyle={{ fontSize: 30, textAlign: 'center' }}
+            textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
           />
         </View>
 
