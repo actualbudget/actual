@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
@@ -27,6 +27,7 @@ import {
   CreatePayeeButton,
   PayeeItem,
 } from '../autocomplete/PayeeAutocomplete';
+import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
@@ -44,11 +45,17 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
   const payees = usePayees();
 
   const { createPayee } = useActions();
-
   const onCloseInner = () => {
     modalProps.onClose();
     onClose?.();
   };
+
+  function onSelectNote(value, mode) {
+    if (value != null) {
+      onSubmit(name, value, mode);
+    }
+    onCloseInner();
+  }
 
   function onSelect(value) {
     if (value != null) {
@@ -79,6 +86,8 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
     inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
+
+  const [noteAmend, onChangeMode] = useState('replace');
 
   switch (name) {
     case 'date': {
@@ -201,11 +210,123 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
     case 'notes':
       label = 'Notes';
       editor = (
-        <Input
-          focused={true}
-          onEnter={e => onSelect(e.target.value)}
-          style={inputStyle}
-        />
+        <>
+          <View
+            style={{
+              flexDirection: 'row',
+              marginTop: 5,
+              marginBottom: 5,
+              marginLeft: 8,
+              marginRight: 4,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              selected={noteAmend === 'prepend'}
+              style={{
+                padding: '5px 10px',
+                width: '33.33%',
+                backgroundColor: theme.menuBackground,
+                marginRight: 5,
+                fontSize: 'inherit',
+                ...(noteAmend === 'prepend' && {
+                  backgroundColor: theme.buttonPrimaryBackground,
+                  color: theme.buttonPrimaryText,
+                  ':hover': {
+                    backgroundColor: theme.buttonPrimaryBackgroundHover,
+                    color: theme.buttonPrimaryTextHover,
+                  },
+                }),
+                ...(noteAmend !== 'prepend' && {
+                  backgroundColor: theme.buttonNormalBackground,
+                  color: theme.buttonNormalText,
+                  ':hover': {
+                    backgroundColor: theme.buttonNormalBackgroundHover,
+                    color: theme.buttonNormalTextHover,
+                  },
+                }),
+              }}
+              onClick={() => {
+                onChangeMode('prepend');
+                document.getElementById('noteInput').focus();
+              }}
+            >
+              Prepend
+            </Button>
+            <Button
+              selected={noteAmend === 'replace'}
+              style={{
+                padding: '5px 10px',
+                width: '33.34%',
+                backgroundColor: theme.menuBackground,
+                marginRight: 5,
+                fontSize: 'inherit',
+                ...(noteAmend === 'replace' && {
+                  backgroundColor: theme.buttonPrimaryBackground,
+                  color: theme.buttonPrimaryText,
+                  ':hover': {
+                    backgroundColor: theme.buttonPrimaryBackgroundHover,
+                    color: theme.buttonPrimaryTextHover,
+                  },
+                }),
+                ...(noteAmend !== 'replace' && {
+                  backgroundColor: theme.buttonNormalBackground,
+                  color: theme.buttonNormalText,
+                  ':hover': {
+                    backgroundColor: theme.buttonNormalBackgroundHover,
+                    color: theme.buttonNormalTextHover,
+                  },
+                }),
+              }}
+              onClick={() => {
+                onChangeMode('replace');
+                document.getElementById('noteInput').focus();
+              }}
+            >
+              Replace
+            </Button>
+            <Button
+              selected={noteAmend === 'append'}
+              style={{
+                padding: '5px 10px',
+                width: '33.33%',
+                backgroundColor: theme.menuBackground,
+                marginRight: 5,
+                fontSize: 'inherit',
+                ...(noteAmend === 'append' && {
+                  backgroundColor: theme.buttonPrimaryBackground,
+                  color: theme.buttonPrimaryText,
+                  ':hover': {
+                    backgroundColor: theme.buttonPrimaryBackgroundHover,
+                    color: theme.buttonPrimaryTextHover,
+                  },
+                }),
+                ...(noteAmend !== 'append' && {
+                  backgroundColor: theme.buttonNormalBackground,
+                  color: theme.buttonNormalText,
+                  ':hover': {
+                    backgroundColor: theme.buttonNormalBackgroundHover,
+                    color: theme.buttonNormalTextHover,
+                  },
+                }),
+              }}
+              onClick={() => {
+                onChangeMode('append');
+                document.getElementById('noteInput').focus();
+              }}
+            >
+              Append
+            </Button>
+          </View>
+          <Input
+            id="noteInput"
+            autoFocus
+            focused={true}
+            onEnter={e => onSelectNote(e.target.value, noteAmend)}
+            style={inputStyle}
+          />
+        </>
       );
       break;
 
