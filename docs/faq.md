@@ -2,8 +2,7 @@
 
 - **Q.** _Can I use the mobile apps with my self hosted version of Actual?_
 
-  **A.** No, the mobile applications are deprecated, the community however is working on a responsive
-  version of Actual Web [PR#79](https://github.com/actualbudget/actual/pull/79)
+  **A.** Unfortunately, the mobile applications are deprecated. However, you can still access Actual through its web version, which functions as a native application with a responsive layout.
 
 - **Q.** _Can I sync my bank to Actual automatically?_
 
