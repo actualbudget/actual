@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
-import { type CategoryEntity } from 'loot-core/src/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 
-import { useCategories } from '../../hooks/useCategories';
-import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
-import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
+import { useAccounts } from '../../hooks/useAccounts';
+import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
+import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
@@ -17,70 +17,54 @@ import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
 
-const BUTTON_HEIGHT = 40;
-
-type CategoryMenuProps = {
+type AccountMenuModalProps = {
   modalProps: CommonModalProps;
-  categoryId: string;
-  onSave: (category: CategoryEntity) => void;
+  accountId: string;
+  onSave: (account: AccountEntity) => void;
+  onCloseAccount: (accountId: string) => void;
+  onReopenAccount: (accountId: string) => void;
   onEditNotes: (id: string) => void;
-  onDelete: (categoryId: string) => void;
   onClose?: () => void;
 };
 
-export function CategoryMenu({
+export function AccountMenuModal({
   modalProps,
-  categoryId,
+  accountId,
   onSave,
+  onCloseAccount,
+  onReopenAccount,
   onEditNotes,
-  onDelete,
   onClose,
-}: CategoryMenuProps) {
-  const { list: categories } = useCategories();
-  const category = categories.find(c => c.id === categoryId);
+}: AccountMenuModalProps) {
+  const accounts = useAccounts();
+  const account = accounts.find(c => c.id === accountId);
   const data = useLiveQuery(
-    () => q('notes').filter({ id: category.id }).select('*'),
-    [category.id],
+    () => q('notes').filter({ id: account.id }).select('*'),
+    [account.id],
   );
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
-  function _onClose() {
+  const _onClose = () => {
     modalProps?.onClose();
     onClose?.();
-  }
+  };
 
-  function _onRename(newName) {
-    if (newName !== category.name) {
+  const onRename = newName => {
+    if (newName !== account.name) {
       onSave?.({
-        ...category,
+        ...account,
         name: newName,
       });
     }
-  }
+  };
 
-  function _onToggleVisibility() {
-    onSave?.({
-      ...category,
-      hidden: !category.hidden,
-    });
-    _onClose();
-  }
-
-  function _onEditNotes() {
-    onEditNotes?.(category.id);
-  }
-
-  function _onDelete() {
-    onDelete?.(category.id);
-  }
-
-  function onNameUpdate(newName) {
-    _onRename(newName);
-  }
+  const _onEditNotes = () => {
+    onEditNotes?.(account.id);
+  };
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
-    height: BUTTON_HEIGHT,
+    height: styles.mobileMinHeight,
     color: theme.formLabelText,
     // Adjust based on desired number of buttons per row.
     flexBasis: '100%',
@@ -88,7 +72,7 @@ export function CategoryMenu({
 
   return (
     <Modal
-      title={category.name}
+      title={account.name}
       titleStyle={styles.underlinedText}
       showHeader
       focusAfterClose={false}
@@ -102,12 +86,12 @@ export function CategoryMenu({
         borderRadius: '6px',
       }}
       editableTitle={true}
-      onTitleUpdate={onNameUpdate}
+      onTitleUpdate={onRename}
       leftHeaderContent={
-        <AdditionalCategoryMenu
-          category={category}
-          onDelete={_onDelete}
-          onToggleVisibility={_onToggleVisibility}
+        <AdditionalAccountMenu
+          account={account}
+          onClose={onCloseAccount}
+          onReopen={onReopenAccount}
         />
       }
     >
@@ -168,11 +152,11 @@ export function CategoryMenu({
   );
 }
 
-function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
+function AdditionalAccountMenu({ account, onClose, onReopen }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
-    height: BUTTON_HEIGHT,
+    height: styles.mobileMinHeight,
   };
 
   return (
@@ -198,29 +182,33 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
             }}
           >
             <Menu
+              getItemStyle={() => itemStyle}
               items={[
-                {
-                  name: 'toggleVisibility',
-                  text: category.hidden ? 'Show' : 'Hide',
-                  icon: category.hidden ? SvgViewShow : SvgViewHide,
-                  iconSize: 16,
-                  style: itemStyle,
-                },
-                Menu.line,
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                  icon: SvgTrash,
-                  iconSize: 15,
-                  style: itemStyle,
-                },
+                account.closed
+                  ? {
+                      name: 'reopen',
+                      text: 'Reopen account',
+                      icon: SvgLockOpen,
+                      iconSize: 15,
+                    }
+                  : {
+                      name: 'close',
+                      text: 'Close account',
+                      icon: SvgClose,
+                      iconSize: 15,
+                    },
               ]}
-              onMenuSelect={itemName => {
+              onMenuSelect={name => {
                 setMenuOpen(false);
-                if (itemName === 'delete') {
-                  onDelete();
-                } else if (itemName === 'toggleVisibility') {
-                  onToggleVisibility();
+                switch (name) {
+                  case 'close':
+                    onClose?.(account.id);
+                    break;
+                  case 'reopen':
+                    onReopen?.(account.id);
+                    break;
+                  default:
+                    throw new Error(`Unsupported item: ${name}`);
                 }
               }}
             />

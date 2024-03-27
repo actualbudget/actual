@@ -166,6 +166,7 @@ type AccountItemProps = {
   embedded?: boolean;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export function AccountItem({
   item,
   className,
