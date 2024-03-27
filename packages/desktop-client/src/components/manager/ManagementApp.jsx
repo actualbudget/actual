@@ -184,7 +184,7 @@ export function ManagementApp({ isLoading }) {
               </>
             ) : (
               <Routes>
-                <Route path="/login" element={<Login />} />
+                <Route path="/login/:method?" element={<Login />} />
                 <Route path="/error" element={<Error />} />
                 <Route path="/config-server" element={<ConfigServer />} />
                 <Route path="/bootstrap" element={<Bootstrap />} />
