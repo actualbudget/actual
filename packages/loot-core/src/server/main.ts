@@ -1487,8 +1487,8 @@ handlers['subscribe-change-password'] = async function ({ password }) {
 };
 
 handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
-  if(typeof(loginMethod) !== "string" || loginMethod == null){
-    loginMethod = "password"
+  if (typeof loginMethod !== 'string' || loginMethod == null) {
+    loginMethod = 'password'
   }
   const res = await post(getServer().SIGNUP_SERVER + '/login', {
     loginMethod,
