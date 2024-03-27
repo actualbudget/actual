@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ChangeEvent, useState, useEffect } from 'react';
+import { type ChangeEvent, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -8,19 +8,19 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { Button, ButtonWithLoading } from '../../common/Button';
 import { ButtonLink } from '../../common/ButtonLink';
 import { BigInput } from '../../common/Input';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { theme } from '../../../style';
+import { Button, ButtonWithLoading } from '../../common/Button';
 
 import { useBootstrapped, Title } from './common';
 
 export function Login() {
   const dispatch = useDispatch();
   const { method = 'password' } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(searchParams.get('error'));
@@ -34,7 +34,7 @@ export function Login() {
         }
       })();
     }
-  }, [checked, searchParams]);
+  }, [checked, searchParams, method, onSubmit]);
 
   function getErrorMessage(error) {
     switch (error) {
