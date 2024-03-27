@@ -10,6 +10,7 @@ import { useHotkeysContext } from 'react-hotkeys-hook';
 import ReactModal from 'react-modal';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, styles, theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -19,21 +20,16 @@ import { Input } from './Input';
 import { Text } from './Text';
 import { View } from './View';
 
-type ModalChildrenProps = {
-  isEditingTitle: boolean;
-};
-
 export type ModalProps = {
-  title?: string;
+  title?: ReactNode;
   isCurrent?: boolean;
   isHidden?: boolean;
-  children: ReactNode | ((props: ModalChildrenProps) => ReactNode);
+  children: ReactNode | (() => ReactNode);
   size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
   padding?: CSSProperties['padding'];
   showHeader?: boolean;
   leftHeaderContent?: ReactNode;
   showTitle?: boolean;
-  editableTitle?: boolean;
   showClose?: boolean;
   showOverlay?: boolean;
   loading?: boolean;
@@ -42,11 +38,9 @@ export type ModalProps = {
   stackIndex?: number;
   parent?: HTMLElement;
   style?: CSSProperties;
-  titleStyle?: CSSProperties;
   contentStyle?: CSSProperties;
   overlayStyle?: CSSProperties;
   onClose?: () => void;
-  onTitleUpdate?: (title: string) => void;
 };
 
 export const Modal = ({
@@ -58,7 +52,6 @@ export const Modal = ({
   showHeader = true,
   leftHeaderContent,
   showTitle = true,
-  editableTitle = false,
   showClose = true,
   showOverlay = true,
   loading = false,
@@ -67,12 +60,10 @@ export const Modal = ({
   stackIndex,
   parent,
   style,
-  titleStyle,
   contentStyle,
   overlayStyle,
   children,
   onClose,
-  onTitleUpdate,
 }: ModalProps) => {
   const { enableScope, disableScope } = useHotkeysContext();
 
@@ -82,20 +73,6 @@ export const Modal = ({
     enableScope(scopeId);
     return () => disableScope(scopeId);
   }, [enableScope, disableScope, scopeId]);
-
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [_title, setTitle] = useState(title);
-
-  const onTitleClick = () => {
-    setIsEditingTitle(true);
-  };
-
-  const _onTitleUpdate = newTitle => {
-    if (newTitle !== title) {
-      onTitleUpdate?.(newTitle);
-    }
-    setIsEditingTitle(false);
-  };
 
   return (
     <ReactModal
@@ -171,38 +148,26 @@ export const Modal = ({
         {showHeader && (
           <View
             style={{
+              justifyContent: 'center',
+              alignItems: 'center',
               padding: 20,
               position: 'relative',
-              flexShrink: 0,
+              height: 80,
             }}
           >
             <View
               style={{
                 position: 'absolute',
                 left: 0,
-                top: 0,
-                bottom: 0,
-                justifyContent: 'center',
-                alignItems: 'center',
+                margin: '0 5px',
               }}
             >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  marginLeft: 15,
-                }}
-              >
-                {leftHeaderContent && !isEditingTitle
-                  ? leftHeaderContent
-                  : null}
-              </View>
+              {leftHeaderContent}
             </View>
 
             {showTitle && (
               <View
                 style={{
-                  flex: 1,
-                  alignSelf: 'center',
                   textAlign: 'center',
                   // We need to force a width for the text-overflow
                   // ellipses to work because we are aligning center.
@@ -210,37 +175,16 @@ export const Modal = ({
                   width: 'calc(100% - 40px)',
                 }}
               >
-                {isEditingTitle ? (
-                  <Input
-                    style={{
-                      fontSize: 25,
-                      fontWeight: 700,
-                      textAlign: 'center',
-                    }}
-                    value={_title}
-                    onChange={e => setTitle(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        _onTitleUpdate(e.currentTarget.value);
-                      }
-                    }}
-                    onBlur={e => _onTitleUpdate(e.target.value)}
+                {!title ? (
+                  <SvgLogo
+                    width={30}
+                    height={30}
+                    style={{ justifyContent: 'center', alignSelf: 'center' }}
                   />
+                ) : typeof title === 'string' || typeof title === 'number' ? (
+                  <ModalTitle title={`${title}`} />
                 ) : (
-                  <Text
-                    style={{
-                      fontSize: 25,
-                      fontWeight: 700,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      ...titleStyle,
-                    }}
-                    {...(editableTitle && { onPointerUp: onTitleClick })}
-                  >
-                    {_title}
-                  </Text>
+                  title
                 )}
               </View>
             )}
@@ -249,36 +193,24 @@ export const Modal = ({
               style={{
                 position: 'absolute',
                 right: 0,
-                top: 0,
-                bottom: 0,
-                justifyContent: 'center',
-                alignItems: 'center',
+                margin: '0 5px',
               }}
             >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  marginRight: 15,
-                }}
-              >
-                {showClose && !isEditingTitle && (
-                  <Button
-                    type="bare"
-                    onClick={onClose}
-                    style={{ padding: '10px 10px' }}
-                    aria-label="Close"
-                  >
-                    <SvgDelete width={10} style={{ color: 'inherit' }} />
-                  </Button>
-                )}
-              </View>
+              {showClose && (
+                <Button
+                  type="bare"
+                  onClick={onClose}
+                  style={{ padding: 10 }}
+                  aria-label="Close"
+                >
+                  <SvgDelete width={10} style={{ color: 'inherit' }} />
+                </Button>
+              )}
             </View>
           </View>
         )}
         <View style={{ padding, paddingTop: 0, flex: 1 }}>
-          {typeof children === 'function'
-            ? children({ isEditingTitle })
-            : children}
+          {typeof children === 'function' ? children() : children}
         </View>
         {loading && (
           <View
@@ -427,3 +359,82 @@ export const ModalButtons = ({
     </View>
   );
 };
+
+type ModalTitleProps = {
+  title: string;
+  isEditable?: boolean;
+  getStyle?: (isEditing: boolean) => CSSProperties;
+  onEdit?: (isEditing: boolean) => void;
+  onTitleUpdate?: (newName: string) => void;
+};
+
+export function ModalTitle({
+  title,
+  isEditable,
+  getStyle,
+  onTitleUpdate,
+}: ModalTitleProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const style = getStyle?.(isEditing);
+
+  const _onEdit = () => {
+    if (!isEditable) {
+      return;
+    }
+
+    setIsEditing(true);
+  };
+
+  const _onTitleUpdate = newTitle => {
+    if (newTitle !== title) {
+      onTitleUpdate?.(newTitle);
+    }
+    setIsEditing(false);
+  };
+
+  const inputRef = useRef<HTMLInputElement>();
+  useEffect(() => {
+    if (isEditing) {
+      if (inputRef.current) {
+        inputRef.current.scrollLeft = 0;
+      }
+    }
+  }, [isEditing]);
+
+  return isEditing ? (
+    <Input
+      inputRef={inputRef}
+      style={{
+        fontSize: 25,
+        fontWeight: 700,
+        textAlign: 'center',
+        ...style,
+      }}
+      focused={isEditing}
+      defaultValue={title}
+      onUpdate={_onTitleUpdate}
+      onKeyDown={e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          _onTitleUpdate?.(e.currentTarget.value);
+        }
+      }}
+    />
+  ) : (
+    <Text
+      style={{
+        fontSize: 25,
+        fontWeight: 700,
+        textAlign: 'center',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        ...(isEditable && styles.underlinedText),
+        ...style,
+      }}
+      onClick={_onEdit}
+    >
+      {title}
+    </Text>
+  );
+}

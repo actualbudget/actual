@@ -25,7 +25,6 @@ export function ReportBalanceMenuModal({
 
   return (
     <Modal
-      title="Actions"
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -37,13 +36,11 @@ export function ReportBalanceMenuModal({
         borderRadius: '6px',
       }}
     >
-      {() => (
-        <BalanceMenu
-          categoryId={categoryId}
-          getItemStyle={() => defaultMenuItemStyle}
-          onCarryover={onCarryover}
-        />
-      )}
+      <BalanceMenu
+        categoryId={categoryId}
+        getItemStyle={() => defaultMenuItemStyle}
+        onCarryover={onCarryover}
+      />
     </Modal>
   );
 }

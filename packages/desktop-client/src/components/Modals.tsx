@@ -13,6 +13,7 @@ import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { BudgetMenuModal } from './modals/BudgetMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
@@ -46,7 +47,7 @@ import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenu
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInputModal } from './modals/SingleInputModal';
-import { SwitchBudgetType } from './modals/SwitchBudgetType';
+import { SwitchBudgetTypeModal } from './modals/SwitchBudgetTypeModal';
 import { TransferModal } from './modals/TransferModal';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
@@ -400,10 +401,10 @@ export function Modals() {
 
         case 'switch-budget-type':
           return (
-            <SwitchBudgetType
+            <SwitchBudgetTypeModal
               key={name}
               modalProps={modalProps}
-              onSwitch={options?.onSwitch}
+              onSwitch={options.onSwitch}
             />
           );
 
@@ -547,6 +548,21 @@ export function Modals() {
               onPost={options.onPost}
               onSkip={options.onSkip}
             />
+          );
+
+        case 'budget-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <BudgetMenuModal
+                modalProps={modalProps}
+                month={options.month}
+                onToggleHiddenCategories={options.onToggleHiddenCategories}
+                onSwitchBudgetType={options.onSwitchBudgetType}
+              />
+            </NamespaceContext.Provider>
           );
 
         default:
