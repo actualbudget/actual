@@ -5,7 +5,7 @@ import { reportBudget } from 'loot-core/src/client/queries';
 import { Menu } from '../../common/Menu';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
-export type BalanceMenuProps = Omit<
+type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
