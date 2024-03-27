@@ -1,9 +1,11 @@
 import { type ReactNode, useState } from 'react';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
 import { LinkButton } from '../common/LinkButton';
 import { Text } from '../common/Text';
@@ -17,6 +19,7 @@ type FeatureToggleProps = {
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;
+  afterChange?: (newValue: boolean) => void;
 };
 
 function FeatureToggle({
@@ -24,6 +27,7 @@ function FeatureToggle({
   disableToggle = false,
   error,
   children,
+  afterChange,
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
   const [_, setFlagPref] = useLocalPref(`flags.${flagName}`);
@@ -34,6 +38,7 @@ function FeatureToggle({
         checked={enabled}
         onChange={() => {
           setFlagPref(!enabled);
+          afterChange?.(!enabled);
         }}
         disabled={disableToggle}
       />
@@ -71,6 +76,36 @@ function ReportBudgetFeature() {
   );
 }
 
+function ExcludeFutureTransactionsFeature() {
+  const [resetting, setResetting] = useState(false);
+
+  async function onResetCache() {
+    setResetting(true);
+    await send('reset-budget-cache');
+    setResetting(false);
+  }
+
+  return (
+    <FeatureToggle flag="excludeFutureTransactions" afterChange={onResetCache}>
+      Exclude future transactions from calculations
+      {resetting && (
+        <View
+          style={{
+            position: 'absolute',
+            alignSelf: 'flex-end',
+            width: 20,
+            height: 20,
+            marginTop: -3,
+            marginRight: -25,
+          }}
+        >
+          <AnimatedLoading />
+        </View>
+      )}
+    </FeatureToggle>
+  );
+}
+
 export function ExperimentalFeatures() {
   const [expanded, setExpanded] = useState(false);
 
@@ -88,6 +123,8 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
             <FeatureToggle flag="splitsInRules">Splits in rules</FeatureToggle>
+
+            <ExcludeFutureTransactionsFeature />
           </View>
         ) : (
           <LinkButton

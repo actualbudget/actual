@@ -21,6 +21,7 @@ type CellValueProps = {
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
   ['data-testid']?: string;
+  prepend?: JSX.Element;
 };
 
 export function CellValue({

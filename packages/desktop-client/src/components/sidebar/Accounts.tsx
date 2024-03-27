@@ -8,6 +8,7 @@ import { type State } from 'loot-core/src/client/state-types';
 import { useBudgetedAccounts } from '../../hooks/useBudgetedAccounts';
 import { useClosedAccounts } from '../../hooks/useClosedAccounts';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
+import { useFeatureFlag } from "../../hooks/useFeatureFlag";
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
@@ -59,12 +60,14 @@ export function Accounts({
     return null;
   };
 
+  const excludeFutureTransactions = useFeatureFlag('excludeFutureTransactions');
+
   return (
     <View>
       <Account
         name="All accounts"
         to="/accounts"
-        query={queries.allAccountBalance()}
+        query={queries.allAccountBalance(excludeFutureTransactions)}
         style={{ fontWeight, marginTop: 15 }}
       />
 
@@ -72,7 +75,7 @@ export function Accounts({
         <Account
           name="For budget"
           to="/accounts/budgeted"
-          query={queries.budgetedAccountBalance()}
+          query={queries.budgetedAccountBalance(excludeFutureTransactions)}
           style={{ fontWeight, marginTop: 13 }}
         />
       )}
@@ -87,7 +90,7 @@ export function Accounts({
           failed={failedAccounts && failedAccounts.has(account.id)}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
           to={getAccountPath(account)}
-          query={queries.accountBalance(account)}
+          query={queries.accountBalance(account, excludeFutureTransactions)}
           onDragChange={onDragChange}
           onDrop={onReorder}
           outerStyle={makeDropPadding(i)}
@@ -98,7 +101,7 @@ export function Accounts({
         <Account
           name="Off budget"
           to="/accounts/offbudget"
-          query={queries.offbudgetAccountBalance()}
+          query={queries.offbudgetAccountBalance(excludeFutureTransactions)}
           style={{ fontWeight, marginTop: 13 }}
         />
       )}
@@ -113,7 +116,7 @@ export function Accounts({
           failed={failedAccounts && failedAccounts.has(account.id)}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
           to={getAccountPath(account)}
-          query={queries.accountBalance(account)}
+          query={queries.accountBalance(account, excludeFutureTransactions)}
           onDragChange={onDragChange}
           onDrop={onReorder}
           outerStyle={makeDropPadding(i)}
@@ -136,7 +139,7 @@ export function Accounts({
             name={account.name}
             account={account}
             to={getAccountPath(account)}
-            query={queries.accountBalance(account)}
+            query={queries.accountBalance(account, excludeFutureTransactions)}
             onDragChange={onDragChange}
             onDrop={onReorder}
           />
