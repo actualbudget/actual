@@ -39,7 +39,7 @@ import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as report from './report/ReportComponents';
 import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/RolloverComponents';
-import { RolloverContext } from './rollover/RolloverContext';
+import { RolloverProvider } from './rollover/RolloverContext';
 import { prewarmAllMonths, prewarmMonth, switchBudgetType } from './util';
 
 type ReportComponents = {
@@ -378,7 +378,7 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   } else {
     table = (
-      <RolloverContext
+      <RolloverProvider
         summaryCollapsed={summaryCollapsed}
         onBudgetAction={onBudgetAction}
         onToggleSummaryCollapse={onToggleCollapse}
@@ -400,7 +400,7 @@ function BudgetInner(props: BudgetInnerProps) {
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
         />
-      </RolloverContext>
+      </RolloverProvider>
     );
   }
 

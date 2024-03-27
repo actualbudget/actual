@@ -1,10 +1,8 @@
 import React from 'react';
 
-import { reportBudget } from 'loot-core/src/client/queries';
-
-import { Menu } from '../../common/Menu';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
+
+import { BalanceMenu } from './BalanceMenu';
 
 type BalanceTooltipProps = {
   categoryId: string;
@@ -22,8 +20,6 @@ export function BalanceTooltip({
   onClose,
   ...tooltipProps
 }: BalanceTooltipProps) {
-  const carryover = useSheetValue(reportBudget.catCarryover(categoryId));
-
   const _onClose = () => {
     tooltip.close();
     onClose?.();
@@ -37,22 +33,14 @@ export function BalanceTooltip({
       onClose={_onClose}
       {...tooltipProps}
     >
-      <Menu
-        onMenuSelect={() => {
-          onBudgetAction(monthIndex, 'carryover', {
+      <BalanceMenu
+        categoryId={categoryId}
+        onCarryover={carryover => {
+          onBudgetAction?.(monthIndex, 'carryover', {
             category: categoryId,
             flag: !carryover,
           });
-          _onClose();
         }}
-        items={[
-          {
-            name: 'carryover',
-            text: carryover
-              ? 'Remove overspending rollover'
-              : 'Rollover overspending',
-          },
-        ]}
       />
     </Tooltip>
   );
