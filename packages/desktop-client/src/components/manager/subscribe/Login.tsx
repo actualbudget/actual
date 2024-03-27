@@ -1,33 +1,33 @@
 // @ts-strict-ignore
 import React, { type ChangeEvent, useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { theme } from '../../../style';
+import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { Button, ButtonWithLoading } from '../../common/Button';
+import { ButtonLink } from '../../common/ButtonLink';
 import { BigInput } from '../../common/Input';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { theme } from '../../../style';
 
 import { useBootstrapped, Title } from './common';
-import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { ButtonLink } from '../../common/ButtonLink';
 
 export function Login() {
   const dispatch = useDispatch();
-  const { method = "password" } = useParams();
+  const { method = 'password' } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(searchParams.get("error"));
-  const { checked } = useBootstrapped(!searchParams.has("error"));
+  const [error, setError] = useState(searchParams.get('error'));
+  const { checked } = useBootstrapped(!searchParams.has('error'));
 
   useEffect(() => {
-    if (checked && !searchParams.has("error")) {
+    if (checked && !searchParams.has('error')) {
       (async () => {
         if (method === 'header') {
           await onSubmit();
@@ -52,10 +52,10 @@ export function Login() {
   }
 
   async function onSubmit(e?: React.FormEvent<HTMLFormElement>) {
-    if (typeof (e) !== "undefined" && e !== null) {
+    if (typeof e !== 'undefined' && e !== null) {
       e.preventDefault();
     }
-    if (method === "password" && password === '') {
+    if (method === 'password' && password === '') {
       return;
     }
     if (loading) {
@@ -64,7 +64,10 @@ export function Login() {
 
     setError(null);
     setLoading(true);
-    const { error } = await send('subscribe-sign-in', { password, loginMethod: method });
+    const { error } = await send('subscribe-sign-in', {
+      password,
+      loginMethod: method,
+    });
     setLoading(false);
 
     if (error) {
@@ -133,15 +136,28 @@ export function Login() {
         </form>
       )}
       {method === 'header' && (
-        <View style={{
-          flexDirection: 'row', justifyContent: 'center', marginTop: 15,
-        }}>
-        { error && (
-          <ButtonLink type="primary" style={{ fontSize: 15 }} to={'/login/password?error='+ error}>Login with Password</ButtonLink>
-        )}
-        { !error && (
-          <span>Checking Header Token Login ... <AnimatedLoading style={{ width: 20, height: 20 }} /></span>
-        )}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 15,
+          }}
+        >
+          {error && (
+            <ButtonLink
+              type="primary"
+              style={{ fontSize: 15 }}
+              to={'/login/password?error=' + error}
+            >
+              Login with Password
+            </ButtonLink>
+          )}
+          {!error && (
+            <span>
+              Checking Header Token Login ...{' '}
+              <AnimatedLoading style={{ width: 20, height: 20 }} />
+            </span>
+          )}
         </View>
       )}
       <View

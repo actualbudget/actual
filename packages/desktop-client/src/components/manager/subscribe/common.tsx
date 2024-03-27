@@ -17,7 +17,7 @@ import { useSetServerURL } from '../../ServerContext';
 // password. Both pages will redirect to the other depending on state;
 // they will also potentially redirect to other pages which do *not*
 // do any checks.
-export function useBootstrapped(redirect: boolean = true) {
+export function useBootstrapped(redirect = true) {
   const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,7 +27,9 @@ export function useBootstrapped(redirect: boolean = true) {
     async function run() {
       const ensure = url => {
         if (location.pathname !== url) {
-          redirect && navigate(url);
+          if (redirect) {
+            navigate(url);
+          }
         } else {
           setChecked(true);
         }
