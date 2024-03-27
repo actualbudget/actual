@@ -8,12 +8,12 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { BigInput } from '../../common/Input';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button';
 import { ButtonLink } from '../../common/ButtonLink';
+import { BigInput } from '../../common/Input';
 
 import { useBootstrapped, Title } from './common';
 
@@ -67,7 +67,7 @@ export function Login() {
         dispatch(loggedIn());
       }
     },
-    [method, loading, error],
+    [method, loading, error, dispatch, password],
   );
 
   useEffect(() => {
