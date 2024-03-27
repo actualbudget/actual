@@ -22,15 +22,15 @@ const Context = createContext<RolloverContextDefinition>({
   currentMonth: 'unknown',
 });
 
-type RolloverContextProps = Omit<RolloverContextDefinition, 'currentMonth'> & {
+type RolloverProviderProps = Omit<RolloverContextDefinition, 'currentMonth'> & {
   children: ReactNode;
 };
-export function RolloverContext({
+export function RolloverProvider({
   summaryCollapsed,
   onBudgetAction,
   onToggleSummaryCollapse,
   children,
-}: RolloverContextProps) {
+}: RolloverProviderProps) {
   const currentMonth = monthUtils.currentMonth();
 
   return (
