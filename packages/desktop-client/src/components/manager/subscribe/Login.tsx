@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type ChangeEvent, useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -8,12 +8,12 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { ButtonLink } from '../../common/ButtonLink';
 import { BigInput } from '../../common/Input';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button';
+import { ButtonLink } from '../../common/ButtonLink';
 
 import { useBootstrapped, Title } from './common';
 
@@ -25,16 +25,6 @@ export function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(searchParams.get('error'));
   const { checked } = useBootstrapped(!searchParams.has('error'));
-
-  useEffect(() => {
-    if (checked && !searchParams.has('error')) {
-      (async () => {
-        if (method === 'header') {
-          await onSubmit();
-        }
-      })();
-    }
-  }, [checked, searchParams, method, onSubmit]);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -51,31 +41,44 @@ export function Login() {
     }
   }
 
-  async function onSubmit(e?: React.FormEvent<HTMLFormElement>) {
-    if (typeof e !== 'undefined' && e !== null) {
-      e.preventDefault();
-    }
-    if (method === 'password' && password === '') {
-      return;
-    }
-    if (loading) {
-      return;
-    }
+  const onSubmit = useCallback(
+    async (e?: React.FormEvent<HTMLFormElement>) => {
+      if (typeof e !== 'undefined' && e !== null) {
+        e.preventDefault();
+      }
+      if (method === 'password' && password === '') {
+        return;
+      }
+      if (loading) {
+        return;
+      }
 
-    setError(null);
-    setLoading(true);
-    const { error } = await send('subscribe-sign-in', {
-      password,
-      loginMethod: method,
-    });
-    setLoading(false);
+      setError(null);
+      setLoading(true);
+      const { error } = await send('subscribe-sign-in', {
+        password,
+        loginMethod: method,
+      });
+      setLoading(false);
 
-    if (error) {
-      setError(error);
-    } else {
-      dispatch(loggedIn());
+      if (error) {
+        setError(error);
+      } else {
+        dispatch(loggedIn());
+      }
+    },
+    [method, loading, error],
+  );
+
+  useEffect(() => {
+    if (checked && !searchParams.has('error')) {
+      (async () => {
+        if (method === 'header') {
+          await onSubmit();
+        }
+      })();
     }
-  }
+  }, [checked, searchParams, method, onSubmit]);
 
   async function onDemo() {
     await dispatch(createBudget({ demoMode: true }));
@@ -121,9 +124,7 @@ export function Login() {
             autoFocus={true}
             placeholder="Password"
             type="password"
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setPassword(e.target.value)
-            }
+            onChange={e => setPassword(e.target.value)}
             style={{ flex: 1, marginRight: 10 }}
           />
           <ButtonWithLoading
