@@ -1,11 +1,6 @@
-import React, {
-  useState,
-  useContext,
-  useEffect,
-  type ComponentPropsWithoutRef,
-} from 'react';
+import type React from 'react';
+import { useState, type ComponentPropsWithoutRef } from 'react';
 
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
@@ -15,63 +10,27 @@ import { Button } from '../../common/Button';
 import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { View } from '../../common/View';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../tooltips';
 import { addToBeBudgetedGroup } from '../util';
 
 type TransferTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
   initialAmount?: number;
-  initialAmountName?: string;
   showToBeBudgeted?: boolean;
-  onSubmit: (amount: number, category: string) => void;
+  onSubmit: (amount: number, categoryId: string) => void;
 };
+
 export function TransferTooltip({
   initialAmount = 0,
-  initialAmountName,
   showToBeBudgeted,
   onSubmit,
   onClose,
   position = 'bottom-right',
   ...props
 }: TransferTooltipProps) {
-  const spreadsheet = useSpreadsheet();
-  const sheetName = useContext(NamespaceContext);
-  let { grouped: categoryGroups } = useCategories();
-
-  categoryGroups = categoryGroups.filter(g => !g.is_income);
-  if (showToBeBudgeted) {
-    categoryGroups = addToBeBudgetedGroup(categoryGroups);
-  }
-
-  const [amount, setAmount] = useState<string | null>(null);
-  const [category, setCategory] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      if (initialAmountName) {
-        const node = await spreadsheet.get(sheetName, initialAmountName);
-        setAmount(integerToCurrency(Math.max(node.value as number, 0)));
-      } else {
-        setAmount(integerToCurrency(Math.max(initialAmount, 0)));
-      }
-    })();
-  }, []);
-
-  function submit(newAmount: string) {
-    const parsedAmount = evalArithmetic(newAmount);
-    if (parsedAmount && category) {
-      onSubmit(amountToInteger(parsedAmount), category);
-      onClose();
-    }
-  }
-
-  if (amount === null) {
-    // Don't render anything until we have the amount to show. This
-    // ensures that the amount field is focused and fully selected
-    // when it's initially rendered (instead of being updated
-    // afterwards and losing selection)
-    return null;
-  }
+  const _onSubmit = (amount: number, categoryId: string) => {
+    onSubmit?.(amount, categoryId);
+    onClose?.();
+  };
 
   return (
     <Tooltip
@@ -81,13 +40,48 @@ export function TransferTooltip({
       onClose={onClose}
       {...props}
     >
+      <Transfer amount={initialAmount} showToBeBudgeted onSubmit={_onSubmit} />
+    </Tooltip>
+  );
+}
+
+type TransferProps = {
+  amount: number;
+  showToBeBudgeted: boolean;
+  onSubmit: (amount: number, categoryId: string) => void;
+};
+
+function Transfer({
+  amount: initialAmount,
+  showToBeBudgeted,
+  onSubmit,
+}: TransferProps) {
+  let { grouped: categoryGroups } = useCategories();
+  categoryGroups = categoryGroups.filter(g => !g.is_income);
+  if (showToBeBudgeted) {
+    categoryGroups = addToBeBudgetedGroup(categoryGroups);
+  }
+
+  const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
+  const [amount, setAmount] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+
+  const _onSubmit = (newAmount: string | null, categoryId: string | null) => {
+    const parsedAmount = evalArithmetic(newAmount || '');
+    if (parsedAmount && categoryId) {
+      onSubmit?.(amountToInteger(parsedAmount), categoryId);
+    }
+  };
+
+  return (
+    <>
       <View style={{ marginBottom: 5 }}>Transfer this amount:</View>
       <View>
         <InitialFocus>
           <Input
-            value={amount}
-            onChange={e => setAmount(e.target['value'])}
-            onEnter={() => submit(amount)}
+            defaultValue={_initialAmount}
+            onUpdate={value => setAmount(value)}
+            onEnter={() => _onSubmit(amount, categoryId)}
           />
         </InitialFocus>
       </View>
@@ -95,11 +89,13 @@ export function TransferTooltip({
 
       <CategoryAutocomplete
         categoryGroups={categoryGroups}
-        value={null}
+        value={categoryGroups.find(g => g.id === categoryId)}
         openOnFocus={true}
-        onUpdate={() => {}}
-        onSelect={(id: string | undefined) => setCategory(id || null)}
-        inputProps={{ onEnter: () => submit(amount), placeholder: '(none)' }}
+        onSelect={(id: string | undefined) => setCategoryId(id || null)}
+        inputProps={{
+          onEnter: () => _onSubmit(amount, categoryId),
+          placeholder: '(none)',
+        }}
         showHiddenCategories={true}
       />
 
@@ -116,11 +112,11 @@ export function TransferTooltip({
             paddingTop: 3,
             paddingBottom: 3,
           }}
-          onClick={() => submit(amount)}
+          onClick={() => _onSubmit(amount, categoryId)}
         >
           Transfer
         </Button>
       </View>
-    </Tooltip>
+    </>
   );
 }
