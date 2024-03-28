@@ -12,8 +12,6 @@ import {
   useHref,
 } from 'react-router-dom';
 
-import hotkeys from 'hotkeys-js';
-
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import { type State } from 'loot-core/src/client/state-types';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
@@ -99,9 +97,6 @@ function RouterBehaviors() {
 function FinancesAppWithoutContext() {
   const actions = useActions();
   useEffect(() => {
-    // The default key handler scope
-    hotkeys.setScope('app');
-
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {

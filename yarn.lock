@@ -89,7 +89,6 @@ __metadata:
     downshift: "npm:7.6.2"
     focus-visible: "npm:^4.1.5"
     glamor: "npm:^2.20.40"
-    hotkeys-js: "npm:^3.13.5"
     inter-ui: "npm:^3.19.3"
     jest: "npm:^27.5.1"
     jest-watch-typeahead: "npm:^2.2.2"
@@ -101,6 +100,7 @@ __metadata:
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dom: "npm:18.2.0"
     react-error-boundary: "npm:^4.0.12"
+    react-hotkeys-hook: "npm:^4.5.0"
     react-markdown: "npm:^8.0.7"
     react-merge-refs: "npm:^1.1.0"
     react-modal: "npm:3.16.1"
@@ -10534,13 +10534,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hotkeys-js@npm:^3.13.5":
-  version: 3.13.5
-  resolution: "hotkeys-js@npm:3.13.5"
-  checksum: 739ac5924cfdd67571bfba85c0e6c0bc8ea1d617247b0e7126b1c4a3d04d14dbd35f5ee8455ac83f8703195b00c31eb8d8c06489143338fff9ac4129d16c007f
-  languageName: node
-  linkType: hard
-
 "html-encoding-sniffer@npm:^2.0.1":
   version: 2.0.1
   resolution: "html-encoding-sniffer@npm:2.0.1"
@@ -15067,6 +15060,16 @@ __metadata:
   peerDependencies:
     react: ">=16.13.1"
   checksum: ba59f885eae3c3786548086c6c2088a9f511080c4052e778017959e9e0b6461892efdcf58fcfc2b3a6bc3e79e17cf842fc8ccdc6d82698c51c2ccab12c8c0b85
+  languageName: node
+  linkType: hard
+
+"react-hotkeys-hook@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "react-hotkeys-hook@npm:4.5.0"
+  peerDependencies:
+    react: ">=16.8.1"
+    react-dom: ">=16.8.1"
+  checksum: f83d4ef7d56e40717f293d936101fb9d72f83b92568d5eb85594cf99e2b7c66556ff8f94e6dd9008813c7d097185593ff1b716b941ccf7ebf1969fecb4dc4b84
   languageName: node
   linkType: hard
 

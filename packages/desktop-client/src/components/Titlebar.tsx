@@ -6,6 +6,7 @@ import React, {
   useContext,
   type ReactNode,
 } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -37,7 +38,6 @@ import { Link } from './common/Link';
 import { Paragraph } from './common/Paragraph';
 import { Text } from './common/Text';
 import { View } from './common/View';
-import { KeyHandlers } from './KeyHandlers';
 import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
@@ -231,56 +231,57 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     marginRight: 5,
   };
 
-  return (
-    <>
-      <KeyHandlers
-        keys={{
-          'ctrl+s, cmd+s': () => {
-            sync();
-          },
-        }}
-      />
+  useHotkeys(
+    'ctrl+s, cmd+s, meta+s',
+    sync,
+    {
+      enableOnFormTags: true,
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [sync],
+  );
 
-      <Button
-        type="bare"
-        aria-label="Sync"
-        style={
-          isMobile
-            ? {
-                ...style,
-                WebkitAppRegion: 'none',
-                ...mobileIconStyle,
-              }
-            : {
-                ...style,
-                WebkitAppRegion: 'none',
-                color: desktopColor,
-              }
-        }
-        hoveredStyle={hoveredStyle}
-        activeStyle={activeStyle}
-        onClick={sync}
-      >
-        {isMobile ? (
-          syncState === 'error' ? (
-            <SvgAlertTriangle width={14} height={14} />
-          ) : (
-            <AnimatedRefresh width={18} height={18} animating={syncing} />
-          )
-        ) : syncState === 'error' ? (
-          <SvgAlertTriangle width={13} />
+  return (
+    <Button
+      type="bare"
+      aria-label="Sync"
+      style={
+        isMobile
+          ? {
+              ...style,
+              WebkitAppRegion: 'none',
+              ...mobileIconStyle,
+            }
+          : {
+              ...style,
+              WebkitAppRegion: 'none',
+              color: desktopColor,
+            }
+      }
+      hoveredStyle={hoveredStyle}
+      activeStyle={activeStyle}
+      onClick={sync}
+    >
+      {isMobile ? (
+        syncState === 'error' ? (
+          <SvgAlertTriangle width={14} height={14} />
         ) : (
-          <AnimatedRefresh animating={syncing} />
-        )}
-        <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
-          {syncState === 'disabled'
-            ? 'Disabled'
-            : syncState === 'offline'
-              ? 'Offline'
-              : 'Sync'}
-        </Text>
-      </Button>
-    </>
+          <AnimatedRefresh width={18} height={18} animating={syncing} />
+        )
+      ) : syncState === 'error' ? (
+        <SvgAlertTriangle width={13} />
+      ) : (
+        <AnimatedRefresh animating={syncing} />
+      )}
+      <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
+        {syncState === 'disabled'
+          ? 'Disabled'
+          : syncState === 'offline'
+            ? 'Offline'
+            : 'Sync'}
+      </Text>
+    </Button>
   );
 }
 

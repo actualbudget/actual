@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
@@ -24,7 +25,6 @@ import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';
-import { KeyHandlers } from '../KeyHandlers';
 import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
 
@@ -109,18 +109,23 @@ export function AccountHeader({
     }
   }
 
+  useHotkeys(
+    'ctrl+f, cmd+f, meta+f',
+    () => {
+      if (searchInput.current) {
+        searchInput.current.focus();
+      }
+    },
+    {
+      enableOnFormTags: true,
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [searchInput],
+  );
+
   return (
     <>
-      <KeyHandlers
-        keys={{
-          'ctrl+f, cmd+f': () => {
-            if (searchInput.current) {
-              searchInput.current.focus();
-            }
-          },
-        }}
-      />
-
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View
           style={{ marginTop: 2, marginBottom: 10, alignItems: 'flex-start' }}

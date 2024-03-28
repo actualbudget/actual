@@ -3,7 +3,10 @@ import React, { createRef, useMemo, useState } from 'react';
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
-import { styles } from '../../../style';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { usePayees } from '../../../hooks/usePayees';
+import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { Menu } from '../../common/Menu';
@@ -11,11 +14,11 @@ import { MenuButton } from '../../common/MenuButton';
 import { MenuTooltip } from '../../common/MenuTooltip';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { ChooseGraph } from '../ChooseGraph';
 import { DateRange } from '../DateRange';
-import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
 import { SaveReportName } from '../SaveReportName';
+
+import { GetCardData } from './GetCardData';
 
 type CardMenuProps = {
   onClose: () => void;
@@ -67,6 +70,10 @@ export function CustomReportListCards({
   const [err, setErr] = useState('');
   const [name, setName] = useState('');
   const inputRef = createRef<HTMLInputElement>();
+
+  const payees = usePayees();
+  const accounts = useAccounts();
+  const categories = useCategories();
 
   const [isCardHovered, setIsCardHovered] = useState('');
 
@@ -191,23 +198,12 @@ export function CustomReportListCards({
                           )}
                         </View>
                       </View>
-
-                      {report.data ? (
-                        <ChooseGraph
-                          startDate={report.startDate}
-                          endDate={report.endDate}
-                          data={report.data}
-                          mode={report.mode}
-                          graphType={report.graphType}
-                          balanceType={report.balanceType}
-                          groupBy={report.groupBy}
-                          interval={report.interval}
-                          compact={true}
-                          style={{ height: 'auto', flex: 1 }}
-                        />
-                      ) : (
-                        <LoadingIndicator />
-                      )}
+                      <GetCardData
+                        report={report}
+                        payees={payees}
+                        accounts={accounts}
+                        categories={categories}
+                      />
                     </View>
                   </ReportCard>
                 </View>

@@ -1,5 +1,6 @@
-// @ts-strict-ignore
 import {
+  type FunctionComponent,
+  type ReactElement,
   type ReactNode,
   createElement,
   useEffect,
@@ -12,6 +13,10 @@ import { type CSSProperties, theme } from '../../style';
 import { Text } from './Text';
 import { Toggle } from './Toggle';
 import { View } from './View';
+
+const MenuLine: unique symbol = Symbol('menu-line');
+Menu.line = MenuLine;
+Menu.label = Symbol('menu-label');
 
 type KeybindingProps = {
   keyName: ReactNode;
@@ -29,7 +34,12 @@ type MenuItem = {
   type?: string | symbol;
   name: string;
   disabled?: boolean;
-  icon?;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  icon?: FunctionComponent<{
+    width: number;
+    height: number;
+    style: CSSProperties;
+  }>;
   iconSize?: number;
   text: string;
   key?: string;
@@ -38,7 +48,7 @@ type MenuItem = {
   tooltip?: string;
 };
 
-export type MenuProps<T extends MenuItem = MenuItem> = {
+type MenuProps<T extends MenuItem = MenuItem> = {
   header?: ReactNode;
   footer?: ReactNode;
   items: Array<T | typeof Menu.line>;
@@ -53,21 +63,21 @@ export function Menu<T extends MenuItem>({
   onMenuSelect,
   style,
 }: MenuProps<T>) {
-  const elRef = useRef(null);
+  const elRef = useRef<HTMLDivElement>(null);
   const items = allItems.filter(x => x);
-  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const el = elRef.current;
-    el.focus();
+    el?.focus();
 
-    const onKeyDown = e => {
+    const onKeyDown = (e: KeyboardEvent) => {
       const filteredItems = items.filter(
         item => item && item !== Menu.line && item.type !== Menu.label,
       );
-      const currentIndex = filteredItems.indexOf(items[hoveredIndex]);
+      const currentIndex = filteredItems.indexOf(items[hoveredIndex || 0]);
 
-      const transformIndex = idx => items.indexOf(filteredItems[idx]);
+      const transformIndex = (idx: number) => items.indexOf(filteredItems[idx]);
 
       switch (e.key) {
         case 'ArrowUp':
@@ -90,7 +100,7 @@ export function Menu<T extends MenuItem>({
           break;
         case 'Enter':
           e.preventDefault();
-          const item = items[hoveredIndex];
+          const item = items[hoveredIndex || 0];
           if (hoveredIndex !== null && item !== Menu.line) {
             onMenuSelect?.(item.name);
           }
@@ -99,10 +109,10 @@ export function Menu<T extends MenuItem>({
       }
     };
 
-    el.addEventListener('keydown', onKeyDown);
+    el?.addEventListener('keydown', onKeyDown);
 
     return () => {
-      el.removeEventListener('keydown', onKeyDown);
+      el?.removeEventListener('keydown', onKeyDown);
     };
   }, [hoveredIndex]);
 
@@ -203,6 +213,7 @@ export function Menu<T extends MenuItem>({
                   style={{ marginLeft: 5, ...item.style }}
                   onToggle={() =>
                     !item.disabled &&
+                    onMenuSelect &&
                     item.toggle !== undefined &&
                     onMenuSelect(item.name)
                   }
@@ -217,7 +228,3 @@ export function Menu<T extends MenuItem>({
     </View>
   );
 }
-
-const MenuLine: unique symbol = Symbol('menu-line');
-Menu.line = MenuLine;
-Menu.label = Symbol('menu-label');

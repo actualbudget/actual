@@ -1,5 +1,8 @@
-// @ts-strict-ignore
-import React, { type ReactNode, type ComponentProps } from 'react';
+import React, {
+  type ComponentProps,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from 'glamor';
@@ -31,7 +34,7 @@ const ButtonLink = ({
   const navigate = useNavigate();
   const match = useMatch({ path: to });
 
-  const handleClick = e => {
+  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
     onClick?.(e);
     navigate(to);
   };

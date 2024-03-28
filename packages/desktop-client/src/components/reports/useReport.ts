@@ -1,26 +1,19 @@
-// @ts-strict-ignore
-import { useState, useEffect, type SetStateAction } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
-export function useReport(
+export function useReport<T>(
   sheetName: string,
   getData: (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (results: unknown) => SetStateAction<unknown>,
+    setData: (results: T) => void,
   ) => Promise<void>,
-) {
+): T | null {
   const spreadsheet = useSpreadsheet();
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState<T | null>(null);
 
   useEffect(() => {
-    let cleanup;
-    getData(spreadsheet, results => setResults(results)).then(c => {
-      cleanup = c;
-    });
-    return () => {
-      cleanup?.();
-    };
+    getData(spreadsheet, results => setResults(results));
   }, [getData]);
   return results;
 }
