@@ -33,7 +33,7 @@ export function Login() {
           setError(null);
           setLoading(true);
           const { error } = await send('subscribe-sign-in', {
-            password: "",
+            password: '',
             loginMethod: method,
           });
           setLoading(false);
@@ -64,7 +64,7 @@ export function Login() {
   }
 
   async function onSubmit(e) {
-      e.preventDefault();
+    e.preventDefault();
     if (password === '' || loading) {
       return;
     }
@@ -128,7 +128,7 @@ export function Login() {
             autoFocus={true}
             placeholder="Password"
             type="password"
-            onChange={e => setPassword(e.target.value) }
+            onChange={e => setPassword(e.target.value)}
             style={{ flex: 1, marginRight: 10 }}
           />
           <ButtonWithLoading
