@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -26,6 +26,28 @@ export function Login() {
   const [error, setError] = useState(searchParams.get('error'));
   const { checked } = useBootstrapped(!searchParams.has('error'));
 
+  useEffect(() => {
+    if (checked && !searchParams.has('error')) {
+      (async () => {
+        if (method === 'header') {
+          setError(null);
+          setLoading(true);
+          const { error } = await send('subscribe-sign-in', {
+            password,
+            loginMethod: method,
+          });
+          setLoading(false);
+      
+          if (error) {
+            setError(error);
+          } else {
+            dispatch(loggedIn());
+          }
+        }
+      })();
+    }
+  }, [checked, searchParams, method, dispatch]);
+
   function getErrorMessage(error) {
     switch (error) {
       case 'invalid-header':
@@ -41,44 +63,31 @@ export function Login() {
     }
   }
 
-  const onSubmit = useCallback(
-    async (e?: React.FormEvent<HTMLFormElement>) => {
-      if (typeof e !== 'undefined' && e !== null) {
-        e.preventDefault();
-      }
-      if (method === 'password' && password === '') {
-        return;
-      }
-      if (loading) {
-        return;
-      }
-
-      setError(null);
-      setLoading(true);
-      const { error } = await send('subscribe-sign-in', {
-        password,
-        loginMethod: method,
-      });
-      setLoading(false);
-
-      if (error) {
-        setError(error);
-      } else {
-        dispatch(loggedIn());
-      }
-    },
-    [method, loading, error, dispatch, password],
-  );
-
-  useEffect(() => {
-    if (checked && !searchParams.has('error')) {
-      (async () => {
-        if (method === 'header') {
-          await onSubmit();
-        }
-      })();
+  async function onSubmit(e?: React.FormEvent<HTMLFormElement>) {
+    if (typeof e !== 'undefined' && e !== null) {
+      e.preventDefault();
     }
-  }, [checked, searchParams, method, onSubmit]);
+    if (method === 'password' && password === '') {
+      return;
+    }
+    if (loading) {
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+    const { error } = await send('subscribe-sign-in', {
+      password,
+      loginMethod: method,
+    });
+    setLoading(false);
+
+    if (error) {
+      setError(error);
+    } else {
+      dispatch(loggedIn());
+    }
+  }
 
   async function onDemo() {
     await dispatch(createBudget({ demoMode: true }));
@@ -124,7 +133,9 @@ export function Login() {
             autoFocus={true}
             placeholder="Password"
             type="password"
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) =>
+              setPassword(e.target.value)
+            }
             style={{ flex: 1, marginRight: 10 }}
           />
           <ButtonWithLoading
