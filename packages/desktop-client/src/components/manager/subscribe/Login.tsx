@@ -8,12 +8,12 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { Text } from '../../common/Text';
-import { View } from '../../common/View';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button';
 import { ButtonLink } from '../../common/ButtonLink';
 import { BigInput } from '../../common/Input';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 
@@ -33,11 +33,11 @@ export function Login() {
           setError(null);
           setLoading(true);
           const { error } = await send('subscribe-sign-in', {
-            password,
+            password: "",
             loginMethod: method,
           });
           setLoading(false);
-      
+
           if (error) {
             setError(error);
           } else {
@@ -63,14 +63,9 @@ export function Login() {
     }
   }
 
-  async function onSubmit(e?: React.FormEvent<HTMLFormElement>) {
-    if (typeof e !== 'undefined' && e !== null) {
+  async function onSubmit(e) {
       e.preventDefault();
-    }
-    if (method === 'password' && password === '') {
-      return;
-    }
-    if (loading) {
+    if (password === '' || loading) {
       return;
     }
 
@@ -133,9 +128,7 @@ export function Login() {
             autoFocus={true}
             placeholder="Password"
             type="password"
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
+            onChange={e => setPassword(e.target.value) }
             style={{ flex: 1, marginRight: 10 }}
           />
           <ButtonWithLoading
