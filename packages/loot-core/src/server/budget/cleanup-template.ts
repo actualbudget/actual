@@ -10,19 +10,26 @@ export function cleanupTemplate({ month }: { month: string }) {
   return processCleanup(month);
 }
 
-async function applyGroupCleanups(month: string, sourceGroups, sinkGroups) {
+async function applyGroupCleanups(
+  month: string,
+  sourceGroups,
+  sinkGroups,
+  generalGroups,
+) {
   const sheetName = monthUtils.sheetForMonth(month);
   const warnings = [];
+  const db_month = parseInt(month.replace('-', ''));
   let groupLength = sourceGroups.length;
   while (groupLength > 0) {
     //function for each unique group
     const groupName = sourceGroups[0].group;
     const tempSourceGroups = sourceGroups.filter(c => c.group === groupName);
-    const group = sinkGroups.filter(c => c.group === groupName);
+    const sinkGroup = sinkGroups.filter(c => c.group === groupName);
+    const generalGroup = generalGroups.filter(c => c.group === groupName);
     let total_weight = 0;
 
-    if (group.length > 0) {
-      //only return group source funds to To Budget if there are corresponding sinking groups
+    if (sinkGroup.length > 0 || generalGroup.length > 0) {
+      //only return group source funds to To Budget if there are corresponding sinking groups or underfunded included groups
       for (let ii = 0; ii < tempSourceGroups.length; ii++) {
         const balance = await getSheetValue(
           sheetName,
@@ -38,20 +45,69 @@ async function applyGroupCleanups(month: string, sourceGroups, sinkGroups) {
           amount: budgeted - balance,
         });
       }
-      for (let ii = 0; ii < group.length; ii++) {
-        total_weight += group[ii].weight;
+
+      //calculate total weight for sinking funds
+      for (let ii = 0; ii < sinkGroup.length; ii++) {
+        total_weight += sinkGroup[ii].weight;
       }
-      const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
-      for (let ii = 0; ii < group.length; ii++) {
+
+      //fill underfunded categories within the group first
+      for (let ii = 0; ii < generalGroup.length; ii++) {
+        const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+        const balance = await getSheetValue(
+          sheetName,
+          `leftover-${generalGroup[ii].category}`,
+        );
         const budgeted = await getSheetValue(
           sheetName,
-          `budget-${group[ii].category}`,
+          `budget-${generalGroup[ii].category}`,
+        );
+        const to_budget = budgeted + Math.abs(balance);
+        const categoryId = generalGroup[ii].category;
+        let carryover = await db.first(
+          `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
+          [db_month, categoryId],
+        );
+
+        if (carryover === null) {
+          carryover = { carryover: 0 };
+        }
+
+        if (
+          balance < 0 &&
+          Math.abs(balance) <= budgetAvailable &&
+          !generalGroup[ii].category.is_income &&
+          carryover.carryover === 0
+        ) {
+          await setBudget({
+            category: generalGroup[ii].category,
+            month,
+            amount: to_budget,
+          });
+        } else if (
+          balance < 0 &&
+          !generalGroup[ii].category.is_income &&
+          carryover.carryover === 0 &&
+          Math.abs(balance) > budgetAvailable
+        ) {
+          await setBudget({
+            category: generalGroup[ii].category,
+            month,
+            amount: budgeted + budgetAvailable,
+          });
+        }
+      }
+      const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+      for (let ii = 0; ii < sinkGroup.length; ii++) {
+        const budgeted = await getSheetValue(
+          sheetName,
+          `budget-${sinkGroup[ii].category}`,
         );
         const to_budget =
           budgeted +
-          Math.round((group[ii].weight / total_weight) * budgetAvailable);
+          Math.round((sinkGroup[ii].weight / total_weight) * budgetAvailable);
         await setBudget({
-          category: group[ii].category,
+          category: sinkGroup[ii].category,
           month,
           amount: to_budget,
         });
@@ -82,6 +138,7 @@ async function processCleanup(month: string): Promise<Notification> {
   const sheetName = monthUtils.sheetForMonth(month);
   const groupSource = [];
   const groupSink = [];
+  const groupGeneral = [];
 
   //filter out category groups
   for (let c = 0; c < categories.length; c++) {
@@ -105,10 +162,20 @@ async function processCleanup(month: string): Promise<Notification> {
           weight: template[0].weight,
         });
       }
+      if (
+        template.filter(t => t.type === null && t.group !== null).length > 0
+      ) {
+        groupGeneral.push({ category: category.id, group: template[0].group });
+      }
     }
   }
   //run category groups
-  const newWarnings = await applyGroupCleanups(month, groupSource, groupSink);
+  const newWarnings = await applyGroupCleanups(
+    month,
+    groupSource,
+    groupSink,
+    groupGeneral,
+  );
   warnings.splice(1, 0, ...newWarnings);
 
   for (let c = 0; c < categories.length; c++) {
@@ -127,10 +194,10 @@ async function processCleanup(month: string): Promise<Notification> {
           `budget-${category.id}`,
         );
         if (balance >= 0) {
-          const spent = await getSheetValue(
-            sheetName,
-            `sum-amount-${category.id}`,
-          );
+          // const spent = await getSheetValue(
+          //   sheetName,
+          //   `sum-amount-${category.id}`,
+          // );
           await setBudget({
             category: category.id,
             month,
@@ -139,7 +206,7 @@ async function processCleanup(month: string): Promise<Notification> {
           await setGoal({
             category: category.id,
             month,
-            goal: -spent,
+            goal: budgeted - balance,
           });
           num_sources += 1;
         } else {
