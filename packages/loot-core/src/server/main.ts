@@ -1654,7 +1654,11 @@ handlers['subscribe-needs-bootstrap'] = async function ({
     return { error: res.reason };
   }
 
-  return { bootstrapped: res.data.bootstrapped, hasServer: true };
+  return {
+    bootstrapped: res.data.bootstrapped,
+    loginMethod: res.data.loginMethod,
+    hasServer: true,
+  };
 };
 
 handlers['subscribe-bootstrap'] = async function ({ password }) {
@@ -1726,8 +1730,12 @@ handlers['subscribe-change-password'] = async function ({ password }) {
   return {};
 };
 
-handlers['subscribe-sign-in'] = async function ({ password }) {
+handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
+  if (typeof loginMethod !== 'string' || loginMethod == null) {
+    loginMethod = 'password';
+  }
   const res = await post(getServer().SIGNUP_SERVER + '/login', {
+    loginMethod,
     password,
   });
 
@@ -1736,7 +1744,7 @@ handlers['subscribe-sign-in'] = async function ({ password }) {
     return {};
   }
 
-  return { error: 'invalid-password' };
+  return { error: res.error || 'invalid-password' };
 };
 
 handlers['subscribe-sign-out'] = async function () {
