@@ -23,6 +23,7 @@ type PayloadItem = {
   dataKey: string;
   value: number;
   date: string;
+  color: string;
   payload: {
     date: string;
   };
@@ -53,8 +54,14 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
           </div>
           <div style={{ lineHeight: 1.5 }}>
             <PrivacyFilter>
-              {payload.map((p: PayloadItem, index: number) => (
-                <AlignedText key={index} left={p.dataKey} right={p.value} />
+              {payload.sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
+              .map((p: PayloadItem, index: number) => (
+                <AlignedText 
+                key={index} 
+                left={p.dataKey} 
+                right={p.value} 
+                style={{ color: p.color }}
+                />
               ))}
             </PrivacyFilter>
           </div>
@@ -109,6 +116,7 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
                   return (
                     <Line
                       key={index}
+                      strokeWidth={2}
                       type="monotone"
                       dataKey={legendItem.name}
                       stroke={legendItem.color}
