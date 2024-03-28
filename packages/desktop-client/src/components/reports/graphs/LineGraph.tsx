@@ -54,15 +54,16 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
           </div>
           <div style={{ lineHeight: 1.5 }}>
             <PrivacyFilter>
-              {payload.sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
-              .map((p: PayloadItem, index: number) => (
-                <AlignedText 
-                key={index} 
-                left={p.dataKey} 
-                right={p.value} 
-                style={{ color: p.color }}
-                />
-              ))}
+              {payload
+                .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
+                .map((p: PayloadItem, index: number) => (
+                  <AlignedText
+                    key={index}
+                    left={p.dataKey}
+                    right={p.value}
+                    style={{ color: p.color }}
+                  />
+                ))}
             </PrivacyFilter>
           </div>
         </div>
