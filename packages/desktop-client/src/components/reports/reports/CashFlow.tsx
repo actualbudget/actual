@@ -112,7 +112,7 @@ export function CashFlow() {
 
   function onChangeDates(start: string, end: string, forecast) {
     const numDays = d.differenceInCalendarDays(
-      d.parseISO(end),
+      d.max([d.parseISO(forecast),d.parseISO(end)]),
       d.parseISO(start),
     );
     const isConcise = numDays > 31 * 3;

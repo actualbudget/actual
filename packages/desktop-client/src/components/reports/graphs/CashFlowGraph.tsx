@@ -4,6 +4,7 @@ import * as d from 'date-fns';
 import { css } from 'glamor';
 import {
   Bar,
+  Cell,
   CartesianGrid,
   ComposedChart,
   Line,
@@ -81,6 +82,17 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
   );
 }
 
+// To ensure a smooth between solid and dashed, there are two identical lines ...
+// ... each with the  unwanted part hidden (opacity=0) using a gradient
+const gradientTwoColors = (id, col1, col2, percentChange) => (
+  <linearGradient id={id} x1="0" y1="0" x2="100%" y2="0">
+      <stop offset="0%" stopColor={col1} />
+      <stop offset={`${percentChange}%`} stopColor={col1} />
+      <stop offset={`${percentChange}%`} stopColor={`${col2}`} />
+      <stop offset="100%" stopColor={col2} />
+  </linearGradient>
+);
+
 type CashFlowGraphProps = {
   graphData: {
     expenses: { x: Date; y: number }[];
@@ -107,24 +119,34 @@ export function CashFlowGraph({
     expenses: row.y,
     income: graphData.income[idx].y,
     balance: graphData.balances[idx].y,
-    futureExpense: 0,
-    futureIncome: 0,
-    futureBalance: 0,
     transfers: graphData.transfers[idx].y,
+    isFuture: false,
   })).concat(graphData.futureExpenses.map((row, idx) => ({
     date: row.x,
-    expenses: 0,
-    income: 0,
-    balance: 0,
-    futureExpense: row.y,
-    futureIncome: graphData.futureIncome[idx].y,
-    futureBalance: graphData.futureBalances[idx].y,
+    expenses: row.y,
+    income: graphData.futureIncome[idx].y,
+    balance: graphData.futureBalances[idx].y,
     transfers: 0,
+    isFuture: true,
   })));
 
   return (
     <ResponsiveContainer width="100%" height={300}>
       <ComposedChart stackOffset="sign" data={data}>
+        <defs>
+          {gradientTwoColors(
+              "hideFuture",
+              theme.pageTextLight,
+              "rgba(0,0,0,0)",
+              100-100*data.filter(d => d.isFuture).length/(data.length-0.5)
+          )}
+          {gradientTwoColors(
+              "showFutureOnly",
+              "rgba(0,0,0,0)",
+              theme.pageTextLight,
+              100-100*data.filter(d => d.isFuture).length/(data.length-0.5)
+          )}
+        </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="date"
@@ -159,29 +181,30 @@ export function CashFlowGraph({
         <Bar
           dataKey="income"
           stackId="a"
-          fill={chartTheme.colors.blue}
           maxBarSize={MAX_BAR_SIZE}
           animationDuration={ANIMATION_DURATION}
-        />
+        >
+          {data.map((entry, index) => (
+            <Cell fill={entry.isFuture ? theme.reportsBlueFaded : chartTheme.colors.blue }/>
+        ))}
+        </Bar>
         <Bar
           dataKey="expenses"
           stackId="a"
-          fill={chartTheme.colors.red}
           maxBarSize={MAX_BAR_SIZE}
           animationDuration={ANIMATION_DURATION}
-        />
-        <Bar
-          dataKey="futureExpense"
-          stackId="a"
-          fill={theme.reportsRedFaded}
-          maxBarSize={MAX_BAR_SIZE}
-          animationDuration={ANIMATION_DURATION}
-        />
-        <Bar
-          dataKey="futureIncome"
-          stackId="a"
-          fill={theme.reportsBlueFaded}
-          maxBarSize={MAX_BAR_SIZE}
+        >
+          {data.map((entry, index) => (
+            <Cell fill={entry.isFuture ? theme.reportsRedFaded : chartTheme.colors.red }/>
+        ))}
+        </Bar>
+        <Line
+          type="monotone"
+          dataKey="balance"
+          dot={false}
+          hide={!showBalance}
+          stroke="url(#hideFuture)"
+          strokeWidth={2}
           animationDuration={ANIMATION_DURATION}
         />
         <Line
@@ -189,18 +212,9 @@ export function CashFlowGraph({
           dataKey="balance"
           dot={false}
           hide={!showBalance}
-          stroke={theme.pageTextLight}
+          stroke="url(#showFutureOnly)"
           strokeWidth={2}
-          animationDuration={ANIMATION_DURATION}
-        />
-        <Line
-          type="monotone"
-          dataKey="futureBalance"
-          dot={false}
-          hide={!showBalance}
-          stroke={theme.pageTextLight}
-          strokeWidth={2}
-          strokeDasharray="4 1"
+          strokeDasharray="4 3"
           animationDuration={ANIMATION_DURATION}
         />
       </ComposedChart>
