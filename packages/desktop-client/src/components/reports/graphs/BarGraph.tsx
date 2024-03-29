@@ -21,6 +21,9 @@ import {
 } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
@@ -143,6 +146,9 @@ export function BarGraph({
   compact,
   viewLabels,
 }: BarGraphProps) {
+  const navigate = useNavigate();
+  const categories = useCategories();
+  const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
@@ -166,6 +172,59 @@ export function BarGraph({
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
+
+  const onShowActivity = item => {
+    const amount = balanceTypeOp === 'totalDebts' ? 'lte' : 'gte';
+    const field = groupBy === 'Interval' ? null : groupBy.toLowerCase();
+    const hiddenCategories = categories.list
+      .filter(f => f.hidden)
+      .map(e => e.id);
+    const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
+
+    const conditions = [
+      { field, op: 'is', value: item.id, type: 'id' },
+      {
+        field: 'date',
+        op: 'gte',
+        value: data.startDate,
+        options: { date: true },
+        type: 'date',
+      },
+      {
+        field: 'date',
+        op: 'lte',
+        value: data.endDate,
+        options: { date: true },
+        type: 'date',
+      },
+      balanceTypeOp !== 'totalTotals' && {
+        field: 'amount',
+        op: amount,
+        value: 0,
+        type: 'number',
+      },
+      hiddenCategories.length > 0 && {
+        field: 'category',
+        op: 'notOneOf',
+        value: hiddenCategories,
+        type: 'id',
+      },
+      offBudgetAccounts.length > 0 && {
+        field: 'account',
+        op: 'notOneOf',
+        value: offBudgetAccounts,
+        type: 'id',
+      },
+    ].filter(f => f);
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        conditions,
+        categoryId: item.id,
+      },
+    });
+  };
+
   return (
     <Container
       style={{
@@ -226,7 +285,13 @@ export function BarGraph({
                     <ReferenceLine y={0} stroke={theme.pageTextLight} />
                   </>
                 )}
-                <Bar dataKey={val => getVal(val)} stackId="a">
+                <Bar
+                  dataKey={val => getVal(val)}
+                  stackId="a"
+                  onClick={
+                    !['Group', 'Interval'].includes(groupBy) && onShowActivity
+                  }
+                >
                   {viewLabels && !compact && (
                     <LabelList
                       dataKey={val => getVal(val)}
