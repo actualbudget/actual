@@ -105,21 +105,6 @@ export function Header({
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
             />
-            {forecast && <View>+</View>}
-            {forecast && (
-              <Select
-                style={{ backgroundColor: 'white' }}
-                onChange={newValue =>
-                  onChangeDates(
-                    ...validateStart(allMonths, start, end),
-                    newValue,
-                  )
-                }
-                value={forecast}
-                options={allForecasts.map(({ name, pretty }) => [name, pretty])}
-                disabledKeys={disabled}
-              />
-            )}
           </View>
 
           {filters && <FilterButton onApply={onApply} type="accounts" />}
@@ -163,6 +148,33 @@ export function Header({
           </Button>
 
           {children || <View style={{ flex: 1 }} />}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            {forecast && <View>Forecast</View>}
+            {forecast && (
+              <Select
+                style={{ backgroundColor: 'white' }}
+                onChange={newValue =>
+                  onChangeDates(
+                    ...validateStart(
+                      allMonths[allMonths.length - 1].name,
+                      start,
+                      end,
+                    ),
+                    newValue,
+                  )
+                }
+                value={forecast}
+                options={allForecasts.map(({ name, pretty }) => [name, pretty])}
+                disabledKeys={disabled}
+              />
+            )}
+          </View>
         </View>
       )}
       {filters && filters.length > 0 && (

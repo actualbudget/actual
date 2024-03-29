@@ -180,7 +180,7 @@ export function CashFlowGraph({
         <Bar
           dataKey="futureIncome"
           stackId="a"
-          fill={theme.reportsRedFaded}
+          fill={theme.reportsBlueFaded}
           maxBarSize={MAX_BAR_SIZE}
           animationDuration={ANIMATION_DURATION}
         />

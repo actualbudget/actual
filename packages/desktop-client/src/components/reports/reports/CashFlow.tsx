@@ -47,7 +47,7 @@ export function CashFlow() {
   const forecastFeatureFlag = useFeatureFlag('cashflowForecast');
   const [forecast, setForecast] = useState(
     forecastFeatureFlag
-      ? monthUtils.addDays(monthUtils.currentDay(), 31)
+      ? monthUtils.addDays(monthUtils.currentDay(), 6 * 31)
       : monthUtils.currentMonth(),
   );
 
