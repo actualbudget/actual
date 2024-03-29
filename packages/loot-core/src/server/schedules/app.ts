@@ -391,6 +391,22 @@ async function getUpcomingDates({ config, count }) {
   }
 }
 
+async function getOccurrencesToDate({ config, end }) {
+  const rules = recurConfigToRSchedule(config);
+
+  try {
+    const schedule = new RSchedule({ rrules: rules });
+
+    return schedule
+      .occurrences({ start: d.startOfDay(new Date()), end })
+      .toArray()
+      .map(date => dayFromDate(date.date));
+  } catch (err) {
+    captureBreadcrumb(config);
+    throw err;
+  }
+}
+
 // Services
 
 function onRuleUpdate(rule) {
@@ -560,6 +576,7 @@ app.method(
 );
 app.method('schedule/discover', discoverSchedules);
 app.method('schedule/get-upcoming-dates', getUpcomingDates);
+app.method('schedule/get-occurrences-to-date', getOccurrencesToDate);
 
 app.service(trackJSONPaths);
 

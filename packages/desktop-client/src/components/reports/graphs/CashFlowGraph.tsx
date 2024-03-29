@@ -86,6 +86,9 @@ type CashFlowGraphProps = {
     expenses: { x: Date; y: number }[];
     income: { x: Date; y: number }[];
     balances: { x: Date; y: number }[];
+    futureBalances: { x: Date; y: number }[];
+    futureExpenses: { x: Date; y: number }[];
+    futureIncome: { x: Date; y: number }[];
     transfers: { x: Date; y: number }[];
   };
   isConcise: boolean;
@@ -104,8 +107,20 @@ export function CashFlowGraph({
     expenses: row.y,
     income: graphData.income[idx].y,
     balance: graphData.balances[idx].y,
+    futureExpense: 0,
+    futureIncome: 0,
+    futureBalance: 0,
     transfers: graphData.transfers[idx].y,
-  }));
+  })).concat(graphData.futureExpenses.map((row, idx) => ({
+    date: row.x,
+    expenses: 0,
+    income: 0,
+    balance: 0,
+    futureExpense: row.y,
+    futureIncome: graphData.futureIncome[idx].y,
+    futureBalance: graphData.futureBalances[idx].y,
+    transfers: 0,
+  })));
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -155,6 +170,20 @@ export function CashFlowGraph({
           maxBarSize={MAX_BAR_SIZE}
           animationDuration={ANIMATION_DURATION}
         />
+        <Bar
+          dataKey="futureExpense"
+          stackId="a"
+          fill={theme.reportsRedFaded}
+          maxBarSize={MAX_BAR_SIZE}
+          animationDuration={ANIMATION_DURATION}
+        />
+        <Bar
+          dataKey="futureIncome"
+          stackId="a"
+          fill={theme.reportsRedFaded}
+          maxBarSize={MAX_BAR_SIZE}
+          animationDuration={ANIMATION_DURATION}
+        />
         <Line
           type="monotone"
           dataKey="balance"
@@ -162,6 +191,16 @@ export function CashFlowGraph({
           hide={!showBalance}
           stroke={theme.pageTextLight}
           strokeWidth={2}
+          animationDuration={ANIMATION_DURATION}
+        />
+        <Line
+          type="monotone"
+          dataKey="futureBalance"
+          dot={false}
+          hide={!showBalance}
+          stroke={theme.pageTextLight}
+          strokeWidth={2}
+          strokeDasharray="4 1"
           animationDuration={ANIMATION_DURATION}
         />
       </ComposedChart>

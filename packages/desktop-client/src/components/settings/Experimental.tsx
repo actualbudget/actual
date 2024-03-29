@@ -88,6 +88,9 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
             <FeatureToggle flag="splitsInRules">Splits in rules</FeatureToggle>
+            <FeatureToggle flag="cashflowForecast">
+              Cashflow Forecast
+            </FeatureToggle>
           </View>
         ) : (
           <LinkButton

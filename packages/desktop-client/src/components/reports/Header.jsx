@@ -22,8 +22,11 @@ export function Header({
   title,
   start,
   end,
+  forecast,
   show1Month,
   allMonths,
+  allForecasts,
+  disabled,
   onChangeDates,
   filters,
   conditionsOp,
@@ -80,6 +83,7 @@ export function Header({
                     newValue,
                     end,
                   ),
+                  forecast,
                 )
               }
               value={start}
@@ -95,11 +99,27 @@ export function Header({
                     start,
                     newValue,
                   ),
+                  forecast,
                 )
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
             />
+            {forecast && <View>+</View>}
+            {forecast && (
+              <Select
+                style={{ backgroundColor: 'white' }}
+                onChange={newValue =>
+                  onChangeDates(
+                    ...validateStart(allMonths, start, end),
+                    newValue,
+                  )
+                }
+                value={forecast}
+                options={allForecasts.map(({ name, pretty }) => [name, pretty])}
+                disabledKeys={disabled}
+              />
+            )}
           </View>
 
           {filters && <FilterButton onApply={onApply} type="accounts" />}
@@ -107,26 +127,26 @@ export function Header({
           {show1Month && (
             <Button
               type="bare"
-              onClick={() => onChangeDates(...getLatestRange(1))}
+              onClick={() => onChangeDates(...getLatestRange(1), forecast)}
             >
               1 month
             </Button>
           )}
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getLatestRange(2))}
+            onClick={() => onChangeDates(...getLatestRange(2), forecast)}
           >
             3 months
           </Button>
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getLatestRange(5))}
+            onClick={() => onChangeDates(...getLatestRange(5), forecast)}
           >
             6 months
           </Button>
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getLatestRange(11))}
+            onClick={() => onChangeDates(...getLatestRange(11), forecast)}
           >
             1 Year
           </Button>
@@ -135,6 +155,7 @@ export function Header({
             onClick={() =>
               onChangeDates(
                 ...getFullRange(allMonths[allMonths.length - 1].name),
+                forecast,
               )
             }
           >
