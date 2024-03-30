@@ -12,6 +12,10 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import {
+  amountToCurrency,
+} from 'loot-core/src/shared/util';
+
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -60,7 +64,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
                   <AlignedText
                     key={index}
                     left={p.dataKey}
-                    right={p.value}
+                    right={amountToCurrency(p.value)}
                     style={{ color: p.color }}
                   />
                 ))}
@@ -74,11 +78,11 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 
 type LineGraphProps = {
   style?: CSSProperties;
-  graphData;
+  data;
   compact?: boolean;
 };
 
-export function LineGraph({ style, graphData, compact }: LineGraphProps) {
+export function LineGraph({ style, data, compact }: LineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -91,14 +95,14 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
       }}
     >
       {(width, height) =>
-        graphData && (
+        data && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <LineChart
                 width={width}
                 height={height}
-                data={graphData.intervalData}
+                data={data.intervalData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 <Tooltip
@@ -113,7 +117,7 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
                     <YAxis name="Value" tickFormatter={tickFormatter} />
                   </>
                 )}
-                {graphData.legend.map((legendItem, index) => {
+                {data.legend.map((legendItem, index) => {
                   return (
                     <Line
                       key={index}

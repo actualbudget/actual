@@ -108,9 +108,7 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'BarLineGraph') {
-    return (
-      <BarLineGraph style={graphStyle} compact={compact} graphData={data} />
-    );
+    return <BarLineGraph style={graphStyle} compact={compact} data={data} />;
   }
   if (graphType === 'DonutGraph') {
     return (
@@ -125,7 +123,7 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={graphStyle} compact={compact} graphData={data} />;
+    return <LineGraph style={graphStyle} compact={compact} data={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return (

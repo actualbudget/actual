@@ -23,7 +23,6 @@ export function ReportTopbar({
   savedStatus,
   setGraphType,
   setGroupBy,
-  setTypeDisabled,
   viewLegend,
   viewSummary,
   viewLabels,
@@ -87,10 +86,9 @@ export function ReportTopbar({
           setGraphType('LineGraph');
           setGroupBy('Category');
           onChangeViews('viewLegend', false);
-          setTypeDisabled(['Net']);
         }}
         style={{ marginRight: 15 }}
-        disabled={customReportItems.mode === 'total' ? true : false}
+        disabled={disabledItems('LineGraph')}
       >
         <SvgChartAnalytics width={15} height={15} />
       </GraphButton>
