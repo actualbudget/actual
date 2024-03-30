@@ -12,9 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import {
-  amountToCurrency,
-} from 'loot-core/src/shared/util';
+import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
