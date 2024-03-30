@@ -51,10 +51,12 @@ const timeGraphOptions = [
   },
   {
     description: 'LineGraph',
-    disabledSplit: [''],
+    disabledSplit: ['Interval'],
     defaultSplit: 'Category',
     disabledType: ['Net'],
     defaultType: 'Payment',
+    disableLegend: false,
+    disableLabel: true,
   },
 ];
 

@@ -3,7 +3,6 @@ import React from 'react';
 import {
   SvgCalculator,
   SvgChart,
-  SvgChartAnalytics,
   SvgChartBar,
   SvgChartPie,
   SvgListBullet,
@@ -86,11 +85,12 @@ export function ReportTopbar({
           setGraphType('LineGraph');
           setGroupBy('Category');
           onChangeViews('viewLegend', false);
+          defaultItems('LineGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('LineGraph')}
       >
-        <SvgChartAnalytics width={15} height={15} />
+        <SvgChart width={15} height={15} />
       </GraphButton>
       <GraphButton
         title="Area Graph"

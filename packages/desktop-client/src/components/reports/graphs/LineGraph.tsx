@@ -115,14 +115,14 @@ export function LineGraph({ style, data, compact }: LineGraphProps) {
                     <YAxis name="Value" tickFormatter={tickFormatter} />
                   </>
                 )}
-                {data.legend.map((legendItem, index) => {
+                {data.legend.map((entry, index) => {
                   return (
                     <Line
                       key={index}
                       strokeWidth={2}
                       type="monotone"
-                      dataKey={legendItem.name}
-                      stroke={legendItem.color}
+                      dataKey={entry.name}
+                      stroke={entry.color}
                     />
                   );
                 })}
