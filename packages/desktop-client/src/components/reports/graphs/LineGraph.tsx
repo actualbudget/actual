@@ -103,7 +103,7 @@ export function LineGraph({ style, data, compact }: LineGraphProps) {
                 width={width}
                 height={height}
                 data={data.intervalData}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
               >
                 <Tooltip
                   content={<CustomTooltip />}
