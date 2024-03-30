@@ -333,7 +333,7 @@ export function CategoryItem({
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
-          ...narrowStyle,
+          narrowStyle,
         },
       ])}`}
       data-testid={`${item.name}-category-item`}

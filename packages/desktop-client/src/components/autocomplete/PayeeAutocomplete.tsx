@@ -524,7 +524,7 @@ export function PayeeItem({
           borderRadius: embedded ? 4 : 0,
           padding: 4,
           paddingLeft: 20,
-          ...narrowStyle,
+          narrowStyle,
         },
       ])}`}
       data-testid={`${item.name}-payee-item`}
