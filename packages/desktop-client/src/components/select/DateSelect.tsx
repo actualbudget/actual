@@ -9,6 +9,7 @@ import React, {
   useMemo,
   type MutableRefObject,
   type KeyboardEvent,
+  type ComponentProps,
 } from 'react';
 
 import { parse, parseISO, format, subDays, addDays, isValid } from 'date-fns';
@@ -27,7 +28,7 @@ import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme } from '../../style';
-import { Input, type InputProps } from '../common/Input';
+import { Input } from '../common/Input';
 import { View, type ViewProps } from '../common/View';
 import { Tooltip } from '../tooltips';
 
@@ -172,7 +173,7 @@ function defaultShouldSaveFromKey(e) {
 
 type DateSelectProps = {
   containerProps?: ViewProps;
-  inputProps?: InputProps;
+  inputProps?: ComponentProps<typeof Input>;
   tooltipStyle?: CSSProperties;
   value: string;
   isOpen?: boolean;
@@ -182,7 +183,7 @@ type DateSelectProps = {
   openOnFocus?: boolean;
   inputRef?: MutableRefObject<HTMLInputElement>;
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
-  tableBehavior?: boolean;
+  clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
   onSelect: (selectedDate: string) => void;
 };
@@ -199,7 +200,7 @@ export function DateSelect({
   openOnFocus = true,
   inputRef: originalInputRef,
   shouldSaveFromKey = defaultShouldSaveFromKey,
-  tableBehavior,
+  clearOnBlur = true,
   onUpdate,
   onSelect,
 }: DateSelectProps) {
@@ -362,7 +363,7 @@ export function DateSelect({
           }
           inputProps?.onBlur?.(e);
 
-          if (!tableBehavior) {
+          if (clearOnBlur) {
             // If value is empty, that drives what gets selected.
             // Otherwise the input is reset to whatever is already
             // selected

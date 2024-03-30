@@ -21,7 +21,7 @@ export const defaultInputStyle = {
   border: '1px solid ' + theme.formInputBorder,
 };
 
-export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   style?: CSSProperties;
   inputRef?: Ref<HTMLInputElement>;
   onEnter?: (event: KeyboardEvent<HTMLInputElement>) => void;

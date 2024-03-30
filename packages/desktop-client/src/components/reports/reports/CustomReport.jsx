@@ -183,8 +183,8 @@ export function CustomReport() {
       balanceTypeOp,
       payees,
       accounts,
-      setDataCheck,
       graphType,
+      setDataCheck,
     });
   }, [
     startDate,
@@ -225,7 +225,7 @@ export function CustomReport() {
     graphType,
     conditions: filters,
     conditionsOp,
-    data,
+    data: {},
   };
 
   const [scrollWidth, setScrollWidth] = useState(0);

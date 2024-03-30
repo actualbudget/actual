@@ -6,6 +6,7 @@ import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
@@ -54,7 +55,15 @@ function AccountHeader({ name, amount, style = {} }) {
   );
 }
 
-function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
+function AccountCard({
+  account,
+  updated,
+  connected,
+  pending,
+  failed,
+  getBalanceQuery,
+  onSelect,
+}) {
   return (
     <View
       style={{
@@ -94,6 +103,22 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
               alignItems: 'center',
             }}
           >
+            {account.bankId && (
+              <View
+                style={{
+                  backgroundColor: pending
+                    ? theme.sidebarItemBackgroundPending
+                    : failed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
+                  marginRight: '8px',
+                  width: 8,
+                  height: 8,
+                  borderRadius: 8,
+                  opacity: connected ? 1 : 0,
+                }}
+              />
+            )}
             <TextOneLine
               style={{
                 ...styles.text,
@@ -106,17 +131,6 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             >
               {account.name}
             </TextOneLine>
-            {account.bankId && (
-              <View
-                style={{
-                  backgroundColor: theme.noticeBackgroundDark,
-                  marginLeft: '-23px',
-                  width: 8,
-                  height: 8,
-                  borderRadius: 8,
-                }}
-              />
-            )}
           </View>
         </View>
         <CellValue
@@ -153,6 +167,8 @@ function AccountList({
   onSelectAccount,
   onSync,
 }) {
+  const failedAccounts = useFailedAccounts();
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
   const noBackgroundColorStyle = {
@@ -194,7 +210,10 @@ function AccountList({
             <AccountCard
               account={acct}
               key={acct.id}
-              updated={updatedAccounts.includes(acct.id)}
+              updated={updatedAccounts && updatedAccounts.includes(acct.id)}
+              connected={!!acct.bank}
+              pending={syncingAccountIds.includes(acct.id)}
+              failed={failedAccounts && failedAccounts.has(acct.id)}
               getBalanceQuery={getBalanceQuery}
               onSelect={onSelectAccount}
             />
@@ -211,7 +230,10 @@ function AccountList({
             <AccountCard
               account={acct}
               key={acct.id}
-              updated={updatedAccounts.includes(acct.id)}
+              updated={updatedAccounts && updatedAccounts.includes(acct.id)}
+              connected={!!acct.bank}
+              pending={syncingAccountIds.includes(acct.id)}
+              failed={failedAccounts && failedAccounts.has(acct.id)}
               getBalanceQuery={getBalanceQuery}
               onSelect={onSelectAccount}
             />
