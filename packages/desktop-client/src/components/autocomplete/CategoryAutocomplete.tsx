@@ -227,7 +227,6 @@ function SplitTransactionButton({
   style,
   ...props
 }: SplitTransactionButtonProps) {
-  const { isNarrowWidth } = useResponsive();
   return (
     <View
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
@@ -254,9 +253,7 @@ function SplitTransactionButton({
       role="button"
       style={{
         backgroundColor: highlighted
-          ? embedded && isNarrowWidth
-            ? theme.menuItemBackgroundHover
-            : theme.menuAutoCompleteBackgroundHover
+          ? theme.menuAutoCompleteBackgroundHover
           : 'transparent',
         borderRadius: embedded ? 4 : 0,
         flexShrink: 0,
@@ -312,7 +309,6 @@ export function CategoryItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
-        color: theme.menuItemText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -326,14 +322,12 @@ export function CategoryItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? embedded && isNarrowWidth
-              ? theme.menuItemBackgroundHover
-              : theme.menuAutoCompleteBackgroundHover
+            ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
-          narrowStyle,
+          ...narrowStyle,
         },
       ])}`}
       data-testid={`${item.name}-category-item`}
