@@ -51,14 +51,6 @@ This is the documentation of all available API methods. The API has not been rel
 "deletePayee"
 ]} />
 
-<APIList title="Payee rules" sections={[
-"Payee rule",
-"getPayeeRules",
-"createPayeeRule",
-"updatePayeeRule",
-"deletePayeeRule"
-]} />
-
 ## Types of methods
 
 API methods are categorized into one of four types:
@@ -100,8 +92,6 @@ These are types.
 
 <Method name="setBudgetCarryover" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'flag', type: 'bool' }]} returns="Promise<null>" />
 
-#### Examples
-
 ## Transactions
 
 #### Transaction
@@ -142,7 +132,7 @@ This method does **not** avoid duplicates. Use `importTransactions` if you want 
 
 This method has the following optional flags:
 
-- `runTransfers`:  create transfers for transactions where transfer payee is given (defaults to false)
+- `runTransfers`: create transfers for transactions where transfer payee is given (defaults to false)
 - `learnCategories`: update Rules based on the category field in the transactions (defaults to false)
 
 This method is mainly for custom importers that want to skip all the automatic stuff because it wants to create raw data. You probably want to use `importTransactions`.
@@ -168,10 +158,6 @@ This method returns an object with the following fields:
 <Method name="getTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'startDate', type: 'date' }, { name: 'endDate', type: 'date' }]} returns="Promise<Transaction[]>" />
 
 Get all the transactions in `accountId` between the specified dates (inclusive). Returns an array of [`Transaction`](#transaction) objects.
-
-#### `filterTransactions`
-
-`filterTransactions` has been removed. Use [ActualQL](./actual-ql/index.md) instead.
 
 #### `updateTransaction`
 
@@ -396,8 +382,6 @@ Update fields of a category group. `fields` can specify any field described in [
 
 Delete a category group.
 
-#### Examples
-
 ## Payees
 
 #### Payee
@@ -442,47 +426,3 @@ Update fields of a payee. `fields` can specify any field described in [`Payee`](
 <Method name="deletePayee" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
 
 Delete a payee.
-
-#### Examples
-
-## Payee rules
-
-#### Payee rule
-
-<StructType fields={objects.payeeRule} />
-
-#### Methods
-
-#### `getPayeeRules`
-
-<Method name="getPayees" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<PayeeRule[]>" />
-
-Get all payees rules for `payeeId`.
-
-#### `createPayeeRule`
-
-<Method name="createPayeeRule" args={[{ name: 'payeeId', type: 'id' }, { name: 'rule', type: 'PayeeRule' }]} returns="Promise<id>" />
-
-Create a payee rule for `payeeId`. Returns the `id` of the new rule.
-
-#### `updatePayeeRule`
-
-<Method name="updatePayeeRule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<id>" />
-
-Update fields of a payee rule. `fields` can specify any field described in [`PayeeRule`](#payeerule).
-
-#### `deletePayeeRule`
-
-<Method name="deletePayeeRule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
-
-Delete a payee rule.
-
-#### Examples
-
-```js
-{
-  payee_id: "08fc54b5-3baa-4874-bef4-470c238d25ac",
-  type: "contains",
-  value: "grocery"
-}
-```
