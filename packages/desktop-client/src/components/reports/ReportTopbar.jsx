@@ -2,6 +2,7 @@ import React from 'react';
 
 import {
   SvgCalculator,
+  SvgChart,
   SvgChartBar,
   SvgChartPie,
   SvgListBullet,
