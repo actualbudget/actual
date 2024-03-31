@@ -968,9 +968,7 @@ function TransactionEditUnconnected({
   dateFormat,
 }) {
   const { transactionId } = useParams();
-  const {
-    state: { accountId, categoryId },
-  } = useLocation();
+  const { state: locationState } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [transactions, setTransactions] = useState([]);
@@ -1011,13 +1009,13 @@ function TransactionEditUnconnected({
     if (adding.current) {
       setTransactions(
         makeTemporaryTransactions(
-          accountId || lastTransaction?.account || null,
-          categoryId || lastTransaction?.category || null,
+          locationState?.accountId || lastTransaction?.account || null,
+          locationState?.categoryId || lastTransaction?.category || null,
           lastTransaction?.date,
         ),
       );
     }
-  }, [accountId, categoryId, lastTransaction]);
+  }, [locationState?.accountId, locationState?.categoryId, lastTransaction]);
 
   if (
     categories.length === 0 ||
