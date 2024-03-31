@@ -6,6 +6,7 @@ import {
   getNumberFormat,
 } from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button';
@@ -22,6 +23,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef();
+  const [hideFraction = false] = useLocalPref('hideFraction');
   const mergedInputRef = useMergedRefs(props.inputRef, inputRef);
 
   const initialValue = Math.abs(props.value);
@@ -72,10 +74,12 @@ const AmountInput = memo(function AmountInput({
     if (text.slice(-1) === '.') {
       text = text.slice(0, -1);
     }
-    text = text.replaceAll(/[,.]/g, '');
-    text = text.replace(/^0+(?!$)/, '');
-    text = text.padStart(3, '0');
-    text = text.slice(0, -2) + '.' + text.slice(-2);
+    if (!hideFraction) {
+      text = text.replaceAll(/[,.]/g, '');
+      text = text.replace(/^0+(?!$)/, '');
+      text = text.padStart(3, '0');
+      text = text.slice(0, -2) + '.' + text.slice(-2);
+    }
 
     setEditing(true);
     setText(text);
