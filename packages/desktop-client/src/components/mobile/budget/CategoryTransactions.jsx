@@ -8,10 +8,7 @@ import * as queries from 'loot-core/client/queries';
 import { pagedQuery } from 'loot-core/client/query-helpers';
 import { listen } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
-import {
-  isPreviewId,
-  ungroupTransactions,
-} from 'loot-core/shared/transactions';
+import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useLocalPref } from '../../../hooks/useLocalPref';
@@ -46,7 +43,7 @@ export function CategoryTransactions({ category, month }) {
     paged.current = pagedQuery(
       query.options({ splits: 'inline' }).select('*'),
       data => setTransactions(data),
-      { pageCount: 10, mapper: ungroupTransactions },
+      { pageCount: 10 },
     );
   }, []);
 
@@ -86,9 +83,11 @@ export function CategoryTransactions({ category, month }) {
           updateQuery(currentQuery);
         } else if (searchText && currentQuery) {
           updateQuery(
-            queries
-              .makeTransactionSearchQuery(currentQuery, searchText, dateFormat)
-              .options({ splits: 'inline' }),
+            queries.makeTransactionSearchQuery(
+              currentQuery,
+              searchText,
+              dateFormat,
+            ),
           );
         }
       },

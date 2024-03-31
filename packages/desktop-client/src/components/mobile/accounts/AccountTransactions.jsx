@@ -19,10 +19,7 @@ import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
 import { pagedQuery } from 'loot-core/client/query-helpers';
 import { listen } from 'loot-core/platform/client/fetch';
-import {
-  isPreviewId,
-  ungroupTransactions,
-} from 'loot-core/shared/transactions';
+import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useLocalPref } from '../../../hooks/useLocalPref';
@@ -36,12 +33,6 @@ import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
 
 export function AccountTransactions({ account, pending, failed }) {
-  const [isSearching, setIsSearching] = useState(false);
-
-  const onSearch = searchText => {
-    setIsSearching(searchText !== '');
-  };
-
   return (
     <Page
       title={
@@ -82,25 +73,15 @@ export function AccountTransactions({ account, pending, failed }) {
         backgroundColor: theme.mobilePageBackground,
       }}
     >
-      <SchedulesProvider
-        transform={getSchedulesTransform(account.id, isSearching)}
-      >
-        <FilteredTransactionsWithPreviews
-          account={account}
-          onSearch={onSearch}
-        />
+      <SchedulesProvider transform={getSchedulesTransform(account.id)}>
+        <TransactionListWithPreviews account={account} />
       </SchedulesProvider>
     </Page>
   );
 }
 
-const getSchedulesTransform = memoizeOne((id, hasSearch) => {
-  let filter = queries.getAccountFilter(id, '_account');
-
-  // Never show schedules on these pages
-  if (hasSearch) {
-    filter = { id: null };
-  }
+const getSchedulesTransform = memoizeOne(id => {
+  const filter = queries.getAccountFilter(id, '_account');
 
   return q => {
     q = q.filter({ $and: [filter, { '_account.closed': false }] });
@@ -108,13 +89,15 @@ const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   };
 });
 
-function FilteredTransactionsWithPreviews({ account, onSearch }) {
+function TransactionListWithPreviews({ account }) {
   const [currentQuery, setCurrentQuery] = useState();
+  const [isSearching, setIsSearching] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const prependTransactions = usePreviewTransactions();
   const allTransactions = useMemo(
-    () => prependTransactions.concat(transactions),
-    [prependTransactions, transactions],
+    () =>
+      !isSearching ? prependTransactions.concat(transactions) : transactions,
+    [isSearching, prependTransactions, transactions],
   );
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -138,7 +121,7 @@ function FilteredTransactionsWithPreviews({ account, onSearch }) {
     paged.current = pagedQuery(
       query.options({ splits: 'none' }).select('*'),
       data => setTransactions(data),
-      { pageCount: 10, mapper: ungroupTransactions },
+      { pageCount: 10 },
     );
   }, []);
 
@@ -192,15 +175,16 @@ function FilteredTransactionsWithPreviews({ account, onSearch }) {
             ),
           );
         }
+
+        setIsSearching(searchText !== '');
       },
       [currentQuery, dateFormat, updateQuery],
     ),
     150,
   );
 
-  const _onSearch = text => {
+  const onSearch = text => {
     updateSearchQuery(text);
-    onSearch?.(text);
   };
 
   const onSelectTransaction = transaction => {
