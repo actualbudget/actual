@@ -83,8 +83,6 @@ export function ReportTopbar({
         onSelect={() => {
           onReportChange({ type: 'modify' });
           setGraphType('LineGraph');
-          setGroupBy('Category');
-          onChangeViews('viewLegend', false);
           defaultItems('LineGraph');
         }}
         style={{ marginRight: 15 }}
