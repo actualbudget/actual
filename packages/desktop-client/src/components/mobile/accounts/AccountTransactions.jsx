@@ -209,6 +209,7 @@ function TransactionListWithPreviews({ account }) {
       balanceCleared={balanceCleared}
       balanceUncleared={balanceUncleared}
       onLoadMore={onLoadMore}
+      searchPlaceholder={`Search ${account.name}`}
       onSearch={onSearch}
       onSelectTransaction={onSelectTransaction}
       onRefresh={onRefresh}

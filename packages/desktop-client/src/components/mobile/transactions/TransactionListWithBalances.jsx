@@ -60,6 +60,7 @@ export function TransactionListWithBalances({
   balance,
   balanceCleared,
   balanceUncleared,
+  searchPlaceholder = 'Search...',
   onSearch,
   onLoadMore,
   onSelectTransaction,
@@ -146,7 +147,10 @@ export function TransactionListWithBalances({
             />
           </View>
         </View>
-        <TransactionSearchInput placeholder="Search..." onSearch={onSearch} />
+        <TransactionSearchInput
+          placeholder={searchPlaceholder}
+          onSearch={onSearch}
+        />
       </View>
       <PullToRefresh isPullable={!!onRefresh} onRefresh={onRefresh}>
         <TransactionList

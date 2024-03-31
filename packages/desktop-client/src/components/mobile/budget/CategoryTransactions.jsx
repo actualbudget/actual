@@ -133,6 +133,7 @@ export function CategoryTransactions({ category, month }) {
         balance={balance}
         balanceCleared={balanceCleared}
         balanceUncleared={balanceUncleared}
+        searchPlaceholder={`Search ${category.name}`}
         onSearch={onSearch}
         onLoadMore={onLoadMore}
         onSelectTransaction={onSelectTransaction}
