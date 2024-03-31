@@ -144,13 +144,7 @@ export async function addGoCardlessAccounts(
       });
 
       // Do an initial sync
-      await bankSync.syncExternalAccount(
-        userId,
-        userKey,
-        id,
-        acct.account_id,
-        bankId,
-      );
+      await bankSync.syncAccount(userId, userKey, id, acct.account_id, bankId);
 
       return id;
     }),
