@@ -19,7 +19,6 @@ import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
-import { TransactionEntity } from 'loot-core/types/models';
 
 // Plaid article about API options:
 // https://support.plaid.com/customer/en/portal/articles/2612155-transactions-returned-per-request
