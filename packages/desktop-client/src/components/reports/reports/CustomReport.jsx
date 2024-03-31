@@ -55,17 +55,17 @@ export function CustomReport() {
   const location = useLocation();
 
   const prevUrl = localStorage.getItem('url');
-  
+
   sessionStorage.setItem('prevUrl', prevUrl);
   sessionStorage.setItem('url', location.pathname);
 
-  ['/reports'].includes(prevUrl) && sessionStorage.clear();
+  if (['/reports'].includes(prevUrl)) sessionStorage.clear();
 
   const session = JSON.parse(sessionStorage.getItem('report'));
   const combine = location.state
     ? location.state.report ?? defaultReport
     : defaultReport;
-  const loadReport = {...combine,...session};
+  const loadReport = { ...combine, ...session };
 
   const [allIntervals, setAllIntervals] = useState(null);
 
@@ -304,6 +304,15 @@ export function CustomReport() {
   };
 
   const onChangeDates = (dateStart, dateEnd) => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    sessionStorage.setItem(
+      'report',
+      JSON.stringify({
+        ...storedReport,
+        startDate: dateStart,
+        endDate: dateEnd,
+      }),
+    );
     setStartDate(dateStart);
     setEndDate(dateEnd);
     onReportChange({ type: 'modify' });

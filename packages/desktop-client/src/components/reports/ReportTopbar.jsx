@@ -30,6 +30,17 @@ export function ReportTopbar({
   disabledItems,
   defaultItems,
 }) {
+  const onChangeGraph = cond => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    sessionStorage.setItem(
+      'report',
+      JSON.stringify({ ...storedReport, graphType: cond }),
+    );
+    onReportChange({ type: 'modify' });
+    setGraphType(cond);
+    defaultItems(cond);
+  };
+
   return (
     <View
       style={{
@@ -43,9 +54,7 @@ export function ReportTopbar({
         selected={customReportItems.graphType === 'TableGraph'}
         title="Data Table"
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType('TableGraph');
-          defaultItems('TableGraph');
+          onChangeGraph('TableGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('TableGraph')}
@@ -61,11 +70,7 @@ export function ReportTopbar({
           customReportItems.graphType === 'StackedBarGraph'
         }
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType(
-            customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
-          );
-          defaultItems(
+          onChangeGraph(
             customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
           );
         }}
@@ -80,9 +85,7 @@ export function ReportTopbar({
         title="Area Graph"
         selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType('AreaGraph');
-          defaultItems('AreaGraph');
+          onChangeGraph('AreaGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('AreaGraph')}
@@ -93,9 +96,7 @@ export function ReportTopbar({
         title="Donut Graph"
         selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType('DonutGraph');
-          defaultItems('DonutGraph');
+          onChangeGraph('DonutGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('DonutGraph')}
