@@ -1,11 +1,10 @@
 import React from 'react';
 
-import { useNavigate } from '../hooks/useNavigate';
-import { SvgCheveronLeft } from '../icons/v1';
-import { type CSSProperties, styles, theme } from '../style';
-
-import { Button } from './common/Button';
-import { Text } from './common/Text';
+import { useNavigate } from '../../hooks/useNavigate';
+import { SvgCheveronLeft } from '../../icons/v1';
+import { type CSSProperties, styles, theme } from '../../style';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
 
 type MobileBackButtonProps = {
   style?: CSSProperties;

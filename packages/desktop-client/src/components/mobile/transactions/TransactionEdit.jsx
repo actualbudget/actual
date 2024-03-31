@@ -7,7 +7,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import {
   format as formatDate,
@@ -56,9 +56,9 @@ import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { MobileBackButton } from '../../MobileBackButton';
 import { Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
+import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
@@ -947,21 +947,30 @@ function isTemporary(transaction) {
   return transaction.id.indexOf('temp') === 0;
 }
 
-function makeTemporaryTransactions(currentAccountId, lastDate) {
+function makeTemporaryTransactions(accountId, categoryId, lastDate) {
   return [
     {
       id: 'temp',
       date: lastDate || monthUtils.currentDay(),
-      account: currentAccountId,
+      account: accountId,
+      category: categoryId,
       amount: 0,
       cleared: false,
     },
   ];
 }
 
-function TransactionEditUnconnected(props) {
-  const { categories, accounts, payees, lastTransaction, dateFormat } = props;
-  const { id: accountId, transactionId } = useParams();
+function TransactionEditUnconnected({
+  categories,
+  accounts,
+  payees,
+  lastTransaction,
+  dateFormat,
+}) {
+  const { transactionId } = useParams();
+  const {
+    state: { accountId, categoryId },
+  } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [transactions, setTransactions] = useState([]);
@@ -991,7 +1000,7 @@ function TransactionEditUnconnected(props) {
       setTransactions(fetchedTransactions);
       setFetchedTransactions(fetchedTransactions);
     }
-    if (transactionId) {
+    if (transactionId !== 'new') {
       fetchTransaction();
     } else {
       adding.current = true;
@@ -1003,11 +1012,12 @@ function TransactionEditUnconnected(props) {
       setTransactions(
         makeTemporaryTransactions(
           accountId || lastTransaction?.account || null,
+          categoryId || lastTransaction?.category || null,
           lastTransaction?.date,
         ),
       );
     }
-  }, [accountId, lastTransaction]);
+  }, [accountId, categoryId, lastTransaction]);
 
   if (
     categories.length === 0 ||

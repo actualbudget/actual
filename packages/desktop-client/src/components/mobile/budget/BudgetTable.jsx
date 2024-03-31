@@ -8,6 +8,7 @@ import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useNavigate } from '../../../hooks/useNavigate';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
@@ -316,6 +317,18 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const listItemRef = useRef();
 
+  const _onBudgetAction = (monthIndex, action, arg) => {
+    onBudgetAction?.(
+      monthUtils.getMonthFromIndex(monthUtils.getYear(month), monthIndex),
+      action,
+      arg,
+    );
+  };
+  const navigate = useNavigate();
+  const onShowActivity = () => {
+    navigate(`/categories/${category.id}?month=${month}`);
+  };
+
   const content = (
     <ListItem
       style={{
@@ -378,10 +391,12 @@ const ExpenseCategory = memo(function ExpenseCategory({
             binding={spent}
             style={{
               ...styles.smallText,
+              ...styles.underlinedText,
               textAlign: 'right',
             }}
             getStyle={makeAmountGrey}
             type="financial"
+            onClick={onShowActivity}
           />
         </View>
         <View
