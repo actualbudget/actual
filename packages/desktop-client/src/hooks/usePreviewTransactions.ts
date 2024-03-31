@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 
-import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
+import {
+  type ScheduleStatuses,
+  useCachedSchedules,
+} from 'loot-core/client/data-hooks/schedules';
+import { type ScheduleEntity } from 'loot-core/types/models';
 
 export function usePreviewTransactions() {
   const scheduleData = useCachedSchedules();
@@ -11,12 +15,8 @@ export function usePreviewTransactions() {
     }
 
     const schedules =
-      scheduleData.schedules?.filter(
-        s =>
-          !s.completed &&
-          ['due', 'upcoming', 'missed'].includes(
-            scheduleData.statuses?.get(s.id),
-          ),
+      scheduleData.schedules.filter(s =>
+        isForPreview(s, scheduleData.statuses),
       ) || [];
 
     return schedules.map(schedule => ({
@@ -29,4 +29,12 @@ export function usePreviewTransactions() {
       schedule: schedule.id,
     }));
   }, [scheduleData]);
+}
+
+function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {
+  const status = statuses.get(schedule.id);
+  return (
+    !schedule.completed &&
+    (status === 'due' || status === 'upcoming' || status === 'missed')
+  );
 }

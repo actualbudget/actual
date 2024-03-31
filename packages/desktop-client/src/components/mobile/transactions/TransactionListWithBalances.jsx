@@ -90,6 +90,7 @@ export function TransactionListWithBalances({
           <View
             style={{
               display: !unclearedAmount ? 'none' : undefined,
+              flexBasis: '33%',
             }}
           >
             <Label
@@ -104,10 +105,10 @@ export function TransactionListWithBalances({
                 textAlign: 'center',
                 fontWeight: '500',
               }}
-              data-testid="filtered-transactions-balance-cleared"
+              data-testid="transactions-balance-cleared"
             />
           </View>
-          <View>
+          <View style={{ flexBasis: '33%' }}>
             <Label title="BALANCE" style={{ textAlign: 'center' }} />
             <CellValue
               binding={balance}
@@ -120,12 +121,13 @@ export function TransactionListWithBalances({
               getStyle={value => ({
                 color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
               })}
-              data-testid="filtered-transactions-balance"
+              data-testid="transactions-balance"
             />
           </View>
           <View
             style={{
               display: !unclearedAmount ? 'none' : undefined,
+              flexBasis: '33%',
             }}
           >
             <Label
@@ -140,7 +142,7 @@ export function TransactionListWithBalances({
                 textAlign: 'center',
                 fontWeight: '500',
               }}
-              data-testid="fitlered-transactions-balance-uncleared"
+              data-testid="transactions-balance-uncleared"
             />
           </View>
         </View>
