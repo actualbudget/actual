@@ -69,11 +69,11 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = text => {
-    if (text.slice(-1) == '.') {
-        text = text.slice(0, -1);
+    if (text.slice(-1) === '.') {
+      text = text.slice(0, -1);
     }
-    text = text.replaceAll(/[,.]/g, "");
-    text = text.replace(/^0+(?!$)/, "");
+    text = text.replaceAll(/[,.]/g, '');
+    text = text.replace(/^0+(?!$)/, '');
     text = text.padStart(3, '0');
     text = text.slice(0, -2) + '.' + text.slice(-2);
 
