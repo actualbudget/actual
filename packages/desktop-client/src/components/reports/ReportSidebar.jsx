@@ -102,6 +102,8 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    sessionStorage.setItem('report', JSON.stringify({...storedReport, groupBy: cond}));
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
     defaultItems(cond);

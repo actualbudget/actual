@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
@@ -16,6 +17,9 @@ import { NetWorthCard } from './reports/NetWorthCard';
 
 export function Overview() {
   const customReports = useReports();
+
+  const location = useLocation();
+  sessionStorage.setItem('url', location.pathname);
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
 
