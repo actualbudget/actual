@@ -1,4 +1,4 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React, { useState, type ComponentPropsWithoutRef } from 'react';
 
 import { reportBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
@@ -37,14 +37,15 @@ export function ReportCategoryBudgetMenuModal({
 
   const budgeted = useSheetValue(reportBudget.catBudgeted(categoryId));
   const category = useCategory(categoryId);
+  const [amountFocused, setAmountFocused] = useState(false);
 
-  const _onUpdateBudget = amount => {
+  const _onUpdateBudget = (amount: number) => {
     onUpdateBudget?.(amountToInteger(amount));
   };
 
   return (
     <Modal
-      title={category?.name}
+      title={`Budget: ${category?.name}`}
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -65,10 +66,19 @@ export function ReportCategoryBudgetMenuModal({
       >
         <FocusableAmountInput
           value={integerToAmount(budgeted || 0)}
-          focused={true}
+          focused={amountFocused}
+          onFocus={() => setAmountFocused(true)}
+          onBlur={() => setAmountFocused(false)}
           zeroSign="+"
+          focusedStyle={{
+            width: 'auto',
+            padding: '5px',
+            paddingLeft: '20px',
+            paddingRight: '20px',
+            minWidth: '100%',
+          }}
           textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
-          onUpdate={_onUpdateBudget}
+          onUpdateAmount={_onUpdateBudget}
         />
       </View>
       <CategoryBudgetMenu

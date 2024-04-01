@@ -18,7 +18,7 @@ export function CategoryBudgetMenu({
   ...props
 }: CategoryBudgetMenuProps) {
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const onMenuSelect = name => {
+  const onMenuSelect = (name: string) => {
     switch (name) {
       case 'copy-single-last':
         onCopyLastMonthAverage?.();

@@ -39,7 +39,7 @@ export function RolloverCategoryBudgetMenuModal({
   const category = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
 
-  const _onUpdateBudget = amount => {
+  const _onUpdateBudget = (amount: number) => {
     onUpdateBudget?.(amountToInteger(amount));
   };
 
@@ -76,10 +76,9 @@ export function RolloverCategoryBudgetMenuModal({
             paddingLeft: '20px',
             paddingRight: '20px',
             minWidth: '100%',
-            transform: [{ translateY: -0.5 }],
           }}
           textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
-          onUpdate={_onUpdateBudget}
+          onUpdateAmount={_onUpdateBudget}
         />
       </View>
       <CategoryBudgetMenu

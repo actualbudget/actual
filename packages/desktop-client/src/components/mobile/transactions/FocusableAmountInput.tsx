@@ -1,4 +1,13 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import React, {
+  type MutableRefObject,
+  type Ref,
+  type ComponentPropsWithRef,
+  type HTMLProps,
+  memo,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   toRelaxedNumber,
@@ -8,23 +17,41 @@ import {
 
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
-import { theme } from '../../../style';
+import { type CSSProperties, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+
+type AmountInputProps = {
+  value: number;
+  focused?: boolean;
+  style?: CSSProperties;
+  textStyle?: CSSProperties;
+  inputRef?: Ref<HTMLInputElement>;
+  onFocus?: HTMLProps<HTMLInputElement>['onFocus'];
+  onBlur?: HTMLProps<HTMLInputElement>['onBlur'];
+  onChangeValue?: (value: string) => void;
+  onUpdate?: (value: string) => void;
+  onUpdateAmount?: (value: number) => void;
+};
 
 const AmountInput = memo(function AmountInput({
   focused,
   style,
   textStyle,
   ...props
-}) {
+}: AmountInputProps) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
-  const inputRef = useRef();
+  const inputRef = useRef<HTMLInputElement>();
   const [hideFraction = false] = useLocalPref('hideFraction');
-  const mergedInputRef = useMergedRefs(props.inputRef, inputRef);
+
+  // Need to update useMergedRefs to support Ref.
+  const mergedInputRef = useMergedRefs<HTMLInputElement>(
+    props.inputRef as MutableRefObject<HTMLInputElement>,
+    inputRef as MutableRefObject<HTMLInputElement>,
+  );
 
   const initialValue = Math.abs(props.value);
 
@@ -44,11 +71,12 @@ const AmountInput = memo(function AmountInput({
     return toRelaxedNumber(text.replace(/[,.]/, getNumberFormat().separator));
   };
 
-  const onKeyPress = e => {
+  const onKeyPress: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
       setEditing(true);
     }
   };
+
   const applyText = () => {
     const parsed = parseText();
     const newValue = editing ? parsed : value;
@@ -60,17 +88,22 @@ const AmountInput = memo(function AmountInput({
     return newValue;
   };
 
-  const onFocus = e => {
+  const onFocus: HTMLProps<HTMLInputElement>['onFocus'] = e => {
     props.onFocus?.(e);
   };
 
-  const onBlur = e => {
-    const value = applyText();
+  const onUpdate = (value: string) => {
     props.onUpdate?.(value);
+    const amount = applyText();
+    props.onUpdateAmount?.(amount);
+  };
+
+  const onBlur: HTMLProps<HTMLInputElement>['onBlur'] = e => {
+    onUpdate(e.target.value);
     props.onBlur?.(e);
   };
 
-  const onChangeText = text => {
+  const onChangeText = (text: string) => {
     if (text.slice(-1) === '.') {
       text = text.slice(0, -1);
     }
@@ -83,7 +116,7 @@ const AmountInput = memo(function AmountInput({
 
     setEditing(true);
     setText(text);
-    props.onChange?.(text);
+    props.onChangeValue?.(text);
   };
 
   const input = (
@@ -117,9 +150,11 @@ const AmountInput = memo(function AmountInput({
     >
       <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
       <Text
-        style={textStyle}
+        style={{
+          pointerEvents: 'none',
+          ...textStyle,
+        }}
         data-testid="amount-fake-input"
-        pointerEvents="none"
       >
         {editing ? amountToCurrency(text) : amountToCurrency(value)}
       </Text>
@@ -127,10 +162,20 @@ const AmountInput = memo(function AmountInput({
   );
 });
 
+type FocusableAmountInputProps = Omit<AmountInputProps, 'onFocus'> & {
+  sign?: '+' | '-';
+  zeroSign?: '+' | '-';
+  focused?: boolean;
+  disabled?: boolean;
+  focusedStyle?: CSSProperties;
+  buttonProps?: ComponentPropsWithRef<typeof Button>;
+  onFocus?: () => void;
+};
+
 export const FocusableAmountInput = memo(function FocusableAmountInput({
   value,
-  sign, // + or -
-  zeroSign, // + or -
+  sign,
+  zeroSign,
   focused,
   disabled,
   textStyle,
@@ -140,8 +185,17 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   onFocus,
   onBlur,
   ...props
-}) {
+}: FocusableAmountInputProps) {
   const [isNegative, setIsNegative] = useState(true);
+
+  const maybeApplyNegative = (amount: number, negative: boolean) => {
+    const absValue = Math.abs(amount);
+    return negative ? -absValue : absValue;
+  };
+
+  const onUpdateAmount = (amount: number, negative: boolean) => {
+    props.onUpdateAmount?.(maybeApplyNegative(amount, negative));
+  };
 
   useEffect(() => {
     if (sign) {
@@ -156,17 +210,8 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
       return;
     }
 
+    onUpdateAmount(value, !isNegative);
     setIsNegative(!isNegative);
-    props.onUpdate?.(maybeApplyNegative(value, !isNegative));
-  };
-
-  const maybeApplyNegative = (val, negative) => {
-    const absValue = Math.abs(val);
-    return negative ? -absValue : absValue;
-  };
-
-  const onUpdate = val => {
-    props.onUpdate?.(maybeApplyNegative(val, isNegative));
   };
 
   return (
@@ -176,7 +221,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         value={value}
         onFocus={onFocus}
         onBlur={onBlur}
-        onUpdate={onUpdate}
+        onUpdateAmount={amount => onUpdateAmount(amount, isNegative)}
         focused={focused && !disabled}
         style={{
           width: 80,
@@ -222,7 +267,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
               borderBottomWidth: 1,
               borderColor: '#e0e0e0',
               justifyContent: 'center',
-              transform: [{ translateY: 0.5 }],
+              // transform: [{ translateY: 0.5 }],
               ...style,
             }}
           >
