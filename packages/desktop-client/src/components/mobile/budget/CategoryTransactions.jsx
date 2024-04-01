@@ -7,6 +7,7 @@ import { getPayees } from 'loot-core/client/actions';
 import * as queries from 'loot-core/client/queries';
 import { pagedQuery } from 'loot-core/client/query-helpers';
 import { listen } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
 
@@ -14,6 +15,8 @@ import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
+import { TextOneLine } from '../../common/TextOneLine';
+import { View } from '../../common/View';
 import { Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
@@ -117,7 +120,12 @@ export function CategoryTransactions({ category, month }) {
 
   return (
     <Page
-      title={category.name}
+      title={
+        <View>
+          <TextOneLine>{category.name}</TextOneLine>
+          <TextOneLine>({monthUtils.format(month, 'MMMM ‘yy')})</TextOneLine>
+        </View>
+      }
       headerLeftContent={<MobileBackButton />}
       headerRightContent={
         <AddTransactionButton state={{ categoryId: category.id }} />

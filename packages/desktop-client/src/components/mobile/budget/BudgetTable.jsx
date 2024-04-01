@@ -1411,8 +1411,7 @@ function MonthSelector({ month, monthBounds, onPrevMonth, onNextMonth }) {
           fontWeight: 500,
         }}
       >
-        {/* eslint-disable-next-line rulesdir/typography */}
-        {monthUtils.format(month, "MMMM ''yy")}
+        {monthUtils.format(month, 'MMMM ‘yy')}
       </Text>
       <Button
         type="bare"
