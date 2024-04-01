@@ -25,7 +25,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { usePayees } from '../../hooks/usePayees';
 import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { type CSSProperties, theme, styles, colors } from '../../style';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
@@ -413,6 +413,7 @@ export function CreatePayeeButton({
       }
     : {};
   const iconSize = isNarrowWidth ? 14 : 8;
+  const noticeTextMenuHover = colors.g3;
 
   return (
     <View
@@ -420,8 +421,7 @@ export function CreatePayeeButton({
       style={{
         display: 'block',
         flexShrink: 0,
-        color:
-          embedded && isNarrowWidth ? theme.menuItemText : theme.noticeTextMenu,
+        color: highlighted ? noticeTextMenuHover : theme.noticeTextMenu,
         borderRadius: embedded ? 4 : 0,
         fontSize: 11,
         fontWeight: 500,

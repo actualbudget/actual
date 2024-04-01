@@ -140,6 +140,7 @@ export const noticeText = colorPalette.green300;
 export const noticeTextLight = colorPalette.green400;
 export const noticeTextDark = colorPalette.green150;
 export const noticeTextMenu = colorPalette.green400;
+export const noticeTextMenuHover = colorPalette.green700;
 export const noticeBorder = colorPalette.green800;
 export const warningBackground = colorPalette.orange800;
 export const warningText = colorPalette.orange200;

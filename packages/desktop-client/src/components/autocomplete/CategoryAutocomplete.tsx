@@ -18,7 +18,7 @@ import {
 
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles } from '../../style';
+import { type CSSProperties, theme, styles, colors } from '../../style';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
@@ -228,6 +228,7 @@ function SplitTransactionButton({
   ...props
 }: SplitTransactionButtonProps) {
   const { isNarrowWidth } = useResponsive();
+  const noticeTextMenuHover = colors.g3;
   return (
     <View
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
@@ -264,7 +265,7 @@ function SplitTransactionButton({
         alignItems: 'center',
         fontSize: 11,
         fontWeight: 500,
-        color: theme.noticeTextMenu,
+        color: highlighted ? noticeTextMenuHover : theme.noticeTextMenu,
         padding: '6px 8px',
         ':active': {
           backgroundColor: 'rgba(100, 100, 100, .25)',
