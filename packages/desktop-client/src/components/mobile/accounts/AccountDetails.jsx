@@ -5,7 +5,7 @@ import { syncAndDownload } from 'loot-core/client/actions';
 
 import { SvgAdd } from '../../../icons/v1';
 import { SvgSearchAlternate } from '../../../icons/v2';
-import { theme } from '../../../style';
+import { styles, theme } from '../../../style';
 import { ButtonLink } from '../../common/ButtonLink';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
@@ -26,7 +26,6 @@ function TransactionSearchInput({ accountName, onSearch }) {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: theme.mobilePageBackground,
-        margin: '11px auto 4px',
         padding: 10,
         width: '100%',
       }}
@@ -53,11 +52,8 @@ function TransactionSearchInput({ accountName, onSearch }) {
         style={{
           backgroundColor: theme.tableBackground,
           border: `1px solid ${theme.formInputBorder}`,
-          fontSize: 15,
           flex: 1,
-          height: 32,
-          marginLeft: 4,
-          padding: 8,
+          height: styles.mobileMinHeight,
         }}
       />
     </View>
@@ -66,6 +62,8 @@ function TransactionSearchInput({ accountName, onSearch }) {
 
 export function AccountDetails({
   account,
+  pending,
+  failed,
   prependTransactions,
   transactions,
   accounts,
@@ -90,7 +88,34 @@ export function AccountDetails({
 
   return (
     <Page
-      title={account.name}
+      title={
+        !account.bankId ? (
+          account.name
+        ) : (
+          <View
+            style={{
+              flexDirection: 'row',
+            }}
+          >
+            <div
+              style={{
+                margin: 'auto',
+                marginRight: 3,
+                width: 8,
+                height: 8,
+                borderRadius: 8,
+                backgroundColor: pending
+                  ? theme.sidebarItemBackgroundPending
+                  : failed
+                    ? theme.sidebarItemBackgroundFailed
+                    : theme.sidebarItemBackgroundPositive,
+                transition: 'transform .3s',
+              }}
+            />
+            {account.name}
+          </View>
+        )
+      }
       headerLeftContent={<MobileBackButton />}
       headerRightContent={
         <ButtonLink

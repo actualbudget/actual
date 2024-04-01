@@ -2,13 +2,13 @@ import React from 'react';
 
 import {
   SvgCalculator,
-  SvgChart,
   SvgChartBar,
   SvgChartPie,
   SvgListBullet,
   SvgQueue,
   SvgTag,
 } from '../../icons/v1';
+import { SvgChartArea } from '../../icons/v1/ChartArea';
 import { theme } from '../../style';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
@@ -87,7 +87,7 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         disabled={disabledItems('AreaGraph')}
       >
-        <SvgChart width={15} height={15} />
+        <SvgChartArea width={15} height={15} />
       </GraphButton>
       <GraphButton
         title="Donut Graph"

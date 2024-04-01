@@ -21,6 +21,7 @@ import {
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useLocalPrefs } from '../../../hooks/useLocalPrefs';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -76,6 +77,9 @@ function PreviewTransactions({ children }) {
 export function Account(props) {
   const accounts = useAccounts();
   const payees = usePayees();
+
+  const failedAccounts = useFailedAccounts();
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
 
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
@@ -238,6 +242,8 @@ export function Account(props) {
               {...state}
               key={numberFormat + hideFraction}
               account={account}
+              pending={syncingAccountIds.includes(account.id)}
+              failed={failedAccounts && failedAccounts.has(account.id)}
               accounts={accounts}
               categories={categories.list}
               payees={state.payees}

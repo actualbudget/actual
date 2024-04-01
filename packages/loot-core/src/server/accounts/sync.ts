@@ -185,6 +185,8 @@ async function downloadGoCardlessTransactions(
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
+  console.log('Pulling transactions from GoCardless');
+
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
     {
@@ -209,6 +211,8 @@ async function downloadGoCardlessTransactions(
     startingBalance,
   } = res;
 
+  console.log('Response:', res);
+
   return {
     transactions: all,
     accountBalance: balances,
@@ -219,6 +223,8 @@ async function downloadGoCardlessTransactions(
 async function downloadSimpleFinTransactions(acctId, since) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
+
+  console.log('Pulling transactions from SimpleFin');
 
   const res = await post(
     getServer().SIMPLEFIN_SERVER + '/transactions',
@@ -240,6 +246,8 @@ async function downloadSimpleFinTransactions(acctId, since) {
     balances,
     startingBalance,
   } = res;
+
+  console.log('Response:', res);
 
   return {
     transactions: all,
@@ -430,6 +438,8 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
 }
 
 export async function reconcileExternalTransactions(acctId, transactions) {
+  console.log('Performing transaction reconciliation');
+
   const hasMatched = new Set();
   const updated = [];
   const added = [];
@@ -605,6 +615,14 @@ export async function reconcileExternalTransactions(acctId, transactions) {
 
   await createNewPayees(payeesToCreate, [...added, ...updated]);
   await batchUpdateTransactions({ added, updated });
+
+  console.log('Debug data for the operations:', {
+    transactionsStep1,
+    transactionsStep2,
+    transactionsStep3,
+    added,
+    updated,
+  });
 
   return {
     added: added.map(trans => trans.id),
