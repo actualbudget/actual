@@ -513,7 +513,7 @@ async function applyCategoryTemplate(
           limit,
           hold,
           to_budget,
-          balance,
+          last_month_balance,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
