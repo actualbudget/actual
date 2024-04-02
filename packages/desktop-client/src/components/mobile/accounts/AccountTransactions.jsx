@@ -64,9 +64,7 @@ export function AccountTransactions({ account, pending, failed }) {
         )
       }
       headerLeftContent={<MobileBackButton />}
-      headerRightContent={
-        <AddTransactionButton state={{ accountId: account.id }} />
-      }
+      headerRightContent={<AddTransactionButton accountId={account.id} />}
       padding={0}
       style={{
         flex: 1,

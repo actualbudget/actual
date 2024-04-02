@@ -127,9 +127,7 @@ export function CategoryTransactions({ category, month }) {
         </View>
       }
       headerLeftContent={<MobileBackButton />}
-      headerRightContent={
-        <AddTransactionButton state={{ categoryId: category.id }} />
-      }
+      headerRightContent={<AddTransactionButton categoryId={category.id} />}
       padding={0}
       style={{
         flex: 1,

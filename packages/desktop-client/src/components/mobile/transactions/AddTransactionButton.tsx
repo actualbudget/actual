@@ -1,24 +1,27 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
 import { theme } from '../../../style';
 import { ButtonLink } from '../../common/ButtonLink';
 
 type AddTransactionButtonProps = {
   to: ComponentPropsWithoutRef<typeof ButtonLink>['to'];
-  state?: ComponentPropsWithoutRef<typeof ButtonLink>['state'];
+  accountId?: string;
+  categoryId?: string;
 };
 
 export function AddTransactionButton({
   to = '/transactions/new',
-  state,
+  accountId,
+  categoryId,
 }: AddTransactionButtonProps) {
+  const navigate = useNavigate();
   return (
     <ButtonLink
       to={to}
-      state={state}
       type="bare"
-      aria-label="Add Transaction"
+      aria-label="Add transaction"
       style={{
         justifyContent: 'center',
         color: theme.mobileHeaderText,
@@ -29,6 +32,10 @@ export function AddTransactionButton({
         background: theme.mobileHeaderTextHover,
       }}
       activeStyle={{ background: 'transparent' }}
+      onClick={e => {
+        e.preventDefault();
+        navigate(to, { state: { accountId, categoryId } });
+      }}
     >
       <SvgAdd width={20} height={20} />
     </ButtonLink>
