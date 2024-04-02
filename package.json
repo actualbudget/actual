@@ -23,7 +23,7 @@
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "debug": "^4.3.4",
-    "express": "4.18.2",
+    "express": "4.19.2",
     "express-actuator": "1.8.4",
     "express-rate-limit": "^6.7.0",
     "express-response-size": "^0.0.3",
