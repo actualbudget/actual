@@ -427,9 +427,7 @@ export function CreatePayeeButton({
         fontWeight: 500,
         padding: '6px 9px',
         backgroundColor: highlighted
-          ? embedded && isNarrowWidth
-            ? theme.menuItemBackgroundHover
-            : theme.menuAutoCompleteBackgroundHover
+          ? theme.menuAutoCompleteBackgroundHover
           : 'transparent',
         ':active': {
           backgroundColor: 'rgba(100, 100, 100, .25)',
@@ -484,7 +482,6 @@ export function PayeeItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
-        color: theme.menuItemText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -517,9 +514,7 @@ export function PayeeItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? embedded && isNarrowWidth
-              ? theme.menuItemBackgroundHover
-              : theme.menuAutoCompleteBackgroundHover
+            ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
           borderRadius: embedded ? 4 : 0,
           padding: 4,
