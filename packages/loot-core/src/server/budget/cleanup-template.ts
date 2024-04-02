@@ -150,7 +150,12 @@ async function processCleanup(month: string): Promise<Notification> {
       if (
         template.filter(t => t.type === 'source' && t.group !== null).length > 0
       ) {
-        groupSource.push({ category: category.id, group: template[0].group });
+        groupSource.push({
+          category: category.id,
+          group: template.filter(
+            t => t.type === 'source' && t.group !== null,
+          )[0].group,
+        });
       }
       if (
         template.filter(t => t.type === 'sink' && t.group !== null).length > 0
@@ -158,8 +163,10 @@ async function processCleanup(month: string): Promise<Notification> {
         //only supports 1 sink reference per category.  Need more?
         groupSink.push({
           category: category.id,
-          group: template[0].group,
-          weight: template[0].weight,
+          group: template.filter(t => t.type === 'sink' && t.group !== null)[0]
+            .group,
+          weight: template.filter(t => t.type === 'sink' && t.group !== null)[0]
+            .weight,
         });
       }
       if (
