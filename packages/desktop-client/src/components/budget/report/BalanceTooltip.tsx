@@ -38,8 +38,9 @@ export function BalanceTooltip({
         onCarryover={carryover => {
           onBudgetAction?.(monthIndex, 'carryover', {
             category: categoryId,
-            flag: !carryover,
+            flag: carryover,
           });
+          _onClose();
         }}
       />
     </Tooltip>

@@ -41,9 +41,9 @@ type CoverProps = {
 };
 
 function Cover({ onSubmit }: CoverProps) {
-  let { grouped: categoryGroups } = useCategories();
-  categoryGroups = addToBeBudgetedGroup(
-    categoryGroups.filter(g => !g.is_income),
+  const { grouped: originalCategoryGroups } = useCategories();
+  const categoryGroups = addToBeBudgetedGroup(
+    originalCategoryGroups.filter(g => !g.is_income),
   );
   const [categoryId, setCategoryId] = useState<string | null>(null);
 

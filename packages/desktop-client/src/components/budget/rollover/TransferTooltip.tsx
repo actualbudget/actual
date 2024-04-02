@@ -56,8 +56,8 @@ function Transfer({
   showToBeBudgeted,
   onSubmit,
 }: TransferProps) {
-  let { grouped: categoryGroups } = useCategories();
-  categoryGroups = categoryGroups.filter(g => !g.is_income);
+  const { grouped: originalCategoryGroups } = useCategories();
+  let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
   if (showToBeBudgeted) {
     categoryGroups = addToBeBudgetedGroup(categoryGroups);
   }
