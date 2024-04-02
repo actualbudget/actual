@@ -52,6 +52,7 @@ netlify
 nordigen
 nynab
 offbudget
+ofx
 OFX
 payeerule
 pikaday
@@ -65,7 +66,9 @@ QIF
 returnsandreimbursements
 Rezip
 RUpdate
+sankey
 screenshots
+SEB
 subfolders
 subreaper
 subtransaction
