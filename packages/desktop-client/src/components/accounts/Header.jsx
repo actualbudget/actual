@@ -424,7 +424,8 @@ function AccountMenu({
           },
           {
             name: 'toggle-reconciled',
-            text: (showReconciled ? 'Hide' : 'Show') + ' reconciled transactions',
+            text:
+              (showReconciled ? 'Hide' : 'Show') + ' reconciled transactions',
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },

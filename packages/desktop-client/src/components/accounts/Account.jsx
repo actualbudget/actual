@@ -362,7 +362,7 @@ class AccountInternal extends PureComponent {
 
     // Filter out reconciled transactions if necessary.
     if (!this.state.showReconciled) {
-      query = query.filter({ reconciled: { $eq: false } })
+      query = query.filter({ reconciled: { $eq: false } });
     }
 
     this.paged = pagedQuery(
