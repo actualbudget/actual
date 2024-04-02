@@ -440,13 +440,17 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
 export async function reconcileTransactions(
   acctId,
   transactions,
-  transactionNormalization = normalizeTransactions,
+  isExternalAccount: boolean = false,
 ) {
   console.log('Performing transaction reconciliation');
 
   const hasMatched = new Set();
   const updated = [];
   const added = [];
+
+  const transactionNormalization = isExternalAccount
+    ? normalizeExternalTransactions
+    : normalizeTransactions;
 
   const { normalized, payeesToCreate } = await transactionNormalization(
     transactions,
@@ -579,7 +583,7 @@ export async function reconcileTransactions(
 
       // Update the transaction
       const updates = {
-        date: trans.date,
+        ...(isExternalAccount ? {} : { date: trans.date }),
         imported_id: trans.imported_id || null,
         payee: existing.payee || trans.payee || null,
         category: existing.category || trans.category || null,
@@ -785,9 +789,7 @@ export async function syncAccount(
       const result = await reconcileTransactions(
         id,
         transactions,
-        isExternalAccount
-          ? normalizeExternalTransactions
-          : normalizeTransactions,
+        isExternalAccount,
       );
       await updateAccountBalance(id, accountBalance);
       return result;
@@ -879,9 +881,7 @@ export async function syncAccount(
       const result = await reconcileTransactions(
         id,
         transactions,
-        isExternalAccount
-          ? normalizeExternalTransactions
-          : normalizeTransactions,
+        isExternalAccount,
       );
       return {
         ...result,
