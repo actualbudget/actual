@@ -213,6 +213,7 @@ class AccountInternal extends PureComponent {
       showBalances: props.showBalances,
       balances: null,
       showCleared: props.showCleared,
+      showReconciled: props.showReconciled,
       editingName: false,
       isAdding: false,
       latestDate: null,
@@ -359,6 +360,11 @@ class AccountInternal extends PureComponent {
       this.paged.unsubscribe();
     }
 
+    // Filter out reconciled transactions if necessary.
+    if (!this.state.showReconciled) {
+      query = query.filter({ reconciled: { $eq: false } })
+    }
+
     this.paged = pagedQuery(
       query.select('*'),
       async (data, prevData) => {
@@ -420,6 +426,7 @@ class AccountInternal extends PureComponent {
           showBalances: nextProps.showBalances,
           balances: null,
           showCleared: nextProps.showCleared,
+          showReconciled: nextProps.showReconciled,
           reconcileAmount: null,
         },
         () => {
@@ -649,6 +656,19 @@ class AccountInternal extends PureComponent {
         } else {
           this.props.savePrefs({ ['hide-cleared-' + accountId]: false });
           this.setState({ showCleared: true });
+        }
+        break;
+      case 'toggle-reconciled':
+        if (this.state.showReconciled) {
+          this.props.savePrefs({ ['hide-reconciled-' + accountId]: true });
+          this.setState({ showReconciled: false }, () => {
+            this.fetchTransactions();
+          });
+        } else {
+          this.props.savePrefs({ ['hide-reconciled-' + accountId]: false });
+          this.setState({ showReconciled: true }, () => {
+            this.fetchTransactions();
+          });
         }
         break;
       default:
@@ -1392,6 +1412,7 @@ class AccountInternal extends PureComponent {
       showBalances,
       balances,
       showCleared,
+      showReconciled,
     } = this.state;
 
     const account = accounts.find(account => account.id === accountId);
@@ -1450,6 +1471,7 @@ class AccountInternal extends PureComponent {
                 showBalances={showBalances}
                 showExtraBalances={showExtraBalances}
                 showCleared={showCleared}
+                showReconciled={showReconciled}
                 showEmptyMessage={showEmptyMessage}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this.canCalculateBalance}
@@ -1593,6 +1615,7 @@ export function Account() {
   const [expandSplits] = useLocalPref('expand-splits');
   const [showBalances] = useLocalPref(`show-balances-${params.id}`);
   const [hideCleared] = useLocalPref(`hide-cleared-${params.id}`);
+  const [hideReconciled] = useLocalPref(`hide-reconciled-${params.id}`);
   const [showExtraBalances] = useLocalPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
@@ -1614,6 +1637,7 @@ export function Account() {
     expandSplits,
     showBalances,
     showCleared: !hideCleared,
+    showReconciled: !hideReconciled,
     showExtraBalances,
     payees,
     modalShowing,

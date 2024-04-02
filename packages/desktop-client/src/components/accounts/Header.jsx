@@ -46,6 +46,7 @@ export function AccountHeader({
   showBalances,
   showExtraBalances,
   showCleared,
+  showReconciled,
   showEmptyMessage,
   balanceQuery,
   reconcileAmount,
@@ -323,6 +324,7 @@ export function AccountHeader({
                   isSorted={isSorted}
                   showBalances={showBalances}
                   showCleared={showCleared}
+                  showReconciled={showReconciled}
                   onMenuSelect={item => {
                     setMenuOpen(false);
                     onMenuSelect(item);
@@ -382,6 +384,7 @@ function AccountMenu({
   showBalances,
   canShowBalances,
   showCleared,
+  showReconciled,
   onClose,
   isSorted,
   onReconcile,
@@ -418,6 +421,10 @@ function AccountMenu({
           {
             name: 'toggle-cleared',
             text: (showCleared ? 'Hide' : 'Show') + ' “cleared” checkboxes',
+          },
+          {
+            name: 'toggle-reconciled',
+            text: (showReconciled ? 'Hide' : 'Show') + ' reconciled transactions',
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
