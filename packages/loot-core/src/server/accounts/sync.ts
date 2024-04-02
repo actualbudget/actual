@@ -440,7 +440,7 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
 export async function reconcileTransactions(
   acctId,
   transactions,
-  isExternalAccount: boolean = false,
+  isExternalAccount = false,
 ) {
   console.log('Performing transaction reconciliation');
 
