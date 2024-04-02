@@ -47,10 +47,9 @@ const AmountInput = memo(function AmountInput({
   const inputRef = useRef<HTMLInputElement>();
   const [hideFraction = false] = useLocalPref('hideFraction');
 
-  // Need to update useMergedRefs to support Ref.
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
-    props.inputRef as MutableRefObject<HTMLInputElement>,
-    inputRef as MutableRefObject<HTMLInputElement>,
+    props.inputRef,
+    inputRef,
   );
 
   const initialValue = Math.abs(props.value);
