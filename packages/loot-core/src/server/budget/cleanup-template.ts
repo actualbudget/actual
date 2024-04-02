@@ -277,7 +277,7 @@ async function processCleanup(month: string): Promise<Notification> {
 
   const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   if (budgetAvailable <= 0) {
-    warnings.push('No funds are available to reallocate.');
+    warnings.push('Global: No funds are available to reallocate.');
   }
 
   //fill sinking categories
@@ -318,7 +318,7 @@ async function processCleanup(month: string): Promise<Notification> {
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: 'Funds not available:',
+        message: 'Global: Funds not available:',
         pre: warnings.join('\n\n'),
       };
     } else {
@@ -340,7 +340,7 @@ async function processCleanup(month: string): Promise<Notification> {
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: 'Funds not available:',
+        message: 'Global: Funds not available:',
         pre: warnings.join('\n\n'),
       };
     } else {
