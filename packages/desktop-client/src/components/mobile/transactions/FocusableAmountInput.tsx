@@ -1,5 +1,4 @@
 import React, {
-  type MutableRefObject,
   type Ref,
   type ComponentPropsWithRef,
   type HTMLProps,
