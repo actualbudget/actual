@@ -4,7 +4,6 @@ import * as d from 'date-fns';
 import { css } from 'glamor';
 import {
   Bar,
-  Cell,
   CartesianGrid,
   ComposedChart,
   Line,
@@ -58,15 +57,34 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
           </strong>
         </div>
         <div style={{ lineHeight: 1.5 }}>
-          <AlignedText left="Income:" right={amountToCurrency(data.income)} />
-          <AlignedText
-            left="Expenses:"
-            right={amountToCurrency(data.expenses)}
-          />
+          {data.income > 0 && (
+            <AlignedText
+              left={"Income:"}
+              right={amountToCurrency(data.income)}
+            />
+          )}
+          {data.futureIncome > 0 && (
+            <AlignedText
+              left={"Future Income:"}
+              right={amountToCurrency(data.futureIncome)}
+            />
+          )}
+          {data.expenses < 0 && (
+            <AlignedText
+              left={"Expenses:"}
+              right={amountToCurrency(data.expenses)}
+            />
+          )}
+          {data.futureExpenses < 0 && (
+            <AlignedText
+              left={"Future Expenses:"}
+              right={amountToCurrency(data.futureExpenses)}
+            />
+          )}
           <AlignedText
             left="Change:"
             right={
-              <strong>{amountToCurrency(data.income + data.expenses)}</strong>
+              <strong>{amountToCurrency(data.income + data.expenses + data.futureIncome + data.futureExpenses)}</strong>
             }
           />
           {data.transfers !== 0 && (
@@ -75,7 +93,7 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
               right={amountToCurrency(data.transfers)}
             />
           )}
-          <AlignedText left="Balance:" right={amountToCurrency(data.balance)} />
+          <AlignedText left="Balance:" right={amountToCurrency(data.balanceTotal)} />
         </div>
       </div>
     </div>
@@ -86,10 +104,10 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
 // ... each with the  unwanted part hidden (opacity=0) using a gradient
 const gradientTwoColors = (id, col1, col2, percentChange) => (
   <linearGradient id={id} x1="0" y1="0" x2="100%" y2="0">
-      <stop offset="0%" stopColor={col1} />
-      <stop offset={`${percentChange}%`} stopColor={col1} />
-      <stop offset={`${percentChange}%`} stopColor={`${col2}`} />
-      <stop offset="100%" stopColor={col2} />
+    <stop offset="0%" stopColor={col1} />
+    <stop offset={`${percentChange}%`} stopColor={col1} />
+    <stop offset={`${percentChange}%`} stopColor={`${col2}`} />
+    <stop offset="100%" stopColor={col2} />
   </linearGradient>
 );
 
@@ -114,37 +132,47 @@ export function CashFlowGraph({
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
 
-  const data = graphData.expenses.map((row, idx) => ({
-    date: row.x,
-    expenses: row.y,
-    income: graphData.income[idx].y,
-    balance: graphData.balances[idx].y,
-    transfers: graphData.transfers[idx].y,
-    isFuture: false,
-  })).concat(graphData.futureExpenses.map((row, idx) => ({
-    date: row.x,
-    expenses: row.y,
-    income: graphData.futureIncome[idx].y,
-    balance: graphData.futureBalances[idx].y,
-    transfers: 0,
-    isFuture: true,
-  })));
+  // get all dates
+  // TODO: All of this toISOString business seems excessive ...
+  // but otherwise the dates cannot be correctly compared...
+  const dates = Array.from(new Set([
+    ...graphData.expenses.map(expense => expense.x.toISOString()),
+    ...graphData.income.map(expense => expense.x.toISOString()),
+    ...graphData.balances.map(expense => expense.x.toISOString()),
+    ...graphData.futureExpenses.map(expense => expense.x.toISOString()),
+    ...graphData.futureIncome.map(expense => expense.x.toISOString()),
+    ...graphData.futureBalances.map(expense => expense.x.toISOString()),
+    ...graphData.transfers.map(expense => expense.x.toISOString()),
+  ]));
+
+  const data = dates.map(d => ({
+    date: new Date(d),
+    expenses: (graphData.expenses.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+    income: (graphData.income.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+    balance: (graphData.balances.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+    futureExpenses: (graphData.futureExpenses.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+    futureIncome: (graphData.futureIncome.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+    futureBalance: (graphData.futureBalances.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+    transfers: (graphData.transfers.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+    balanceTotal: graphData.futureBalances.find(obj => (obj.x.toISOString() === d)) ? (graphData.futureBalances.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y : (graphData.balances.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+  }));
 
   return (
     <ResponsiveContainer width="100%" height={300}>
       <ComposedChart stackOffset="sign" data={data}>
         <defs>
           {gradientTwoColors(
-              "hideFuture",
-              theme.pageTextLight,
-              "rgba(0,0,0,0)",
-              100-100*data.filter(d => d.isFuture).length/(data.length-0.5)
+            "hideFuture",
+            theme.pageTextLight,
+            "rgba(0,0,0,0)",
+            // TODO: Basing this on date would be most clean!
+            100 * (graphData.balances.length) / (graphData.balances.length + graphData.futureBalances.length)
           )}
           {gradientTwoColors(
-              "showFutureOnly",
-              "rgba(0,0,0,0)",
-              theme.pageTextLight,
-              100-100*data.filter(d => d.isFuture).length/(data.length-0.5)
+            "showFutureOnly",
+            "rgba(0,0,0,0)",
+            theme.pageTextLight,
+            100 * (graphData.balances.length) / (graphData.balances.length + graphData.futureBalances.length)
           )}
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -181,26 +209,34 @@ export function CashFlowGraph({
         <Bar
           dataKey="income"
           stackId="a"
+          fill={chartTheme.colors.blue}
           maxBarSize={MAX_BAR_SIZE}
           animationDuration={ANIMATION_DURATION}
-        >
-          {data.map((entry, index) => (
-            <Cell fill={entry.isFuture ? theme.reportsBlueFaded : chartTheme.colors.blue }/>
-        ))}
-        </Bar>
+        />
         <Bar
           dataKey="expenses"
           stackId="a"
+          fill={chartTheme.colors.red}
           maxBarSize={MAX_BAR_SIZE}
           animationDuration={ANIMATION_DURATION}
-        >
-          {data.map((entry, index) => (
-            <Cell fill={entry.isFuture ? theme.reportsRedFaded : chartTheme.colors.red }/>
-        ))}
-        </Bar>
+        />
+        <Bar
+          dataKey="futureIncome"
+          stackId="a"
+          fill={theme.reportsBlueFaded}
+          maxBarSize={MAX_BAR_SIZE}
+          animationDuration={ANIMATION_DURATION}
+        />
+        <Bar
+          dataKey="futureExpenses"
+          stackId="a"
+          fill={theme.reportsRedFaded}
+          maxBarSize={MAX_BAR_SIZE}
+          animationDuration={ANIMATION_DURATION}
+        />
         <Line
           type="monotone"
-          dataKey="balance"
+          dataKey="balanceTotal"
           dot={false}
           hide={!showBalance}
           stroke="url(#hideFuture)"
@@ -209,7 +245,7 @@ export function CashFlowGraph({
         />
         <Line
           type="monotone"
-          dataKey="balance"
+          dataKey="balanceTotal"
           dot={false}
           hide={!showBalance}
           stroke="url(#showFutureOnly)"
