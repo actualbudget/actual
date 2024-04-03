@@ -659,20 +659,16 @@ class AccountInternal extends PureComponent {
         }
         break;
       case 'toggle-reconciled':
-        const refilterTransactions = () => {
-          const filters = this.state.filters;
-          if (filters.length > 0) {
-            this.applyFilters([...filters]);
-          } else {
-            this.fetchTransactions();
-          }
-        };
         if (this.state.showReconciled) {
           this.props.savePrefs({ ['hide-reconciled-' + accountId]: true });
-          this.setState({ showReconciled: false }, refilterTransactions);
+          this.setState({ showReconciled: false }, () =>
+            this.fetchTransactions(this.state.filters),
+          );
         } else {
           this.props.savePrefs({ ['hide-reconciled-' + accountId]: false });
-          this.setState({ showReconciled: true }, refilterTransactions);
+          this.setState({ showReconciled: true }, () =>
+            this.fetchTransactions(this.state.filters),
+          );
         }
         break;
       default:
