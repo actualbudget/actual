@@ -1,12 +1,9 @@
 // @ts-strict-ignore
-import snapshotDiff from 'snapshot-diff';
-
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { post } from '../post';
 import { getServer } from '../server-config';
-import * as mockSyncServer from '../tests/mockSyncServer';
 
 import { reconcileTransactions, addTransactions } from './sync';
 import { loadRules, insertRule } from './transaction-rules';
@@ -18,7 +15,6 @@ jest.mock('../../shared/months', () => ({
 }));
 
 beforeEach(async () => {
-  mockSyncServer.reset();
   jest.resetAllMocks();
   (monthUtils.currentDay as jest.Mock).mockReturnValue('2017-10-15');
   (monthUtils.currentMonth as jest.Mock).mockReturnValue('2017-10');
@@ -35,37 +31,6 @@ function getAllTransactions() {
        ORDER BY date DESC, amount DESC, id
      `,
   );
-}
-
-function expectSnapshotWithDiffer(initialValue) {
-  let currentValue = initialValue;
-  expect(initialValue).toMatchSnapshot();
-  return {
-    expectToMatchDiff: value => {
-      expect(snapshotDiff(currentValue, value)).toMatchSnapshot();
-      currentValue = value;
-    },
-  };
-}
-
-function prepMockTransactions() {
-  let mockTransactions;
-  mockSyncServer.filterMockData(data => {
-    const account_id = data.accounts[0].account_id;
-    const transactions = data.transactions[account_id].filter(t => !t.pending);
-
-    mockTransactions = [
-      ...transactions.filter(t => t.date <= '2017-10-15'),
-      ...transactions.filter(t => t.date === '2017-10-16').slice(0, 1),
-      ...transactions.filter(t => t.date === '2017-10-17').slice(0, 3),
-    ];
-
-    return {
-      accounts: data.accounts,
-      transactions: { [account_id]: mockTransactions },
-    };
-  });
-  return mockTransactions;
 }
 
 async function prepareDatabase() {
