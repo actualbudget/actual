@@ -45,10 +45,15 @@ export function CategorySelector({
     filteredGroup(categoryGroup).map(category => selectAll.push(category)),
   );
 
+  if (selectedCategories === undefined) {
+    selectedCategories = categoryGroups.flatMap(cg => cg.categories);
+  }
+
   const selectedCategoryMap = useMemo(
     () => selectedCategories.map(selected => selected.id),
     [selectedCategories],
   );
+
   const allCategoriesSelected = selectAll.every(category =>
     selectedCategoryMap.includes(category.id),
   );

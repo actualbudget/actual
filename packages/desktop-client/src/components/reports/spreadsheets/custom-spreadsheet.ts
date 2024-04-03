@@ -18,7 +18,11 @@ import {
   type GroupedEntity,
 } from 'loot-core/src/types/models/reports';
 
-import { categoryLists, groupBySelections } from '../ReportOptions';
+import {
+  categoryLists,
+  groupBySelections,
+  ReportOptions,
+} from '../ReportOptions';
 
 import { calculateLegend } from './calculateLegend';
 import { filterEmptyRows } from './filterEmptyRows';
@@ -123,10 +127,9 @@ export function createCustomSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
-    const rangeInc =
-      interval === 'Monthly' ? 'rangeInclusive' : 'yearRangeInclusive';
-    const format = interval === 'Monthly' ? 'monthFromDate' : 'yearFromDate';
-    const intervals = monthUtils[rangeInc](
+    const format =
+      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+    const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
       monthUtils[format](startDate),
       monthUtils[format](endDate),
     );
