@@ -720,17 +720,6 @@ handlers['simplefin-accounts-link'] = async function ({
   return 'ok';
 };
 
-handlers['accounts-connect'] = async function ({
-  institution,
-  publicToken,
-  accountIds,
-  offbudgetIds,
-}) {
-  const bankId = await link.handoffPublicToken(institution, publicToken);
-  const ids = await link.addAccounts(bankId, accountIds, offbudgetIds);
-  return ids;
-};
-
 handlers['gocardless-accounts-connect'] = async function ({
   institution,
   publicToken,

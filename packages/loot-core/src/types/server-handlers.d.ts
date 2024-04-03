@@ -160,13 +160,6 @@ export interface ServerHandlers {
     upgradingId;
   }) => Promise<'ok'>;
 
-  'accounts-connect': (arg: {
-    institution;
-    publicToken;
-    accountIds;
-    offbudgetIds?;
-  }) => Promise<unknown>;
-
   'gocardless-accounts-connect': (arg: {
     institution;
     publicToken;

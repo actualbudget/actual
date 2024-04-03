@@ -805,7 +805,7 @@ export async function syncAccount(
       );
     }
 
-    const transactions = download.transactions;
+    const { transactions } = download;
     let balanceToUse = download.startingBalance;
 
     if (acctRow.account_sync_source === 'simpleFin') {
