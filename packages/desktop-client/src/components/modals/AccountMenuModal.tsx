@@ -208,7 +208,7 @@ function AdditionalAccountMenu({ account, onClose, onReopen }) {
                     onReopen?.(account.id);
                     break;
                   default:
-                    throw new Error(`Unsupported item: ${name}`);
+                    throw new Error(`Unrecognized menu option: ${name}`);
                 }
               }}
             />

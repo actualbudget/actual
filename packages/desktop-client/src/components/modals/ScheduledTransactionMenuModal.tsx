@@ -75,7 +75,7 @@ function ScheduledTransactionMenu({
             onSkip?.(transactionId);
             break;
           default:
-            throw new Error(`Unsupported item: ${name}`);
+            throw new Error(`Unrecognized menu option: ${name}`);
         }
       }}
       items={[
