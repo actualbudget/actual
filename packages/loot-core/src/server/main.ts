@@ -610,54 +610,6 @@ handlers['account-properties'] = async function ({ id }) {
   return { balance: balance || 0, numTransactions: count };
 };
 
-handlers['accounts-link'] = async function ({
-  institution,
-  publicToken,
-  accountId,
-  upgradingId,
-}) {
-  const bankId = await link.handoffPublicToken(institution, publicToken);
-
-  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-
-  // Get all the available accounts and find the selected one
-  const accounts = await bankSync.getGoCardlessAccounts(
-    userId,
-    userKey,
-    bankId,
-  );
-  const account = accounts.find(acct => acct.account_id === accountId);
-
-  await db.update('accounts', {
-    id: upgradingId,
-    account_id: account.account_id,
-    official_name: account.official_name,
-    balance_current: amountToInteger(account.balances.current),
-    balance_available: amountToInteger(account.balances.available),
-    balance_limit: amountToInteger(account.balances.limit),
-    mask: account.mask,
-    bank: bankId,
-  });
-
-  await bankSync.syncAccount(
-    userId,
-    userKey,
-    upgradingId,
-    account.account_id,
-    bankId,
-  );
-
-  connection.send('sync-event', {
-    type: 'success',
-    tables: ['transactions'],
-  });
-
-  return 'ok';
-};
-
 handlers['gocardless-accounts-link'] = async function ({
   requisitionId,
   account,

@@ -328,7 +328,7 @@ async function normalizeTransactions(
   return { normalized, payeesToCreate };
 }
 
-async function normalizeExternalTransactions(transactions, acctId) {
+async function normalizeBankSyncTransactions(transactions, acctId) {
   const payeesToCreate = new Map();
 
   const normalized = [];
@@ -440,7 +440,7 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
 export async function reconcileTransactions(
   acctId,
   transactions,
-  isExternalAccount = false,
+  isBankSyncAccount = false,
 ) {
   console.log('Performing transaction reconciliation');
 
@@ -448,8 +448,8 @@ export async function reconcileTransactions(
   const updated = [];
   const added = [];
 
-  const transactionNormalization = isExternalAccount
-    ? normalizeExternalTransactions
+  const transactionNormalization = isBankSyncAccount
+    ? normalizeBankSyncTransactions
     : normalizeTransactions;
 
   const { normalized, payeesToCreate } = await transactionNormalization(
@@ -583,7 +583,7 @@ export async function reconcileTransactions(
 
       // Update the transaction
       const updates = {
-        ...(isExternalAccount ? {} : { date: trans.date }),
+        ...(isBankSyncAccount ? {} : { date: trans.date }),
         imported_id: trans.imported_id || null,
         payee: existing.payee || trans.payee || null,
         category: existing.category || trans.category || null,
@@ -712,9 +712,6 @@ export async function syncAccount(
   );
 
   const acctRow = await db.select('accounts', id);
-  const isExternalAccount =
-    acctRow.account_sync_source === 'simpleFin' ||
-    acctRow.account_sync_source === 'goCardless';
 
   if (latestTransaction) {
     const startingTransaction = await db.first(
@@ -786,76 +783,39 @@ export async function syncAccount(
     }));
 
     return runMutator(async () => {
-      const result = await reconcileTransactions(
-        id,
-        transactions,
-        isExternalAccount,
-      );
+      const result = await reconcileTransactions(id, transactions, true);
       await updateAccountBalance(id, accountBalance);
       return result;
     });
   } else {
-    let balanceToUse: number;
-    let transactions;
+    let download;
 
-    if (isExternalAccount) {
-      let download;
+    // Otherwise, download transaction for the past 90 days
+    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 90);
 
-      // Otherwise, download transaction for the past 90 days
-      const startingDay = monthUtils.subDays(monthUtils.currentDay(), 90);
-
-      if (acctRow.account_sync_source === 'simpleFin') {
-        download = await downloadSimpleFinTransactions(acctId, startingDay);
-      } else if (acctRow.account_sync_source === 'goCardless') {
-        download = await downloadGoCardlessTransactions(
-          userId,
-          userKey,
-          acctId,
-          bankId,
-          startingDay,
-        );
-      }
-
-      transactions = download.transactions;
-      balanceToUse = download.startingBalance;
-
-      if (acctRow.account_sync_source === 'simpleFin') {
-        const currentBalance = download.startingBalance;
-        const previousBalance = transactions.reduce((total, trans) => {
-          return (
-            total - parseInt(trans.transactionAmount.amount.replace('.', ''))
-          );
-        }, currentBalance);
-        balanceToUse = previousBalance;
-      }
-    } else {
-      // Otherwise, download transaction for the last few days if it's an
-      // on-budget account, or for the past 30 days if off-budget
-      const startingDay = monthUtils.subDays(
-        monthUtils.currentDay(),
-        acctRow.offbudget === 0 ? 1 : 30,
-      );
-
-      const download = await downloadTransactions(
+    if (acctRow.account_sync_source === 'simpleFin') {
+      download = await downloadSimpleFinTransactions(acctId, startingDay);
+    } else if (acctRow.account_sync_source === 'goCardless') {
+      download = await downloadGoCardlessTransactions(
         userId,
         userKey,
         acctId,
         bankId,
-        dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd'),
+        startingDay,
       );
+    }
 
-      transactions = download.transactions;
+    const transactions = download.transactions;
+    let balanceToUse = download.startingBalance;
 
-      // We need to add a transaction that represents the starting
-      // balance for everything to balance out. In order to get balance
-      // before the first imported transaction, we need to get the
-      // current balance from the accounts table and subtract all the
-      // imported transactions.
-      const currentBalance = acctRow.balance_current;
-
-      balanceToUse = transactions.reduce((total, trans) => {
-        return total - trans.amount;
+    if (acctRow.account_sync_source === 'simpleFin') {
+      const currentBalance = download.startingBalance;
+      const previousBalance = transactions.reduce((total, trans) => {
+        return (
+          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
+        );
       }, currentBalance);
+      balanceToUse = previousBalance;
     }
 
     const oldestTransaction = transactions[transactions.length - 1];
@@ -878,11 +838,7 @@ export async function syncAccount(
         starting_balance_flag: true,
       });
 
-      const result = await reconcileTransactions(
-        id,
-        transactions,
-        isExternalAccount,
-      );
+      const result = await reconcileTransactions(id, transactions, true);
       return {
         ...result,
         added: [initialId, ...result.added],
