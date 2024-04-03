@@ -1502,7 +1502,7 @@ handlers['load-global-prefs'] = async function () {
       theme === 'development' ||
       theme === 'midnight'
         ? theme
-        : 'light',
+        : 'auto',
   };
 };
 
