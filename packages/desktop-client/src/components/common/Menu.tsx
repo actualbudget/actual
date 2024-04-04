@@ -173,7 +173,11 @@ export function Menu<T extends MenuItem>({
             }}
             onPointerEnter={() => setHoveredIndex(idx)}
             onPointerLeave={() => setHoveredIndex(null)}
-            onClick={() => !item.disabled && onMenuSelect?.(item.name)}
+            onClick={() =>
+              !item.disabled &&
+              item.toggle === undefined &&
+              onMenuSelect?.(item.name)
+            }
           >
             {/* Force it to line up evenly */}
             {item.toggle === undefined ? (
@@ -200,7 +204,9 @@ export function Menu<T extends MenuItem>({
                   onColor={theme.pageTextPositive}
                   style={{ marginLeft: 5 }}
                   onToggle={() =>
-                    !item.disabled && item.toggle && onMenuSelect?.(item.name)
+                    !item.disabled &&
+                    item.toggle !== undefined &&
+                    onMenuSelect?.(item.name)
                   }
                 />
               </>
