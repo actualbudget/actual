@@ -1287,6 +1287,7 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
+        console.group('Bank Sync operation');
         const res = await bankSync.syncExternalAccount(
           userId,
           userKey,
@@ -1294,6 +1295,8 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
           acct.account_id,
           acct.bankId,
         );
+        console.groupEnd();
+
         const { added, updated } = res;
 
         newTransactions = newTransactions.concat(added);

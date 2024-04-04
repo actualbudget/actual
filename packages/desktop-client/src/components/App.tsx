@@ -5,6 +5,7 @@ import {
   useErrorBoundary,
   type FallbackProps,
 } from 'react-error-boundary';
+import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useSelector } from 'react-redux';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -146,27 +147,29 @@ export function App() {
   }, [sync]);
 
   return (
-    <ResponsiveProvider>
-      <View
-        style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-      >
+    <HotkeysProvider initiallyActiveScopes={['*']}>
+      <ResponsiveProvider>
         <View
-          key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-          style={{
-            flexGrow: 1,
-            overflow: 'hidden',
-            ...styles.lightScrollbar,
-          }}
+          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
         >
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
-              <DevelopmentTopBar />
-            )}
-            <AppInner budgetId={budgetId} cloudFileId={cloudFileId} />
-          </ErrorBoundary>
-          <ThemeStyle />
+          <View
+            key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+            style={{
+              flexGrow: 1,
+              overflow: 'hidden',
+              ...styles.lightScrollbar,
+            }}
+          >
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
+                <DevelopmentTopBar />
+              )}
+              <AppInner budgetId={budgetId} cloudFileId={cloudFileId} />
+            </ErrorBoundary>
+            <ThemeStyle />
+          </View>
         </View>
-      </View>
-    </ResponsiveProvider>
+      </ResponsiveProvider>
+    </HotkeysProvider>
   );
 }

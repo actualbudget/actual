@@ -8,6 +8,7 @@ export async function goalsSimple(
   limit,
   hold,
   to_budget,
+  last_month_balance,
 ) {
   // simple has 'monthly' and/or 'limit' params
   if (template.limit != null) {
@@ -25,7 +26,7 @@ export async function goalsSimple(
     const monthly = amountToInteger(template.monthly);
     increment = monthly;
   } else {
-    increment = limit;
+    increment = limit - last_month_balance;
   }
   to_budget += increment;
   return { to_budget, errors, limit, limitCheck, hold };

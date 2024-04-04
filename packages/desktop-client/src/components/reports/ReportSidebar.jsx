@@ -77,7 +77,6 @@ export function ReportSidebar({
         [dateStart, dateEnd] = getSpecificRange(
           ReportOptions.dateRangeMap.get(cond),
           cond === 'Last month' ? 0 : null,
-          customReportItems.interval,
         );
         onChangeDates(dateStart, dateEnd);
     }
@@ -209,16 +208,20 @@ export function ReportSidebar({
             onChange={e => {
               setInterval(e);
               onReportChange({ type: 'modify' });
+              if (
+                ReportOptions.dateRange
+                  .filter(int => !int[e])
+                  .map(int => int.description)
+                  .includes(customReportItems.dateRange)
+              ) {
+                onSelectRange('Year to date');
+              }
             }}
             options={ReportOptions.interval.map(option => [
               option.description,
               option.description,
             ])}
-            disabledKeys={
-              customReportItems.mode === 'time'
-                ? ['Monthly', 'Yearly']
-                : ['Yearly']
-            }
+            disabledKeys={[]}
           />
         </View>
         <View
@@ -354,11 +357,10 @@ export function ReportSidebar({
               onChange={e => {
                 onSelectRange(e);
               }}
-              options={ReportOptions.dateRange.map(option => [
-                option.description,
-                option.description,
-              ])}
-              line={dateRangeLine}
+              options={ReportOptions.dateRange
+                .filter(f => f[customReportItems.interval])
+                .map(option => [option.description, option.description])}
+              line={customReportItems.interval === 'Monthly' && dateRangeLine}
             />
           </View>
         ) : (
@@ -387,7 +389,7 @@ export function ReportSidebar({
                 value={customReportItems.startDate}
                 defaultLabel={monthUtils.format(
                   customReportItems.startDate,
-                  'MMMM, yyyy',
+                  ReportOptions.intervalFormat.get(customReportItems.interval),
                 )}
                 options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
@@ -416,7 +418,7 @@ export function ReportSidebar({
                 value={customReportItems.endDate}
                 defaultLabel={monthUtils.format(
                   customReportItems.endDate,
-                  'MMMM, yyyy',
+                  ReportOptions.intervalFormat.get(customReportItems.interval),
                 )}
                 options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />

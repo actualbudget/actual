@@ -359,7 +359,16 @@ export function integerToAmount(n) {
 // currencies. We extract out the numbers and just ignore separators.
 export function looselyParseAmount(amount: string) {
   function safeNumber(v: number): null | number {
-    return isNaN(v) ? null : v;
+    if (isNaN(v)) {
+      return null;
+    }
+
+    const value = v * 100;
+    if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
+      return null;
+    }
+
+    return v;
   }
 
   function extractNumbers(v: string): string {

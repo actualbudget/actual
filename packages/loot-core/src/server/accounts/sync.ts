@@ -185,6 +185,8 @@ async function downloadGoCardlessTransactions(
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
+  console.log('Pulling transactions from GoCardless');
+
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
     {
@@ -209,6 +211,8 @@ async function downloadGoCardlessTransactions(
     startingBalance,
   } = res;
 
+  console.log('Response:', res);
+
   return {
     transactions: all,
     accountBalance: balances,
@@ -219,6 +223,8 @@ async function downloadGoCardlessTransactions(
 async function downloadSimpleFinTransactions(acctId, since) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
+
+  console.log('Pulling transactions from SimpleFin');
 
   const res = await post(
     getServer().SIMPLEFIN_SERVER + '/transactions',
@@ -240,6 +246,8 @@ async function downloadSimpleFinTransactions(acctId, since) {
     balances,
     startingBalance,
   } = res;
+
+  console.log('Response:', res);
 
   return {
     transactions: all,
@@ -430,6 +438,8 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
 }
 
 export async function reconcileExternalTransactions(acctId, transactions) {
+  console.log('Performing transaction reconciliation');
+
   const hasMatched = new Set();
   const updated = [];
   const added = [];
@@ -482,6 +492,26 @@ export async function reconcileExternalTransactions(acctId, transactions) {
           acctId,
         ],
       );
+
+      // Sort the matched transactions according to the distance from the original
+      // transactions date. i.e. if the original transaction is in 21-02-2024 and
+      // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
+      // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
+      fuzzyDataset = fuzzyDataset.sort((a, b) => {
+        const aDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(a.date)),
+          ),
+        );
+        const bDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(b.date)),
+          ),
+        );
+        return aDistance > bDistance ? 1 : -1;
+      });
     }
 
     transactionsStep1.push({
@@ -586,6 +616,14 @@ export async function reconcileExternalTransactions(acctId, transactions) {
   await createNewPayees(payeesToCreate, [...added, ...updated]);
   await batchUpdateTransactions({ added, updated });
 
+  console.log('Debug data for the operations:', {
+    transactionsStep1,
+    transactionsStep2,
+    transactionsStep3,
+    added,
+    updated,
+  });
+
   return {
     added: added.map(trans => trans.id),
     updated: updated.map(trans => trans.id),
@@ -645,6 +683,26 @@ export async function reconcileTransactions(acctId, transactions) {
           acctId,
         ],
       );
+
+      // Sort the matched transactions according to the distance from the original
+      // transactions date. i.e. if the original transaction is in 21-02-2024 and
+      // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
+      // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
+      fuzzyDataset = fuzzyDataset.sort((a, b) => {
+        const aDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(a.date)),
+          ),
+        );
+        const bDistance = Math.abs(
+          dateFns.differenceInMilliseconds(
+            dateFns.parseISO(trans.date),
+            dateFns.parseISO(db.fromDateRepr(b.date)),
+          ),
+        );
+        return aDistance > bDistance ? 1 : -1;
+      });
     }
 
     transactionsStep1.push({

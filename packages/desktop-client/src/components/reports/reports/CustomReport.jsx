@@ -81,14 +81,29 @@ export function CustomReport() {
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const [dataCheck, setDataCheck] = useState(false);
-  const dateRangeLine = ReportOptions.dateRange.length - 3;
+  const dateRangeLine =
+    ReportOptions.dateRange.filter(f => f[interval]).length - 3;
 
+  const [intervals, setIntervals] = useState(
+    monthUtils.rangeInclusive(startDate, endDate),
+  );
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
     location.state ? (location.state.report ? 'saved' : 'new') : 'new',
   );
-  const intervals = monthUtils.rangeInclusive(startDate, endDate);
+
+  useEffect(() => {
+    const format =
+      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+
+    const dateStart = monthUtils[format](startDate);
+    const dateEnd = monthUtils[format](endDate);
+
+    setIntervals(
+      monthUtils[ReportOptions.intervalRange.get(interval)](dateStart, dateEnd),
+    );
+  }, [interval, startDate, endDate]);
 
   useEffect(() => {
     if (selectedCategories === undefined && categories.list.length !== 0) {
@@ -101,31 +116,31 @@ export function CustomReport() {
       report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
       setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
-      const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : currentMonth;
+      const format =
+        ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+      const currentInterval =
+        monthUtils['current' + ReportOptions.intervalMap.get(interval)]();
+      const earliestInterval = trans
+        ? monthUtils[format](d.parseISO(fromDateRepr(trans.date)))
+        : currentInterval;
 
-      // Make sure the month selects are at least populates with a
-      // year's worth of months. We can undo this when we have fancier
-      // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
-      if (earliestMonth > yearAgo) {
-        earliestMonth = yearAgo;
-      }
-
-      const allInter = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
-        .map(month => ({
-          name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+      const allInter = monthUtils[ReportOptions.intervalRange.get(interval)](
+        earliestInterval,
+        currentInterval,
+      )
+        .map(inter => ({
+          name: inter,
+          pretty: monthUtils.format(
+            inter,
+            ReportOptions.intervalFormat.get(interval),
+          ),
         }))
         .reverse();
 
       setAllIntervals(allInter);
     }
     run();
-  }, []);
+  }, [interval]);
 
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = usePayees();
@@ -149,8 +164,8 @@ export function CustomReport() {
   }, [
     startDate,
     endDate,
-    groupBy,
     interval,
+    groupBy,
     balanceType,
     categories,
     selectedCategories,
@@ -183,14 +198,14 @@ export function CustomReport() {
       balanceTypeOp,
       payees,
       accounts,
-      setDataCheck,
       graphType,
+      setDataCheck,
     });
   }, [
     startDate,
     endDate,
-    groupBy,
     interval,
+    groupBy,
     balanceType,
     categories,
     selectedCategories,
@@ -225,7 +240,7 @@ export function CustomReport() {
     graphType,
     conditions: filters,
     conditionsOp,
-    data,
+    data: {},
   };
 
   const [scrollWidth, setScrollWidth] = useState(0);

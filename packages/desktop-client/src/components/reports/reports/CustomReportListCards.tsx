@@ -3,7 +3,10 @@ import React, { createRef, useMemo, useState } from 'react';
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
-import { styles } from '../../../style';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { usePayees } from '../../../hooks/usePayees';
+import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { Menu } from '../../common/Menu';
@@ -11,11 +14,12 @@ import { MenuButton } from '../../common/MenuButton';
 import { MenuTooltip } from '../../common/MenuTooltip';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { ChooseGraph } from '../ChooseGraph';
 import { DateRange } from '../DateRange';
-import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
+import { SaveReportDelete } from '../SaveReportDelete';
 import { SaveReportName } from '../SaveReportName';
+
+import { GetCardData } from './GetCardData';
 
 type CardMenuProps = {
   onClose: () => void;
@@ -63,12 +67,23 @@ export function CustomReportListCards({
 }) {
   const result: { [key: string]: boolean }[] = index(reports);
   const [reportMenu, setReportMenu] = useState(result);
+  const [deleteMenuOpen, setDeleteMenuOpen] = useState(result);
   const [nameMenuOpen, setNameMenuOpen] = useState(result);
   const [err, setErr] = useState('');
   const [name, setName] = useState('');
   const inputRef = createRef<HTMLInputElement>();
 
+  const payees = usePayees();
+  const accounts = useAccounts();
+  const categories = useCategories();
+
   const [isCardHovered, setIsCardHovered] = useState('');
+
+  const onDelete = async (reportData: string) => {
+    setName('');
+    await send('report/delete', reportData);
+    onDeleteMenuOpen(reportData === undefined ? '' : reportData, false);
+  };
 
   const onAddUpdate = async ({
     reportData,
@@ -98,7 +113,8 @@ export function CustomReportListCards({
   const onMenuSelect = async (item: string, report: CustomReportEntity) => {
     if (item === 'delete') {
       onMenuOpen(report.id, false);
-      await send('report/delete', report.id);
+      onDeleteMenuOpen(report.id, true);
+      setErr('');
     }
     if (item === 'rename') {
       onMenuOpen(report.id, false);
@@ -110,6 +126,10 @@ export function CustomReportListCards({
 
   const onMenuOpen = (item: string, state: boolean) => {
     setReportMenu({ ...reportMenu, [item]: state });
+  };
+
+  const onDeleteMenuOpen = (item: string, state: boolean) => {
+    setDeleteMenuOpen({ ...deleteMenuOpen, [item]: state });
   };
 
   const onNameMenuOpen = (item: string, state: boolean) => {
@@ -191,23 +211,12 @@ export function CustomReportListCards({
                           )}
                         </View>
                       </View>
-
-                      {report.data ? (
-                        <ChooseGraph
-                          startDate={report.startDate}
-                          endDate={report.endDate}
-                          data={report.data}
-                          mode={report.mode}
-                          graphType={report.graphType}
-                          balanceType={report.balanceType}
-                          groupBy={report.groupBy}
-                          interval={report.interval}
-                          compact={true}
-                          style={{ height: 'auto', flex: 1 }}
-                        />
-                      ) : (
-                        <LoadingIndicator />
-                      )}
+                      <GetCardData
+                        report={report}
+                        payees={payees}
+                        accounts={accounts}
+                        categories={categories}
+                      />
                     </View>
                   </ReportCard>
                 </View>
@@ -259,6 +268,22 @@ export function CustomReportListCards({
                           onAddUpdate={onAddUpdate}
                           err={err}
                           report={report}
+                        />
+                      )}
+                  {report.id === undefined
+                    ? null
+                    : deleteMenuOpen[
+                        report.id as keyof typeof deleteMenuOpen
+                      ] && (
+                        <SaveReportDelete
+                          onDelete={() => onDelete(report.id)}
+                          onClose={() =>
+                            onDeleteMenuOpen(
+                              report.id === undefined ? '' : report.id,
+                              false,
+                            )
+                          }
+                          name={report.name}
                         />
                       )}
                 </View>
