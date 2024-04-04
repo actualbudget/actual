@@ -60,7 +60,7 @@ This is purely a visual change and doesn't affect the budget itself.
 
 You will likely see money leftover in each of the imported months in your `To Budget`.
 This extra comes from nYNAB including funds budgeted in future months when calculating its `Ready to Assign` value.
-Actual does not include those funds by default, but offers a way to manually reserve funds for use if future months.
+Actual does not include those funds by default, but offers a way to manually reserve funds for use in future months.
 This is affectively the same thing nYNAB does, but in a manual form.
 To `hold` the leftover funds for the next month follow these steps:
 1. Click on your `To Budget` value for the month.
