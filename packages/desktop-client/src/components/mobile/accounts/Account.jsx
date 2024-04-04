@@ -12,7 +12,7 @@ import {
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
-import { listen } from 'loot-core/src/platform/client/fetch';
+import { listen, send } from 'loot-core/src/platform/client/fetch';
 import {
   isPreviewId,
   ungroupTransactions,
@@ -21,6 +21,7 @@ import {
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useLocalPrefs } from '../../../hooks/useLocalPrefs';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -77,6 +78,9 @@ export function Account(props) {
   const accounts = useAccounts();
   const payees = usePayees();
 
+  const failedAccounts = useFailedAccounts();
+  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -122,6 +126,10 @@ export function Account(props) {
     updateQuery(query);
   }, [makeRootQuery, updateQuery]);
 
+  const refetchTransactions = () => {
+    paged.current?.run();
+  };
+
   useEffect(() => {
     let unlisten;
 
@@ -133,7 +141,7 @@ export function Account(props) {
             tables.includes('category_mapping') ||
             tables.includes('payee_mapping')
           ) {
-            paged.current?.run();
+            refetchTransactions();
           }
 
           if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -218,6 +226,23 @@ export function Account(props) {
     // details of how the native app used to handle preview transactions here can be found at commit 05e58279
     if (!isPreviewId(transaction.id)) {
       navigate(`transactions/${transaction.id}`);
+    } else {
+      dispatch(
+        actions.pushModal('scheduled-transaction-menu', {
+          transactionId: transaction.id,
+          onPost: async transactionId => {
+            const parts = transactionId.split('/');
+            await send('schedule/post-transaction', { id: parts[1] });
+            refetchTransactions();
+            dispatch(actions.collapseModals('scheduled-transaction-menu'));
+          },
+          onSkip: async transactionId => {
+            const parts = transactionId.split('/');
+            await send('schedule/skip-next-date', { id: parts[1] });
+            dispatch(actions.collapseModals('scheduled-transaction-menu'));
+          },
+        }),
+      );
     }
   };
 
@@ -238,6 +263,8 @@ export function Account(props) {
               {...state}
               key={numberFormat + hideFraction}
               account={account}
+              pending={syncingAccountIds.includes(account.id)}
+              failed={failedAccounts && failedAccounts.has(account.id)}
               accounts={accounts}
               categories={categories.list}
               payees={state.payees}

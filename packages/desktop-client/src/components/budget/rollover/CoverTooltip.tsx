@@ -10,7 +10,7 @@ import { addToBeBudgetedGroup } from '../util';
 
 type CoverTooltipProps = {
   tooltipProps?: ComponentProps<typeof Tooltip>;
-  onSubmit: (category: unknown) => void;
+  onSubmit: (categoryId: string) => void;
   onClose: () => void;
 };
 export function CoverTooltip({
@@ -18,18 +18,10 @@ export function CoverTooltip({
   onSubmit,
   onClose,
 }: CoverTooltipProps) {
-  const { grouped } = useCategories();
-  const categoryGroups = addToBeBudgetedGroup(
-    grouped.filter(g => !g.is_income),
-  );
-  const [category, setCategory] = useState<string | null>(null);
-
-  function submit() {
-    if (category) {
-      onSubmit(category);
-      onClose();
-    }
-  }
+  const _onSubmit = (categoryId: string) => {
+    onSubmit?.(categoryId);
+    onClose?.();
+  };
 
   return (
     <Tooltip
@@ -39,16 +31,38 @@ export function CoverTooltip({
       {...tooltipProps}
       onClose={onClose}
     >
+      <Cover onSubmit={_onSubmit} />
+    </Tooltip>
+  );
+}
+
+type CoverProps = {
+  onSubmit: (categoryId: string) => void;
+};
+
+function Cover({ onSubmit }: CoverProps) {
+  const { grouped: originalCategoryGroups } = useCategories();
+  const categoryGroups = addToBeBudgetedGroup(
+    originalCategoryGroups.filter(g => !g.is_income),
+  );
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+
+  function submit() {
+    if (categoryId) {
+      onSubmit(categoryId);
+    }
+  }
+  return (
+    <>
       <View style={{ marginBottom: 5 }}>Cover from category:</View>
 
       <InitialFocus>
         {node => (
           <CategoryAutocomplete
             categoryGroups={categoryGroups}
-            value={null}
+            value={categoryGroups.find(g => g.id === categoryId)}
             openOnFocus={true}
-            onUpdate={() => {}}
-            onSelect={(id: string | undefined) => setCategory(id || null)}
+            onSelect={(id: string | undefined) => setCategoryId(id || null)}
             inputProps={{
               inputRef: node,
               onKeyDown: e => {
@@ -56,8 +70,9 @@ export function CoverTooltip({
                   submit();
                 }
               },
+              placeholder: '(none)',
             }}
-            showHiddenItems={false}
+            showHiddenCategories={false}
           />
         )}
       </InitialFocus>
@@ -79,6 +94,6 @@ export function CoverTooltip({
           Transfer
         </Button>
       </View>
-    </Tooltip>
+    </>
   );
 }

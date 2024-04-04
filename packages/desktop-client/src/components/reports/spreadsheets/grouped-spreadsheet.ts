@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 import { runQuery } from 'loot-core/src/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { categoryLists, ReportOptions } from '../ReportOptions';
 
@@ -37,9 +38,12 @@ export function createGroupedSpreadsheet({
       ),
   );
 
-  return async (spreadsheet, setData) => {
+  return async (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: DataEntity[]) => void,
+  ) => {
     if (categoryList.length === 0) {
-      return null;
+      return;
     }
 
     const { filters } = await send('make-filters-from-conditions', {
@@ -81,7 +85,7 @@ export function createGroupedSpreadsheet({
       monthUtils[format](endDate),
     );
 
-    const groupedData: GroupedEntity[] = categoryGroup.map(
+    const groupedData: DataEntity[] = categoryGroup.map(
       group => {
         let totalAssets = 0;
         let totalDebts = 0;

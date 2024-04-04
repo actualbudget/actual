@@ -9,6 +9,7 @@ import {
   SvgQueue,
   SvgTag,
 } from '../../icons/v1';
+import { SvgChartArea } from '../../icons/v1/ChartArea';
 import { theme } from '../../style';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
@@ -77,6 +78,19 @@ export function ReportTopbar({
         <SvgChartBar width={15} height={15} />
       </GraphButton>
       <GraphButton
+        title="Line Graph"
+        selected={customReportItems.graphType === 'LineGraph'}
+        onSelect={() => {
+          onReportChange({ type: 'modify' });
+          setGraphType('LineGraph');
+          defaultItems('LineGraph');
+        }}
+        style={{ marginRight: 15 }}
+        disabled={disabledItems('LineGraph')}
+      >
+        <SvgChart width={15} height={15} />
+      </GraphButton>
+      <GraphButton
         title="Area Graph"
         selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
@@ -87,7 +101,7 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         disabled={disabledItems('AreaGraph')}
       >
-        <SvgChart width={15} height={15} />
+        <SvgChartArea width={15} height={15} />
       </GraphButton>
       <GraphButton
         title="Donut Graph"

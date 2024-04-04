@@ -2,6 +2,7 @@
 import * as d from 'date-fns';
 
 import { runQuery } from 'loot-core/src/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
@@ -12,6 +13,10 @@ import {
   type RuleConditionEntity,
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
+import {
+  type DataEntity,
+  type GroupedEntity,
+} from 'loot-core/src/types/models/reports';
 
 import {
   categoryLists,
@@ -38,11 +43,11 @@ export type createCustomSpreadsheetProps = {
   showHiddenCategories: boolean;
   showUncategorized: boolean;
   groupBy?: string;
-  balanceTypeOp?: string;
+  balanceTypeOp?: keyof DataEntity;
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
-  setDataCheck?: (value: boolean) => void;
   graphType?: string;
+  setDataCheck?: (value: boolean) => void;
 };
 
 export function createCustomSpreadsheet({
@@ -61,8 +66,8 @@ export function createCustomSpreadsheet({
   balanceTypeOp,
   payees,
   accounts,
-  setDataCheck,
   graphType,
+  setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
 
@@ -82,9 +87,12 @@ export function createCustomSpreadsheet({
     accounts,
   );
 
-  return async (spreadsheet, setData) => {
+  return async (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: GroupedEntity) => void,
+  ) => {
     if (groupByList.length === 0) {
-      return null;
+      return;
     }
 
     const { filters } = await send('make-filters-from-conditions', {

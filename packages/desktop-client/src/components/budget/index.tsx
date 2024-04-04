@@ -28,6 +28,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import { View } from '../common/View';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import {
   SWITCH_BUDGET_MESSAGE_TYPE,
   TitlebarContext,
@@ -39,7 +40,7 @@ import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as report from './report/ReportComponents';
 import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/RolloverComponents';
-import { RolloverContext } from './rollover/RolloverContext';
+import { RolloverProvider } from './rollover/RolloverContext';
 import { prewarmAllMonths, prewarmMonth, switchBudgetType } from './util';
 
 type ReportComponents = {
@@ -378,7 +379,7 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   } else {
     table = (
-      <RolloverContext
+      <RolloverProvider
         summaryCollapsed={summaryCollapsed}
         onBudgetAction={onBudgetAction}
         onToggleSummaryCollapse={onToggleCollapse}
@@ -400,11 +401,15 @@ function BudgetInner(props: BudgetInnerProps) {
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
         />
-      </RolloverContext>
+      </RolloverProvider>
     );
   }
 
-  return <View style={{ flex: 1 }}>{table}</View>;
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
+      <View style={{ flex: 1 }}>{table}</View>
+    </NamespaceContext.Provider>
+  );
 }
 
 const RolloverBudgetSummary = memo<{ month: string }>(props => {

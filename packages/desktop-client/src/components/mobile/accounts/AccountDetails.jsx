@@ -1,14 +1,22 @@
 import React, { useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { syncAndDownload } from 'loot-core/client/actions';
+import {
+  openAccountCloseModal,
+  pushModal,
+  reopenAccount,
+  syncAndDownload,
+  updateAccount,
+} from 'loot-core/client/actions';
+import { send } from 'loot-core/platform/client/fetch';
 
 import { SvgAdd } from '../../../icons/v1';
 import { SvgSearchAlternate } from '../../../icons/v2';
-import { theme } from '../../../style';
+import { styles, theme } from '../../../style';
 import { ButtonLink } from '../../common/ButtonLink';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
+import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobileBackButton } from '../../MobileBackButton';
 import { Page } from '../../Page';
@@ -26,7 +34,6 @@ function TransactionSearchInput({ accountName, onSearch }) {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: theme.mobilePageBackground,
-        margin: '11px auto 4px',
         padding: 10,
         width: '100%',
       }}
@@ -53,19 +60,91 @@ function TransactionSearchInput({ accountName, onSearch }) {
         style={{
           backgroundColor: theme.tableBackground,
           border: `1px solid ${theme.formInputBorder}`,
-          fontSize: 15,
           flex: 1,
-          height: 32,
-          marginLeft: 4,
-          padding: 8,
+          height: styles.mobileMinHeight,
         }}
       />
     </View>
   );
 }
 
+function AccountName({ account, pending, failed }) {
+  const dispatch = useDispatch();
+
+  const onSave = account => {
+    dispatch(updateAccount(account));
+  };
+
+  const onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  const onEditNotes = () => {
+    dispatch(
+      pushModal('notes', {
+        id: account.id,
+        name: account.name,
+        onSave: onSaveNotes,
+      }),
+    );
+  };
+
+  const onCloseAccount = () => {
+    dispatch(openAccountCloseModal(account.id));
+  };
+
+  const onReopenAccount = () => {
+    dispatch(reopenAccount(account.id));
+  };
+
+  const onClick = () => {
+    dispatch(
+      pushModal('account-menu', {
+        accountId: account.id,
+        onSave,
+        onEditNotes,
+        onCloseAccount,
+        onReopenAccount,
+      }),
+    );
+  };
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+      }}
+    >
+      {account.bankId && (
+        <div
+          style={{
+            margin: 'auto',
+            marginRight: 5,
+            width: 8,
+            height: 8,
+            borderRadius: 8,
+            backgroundColor: pending
+              ? theme.sidebarItemBackgroundPending
+              : failed
+                ? theme.sidebarItemBackgroundFailed
+                : theme.sidebarItemBackgroundPositive,
+            transition: 'transform .3s',
+          }}
+        />
+      )}
+      <Text
+        style={{ ...styles.underlinedText, ...styles.lineClamp(2) }}
+        onClick={onClick}
+      >
+        {`${account.closed ? 'Closed: ' : ''}${account.name}`}
+      </Text>
+    </View>
+  );
+}
+
 export function AccountDetails({
   account,
+  pending,
+  failed,
   prependTransactions,
   transactions,
   accounts,
@@ -90,7 +169,9 @@ export function AccountDetails({
 
   return (
     <Page
-      title={account.name}
+      title={
+        <AccountName account={account} pending={pending} failed={failed} />
+      }
       headerLeftContent={<MobileBackButton />}
       headerRightContent={
         <ButtonLink

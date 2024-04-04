@@ -1,14 +1,13 @@
-// @ts-strict-ignore
 import React, {
-  useRef,
+  type InputHTMLAttributes,
   type KeyboardEvent,
   type Ref,
-  type InputHTMLAttributes,
+  useRef,
 } from 'react';
-import mergeRefs from 'react-merge-refs';
 
 import { css } from 'glamor';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useProperFocus } from '../../hooks/useProperFocus';
 import { type CSSProperties, styles, theme } from '../../style';
 
@@ -22,7 +21,7 @@ export const defaultInputStyle = {
   border: '1px solid ' + theme.formInputBorder,
 };
 
-export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   style?: CSSProperties;
   inputRef?: Ref<HTMLInputElement>;
   onEnter?: (event: KeyboardEvent<HTMLInputElement>) => void;
@@ -42,12 +41,14 @@ export function Input({
   focused,
   ...nativeProps
 }: InputProps) {
-  const ref = useRef();
+  const ref = useRef<HTMLInputElement>(null);
   useProperFocus(ref, focused);
+
+  const mergedRef = useMergedRefs<HTMLInputElement>(ref, inputRef);
 
   return (
     <input
-      ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
+      ref={mergedRef}
       className={`${css(
         defaultInputStyle,
         {

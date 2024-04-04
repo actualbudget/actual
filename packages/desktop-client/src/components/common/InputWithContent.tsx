@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { useState, type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
@@ -23,7 +22,7 @@ export function InputWithContent({
   getStyle,
   ...props
 }: InputWithContentProps) {
-  const [focused, setFocused] = useState(props.focused);
+  const [focused, setFocused] = useState(props.focused ?? false);
 
   return (
     <View
@@ -37,7 +36,7 @@ export function InputWithContent({
           (focusStyle ?? {
             boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
           })),
-        ...(getStyle && getStyle(focused)),
+        ...getStyle?.(focused),
       }}
     >
       {leftContent}
