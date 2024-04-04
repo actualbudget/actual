@@ -2,6 +2,7 @@ import React from 'react';
 
 import {
   SvgCalculator,
+  SvgChart,
   SvgChartBar,
   SvgChartPie,
   SvgListBullet,
@@ -75,6 +76,19 @@ export function ReportTopbar({
         )}
       >
         <SvgChartBar width={15} height={15} />
+      </GraphButton>
+      <GraphButton
+        title="Line Graph"
+        selected={customReportItems.graphType === 'LineGraph'}
+        onSelect={() => {
+          onReportChange({ type: 'modify' });
+          setGraphType('LineGraph');
+          defaultItems('LineGraph');
+        }}
+        style={{ marginRight: 15 }}
+        disabled={disabledItems('LineGraph')}
+      >
+        <SvgChart width={15} height={15} />
       </GraphButton>
       <GraphButton
         title="Area Graph"
