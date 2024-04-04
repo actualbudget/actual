@@ -146,6 +146,8 @@ type BarGraphProps = {
   balanceTypeOp: string;
   compact?: boolean;
   viewLabels: boolean;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export function BarGraph({
@@ -155,6 +157,8 @@ export function BarGraph({
   balanceTypeOp,
   compact,
   viewLabels,
+  showHiddenCategories,
+  showOffBudget,
 }: BarGraphProps) {
   const navigate = useNavigate();
   const categories = useCategories();
@@ -213,18 +217,20 @@ export function BarGraph({
         value: 0,
         type: 'number',
       },
-      hiddenCategories.length > 0 && {
-        field: 'category',
-        op: 'notOneOf',
-        value: hiddenCategories,
-        type: 'id',
-      },
-      offBudgetAccounts.length > 0 && {
-        field: 'account',
-        op: 'notOneOf',
-        value: offBudgetAccounts,
-        type: 'id',
-      },
+      hiddenCategories.length > 0 &&
+        !showHiddenCategories && {
+          field: 'category',
+          op: 'notOneOf',
+          value: hiddenCategories,
+          type: 'id',
+        },
+      offBudgetAccounts.length > 0 &&
+        !showOffBudget && {
+          field: 'account',
+          op: 'notOneOf',
+          value: offBudgetAccounts,
+          type: 'id',
+        },
     ].filter(f => f);
     navigate('/accounts', {
       state: {

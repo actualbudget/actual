@@ -566,6 +566,8 @@ export function CustomReport() {
                     setScrollWidth={setScrollWidth}
                     viewLabels={viewLabels}
                     compact={false}
+                    showHiddenCategories={showHiddenCategories}
+                    showOffBudget={showOffBudget}
                   />
                 ) : (
                   <LoadingIndicator message="Loading report..." />
