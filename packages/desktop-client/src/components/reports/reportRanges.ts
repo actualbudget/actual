@@ -115,33 +115,13 @@ function boundedRange(
   return [start, end];
 }
 
-export function getSpecificRange(
-  offset: number,
-  addNumber: number,
-  interval: string,
-) {
+export function getSpecificRange(offset: number, addNumber: number) {
   const currentDay = monthUtils.currentDay();
-  let currInterval;
-  let dateStart;
-  let dateEnd;
-  switch (interval) {
-    case 'Monthly':
-      currInterval = monthUtils.monthFromDate(currentDay);
-      dateStart = monthUtils.subMonths(currInterval, offset);
-      dateEnd = monthUtils.addMonths(
-        dateStart,
-        addNumber === null ? offset : addNumber,
-      );
-      break;
-    default:
-      currInterval = currentDay;
-      dateStart = monthUtils.subDays(currInterval, offset);
-      dateEnd = monthUtils.addDays(
-        dateStart,
-        addNumber === null ? offset : addNumber,
-      );
-      break;
-  }
+  const dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
+  const dateEnd = monthUtils.getMonthEnd(
+    monthUtils.addMonths(dateStart, addNumber === null ? offset : addNumber) +
+      '-01',
+  );
   return [dateStart, dateEnd];
 }
 
