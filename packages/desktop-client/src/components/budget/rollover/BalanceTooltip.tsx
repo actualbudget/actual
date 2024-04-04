@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
-import { Menu } from '../../common/Menu';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
 
+import { BalanceMenu } from './BalanceMenu';
 import { CoverTooltip } from './CoverTooltip';
 import { TransferTooltip } from './TransferTooltip';
 
@@ -16,6 +16,7 @@ type BalanceTooltipProps = {
   onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
   onClose?: () => void;
 };
+
 export function BalanceTooltip({
   categoryId,
   tooltip,
@@ -24,8 +25,7 @@ export function BalanceTooltip({
   onClose,
   ...tooltipProps
 }: BalanceTooltipProps) {
-  const carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
-  const balance = useSheetValue(rolloverBudget.catBalance(categoryId));
+  const catBalance = useSheetValue(rolloverBudget.catBalance(categoryId));
   const [menu, setMenu] = useState('menu');
 
   const _onClose = () => {
@@ -43,52 +43,31 @@ export function BalanceTooltip({
           onClose={_onClose}
           {...tooltipProps}
         >
-          <Menu
-            onMenuSelect={type => {
-              if (type === 'carryover') {
-                onBudgetAction(monthIndex, 'carryover', {
-                  category: categoryId,
-                  flag: !carryover,
-                });
-                _onClose();
-              } else {
-                setMenu(type);
-              }
+          <BalanceMenu
+            categoryId={categoryId}
+            onCarryover={carryover => {
+              onBudgetAction(monthIndex, 'carryover', {
+                category: categoryId,
+                flag: carryover,
+              });
+              _onClose();
             }}
-            items={[
-              {
-                name: 'transfer',
-                text: 'Transfer to another category',
-              },
-              {
-                name: 'carryover',
-                text: carryover
-                  ? 'Remove overspending rollover'
-                  : 'Rollover overspending',
-              },
-              ...(balance < 0
-                ? [
-                    {
-                      name: 'cover',
-                      text: 'Cover overspending',
-                    },
-                  ]
-                : []),
-            ]}
+            onTransfer={() => setMenu('transfer')}
+            onCover={() => setMenu('cover')}
           />
         </Tooltip>
       )}
 
       {menu === 'transfer' && (
         <TransferTooltip
-          initialAmountName={rolloverBudget.catBalance(categoryId)}
+          initialAmount={catBalance}
           showToBeBudgeted={true}
           onClose={_onClose}
-          onSubmit={(amount, toCategory) => {
+          onSubmit={(amount, toCategoryId) => {
             onBudgetAction(monthIndex, 'transfer-category', {
               amount,
               from: categoryId,
-              to: toCategory,
+              to: toCategoryId,
             });
           }}
         />
@@ -97,10 +76,10 @@ export function BalanceTooltip({
       {menu === 'cover' && (
         <CoverTooltip
           onClose={_onClose}
-          onSubmit={fromCategory => {
+          onSubmit={fromCategoryId => {
             onBudgetAction(monthIndex, 'cover', {
               to: categoryId,
-              from: fromCategory,
+              from: fromCategoryId,
             });
           }}
         />

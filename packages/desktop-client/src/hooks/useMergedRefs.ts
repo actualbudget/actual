@@ -1,21 +1,19 @@
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import type { MutableRefObject, Ref, RefCallback } from 'react';
 
 export function useMergedRefs<T>(
-  ref1: RefCallback<T> | MutableRefObject<T>,
-  ref2: RefCallback<T> | MutableRefObject<T>,
+  ...refs: (RefCallback<T> | MutableRefObject<T> | Ref<T> | null | undefined)[]
 ): Ref<T> {
-  return useMemo(() => {
-    function ref(value: T) {
-      [ref1, ref2].forEach(ref => {
+  return useCallback(
+    (value: T) => {
+      [...refs].forEach(ref => {
         if (typeof ref === 'function') {
           ref(value);
-        } else if (ref != null) {
-          ref.current = value;
+        } else if (ref != null && 'current' in ref) {
+          (ref as MutableRefObject<T>).current = value;
         }
       });
-    }
-
-    return ref;
-  }, [ref1, ref2]);
+    },
+    [refs],
+  );
 }

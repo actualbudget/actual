@@ -177,7 +177,6 @@ export function AccountItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
-        color: theme.menuItemText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -211,9 +210,7 @@ export function AccountItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? embedded && isNarrowWidth
-              ? theme.menuItemBackgroundHover
-              : theme.menuAutoCompleteBackgroundHover
+            ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
           padding: 4,
           paddingLeft: 20,

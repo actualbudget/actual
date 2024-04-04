@@ -18,7 +18,7 @@ function _authorize(
       const resp = await send('gocardless-create-web-token', {
         upgradingAccountId,
         institutionId,
-        accessValidForDays: 30,
+        accessValidForDays: 90,
       });
 
       if ('error' in resp) return resp;

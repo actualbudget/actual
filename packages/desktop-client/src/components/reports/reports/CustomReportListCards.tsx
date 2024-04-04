@@ -16,6 +16,7 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
+import { SaveReportDelete } from '../SaveReportDelete';
 import { SaveReportName } from '../SaveReportName';
 
 import { GetCardData } from './GetCardData';
@@ -66,6 +67,7 @@ export function CustomReportListCards({
 }) {
   const result: { [key: string]: boolean }[] = index(reports);
   const [reportMenu, setReportMenu] = useState(result);
+  const [deleteMenuOpen, setDeleteMenuOpen] = useState(result);
   const [nameMenuOpen, setNameMenuOpen] = useState(result);
   const [err, setErr] = useState('');
   const [name, setName] = useState('');
@@ -76,6 +78,12 @@ export function CustomReportListCards({
   const categories = useCategories();
 
   const [isCardHovered, setIsCardHovered] = useState('');
+
+  const onDelete = async (reportData: string) => {
+    setName('');
+    await send('report/delete', reportData);
+    onDeleteMenuOpen(reportData === undefined ? '' : reportData, false);
+  };
 
   const onAddUpdate = async ({
     reportData,
@@ -105,7 +113,8 @@ export function CustomReportListCards({
   const onMenuSelect = async (item: string, report: CustomReportEntity) => {
     if (item === 'delete') {
       onMenuOpen(report.id, false);
-      await send('report/delete', report.id);
+      onDeleteMenuOpen(report.id, true);
+      setErr('');
     }
     if (item === 'rename') {
       onMenuOpen(report.id, false);
@@ -117,6 +126,10 @@ export function CustomReportListCards({
 
   const onMenuOpen = (item: string, state: boolean) => {
     setReportMenu({ ...reportMenu, [item]: state });
+  };
+
+  const onDeleteMenuOpen = (item: string, state: boolean) => {
+    setDeleteMenuOpen({ ...deleteMenuOpen, [item]: state });
   };
 
   const onNameMenuOpen = (item: string, state: boolean) => {
@@ -255,6 +268,22 @@ export function CustomReportListCards({
                           onAddUpdate={onAddUpdate}
                           err={err}
                           report={report}
+                        />
+                      )}
+                  {report.id === undefined
+                    ? null
+                    : deleteMenuOpen[
+                        report.id as keyof typeof deleteMenuOpen
+                      ] && (
+                        <SaveReportDelete
+                          onDelete={() => onDelete(report.id)}
+                          onClose={() =>
+                            onDeleteMenuOpen(
+                              report.id === undefined ? '' : report.id,
+                              false,
+                            )
+                          }
+                          name={report.name}
                         />
                       )}
                 </View>
