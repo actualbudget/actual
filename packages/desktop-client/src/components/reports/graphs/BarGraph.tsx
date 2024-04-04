@@ -58,6 +58,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
+  compact?: boolean;
   groupBy?: string;
   balanceTypeOp?: string;
   yAxis?: string;
@@ -66,6 +67,7 @@ type CustomTooltipProps = {
 const CustomTooltip = ({
   active,
   payload,
+  compact,
   groupBy,
   balanceTypeOp,
   yAxis,
@@ -110,7 +112,7 @@ const CustomTooltip = ({
                 }
               />
             )}
-            {!['Interval', 'Group'].includes(groupBy) && (
+            {!['Interval', 'Group'].includes(groupBy) && !compact && (
               <Text style={{ marginLeft: 10, color: theme.pageTextLight }}>
                 Click for details
               </Text>
@@ -261,6 +263,7 @@ export function BarGraph({
                   cursor={{ fill: 'transparent' }}
                   content={
                     <CustomTooltip
+                      compact={compact}
                       groupBy={groupBy}
                       balanceTypeOp={balanceTypeOp}
                       yAxis={yAxis}
