@@ -31,7 +31,7 @@ export function ToBudgetMenu({
             onResetHoldBuffer?.();
             break;
           default:
-            throw new Error(`Unsupported item: ${name}`);
+            throw new Error(`Unrecognized menu option: ${name}`);
         }
       }}
       items={[

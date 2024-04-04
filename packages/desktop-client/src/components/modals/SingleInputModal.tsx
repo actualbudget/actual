@@ -5,12 +5,12 @@ import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
-import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
+import { InputField } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
 
-type SingleInputProps = {
+type SingleInputModalProps = {
   modalProps: Partial<CommonModalProps>;
   title: string;
   buttonText: string;
@@ -19,14 +19,14 @@ type SingleInputProps = {
   inputPlaceholder?: string;
 };
 
-export function SingleInput({
+export function SingleInputModal({
   modalProps,
   title,
   buttonText,
   onSubmit,
   onValidate,
   inputPlaceholder,
-}: SingleInputProps) {
+}: SingleInputModalProps) {
   const [value, setValue] = useState('');
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -40,49 +40,57 @@ export function SingleInput({
     onSubmit?.(value);
     modalProps.onClose();
   };
+
   return (
-    <Modal title={title} {...modalProps}>
+    <Modal
+      title={title}
+      {...modalProps}
+      padding={0}
+      style={{
+        flex: 1,
+        padding: '0 10px',
+        paddingBottom: 10,
+        borderRadius: '6px',
+      }}
+    >
       {() => (
         <>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              paddingBottom: 15,
-            }}
-          >
-            <View style={{ flexDirection: 'column', flex: 1 }}>
-              <InitialFocus>
-                <Input
-                  placeholder={inputPlaceholder}
-                  style={{ ...styles.mediumText }}
-                  value={value}
-                  onChangeValue={setValue}
-                  onEnter={e => _onSubmit(e.currentTarget.value)}
-                />
-              </InitialFocus>
-              {errorMessage && (
-                <FormError style={{ paddingTop: 5 }}>
-                  * {errorMessage}
-                </FormError>
-              )}
-            </View>
+          <View>
+            <InitialFocus>
+              <InputField
+                placeholder={inputPlaceholder}
+                defaultValue={value}
+                onUpdate={setValue}
+                onEnter={e => _onSubmit(e.currentTarget.value)}
+              />
+            </InitialFocus>
+            {errorMessage && (
+              <FormError
+                style={{
+                  paddingTop: 5,
+                  marginLeft: styles.mobileEditingPadding,
+                  marginRight: styles.mobileEditingPadding,
+                }}
+              >
+                * {errorMessage}
+              </FormError>
+            )}
           </View>
-
           <View
             style={{
-              flexDirection: 'row',
-              alignContent: 'center',
               justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 10,
             }}
           >
             <Button
               type="primary"
               style={{
-                ...styles.mediumText,
-                flexBasis: '50%',
+                height: styles.mobileMinHeight,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
               }}
-              onPointerUp={() => _onSubmit(value)}
+              onClick={() => _onSubmit(value)}
             >
               {buttonText}
             </Button>
