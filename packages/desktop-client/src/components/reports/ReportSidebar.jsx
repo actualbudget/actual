@@ -98,11 +98,19 @@ export function ReportSidebar({
     let graph;
     if (cond === 'time') {
       if (customReportItems.graphType === 'BarGraph') {
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({ ...storedReport, graphType: 'StackedBarGraph' }),
+        );
         setGraphType('StackedBarGraph');
         graph = 'StackedBarGraph';
       }
     } else {
       if (customReportItems.graphType === 'StackedBarGraph') {
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({ ...storedReport, graphType: 'BarGraph' }),
+        );
         setGraphType('BarGraph');
         graph = 'BarGraph';
       }
