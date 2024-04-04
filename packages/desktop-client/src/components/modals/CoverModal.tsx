@@ -61,7 +61,7 @@ export function CoverModal({
 
   const category = categories.find(c => c.id === categoryId);
 
-  if (category == null) {
+  if (!category) {
     return null;
   }
 

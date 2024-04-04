@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
@@ -16,6 +15,11 @@ import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
+
+type NoteEntity = {
+  id: string;
+  note: string;
+};
 
 type AccountMenuModalProps = {
   modalProps: CommonModalProps;
@@ -39,9 +43,9 @@ export function AccountMenuModal({
   const accounts = useAccounts();
   const account = accounts.find(c => c.id === accountId);
   const data = useLiveQuery(
-    () => q('notes').filter({ id: account.id }).select('*'),
-    [account.id],
-  );
+    () => q('notes').filter({ id: account?.id }).select('*'),
+    [account?.id],
+  ) as NoteEntity[] | null;
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
   const _onClose = () => {
@@ -49,7 +53,11 @@ export function AccountMenuModal({
     onClose?.();
   };
 
-  const onRename = newName => {
+  const onRename = (newName: string) => {
+    if (!account) {
+      return;
+    }
+
     if (newName !== account.name) {
       onSave?.({
         ...account,
@@ -59,6 +67,10 @@ export function AccountMenuModal({
   };
 
   const _onEditNotes = () => {
+    if (!account) {
+      return;
+    }
+
     onEditNotes?.(account.id);
   };
 
@@ -69,6 +81,10 @@ export function AccountMenuModal({
     // Adjust based on desired number of buttons per row.
     flexBasis: '100%',
   };
+
+  if (!account) {
+    return null;
+  }
 
   return (
     <Modal
@@ -109,7 +125,11 @@ export function AccountMenuModal({
             }}
           >
             <Notes
-              notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
+              notes={
+                originalNotes && originalNotes.length > 0
+                  ? originalNotes
+                  : 'No notes'
+              }
               editable={false}
               focused={false}
               getStyle={() => ({
@@ -152,7 +172,17 @@ export function AccountMenuModal({
   );
 }
 
-function AdditionalAccountMenu({ account, onClose, onReopen }) {
+type AdditionalAccountMenuProps = {
+  account: AccountEntity;
+  onClose?: (accountId: string) => void;
+  onReopen?: (accountId: string) => void;
+};
+
+function AdditionalAccountMenu({
+  account,
+  onClose,
+  onReopen,
+}: AdditionalAccountMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,

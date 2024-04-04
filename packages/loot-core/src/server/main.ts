@@ -441,8 +441,7 @@ handlers['must-category-transfer'] = async function ({ id }) {
 
 handlers['payee-create'] = mutator(async function ({ name }) {
   return withUndo(async () => {
-    const id = await db.insertPayee({ name });
-    return id;
+    return db.insertPayee({ name });
   });
 });
 

@@ -472,8 +472,7 @@ type PayeeItemProps = {
   embedded?: boolean;
 };
 
-// eslint-disable-next-line import/no-unused-modules
-export function PayeeItem({
+function PayeeItem({
   item,
   className,
   highlighted,
