@@ -67,7 +67,10 @@ export function NotesButton({
             ...(hasNotes && { display: 'flex !important' }),
             ...(isOpen && { color: theme.buttonNormalText }),
           }}
-          onClick={() => setIsOpen(true)}
+          onClick={event => {
+            event.stopPropagation();
+            setIsOpen(true);
+          }}
         >
           <SvgCustomNotesPaper style={{ width, height }} />
         </Button>
