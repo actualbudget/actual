@@ -12,6 +12,7 @@ import ReactModal from 'react-modal';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
@@ -65,6 +66,7 @@ export const Modal = ({
   children,
   onClose,
 }: ModalProps) => {
+  const { isNarrowWidth } = useResponsive();
   const { enableScope, disableScope } = useHotkeysContext();
 
   // This deactivates any key handlers in the "app" scope
@@ -159,7 +161,8 @@ export const Modal = ({
               style={{
                 position: 'absolute',
                 left: 0,
-                margin: '0 5px',
+                marginRight: !isNarrowWidth ? 5 : undefined,
+                marginLeft: !isNarrowWidth ? 15 : undefined,
               }}
             >
               {leftHeaderContent}
@@ -193,7 +196,8 @@ export const Modal = ({
               style={{
                 position: 'absolute',
                 right: 0,
-                margin: '0 5px',
+                marginRight: !isNarrowWidth ? 15 : undefined,
+                marginLeft: !isNarrowWidth ? 5 : undefined,
               }}
             >
               {showClose && (
