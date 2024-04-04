@@ -1,5 +1,5 @@
 import React, {
-  type ComponentPropsWithoutRef,
+  type ComponentPropsWithRef,
   forwardRef,
   type ReactNode,
 } from 'react';
@@ -45,7 +45,7 @@ const valueStyle = {
   height: styles.mobileMinHeight,
 };
 
-type InputFieldProps = ComponentPropsWithoutRef<typeof Input>;
+type InputFieldProps = ComponentPropsWithRef<typeof Input>;
 
 export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   ({ disabled, style, onUpdate, ...props }, ref) => {
@@ -72,7 +72,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
 
 InputField.displayName = 'InputField';
 
-type TapFieldProps = ComponentPropsWithoutRef<typeof Button> & {
+type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
   rightContent?: ReactNode;
 };
 

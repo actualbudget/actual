@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Bank-sync issues
+    url: https://discord.gg/pRYNYr4W5A
+    about: Is bank-sync not working? Returning too much or too few information? Reach out to the community on Discord.
   - name: Support
     url: https://discord.gg/pRYNYr4W5A
-    about: Need help with something? Perhaps having issues setting up bank-sync with GoCardless or SimpleFin? Reach out to the community on Discord.
+    about: Need help with something? Having troubles setting up? Or perhaps issues using the API? Reach out to the community on Discord.

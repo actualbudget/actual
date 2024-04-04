@@ -297,7 +297,7 @@ type CategoryItemProps = {
   embedded?: boolean;
 };
 
-export function CategoryItem({
+function CategoryItem({
   item,
   className,
   style,
