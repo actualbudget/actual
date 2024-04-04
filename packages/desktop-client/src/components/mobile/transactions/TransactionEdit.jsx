@@ -587,6 +587,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('edit-field', {
               name,
+              month: monthUtils.monthFromDate(transaction.date),
               onSubmit: (name, value) => {
                 onEdit(transactionToEdit, name, value);
               },

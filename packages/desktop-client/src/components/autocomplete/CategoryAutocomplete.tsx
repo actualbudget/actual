@@ -11,17 +11,22 @@ import React, {
 
 import { css } from 'glamor';
 
+import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
+import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
@@ -59,6 +64,7 @@ function CategoryList({
   renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
   showHiddenItems,
+  showBalances,
 }: CategoryListProps) {
   let lastGroup: string | undefined | null = null;
 
@@ -111,6 +117,7 @@ function CategoryList({
                     ...(showHiddenItems &&
                       item.hidden && { color: theme.pageTextSubdued }),
                   },
+                  showBalances,
                 })}
               </Fragment>
             </Fragment>
@@ -126,6 +133,7 @@ type CategoryAutocompleteProps = ComponentProps<
   typeof Autocomplete<CategoryAutocompleteItem>
 > & {
   categoryGroups: Array<CategoryGroupEntity>;
+  showBalances?: boolean;
   showSplitOption?: boolean;
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
@@ -141,6 +149,7 @@ type CategoryAutocompleteProps = ComponentProps<
 
 export function CategoryAutocomplete({
   categoryGroups,
+  showBalances = true,
   showSplitOption,
   embedded,
   closeOnBlur,
@@ -200,6 +209,7 @@ export function CategoryAutocomplete({
           renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
           renderCategoryItem={renderCategoryItem}
           showHiddenItems={showHiddenCategories}
+          showBalances={showBalances}
         />
       )}
       {...props}
@@ -297,6 +307,7 @@ type CategoryItemProps = {
   style?: CSSProperties;
   highlighted?: boolean;
   embedded?: boolean;
+  showBalances?: boolean;
 };
 
 function CategoryItem({
@@ -305,6 +316,7 @@ function CategoryItem({
   style,
   highlighted,
   embedded,
+  showBalances,
   ...props
 }: CategoryItemProps) {
   const { isNarrowWidth } = useResponsive();
@@ -315,6 +327,16 @@ function CategoryItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
+  const [budgetType] = useLocalPref('budgetType');
+
+  const balance = useSheetValue(
+    budgetType === 'rollover'
+      ? rolloverBudget.catBalance(item.id)
+      : reportBudget.catBalance(item.id),
+  );
+
+  const isToBeBudgetedItem = item.id === 'to-be-budgeted';
+  const toBudget = useSheetValue(rolloverBudget.toBudget);
 
   return (
     <div
@@ -339,10 +361,26 @@ function CategoryItem({
       data-highlighted={highlighted || undefined}
       {...props}
     >
-      <TextOneLine>
-        {item.name}
-        {item.hidden ? ' (hidden)' : null}
-      </TextOneLine>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <TextOneLine>
+          {item.name}
+          {item.hidden ? ' (hidden)' : null}
+        </TextOneLine>
+        <TextOneLine
+          style={{
+            display: !showBalances ? 'none' : undefined,
+            marginLeft: 5,
+            flexShrink: 0,
+            ...makeAmountFullStyle(isToBeBudgetedItem ? toBudget : balance),
+          }}
+        >
+          {isToBeBudgetedItem
+            ? integerToCurrency(toBudget || 0)
+            : balance != null
+              ? integerToCurrency(balance || 0)
+              : null}
+        </TextOneLine>
+      </View>
     </div>
   );
 }
