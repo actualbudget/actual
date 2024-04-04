@@ -53,6 +53,7 @@ export type CategoryListProps = {
     props: ComponentPropsWithoutRef<typeof CategoryItem>,
   ) => ReactElement<typeof CategoryItem>;
   showHiddenItems?: boolean;
+  showBalances?: boolean;
 };
 function CategoryList({
   items,
