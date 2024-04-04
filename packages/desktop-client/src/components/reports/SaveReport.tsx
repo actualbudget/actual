@@ -10,6 +10,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { SaveReportChoose } from './SaveReportChoose';
+import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
@@ -33,6 +34,7 @@ export function SaveReport({
   onReportChange,
 }: SaveReportProps) {
   const listReports = useReports();
+  const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [chooseMenuOpen, setChooseMenuOpen] = useState(false);
@@ -97,6 +99,13 @@ export function SaveReport({
     });
   };
 
+  const onDelete = async () => {
+    setName('');
+    await send('report/delete', report.id);
+    onReportChange({ type: 'reset' });
+    setDeleteMenuOpen(false);
+  };
+
   const onMenuSelect = async (item: string) => {
     setMenuItem(item);
     switch (item) {
@@ -107,9 +116,7 @@ export function SaveReport({
         break;
       case 'delete-report':
         setMenuOpen(false);
-        setName('');
-        await send('report/delete', report.id);
-        onReportChange({ type: 'reset' });
+        setDeleteMenuOpen(true);
         break;
       case 'update-report':
         setErr('');
@@ -189,6 +196,13 @@ export function SaveReport({
         <SaveReportChoose
           onApply={onApply}
           onClose={() => setChooseMenuOpen(false)}
+        />
+      )}
+      {deleteMenuOpen && (
+        <SaveReportDelete
+          onDelete={onDelete}
+          onClose={() => setDeleteMenuOpen(false)}
+          name={report.name}
         />
       )}
     </View>

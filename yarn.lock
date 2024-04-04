@@ -103,7 +103,6 @@ __metadata:
     react-error-boundary: "npm:^4.0.12"
     react-hotkeys-hook: "npm:^4.5.0"
     react-markdown: "npm:^8.0.7"
-    react-merge-refs: "npm:^1.1.0"
     react-modal: "npm:3.16.1"
     react-redux: "npm:7.2.9"
     react-router-dom: "npm:6.21.3"
@@ -15412,13 +15411,6 @@ __metadata:
     "@types/react": ">=16"
     react: ">=16"
   checksum: 5702a2ef0b8a8cb0a085bb5101810d7446e818f7b76291238eff73cce5aaea65b95ffa28f9b4127d1fc785b6cfe0790bba261b11c5a69655ff901399d8ea6896
-  languageName: node
-  linkType: hard
-
-"react-merge-refs@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "react-merge-refs@npm:1.1.0"
-  checksum: 5c12a6092036336a5d04c6259e1e9dc8f554171cdf737f43fa7611ac49bcff30a6127f0ddfe67803c8539dc5e3ff35be3a0c723c6823841142b3c0cd5c19c2a0
   languageName: node
   linkType: hard
 
