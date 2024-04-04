@@ -25,9 +25,10 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
+import { theme } from '../../../style/index';
 import { AlignedText } from '../../common/AlignedText';
+import { Text } from '../../common/Text';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
@@ -57,6 +58,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
+  groupBy?: string;
   balanceTypeOp?: string;
   yAxis?: string;
 };
@@ -64,6 +66,7 @@ type CustomTooltipProps = {
 const CustomTooltip = ({
   active,
   payload,
+  groupBy,
   balanceTypeOp,
   yAxis,
 }: CustomTooltipProps) => {
@@ -106,6 +109,11 @@ const CustomTooltip = ({
                   </strong>
                 }
               />
+            )}
+            {!['Interval', 'Group'].includes(groupBy) && (
+              <Text style={{ marginLeft: 10, color: theme.pageTextLight }}>
+                Click for details
+              </Text>
             )}
           </div>
         </div>
@@ -253,6 +261,7 @@ export function BarGraph({
                   cursor={{ fill: 'transparent' }}
                   content={
                     <CustomTooltip
+                      groupBy={groupBy}
                       balanceTypeOp={balanceTypeOp}
                       yAxis={yAxis}
                     />

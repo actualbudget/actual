@@ -54,7 +54,7 @@ export function CustomReport() {
 
   const location = useLocation();
 
-  const prevUrl = localStorage.getItem('url');
+  const prevUrl = sessionStorage.getItem('url');
 
   sessionStorage.setItem('prevUrl', prevUrl);
   sessionStorage.setItem('url', location.pathname);
