@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useState } from 'react';
 
 import { css } from 'glamor';
 import {
@@ -28,7 +28,6 @@ import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { type CSSProperties } from '../../../style';
 import { theme } from '../../../style/index';
 import { AlignedText } from '../../common/AlignedText';
-import { Text } from '../../common/Text';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
@@ -58,8 +57,6 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  compact?: boolean;
-  groupBy?: string;
   balanceTypeOp?: string;
   yAxis?: string;
 };
@@ -67,8 +64,6 @@ type CustomTooltipProps = {
 const CustomTooltip = ({
   active,
   payload,
-  compact,
-  groupBy,
   balanceTypeOp,
   yAxis,
 }: CustomTooltipProps) => {
@@ -111,11 +106,6 @@ const CustomTooltip = ({
                   </strong>
                 }
               />
-            )}
-            {!['Interval', 'Group'].includes(groupBy) && !compact && (
-              <Text style={{ marginLeft: 10, color: theme.pageTextLight }}>
-                Click for details
-              </Text>
             )}
           </div>
         </div>
@@ -164,6 +154,7 @@ export function BarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const [pointer, setPointer] = useState('');
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
@@ -258,6 +249,7 @@ export function BarGraph({
                 height={height}
                 stackOffset="sign"
                 data={data[splitData]}
+                cursor={pointer}
                 margin={{
                   top: labelsMargin,
                   right: 0,
@@ -269,8 +261,6 @@ export function BarGraph({
                   cursor={{ fill: 'transparent' }}
                   content={
                     <CustomTooltip
-                      compact={compact}
-                      groupBy={groupBy}
                       balanceTypeOp={balanceTypeOp}
                       yAxis={yAxis}
                     />
@@ -306,6 +296,11 @@ export function BarGraph({
                 <Bar
                   dataKey={val => getVal(val)}
                   stackId="a"
+                  onMouseLeave={() => setPointer('')}
+                  onMouseEnter={() =>
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    setPointer('pointer')
+                  }
                   onClick={
                     !['Group', 'Interval'].includes(groupBy) && onShowActivity
                   }
