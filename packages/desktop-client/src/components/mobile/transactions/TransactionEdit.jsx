@@ -428,6 +428,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       [],
     [unserializedTransactions, dateFormat],
   );
+  const { grouped: categoryGroups } = useCategories();
 
   const [transaction, ...childTransactions] = transactions;
 
@@ -542,24 +543,90 @@ const TransactionEditInner = memo(function TransactionEditInner({
   };
 
   const onClick = (transactionId, name) => {
-    onRequestActiveEdit?.(getFieldName(transaction.id, 'payee'), () => {
-      dispatch(
-        pushModal('edit-field', {
-          name,
-          onSubmit: (name, value) => {
-            const transaction = unserializedTransactions.find(
-              t => t.id === transactionId,
-            );
-            // This is a deficiency of this API, need to fix. It
-            // assumes that it receives a serialized transaction,
-            // but we only have access to the raw transaction
-            onEdit(serializeTransaction(transaction, dateFormat), name, value);
-          },
-          onClose: () => {
-            onClearActiveEdit();
-          },
-        }),
+    onRequestActiveEdit?.(getFieldName(transaction.id, name), () => {
+      const transaction = unserializedTransactions.find(
+        t => t.id === transactionId,
       );
+      switch (name) {
+        case 'category':
+          dispatch(
+            pushModal('category-autocomplete', {
+              categoryGroups,
+              onSelect: categoryId => {
+                // This is a deficiency of this API, need to fix. It
+                // assumes that it receives a serialized transaction,
+                // but we only have access to the raw transaction
+                onEdit(
+                  serializeTransaction(transaction, dateFormat),
+                  name,
+                  categoryId,
+                );
+              },
+              onClose: () => {
+                onClearActiveEdit();
+              },
+            }),
+          );
+          break;
+        case 'account':
+          dispatch(
+            pushModal('account-autocomplete', {
+              onSelect: accountId => {
+                // This is a deficiency of this API, need to fix. It
+                // assumes that it receives a serialized transaction,
+                // but we only have access to the raw transaction
+                onEdit(
+                  serializeTransaction(transaction, dateFormat),
+                  name,
+                  accountId,
+                );
+              },
+              onClose: () => {
+                onClearActiveEdit();
+              },
+            }),
+          );
+          break;
+        case 'payee':
+          dispatch(
+            pushModal('payee-autocomplete', {
+              onSelect: payeeId => {
+                // This is a deficiency of this API, need to fix. It
+                // assumes that it receives a serialized transaction,
+                // but we only have access to the raw transaction
+                onEdit(
+                  serializeTransaction(transaction, dateFormat),
+                  name,
+                  payeeId,
+                );
+              },
+              onClose: () => {
+                onClearActiveEdit();
+              },
+            }),
+          );
+          break;
+        default:
+          dispatch(
+            pushModal('edit-field', {
+              name,
+              onSubmit: (name, value) => {
+                // This is a deficiency of this API, need to fix. It
+                // assumes that it receives a serialized transaction,
+                // but we only have access to the raw transaction
+                onEdit(
+                  serializeTransaction(transaction, dateFormat),
+                  name,
+                  value,
+                );
+              },
+              onClose: () => {
+                onClearActiveEdit();
+              },
+            }),
+          );
+          break;
+      }
     });
   };
 
