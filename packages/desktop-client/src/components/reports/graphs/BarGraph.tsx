@@ -249,7 +249,7 @@ export function BarGraph({
                 height={height}
                 stackOffset="sign"
                 data={data[splitData]}
-                cursor={pointer}
+                style={{ cursor: pointer }}
                 margin={{
                   top: labelsMargin,
                   right: 0,
