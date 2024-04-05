@@ -13,19 +13,24 @@ import { useDebounceCallback } from 'usehooks-ts';
 import {
   getPayees,
   markAccountRead,
+  openAccountCloseModal,
+  pushModal,
+  reopenAccount,
   syncAndDownload,
+  updateAccount,
 } from 'loot-core/client/actions';
 import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
 import { pagedQuery } from 'loot-core/client/query-helpers';
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/fetch';
 import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
-import { theme } from '../../../style';
+import { styles, theme } from '../../../style';
+import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
@@ -36,32 +41,7 @@ export function AccountTransactions({ account, pending, failed }) {
   return (
     <Page
       title={
-        !account.bankId ? (
-          account.name
-        ) : (
-          <View
-            style={{
-              flexDirection: 'row',
-            }}
-          >
-            <div
-              style={{
-                margin: 'auto',
-                marginRight: 3,
-                width: 8,
-                height: 8,
-                borderRadius: 8,
-                backgroundColor: pending
-                  ? theme.sidebarItemBackgroundPending
-                  : failed
-                    ? theme.sidebarItemBackgroundFailed
-                    : theme.sidebarItemBackgroundPositive,
-                transition: 'transform .3s',
-              }}
-            />
-            {account.name}
-          </View>
-        )
+        <AccountName account={account} pending={pending} failed={failed} />
       }
       headerLeftContent={<MobileBackButton />}
       headerRightContent={<AddTransactionButton accountId={account.id} />}
@@ -75,6 +55,79 @@ export function AccountTransactions({ account, pending, failed }) {
         <TransactionListWithPreviews account={account} />
       </SchedulesProvider>
     </Page>
+  );
+}
+
+function AccountName({ account, pending, failed }) {
+  const dispatch = useDispatch();
+
+  const onSave = account => {
+    dispatch(updateAccount(account));
+  };
+
+  const onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  const onEditNotes = () => {
+    dispatch(
+      pushModal('notes', {
+        id: account.id,
+        name: account.name,
+        onSave: onSaveNotes,
+      }),
+    );
+  };
+
+  const onCloseAccount = () => {
+    dispatch(openAccountCloseModal(account.id));
+  };
+
+  const onReopenAccount = () => {
+    dispatch(reopenAccount(account.id));
+  };
+
+  const onClick = () => {
+    dispatch(
+      pushModal('account-menu', {
+        accountId: account.id,
+        onSave,
+        onEditNotes,
+        onCloseAccount,
+        onReopenAccount,
+      }),
+    );
+  };
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+      }}
+    >
+      {account.bankId && (
+        <div
+          style={{
+            margin: 'auto',
+            marginRight: 5,
+            width: 8,
+            height: 8,
+            borderRadius: 8,
+            backgroundColor: pending
+              ? theme.sidebarItemBackgroundPending
+              : failed
+                ? theme.sidebarItemBackgroundFailed
+                : theme.sidebarItemBackgroundPositive,
+            transition: 'transform .3s',
+          }}
+        />
+      )}
+      <Text
+        style={{ ...styles.underlinedText, ...styles.lineClamp(2) }}
+        onClick={onClick}
+      >
+        {`${account.closed ? 'Closed: ' : ''}${account.name}`}
+      </Text>
+    </View>
   );
 }
 
