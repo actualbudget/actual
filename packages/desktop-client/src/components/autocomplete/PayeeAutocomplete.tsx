@@ -25,7 +25,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { usePayees } from '../../hooks/usePayees';
 import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles, colors } from '../../style';
+import { type CSSProperties, theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
@@ -518,6 +518,9 @@ function PayeeItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
+          color: highlighted
+            ? theme.menuAutoCompleteItemTextHover
+            : theme.menuItemText,
           ':hover': {
             color: theme.menuAutoCompleteItemTextHover,
           },

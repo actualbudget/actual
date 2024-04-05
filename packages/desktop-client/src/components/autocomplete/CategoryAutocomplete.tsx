@@ -18,7 +18,7 @@ import {
 
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme, styles, colors } from '../../style';
+import { type CSSProperties, theme, styles } from '../../style';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
@@ -301,6 +301,7 @@ type CategoryItemProps = {
   embedded?: boolean;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export function CategoryItem({
   item,
   className,
@@ -313,7 +314,7 @@ export function CategoryItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
-        color: theme.menuItemText,
+        color: theme.menuAutoCompleteText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -331,6 +332,9 @@ export function CategoryItem({
               ? theme.menuItemBackgroundHover
               : theme.menuAutoCompleteBackgroundHover
             : 'transparent',
+          color: highlighted
+            ? theme.menuAutoCompleteItemTextHover
+            : theme.menuItemText,
           ':hover': {
             color: theme.menuAutoCompleteItemTextHover,
           },
