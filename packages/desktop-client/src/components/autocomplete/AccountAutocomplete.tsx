@@ -166,7 +166,7 @@ type AccountItemProps = {
   embedded?: boolean;
 };
 
-export function AccountItem({
+function AccountItem({
   item,
   className,
   highlighted,
