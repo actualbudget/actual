@@ -227,8 +227,6 @@ function SplitTransactionButton({
   style,
   ...props
 }: SplitTransactionButtonProps) {
-  const { isNarrowWidth } = useResponsive();
-  const noticeTextMenuHover = colors.g3;
   return (
     <View
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`

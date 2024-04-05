@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "24.3.0",
+  "version": "24.4.0",
   "license": "MIT",
   "files": [
     "build"
@@ -50,7 +50,6 @@
     "react-error-boundary": "^4.0.12",
     "react-hotkeys-hook": "^4.5.0",
     "react-markdown": "^8.0.7",
-    "react-merge-refs": "^1.1.0",
     "react-modal": "3.16.1",
     "react-redux": "7.2.9",
     "react-router-dom": "6.21.3",

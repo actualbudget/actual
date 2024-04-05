@@ -4,10 +4,10 @@ import React, {
   type Ref,
   useRef,
 } from 'react';
-import mergeRefs from 'react-merge-refs';
 
 import { css } from 'glamor';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useProperFocus } from '../../hooks/useProperFocus';
 import { type CSSProperties, styles, theme } from '../../style';
 
@@ -44,9 +44,11 @@ export function Input({
   const ref = useRef<HTMLInputElement>(null);
   useProperFocus(ref, focused);
 
+  const mergedRef = useMergedRefs<HTMLInputElement>(ref, inputRef);
+
   return (
     <input
-      ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
+      ref={mergedRef}
       className={`${css(
         defaultInputStyle,
         {

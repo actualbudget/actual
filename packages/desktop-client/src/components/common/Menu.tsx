@@ -1,11 +1,11 @@
 import {
-  type FunctionComponent,
   type ReactElement,
   type ReactNode,
-  createElement,
   useEffect,
   useRef,
   useState,
+  type ComponentType,
+  type SVGProps,
 } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
@@ -34,16 +34,10 @@ type MenuItem = {
   type?: string | symbol;
   name: string;
   disabled?: boolean;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  icon?: FunctionComponent<{
-    width: number;
-    height: number;
-    style: CSSProperties;
-  }>;
+  icon?: ComponentType<SVGProps<SVGSVGElement>>;
   iconSize?: number;
   text: string;
   key?: string;
-  style?: CSSProperties;
   toggle?: boolean;
   tooltip?: string;
 };
@@ -54,6 +48,7 @@ type MenuProps<T extends MenuItem = MenuItem> = {
   items: Array<T | typeof Menu.line>;
   onMenuSelect?: (itemName: T['name']) => void;
   style?: CSSProperties;
+  getItemStyle?: (item: T) => CSSProperties;
 };
 
 export function Menu<T extends MenuItem>({
@@ -62,6 +57,7 @@ export function Menu<T extends MenuItem>({
   items: allItems,
   onMenuSelect,
   style,
+  getItemStyle,
 }: MenuProps<T>) {
   const elRef = useRef<HTMLDivElement>(null);
   const items = allItems.filter(x => x);
@@ -149,6 +145,7 @@ export function Menu<T extends MenuItem>({
         }
 
         const lastItem = items[idx - 1];
+        const Icon = item.icon;
 
         return (
           <View
@@ -172,31 +169,26 @@ export function Menu<T extends MenuItem>({
                   backgroundColor: theme.menuItemBackgroundHover,
                   color: theme.menuItemTextHover,
                 }),
-              ...item.style,
+              ...getItemStyle?.(item),
             }}
-            onMouseEnter={() => setHoveredIndex(idx)}
-            onMouseLeave={() => setHoveredIndex(null)}
+            onPointerEnter={() => setHoveredIndex(idx)}
+            onPointerLeave={() => setHoveredIndex(null)}
             onClick={() =>
               !item.disabled &&
-              onMenuSelect &&
               item.toggle === undefined &&
-              onMenuSelect(item.name)
+              onMenuSelect?.(item.name)
             }
           >
             {/* Force it to line up evenly */}
             {item.toggle === undefined ? (
               <>
-                <Text style={{ lineHeight: 0 }}>
-                  {item.icon &&
-                    createElement(item.icon, {
-                      width: item.iconSize || 10,
-                      height: item.iconSize || 10,
-                      style: {
-                        marginRight: 7,
-                        width: item.iconSize || 10,
-                      },
-                    })}
-                </Text>
+                {Icon && (
+                  <Icon
+                    width={item.iconSize || 10}
+                    height={item.iconSize || 10}
+                    style={{ marginRight: 7, width: item.iconSize || 10 }}
+                  />
+                )}
                 <Text title={item.tooltip}>{item.text}</Text>
                 <View style={{ flex: 1 }} />
               </>
@@ -210,12 +202,11 @@ export function Menu<T extends MenuItem>({
                   id={item.name}
                   checked={item.toggle}
                   onColor={theme.pageTextPositive}
-                  style={{ marginLeft: 5, ...item.style }}
+                  style={{ marginLeft: 5 }}
                   onToggle={() =>
                     !item.disabled &&
-                    onMenuSelect &&
                     item.toggle !== undefined &&
-                    onMenuSelect(item.name)
+                    onMenuSelect?.(item.name)
                   }
                 />
               </>
