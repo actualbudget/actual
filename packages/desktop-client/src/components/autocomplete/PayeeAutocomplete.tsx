@@ -12,7 +12,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { css } from 'glamor';
+import { css, hover } from 'glamor';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
@@ -398,7 +398,6 @@ type CreatePayeeButtonProps = {
   style?: CSSProperties;
 };
 
-// eslint-disable-next-line import/no-unused-modules
 export function CreatePayeeButton({
   Icon,
   payeeName,
@@ -414,7 +413,6 @@ export function CreatePayeeButton({
       }
     : {};
   const iconSize = isNarrowWidth ? 14 : 8;
-  const noticeTextMenuHover = colors.g3;
 
   return (
     <View
@@ -422,7 +420,9 @@ export function CreatePayeeButton({
       style={{
         display: 'block',
         flexShrink: 0,
-        color: highlighted ? noticeTextMenuHover : theme.noticeTextMenu,
+        color: highlighted
+          ? theme.menuAutoCompleteTextHover
+          : theme.noticeTextMenu,
         borderRadius: embedded ? 4 : 0,
         fontSize: 11,
         fontWeight: 500,
@@ -483,6 +483,7 @@ function PayeeItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
+        color: theme.menuAutoCompleteText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -517,6 +518,9 @@ function PayeeItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
+          ':hover': {
+            color: theme.menuAutoCompleteItemTextHover,
+          },
           borderRadius: embedded ? 4 : 0,
           padding: 4,
           paddingLeft: 20,
