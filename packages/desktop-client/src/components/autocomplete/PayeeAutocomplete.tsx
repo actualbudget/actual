@@ -12,7 +12,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { css, hover } from 'glamor';
+import { css } from 'glamor';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
@@ -398,6 +398,7 @@ type CreatePayeeButtonProps = {
   style?: CSSProperties;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export function CreatePayeeButton({
   Icon,
   payeeName,
