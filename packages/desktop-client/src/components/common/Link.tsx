@@ -1,6 +1,5 @@
 import React, {
   type ComponentProps,
-  type MouseEvent,
   type ReactNode,
 } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
@@ -27,21 +26,9 @@ type AnchorLinkProps = {
   report?: CustomReportEntity;
 };
 
-const ButtonLink = ({
-  to,
-  style,
-  activeStyle,
-  onClick,
-  ...props
-}: ButtonLinkProps) => {
+const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const navigate = useNavigate();
   const match = useMatch({ path: to });
-
-  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e);
-    navigate(to);
-  };
-
   return (
     <Button
       style={{
@@ -50,7 +37,10 @@ const ButtonLink = ({
       }}
       activeStyle={activeStyle}
       {...props}
-      onClick={handleClick}
+      onClick={e => {
+        props.onClick?.(e);
+        navigate(to);
+      }}
     />
   );
 };

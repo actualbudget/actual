@@ -6,9 +6,9 @@ import { syncAndDownload } from 'loot-core/client/actions';
 import { SvgAdd } from '../../../icons/v1';
 import { SvgSearchAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
-import { ButtonLink } from '../../common/ButtonLink';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
+import { Link } from '../../common/Link';
 import { View } from '../../common/View';
 import { MobileBackButton } from '../../MobileBackButton';
 import { Page } from '../../Page';
@@ -118,7 +118,8 @@ export function AccountDetails({
       }
       headerLeftContent={<MobileBackButton />}
       headerRightContent={
-        <ButtonLink
+        <Link
+          variant="button"
           to="transactions/new"
           type="bare"
           aria-label="Add Transaction"
@@ -134,7 +135,7 @@ export function AccountDetails({
           activeStyle={{ background: 'transparent' }}
         >
           <SvgAdd width={20} height={20} />
-        </ButtonLink>
+        </Link>
       }
       padding={0}
       style={{
