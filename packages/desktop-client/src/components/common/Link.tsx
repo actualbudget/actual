@@ -1,7 +1,4 @@
-import React, {
-  type ComponentProps,
-  type ReactNode,
-} from 'react';
+import React, { type ComponentProps, type ReactNode } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from 'glamor';
