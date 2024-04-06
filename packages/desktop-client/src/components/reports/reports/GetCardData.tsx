@@ -11,6 +11,7 @@ import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
 import { Text } from '../../common/Text';
 import { ChooseGraph } from '../ChooseGraph';
+import { getLiveRange } from '../getLiveRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportOptions } from '../ReportOptions';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
@@ -35,16 +36,30 @@ export function GetCardData({
   payees,
   accounts,
   categories,
+  earliestTransaction,
 }: {
   report: CustomReportEntity;
   payees: PayeeEntity[];
   accounts: AccountEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  earliestTransaction: string;
 }) {
+  let startDate = report.startDate;
+  let endDate = report.endDate;
+
+  if (!report.isDateStatic) {
+    const [dateStart, dateEnd] = getLiveRange(
+      report.dateRange,
+      earliestTransaction,
+    );
+    startDate = dateStart || report.startDate;
+    endDate = dateEnd || report.startDate;
+  }
+
   const getGroupData = useMemo(() => {
     return createGroupedSpreadsheet({
-      startDate: report.startDate,
-      endDate: report.endDate,
+      startDate,
+      endDate,
       interval: report.interval,
       categories,
       selectedCategories: report.selectedCategories ?? categories.list,
@@ -56,11 +71,11 @@ export function GetCardData({
       showUncategorized: report.showUncategorized,
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
     });
-  }, [report, categories]);
+  }, [report, categories, startDate, endDate]);
   const getGraphData = useMemo(() => {
     return createCustomSpreadsheet({
-      startDate: report.startDate,
-      endDate: report.endDate,
+      startDate,
+      endDate,
       interval: report.interval,
       categories,
       selectedCategories: report.selectedCategories ?? categories.list,
@@ -76,7 +91,7 @@ export function GetCardData({
       accounts,
       graphType: report.graphType,
     });
-  }, [report, categories, payees, accounts]);
+  }, [report, categories, payees, accounts, startDate, endDate]);
   const graphData = useReport('default' + report.name, getGraphData);
   const groupedData = useReport('grouped' + report.name, getGroupData);
 
@@ -86,8 +101,8 @@ export function GetCardData({
   return data?.data ? (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <ChooseGraph
-        startDate={report.startDate}
-        endDate={report.endDate}
+        startDate={startDate}
+        endDate={endDate}
         data={data}
         mode={report.mode}
         graphType={report.graphType}

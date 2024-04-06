@@ -11,14 +11,10 @@ import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
+import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
-import {
-  getSpecificRange,
-  validateEnd,
-  validateRange,
-  validateStart,
-} from './reportRanges';
+import { validateEnd, validateStart } from './reportRanges';
 
 export function ReportSidebar({
   customReportItems,
@@ -48,38 +44,7 @@ export function ReportSidebar({
   const onSelectRange = cond => {
     onReportChange({ type: 'modify' });
     setDateRange(cond);
-    let dateStart;
-    let dateEnd;
-    switch (cond) {
-      case 'All time':
-        onChangeDates(earliestTransaction, monthUtils.currentDay());
-        break;
-      case 'Year to date':
-        [dateStart, dateEnd] = validateRange(
-          earliestTransaction,
-          monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
-          monthUtils.currentDay(),
-        );
-        onChangeDates(dateStart, dateEnd);
-        break;
-      case 'Last year':
-        [dateStart, dateEnd] = validateRange(
-          earliestTransaction,
-          monthUtils.getYearStart(
-            monthUtils.prevYear(monthUtils.currentMonth()),
-          ) + '-01',
-          monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())) +
-            '-31',
-        );
-        onChangeDates(dateStart, dateEnd);
-        break;
-      default:
-        [dateStart, dateEnd] = getSpecificRange(
-          ReportOptions.dateRangeMap.get(cond),
-          cond === 'Last month' ? 0 : null,
-        );
-        onChangeDates(dateStart, dateEnd);
-    }
+    onChangeDates(...getLiveRange(cond, earliestTransaction));
   };
 
   const onChangeMode = cond => {
