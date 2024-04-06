@@ -41,6 +41,7 @@ export function AccountHeader({
   filterId,
   filtersList,
   accountsSyncing,
+  failedAccounts,
   accounts,
   transactions,
   showBalances,
@@ -165,6 +166,21 @@ export function AccountHeader({
                   },
                 }}
               >
+                {!!account?.bank && (
+                  <View
+                    style={{
+                      backgroundColor: accountsSyncing.includes(account.id)
+                        ? theme.sidebarItemBackgroundPending
+                        : failedAccounts.has(account.id)
+                          ? theme.sidebarItemBackgroundFailed
+                          : theme.sidebarItemBackgroundPositive,
+                      marginRight: '4px',
+                      width: 8,
+                      height: 8,
+                      borderRadius: 8,
+                    }}
+                  />
+                )}
                 <View
                   style={{
                     fontSize: 25,
