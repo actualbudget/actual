@@ -1,4 +1,4 @@
-import React, { type ComponentProps, type ReactNode } from 'react';
+import React, { MouseEventHandler, type ComponentProps, type ReactNode } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from 'glamor';
@@ -9,18 +9,44 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { type CSSProperties, styles } from '../../style';
 
 import { Button } from './Button';
+import { Text } from './Text';
+
+type ClickLinkProps = {
+  to: string;
+  style?: CSSProperties;
+  onClick?: MouseEventHandler;
+  children?: ReactNode;
+};
 
 type ButtonLinkProps = ComponentProps<typeof Button> & {
   to: string;
   activeStyle?: CSSProperties;
 };
 
-type AnchorLinkProps = {
+type InternalLinkProps = {
   to: string;
   style?: CSSProperties;
   activeStyle?: CSSProperties;
   children?: ReactNode;
   report?: CustomReportEntity;
+};
+
+const ClickLink = ({ to, style, onClick, children }: ClickLinkProps) => {
+  return (
+    <Text
+      style={{
+        ':hover': {
+          textDecoration: 'underline',
+          boxShadow: 'none',
+          cursor: 'default',
+        },
+        ...style,
+      }}
+      onClick={onClick}
+    >
+      {children}
+    </Text>
+  );
 };
 
 const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
@@ -42,13 +68,13 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   );
 };
 
-const AnchorLink = ({
+const InternalLink = ({
   to,
   style,
   activeStyle,
   children,
   report,
-}: AnchorLinkProps) => {
+}: InternalLinkProps) => {
   const match = useMatch({ path: to });
 
   return (
@@ -70,15 +96,19 @@ type LinkProps =
   | ({
       variant: 'button';
     } & ButtonLinkProps)
-  | ({ variant?: 'anchor' } & AnchorLinkProps);
+  | ({ variant?: 'internal' } & InternalLinkProps)
+  | ({ variant?: 'click' } & ClickLinkProps);
 
-export function Link({ variant = 'anchor', ...props }: LinkProps) {
+export function Link({ variant = 'internal', ...props }: LinkProps) {
   switch (variant) {
-    case 'anchor':
-      return <AnchorLink {...props} />;
+    case 'internal':
+      return <InternalLink {...props} />;
 
     case 'button':
       return <ButtonLink {...props} />;
+
+    case 'click':
+      return <ClickLink {...props} />;
 
     default:
       throw new Error(`Unrecognised link type: ${variant}`);
