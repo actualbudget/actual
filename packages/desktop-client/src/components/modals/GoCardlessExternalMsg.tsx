@@ -17,7 +17,6 @@ import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
-import { LinkButton } from '../common/LinkButton';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
@@ -298,9 +297,9 @@ export function GoCardlessExternalMsg({
               </View>
 
               {waiting === 'browser' && (
-                <LinkButton onClick={onJump} style={{ marginTop: 10 }}>
+                <Button type="link" onClick={onJump} style={{ marginTop: 10 }}>
                   (Account linking not opening in a new tab? Click here)
-                </LinkButton>
+                </Button>
               )}
             </View>
           ) : success ? (

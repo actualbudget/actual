@@ -8,7 +8,6 @@ import { SvgClose } from '../icons/v1';
 import { theme } from '../style';
 
 import { Button } from './common/Button';
-import { LinkButton } from './common/LinkButton';
 import { Text } from './common/Text';
 import { View } from './common/View';
 
@@ -56,7 +55,8 @@ export function UpdateNotification() {
                 Restart
               </Button>{' '}
               (
-              <LinkButton
+              <Button
+                type="link"
                 style={{
                   color: theme.buttonPrimaryText,
                   textDecoration: 'underline',
@@ -68,7 +68,7 @@ export function UpdateNotification() {
                 }
               >
                 notes
-              </LinkButton>
+              </Button>
               )
               <Button
                 type="bare"
