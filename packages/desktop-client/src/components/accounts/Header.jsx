@@ -132,7 +132,28 @@ export function AccountHeader({
         <View
           style={{ marginTop: 2, marginBottom: 10, alignItems: 'flex-start' }}
         >
-          <View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 3,
+            }}
+          >
+            {!!account?.bank && (
+              <View
+                style={{
+                  backgroundColor: accountsSyncing.includes(account.id)
+                    ? theme.sidebarItemBackgroundPending
+                    : failedAccounts.has(account.id)
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
+                  marginRight: '4px',
+                  width: 8,
+                  height: 8,
+                  borderRadius: 8,
+                }}
+              />
+            )}
             {editingName ? (
               <InitialFocus>
                 <Input
@@ -143,9 +164,9 @@ export function AccountHeader({
                   style={{
                     fontSize: 25,
                     fontWeight: 500,
-                    marginTop: -5,
-                    marginBottom: -2,
-                    marginLeft: -5,
+                    marginTop: -3,
+                    marginBottom: -4,
+                    marginLeft: -6,
                     paddingTop: 2,
                     paddingBottom: 2,
                   }}
@@ -166,21 +187,6 @@ export function AccountHeader({
                   },
                 }}
               >
-                {!!account?.bank && (
-                  <View
-                    style={{
-                      backgroundColor: accountsSyncing.includes(account.id)
-                        ? theme.sidebarItemBackgroundPending
-                        : failedAccounts.has(account.id)
-                          ? theme.sidebarItemBackgroundFailed
-                          : theme.sidebarItemBackgroundPositive,
-                      marginRight: '4px',
-                      width: 8,
-                      height: 8,
-                      borderRadius: 8,
-                    }}
-                  />
-                )}
                 <View
                   style={{
                     fontSize: 25,
