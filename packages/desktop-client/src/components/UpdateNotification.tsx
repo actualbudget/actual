@@ -45,7 +45,8 @@ export function UpdateNotification() {
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
-              <LinkButton
+              <Button
+                type="link"
                 onClick={updateApp}
                 style={{
                   color: theme.buttonPrimaryText,
@@ -53,7 +54,7 @@ export function UpdateNotification() {
                 }}
               >
                 Restart
-              </LinkButton>{' '}
+              </Button>{' '}
               (
               <LinkButton
                 style={{

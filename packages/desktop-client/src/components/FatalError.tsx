@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { Block } from './common/Block';
 import { Button } from './common/Button';
 import { ExternalLink } from './common/ExternalLink';
-import { LinkButton } from './common/LinkButton';
 import { Modal } from './common/Modal';
 import { Paragraph } from './common/Paragraph';
 import { Stack } from './common/Stack';
@@ -146,9 +145,13 @@ function SharedArrayBufferOverride() {
       </Button>
     </>
   ) : (
-    <LinkButton onClick={() => setExpanded(true)} style={{ marginLeft: 5 }}>
+    <Button
+      type="link"
+      onClick={() => setExpanded(true)}
+      style={{ marginLeft: 5 }}
+    >
       Advanced options
-    </LinkButton>
+    </Button>
   );
 }
 
@@ -171,7 +174,9 @@ export function FatalError({ buttonText, error }: FatalErrorProps) {
           </Button>
         </Paragraph>
         <Paragraph isLast={true} style={{ fontSize: 11 }}>
-          <LinkButton onClick={() => setShowError(true)}>Show Error</LinkButton>
+          <Button type="link" onClick={() => setShowError(true)}>
+            Show Error
+          </Button>
           {showError && (
             <Block
               style={{

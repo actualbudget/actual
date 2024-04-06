@@ -12,7 +12,6 @@ import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button';
 import { FormError } from '../common/FormError';
-import { LinkButton } from '../common/LinkButton';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
@@ -166,7 +165,8 @@ export function CloseAccount({
               <View style={{ marginBottom: 15 }}>
                 <Text style={{ fontSize: 12 }}>
                   You can also{' '}
-                  <LinkButton
+                  <Button
+                    type="link"
                     onClick={() => {
                       setLoading(true);
 
@@ -177,7 +177,7 @@ export function CloseAccount({
                     style={{ color: theme.errorText }}
                   >
                     force close
-                  </LinkButton>{' '}
+                  </Button>{' '}
                   the account which will delete it and all its transactions
                   permanently. Doing so may change your budget unexpectedly
                   since money in it may vanish.

@@ -169,12 +169,13 @@ export function GoCardlessExternalMsg({
           <Error>
             Failed loading available banks: GoCardless access credentials might
             be misconfigured. Please{' '}
-            <LinkButton
+            <Button
+              type="link"
               onClick={onGoCardlessInit}
               style={{ color: theme.formLabelText, display: 'inline' }}
             >
               set them up
-            </LinkButton>{' '}
+            </Button>{' '}
             again.
           </Error>
         ) : (
