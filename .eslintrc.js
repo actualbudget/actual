@@ -146,10 +146,9 @@ module.exports = {
           'Using default React import is discouraged, please use named exports directly instead.',
       },
       {
-        // forbid <a> in favor of <Link> or <ExternalLink>
+        // forbid <a> in favor of <Link>
         selector: 'JSXOpeningElement[name.name="a"]',
-        message:
-          'Using <a> is discouraged, please use <Link> or <ExternalLink> instead.',
+        message: 'Using <a> is discouraged, please use <Link> instead.',
       },
     ],
     'no-restricted-imports': [

@@ -11,6 +11,7 @@ import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { type CSSProperties, styles } from '../../style';
+import { theme } from '../../style/theme';
 
 import { Button } from './Button';
 import { Text } from './Text';
@@ -34,17 +35,52 @@ type InternalLinkProps = {
   report?: CustomReportEntity;
 };
 
-const TextLink = ({ style, onClick, children }: TextLinkProps) => {
+const externalLinkColors = {
+  purple: theme.pageTextPositive,
+  blue: theme.pageTextLink,
+  muted: 'inherit',
+};
+
+type ExternalLinkProps = {
+  children?: ReactNode;
+  to?: string;
+  linkColor?: keyof typeof externalLinkColors;
+};
+
+const ExternalLink = ({
+  children,
+  to,
+  linkColor = 'blue',
+}: ExternalLinkProps) => {
+  return (
+    // we can’t use <ExternalLink /> here for obvious reasons
+    // eslint-disable-next-line no-restricted-syntax
+    <a
+      href={to ?? ''}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ color: externalLinkColors[linkColor] }}
+    >
+      {children}
+    </a>
+  );
+};
+
+const TextLink = ({ style, onClick, children, ...props }: TextLinkProps) => {
   return (
     <Text
       style={{
+        backgroundColor: 'transparent',
+        display: 'inline',
+        border: 0,
+        cursor: 'pointer',
         ':hover': {
           textDecoration: 'underline',
           boxShadow: 'none',
-          cursor: 'default',
         },
         ...style,
       }}
+      {...props}
       onClick={onClick}
     >
       {children}
@@ -102,12 +138,16 @@ type LinkProps =
       variant: 'button';
     } & ButtonLinkProps)
   | ({ variant?: 'internal' } & InternalLinkProps)
+  | ({ variant?: 'external' } & ExternalLinkProps)
   | ({ variant?: 'text' } & TextLinkProps);
 
 export function Link({ variant = 'internal', ...props }: LinkProps) {
   switch (variant) {
     case 'internal':
       return <InternalLink {...props} />;
+
+    case 'external':
+      return <ExternalLink {...props} />;
 
     case 'button':
       return <ButtonLink {...props} />;

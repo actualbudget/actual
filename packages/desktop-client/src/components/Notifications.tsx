@@ -17,6 +17,7 @@ import { styles, theme, type CSSProperties } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button';
 import { ExternalLink } from './common/ExternalLink';
+import { Link } from './common/Link';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
 import { View } from './common/View';
@@ -42,8 +43,8 @@ function compileMessage(
                 if (href[0] === '#') {
                   const actionName = href.slice(1);
                   return (
-                    <Button
-                      type="link"
+                    <Link
+                      variant="text"
                       key={idx}
                       onClick={async e => {
                         e.preventDefault();
@@ -55,7 +56,7 @@ function compileMessage(
                       }}
                     >
                       {text}
-                    </Button>
+                    </Link>
                   );
                 }
 

@@ -8,6 +8,7 @@ import { SvgClose } from '../icons/v1';
 import { theme } from '../style';
 
 import { Button } from './common/Button';
+import { Link } from './common/Link';
 import { Text } from './common/Text';
 import { View } from './common/View';
 
@@ -44,8 +45,8 @@ export function UpdateNotification() {
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
-              <Button
-                type="link"
+              <Link
+                variant="text"
                 onClick={updateApp}
                 style={{
                   color: theme.buttonPrimaryText,
@@ -53,10 +54,10 @@ export function UpdateNotification() {
                 }}
               >
                 Restart
-              </Button>{' '}
+              </Link>{' '}
               (
-              <Button
-                type="link"
+              <Link
+                variant="text"
                 style={{
                   color: theme.buttonPrimaryText,
                   textDecoration: 'underline',
@@ -68,7 +69,7 @@ export function UpdateNotification() {
                 }
               >
                 notes
-              </Button>
+              </Link>
               )
               <Button
                 type="bare"
