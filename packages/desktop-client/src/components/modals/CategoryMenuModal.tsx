@@ -1,15 +1,15 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
 import {
-  type CategoryGroupEntity,
+  type CategoryEntity,
   type NoteEntity,
 } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
+import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
@@ -20,87 +20,73 @@ import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
 
-const BUTTON_HEIGHT = 40;
-
-type CategoryGroupMenuProps = {
+type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
-  groupId: string;
-  onSave: (group: CategoryGroupEntity) => void;
-  onAddCategory: (groupId: string, isIncome: boolean) => void;
+  categoryId: string;
+  onSave: (category: CategoryEntity) => void;
   onEditNotes: (id: string) => void;
-  onSaveNotes: (id: string, notes: string) => void;
-  onDelete: (groupId: string) => void;
+  onDelete: (categoryId: string) => void;
   onClose?: () => void;
 };
 
-export function CategoryGroupMenu({
+export function CategoryMenuModal({
   modalProps,
-  groupId,
+  categoryId,
   onSave,
-  onAddCategory,
   onEditNotes,
   onDelete,
   onClose,
-}: CategoryGroupMenuProps) {
-  const { grouped: categoryGroups } = useCategories();
-  const group = categoryGroups.find(g => g.id === groupId);
+}: CategoryMenuModalProps) {
+  const { list: categories } = useCategories();
+  const category = categories.find(c => c.id === categoryId);
   const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id: group.id }).select('*'),
-    [group.id],
+    () => q('notes').filter({ id: category.id }).select('*'),
+    [category.id],
   );
-  const notes = data && data.length > 0 ? data[0].note : null;
+  const originalNotes = data && data.length > 0 ? data[0].note : null;
 
-  function _onClose() {
+  const _onClose = () => {
     modalProps?.onClose();
     onClose?.();
-  }
+  };
 
-  function _onRename(newName) {
-    if (newName !== group.name) {
+  const onRename = newName => {
+    if (newName !== category.name) {
       onSave?.({
-        ...group,
+        ...category,
         name: newName,
       });
     }
-  }
+  };
 
-  function _onAddCategory() {
-    onAddCategory?.(group.id, group.is_income);
-  }
-
-  function _onEditNotes() {
-    onEditNotes?.(group.id);
-  }
-
-  function _onToggleVisibility() {
+  const _onToggleVisibility = () => {
     onSave?.({
-      ...group,
-      hidden: !!!group.hidden,
+      ...category,
+      hidden: !category.hidden,
     });
     _onClose();
-  }
+  };
 
-  function _onDelete() {
-    onDelete?.(group.id);
-  }
+  const _onEditNotes = () => {
+    onEditNotes?.(category.id);
+  };
 
-  function onNameUpdate(newName) {
-    _onRename(newName);
-  }
+  const _onDelete = () => {
+    onDelete?.(category.id);
+  };
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
-    height: BUTTON_HEIGHT,
+    height: styles.mobileMinHeight,
     color: theme.formLabelText,
     // Adjust based on desired number of buttons per row.
-    flexBasis: '48%',
-    marginLeft: '1%',
-    marginRight: '1%',
+    flexBasis: '100%',
   };
 
   return (
     <Modal
-      title={group.name}
+      title={category.name}
+      titleStyle={styles.underlinedText}
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -113,11 +99,10 @@ export function CategoryGroupMenu({
         borderRadius: '6px',
       }}
       editableTitle={true}
-      titleStyle={styles.underlinedText}
-      onTitleUpdate={onNameUpdate}
+      onTitleUpdate={onRename}
       leftHeaderContent={
-        <AdditionalCategoryGroupMenu
-          group={group}
+        <AdditionalCategoryMenu
+          category={category}
           onDelete={_onDelete}
           onToggleVisibility={_onToggleVisibility}
         />
@@ -137,13 +122,12 @@ export function CategoryGroupMenu({
             }}
           >
             <Notes
-              notes={notes?.length > 0 ? notes : 'No notes'}
+              notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
               editable={false}
               focused={false}
               getStyle={() => ({
-                ...styles.mediumText,
                 borderRadius: 6,
-                ...((!notes || notes.length === 0) && {
+                ...((!originalNotes || originalNotes.length === 0) && {
                   justifySelf: 'center',
                   alignSelf: 'center',
                   color: theme.pageTextSubdued,
@@ -157,21 +141,9 @@ export function CategoryGroupMenu({
               flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignContent: 'space-between',
-              paddingTop: 10,
-              paddingBottom: 10,
+              margin: '10px 0',
             }}
           >
-            <Button
-              disabled={isEditingTitle}
-              style={{
-                ...buttonStyle,
-                display: isEditingTitle ? 'none' : undefined,
-              }}
-              onClick={_onAddCategory}
-            >
-              <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
-              Add category
-            </Button>
             <Button
               style={{
                 ...buttonStyle,
@@ -193,11 +165,11 @@ export function CategoryGroupMenu({
   );
 }
 
-function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
+function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
-    height: BUTTON_HEIGHT,
+    height: styles.mobileMinHeight,
   };
 
   return (
@@ -223,31 +195,22 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
             }}
           >
             <Menu
-              style={{
-                ...styles.mediumText,
-                color: theme.formLabelText,
-              }}
-              items={
-                [
-                  {
-                    name: 'toggleVisibility',
-                    text: group.hidden ? 'Show' : 'Hide',
-                    icon: group.hidden ? SvgViewShow : SvgViewHide,
-                    iconSize: 16,
-                    style: itemStyle,
-                  },
-                  ...(!group.is_income && [
-                    Menu.line,
-                    {
-                      name: 'delete',
-                      text: 'Delete',
-                      icon: SvgTrash,
-                      iconSize: 15,
-                      style: itemStyle,
-                    },
-                  ]),
-                ].filter(i => i != null) as ComponentProps<typeof Menu>['items']
-              }
+              getItemStyle={() => itemStyle}
+              items={[
+                {
+                  name: 'toggleVisibility',
+                  text: category.hidden ? 'Show' : 'Hide',
+                  icon: category.hidden ? SvgViewShow : SvgViewHide,
+                  iconSize: 16,
+                },
+                Menu.line,
+                {
+                  name: 'delete',
+                  text: 'Delete',
+                  icon: SvgTrash,
+                  iconSize: 15,
+                },
+              ]}
               onMenuSelect={itemName => {
                 setMenuOpen(false);
                 if (itemName === 'delete') {
