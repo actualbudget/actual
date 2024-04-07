@@ -176,7 +176,7 @@ export class LiveQuery {
 }
 
 // Paging
-class PagedQuery extends LiveQuery {
+export class PagedQuery extends LiveQuery {
   done;
   onPageData;
   pageCount;

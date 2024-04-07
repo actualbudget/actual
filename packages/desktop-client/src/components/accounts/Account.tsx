@@ -1,4 +1,4 @@
-import React, { PureComponent, createRef, useMemo } from 'react';
+import React, { PureComponent, RefObject, createRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
 
@@ -13,10 +13,15 @@ import {
   useCachedSchedules,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
-import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
+import {
+  runQuery,
+  pagedQuery,
+  LiveQuery,
+  PagedQuery,
+} from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
+import { q, Query } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   deleteTransaction,
@@ -45,8 +50,20 @@ import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
 
 import { AccountHeader } from './Header';
+import {
+  AccountEntity,
+  NewTransactionEntity,
+  RuleConditionEntity,
+} from 'loot-core/types/models';
+import { SetLastUndoStateAction } from 'loot-core/client/state-types/app';
+import { MarkAccountReadAction } from 'loot-core/client/state-types/queries';
+import { keyboard } from '@testing-library/user-event/dist/types/keyboard';
 
-function EmptyMessage({ onAdd }) {
+type EmptyMessageProps = {
+  onAdd: () => void;
+};
+
+function EmptyMessage({ onAdd }: EmptyMessageProps) {
   return (
     <View
       style={{
@@ -86,14 +103,26 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
+type AllTransactionsProps = {
+  account: AccountEntity;
+  transactions: NewTransactionEntity[];
+  balances: number[];
+  showBalances: boolean;
+  filtered: boolean;
+  children: (
+    transactions: NewTransactionEntity[],
+    balances: number[],
+  ) => React.ReactNode;
+};
+
 function AllTransactions({
-  account = {},
+  account = {} as AccountEntity,
   transactions,
   balances,
   showBalances,
   filtered,
   children,
-}) {
+}: AllTransactionsProps) {
   const { id: accountId } = account;
   const scheduleData = useCachedSchedules();
 
@@ -195,7 +224,65 @@ function getField(field) {
   }
 }
 
-class AccountInternal extends PureComponent {
+type AccountInternalProps = {
+  setLastUndoState: (
+    state: SetLastUndoStateAction['undoState'],
+  ) => SetLastUndoStateAction;
+  initiallyLoadPayees: () => Promise<void>;
+  conditions: RuleConditionEntity[];
+  lastUndoState: RefObject<any>;
+  accountId: string;
+  modalShowing: boolean;
+  markAccountRead: (accountId: string) => MarkAccountReadAction;
+  splitsExpandedDispatch: ({
+    type,
+    mode,
+  }: {
+    type: string;
+    mode: string;
+  }) => void;
+  expandSplits?: boolean;
+  dateFormat: string;
+  accounts: AccountEntity[];
+  syncAndDownload: (accountId?: string) => Promise<void>;
+  getCategories: () => Promise<any>;
+};
+
+type AccountInternalState = {
+  search: string;
+  filters: RuleConditionEntity[];
+  loading: boolean;
+  workingHard: boolean;
+  isAdding: boolean;
+  sort: sort[];
+  showReconciled: boolean;
+  transactions: NewTransactionEntity[];
+  transactionCount: number;
+  transactionsFiltered: boolean;
+  balances?: { [key: string]: { id: string } };
+  showBalances: boolean;
+  editingName: boolean;
+  showCleared: boolean;
+  reconcileAmount: number | null;
+};
+
+type sort = {
+  field: string;
+  ascDesc: 'asc' | 'desc';
+  prevField?: string;
+  prevAscDesc?: 'asc' | 'desc';
+};
+
+class AccountInternal extends PureComponent<
+  AccountInternalProps,
+  AccountInternalState
+> {
+  paged: PagedQuery | null;
+  table: RefObject<any>;
+  animated: boolean;
+  unlisten: () => void;
+  rootQuery: Query;
+  currentQuery: Query;
   constructor(props) {
     super(props);
     this.paged = null;
@@ -282,7 +369,6 @@ class AccountInternal extends PureComponent {
     // listeners are set up synchronously
     await this.props.initiallyLoadPayees();
     await this.fetchTransactions(this.state.filters);
-
     // If there is a pending undo, apply it immediately (this happens
     // when an undo changes the location to this page)
     if (this.props.lastUndoState && this.props.lastUndoState.current) {
@@ -338,7 +424,7 @@ class AccountInternal extends PureComponent {
     this.paged?.run();
   };
 
-  fetchTransactions = filters => {
+  fetchTransactions = (filters: RuleConditionEntity[] = undefined) => {
     const query = this.makeRootQuery();
     this.rootQuery = this.currentQuery = query;
     if (filters) this.applyFilters(filters);
@@ -355,7 +441,7 @@ class AccountInternal extends PureComponent {
     return queries.makeTransactionsQuery(accountId);
   };
 
-  updateQuery(query, isFiltered) {
+  updateQuery(query: Query, isFiltered: boolean = undefined) {
     if (this.paged) {
       this.paged.unsubscribe();
     }
@@ -369,7 +455,6 @@ class AccountInternal extends PureComponent {
       query.select('*'),
       async (data, prevData) => {
         const firstLoad = prevData == null;
-
         if (firstLoad) {
           this.table.current?.setRowAnimation(false);
 
@@ -385,7 +470,6 @@ class AccountInternal extends PureComponent {
             });
           }
         }
-
         this.setState(
           {
             transactions: data,
@@ -464,6 +548,7 @@ class AccountInternal extends PureComponent {
   };
 
   onImport = async () => {
+    debugger;
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
     const categories = await this.props.getCategories();
@@ -1449,7 +1534,6 @@ class AccountInternal extends PureComponent {
       accountId !== 'uncategorized';
 
     const balanceQuery = this.getBalanceQuery(account, accountId);
-
     return (
       <AllTransactions
         account={account}
