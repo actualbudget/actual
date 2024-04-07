@@ -169,6 +169,7 @@ export function AccountHeader({
                     marginLeft: -6,
                     paddingTop: 2,
                     paddingBottom: 2,
+                    width: Math.max(20, accountName.length) + "ch",
                   }}
                 />
               </InitialFocus>
