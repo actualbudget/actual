@@ -16,7 +16,6 @@ import { SvgDelete } from '../icons/v0';
 import { styles, theme, type CSSProperties } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button';
-import { ExternalLink } from './common/ExternalLink';
 import { Link } from './common/Link';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
@@ -61,9 +60,14 @@ function compileMessage(
                 }
 
                 return (
-                  <ExternalLink linkColor="purple" key={idx} to={match[2]}>
+                  <Link
+                    variant="external"
+                    linkColor="purple"
+                    key={idx}
+                    to={match[2]}
+                  >
                     {match[1]}
-                  </ExternalLink>
+                  </Link>
                 );
               }
               return <Text key={idx}>{part}</Text>;

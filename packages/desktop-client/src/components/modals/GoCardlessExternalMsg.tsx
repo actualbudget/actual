@@ -16,7 +16,6 @@ import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
@@ -206,9 +205,13 @@ export function GoCardlessExternalMsg({
           service) read-only access to your entire account’s transaction
           history. This service is not affiliated with Actual in any way. Make
           sure you’ve read and understand GoCardless’s{' '}
-          <ExternalLink to="https://gocardless.com/privacy/" linkColor="purple">
+          <Link
+            variant="external"
+            to="https://gocardless.com/privacy/"
+            linkColor="purple"
+          >
             Privacy Policy
-          </ExternalLink>{' '}
+          </Link>{' '}
           before proceeding.
         </Warning>
 
