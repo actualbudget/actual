@@ -14,8 +14,8 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
 import { Input } from '../common/Input';
+import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
@@ -60,24 +60,26 @@ function About() {
         <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>
         {isOutdated ? (
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
             New version available: {latestVersion}
-          </ExternalLink>
+          </Link>
         ) : (
           <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
             You’re up to date!
           </Text>
         )}
         <Text>
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
             Release Notes
-          </ExternalLink>
+          </Link>
         </Text>
       </View>
     </Setting>

@@ -33,7 +33,6 @@ import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Button, ButtonWithLoading } from './common/Button';
-import { ExternalLink } from './common/ExternalLink';
 import { Link } from './common/Link';
 import { Paragraph } from './common/Paragraph';
 import { Text } from './common/Text';
@@ -364,12 +363,13 @@ function BudgetTitlebar() {
                 </ButtonWithLoading>
               </Paragraph>
               <Paragraph isLast={true}>
-                <ExternalLink
+                <Link
+                  variant="external"
                   to="https://actualbudget.org/docs/experimental/report-budget"
                   linkColor="muted"
                 >
                   How do these types of budgeting work?
-                </ExternalLink>
+                </Link>
               </Paragraph>
             </Tooltip>
           )}

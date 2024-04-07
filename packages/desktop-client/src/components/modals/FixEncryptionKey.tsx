@@ -8,9 +8,9 @@ import { getTestKeyError } from 'loot-core/src/shared/errors';
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
+import { Link } from '../common/Link';
 import { Modal, ModalButtons } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
@@ -76,17 +76,23 @@ export function FixEncryptionKey({
               This file was encrypted with a different key than you are
               currently using. This probably means you changed your password.
               Enter your current password to update your key.{' '}
-              <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
+              <Link
+                variant="external"
+                to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
+              >
                 Learn more
-              </ExternalLink>
+              </Link>
             </Paragraph>
           ) : (
             <Paragraph>
               We don’t have a key that encrypts or decrypts this file. Enter the
               password for this file to create the key for encryption.{' '}
-              <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
+              <Link
+                variant="external"
+                to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
+              >
                 Learn more
-              </ExternalLink>
+              </Link>
             </Paragraph>
           )}
           <form
