@@ -203,8 +203,17 @@ export function parseTransactions(filepath, options) {
   };
 }
 
-export function importTransactions(id, transactions) {
-  return async (dispatch: Dispatch) => {
+export function importTransactions(id: string, transactions, reconcile = true) {
+  return async (dispatch: Dispatch): Promise<boolean> => {
+    if (!reconcile) {
+      await send('api/transactions-add', {
+        accountId: id,
+        transactions,
+      });
+
+      return true;
+    }
+
     const {
       errors = [],
       added,
