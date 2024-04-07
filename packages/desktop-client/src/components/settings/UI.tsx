@@ -77,8 +77,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
     </View>
   ) : (
     <Link
-      variant="click"
-      to="clickEvent"
+      variant="text"
       onClick={() => setExpanded(true)}
       style={{
         flexShrink: 0,

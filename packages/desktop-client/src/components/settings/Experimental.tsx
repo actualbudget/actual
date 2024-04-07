@@ -91,8 +91,7 @@ export function ExperimentalFeatures() {
           </View>
         ) : (
           <Link
-            to="clickEvent"
-            variant="click"
+            variant="text"
             onClick={() => setExpanded(true)}
             style={{
               flexShrink: 0,
