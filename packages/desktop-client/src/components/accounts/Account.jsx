@@ -1407,6 +1407,7 @@ class AccountInternal extends PureComponent {
       hideFraction,
       addNotification,
       accountsSyncing,
+      failedAccounts,
       pushModal,
       replaceModal,
       showExtraBalances,
@@ -1478,6 +1479,7 @@ class AccountInternal extends PureComponent {
                 location={this.props.location}
                 accountName={accountName}
                 accountsSyncing={accountsSyncing}
+                failedAccounts={failedAccounts}
                 accounts={accounts}
                 transactions={transactions}
                 showBalances={showBalances}
