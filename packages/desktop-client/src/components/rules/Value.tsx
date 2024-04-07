@@ -12,7 +12,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
 import { type CSSProperties, theme } from '../../style';
-import { LinkButton } from '../common/LinkButton';
+import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 
 type ValueProps<T> = {
@@ -155,9 +155,9 @@ export function Value<T>({
         {numHidden > 0 && (
           <Text style={valueStyle}>
             &nbsp;&nbsp;
-            <LinkButton onClick={onExpand} style={valueStyle}>
+            <Link variant="text" onClick={onExpand} style={valueStyle}>
               {numHidden} more items...
-            </LinkButton>
+            </Link>
             {!inline && <br />}
           </Text>
         )}

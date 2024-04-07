@@ -5,7 +5,7 @@ import type { FeatureFlag } from 'loot-core/src/types/prefs';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
-import { LinkButton } from '../common/LinkButton';
+import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
@@ -90,7 +90,8 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="splitsInRules">Splits in rules</FeatureToggle>
           </View>
         ) : (
-          <LinkButton
+          <Link
+            variant="text"
             onClick={() => setExpanded(true)}
             style={{
               flexShrink: 0,
@@ -99,7 +100,7 @@ export function ExperimentalFeatures() {
             }}
           >
             I understand the risks, show experimental features
-          </LinkButton>
+          </Link>
         )
       }
     >
