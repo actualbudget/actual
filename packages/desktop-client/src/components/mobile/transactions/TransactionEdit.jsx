@@ -495,10 +495,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
   };
 
   const onSave = async () => {
-    const [transaction] = unserializedTransactions;
+    const [unserializedTransaction] = unserializedTransactions;
 
     const onConfirmSave = async () => {
-      const { account: accountId } = transaction;
+      const { account: accountId } = unserializedTransaction;
       const account = accountsById[accountId];
 
       if (unserializedTransactions.find(t => t.account == null)) {
@@ -516,7 +516,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       navigate(`/accounts/${account.id}`, { replace: true });
     };
 
-    if (transaction.reconciled) {
+    if (unserializedTransaction.reconciled) {
       // On mobile any save gives the warning.
       // On the web only certain changes trigger a warning.
       // Should we bring that here as well? Or does the nature of the editing form
@@ -536,31 +536,22 @@ const TransactionEditInner = memo(function TransactionEditInner({
     onSave();
   };
 
-  const onEdit = async (transaction, name, value) => {
-    const newTransaction = { ...transaction, [name]: value };
+  const onEdit = async (serializedTransaction, name, value) => {
+    const newTransaction = { ...serializedTransaction, [name]: value };
     await props.onEdit(newTransaction);
     onClearActiveEdit();
   };
 
   const onClick = (transactionId, name) => {
     onRequestActiveEdit?.(getFieldName(transaction.id, name), () => {
-      const transaction = unserializedTransactions.find(
-        t => t.id === transactionId,
-      );
+      const transactionToEdit = transactions.find(t => t.id === transactionId);
       switch (name) {
         case 'category':
           dispatch(
             pushModal('category-autocomplete', {
               categoryGroups,
               onSelect: categoryId => {
-                // This is a deficiency of this API, need to fix. It
-                // assumes that it receives a serialized transaction,
-                // but we only have access to the raw transaction
-                onEdit(
-                  serializeTransaction(transaction, dateFormat),
-                  name,
-                  categoryId,
-                );
+                onEdit(transactionToEdit, name, categoryId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -572,14 +563,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('account-autocomplete', {
               onSelect: accountId => {
-                // This is a deficiency of this API, need to fix. It
-                // assumes that it receives a serialized transaction,
-                // but we only have access to the raw transaction
-                onEdit(
-                  serializeTransaction(transaction, dateFormat),
-                  name,
-                  accountId,
-                );
+                onEdit(transactionToEdit, name, accountId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -591,14 +575,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('payee-autocomplete', {
               onSelect: payeeId => {
-                // This is a deficiency of this API, need to fix. It
-                // assumes that it receives a serialized transaction,
-                // but we only have access to the raw transaction
-                onEdit(
-                  serializeTransaction(transaction, dateFormat),
-                  name,
-                  payeeId,
-                );
+                onEdit(transactionToEdit, name, payeeId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -611,14 +588,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             pushModal('edit-field', {
               name,
               onSubmit: (name, value) => {
-                // This is a deficiency of this API, need to fix. It
-                // assumes that it receives a serialized transaction,
-                // but we only have access to the raw transaction
-                onEdit(
-                  serializeTransaction(transaction, dateFormat),
-                  name,
-                  value,
-                );
+                onEdit(transactionToEdit, name, value);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -631,18 +601,18 @@ const TransactionEditInner = memo(function TransactionEditInner({
   };
 
   const onDelete = id => {
-    const [transaction, ..._childTransactions] = unserializedTransactions;
+    const [unserializedTransaction] = unserializedTransactions;
 
     const onConfirmDelete = () => {
       props.onDelete(id);
 
-      if (transaction.id !== id) {
+      if (unserializedTransaction.id !== id) {
         // Only a child transaction was deleted.
         onClearActiveEdit();
         return;
       }
 
-      const { account: accountId } = transaction;
+      const { account: accountId } = unserializedTransaction;
       if (accountId) {
         navigate(`/accounts/${accountId}`, { replace: true });
       } else {
@@ -650,7 +620,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       }
     };
 
-    if (transaction.reconciled) {
+    if (unserializedTransaction.reconciled) {
       dispatch(
         pushModal('confirm-transaction-edit', {
           onConfirm: onConfirmDelete,
@@ -683,9 +653,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
   };
 
   useEffect(() => {
-    const noAmountTransaction = childTransactions.find(t => t.amount === 0);
-    if (noAmountTransaction) {
-      scrollChildTransactionIntoView(noAmountTransaction.id);
+    const noAmountChildTransaction = childTransactions.find(
+      t => t.amount === 0,
+    );
+    if (noAmountChildTransaction) {
+      scrollChildTransactionIntoView(noAmountChildTransaction.id);
     }
   }, [childTransactions]);
 
