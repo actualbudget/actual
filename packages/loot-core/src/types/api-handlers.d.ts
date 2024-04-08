@@ -143,4 +143,12 @@ export interface ApiHandlers {
   'api/payee-update': (arg: { id; fields }) => Promise<unknown>;
 
   'api/payee-delete': (arg: { id }) => Promise<unknown>;
+
+  'api/payee-rules-get': () => Promise<unknown[]>;
+
+  'api/payee-rule-create': (arg: { rule }) => Promise<string>;
+
+  'api/payee-rule-update': (arg: { id; rule }) => Promise<unknown>;
+
+  'api/payee-rule-delete': (arg: { id }) => Promise<unknown>;
 }

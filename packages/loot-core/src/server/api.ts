@@ -600,6 +600,26 @@ handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-batch-change']({ deleted: [{ id }] });
 });
 
+handlers['api/payee-rules-get'] = async function () {
+  checkFileOpen();
+  return await handlers['rules-get']();
+};
+
+handlers['api/payee-rule-create'] = withMutation(async function ({ rule }) {
+  checkFileOpen();
+  return handlers['payee-rule-create']({ rule });
+});
+
+handlers['api/payee-rule-update'] = withMutation(async function ({ id, rule }) {
+  checkFileOpen();
+  return handlers['payee-rule-update']({ id, rule });
+});
+
+handlers['api/payee-rule-delete'] = withMutation(async function (id) {
+  checkFileOpen();
+  return handlers['payee-rule-delete'](id);
+});
+
 export function installAPI(serverHandlers: ServerHandlers) {
   const merged = Object.assign({}, serverHandlers, handlers);
   handlers = merged as Handlers;
