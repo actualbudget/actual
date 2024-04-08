@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
+import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
@@ -17,6 +18,8 @@ import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
+
+import { AmountInput } from './AmountInput';
 
 export function GenericInput({
   field,
@@ -209,15 +212,30 @@ export function GenericInput({
           />
         );
       } else {
-        content = (
-          <Input
-            inputRef={inputRef}
-            defaultValue={value || ''}
-            placeholder="nothing"
-            onEnter={e => onChange(e.target.value)}
-            onBlur={e => onChange(e.target.value)}
-          />
-        );
+        switch (type) {
+          case 'number':
+            content = (
+              <AmountInput
+                inputRef={inputRef}
+                value={amountToInteger(value)}
+                placeholder="0.00"
+                onEnter={e => onChange(e.target.value)}
+                onBlur={e => onChange(e.target.value)}
+                onUpdate={newValue => onChange(integerToAmount(newValue))}
+              />
+            );
+            break;
+          default:
+            content = (
+              <Input
+                inputRef={inputRef}
+                defaultValue={value || ''}
+                placeholder="nothing"
+                onEnter={e => onChange(e.target.value)}
+                onBlur={e => onChange(e.target.value)}
+              />
+            );
+        }
       }
       break;
   }
