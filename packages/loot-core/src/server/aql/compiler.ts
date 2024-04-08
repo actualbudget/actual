@@ -334,9 +334,10 @@ function castInput(state, expr, type) {
       throw new CompileError(`Can’t cast ${expr.type} to date-week`);
     }
 
+    const test = 3;
     return typed(
       // eslint-disable-next-line rulesdir/typography
-      `CAST(strftime('%Y%m%d',datetime(substr(${expr2.value}, 1, 4) || '-' || substr(${expr2.value}, 5, 2) || '-' || substr(${expr2.value}, 7, 2)), 'weekday 0', '-6 days') AS integer)`,
+      `CAST(strftime('%Y%m%d',datetime(substr(${expr2.value}, 1, 4) || '-' || substr(${expr2.value}, 5, 2) || '-' || substr(${expr2.value}, 7, 2)), 'weekday ${test}', '-6 days') AS integer)`,
       'date-week',
     );
   } else if (type === 'id') {

@@ -5,7 +5,7 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import { amountToCurrency, stringToInteger } from 'loot-core/src/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -36,6 +36,8 @@ import { fromDateRepr } from '../util';
 
 export function CustomReport() {
   const categories = useCategories();
+  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = stringToInteger(_firstDayOfWeekIdx || '0');
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -113,9 +115,12 @@ export function CustomReport() {
         ? monthUtils[format](d.parseISO(fromDateRepr(trans.date)))
         : currentInterval;
 
+      const rangeProps =
+        interval === 'Weekly'
+          ? [earliestInterval, currentInterval, firstDayOfWeekIdx]
+          : [earliestInterval, currentInterval];
       const allInter = monthUtils[ReportOptions.intervalRange.get(interval)](
-        earliestInterval,
-        currentInterval,
+        ...rangeProps,
       )
         .map(inter => ({
           name: inter,
@@ -147,8 +152,12 @@ export function CustomReport() {
     const dateStart = monthUtils[format](startDate);
     const dateEnd = monthUtils[format](endDate);
 
+    const rangeProps =
+      interval === 'Weekly'
+        ? [dateStart, dateEnd, firstDayOfWeekIdx]
+        : [dateStart, dateEnd];
     setIntervals(
-      monthUtils[ReportOptions.intervalRange.get(interval)](dateStart, dateEnd),
+      monthUtils[ReportOptions.intervalRange.get(interval)](...rangeProps),
     );
   }, [interval, startDate, endDate]);
 
@@ -170,6 +179,7 @@ export function CustomReport() {
       showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
+      firstDayOfWeekIdx,
     });
   }, [
     startDate,
@@ -188,6 +198,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     graphType,
+    firstDayOfWeekIdx,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -209,6 +220,7 @@ export function CustomReport() {
       payees,
       accounts,
       graphType,
+      firstDayOfWeekIdx,
       setDataCheck,
     });
   }, [
@@ -228,6 +240,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     graphType,
+    firstDayOfWeekIdx,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -449,6 +462,7 @@ export function CustomReport() {
           defaultItems={defaultItems}
           defaultModeItems={defaultModeItems}
           earliestTransaction={earliestTransaction}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
         />
         <View
           style={{

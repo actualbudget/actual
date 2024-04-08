@@ -32,7 +32,7 @@ export function convertInputType(value, type) {
 
       return toDateRepr(value);
     case 'date-week':
-      return toDateRepr(weekFromDate(value));
+      return toDateRepr(dayFromDate(value));
     case 'date-month':
       return toDateRepr(value.slice(0, 7));
     case 'date-year':

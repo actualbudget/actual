@@ -47,6 +47,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
+  firstDayOfWeekIdx?: number;
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -67,6 +68,7 @@ export function createCustomSpreadsheet({
   payees,
   accounts,
   graphType,
+  firstDayOfWeekIdx,
   setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
@@ -129,9 +131,16 @@ export function createCustomSpreadsheet({
 
     const format =
       ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+    const rangeProps =
+      interval === 'Weekly'
+        ? [
+            monthUtils[format](startDate),
+            monthUtils[format](endDate),
+            firstDayOfWeekIdx,
+          ]
+        : [monthUtils[format](startDate), monthUtils[format](endDate)];
     const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      monthUtils[format](startDate),
-      monthUtils[format](endDate),
+      ...rangeProps,
     );
 
     let totalAssets = 0;

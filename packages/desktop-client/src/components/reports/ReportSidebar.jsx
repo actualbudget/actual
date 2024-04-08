@@ -40,12 +40,15 @@ export function ReportSidebar({
   defaultItems,
   defaultModeItems,
   earliestTransaction,
+  firstDayOfWeekIdx,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
     onReportChange({ type: 'modify' });
     setDateRange(cond);
-    onChangeDates(...getLiveRange(cond, earliestTransaction));
+    onChangeDates(
+      ...getLiveRange(cond, earliestTransaction, firstDayOfWeekIdx),
+    );
   };
 
   const onChangeMode = cond => {
@@ -349,6 +352,7 @@ export function ReportSidebar({
                       newValue,
                       customReportItems.endDate,
                       customReportItems.interval,
+                      firstDayOfWeekIdx,
                     ),
                   )
                 }
@@ -378,6 +382,7 @@ export function ReportSidebar({
                       customReportItems.startDate,
                       newValue,
                       customReportItems.interval,
+                      firstDayOfWeekIdx,
                     ),
                   )
                 }
