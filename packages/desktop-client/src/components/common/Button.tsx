@@ -22,13 +22,7 @@ type ButtonProps = HTMLProps<HTMLButtonElement> & {
   as?: ElementType;
 };
 
-type ButtonType =
-  | 'normal'
-  | 'primary'
-  | 'bare'
-  | 'link'
-  | 'menu'
-  | 'menuSelected';
+type ButtonType = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
 const backgroundColor: {
   [key in ButtonType | `${ButtonType}Disabled`]?: string;
@@ -41,7 +35,6 @@ const backgroundColor: {
   bareDisabled: theme.buttonBareDisabledBackground,
   menu: theme.buttonMenuBackground,
   menuSelected: theme.buttonMenuSelectedBackground,
-  link: theme.buttonBareBackground,
 };
 
 const backgroundColorHover: Record<ButtonType, string> = {
@@ -50,7 +43,6 @@ const backgroundColorHover: Record<ButtonType, string> = {
   bare: theme.buttonBareBackgroundHover,
   menu: theme.buttonMenuBackgroundHover,
   menuSelected: theme.buttonMenuSelectedBackgroundHover,
-  link: theme.buttonBareBackground,
 };
 
 const borderColor: {
@@ -62,7 +54,6 @@ const borderColor: {
   primaryDisabled: theme.buttonPrimaryDisabledBorder,
   menu: theme.buttonMenuBorder,
   menuSelected: theme.buttonMenuSelectedBorder,
-  link: theme.buttonBareBackground,
 };
 
 const textColor: {
@@ -76,7 +67,6 @@ const textColor: {
   bareDisabled: theme.buttonBareDisabledText,
   menu: theme.buttonMenuText,
   menuSelected: theme.buttonMenuSelectedText,
-  link: theme.pageTextLink,
 };
 
 const textColorHover: {
@@ -89,18 +79,12 @@ const textColorHover: {
   menuSelected: theme.buttonMenuSelectedTextHover,
 };
 
-const linkButtonHoverStyles = {
-  textDecoration: 'underline',
-  boxShadow: 'none',
-};
-
 const _getBorder = (
   type: ButtonType,
   typeWithDisabled: keyof typeof borderColor,
 ): string => {
   switch (type) {
     case 'bare':
-    case 'link':
       return 'none';
 
     default:
@@ -112,8 +96,6 @@ const _getPadding = (type: ButtonType): string => {
   switch (type) {
     case 'bare':
       return '5px';
-    case 'link':
-      return '0';
     default:
       return '5px 10px';
   }
@@ -123,11 +105,6 @@ const _getActiveStyles = (type: ButtonType, bounce: boolean): CSSProperties => {
   switch (type) {
     case 'bare':
       return { backgroundColor: theme.buttonBareBackgroundActive };
-    case 'link':
-      return {
-        transform: 'none',
-        boxShadow: 'none',
-      };
     default:
       return {
         transform: bounce ? 'translateY(1px)' : undefined,
@@ -166,7 +143,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     hoveredStyle = {
       ...(type !== 'bare' && styles.shadow),
-      ...(type === 'link' && linkButtonHoverStyles),
       backgroundColor: backgroundColorHover[type],
       color: color || textColorHover[type],
       ...hoveredStyle,
@@ -184,7 +160,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       padding: _getPadding(type),
       margin: 0,
       overflow: 'hidden',
-      display: type === 'link' ? 'inline' : 'flex',
+      display: 'flex',
       borderRadius: 4,
       backgroundColor: backgroundColor[typeWithDisabled],
       border: _getBorder(type, typeWithDisabled),

@@ -8,7 +8,7 @@ import { useActions } from '../../hooks/useActions';
 import { SvgExclamationOutline } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
+import { Link } from '../common/Link';
 import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
@@ -41,9 +41,9 @@ function getErrorMessage(type, code) {
   return (
     <>
       An internal error occurred. Try to login again, or get{' '}
-      <ExternalLink to="https://actualbudget.org/contact/">
+      <Link variant="external" to="https://actualbudget.org/contact/">
         in touch
-      </ExternalLink>{' '}
+      </Link>{' '}
       for support.
     </>
   );
