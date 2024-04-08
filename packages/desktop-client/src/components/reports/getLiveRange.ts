@@ -25,7 +25,7 @@ export function getLiveRange(cond: string, earliestTransaction: string) {
           '-31',
       );
       break;
-    case 'allMonths':
+    case 'allTime':
       dateStart = earliestTransaction;
       dateEnd = monthUtils.currentDay();
       break;
@@ -33,7 +33,8 @@ export function getLiveRange(cond: string, earliestTransaction: string) {
       if (typeof rangeName === 'number') {
         [dateStart, dateEnd] = getSpecificRange(
           rangeName,
-          cond === 'Last month' ? 0 : null,
+          cond === 'Last month' || cond === 'Last week' ? 0 : null,
+          ReportOptions.dateRangeType.get(cond),
         );
       } else {
         break;
