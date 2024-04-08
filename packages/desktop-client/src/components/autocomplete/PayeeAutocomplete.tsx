@@ -521,7 +521,7 @@ function PayeeItem({
             : 'transparent',
           color: highlighted
             ? theme.menuAutoCompleteItemTextHover
-            : theme.menuItemText,
+            : theme.menuAutoCompleteItemText,
           ':hover': {
             color: theme.menuAutoCompleteItemTextHover,
           },
