@@ -124,19 +124,15 @@ function boundedRange(
 export function getSpecificRange(
   offset: number,
   addNumber: number | null,
-  type: string,
+  type?: string,
 ) {
   const currentDay = monthUtils.currentDay();
 
-  let dateStart;
-  let dateEnd;
-  if (type === 'Months') {
-    dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
-    dateEnd = monthUtils.getMonthEnd(
-      monthUtils.addMonths(dateStart, addNumber === null ? offset : addNumber) +
-        '-01',
-    );
-  }
+  let dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
+  let dateEnd = monthUtils.getMonthEnd(
+    monthUtils.addMonths(dateStart, addNumber === null ? offset : addNumber) +
+      '-01',
+  );
 
   if (type === 'Weeks') {
     dateStart = monthUtils.subWeeks(currentDay, offset);
