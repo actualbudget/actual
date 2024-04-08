@@ -7,7 +7,7 @@ import { importBudget } from 'loot-core/src/client/actions/budgets';
 import { styles, theme } from '../../style';
 import { Block } from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
+import { Link } from '../common/Link';
 import { Modal, type ModalProps } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
@@ -64,9 +64,12 @@ export function ImportYNAB5({ modalProps }: ImportProps) {
             style={{ alignItems: 'center', '& > div': { lineHeight: '1.7em' } }}
           >
             <Paragraph>
-              <ExternalLink to="https://actualbudget.org/docs/migration/nynab">
+              <Link
+                variant="external"
+                to="https://actualbudget.org/docs/migration/nynab"
+              >
                 Read here
-              </ExternalLink>{' '}
+              </Link>{' '}
               for instructions on how to migrate your data from YNAB. You need
               to export your data as JSON, and that page explains how to do
               that.

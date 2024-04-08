@@ -21,6 +21,7 @@ import { AppliedFilters } from '../../filters/AppliedFilters';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import { defaultsList, disabledList } from '../disabledList';
+import { getLiveRange } from '../getLiveRange';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportLegend } from '../ReportLegend';
@@ -94,18 +95,6 @@ export function CustomReport() {
   );
 
   useEffect(() => {
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
-
-    const dateStart = monthUtils[format](startDate);
-    const dateEnd = monthUtils[format](endDate);
-
-    setIntervals(
-      monthUtils[ReportOptions.intervalRange.get(interval)](dateStart, dateEnd),
-    );
-  }, [interval, startDate, endDate]);
-
-  useEffect(() => {
     if (selectedCategories === undefined && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
@@ -138,9 +127,30 @@ export function CustomReport() {
         .reverse();
 
       setAllIntervals(allInter);
+
+      if (!isDateStatic) {
+        const [dateStart, dateEnd] = getLiveRange(
+          dateRange,
+          trans ? trans.date : monthUtils.currentDay(),
+        );
+        setStartDate(dateStart);
+        setEndDate(dateEnd);
+      }
     }
     run();
   }, [interval]);
+
+  useEffect(() => {
+    const format =
+      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+
+    const dateStart = monthUtils[format](startDate);
+    const dateEnd = monthUtils[format](endDate);
+
+    setIntervals(
+      monthUtils[ReportOptions.intervalRange.get(interval)](dateStart, dateEnd),
+    );
+  }, [interval, startDate, endDate]);
 
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = usePayees();

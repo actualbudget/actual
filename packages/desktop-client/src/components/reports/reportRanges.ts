@@ -48,7 +48,7 @@ export function validateEnd(
   let dateEnd;
   switch (interval) {
     case 'Monthly':
-      dateEnd = end + '-31';
+      dateEnd = monthUtils.getMonthEnd(end + '-01');
       subDays = 180;
       break;
     case 'Yearly':
@@ -123,7 +123,7 @@ function boundedRange(
 
 export function getSpecificRange(
   offset: number,
-  addNumber: number,
+  addNumber: number | null,
   type: string,
 ) {
   const currentDay = monthUtils.currentDay();

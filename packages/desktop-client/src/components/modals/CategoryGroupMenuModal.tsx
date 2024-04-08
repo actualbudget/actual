@@ -3,7 +3,10 @@ import React, { type ComponentProps, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
+import {
+  type CategoryGroupEntity,
+  type NoteEntity,
+} from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
@@ -39,7 +42,7 @@ export function CategoryGroupMenuModal({
 }: CategoryGroupMenuModalProps) {
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
-  const data = useLiveQuery(
+  const data = useLiveQuery<NoteEntity[]>(
     () => q('notes').filter({ id: group.id }).select('*'),
     [group.id],
   );
