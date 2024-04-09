@@ -3,10 +3,10 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
 import { theme } from '../../../style';
-import { ButtonLink } from '../../common/ButtonLink';
+import { Link } from '../../common/Link';
 
 type AddTransactionButtonProps = {
-  to: ComponentPropsWithoutRef<typeof ButtonLink>['to'];
+  to: ComponentPropsWithoutRef<typeof Link>['to'];
   accountId?: string;
   categoryId?: string;
 };
@@ -18,7 +18,8 @@ export function AddTransactionButton({
 }: AddTransactionButtonProps) {
   const navigate = useNavigate();
   return (
-    <ButtonLink
+    <Link
+      variant="button"
       to={to}
       type="bare"
       aria-label="Add transaction"
@@ -38,6 +39,6 @@ export function AddTransactionButton({
       }}
     >
       <SvgAdd width={20} height={20} />
-    </ButtonLink>
+    </Link>
   );
 }
