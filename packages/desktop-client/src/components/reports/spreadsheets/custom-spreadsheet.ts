@@ -102,7 +102,7 @@ export function createCustomSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const [assets, debts] = await Promise.all([
+    let [assets, debts] = await Promise.all([
       runQuery(
         makeQuery(
           'assets',
@@ -128,6 +128,21 @@ export function createCustomSpreadsheet({
         ),
       ).then(({ data }) => data),
     ]);
+
+    if (interval === 'Weekly') {
+      debts = debts.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+      assets = assets.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+    }
 
     const format =
       ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';

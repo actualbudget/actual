@@ -15,14 +15,16 @@ export function makeQuery(
 ) {
   const intervalGroup =
     interval === 'Weekly'
-      ? { $week: '$date' }
+      ? { $day: '$date' }
       : interval === 'Daily'
         ? { $day: '$date' }
         : interval === 'Monthly'
           ? { $month: '$date' }
           : { $year: '$date' };
   const intervalFilter =
-    '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
+    interval === 'Weekly'
+      ? '$day'
+      : '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
 
   const query = q('transactions')
     //Apply Category_Selector

@@ -9,8 +9,13 @@ function isoWeekSettings(
   type: string,
   firstDayOfWeekIdx: number,
 ): Date {
-  const checkNull = firstDayOfWeekIdx || 1;
-  const subNum = checkNull <= 1 ? 1 - checkNull : 8 - checkNull;
+  const checkNull = firstDayOfWeekIdx === undefined ? 1 : firstDayOfWeekIdx + 1;
+  const subNum =
+    d.getISODay(date) === 7 && checkNull === 1
+      ? -6
+      : d.getISODay(date) + 1 >= checkNull
+        ? 2 - checkNull
+        : 9 - checkNull;
 
   if (type === 'start') {
     return _parse(subDays(d.startOfISOWeek(date), subNum));

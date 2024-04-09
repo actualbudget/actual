@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { dayFromDate, weekFromDate } from '../../shared/months';
+import { dayFromDate } from '../../shared/months';
 import { toDateRepr, fromDateRepr } from '../models';
 
 function isRequired(name, fieldDesc) {
