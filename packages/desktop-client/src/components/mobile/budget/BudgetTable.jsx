@@ -287,6 +287,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             from: category.id,
             to: toCategoryId,
           });
+          dispatch(collapseModals(`${budgetType}-balance-menu`));
         },
         showToBeBudgeted: true,
       }),
@@ -302,6 +303,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             to: category.id,
             from: fromCategoryId,
           });
+          dispatch(collapseModals(`${budgetType}-balance-menu`));
         },
       }),
     );
