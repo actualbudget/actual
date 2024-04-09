@@ -679,10 +679,17 @@ const IncomeCategory = memo(function IncomeCategory({
   style,
   onEdit,
   onBudgetAction,
-  isEditingBudget,
-  onEditBudget,
 }) {
   const listItemRef = useRef();
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const { onRequestActiveEdit, onClearActiveEdit } = useSingleActiveEditForm();
+
+  const onEditBudget = () => {
+    onRequestActiveEdit(`${category.id}-budget`, () => {
+      setIsEditingBudget(true);
+      return () => setIsEditingBudget(false);
+    });
+  };
 
   return (
     <ListItem
@@ -740,15 +747,8 @@ const IncomeCategory = memo(function IncomeCategory({
             onBudgetAction={onBudgetAction}
             isEditing={isEditingBudget}
             onEdit={onEditBudget}
+            onBlur={onClearActiveEdit}
           />
-          {/* <CellValue
-            binding={budget}
-            style={{
-              ...styles.smallText,
-              textAlign: 'right',
-            }}
-            type="financial"
-          /> */}
         </View>
       )}
       <View
@@ -949,8 +949,6 @@ function IncomeGroup({
   editMode,
   onEditGroup,
   onEditCategory,
-  editingBudgetCategoryId,
-  onEditCategoryBudget,
   onBudgetAction,
 }) {
   return (
@@ -1014,8 +1012,6 @@ function IncomeGroup({
                 editMode={editMode}
                 onEdit={onEditCategory}
                 onBudgetAction={onBudgetAction}
-                isEditingBudget={editingBudgetCategoryId === category.id}
-                onEditBudget={onEditCategoryBudget}
               />
             );
           })}
