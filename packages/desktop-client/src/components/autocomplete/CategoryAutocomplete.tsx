@@ -261,7 +261,9 @@ function SplitTransactionButton({
         alignItems: 'center',
         fontSize: 11,
         fontWeight: 500,
-        color: theme.noticeTextMenu,
+        color: highlighted
+          ? theme.menuAutoCompleteTextHover
+          : theme.noticeTextMenu,
         padding: '6px 8px',
         ':active': {
           backgroundColor: 'rgba(100, 100, 100, .25)',
@@ -297,7 +299,8 @@ type CategoryItemProps = {
   embedded?: boolean;
 };
 
-function CategoryItem({
+// eslint-disable-next-line import/no-unused-modules
+export function CategoryItem({
   item,
   className,
   style,
@@ -309,6 +312,7 @@ function CategoryItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
+        color: theme.menuAutoCompleteText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -324,6 +328,12 @@ function CategoryItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
+          color: highlighted
+            ? theme.menuAutoCompleteItemTextHover
+            : theme.menuAutoCompleteItemText,
+          ':hover': {
+            color: theme.menuAutoCompleteItemTextHover,
+          },
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,

@@ -421,8 +421,9 @@ export function CreatePayeeButton({
       style={{
         display: 'block',
         flexShrink: 0,
-        color:
-          embedded && isNarrowWidth ? theme.menuItemText : theme.noticeTextMenu,
+        color: highlighted
+          ? theme.menuAutoCompleteTextHover
+          : theme.noticeTextMenu,
         borderRadius: embedded ? 4 : 0,
         fontSize: 11,
         fontWeight: 500,
@@ -483,6 +484,7 @@ function PayeeItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
+        color: theme.menuAutoCompleteText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -517,6 +519,12 @@ function PayeeItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
+          color: highlighted
+            ? theme.menuAutoCompleteItemTextHover
+            : theme.menuAutoCompleteItemText,
+          ':hover': {
+            color: theme.menuAutoCompleteItemTextHover,
+          },
           borderRadius: embedded ? 4 : 0,
           padding: 4,
           paddingLeft: 20,
