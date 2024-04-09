@@ -11,6 +11,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useActions } from '../hooks/useActions';
 import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 
+import { ModalTitle } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetMenuModal } from './modals/BudgetMenuModal';
@@ -314,7 +315,7 @@ export function Modals() {
           return (
             <SingleInputModal
               modalProps={modalProps}
-              title="New Category"
+              title={<ModalTitle title="New Category" shrinkOnOverflow />}
               inputPlaceholder="Category name"
               buttonText="Add"
               onValidate={options.onValidate}
@@ -326,7 +327,7 @@ export function Modals() {
           return (
             <SingleInputModal
               modalProps={modalProps}
-              title="New Category Group"
+              title={<ModalTitle title="New Category Group" shrinkOnOverflow />}
               inputPlaceholder="Category group name"
               buttonText="Add"
               onValidate={options.onValidate}

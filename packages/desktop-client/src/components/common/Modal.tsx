@@ -370,6 +370,7 @@ type ModalTitleProps = {
   getStyle?: (isEditing: boolean) => CSSProperties;
   onEdit?: (isEditing: boolean) => void;
   onTitleUpdate?: (newName: string) => void;
+  shrinkOnOverflow?: boolean;
 };
 
 export function ModalTitle({
@@ -377,6 +378,7 @@ export function ModalTitle({
   isEditable,
   getStyle,
   onTitleUpdate,
+  shrinkOnOverflow = false,
 }: ModalTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const style = getStyle?.(isEditing);
@@ -405,6 +407,23 @@ export function ModalTitle({
     }
   }, [isEditing]);
 
+  // Dynamic font size to avoid ellipsis.
+  const textRef = useRef<HTMLSpanElement>();
+  const [textFontSize, setTextFontSize] = useState(25);
+  useEffect(() => {
+    if (shrinkOnOverflow) {
+      const containerWidth = textRef.current.offsetWidth;
+      const textWidth = textRef.current.scrollWidth;
+
+      if (textWidth > containerWidth) {
+        const newFontSize = Math.floor(
+          (containerWidth / textWidth) * textFontSize,
+        );
+        setTextFontSize(newFontSize);
+      }
+    }
+  }, [textFontSize, shrinkOnOverflow]);
+
   return isEditing ? (
     <Input
       inputRef={inputRef}
@@ -426,8 +445,9 @@ export function ModalTitle({
     />
   ) : (
     <Text
+      innerRef={textRef}
       style={{
-        fontSize: 25,
+        fontSize: textFontSize,
         fontWeight: 700,
         textAlign: 'center',
         whiteSpace: 'nowrap',
