@@ -43,11 +43,9 @@ export function RolloverBalanceMenuModal({
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      padding={0}
+      padding={10}
       style={{
         flex: 1,
-        padding: '0 10px',
-        paddingBottom: 10,
         borderRadius: '6px',
       }}
     >

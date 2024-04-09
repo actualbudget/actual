@@ -45,11 +45,10 @@ export function PayeeAutocompleteModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
+      padding={10}
       style={{
         flex: 0,
         height: isNarrowWidth ? '85vh' : 275,
-        padding: '15px 10px',
         borderRadius: '6px',
         backgroundColor: theme.menuAutoCompleteBackground,
       }}

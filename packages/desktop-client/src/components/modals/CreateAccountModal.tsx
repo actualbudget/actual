@@ -24,7 +24,7 @@ type CreateAccountProps = {
   upgradingAccountId?: string;
 };
 
-export function CreateAccount({
+export function CreateAccountModal({
   modalProps,
   syncServerStatus,
   upgradingAccountId,
@@ -129,7 +129,15 @@ export function CreateAccount({
   const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
 
   return (
-    <Modal title={title} {...modalProps}>
+    <Modal
+      title={title}
+      padding={10}
+      style={{
+        flex: 1,
+        borderRadius: '6px',
+      }}
+      {...modalProps}
+    >
       {() => (
         <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
           {upgradingAccountId == null && (
