@@ -1,4 +1,4 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React from 'react';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgAdd } from '../../../icons/v1';
@@ -6,7 +6,7 @@ import { theme } from '../../../style';
 import { Link } from '../../common/Link';
 
 type AddTransactionButtonProps = {
-  to: ComponentPropsWithoutRef<typeof Link>['to'];
+  to: string;
   accountId?: string;
   categoryId?: string;
 };
