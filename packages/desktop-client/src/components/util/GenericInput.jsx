@@ -218,9 +218,6 @@ export function GenericInput({
               <AmountInput
                 inputRef={inputRef}
                 value={amountToInteger(value)}
-                placeholder="0.00"
-                onEnter={e => onChange(e.target.value)}
-                onBlur={e => onChange(e.target.value)}
                 onUpdate={newValue => onChange(integerToAmount(newValue))}
               />
             );
