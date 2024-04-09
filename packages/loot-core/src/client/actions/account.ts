@@ -78,26 +78,6 @@ export function linkAccountSimpleFin(externalAccount, upgradingId) {
   };
 }
 
-// TODO: type correctly or remove (unused)
-export function connectAccounts(
-  institution,
-  publicToken,
-  accountIds,
-  offbudgetIds,
-) {
-  return async (dispatch: Dispatch) => {
-    const ids = await send('accounts-connect', {
-      institution,
-      publicToken,
-      accountIds,
-      offbudgetIds,
-    });
-    await dispatch(getPayees());
-    await dispatch(getAccounts());
-    return ids;
-  };
-}
-
 export function syncAccounts(id?: string) {
   return async (dispatch: Dispatch, getState: GetState) => {
     // Disallow two parallel sync operations
