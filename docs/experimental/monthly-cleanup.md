@@ -19,16 +19,29 @@ Enable this feature alongside the **Goals** experimental feature by enabling **G
 There are different ways to interact with the cleanup script, and a few of the examples will be given. But first, let's explore the syntax.
 
 <!-- prettier-ignore -->
+### Global source and sinks
+Global source and sink definitions can affect the whole budget.
+
 |Syntax|Description|Application|
 |---|---|---|
 |#cleanup source|This is a source of money to be reused at the end of the month|Electricity is intentionally over budgeted each month and the excess is used to pay down debt|
 |#cleanup sink|This is a category where extra money will be moved. Weight: 1|This can be a vacation, debt, or other savings category where you want to accelerate the savings rate|
 |#cleanup sink 2|This is a category where extra money will be moved. Weight: 2|This can be a vacation, debt, or other savings category where you want to accelerate the savings rate|
 
+### Local group source and sinks
+Local groups can be defined to target certain categories for more refined control. You can have many groups by changing the group name.
+
+|Syntax|Description|Application|
+|---|---|---|
+|#cleanup _Group_ source|This is a source of money to be reused at the end of the month with any Group categories|A reimbursement holding category exists for making small loans to family or friends|
+|#cleanup _Group_ sink |This is a category where extra money will be moved from the Group source. Weight: 1|This can be a category specific to a person or a business where reimbursements are expected.|
+|#cleanup _Group_ sink 2 |This is a category where extra money will be moved. Weight: 2|This can be a category specific to a person or a business where reimbursements are expected.|
+
 The feature works sequentially in the following manner after pressing the **End of month cleanup** button .
 
 ![](/img/monthly-cleanup/cleanup-01.png)
 
+1.  Local groups are applied first.  Overspent categories are not automatically filled at this step and the group source funds will be distributed.
 1.  Any `#cleanup source` entries will be found and all extra money in those categories will be returned to **To Budget**.
     - A source category that has a negative balance will be ignored.
 2.  **Overspent** categories that do NOT use **Rollover Overspending** will be found and will attempt to cover the overspending from **To Budget**.
@@ -85,3 +98,20 @@ YES!
 - Add both lines, `#cleanup source` and `#cleanup sink` to your buffer category.
 
 The script will remove all of your buffer funds, cover your overspending, and put your buffer funds back into the buffer for next time. You can also add a `#template` goal to this category so you can fill it back up next month!
+
+**My utility bills fluctuate from month to month, but are always less than $500.  Can I shift that $500 around in just the utility categories?**
+
+Yes.
+
+Method 1:
+
+One way to do this is to have a Utilities holding category with $500 budgeted.  Within that category, use `#cleanup utilities source` and `#cleanup utilities sink`.  Within all of the remaining utilities categories (power, gas, water, etc), use `#cleanup utilities`.  This adds the remaining categories to the `utilities` group.  The script will fill any overspending from the holding category and return any remaining money to the holding category.
+
+Method 2: 
+
+Another way to accomplish this is to budget what you think you will spend for each of the utilities in each category. For example:
+* Power - $200
+* Water - $150
+* Gas - $150
+
+In each category use `#cleanup utilities source` and `#cleanup utilities sink`.  When the script is run, all of the remaining funds from each utilities category will be used to fund your overspent categories within the group and the leftover money will be evenly distributed to the utilities to carry over for the next month.  Add a weight to the end of any of the categories if you would like to fund more.
