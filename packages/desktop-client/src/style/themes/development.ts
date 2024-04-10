@@ -63,6 +63,7 @@ export const menuAutoCompleteText = colorPalette.white;
 export const menuAutoCompleteTextHeader = colorPalette.orange150;
 export const menuAutoCompleteItemText = menuAutoCompleteText;
 
+export const modalText = colorPalette.white;
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
 export const mobileHeaderBackground = colorPalette.purple400;
@@ -75,8 +76,6 @@ export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
-export const mobileModalBackground = colorPalette.navy900;
-export const mobileModalText = colorPalette.white;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = mobileHeaderBackground;

@@ -44,8 +44,7 @@ export function CategoryAutocompleteModal({
         height: isNarrowWidth ? '85vh' : 275,
         padding: '15px 10px',
         borderRadius: '6px',
-        backgroundColor: theme.mobileModalBackground,
-        color: theme.mobileModalText,
+        backgroundColor: theme.menuAutoCompleteBackground,
       }}
     >
       {() => (
@@ -55,7 +54,7 @@ export function CategoryAutocompleteModal({
               title="Category"
               style={{
                 alignSelf: 'center',
-                color: theme.mobileModalText,
+                color: theme.modalText,
                 marginBottom: 10,
               }}
             />
