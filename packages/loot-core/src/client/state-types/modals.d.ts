@@ -26,6 +26,7 @@ type FinanceModals = {
     accountId: string;
     filename: string;
     onImported: (didChange: boolean) => void;
+    categories: ReturnType<Handlers['get-categories']>;
   };
 
   'add-account': EmptyObject;
@@ -52,7 +53,7 @@ type FinanceModals = {
   'manage-rules': { payeeId?: string };
   'edit-rule': {
     rule: RuleEntity;
-    onSave: (rule: RuleEntity) => void;
+    onSave?: (rule: RuleEntity) => void;
   };
   'merge-unused-payees': {
     payeeIds: string[];
@@ -100,7 +101,7 @@ type FinanceModals = {
   'edit-field': {
     name: string;
     onSubmit: (name: string, value: string) => void;
-    onClose: () => void;
+    onClose?: () => void;
   };
 
   'category-autocomplete': {
@@ -215,6 +216,8 @@ type FinanceModals = {
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
   };
+  'confirm-unlink-account': object;
+  'confirm-transaction-edit': object;
 };
 
 export type PushModalAction = {

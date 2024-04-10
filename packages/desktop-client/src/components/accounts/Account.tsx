@@ -1,4 +1,10 @@
-import React, { PureComponent, RefObject, createRef, useMemo } from 'react';
+import React, {
+  PureComponent,
+  ReactNode,
+  RefObject,
+  createRef,
+  useMemo,
+} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
 
@@ -53,11 +59,23 @@ import { AccountHeader } from './Header';
 import {
   AccountEntity,
   NewTransactionEntity,
+  PayeeEntity,
   RuleConditionEntity,
+  RuleEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 import { SetLastUndoStateAction } from 'loot-core/client/state-types/app';
 import { MarkAccountReadAction } from 'loot-core/client/state-types/queries';
-import { keyboard } from '@testing-library/user-event/dist/types/keyboard';
+import {
+  openAccountCloseModal,
+  pushModal,
+  reopenAccount,
+  savePrefs,
+  unlinkAccount,
+  updateAccount,
+  updateNewTransactions,
+} from 'loot-core/src/client/actions';
+import { Handlers } from 'loot-core/types/handlers';
 
 type EmptyMessageProps = {
   onAdd: () => void;
@@ -112,7 +130,7 @@ type AllTransactionsProps = {
   children: (
     transactions: NewTransactionEntity[],
     balances: number[],
-  ) => React.ReactNode;
+  ) => ReactNode;
 };
 
 function AllTransactions({
@@ -245,7 +263,20 @@ type AccountInternalProps = {
   dateFormat: string;
   accounts: AccountEntity[];
   syncAndDownload: (accountId?: string) => Promise<void>;
-  getCategories: () => Promise<any>;
+  getCategories: () => ReturnType<Handlers['get-categories']>;
+  pushModal: typeof actions.pushModal;
+  updateNewTransactions: typeof actions.updateNewTransactions;
+  updateAccount: typeof actions.updateAccount;
+  showExtraBalances: boolean;
+  savePrefs: typeof actions.savePrefs;
+  unlinkAccount: typeof actions.unlinkAccount;
+  openAccountCloseModal: typeof actions.openAccountCloseModal;
+  reopenAccount: typeof actions.reopenAccount;
+  location: Location<any>;
+  newTransactions: TransactionEntity[];
+  matchedTransactions: TransactionEntity[];
+  createPayee: typeof actions.createPayee;
+  getPayees: () => () => Promise<[]>;
 };
 
 type AccountInternalState = {
@@ -254,7 +285,7 @@ type AccountInternalState = {
   loading: boolean;
   workingHard: boolean;
   isAdding: boolean;
-  sort: sort[];
+  sort: Sort[] | Sort;
   showReconciled: boolean;
   transactions: NewTransactionEntity[];
   transactionCount: number;
@@ -266,7 +297,7 @@ type AccountInternalState = {
   reconcileAmount: number | null;
 };
 
-type sort = {
+type Sort = {
   field: string;
   ascDesc: 'asc' | 'desc';
   prevField?: string;
@@ -548,7 +579,6 @@ class AccountInternal extends PureComponent<
   };
 
   onImport = async () => {
-    debugger;
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
     const categories = await this.props.getCategories();
@@ -622,8 +652,9 @@ class AccountInternal extends PureComponent<
       account &&
       this.state.search === '' &&
       this.state.filters.length === 0 &&
-      (this.state.sort.length === 0 ||
-        (this.state.sort.field === 'date' &&
+      ((Array.isArray(this.state.sort) && this.state.sort.length === 0) ||
+        (!Array.isArray(this.state.sort) &&
+          this.state.sort.field === 'date' &&
           this.state.sort.ascDesc === 'desc'))
     );
   };
@@ -666,7 +697,9 @@ class AccountInternal extends PureComponent<
     const { accountId, showExtraBalances } = this.props;
     const key = 'show-extra-balances-' + accountId || 'all-accounts';
 
-    this.props.savePrefs({ [key]: !showExtraBalances });
+    this.props.savePrefs({ [key]: !showExtraBalances } as {
+      [key: `show-extra-balances-${string}`]: boolean;
+    });
   };
 
   onMenuSelect = async item => {
@@ -701,10 +734,14 @@ class AccountInternal extends PureComponent<
         break;
       case 'toggle-balance':
         if (this.state.showBalances) {
-          this.props.savePrefs({ ['show-balances-' + accountId]: false });
+          this.props.savePrefs({
+            [`show-balances-${accountId}`]: false,
+          } as { [key: `show-balances-${string}`]: boolean });
           this.setState({ showBalances: false, balances: null });
         } else {
-          this.props.savePrefs({ ['show-balances-' + accountId]: true });
+          this.props.savePrefs({
+            ['show-balances-' + accountId]: true,
+          } as { [key: `show-balances-${string}`]: boolean });
           this.setState(
             {
               transactions: [],
@@ -736,21 +773,29 @@ class AccountInternal extends PureComponent<
       }
       case 'toggle-cleared':
         if (this.state.showCleared) {
-          this.props.savePrefs({ ['hide-cleared-' + accountId]: true });
+          this.props.savePrefs({
+            ['hide-cleared-' + accountId]: true,
+          } as Partial<{ 'hide-cleared' }>);
           this.setState({ showCleared: false });
         } else {
-          this.props.savePrefs({ ['hide-cleared-' + accountId]: false });
+          this.props.savePrefs({ ['hide-cleared-' + accountId]: false } as {
+            [key: `hide-cleared-${string}`]: boolean;
+          });
           this.setState({ showCleared: true });
         }
         break;
       case 'toggle-reconciled':
         if (this.state.showReconciled) {
-          this.props.savePrefs({ ['hide-reconciled-' + accountId]: true });
+          this.props.savePrefs({ ['hide-reconciled-' + accountId]: true } as {
+            [key: `hide-reconciled-${string}`]: boolean;
+          });
           this.setState({ showReconciled: false }, () =>
             this.fetchTransactions(this.state.filters),
           );
         } else {
-          this.props.savePrefs({ ['hide-reconciled-' + accountId]: false });
+          this.props.savePrefs({ ['hide-reconciled-' + accountId]: false } as {
+            [key: `hide-reconciled-${string}`]: boolean;
+          });
           this.setState({ showReconciled: true }, () =>
             this.fetchTransactions(this.state.filters),
           );
@@ -876,7 +921,7 @@ class AccountInternal extends PureComponent<
     const reconciliationTransactions = realizeTempTransactions([
       {
         id: 'temp',
-        account: this.props.accountId,
+        account: this.props.accountId as any, // this contains account id, maybe this should be assigned to id field
         cleared: true,
         reconciled: false,
         amount: diff,
@@ -887,7 +932,10 @@ class AccountInternal extends PureComponent<
 
     // Optimistic UI: update the transaction list before sending the data to the database
     this.setState({
-      transactions: [...reconciliationTransactions, ...this.state.transactions],
+      transactions: [
+        ...reconciliationTransactions,
+        ...this.state.transactions,
+      ] as NewTransactionEntity[],
     });
 
     // sync the reconciliation transaction
@@ -905,7 +953,11 @@ class AccountInternal extends PureComponent<
   };
 
   onBatchEdit = async (name, ids) => {
-    const onChange = async (name, value, mode) => {
+    const onChange = async (
+      name: string,
+      value?: string | boolean,
+      mode: string = undefined,
+    ) => {
       const newValue = value === null ? '' : value;
       this.setState({ workingHard: true });
 
@@ -917,7 +969,7 @@ class AccountInternal extends PureComponent<
       );
       let transactions = ungroupTransactions(data);
 
-      const changes = { deleted: [], updated: [] };
+      const changes = { deleted: [], updated: [], added: undefined };
 
       // Cleared is a special case right now
       if (name === 'cleared') {
@@ -956,7 +1008,10 @@ class AccountInternal extends PureComponent<
           [name]: value,
         };
 
-        if (name === 'account' && trans.account !== value) {
+        if (
+          name === 'account' &&
+          (trans.account as unknown as string) !== value
+        ) {
           transaction.reconciled = false;
         }
 
@@ -967,7 +1022,6 @@ class AccountInternal extends PureComponent<
         // updating split transactions, works. This isn't ideal and we
         // should figure something else out
         transactions = applyChanges(diff, transactions);
-
         changes.deleted = changes.deleted
           ? changes.deleted.concat(diff.deleted)
           : diff.deleted;
@@ -1168,7 +1222,7 @@ class AccountInternal extends PureComponent<
           type: 'id',
         },
       ],
-    };
+    } as RuleEntity;
 
     this.props.pushModal('edit-rule', { rule });
   };
@@ -1693,6 +1747,7 @@ function AccountHack(props) {
     />
   );
 }
+type LocationState = {};
 
 export function Account() {
   const params = useParams();
@@ -1772,7 +1827,6 @@ export function Account() {
       return q.orderBy({ next_date: 'desc' });
     };
   }, [params.id]);
-
   return (
     <SchedulesProvider transform={transform}>
       <SplitsExpandedProvider

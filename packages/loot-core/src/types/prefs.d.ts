@@ -24,6 +24,7 @@ export type LocalPrefs = Partial<
     budgetName: string;
     'ui.showClosedAccounts': boolean;
     'expand-splits': boolean;
+    [key: `show-balanes-${string}`]: boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
     [key: `hide-reconciled-${string}`]: boolean;
