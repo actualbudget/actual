@@ -372,7 +372,10 @@ function CategoryItem({
             display: !showBalances ? 'none' : undefined,
             marginLeft: 5,
             flexShrink: 0,
-            ...makeAmountFullStyle(isToBeBudgetedItem ? toBudget : balance),
+            ...makeAmountFullStyle(isToBeBudgetedItem ? toBudget : balance, {
+              positiveColor: theme.noticeTextMenu,
+              negativeColor: theme.errorTextMenu,
+            }),
           }}
         >
           {isToBeBudgetedItem

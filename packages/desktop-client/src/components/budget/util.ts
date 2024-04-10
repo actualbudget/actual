@@ -67,14 +67,20 @@ export function makeAmountStyle(
   }
 }
 
-export function makeAmountFullStyle(value: number) {
+export function makeAmountFullStyle(
+  value: number,
+  colors?: {
+    positiveColor?: string;
+    negativeColor?: string;
+    zeroColor?: string;
+  },
+) {
+  const _positiveColor = colors.positiveColor || theme.noticeText;
+  const _negativeColor = colors.negativeColor || theme.errorText;
+  const _zeroColor = colors.zeroColor || theme.tableTextSubdued;
   return {
     color:
-      value < 0
-        ? theme.errorText
-        : value === 0
-          ? theme.tableTextSubdued
-          : theme.noticeText,
+      value < 0 ? _negativeColor : value === 0 ? _zeroColor : _positiveColor,
   };
 }
 
