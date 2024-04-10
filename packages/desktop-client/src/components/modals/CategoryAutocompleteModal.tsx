@@ -33,6 +33,9 @@ export function CategoryAutocompleteModal({
   return (
     <Modal
       title="Category"
+      titleStyle={{
+        color: theme.menuAutoCompleteText,
+      }}
       noAnimation={!isNarrowWidth}
       showHeader={isNarrowWidth}
       focusAfterClose={false}
@@ -54,7 +57,7 @@ export function CategoryAutocompleteModal({
               title="Category"
               style={{
                 alignSelf: 'center',
-                color: theme.modalText,
+                color: theme.menuAutoCompleteText,
                 marginBottom: 10,
               }}
             />

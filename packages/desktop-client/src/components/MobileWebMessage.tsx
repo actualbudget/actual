@@ -51,7 +51,7 @@ export function MobileWebMessage() {
         left: 0,
         right: 0,
         backgroundColor: theme.menuAutoCompleteBackground,
-        color: theme.modalText,
+        color: theme.menuAutoCompleteText,
         padding: 10,
         margin: 10,
         borderRadius: 6,

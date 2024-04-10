@@ -65,7 +65,6 @@ export const menuAutoCompleteTextHeader = colorPalette.orange150;
 export const menuAutoCompleteItemTextHover = menuAutoCompleteText;
 export const menuAutoCompleteItemText = menuAutoCompleteText;
 
-export const modalText = colorPalette.white;
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
 export const mobileHeaderBackground = colorPalette.purple400;

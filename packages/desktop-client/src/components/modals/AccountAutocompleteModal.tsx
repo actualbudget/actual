@@ -32,6 +32,9 @@ export function AccountAutocompleteModal({
   return (
     <Modal
       title="Account"
+      titleStyle={{
+        color: theme.menuAutoCompleteText,
+      }}
       noAnimation={!isNarrowWidth}
       showHeader={isNarrowWidth}
       focusAfterClose={false}
@@ -53,7 +56,7 @@ export function AccountAutocompleteModal({
               title="Account"
               style={{
                 alignSelf: 'center',
-                color: theme.modalText,
+                color: theme.menuAutoCompleteText,
                 marginBottom: 10,
               }}
             />

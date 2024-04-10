@@ -35,6 +35,9 @@ export function PayeeAutocompleteModal({
   return (
     <Modal
       title="Payee"
+      titleStyle={{
+        color: theme.menuAutoCompleteText,
+      }}
       noAnimation={!isNarrowWidth}
       showHeader={isNarrowWidth}
       focusAfterClose={false}

@@ -278,9 +278,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
         padding: '15px 10px',
         borderRadius: '6px',
         ...(minWidth && { minWidth }),
-        ...(!isNarrowWidth && {
-          backgroundColor: theme.menuAutoCompleteBackground,
-        }),
+        backgroundColor: theme.menuAutoCompleteBackground,
       }}
     >
       {() => (
@@ -290,7 +288,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
               title={label}
               style={{
                 alignSelf: 'center',
-                color: theme.modalText,
+                color: theme.menuAutoCompleteText,
                 marginBottom: 10,
               }}
             />
