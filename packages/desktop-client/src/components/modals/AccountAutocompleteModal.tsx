@@ -43,10 +43,8 @@ export function AccountAutocompleteModal({
         height: isNarrowWidth ? '85vh' : 275,
         padding: '15px 10px',
         borderRadius: '6px',
-        ...(!isNarrowWidth && {
-          backgroundColor: theme.mobileModalBackground,
-          color: theme.mobileModalText,
-        }),
+        backgroundColor: theme.mobileModalBackground,
+        color: theme.mobileModalText,
       }}
     >
       {() => (

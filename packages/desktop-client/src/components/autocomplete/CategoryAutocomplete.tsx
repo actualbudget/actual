@@ -299,8 +299,7 @@ type CategoryItemProps = {
   embedded?: boolean;
 };
 
-// eslint-disable-next-line import/no-unused-modules
-export function CategoryItem({
+function CategoryItem({
   item,
   className,
   style,
@@ -312,7 +311,6 @@ export function CategoryItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
-        color: theme.menuAutoCompleteText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -331,9 +329,6 @@ export function CategoryItem({
           color: highlighted
             ? theme.menuAutoCompleteItemTextHover
             : theme.menuAutoCompleteItemText,
-          ':hover': {
-            color: theme.menuAutoCompleteItemTextHover,
-          },
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
