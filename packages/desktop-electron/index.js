@@ -202,7 +202,7 @@ function updateMenu(budgetId) {
 
   const tools = menu.items.filter(item => item.label === 'Tools')[0];
   tools.submenu.items.forEach(item => {
-    item.enabled = !!budgetId;
+    item.enabled = isBudgetOpen;
   });
 
   const edit = menu.items.filter(item => item.label === 'Edit')[0];
