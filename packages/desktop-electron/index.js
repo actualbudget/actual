@@ -192,7 +192,6 @@ function updateMenu(budgetId) {
   const menu = getMenu(isDev, createWindow);
   const file = menu.items.filter(item => item.label === 'File')[0];
   const fileItems = file.submenu.items;
-  debugger;
   fileItems
     .filter(item => item.label === 'Load Backup...')
     .forEach(item => {
