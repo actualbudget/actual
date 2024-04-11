@@ -849,12 +849,12 @@ const rowStyle: CSSProperties = {
   width: '100%',
 };
 
-type TableHandleRef<T extends TableItem = TableItem> = {
+export type TableHandleRef<T extends TableItem = TableItem> = {
   scrollTo: (id: T['id'], alignment?: string) => void;
   scrollToTop: () => void;
   getScrolledItem: () => T['id'];
   setRowAnimation: (flag) => void;
-  edit(id: number, field: string, shouldScroll: boolean): void;
+  edit(id: number | string, field: string, shouldScroll: boolean): void;
   anchor(): void;
   unanchor(): void;
   isAnchored(): boolean;

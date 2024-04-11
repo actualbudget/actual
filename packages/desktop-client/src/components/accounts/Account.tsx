@@ -48,7 +48,6 @@ import {
   type RuleConditionEntity,
   type RuleEntity,
   type TransactionEntity,
-  type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -69,6 +68,7 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type TableHandleRef } from '../table';
 import { TransactionList } from '../transactions/TransactionList';
 
 import { AccountHeader } from './Header';
@@ -192,6 +192,7 @@ function AllTransactions({
           (scheduledTransaction._inverse ? -1 : 1) *
           getScheduledAmount(scheduledTransaction.amount);
         return {
+          // eslint-disable-next-line react-hooks/exhaustive-deps
           balance: (runningBalance += amount),
           id: scheduledTransaction.id,
         };
@@ -281,6 +282,13 @@ type AccountInternalProps = {
   replaceModal: typeof actions.replaceModal;
   categoryId: string;
   filtersList: RuleEntity[];
+  failedAccounts: Map<
+    string,
+    {
+      type: string;
+      code: string;
+    }
+  >;
 };
 
 type AccountInternalState = {
@@ -317,7 +325,7 @@ class AccountInternal extends PureComponent<
   AccountInternalState
 > {
   paged: PagedQuery | null;
-  table: RefObject<any>;
+  table: RefObject<TableHandleRef>;
   animated: boolean;
   unlisten: () => void;
   rootQuery: Query;
@@ -385,7 +393,8 @@ class AccountInternal extends PureComponent<
       }
 
       if (this.table.current) {
-        this.table.current.edit(null);
+        debugger;
+        this.table.current.edit(null, null, null);
 
         // Focus a transaction if applicable. There is a chance if the
         // user navigated away that focusId is a transaction that has
@@ -933,7 +942,7 @@ class AccountInternal extends PureComponent<
     const reconciliationTransactions = realizeTempTransactions([
       {
         id: 'temp',
-        account: this.props.accountId as any, // this contains account id, maybe this should be assigned to id field
+        account: this.props.accountId as unknown as AccountEntity, // this contains account id, maybe this should be assigned to id field
         cleared: true,
         reconciled: false,
         amount: diff,
@@ -1053,6 +1062,7 @@ class AccountInternal extends PureComponent<
       await this.refetchTransactions();
 
       if (this.table.current) {
+        debugger;
         this.table.current.edit(transactions[0].id, 'select', false);
       }
     };
