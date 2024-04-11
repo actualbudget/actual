@@ -503,7 +503,7 @@ handlers['payees-check-orphaned'] = async function ({ ids }) {
   return ids.filter(id => orphaned.has(id));
 };
 
-handlers['payees-get-rules'] = async function ({ id }) {
+handlers['payee-rules-get'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
