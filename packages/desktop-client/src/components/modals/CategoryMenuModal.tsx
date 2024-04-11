@@ -155,7 +155,12 @@ export function CategoryMenuModal({
   );
 }
 
-function AdditionalCategoryMenu({ category, isHidden, onDelete, onToggleVisibility }) {
+function AdditionalCategoryMenu({
+  category,
+  isHidden,
+  onDelete,
+  onToggleVisibility,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
