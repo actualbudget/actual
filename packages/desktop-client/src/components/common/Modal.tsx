@@ -35,7 +35,6 @@ export type ModalProps = {
   leftHeaderContent?: ReactNode;
   CloseButton?: ComponentType<ComponentPropsWithRef<typeof ModalCloseButton>>;
   showTitle?: boolean;
-  editableTitle?: boolean;
   showOverlay?: boolean;
   loading?: boolean;
   noAnimation?: boolean;
