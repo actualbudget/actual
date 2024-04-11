@@ -60,7 +60,10 @@ export const menuKeybindingText = colorPalette.navy400;
 export const menuAutoCompleteBackground = colorPalette.navy900;
 export const menuAutoCompleteBackgroundHover = colorPalette.navy600;
 export const menuAutoCompleteText = colorPalette.white;
+export const menuAutoCompleteTextHover = colorPalette.green150;
 export const menuAutoCompleteTextHeader = colorPalette.orange150;
+export const menuAutoCompleteItemTextHover = menuAutoCompleteText;
+export const menuAutoCompleteItemText = menuAutoCompleteText;
 
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;

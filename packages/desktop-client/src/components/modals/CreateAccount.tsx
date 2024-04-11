@@ -11,7 +11,7 @@ import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
+import { Link } from '../common/Link';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
@@ -149,12 +149,13 @@ export function CreateAccount({
                 <Text>
                   <strong>Create a local account</strong> if you want to add
                   transactions manually. You can also{' '}
-                  <ExternalLink
+                  <Link
+                    variant="external"
                     to="https://actualbudget.org/docs/transactions/importing"
                     linkColor="muted"
                   >
                     import QIF/OFX/QFX files into a local account
-                  </ExternalLink>
+                  </Link>
                   .
                 </Text>
               </View>
@@ -226,12 +227,13 @@ export function CreateAccount({
                 </Button>
                 <Paragraph style={{ fontSize: 15 }}>
                   Connect to an Actual server to set up{' '}
-                  <ExternalLink
+                  <Link
+                    variant="external"
                     to="https://actualbudget.org/docs/advanced/bank-sync"
                     linkColor="muted"
                   >
                     automatic syncing.
-                  </ExternalLink>
+                  </Link>
                   .
                 </Paragraph>
               </>

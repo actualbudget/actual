@@ -16,8 +16,7 @@ import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
-import { LinkButton } from '../common/LinkButton';
+import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
@@ -169,12 +168,13 @@ export function GoCardlessExternalMsg({
           <Error>
             Failed loading available banks: GoCardless access credentials might
             be misconfigured. Please{' '}
-            <LinkButton
+            <Link
+              variant="text"
               onClick={onGoCardlessInit}
               style={{ color: theme.formLabelText, display: 'inline' }}
             >
               set them up
-            </LinkButton>{' '}
+            </Link>{' '}
             again.
           </Error>
         ) : (
@@ -205,9 +205,13 @@ export function GoCardlessExternalMsg({
           service) read-only access to your entire account’s transaction
           history. This service is not affiliated with Actual in any way. Make
           sure you’ve read and understand GoCardless’s{' '}
-          <ExternalLink to="https://gocardless.com/privacy/" linkColor="purple">
+          <Link
+            variant="external"
+            to="https://gocardless.com/privacy/"
+            linkColor="purple"
+          >
             Privacy Policy
-          </ExternalLink>{' '}
+          </Link>{' '}
           before proceeding.
         </Warning>
 
@@ -297,9 +301,9 @@ export function GoCardlessExternalMsg({
               </View>
 
               {waiting === 'browser' && (
-                <LinkButton onClick={onJump} style={{ marginTop: 10 }}>
+                <Link variant="text" onClick={onJump} style={{ marginTop: 10 }}>
                   (Account linking not opening in a new tab? Click here)
-                </LinkButton>
+                </Link>
               )}
             </View>
           ) : success ? (

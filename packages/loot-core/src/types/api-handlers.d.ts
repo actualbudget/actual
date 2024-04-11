@@ -1,5 +1,12 @@
 import { type batchUpdateTransactions } from '../server/accounts/transactions';
 
+import type {
+  TransactionEntity,
+  AccountEntity,
+  CategoryGroupEntity,
+  CategoryEntity,
+  PayeeEntity,
+} from './models';
 import { type ServerHandlers } from './server-handlers';
 
 export interface ApiHandlers {
@@ -107,7 +114,7 @@ export interface ApiHandlers {
 
   'api/categories-get': (arg: {
     grouped;
-  }) => Promise<Array<CategoryGroupEntity> | Array<CategoryEntity>>;
+  }) => Promise<Array<CategoryGroupEntity | CategoryEntity>>;
 
   'api/category-groups-get': () => Promise<CategoryGroupEntity[]>;
 

@@ -9,9 +9,9 @@ import { getCreateKeyError } from 'loot-core/src/shared/errors';
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
+import { Link } from '../common/Link';
 import { Modal, ModalButtons } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
@@ -75,12 +75,13 @@ export function CreateEncryptionKey({
                 will generate a key based on a password and use it to encrypt
                 from now on. <strong>This requires a sync reset</strong> and all
                 other devices will have to revert to this version of your data.{' '}
-                <ExternalLink
+                <Link
+                  variant="external"
                   to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
                   linkColor="purple"
                 >
                   Learn more
-                </ExternalLink>
+                </Link>
               </Paragraph>
               <Paragraph>
                 <ul
@@ -119,12 +120,13 @@ export function CreateEncryptionKey({
                 <strong>This requires a sync reset</strong> and all other
                 devices will have to revert to this version of your data. Actual
                 will take you through that process on those devices.{' '}
-                <ExternalLink
+                <Link
+                  variant="external"
                   to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
                   linkColor="purple"
                 >
                   Learn more
-                </ExternalLink>
+                </Link>
               </Paragraph>
               <Paragraph>
                 Key generation is randomized. The same password will create

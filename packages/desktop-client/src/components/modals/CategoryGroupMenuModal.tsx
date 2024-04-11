@@ -3,7 +3,10 @@ import React, { type ComponentProps, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
+import {
+  type CategoryGroupEntity,
+  type NoteEntity,
+} from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
@@ -39,7 +42,7 @@ export function CategoryGroupMenuModal({
 }: CategoryGroupMenuModalProps) {
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
-  const data = useLiveQuery(
+  const data = useLiveQuery<NoteEntity[]>(
     () => q('notes').filter({ id: group.id }).select('*'),
     [group.id],
   );
@@ -193,63 +196,67 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
 
   return (
     <View>
-      <Button
-        type="bare"
-        aria-label="Menu"
-        onClick={() => {
-          setMenuOpen(true);
-        }}
-      >
-        <SvgDotsHorizontalTriple
-          width={17}
-          height={17}
-          style={{ color: 'currentColor' }}
-        />
-        {menuOpen && (
-          <Tooltip
-            position="bottom-left"
-            style={{ padding: 0 }}
-            onClose={() => {
-              setMenuOpen(false);
-            }}
-          >
-            <Menu
-              style={{
-                ...styles.mediumText,
-                color: theme.formLabelText,
-              }}
-              getItemStyle={() => itemStyle}
-              items={
-                [
-                  {
-                    name: 'toggleVisibility',
-                    text: group.hidden ? 'Show' : 'Hide',
-                    icon: group.hidden ? SvgViewShow : SvgViewHide,
-                    iconSize: 16,
-                  },
-                  ...(!group.is_income && [
-                    Menu.line,
-                    {
-                      name: 'delete',
-                      text: 'Delete',
-                      icon: SvgTrash,
-                      iconSize: 15,
-                    },
-                  ]),
-                ].filter(i => i != null) as ComponentProps<typeof Menu>['items']
-              }
-              onMenuSelect={itemName => {
+      {!group.is_income && (
+        <Button
+          type="bare"
+          aria-label="Menu"
+          onClick={() => {
+            setMenuOpen(true);
+          }}
+        >
+          <SvgDotsHorizontalTriple
+            width={17}
+            height={17}
+            style={{ color: 'currentColor' }}
+          />
+          {menuOpen && (
+            <Tooltip
+              position="bottom-left"
+              style={{ padding: 0 }}
+              onClose={() => {
                 setMenuOpen(false);
-                if (itemName === 'delete') {
-                  onDelete();
-                } else if (itemName === 'toggleVisibility') {
-                  onToggleVisibility();
-                }
               }}
-            />
-          </Tooltip>
-        )}
-      </Button>
+            >
+              <Menu
+                style={{
+                  ...styles.mediumText,
+                  color: theme.formLabelText,
+                }}
+                getItemStyle={() => itemStyle}
+                items={
+                  [
+                    {
+                      name: 'toggleVisibility',
+                      text: group.hidden ? 'Show' : 'Hide',
+                      icon: group.hidden ? SvgViewShow : SvgViewHide,
+                      iconSize: 16,
+                    },
+                    ...(!group.is_income && [
+                      Menu.line,
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                        icon: SvgTrash,
+                        iconSize: 15,
+                      },
+                    ]),
+                  ].filter(i => i != null) as ComponentProps<
+                    typeof Menu
+                  >['items']
+                }
+                onMenuSelect={itemName => {
+                  setMenuOpen(false);
+                  if (itemName === 'delete') {
+                    onDelete();
+                  } else if (itemName === 'toggleVisibility') {
+                    onToggleVisibility();
+                  }
+                }}
+              />
+            </Tooltip>
+          )}
+        </Button>
+      )}
     </View>
   );
 }

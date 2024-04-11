@@ -1211,18 +1211,24 @@ class AccountInternal extends PureComponent<
         .select('*')
         .options({ splits: 'grouped' }),
     );
+
     const transactions = ungroupTransactions(data);
-    const payeeCondition = transactions[0].imported_payee
+    const ruleTransaction = transactions[0];
+    const childTransactions = transactions.filter(
+      t => t.parent_id === ruleTransaction.id,
+    );
+
+    const payeeCondition = ruleTransaction.imported_payee
       ? {
           field: 'imported_payee',
           op: 'is',
-          value: transactions[0].imported_payee,
+          value: ruleTransaction.imported_payee,
           type: 'string',
         }
       : {
           field: 'payee',
           op: 'is',
-          value: transactions[0].payee,
+          value: ruleTransaction.payee,
           type: 'id',
         };
 
@@ -1231,12 +1237,38 @@ class AccountInternal extends PureComponent<
       conditionsOp: 'and',
       conditions: [payeeCondition],
       actions: [
-        {
-          op: 'set',
-          field: 'category',
-          value: transactions[0].category,
-          type: 'id',
-        },
+        ...(childTransactions.length === 0
+          ? [
+              {
+                op: 'set',
+                field: 'category',
+                value: ruleTransaction.category,
+                type: 'id',
+                options: {
+                  splitIndex: 0,
+                },
+              },
+            ]
+          : []),
+        ...childTransactions.flatMap((sub, index) => [
+          {
+            op: 'set-split-amount',
+            value: sub.amount,
+            options: {
+              splitIndex: index + 1,
+              method: 'fixed-amount',
+            },
+          },
+          {
+            op: 'set',
+            field: 'category',
+            value: sub.category,
+            type: 'id',
+            options: {
+              splitIndex: index + 1,
+            },
+          },
+        ]),
       ],
     } as RuleEntity;
 
@@ -1580,6 +1612,7 @@ class AccountInternal extends PureComponent<
       hideFraction,
       addNotification,
       accountsSyncing,
+      failedAccounts,
       pushModal,
       replaceModal,
       showExtraBalances,
@@ -1650,6 +1683,7 @@ class AccountInternal extends PureComponent<
                 filtersList={this.props.filtersList}
                 accountName={accountName}
                 accountsSyncing={accountsSyncing}
+                failedAccounts={failedAccounts}
                 accounts={accounts}
                 transactions={transactions}
                 showBalances={showBalances}
