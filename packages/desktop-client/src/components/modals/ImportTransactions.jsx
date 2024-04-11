@@ -755,6 +755,7 @@ export function ImportTransactions({ modalProps, options }) {
   const [outValue, setOutValue] = useState('');
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
+  const [reconcile, setReconcile] = useState(true);
   const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -980,7 +981,11 @@ export function ImportTransactions({ modalProps, options }) {
       savePrefs({ [`flip-amount-${accountId}-${filetype}`]: flipAmount });
     }
 
-    const didChange = await importTransactions(accountId, finalTransactions);
+    const didChange = await importTransactions(
+      accountId,
+      finalTransactions,
+      reconcile,
+    );
     if (didChange) {
       await getPayees();
     }
@@ -1105,21 +1110,32 @@ export function ImportTransactions({ modalProps, options }) {
       )}
 
       {isOfxFile(filetype) && (
-        <CheckboxOption
-          id="form_fallback_missing_payee"
-          checked={fallbackMissingPayeeToMemo}
-          onChange={() => {
-            setFallbackMissingPayeeToMemo(state => !state);
-            parse(
-              filename,
-              getParseOptions('ofx', {
-                fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
-              }),
-            );
-          }}
-        >
-          Use Memo as a fallback for empty Payees
-        </CheckboxOption>
+        <>
+          <CheckboxOption
+            id="form_fallback_missing_payee"
+            checked={fallbackMissingPayeeToMemo}
+            onChange={() => {
+              setFallbackMissingPayeeToMemo(state => !state);
+              parse(
+                filename,
+                getParseOptions('ofx', {
+                  fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
+                }),
+              );
+            }}
+          >
+            Use Memo as a fallback for empty Payees
+          </CheckboxOption>
+          <CheckboxOption
+            id="form_dont_reconcile"
+            checked={reconcile}
+            onChange={() => {
+              setReconcile(state => !state);
+            }}
+          >
+            Reconcile transactions
+          </CheckboxOption>
+        </>
       )}
 
       {/*Import Options */}
