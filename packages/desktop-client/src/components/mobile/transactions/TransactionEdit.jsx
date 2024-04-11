@@ -545,11 +545,15 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const onClick = (transactionId, name) => {
     onRequestActiveEdit?.(getFieldName(transaction.id, name), () => {
       const transactionToEdit = transactions.find(t => t.id === transactionId);
+      const unserializedTransaction = unserializedTransactions.find(
+        t => t.id === transactionId,
+      );
       switch (name) {
         case 'category':
           dispatch(
             pushModal('category-autocomplete', {
               categoryGroups,
+              month: monthUtils.monthFromDate(unserializedTransaction.date),
               onSelect: categoryId => {
                 onEdit(transactionToEdit, name, categoryId);
               },
@@ -587,7 +591,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('edit-field', {
               name,
-              month: monthUtils.monthFromDate(transaction.date),
+              month: monthUtils.monthFromDate(unserializedTransaction.date),
               onSubmit: (name, value) => {
                 onEdit(transactionToEdit, name, value);
               },

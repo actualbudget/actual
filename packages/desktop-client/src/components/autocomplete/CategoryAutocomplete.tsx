@@ -379,7 +379,9 @@ function CategoryItem({
           }}
         >
           {isToBeBudgetedItem
-            ? integerToCurrency(toBudget || 0)
+            ? toBudget != null
+              ? integerToCurrency(toBudget || 0)
+              : null
             : balance != null
               ? integerToCurrency(balance || 0)
               : null}
