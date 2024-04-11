@@ -348,8 +348,8 @@ describe('API CRUD operations', () => {
 
   // apis: getPayeeRules, createPayeeRule, updatePayeeRule, deletePayeeRule
   test('PayeeRules: successfully update payee rules', async () => {
-    const payeeId1 = await api.createPayee({ name: 'test-payee' });
-    const payeeId2 = await api.createPayee({ name: 'test-payee2' });
+    await api.createPayee({ name: 'test-payee' });
+    await api.createPayee({ name: 'test-payee2' });
 
     // create our test rules
     const rule = {
