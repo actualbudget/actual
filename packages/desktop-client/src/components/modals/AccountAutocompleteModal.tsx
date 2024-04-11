@@ -3,7 +3,7 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
-import { ModalCloseButton, Modal } from '../common/Modal';
+import { ModalCloseButton, Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { type CommonModalProps } from '../Modals';
@@ -31,10 +31,12 @@ export function AccountAutocompleteModal({
 
   return (
     <Modal
-      title="Account"
-      titleStyle={{
-        color: theme.menuAutoCompleteText,
-      }}
+      title={
+        <ModalTitle
+          title="Account"
+          getStyle={() => ({ color: theme.menuAutoCompleteText })}
+        />
+      }
       noAnimation={!isNarrowWidth}
       showHeader={isNarrowWidth}
       focusAfterClose={false}

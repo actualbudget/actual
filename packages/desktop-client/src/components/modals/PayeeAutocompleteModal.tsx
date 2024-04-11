@@ -5,7 +5,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { ModalCloseButton, Modal } from '../common/Modal';
+import { ModalCloseButton, Modal, ModalTitle } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
 type PayeeAutocompleteModalProps = {
@@ -34,10 +34,12 @@ export function PayeeAutocompleteModal({
 
   return (
     <Modal
-      title="Payee"
-      titleStyle={{
-        color: theme.menuAutoCompleteText,
-      }}
+      title={
+        <ModalTitle
+          title="Payee"
+          getStyle={() => ({ color: theme.menuAutoCompleteText })}
+        />
+      }
       noAnimation={!isNarrowWidth}
       showHeader={isNarrowWidth}
       focusAfterClose={false}
