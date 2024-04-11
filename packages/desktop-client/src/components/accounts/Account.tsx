@@ -167,7 +167,7 @@ function AllTransactions({
       schedule: schedule.id,
       _inverse: accountId ? accountId !== schedule._account : false,
     }));
-  }, [schedules, accountId]);
+  }, [schedules, scheduleData.statuses, accountId]);
 
   let runningBalance = useMemo(() => {
     if (!showBalances) {
