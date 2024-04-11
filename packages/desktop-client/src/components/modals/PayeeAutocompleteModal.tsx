@@ -5,7 +5,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { Modal } from '../common/Modal';
+import { CloseButton, Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
 type PayeeAutocompleteModalProps = {
@@ -51,6 +51,9 @@ export function PayeeAutocompleteModal({
         borderRadius: '6px',
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
+      CloseButton={props => (
+        <CloseButton {...props} style={{ color: theme.menuAutoCompleteText }} />
+      )}
     >
       {() => (
         <PayeeAutocomplete
