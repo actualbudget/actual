@@ -43,6 +43,10 @@ export function ReportCategoryBudgetMenuModal({
     onUpdateBudget?.(amountToInteger(amount));
   };
 
+  useEffect(() => {
+    setAmountFocused(true);
+  }, []);
+
   return (
     <Modal
       title={`Budget: ${category?.name}`}
