@@ -178,7 +178,7 @@ export function getPayeeRules(id) {
 }
 
 export function createRule(rule) {
-  return send('api/rule-create', { rule });
+  return send('api/rule-create', { rule });
 }
 
 export function updateRule(rule) {
