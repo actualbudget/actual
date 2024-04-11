@@ -446,7 +446,7 @@ describe('API CRUD operations', () => {
     );
 
     // get by payee
-    rules = await api.getPayeeRules(payeeId1);
+    rules = await api.getPayeeRules('test-payee');
     expect(rules).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -473,7 +473,7 @@ describe('API CRUD operations', () => {
       ]),
     );
 
-    rules = await api.getPayeeRules(payeeId2);
+    rules = await api.getPayeeRules('test-payee2');
     expect(rules).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
