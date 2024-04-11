@@ -24,6 +24,7 @@ export interface NewTransactionEntity {
   tombstone?: boolean;
   schedule?: string;
   subtransactions?: Omit<NewTransactionEntity, 'account' | 'date'>[];
+  _unmatched?: boolean;
 }
 
 export interface TransactionEntity extends NewTransactionEntity {

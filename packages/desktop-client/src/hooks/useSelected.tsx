@@ -19,7 +19,7 @@ import { type UndoState } from 'loot-core/src/server/undo';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 type Range<T> = { start: T; end: T | null };
-type Item = { id: string };
+type Item = { id?: string };
 
 function iterateRange(range: Range<number>, func: (i: number) => void): void {
   const from = Math.min(range.start, range.end);
@@ -50,7 +50,7 @@ type SelectAllAction = {
   ids?: string[];
 } & WithOptionalMouseEvent;
 
-type Actions = SelectAction | SelectNoneAction | SelectAllAction;
+export type Actions = SelectAction | SelectNoneAction | SelectAllAction;
 
 export function useSelected<T extends Item>(
   name: string,
