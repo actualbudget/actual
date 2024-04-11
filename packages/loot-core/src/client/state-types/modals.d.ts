@@ -218,6 +218,12 @@ type FinanceModals = {
   };
   'confirm-unlink-account': object;
   'confirm-transaction-edit': object;
+
+  'budget-menu': {
+    month: string;
+    onToggleHiddenCategories: () => void;
+    onSwitchBudgetType: () => void;
+  };
 };
 
 export type PushModalAction = {

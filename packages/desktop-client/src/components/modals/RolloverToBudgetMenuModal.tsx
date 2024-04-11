@@ -26,7 +26,6 @@ export function RolloverToBudgetMenuModal({
 
   return (
     <Modal
-      title="Actions"
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -38,14 +37,12 @@ export function RolloverToBudgetMenuModal({
         borderRadius: '6px',
       }}
     >
-      {() => (
-        <ToBudgetMenu
-          getItemStyle={() => defaultMenuItemStyle}
-          onTransfer={onTransfer}
-          onHoldBuffer={onHoldBuffer}
-          onResetHoldBuffer={onResetHoldBuffer}
-        />
-      )}
+      <ToBudgetMenu
+        getItemStyle={() => defaultMenuItemStyle}
+        onTransfer={onTransfer}
+        onHoldBuffer={onHoldBuffer}
+        onResetHoldBuffer={onResetHoldBuffer}
+      />
     </Modal>
   );
 }
