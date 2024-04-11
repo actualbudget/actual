@@ -33,7 +33,7 @@ export type ModalProps = {
   padding?: CSSProperties['padding'];
   showHeader?: boolean;
   leftHeaderContent?: ReactNode;
-  CloseButton?: ComponentType<ComponentPropsWithRef<typeof CloseButton>>;
+  CloseButton?: ComponentType<ComponentPropsWithRef<typeof ModalCloseButton>>;
   showTitle?: boolean;
   editableTitle?: boolean;
   showOverlay?: boolean;
@@ -56,7 +56,7 @@ export const Modal = ({
   padding = 20,
   showHeader = true,
   leftHeaderContent,
-  CloseButton: CloseButtonComponent = CloseButton,
+  CloseButton: CloseButtonComponent = ModalCloseButton,
   showTitle = true,
   showOverlay = true,
   loading = false,
@@ -458,12 +458,12 @@ export function ModalTitle({
   );
 }
 
-type CloseButtonProps = {
+type ModalCloseButtonProps = {
   onClick: ComponentProps<typeof Button>['onClick'];
   style?: CSSProperties;
 };
 
-export function CloseButton({ onClick, style }: CloseButtonProps) {
+export function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
   return (
     <Button
       type="bare"
