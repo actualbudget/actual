@@ -429,6 +429,7 @@ export function Modals() {
               key={name}
               modalProps={modalProps}
               categoryId={options.categoryId}
+              isHidden={options.isHidden}
               onSave={options.onSave}
               onEditNotes={options.onEditNotes}
               onDelete={options.onDelete}

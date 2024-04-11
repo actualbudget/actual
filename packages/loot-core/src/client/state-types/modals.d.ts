@@ -143,6 +143,7 @@ type FinanceModals = {
   };
   'category-menu': {
     categoryId: string;
+    isHidden: boolean;
     onSave: (category: CategoryEntity) => void;
     onEditNotes: (id: string) => void;
     onDelete: (categoryId: string) => void;

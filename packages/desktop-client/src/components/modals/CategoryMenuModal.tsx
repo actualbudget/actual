@@ -23,6 +23,7 @@ import { Tooltip } from '../tooltips';
 type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
+  isHidden?: boolean;
   onSave: (category: CategoryEntity) => void;
   onEditNotes: (id: string) => void;
   onDelete: (categoryId: string) => void;
@@ -32,6 +33,7 @@ type CategoryMenuModalProps = {
 export function CategoryMenuModal({
   modalProps,
   categoryId,
+  isHidden,
   onSave,
   onEditNotes,
   onDelete,
@@ -102,6 +104,7 @@ export function CategoryMenuModal({
       leftHeaderContent={
         <AdditionalCategoryMenu
           category={category}
+          isHidden={isHidden}
           onDelete={_onDelete}
           onToggleVisibility={_onToggleVisibility}
         />
@@ -152,7 +155,7 @@ export function CategoryMenuModal({
   );
 }
 
-function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
+function AdditionalCategoryMenu({ category, isHidden, onDelete, onToggleVisibility }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
@@ -184,7 +187,7 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
             <Menu
               getItemStyle={() => itemStyle}
               items={[
-                {
+                !isHidden && {
                   name: 'toggleVisibility',
                   text: category.hidden ? 'Show' : 'Hide',
                   icon: category.hidden ? SvgViewShow : SvgViewHide,
