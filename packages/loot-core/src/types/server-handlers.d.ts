@@ -119,7 +119,7 @@ export interface ServerHandlers {
 
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
 
-  'payee-rules-get': (arg: { id }) => Promise<RuleEntity[]>;
+  'payees-get-rules': (arg: { id }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
     conditions;

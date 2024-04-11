@@ -607,7 +607,7 @@ handlers['api/rules-get'] = async function () {
 
 handlers['api/payee-rules-get'] = async function ({ id }) {
   checkFileOpen();
-  return handlers['payee-rules-get'](id);
+  return handlers['payees-get-rules']({ id });
 };
 
 handlers['api/rule-create'] = withMutation(async function ({ rule }) {
