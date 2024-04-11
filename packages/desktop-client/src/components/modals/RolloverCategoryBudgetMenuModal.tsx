@@ -1,4 +1,8 @@
-import React, { useState, type ComponentPropsWithoutRef, useEffect } from 'react';
+import React, {
+  useState,
+  type ComponentPropsWithoutRef,
+  useEffect,
+} from 'react';
 
 import { rolloverBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
@@ -11,7 +15,6 @@ import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 import { type CommonModalProps } from '../Modals';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-import { useInitialMount } from '../../hooks/useInitialMount';
 
 type RolloverCategoryBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof CategoryBudgetMenu
