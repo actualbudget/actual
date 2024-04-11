@@ -169,18 +169,22 @@ export function deletePayee(id) {
   return send('api/payee-delete', { id });
 }
 
-export function getPayeeRules() {
-  return send('api/payee-rules-get');
+export function getRules() {
+  return send('api/rules-get');
 }
 
-export function createPayeeRule(rule) {
-  return send('api/payee-rule-create', { rule });
+export function getPayeeRules(id) {
+  return send('api/payee-rules-get', { id });
 }
 
-export function updatePayeeRule(id, rule) {
-  return send('api/payee-rule-update', { id, rule });
+export function createRule(rule) {
+  return send('api/rule-create', { rule });
 }
 
-export function deletePayeeRule(id) {
-  return send('api/payee-rule-delete', id);
+export function updateRule(rule) {
+  return send('api/rule-update', { rule });
+}
+
+export function deleteRule(id) {
+  return send('api/rule-delete', { id });
 }

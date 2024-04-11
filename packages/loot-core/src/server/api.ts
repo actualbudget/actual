@@ -600,24 +600,30 @@ handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-batch-change']({ deleted: [{ id }] });
 });
 
-handlers['api/payee-rules-get'] = async function () {
+handlers['api/rules-get'] = async function () {
   checkFileOpen();
-  return await handlers['rules-get']();
+  return handlers['rules-get']();
 };
 
-handlers['api/payee-rule-create'] = withMutation(async function ({ rule }) {
+handlers['api/payee-rules-get'] = async function ({ id }) {
   checkFileOpen();
-  return handlers['payee-rule-create']({ rule });
+  return handlers['payee-rules-get'](id);
+};
+
+handlers['api/rule-create'] = withMutation(async function ({ rule }) {
+  checkFileOpen();
+  const addedRule = await handlers['rule-add'](rule);
+  return (addedRule as { id }).id;
 });
 
-handlers['api/payee-rule-update'] = withMutation(async function ({ id, rule }) {
+handlers['api/rule-update'] = withMutation(async function ({ rule }) {
   checkFileOpen();
-  return handlers['payee-rule-update']({ id, rule });
+  return handlers['rule-update'](rule);
 });
 
-handlers['api/payee-rule-delete'] = withMutation(async function (id) {
+handlers['api/rule-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
-  return handlers['payee-rule-delete'](id);
+  return handlers['rule-delete'](id);
 });
 
 export function installAPI(serverHandlers: ServerHandlers) {

@@ -121,12 +121,6 @@ export interface ServerHandlers {
 
   'payees-get-rules': (arg: { id }) => Promise<RuleEntity[]>;
 
-  'payee-rule-create': (arg: { rule }) => Promise<string>;
-
-  'payee-rule-update': (arg: { id; rule }) => Promise<void>;
-
-  'payee-rule-delete': (arg: { id }) => Promise<false | void>;
-
   'make-filters-from-conditions': (arg: {
     conditions;
   }) => Promise<{ filters: unknown[] }>;

@@ -353,6 +353,7 @@ describe('API CRUD operations', () => {
 
     // create our test rules
     const rule = {
+      id: null,
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [
@@ -370,9 +371,11 @@ describe('API CRUD operations', () => {
         },
       ],
     };
-    const ruleId = await api.createPayeeRule(rule);
+    const ruleId = await api.createRule(rule);
+    rule.id = ruleId;
 
     const rule2 = {
+      id: null,
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [
@@ -390,12 +393,34 @@ describe('API CRUD operations', () => {
         },
       ],
     };
-    const ruleId2 = await api.createPayeeRule(rule2);
+    const ruleId2 = await api.createRule(rule2);
+    rule2.id = ruleId2;
 
     // get existing rules
-    let rules = await api.getPayeeRules();
+    let rules = await api.getRules();
     expect(rules).toEqual(
       expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: ruleId2,
+          stage: 'pre',
+        }),
         expect.objectContaining({
           actions: expect.arrayContaining([
             expect.objectContaining({
@@ -417,59 +442,17 @@ describe('API CRUD operations', () => {
           id: ruleId,
           stage: 'pre',
         }),
-        expect.objectContaining({
-          actions: expect.arrayContaining([
-            expect.objectContaining({
-              field: 'category',
-              op: 'set',
-              type: 'id',
-              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
-            }),
-          ]),
-          conditions: expect.arrayContaining([
-            expect.objectContaining({
-              field: 'payee',
-              op: 'is',
-              type: 'id',
-              value: 'test-payee2',
-            }),
-          ]),
-          conditionsOp: 'and',
-          id: ruleId2,
-          stage: 'pre',
-        }),
       ]),
     );
 
     // update one rule
     rule.stage = 'post';
     rule.conditionsOp = 'or';
-    await api.updatePayeeRule(ruleId, rule);
+    await api.updateRule(rule);
 
-    rules = await api.getPayeeRules();
+    rules = await api.getRules();
     expect(rules).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          actions: expect.arrayContaining([
-            expect.objectContaining({
-              field: 'category',
-              op: 'set',
-              type: 'id',
-              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
-            }),
-          ]),
-          conditions: expect.arrayContaining([
-            expect.objectContaining({
-              field: 'payee',
-              op: 'is',
-              type: 'id',
-              value: 'test-payee2',
-            }),
-          ]),
-          conditionsOp: 'and',
-          id: ruleId2,
-          stage: 'pre',
-        }),
         expect.objectContaining({
           actions: expect.arrayContaining([
             expect.objectContaining({
@@ -491,17 +474,36 @@ describe('API CRUD operations', () => {
           id: ruleId,
           stage: 'post',
         }),
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: ruleId2,
+          stage: 'pre',
+        }),
       ]),
     );
 
     // delete rules
-    // by passing in a rule itself (needs to have an 'id' property)
-    await api.deletePayeeRule(rules[1]);
-    expect(await api.getPayeeRules()).toHaveLength(1);
+    await api.deleteRule(rules[1]);
+    expect(await api.getRules()).toHaveLength(1);
 
-    // by passing in just the rule id
-    await api.deletePayeeRule(ruleId2);
-    expect(await api.getPayeeRules()).toHaveLength(0);
+    await api.deleteRule(rules[0]);
+    expect(await api.getRules()).toHaveLength(0);
   });
 
   // apis: addTransactions, getTransactions, importTransactions, updateTransaction, deleteTransaction

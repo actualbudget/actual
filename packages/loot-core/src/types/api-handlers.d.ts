@@ -144,11 +144,13 @@ export interface ApiHandlers {
 
   'api/payee-delete': (arg: { id }) => Promise<unknown>;
 
-  'api/payee-rules-get': () => Promise<RuleEntity[]>;
+  'api/rules-get': () => Promise<RuleEntity[]>;
 
-  'api/payee-rule-create': (arg: { rule }) => Promise<string>;
+  'api/payee-rules-get': (arg: { id }) => Promise<RuleEntity[]>;
 
-  'api/payee-rule-update': (arg: { id; rule }) => Promise<unknown>;
+  'api/rule-create': (arg: { rule }) => Promise<string>;
 
-  'api/payee-rule-delete': (arg: { id }) => Promise<unknown>;
+  'api/rule-update': (arg: { rule }) => Promise<unknown>;
+
+  'api/rule-delete': (arg: { id }) => Promise<unknown>;
 }

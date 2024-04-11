@@ -507,21 +507,6 @@ handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
-handlers['payee-rule-create'] = async function ({ rule }) {
-  return rules.insertRule(rule);
-};
-
-handlers['payee-rule-update'] = async function ({ id, rule }) {
-  return rules.updateRule({ id, ...rule });
-};
-
-handlers['payee-rule-delete'] = async function (rule) {
-  if (!rule.id) {
-    rule = { id: rule };
-  }
-  return rules.deleteRule(rule);
-};
-
 handlers['make-filters-from-conditions'] = async function ({ conditions }) {
   return rules.conditionsToAQL(conditions);
 };
