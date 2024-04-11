@@ -348,8 +348,8 @@ describe('API CRUD operations', () => {
 
   // apis: getPayeeRules, createPayeeRule, updatePayeeRule, deletePayeeRule
   test('PayeeRules: successfully update payee rules', async () => {
-    await api.createPayee({ name: 'test-payee' });
-    await api.createPayee({ name: 'test-payee2' });
+    const payeeId1 = await api.createPayee({ name: 'test-payee' });
+    const payeeId2 = await api.createPayee({ name: 'test-payee2' });
 
     // create our test rules
     const rule = {
@@ -440,6 +440,61 @@ describe('API CRUD operations', () => {
           ]),
           conditionsOp: 'and',
           id: ruleId,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    // get by payee
+    rules = await api.getPayeeRules(payeeId1);
+    expect(rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: ruleId,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    rules = await api.getPayeeRules(payeeId2);
+    expect(rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: ruleId2,
           stage: 'pre',
         }),
       ]),
