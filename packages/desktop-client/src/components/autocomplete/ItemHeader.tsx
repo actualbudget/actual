@@ -15,7 +15,6 @@ export function ItemHeader({ title, style, type, ...props }: ItemHeaderProps) {
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.largeText,
-        color: theme.menuItemTextHeader,
         paddingTop: 10,
         paddingBottom: 10,
       }

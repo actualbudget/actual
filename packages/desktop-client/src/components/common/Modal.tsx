@@ -5,6 +5,9 @@ import React, {
   useLayoutEffect,
   type ReactNode,
   useState,
+  type ComponentProps,
+  type ComponentType,
+  type ComponentPropsWithRef,
 } from 'react';
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import ReactModal from 'react-modal';
@@ -30,8 +33,9 @@ export type ModalProps = {
   padding?: CSSProperties['padding'];
   showHeader?: boolean;
   leftHeaderContent?: ReactNode;
+  CloseButton?: ComponentType<ComponentPropsWithRef<typeof ModalCloseButton>>;
   showTitle?: boolean;
-  showClose?: boolean;
+  editableTitle?: boolean;
   showOverlay?: boolean;
   loading?: boolean;
   noAnimation?: boolean;
@@ -52,8 +56,8 @@ export const Modal = ({
   padding = 20,
   showHeader = true,
   leftHeaderContent,
+  CloseButton: CloseButtonComponent = ModalCloseButton,
   showTitle = true,
-  showClose = true,
   showOverlay = true,
   loading = false,
   noAnimation = false,
@@ -200,16 +204,7 @@ export const Modal = ({
                 marginLeft: !isNarrowWidth ? 5 : undefined,
               }}
             >
-              {showClose && (
-                <Button
-                  type="bare"
-                  onClick={onClose}
-                  style={{ padding: 10 }}
-                  aria-label="Close"
-                >
-                  <SvgDelete width={10} style={{ color: 'inherit' }} />
-                </Button>
-              )}
+              <CloseButtonComponent onClick={onClose} />
             </View>
           </View>
         )}
@@ -460,5 +455,23 @@ export function ModalTitle({
     >
       {title}
     </Text>
+  );
+}
+
+type ModalCloseButtonProps = {
+  onClick: ComponentProps<typeof Button>['onClick'];
+  style?: CSSProperties;
+};
+
+export function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
+  return (
+    <Button
+      type="bare"
+      onClick={onClick}
+      style={{ padding: '10px 10px' }}
+      aria-label="Close"
+    >
+      <SvgDelete width={10} style={style} />
+    </Button>
   );
 }

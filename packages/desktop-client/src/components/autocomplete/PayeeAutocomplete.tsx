@@ -484,7 +484,6 @@ function PayeeItem({
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
-        color: theme.menuAutoCompleteText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
@@ -522,9 +521,6 @@ function PayeeItem({
           color: highlighted
             ? theme.menuAutoCompleteItemTextHover
             : theme.menuAutoCompleteItemText,
-          ':hover': {
-            color: theme.menuAutoCompleteItemTextHover,
-          },
           borderRadius: embedded ? 4 : 0,
           padding: 4,
           paddingLeft: 20,
