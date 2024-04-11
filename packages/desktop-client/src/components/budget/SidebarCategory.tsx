@@ -18,7 +18,7 @@ import { Tooltip } from '../tooltips';
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
   category: CategoryEntity;
-  catGroup?: CategoryGroupEntity;
+  categoryGroup?: CategoryGroupEntity;
   dragPreview?: boolean;
   dragging?: boolean;
   editing: boolean;
@@ -34,7 +34,7 @@ type SidebarCategoryProps = {
 export function SidebarCategory({
   innerRef,
   category,
-  catGroup,
+  categoryGroup,
   dragPreview,
   dragging,
   editing,
@@ -55,7 +55,7 @@ export function SidebarCategory({
         alignItems: 'center',
         userSelect: 'none',
         WebkitUserSelect: 'none',
-        opacity: category.hidden || catGroup?.hidden ? 0.33 : undefined,
+        opacity: category.hidden || categoryGroup?.hidden ? 0.33 : undefined,
       }}
     >
       <div
@@ -104,7 +104,7 @@ export function SidebarCategory({
                 setMenuOpen(false);
               }}
               items={[
-                !catGroup?.hidden && {
+                !categoryGroup?.hidden && {
                   name: 'toggle-visibility',
                   text: category.hidden ? 'Show' : 'Hide',
                 },

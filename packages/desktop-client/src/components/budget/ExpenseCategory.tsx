@@ -23,7 +23,7 @@ import { SidebarCategory } from './SidebarCategory';
 
 type ExpenseCategoryProps = {
   cat: CategoryEntity;
-  catGroup?: CategoryGroupEntity;
+  categoryGroup?: CategoryGroupEntity;
   editingCell: { id: string; cell: string } | null;
   dragState: DragState<CategoryEntity>;
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
@@ -39,7 +39,7 @@ type ExpenseCategoryProps = {
 
 export function ExpenseCategory({
   cat,
-  catGroup,
+  categoryGroup,
   editingCell,
   dragState,
   MonthComponent,
@@ -77,7 +77,7 @@ export function ExpenseCategory({
       collapsed={true}
       style={{
         backgroundColor: theme.tableBackground,
-        opacity: cat.hidden || catGroup?.hidden ? 0.5 : undefined,
+        opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,
       }}
     >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
@@ -86,7 +86,7 @@ export function ExpenseCategory({
         <SidebarCategory
           innerRef={dragRef}
           category={cat}
-          catGroup={catGroup}
+          categoryGroup={categoryGroup}
           dragPreview={dragging && dragState.preview}
           dragging={dragging && !dragState.preview}
           editing={

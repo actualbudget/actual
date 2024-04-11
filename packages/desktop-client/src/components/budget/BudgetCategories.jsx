@@ -177,7 +177,7 @@ export const BudgetCategories = memo(
       }
     }
 
-    let catGroup = null;
+    let categoryGroup = null;
 
     return (
       <View
@@ -230,7 +230,7 @@ export const BudgetCategories = memo(
               break;
 
             case 'expense-group':
-              catGroup = item.value;
+              categoryGroup = item.value;
               content = (
                 <ExpenseGroup
                   group={item.value}
@@ -253,7 +253,7 @@ export const BudgetCategories = memo(
               content = (
                 <ExpenseCategory
                   cat={item.value}
-                  catGroup={catGroup}
+                  categoryGroup={categoryGroup}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.ExpenseCategoryComponent}
                   dragState={dragState}
