@@ -27,7 +27,6 @@ export function RolloverBalanceMenuModal({
 
   return (
     <Modal
-      title="Actions"
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -39,15 +38,13 @@ export function RolloverBalanceMenuModal({
         borderRadius: '6px',
       }}
     >
-      {() => (
-        <BalanceMenu
-          categoryId={categoryId}
-          getItemStyle={() => defaultMenuItemStyle}
-          onCarryover={onCarryover}
-          onTransfer={onTransfer}
-          onCover={onCover}
-        />
-      )}
+      <BalanceMenu
+        categoryId={categoryId}
+        getItemStyle={() => defaultMenuItemStyle}
+        onCarryover={onCarryover}
+        onTransfer={onTransfer}
+        onCover={onCover}
+      />
     </Modal>
   );
 }
