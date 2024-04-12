@@ -198,7 +198,7 @@ function AdditionalCategoryMenu({
                   icon: category.hidden ? SvgViewShow : SvgViewHide,
                   iconSize: 16,
                 },
-                Menu.line,
+                !isHidden && Menu.line,
                 {
                   name: 'delete',
                   text: 'Delete',
