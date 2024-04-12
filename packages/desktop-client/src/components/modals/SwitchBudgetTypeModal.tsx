@@ -2,6 +2,8 @@
 import React from 'react';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useResponsive } from '../../ResponsiveProvider';
+import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
 import { Modal } from '../common/Modal';
@@ -9,16 +11,22 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { type CommonModalProps } from '../Modals';
 
-type SwitchBudgetTypeProps = {
+type SwitchBudgetTypeModalProps = {
   modalProps: CommonModalProps;
   onSwitch: () => void;
 };
 
-export function SwitchBudgetType({
+export function SwitchBudgetTypeModal({
   modalProps,
   onSwitch,
-}: SwitchBudgetTypeProps) {
+}: SwitchBudgetTypeModalProps) {
   const [budgetType] = useLocalPref('budgetType');
+  const { isNarrowWidth } = useResponsive();
+  const narrowStyle = isNarrowWidth
+    ? {
+        height: styles.mobileMinHeight,
+      }
+    : {};
   return (
     <Modal title="Switch budget type?" {...modalProps}>
       {() => (
@@ -32,8 +40,11 @@ export function SwitchBudgetType({
           </Paragraph>
           <Button
             type="primary"
+            style={{
+              ...narrowStyle,
+            }}
             onClick={() => {
-              onSwitch();
+              onSwitch?.();
               modalProps.onClose?.();
             }}
           >

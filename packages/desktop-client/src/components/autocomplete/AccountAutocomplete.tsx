@@ -212,6 +212,9 @@ function AccountItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
+          color: highlighted
+            ? theme.menuAutoCompleteItemTextHover
+            : theme.menuAutoCompleteItemText,
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
