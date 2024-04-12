@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
 import {
+  CategoryGroupEntity,
   type CategoryEntity,
   type NoteEntity,
 } from 'loot-core/src/types/models';
@@ -23,7 +24,7 @@ import { Tooltip } from '../tooltips';
 type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
-  isHidden?: boolean;
+  categoryGroup?: CategoryGroupEntity;
   onSave: (category: CategoryEntity) => void;
   onEditNotes: (id: string) => void;
   onDelete: (categoryId: string) => void;
@@ -33,7 +34,7 @@ type CategoryMenuModalProps = {
 export function CategoryMenuModal({
   modalProps,
   categoryId,
-  isHidden,
+  categoryGroup,
   onSave,
   onEditNotes,
   onDelete,
@@ -104,7 +105,7 @@ export function CategoryMenuModal({
       leftHeaderContent={
         <AdditionalCategoryMenu
           category={category}
-          isHidden={isHidden}
+          categoryGroup={categoryGroup}
           onDelete={_onDelete}
           onToggleVisibility={_onToggleVisibility}
         />
@@ -157,7 +158,7 @@ export function CategoryMenuModal({
 
 function AdditionalCategoryMenu({
   category,
-  isHidden,
+  categoryGroup,
   onDelete,
   onToggleVisibility,
 }) {
@@ -192,13 +193,13 @@ function AdditionalCategoryMenu({
             <Menu
               getItemStyle={() => itemStyle}
               items={[
-                !isHidden && {
+                !categoryGroup?.hidden && {
                   name: 'toggleVisibility',
                   text: category.hidden ? 'Show' : 'Hide',
                   icon: category.hidden ? SvgViewShow : SvgViewHide,
                   iconSize: 16,
                 },
-                !isHidden && Menu.line,
+                !categoryGroup?.hidden && Menu.line,
                 {
                   name: 'delete',
                   text: 'Delete',

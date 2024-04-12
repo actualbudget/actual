@@ -347,7 +347,7 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(
       pushModal('category-menu', {
         categoryId: category.id,
-        isHidden: categoryGroup?.hidden,
+        categoryGroup: categoryGroup,
         onSave: onSaveCategory,
         onEditNotes: onEditCategoryNotes,
         onDelete: onDeleteCategory,
