@@ -73,6 +73,7 @@ __metadata:
     "@swc/plugin-react-remove-properties": "npm:^1.5.108"
     "@testing-library/react": "npm:14.1.2"
     "@testing-library/user-event": "npm:14.5.2"
+    "@types/debounce": "npm:^1.2.4"
     "@types/react": "npm:^18.2.0"
     "@types/react-dom": "npm:^18.2.1"
     "@types/react-modal": "npm:^3.16.0"
@@ -5296,6 +5297,13 @@ __metadata:
   version: 3.0.0
   resolution: "@types/d3-timer@npm:3.0.0"
   checksum: 1ec86b3808de6ecfa93cfdf34254761069658af0cc1d9540e8353dbcba161cdf1296a0724187bd17433b2ff16563115fd20b85fc89d5e809ff28f9b1ab134b42
+  languageName: node
+  linkType: hard
+
+"@types/debounce@npm:^1.2.4":
+  version: 1.2.4
+  resolution: "@types/debounce@npm:1.2.4"
+  checksum: decef3eee65d681556d50f7fac346f1b33134f6b21f806d41326f9dfb362fa66b0282ff0640ae6791b690694c9dc3dad4e146e909e707e6f96650f3aa325b9da
   languageName: node
   linkType: hard
 

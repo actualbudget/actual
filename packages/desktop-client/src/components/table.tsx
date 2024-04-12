@@ -854,7 +854,11 @@ export type TableHandleRef<T extends TableItem = TableItem> = {
   scrollToTop: () => void;
   getScrolledItem: () => T['id'];
   setRowAnimation: (flag) => void;
-  edit(id: number | string, field: string, shouldScroll: boolean): void;
+  edit(
+    id: number | string | null,
+    field: string | null,
+    shouldScroll: boolean | null,
+  ): void;
   anchor(): void;
   unanchor(): void;
   isAnchored(): boolean;

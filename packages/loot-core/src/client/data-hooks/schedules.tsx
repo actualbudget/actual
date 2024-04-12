@@ -66,7 +66,7 @@ export function useSchedules({
   return data;
 }
 
-const SchedulesContext = createContext(null);
+const SchedulesContext = createContext<UseSchedulesReturnType>(null);
 
 export function SchedulesProvider({ transform, children }) {
   const data = useSchedules({ transform });
@@ -78,5 +78,5 @@ export function SchedulesProvider({ transform, children }) {
 }
 
 export function useCachedSchedules() {
-  return useContext(SchedulesContext);
+  return useContext<UseSchedulesReturnType>(SchedulesContext);
 }

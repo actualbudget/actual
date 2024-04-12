@@ -149,7 +149,7 @@ function AllTransactions({
             s =>
               !s.completed &&
               ['due', 'upcoming', 'missed'].includes(
-                scheduleData.statuses.get(s.id),
+                scheduleData.statuses.get(s.id) as string,
               ),
           )
         : [],
@@ -163,11 +163,11 @@ function AllTransactions({
       account: schedule._account,
       amount: schedule._amount,
       date: schedule.next_date,
-      notes: scheduleData.statuses.get(schedule.id),
+      notes: scheduleData && scheduleData.statuses.get(schedule.id),
       schedule: schedule.id,
       _inverse: accountId ? accountId !== schedule._account : false,
     }));
-  }, [schedules, scheduleData.statuses, accountId]);
+  }, [schedules, scheduleData, accountId]);
 
   let runningBalance = useMemo(() => {
     if (!showBalances) {
@@ -302,7 +302,7 @@ type AccountInternalState = {
   transactions: NewTransactionEntity[];
   transactionCount?: number;
   transactionsFiltered?: boolean;
-  balances?: { [key: string]: { id: string; balance: number } };
+  balances?: { [key: string]: { id: string; balance: number } } | null;
   showBalances: boolean;
   editingName: boolean;
   showCleared: boolean;
@@ -310,7 +310,7 @@ type AccountInternalState = {
   filterId: Partial<{ id: string; status: string }>;
   conditionsOp: string;
   transactionsCount: number;
-  latestDate?: Date;
+  latestDate?: Date | null;
 };
 
 type Sort = {
@@ -464,6 +464,7 @@ class AccountInternal extends PureComponent<
   }
 
   fetchAllIds = async () => {
+    if (!this.paged) return [];
     const { data } = await runQuery(this.paged.getQuery().select('id'));
     // Remember, this is the `grouped` split type so we need to deal
     // with the `subtransactions` property
@@ -478,7 +479,7 @@ class AccountInternal extends PureComponent<
     this.paged?.run();
   };
 
-  fetchTransactions = (filters: RuleConditionEntity[] = undefined) => {
+  fetchTransactions = (filters?: RuleConditionEntity[]) => {
     const query = this.makeRootQuery();
     this.rootQuery = this.currentQuery = query;
     if (filters) this.applyFilters(filters);
@@ -495,7 +496,7 @@ class AccountInternal extends PureComponent<
     return queries.makeTransactionsQuery(accountId);
   };
 
-  updateQuery(query: Query, isFiltered: boolean = undefined) {
+  updateQuery(query: Query, isFiltered?: boolean) {
     if (this.paged) {
       this.paged.unsubscribe();
     }
@@ -527,7 +528,7 @@ class AccountInternal extends PureComponent<
         this.setState(
           {
             transactions: data,
-            transactionCount: this.paged.getTotalCount(),
+            transactionCount: this.paged && this.paged.getTotalCount(),
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
@@ -575,6 +576,7 @@ class AccountInternal extends PureComponent<
   }
 
   onSearch = value => {
+    if (!this.paged) return;
     this.paged.unsubscribe();
     this.setState({ search: value }, this.onSearchDone);
   };
