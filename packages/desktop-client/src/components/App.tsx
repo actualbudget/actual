@@ -77,7 +77,7 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   }, []);
 
   useEffect(() => {
-    global.Actual.updateAppMenu(!!budgetId);
+    global.Actual.updateAppMenu(budgetId);
   }, [budgetId]);
 
   return (
