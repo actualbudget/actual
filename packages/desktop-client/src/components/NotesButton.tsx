@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, type ComponentProps } from 'react';
-import { Popover } from 'react-aria-components';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -7,9 +6,10 @@ import { q } from 'loot-core/src/shared/query';
 import { type NoteEntity } from 'loot-core/types/models';
 
 import { SvgCustomNotesPaper } from '../icons/v2';
-import { type CSSProperties, styles, theme } from '../style';
+import { type CSSProperties, theme } from '../style';
 
 import { Button } from './common/Button';
+import { Popover } from './common/Popover';
 import { Tooltip } from './common/Tooltip';
 import { View } from './common/View';
 import { Notes } from './Notes';
@@ -81,7 +81,7 @@ export function NotesButton({
         isOpen={isOpen}
         onOpenChange={onClose}
         placement={tooltipPosition}
-        style={{ ...styles.tooltip, marginTop: -8 }}
+        style={{ padding: 4 }}
       >
         <Notes notes={tempNotes} editable focused onChange={setTempNotes} />
       </Popover>
