@@ -1,15 +1,15 @@
 // @ts-strict-ignore
 import React, {
   forwardRef,
-  useState,
-  useRef,
   useEffect,
-  useLayoutEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
-  type MutableRefObject,
-  type KeyboardEvent,
+  useRef,
+  useState,
   type ComponentProps,
+  type KeyboardEvent,
+  type MutableRefObject,
 } from 'react';
 
 import { parse, parseISO, format, subDays, addDays, isValid } from 'date-fns';
@@ -29,7 +29,7 @@ import { stringToInteger } from 'loot-core/src/shared/util';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme } from '../../style';
 import { Input } from '../common/Input';
-import { View, type ViewProps } from '../common/View';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';
@@ -172,7 +172,7 @@ function defaultShouldSaveFromKey(e) {
 }
 
 type DateSelectProps = {
-  containerProps?: ViewProps;
+  containerProps?: ComponentProps<typeof View>;
   inputProps?: ComponentProps<typeof Input>;
   tooltipStyle?: CSSProperties;
   value: string;

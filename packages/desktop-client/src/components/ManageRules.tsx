@@ -24,7 +24,7 @@ import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
 import { Button } from './common/Button';
-import { ExternalLink } from './common/ExternalLink';
+import { Link } from './common/Link';
 import { Search } from './common/Search';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
@@ -267,12 +267,13 @@ function ManageRulesContent({
           >
             <Text>
               Rules are always run in the order that you see them.{' '}
-              <ExternalLink
+              <Link
+                variant="external"
                 to="https://actualbudget.org/docs/budgeting/rules/"
                 linkColor="muted"
               >
                 Learn more
-              </ExternalLink>
+              </Link>
             </Text>
           </View>
           <View style={{ flex: 1 }} />

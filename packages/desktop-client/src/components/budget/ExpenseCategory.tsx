@@ -1,7 +1,10 @@
 // @ts-strict-ignore
 import React, { type ComponentProps } from 'react';
 
-import { type CategoryEntity } from 'loot-core/src/types/models';
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
 import { View } from '../common/View';
@@ -20,6 +23,7 @@ import { SidebarCategory } from './SidebarCategory';
 
 type ExpenseCategoryProps = {
   cat: CategoryEntity;
+  categoryGroup?: CategoryGroupEntity;
   editingCell: { id: string; cell: string } | null;
   dragState: DragState<CategoryEntity>;
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
@@ -35,6 +39,7 @@ type ExpenseCategoryProps = {
 
 export function ExpenseCategory({
   cat,
+  categoryGroup,
   editingCell,
   dragState,
   MonthComponent,
@@ -72,7 +77,7 @@ export function ExpenseCategory({
       collapsed={true}
       style={{
         backgroundColor: theme.tableBackground,
-        opacity: cat.hidden ? 0.5 : undefined,
+        opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,
       }}
     >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
@@ -81,6 +86,7 @@ export function ExpenseCategory({
         <SidebarCategory
           innerRef={dragRef}
           category={cat}
+          categoryGroup={categoryGroup}
           dragPreview={dragging && dragState.preview}
           dragging={dragging && !dragState.preview}
           editing={

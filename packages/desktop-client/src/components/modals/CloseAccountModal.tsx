@@ -1,18 +1,24 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
+import {
+  closeAccount,
+  forceCloseAccount,
+  pushModal,
+} from 'loot-core/client/actions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { type BoundActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
-import { theme } from '../../style';
+import { useResponsive } from '../../ResponsiveProvider';
+import { type CSSProperties, styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button';
 import { FormError } from '../common/FormError';
-import { LinkButton } from '../common/LinkButton';
+import { Link } from '../common/Link';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
@@ -32,29 +38,53 @@ function needsCategory(
   return account.offbudget === 0 && isOffBudget;
 }
 
-type CloseAccountProps = {
+type CloseAccountModalProps = {
   account: AccountEntity;
   balance: number;
   canDelete: boolean;
-  actions: BoundActions;
   modalProps: CommonModalProps;
 };
 
-export function CloseAccount({
+export function CloseAccountModal({
   account,
   balance,
   canDelete,
-  actions,
   modalProps,
-}: CloseAccountProps) {
+}: CloseAccountModalProps) {
+  const accounts = useAccounts().filter(a => a.closed === 0);
+  const { grouped: categoryGroups, list: categories } = useCategories();
   const [loading, setLoading] = useState(false);
-  const [transfer, setTransfer] = useState('');
-  const [category, setCategory] = useState('');
+  const [transferAccountId, setTransferAccountId] = useState('');
+  const transferAccount = accounts.find(a => a.id === transferAccountId);
+  const [categoryId, setCategoryId] = useState('');
+  const category = categories.find(c => c.id === categoryId);
 
   const [transferError, setTransferError] = useState(false);
   const [categoryError, setCategoryError] = useState(false);
-  const accounts = useAccounts().filter(a => a.closed === 0);
-  const { grouped: categoryGroups } = useCategories();
+  const dispatch = useDispatch();
+  const { isNarrowWidth } = useResponsive();
+
+  const onSelectAccount = accId => {
+    setTransferAccountId(accId);
+    if (transferError && accId) {
+      setTransferError(false);
+    }
+  };
+
+  const onSelectCategory = catId => {
+    setCategoryId(catId);
+    if (categoryError && catId) {
+      setCategoryError(false);
+    }
+  };
+
+  const narrowStyle: CSSProperties = isNarrowWidth
+    ? {
+        userSelect: 'none',
+        height: styles.mobileMinHeight,
+        ...styles.mediumText,
+      }
+    : {};
 
   return (
     <Modal
@@ -82,21 +112,25 @@ export function CloseAccount({
             onSubmit={event => {
               event.preventDefault();
 
-              const transferError = balance !== 0 && transfer === '';
+              const transferError = balance !== 0 && transferAccountId === '';
               setTransferError(transferError);
 
               const categoryError =
-                needsCategory(account, transfer, accounts) && category === '';
+                needsCategory(account, transferAccountId, accounts) &&
+                categoryId === '';
               setCategoryError(categoryError);
 
               if (!transferError && !categoryError) {
                 setLoading(true);
 
-                actions
-                  .closeAccount(account.id, transfer || null, category || null)
-                  .then(() => {
-                    modalProps.onClose();
-                  });
+                dispatch(
+                  closeAccount(
+                    account.id,
+                    transferAccountId || null,
+                    categoryId || null,
+                  ),
+                );
+                modalProps.onClose();
               }
             }}
           >
@@ -112,16 +146,25 @@ export function CloseAccount({
                 <View style={{ marginBottom: 15 }}>
                   <AccountAutocomplete
                     includeClosedAccounts={false}
-                    value={transfer}
+                    value={transferAccountId}
                     inputProps={{
                       placeholder: 'Select account...',
+                      ...(isNarrowWidth && {
+                        value: transferAccount?.name || '',
+                        style: {
+                          ...narrowStyle,
+                        },
+                        onClick: () => {
+                          dispatch(
+                            pushModal('account-autocomplete', {
+                              includeClosedAccounts: false,
+                              onSelect: onSelectAccount,
+                            }),
+                          );
+                        },
+                      }),
                     }}
-                    onSelect={acc => {
-                      setTransfer(acc);
-                      if (transferError && acc) {
-                        setTransferError(false);
-                      }
-                    }}
+                    onSelect={onSelectAccount}
                   />
                 </View>
 
@@ -131,7 +174,7 @@ export function CloseAccount({
                   </FormError>
                 )}
 
-                {needsCategory(account, transfer, accounts) && (
+                {needsCategory(account, transferAccountId, accounts) && (
                   <View style={{ marginBottom: 15 }}>
                     <Paragraph>
                       Since you are transferring the balance from a budgeted
@@ -141,17 +184,26 @@ export function CloseAccount({
 
                     <CategoryAutocomplete
                       categoryGroups={categoryGroups}
-                      value={category}
+                      value={categoryId}
                       inputProps={{
                         placeholder: 'Select category...',
+                        ...(isNarrowWidth && {
+                          value: category?.name || '',
+                          style: {
+                            ...narrowStyle,
+                          },
+                          onClick: () => {
+                            dispatch(
+                              pushModal('category-autocomplete', {
+                                categoryGroups,
+                                showHiddenCategories: true,
+                                onSelect: onSelectCategory,
+                              }),
+                            );
+                          },
+                        }),
                       }}
-                      onSelect={newValue => {
-                        setCategory(newValue);
-                        if (categoryError && newValue) {
-                          setCategoryError(false);
-                        }
-                      }}
-                      showHiddenCategories={true}
+                      onSelect={onSelectCategory}
                     />
 
                     {categoryError && (
@@ -166,18 +218,18 @@ export function CloseAccount({
               <View style={{ marginBottom: 15 }}>
                 <Text style={{ fontSize: 12 }}>
                   You can also{' '}
-                  <LinkButton
+                  <Link
+                    variant="text"
                     onClick={() => {
                       setLoading(true);
 
-                      actions
-                        .forceCloseAccount(account.id)
-                        .then(() => modalProps.onClose());
+                      dispatch(forceCloseAccount(account.id));
+                      modalProps.onClose();
                     }}
                     style={{ color: theme.errorText }}
                   >
                     force close
-                  </LinkButton>{' '}
+                  </Link>{' '}
                   the account which will delete it and all its transactions
                   permanently. Doing so may change your budget unexpectedly
                   since money in it may vanish.
@@ -191,10 +243,23 @@ export function CloseAccount({
                 justifyContent: 'flex-end',
               }}
             >
-              <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
+              <Button
+                style={{
+                  marginRight: 10,
+                  height: isNarrowWidth ? styles.mobileMinHeight : undefined,
+                }}
+                onClick={modalProps.onClose}
+              >
                 Cancel
               </Button>
-              <Button type="primary">Close Account</Button>
+              <Button
+                type="primary"
+                style={{
+                  height: isNarrowWidth ? styles.mobileMinHeight : undefined,
+                }}
+              >
+                Close Account
+              </Button>
             </View>
           </form>
         </View>

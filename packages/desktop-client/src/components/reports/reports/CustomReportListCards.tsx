@@ -1,6 +1,7 @@
-import React, { createRef, useMemo, useState } from 'react';
+import React, { createRef, useEffect, useMemo, useState } from 'react';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -72,6 +73,7 @@ export function CustomReportListCards({
   const [err, setErr] = useState('');
   const [name, setName] = useState('');
   const inputRef = createRef<HTMLInputElement>();
+  const [earliestTransaction, setEarliestTransaction] = useState('');
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -84,6 +86,14 @@ export function CustomReportListCards({
     await send('report/delete', reportData);
     onDeleteMenuOpen(reportData === undefined ? '' : reportData, false);
   };
+
+  useEffect(() => {
+    async function run() {
+      const trans = await send('get-earliest-transaction');
+      setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
+    }
+    run();
+  }, []);
 
   const onAddUpdate = async ({
     reportData,
@@ -216,6 +226,7 @@ export function CustomReportListCards({
                         payees={payees}
                         accounts={accounts}
                         categories={categories}
+                        earliestTransaction={earliestTransaction}
                       />
                     </View>
                   </ReportCard>

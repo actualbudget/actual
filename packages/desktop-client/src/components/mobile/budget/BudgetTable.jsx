@@ -3,48 +3,34 @@ import { useDispatch } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
 
-import { pushModal } from 'loot-core/client/actions';
+import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
 } from '../../../hooks/useSingleActiveEditForm';
-import {
-  SvgArrowThinLeft,
-  SvgArrowThinRight,
-  SvgDotsHorizontalTriple,
-} from '../../../icons/v1';
+import { SvgLogo } from '../../../icons/logo';
+import { SvgAdd, SvgArrowThinLeft, SvgArrowThinRight } from '../../../icons/v1';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
-import { BalanceTooltip as ReportBudgetBalanceTooltip } from '../../budget/report/BalanceTooltip';
-import { BalanceTooltip as RolloverBudgetBalanceTooltip } from '../../budget/rollover/BalanceTooltip';
 import { makeAmountGrey } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
-import { Menu } from '../../common/Menu';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { Page } from '../../Page';
 import { CellValue } from '../../spreadsheet/CellValue';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
-import { Tooltip, useTooltip } from '../../tooltips';
 import { AmountInput } from '../../util/AmountInput';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
-// import {
-//   AmountAccessoryContext,
-//   MathOperations
-// } from '../mobile/AmountInput';
 
-// import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
 import { ListItem, ROW_HEIGHT } from './ListItem';
 
 function ToBudget({ toBudget, onClick }) {
@@ -241,6 +227,7 @@ function ExpenseCategoryPreview({ name, pending, style }) {
 const ExpenseCategory = memo(function ExpenseCategory({
   type,
   category,
+  isHidden,
   goal,
   budgeted,
   spent,
@@ -257,10 +244,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
   showBudgetedCol,
 }) {
   const opacity = blank ? 0 : 1;
-  const balanceTooltip = useTooltip();
 
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   const { onRequestActiveEdit, onClearActiveEdit } = useSingleActiveEditForm();
+  const dispatch = useDispatch();
 
   const onEditBudget = () => {
     onRequestActiveEdit(`${category.id}-budget`, () => {
@@ -269,22 +257,65 @@ const ExpenseCategory = memo(function ExpenseCategory({
     });
   };
 
-  const onOpenBalanceActionMenu = () => {
-    onRequestActiveEdit(`${category.id}-balance`, () => {
-      balanceTooltip.open();
-      return () => balanceTooltip.close();
+  const onCarryover = carryover => {
+    onBudgetAction(month, 'carryover', {
+      category: category.id,
+      flag: carryover,
     });
+    dispatch(collapseModals(`${budgetType}-balance-menu`));
+  };
+
+  const catBalance = useSheetValue(
+    type === 'rollover'
+      ? rolloverBudget.catBalance(category.id)
+      : reportBudget.catBalance(category.id),
+  );
+
+  const onTransfer = () => {
+    dispatch(
+      pushModal('transfer', {
+        title: `Transfer: ${category.name}`,
+        amount: catBalance,
+        onSubmit: (amount, toCategoryId) => {
+          onBudgetAction(month, 'transfer-category', {
+            amount,
+            from: category.id,
+            to: toCategoryId,
+          });
+          dispatch(collapseModals(`${budgetType}-balance-menu`));
+        },
+        showToBeBudgeted: true,
+      }),
+    );
+  };
+
+  const onCover = () => {
+    dispatch(
+      pushModal('cover', {
+        categoryId: category.id,
+        onSubmit: fromCategoryId => {
+          onBudgetAction(month, 'cover', {
+            to: category.id,
+            from: fromCategoryId,
+          });
+          dispatch(collapseModals(`${budgetType}-balance-menu`));
+        },
+      }),
+    );
+  };
+
+  const onOpenBalanceActionMenu = () => {
+    dispatch(
+      pushModal(`${budgetType}-balance-menu`, {
+        categoryId: category.id,
+        month,
+        onCarryover,
+        ...(budgetType === 'rollover' && { onTransfer, onCover }),
+      }),
+    );
   };
 
   const listItemRef = useRef();
-
-  const _onBudgetAction = (monthIndex, action, arg) => {
-    onBudgetAction?.(
-      monthUtils.getMonthFromIndex(monthUtils.getYear(month), monthIndex),
-      action,
-      arg,
-    );
-  };
 
   const content = (
     <ListItem
@@ -292,7 +323,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         backgroundColor: 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
-        opacity: !!category.hidden ? 0.5 : undefined,
+        opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
       data-testid="row"
@@ -363,11 +394,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             height: ROW_HEIGHT,
           }}
         >
-          <span
-            role="button"
-            onPointerUp={() => onOpenBalanceActionMenu?.()}
-            onPointerDown={e => e.preventDefault()}
-          >
+          <span role="button" onClick={() => onOpenBalanceActionMenu?.()}>
             <BalanceWithCarryover
               carryover={carryover}
               balance={balance}
@@ -378,30 +405,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 ...styles.underlinedText,
               }}
             />
-            {balanceTooltip.isOpen &&
-              (type === 'report' ? (
-                <ReportBudgetBalanceTooltip
-                  offset={5}
-                  categoryId={category.id}
-                  tooltip={balanceTooltip}
-                  monthIndex={monthUtils.getMonthIndex(month)}
-                  onBudgetAction={_onBudgetAction}
-                  onClose={() => {
-                    onClearActiveEdit();
-                  }}
-                />
-              ) : (
-                <RolloverBudgetBalanceTooltip
-                  offset={5}
-                  categoryId={category.id}
-                  tooltip={balanceTooltip}
-                  monthIndex={monthUtils.getMonthIndex(month)}
-                  onBudgetAction={_onBudgetAction}
-                  onClose={() => {
-                    onClearActiveEdit();
-                  }}
-                />
-              ))}
           </span>
         </View>
       </View>
@@ -673,10 +676,17 @@ const IncomeCategory = memo(function IncomeCategory({
   style,
   onEdit,
   onBudgetAction,
-  isEditingBudget,
-  onEditBudget,
 }) {
   const listItemRef = useRef();
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+  const { onRequestActiveEdit, onClearActiveEdit } = useSingleActiveEditForm();
+
+  const onEditBudget = () => {
+    onRequestActiveEdit(`${category.id}-budget`, () => {
+      setIsEditingBudget(true);
+      return () => setIsEditingBudget(false);
+    });
+  };
 
   return (
     <ListItem
@@ -734,15 +744,8 @@ const IncomeCategory = memo(function IncomeCategory({
             onBudgetAction={onBudgetAction}
             isEditing={isEditingBudget}
             onEdit={onEditBudget}
+            onBlur={onClearActiveEdit}
           />
-          {/* <CellValue
-            binding={budget}
-            style={{
-              ...styles.smallText,
-              textAlign: 'right',
-            }}
-            type="financial"
-          /> */}
         </View>
       )}
       <View
@@ -892,6 +895,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
               show3Cols={show3Cols}
               type={type}
               category={category}
+              isHidden={!!category.hidden || group.hidden}
               goal={
                 type === 'report'
                   ? reportBudget.catGoal(category.id)
@@ -943,8 +947,6 @@ function IncomeGroup({
   editMode,
   onEditGroup,
   onEditCategory,
-  editingBudgetCategoryId,
-  onEditCategoryBudget,
   onBudgetAction,
 }) {
   return (
@@ -1008,8 +1010,6 @@ function IncomeGroup({
                 editMode={editMode}
                 onEdit={onEditCategory}
                 onBudgetAction={onBudgetAction}
-                isEditingBudget={editingBudgetCategoryId === category.id}
-                onEditBudget={onEditCategoryBudget}
               />
             );
           })}
@@ -1029,7 +1029,6 @@ function BudgetGroups({
   onSaveCategory,
   onDeleteCategory,
   onAddCategory,
-  onAddGroup,
   onReorderCategory,
   onReorderGroup,
   onBudgetAction,
@@ -1078,17 +1077,6 @@ function BudgetGroups({
             );
           })}
 
-        <View
-          style={{
-            alignItems: 'flex-start',
-            justifyContent: 'flex-start',
-          }}
-        >
-          <Button onClick={onAddGroup} style={{ fontSize: 12, margin: 10 }}>
-            Add Group
-          </Button>
-        </View>
-
         {incomeGroup && (
           <IncomeGroup
             type={type}
@@ -1114,7 +1102,7 @@ export function BudgetTable({
   categoryGroups,
   month,
   monthBounds,
-  editMode,
+  // editMode,
   // refreshControl,
   onPrevMonth,
   onNextMonth,
@@ -1124,30 +1112,28 @@ export function BudgetTable({
   onAddCategory,
   onSaveCategory,
   onDeleteCategory,
-  onEditMode,
   onReorderCategory,
   onReorderGroup,
   onShowBudgetSummary,
-  onOpenMonthActionMenu,
   onBudgetAction,
   onRefresh,
-  onSwitchBudgetType,
   onEditGroup,
   onEditCategory,
+  onOpenBudgetActionMenu,
 }) {
   const { width } = useResponsive();
   const show3Cols = width >= 360;
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
   const format = useFormat();
-  const dispatch = useDispatch();
 
   const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
   );
 
-  const [showHiddenCategories = false, setShowHiddenCategoriesPref] =
-    useLocalPref('budget.showHiddenCategories');
+  const [showHiddenCategories = false] = useLocalPref(
+    'budget.showHiddenCategories',
+  );
 
   function toggleDisplay() {
     setShowSpentColumnPref(!showSpentColumn);
@@ -1159,340 +1145,214 @@ export function BudgetTable({
     borderRadius: 'unset',
   };
 
-  const _onSwitchBudgetType = () => {
-    dispatch(
-      pushModal('switch-budget-type', {
-        onSwitch: onSwitchBudgetType,
-      }),
-    );
-  };
-
-  const onToggleHiddenCategories = () => {
-    setShowHiddenCategoriesPref(!showHiddenCategories);
+  const noBackgroundColorStyle = {
+    backgroundColor: 'transparent',
+    color: 'white',
   };
 
   return (
-    <NamespaceContext.Provider value={monthUtils.sheetForMonth(month, type)}>
-      <Page
-        padding={0}
-        title={
-          <MonthSelector
-            month={month}
-            monthBounds={monthBounds}
-            onPrevMonth={onPrevMonth}
-            onNextMonth={onNextMonth}
-          />
-        }
-        headerRightContent={
-          !editMode ? (
-            <BudgetPageMenu
-              onEditMode={onEditMode}
-              onToggleHiddenCategories={onToggleHiddenCategories}
-              onSwitchBudgetType={_onSwitchBudgetType}
-            />
-          ) : (
-            <Button
-              type="bare"
-              hoveredStyle={{
-                color: theme.mobileHeaderText,
-                background: theme.mobileHeaderTextHover,
-              }}
-              style={{
-                ...styles.noTapHighlight,
-                ...styles.text,
-                backgroundColor: 'transparent',
-                color: theme.mobileHeaderText,
-              }}
-              onClick={() => onEditMode?.(false)}
-            >
-              Done
-            </Button>
-          )
-        }
-        style={{ flex: 1 }}
-      >
-        <View
+    <Page
+      padding={0}
+      title={
+        <MonthSelector
+          month={month}
+          monthBounds={monthBounds}
+          onPrevMonth={onPrevMonth}
+          onNextMonth={onNextMonth}
+        />
+      }
+      headerLeftContent={
+        <Button
+          type="bare"
           style={{
-            flexDirection: 'row',
-            flexShrink: 0,
-            padding: 10,
-            paddingRight: 14,
-            backgroundColor: theme.tableRowHeaderBackground,
-            borderBottomWidth: 1,
-            borderColor: theme.tableBorder,
+            color: theme.mobileHeaderText,
+            margin: 10,
           }}
+          hoveredStyle={noBackgroundColorStyle}
+          activeStyle={noBackgroundColorStyle}
+          onClick={() => onOpenBudgetActionMenu?.(month)}
         >
-          {type === 'report' ? (
-            <Saved
-              projected={month >= monthUtils.currentMonth()}
-              onClick={onShowBudgetSummary}
-            />
-          ) : (
-            <ToBudget
-              toBudget={rolloverBudget.toBudget}
-              onClick={onShowBudgetSummary}
-            />
-          )}
-          <View style={{ flex: 1 }} />
-          {(show3Cols || !showSpentColumn) && (
-            <Button
-              type="bare"
-              disabled={show3Cols}
-              onClick={toggleDisplay}
-              style={{
-                ...buttonStyle,
-                padding: '0 8px',
-                margin: '0 -8px',
-                background:
-                  !showSpentColumn && !show3Cols
-                    ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
-                    : null,
-              }}
-            >
-              <View
-                style={{
-                  flexBasis: 90,
-                  width: 90,
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
-                }}
-              >
-                <Label
-                  title="BUDGETED"
-                  style={{ color: theme.buttonNormalText }}
-                />
-                <CellValue
-                  binding={
-                    type === 'report'
-                      ? reportBudget.totalBudgetedExpense
-                      : rolloverBudget.totalBudgeted
-                  }
-                  type="financial"
-                  style={{
-                    ...styles.smallText,
-                    color: theme.buttonNormalText,
-                    textAlign: 'right',
-                    fontWeight: '500',
-                  }}
-                  formatter={value => {
-                    return format(-parseFloat(value || '0'), 'financial');
-                  }}
-                />
-              </View>
-            </Button>
-          )}
-          {(show3Cols || showSpentColumn) && (
-            <Button
-              type="bare"
-              disabled={show3Cols}
-              onClick={toggleDisplay}
-              style={{
-                ...buttonStyle,
-                background:
-                  showSpentColumn && !show3Cols
-                    ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
-                    : null,
-              }}
-            >
-              <View
-                style={{
-                  width: 90,
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
-                }}
-              >
-                <Label title="SPENT" style={{ color: theme.formInputText }} />
-                <CellValue
-                  binding={
-                    type === 'report'
-                      ? reportBudget.totalSpent
-                      : rolloverBudget.totalSpent
-                  }
-                  type="financial"
-                  style={{
-                    ...styles.smallText,
-                    color: theme.formInputText,
-                    textAlign: 'right',
-                    fontWeight: '500',
-                  }}
-                />
-              </View>
-            </Button>
-          )}
-          <View
+          <SvgLogo width="20" height="20" />
+        </Button>
+      }
+      headerRightContent={
+        <Button
+          type="bare"
+          style={{
+            color: theme.mobileHeaderText,
+            margin: 10,
+          }}
+          hoveredStyle={noBackgroundColorStyle}
+          activeStyle={noBackgroundColorStyle}
+          onClick={onAddGroup}
+        >
+          <SvgAdd width="20" height="20" />
+        </Button>
+      }
+      style={{ flex: 1 }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          flexShrink: 0,
+          padding: 10,
+          paddingRight: 14,
+          backgroundColor: theme.tableRowHeaderBackground,
+          borderBottomWidth: 1,
+          borderColor: theme.tableBorder,
+        }}
+      >
+        {type === 'report' ? (
+          <Saved
+            projected={month >= monthUtils.currentMonth()}
+            onClick={onShowBudgetSummary}
+          />
+        ) : (
+          <ToBudget
+            toBudget={rolloverBudget.toBudget}
+            onClick={onShowBudgetSummary}
+          />
+        )}
+        <View style={{ flex: 1 }} />
+        {(show3Cols || !showSpentColumn) && (
+          <Button
+            type="bare"
+            disabled={show3Cols}
+            onClick={toggleDisplay}
             style={{
-              width: 90,
-              justifyContent: 'center',
-              alignItems: 'flex-end',
+              ...buttonStyle,
+              padding: '0 8px',
+              margin: '0 -8px',
+              background:
+                !showSpentColumn && !show3Cols
+                  ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
+                  : null,
             }}
           >
-            <Label title="BALANCE" style={{ color: theme.formInputText }} />
-            <CellValue
-              binding={
-                type === 'report'
-                  ? reportBudget.totalLeftover
-                  : rolloverBudget.totalBalance
-              }
-              type="financial"
-              style={{
-                ...styles.smallText,
-                color: theme.formInputText,
-                textAlign: 'right',
-                fontWeight: '500',
-              }}
-            />
-          </View>
-        </View>
-        <PullToRefresh onRefresh={onRefresh}>
-          {!editMode ? (
-            // <ScrollView
-            //   ref={el => (this.list = el)}
-            //   keyboardShouldPersistTaps="always"
-            //   refreshControl={refreshControl}
-            //   style={{ backgroundColor: colors.n10 }}
-            //   automaticallyAdjustContentInsets={false}
-            // >
             <View
-              data-testid="budget-table"
               style={{
-                paddingBottom: MOBILE_NAV_HEIGHT,
+                flexBasis: 90,
+                width: 90,
+                justifyContent: 'center',
+                alignItems: 'flex-end',
               }}
             >
-              <BudgetGroups
-                type={type}
-                categoryGroups={categoryGroups}
-                showBudgetedCol={!showSpentColumn}
-                show3Cols={show3Cols}
-                showHiddenCategories={showHiddenCategories}
-                // gestures={gestures}
-                month={month}
-                editMode={editMode}
-                onEditGroup={onEditGroup}
-                onEditCategory={onEditCategory}
-                onSaveCategory={onSaveCategory}
-                onDeleteCategory={onDeleteCategory}
-                onAddCategory={onAddCategory}
-                onAddGroup={onAddGroup}
-                onSaveGroup={onSaveGroup}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={onReorderCategory}
-                onReorderGroup={onReorderGroup}
-                onOpenMonthActionMenu={onOpenMonthActionMenu}
-                onBudgetAction={onBudgetAction}
+              <Label
+                title="BUDGETED"
+                style={{ color: theme.buttonNormalText }}
+              />
+              <CellValue
+                binding={
+                  type === 'report'
+                    ? reportBudget.totalBudgetedExpense
+                    : rolloverBudget.totalBudgeted
+                }
+                type="financial"
+                style={{
+                  ...styles.smallText,
+                  color: theme.buttonNormalText,
+                  textAlign: 'right',
+                  fontWeight: '500',
+                }}
+                formatter={value => {
+                  return format(-parseFloat(value || '0'), 'financial');
+                }}
               />
             </View>
-          ) : (
-            // </ScrollView>
-            // <DragDrop>
-            //   {({
-            //     dragging,
-            //     onGestureEvent,
-            //     onHandlerStateChange,
-            //     scrollRef,
-            //     onScroll
-            //   }) => (
-            <View data-testid="budget-table">
-              <BudgetGroups
-                type={type}
-                categoryGroups={categoryGroups}
-                showBudgetedCol={!showSpentColumn}
-                show3Cols={show3Cols}
-                showHiddenCategories={showHiddenCategories}
-                // gestures={gestures}
-                editMode={editMode}
-                onEditGroup={onEditGroup}
-                onEditCategory={onEditCategory}
-                onSaveCategory={onSaveCategory}
-                onDeleteCategory={onDeleteCategory}
-                onAddCategory={onAddCategory}
-                onAddGroup={onAddGroup}
-                onSaveGroup={onSaveGroup}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={onReorderCategory}
-                onReorderGroup={onReorderGroup}
-                onOpenMonthActionMenu={onOpenMonthActionMenu}
-                onBudgetAction={onBudgetAction}
+          </Button>
+        )}
+        {(show3Cols || showSpentColumn) && (
+          <Button
+            type="bare"
+            disabled={show3Cols}
+            onClick={toggleDisplay}
+            style={{
+              ...buttonStyle,
+              background:
+                showSpentColumn && !show3Cols
+                  ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
+                  : null,
+            }}
+          >
+            <View
+              style={{
+                width: 90,
+                justifyContent: 'center',
+                alignItems: 'flex-end',
+              }}
+            >
+              <Label title="SPENT" style={{ color: theme.formInputText }} />
+              <CellValue
+                binding={
+                  type === 'report'
+                    ? reportBudget.totalSpent
+                    : rolloverBudget.totalSpent
+                }
+                type="financial"
+                style={{
+                  ...styles.smallText,
+                  color: theme.formInputText,
+                  textAlign: 'right',
+                  fontWeight: '500',
+                }}
               />
             </View>
-
-            // <DragDropHighlight />
-            // </DragDrop>
-          )}
-        </PullToRefresh>
-      </Page>
-    </NamespaceContext.Provider>
-  );
-}
-
-function BudgetPageMenu({
-  onEditMode,
-  onToggleHiddenCategories,
-  onSwitchBudgetType,
-}) {
-  const tooltip = useTooltip();
-  const isReportBudgetEnabled = useFeatureFlag('reportBudget');
-
-  const onMenuSelect = name => {
-    tooltip.close();
-    switch (name) {
-      case 'edit-mode':
-        onEditMode?.(true);
-        break;
-      case 'toggle-hidden-categories':
-        onToggleHiddenCategories?.();
-        break;
-      case 'switch-budget-type':
-        onSwitchBudgetType?.();
-        break;
-      default:
-        throw new Error(`Unrecognized menu option: ${name}`);
-    }
-  };
-
-  return (
-    <>
-      <Button
-        type="bare"
-        style={{
-          ...styles.noTapHighlight,
-        }}
-        hoveredStyle={{
-          color: theme.mobileHeaderText,
-          background: theme.mobileHeaderTextHover,
-        }}
-        {...tooltip.getOpenEvents()}
-      >
-        <SvgDotsHorizontalTriple
-          width="20"
-          height="20"
-          style={{ color: theme.mobileHeaderText }}
-        />
-      </Button>
-      {tooltip.isOpen && (
-        <Tooltip
-          position="bottom-right"
-          width={250}
-          style={{ padding: 0 }}
-          onClose={tooltip.close}
+          </Button>
+        )}
+        <View
+          style={{
+            width: 90,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+          }}
         >
-          <Menu
-            onMenuSelect={onMenuSelect}
-            items={[
-              // Removing for now until we work on mobile category drag and drop.
-              // { name: 'edit-mode', text: 'Edit mode' },
-              {
-                name: 'toggle-hidden-categories',
-                text: 'Toggle hidden categories',
-              },
-              isReportBudgetEnabled && {
-                name: 'switch-budget-type',
-                text: 'Switch budget type',
-              },
-            ]}
+          <Label title="BALANCE" style={{ color: theme.formInputText }} />
+          <CellValue
+            binding={
+              type === 'report'
+                ? reportBudget.totalLeftover
+                : rolloverBudget.totalBalance
+            }
+            type="financial"
+            style={{
+              ...styles.smallText,
+              color: theme.formInputText,
+              textAlign: 'right',
+              fontWeight: '500',
+            }}
           />
-        </Tooltip>
-      )}
-    </>
+        </View>
+      </View>
+      <PullToRefresh onRefresh={onRefresh}>
+        <View
+          data-testid="budget-table"
+          style={{
+            paddingBottom: MOBILE_NAV_HEIGHT,
+          }}
+        >
+          <BudgetGroups
+            type={type}
+            categoryGroups={categoryGroups}
+            showBudgetedCol={!showSpentColumn}
+            show3Cols={show3Cols}
+            showHiddenCategories={showHiddenCategories}
+            month={month}
+            // gestures={gestures}
+            // editMode={editMode}
+            onEditGroup={onEditGroup}
+            onEditCategory={onEditCategory}
+            onSaveCategory={onSaveCategory}
+            onDeleteCategory={onDeleteCategory}
+            onAddCategory={onAddCategory}
+            onSaveGroup={onSaveGroup}
+            onDeleteGroup={onDeleteGroup}
+            onReorderCategory={onReorderCategory}
+            onReorderGroup={onReorderGroup}
+            onBudgetAction={onBudgetAction}
+          />
+        </View>
+      </PullToRefresh>
+    </Page>
   );
 }
 

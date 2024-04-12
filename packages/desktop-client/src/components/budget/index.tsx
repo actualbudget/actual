@@ -28,6 +28,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import { View } from '../common/View';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import {
   SWITCH_BUDGET_MESSAGE_TYPE,
   TitlebarContext,
@@ -404,7 +405,11 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   }
 
-  return <View style={{ flex: 1 }}>{table}</View>;
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
+      <View style={{ flex: 1 }}>{table}</View>
+    </NamespaceContext.Provider>
+  );
 }
 
 const RolloverBudgetSummary = memo<{ month: string }>(props => {

@@ -213,6 +213,7 @@ class AccountInternal extends PureComponent {
       showBalances: props.showBalances,
       balances: null,
       showCleared: props.showCleared,
+      showReconciled: props.showReconciled,
       editingName: false,
       isAdding: false,
       latestDate: null,
@@ -359,6 +360,11 @@ class AccountInternal extends PureComponent {
       this.paged.unsubscribe();
     }
 
+    // Filter out reconciled transactions if necessary.
+    if (!this.state.showReconciled) {
+      query = query.filter({ reconciled: { $eq: false } });
+    }
+
     this.paged = pagedQuery(
       query.select('*'),
       async (data, prevData) => {
@@ -420,6 +426,7 @@ class AccountInternal extends PureComponent {
           showBalances: nextProps.showBalances,
           balances: null,
           showCleared: nextProps.showCleared,
+          showReconciled: nextProps.showReconciled,
           reconcileAmount: null,
         },
         () => {
@@ -649,6 +656,19 @@ class AccountInternal extends PureComponent {
         } else {
           this.props.savePrefs({ ['hide-cleared-' + accountId]: false });
           this.setState({ showCleared: true });
+        }
+        break;
+      case 'toggle-reconciled':
+        if (this.state.showReconciled) {
+          this.props.savePrefs({ ['hide-reconciled-' + accountId]: true });
+          this.setState({ showReconciled: false }, () =>
+            this.fetchTransactions(this.state.filters),
+          );
+        } else {
+          this.props.savePrefs({ ['hide-reconciled-' + accountId]: false });
+          this.setState({ showReconciled: true }, () =>
+            this.fetchTransactions(this.state.filters),
+          );
         }
         break;
       default:
@@ -1036,18 +1056,24 @@ class AccountInternal extends PureComponent {
         .select('*')
         .options({ splits: 'grouped' }),
     );
+
     const transactions = ungroupTransactions(data);
-    const payeeCondition = transactions[0].imported_payee
+    const ruleTransaction = transactions[0];
+    const childTransactions = transactions.filter(
+      t => t.parent_id === ruleTransaction.id,
+    );
+
+    const payeeCondition = ruleTransaction.imported_payee
       ? {
           field: 'imported_payee',
           op: 'is',
-          value: transactions[0].imported_payee,
+          value: ruleTransaction.imported_payee,
           type: 'string',
         }
       : {
           field: 'payee',
           op: 'is',
-          value: transactions[0].payee,
+          value: ruleTransaction.payee,
           type: 'id',
         };
 
@@ -1056,12 +1082,38 @@ class AccountInternal extends PureComponent {
       conditionsOp: 'and',
       conditions: [payeeCondition],
       actions: [
-        {
-          op: 'set',
-          field: 'category',
-          value: transactions[0].category,
-          type: 'id',
-        },
+        ...(childTransactions.length === 0
+          ? [
+              {
+                op: 'set',
+                field: 'category',
+                value: ruleTransaction.category,
+                type: 'id',
+                options: {
+                  splitIndex: 0,
+                },
+              },
+            ]
+          : []),
+        ...childTransactions.flatMap((sub, index) => [
+          {
+            op: 'set-split-amount',
+            value: sub.amount,
+            options: {
+              splitIndex: index + 1,
+              method: 'fixed-amount',
+            },
+          },
+          {
+            op: 'set',
+            field: 'category',
+            value: sub.category,
+            type: 'id',
+            options: {
+              splitIndex: index + 1,
+            },
+          },
+        ]),
       ],
     };
 
@@ -1387,6 +1439,7 @@ class AccountInternal extends PureComponent {
       hideFraction,
       addNotification,
       accountsSyncing,
+      failedAccounts,
       pushModal,
       replaceModal,
       showExtraBalances,
@@ -1404,6 +1457,7 @@ class AccountInternal extends PureComponent {
       showBalances,
       balances,
       showCleared,
+      showReconciled,
     } = this.state;
 
     const account = accounts.find(account => account.id === accountId);
@@ -1457,11 +1511,13 @@ class AccountInternal extends PureComponent {
                 location={this.props.location}
                 accountName={accountName}
                 accountsSyncing={accountsSyncing}
+                failedAccounts={failedAccounts}
                 accounts={accounts}
                 transactions={transactions}
                 showBalances={showBalances}
                 showExtraBalances={showExtraBalances}
                 showCleared={showCleared}
+                showReconciled={showReconciled}
                 showEmptyMessage={showEmptyMessage}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this.canCalculateBalance}
@@ -1605,6 +1661,7 @@ export function Account() {
   const [expandSplits] = useLocalPref('expand-splits');
   const [showBalances] = useLocalPref(`show-balances-${params.id}`);
   const [hideCleared] = useLocalPref(`hide-cleared-${params.id}`);
+  const [hideReconciled] = useLocalPref(`hide-reconciled-${params.id}`);
   const [showExtraBalances] = useLocalPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
@@ -1626,6 +1683,7 @@ export function Account() {
     expandSplits,
     showBalances,
     showCleared: !hideCleared,
+    showReconciled: !hideReconciled,
     showExtraBalances,
     payees,
     modalShowing,

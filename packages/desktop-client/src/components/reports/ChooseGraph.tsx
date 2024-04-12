@@ -32,6 +32,8 @@ type ChooseGraphProps = {
   viewLabels?: boolean;
   compact?: boolean;
   style?: CSSProperties;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export function ChooseGraph({
@@ -47,6 +49,8 @@ export function ChooseGraph({
   viewLabels,
   compact,
   style,
+  showHiddenCategories,
+  showOffBudget,
 }: ChooseGraphProps) {
   const intervals: string[] = monthUtils.rangeInclusive(startDate, endDate);
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
@@ -104,13 +108,13 @@ export function ChooseGraph({
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
   if (graphType === 'BarLineGraph') {
-    return (
-      <BarLineGraph style={graphStyle} compact={compact} graphData={data} />
-    );
+    return <BarLineGraph style={graphStyle} compact={compact} data={data} />;
   }
   if (graphType === 'DonutGraph') {
     return (
@@ -125,7 +129,7 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={graphStyle} compact={compact} graphData={data} />;
+    return <LineGraph style={graphStyle} compact={compact} data={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return (

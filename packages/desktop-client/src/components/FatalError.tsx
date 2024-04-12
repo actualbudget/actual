@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 
 import { Block } from './common/Block';
 import { Button } from './common/Button';
-import { ExternalLink } from './common/ExternalLink';
-import { LinkButton } from './common/LinkButton';
+import { Link } from './common/Link';
 import { Modal } from './common/Modal';
 import { Paragraph } from './common/Paragraph';
 import { Stack } from './common/Stack';
@@ -50,12 +49,13 @@ function RenderSimple({ error }: RenderSimpleProps) {
         function properly. If you’re seeing this error, either your browser does
         not support <code>SharedArrayBuffer</code>, or your server is not
         sending the appropriate headers, or you are not using HTTPS. See{' '}
-        <ExternalLink
+        <Link
+          variant="external"
           linkColor="muted"
           to="https://actualbudget.org/docs/troubleshooting/shared-array-buffer"
         >
           our troubleshooting documentation
-        </ExternalLink>{' '}
+        </Link>{' '}
         to learn more. <SharedArrayBufferOverride />
       </Text>
     );
@@ -67,12 +67,13 @@ function RenderSimple({ error }: RenderSimpleProps) {
       <Text>
         There was a problem loading the app in this browser version. If this
         continues to be a problem, you can{' '}
-        <ExternalLink
+        <Link
+          variant="external"
           linkColor="muted"
           to="https://github.com/actualbudget/releases"
         >
           download the desktop app
-        </ExternalLink>
+        </Link>
         .
       </Text>
     );
@@ -89,9 +90,13 @@ function RenderSimple({ error }: RenderSimpleProps) {
       <Text>{msg}</Text>
       <Text>
         Please get{' '}
-        <ExternalLink linkColor="muted" to="https://actualbudget.org/contact">
+        <Link
+          variant="external"
+          linkColor="muted"
+          to="https://actualbudget.org/contact"
+        >
           in touch
-        </ExternalLink>{' '}
+        </Link>{' '}
         for support
       </Text>
     </Stack>
@@ -104,9 +109,9 @@ function RenderUIError() {
       <Paragraph>There was an unrecoverable error in the UI. Sorry!</Paragraph>
       <Paragraph>
         If this error persists, please get{' '}
-        <ExternalLink to="https://actualbudget.org/contact">
+        <Link variant="external" to="https://actualbudget.org/contact">
           in touch
-        </ExternalLink>{' '}
+        </Link>{' '}
         so it can be investigated.
       </Paragraph>
     </>
@@ -146,9 +151,13 @@ function SharedArrayBufferOverride() {
       </Button>
     </>
   ) : (
-    <LinkButton onClick={() => setExpanded(true)} style={{ marginLeft: 5 }}>
+    <Link
+      variant="text"
+      onClick={() => setExpanded(true)}
+      style={{ marginLeft: 5 }}
+    >
       Advanced options
-    </LinkButton>
+    </Link>
   );
 }
 
@@ -158,7 +167,7 @@ export function FatalError({ buttonText, error }: FatalErrorProps) {
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
 
   return (
-    <Modal isCurrent={true} showClose={false} title="Fatal Error">
+    <Modal isCurrent={true} CloseButton={undefined} title="Fatal Error">
       <View
         style={{
           maxWidth: 500,
@@ -171,7 +180,9 @@ export function FatalError({ buttonText, error }: FatalErrorProps) {
           </Button>
         </Paragraph>
         <Paragraph isLast={true} style={{ fontSize: 11 }}>
-          <LinkButton onClick={() => setShowError(true)}>Show Error</LinkButton>
+          <Link variant="text" onClick={() => setShowError(true)}>
+            Show Error
+          </Link>
           {showError && (
             <Block
               style={{

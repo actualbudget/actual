@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { amountToCurrency } from 'loot-core/src/shared/util';
+
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -20,12 +22,12 @@ import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
 type PayloadItem = {
+  dataKey: string;
+  value: number;
+  date: string;
+  color: string;
   payload: {
     date: string;
-    assets: number | string;
-    debt: number | string;
-    networth: number | string;
-    change: number | string;
   };
 };
 
@@ -54,12 +56,16 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
           </div>
           <div style={{ lineHeight: 1.5 }}>
             <PrivacyFilter>
-              <AlignedText left="Assets:" right={payload[0].payload.assets} />
-              <AlignedText left="Debt:" right={payload[0].payload.debt} />
-              <AlignedText
-                left="Change:"
-                right={<strong>{payload[0].payload.change}</strong>}
-              />
+              {payload
+                .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
+                .map((p: PayloadItem, index: number) => (
+                  <AlignedText
+                    key={index}
+                    left={p.dataKey}
+                    right={amountToCurrency(p.value)}
+                    style={{ color: p.color }}
+                  />
+                ))}
             </PrivacyFilter>
           </div>
         </div>
@@ -70,11 +76,11 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 
 type LineGraphProps = {
   style?: CSSProperties;
-  graphData;
+  data;
   compact?: boolean;
 };
 
-export function LineGraph({ style, graphData, compact }: LineGraphProps) {
+export function LineGraph({ style, data, compact }: LineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -87,15 +93,15 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
       }}
     >
       {(width, height) =>
-        graphData && (
+        data && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <LineChart
                 width={width}
                 height={height}
-                data={graphData.data}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                data={data.intervalData}
+                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
               >
                 <Tooltip
                   content={<CustomTooltip />}
@@ -105,11 +111,21 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="x" />
-                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                    <XAxis dataKey="date" />
+                    <YAxis name="Value" tickFormatter={tickFormatter} />
                   </>
                 )}
-                <Line type="monotone" dataKey="y" stroke="#8884d8" />
+                {data.legend.map((entry, index) => {
+                  return (
+                    <Line
+                      key={index}
+                      strokeWidth={2}
+                      type="monotone"
+                      dataKey={entry.name}
+                      stroke={entry.color}
+                    />
+                  );
+                })}
               </LineChart>
             </div>
           </ResponsiveContainer>

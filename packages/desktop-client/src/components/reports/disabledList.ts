@@ -49,13 +49,22 @@ const timeGraphOptions = [
     disabledType: ['Net'],
     defaultType: 'Payment',
   },
+  {
+    description: 'LineGraph',
+    disabledSplit: ['Interval'],
+    defaultSplit: 'Category',
+    disabledType: ['Net'],
+    defaultType: 'Payment',
+    disableLegend: false,
+    disableLabel: true,
+  },
 ];
 
 const modeOptions = [
   {
     description: 'total',
     graphs: totalGraphOptions,
-    disabledGraph: [],
+    disabledGraph: ['LineGraph'],
     defaultGraph: 'TableGraph',
   },
   {

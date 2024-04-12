@@ -5,7 +5,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { SvgArrowLeft } from '../../icons/v1';
 import { styles } from '../../style';
 import { Button } from '../common/Button';
-import { ButtonLink } from '../common/ButtonLink';
+import { Link } from '../common/Link';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
@@ -48,13 +48,14 @@ export function Header({
         flexShrink: 0,
       }}
     >
-      <ButtonLink
+      <Link
+        variant="button"
         type="bare"
         to="/reports"
         style={{ marginBottom: '15', alignSelf: 'flex-start' }}
       >
         <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
-      </ButtonLink>
+      </Link>
       <View style={styles.veryLargeText}>{title}</View>
 
       {path !== '/reports/custom' && (
