@@ -227,6 +227,7 @@ function ExpenseCategoryPreview({ name, pending, style }) {
 const ExpenseCategory = memo(function ExpenseCategory({
   type,
   category,
+  isHidden,
   goal,
   budgeted,
   spent,
@@ -322,7 +323,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         backgroundColor: 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
-        opacity: !!category.hidden ? 0.5 : undefined,
+        opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
       data-testid="row"
@@ -894,6 +895,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
               show3Cols={show3Cols}
               type={type}
               category={category}
+              isHidden={!!category.hidden || group.hidden}
               goal={
                 type === 'report'
                   ? reportBudget.catGoal(category.id)

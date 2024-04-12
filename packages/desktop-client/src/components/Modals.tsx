@@ -429,6 +429,7 @@ export function Modals() {
               key={name}
               modalProps={modalProps}
               categoryId={options.categoryId}
+              categoryGroup={options.categoryGroup}
               onSave={options.onSave}
               onEditNotes={options.onEditNotes}
               onDelete={options.onDelete}

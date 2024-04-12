@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
 import {
+  type CategoryGroupEntity,
   type CategoryEntity,
   type NoteEntity,
 } from 'loot-core/src/types/models';
@@ -23,6 +24,7 @@ import { Tooltip } from '../tooltips';
 type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
+  categoryGroup?: CategoryGroupEntity;
   onSave: (category: CategoryEntity) => void;
   onEditNotes: (id: string) => void;
   onDelete: (categoryId: string) => void;
@@ -32,6 +34,7 @@ type CategoryMenuModalProps = {
 export function CategoryMenuModal({
   modalProps,
   categoryId,
+  categoryGroup,
   onSave,
   onEditNotes,
   onDelete,
@@ -102,6 +105,7 @@ export function CategoryMenuModal({
       leftHeaderContent={
         <AdditionalCategoryMenu
           category={category}
+          categoryGroup={categoryGroup}
           onDelete={_onDelete}
           onToggleVisibility={_onToggleVisibility}
         />
@@ -152,7 +156,12 @@ export function CategoryMenuModal({
   );
 }
 
-function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
+function AdditionalCategoryMenu({
+  category,
+  categoryGroup,
+  onDelete,
+  onToggleVisibility,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
@@ -184,13 +193,13 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
             <Menu
               getItemStyle={() => itemStyle}
               items={[
-                {
+                !categoryGroup?.hidden && {
                   name: 'toggleVisibility',
                   text: category.hidden ? 'Show' : 'Hide',
                   icon: category.hidden ? SvgViewShow : SvgViewHide,
                   iconSize: 16,
                 },
-                Menu.line,
+                !categoryGroup?.hidden && Menu.line,
                 {
                   name: 'delete',
                   text: 'Delete',
