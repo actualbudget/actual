@@ -67,7 +67,7 @@ export function RolloverBudgetSummaryModal({
 
   const onClick = () => {
     dispatch(
-      pushModal('rollover-to-budget-menu', {
+      pushModal('rollover-summary-to-budget-menu', {
         month,
         onTransfer: openTransferModal,
         onResetHoldBuffer,

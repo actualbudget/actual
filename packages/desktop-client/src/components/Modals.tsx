@@ -14,7 +14,7 @@ import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 import { ModalTitle } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
-import { BudgetMenuModal } from './modals/BudgetMenuModal';
+import { BudgetMonthMenuModal } from './modals/BudgetMonthMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
@@ -440,7 +440,7 @@ export function Modals() {
             />
           );
 
-        case 'rollover-category-budget-menu':
+        case 'rollover-budget-menu':
           return (
             <NamespaceContext.Provider
               key={name}
@@ -457,7 +457,7 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'report-category-budget-menu':
+        case 'report-budget-menu':
           return (
             <NamespaceContext.Provider
               key={name}
@@ -516,7 +516,7 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'rollover-to-budget-menu':
+        case 'rollover-summary-to-budget-menu':
           return (
             <NamespaceContext.Provider
               key={name}
@@ -589,13 +589,13 @@ export function Modals() {
             />
           );
 
-        case 'budget-menu':
+        case 'budget-month-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <BudgetMenuModal
+              <BudgetMonthMenuModal
                 modalProps={modalProps}
                 month={options.month}
                 onToggleHiddenCategories={options.onToggleHiddenCategories}

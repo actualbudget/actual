@@ -1,8 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 
-import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
 import {
@@ -12,12 +10,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import {
-  SvgCalculator,
-  SvgDotsHorizontalTriple,
-  SvgTrash,
-} from '../../icons/v1';
+import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
@@ -32,7 +25,6 @@ type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
   categoryGroup?: CategoryGroupEntity;
-  month: string;
   onSave: (category: CategoryEntity) => void;
   onEditNotes: (id: string) => void;
   onDelete: (categoryId: string) => void;
@@ -44,11 +36,9 @@ export function CategoryMenuModal({
   modalProps,
   categoryId,
   categoryGroup,
-  month,
   onSave,
   onEditNotes,
   onDelete,
-  onBudgetAction,
   onClose,
 }: CategoryMenuModalProps) {
   const { list: categories } = useCategories();
@@ -58,8 +48,6 @@ export function CategoryMenuModal({
     [category.id],
   );
   const originalNotes = data && data.length > 0 ? data[0].note : null;
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
-  const dispatch = useDispatch();
 
   const _onClose = () => {
     modalProps?.onClose();
@@ -91,59 +79,12 @@ export function CategoryMenuModal({
     onDelete?.(category.id);
   };
 
-  const categoryBudgetModal: `${typeof budgetType}-category-budget-menu` = `${budgetType}-category-budget-menu`;
-
-  const _onBudgetAction = (month, action, args) => {
-    onBudgetAction?.(month, action, args);
-    dispatch(collapseModals(categoryBudgetModal));
-  };
-
-  const onOpenBudgetActions = () => {
-    dispatch(
-      pushModal(categoryBudgetModal, {
-        categoryId: category.id,
-        month,
-        onUpdateBudget: amount => {
-          onBudgetAction?.(month, 'budget-amount', {
-            category: category.id,
-            amount,
-          });
-        },
-        onCopyLastMonthAverage: () => {
-          _onBudgetAction(month, 'copy-single-last', {
-            category: category.id,
-          });
-        },
-        onSetMonthsAverage: numberOfMonths => {
-          if (
-            numberOfMonths !== 3 &&
-            numberOfMonths !== 6 &&
-            numberOfMonths !== 12
-          ) {
-            return;
-          }
-
-          _onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
-            category: category.id,
-          });
-        },
-        onApplyBudgetTemplate: () => {
-          _onBudgetAction(month, 'apply-single-category-template', {
-            category: category.id,
-          });
-        },
-      }),
-    );
-  };
-
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
     color: theme.formLabelText,
     // Adjust based on desired number of buttons per row.
-    flexBasis: '48%',
-    marginLeft: '1%',
-    marginRight: '1%',
+    flexBasis: '100%',
   };
 
   return (
@@ -207,10 +148,6 @@ export function CategoryMenuModal({
             paddingBottom: 10,
           }}
         >
-          <Button style={buttonStyle} onClick={onOpenBudgetActions}>
-            <SvgCalculator width={20} height={20} style={{ paddingRight: 5 }} />
-            Budget actions
-          </Button>
           <Button style={buttonStyle} onClick={_onEditNotes}>
             <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
             Edit notes

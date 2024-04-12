@@ -362,7 +362,7 @@ function BudgetInner(props: BudgetInnerProps) {
       pushModal('switch-budget-type', {
         onSwitch: () => {
           onSwitchBudgetType?.();
-          dispatch(collapseModals('budget-menu'));
+          dispatch(collapseModals('budget-month-menu'));
         },
       }),
     );
@@ -374,12 +374,12 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onToggleHiddenCategories = () => {
     setShowHiddenCategoriesPref(!showHiddenCategories);
-    dispatch(collapseModals('budget-menu'));
+    dispatch(collapseModals('budget-month-menu'));
   };
 
-  const onOpenBudgetActionMenu = month => {
+  const onOpenBudgetMonthMenu = month => {
     dispatch(
-      pushModal('budget-menu', {
+      pushModal('budget-month-menu', {
         month,
         onToggleHiddenCategories,
         onSwitchBudgetType: _onSwitchBudgetType,
@@ -435,7 +435,7 @@ function BudgetInner(props: BudgetInnerProps) {
             onRefresh={onRefresh}
             onEditGroup={onEditGroup}
             onEditCategory={onEditCategory}
-            onOpenBudgetActionMenu={onOpenBudgetActionMenu}
+            onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
           />
         )}
       </SyncRefresh>

@@ -151,7 +151,7 @@ type FinanceModals = {
     onBudgetAction: (month: string, action: string, args?: unknown) => void;
     onClose?: () => void;
   };
-  'rollover-category-budget-menu': {
+  'rollover-budget-menu': {
     categoryId: string;
     month: string;
     onUpdateBudget: (amount: number) => void;
@@ -159,7 +159,7 @@ type FinanceModals = {
     onSetMonthsAverage: (numberOfMonths: number) => void;
     onApplyBudgetTemplate: () => void;
   };
-  'report-category-budget-menu': {
+  'report-budget-menu': {
     categoryId: string;
     month: string;
     onUpdateBudget: (amount: number) => void;
@@ -204,7 +204,7 @@ type FinanceModals = {
     onTransfer: () => void;
     onCover: () => void;
   };
-  'rollover-to-budget-menu': {
+  'rollover-summary-to-budget-menu': {
     month: string;
     onTransfer: () => void;
     onHoldBuffer: () => void;
@@ -234,7 +234,7 @@ type FinanceModals = {
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
   };
-  'budget-menu': {
+  'budget-month-menu': {
     month: string;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetType: () => void;
