@@ -213,6 +213,7 @@ export function StackedBarGraph({
       },
     });
   };
+
   return (
     <Container
       style={{
@@ -270,7 +271,10 @@ export function StackedBarGraph({
                       dataKey={entry.name}
                       stackId="a"
                       fill={entry.color}
-                      onMouseLeave={() => setPointer('')}
+                      onMouseLeave={() => {
+                        setPointer('');
+                        setTooltip('');
+                      }}
                       onMouseEnter={() => {
                         setTooltip(entry.name);
                         if (!['Group', 'Interval'].includes(groupBy)) {

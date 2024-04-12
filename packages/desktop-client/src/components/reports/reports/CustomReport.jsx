@@ -270,36 +270,62 @@ export function CustomReport() {
   }
 
   const defaultModeItems = (graph, item) => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
     const chooseGraph = graph || graphType;
     const newGraph = disabledList.modeGraphsMap.get(item).includes(chooseGraph)
       ? defaultsList.modeGraphsMap.get(item)
       : chooseGraph;
     if (disabledList.modeGraphsMap.get(item).includes(graphType)) {
+      sessionStorage.setItem(
+        'report',
+        JSON.stringify({ ...storedReport, graphType: newGraph }),
+      );
       setGraphType(newGraph);
     }
 
     if (disabledList.graphSplitMap.get(item).get(newGraph).includes(groupBy)) {
-      setGroupBy(defaultsList.graphSplitMap.get(item).get(newGraph));
+      const cond = defaultsList.graphSplitMap.get(item).get(newGraph);
+      sessionStorage.setItem(
+        'report',
+        JSON.stringify({ ...storedReport, groupBy: cond }),
+      );
+      setGroupBy(cond);
     }
 
     if (
       disabledList.graphTypeMap.get(item).get(newGraph).includes(balanceType)
     ) {
-      setBalanceType(defaultsList.graphTypeMap.get(item).get(newGraph));
+      const cond = defaultsList.graphTypeMap.get(item).get(newGraph);
+      sessionStorage.setItem(
+        'report',
+        JSON.stringify({ ...storedReport, balanceType: cond }),
+      );
+      setBalanceType(cond);
     }
   };
 
   const defaultItems = item => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
     const chooseGraph = ReportOptions.groupBy.includes(item) ? graphType : item;
     if (
       disabledList.graphSplitMap.get(mode).get(chooseGraph).includes(groupBy)
     ) {
-      setGroupBy(defaultsList.graphSplitMap.get(mode).get(chooseGraph));
+      const cond = defaultsList.graphSplitMap.get(mode).get(chooseGraph);
+      sessionStorage.setItem(
+        'report',
+        JSON.stringify({ ...storedReport, groupBy: cond }),
+      );
+      setGroupBy(cond);
     }
     if (
       disabledList.graphTypeMap.get(mode).get(chooseGraph).includes(balanceType)
     ) {
-      setBalanceType(defaultsList.graphTypeMap.get(mode).get(chooseGraph));
+      const cond = defaultsList.graphTypeMap.get(mode).get(chooseGraph);
+      sessionStorage.setItem(
+        'report',
+        JSON.stringify({ ...storedReport, balancyType: cond }),
+      );
+      setBalanceType(cond);
     }
   };
 
