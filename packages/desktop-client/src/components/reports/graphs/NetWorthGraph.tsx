@@ -17,6 +17,7 @@ import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
+import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -29,8 +30,10 @@ export function NetWorthGraph({
   graphData,
   compact,
 }: NetWorthGraphProps) {
+  const privacyMode = usePrivacyMode();
+
   const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    return privacyMode ? '...' : `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
 
   const gradientOffset = () => {
