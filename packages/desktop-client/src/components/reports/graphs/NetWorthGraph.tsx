@@ -12,12 +12,12 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
-import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
