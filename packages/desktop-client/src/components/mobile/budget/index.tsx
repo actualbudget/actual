@@ -343,12 +343,9 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onEditCategory = id => {
     const category = categories.find(c => c.id === id);
-    const categoryGroup = categoryGroups.find(g => g.id === category.cat_group);
     dispatch(
       pushModal('category-menu', {
         categoryId: category.id,
-        categoryGroup,
-        month: currentMonth,
         onSave: onSaveCategory,
         onEditNotes: onEditCategoryNotes,
         onDelete: onDeleteCategory,

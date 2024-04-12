@@ -431,11 +431,9 @@ export function Modals() {
               key={name}
               modalProps={modalProps}
               categoryId={options.categoryId}
-              month={options.month}
               onSave={options.onSave}
               onEditNotes={options.onEditNotes}
               onDelete={options.onDelete}
-              onBudgetAction={options.onBudgetAction}
               onClose={options.onClose}
             />
           );
