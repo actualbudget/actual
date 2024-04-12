@@ -28,6 +28,7 @@ import { initialState as initialAppState } from 'loot-core/src/client/reducers/a
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
 
+import { type ActualType } from './browser-preload.browser';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
@@ -72,6 +73,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
     __actionsForMenu: BoundActions;
+    Actual: ActualType;
 
     $send: typeof send;
     $query: typeof runQuery;

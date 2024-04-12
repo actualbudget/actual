@@ -1,3 +1,5 @@
+import { type ChangeEvent } from 'react';
+
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -39,7 +41,8 @@ function createBackendWorker() {
 
 createBackendWorker();
 
-global.Actual = {
+export type ActualType = typeof Actual;
+const Actual = {
   IS_DEV,
   ACTUAL_VERSION,
 
@@ -51,13 +54,17 @@ global.Actual = {
     window.location.reload();
   },
 
-  openFileDialog: async ({ filters = [] }) => {
+  openFileDialog: async ({
+    filters = [],
+  }: {
+    filters: { name: string; extensions: string[] }[];
+  }) => {
     return new Promise(resolve => {
       let createdElement = false;
       // Attempt to reuse an already-created file input.
       let input = document.body.querySelector(
         'input[id="open-file-dialog-input"]',
-      );
+      ) as HTMLInputElement | null;
       if (!input) {
         createdElement = true;
         input = document.createElement('input');
@@ -65,7 +72,7 @@ global.Actual = {
 
       input.type = 'file';
       input.id = 'open-file-dialog-input';
-      input.value = null;
+      input.value = null as unknown as string;
 
       const filter = filters.find(filter => filter.extensions);
       if (filter) {
@@ -78,17 +85,20 @@ global.Actual = {
       input.style.display = 'none';
 
       input.onchange = e => {
-        const file = e.target.files[0];
+        const event = e as unknown as ChangeEvent<HTMLInputElement>;
+        if (!event?.target?.files) return;
+        const file = event.target.files[0];
         const filename = file.name.replace(/.*(\.[^.]*)/, 'file$1');
 
         if (file) {
           const reader = new FileReader();
           reader.readAsArrayBuffer(file);
           reader.onload = async function (ev) {
+            if (!ev.target?.result) return;
             const filepath = `/uploads/${filename}`;
 
             window.__actionsForMenu
-              .uploadFile(filename, ev.target.result)
+              .uploadFile(filename, ev.target.result as ArrayBuffer)
               .then(() => resolve([filepath]));
           };
           reader.onerror = function () {
@@ -108,8 +118,8 @@ global.Actual = {
   },
 
   saveFile: (contents, defaultFilename) => {
-    const temp = document.createElement('a');
-    temp.style = 'display: none';
+    const temp = document.createElement('a') as HTMLAnchorElement;
+    temp.style.display = 'none';
     temp.download = defaultFilename;
     temp.rel = 'noopener';
 
@@ -135,7 +145,9 @@ global.Actual = {
   },
 };
 
-document.addEventListener('keydown', e => {
+global.Actual = Actual;
+
+document.addEventListener('keydown', (e: KeyboardEvent) => {
   if (e.metaKey || e.ctrlKey) {
     // Cmd/Ctrl+o
     if (e.key === 'o') {
@@ -144,10 +156,11 @@ document.addEventListener('keydown', e => {
     }
     // Cmd/Ctrl+z
     else if (e.key.toLowerCase() === 'z') {
+      if (!e?.target) return;
       if (
-        e.target.tagName === 'INPUT' ||
-        e.target.tagName === 'TEXTAREA' ||
-        e.target.isContentEditable
+        (e.target as Element).tagName === 'INPUT' ||
+        (e.target as Element).tagName === 'TEXTAREA' ||
+        (e.target as HTMLElement).isContentEditable
       ) {
         return;
       }
