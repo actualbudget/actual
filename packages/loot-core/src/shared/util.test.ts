@@ -6,7 +6,7 @@ describe('utility functions', () => {
     // Ignoring 3 places removes the possibility of improper parse
     //  of amounts without decimal amounts included.
     expect(looselyParseAmount('3')).toBe(3);
-    expect(looselyParseAmount('3.4')).toBe(3.40);
+    expect(looselyParseAmount('3.4')).toBe(3.4);
     expect(looselyParseAmount('3.45')).toBe(3.45);
     expect(looselyParseAmount('3.456')).toBe(3456);
     expect(looselyParseAmount('3.45000')).toBe(3.45);
