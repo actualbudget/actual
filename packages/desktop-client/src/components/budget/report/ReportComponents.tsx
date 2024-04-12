@@ -18,7 +18,7 @@ import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
 import { BalanceTooltip } from './BalanceTooltip';
-import { CategoryBudgetMenu } from './CategoryBudgetMenu';
+import { BudgetMenu } from './BudgetMenu';
 
 const headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -219,7 +219,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                 style={{ padding: 0 }}
                 onClose={() => setMenuOpen(false)}
               >
-                <CategoryBudgetMenu
+                <BudgetMenu
                   onCopyLastMonthAverage={() => {
                     onBudgetAction?.(month, 'copy-single-last', {
                       category: category.id,

@@ -3,7 +3,7 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { Menu } from '../../common/Menu';
 
-type CategoryBudgetMenuProps = Omit<
+type BudgetMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
@@ -11,12 +11,12 @@ type CategoryBudgetMenuProps = Omit<
   onSetMonthsAverage: (numberOfMonths: number) => void;
   onApplyBudgetTemplate: () => void;
 };
-export function CategoryBudgetMenu({
+export function BudgetMenu({
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
   ...props
-}: CategoryBudgetMenuProps) {
+}: BudgetMenuProps) {
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const onMenuSelect = (name: string) => {
     switch (name) {

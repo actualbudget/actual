@@ -127,24 +127,19 @@ function BudgetCell({
 
   const categoryBudgetMenuModal = `${budgetType}-budget-menu`;
 
-  const _onBudgetAction = (month, action, args) => {
-    onBudgetAction?.(month, action, args);
-    dispatch(collapseModals(categoryBudgetMenuModal));
-  };
-
   const onOpenCategoryBudgetMenu = () => {
     dispatch(
       pushModal(categoryBudgetMenuModal, {
         categoryId,
         month,
         onUpdateBudget: amount => {
-          onBudgetAction?.(month, 'budget-amount', {
+          onBudgetAction(month, 'budget-amount', {
             category: categoryId,
             amount,
           });
         },
         onCopyLastMonthAverage: () => {
-          _onBudgetAction(month, 'copy-single-last', {
+          onBudgetAction(month, 'copy-single-last', {
             category: categoryId,
           });
         },
@@ -157,12 +152,12 @@ function BudgetCell({
             return;
           }
 
-          _onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
+          onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
             category: categoryId,
           });
         },
         onApplyBudgetTemplate: () => {
-          _onBudgetAction(month, 'apply-single-category-template', {
+          onBudgetAction(month, 'apply-single-category-template', {
             category: categoryId,
           });
         },

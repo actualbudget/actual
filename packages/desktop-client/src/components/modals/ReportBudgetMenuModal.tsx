@@ -9,29 +9,29 @@ import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
-import { CategoryBudgetMenu } from '../budget/report/CategoryBudgetMenu';
+import { BudgetMenu } from '../budget/report/BudgetMenu';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 import { type CommonModalProps } from '../Modals';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
-type ReportCategoryBudgetMenuModalProps = ComponentPropsWithoutRef<
-  typeof CategoryBudgetMenu
+type ReportBudgetMenuModalProps = ComponentPropsWithoutRef<
+  typeof BudgetMenu
 > & {
   modalProps: CommonModalProps;
   categoryId: string;
   onUpdateBudget: (amount: number) => void;
 };
 
-export function ReportCategoryBudgetMenuModal({
+export function ReportBudgetMenuModal({
   modalProps,
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
-}: ReportCategoryBudgetMenuModalProps) {
+}: ReportBudgetMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -89,7 +89,7 @@ export function ReportCategoryBudgetMenuModal({
           onUpdateAmount={_onUpdateBudget}
         />
       </View>
-      <CategoryBudgetMenu
+      <BudgetMenu
         getItemStyle={() => defaultMenuItemStyle}
         onCopyLastMonthAverage={onCopyLastMonthAverage}
         onSetMonthsAverage={onSetMonthsAverage}

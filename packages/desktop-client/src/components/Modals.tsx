@@ -40,11 +40,11 @@ import { Notes } from './modals/Notes';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
+import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
 import { ReportBudgetSummaryModal } from './modals/ReportBudgetSummaryModal';
-import { ReportCategoryBudgetMenuModal } from './modals/ReportCategoryBudgetMenuModal';
 import { RolloverBalanceMenuModal } from './modals/RolloverBalanceMenuModal';
+import { RolloverBudgetMenuModal } from './modals/RolloverBudgetMenuModal';
 import { RolloverBudgetSummaryModal } from './modals/RolloverBudgetSummaryModal';
-import { RolloverCategoryBudgetMenuModal } from './modals/RolloverCategoryBudgetMenuModal';
 import { RolloverToBudgetMenuModal } from './modals/RolloverToBudgetMenuModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
@@ -446,7 +446,7 @@ export function Modals() {
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <RolloverCategoryBudgetMenuModal
+              <RolloverBudgetMenuModal
                 modalProps={modalProps}
                 categoryId={options.categoryId}
                 onUpdateBudget={options.onUpdateBudget}
@@ -463,7 +463,7 @@ export function Modals() {
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <ReportCategoryBudgetMenuModal
+              <ReportBudgetMenuModal
                 modalProps={modalProps}
                 categoryId={options.categoryId}
                 onUpdateBudget={options.onUpdateBudget}
