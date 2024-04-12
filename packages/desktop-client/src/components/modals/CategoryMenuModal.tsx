@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
 import {
-  CategoryGroupEntity,
+  type CategoryGroupEntity,
   type CategoryEntity,
   type NoteEntity,
 } from 'loot-core/src/types/models';

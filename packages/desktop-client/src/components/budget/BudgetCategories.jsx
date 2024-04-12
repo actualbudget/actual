@@ -66,7 +66,7 @@ export const BudgetCategories = memo(
               cat => ({
                 type: 'expense-category',
                 value: cat,
-                group: group,
+                group,
               }),
             ),
           ];
