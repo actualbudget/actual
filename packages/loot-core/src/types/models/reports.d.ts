@@ -38,6 +38,7 @@ export interface GroupedEntity {
 
 type LegendEntity = {
   name: string;
+  id: string;
   color: string;
 };
 

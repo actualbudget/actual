@@ -197,6 +197,7 @@ export function createCustomSpreadsheet({
               d.format(d.parseISO(`${intervalItem}-01`), "MMM ''yy")
             : intervalItem,
         ...stacked,
+        dateStart: intervalItem,
         totalDebts: integerToAmount(perIntervalDebts),
         totalAssets: integerToAmount(perIntervalAssets),
         totalTotals: integerToAmount(perIntervalDebts + perIntervalAssets),

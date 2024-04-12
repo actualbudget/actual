@@ -139,6 +139,9 @@ export function ChooseGraph({
         data={data}
         viewLabels={viewLabels}
         balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }

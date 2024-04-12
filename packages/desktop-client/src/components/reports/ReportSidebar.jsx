@@ -53,7 +53,7 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
-    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    let storedReport = JSON.parse(sessionStorage.getItem('report'));
     sessionStorage.setItem(
       'report',
       JSON.stringify({ ...storedReport, mode: cond }),
@@ -61,6 +61,8 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setMode(cond);
     let graph;
+    //need this again to capture the mode change
+    storedReport = JSON.parse(sessionStorage.getItem('report'));
     if (cond === 'time') {
       if (customReportItems.graphType === 'BarGraph') {
         sessionStorage.setItem(
