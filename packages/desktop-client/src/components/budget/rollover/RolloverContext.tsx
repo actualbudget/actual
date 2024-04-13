@@ -4,7 +4,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 type RolloverContextDefinition = {
   summaryCollapsed: boolean;
-  onBudgetAction: (idx: string, action: string, arg?: unknown) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onToggleSummaryCollapse: () => void;
   currentMonth: string;
 };

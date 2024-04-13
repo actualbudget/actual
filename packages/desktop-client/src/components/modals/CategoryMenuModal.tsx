@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { q } from 'loot-core/src/shared/query';
 import {
-  type CategoryGroupEntity,
   type CategoryEntity,
   type NoteEntity,
 } from 'loot-core/src/types/models';
 
-import { useCategories } from '../../hooks/useCategories';
+import { useCategory } from '../../hooks/useCategory';
+import { useCategoryGroup } from '../../hooks/useCategoryGroup';
 import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -24,7 +24,6 @@ import { Tooltip } from '../tooltips';
 type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
-  categoryGroup?: CategoryGroupEntity;
   onSave: (category: CategoryEntity) => void;
   onEditNotes: (id: string) => void;
   onDelete: (categoryId: string) => void;
@@ -34,14 +33,13 @@ type CategoryMenuModalProps = {
 export function CategoryMenuModal({
   modalProps,
   categoryId,
-  categoryGroup,
   onSave,
   onEditNotes,
   onDelete,
   onClose,
 }: CategoryMenuModalProps) {
-  const { list: categories } = useCategories();
-  const category = categories.find(c => c.id === categoryId);
+  const category = useCategory(categoryId);
+  const categoryGroup = useCategoryGroup(category?.cat_group);
   const data = useLiveQuery<NoteEntity[]>(
     () => q('notes').filter({ id: category.id }).select('*'),
     [category.id],
@@ -143,7 +141,8 @@ export function CategoryMenuModal({
             flexWrap: 'wrap',
             justifyContent: 'space-between',
             alignContent: 'space-between',
-            margin: '10px 0',
+            paddingTop: 10,
+            paddingBottom: 10,
           }}
         >
           <Button style={buttonStyle} onClick={_onEditNotes}>
@@ -168,6 +167,11 @@ function AdditionalCategoryMenu({
     height: styles.mobileMinHeight,
   };
 
+  const getItemStyle = item => ({
+    ...itemStyle,
+    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  });
+
   return (
     <View>
       <Button
@@ -191,7 +195,7 @@ function AdditionalCategoryMenu({
             }}
           >
             <Menu
-              getItemStyle={() => itemStyle}
+              getItemStyle={getItemStyle}
               items={[
                 !categoryGroup?.hidden && {
                   name: 'toggleVisibility',

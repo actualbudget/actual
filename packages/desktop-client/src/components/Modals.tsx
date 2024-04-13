@@ -14,7 +14,7 @@ import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 import { ModalTitle } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
-import { BudgetMenuModal } from './modals/BudgetMenuModal';
+import { BudgetMonthMenuModal } from './modals/BudgetMonthMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
@@ -40,8 +40,10 @@ import { Notes } from './modals/Notes';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
+import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
 import { ReportBudgetSummaryModal } from './modals/ReportBudgetSummaryModal';
 import { RolloverBalanceMenuModal } from './modals/RolloverBalanceMenuModal';
+import { RolloverBudgetMenuModal } from './modals/RolloverBudgetMenuModal';
 import { RolloverBudgetSummaryModal } from './modals/RolloverBudgetSummaryModal';
 import { RolloverToBudgetMenuModal } from './modals/RolloverToBudgetMenuModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
@@ -429,12 +431,45 @@ export function Modals() {
               key={name}
               modalProps={modalProps}
               categoryId={options.categoryId}
-              categoryGroup={options.categoryGroup}
               onSave={options.onSave}
               onEditNotes={options.onEditNotes}
               onDelete={options.onDelete}
               onClose={options.onClose}
             />
+          );
+
+        case 'rollover-budget-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <RolloverBudgetMenuModal
+                modalProps={modalProps}
+                categoryId={options.categoryId}
+                onUpdateBudget={options.onUpdateBudget}
+                onCopyLastMonthAverage={options.onCopyLastMonthAverage}
+                onSetMonthsAverage={options.onSetMonthsAverage}
+                onApplyBudgetTemplate={options.onApplyBudgetTemplate}
+              />
+            </NamespaceContext.Provider>
+          );
+
+        case 'report-budget-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <ReportBudgetMenuModal
+                modalProps={modalProps}
+                categoryId={options.categoryId}
+                onUpdateBudget={options.onUpdateBudget}
+                onCopyLastMonthAverage={options.onCopyLastMonthAverage}
+                onSetMonthsAverage={options.onSetMonthsAverage}
+                onApplyBudgetTemplate={options.onApplyBudgetTemplate}
+              />
+            </NamespaceContext.Provider>
           );
 
         case 'category-group-menu':
@@ -479,7 +514,7 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'rollover-to-budget-menu':
+        case 'rollover-summary-to-budget-menu':
           return (
             <NamespaceContext.Provider
               key={name}
@@ -552,13 +587,13 @@ export function Modals() {
             />
           );
 
-        case 'budget-menu':
+        case 'budget-month-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <BudgetMenuModal
+              <BudgetMonthMenuModal
                 modalProps={modalProps}
                 month={options.month}
                 onToggleHiddenCategories={options.onToggleHiddenCategories}
