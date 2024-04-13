@@ -754,7 +754,11 @@ class AccountInternal extends PureComponent {
   };
 
   onReconcile = async balance => {
-    this.setState({ reconcileAmount: balance });
+    this.setState(({ showCleared }) => ({
+      reconcileAmount: balance,
+      showCleared: true,
+      prevShowCleared: showCleared,
+    }));
   };
 
   onDoneReconciling = async () => {
@@ -783,7 +787,10 @@ class AccountInternal extends PureComponent {
       await this.lockTransactions();
     }
 
-    this.setState({ reconcileAmount: null });
+    this.setState({
+      reconcileAmount: null,
+      showCleared: this.state.prevShowCleared,
+    });
   };
 
   onCreateReconciliationTransaction = async diff => {
