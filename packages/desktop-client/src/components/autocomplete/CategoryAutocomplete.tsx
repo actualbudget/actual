@@ -380,10 +380,10 @@ function CategoryItem({
         >
           {isToBeBudgetedItem
             ? toBudget != null
-              ? integerToCurrency(toBudget || 0)
+              ? ` ${integerToCurrency(toBudget || 0)}`
               : null
             : balance != null
-              ? integerToCurrency(balance || 0)
+              ? ` ${integerToCurrency(balance || 0)}`
               : null}
         </TextOneLine>
       </View>
