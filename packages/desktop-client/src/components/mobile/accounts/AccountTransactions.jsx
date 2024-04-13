@@ -176,39 +176,31 @@ function TransactionListWithPreviews({ account }) {
     );
   }, []);
 
-  const fetchTransactions = useCallback(async () => {
+  const fetchTransactions = useCallback(() => {
     const query = makeRootQuery();
     setCurrentQuery(query);
     updateQuery(query);
   }, [makeRootQuery, updateQuery]);
 
   useEffect(() => {
-    let unlisten;
-
-    async function setUpAccount() {
-      unlisten = listen('sync-event', ({ type, tables }) => {
-        if (type === 'applied') {
-          if (
-            tables.includes('transactions') ||
-            tables.includes('category_mapping') ||
-            tables.includes('payee_mapping')
-          ) {
-            paged.current?.run();
-          }
-
-          if (tables.includes('payees') || tables.includes('payee_mapping')) {
-            dispatch(getPayees());
-          }
+    const unlisten = listen('sync-event', ({ type, tables }) => {
+      if (type === 'applied') {
+        if (
+          tables.includes('transactions') ||
+          tables.includes('category_mapping') ||
+          tables.includes('payee_mapping')
+        ) {
+          paged.current?.run();
         }
-      });
 
-      await fetchTransactions();
+        if (tables.includes('payees') || tables.includes('payee_mapping')) {
+          dispatch(getPayees());
+        }
+      }
+    });
 
-      dispatch(markAccountRead(account.id));
-    }
-
-    setUpAccount();
-
+    fetchTransactions();
+    dispatch(markAccountRead(account.id));
     return () => unlisten();
   }, [account.id, dispatch, fetchTransactions]);
 

@@ -15,6 +15,7 @@ export function MobileBackButton({ style }: MobileBackButtonProps) {
   return (
     <Button
       type="bare"
+      aria-label="Back"
       style={{
         color: theme.mobileHeaderText,
         justifyContent: 'center',
