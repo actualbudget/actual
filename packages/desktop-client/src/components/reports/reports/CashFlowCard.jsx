@@ -123,21 +123,15 @@ export function CashFlowCard() {
               <Bar dataKey="income" fill={chartTheme.colors.blue} barSize={14}>
                 <LabelList
                   dataKey="income"
-                  content={props =>
-                    CustomLabel({ ...props, name: 'Income', position: 'left' })
-                  }
+                  position="left"
+                  content={<CustomLabel name="Income" />}
                 />
               </Bar>
               <Bar dataKey="expenses" fill={chartTheme.colors.red} barSize={14}>
                 <LabelList
                   dataKey="expenses"
-                  content={props =>
-                    CustomLabel({
-                      ...props,
-                      name: 'Expenses',
-                      position: 'right',
-                    })
-                  }
+                  position="right"
+                  content={<CustomLabel name="Expenses" />}
                 />
               </Bar>
             </BarChart>
