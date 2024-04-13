@@ -77,6 +77,7 @@ export function RolloverBudgetMenuModal({
           focused={amountFocused}
           onFocus={() => setAmountFocused(true)}
           onBlur={() => setAmountFocused(false)}
+          onEnter={() => modalProps.onClose()}
           zeroSign="+"
           focusedStyle={{
             width: 'auto',

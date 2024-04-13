@@ -29,6 +29,7 @@ type AmountInputProps = {
   inputRef?: Ref<HTMLInputElement>;
   onFocus?: HTMLProps<HTMLInputElement>['onFocus'];
   onBlur?: HTMLProps<HTMLInputElement>['onBlur'];
+  onEnter?: HTMLProps<HTMLInputElement>['onKeyUp'];
   onChangeValue?: (value: string) => void;
   onUpdate?: (value: string) => void;
   onUpdateAmount?: (value: number) => void;
@@ -69,9 +70,14 @@ const AmountInput = memo(function AmountInput({
     return toRelaxedNumber(text.replace(/[,.]/, getNumberFormat().separator));
   };
 
-  const onKeyPress: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
+  const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
       setEditing(true);
+    } else if (e.key === 'Enter') {
+      props.onEnter?.(e);
+      if (!e.defaultPrevented) {
+        onUpdate(e.currentTarget.value);
+      }
     }
   };
 
@@ -97,8 +103,10 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onBlur: HTMLProps<HTMLInputElement>['onBlur'] = e => {
-    onUpdate(e.target.value);
     props.onBlur?.(e);
+    if (!e.defaultPrevented) {
+      onUpdate(e.target.value);
+    }
   };
 
   const onChangeText = (text: string) => {
@@ -127,7 +135,7 @@ const AmountInput = memo(function AmountInput({
       onChange={e => onChangeText(e.target.value)}
       onFocus={onFocus}
       onBlur={onBlur}
-      onKeyUp={onKeyPress}
+      onKeyUp={onKeyUp}
       data-testid="amount-input"
       style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
     />
