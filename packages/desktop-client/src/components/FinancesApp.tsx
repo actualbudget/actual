@@ -30,6 +30,7 @@ import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
+import { Category } from './mobile/budget/Category';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Modals } from './Modals';
@@ -210,7 +211,7 @@ function FinancesAppWithoutContext() {
                 />
 
                 <Route
-                  path="/accounts/:id/transactions/:transactionId"
+                  path="/transactions/:transactionId"
                   element={
                     <WideNotSupported>
                       <TransactionEdit />
@@ -219,18 +220,10 @@ function FinancesAppWithoutContext() {
                 />
 
                 <Route
-                  path="/accounts/:id/transactions/new"
+                  path="/categories/:id"
                   element={
                     <WideNotSupported>
-                      <TransactionEdit />
-                    </WideNotSupported>
-                  }
-                />
-                <Route
-                  path="/transactions/new"
-                  element={
-                    <WideNotSupported>
-                      <TransactionEdit />
+                      <Category />
                     </WideNotSupported>
                   }
                 />
