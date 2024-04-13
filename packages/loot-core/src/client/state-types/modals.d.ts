@@ -143,11 +143,27 @@ type FinanceModals = {
   };
   'category-menu': {
     categoryId: string;
-    categoryGroup?: CategoryGroupEntity;
     onSave: (category: CategoryEntity) => void;
     onEditNotes: (id: string) => void;
     onDelete: (categoryId: string) => void;
+    onBudgetAction: (month: string, action: string, args?: unknown) => void;
     onClose?: () => void;
+  };
+  'rollover-budget-menu': {
+    categoryId: string;
+    month: string;
+    onUpdateBudget: (amount: number) => void;
+    onCopyLastMonthAverage: () => void;
+    onSetMonthsAverage: (numberOfMonths: number) => void;
+    onApplyBudgetTemplate: () => void;
+  };
+  'report-budget-menu': {
+    categoryId: string;
+    month: string;
+    onUpdateBudget: (amount: number) => void;
+    onCopyLastMonthAverage: () => void;
+    onSetMonthsAverage: (numberOfMonths: number) => void;
+    onApplyBudgetTemplate: () => void;
   };
   'category-group-menu': {
     groupId: string;
@@ -186,7 +202,7 @@ type FinanceModals = {
     onTransfer: () => void;
     onCover: () => void;
   };
-  'rollover-to-budget-menu': {
+  'rollover-summary-to-budget-menu': {
     month: string;
     onTransfer: () => void;
     onHoldBuffer: () => void;
@@ -216,7 +232,7 @@ type FinanceModals = {
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
   };
-  'budget-menu': {
+  'budget-month-menu': {
     month: string;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetType: () => void;

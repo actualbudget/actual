@@ -7,7 +7,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import {
   format as formatDate,
@@ -56,9 +56,9 @@ import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { MobileBackButton } from '../../MobileBackButton';
 import { Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
+import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
@@ -720,16 +720,15 @@ const TransactionEditInner = memo(function TransactionEditInner({
             zeroSign="-"
             focused={totalAmountFocused}
             onFocus={onTotalAmountEdit}
-            onUpdate={onTotalAmountUpdate}
+            onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',
               padding: '5px',
               paddingLeft: '20px',
               paddingRight: '20px',
-              minWidth: 120,
-              transform: [{ translateY: -0.5 }],
+              minWidth: '100%',
             }}
-            textStyle={{ fontSize: 30, textAlign: 'center' }}
+            textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
           />
         </View>
 
@@ -947,21 +946,28 @@ function isTemporary(transaction) {
   return transaction.id.indexOf('temp') === 0;
 }
 
-function makeTemporaryTransactions(currentAccountId, lastDate) {
+function makeTemporaryTransactions(accountId, categoryId, lastDate) {
   return [
     {
       id: 'temp',
       date: lastDate || monthUtils.currentDay(),
-      account: currentAccountId,
+      account: accountId,
+      category: categoryId,
       amount: 0,
       cleared: false,
     },
   ];
 }
 
-function TransactionEditUnconnected(props) {
-  const { categories, accounts, payees, lastTransaction, dateFormat } = props;
-  const { id: accountId, transactionId } = useParams();
+function TransactionEditUnconnected({
+  categories,
+  accounts,
+  payees,
+  lastTransaction,
+  dateFormat,
+}) {
+  const { transactionId } = useParams();
+  const { state: locationState } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [transactions, setTransactions] = useState([]);
@@ -991,7 +997,7 @@ function TransactionEditUnconnected(props) {
       setTransactions(fetchedTransactions);
       setFetchedTransactions(fetchedTransactions);
     }
-    if (transactionId) {
+    if (transactionId !== 'new') {
       fetchTransaction();
     } else {
       adding.current = true;
@@ -1002,12 +1008,13 @@ function TransactionEditUnconnected(props) {
     if (adding.current) {
       setTransactions(
         makeTemporaryTransactions(
-          accountId || lastTransaction?.account || null,
+          locationState?.accountId || lastTransaction?.account || null,
+          locationState?.categoryId || lastTransaction?.category || null,
           lastTransaction?.date,
         ),
       );
     }
-  }, [accountId, lastTransaction]);
+  }, [locationState?.accountId, locationState?.categoryId, lastTransaction]);
 
   if (
     categories.length === 0 ||

@@ -13,7 +13,7 @@ import { ToBudgetMenu } from './ToBudgetMenu';
 
 type ToBudgetProps = {
   month: string;
-  onBudgetAction: (idx: string, action: string, arg?: unknown) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   prevMonthName: string;
   showTotalsTooltipOnHover?: boolean;
   style?: CSSProperties;
