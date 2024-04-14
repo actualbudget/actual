@@ -167,7 +167,7 @@ export function FatalError({ buttonText, error }: FatalErrorProps) {
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
 
   return (
-    <Modal isCurrent={true} showClose={false} title="Fatal Error">
+    <Modal isCurrent={true} CloseButton={undefined} title="Fatal Error">
       <View
         style={{
           maxWidth: 500,

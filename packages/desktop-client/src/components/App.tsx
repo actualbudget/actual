@@ -27,7 +27,7 @@ import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
-import { MobileWebMessage } from './MobileWebMessage';
+import { MobileWebMessage } from './mobile/MobileWebMessage';
 import { UpdateNotification } from './UpdateNotification';
 
 type AppInnerProps = {
@@ -77,7 +77,7 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   }, []);
 
   useEffect(() => {
-    global.Actual.updateAppMenu(!!budgetId);
+    global.Actual.updateAppMenu(budgetId);
   }, [budgetId]);
 
   return (

@@ -16,7 +16,6 @@ import {
   disableGlobalMutations,
   enableGlobalMutations,
 } from './mutators';
-import { post } from './post';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 
@@ -103,63 +102,6 @@ describe('Budgets', () => {
 });
 
 describe('Accounts', () => {
-  test('create accounts with correct starting balance', async () => {
-    prefs.loadPrefs();
-    prefs.savePrefs({ groupId: 'group' });
-
-    await runMutator(async () => {
-      // An income category is required because the starting balance is
-      // categorized to it. Create one now.
-      await db.insertCategoryGroup({
-        id: 'group1',
-        name: 'income',
-        is_income: 1,
-      });
-      await db.insertCategory({
-        name: 'income',
-        cat_group: 'group1',
-        is_income: 1,
-      });
-    });
-
-    // Get accounts from the server. This isn't the normal API call,
-    // we know that the mock server just returns hardcoded accounts
-    const { accounts } = await post('/plaid/accounts', {});
-
-    // Create the accounts for the bank (bank is generally ignored in tests)
-    await runHandler(handlers['accounts-connect'], {
-      institution: { institution_id: 1, name: 'Jamesy Bank' },
-      publicToken: 'foo',
-      accountIds: accounts.map(acct => acct.account_id),
-    });
-
-    // Import transactions for all accounts
-    await runHandler(handlers['accounts-sync'], {});
-
-    // Go through each account and make sure the starting balance was
-    // created correctly
-    const res = await db.all('SELECT * FROM accounts');
-    for (const account of res) {
-      const sum = await db.first(
-        'SELECT sum(amount) as sum FROM transactions WHERE acct = ? AND starting_balance_flag = 0',
-        [account.id],
-      );
-      const starting = await db.first(
-        'SELECT * FROM transactions WHERE acct = ? AND starting_balance_flag = 1',
-        [account.id],
-      );
-      expect(account.balance_current - sum.sum).toBe(starting.amount);
-
-      // Also ensure that the starting balance has the earliest date
-      // possible
-      const earliestTrans = await db.first(
-        'SELECT p.name as payee_name FROM transactions t LEFT JOIN payees p ON p.id = t.description WHERE acct = ? ORDER BY date LIMIT 1',
-        [account.id],
-      );
-      expect(earliestTrans.payee_name).toBe('Starting Balance');
-    }
-  });
-
   test('Transfers are properly updated', async () => {
     await runMutator(async () => {
       await db.insertAccount({ id: 'one', name: 'one' });

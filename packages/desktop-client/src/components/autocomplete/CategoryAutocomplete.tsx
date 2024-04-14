@@ -261,7 +261,9 @@ function SplitTransactionButton({
         alignItems: 'center',
         fontSize: 11,
         fontWeight: 500,
-        color: theme.noticeTextMenu,
+        color: highlighted
+          ? theme.menuAutoCompleteTextHover
+          : theme.noticeTextMenu,
         padding: '6px 8px',
         ':active': {
           backgroundColor: 'rgba(100, 100, 100, .25)',
@@ -324,6 +326,9 @@ function CategoryItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
+          color: highlighted
+            ? theme.menuAutoCompleteItemTextHover
+            : theme.menuAutoCompleteItemText,
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,

@@ -44,6 +44,11 @@ export function ReportSidebar({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    sessionStorage.setItem(
+      'report',
+      JSON.stringify({ ...storedReport, dateRange: cond }),
+    );
     onReportChange({ type: 'modify' });
     setDateRange(cond);
     onChangeDates(
@@ -52,16 +57,29 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    sessionStorage.setItem(
+      'report',
+      JSON.stringify({ ...storedReport, mode: cond }),
+    );
     onReportChange({ type: 'modify' });
     setMode(cond);
     let graph;
     if (cond === 'time') {
       if (customReportItems.graphType === 'BarGraph') {
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({ ...storedReport, graphType: 'StackedBarGraph' }),
+        );
         setGraphType('StackedBarGraph');
         graph = 'StackedBarGraph';
       }
     } else {
       if (customReportItems.graphType === 'StackedBarGraph') {
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({ ...storedReport, graphType: 'BarGraph' }),
+        );
         setGraphType('BarGraph');
         graph = 'BarGraph';
       }
@@ -70,12 +88,22 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    sessionStorage.setItem(
+      'report',
+      JSON.stringify({ ...storedReport, groupBy: cond }),
+    );
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
     defaultItems(cond);
   };
 
   const onChangeBalanceType = cond => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    sessionStorage.setItem(
+      'report',
+      JSON.stringify({ ...storedReport, balanceType: cond }),
+    );
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
   };
@@ -221,17 +249,50 @@ export function ReportSidebar({
               >
                 <Menu
                   onMenuSelect={type => {
+                    const storedReport = JSON.parse(
+                      sessionStorage.getItem('report'),
+                    );
                     onReportChange({ type: 'modify' });
 
                     if (type === 'show-hidden-categories') {
+                      sessionStorage.setItem(
+                        'report',
+                        JSON.stringify({
+                          ...storedReport,
+                          showHiddenCategories:
+                            !customReportItems.showHiddenCategories,
+                        }),
+                      );
                       setShowHiddenCategories(
                         !customReportItems.showHiddenCategories,
                       );
                     } else if (type === 'show-off-budget') {
+                      sessionStorage.setItem(
+                        'report',
+                        JSON.stringify({
+                          ...storedReport,
+                          showOffBudget: !customReportItems.showOffBudget,
+                        }),
+                      );
                       setShowOffBudget(!customReportItems.showOffBudget);
                     } else if (type === 'show-empty-items') {
+                      sessionStorage.setItem(
+                        'report',
+                        JSON.stringify({
+                          ...storedReport,
+                          showEmpty: !customReportItems.showEmpty,
+                        }),
+                      );
                       setShowEmpty(!customReportItems.showEmpty);
                     } else if (type === 'show-uncategorized') {
+                      sessionStorage.setItem(
+                        'report',
+                        JSON.stringify({
+                          ...storedReport,
+                          showUncategorized:
+                            !customReportItems.showUncategorized,
+                        }),
+                      );
                       setShowUncategorized(
                         !customReportItems.showUncategorized,
                       );
@@ -291,6 +352,11 @@ export function ReportSidebar({
           <ModeButton
             selected={!customReportItems.isDateStatic}
             onSelect={() => {
+              const storedReport = JSON.parse(sessionStorage.getItem('report'));
+              sessionStorage.setItem(
+                'report',
+                JSON.stringify({ ...storedReport, isDateStatic: false }),
+              );
               setIsDateStatic(false);
               onSelectRange(customReportItems.dateRange);
             }}
@@ -300,6 +366,11 @@ export function ReportSidebar({
           <ModeButton
             selected={customReportItems.isDateStatic}
             onSelect={() => {
+              const storedReport = JSON.parse(sessionStorage.getItem('report'));
+              sessionStorage.setItem(
+                'report',
+                JSON.stringify({ ...storedReport, isDateStatic: true }),
+              );
               setIsDateStatic(true);
               onChangeDates(
                 customReportItems.startDate,

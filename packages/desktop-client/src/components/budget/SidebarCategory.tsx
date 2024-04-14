@@ -1,7 +1,10 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, type Ref, useState } from 'react';
 
-import { type CategoryEntity } from 'loot-core/src/types/models';
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/src/types/models';
 
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
@@ -15,6 +18,7 @@ import { Tooltip } from '../tooltips';
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
   category: CategoryEntity;
+  categoryGroup?: CategoryGroupEntity;
   dragPreview?: boolean;
   dragging?: boolean;
   editing: boolean;
@@ -30,6 +34,7 @@ type SidebarCategoryProps = {
 export function SidebarCategory({
   innerRef,
   category,
+  categoryGroup,
   dragPreview,
   dragging,
   editing,
@@ -50,7 +55,7 @@ export function SidebarCategory({
         alignItems: 'center',
         userSelect: 'none',
         WebkitUserSelect: 'none',
-        opacity: category.hidden ? 0.33 : undefined,
+        opacity: category.hidden || categoryGroup?.hidden ? 0.33 : undefined,
       }}
     >
       <div
@@ -99,7 +104,7 @@ export function SidebarCategory({
                 setMenuOpen(false);
               }}
               items={[
-                {
+                !categoryGroup?.hidden && {
                   name: 'toggle-visibility',
                   text: category.hidden ? 'Show' : 'Hide',
                 },

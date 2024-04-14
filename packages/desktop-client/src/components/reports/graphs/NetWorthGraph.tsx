@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -29,8 +30,10 @@ export function NetWorthGraph({
   graphData,
   compact,
 }: NetWorthGraphProps) {
+  const privacyMode = usePrivacyMode();
+
   const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    return privacyMode ? '...' : `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
 
   const gradientOffset = () => {

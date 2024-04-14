@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type ComponentProps, useState } from 'react';
 
 import { styles } from '../../style';
 import { Button } from '../common/Button';
@@ -12,7 +12,7 @@ import { type CommonModalProps } from '../Modals';
 
 type SingleInputModalProps = {
   modalProps: Partial<CommonModalProps>;
-  title: string;
+  title: ComponentProps<typeof Modal>['title'];
   buttonText: string;
   onSubmit: (value: string) => void;
   onValidate?: (value: string) => string[];

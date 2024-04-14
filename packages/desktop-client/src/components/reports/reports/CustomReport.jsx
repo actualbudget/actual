@@ -56,9 +56,19 @@ export function CustomReport() {
   } = useFilters();
 
   const location = useLocation();
-  const loadReport = location.state
+
+  const prevUrl = sessionStorage.getItem('url');
+
+  sessionStorage.setItem('prevUrl', prevUrl);
+  sessionStorage.setItem('url', location.pathname);
+
+  if (['/reports'].includes(prevUrl)) sessionStorage.clear();
+
+  const session = JSON.parse(sessionStorage.getItem('report'));
+  const combine = location.state
     ? location.state.report ?? defaultReport
     : defaultReport;
+  const loadReport = { ...combine, ...session };
 
   const [allIntervals, setAllIntervals] = useState(null);
 
@@ -332,6 +342,15 @@ export function CustomReport() {
   };
 
   const onChangeDates = (dateStart, dateEnd) => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
+    sessionStorage.setItem(
+      'report',
+      JSON.stringify({
+        ...storedReport,
+        startDate: dateStart,
+        endDate: dateEnd,
+      }),
+    );
     setStartDate(dateStart);
     setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
@@ -394,15 +413,18 @@ export function CustomReport() {
         }
         break;
       case 'reload':
+        sessionStorage.clear();
         setSavedStatus('saved');
         setReportData(report);
         break;
       case 'reset':
+        sessionStorage.clear();
         setSavedStatus('new');
         setReport(defaultReport);
         setReportData(defaultReport);
         break;
       case 'choose':
+        sessionStorage.clear();
         setSavedStatus('saved');
         setReport(savedReport);
         setReportData(savedReport);
@@ -568,6 +590,8 @@ export function CustomReport() {
                     setScrollWidth={setScrollWidth}
                     viewLabels={viewLabels}
                     compact={false}
+                    showHiddenCategories={showHiddenCategories}
+                    showOffBudget={showOffBudget}
                   />
                 ) : (
                   <LoadingIndicator message="Loading report..." />

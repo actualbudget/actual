@@ -14,7 +14,7 @@ import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
+import { Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
@@ -94,7 +94,9 @@ export function CategoryGroupMenuModal({
 
   return (
     <Modal
-      title={group.name}
+      title={
+        <ModalTitle isEditable title={group.name} onTitleUpdate={onRename} />
+      }
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -106,9 +108,6 @@ export function CategoryGroupMenuModal({
         padding: '0 10px',
         borderRadius: '6px',
       }}
-      editableTitle={true}
-      titleStyle={styles.underlinedText}
-      onTitleUpdate={onRename}
       leftHeaderContent={
         <AdditionalCategoryGroupMenu
           group={group}
@@ -117,72 +116,53 @@ export function CategoryGroupMenuModal({
         />
       }
     >
-      {({ isEditingTitle }) => (
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+        }}
+      >
         <View
           style={{
+            overflowY: 'auto',
             flex: 1,
-            flexDirection: 'column',
           }}
         >
-          <View
-            style={{
-              overflowY: 'auto',
-              flex: 1,
-            }}
-          >
-            <Notes
-              notes={notes?.length > 0 ? notes : 'No notes'}
-              editable={false}
-              focused={false}
-              getStyle={() => ({
-                ...styles.mediumText,
-                borderRadius: 6,
-                ...((!notes || notes.length === 0) && {
-                  justifySelf: 'center',
-                  alignSelf: 'center',
-                  color: theme.pageTextSubdued,
-                }),
-              })}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignContent: 'space-between',
-              paddingTop: 10,
-              paddingBottom: 10,
-            }}
-          >
-            <Button
-              disabled={isEditingTitle}
-              style={{
-                ...buttonStyle,
-                display: isEditingTitle ? 'none' : undefined,
-              }}
-              onClick={_onAddCategory}
-            >
-              <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
-              Add category
-            </Button>
-            <Button
-              style={{
-                ...buttonStyle,
-                display: isEditingTitle ? 'none' : undefined,
-              }}
-              onClick={_onEditNotes}
-            >
-              <SvgNotesPaper
-                width={20}
-                height={20}
-                style={{ paddingRight: 5 }}
-              />
-              Edit notes
-            </Button>
-          </View>
+          <Notes
+            notes={notes?.length > 0 ? notes : 'No notes'}
+            editable={false}
+            focused={false}
+            getStyle={() => ({
+              ...styles.mediumText,
+              borderRadius: 6,
+              ...((!notes || notes.length === 0) && {
+                justifySelf: 'center',
+                alignSelf: 'center',
+                color: theme.pageTextSubdued,
+              }),
+            })}
+          />
         </View>
-      )}
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignContent: 'space-between',
+            paddingTop: 10,
+            paddingBottom: 10,
+          }}
+        >
+          <Button style={buttonStyle} onClick={_onAddCategory}>
+            <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
+            Add category
+          </Button>
+          <Button style={buttonStyle} onClick={_onEditNotes}>
+            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+            Edit notes
+          </Button>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -194,65 +174,74 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
     height: styles.mobileMinHeight,
   };
 
+  const getItemStyle = item => ({
+    ...itemStyle,
+    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  });
+
   return (
     <View>
-      <Button
-        type="bare"
-        aria-label="Menu"
-        onClick={() => {
-          setMenuOpen(true);
-        }}
-      >
-        <SvgDotsHorizontalTriple
-          width={17}
-          height={17}
-          style={{ color: 'currentColor' }}
-        />
-        {menuOpen && (
-          <Tooltip
-            position="bottom-left"
-            style={{ padding: 0 }}
-            onClose={() => {
-              setMenuOpen(false);
-            }}
-          >
-            <Menu
-              style={{
-                ...styles.mediumText,
-                color: theme.formLabelText,
-              }}
-              getItemStyle={() => itemStyle}
-              items={
-                [
-                  {
-                    name: 'toggleVisibility',
-                    text: group.hidden ? 'Show' : 'Hide',
-                    icon: group.hidden ? SvgViewShow : SvgViewHide,
-                    iconSize: 16,
-                  },
-                  ...(!group.is_income && [
-                    Menu.line,
-                    {
-                      name: 'delete',
-                      text: 'Delete',
-                      icon: SvgTrash,
-                      iconSize: 15,
-                    },
-                  ]),
-                ].filter(i => i != null) as ComponentProps<typeof Menu>['items']
-              }
-              onMenuSelect={itemName => {
+      {!group.is_income && (
+        <Button
+          type="bare"
+          aria-label="Menu"
+          onClick={() => {
+            setMenuOpen(true);
+          }}
+        >
+          <SvgDotsHorizontalTriple
+            width={17}
+            height={17}
+            style={{ color: 'currentColor' }}
+          />
+          {menuOpen && (
+            <Tooltip
+              position="bottom-left"
+              style={{ padding: 0 }}
+              onClose={() => {
                 setMenuOpen(false);
-                if (itemName === 'delete') {
-                  onDelete();
-                } else if (itemName === 'toggleVisibility') {
-                  onToggleVisibility();
-                }
               }}
-            />
-          </Tooltip>
-        )}
-      </Button>
+            >
+              <Menu
+                style={{
+                  ...styles.mediumText,
+                  color: theme.formLabelText,
+                }}
+                getItemStyle={getItemStyle}
+                items={
+                  [
+                    {
+                      name: 'toggleVisibility',
+                      text: group.hidden ? 'Show' : 'Hide',
+                      icon: group.hidden ? SvgViewShow : SvgViewHide,
+                      iconSize: 16,
+                    },
+                    ...(!group.is_income && [
+                      Menu.line,
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                        icon: SvgTrash,
+                        iconSize: 15,
+                      },
+                    ]),
+                  ].filter(i => i != null) as ComponentProps<
+                    typeof Menu
+                  >['items']
+                }
+                onMenuSelect={itemName => {
+                  setMenuOpen(false);
+                  if (itemName === 'delete') {
+                    onDelete();
+                  } else if (itemName === 'toggleVisibility') {
+                    onToggleVisibility();
+                  }
+                }}
+              />
+            </Tooltip>
+          )}
+        </Button>
+      )}
     </View>
   );
 }

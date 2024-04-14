@@ -8,10 +8,7 @@ import { bindActionCreators } from 'redux';
 import { validForTransfer } from 'loot-core/client/transfer';
 import * as actions from 'loot-core/src/client/actions';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
-import {
-  SchedulesProvider,
-  useCachedSchedules,
-} from 'loot-core/src/client/data-hooks/schedules';
+import { SchedulesProvider } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -33,6 +30,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
+import { usePreviewTransactions } from '../../hooks/usePreviewTransactions';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import {
   SplitsExpandedProvider,
@@ -94,37 +92,13 @@ function AllTransactions({
   filtered,
   children,
 }) {
-  const { id: accountId } = account;
-  const scheduleData = useCachedSchedules();
+  const accountId = account.id;
+  const prependTransactions = usePreviewTransactions().map(trans => ({
+    ...trans,
+    _inverse: accountId ? accountId !== trans.account : false,
+  }));
 
   transactions ??= [];
-
-  const schedules = useMemo(
-    () =>
-      scheduleData
-        ? scheduleData.schedules.filter(
-            s =>
-              !s.completed &&
-              ['due', 'upcoming', 'missed'].includes(
-                scheduleData.statuses.get(s.id),
-              ),
-          )
-        : [],
-    [scheduleData],
-  );
-
-  const prependTransactions = useMemo(() => {
-    return schedules.map(schedule => ({
-      id: `preview/${schedule.id}`,
-      payee: schedule._payee,
-      account: schedule._account,
-      amount: schedule._amount,
-      date: schedule.next_date,
-      notes: scheduleData.statuses.get(schedule.id),
-      schedule: schedule.id,
-      _inverse: accountId ? accountId !== schedule._account : false,
-    }));
-  }, [schedules, accountId]);
 
   let runningBalance = useMemo(() => {
     if (!showBalances) {
@@ -172,7 +146,7 @@ function AllTransactions({
     return balances;
   }, [filtered, prependBalances, balances]);
 
-  if (scheduleData == null) {
+  if (!prependTransactions) {
     return children(transactions, balances);
   }
   return children(allTransactions, allBalances);
@@ -754,7 +728,11 @@ class AccountInternal extends PureComponent {
   };
 
   onReconcile = async balance => {
-    this.setState({ reconcileAmount: balance });
+    this.setState(({ showCleared }) => ({
+      reconcileAmount: balance,
+      showCleared: true,
+      prevShowCleared: showCleared,
+    }));
   };
 
   onDoneReconciling = async () => {
@@ -783,7 +761,10 @@ class AccountInternal extends PureComponent {
       await this.lockTransactions();
     }
 
-    this.setState({ reconcileAmount: null });
+    this.setState({
+      reconcileAmount: null,
+      showCleared: this.state.prevShowCleared,
+    });
   };
 
   onCreateReconciliationTransaction = async diff => {
@@ -1056,18 +1037,24 @@ class AccountInternal extends PureComponent {
         .select('*')
         .options({ splits: 'grouped' }),
     );
+
     const transactions = ungroupTransactions(data);
-    const payeeCondition = transactions[0].imported_payee
+    const ruleTransaction = transactions[0];
+    const childTransactions = transactions.filter(
+      t => t.parent_id === ruleTransaction.id,
+    );
+
+    const payeeCondition = ruleTransaction.imported_payee
       ? {
           field: 'imported_payee',
           op: 'is',
-          value: transactions[0].imported_payee,
+          value: ruleTransaction.imported_payee,
           type: 'string',
         }
       : {
           field: 'payee',
           op: 'is',
-          value: transactions[0].payee,
+          value: ruleTransaction.payee,
           type: 'id',
         };
 
@@ -1076,12 +1063,38 @@ class AccountInternal extends PureComponent {
       conditionsOp: 'and',
       conditions: [payeeCondition],
       actions: [
-        {
-          op: 'set',
-          field: 'category',
-          value: transactions[0].category,
-          type: 'id',
-        },
+        ...(childTransactions.length === 0
+          ? [
+              {
+                op: 'set',
+                field: 'category',
+                value: ruleTransaction.category,
+                type: 'id',
+                options: {
+                  splitIndex: 0,
+                },
+              },
+            ]
+          : []),
+        ...childTransactions.flatMap((sub, index) => [
+          {
+            op: 'set-split-amount',
+            value: sub.amount,
+            options: {
+              splitIndex: index + 1,
+              method: 'fixed-amount',
+            },
+          },
+          {
+            op: 'set',
+            field: 'category',
+            value: sub.category,
+            type: 'id',
+            options: {
+              splitIndex: index + 1,
+            },
+          },
+        ]),
       ],
     };
 
