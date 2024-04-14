@@ -12,15 +12,15 @@ let hasInitialized = false;
 const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
   try {
     importScripts(script);
-  } catch (e) {
+  } catch (error) {
     // Break if maxRetries has exceeded
     if (maxRetries <= 0) {
-      throw e;
+      throw error;
     } else {
       console.groupCollapsed(
         `Failed to load backend, will retry ${maxRetries} more time(s)`,
       );
-      console.log(e);
+      console.log(error);
       console.groupEnd();
     }
 
@@ -36,10 +36,10 @@ const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
   }
 };
 
-self.addEventListener('message', async e => {
+self.addEventListener('message', async event => {
   try {
     if (!hasInitialized) {
-      const msg = e.data;
+      const msg = event.data;
 
       if (msg.type === 'init') {
         hasInitialized = true;
@@ -75,8 +75,8 @@ self.addEventListener('message', async e => {
         });
       }
     }
-  } catch (e) {
-    console.log('Failed initializing backend:', e);
+  } catch (error) {
+    console.log('Failed initializing backend:', error);
     self.postMessage({
       type: 'app-init-failure',
       BackendInitFailure: true,
