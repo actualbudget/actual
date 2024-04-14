@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
+import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -41,7 +42,11 @@ export function GenericInput({
     switch (numberFormatType) {
       case 'currency':
         return (
-          <AmountInput inputRef={inputRef} value={value} onUpdate={onChange} />
+          <AmountInput
+            inputRef={inputRef}
+            value={amountToInteger(value)}
+            onUpdate={v => onChange(integerToAmount(v))}
+          />
         );
       case 'percentage':
         return (

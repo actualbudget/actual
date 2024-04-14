@@ -381,22 +381,14 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           />
 
           <View style={{ flex: 1 }}>
-            {options.method === 'fixed-amount' && (
+            {options.method !== 'remainder' && (
               <GenericInput
                 key={inputKey}
                 field={field}
                 type="number"
-                numberFormatType="currency"
-                value={amountToInteger(value)}
-                onChange={v => onChange('value', integerToAmount(v))}
-              />
-            )}
-            {options.method === 'fixed-percent' && (
-              <GenericInput
-                key={inputKey}
-                field={field}
-                type="number"
-                numberFormatType="percentage"
+                numberFormatType={
+                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                }
                 value={value}
                 onChange={v => onChange('value', v)}
               />
