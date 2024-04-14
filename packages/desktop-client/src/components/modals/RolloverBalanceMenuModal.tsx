@@ -32,6 +32,10 @@ export function RolloverBalanceMenuModal({
 
   const category = useCategory(categoryId);
 
+  if (!category) {
+    return null;
+  }
+
   return (
     <Modal
       title={`Balance: ${category.name}`}
