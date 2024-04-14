@@ -1085,6 +1085,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                     onClick={() => {
                       addActionToSplitAfterIndex(actionSplits.length, -1);
                     }}
+                    data-testid="split-transactions-add"
                   >
                     {actionSplits.length > 1
                       ? 'Add another split'
