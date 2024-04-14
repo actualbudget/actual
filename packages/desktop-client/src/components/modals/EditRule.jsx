@@ -386,6 +386,9 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
                 key={inputKey}
                 field={field}
                 type="number"
+                numberFormatType={
+                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                }
                 value={value}
                 onChange={v => onChange('value', v)}
               />

@@ -20,11 +20,13 @@ import { DateSelect } from '../select/DateSelect';
 import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 
 import { AmountInput } from './AmountInput';
+import { PercentInput } from './PercentInput';
 
 export function GenericInput({
   field,
   subfield,
   type,
+  numberFormatType = 'currency',
   multi,
   value,
   inputRef,
@@ -35,6 +37,29 @@ export function GenericInput({
   const savedReports = useReports();
   const saved = useSelector(state => state.queries.saved);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
+  const getNumberInputByFormatType = numberFormatType => {
+    switch (numberFormatType) {
+      case 'currency':
+        return (
+          <AmountInput inputRef={inputRef} value={value} onUpdate={onChange} />
+        );
+      case 'percentage':
+        return (
+          <PercentInput inputRef={inputRef} value={value} onUpdate={onChange} />
+        );
+      default:
+        return (
+          <Input
+            inputRef={inputRef}
+            defaultValue={value || ''}
+            placeholder="nothing"
+            onEnter={e => onChange(e.target.value)}
+            onBlur={e => onChange(e.target.value)}
+          />
+        );
+    }
+  };
 
   // This makes the UI more resilient in case of faulty data
   if (multi && !Array.isArray(value)) {
@@ -214,13 +239,7 @@ export function GenericInput({
       } else {
         switch (type) {
           case 'number':
-            content = (
-              <AmountInput
-                inputRef={inputRef}
-                value={amountToInteger(value)}
-                onUpdate={newValue => onChange(integerToAmount(newValue))}
-              />
-            );
+            content = getNumberInputByFormatType(numberFormatType);
             break;
           default:
             content = (
