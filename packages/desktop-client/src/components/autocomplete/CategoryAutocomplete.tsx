@@ -62,6 +62,14 @@ function CategoryList({
 }: CategoryListProps) {
   let lastGroup: string | undefined | null = null;
 
+  const filteredItems = useMemo(
+    () =>
+      showHiddenItems
+        ? items
+        : items.filter(item => !item.hidden && !item.group?.hidden),
+    [showHiddenItems, items],
+  );
+
   return (
     <View>
       <View
@@ -71,7 +79,7 @@ function CategoryList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {items.map((item, idx) => {
+        {filteredItems.map((item, idx) => {
           if (item.id === 'split') {
             return renderSplitTransactionButton({
               key: 'split',
@@ -79,10 +87,6 @@ function CategoryList({
               highlighted: highlightedIndex === idx,
               embedded,
             });
-          }
-
-          if ((item.hidden || item.group?.hidden) && !showHiddenItems) {
-            return <Fragment key={item.id} />;
           }
 
           const showGroup = item.cat_group !== lastGroup;
