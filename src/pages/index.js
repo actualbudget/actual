@@ -278,7 +278,7 @@ export default function Hello() {
             their servers to{' '}
             <a
               style={{ color: 'inherit', textDecoration: 'underline' }}
-              href="https://opencollective.org/actual"
+              href="https://opencollective.com/actual"
             >
               our Open Collective
             </a>
