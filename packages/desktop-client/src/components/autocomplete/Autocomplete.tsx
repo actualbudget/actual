@@ -566,7 +566,7 @@ function SingleAutocomplete<T extends Item>({
                 placement="bottom start"
                 offset={2}
                 isOpen={isOpen}
-                onOpenChange={() => onClose?.()}
+                onOpenChange={close}
                 style={{
                   backgroundColor: theme.menuAutoCompleteBackground,
                   color: theme.menuAutoCompleteText,
