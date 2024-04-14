@@ -70,8 +70,8 @@ export function BalanceWithCarryover({
           }}
         >
           <SvgArrowThinRight
-            width={7}
-            height={7}
+            width={carryoverStyle?.width || 7}
+            height={carryoverStyle?.height || 7}
             style={makeAmountStyle(balanceValue, goalValue, budgetedValue)}
           />
         </View>
