@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   type FocusEventHandler,
+  type FocusEvent,
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -53,34 +54,29 @@ export function PercentInput({
     }
   }, [focused]);
 
-  function onSelectionChange(e) {
-    const selectionStart = e.target.selectionStart;
-    const selectionEnd = e.target.selectionEnd;
+  function onSelectionChange() {
+    if (!ref.current) {
+      return;
+    }
+
+    const selectionStart = ref.current.selectionStart;
+    const selectionEnd = ref.current.selectionEnd;
     if (
       selectionStart === selectionEnd &&
-      selectionStart >= e.target.value.length
+      selectionStart !== null &&
+      selectionStart >= ref.current.value.length
     ) {
-      e.target.setSelectionRange(
-        e.target.value.length - 1,
-        e.target.value.length - 1,
+      ref.current.setSelectionRange(
+        ref.current.value.length - 1,
+        ref.current.value.length - 1,
       );
     }
   }
 
-  function onInputTextChange(val) {
+  function onInputTextChange(val: string) {
     const number = val.replace(/[^0-9.]/g, '');
-    console.log(val);
-
     setValue(number ? format(number, 'percentage') : '');
     onChangeValue?.(number);
-
-    const selectionStart = ref.current?.selectionStart;
-    const selectionEnd = ref.current?.selectionEnd;
-    console.log(selectionStart, selectionEnd, val.length);
-    if (selectionStart === selectionEnd && selectionStart >= val.length) {
-      console.log('set range to', val.length - 1, val.length - 1);
-      ref.current?.setSelectionRange(val.length - 1, val.length - 1);
-    }
   }
 
   function fireUpdate() {
@@ -91,7 +87,7 @@ export function PercentInput({
     onUpdate?.(valueOrInitial);
   }
 
-  function onInputAmountBlur(e) {
+  function onInputAmountBlur(e: FocusEvent<HTMLInputElement>) {
     if (!ref.current?.contains(e.relatedTarget)) {
       fireUpdate();
     }
