@@ -3,7 +3,6 @@ import React, {
   useContext,
   useEffect,
   type ChangeEvent,
-  type ComponentPropsWithoutRef,
 } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -15,17 +14,12 @@ import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { View } from '../../common/View';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
-import { Tooltip } from '../../tooltips';
 
-type HoldTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
+type HoldTooltipProps = {
   onSubmit: (amount: number) => void;
+  onClose: () => void;
 };
-export function HoldTooltip({
-  onSubmit,
-  onClose,
-  position = 'bottom-right',
-  ...props
-}: HoldTooltipProps) {
+export function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
   const spreadsheet = useSpreadsheet();
   const sheetName = useContext(NamespaceContext);
 
@@ -52,13 +46,7 @@ export function HoldTooltip({
   }
 
   return (
-    <Tooltip
-      position={position}
-      width={200}
-      style={{ padding: 10 }}
-      onClose={onClose}
-      {...props}
-    >
+    <View style={{ padding: 10 }}>
       <View style={{ marginBottom: 5 }}>Hold this amount:</View>
       <View>
         <InitialFocus>
@@ -89,6 +77,6 @@ export function HoldTooltip({
           Hold
         </Button>
       </View>
-    </Tooltip>
+    </View>
   );
 }
