@@ -30,9 +30,14 @@ function CustomLabel({
 
   const yOffset = barHeight < 25 ? 105 : y;
 
-  const xOffsets = {
-    right: 5,
-    left: -valueLengthOffset,
+  const labelXOffsets = {
+    right: 6,
+    left: -valueLengthOffset + 1,
+  };
+
+  const valueXOffsets = {
+    right: 6,
+    left: -valueLengthOffset + 2,
   };
 
   const anchorValue = {
@@ -43,7 +48,7 @@ function CustomLabel({
   return (
     <>
       <text
-        x={x + barWidth + xOffsets[position]}
+        x={x + barWidth + labelXOffsets[position]}
         y={yOffset + 10}
         textAnchor={anchorValue[position]}
         fill={theme.tableText}
@@ -51,8 +56,8 @@ function CustomLabel({
         {name}
       </text>
       <text
-        x={x + barWidth + xOffsets[position]}
-        y={yOffset + 25}
+        x={x + barWidth + valueXOffsets[position]}
+        y={yOffset + 26}
         textAnchor={anchorValue[position]}
         fill={theme.tableText}
       >
