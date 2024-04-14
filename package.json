@@ -29,7 +29,7 @@
     "express-response-size": "^0.0.3",
     "jws": "^4.0.0",
     "migrate": "^2.0.1",
-    "nordigen-node": "^1.3.0",
+    "nordigen-node": "^1.4.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

@@ -15,6 +15,8 @@ export default {
     'NORWEGIAN_FI_NORWNOK1',
   ],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

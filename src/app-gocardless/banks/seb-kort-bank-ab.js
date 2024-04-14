@@ -8,6 +8,8 @@ import {
 export default {
   institutionIds: ['SEB_KORT_AB_SE_SKHSFI21'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

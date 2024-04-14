@@ -81,7 +81,6 @@ export type GetTransactionsResponse = {
 
 export type CreateRequisitionParams = {
   institutionId: string;
-  accessValidForDays: number;
 
   /**
    * Host of your frontend app - on this host you will be redirected after linking with bank

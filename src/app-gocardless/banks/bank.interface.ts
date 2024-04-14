@@ -6,6 +6,9 @@ import { Transaction, Balance } from '../gocardless-node.types.js';
 
 export interface IBank {
   institutionIds: string[];
+
+  accessValidForDays: number;
+
   /**
    * Returns normalized object with required data for the frontend
    */

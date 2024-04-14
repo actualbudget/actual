@@ -22,6 +22,8 @@ export default {
     'ANDELSKASSEN_FALLESKASSEN_FAELDKK1',
   ],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

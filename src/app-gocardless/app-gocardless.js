@@ -40,11 +40,10 @@ app.post('/status', async (req, res) => {
 app.post(
   '/create-web-token',
   handleError(async (req, res) => {
-    const { accessValidForDays, institutionId } = req.body;
+    const { institutionId } = req.body;
     const { origin } = req.headers;
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
-      accessValidForDays,
       institutionId,
       host: origin,
     });

@@ -22,6 +22,8 @@ export default {
     'BNP_BE_GEBABEBB',
   ],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

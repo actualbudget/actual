@@ -4,6 +4,8 @@ import { amountToInteger, sortByBookingDateOrValueDate } from '../utils.js';
 export default {
   institutionIds: ['AMERICAN_EXPRESS_AESUDEF1'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

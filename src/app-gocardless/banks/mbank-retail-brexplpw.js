@@ -4,6 +4,8 @@ import { printIban, amountToInteger } from '../utils.js';
 export default {
   institutionIds: ['MBANK_RETAIL_BREXPLPW'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

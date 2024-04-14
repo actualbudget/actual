@@ -1639,7 +1639,7 @@ __metadata:
     jest: "npm:^29.3.1"
     jws: "npm:^4.0.0"
     migrate: "npm:^2.0.1"
-    nordigen-node: "npm:^1.3.0"
+    nordigen-node: "npm:^1.4.0"
     prettier: "npm:^2.8.3"
     supertest: "npm:^6.3.1"
     typescript: "npm:^4.9.5"
@@ -4856,13 +4856,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nordigen-node@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "nordigen-node@npm:1.3.0"
+"nordigen-node@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "nordigen-node@npm:1.4.0"
   dependencies:
     axios: "npm:^1.2.1"
     dotenv: "npm:^10.0.0"
-  checksum: 033771af257ecf8e36a375b07e10246b08d23b647ef2db737b6efe52a1bcd68f04c88c2aff6790d4cbcd00da0148550247624142a6eea7444d370b2e65f08fc8
+  checksum: a04ec90480e4e65b2169d909ac9ea3044f764d59283162420d287a6b229808754dc78c758637724d63c87aa77f2237bc47543f521b0b4057ed3980d6db137e1a
   languageName: node
   linkType: hard
 

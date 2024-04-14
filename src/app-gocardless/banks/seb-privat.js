@@ -8,12 +8,10 @@ import {
 /** @type {import('./bank.interface.js').IBank} */
 export default {
   institutionIds: ['SEB_ESSESESS_PRIVATE'],
-  normalizeAccount(account) {
-    console.log(
-      'Available account properties for new institution integration',
-      { account: JSON.stringify(account) },
-    );
 
+  accessValidForDays: 180,
+
+  normalizeAccount(account) {
     return {
       account_id: account.id,
       institution: account.institution,
@@ -48,10 +46,6 @@ export default {
   },
 
   sortTransactions(transactions = []) {
-    console.log(
-      'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-      { top10Transactions: JSON.stringify(transactions.slice(0, 10)) },
-    );
     return sortByBookingDateOrValueDate(transactions);
   },
 

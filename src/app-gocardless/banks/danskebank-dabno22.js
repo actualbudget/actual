@@ -8,6 +8,8 @@ import {
 export default {
   institutionIds: ['DANSKEBANK_DABANO22'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

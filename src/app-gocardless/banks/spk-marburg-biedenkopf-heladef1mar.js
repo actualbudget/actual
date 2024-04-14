@@ -19,6 +19,8 @@ const SORTED_BALANCE_TYPE_LIST = [
 export default {
   institutionIds: ['SPK_MARBURG_BIEDENKOPF_HELADEF1MAR'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return {
       account_id: account.id,

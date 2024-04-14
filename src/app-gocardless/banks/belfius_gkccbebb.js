@@ -4,6 +4,8 @@ import Fallback from './integration-bank.js';
 export default {
   institutionIds: ['BELFIUS_GKCCBEBB'],
 
+  accessValidForDays: 180,
+
   normalizeAccount(account) {
     return Fallback.normalizeAccount(account);
   },
