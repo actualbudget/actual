@@ -5,7 +5,7 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToCurrency, stringToInteger } from 'loot-core/src/shared/util';
+import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -37,7 +37,7 @@ import { fromDateRepr } from '../util';
 export function CustomReport() {
   const categories = useCategories();
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = stringToInteger(_firstDayOfWeekIdx || '0');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || 0;
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');

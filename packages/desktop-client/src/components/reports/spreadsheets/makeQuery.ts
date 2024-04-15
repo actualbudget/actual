@@ -14,13 +14,11 @@ export function makeQuery(
   filters: unknown[],
 ) {
   const intervalGroup =
-    interval === 'Weekly'
-      ? { $day: '$date' }
-      : interval === 'Daily'
-        ? { $day: '$date' }
-        : interval === 'Monthly'
-          ? { $month: '$date' }
-          : { $year: '$date' };
+    interval === 'Monthly'
+      ? { $month: '$date' }
+      : interval === 'Yearly'
+        ? { $year: '$date' }
+        : { $day: '$date' };
   const intervalFilter =
     interval === 'Weekly'
       ? '$day'

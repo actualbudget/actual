@@ -47,7 +47,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
-  firstDayOfWeekIdx?: number;
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   setDataCheck?: (value: boolean) => void;
 };
 

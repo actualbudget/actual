@@ -5,7 +5,7 @@ export function validateStart(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: number,
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ) {
   let addDays;
   let dateStart;
@@ -45,7 +45,7 @@ export function validateEnd(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: number,
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ) {
   let subDays;
   let dateEnd;
@@ -96,7 +96,7 @@ function boundedRange(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: number,
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ) {
   let latest;
   switch (interval) {
@@ -130,7 +130,7 @@ export function getSpecificRange(
   offset: number,
   addNumber: number | null,
   type?: string,
-  firstDayOfWeekIdx?: number,
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ) {
   const currentDay = monthUtils.currentDay();
 
