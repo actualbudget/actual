@@ -11,7 +11,7 @@ import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button';
 import { BigInput } from '../../common/Input';
-import { ButtonLink } from '../../common/Link';
+import { Link } from '../../common/Link';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
@@ -151,13 +151,14 @@ export function Login() {
           }}
         >
           {error && (
-            <ButtonLink
+            <Link
+              variant='button'
               type="primary"
               style={{ fontSize: 15 }}
               to={'/login/password?error=' + error}
             >
               Login with Password
-            </ButtonLink>
+            </Link>
           )}
           {!error && (
             <span>
