@@ -161,7 +161,7 @@ export function CategoryAutocomplete({
   showHiddenCategories,
   ...props
 }: CategoryAutocompleteProps) {
-  const { grouped: defaultCategoryGroups } = useCategories();
+  const { grouped: defaultCategoryGroups = [] } = useCategories();
   const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
     () =>
       (categoryGroups || defaultCategoryGroups).reduce(
@@ -176,7 +176,7 @@ export function CategoryAutocomplete({
           ),
         showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
       ),
-    [categoryGroups, defaultCategoryGroups, showSplitOption],
+    [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
   return (

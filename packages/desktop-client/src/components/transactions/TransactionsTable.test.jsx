@@ -161,6 +161,7 @@ function initBasicServer() {
     getCell: () => ({
       value: 129_87,
     }),
+    'get-categories': () => ({ grouped: categoryGroups, list: categories }),
   });
 }
 
