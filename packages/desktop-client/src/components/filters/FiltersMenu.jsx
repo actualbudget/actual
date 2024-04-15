@@ -40,6 +40,8 @@ import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
 
+let isDatepickerClick = false;
+
 const filterFields = [
   'date',
   'account',
@@ -369,7 +371,32 @@ export function FilterButton({ onApply, compact, hover }) {
         triggerRef={triggerRef}
         placement="bottom start"
         isOpen={state.condOpen}
-        onOpenChange={() => dispatch({ type: 'close' })}
+        onOpenChange={() => {
+          dispatch({ type: 'close' });
+        }}
+        shouldCloseOnInteractOutside={element => {
+          // Disable closing the popover when a reach listbox is clicked (Select component)
+          if (
+            element.getAttribute('data-reach-listbox-list') !== null ||
+            element.getAttribute('data-reach-listbox-option') !== null
+          ) {
+            return false;
+          }
+
+          // Datepicker selections for some reason register 2x clicks
+          // We want to keep the popover open after selecting a date.
+          // So we ignore the "close" event on selection + the subsequent event.
+          if (element.dataset.pikaYear) {
+            isDatepickerClick = true;
+            return false;
+          }
+          if (isDatepickerClick) {
+            isDatepickerClick = false;
+            return false;
+          }
+
+          return true;
+        }}
         style={{ width: 275, padding: 15, color: theme.menuItemText }}
         data-testid="filters-menu-tooltip"
       >
