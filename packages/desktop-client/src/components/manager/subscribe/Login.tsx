@@ -128,7 +128,9 @@ export function Login() {
             autoFocus={true}
             placeholder="Password"
             type="password"
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
             style={{ flex: 1, marginRight: 10 }}
           />
           <ButtonWithLoading
