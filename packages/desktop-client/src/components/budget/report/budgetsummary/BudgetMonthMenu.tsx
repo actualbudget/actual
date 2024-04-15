@@ -39,7 +39,6 @@ export function BudgetMonthMenu({
           case 'set-3-avg':
             onSetMonthsAverage(3);
             break;
-            
           case 'check-templates':
             onCheckTemplates();
             break;
