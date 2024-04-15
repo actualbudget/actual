@@ -375,14 +375,6 @@ export function FilterButton({ onApply, compact, hover }) {
           dispatch({ type: 'close' });
         }}
         shouldCloseOnInteractOutside={element => {
-          // Disable closing the popover when a reach listbox is clicked (Select component)
-          if (
-            element.getAttribute('data-reach-listbox-list') !== null ||
-            element.getAttribute('data-reach-listbox-option') !== null
-          ) {
-            return false;
-          }
-
           // Datepicker selections for some reason register 2x clicks
           // We want to keep the popover open after selecting a date.
           // So we ignore the "close" event on selection + the subsequent event.

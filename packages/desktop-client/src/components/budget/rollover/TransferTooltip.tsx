@@ -39,6 +39,7 @@ export function TransferTooltip({
     if (parsedAmount && categoryId) {
       onSubmit?.(amountToInteger(parsedAmount), categoryId);
     }
+
     onClose();
   };
 
@@ -62,7 +63,8 @@ export function TransferTooltip({
         openOnFocus={true}
         onSelect={(id: string | undefined) => setCategoryId(id || null)}
         inputProps={{
-          onEnter: () => _onSubmit(amount, categoryId),
+          onEnter: event =>
+            !event.defaultPrevented && _onSubmit(amount, categoryId),
           placeholder: '(none)',
         }}
         showHiddenCategories={true}

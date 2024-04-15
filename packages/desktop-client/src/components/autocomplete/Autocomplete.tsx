@@ -481,35 +481,37 @@ function SingleAutocomplete<T extends Item>({
 
                   // If the dropdown is open, an item is highlighted, and the user
                   // pressed enter, always capture that and handle it ourselves
-                  if (e.key === 'Enter') {
-                    if (highlightedIndex != null) {
-                      if (
-                        inst.lastChangeType ===
-                        Downshift.stateChangeTypes.itemMouseEnter
-                      ) {
-                        // If the last thing the user did was hover an item, intentionally
-                        // ignore the default behavior of selecting the item. It's too
-                        // common to accidentally hover an item and then save it
-                        e.preventDefault();
-                      } else {
-                        // Otherwise, stop propagation so that the table navigator
-                        // doesn't handle it
+                  if (isOpen) {
+                    if (e.key === 'Enter') {
+                      if (highlightedIndex != null) {
+                        if (
+                          inst.lastChangeType ===
+                          Downshift.stateChangeTypes.itemMouseEnter
+                        ) {
+                          // If the last thing the user did was hover an item, intentionally
+                          // ignore the default behavior of selecting the item. It's too
+                          // common to accidentally hover an item and then save it
+                          e.preventDefault();
+                        } else {
+                          // Otherwise, stop propagation so that the table navigator
+                          // doesn't handle it
+                          e.stopPropagation();
+                        }
+                      } else if (!strict) {
+                        // Handle it ourselves
                         e.stopPropagation();
+                        onSelect(value, (e.target as HTMLInputElement).value);
+                        return onSelectAfter();
+                      } else {
+                        // No highlighted item, still allow the table to save the item
+                        // as `null`, even though we're allowing the table to move
+                        e.preventDefault();
+                        onKeyDown?.(e);
                       }
-                    } else if (!strict) {
-                      // Handle it ourselves
-                      e.stopPropagation();
-                      onSelect(value, (e.target as HTMLInputElement).value);
-                      return onSelectAfter();
-                    } else {
-                      // No highlighted item, still allow the table to save the item
-                      // as `null`, even though we're allowing the table to move
+                    } else if (shouldSaveFromKey(e)) {
                       e.preventDefault();
                       onKeyDown?.(e);
                     }
-                  } else if (shouldSaveFromKey(e)) {
-                    e.preventDefault();
-                    onKeyDown?.(e);
                   }
 
                   // Handle escape ourselves
