@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { useState, useEffect } from 'react';
+import React, { type ChangeEvent, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 
