@@ -18,6 +18,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
+import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
@@ -133,7 +134,7 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<
   typeof Autocomplete<CategoryAutocompleteItem>
 > & {
-  categoryGroups: Array<CategoryGroupEntity>;
+  categoryGroups?: Array<CategoryGroupEntity>;
   showBalances?: boolean;
   showSplitOption?: boolean;
   renderSplitTransactionButton?: (
@@ -160,9 +161,10 @@ export function CategoryAutocomplete({
   showHiddenCategories,
   ...props
 }: CategoryAutocompleteProps) {
+  const { grouped: defaultCategoryGroups } = useCategories();
   const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
     () =>
-      categoryGroups.reduce(
+      (categoryGroups || defaultCategoryGroups).reduce(
         (list, group) =>
           list.concat(
             (group.categories || [])
@@ -174,7 +176,7 @@ export function CategoryAutocomplete({
           ),
         showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
       ),
-    [showSplitOption, categoryGroups],
+    [categoryGroups, defaultCategoryGroups, showSplitOption],
   );
 
   return (

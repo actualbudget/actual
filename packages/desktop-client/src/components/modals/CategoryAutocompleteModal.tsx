@@ -77,7 +77,7 @@ export function CategoryAutocompleteModal({
           )}
           <View style={{ flex: 1 }}>
             <NamespaceContext.Provider
-              value={monthUtils.sheetForMonth(month || '')}
+              value={month ? monthUtils.sheetForMonth(month) : ''}
             >
               <CategoryAutocomplete
                 focused={true}
