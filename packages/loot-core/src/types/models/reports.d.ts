@@ -52,6 +52,8 @@ export type ItemEntity = {
 };
 
 export type IntervalData = {
+  change: number;
+  dateLookup: string;
   date: string;
   totalAssets: number;
   totalDebts: number;

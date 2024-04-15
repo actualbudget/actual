@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { type RefProp } from 'react-spring';
 
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
@@ -22,12 +22,14 @@ type ReportTableProps = {
   handleScroll: UIEventHandler<HTMLDivElement>;
   groupBy: string;
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
-  data: DataEntity[];
+  data: GroupedEntity;
   mode: string;
   intervalsCount: number;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export function ReportTable({
@@ -42,6 +44,8 @@ export function ReportTable({
   compact,
   style,
   compactStyle,
+  showHiddenCategories,
+  showOffBudget,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +58,9 @@ export function ReportTable({
   const renderItem = useCallback(
     ({
       item,
-      groupByItem,
+      startDate,
+      endDate,
+      groupBy,
       mode,
       intervalsCount,
       compact,
@@ -65,12 +71,16 @@ export function ReportTable({
         <ReportTableRow
           item={item}
           balanceTypeOp={balanceTypeOp}
-          groupByItem={groupByItem}
+          startDate={startDate}
+          endDate={endDate}
+          groupBy={groupBy}
           mode={mode}
           intervalsCount={intervalsCount}
           compact={compact}
           style={style}
           compactStyle={compactStyle}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
       );
     },
