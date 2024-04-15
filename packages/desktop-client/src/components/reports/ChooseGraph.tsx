@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../style';
 import { styles } from '../../style/styles';
@@ -23,6 +24,7 @@ type ChooseGraphProps = {
   startDate: string;
   endDate: string;
   data: GroupedEntity;
+  filters?: RuleConditionEntity[];
   mode: string;
   graphType: string;
   balanceType: string;
@@ -40,6 +42,7 @@ export function ChooseGraph({
   startDate,
   endDate,
   data,
+  filters,
   mode,
   graphType,
   balanceType,
@@ -105,6 +108,7 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
@@ -122,6 +126,7 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}

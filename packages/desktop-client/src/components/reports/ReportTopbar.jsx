@@ -171,6 +171,14 @@ export function ReportTopbar({
         compact
         hover
         onApply={e => {
+          const storedReport = JSON.parse(sessionStorage.getItem('report'));
+          sessionStorage.setItem(
+            'report',
+            JSON.stringify({
+              ...storedReport,
+              conditions: [...customReportItems.conditions, e],
+            }),
+          );
           onApplyFilter(e);
           onReportChange({ type: 'modify' });
         }}

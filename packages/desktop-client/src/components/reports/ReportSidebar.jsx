@@ -199,6 +199,14 @@ export function ReportSidebar({
           <Select
             value={customReportItems.interval}
             onChange={e => {
+              const storedReport = JSON.parse(sessionStorage.getItem('report'));
+              sessionStorage.setItem(
+                'report',
+                JSON.stringify({
+                  ...storedReport,
+                  interval: e,
+                }),
+              );
               setInterval(e);
               onReportChange({ type: 'modify' });
               if (

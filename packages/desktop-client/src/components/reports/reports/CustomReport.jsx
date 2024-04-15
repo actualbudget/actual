@@ -101,7 +101,11 @@ export function CustomReport() {
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
-    location.state ? (location.state.report ? 'saved' : 'new') : 'new',
+    location.state
+      ? location.state.report
+        ? 'saved'
+        : loadReport.savedStatus ?? 'new'
+      : loadReport.savedStatus ?? 'new',
   );
 
   useEffect(() => {
@@ -386,8 +390,16 @@ export function CustomReport() {
   };
 
   const onReportChange = ({ savedReport, type }) => {
+    const storedReport = JSON.parse(sessionStorage.getItem('report'));
     switch (type) {
       case 'add-update':
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({
+            ...storedReport,
+            savedStatus: 'saved',
+          }),
+        );
         setSavedStatus('saved');
         setReport(savedReport);
         break;
@@ -396,11 +408,24 @@ export function CustomReport() {
         break;
       case 'modify':
         if (report.name) {
+          sessionStorage.setItem(
+            'report',
+            JSON.stringify({
+              ...storedReport,
+              savedStatus: 'modified',
+            }),
+          );
           setSavedStatus('modified');
         }
         break;
       case 'reload':
-        sessionStorage.clear();
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({
+            ...report,
+            savedStatus: 'saved',
+          }),
+        );
         setSavedStatus('saved');
         setReportData(report);
         break;
@@ -411,7 +436,13 @@ export function CustomReport() {
         setReportData(defaultReport);
         break;
       case 'choose':
-        sessionStorage.clear();
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({
+            ...savedReport,
+            savedStatus: 'saved',
+          }),
+        );
         setSavedStatus('saved');
         setReport(savedReport);
         setReportData(savedReport);
@@ -501,10 +532,35 @@ export function CustomReport() {
             >
               <AppliedFilters
                 filters={filters}
-                onUpdate={onUpdateFilter}
-                onDelete={filter =>
-                  onChangeAppliedFilter(filter, onDeleteFilter)
-                }
+                onUpdate={(oldFilter, newFilter) => {
+                  const storedReport = JSON.parse(
+                    sessionStorage.getItem('report'),
+                  );
+                  sessionStorage.setItem(
+                    'report',
+                    JSON.stringify({
+                      ...storedReport,
+                      conditions: filters.map(f =>
+                        f === oldFilter ? newFilter : f,
+                      ),
+                    }),
+                  );
+                  onReportChange({ type: 'modify' });
+                  onUpdateFilter(oldFilter, newFilter);
+                }}
+                onDelete={deletedFilter => {
+                  const storedReport = JSON.parse(
+                    sessionStorage.getItem('report'),
+                  );
+                  sessionStorage.setItem(
+                    'report',
+                    JSON.stringify({
+                      ...storedReport,
+                      conditions: filters.filter(f => f !== deletedFilter),
+                    }),
+                  );
+                  onChangeAppliedFilter(deletedFilter, onDeleteFilter);
+                }}
                 conditionsOp={conditionsOp}
                 onCondOpChange={filter =>
                   onChangeAppliedFilter(filter, onCondOpChange)
@@ -566,6 +622,7 @@ export function CustomReport() {
                     startDate={startDate}
                     endDate={endDate}
                     data={data}
+                    filters={filters}
                     mode={mode}
                     graphType={graphType}
                     balanceType={balanceType}
