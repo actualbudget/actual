@@ -362,7 +362,7 @@ function BudgetInner(props: BudgetInnerProps) {
       pushModal('switch-budget-type', {
         onSwitch: () => {
           onSwitchBudgetType?.();
-          dispatch(collapseModals('budget-month-menu'));
+          dispatch(collapseModals('budget-page-menu'));
         },
       }),
     );
@@ -374,15 +374,35 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onToggleHiddenCategories = () => {
     setShowHiddenCategoriesPref(!showHiddenCategories);
-    dispatch(collapseModals('budget-month-menu'));
+    dispatch(collapseModals('budget-page-menu'));
+  };
+
+  const onOpenBudgetPageMenu = month => {
+    dispatch(
+      pushModal('budget-page-menu', {
+        month,
+        onToggleHiddenCategories,
+        onSwitchBudgetType: _onSwitchBudgetType,
+      }),
+    );
+  };
+
+  const onEditBudgetMonthNotes = id => {
+    dispatch(
+      pushModal('notes', {
+        id,
+        name: monthUtils.format(currentMonth, 'MMMM ‘yy'),
+        onSave: onSaveNotes,
+      }),
+    );
   };
 
   const onOpenBudgetMonthMenu = month => {
     dispatch(
-      pushModal('budget-month-menu', {
+      pushModal(`${budgetType}-budget-month-menu`, {
         month,
-        onToggleHiddenCategories,
-        onSwitchBudgetType: _onSwitchBudgetType,
+        onBudgetAction,
+        onEditNotes: onEditBudgetMonthNotes,
       }),
     );
   };
@@ -435,6 +455,7 @@ function BudgetInner(props: BudgetInnerProps) {
             onRefresh={onRefresh}
             onEditGroup={onEditGroup}
             onEditCategory={onEditCategory}
+            onOpenBudgetPageMenu={onOpenBudgetPageMenu}
             onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
           />
         )}

@@ -6,18 +6,18 @@ import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
-type BudgetMonthMenuModalProps = ComponentPropsWithoutRef<
-  typeof BudgetMonthMenu
+type BudgetPageMenuModalProps = ComponentPropsWithoutRef<
+  typeof BudgetPageMenu
 > & {
   modalProps: CommonModalProps;
 };
 
-export function BudgetMonthMenuModal({
+export function BudgetPageMenuModal({
   modalProps,
   month,
   onToggleHiddenCategories,
   onSwitchBudgetType,
-}: BudgetMonthMenuModalProps) {
+}: BudgetPageMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -38,7 +38,7 @@ export function BudgetMonthMenuModal({
         borderRadius: '6px',
       }}
     >
-      <BudgetMonthMenu
+      <BudgetPageMenu
         month={month}
         getItemStyle={() => defaultMenuItemStyle}
         onToggleHiddenCategories={onToggleHiddenCategories}
@@ -48,7 +48,7 @@ export function BudgetMonthMenuModal({
   );
 }
 
-type BudgetMonthMenuProps = Omit<
+type BudgetPageMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
@@ -57,13 +57,13 @@ type BudgetMonthMenuProps = Omit<
   onSwitchBudgetType: () => void;
 };
 
-function BudgetMonthMenu({
+function BudgetPageMenu({
   // onEditMode,
   month,
   onToggleHiddenCategories,
   onSwitchBudgetType,
   ...props
-}: BudgetMonthMenuProps) {
+}: BudgetPageMenuProps) {
   const isReportBudgetEnabled = useFeatureFlag('reportBudget');
 
   const onMenuSelect = (name: string) => {
