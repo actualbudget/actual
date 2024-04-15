@@ -189,14 +189,6 @@ function parseDate(str) {
   return null;
 }
 
-function parseWeek(str) {
-  const m = str.match(/^(\d{4}-\d{2}-\d{2})$/);
-  if (m) {
-    return typed(dateToInt(m[1]), 'date', { literal: true });
-  }
-  return null;
-}
-
 function parseMonth(str) {
   const m = str.match(/^(\d{4}-\d{2})$/);
   if (m) {
@@ -222,7 +214,6 @@ function inferParam(param, type) {
   if (existingType) {
     const casts = {
       date: ['string'],
-      'date-week': ['date'],
       'date-month': ['date'],
       'date-year': ['date', 'date-month'],
       id: ['string'],
@@ -321,23 +312,6 @@ function castInput(state, expr, type) {
         'date-year',
       );
     }
-  } else if (type === 'date-week') {
-    let expr2;
-    if (expr.type === 'date') {
-      expr2 = expr;
-    } else if (expr.type === 'string') {
-      expr2 =
-        parseWeek(expr.value) ||
-        parseDate(expr.value) ||
-        badDateFormat(expr.value, 'date-week');
-    } else {
-      throw new CompileError(`Can’t cast ${expr.type} to date-week`);
-    }
-    return typed(
-      // eslint-disable-next-line rulesdir/typography
-      `CAST(strftime('%Y%m%d',datetime(substr(${expr2.value}, 1, 4) || '-' || substr(${expr2.value}, 5, 2) || '-' || substr(${expr2.value}, 7, 2)), 'weekday ${test}', '-6 days') AS integer)`,
-      'date-week',
-    );
   } else if (type === 'id') {
     if (expr.type === 'string') {
       return typed(expr.value, 'id', { literal: expr.literal });
