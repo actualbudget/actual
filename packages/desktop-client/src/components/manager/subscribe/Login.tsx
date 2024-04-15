@@ -152,7 +152,7 @@ export function Login() {
         >
           {error && (
             <Link
-              variant='button'
+              variant="button"
               type="primary"
               style={{ fontSize: 15 }}
               to={'/login/password?error=' + error}
