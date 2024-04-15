@@ -30,7 +30,7 @@ export function NotesButton({
 }: NotesButtonProps) {
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const note = useNotes(id);
+  const note = useNotes(id) || '';
   const hasNotes = note && note !== '';
 
   const [tempNotes, setTempNotes] = useState<string>(note);
