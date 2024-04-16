@@ -33,7 +33,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install flatpak-builder
-          flaptak install org.freedesktop.Sdk/x86_64/23.08 -y
+          flatpak install org.freedesktop.Sdk/x86_64/23.08 -y
           flatpak install org.freedesktop.Platform/x86_64/23.08 -y
           flatpak install org.electronjs.Electron2.BaseApp/x86_64/23.08 -y
       - name: Set up environment
