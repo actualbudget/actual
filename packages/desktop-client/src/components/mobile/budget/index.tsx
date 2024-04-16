@@ -111,18 +111,19 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
-  const onAddGroup = () => {
+  const onOpenNewCategoryGroupModal = () => {
     dispatch(
       pushModal('new-category-group', {
         onValidate: name => (!name ? 'Name is required.' : null),
         onSubmit: async name => {
+          dispatch(collapseModals(`${budgetType}-budget-month-menu`));
           dispatch(createGroup(name));
         },
       }),
     );
   };
 
-  const onAddCategory = (groupId, isIncome) => {
+  const onOpenNewCategoryModal = (groupId, isIncome) => {
     dispatch(
       pushModal('new-category', {
         onValidate: name => (!name ? 'Name is required.' : null),
@@ -309,7 +310,7 @@ function BudgetInner(props: BudgetInnerProps) {
     await send('notes-save', { id, note: notes });
   };
 
-  const onEditGroupNotes = id => {
+  const onOpenCategoryGroupNotesModal = id => {
     const group = categoryGroups.find(g => g.id === id);
     dispatch(
       pushModal('notes', {
@@ -320,7 +321,7 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   };
 
-  const onEditCategoryNotes = id => {
+  const onOpenCategoryNotesModal = id => {
     const category = categories.find(c => c.id === id);
     dispatch(
       pushModal('notes', {
@@ -331,38 +332,38 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   };
 
-  const onEditGroup = id => {
+  const onOpenCategoryGroupMenuModal = id => {
     const group = categoryGroups.find(g => g.id === id);
     dispatch(
       pushModal('category-group-menu', {
         groupId: group.id,
         onSave: onSaveGroup,
-        onAddCategory,
-        onEditNotes: onEditGroupNotes,
+        onAddCategory: onOpenNewCategoryModal,
+        onEditNotes: onOpenCategoryGroupNotesModal,
         onDelete: onDeleteGroup,
       }),
     );
   };
 
-  const onEditCategory = id => {
+  const onOpenCategoryMenuModal = id => {
     const category = categories.find(c => c.id === id);
     dispatch(
       pushModal('category-menu', {
         categoryId: category.id,
         onSave: onSaveCategory,
-        onEditNotes: onEditCategoryNotes,
+        onEditNotes: onOpenCategoryNotesModal,
         onDelete: onDeleteCategory,
         onBudgetAction,
       }),
     );
   };
 
-  const _onSwitchBudgetType = () => {
+  const onOpenSwitchBudgetTypeModal = () => {
     dispatch(
       pushModal('switch-budget-type', {
         onSwitch: () => {
-          onSwitchBudgetType?.();
-          dispatch(collapseModals('budget-page-menu'));
+          onSwitchBudgetType();
+          dispatch(collapseModals(`${budgetType}-budget-month-menu`));
         },
       }),
     );
@@ -374,20 +375,10 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onToggleHiddenCategories = () => {
     setShowHiddenCategoriesPref(!showHiddenCategories);
-    dispatch(collapseModals('budget-page-menu'));
+    dispatch(collapseModals(`${budgetType}-budget-month-menu`));
   };
 
-  const onOpenBudgetPageMenu = month => {
-    dispatch(
-      pushModal('budget-page-menu', {
-        month,
-        onToggleHiddenCategories,
-        onSwitchBudgetType: _onSwitchBudgetType,
-      }),
-    );
-  };
-
-  const onEditBudgetMonthNotes = id => {
+  const onOpenBudgetMonthNotesModal = id => {
     dispatch(
       pushModal('notes', {
         id,
@@ -401,8 +392,11 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(
       pushModal(`${budgetType}-budget-month-menu`, {
         month,
+        onAddCategoryGroup: onOpenNewCategoryGroupModal,
+        onToggleHiddenCategories,
+        onSwitchBudgetType: onOpenSwitchBudgetTypeModal,
         onBudgetAction,
-        onEditNotes: onEditBudgetMonthNotes,
+        onEditNotes: onOpenBudgetMonthNotesModal,
       }),
     );
   };
@@ -445,17 +439,15 @@ function BudgetInner(props: BudgetInnerProps) {
             onNextMonth={onNextMonth}
             onSaveGroup={onSaveGroup}
             onDeleteGroup={onDeleteGroup}
-            onAddGroup={onAddGroup}
-            onAddCategory={onAddCategory}
+            onAddCategory={onOpenNewCategoryModal}
             onSaveCategory={onSaveCategory}
             onDeleteCategory={onDeleteCategory}
             onReorderCategory={onReorderCategory}
             onReorderGroup={onReorderGroup}
             onBudgetAction={onBudgetAction}
             onRefresh={onRefresh}
-            onEditGroup={onEditGroup}
-            onEditCategory={onEditCategory}
-            onOpenBudgetPageMenu={onOpenBudgetPageMenu}
+            onEditGroup={onOpenCategoryGroupMenuModal}
+            onEditCategory={onOpenCategoryMenuModal}
             onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
           />
         )}

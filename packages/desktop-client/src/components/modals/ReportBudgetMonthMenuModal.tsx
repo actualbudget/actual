@@ -1,24 +1,37 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type ComponentPropsWithoutRef, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { type NoteEntity } from 'loot-core/src/types/models';
 
-import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
-import { SvgNotesPaper } from '../../icons/v2';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import {
+  SvgAdd,
+  SvgCheveronDown,
+  SvgCheveronUp,
+  SvgCog,
+  SvgSwap,
+} from '../../icons/v1';
+import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
 import { Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
+import { Tooltip } from '../tooltips';
 
 type ReportBudgetMonthMenuModalProps = {
   modalProps: CommonModalProps;
   month: string;
+  onAddCategoryGroup: () => void;
+  onToggleHiddenCategories: () => void;
+  onSwitchBudgetType: () => void;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onEditNotes: (id: string) => void;
   onClose?: () => void;
@@ -27,6 +40,9 @@ type ReportBudgetMonthMenuModalProps = {
 export function ReportBudgetMonthMenuModal({
   modalProps,
   month,
+  onAddCategoryGroup,
+  onToggleHiddenCategories,
+  onSwitchBudgetType,
   onBudgetAction,
   onEditNotes,
   onClose,
@@ -59,9 +75,7 @@ export function ReportBudgetMonthMenuModal({
     height: styles.mobileMinHeight,
     color: theme.formLabelText,
     // Adjust based on desired number of buttons per row.
-    flexBasis: '48%',
-    marginLeft: '1%',
-    marginRight: '1%',
+    flexBasis: '100%',
   };
 
   const [showMore, setShowMore] = useState(false);
@@ -77,10 +91,17 @@ export function ReportBudgetMonthMenuModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
+      leftHeaderContent={
+        <AdditionalMenu
+          onAddCategoryGroup={onAddCategoryGroup}
+          onToggleHiddenCategories={onToggleHiddenCategories}
+          onSwitchBudgetType={onSwitchBudgetType}
+        />
+      }
       padding={0}
       style={{
         flex: 1,
-        minHeight: '45vh',
+        height: '45vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}
@@ -93,9 +114,9 @@ export function ReportBudgetMonthMenuModal({
       >
         <View
           style={{
+            display: showMore ? 'none' : undefined,
             overflowY: 'auto',
             flex: 1,
-            maxHeight: '30vh',
           }}
         >
           <Notes
@@ -114,34 +135,58 @@ export function ReportBudgetMonthMenuModal({
         </View>
         <View
           style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignContent: 'space-between',
             paddingTop: 10,
             paddingBottom: 10,
           }}
         >
-          <Button style={buttonStyle} onClick={onShowMore}>
-            {!showMore ? (
-              <SvgCheveronDown
+          <View
+            style={{
+              display: showMore ? 'none' : undefined,
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignContent: 'space-between',
+            }}
+          >
+            <Button style={buttonStyle} onClick={_onEditNotes}>
+              <SvgNotesPaper
                 width={20}
                 height={20}
                 style={{ paddingRight: 5 }}
               />
-            ) : (
-              <SvgCheveronUp
-                width={20}
-                height={20}
-                style={{ paddingRight: 5 }}
-              />
-            )}
-            Actions
-          </Button>
-          <Button style={buttonStyle} onClick={_onEditNotes}>
-            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
-            Edit notes
-          </Button>
+              Edit notes
+            </Button>
+          </View>
+          <View>
+            <Button
+              type="bare"
+              style={buttonStyle}
+              activeStyle={{
+                backgroundColor: 'transparent',
+                color: buttonStyle.color,
+              }}
+              hoveredStyle={{
+                backgroundColor: 'transparent',
+                color: buttonStyle.color,
+              }}
+              onClick={onShowMore}
+            >
+              {!showMore ? (
+                <SvgCheveronUp
+                  width={30}
+                  height={30}
+                  style={{ paddingRight: 5 }}
+                />
+              ) : (
+                <SvgCheveronDown
+                  width={30}
+                  height={30}
+                  style={{ paddingRight: 5 }}
+                />
+              )}
+              Actions
+            </Button>
+          </View>
         </View>
         {showMore && (
           <BudgetMonthMenu
@@ -175,5 +220,98 @@ export function ReportBudgetMonthMenuModal({
         )}
       </View>
     </Modal>
+  );
+}
+
+type AdditonalMenuProps = Omit<
+  ComponentPropsWithoutRef<typeof Menu>,
+  'onMenuSelect' | 'items'
+> & {
+  onAddCategoryGroup: () => void;
+  onToggleHiddenCategories: () => void;
+  onSwitchBudgetType: () => void;
+};
+
+function AdditionalMenu({
+  onAddCategoryGroup,
+  onToggleHiddenCategories,
+  onSwitchBudgetType,
+}: AdditonalMenuProps) {
+  const isReportBudgetEnabled = useFeatureFlag('reportBudget');
+  const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const itemStyle: CSSProperties = {
+    ...styles.mediumText,
+    height: styles.mobileMinHeight,
+  };
+
+  const onMenuSelect = (name: string) => {
+    switch (name) {
+      case 'add-category-group':
+        onAddCategoryGroup?.();
+        break;
+      case 'toggle-hidden-categories':
+        onToggleHiddenCategories?.();
+        break;
+      case 'switch-budget-type':
+        onSwitchBudgetType?.();
+        break;
+      default:
+        throw new Error(`Unrecognized menu item: ${name}`);
+    }
+    setMenuOpen(false);
+  };
+
+  return (
+    <View>
+      <Button
+        type="bare"
+        aria-label="Menu"
+        onClick={() => {
+          setMenuOpen(true);
+        }}
+      >
+        <SvgCog width={17} height={17} style={{ color: 'currentColor' }} />
+      </Button>
+      {menuOpen && (
+        <Tooltip
+          position="bottom-left"
+          style={{ padding: 0 }}
+          onClose={() => {
+            setMenuOpen(false);
+          }}
+        >
+          <Menu
+            getItemStyle={() => itemStyle}
+            onMenuSelect={onMenuSelect}
+            items={[
+              {
+                name: 'add-category-group',
+                text: 'Add category group',
+                icon: SvgAdd,
+                iconSize: 16,
+              },
+              {
+                name: 'toggle-hidden-categories',
+                text: `${!showHiddenCategories ? 'Show' : 'Hide'} hidden categories`,
+                icon: !showHiddenCategories ? SvgViewShow : SvgViewHide,
+                iconSize: 16,
+              },
+              ...(isReportBudgetEnabled
+                ? [
+                    {
+                      name: 'switch-budget-type',
+                      text: 'Switch budget type',
+                      icon: SvgSwap,
+                      iconSize: 16,
+                    },
+                  ]
+                : []),
+            ]}
+          />
+        </Tooltip>
+      )}
+    </View>
   );
 }

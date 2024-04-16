@@ -11,7 +11,6 @@ import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgLogo } from '../../../icons/logo';
 import {
-  SvgAdd,
   SvgArrowThinLeft,
   SvgArrowThinRight,
   SvgCheveronDown,
@@ -1154,7 +1153,6 @@ export function BudgetTable({
   onNextMonth,
   onSaveGroup,
   onDeleteGroup,
-  onAddGroup,
   onAddCategory,
   onSaveCategory,
   onDeleteCategory,
@@ -1165,7 +1163,6 @@ export function BudgetTable({
   onRefresh,
   onEditGroup,
   onEditCategory,
-  onOpenBudgetPageMenu,
   onOpenBudgetMonthMenu,
 }) {
   const { width } = useResponsive();
@@ -1203,25 +1200,10 @@ export function BudgetTable({
       title={
         <MonthSelector
           month={month}
-          onMonthClick={onOpenBudgetMonthMenu}
           monthBounds={monthBounds}
           onPrevMonth={onPrevMonth}
           onNextMonth={onNextMonth}
         />
-      }
-      headerLeftContent={
-        <Button
-          type="bare"
-          style={{
-            color: theme.mobileHeaderText,
-            margin: 10,
-          }}
-          hoveredStyle={noBackgroundColorStyle}
-          activeStyle={noBackgroundColorStyle}
-          onClick={() => onOpenBudgetPageMenu?.(month)}
-        >
-          <SvgLogo width="20" height="20" />
-        </Button>
       }
       headerRightContent={
         <Button
@@ -1232,9 +1214,9 @@ export function BudgetTable({
           }}
           hoveredStyle={noBackgroundColorStyle}
           activeStyle={noBackgroundColorStyle}
-          onClick={onAddGroup}
+          onClick={() => onOpenBudgetMonthMenu?.(month)}
         >
-          <SvgAdd width="20" height="20" />
+          <SvgLogo width="20" height="20" />
         </Button>
       }
       style={{ flex: 1 }}
@@ -1404,13 +1386,7 @@ export function BudgetTable({
   );
 }
 
-function MonthSelector({
-  month,
-  onMonthClick,
-  monthBounds,
-  onPrevMonth,
-  onNextMonth,
-}) {
+function MonthSelector({ month, monthBounds, onPrevMonth, onNextMonth }) {
   const prevEnabled = month > monthBounds.start;
   const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
 
@@ -1450,9 +1426,7 @@ function MonthSelector({
           textAlign: 'center',
           fontSize: 16,
           fontWeight: 500,
-          ...styles.underlinedText,
         }}
-        onClick={() => onMonthClick?.(month)}
       >
         {monthUtils.format(month, 'MMMM ‘yy')}
       </Text>

@@ -14,7 +14,6 @@ import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 import { ModalTitle } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
-import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
@@ -627,6 +626,9 @@ export function Modals() {
               <RolloverBudgetMonthMenuModal
                 modalProps={modalProps}
                 month={options.month}
+                onAddCategoryGroup={options.onAddCategoryGroup}
+                onToggleHiddenCategories={options.onToggleHiddenCategories}
+                onSwitchBudgetType={options.onSwitchBudgetType}
                 onBudgetAction={options.onBudgetAction}
                 onEditNotes={options.onEditNotes}
                 onClose={options.onClose}
@@ -643,24 +645,12 @@ export function Modals() {
               <ReportBudgetMonthMenuModal
                 modalProps={modalProps}
                 month={options.month}
+                onAddCategoryGroup={options.onAddCategoryGroup}
+                onToggleHiddenCategories={options.onToggleHiddenCategories}
+                onSwitchBudgetType={options.onSwitchBudgetType}
                 onBudgetAction={options.onBudgetAction}
                 onEditNotes={options.onEditNotes}
                 onClose={options.onClose}
-              />
-            </NamespaceContext.Provider>
-          );
-
-        case 'budget-page-menu':
-          return (
-            <NamespaceContext.Provider
-              key={name}
-              value={monthUtils.sheetForMonth(options.month)}
-            >
-              <BudgetPageMenuModal
-                modalProps={modalProps}
-                month={options.month}
-                onToggleHiddenCategories={options.onToggleHiddenCategories}
-                onSwitchBudgetType={options.onSwitchBudgetType}
               />
             </NamespaceContext.Provider>
           );
