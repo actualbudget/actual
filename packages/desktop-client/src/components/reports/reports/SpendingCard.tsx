@@ -1,39 +1,41 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { amountToInteger, integerToCurrency } from 'loot-core/src/shared/util';
 
-import { theme, styles } from '../../../style';
+import { useCategories } from '../../../hooks/useCategories';
+import { styles } from '../../../style/styles';
+import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { DateRange } from '../DateRange';
-import { NetWorthGraph } from '../graphs/NetWorthGraph';
+import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
-import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
+import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
-export function NetWorthCard({ accounts }) {
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, 5);
-  const [isCardHovered, setIsCardHovered] = useState(false);
-  const onCardHover = useCallback(() => setIsCardHovered(true));
-  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
+export function SpendingCard() {
+  const categories = useCategories();
 
-  const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts),
-    [start, end, accounts],
-  );
-  const data = useReport('net_worth', params);
+  const [isCardHovered, setIsCardHovered] = useState(false);
+
+  const getGraphData = useMemo(() => {
+    return createSpendingSpreadsheet({
+      categories,
+    });
+  }, [categories]);
+
+  const data = useReport('default', getGraphData);
 
   return (
-    <ReportCard flex={1} to="/reports/net-worth">
+    <ReportCard flex="1" to="/reports/spending">
       <View
         style={{ flex: 1 }}
-        onPointerEnter={onCardHover}
-        onPointerLeave={onCardHoverEnd}
+        onPointerEnter={() => setIsCardHovered(true)}
+        onPointerLeave={() => setIsCardHovered(false)}
       >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
@@ -41,9 +43,12 @@ export function NetWorthCard({ accounts }) {
               style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
               role="heading"
             >
-              Net Worth
+              Monthly Spending
             </Block>
-            <DateRange start={start} end={end} />
+            <DateRange
+              start={monthUtils.currentMonth()}
+              end={monthUtils.currentMonth()}
+            />
           </View>
           {data && (
             <View style={{ textAlign: 'right' }}>
@@ -55,12 +60,12 @@ export function NetWorthCard({ accounts }) {
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {integerToCurrency(data.netWorth)}
+                  {integerToCurrency(data.totalAssets)}
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
-                  amount={data.totalChange}
+                  amount={amountToInteger(data.totalDebts)}
                   style={{ color: theme.tableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
@@ -69,13 +74,7 @@ export function NetWorthCard({ accounts }) {
         </View>
 
         {data ? (
-          <NetWorthGraph
-            start={start}
-            end={end}
-            graphData={data.graphData}
-            compact={true}
-            style={{ height: 'auto', flex: 1 }}
-          />
+          <SpendingGraph style={{ flexGrow: 1 }} compact={true} data={data} />
         ) : (
           <LoadingIndicator />
         )}

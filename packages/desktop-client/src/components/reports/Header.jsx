@@ -55,7 +55,7 @@ export function Header({
       </Link>
       <View style={styles.veryLargeText}>{title}</View>
 
-      {path !== '/reports/custom' && (
+      {!['/reports/custom', '/reports/spending'].includes(path) && (
         <View
           style={{
             flexDirection: 'row',

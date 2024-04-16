@@ -24,6 +24,23 @@ export interface CustomReportEntity {
   tombstone?: boolean;
 }
 
+export interface SpendingDataEntity {
+  date: string;
+  totalAssets: number;
+  totalDebts: number;
+  totalTotals: number;
+  cumulative: number;
+}
+
+export interface SpendingEntity {
+  intervalData: Array[SpendingDataEntity];
+  startDate?: string;
+  endDate?: string;
+  totalDebts: number;
+  totalAssets: number;
+  totalTotals: number;
+}
+
 export interface GroupedEntity {
   data?: DataEntity[];
   intervalData: DataEntity[];
