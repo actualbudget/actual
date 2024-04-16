@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
@@ -9,8 +9,8 @@ import { SvgExclamationOutline } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
@@ -56,6 +56,8 @@ export function AccountSyncCheck() {
 
   const { id } = useParams();
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef(null);
+
   if (!failedAccounts) {
     return null;
   }
@@ -85,6 +87,7 @@ export function AccountSyncCheck() {
   return (
     <View>
       <Button
+        ref={triggerRef}
         type="bare"
         style={{
           flexDirection: 'row',
@@ -102,38 +105,34 @@ export function AccountSyncCheck() {
         This account is experiencing connection problems. Let’s fix it.
       </Button>
 
-      {open && (
-        <Tooltip
-          position="bottom-left"
-          onClose={() => setOpen(false)}
-          style={{ fontSize: 14, padding: 15, maxWidth: 400 }}
-        >
-          <div style={{ marginBottom: '1.15em' }}>
-            The server returned the following error:
-          </div>
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={open}
+        onOpenChange={() => setOpen(false)}
+        style={{ fontSize: 14, padding: 15, maxWidth: 400 }}
+      >
+        <div style={{ marginBottom: '1.15em' }}>
+          The server returned the following error:
+        </div>
 
-          <div style={{ marginBottom: '1.25em', color: theme.errorText }}>
-            {getErrorMessage(error.type, error.code)}
-          </div>
+        <div style={{ marginBottom: '1.25em', color: theme.errorText }}>
+          {getErrorMessage(error.type, error.code)}
+        </div>
 
-          <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
-            {showAuth ? (
-              <>
-                <Button onClick={unlink}>Unlink</Button>
-                <Button
-                  type="primary"
-                  onClick={reauth}
-                  style={{ marginLeft: 5 }}
-                >
-                  Reauthorize
-                </Button>
-              </>
-            ) : (
-              <Button onClick={unlink}>Unlink account</Button>
-            )}
-          </View>
-        </Tooltip>
-      )}
+        <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
+          {showAuth ? (
+            <>
+              <Button onClick={unlink}>Unlink</Button>
+              <Button type="primary" onClick={reauth} style={{ marginLeft: 5 }}>
+                Reauthorize
+              </Button>
+            </>
+          ) : (
+            <Button onClick={unlink}>Unlink account</Button>
+          )}
+        </View>
+      </Popover>
     </View>
   );
 }

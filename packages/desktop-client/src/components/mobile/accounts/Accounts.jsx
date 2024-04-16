@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -247,23 +246,15 @@ function AccountList({
 export function Accounts() {
   const dispatch = useDispatch();
   const accounts = useAccounts();
-  const newTransactions = useSelector(state => state.queries.newTransactions);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
   const [_numberFormat] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false] = useLocalPref('hideFraction');
 
-  const { list: categories } = useCategories();
-
-  const transactions = useState({});
   const navigate = useNavigate();
 
   const onSelectAccount = id => {
     navigate(`/accounts/${id}`);
-  };
-
-  const onSelectTransaction = transaction => {
-    navigate(`/transaction/${transaction}`);
   };
 
   const onAddAccount = () => {
@@ -283,16 +274,12 @@ export function Accounts() {
         // format changes
         key={numberFormat + hideFraction}
         accounts={accounts.filter(account => !account.closed)}
-        categories={categories}
-        transactions={transactions || []}
         updatedAccounts={updatedAccounts}
-        newTransactions={newTransactions}
         getBalanceQuery={queries.accountBalance}
         getOnBudgetBalance={queries.budgetedAccountBalance}
         getOffBudgetBalance={queries.offbudgetAccountBalance}
         onAddAccount={onAddAccount}
         onSelectAccount={onSelectAccount}
-        onSelectTransaction={onSelectTransaction}
         onSync={onSync}
       />
     </View>

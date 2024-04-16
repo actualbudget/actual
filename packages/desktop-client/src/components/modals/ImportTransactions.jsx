@@ -1218,6 +1218,15 @@ export function ImportTransactions({ modalProps, options }) {
                 >
                   Clear transactions on import
                 </CheckboxOption>
+                <CheckboxOption
+                  id="form_dont_reconcile"
+                  checked={reconcile}
+                  onChange={() => {
+                    setReconcile(state => !state);
+                  }}
+                >
+                  Reconcile transactions
+                </CheckboxOption>
               </View>
             )}
 

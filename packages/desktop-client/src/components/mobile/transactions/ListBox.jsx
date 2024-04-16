@@ -15,7 +15,7 @@ export function ListBox(props) {
   const { loadMore } = props;
 
   const { hasScrolledToBottom } = useScroll();
-  const scrolledToBottom = hasScrolledToBottom();
+  const scrolledToBottom = hasScrolledToBottom(5);
   const prevScrolledToBottom = usePrevious(scrolledToBottom);
 
   if (!prevScrolledToBottom && scrolledToBottom) {

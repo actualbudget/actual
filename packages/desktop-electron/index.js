@@ -137,7 +137,7 @@ async function createWindow() {
 
   win.on('closed', () => {
     clientWin = null;
-    updateMenu(false);
+    updateMenu();
     unlistenToState();
   });
 
@@ -187,13 +187,17 @@ function isExternalUrl(url) {
   return !url.includes('localhost:') && !url.includes('app://');
 }
 
-function updateMenu(isBudgetOpen) {
+function updateMenu(budgetId) {
+  const isBudgetOpen = !!budgetId;
   const menu = getMenu(isDev, createWindow);
   const file = menu.items.filter(item => item.label === 'File')[0];
   const fileItems = file.submenu.items;
   fileItems
     .filter(item => item.label === 'Load Backup...')
-    .map(item => (item.enabled = isBudgetOpen));
+    .forEach(item => {
+      item.enabled = isBudgetOpen;
+      item.budgetId = budgetId;
+    });
 
   const tools = menu.items.filter(item => item.label === 'Tools')[0];
   tools.submenu.items.forEach(item => {
@@ -362,8 +366,8 @@ ipcMain.on('apply-update', () => {
   updater.apply();
 });
 
-ipcMain.on('update-menu', (event, isBudgetOpen) => {
-  updateMenu(isBudgetOpen);
+ipcMain.on('update-menu', (event, budgetId) => {
+  updateMenu(budgetId);
 });
 
 ipcMain.on('set-theme', theme => {

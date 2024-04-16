@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 
-import { useLocalPref } from '../hooks/useLocalPref';
-import { useResponsive } from '../ResponsiveProvider';
-import { theme, styles } from '../style';
-
-import { Button } from './common/Button';
-import { Text } from './common/Text';
-import { View } from './common/View';
-import { Checkbox } from './forms';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { useResponsive } from '../../ResponsiveProvider';
+import { theme, styles } from '../../style';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
+import { Checkbox } from '../forms';
 
 const buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
@@ -50,8 +49,8 @@ export function MobileWebMessage() {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: theme.mobileModalBackground,
-        color: theme.mobileModalText,
+        backgroundColor: theme.menuAutoCompleteBackground,
+        color: theme.menuAutoCompleteText,
         padding: 10,
         margin: 10,
         borderRadius: 6,

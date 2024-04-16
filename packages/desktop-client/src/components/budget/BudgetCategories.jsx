@@ -66,6 +66,7 @@ export const BudgetCategories = memo(
               cat => ({
                 type: 'expense-category',
                 value: cat,
+                group,
               }),
             ),
           ];
@@ -250,6 +251,7 @@ export const BudgetCategories = memo(
               content = (
                 <ExpenseCategory
                   cat={item.value}
+                  categoryGroup={item.group}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.ExpenseCategoryComponent}
                   dragState={dragState}
