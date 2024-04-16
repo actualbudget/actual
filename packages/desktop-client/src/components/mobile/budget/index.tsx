@@ -382,7 +382,7 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(
       pushModal('notes', {
         id,
-        name: monthUtils.format(currentMonth, 'MMMM ‘yy'),
+        name: monthUtils.format(startMonth, 'MMMM ‘yy'),
         onSave: onSaveNotes,
       }),
     );
