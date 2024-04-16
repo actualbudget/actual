@@ -99,6 +99,7 @@ type FinanceModals = {
 
   'edit-field': {
     name: string;
+    month: string;
     onSubmit: (name: string, value: string) => void;
     onClose: () => void;
   };
@@ -106,6 +107,7 @@ type FinanceModals = {
   'category-autocomplete': {
     categoryGroups: CategoryGroupEntity[];
     onSelect: (categoryId: string, categoryName: string) => void;
+    month?: string;
     showHiddenCategories?: boolean;
     onClose?: () => void;
   };
@@ -215,12 +217,14 @@ type FinanceModals = {
   };
   transfer: {
     title: string;
+    month: string;
     amount: number;
     onSubmit: (amount: number, toCategoryId: string) => void;
     showToBeBudgeted?: boolean;
   };
   cover: {
     categoryId: string;
+    month: string;
     onSubmit: (fromCategoryId: string) => void;
   };
   'hold-buffer': {
