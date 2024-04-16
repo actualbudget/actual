@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties } from '../../style';
@@ -20,8 +19,6 @@ import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
-  startDate: string;
-  endDate: string;
   data: GroupedEntity;
   mode: string;
   graphType: string;
@@ -32,11 +29,12 @@ type ChooseGraphProps = {
   viewLabels?: boolean;
   compact?: boolean;
   style?: CSSProperties;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
+  intervalsCount?: number;
 };
 
 export function ChooseGraph({
-  startDate,
-  endDate,
   data,
   mode,
   graphType,
@@ -47,8 +45,10 @@ export function ChooseGraph({
   viewLabels,
   compact,
   style,
+  showHiddenCategories,
+  showOffBudget,
+  intervalsCount,
 }: ChooseGraphProps) {
-  const intervals: string[] = monthUtils.rangeInclusive(startDate, endDate);
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const groupByData =
@@ -104,13 +104,13 @@ export function ChooseGraph({
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
   if (graphType === 'BarLineGraph') {
-    return (
-      <BarLineGraph style={graphStyle} compact={compact} graphData={data} />
-    );
+    return <BarLineGraph style={graphStyle} compact={compact} data={data} />;
   }
   if (graphType === 'DonutGraph') {
     return (
@@ -121,11 +121,13 @@ export function ChooseGraph({
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={graphStyle} compact={compact} graphData={data} />;
+    return <LineGraph style={graphStyle} compact={compact} data={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return (
@@ -160,7 +162,7 @@ export function ChooseGraph({
           groupBy={groupBy}
           data={data[groupByData]}
           mode={mode}
-          intervalsCount={intervals.length}
+          intervalsCount={intervalsCount}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
@@ -171,7 +173,7 @@ export function ChooseGraph({
           data={data}
           mode={mode}
           balanceTypeOp={balanceTypeOp}
-          intervalsCount={intervals.length}
+          intervalsCount={intervalsCount}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}

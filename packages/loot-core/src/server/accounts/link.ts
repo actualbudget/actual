@@ -63,48 +63,6 @@ export async function findOrCreateBank(institution, requisitionId) {
   return bankData;
 }
 
-export async function addAccounts(bankId, accountIds, offbudgetIds = []) {
-  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-
-  // Get all the available accounts
-  let accounts = await bankSync.getAccounts(userId, userKey, bankId);
-
-  // Only add the selected accounts
-  accounts = accounts.filter(acct => accountIds.includes(acct.account_id));
-
-  return Promise.all(
-    accounts.map(async acct => {
-      const id = await runMutator(async () => {
-        const id = await db.insertAccount({
-          account_id: acct.account_id,
-          name: acct.name,
-          official_name: acct.official_name,
-          balance_current: amountToInteger(acct.balances.current),
-          mask: acct.mask,
-          bank: bankId,
-          offbudget: offbudgetIds.includes(acct.account_id) ? 1 : 0,
-        });
-
-        // Create a transfer payee
-        await db.insertPayee({
-          name: '',
-          transfer_acct: id,
-        });
-
-        return id;
-      });
-
-      // Do an initial sync
-      await bankSync.syncAccount(userId, userKey, id, acct.account_id, bankId);
-
-      return id;
-    }),
-  );
-}
-
 export async function addGoCardlessAccounts(
   bankId,
   accountIds,
@@ -144,13 +102,7 @@ export async function addGoCardlessAccounts(
       });
 
       // Do an initial sync
-      await bankSync.syncExternalAccount(
-        userId,
-        userKey,
-        id,
-        acct.account_id,
-        bankId,
-      );
+      await bankSync.syncAccount(userId, userKey, id, acct.account_id, bankId);
 
       return id;
     }),

@@ -103,6 +103,24 @@ type FinanceModals = {
     onClose: () => void;
   };
 
+  'category-autocomplete': {
+    categoryGroups: CategoryGroupEntity[];
+    onSelect: (categoryId: string, categoryName: string) => void;
+    showHiddenCategories?: boolean;
+    onClose?: () => void;
+  };
+
+  'account-autocomplete': {
+    onSelect: (accountId: string, accountName: string) => void;
+    includeClosedAccounts?: boolean;
+    onClose?: () => void;
+  };
+
+  'payee-autocomplete': {
+    onSelect: (payeeId: string) => void;
+    onClose?: () => void;
+  };
+
   'budget-summary': {
     month: string;
   };
@@ -115,12 +133,37 @@ type FinanceModals = {
 
   'schedule-posts-offline-notification': null;
   'switch-budget-type': { onSwitch: () => void };
+  'account-menu': {
+    accountId: string;
+    onSave: (account: AccountEntity) => void;
+    onCloseAccount: (accountId: string) => void;
+    onReopenAccount: (accountId: string) => void;
+    onEditNotes: (id: string) => void;
+    onClose?: () => void;
+  };
   'category-menu': {
     categoryId: string;
     onSave: (category: CategoryEntity) => void;
     onEditNotes: (id: string) => void;
     onDelete: (categoryId: string) => void;
+    onBudgetAction: (month: string, action: string, args?: unknown) => void;
     onClose?: () => void;
+  };
+  'rollover-budget-menu': {
+    categoryId: string;
+    month: string;
+    onUpdateBudget: (amount: number) => void;
+    onCopyLastMonthAverage: () => void;
+    onSetMonthsAverage: (numberOfMonths: number) => void;
+    onApplyBudgetTemplate: () => void;
+  };
+  'report-budget-menu': {
+    categoryId: string;
+    month: string;
+    onUpdateBudget: (amount: number) => void;
+    onCopyLastMonthAverage: () => void;
+    onSetMonthsAverage: (numberOfMonths: number) => void;
+    onApplyBudgetTemplate: () => void;
   };
   'category-group-menu': {
     groupId: string;
@@ -151,6 +194,48 @@ type FinanceModals = {
   'new-category': {
     onValidate?: (value: string) => string;
     onSubmit: (value: string) => Promise<void>;
+  };
+  'rollover-balance-menu': {
+    categoryId: string;
+    month: string;
+    onCarryover: (carryover: boolean) => void;
+    onTransfer: () => void;
+    onCover: () => void;
+  };
+  'rollover-summary-to-budget-menu': {
+    month: string;
+    onTransfer: () => void;
+    onHoldBuffer: () => void;
+    onResetHoldBuffer: () => void;
+  };
+  'report-balance-menu': {
+    categoryId: string;
+    month: string;
+    onCarryover: (carryover: boolean) => void;
+  };
+  transfer: {
+    title: string;
+    amount: number;
+    onSubmit: (amount: number, toCategoryId: string) => void;
+    showToBeBudgeted?: boolean;
+  };
+  cover: {
+    categoryId: string;
+    onSubmit: (fromCategoryId: string) => void;
+  };
+  'hold-buffer': {
+    month: string;
+    onSubmit: (amount: number) => void;
+  };
+  'scheduled-transaction-menu': {
+    transactionId: string;
+    onPost: (transactionId: string) => void;
+    onSkip: (transactionId: string) => void;
+  };
+  'budget-month-menu': {
+    month: string;
+    onToggleHiddenCategories: () => void;
+    onSwitchBudgetType: () => void;
   };
 };
 

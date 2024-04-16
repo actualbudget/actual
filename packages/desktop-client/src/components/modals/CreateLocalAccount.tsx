@@ -7,11 +7,11 @@ import { type BoundActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
 import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
 import { InlineField } from '../common/InlineField';
 import { Input } from '../common/Input';
+import { Link } from '../common/Link';
 import { Modal, ModalButtons } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -124,12 +124,13 @@ export function CreateLocalAccount({
                   <Text>
                     This cannot be changed later. <br /> {'\n'}
                     See{' '}
-                    <ExternalLink
+                    <Link
+                      variant="external"
                       linkColor="muted"
                       to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
                     >
                       Accounts Overview
-                    </ExternalLink>{' '}
+                    </Link>{' '}
                     for more information.
                   </Text>
                 </div>

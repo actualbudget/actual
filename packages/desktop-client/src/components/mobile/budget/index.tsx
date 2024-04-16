@@ -33,6 +33,7 @@ import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
 import { prewarmMonth, switchBudgetType } from '../../budget/util';
 import { View } from '../../common/View';
+import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
 
 import { BudgetTable } from './BudgetTable';
@@ -52,7 +53,7 @@ function BudgetInner(props: BudgetInnerProps) {
   const [bounds, setBounds] = useState({ start: currMonth, end: currMonth });
   const [currentMonth, setCurrentMonth] = useState(currMonth);
   const [initialized, setInitialized] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  // const [editMode, setEditMode] = useState(false);
 
   const [_numberFormat] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
@@ -348,6 +349,37 @@ function BudgetInner(props: BudgetInnerProps) {
         onSave: onSaveCategory,
         onEditNotes: onEditCategoryNotes,
         onDelete: onDeleteCategory,
+        onBudgetAction,
+      }),
+    );
+  };
+
+  const _onSwitchBudgetType = () => {
+    dispatch(
+      pushModal('switch-budget-type', {
+        onSwitch: () => {
+          onSwitchBudgetType?.();
+          dispatch(collapseModals('budget-month-menu'));
+        },
+      }),
+    );
+  };
+
+  const [showHiddenCategories, setShowHiddenCategoriesPref] = useLocalPref(
+    'budget.showHiddenCategories',
+  );
+
+  const onToggleHiddenCategories = () => {
+    setShowHiddenCategoriesPref(!showHiddenCategories);
+    dispatch(collapseModals('budget-month-menu'));
+  };
+
+  const onOpenBudgetMonthMenu = month => {
+    dispatch(
+      pushModal('budget-month-menu', {
+        month,
+        onToggleHiddenCategories,
+        onSwitchBudgetType: _onSwitchBudgetType,
       }),
     );
   };
@@ -369,42 +401,42 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   return (
-    <SyncRefresh
-      onSync={async () => {
-        dispatch(sync());
-      }}
-    >
-      {({ onRefresh }) => (
-        <BudgetTable
-          // This key forces the whole table rerender when the number
-          // format changes
-          key={`${numberFormat}${hideFraction}`}
-          categoryGroups={categoryGroups}
-          type={budgetType}
-          month={currentMonth}
-          monthBounds={bounds}
-          editMode={editMode}
-          onEditMode={flag => setEditMode(flag)}
-          onShowBudgetSummary={onShowBudgetSummary}
-          onPrevMonth={onPrevMonth}
-          onNextMonth={onNextMonth}
-          onSaveGroup={onSaveGroup}
-          onDeleteGroup={onDeleteGroup}
-          onAddGroup={onAddGroup}
-          onAddCategory={onAddCategory}
-          onSaveCategory={onSaveCategory}
-          onDeleteCategory={onDeleteCategory}
-          onReorderCategory={onReorderCategory}
-          onReorderGroup={onReorderGroup}
-          onOpenMonthActionMenu={() => {}} //onOpenMonthActionMenu}
-          onBudgetAction={onBudgetAction}
-          onRefresh={onRefresh}
-          onSwitchBudgetType={onSwitchBudgetType}
-          onEditGroup={onEditGroup}
-          onEditCategory={onEditCategory}
-        />
-      )}
-    </SyncRefresh>
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(currentMonth)}>
+      <SyncRefresh
+        onSync={async () => {
+          dispatch(sync());
+        }}
+      >
+        {({ onRefresh }) => (
+          <BudgetTable
+            // This key forces the whole table rerender when the number
+            // format changes
+            key={`${numberFormat}${hideFraction}`}
+            categoryGroups={categoryGroups}
+            type={budgetType}
+            month={currentMonth}
+            monthBounds={bounds}
+            // editMode={editMode}
+            onShowBudgetSummary={onShowBudgetSummary}
+            onPrevMonth={onPrevMonth}
+            onNextMonth={onNextMonth}
+            onSaveGroup={onSaveGroup}
+            onDeleteGroup={onDeleteGroup}
+            onAddGroup={onAddGroup}
+            onAddCategory={onAddCategory}
+            onSaveCategory={onSaveCategory}
+            onDeleteCategory={onDeleteCategory}
+            onReorderCategory={onReorderCategory}
+            onReorderGroup={onReorderGroup}
+            onBudgetAction={onBudgetAction}
+            onRefresh={onRefresh}
+            onEditGroup={onEditGroup}
+            onEditCategory={onEditCategory}
+            onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
+          />
+        )}
+      </SyncRefresh>
+    </NamespaceContext.Provider>
   );
 }
 

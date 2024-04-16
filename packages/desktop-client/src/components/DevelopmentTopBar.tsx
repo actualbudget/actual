@@ -1,6 +1,6 @@
 import { theme } from '../style';
 
-import { ExternalLink } from './common/ExternalLink';
+import { Link } from './common/Link';
 import { View } from './common/View';
 
 export function DevelopmentTopBar() {
@@ -20,12 +20,13 @@ export function DevelopmentTopBar() {
     >
       <View>This is a demo build of Actual.</View>
       <View>
-        <ExternalLink
+        <Link
+          variant="external"
           linkColor="purple"
           to={`https://github.com/actualbudget/actual/pull/${process.env.REACT_APP_REVIEW_ID}`}
         >
           Open the PR: #{process.env.REACT_APP_REVIEW_ID}
-        </ExternalLink>
+        </Link>
       </View>
     </View>
   );

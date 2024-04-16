@@ -4,12 +4,12 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 type RolloverContextDefinition = {
   summaryCollapsed: boolean;
-  onBudgetAction: (idx: string, action: string, arg?: unknown) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onToggleSummaryCollapse: () => void;
   currentMonth: string;
 };
 
-const Context = createContext<RolloverContextDefinition>({
+const RolloverContext = createContext<RolloverContextDefinition>({
   summaryCollapsed: false,
   onBudgetAction: () => {
     throw new Error('Unitialised context method called: onBudgetAction');
@@ -34,7 +34,7 @@ export function RolloverProvider({
   const currentMonth = monthUtils.currentMonth();
 
   return (
-    <Context.Provider
+    <RolloverContext.Provider
       value={{
         currentMonth,
         summaryCollapsed,
@@ -43,10 +43,10 @@ export function RolloverProvider({
       }}
     >
       {children}
-    </Context.Provider>
+    </RolloverContext.Provider>
   );
 }
 
 export function useRollover() {
-  return useContext(Context);
+  return useContext(RolloverContext);
 }

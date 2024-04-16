@@ -1,3 +1,22 @@
+const intervalOptions = [
+  {
+    description: 'Daily',
+    defaultRange: 'This month',
+  },
+  {
+    description: 'Weekly',
+    defaultRange: 'Last 3 months',
+  },
+  {
+    description: 'Monthly',
+    defaultRange: 'Last 6 months',
+  },
+  {
+    description: 'Yearly',
+    defaultRange: 'Year to date',
+  },
+];
+
 const totalGraphOptions = [
   {
     description: 'TableGraph',
@@ -49,13 +68,22 @@ const timeGraphOptions = [
     disabledType: ['Net'],
     defaultType: 'Payment',
   },
+  {
+    description: 'LineGraph',
+    disabledSplit: ['Interval'],
+    defaultSplit: 'Category',
+    disabledType: ['Net'],
+    defaultType: 'Payment',
+    disableLegend: false,
+    disableLabel: true,
+  },
 ];
 
 const modeOptions = [
   {
     description: 'total',
     graphs: totalGraphOptions,
-    disabledGraph: [],
+    disabledGraph: ['LineGraph'],
     defaultGraph: 'TableGraph',
   },
   {
@@ -113,5 +141,8 @@ export const defaultsList = {
       item.description,
       new Map([...item.graphs].map(f => [f.description, f.defaultType])),
     ]),
+  ),
+  intervalRange: new Map(
+    intervalOptions.map(item => [item.description, item.defaultRange]),
   ),
 };

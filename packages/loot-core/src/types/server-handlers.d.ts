@@ -149,13 +149,6 @@ export interface ServerHandlers {
     id;
   }) => Promise<{ balance: number; numTransactions: number }>;
 
-  'accounts-link': (arg: {
-    institution;
-    publicToken;
-    accountId;
-    upgradingId;
-  }) => Promise<'ok'>;
-
   'gocardless-accounts-link': (arg: {
     requisitionId;
     account;
@@ -166,13 +159,6 @@ export interface ServerHandlers {
     externalAccount;
     upgradingId;
   }) => Promise<'ok'>;
-
-  'accounts-connect': (arg: {
-    institution;
-    publicToken;
-    accountIds;
-    offbudgetIds?;
-  }) => Promise<unknown>;
 
   'gocardless-accounts-connect': (arg: {
     institution;
