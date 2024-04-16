@@ -95,12 +95,17 @@ export function Modals() {
       switch (name) {
         case 'import-transactions':
           return (
-            <ImportTransactions modalProps={modalProps} options={options} />
+            <ImportTransactions
+              key={name}
+              modalProps={modalProps}
+              options={options}
+            />
           );
 
         case 'add-account':
           return (
             <CreateAccount
+              key={name}
               modalProps={modalProps}
               syncServerStatus={syncServerStatus}
               upgradingAccountId={options?.upgradingAccountId}
@@ -109,12 +114,17 @@ export function Modals() {
 
         case 'add-local-account':
           return (
-            <CreateLocalAccount modalProps={modalProps} actions={actions} />
+            <CreateLocalAccount
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
+            />
           );
 
         case 'close-account':
           return (
             <CloseAccountModal
+              key={name}
               modalProps={modalProps}
               account={options.account}
               balance={options.balance}
@@ -125,6 +135,7 @@ export function Modals() {
         case 'select-linked-accounts':
           return (
             <SelectLinkedAccounts
+              key={name}
               modalProps={modalProps}
               externalAccounts={options.accounts}
               requisitionId={options.requisitionId}
@@ -136,6 +147,7 @@ export function Modals() {
         case 'confirm-category-delete':
           return (
             <ConfirmCategoryDelete
+              key={name}
               modalProps={modalProps}
               category={options.category}
               group={options.group}
@@ -146,6 +158,7 @@ export function Modals() {
         case 'confirm-unlink-account':
           return (
             <ConfirmUnlinkAccount
+              key={name}
               modalProps={modalProps}
               accountName={options.accountName}
               onUnlink={options.onUnlink}
@@ -155,6 +168,7 @@ export function Modals() {
         case 'confirm-transaction-edit':
           return (
             <ConfirmTransactionEdit
+              key={name}
               modalProps={modalProps}
               onConfirm={options.onConfirm}
               confirmReason={options.confirmReason}
@@ -164,6 +178,7 @@ export function Modals() {
         case 'load-backup':
           return (
             <LoadBackup
+              key={name}
               watchUpdates
               budgetId={options.budgetId}
               modalProps={modalProps}
@@ -175,6 +190,7 @@ export function Modals() {
         case 'manage-rules':
           return (
             <ManageRulesModal
+              key={name}
               modalProps={modalProps}
               payeeId={options?.payeeId}
             />
@@ -183,6 +199,7 @@ export function Modals() {
         case 'edit-rule':
           return (
             <EditRule
+              key={name}
               modalProps={modalProps}
               defaultRule={options.rule}
               onSave={options.onSave}
@@ -192,6 +209,7 @@ export function Modals() {
         case 'merge-unused-payees':
           return (
             <MergeUnusedPayees
+              key={name}
               modalProps={modalProps}
               payeeIds={options.payeeIds}
               targetPayeeId={options.targetPayeeId}
@@ -201,6 +219,7 @@ export function Modals() {
         case 'plaid-external-msg':
           return (
             <PlaidExternalMsg
+              key={name}
               modalProps={modalProps}
               onMoveExternal={options.onMoveExternal}
               onClose={() => {
@@ -214,6 +233,7 @@ export function Modals() {
         case 'gocardless-init':
           return (
             <GoCardlessInitialise
+              key={name}
               modalProps={modalProps}
               onSuccess={options.onSuccess}
             />
@@ -222,6 +242,7 @@ export function Modals() {
         case 'simplefin-init':
           return (
             <SimpleFinInitialise
+              key={name}
               modalProps={modalProps}
               onSuccess={options.onSuccess}
             />
@@ -230,6 +251,7 @@ export function Modals() {
         case 'gocardless-external-msg':
           return (
             <GoCardlessExternalMsg
+              key={name}
               modalProps={modalProps}
               onMoveExternal={options.onMoveExternal}
               onClose={() => {
@@ -316,6 +338,7 @@ export function Modals() {
         case 'new-category':
           return (
             <SingleInputModal
+              key={name}
               modalProps={modalProps}
               title={<ModalTitle title="New Category" shrinkOnOverflow />}
               inputPlaceholder="Category name"
@@ -328,6 +351,7 @@ export function Modals() {
         case 'new-category-group':
           return (
             <SingleInputModal
+              key={name}
               modalProps={modalProps}
               title={<ModalTitle title="New Category Group" shrinkOnOverflow />}
               inputPlaceholder="Category group name"
@@ -560,6 +584,7 @@ export function Modals() {
         case 'transfer':
           return (
             <TransferModal
+              key={name}
               modalProps={modalProps}
               title={options.title}
               amount={options.amount}
@@ -571,6 +596,7 @@ export function Modals() {
         case 'cover':
           return (
             <CoverModal
+              key={name}
               modalProps={modalProps}
               categoryId={options.categoryId}
               onSubmit={options.onSubmit}
@@ -580,6 +606,7 @@ export function Modals() {
         case 'scheduled-transaction-menu':
           return (
             <ScheduledTransactionMenuModal
+              key={name}
               modalProps={modalProps}
               transactionId={options.transactionId}
               onPost={options.onPost}
