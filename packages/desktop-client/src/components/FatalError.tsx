@@ -15,6 +15,7 @@ type AppError = Error & {
   type?: string;
   IDBFailure?: boolean;
   SharedArrayBufferMissing?: boolean;
+  BackendInitFailure?: boolean;
 };
 
 type FatalErrorProps = {
@@ -64,18 +65,7 @@ function RenderSimple({ error }: RenderSimpleProps) {
     // user something at least so they aren't looking at a blank
     // screen
     msg = (
-      <Text>
-        There was a problem loading the app in this browser version. If this
-        continues to be a problem, you can{' '}
-        <Link
-          variant="external"
-          linkColor="muted"
-          to="https://github.com/actualbudget/releases"
-        >
-          download the desktop app
-        </Link>
-        .
-      </Text>
+      <Text>There was a problem loading the app in this browser version.</Text>
     );
   }
 
@@ -167,7 +157,7 @@ export function FatalError({ buttonText, error }: FatalErrorProps) {
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
 
   return (
-    <Modal isCurrent={true} showClose={false} title="Fatal Error">
+    <Modal isCurrent={true} CloseButton={undefined} title="Fatal Error">
       <View
         style={{
           maxWidth: 500,

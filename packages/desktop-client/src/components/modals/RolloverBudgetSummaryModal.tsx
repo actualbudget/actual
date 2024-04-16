@@ -15,7 +15,7 @@ import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type RolloverBudgetSummaryModalProps = {
   modalProps: CommonModalProps;
-  onBudgetAction: (idx: string | number, action: string, arg?: unknown) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   month: string;
 };
 
@@ -67,7 +67,7 @@ export function RolloverBudgetSummaryModal({
 
   const onClick = () => {
     dispatch(
-      pushModal('rollover-to-budget-menu', {
+      pushModal('rollover-summary-to-budget-menu', {
         month,
         onTransfer: openTransferModal,
         onResetHoldBuffer,
