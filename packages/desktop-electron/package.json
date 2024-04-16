@@ -37,10 +37,7 @@
       }
     },
     "linux": {
-      "target": [
-        "flatpak",
-        "Appimage"
-      ],
+      "target": ["flatpak"," AppImage"],
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "flatpak": {
