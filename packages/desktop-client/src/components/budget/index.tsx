@@ -78,14 +78,16 @@ function BudgetInner(props: BudgetInnerProps) {
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
-  const [maxMonths = 1] = useGlobalPref('maxMonths');
-  const [startMonth = currentMonth, setStartMonthPref] =
-    useLocalPref('budget.startMonth');
+  const [startMonthPref, setStartMonthPref] = useLocalPref('budget.startMonth');
+  const startMonth = startMonthPref || currentMonth;
   const [bounds, setBounds] = useState({
     start: startMonth,
     end: startMonth,
   });
+  const [budgetTypePref] = useLocalPref('budgetType');
+  const budgetType = budgetTypePref || 'rollover';
+  const [maxMonthsPref] = useGlobalPref('maxMonths');
+  const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
   const { grouped: categoryGroups } = useCategories();
 
