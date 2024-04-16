@@ -42,7 +42,7 @@
     },
     "flatpak": {
       "runtimeVersion": "23.08",
-      "baseVersion": "23.08"
+      "baseVersion": "stable"
     },
     "win": {
       "target": "nsis",
