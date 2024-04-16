@@ -36,6 +36,8 @@ import { fromDateRepr } from '../util';
 
 export function CustomReport() {
   const categories = useCategories();
+  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || 0;
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -123,9 +125,12 @@ export function CustomReport() {
         ? monthUtils[format](d.parseISO(fromDateRepr(trans.date)))
         : currentInterval;
 
+      const rangeProps =
+        interval === 'Weekly'
+          ? [earliestInterval, currentInterval, firstDayOfWeekIdx]
+          : [earliestInterval, currentInterval];
       const allInter = monthUtils[ReportOptions.intervalRange.get(interval)](
-        earliestInterval,
-        currentInterval,
+        ...rangeProps,
       )
         .map(inter => ({
           name: inter,
@@ -157,8 +162,12 @@ export function CustomReport() {
     const dateStart = monthUtils[format](startDate);
     const dateEnd = monthUtils[format](endDate);
 
+    const rangeProps =
+      interval === 'Weekly'
+        ? [dateStart, dateEnd, firstDayOfWeekIdx]
+        : [dateStart, dateEnd];
     setIntervals(
-      monthUtils[ReportOptions.intervalRange.get(interval)](dateStart, dateEnd),
+      monthUtils[ReportOptions.intervalRange.get(interval)](...rangeProps),
     );
   }, [interval, startDate, endDate]);
 
@@ -180,6 +189,7 @@ export function CustomReport() {
       showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
+      firstDayOfWeekIdx,
     });
   }, [
     startDate,
@@ -198,6 +208,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     graphType,
+    firstDayOfWeekIdx,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -219,6 +230,7 @@ export function CustomReport() {
       payees,
       accounts,
       graphType,
+      firstDayOfWeekIdx,
       setDataCheck,
     });
   }, [
@@ -238,6 +250,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     graphType,
+    firstDayOfWeekIdx,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -471,6 +484,7 @@ export function CustomReport() {
           defaultItems={defaultItems}
           defaultModeItems={defaultModeItems}
           earliestTransaction={earliestTransaction}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
         />
         <View
           style={{
@@ -563,8 +577,6 @@ export function CustomReport() {
 
                 {dataCheck ? (
                   <ChooseGraph
-                    startDate={startDate}
-                    endDate={endDate}
                     data={data}
                     mode={mode}
                     graphType={graphType}
@@ -578,6 +590,7 @@ export function CustomReport() {
                     compact={false}
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
+                    intervalsCount={intervals.length}
                   />
                 ) : (
                   <LoadingIndicator message="Loading report..." />

@@ -5,6 +5,7 @@ export function validateStart(
   start: string,
   end: string,
   interval?: string,
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ) {
   let addDays;
   let dateStart;
@@ -35,6 +36,7 @@ export function validateStart(
     dateStart,
     interval ? end : monthUtils.monthFromDate(end),
     interval,
+    firstDayOfWeekIdx,
   );
 }
 
@@ -43,6 +45,7 @@ export function validateEnd(
   start: string,
   end: string,
   interval?: string,
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ) {
   let subDays;
   let dateEnd;
@@ -73,6 +76,7 @@ export function validateEnd(
     interval ? start : monthUtils.monthFromDate(start),
     dateEnd,
     interval,
+    firstDayOfWeekIdx,
   );
 }
 
@@ -92,9 +96,16 @@ function boundedRange(
   start: string,
   end: string,
   interval?: string,
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
 ) {
   let latest;
   switch (interval) {
+    case 'Daily':
+      latest = monthUtils.currentDay();
+      break;
+    case 'Weekly':
+      latest = monthUtils.currentWeek(firstDayOfWeekIdx);
+      break;
     case 'Monthly':
       latest = monthUtils.currentMonth() + '-31';
       break;
@@ -115,13 +126,28 @@ function boundedRange(
   return [start, end];
 }
 
-export function getSpecificRange(offset: number, addNumber: number | null) {
+export function getSpecificRange(
+  offset: number,
+  addNumber: number | null,
+  type?: string,
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+) {
   const currentDay = monthUtils.currentDay();
-  const dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
-  const dateEnd = monthUtils.getMonthEnd(
+
+  let dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
+  let dateEnd = monthUtils.getMonthEnd(
     monthUtils.addMonths(dateStart, addNumber === null ? offset : addNumber) +
       '-01',
   );
+
+  if (type === 'Weeks') {
+    dateStart = monthUtils.subWeeks(currentDay, offset);
+    dateEnd = monthUtils.getWeekEnd(
+      monthUtils.addWeeks(dateStart, addNumber === null ? offset : addNumber),
+      firstDayOfWeekIdx,
+    );
+  }
+
   return [dateStart, dateEnd];
 }
 

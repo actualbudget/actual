@@ -101,8 +101,6 @@ export function GetCardData({
   return data?.data ? (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <ChooseGraph
-        startDate={startDate}
-        endDate={endDate}
         data={data}
         mode={report.mode}
         graphType={report.graphType}
