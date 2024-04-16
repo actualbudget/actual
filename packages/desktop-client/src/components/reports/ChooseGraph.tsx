@@ -131,17 +131,7 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'LineGraph') {
-    return (
-      <LineGraph
-        style={graphStyle}
-        compact={compact}
-        data={data}
-        groupBy={groupBy}
-        balanceTypeOp={balanceTypeOp}
-        showHiddenCategories={showHiddenCategories}
-        showOffBudget={showOffBudget}
-      />
-    );
+    return <LineGraph style={graphStyle} compact={compact} data={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return (

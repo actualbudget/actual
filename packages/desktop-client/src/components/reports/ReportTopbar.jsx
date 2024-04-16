@@ -86,7 +86,9 @@ export function ReportTopbar({
         title="Line Graph"
         selected={customReportItems.graphType === 'LineGraph'}
         onSelect={() => {
-          onChangeGraph('LineGraph');
+          onReportChange({ type: 'modify' });
+          setGraphType('LineGraph');
+          defaultItems('LineGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('LineGraph')}
