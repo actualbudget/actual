@@ -10,7 +10,13 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgLogo } from '../../../icons/logo';
-import { SvgAdd, SvgArrowThinLeft, SvgArrowThinRight } from '../../../icons/v1';
+import {
+  SvgAdd,
+  SvgArrowThinLeft,
+  SvgArrowThinRight,
+  SvgCheveronDown,
+  SvgCheveronRight,
+} from '../../../icons/v1';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
@@ -192,7 +198,7 @@ function ExpenseGroupPreview({ group, pending, style }) {
         opacity: pending ? 1 : 0.4,
       }}
     >
-      <ExpenseGroupTotals group={group} blank={true} />
+      <ExpenseGroupHeader group={group} blank={true} />
 
       {group.categories.map((cat, index) => (
         <ExpenseCategory
@@ -443,7 +449,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   // </Draggable>
 });
 
-const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
+const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   group,
   budgeted,
   spent,
@@ -453,6 +459,8 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   blank,
   show3Cols,
   showBudgetedCol,
+  collapsed,
+  onToggleCollapse,
 }) {
   const opacity = blank ? 0 : 1;
   const listItemRef = useRef();
@@ -464,11 +472,30 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         alignItems: 'center',
         backgroundColor: theme.tableRowHeaderBackground,
         opacity: !!group.hidden ? 0.5 : undefined,
+        paddingLeft: 0,
       }}
       data-testid="totals"
       innerRef={listItemRef}
     >
-      <View role="button" style={{ flex: 1 }}>
+      <View
+        role="button"
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          flexDirection: 'row',
+        }}
+      >
+        <Button
+          type="bare"
+          style={{ marginRight: 3, ...styles.noTapHighlight }}
+          onClick={() => onToggleCollapse?.(group.id)}
+        >
+          {collapsed ? (
+            <SvgCheveronRight width={12} height={12} />
+          ) : (
+            <SvgCheveronDown width={12} height={12} />
+          )}
+        </Button>
         <Text
           style={{
             ...styles.smallText,
@@ -580,12 +607,13 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   // </Droppable>
 });
 
-const IncomeGroupTotals = memo(function IncomeGroupTotals({
+const IncomeGroupHeader = memo(function IncomeGroupHeader({
   group,
   budgeted,
   balance,
-  style,
   onEdit,
+  collapsed,
+  onToggleCollapse,
 }) {
   const listItemRef = useRef();
 
@@ -594,10 +622,9 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
         backgroundColor: theme.tableRowHeaderBackground,
         opacity: !!group.hidden ? 0.5 : undefined,
-        ...style,
+        paddingLeft: 0,
       }}
       innerRef={listItemRef}
     >
@@ -605,11 +632,22 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         role="button"
         style={{
           flex: 1,
-          justifyContent: 'center',
-          alignItems: 'flex-start',
+          alignItems: 'center',
+          flexDirection: 'row',
           height: ROW_HEIGHT,
         }}
       >
+        <Button
+          type="bare"
+          style={{ marginRight: 3, ...styles.noTapHighlight }}
+          onClick={() => onToggleCollapse?.(group.id)}
+        >
+          {collapsed ? (
+            <SvgCheveronRight width={12} height={12} />
+          ) : (
+            <SvgCheveronDown width={12} height={12} />
+          )}
+        </Button>
         <Text
           style={{
             ...styles.smallText,
@@ -682,7 +720,6 @@ const IncomeCategory = memo(function IncomeCategory({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
         backgroundColor: 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
@@ -797,6 +834,8 @@ const ExpenseGroup = memo(function ExpenseGroup({
   showBudgetedCol,
   show3Cols,
   showHiddenCategories,
+  collapsed,
+  onToggleCollapse,
 }) {
   function editable(content) {
     if (!editMode) {
@@ -830,11 +869,11 @@ const ExpenseGroup = memo(function ExpenseGroup({
   return editable(
     <Card
       style={{
-        marginTop: 7,
-        marginBottom: 7,
+        marginTop: 4,
+        marginBottom: 4,
       }}
     >
-      <ExpenseGroupTotals
+      <ExpenseGroupHeader
         group={group}
         showBudgetedCol={showBudgetedCol}
         budgeted={
@@ -856,11 +895,15 @@ const ExpenseGroup = memo(function ExpenseGroup({
         editMode={editMode}
         onAddCategory={onAddCategory}
         onEdit={onEditGroup}
+        collapsed={collapsed}
+        onToggleCollapse={onToggleCollapse}
         // onReorderCategory={onReorderCategory}
       />
 
       {group.categories
-        .filter(category => !category.hidden || showHiddenCategories)
+        .filter(
+          category => !collapsed && (!category.hidden || showHiddenCategories),
+        )
         .map((category, index) => {
           return (
             <ExpenseCategory
@@ -922,6 +965,8 @@ function IncomeGroup({
   onEditGroup,
   onEditCategory,
   onBudgetAction,
+  collapsed,
+  onToggleCollapse,
 }) {
   return (
     <View>
@@ -940,7 +985,7 @@ function IncomeGroup({
       </View>
 
       <Card style={{ marginTop: 0 }}>
-        <IncomeGroupTotals
+        <IncomeGroupHeader
           group={group}
           budgeted={
             type === 'report' ? reportBudget.groupBudgeted(group.id) : null
@@ -950,16 +995,18 @@ function IncomeGroup({
               ? reportBudget.groupSumAmount(group.id)
               : rolloverBudget.groupSumAmount(group.id)
           }
-          style={{
-            backgroundColor: theme.tableRowHeaderBackground,
-          }}
           onAddCategory={onAddCategory}
           editMode={editMode}
           onEdit={onEditGroup}
+          collapsed={collapsed}
+          onToggleCollapse={onToggleCollapse}
         />
 
         {group.categories
-          .filter(category => !category.hidden || showHiddenCategories)
+          .filter(
+            category =>
+              !collapsed && (!category.hidden || showHiddenCategories),
+          )
           .map((category, index) => {
             return (
               <IncomeCategory
@@ -1018,6 +1065,16 @@ function BudgetGroups({
   });
 
   const { incomeGroup, expenseGroups } = separateGroups(categoryGroups);
+  const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
+    useLocalPref('budget.collapsed');
+
+  const onToggleCollapse = id => {
+    setCollapsedGroupIdsPref(
+      collapsedGroupIds.includes(id)
+        ? collapsedGroupIds.filter(collapsedId => collapsedId !== id)
+        : [...collapsedGroupIds, id],
+    );
+  };
 
   return (
     <View
@@ -1046,6 +1103,8 @@ function BudgetGroups({
               onBudgetAction={onBudgetAction}
               show3Cols={show3Cols}
               showHiddenCategories={showHiddenCategories}
+              collapsed={collapsedGroupIds.includes(group.id)}
+              onToggleCollapse={onToggleCollapse}
             />
           );
         })}
@@ -1063,6 +1122,8 @@ function BudgetGroups({
           onEditGroup={onEditGroup}
           onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
+          collapsed={collapsedGroupIds.includes(incomeGroup.id)}
+          onToggleCollapse={onToggleCollapse}
         />
       )}
     </View>
