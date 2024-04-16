@@ -643,6 +643,9 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
         <Button
           type="bare"
           style={{ margin: '0 1px', ...styles.noTapHighlight }}
+          activeStyle={{
+            backgroundColor: 'transparent',
+          }}
           onClick={() => onToggleCollapse?.(group.id)}
         >
           {collapsed ? (
