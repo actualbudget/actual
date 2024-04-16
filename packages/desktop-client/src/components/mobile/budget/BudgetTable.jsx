@@ -487,13 +487,13 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       >
         <Button
           type="bare"
-          style={{ marginRight: 3, ...styles.noTapHighlight }}
+          style={{ margin: '0 1px', ...styles.noTapHighlight }}
           onClick={() => onToggleCollapse?.(group.id)}
         >
           {collapsed ? (
-            <SvgCheveronRight width={12} height={12} />
+            <SvgCheveronRight width={14} height={14} />
           ) : (
-            <SvgCheveronDown width={12} height={12} />
+            <SvgCheveronDown width={14} height={14} />
           )}
         </Button>
         <Text
@@ -639,13 +639,13 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
       >
         <Button
           type="bare"
-          style={{ marginRight: 3, ...styles.noTapHighlight }}
+          style={{ margin: '0 1px', ...styles.noTapHighlight }}
           onClick={() => onToggleCollapse?.(group.id)}
         >
           {collapsed ? (
-            <SvgCheveronRight width={12} height={12} />
+            <SvgCheveronRight width={14} height={14} />
           ) : (
-            <SvgCheveronDown width={12} height={12} />
+            <SvgCheveronDown width={14} height={14} />
           )}
         </Button>
         <Text
