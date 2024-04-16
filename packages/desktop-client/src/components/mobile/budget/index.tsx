@@ -49,9 +49,12 @@ function BudgetInner(props: BudgetInnerProps) {
   const { categoryGroups, categories, budgetType, spreadsheet } = props;
 
   const currMonth = monthUtils.currentMonth();
-
-  const [bounds, setBounds] = useState({ start: currMonth, end: currMonth });
-  const [currentMonth, setCurrentMonth] = useState(currMonth);
+  const [startMonth = currMonth, setStartMonthPref] =
+    useLocalPref('budget.startMonth');
+  const [bounds, setBounds] = useState({
+    start: startMonth,
+    end: startMonth,
+  });
   const [initialized, setInitialized] = useState(false);
   // const [editMode, setEditMode] = useState(false);
 
@@ -65,7 +68,7 @@ function BudgetInner(props: BudgetInnerProps) {
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
 
-      await prewarmMonth(budgetType, spreadsheet, currentMonth);
+      await prewarmMonth(budgetType, spreadsheet, startMonth);
 
       setInitialized(true);
     }
@@ -85,7 +88,7 @@ function BudgetInner(props: BudgetInnerProps) {
     });
 
     return () => unlisten();
-  }, [budgetType, currentMonth, dispatch, spreadsheet]);
+  }, [budgetType, startMonth, dispatch, spreadsheet]);
 
   const onBudgetAction = async (month, type, args) => {
     dispatch(applyBudgetAction(month, type, args));
@@ -95,13 +98,13 @@ function BudgetInner(props: BudgetInnerProps) {
     if (budgetType === 'report') {
       dispatch(
         pushModal('report-budget-summary', {
-          month: currentMonth,
+          month: startMonth,
         }),
       );
     } else {
       dispatch(
         pushModal('rollover-budget-summary', {
-          month: currentMonth,
+          month: startMonth,
           onBudgetAction,
         }),
       );
@@ -233,16 +236,16 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onPrevMonth = async () => {
-    const month = monthUtils.subMonths(currentMonth, 1);
+    const month = monthUtils.subMonths(startMonth, 1);
     await prewarmMonth(budgetType, spreadsheet, month);
-    setCurrentMonth(month);
+    setStartMonthPref(month);
     setInitialized(true);
   };
 
   const onNextMonth = async () => {
-    const month = monthUtils.addMonths(currentMonth, 1);
+    const month = monthUtils.addMonths(startMonth, 1);
     await prewarmMonth(budgetType, spreadsheet, month);
-    setCurrentMonth(month);
+    setStartMonthPref(month);
     setInitialized(true);
   };
 
@@ -293,7 +296,7 @@ function BudgetInner(props: BudgetInnerProps) {
       newBudgetType,
       spreadsheet,
       bounds,
-      currentMonth,
+      startMonth,
       async () => {
         dispatch(loadPrefs());
       },
@@ -401,7 +404,7 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   return (
-    <NamespaceContext.Provider value={monthUtils.sheetForMonth(currentMonth)}>
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
       <SyncRefresh
         onSync={async () => {
           dispatch(sync());
@@ -414,7 +417,7 @@ function BudgetInner(props: BudgetInnerProps) {
             key={`${numberFormat}${hideFraction}`}
             categoryGroups={categoryGroups}
             type={budgetType}
-            month={currentMonth}
+            month={startMonth}
             monthBounds={bounds}
             // editMode={editMode}
             onShowBudgetSummary={onShowBudgetSummary}

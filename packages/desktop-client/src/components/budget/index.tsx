@@ -75,22 +75,18 @@ function BudgetInner(props: BudgetInnerProps) {
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [_startMonth, setBudgetStartMonthPref] =
-    useLocalPref('budget.startMonth');
-  const startMonth = _startMonth || currentMonth;
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
-  const [_budgetType] = useLocalPref('budgetType');
-  const budgetType = _budgetType || 'rollover';
-  const [_maxMonths] = useGlobalPref('maxMonths');
-  const maxMonths = _maxMonths || 1;
-
-  const [initialized, setInitialized] = useState(false);
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [maxMonths = 1] = useGlobalPref('maxMonths');
+  const [startMonth = currentMonth, setStartMonthPref] =
+    useLocalPref('budget.startMonth');
   const [bounds, setBounds] = useState({
-    start: currentMonth,
-    end: currentMonth,
+    start: startMonth,
+    end: startMonth,
   });
+  const [initialized, setInitialized] = useState(false);
   const { grouped: categoryGroups } = useCategories();
 
   function loadCategories() {
@@ -153,7 +149,7 @@ function BudgetInner(props: BudgetInnerProps) {
   }, [props.accountId]);
 
   const onMonthSelect = async (month, numDisplayed) => {
-    setBudgetStartMonthPref(month);
+    setStartMonthPref(month);
 
     const warmingMonth = month;
 
@@ -180,7 +176,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
 
     if (warmingMonth === month) {
-      setBudgetStartMonthPref(month);
+      setStartMonthPref(month);
     }
   };
 
