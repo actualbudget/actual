@@ -491,6 +491,9 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
           activeStyle={{
             backgroundColor: 'transparent',
           }}
+          hoveredStyle={{
+            backgroundColor: 'transparent',
+          }}
           onClick={() => onToggleCollapse?.(group.id)}
         >
           {collapsed ? (
@@ -644,6 +647,9 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           type="bare"
           style={{ margin: '0 1px', ...styles.noTapHighlight }}
           activeStyle={{
+            backgroundColor: 'transparent',
+          }}
+          hoveredStyle={{
             backgroundColor: 'transparent',
           }}
           onClick={() => onToggleCollapse?.(group.id)}
