@@ -1,14 +1,14 @@
 // @ts-strict-ignore
 import React from 'react';
 
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row } from '../../../table';
 
 type ReportTableListProps = {
-  data: GroupedEntity;
+  data: DataEntity[];
   mode?: string;
   intervalsCount?: number;
   groupBy: string;
@@ -16,8 +16,6 @@ type ReportTableListProps = {
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
-  showHiddenCategories?: boolean;
-  showOffBudget?: boolean;
 };
 
 export function ReportTableList({
@@ -29,16 +27,8 @@ export function ReportTableList({
   compact,
   style,
   compactStyle,
-  showHiddenCategories,
-  showOffBudget,
 }: ReportTableListProps) {
-  const groupByData =
-    groupBy === 'Category'
-      ? 'groupedData'
-      : groupBy === 'Interval'
-        ? 'intervalData'
-        : 'data';
-  const metadata = data[groupByData];
+  const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
 
   type RenderRowProps = {
     index: number;
@@ -56,29 +46,25 @@ export function ReportTableList({
   }: RenderRowProps) {
     const item =
       parent_index === undefined
-        ? metadata[index]
-        : metadata[parent_index].categories[index];
+        ? data[index]
+        : data[parent_index].categories[index];
 
     return renderItem({
       item,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      groupBy,
+      groupByItem,
       mode,
       intervalsCount,
       compact,
       style,
       compactStyle,
-      showHiddenCategories,
-      showOffBudget,
     });
   }
 
   return (
     <View>
-      {metadata ? (
+      {data ? (
         <View>
-          {metadata.map((item, index) => {
+          {data.map((item, index) => {
             return (
               <View key={item.id}>
                 <RenderRow

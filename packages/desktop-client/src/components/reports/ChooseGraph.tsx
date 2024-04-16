@@ -55,6 +55,12 @@ export function ChooseGraph({
   const intervals: string[] = monthUtils.rangeInclusive(startDate, endDate);
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
+  const groupByData =
+    groupBy === 'Category'
+      ? 'groupedData'
+      : groupBy === 'Interval'
+        ? 'intervalData'
+        : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -171,14 +177,12 @@ export function ChooseGraph({
           handleScroll={handleScroll}
           balanceTypeOp={balanceTypeOp}
           groupBy={groupBy}
-          data={data}
+          data={data[groupByData]}
           mode={mode}
           intervalsCount={intervals.length}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
-          showHiddenCategories={showHiddenCategories}
-          showOffBudget={showOffBudget}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
