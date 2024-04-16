@@ -571,6 +571,7 @@ function SingleAutocomplete<T extends Item>({
                   backgroundColor: theme.menuAutoCompleteBackground,
                   color: theme.menuAutoCompleteText,
                   minWidth: 200,
+                  width: triggerRef.current?.clientWidth,
                 }}
                 data-testid="autocomplete"
               >
