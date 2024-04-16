@@ -38,7 +38,6 @@ import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
 import { Notes } from './modals/Notes';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
-import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
 import { ReportBudgetSummaryModal } from './modals/ReportBudgetSummaryModal';
@@ -213,20 +212,6 @@ export function Modals() {
               modalProps={modalProps}
               payeeIds={options.payeeIds}
               targetPayeeId={options.targetPayeeId}
-            />
-          );
-
-        case 'plaid-external-msg':
-          return (
-            <PlaidExternalMsg
-              key={name}
-              modalProps={modalProps}
-              onMoveExternal={options.onMoveExternal}
-              onClose={() => {
-                options.onClose?.();
-                send('poll-web-token-stop');
-              }}
-              onSuccess={options.onSuccess}
             />
           );
 
