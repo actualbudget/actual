@@ -84,7 +84,6 @@ export function RolloverBudgetMonthMenuModal({
         style={{
           flex: 1,
           flexDirection: 'column',
-          paddingBottom: 10,
         }}
       >
         <View
