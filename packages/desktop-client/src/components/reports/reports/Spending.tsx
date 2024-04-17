@@ -79,7 +79,7 @@ export function Spending() {
             Back
           </Link>
           <Text style={{ ...styles.veryLargeText, marginBottom: 10 }}>
-            Monthly Spending Report
+            Monthly Spending
           </Text>
 
           {filters && (
