@@ -32,6 +32,15 @@ expect.extend({
       return darkmode;
     }
 
+    // Switch to darkmode and check
+    await locator.evaluate(() => window.Actual.setTheme('midnight'));
+    const midnightMode = await expect(locator).toHaveScreenshot(config);
+
+    // Assert on
+    if (midnightMode && !midnightMode.pass) {
+      return midnightMode;
+    }
+
     // Switch back to lightmode
     await locator.evaluate(() => window.Actual.setTheme('light'));
     return {
