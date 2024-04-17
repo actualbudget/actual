@@ -36,7 +36,7 @@ jobs:
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install org.freedesktop.Sdk/x86_64/23.08 -y
           sudo flatpak install org.freedesktop.Platform/x86_64/23.08 -y
-          sudo flatpak install org.electronjs.Electron2.BaseApp/x86_64/stable -y
+          sudo flatpak install org.electronjs.Electron2.BaseApp/x86_64/23.08 -y
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron
