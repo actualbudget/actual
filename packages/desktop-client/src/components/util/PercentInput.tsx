@@ -41,9 +41,16 @@ export function PercentInput({
 }: PercentInputProps) {
   const format = useFormat();
 
-  const initialValueAbsolute = format(initialValue || 0, 'percentage');
-  const [value, setValue] = useState(initialValueAbsolute);
-  useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
+  const [value, setValue] = useState(() =>
+    format(Math.abs(initialValue || 0), 'percentage'),
+  );
+  useEffect(() => {
+    const initialValueAbsolute = Math.abs(initialValue || 0);
+    if (initialValueAbsolute !== initialValue) {
+      setValue(format(initialValueAbsolute, 'percentage'));
+      onUpdatePercent?.(initialValueAbsolute);
+    }
+  }, [initialValue, onUpdatePercent, value, format]);
 
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
