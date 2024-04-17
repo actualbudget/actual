@@ -236,23 +236,20 @@ type FinanceModals = {
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
   };
-  'rollover-budget-month-menu': {
-    month: string;
+  'budget-page-menu': {
     onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetType: () => void;
+  };
+  'rollover-budget-month-menu': {
+    month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (id: string) => void;
-    onClose?: () => void;
   };
   'report-budget-month-menu': {
     month: string;
-    onAddCategoryGroup: () => void;
-    onToggleHiddenCategories: () => void;
-    onSwitchBudgetType: () => void;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (id: string) => void;
-    onClose?: () => void;
   };
 };
 

@@ -1,51 +1,33 @@
 // @ts-strict-ignore
-import React, { type ComponentPropsWithoutRef, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { type NoteEntity } from 'loot-core/src/types/models';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import {
-  SvgAdd,
-  SvgCheveronDown,
-  SvgCheveronUp,
-  SvgCog,
-  SvgSwap,
-} from '../../icons/v1';
-import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
+import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
+import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button';
-import { Menu } from '../common/Menu';
 import { Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
-import { Tooltip } from '../tooltips';
 
 type ReportBudgetMonthMenuModalProps = {
   modalProps: CommonModalProps;
   month: string;
-  onAddCategoryGroup: () => void;
-  onToggleHiddenCategories: () => void;
-  onSwitchBudgetType: () => void;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onEditNotes: (id: string) => void;
-  onClose?: () => void;
 };
 
 export function ReportBudgetMonthMenuModal({
   modalProps,
   month,
-  onAddCategoryGroup,
-  onToggleHiddenCategories,
-  onSwitchBudgetType,
   onBudgetAction,
   onEditNotes,
-  onClose,
 }: ReportBudgetMonthMenuModalProps) {
   const notesId = `budget-${month}`;
   const data = useLiveQuery<NoteEntity[]>(
@@ -54,9 +36,8 @@ export function ReportBudgetMonthMenuModal({
   );
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
-  const _onClose = () => {
-    modalProps?.onClose();
-    onClose?.();
+  const onClose = () => {
+    modalProps.onClose();
   };
 
   const _onEditNotes = () => {
@@ -90,14 +71,7 @@ export function ReportBudgetMonthMenuModal({
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      onClose={_onClose}
-      leftHeaderContent={
-        <AdditionalMenu
-          onAddCategoryGroup={onAddCategoryGroup}
-          onToggleHiddenCategories={onToggleHiddenCategories}
-          onSwitchBudgetType={onSwitchBudgetType}
-        />
-      }
+      onClose={onClose}
       padding={0}
       style={{
         flex: 1,
@@ -194,124 +168,31 @@ export function ReportBudgetMonthMenuModal({
             getItemStyle={() => defaultMenuItemStyle}
             onCopyLastMonthBudget={() => {
               onBudgetAction(month, 'copy-last');
-              _onClose();
+              onClose();
             }}
             onSetBudgetsToZero={() => {
               onBudgetAction(month, 'set-zero');
-              _onClose();
+              onClose();
             }}
             onSetMonthsAverage={numberOfMonths => {
               onBudgetAction(month, `set-${numberOfMonths}-avg`);
-              _onClose();
+              onClose();
             }}
             onCheckTemplates={() => {
               onBudgetAction(month, 'check-templates');
-              _onClose();
+              onClose();
             }}
             onApplyBudgetTemplates={() => {
               onBudgetAction(month, 'apply-goal-template');
-              _onClose();
+              onClose();
             }}
             onOverwriteWithBudgetTemplates={() => {
               onBudgetAction(month, 'overwrite-goal-template');
-              _onClose();
+              onClose();
             }}
           />
         )}
       </View>
     </Modal>
-  );
-}
-
-type AdditonalMenuProps = Omit<
-  ComponentPropsWithoutRef<typeof Menu>,
-  'onMenuSelect' | 'items'
-> & {
-  onAddCategoryGroup: () => void;
-  onToggleHiddenCategories: () => void;
-  onSwitchBudgetType: () => void;
-};
-
-function AdditionalMenu({
-  onAddCategoryGroup,
-  onToggleHiddenCategories,
-  onSwitchBudgetType,
-}: AdditonalMenuProps) {
-  const isReportBudgetEnabled = useFeatureFlag('reportBudget');
-  const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const itemStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: styles.mobileMinHeight,
-  };
-
-  const onMenuSelect = (name: string) => {
-    switch (name) {
-      case 'add-category-group':
-        onAddCategoryGroup?.();
-        break;
-      case 'toggle-hidden-categories':
-        onToggleHiddenCategories?.();
-        break;
-      case 'switch-budget-type':
-        onSwitchBudgetType?.();
-        break;
-      default:
-        throw new Error(`Unrecognized menu item: ${name}`);
-    }
-    setMenuOpen(false);
-  };
-
-  return (
-    <View>
-      <Button
-        type="bare"
-        aria-label="Menu"
-        onClick={() => {
-          setMenuOpen(true);
-        }}
-      >
-        <SvgCog width={17} height={17} style={{ color: 'currentColor' }} />
-      </Button>
-      {menuOpen && (
-        <Tooltip
-          position="bottom-left"
-          style={{ padding: 0 }}
-          onClose={() => {
-            setMenuOpen(false);
-          }}
-        >
-          <Menu
-            getItemStyle={() => itemStyle}
-            onMenuSelect={onMenuSelect}
-            items={[
-              {
-                name: 'add-category-group',
-                text: 'Add category group',
-                icon: SvgAdd,
-                iconSize: 16,
-              },
-              {
-                name: 'toggle-hidden-categories',
-                text: `${!showHiddenCategories ? 'Show' : 'Hide'} hidden categories`,
-                icon: !showHiddenCategories ? SvgViewShow : SvgViewHide,
-                iconSize: 16,
-              },
-              ...(isReportBudgetEnabled
-                ? [
-                    {
-                      name: 'switch-budget-type',
-                      text: 'Switch budget type',
-                      icon: SvgSwap,
-                      iconSize: 16,
-                    },
-                  ]
-                : []),
-            ]}
-          />
-        </Tooltip>
-      )}
-    </View>
   );
 }

@@ -1163,6 +1163,7 @@ export function BudgetTable({
   onRefresh,
   onEditGroup,
   onEditCategory,
+  onOpenBudgetPageMenu,
   onOpenBudgetMonthMenu,
 }) {
   const { width } = useResponsive();
@@ -1201,11 +1202,12 @@ export function BudgetTable({
         <MonthSelector
           month={month}
           monthBounds={monthBounds}
+          onOpenMonthMenu={onOpenBudgetMonthMenu}
           onPrevMonth={onPrevMonth}
           onNextMonth={onNextMonth}
         />
       }
-      headerRightContent={
+      headerLeftContent={
         <Button
           type="bare"
           style={{
@@ -1214,7 +1216,7 @@ export function BudgetTable({
           }}
           hoveredStyle={noBackgroundColorStyle}
           activeStyle={noBackgroundColorStyle}
-          onClick={() => onOpenBudgetMonthMenu?.(month)}
+          onClick={() => onOpenBudgetPageMenu?.()}
         >
           <SvgLogo width="20" height="20" />
         </Button>
@@ -1386,7 +1388,13 @@ export function BudgetTable({
   );
 }
 
-function MonthSelector({ month, monthBounds, onPrevMonth, onNextMonth }) {
+function MonthSelector({
+  month,
+  monthBounds,
+  onOpenMonthMenu,
+  onPrevMonth,
+  onNextMonth,
+}) {
   const prevEnabled = month > monthBounds.start;
   const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
 
@@ -1426,7 +1434,10 @@ function MonthSelector({ month, monthBounds, onPrevMonth, onNextMonth }) {
           textAlign: 'center',
           fontSize: 16,
           fontWeight: 500,
+          margin: '0 5px',
+          ...styles.underlinedText,
         }}
+        onClick={() => onOpenMonthMenu?.(month)}
       >
         {monthUtils.format(month, 'MMMM ‘yy')}
       </Text>

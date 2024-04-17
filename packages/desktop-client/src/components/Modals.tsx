@@ -14,6 +14,7 @@ import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 import { ModalTitle } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
@@ -617,6 +618,17 @@ export function Modals() {
             />
           );
 
+        case 'budget-page-menu':
+          return (
+            <BudgetPageMenuModal
+              key={name}
+              modalProps={modalProps}
+              onAddCategoryGroup={options.onAddCategoryGroup}
+              onToggleHiddenCategories={options.onToggleHiddenCategories}
+              onSwitchBudgetType={options.onSwitchBudgetType}
+            />
+          );
+
         case 'rollover-budget-month-menu':
           return (
             <NamespaceContext.Provider
@@ -626,12 +638,8 @@ export function Modals() {
               <RolloverBudgetMonthMenuModal
                 modalProps={modalProps}
                 month={options.month}
-                onAddCategoryGroup={options.onAddCategoryGroup}
-                onToggleHiddenCategories={options.onToggleHiddenCategories}
-                onSwitchBudgetType={options.onSwitchBudgetType}
                 onBudgetAction={options.onBudgetAction}
                 onEditNotes={options.onEditNotes}
-                onClose={options.onClose}
               />
             </NamespaceContext.Provider>
           );
@@ -645,12 +653,8 @@ export function Modals() {
               <ReportBudgetMonthMenuModal
                 modalProps={modalProps}
                 month={options.month}
-                onAddCategoryGroup={options.onAddCategoryGroup}
-                onToggleHiddenCategories={options.onToggleHiddenCategories}
-                onSwitchBudgetType={options.onSwitchBudgetType}
                 onBudgetAction={options.onBudgetAction}
                 onEditNotes={options.onEditNotes}
-                onClose={options.onClose}
               />
             </NamespaceContext.Provider>
           );
