@@ -32,7 +32,8 @@ export function BudgetTable(props) {
 
   const budgetCategoriesRef = useRef();
   const { grouped: categoryGroups } = useCategories();
-  const [collapsed = [], setCollapsedPref] = useLocalPref('budget.collapsed');
+  const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
+    useLocalPref('budget.collapsed');
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
     'budget.showHiddenCategories',
   );
@@ -95,7 +96,7 @@ export function BudgetTable(props) {
 
   const moveVertically = dir => {
     const flattened = categoryGroups.reduce((all, group) => {
-      if (collapsed.includes(group.id)) {
+      if (collapsedGroupIds.includes(group.id)) {
         return all.concat({ id: group.id, isGroup: true });
       }
       return all.concat([{ id: group.id, isGroup: true }, ...group.categories]);
@@ -133,7 +134,7 @@ export function BudgetTable(props) {
   };
 
   const onCollapse = collapsedIds => {
-    setCollapsedPref(collapsedIds);
+    setCollapsedGroupIdsPref(collapsedIds);
   };
 
   const onToggleHiddenCategories = () => {

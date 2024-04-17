@@ -11,6 +11,7 @@ import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
+import { defaultsList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
@@ -40,13 +41,16 @@ export function ReportSidebar({
   defaultItems,
   defaultModeItems,
   earliestTransaction,
+  firstDayOfWeekIdx,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
     setSessionReport('dateRange', cond);
     onReportChange({ type: 'modify' });
     setDateRange(cond);
-    onChangeDates(...getLiveRange(cond, earliestTransaction));
+    onChangeDates(
+      ...getLiveRange(cond, earliestTransaction, firstDayOfWeekIdx),
+    );
   };
 
   const onChangeMode = cond => {
@@ -187,7 +191,7 @@ export function ReportSidebar({
                   .map(int => int.description)
                   .includes(customReportItems.dateRange)
               ) {
-                onSelectRange('Year to date');
+                onSelectRange(defaultsList.intervalRange.get(e));
               }
             }}
             options={ReportOptions.interval.map(option => [
@@ -351,7 +355,7 @@ export function ReportSidebar({
               options={ReportOptions.dateRange
                 .filter(f => f[customReportItems.interval])
                 .map(option => [option.description, option.description])}
-              line={customReportItems.interval === 'Monthly' && dateRangeLine}
+              line={dateRangeLine > 0 && dateRangeLine}
             />
           </View>
         ) : (
@@ -374,6 +378,7 @@ export function ReportSidebar({
                       newValue,
                       customReportItems.endDate,
                       customReportItems.interval,
+                      firstDayOfWeekIdx,
                     ),
                   )
                 }
@@ -403,6 +408,7 @@ export function ReportSidebar({
                       customReportItems.startDate,
                       newValue,
                       customReportItems.interval,
+                      firstDayOfWeekIdx,
                     ),
                   )
                 }

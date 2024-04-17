@@ -11,6 +11,7 @@ import memoizeOne from 'memoize-one';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import {
+  collapseModals,
   getPayees,
   markAccountRead,
   openAccountCloseModal,
@@ -182,6 +183,10 @@ function TransactionListWithPreviews({ account }) {
     updateQuery(query);
   }, [makeRootQuery, updateQuery]);
 
+  const refetchTransactions = () => {
+    paged.current?.run();
+  };
+
   useEffect(() => {
     const unlisten = listen('sync-event', ({ type, tables }) => {
       if (type === 'applied') {
@@ -190,7 +195,7 @@ function TransactionListWithPreviews({ account }) {
           tables.includes('category_mapping') ||
           tables.includes('payee_mapping')
         ) {
-          paged.current?.run();
+          refetchTransactions();
         }
 
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -231,9 +236,24 @@ function TransactionListWithPreviews({ account }) {
   };
 
   const onSelectTransaction = transaction => {
-    // details of how the native app used to handle preview transactions here can be found at commit 05e58279
     if (!isPreviewId(transaction.id)) {
       navigate(`/transactions/${transaction.id}`);
+    } else {
+      dispatch(
+        pushModal('scheduled-transaction-menu', {
+          transactionId: transaction.id,
+          onPost: async transactionId => {
+            const parts = transactionId.split('/');
+            await send('schedule/post-transaction', { id: parts[1] });
+            dispatch(collapseModals('scheduled-transaction-menu'));
+          },
+          onSkip: async transactionId => {
+            const parts = transactionId.split('/');
+            await send('schedule/skip-next-date', { id: parts[1] });
+            dispatch(collapseModals('scheduled-transaction-menu'));
+          },
+        }),
+      );
     }
   };
 
