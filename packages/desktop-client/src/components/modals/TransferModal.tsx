@@ -85,6 +85,7 @@ export function TransferModal({
             <FieldLabel title="Transfer this amount:" />
             <InitialFocus>
               <InputField
+                inputMode="decimal"
                 tabIndex={1}
                 defaultValue={_initialAmount}
                 onUpdate={setAmount}
