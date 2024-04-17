@@ -14,14 +14,14 @@ import { type CSSProperties } from '../../style';
 import { Input } from '../common/Input';
 import { useFormat } from '../spreadsheet/useFormat';
 
-type AmountInputProps = {
+type PercentInputProps = {
   id?: string;
   inputRef?: Ref<HTMLInputElement>;
   value: number;
   onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
-  onUpdate?: (amount: number) => void;
+  onUpdatePercent?: (percent: number) => void;
   style?: CSSProperties;
   focused?: boolean;
   disabled?: boolean;
@@ -34,11 +34,11 @@ export function PercentInput({
   onFocus,
   onBlur,
   onChangeValue,
-  onUpdate,
+  onUpdatePercent,
   style,
   focused,
   disabled = false,
-}: AmountInputProps) {
+}: PercentInputProps) {
   const format = useFormat();
 
   const initialValueAbsolute = format(initialValue || 0, 'percentage');
@@ -84,7 +84,7 @@ export function PercentInput({
       Math.min(evalArithmetic(value.replace('%', '')), 100),
       0,
     );
-    onUpdate?.(valueOrInitial);
+    onUpdatePercent?.(valueOrInitial);
   }
 
   function onInputAmountBlur(e: FocusEvent<HTMLInputElement>) {

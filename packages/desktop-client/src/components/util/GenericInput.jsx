@@ -50,7 +50,11 @@ export function GenericInput({
         );
       case 'percentage':
         return (
-          <PercentInput inputRef={inputRef} value={value} onUpdate={onChange} />
+          <PercentInput
+            inputRef={inputRef}
+            value={value}
+            onUpdatePercent={onChange}
+          />
         );
       default:
         return (
