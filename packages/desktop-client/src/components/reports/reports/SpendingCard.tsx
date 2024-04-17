@@ -1,15 +1,13 @@
 import React, { useState, useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToInteger, integerToCurrency } from 'loot-core/src/shared/util';
+import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { styles } from '../../../style/styles';
-import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { Change } from '../Change';
 import { DateRange } from '../DateRange';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -29,6 +27,11 @@ export function SpendingCard() {
   }, [categories]);
 
   const data = useReport('default', getGraphData);
+  const difference =
+    data &&
+    data.intervalData[monthUtils.getDay(monthUtils.currentDay()) - 1].average -
+      data.intervalData[monthUtils.getDay(monthUtils.currentDay()) - 1]
+        .thisMonth;
 
   return (
     <ReportCard flex="1" to="/reports/spending">
@@ -60,21 +63,20 @@ export function SpendingCard() {
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {integerToCurrency(data.totalAssets)}
+                  {data && amountToCurrency(difference)}
                 </PrivacyFilter>
               </Block>
-              <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <Change
-                  amount={amountToInteger(data.totalDebts)}
-                  style={{ color: theme.tableText, fontWeight: 300 }}
-                />
-              </PrivacyFilter>
             </View>
           )}
         </View>
 
         {data ? (
-          <SpendingGraph style={{ flexGrow: 1 }} compact={true} data={data} />
+          <SpendingGraph
+            style={{ flexGrow: 1 }}
+            compact={true}
+            data={data}
+            mode="average"
+          />
         ) : (
           <LoadingIndicator />
         )}

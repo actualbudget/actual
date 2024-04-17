@@ -33,7 +33,12 @@ export interface SpendingDataEntity {
 }
 
 export interface SpendingEntity {
-  intervalData: Array[SpendingDataEntity];
+  intervalData: {
+    day: string;
+    average: number;
+    thisMonth: number;
+    lastMonth: number;
+  }[];
   startDate?: string;
   endDate?: string;
   totalDebts: number;

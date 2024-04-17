@@ -82,6 +82,8 @@ export function createSpendingSpreadsheet({
       });
 
     const intervalData = days.map(day => {
+      let averageSum = 0;
+      let monthCount = 0;
       const dayData = months.map(month => {
         const data = intervals.reduce((arr, intervalItem) => {
           const offsetDay =
@@ -120,6 +122,10 @@ export function createSpendingSpreadsheet({
               }
               return null;
             });
+            if (month.month !== monthUtils.currentMonth()) {
+              averageSum += cumulativeAssets + cumulativeDebts;
+              monthCount += 1;
+            }
 
             arr.push({
               date: intervalItem,
@@ -151,6 +157,9 @@ export function createSpendingSpreadsheet({
       return {
         ...indexedData,
         day,
+        average: integerToAmount(averageSum) / monthCount,
+        thisMonth: dayData[3].cumulative,
+        lastMonth: dayData[2].cumulative,
       };
     });
 

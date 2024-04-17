@@ -11,6 +11,7 @@ import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Link } from '../../common/Link';
+import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
@@ -18,6 +19,7 @@ import { FilterButton } from '../../filters/FiltersMenu';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
+import { ModeButton } from '../ModeButton';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
@@ -34,6 +36,7 @@ export function Spending() {
   } = useFilters<RuleConditionEntity>();
 
   const [dataCheck, setDataCheck] = useState(false);
+  const [mode, setMode] = useState('Average');
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
@@ -134,80 +137,117 @@ export function Spending() {
           >
             <View
               style={{
-                flexDirection: 'row',
+                flexDirection: 'column',
                 flexGrow: 1,
+                padding: 10,
+                paddingTop: 10,
               }}
             >
               <View
                 style={{
-                  flexDirection: 'column',
-                  flexGrow: 1,
-                  padding: 10,
+                  alignItems: 'flex-end',
                   paddingTop: 10,
                 }}
               >
                 <View
                   style={{
-                    alignItems: 'flex-end',
-                    paddingTop: 10,
+                    ...styles.mediumText,
+                    fontWeight: 500,
+                    marginBottom: 5,
                   }}
                 >
-                  <View
-                    style={{
-                      ...styles.mediumText,
-                      fontWeight: 500,
-                      marginBottom: 5,
-                    }}
-                  >
-                    <AlignedText
-                      left={<Block>Spent Last MTD:</Block>}
-                      right={
-                        <Text>
-                          <PrivacyFilter blurIntensity={5}>
-                            {amountToCurrency(
-                              Math.abs(
-                                data.intervalData[
-                                  monthUtils.getDay(monthUtils.currentDay()) - 1
-                                ][
-                                  monthUtils.subMonths(
-                                    monthUtils.currentMonth(),
-                                    1,
-                                  )
-                                ].cumulative,
-                              ),
-                            )}
-                          </PrivacyFilter>
-                        </Text>
-                      }
-                    />
-                    <AlignedText
-                      left={<Block>Spent MTD:</Block>}
-                      right={
-                        <Text>
-                          <PrivacyFilter blurIntensity={5}>
-                            {amountToCurrency(
-                              Math.abs(
-                                data.intervalData[
-                                  monthUtils.getDay(monthUtils.currentDay()) - 1
-                                ][monthUtils.currentMonth()].cumulative,
-                              ),
-                            )}
-                          </PrivacyFilter>
-                        </Text>
-                      }
-                    />
-                  </View>
-                </View>
-
-                {dataCheck ? (
-                  <SpendingGraph
-                    style={{ flexGrow: 1 }}
-                    compact={false}
-                    data={data}
+                  <AlignedText
+                    left={<Block>Spent Average MTD:</Block>}
+                    right={
+                      <Text>
+                        <PrivacyFilter blurIntensity={5}>
+                          {amountToCurrency(
+                            Math.abs(
+                              data.intervalData[
+                                monthUtils.getDay(monthUtils.currentDay()) - 1
+                              ].average,
+                            ),
+                          )}
+                        </PrivacyFilter>
+                      </Text>
+                    }
                   />
-                ) : (
-                  <LoadingIndicator message="Loading report..." />
-                )}
+                  <AlignedText
+                    left={<Block>Spent Last MTD:</Block>}
+                    right={
+                      <Text>
+                        <PrivacyFilter blurIntensity={5}>
+                          {amountToCurrency(
+                            Math.abs(
+                              data.intervalData[
+                                monthUtils.getDay(monthUtils.currentDay()) - 1
+                              ].lastMonth,
+                            ),
+                          )}
+                        </PrivacyFilter>
+                      </Text>
+                    }
+                  />
+                  <AlignedText
+                    left={<Block>Spent MTD:</Block>}
+                    right={
+                      <Text>
+                        <PrivacyFilter blurIntensity={5}>
+                          {amountToCurrency(
+                            Math.abs(
+                              data.intervalData[
+                                monthUtils.getDay(monthUtils.currentDay()) - 1
+                              ].thisMonth,
+                            ),
+                          )}
+                        </PrivacyFilter>
+                      </Text>
+                    }
+                  />
+                </View>
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                }}
+              >
+                <ModeButton
+                  selected={mode === 'Average'}
+                  onSelect={() => setMode('Average')}
+                >
+                  3 month average
+                </ModeButton>
+                <ModeButton
+                  selected={mode === 'Last Month'}
+                  onSelect={() => setMode('Last Month')}
+                >
+                  Last month
+                </ModeButton>
+              </View>
+
+              {dataCheck ? (
+                <SpendingGraph
+                  style={{ flexGrow: 1 }}
+                  compact={false}
+                  data={data}
+                  mode={mode}
+                />
+              ) : (
+                <LoadingIndicator message="Loading report..." />
+              )}
+
+              <View style={{ marginTop: 30 }}>
+                <Paragraph>
+                  <strong>How is three month average calculated?</strong>
+                </Paragraph>
+                <Paragraph>
+                  Three month average takes the average cumulative spending from
+                  the last three month and divides by three. If you do not have
+                  3 months of data then please use the “Last month” graph until
+                  you do.
+                </Paragraph>
               </View>
             </View>
           </View>

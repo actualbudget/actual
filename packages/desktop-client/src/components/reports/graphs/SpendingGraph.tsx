@@ -17,7 +17,7 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type SpendingEntity } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
@@ -42,7 +42,7 @@ type CustomTooltipProps = {
   payload?: PayloadItem[];
   balanceTypeOp?: string;
   thisMonth?: string;
-  lastMonth?: string;
+  selection?: string;
 };
 
 const CustomTooltip = ({
@@ -50,9 +50,13 @@ const CustomTooltip = ({
   payload,
   balanceTypeOp,
   thisMonth,
-  lastMonth,
+  selection,
 }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
+    const comparison =
+      selection === 'average'
+        ? payload[0].payload[selection] * -1
+        : payload[0].payload[selection].cumulative * -1;
     return (
       <div
         className={`${css({
@@ -73,15 +77,13 @@ const CustomTooltip = ({
             {['cumulative'].includes(balanceTypeOp) && (
               <>
                 <AlignedText
-                  left="Last Month:"
-                  right={amountToCurrency(
-                    payload[0].payload[lastMonth].cumulative * -1,
-                  )}
+                  left={selection === 'average' ? 'Average' : 'Last month:'}
+                  right={amountToCurrency(comparison)}
                 />
                 {payload[0].payload[thisMonth].cumulative && (
                   <>
                     <AlignedText
-                      left="Spending:"
+                      left="This month:"
                       right={amountToCurrency(
                         payload[0].payload[thisMonth].cumulative * -1,
                       )}
@@ -89,9 +91,8 @@ const CustomTooltip = ({
                     <AlignedText
                       left="Difference:"
                       right={amountToCurrency(
-                        (payload[0].payload[thisMonth].cumulative -
-                          payload[0].payload[lastMonth].cumulative) *
-                          -1,
+                        payload[0].payload[thisMonth].cumulative * -1 -
+                          comparison,
                       )}
                     />
                   </>
@@ -135,15 +136,32 @@ const CustomTooltip = ({
 
 type SpendingGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
+  data: SpendingEntity;
   compact?: boolean;
+  mode: string;
 };
 
-export function SpendingGraph({ style, data, compact }: SpendingGraphProps) {
+export function SpendingGraph({
+  style,
+  data,
+  compact,
+  mode,
+}: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
   const balanceTypeOp = 'cumulative';
   const thisMonth = monthUtils.currentMonth();
   const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+  const selection = mode.toLowerCase() === 'average' ? 'average' : lastMonth;
+  const thisMonthMax = data.intervalData.reduce((a, b) =>
+    a[thisMonth][balanceTypeOp] < b[thisMonth][balanceTypeOp] ? a : b,
+  )[thisMonth][balanceTypeOp];
+  const selectionMax =
+    selection === 'average'
+      ? data.intervalData[27].average
+      : data.intervalData.reduce((a, b) =>
+          a[lastMonth][balanceTypeOp] < b[lastMonth][balanceTypeOp] ? a : b,
+        )[lastMonth][balanceTypeOp];
+  const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
   const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
 
@@ -166,7 +184,11 @@ export function SpendingGraph({ style, data, compact }: SpendingGraphProps) {
   const off = gradientOffset();
 
   const getVal = (obj, month) => {
-    return obj[month][balanceTypeOp] && -1 * obj[month][balanceTypeOp];
+    if (month === 'average') {
+      return obj[month] && -1 * obj[month];
+    } else {
+      return obj[month][balanceTypeOp] && -1 * obj[month][balanceTypeOp];
+    }
   };
 
   const getDate = obj => {
@@ -208,7 +230,9 @@ export function SpendingGraph({ style, data, compact }: SpendingGraphProps) {
                 )}
                 {compact ? null : (
                   <YAxis
-                    dataKey={val => getVal(val, lastMonth)}
+                    dataKey={val =>
+                      getVal(val, maxYAxis ? thisMonth : selection)
+                    }
                     domain={[0, 'auto']}
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
@@ -221,7 +245,7 @@ export function SpendingGraph({ style, data, compact }: SpendingGraphProps) {
                     <CustomTooltip
                       balanceTypeOp={balanceTypeOp}
                       thisMonth={thisMonth}
-                      lastMonth={lastMonth}
+                      selection={selection}
                     />
                   }
                   formatter={numberFormatterTooltip}
@@ -276,7 +300,7 @@ export function SpendingGraph({ style, data, compact }: SpendingGraphProps) {
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
-                  dataKey={val => getVal(val, lastMonth)}
+                  dataKey={val => getVal(val, selection)}
                   stroke="gray"
                   strokeDasharray="10 10"
                   strokeWidth={3}
