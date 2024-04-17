@@ -91,7 +91,7 @@ export function ReportBudgetMonthMenuModal({
             display: showMore ? 'none' : undefined,
             overflowY: 'auto',
             flex: 1,
-            paddingBottom: 10
+            paddingBottom: 10,
           }}
         >
           <Notes
