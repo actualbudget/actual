@@ -75,7 +75,7 @@ export function RolloverBudgetMonthMenuModal({
       padding={0}
       style={{
         flex: 1,
-        height: '45vh',
+        height: '50vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}
@@ -84,6 +84,7 @@ export function RolloverBudgetMonthMenuModal({
         style={{
           flex: 1,
           flexDirection: 'column',
+          paddingBottom: 10
         }}
       >
         <View
@@ -164,7 +165,7 @@ export function RolloverBudgetMonthMenuModal({
         </View>
         {showMore && (
           <BudgetMonthMenu
-            style={{ paddingBottom: 10 }}
+            style={{ overflowY: 'auto' }}
             getItemStyle={() => defaultMenuItemStyle}
             onCopyLastMonthBudget={() => {
               onBudgetAction(month, 'copy-last');

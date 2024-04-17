@@ -75,7 +75,7 @@ export function ReportBudgetMonthMenuModal({
       padding={0}
       style={{
         flex: 1,
-        height: '45vh',
+        height: '50vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}
@@ -91,6 +91,7 @@ export function ReportBudgetMonthMenuModal({
             display: showMore ? 'none' : undefined,
             overflowY: 'auto',
             flex: 1,
+            paddingBottom: 10
           }}
         >
           <Notes
@@ -164,7 +165,7 @@ export function ReportBudgetMonthMenuModal({
         </View>
         {showMore && (
           <BudgetMonthMenu
-            style={{ paddingBottom: 10 }}
+            style={{ overflowY: 'auto' }}
             getItemStyle={() => defaultMenuItemStyle}
             onCopyLastMonthBudget={() => {
               onBudgetAction(month, 'copy-last');
