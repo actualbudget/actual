@@ -16,6 +16,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
+import { setSessionReport } from './setSessionReport';
 
 export function ReportTopbar({
   customReportItems,
@@ -32,11 +33,7 @@ export function ReportTopbar({
   defaultItems,
 }) {
   const onChangeGraph = cond => {
-    const storedReport = JSON.parse(sessionStorage.getItem('report'));
-    sessionStorage.setItem(
-      'report',
-      JSON.stringify({ ...storedReport, graphType: cond }),
-    );
+    setSessionReport('graphType', cond);
     onReportChange({ type: 'modify' });
     setGraphType(cond);
     defaultItems(cond);
@@ -171,14 +168,7 @@ export function ReportTopbar({
         compact
         hover
         onApply={e => {
-          const storedReport = JSON.parse(sessionStorage.getItem('report'));
-          sessionStorage.setItem(
-            'report',
-            JSON.stringify({
-              ...storedReport,
-              conditions: [...customReportItems.conditions, e],
-            }),
-          );
+          setSessionReport('conditions', [...customReportItems.conditions, e]);
           onApplyFilter(e);
           onReportChange({ type: 'modify' });
         }}
