@@ -43,6 +43,9 @@ export function useBootstrapped(redirect = true) {
         const result = await send('subscribe-needs-bootstrap', {
           url: serverURL,
         });
+        // ensure loginMethod is set since it is a new prop
+        result.loginMethod = result.loginMethod || 'password';
+        
         if ('error' in result || !result.hasServer) {
           console.log('error' in result && result.error);
           navigate('/config-server');
