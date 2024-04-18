@@ -59,12 +59,6 @@ type FinanceModals = {
     targetPayeeId: string;
   };
 
-  'plaid-external-msg': {
-    onMoveExternal: () => Promise<void>;
-    onClose?: () => void;
-    onSuccess: (data: unknown) => Promise<void>;
-  };
-
   'gocardless-init': {
     onSuccess: () => void;
   };
