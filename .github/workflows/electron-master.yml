@@ -1,4 +1,4 @@
-name: Electron
+name: Electron 
 
 defaults:
   run:
@@ -9,8 +9,8 @@ env:
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - v**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,6 +18,9 @@ concurrency:
 
 jobs:
   build:
+    # this is so the assets can be added to the release
+    permissions:
+      contents: write
     strategy:
       matrix:
         os:
@@ -53,6 +56,14 @@ jobs:
         with:
           name: actual-electron-${{ matrix.os }}
           path: |
+            packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/*.exe
+            packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.flatpak
+      - name: Add to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
             packages/desktop-electron/dist/*.AppImage
