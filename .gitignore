@@ -1,6 +1,12 @@
+# Sample Data
 /data/*
 !data/.gitkeep
 /data2
+Actual-*
+**/xcuserdata/*
+export-2020-01-10.csv
+
+# Pre-opensource Builds
 packages/api/dist
 packages/api/@types
 packages/crdt/dist
@@ -8,21 +14,21 @@ packages/desktop-electron/client-build
 packages/desktop-electron/.electron-symbols
 packages/desktop-electron/dist
 packages/desktop-electron/loot-core
-node_modules
-.DS_Store
-lerna-debug.log
-Actual-*
-.#*
-**/xcuserdata/*
-.secret-tokens
 bundle.desktop.js
 bundle.desktop.js.map
 bundle.mobile.js
 bundle.mobile.js.map
-export-2020-01-10.csv
-.idea
-.vscode
 
+# Secrets
+.secret-tokens
+
+# Node
+node_modules
+
+# MacOS
+.DS_Store
+
+# Logs
 **/*.log
 
 # Yarn
@@ -36,3 +42,9 @@ export-2020-01-10.csv
 
 # VSCode
 .vscode
+
+# IntelliJ IDEA
+.idea
+
+# Misc
+.#*
