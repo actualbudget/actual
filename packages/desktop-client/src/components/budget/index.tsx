@@ -22,7 +22,6 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -411,13 +410,7 @@ function BudgetInner(props: BudgetInnerProps) {
 }
 
 const RolloverBudgetSummary = memo<{ month: string }>(props => {
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  return (
-    <rollover.BudgetSummary
-      {...props}
-      isGoalTemplatesEnabled={isGoalTemplatesEnabled}
-    />
-  );
+  return <rollover.BudgetSummary {...props} />;
 });
 
 RolloverBudgetSummary.displayName = 'RolloverBudgetSummary';

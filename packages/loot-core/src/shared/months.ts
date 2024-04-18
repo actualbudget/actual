@@ -370,8 +370,7 @@ export function sheetForMonth(month: string): string {
 }
 
 export function nameForMonth(month: DateLike): string {
-  // eslint-disable-next-line rulesdir/typography
-  return d.format(_parse(month), "MMMM 'yy");
+  return d.format(_parse(month), 'MMMM ‘yy');
 }
 
 export function format(month: DateLike, str: string): string {

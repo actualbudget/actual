@@ -230,10 +230,20 @@ type FinanceModals = {
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
   };
-  'budget-month-menu': {
-    month: string;
+  'budget-page-menu': {
+    onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetType: () => void;
+  };
+  'rollover-budget-month-menu': {
+    month: string;
+    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+    onEditNotes: (id: string) => void;
+  };
+  'report-budget-month-menu': {
+    month: string;
+    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+    onEditNotes: (id: string) => void;
   };
 };
 
