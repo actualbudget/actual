@@ -331,6 +331,7 @@ export function DateSelect({
         placement="bottom start"
         offset={2}
         isOpen={open}
+        isNonModal
         onOpenChange={() => setOpen(false)}
         style={{ minWidth: 225 }}
         data-testid="date-select-tooltip"
