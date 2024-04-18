@@ -75,7 +75,7 @@ export class RulesPage {
 
       if (data.splits.splitActions) {
         for (const splitActions of data.splits.splitActions) {
-          await this.page.getByTestId('split-transactions-add').click();
+          await this.page.getByTestId('add-split-transactions').click();
           await this._fillEditorFields(
             splitActions,
             this.page.getByTestId('action-list').nth(idx),
