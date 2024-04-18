@@ -63,10 +63,7 @@ export class RulesPage {
     }
 
     if (data.splits) {
-      let idx = 0;
-
       if (data.splits.beforeSplitActions) {
-        idx = data.splits.beforeSplitActions.length;
         await this._fillEditorFields(
           data.splits.beforeSplitActions,
           this.page.getByTestId('action-list'),
@@ -74,6 +71,7 @@ export class RulesPage {
       }
 
       if (data.splits.splitActions) {
+        let idx = data.splits?.beforeSplitActions.length ?? 0;
         for (const splitActions of data.splits.splitActions) {
           await this.page.getByTestId('add-split-transactions').click();
           await this._fillEditorFields(
