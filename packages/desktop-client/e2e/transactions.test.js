@@ -36,7 +36,7 @@ test.describe('Transactions', () => {
       await accountPage.removeFilter(0);
     });
 
-    test.only('by date', async () => {
+    test('by date', async () => {
       const filterTooltip = await accountPage.filterBy('Date');
       await expect(filterTooltip.page).toMatchThemeScreenshots();
 
