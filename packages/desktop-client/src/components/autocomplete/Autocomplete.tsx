@@ -244,10 +244,6 @@ function SingleAutocomplete<T extends Item>({
   const [highlightedIndex, setHighlightedIndex] = useState(null);
   const [isOpen, setIsOpen] = useState(embedded);
   const open = () => setIsOpen(true);
-  const closeWithDelay = () => {
-    setTimeout(() => setIsOpen(false), 10);
-    onClose?.();
-  };
   const close = () => {
     setIsOpen(false);
     onClose?.();
@@ -570,7 +566,8 @@ function SingleAutocomplete<T extends Item>({
                 placement="bottom start"
                 offset={2}
                 isOpen={isOpen}
-                onOpenChange={closeWithDelay}
+                onOpenChange={close}
+                isNonModal
                 style={{
                   backgroundColor: theme.menuAutoCompleteBackground,
                   color: theme.menuAutoCompleteText,
