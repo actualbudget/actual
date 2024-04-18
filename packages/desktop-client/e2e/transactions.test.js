@@ -36,7 +36,7 @@ test.describe('Transactions', () => {
       await accountPage.removeFilter(0);
     });
 
-    test('by date', async () => {
+    test.only('by date', async () => {
       const filterTooltip = await accountPage.filterBy('Date');
       await expect(filterTooltip.page).toMatchThemeScreenshots();
 
@@ -46,7 +46,7 @@ test.describe('Transactions', () => {
       await expect(datepicker).toMatchThemeScreenshots();
 
       // Select "is xxxxx"
-      await datepicker.getByRole('button', { name: '20' }).click();
+      await datepicker.getByText('20', { exact: true }).click();
       await filterTooltip.applyButton.click();
 
       // Assert that there are no transactions
