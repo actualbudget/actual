@@ -20,9 +20,6 @@ import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 
-// Plaid article about API options:
-// https://support.plaid.com/customer/en/portal/articles/2612155-transactions-returned-per-request
-
 function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
 }
@@ -60,22 +57,6 @@ async function updateAccountBalance(id, balance) {
   ]);
 }
 
-export async function getAccounts(userId, userKey, id) {
-  const res = await post(getServer().PLAID_SERVER + '/accounts', {
-    userId,
-    key: userKey,
-    item_id: id,
-  });
-
-  const { accounts } = res;
-
-  accounts.forEach(acct => {
-    acct.balances.current = getAccountBalance(acct);
-  });
-
-  return accounts;
-}
-
 export async function getGoCardlessAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -99,80 +80,6 @@ export async function getGoCardlessAccounts(userId, userKey, id) {
   });
 
   return accounts;
-}
-
-export function fromPlaid(trans) {
-  return {
-    imported_id: trans.transaction_id,
-    payee_name: trans.name,
-    imported_payee: trans.name,
-    amount: -amountToInteger(trans.amount),
-    date: trans.date,
-  };
-}
-
-async function downloadTransactions(
-  userId,
-  userKey,
-  acctId,
-  bankId,
-  since,
-  count?: number,
-) {
-  let allTransactions = [];
-  let accountBalance = null;
-  const pageSize = 100;
-  let offset = 0;
-  let numDownloaded = 0;
-
-  while (1) {
-    const endDate = monthUtils.currentDay();
-
-    const res = await post(getServer().PLAID_SERVER + '/transactions', {
-      userId,
-      key: userKey,
-      item_id: '' + bankId,
-      account_id: acctId,
-      start_date: since,
-      end_date: endDate,
-      count: pageSize,
-      offset,
-    });
-
-    if (res.error_code) {
-      throw BankSyncError(res.error_type, res.error_code);
-    }
-
-    if (res.transactions.length === 0) {
-      break;
-    }
-
-    numDownloaded += res.transactions.length;
-
-    // Remove pending transactions for now - we will handle them in
-    // the future.
-    allTransactions = allTransactions.concat(
-      res.transactions.filter(t => !t.pending),
-    );
-    accountBalance = getAccountBalance(res.accounts[0]);
-
-    if (
-      numDownloaded === res.total_transactions ||
-      (count != null && allTransactions.length >= count)
-    ) {
-      break;
-    }
-
-    offset += pageSize;
-  }
-
-  allTransactions =
-    count != null ? allTransactions.slice(0, count) : allTransactions;
-
-  return {
-    transactions: allTransactions.map(fromPlaid),
-    accountBalance,
-  };
 }
 
 async function downloadGoCardlessTransactions(
@@ -745,29 +652,8 @@ export async function syncAccount(
         startDate,
       );
     } else {
-      // Get all transactions since the latest transaction, plus any 5
-      // days before the latest transaction. This gives us a chance to
-      // resolve any transactions that were entered manually.
-      //
-      // TODO: What this really should do is query the last imported_id
-      // and since then
-      let date = monthUtils.subDays(
-        db.fromDateRepr(latestTransaction.date),
-        31,
-      );
-
-      // Never download transactions before the starting date. This was
-      // when the account was added to the system.
-      if (date < startingDate) {
-        date = startingDate;
-      }
-
-      download = await downloadTransactions(
-        userId,
-        userKey,
-        acctId,
-        bankId,
-        date,
+      throw new Error(
+        `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
       );
     }
 
