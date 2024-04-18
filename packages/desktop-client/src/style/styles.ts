@@ -26,6 +26,7 @@ export const styles = {
     paddingTop: 8,
     paddingBottom: 8,
     height: MOBILE_MIN_HEIGHT,
+    minHeight: MOBILE_MIN_HEIGHT,
   },
   mobileEditingPadding: 12,
   altMenuMaxHeight: 250,
@@ -135,6 +136,7 @@ export const styles = {
     borderRadius: 4,
     backgroundColor: theme.menuBackground,
     color: theme.menuItemText,
+    overflow: 'scroll',
   },
   // Dynamically set
   lightScrollbar: null as CSSProperties | null,

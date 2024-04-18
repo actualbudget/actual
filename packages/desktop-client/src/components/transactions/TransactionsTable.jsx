@@ -25,6 +25,7 @@ import {
 } from 'loot-core/src/client/reducers/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   splitTransaction,
@@ -62,6 +63,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import {
   Cell,
   Field,
@@ -1171,19 +1173,25 @@ const Transaction = memo(function Transaction(props) {
             shouldSaveFromKey,
             inputStyle,
           }) => (
-            <CategoryAutocomplete
-              categoryGroups={categoryGroups}
-              value={categoryId}
-              focused={true}
-              clearOnBlur={false}
-              showSplitOption={!isChild && !isParent}
-              shouldSaveFromKey={shouldSaveFromKey}
-              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-              onUpdate={onUpdate}
-              onSelect={onSave}
-              menuPortalTarget={undefined}
-              showHiddenCategories={false}
-            />
+            <NamespaceContext.Provider
+              value={monthUtils.sheetForMonth(
+                monthUtils.monthFromDate(transaction.date),
+              )}
+            >
+              <CategoryAutocomplete
+                categoryGroups={categoryGroups}
+                value={categoryId}
+                focused={true}
+                clearOnBlur={false}
+                showSplitOption={!isChild && !isParent}
+                shouldSaveFromKey={shouldSaveFromKey}
+                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                onUpdate={onUpdate}
+                onSelect={onSave}
+                menuPortalTarget={undefined}
+                showHiddenCategories={false}
+              />
+            </NamespaceContext.Provider>
           )}
         </CustomCell>
       )}
