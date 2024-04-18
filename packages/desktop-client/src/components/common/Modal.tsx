@@ -156,9 +156,9 @@ export const Modal = ({
             style={{
               justifyContent: 'center',
               alignItems: 'center',
-              padding: 20,
+              padding: '0 20px',
               position: 'relative',
-              height: 80,
+              height: 70,
             }}
           >
             <View

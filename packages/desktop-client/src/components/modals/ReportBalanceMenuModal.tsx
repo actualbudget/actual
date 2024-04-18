@@ -7,6 +7,7 @@ import { type CSSProperties, theme, styles } from '../../style';
 import { BalanceWithCarryover } from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/report/BalanceMenu';
 import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 
@@ -36,7 +37,7 @@ export function ReportBalanceMenuModal({
 
   return (
     <Modal
-      title={`Balance: ${category.name}`}
+      title={category.name}
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -55,6 +56,14 @@ export function ReportBalanceMenuModal({
           marginBottom: 20,
         }}
       >
+        <Text
+          style={{
+            fontSize: 17,
+            fontWeight: 400,
+          }}
+        >
+          Balance
+        </Text>
         <BalanceWithCarryover
           disabled
           balanceStyle={{
