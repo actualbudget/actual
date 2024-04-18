@@ -5,6 +5,7 @@ import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
@@ -17,6 +18,7 @@ import { NetWorthCard } from './reports/NetWorthCard';
 
 export function Overview() {
   const customReports = useReports();
+  const { isNarrowWidth } = useResponsive();
 
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
@@ -28,10 +30,14 @@ export function Overview() {
     <View
       style={{
         ...styles.page,
-        ...{ paddingLeft: 40, paddingRight: 40, minWidth: 700 },
+        ...{
+          paddingLeft: 40,
+          paddingRight: 40,
+          minWidth: isNarrowWidth ? null : 700,
+        },
       }}
     >
-      {customReportsFeatureFlag && (
+      {customReportsFeatureFlag && !isNarrowWidth && (
         <View
           style={{
             flex: '0 0 auto',
@@ -49,7 +55,7 @@ export function Overview() {
       )}
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: isNarrowWidth ? 'column' : 'row',
           flex: '0 0 auto',
         }}
       >

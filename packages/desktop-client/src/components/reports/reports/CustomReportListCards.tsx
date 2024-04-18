@@ -7,6 +7,7 @@ import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { usePayees } from '../../../hooks/usePayees';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
@@ -78,6 +79,7 @@ export function CustomReportListCards({
   const payees = usePayees();
   const accounts = useAccounts();
   const categories = useCategories();
+  const { isNarrowWidth } = useResponsive();
 
   const [isCardHovered, setIsCardHovered] = useState('');
 
@@ -168,7 +170,7 @@ export function CustomReportListCards({
           key={i}
           style={{
             flex: '0 0 auto',
-            flexDirection: 'row',
+            flexDirection: isNarrowWidth ? 'column' : 'row',
           }}
         >
           {group &&
@@ -193,7 +195,6 @@ export function CustomReportListCards({
                     >
                       <View
                         style={{
-                          flexDirection: 'row',
                           flexShrink: 0,
                           paddingBottom: 5,
                         }}

@@ -12,6 +12,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayees } from '../../../hooks/usePayees';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -36,6 +37,7 @@ import { fromDateRepr } from '../util';
 
 export function CustomReport() {
   const categories = useCategories();
+  const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || 0;
 
@@ -434,7 +436,13 @@ export function CustomReport() {
   };
 
   return (
-    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
+    <View
+      style={{
+        ...styles.page,
+        minWidth: isNarrowWidth ? undefined : 650,
+        overflow: 'hidden',
+      }}
+    >
       <View
         style={{
           flexDirection: 'row',
@@ -461,50 +469,54 @@ export function CustomReport() {
           flexGrow: 1,
         }}
       >
-        <ReportSidebar
-          customReportItems={customReportItems}
-          categories={categories}
-          dateRangeLine={dateRangeLine}
-          allIntervals={allIntervals}
-          setDateRange={setDateRange}
-          setGraphType={setGraphType}
-          setGroupBy={setGroupBy}
-          setInterval={setInterval}
-          setBalanceType={setBalanceType}
-          setMode={setMode}
-          setIsDateStatic={setIsDateStatic}
-          setShowEmpty={setShowEmpty}
-          setShowOffBudget={setShowOffBudget}
-          setShowHiddenCategories={setShowHiddenCategories}
-          setShowUncategorized={setShowUncategorized}
-          setSelectedCategories={setSelectedCategories}
-          onChangeDates={onChangeDates}
-          onReportChange={onReportChange}
-          disabledItems={disabledItems}
-          defaultItems={defaultItems}
-          defaultModeItems={defaultModeItems}
-          earliestTransaction={earliestTransaction}
-          firstDayOfWeekIdx={firstDayOfWeekIdx}
-        />
+        {!isNarrowWidth && (
+          <ReportSidebar
+            customReportItems={customReportItems}
+            categories={categories}
+            dateRangeLine={dateRangeLine}
+            allIntervals={allIntervals}
+            setDateRange={setDateRange}
+            setGraphType={setGraphType}
+            setGroupBy={setGroupBy}
+            setInterval={setInterval}
+            setBalanceType={setBalanceType}
+            setMode={setMode}
+            setIsDateStatic={setIsDateStatic}
+            setShowEmpty={setShowEmpty}
+            setShowOffBudget={setShowOffBudget}
+            setShowHiddenCategories={setShowHiddenCategories}
+            setShowUncategorized={setShowUncategorized}
+            setSelectedCategories={setSelectedCategories}
+            onChangeDates={onChangeDates}
+            onReportChange={onReportChange}
+            disabledItems={disabledItems}
+            defaultItems={defaultItems}
+            defaultModeItems={defaultModeItems}
+            earliestTransaction={earliestTransaction}
+            firstDayOfWeekIdx={firstDayOfWeekIdx}
+          />
+        )}
         <View
           style={{
             flexGrow: 1,
           }}
         >
-          <ReportTopbar
-            customReportItems={customReportItems}
-            report={report}
-            savedStatus={savedStatus}
-            setGraphType={setGraphType}
-            viewLegend={viewLegend}
-            viewSummary={viewSummary}
-            viewLabels={viewLabels}
-            onApplyFilter={onApplyFilter}
-            onChangeViews={onChangeViews}
-            onReportChange={onReportChange}
-            disabledItems={disabledItems}
-            defaultItems={defaultItems}
-          />
+          {!isNarrowWidth && (
+            <ReportTopbar
+              customReportItems={customReportItems}
+              report={report}
+              savedStatus={savedStatus}
+              setGraphType={setGraphType}
+              viewLegend={viewLegend}
+              viewSummary={viewSummary}
+              viewLabels={viewLabels}
+              onApplyFilter={onApplyFilter}
+              onChangeViews={onChangeViews}
+              onReportChange={onReportChange}
+              disabledItems={disabledItems}
+              defaultItems={defaultItems}
+            />
+          )}
           {filters && filters.length > 0 && (
             <View
               style={{ marginBottom: 10, marginLeft: 5, flexShrink: 0 }}
@@ -596,7 +608,7 @@ export function CustomReport() {
                   <LoadingIndicator message="Loading report..." />
                 )}
               </View>
-              {(viewLegend || viewSummary) && data && (
+              {(viewLegend || viewSummary) && data && !isNarrowWidth && (
                 <View
                   style={{
                     padding: 10,
