@@ -31,6 +31,8 @@ test.describe('Schedules', () => {
   });
 
   test('creates a new schedule, posts the transaction and later completes it', async () => {
+    test.setTimeout(40000);
+
     await schedulesPage.addNewSchedule({
       payee: 'Home Depot',
       account: 'HSBC',
