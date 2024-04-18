@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { SvgArrowLeft } from '../../icons/v1';
+import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
@@ -36,6 +37,7 @@ export function Header({
 }) {
   const location = useLocation();
   const path = location.pathname;
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <View
@@ -103,9 +105,11 @@ export function Header({
             />
           </View>
 
-          {filters && <FilterButton onApply={onApply} type="accounts" />}
+          {!isNarrowWidth && filters && (
+            <FilterButton onApply={onApply} type="accounts" />
+          )}
 
-          {show1Month && (
+          {!isNarrowWidth && show1Month && (
             <Button
               type="bare"
               onClick={() => onChangeDates(...getLatestRange(1))}
@@ -113,34 +117,38 @@ export function Header({
               1 month
             </Button>
           )}
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(2))}
-          >
-            3 months
-          </Button>
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(5))}
-          >
-            6 months
-          </Button>
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(11))}
-          >
-            1 Year
-          </Button>
-          <Button
-            type="bare"
-            onClick={() =>
-              onChangeDates(
-                ...getFullRange(allMonths[allMonths.length - 1].name),
-              )
-            }
-          >
-            All Time
-          </Button>
+          {!isNarrowWidth && (
+            <>
+              <Button
+                type="bare"
+                onClick={() => onChangeDates(...getLatestRange(2))}
+              >
+                3 months
+              </Button>
+              <Button
+                type="bare"
+                onClick={() => onChangeDates(...getLatestRange(5))}
+              >
+                6 months
+              </Button>
+              <Button
+                type="bare"
+                onClick={() => onChangeDates(...getLatestRange(11))}
+              >
+                1 Year
+              </Button>
+              <Button
+                type="bare"
+                onClick={() =>
+                  onChangeDates(
+                    ...getFullRange(allMonths[allMonths.length - 1].name),
+                  )
+                }
+              >
+                All Time
+              </Button>
+            </>
+          )}
 
           {children || <View style={{ flex: 1 }} />}
         </View>
