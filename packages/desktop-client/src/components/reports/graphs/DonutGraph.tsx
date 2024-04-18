@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -176,6 +177,7 @@ const customLabel = props => {
 type DonutGraphProps = {
   style?: CSSProperties;
   data: GroupedEntity;
+  filters: RuleConditionEntity[];
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
@@ -187,6 +189,7 @@ type DonutGraphProps = {
 export function DonutGraph({
   style,
   data,
+  filters,
   groupBy,
   balanceTypeOp,
   compact,
@@ -211,6 +214,7 @@ export function DonutGraph({
     const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
 
     const conditions = [
+      ...filters,
       { field, op: 'is', value: item.id, type: 'id' },
       {
         field: 'date',

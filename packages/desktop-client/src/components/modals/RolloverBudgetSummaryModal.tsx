@@ -34,7 +34,7 @@ export function RolloverBudgetSummaryModal({
   const openTransferModal = () => {
     dispatch(
       pushModal('transfer', {
-        title: 'Transfer',
+        title: 'Transfer: To Budget',
         month,
         amount: sheetValue,
         onSubmit: (amount, toCategoryId) => {

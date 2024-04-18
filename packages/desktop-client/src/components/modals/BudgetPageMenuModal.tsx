@@ -1,23 +1,24 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { type CommonModalProps } from '../Modals';
 
-type BudgetMonthMenuModalProps = ComponentPropsWithoutRef<
-  typeof BudgetMonthMenu
+type BudgetPageMenuModalProps = ComponentPropsWithoutRef<
+  typeof BudgetPageMenu
 > & {
   modalProps: CommonModalProps;
 };
 
-export function BudgetMonthMenuModal({
+export function BudgetPageMenuModal({
   modalProps,
-  month,
+  onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetType,
-}: BudgetMonthMenuModalProps) {
+}: BudgetPageMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -38,9 +39,9 @@ export function BudgetMonthMenuModal({
         borderRadius: '6px',
       }}
     >
-      <BudgetMonthMenu
-        month={month}
+      <BudgetPageMenu
         getItemStyle={() => defaultMenuItemStyle}
+        onAddCategoryGroup={onAddCategoryGroup}
         onToggleHiddenCategories={onToggleHiddenCategories}
         onSwitchBudgetType={onSwitchBudgetType}
       />
@@ -48,29 +49,29 @@ export function BudgetMonthMenuModal({
   );
 }
 
-type BudgetMonthMenuProps = Omit<
+type BudgetPageMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
-  month: string;
+  onAddCategoryGroup: () => void;
   onToggleHiddenCategories: () => void;
   onSwitchBudgetType: () => void;
 };
 
-function BudgetMonthMenu({
-  // onEditMode,
-  month,
+function BudgetPageMenu({
+  onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetType,
   ...props
-}: BudgetMonthMenuProps) {
+}: BudgetPageMenuProps) {
   const isReportBudgetEnabled = useFeatureFlag('reportBudget');
+  const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
 
   const onMenuSelect = (name: string) => {
     switch (name) {
-      // case 'edit-mode':
-      //   onEditMode?.(true);
-      //   break;
+      case 'add-category-group':
+        onAddCategoryGroup?.();
+        break;
       case 'toggle-hidden-categories':
         onToggleHiddenCategories?.();
         break;
@@ -87,11 +88,13 @@ function BudgetMonthMenu({
       {...props}
       onMenuSelect={onMenuSelect}
       items={[
-        // Removing for now until we work on mobile category drag and drop.
-        // { name: 'edit-mode', text: 'Edit mode' },
+        {
+          name: 'add-category-group',
+          text: 'Add category group',
+        },
         {
           name: 'toggle-hidden-categories',
-          text: 'Toggle hidden categories',
+          text: `${!showHiddenCategories ? 'Show' : 'Hide'} hidden categories`,
         },
         ...(isReportBudgetEnabled
           ? [
