@@ -6,7 +6,17 @@ Actual-*
 **/xcuserdata/*
 export-2020-01-10.csv
 
-# Pre-opensource Builds
+# Secrets
+.secret-tokens
+
+# MacOS
+.DS_Store
+
+# Logs
+**/*.log
+
+# JavaScript
+node_modules
 packages/api/dist
 packages/api/@types
 packages/crdt/dist
@@ -18,18 +28,6 @@ bundle.desktop.js
 bundle.desktop.js.map
 bundle.mobile.js
 bundle.mobile.js.map
-
-# Secrets
-.secret-tokens
-
-# Node
-node_modules
-
-# MacOS
-.DS_Store
-
-# Logs
-**/*.log
 
 # Yarn
 .pnp.*
