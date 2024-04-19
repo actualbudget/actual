@@ -38,7 +38,7 @@ export function TransferModal({
     expenseGroups = showToBeBudgeted
       ? addToBeBudgetedGroup(expenseGroups)
       : expenseGroups;
-    const expenseCategories = expenseGroups.flatMap(g => g.categories);
+    const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
   }, [originalCategoryGroups, showToBeBudgeted]);
 

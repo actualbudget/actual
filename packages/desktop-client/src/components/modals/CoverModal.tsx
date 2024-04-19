@@ -31,7 +31,7 @@ export function CoverModal({
     const expenseGroups = addToBeBudgetedGroup(
       originalCategoryGroups.filter(g => !g.is_income),
     );
-    const expenseCategories = expenseGroups.flatMap(g => g.categories);
+    const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
   }, [originalCategoryGroups]);
 
