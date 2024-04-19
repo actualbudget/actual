@@ -49,8 +49,13 @@ export function bootstrap(password) {
 }
 
 export function login(password) {
+  if (password === undefined || password === '') {
+    return { error: 'invalid-password' };
+  }
+
   let accountDb = getAccountDb();
   let row = accountDb.first('SELECT * FROM auth');
+
   let confirmed = row && bcrypt.compareSync(password, row.password);
 
   if (confirmed) {
@@ -59,7 +64,7 @@ export function login(password) {
     // "session" that times out after a long time or something, and
     // maybe each device has a different token
     let row = accountDb.first('SELECT * FROM sessions');
-    return row.token;
+    return { token: row.token };
   } else {
     return null;
   }
