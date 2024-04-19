@@ -95,6 +95,7 @@ __metadata:
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
+    promise-retry: "npm:^2.0.1"
     react: "npm:18.2.0"
     react-aria-components: "npm:^1.1.1"
     react-dnd: "npm:^16.0.1"
