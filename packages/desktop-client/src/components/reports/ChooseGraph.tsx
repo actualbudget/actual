@@ -136,6 +136,7 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         showHiddenCategories={showHiddenCategories}
