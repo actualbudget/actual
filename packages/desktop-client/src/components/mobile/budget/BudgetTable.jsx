@@ -1452,6 +1452,11 @@ export function BudgetTable({
               onClick={() => onOpenBudgetPageMenu?.()}
             >
               <SvgLogo width="20" height="20" />
+              <SvgCheveronRight
+                style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
+                width="14"
+                height="14"
+              />
             </Button>
           }
         />
