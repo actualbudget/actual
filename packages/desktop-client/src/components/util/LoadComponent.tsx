@@ -1,5 +1,6 @@
-import promiseRetry from 'promise-retry';
 import { type ComponentType, useEffect, useState } from 'react';
+
+import promiseRetry from 'promise-retry';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
