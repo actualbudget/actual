@@ -21,6 +21,7 @@
     "@swc/plugin-react-remove-properties": "^1.5.108",
     "@testing-library/react": "14.1.2",
     "@testing-library/user-event": "14.5.2",
+    "@types/promise-retry": "^1.1.6",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.1",
     "@types/react-modal": "^3.16.0",
