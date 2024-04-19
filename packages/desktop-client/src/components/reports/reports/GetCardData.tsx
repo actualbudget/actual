@@ -88,7 +88,7 @@ export function GetCardData({
 
   const fromDate = convertFromDate(report.interval);
   const rangeInclusive = convertRangeInclusive(report.interval);
-  
+
   let intervalDateStart;
   let intervalDateEnd;
   let intervals;
