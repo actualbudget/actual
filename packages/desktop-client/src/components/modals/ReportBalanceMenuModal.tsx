@@ -59,7 +59,7 @@ export function ReportBalanceMenuModal({
         </Text>
         <BalanceWithCarryover
           disabled
-          balanceStyle={{
+          style={{
             textAlign: 'center',
             ...styles.veryLargeText,
           }}

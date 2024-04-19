@@ -61,7 +61,7 @@ export function RolloverBalanceMenuModal({
         </Text>
         <BalanceWithCarryover
           disabled
-          balanceStyle={{
+          style={{
             textAlign: 'center',
             ...styles.veryLargeText,
           }}
