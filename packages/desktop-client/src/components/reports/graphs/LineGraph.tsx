@@ -28,6 +28,7 @@ import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
+import { RuleConditionEntity } from 'loot-core/types/models/rule';
 
 type PayloadItem = {
   dataKey: string;
@@ -109,6 +110,7 @@ const CustomTooltip = ({
 type LineGraphProps = {
   style?: CSSProperties;
   data: GroupedEntity;
+  filters: RuleConditionEntity[];
   groupBy: string;
   compact?: boolean;
   balanceTypeOp: string;
@@ -119,6 +121,7 @@ type LineGraphProps = {
 export function LineGraph({
   style,
   data,
+  filters,
   groupBy,
   compact,
   balanceTypeOp,
@@ -147,6 +150,7 @@ export function LineGraph({
     const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
 
     const conditions = [
+      ...filters,
       { field, op: 'is', value: id, type: 'id' },
       {
         field: 'date',
