@@ -18,6 +18,7 @@ import {
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -137,6 +138,7 @@ const customLabel = props => {
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data: GroupedEntity;
+  filters: RuleConditionEntity[];
   groupBy: string;
   compact?: boolean;
   viewLabels: boolean;
@@ -148,6 +150,7 @@ type StackedBarGraphProps = {
 export function StackedBarGraph({
   style,
   data,
+  filters,
   groupBy,
   compact,
   viewLabels,
@@ -177,6 +180,7 @@ export function StackedBarGraph({
     const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
 
     const conditions = [
+      ...filters,
       { field, op: 'is', value: id, type: 'id' },
       {
         field: 'date',

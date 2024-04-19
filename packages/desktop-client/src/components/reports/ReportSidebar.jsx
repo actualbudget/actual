@@ -58,8 +58,6 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setMode(cond);
     let graph;
-    //need this again to capture the mode change
-    storedReport = JSON.parse(sessionStorage.getItem('report'));
     if (cond === 'time') {
       if (customReportItems.graphType === 'BarGraph') {
         setSessionReport('graphType', 'StackedBarGraph');
