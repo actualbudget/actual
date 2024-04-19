@@ -29,6 +29,7 @@ import { ReportOptions, defaultReport } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
+import { setSessionReport } from '../setSessionReport';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
@@ -36,6 +37,8 @@ import { fromDateRepr } from '../util';
 
 export function CustomReport() {
   const categories = useCategories();
+  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || 0;
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -101,7 +104,11 @@ export function CustomReport() {
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
-    location.state ? (location.state.report ? 'saved' : 'new') : 'new',
+    location.state
+      ? location.state.report
+        ? 'saved'
+        : loadReport.savedStatus ?? 'new'
+      : loadReport.savedStatus ?? 'new',
   );
 
   useEffect(() => {
@@ -123,9 +130,12 @@ export function CustomReport() {
         ? monthUtils[format](d.parseISO(fromDateRepr(trans.date)))
         : currentInterval;
 
+      const rangeProps =
+        interval === 'Weekly'
+          ? [earliestInterval, currentInterval, firstDayOfWeekIdx]
+          : [earliestInterval, currentInterval];
       const allInter = monthUtils[ReportOptions.intervalRange.get(interval)](
-        earliestInterval,
-        currentInterval,
+        ...rangeProps,
       )
         .map(inter => ({
           name: inter,
@@ -157,8 +167,12 @@ export function CustomReport() {
     const dateStart = monthUtils[format](startDate);
     const dateEnd = monthUtils[format](endDate);
 
+    const rangeProps =
+      interval === 'Weekly'
+        ? [dateStart, dateEnd, firstDayOfWeekIdx]
+        : [dateStart, dateEnd];
     setIntervals(
-      monthUtils[ReportOptions.intervalRange.get(interval)](dateStart, dateEnd),
+      monthUtils[ReportOptions.intervalRange.get(interval)](...rangeProps),
     );
   }, [interval, startDate, endDate]);
 
@@ -180,6 +194,7 @@ export function CustomReport() {
       showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
+      firstDayOfWeekIdx,
     });
   }, [
     startDate,
@@ -198,6 +213,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     graphType,
+    firstDayOfWeekIdx,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -219,6 +235,7 @@ export function CustomReport() {
       payees,
       accounts,
       graphType,
+      firstDayOfWeekIdx,
       setDataCheck,
     });
   }, [
@@ -238,6 +255,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     graphType,
+    firstDayOfWeekIdx,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -355,15 +373,8 @@ export function CustomReport() {
   };
 
   const onChangeDates = (dateStart, dateEnd) => {
-    const storedReport = JSON.parse(sessionStorage.getItem('report'));
-    sessionStorage.setItem(
-      'report',
-      JSON.stringify({
-        ...storedReport,
-        startDate: dateStart,
-        endDate: dateEnd,
-      }),
-    );
+    setSessionReport('startDate', dateStart);
+    setSessionReport('endDate', dateEnd);
     setStartDate(dateStart);
     setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
@@ -414,6 +425,7 @@ export function CustomReport() {
   const onReportChange = ({ savedReport, type }) => {
     switch (type) {
       case 'add-update':
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(savedReport);
         break;
@@ -422,11 +434,12 @@ export function CustomReport() {
         break;
       case 'modify':
         if (report.name) {
+          setSessionReport('savedStatus', 'modified');
           setSavedStatus('modified');
         }
         break;
       case 'reload':
-        sessionStorage.clear();
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReportData(report);
         break;
@@ -437,7 +450,7 @@ export function CustomReport() {
         setReportData(defaultReport);
         break;
       case 'choose':
-        sessionStorage.clear();
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(savedReport);
         setReportData(savedReport);
@@ -497,6 +510,7 @@ export function CustomReport() {
           defaultItems={defaultItems}
           defaultModeItems={defaultModeItems}
           earliestTransaction={earliestTransaction}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
         />
         <View
           style={{
@@ -527,10 +541,21 @@ export function CustomReport() {
             >
               <AppliedFilters
                 filters={filters}
-                onUpdate={onUpdateFilter}
-                onDelete={filter =>
-                  onChangeAppliedFilter(filter, onDeleteFilter)
-                }
+                onUpdate={(oldFilter, newFilter) => {
+                  setSessionReport(
+                    'conditions',
+                    filters.map(f => (f === oldFilter ? newFilter : f)),
+                  );
+                  onReportChange({ type: 'modify' });
+                  onUpdateFilter(oldFilter, newFilter);
+                }}
+                onDelete={deletedFilter => {
+                  setSessionReport(
+                    'conditions',
+                    filters.filter(f => f !== deletedFilter),
+                  );
+                  onChangeAppliedFilter(deletedFilter, onDeleteFilter);
+                }}
                 conditionsOp={conditionsOp}
                 onCondOpChange={filter =>
                   onChangeAppliedFilter(filter, onCondOpChange)
@@ -589,9 +614,8 @@ export function CustomReport() {
 
                 {dataCheck ? (
                   <ChooseGraph
-                    startDate={startDate}
-                    endDate={endDate}
                     data={data}
+                    filters={filters}
                     mode={mode}
                     graphType={graphType}
                     balanceType={balanceType}
@@ -604,6 +628,7 @@ export function CustomReport() {
                     compact={false}
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
+                    intervalsCount={intervals.length}
                   />
                 ) : (
                   <LoadingIndicator message="Loading report..." />

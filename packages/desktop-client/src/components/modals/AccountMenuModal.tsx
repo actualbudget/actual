@@ -1,10 +1,9 @@
 import React, { type ComponentProps, useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { q } from 'loot-core/src/shared/query';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useNotes } from '../../hooks/useNotes';
 import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -15,11 +14,6 @@ import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
-
-type NoteEntity = {
-  id: string;
-  note: string;
-};
 
 type AccountMenuModalProps = {
   modalProps: CommonModalProps;
@@ -42,11 +36,7 @@ export function AccountMenuModal({
 }: AccountMenuModalProps) {
   const accounts = useAccounts();
   const account = accounts.find(c => c.id === accountId);
-  const data = useLiveQuery(
-    () => q('notes').filter({ id: account?.id }).select('*'),
-    [account?.id],
-  ) as NoteEntity[] | null;
-  const originalNotes = data && data.length > 0 ? data[0].note : null;
+  const originalNotes = useNotes(`account-${accountId}`);
 
   const _onClose = () => {
     modalProps?.onClose();

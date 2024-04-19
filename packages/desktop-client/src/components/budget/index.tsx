@@ -22,7 +22,6 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -75,22 +74,20 @@ function BudgetInner(props: BudgetInnerProps) {
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [_startMonth, setBudgetStartMonthPref] =
-    useLocalPref('budget.startMonth');
-  const startMonth = _startMonth || currentMonth;
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
-  const [_budgetType] = useLocalPref('budgetType');
-  const budgetType = _budgetType || 'rollover';
-  const [_maxMonths] = useGlobalPref('maxMonths');
-  const maxMonths = _maxMonths || 1;
-
-  const [initialized, setInitialized] = useState(false);
+  const [startMonthPref, setStartMonthPref] = useLocalPref('budget.startMonth');
+  const startMonth = startMonthPref || currentMonth;
   const [bounds, setBounds] = useState({
-    start: currentMonth,
-    end: currentMonth,
+    start: startMonth,
+    end: startMonth,
   });
+  const [budgetTypePref] = useLocalPref('budgetType');
+  const budgetType = budgetTypePref || 'rollover';
+  const [maxMonthsPref] = useGlobalPref('maxMonths');
+  const maxMonths = maxMonthsPref || 1;
+  const [initialized, setInitialized] = useState(false);
   const { grouped: categoryGroups } = useCategories();
 
   function loadCategories() {
@@ -153,7 +150,7 @@ function BudgetInner(props: BudgetInnerProps) {
   }, [props.accountId]);
 
   const onMonthSelect = async (month, numDisplayed) => {
-    setBudgetStartMonthPref(month);
+    setStartMonthPref(month);
 
     const warmingMonth = month;
 
@@ -180,7 +177,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
 
     if (warmingMonth === month) {
-      setBudgetStartMonthPref(month);
+      setStartMonthPref(month);
     }
   };
 
@@ -413,13 +410,7 @@ function BudgetInner(props: BudgetInnerProps) {
 }
 
 const RolloverBudgetSummary = memo<{ month: string }>(props => {
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  return (
-    <rollover.BudgetSummary
-      {...props}
-      isGoalTemplatesEnabled={isGoalTemplatesEnabled}
-    />
-  );
+  return <rollover.BudgetSummary {...props} />;
 });
 
 RolloverBudgetSummary.displayName = 'RolloverBudgetSummary';

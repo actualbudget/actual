@@ -56,6 +56,7 @@ export function HoldBufferModal({
             <FieldLabel title="Hold this amount:" />
             <InitialFocus>
               <InputField
+                inputMode="decimal"
                 defaultValue={initialAmount}
                 onUpdate={value => setAmount(value)}
                 onEnter={() => _onSubmit(amount)}

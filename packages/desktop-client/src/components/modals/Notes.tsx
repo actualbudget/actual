@@ -1,10 +1,7 @@
 // @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { q } from 'loot-core/src/shared/query';
-import { type NoteEntity } from 'loot-core/types/models';
-
+import { useNotes } from '../../hooks/useNotes';
 import { SvgCheck } from '../../icons/v2';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
@@ -20,11 +17,7 @@ type NotesProps = {
 };
 
 export function Notes({ modalProps, id, name, onSave }: NotesProps) {
-  const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id }).select('*'),
-    [id],
-  );
-  const originalNotes = data && data.length > 0 ? data[0].note : null;
+  const originalNotes = useNotes(id);
 
   const [notes, setNotes] = useState(originalNotes);
   useEffect(() => setNotes(originalNotes), [originalNotes]);

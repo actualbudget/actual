@@ -13,6 +13,7 @@ import * as queries from 'loot-core/src/client/queries';
 import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
@@ -801,29 +802,31 @@ class AccountInternal extends PureComponent {
   };
 
   onBatchEdit = async (name, ids) => {
+    const { data } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+    const transactions = ungroupTransactions(data);
+
     const onChange = async (name, value, mode) => {
+      let transactionsToChange = transactions;
+
       const newValue = value === null ? '' : value;
       this.setState({ workingHard: true });
-
-      const { data } = await runQuery(
-        q('transactions')
-          .filter({ id: { $oneof: ids } })
-          .select('*')
-          .options({ splits: 'grouped' }),
-      );
-      let transactions = ungroupTransactions(data);
 
       const changes = { deleted: [], updated: [] };
 
       // Cleared is a special case right now
       if (name === 'cleared') {
         // Clear them if any are uncleared, otherwise unclear them
-        value = !!transactions.find(t => !t.cleared);
+        value = !!transactionsToChange.find(t => !t.cleared);
       }
 
       const idSet = new Set(ids);
 
-      transactions.forEach(trans => {
+      transactionsToChange.forEach(trans => {
         if (name === 'cleared' && trans.reconciled) {
           // Skip transactions that are reconciled. Don't want to set them as
           // uncleared.
@@ -856,13 +859,13 @@ class AccountInternal extends PureComponent {
           transaction.reconciled = false;
         }
 
-        const { diff } = updateTransaction(transactions, transaction);
+        const { diff } = updateTransaction(transactionsToChange, transaction);
 
         // TODO: We need to keep an updated list of transactions so
         // the logic in `updateTransaction`, particularly about
         // updating split transactions, works. This isn't ideal and we
         // should figure something else out
-        transactions = applyChanges(diff, transactions);
+        transactionsToChange = applyChanges(diff, transactionsToChange);
 
         changes.deleted = changes.deleted
           ? changes.deleted.concat(diff.deleted)
@@ -879,8 +882,36 @@ class AccountInternal extends PureComponent {
       await this.refetchTransactions();
 
       if (this.table.current) {
-        this.table.current.edit(transactions[0].id, 'select', false);
+        this.table.current.edit(transactionsToChange[0].id, 'select', false);
       }
+    };
+
+    const pushPayeeAutocompleteModal = () => {
+      this.props.pushModal('payee-autocomplete', {
+        onSelect: payeeId => onChange(name, payeeId),
+      });
+    };
+
+    const pushAccountAutocompleteModal = () => {
+      this.props.pushModal('account-autocomplete', {
+        onSelect: accountId => onChange(name, accountId),
+      });
+    };
+
+    const pushCategoryAutocompleteModal = () => {
+      // Only show balances when all selected transaction are in the same month.
+      const transactionMonth = transactions[0]?.date
+        ? monthUtils.monthFromDate(transactions[0]?.date)
+        : null;
+      const transactionsHaveSameMonth =
+        transactionMonth &&
+        transactions.every(
+          t => monthUtils.monthFromDate(t.date) === transactionMonth,
+        );
+      this.props.pushModal('category-autocomplete', {
+        month: transactionsHaveSameMonth ? transactionMonth : undefined,
+        onSelect: categoryId => onChange(name, categoryId),
+      });
     };
 
     if (
@@ -889,18 +920,17 @@ class AccountInternal extends PureComponent {
       name === 'account' ||
       name === 'date'
     ) {
-      const { data } = await runQuery(
-        q('transactions')
-          .filter({ id: { $oneof: ids }, reconciled: true })
-          .select('*')
-          .options({ splits: 'grouped' }),
-      );
-      const transactions = ungroupTransactions(data);
-
-      if (transactions.length > 0) {
+      const reconciledTransactions = transactions.filter(t => t.reconciled);
+      if (reconciledTransactions.length > 0) {
         this.props.pushModal('confirm-transaction-edit', {
           onConfirm: () => {
-            this.props.pushModal('edit-field', { name, onSubmit: onChange });
+            if (name === 'payee') {
+              pushPayeeAutocompleteModal();
+            } else if (name === 'account') {
+              pushAccountAutocompleteModal();
+            } else {
+              this.props.pushModal('edit-field', { name, onSubmit: onChange });
+            }
           },
           confirmReason: 'batchEditWithReconciled',
         });
@@ -912,6 +942,12 @@ class AccountInternal extends PureComponent {
       // Cleared just toggles it on/off and it depends on the data
       // loaded. Need to clean this up in the future.
       onChange('cleared', null);
+    } else if (name === 'category') {
+      pushCategoryAutocompleteModal();
+    } else if (name === 'payee') {
+      pushPayeeAutocompleteModal();
+    } else if (name === 'account') {
+      pushAccountAutocompleteModal();
     } else {
       this.props.pushModal('edit-field', { name, onSubmit: onChange });
     }
