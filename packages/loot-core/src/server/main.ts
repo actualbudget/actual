@@ -1483,16 +1483,18 @@ handlers['subscribe-change-password'] = async function ({ password }) {
 };
 
 handlers['subscribe-sign-in'] = async function ({ password }) {
-  const res = await post(getServer().SIGNUP_SERVER + '/login', {
-    password,
-  });
+  try {
+    const res = await post(getServer().SIGNUP_SERVER + '/login', {
+      password,
+    });
 
-  if (res.token) {
-    await asyncStorage.setItem('user-token', res.token);
-    return {};
+    if (res.token) {
+      await asyncStorage.setItem('user-token', res.token);
+      return {};
+    }
+  } catch (e) {
+    return { error: 'invalid-password' };
   }
-
-  return { error: 'invalid-password' };
 };
 
 handlers['subscribe-sign-out'] = async function () {
