@@ -17,6 +17,7 @@ import {
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -28,7 +29,6 @@ import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
-import { RuleConditionEntity } from 'loot-core/types/models/rule';
 
 type PayloadItem = {
   dataKey: string;
