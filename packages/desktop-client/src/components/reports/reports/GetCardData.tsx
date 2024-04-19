@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
+import * as monthUtils from 'loot-core/src/shared/months';
 import { type AccountEntity } from 'loot-core/types/models/account';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type PayeeEntity } from 'loot-core/types/models/payee';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
@@ -31,19 +33,67 @@ function ErrorFallback() {
   );
 }
 
+function convertFromDate(
+  interval: string | undefined,
+): 'dayFromDate' | 'monthFromDate' | 'yearFromDate' {
+  switch (interval) {
+    case 'Monthly':
+      return 'monthFromDate';
+    case 'Yearly':
+      return 'yearFromDate';
+    default:
+      return 'dayFromDate';
+  }
+}
+
+function convertRangeInclusive(
+  interval: string | undefined,
+): 'dayRangeInclusive' | 'rangeInclusive' | 'yearRangeInclusive' {
+  switch (interval) {
+    case 'Monthly':
+      return 'rangeInclusive';
+    case 'Yearly':
+      return 'yearRangeInclusive';
+    default:
+      return 'dayRangeInclusive';
+  }
+}
+
 export function GetCardData({
   report,
   payees,
   accounts,
   categories,
   earliestTransaction,
+  firstDayOfWeekIdx,
 }: {
   report: CustomReportEntity;
   payees: PayeeEntity[];
   accounts: AccountEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   earliestTransaction: string;
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
 }) {
+  const fromDate = convertFromDate(report.interval);
+  const rangeInclusive = convertRangeInclusive(report.interval);
+
+  let dateStart;
+  let dateEnd;
+  let intervals;
+  if (report.interval === 'Weekly') {
+    dateStart = monthUtils.weekFromDate(report.startDate, firstDayOfWeekIdx);
+    dateEnd = monthUtils.weekFromDate(report.endDate, firstDayOfWeekIdx);
+    intervals = monthUtils.weekRangeInclusive(
+      dateStart,
+      dateEnd,
+      firstDayOfWeekIdx,
+    );
+  } else {
+    dateStart = monthUtils[fromDate](report.startDate);
+    dateEnd = monthUtils[fromDate](report.endDate);
+    intervals = monthUtils[rangeInclusive](dateStart, dateEnd);
+  }
+
   let startDate = report.startDate;
   let endDate = report.endDate;
 
@@ -70,8 +120,9 @@ export function GetCardData({
       showHiddenCategories: report.showHiddenCategories,
       showUncategorized: report.showUncategorized,
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
+      firstDayOfWeekIdx,
     });
-  }, [report, categories, startDate, endDate]);
+  }, [report, categories, startDate, endDate, firstDayOfWeekIdx]);
   const getGraphData = useMemo(() => {
     return createCustomSpreadsheet({
       startDate,
@@ -90,8 +141,17 @@ export function GetCardData({
       payees,
       accounts,
       graphType: report.graphType,
+      firstDayOfWeekIdx,
     });
-  }, [report, categories, payees, accounts, startDate, endDate]);
+  }, [
+    report,
+    categories,
+    payees,
+    accounts,
+    startDate,
+    endDate,
+    firstDayOfWeekIdx,
+  ]);
   const graphData = useReport('default' + report.name, getGraphData);
   const groupedData = useReport('grouped' + report.name, getGroupData);
 
@@ -109,6 +169,7 @@ export function GetCardData({
         interval={report.interval}
         compact={true}
         style={{ height: 'auto', flex: 1 }}
+        intervalsCount={intervals.length}
       />
     </ErrorBoundary>
   ) : (
