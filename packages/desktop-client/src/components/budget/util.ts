@@ -75,9 +75,9 @@ export function makeAmountFullStyle(
     zeroColor?: string;
   },
 ) {
-  const positiveColorToUse = colors.positiveColor || theme.noticeText;
-  const negativeColorToUse = colors.negativeColor || theme.errorText;
-  const zeroColorToUse = colors.zeroColor || theme.tableTextSubdued;
+  const positiveColorToUse = colors?.positiveColor || theme.noticeText;
+  const negativeColorToUse = colors?.negativeColor || theme.errorText;
+  const zeroColorToUse = colors?.zeroColor || theme.tableTextSubdued;
   return {
     color:
       value < 0
