@@ -13,6 +13,7 @@ export default function run(direction = 'up') {
         stateStore: `${path.join(config.dataDir, '.migrate')}${
           config.mode === 'test' ? '-test' : ''
         }`,
+        migrationsDirectory: `${path.join(config.projectRoot, 'migrations')}`,
       },
       (err, set) => {
         if (err) {

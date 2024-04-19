@@ -3,6 +3,7 @@ import { ServerOptions } from 'https';
 export interface Config {
   mode: 'test' | 'development';
   dataDir: string;
+  projectRoot: string;
   port: number;
   hostname: string;
   serverFiles: string;

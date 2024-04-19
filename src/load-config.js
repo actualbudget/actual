@@ -33,6 +33,8 @@ if (process.env.ACTUAL_CONFIG_PATH) {
     `loading config from ACTUAL_CONFIG_PATH: '${process.env.ACTUAL_CONFIG_PATH}'`,
   );
   userConfig = parseJSON(process.env.ACTUAL_CONFIG_PATH);
+
+  defaultDataDir = userConfig.dataDir ?? defaultDataDir;
 } else {
   let configFile = path.join(projectRoot, 'config.json');
 
@@ -60,6 +62,7 @@ let defaultConfig = {
     syncEncryptedFileSizeLimitMB: 50,
     fileSizeLimitMB: 20,
   },
+  projectRoot,
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -120,6 +123,7 @@ const finalConfig = {
 
 debug(`using port ${finalConfig.port}`);
 debug(`using hostname ${finalConfig.hostname}`);
+debug(`using data directory ${finalConfig.dataDir}`);
 debug(`using server files directory ${finalConfig.serverFiles}`);
 debug(`using user files directory ${finalConfig.userFiles}`);
 debug(`using web root directory ${finalConfig.webRoot}`);
