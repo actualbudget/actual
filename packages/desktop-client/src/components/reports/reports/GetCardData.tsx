@@ -74,26 +74,6 @@ export function GetCardData({
   earliestTransaction: string;
   firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
 }) {
-  const fromDate = convertFromDate(report.interval);
-  const rangeInclusive = convertRangeInclusive(report.interval);
-
-  let dateStart;
-  let dateEnd;
-  let intervals;
-  if (report.interval === 'Weekly') {
-    dateStart = monthUtils.weekFromDate(report.startDate, firstDayOfWeekIdx);
-    dateEnd = monthUtils.weekFromDate(report.endDate, firstDayOfWeekIdx);
-    intervals = monthUtils.weekRangeInclusive(
-      dateStart,
-      dateEnd,
-      firstDayOfWeekIdx,
-    );
-  } else {
-    dateStart = monthUtils[fromDate](report.startDate);
-    dateEnd = monthUtils[fromDate](report.endDate);
-    intervals = monthUtils[rangeInclusive](dateStart, dateEnd);
-  }
-
   let startDate = report.startDate;
   let endDate = report.endDate;
 
@@ -104,6 +84,26 @@ export function GetCardData({
     );
     startDate = dateStart || report.startDate;
     endDate = dateEnd || report.startDate;
+  }
+
+  const fromDate = convertFromDate(report.interval);
+  const rangeInclusive = convertRangeInclusive(report.interval);
+  
+  let intervalDateStart;
+  let intervalDateEnd;
+  let intervals;
+  if (report.interval === 'Weekly') {
+    intervalDateStart = monthUtils.weekFromDate(startDate, firstDayOfWeekIdx);
+    intervalDateEnd = monthUtils.weekFromDate(endDate, firstDayOfWeekIdx);
+    intervals = monthUtils.weekRangeInclusive(
+      intervalDateStart,
+      intervalDateEnd,
+      firstDayOfWeekIdx,
+    );
+  } else {
+    intervalDateStart = monthUtils[fromDate](startDate);
+    intervalDateEnd = monthUtils[fromDate](endDate);
+    intervals = monthUtils[rangeInclusive](intervalDateStart, intervalDateEnd);
   }
 
   const getGroupData = useMemo(() => {
