@@ -32,9 +32,9 @@ app.post('/bootstrap', (req, res) => {
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
     return;
-  } else {
-    res.send({ status: 'ok', data: { token } });
   }
+
+  res.send({ status: 'ok', data: { token } });
 });
 
 app.post('/login', (req, res) => {
