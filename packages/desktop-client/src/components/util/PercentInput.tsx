@@ -18,6 +18,7 @@ type PercentInputProps = {
   id?: string;
   inputRef?: Ref<HTMLInputElement>;
   value: number;
+  defaultValue?: number;
   onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
@@ -27,10 +28,13 @@ type PercentInputProps = {
   disabled?: boolean;
 };
 
+const clampToPercent = (value: number) => Math.max(Math.min(value, 100), 0);
+
 export function PercentInput({
   id,
   inputRef,
-  value: initialValue,
+  value: initialValue = 0,
+  defaultValue = 100,
   onFocus,
   onBlur,
   onChangeValue,
@@ -42,15 +46,15 @@ export function PercentInput({
   const format = useFormat();
 
   const [value, setValue] = useState(() =>
-    format(Math.abs(initialValue || 0), 'percentage'),
+    format(clampToPercent(defaultValue), 'percentage'),
   );
   useEffect(() => {
-    const initialValueAbsolute = Math.abs(initialValue || 0);
-    if (initialValueAbsolute !== initialValue) {
-      setValue(format(initialValueAbsolute, 'percentage'));
-      onUpdatePercent?.(initialValueAbsolute);
+    const clampedDefaultValue = clampToPercent(defaultValue);
+    if (clampedDefaultValue !== initialValue) {
+      setValue(format(clampedDefaultValue, 'percentage'));
+      onUpdatePercent?.(clampedDefaultValue);
     }
-  }, [initialValue, onUpdatePercent, value, format]);
+  }, [initialValue, onUpdatePercent, format, defaultValue]);
 
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
