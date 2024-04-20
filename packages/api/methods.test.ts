@@ -352,7 +352,7 @@ describe('API CRUD operations', () => {
 
     let newTransaction = [
       { date: '2023-11-03', imported_id: '11', amount: 100 },
-      { date: '2023-11-03', imported_id: '11', amount: 100 },
+      { date: '2023-11-03', imported_id: '12', amount: 100 },
     ];
 
     const addResult = await api.addTransactions(accountId, newTransaction, {

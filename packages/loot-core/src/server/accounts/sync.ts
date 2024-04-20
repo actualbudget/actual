@@ -381,12 +381,24 @@ export async function reconcileTransactions(
     // is the highest fidelity match and should always be attempted
     // first.
     if (trans.imported_id) {
-      match = await db.first(
-        'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
-        [trans.imported_id, acctId],
-      );
+      let transactionsMatchingId = [];
 
-      if (match) {
+      if (trans.imported_payee) {
+        transactionsMatchingId = await db.all(
+          'SELECT * FROM v_transactions WHERE imported_id = ? AND imported_payee = ? AND amount = ? AND account = ?',
+          [trans.imported_id, trans.imported_payee, trans.amount || 0, acctId],
+        );
+      } else {
+        transactionsMatchingId = await db.all(
+          'SELECT * FROM v_transactions WHERE imported_id = ? AND imported_payee is null AND amount = ? AND account = ?',
+          [trans.imported_id, trans.amount || 0, acctId],
+        );
+      }
+
+      // Only match if a single transaction was found, otherwise let
+      // the fuzzy matching try to match the correct transaction.
+      if (transactionsMatchingId.length === 1) {
+        match = transactionsMatchingId[0];
         hasMatched.add(match.id);
       }
     }
