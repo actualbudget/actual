@@ -21,7 +21,6 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
   // user. The current user should be able to delete the local file,
   // but not the remote one
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
-  console.log('file', file);
 
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,
