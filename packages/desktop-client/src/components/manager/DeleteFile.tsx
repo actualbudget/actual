@@ -20,7 +20,8 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
   // If the state is "broken" that means it was created by another
   // user. The current user should be able to delete the local file,
   // but not the remote one
-  const isCloudFile = !!file.cloudFileId && file.state !== 'broken';
+  const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
+  console.log('file', file);
 
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,
