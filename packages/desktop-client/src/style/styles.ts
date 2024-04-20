@@ -136,7 +136,7 @@ export const styles = {
     borderRadius: 4,
     backgroundColor: theme.menuBackground,
     color: theme.menuItemText,
-    overflow: 'scroll',
+    overflow: 'auto',
   },
   // Dynamically set
   lightScrollbar: null as CSSProperties | null,
