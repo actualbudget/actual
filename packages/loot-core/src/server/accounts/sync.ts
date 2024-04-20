@@ -490,7 +490,6 @@ export async function reconcileTransactions(
 
       // Update the transaction
       const updates = {
-        ...(isBankSyncAccount ? {} : { date: trans.date }),
         imported_id: trans.imported_id || null,
         payee: existing.payee || trans.payee || null,
         category: existing.category || trans.category || null,
