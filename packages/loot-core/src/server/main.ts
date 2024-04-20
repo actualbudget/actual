@@ -15,6 +15,7 @@ import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
+import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
@@ -1576,10 +1577,10 @@ handlers['get-budgets'] = async function () {
           if (name !== DEMO_BUDGET_ID) {
             return {
               id: name,
-              cloudFileId: prefs.cloudFileId,
-              groupId: prefs.groupId,
+              ...(prefs.cloudFileId ? { cloudFileId: prefs.cloudFileId } : {}),
+              ...(prefs.groupId ? { groupId: prefs.groupId } : {}),
               name: prefs.budgetName || '(no name)',
-            };
+            } satisfies Budget;
           }
         }
 
