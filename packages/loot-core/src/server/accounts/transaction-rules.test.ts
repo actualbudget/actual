@@ -422,6 +422,14 @@ describe('Transaction rules', () => {
       notes: '',
       amount: 124,
     });
+    await db.insertTransaction({
+      id: '6',
+      date: '2020-10-17',
+      account,
+      payee: krogerId,
+      notes: 'baz',
+      amount: -124,
+    });
 
     let transactions = await getMatchingTransactions([
       { field: 'date', op: 'is', value: '2020-10-15' },
@@ -437,6 +445,16 @@ describe('Transaction rules', () => {
       { field: 'amount', op: 'is', value: 353 },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['1']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'amount', op: 'is', value: 124 },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['6', '5']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'amount', op: 'is', value: -124 },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['6', '5']);
 
     transactions = await getMatchingTransactions([
       { field: 'notes', op: 'is', value: 'FooO' },
@@ -490,7 +508,7 @@ describe('Transaction rules', () => {
     transactions = await getMatchingTransactions([
       { field: 'date', op: 'gt', value: '2020-10-10' },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['4', '5', '2', '3']);
+    expect(transactions.map(t => t.id)).toEqual(['6', '4', '5', '2', '3']);
 
     // todo: isapprox
   });

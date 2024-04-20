@@ -349,8 +349,16 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
             };
           }
         }
+        if (op === "$eq") {
+          return {
+            $or: [
+              { amount: { [op]: value } },
+              { amount: { $transform: '$neg', [op]: value } }
+            ]
+          };
+        }
 
-        return {$or: [{ amount: { [op]: value } }, { amount: { $transform: '$neg', [op]: value }}]};
+        return { amount: { [op]: value } };
       } else if (type === 'string') {
         return { [field]: { $transform: '$lower', [op]: value } };
       } else if (type === 'date') {
