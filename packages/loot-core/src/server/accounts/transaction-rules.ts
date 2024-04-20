@@ -349,12 +349,12 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
             };
           }
         }
-        if (op === "$eq") {
+        if (op === '$eq') {
           return {
             $or: [
               { amount: { [op]: value } },
-              { amount: { $transform: '$neg', [op]: value } }
-            ]
+              { amount: { $transform: '$neg', [op]: value } },
+            ],
           };
         }
 
