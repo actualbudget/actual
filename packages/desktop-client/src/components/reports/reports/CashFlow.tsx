@@ -51,6 +51,8 @@ export function CashFlow() {
       : monthUtils.currentMonth(),
   );
 
+  const [forecastSource, setForecastSource] = useState(null);
+
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
@@ -60,8 +62,8 @@ export function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, forecast, isConcise, filters, conditionsOp),
-    [start, end, forecast, isConcise, filters, conditionsOp],
+    () => cashFlowByDate(start, end, forecast, forecastSource, isConcise, filters, conditionsOp),
+    [start, end, forecast, forecastSource, isConcise, filters, conditionsOp],
   );
   const data = useReport('cash_flow', params);
 
@@ -89,6 +91,17 @@ export function CashFlow() {
     },
   ];
 
+  const allForecastSource = [
+    {
+      name: 'schedule',
+      pretty: 'Schedules',
+    },
+    {
+      name: 'average',
+      pretty: 'Average Spending',
+    },
+  ];
+
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
@@ -106,13 +119,14 @@ export function CashFlow() {
 
       setAllMonths(allMonths);
       setAllForecasts(forecastMonths);
+      setForecastSource('schedule');
     }
     run();
   }, []);
 
   function onChangeDates(start: string, end: string, forecast) {
     const numDays = d.differenceInCalendarDays(
-      d.max([d.parseISO(forecast),d.parseISO(end)]),
+      d.max([d.parseISO(forecast), d.parseISO(end)]),
       d.parseISO(start),
     );
     const isConcise = numDays > 31 * 3;
@@ -151,12 +165,15 @@ export function CashFlow() {
         title="Cash Flow"
         allMonths={allMonths}
         allForecasts={allForecasts}
+        allForecastSource={allForecastSource}
         disabled={disabled}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
         show1Month
         forecast={forecastFeatureFlag ? forecast : null}
+        forecastSource={forecastFeatureFlag ? forecastSource : null}
         onChangeDates={onChangeDates}
+        onForecastSourceChange={setForecastSource}
         onApply={onApplyFilter}
         filters={filters}
         onUpdateFilter={onUpdateFilter}

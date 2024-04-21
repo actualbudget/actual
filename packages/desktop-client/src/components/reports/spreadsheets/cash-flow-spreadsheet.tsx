@@ -14,6 +14,8 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
+// import { makeQuery } from './makeQuery';
+
 export function simpleCashFlow(start, end) {
   return async (spreadsheet, setData) => {
     function makeQuery() {
@@ -47,6 +49,7 @@ export function cashFlowByDate(
   start: string,
   end: string,
   forecast,
+  forecastSource: string,
   isConcise: boolean,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or',
@@ -123,10 +126,10 @@ export function cashFlowByDate(
       });
     }
 
-    const { data } = await runQuery(scheduleQuery);
+    const { data: scheduledata } = await runQuery(scheduleQuery);
 
     const schedules = await Promise.all(
-      data.map(schedule => {
+      scheduledata.map(schedule => {
         if (typeof schedule._date !== 'string') {
           return sendCatch('schedule/get-occurrences-to-date', {
             config: schedule._date,
@@ -164,6 +167,7 @@ export function cashFlowByDate(
             isConcise,
             schedules,
             filters,
+            forecastSource,
           ),
         );
       },
@@ -176,9 +180,10 @@ function recalculate(
   start,
   end,
   forecast,
-  isConcise,
+  isConcise: boolean,
   schedules,
   filters,
+  forecastSource: string,
 ) {
   const [startingBalance, income, expense] = data;
   const convIncome = income.map(t => {
@@ -190,69 +195,88 @@ function recalculate(
 
   const futureIncome = [];
   const futureExpense = [];
-  schedules.forEach(schedule => {
-    schedule._dates?.forEach(date => {
-      const futureTx = {
-        date: isConcise ? monthUtils.monthFromDate(date) : date,
-        isTransfer: schedule.isTransfer != null,
-        trasferAccount: schedule.isTransfer,
-        amount:
-          schedule._amountOp === 'isbetween'
-            ? (schedule._amount.num1 + schedule._amount.num2) / 2
-            : schedule._amount,
-      };
+  if (forecastSource === 'schedule') {
+    schedules.forEach(schedule => {
+      schedule._dates?.forEach(date => {
+        const futureTx = {
+          date: isConcise ? monthUtils.monthFromDate(date) : date,
+          isTransfer: schedule.isTransfer != null,
+          trasferAccount: schedule.isTransfer,
+          amount:
+            schedule._amountOp === 'isbetween'
+              ? (schedule._amount.num1 + schedule._amount.num2) / 2
+              : schedule._amount,
+        };
 
-      const includeFutureTx =
-        filters.reduce((include, filter) => {
+        const includeFutureTx =
+          filters.reduce((include, filter) => {
+            return (
+              include ||
+              (filter.hasOwnProperty('account')
+                ? filter.account.$eq === schedule._account
+                : true)
+            );
+          }, filters.length === 0) && !schedule.isAccountOffBudget;
+
+        const includeTransfer = filters.reduce((include, filter) => {
           return (
             include ||
             (filter.hasOwnProperty('account')
-              ? filter.account.$eq === schedule._account
+              ? filter.account.$eq === futureTx.trasferAccount
               : true)
           );
-        }, filters.length === 0) && !schedule.isAccountOffBudget;
+        }, filters.length === 0);
 
-      const includeTransfer = filters.reduce((include, filter) => {
-        return (
-          include ||
-          (filter.hasOwnProperty('account')
-            ? filter.account.$eq === futureTx.trasferAccount
-            : true)
-        );
-      }, filters.length === 0);
+        if (
+          futureTx.isTransfer &&
+          !schedule.isPayeeOffBudget &&
+          includeTransfer
+        ) {
+          const futureTxTransfer = {
+            date: isConcise ? monthUtils.monthFromDate(date) : date,
+            isTransfer: schedule.isTransfer != null,
+            amount: -schedule._amount,
+          };
+          if (futureTxTransfer.amount < 0) {
+            futureExpense.push(futureTxTransfer);
+          } else {
+            futureIncome.push(futureTxTransfer);
+          }
+        }
 
-      if (
-        futureTx.isTransfer &&
-        !schedule.isPayeeOffBudget &&
-        includeTransfer
-      ) {
-        const futureTxTransfer = {
+        if (includeFutureTx) {
+          if (futureTx.amount < 0) {
+            futureExpense.push(futureTx);
+          } else {
+            futureIncome.push(futureTx);
+          }
+        }
+      });
+    });
+  }
+  if (forecastSource === 'average') {
+    schedules.forEach(schedule => {
+      schedule._dates?.forEach(date => {
+        const futureTx = {
           date: isConcise ? monthUtils.monthFromDate(date) : date,
           isTransfer: schedule.isTransfer != null,
-          amount: -schedule._amount,
+          trasferAccount: schedule.isTransfer,
+          amount: -100 * 100
         };
-        if (futureTxTransfer.amount < 0) {
-          futureExpense.push(futureTxTransfer);
-        } else {
-          futureIncome.push(futureTxTransfer);
-        }
-      }
-
-      if (includeFutureTx) {
         if (futureTx.amount < 0) {
           futureExpense.push(futureTx);
         } else {
           futureIncome.push(futureTx);
         }
-      }
+      });
     });
-  });
+  }
 
   const dates = isConcise
     ? monthUtils.rangeInclusive(
-        monthUtils.getMonth(start),
-        monthUtils.getMonth(end),
-      )
+      monthUtils.getMonth(start),
+      monthUtils.getMonth(end),
+    )
     : monthUtils.dayRangeInclusive(start, end);
 
   let forecastDates;
@@ -261,9 +285,9 @@ function recalculate(
   } else {
     forecastDates = isConcise
       ? monthUtils.rangeInclusive(
-          monthUtils.getMonth(end),
-          monthUtils.getMonth(forecast),
-        )
+        monthUtils.getMonth(end),
+        monthUtils.getMonth(forecast),
+      )
       : monthUtils.dayRangeInclusive(end, forecast);
   }
 

@@ -23,11 +23,14 @@ export function Header({
   start,
   end,
   forecast,
+  forecastSource,
   show1Month,
   allMonths,
   allForecasts,
+  allForecastSource,
   disabled,
   onChangeDates,
+  onForecastSourceChange,
   filters,
   conditionsOp,
   onApply,
@@ -159,7 +162,16 @@ export function Header({
             {forecast && <View>Forecast</View>}
             {forecast && (
               <Select
-                style={{ backgroundColor: 'white' }}
+                // style={{ backgroundColor: 'white' }}
+                onChange={newValue =>
+                  onForecastSourceChange(newValue)
+                }
+                value={forecastSource}
+                options={allForecastSource.map(({ name, pretty }) => [name, pretty])}
+              />
+            )}
+            {forecast && (
+              <Select
                 onChange={newValue =>
                   onChangeDates(
                     ...validateStart(
