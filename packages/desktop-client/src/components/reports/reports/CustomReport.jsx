@@ -152,6 +152,7 @@ export function CustomReport() {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
           trans ? trans.date : monthUtils.currentDay(),
+          firstDayOfWeekIdx,
         );
         setStartDate(dateStart);
         setEndDate(dateEnd);
