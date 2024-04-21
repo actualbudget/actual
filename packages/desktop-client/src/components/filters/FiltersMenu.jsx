@@ -359,7 +359,7 @@ export function FilterButton({ onApply, compact, hover }) {
             onMenuSelect={name => {
               dispatch({ type: 'configure', field: name });
             }}
-            items={filterFields.map(([name, text]) => ({
+            items={filterFields.sort().map(([name, text]) => ({
               name,
               text: titleFirst(text),
             }))}
