@@ -91,8 +91,8 @@ const CustomTooltip = ({
                       right={amountToCurrency(pay.value)}
                       style={{
                         color: pay.color,
-                        fontWeight: tooltip === pay.name ? 'bold' : 'inherit',
-                        fontSize: tooltip === pay.name ? 15 : 'inherit',
+                        textDecoration:
+                          tooltip === pay.name ? 'underline' : 'inherit',
                       }}
                     />
                   )
