@@ -31,8 +31,8 @@ export function Overview() {
       style={{
         ...styles.page,
         ...{
-          paddingLeft: 40,
-          paddingRight: 40,
+          padding: 15,
+          paddingTop: 0,
           minWidth: isNarrowWidth ? null : 700,
         },
       }}
