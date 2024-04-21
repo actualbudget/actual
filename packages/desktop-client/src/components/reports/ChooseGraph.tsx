@@ -140,8 +140,12 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         viewLabels={viewLabels}
         balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
