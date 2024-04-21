@@ -152,57 +152,52 @@ async function importTransactions(
   const payeeTransferAcctHashMap = new Map<string, YNAB5.Payee>(
     payeesByTransferAcct,
   );
+  const orphanTransferMap = new Map<string, YNAB5.Transaction[]>();
+  const orphanSubtransfer = [] as YNAB5.Subtransaction[];
+  const orphanSubtransferTrxId = [] as string[];
+  const orphanSubtransferAcctIdByTrxIdMap = new Map<string, string>();
+  const orphanSubtransferDateByTrxIdMap = new Map<string, string>();
 
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
-  for (const transaction of data.transactions) {
-    entityIdMap.set(transaction.id, uuidv4());
-  }
+  // Also identify orphan transfer transactions and subtransactions.
   for (const transaction of data.subtransactions) {
     entityIdMap.set(transaction.id, uuidv4());
+
+    if (transaction.transfer_account_id) {
+      orphanSubtransfer.push(transaction);
+      orphanSubtransferTrxId.push(transaction.transaction_id);
+    }
+  }
+
+  for (const transaction of data.transactions) {
+    entityIdMap.set(transaction.id, uuidv4());
+
+    if (
+      transaction.transfer_account_id &&
+      !transaction.transfer_transaction_id
+    ) {
+      const key =
+        transaction.account_id + '#' + transaction.transfer_account_id;
+      if (!orphanTransferMap.has(key)) {
+        orphanTransferMap.set(key, [transaction]);
+      } else {
+        orphanTransferMap.get(key).push(transaction);
+      }
+    }
+
+    if (orphanSubtransferTrxId.includes(transaction.id)) {
+      orphanSubtransferAcctIdByTrxIdMap.set(
+        transaction.id,
+        transaction.account_id,
+      );
+      orphanSubtransferDateByTrxIdMap.set(transaction.id, transaction.date);
+    }
   }
 
   // Compute link between subtransaction transfers and orphaned transaction
   // transfers. The goal is to match each transfer subtransaction to the related
   // transfer transaction according to the accounts, date, amount and memo.
-  const orphanTransferMap = data.transactions
-    .filter(
-      transaction =>
-        transaction.transfer_account_id && !transaction.transfer_transaction_id,
-    )
-    .reduce((map, transaction) => {
-      const key =
-        transaction.account_id + '#' + transaction.transfer_account_id;
-      if (!map.has(key)) {
-        map.set(key, [transaction]);
-      } else {
-        map.get(key).push(transaction);
-      }
-      return map;
-    }, new Map<string, YNAB5.Transaction[]>());
-
-  const orphanSubtransfer = data.subtransactions.filter(
-    subtransaction => subtransaction.transfer_account_id,
-  );
-  const orphanSubtransferTrxId = orphanSubtransfer.map(
-    subtransaction => subtransaction.transaction_id,
-  );
-  const orphanSubtransferAcctIdByTrxId = data.transactions
-    .filter(transaction => orphanSubtransferTrxId.includes(transaction.id))
-    .map(
-      transaction =>
-        [transaction.id, transaction.account_id] as [string, string],
-    );
-  const orphanSubtransferAcctIdByTrxIdMap = new Map<string, string>(
-    orphanSubtransferAcctIdByTrxId,
-  );
-  const orphanSubtransferDateByTrxId = data.transactions
-    .filter(transaction => orphanSubtransferTrxId.includes(transaction.id))
-    .map(transaction => [transaction.id, transaction.date] as [string, string]);
-  const orphanSubtransferDateByTrxIdMap = new Map<string, string>(
-    orphanSubtransferDateByTrxId,
-  );
-
   const orphanSubtransferMap = orphanSubtransfer.reduce(
     (map, subtransaction) => {
       const key =
