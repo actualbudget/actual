@@ -78,32 +78,9 @@ handlers['/sync/sync'] = async (data: Uint8Array): Promise<Uint8Array> => {
   return responsePb.serializeBinary();
 };
 
-handlers['/plaid/handoff_public_token'] = () => {
-  // Do nothing
-};
-
-handlers['/plaid/accounts'] = () => {
+handlers['/gocardless/accounts'] = () => {
   // Ignore the parameters and just return the accounts.
   return { accounts: currentMockData.accounts };
-};
-
-handlers['/plaid/transactions'] = ({
-  account_id,
-  start_date,
-  end_date,
-  count,
-  offset,
-}) => {
-  const accounts = currentMockData.accounts;
-  const transactions = currentMockData.transactions[account_id].filter(
-    t => t.date >= start_date && t.date <= end_date,
-  );
-
-  return {
-    accounts: accounts.filter(acct => acct.account_id === account_id),
-    transactions: transactions.slice(offset, offset + count),
-    total_transactions: transactions.length,
-  };
 };
 
 export const filterMockData = func => {

@@ -30,6 +30,7 @@ import { ReportOptions, defaultReport } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
+import { setSessionReport } from '../setSessionReport';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
@@ -105,7 +106,11 @@ export function CustomReport() {
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
-    location.state ? (location.state.report ? 'saved' : 'new') : 'new',
+    location.state
+      ? location.state.report
+        ? 'saved'
+        : loadReport.savedStatus ?? 'new'
+      : loadReport.savedStatus ?? 'new',
   );
 
   useEffect(() => {
@@ -344,15 +349,8 @@ export function CustomReport() {
   };
 
   const onChangeDates = (dateStart, dateEnd) => {
-    const storedReport = JSON.parse(sessionStorage.getItem('report'));
-    sessionStorage.setItem(
-      'report',
-      JSON.stringify({
-        ...storedReport,
-        startDate: dateStart,
-        endDate: dateEnd,
-      }),
-    );
+    setSessionReport('startDate', dateStart);
+    setSessionReport('endDate', dateEnd);
     setStartDate(dateStart);
     setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
@@ -403,6 +401,7 @@ export function CustomReport() {
   const onReportChange = ({ savedReport, type }) => {
     switch (type) {
       case 'add-update':
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(savedReport);
         break;
@@ -411,11 +410,12 @@ export function CustomReport() {
         break;
       case 'modify':
         if (report.name) {
+          setSessionReport('savedStatus', 'modified');
           setSavedStatus('modified');
         }
         break;
       case 'reload':
-        sessionStorage.clear();
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReportData(report);
         break;
@@ -426,7 +426,7 @@ export function CustomReport() {
         setReportData(defaultReport);
         break;
       case 'choose':
-        sessionStorage.clear();
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(savedReport);
         setReportData(savedReport);
@@ -530,10 +530,21 @@ export function CustomReport() {
             >
               <AppliedFilters
                 filters={filters}
-                onUpdate={onUpdateFilter}
-                onDelete={filter =>
-                  onChangeAppliedFilter(filter, onDeleteFilter)
-                }
+                onUpdate={(oldFilter, newFilter) => {
+                  setSessionReport(
+                    'conditions',
+                    filters.map(f => (f === oldFilter ? newFilter : f)),
+                  );
+                  onReportChange({ type: 'modify' });
+                  onUpdateFilter(oldFilter, newFilter);
+                }}
+                onDelete={deletedFilter => {
+                  setSessionReport(
+                    'conditions',
+                    filters.filter(f => f !== deletedFilter),
+                  );
+                  onChangeAppliedFilter(deletedFilter, onDeleteFilter);
+                }}
                 conditionsOp={conditionsOp}
                 onCondOpChange={filter =>
                   onChangeAppliedFilter(filter, onCondOpChange)
@@ -593,6 +604,7 @@ export function CustomReport() {
                 {dataCheck ? (
                   <ChooseGraph
                     data={data}
+                    filters={filters}
                     mode={mode}
                     graphType={graphType}
                     balanceType={balanceType}
