@@ -38,7 +38,7 @@ import { fromDateRepr } from '../util';
 export function CustomReport() {
   const categories = useCategories();
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || 0;
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -152,6 +152,7 @@ export function CustomReport() {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
           trans ? trans.date : monthUtils.currentDay(),
+          firstDayOfWeekIdx,
         );
         setStartDate(dateStart);
         setEndDate(dateEnd);

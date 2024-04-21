@@ -17,6 +17,7 @@ import {
   type DataEntity,
   type GroupedEntity,
 } from 'loot-core/src/types/models/reports';
+import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import {
   categoryLists,
@@ -47,7 +48,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
   setDataCheck?: (value: boolean) => void;
 };
 
