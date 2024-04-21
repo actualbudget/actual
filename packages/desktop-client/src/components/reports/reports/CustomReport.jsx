@@ -445,7 +445,7 @@ export function CustomReport() {
     >
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: isNarrowWidth ? 'column' : 'row',
           flexShrink: 0,
         }}
       >
@@ -453,7 +453,10 @@ export function CustomReport() {
         <Text
           style={{
             ...styles.veryLargeText,
-            marginTop: 40,
+            marginTop: isNarrowWidth ? 0 : 40,
+            padding: isNarrowWidth ? 10 : 0,
+            paddingTop: 0,
+            flexShrink: 0,
             color: theme.pageTextPositive,
           }}
         >

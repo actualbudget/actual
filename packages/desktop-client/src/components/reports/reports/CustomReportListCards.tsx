@@ -175,7 +175,19 @@ export function CustomReportListCards({
         >
           {group &&
             group.map((report, id) => (
-              <View key={id} style={{ position: 'relative', flex: '1' }}>
+              <View
+                key={id}
+                style={
+                  !isNarrowWidth
+                    ? {
+                        position: 'relative',
+                        flex: '1',
+                      }
+                    : {
+                        position: 'relative',
+                      }
+                }
+              >
                 <View style={{ width: '100%', height: '100%' }}>
                   <ReportCard to="/reports/custom" report={report}>
                     <View

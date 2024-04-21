@@ -60,8 +60,8 @@ export function Header({
       {path !== '/reports/custom' && (
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
+            flexDirection: isNarrowWidth ? 'column' : 'row',
+            alignItems: isNarrowWidth ? 'right' : 'center',
             marginTop: 15,
             gap: 15,
           }}
@@ -108,48 +108,50 @@ export function Header({
           {!isNarrowWidth && filters && (
             <FilterButton onApply={onApply} type="accounts" />
           )}
-
-          {!isNarrowWidth && show1Month && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 15,
+            }}
+          >
+            {show1Month && (
+              <Button
+                type="bare"
+                onClick={() => onChangeDates(...getLatestRange(1))}
+              >
+                1 month
+              </Button>
+            )}
             <Button
               type="bare"
-              onClick={() => onChangeDates(...getLatestRange(1))}
+              onClick={() => onChangeDates(...getLatestRange(2))}
             >
-              1 month
+              3 months
             </Button>
-          )}
-          {!isNarrowWidth && (
-            <>
-              <Button
-                type="bare"
-                onClick={() => onChangeDates(...getLatestRange(2))}
-              >
-                3 months
-              </Button>
-              <Button
-                type="bare"
-                onClick={() => onChangeDates(...getLatestRange(5))}
-              >
-                6 months
-              </Button>
-              <Button
-                type="bare"
-                onClick={() => onChangeDates(...getLatestRange(11))}
-              >
-                1 Year
-              </Button>
-              <Button
-                type="bare"
-                onClick={() =>
-                  onChangeDates(
-                    ...getFullRange(allMonths[allMonths.length - 1].name),
-                  )
-                }
-              >
-                All Time
-              </Button>
-            </>
-          )}
-
+            <Button
+              type="bare"
+              onClick={() => onChangeDates(...getLatestRange(5))}
+            >
+              6 months
+            </Button>
+            <Button
+              type="bare"
+              onClick={() => onChangeDates(...getLatestRange(11))}
+            >
+              1 Year
+            </Button>
+            <Button
+              type="bare"
+              onClick={() =>
+                onChangeDates(
+                  ...getFullRange(allMonths[allMonths.length - 1].name),
+                )
+              }
+            >
+              All Time
+            </Button>
+          </View>
           {children || <View style={{ flex: 1 }} />}
         </View>
       )}
