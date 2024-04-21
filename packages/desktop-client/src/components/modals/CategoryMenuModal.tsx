@@ -1,15 +1,11 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { q } from 'loot-core/src/shared/query';
-import {
-  type CategoryEntity,
-  type NoteEntity,
-} from 'loot-core/src/types/models';
+import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategory } from '../../hooks/useCategory';
 import { useCategoryGroup } from '../../hooks/useCategoryGroup';
+import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -40,12 +36,7 @@ export function CategoryMenuModal({
 }: CategoryMenuModalProps) {
   const category = useCategory(categoryId);
   const categoryGroup = useCategoryGroup(category?.cat_group);
-  const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id: category.id }).select('*'),
-    [category.id],
-  );
-  const originalNotes = data && data.length > 0 ? data[0].note : null;
-
+  const originalNotes = useNotes(category.id);
   const _onClose = () => {
     modalProps?.onClose();
     onClose?.();

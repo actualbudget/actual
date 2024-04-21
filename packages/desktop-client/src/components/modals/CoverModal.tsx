@@ -16,12 +16,14 @@ import { type CommonModalProps } from '../Modals';
 type CoverModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
+  month: string;
   onSubmit: (categoryId: string) => void;
 };
 
 export function CoverModal({
   modalProps,
   categoryId,
+  month,
   onSubmit,
 }: CoverModalProps) {
   const { grouped: originalCategoryGroups, list: categories } = useCategories();
@@ -36,12 +38,13 @@ export function CoverModal({
     dispatch(
       pushModal('category-autocomplete', {
         categoryGroups,
+        month,
         onSelect: categoryId => {
           setFromCategoryId(categoryId);
         },
       }),
     );
-  }, [categoryGroups, dispatch]);
+  }, [categoryGroups, dispatch, month]);
 
   const _onSubmit = (categoryId: string | null) => {
     if (categoryId) {

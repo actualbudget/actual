@@ -47,6 +47,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
+  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -67,6 +68,7 @@ export function createCustomSpreadsheet({
   payees,
   accounts,
   graphType,
+  firstDayOfWeekIdx,
   setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
@@ -100,7 +102,7 @@ export function createCustomSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const [assets, debts] = await Promise.all([
+    let [assets, debts] = await Promise.all([
       runQuery(
         makeQuery(
           'assets',
@@ -127,11 +129,33 @@ export function createCustomSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
+    if (interval === 'Weekly') {
+      debts = debts.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+      assets = assets.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+    }
+
     const format =
       ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+    const rangeProps =
+      interval === 'Weekly'
+        ? [
+            monthUtils[format](startDate),
+            monthUtils[format](endDate),
+            firstDayOfWeekIdx,
+          ]
+        : [monthUtils[format](startDate), monthUtils[format](endDate)];
     const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      monthUtils[format](startDate),
-      monthUtils[format](endDate),
+      ...rangeProps,
     );
 
     let totalAssets = 0;

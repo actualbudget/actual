@@ -14,9 +14,15 @@ export function makeQuery(
   filters: unknown[],
 ) {
   const intervalGroup =
-    interval === 'Monthly' ? { $month: '$date' } : { $year: '$date' };
+    interval === 'Monthly'
+      ? { $month: '$date' }
+      : interval === 'Yearly'
+        ? { $year: '$date' }
+        : { $day: '$date' };
   const intervalFilter =
-    '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
+    interval === 'Weekly'
+      ? '$day'
+      : '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
 
   const query = q('transactions')
     //Apply Category_Selector

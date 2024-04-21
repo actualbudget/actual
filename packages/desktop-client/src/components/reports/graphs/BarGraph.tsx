@@ -20,6 +20,7 @@ import {
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -132,6 +133,7 @@ const customLabel = (props, typeOp) => {
 type BarGraphProps = {
   style?: CSSProperties;
   data: GroupedEntity;
+  filters: RuleConditionEntity[];
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
@@ -143,6 +145,7 @@ type BarGraphProps = {
 export function BarGraph({
   style,
   data,
+  filters,
   groupBy,
   balanceTypeOp,
   compact,
@@ -187,6 +190,7 @@ export function BarGraph({
     const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
 
     const conditions = [
+      ...filters,
       { field, op: 'is', value: item.id, type: 'id' },
       {
         field: 'date',
