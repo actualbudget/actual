@@ -145,6 +145,32 @@ export function cashFlowByDate(
       }),
     );
 
+    let transactionQuery = q('transactions')
+      .filter({
+        [conditionsOpKey]: filters,
+      })
+      .filter({
+        $and: [
+          { date: { $transform: '$month', $lte: end } },
+        ],
+        'account.offbudget': false,
+      })
+      .groupBy(['date', 'payee.transfer_acct'])
+      .select([
+        'date',
+        { isTransfer: 'payee.transfer_acct' },
+        { amount: { $sum: '$amount' } },
+      ]);
+
+    const { data: transactionData } = await runQuery(transactionQuery)
+
+    const transactions = await Promise.all(
+      transactionData.map(trs => {
+        return trs
+      }),
+    );
+
+
     return runAll(
       [
         q('transactions')
@@ -166,6 +192,7 @@ export function cashFlowByDate(
             forecast,
             isConcise,
             schedules,
+            transactions,
             filters,
             forecastSource,
           ),
@@ -182,6 +209,7 @@ function recalculate(
   forecast,
   isConcise: boolean,
   schedules,
+  transactions,
   filters,
   forecastSource: string,
 ) {
@@ -255,20 +283,68 @@ function recalculate(
     });
   }
   if (forecastSource === 'average') {
-    schedules.forEach(schedule => {
-      schedule._dates?.forEach(date => {
-        const futureTx = {
-          date: isConcise ? monthUtils.monthFromDate(date) : date,
-          isTransfer: schedule.isTransfer != null,
-          trasferAccount: schedule.isTransfer,
-          amount: -100 * 100
-        };
-        if (futureTx.amount < 0) {
-          futureExpense.push(futureTx);
+    const monthTotals = transactions.reduce((months, transaction) => {
+      const year = monthUtils.getYear(transaction.date);
+      const month = monthUtils.getMonthIndex(transaction.date); // Month is zero-indexed (0 = January)
+
+      const yearData = {
+        year: year,
+        amount: transaction.amount,
+      }
+      const indexMonth = months.findIndex(a => a.month === month)
+
+      if (indexMonth >= 0) {
+        const indexYear = months[indexMonth].data.findIndex(d => d.year === year)
+        if (indexYear >= 0) {
+          months[indexMonth].data[indexYear].amount += transaction.amount
         } else {
-          futureIncome.push(futureTx);
+          months[indexMonth].data.push(yearData)
         }
-      });
+      } else {
+        months.push({
+          month: month,
+          data: [yearData]
+        })
+      }
+      return months;
+    }, []);
+
+    const monthAvgs = monthTotals.reduce((arr, total) => {
+      const sum = total.data.reduce((sum, d) => sum + d.amount, 0)
+      const average = sum / total.data.length
+      arr.push({
+        month: total.month,
+        average: average,
+      })
+      return arr;
+    }, []);
+
+    const totalAvg = 100000;
+
+    monthUtils.range(end, forecast).forEach(month => {
+      const monthAvgIndex = monthAvgs.findIndex(m => (m.month === monthUtils.getMonthIndex(month)));
+      let futureTx = {}
+      if (monthAvgIndex !== -1) {
+        futureTx = {
+          date: month,
+          isTransfer: false,
+          trasferAccount: null,
+          amount: monthAvgs[monthAvgIndex].average,
+        }
+      } else {
+        // take an average of all months, weighted by the number of days
+        futureTx = {
+          date: month,
+          isTransfer: false,
+          trasferAccount: null,
+          amount: totalAvg,
+        }
+      };
+      if (futureTx.amount < 0) {
+        futureExpense.push(futureTx);
+      } else {
+        futureIncome.push(futureTx);
+      }
     });
   }
 
