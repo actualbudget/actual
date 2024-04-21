@@ -14,6 +14,7 @@ import {
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -81,6 +82,7 @@ type LineGraphProps = {
 };
 
 export function LineGraph({ style, data, compact }: LineGraphProps) {
+  const { isNarrowWidth } = useResponsive();
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -103,11 +105,13 @@ export function LineGraph({ style, data, compact }: LineGraphProps) {
                 data={data.intervalData}
                 margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
               >
-                <Tooltip
-                  content={<CustomTooltip />}
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    content={<CustomTooltip />}
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                  />
+                )}
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />

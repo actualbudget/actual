@@ -20,6 +20,7 @@ import {
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -141,6 +142,7 @@ export function StackedBarGraph({
   balanceTypeOp,
 }: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();
+  const { isNarrowWidth } = useResponsive();
 
   const largestValue = data.intervalData
     .map(c => c[balanceTypeOp])
@@ -165,12 +167,14 @@ export function StackedBarGraph({
                 data={data.intervalData}
                 margin={{ top: 0, right: 0, left: leftMargin, bottom: 0 }}
               >
-                <Tooltip
-                  content={<CustomTooltip compact={compact} />}
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                  cursor={{ fill: 'transparent' }}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    content={<CustomTooltip compact={compact} />}
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                    cursor={{ fill: 'transparent' }}
+                  />
+                )}
                 <XAxis
                   dataKey="date"
                   tick={{ fill: theme.pageText }}

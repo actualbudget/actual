@@ -9,6 +9,7 @@ import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, type CSSProperties } from '../../../style';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
@@ -200,6 +201,7 @@ export function DonutGraph({
   const navigate = useNavigate();
   const categories = useCategories();
   const accounts = useAccounts();
+  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
 
   const onShowActivity = item => {
@@ -304,7 +306,9 @@ export function DonutGraph({
                     }
                   }}
                   onClick={
-                    !['Group', 'Interval'].includes(groupBy) && onShowActivity
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    onShowActivity
                   }
                 >
                   {data.legend.map((entry, index) => (
