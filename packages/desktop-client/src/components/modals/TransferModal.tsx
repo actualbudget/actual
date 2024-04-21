@@ -18,6 +18,7 @@ import { type CommonModalProps } from '../Modals';
 type TransferModalProps = {
   modalProps: CommonModalProps;
   title: string;
+  month: string;
   amount: number;
   showToBeBudgeted: boolean;
   onSubmit: (amount: number, toCategoryId: string) => void;
@@ -26,6 +27,7 @@ type TransferModalProps = {
 export function TransferModal({
   modalProps,
   title,
+  month,
   amount: initialAmount,
   showToBeBudgeted,
   onSubmit,
@@ -45,6 +47,7 @@ export function TransferModal({
     dispatch(
       pushModal('category-autocomplete', {
         categoryGroups,
+        month,
         showHiddenCategories: true,
         onSelect: categoryId => {
           setToCategoryId(categoryId);
@@ -82,6 +85,7 @@ export function TransferModal({
             <FieldLabel title="Transfer this amount:" />
             <InitialFocus>
               <InputField
+                inputMode="decimal"
                 tabIndex={1}
                 defaultValue={_initialAmount}
                 onUpdate={setAmount}

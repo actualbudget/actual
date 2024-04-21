@@ -17,6 +17,7 @@ import {
   type DataEntity,
   type GroupedEntity,
 } from 'loot-core/src/types/models/reports';
+import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import {
   categoryLists,
@@ -47,6 +48,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -67,6 +69,7 @@ export function createCustomSpreadsheet({
   payees,
   accounts,
   graphType,
+  firstDayOfWeekIdx,
   setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
@@ -100,7 +103,7 @@ export function createCustomSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const [assets, debts] = await Promise.all([
+    let [assets, debts] = await Promise.all([
       runQuery(
         makeQuery(
           'assets',
@@ -127,11 +130,33 @@ export function createCustomSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
+    if (interval === 'Weekly') {
+      debts = debts.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+      assets = assets.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+    }
+
     const format =
       ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+    const rangeProps =
+      interval === 'Weekly'
+        ? [
+            monthUtils[format](startDate),
+            monthUtils[format](endDate),
+            firstDayOfWeekIdx,
+          ]
+        : [monthUtils[format](startDate), monthUtils[format](endDate)];
     const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      monthUtils[format](startDate),
-      monthUtils[format](endDate),
+      ...rangeProps,
     );
 
     let totalAssets = 0;
@@ -197,6 +222,7 @@ export function createCustomSpreadsheet({
               d.format(d.parseISO(`${intervalItem}-01`), "MMM ''yy")
             : intervalItem,
         ...stacked,
+        dateStart: intervalItem,
         totalDebts: integerToAmount(perIntervalDebts),
         totalAssets: integerToAmount(perIntervalAssets),
         totalTotals: integerToAmount(perIntervalDebts + perIntervalAssets),
