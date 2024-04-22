@@ -1,6 +1,6 @@
 import { useEffect, useState, type RefObject } from 'react';
 
-export function useShrinkFontOnOverflow({
+export function useShrinkFontSizeOnOverflow({
   textRef,
   initialFontSize,
   disabled,
