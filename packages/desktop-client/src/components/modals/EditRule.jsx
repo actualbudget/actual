@@ -1014,7 +1014,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                         >
                           <Text
                             style={{
-                              ...styles.verySmallText,
+                              ...styles.smallText,
                               marginBottom: '10px',
                             }}
                           >
