@@ -1631,7 +1631,7 @@ export function BudgetTable({
                       : null,
                 }}
               >
-                <View>
+                <View style={{ alignItems: 'flex-end' }}>
                   <Label
                     title="Budgeted"
                     style={{ color: theme.buttonNormalText, padding: '0 5px' }}
