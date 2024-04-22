@@ -48,12 +48,8 @@ export function CategoryAutocompleteModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 0,
         height: isNarrowWidth ? '85vh' : 275,
-        padding: '15px 10px',
-        borderRadius: '6px',
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
       CloseButton={props => (

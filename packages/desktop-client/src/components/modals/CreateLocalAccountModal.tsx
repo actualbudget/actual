@@ -12,7 +12,7 @@ import { InitialFocus } from '../common/InitialFocus';
 import { InlineField } from '../common/InlineField';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Modal, ModalButtons } from '../common/Modal';
+import { Modal, ModalButtons, ModalTitle } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
@@ -23,7 +23,7 @@ type CreateLocalAccountProps = {
   actions: BoundActions;
 };
 
-export function CreateLocalAccount({
+export function CreateLocalAccountModal({
   modalProps,
   actions,
 }: CreateLocalAccountProps) {
@@ -38,7 +38,10 @@ export function CreateLocalAccount({
   const validateBalance = balance => !isNaN(parseFloat(balance));
 
   return (
-    <Modal title="Create Local Account" {...modalProps}>
+    <Modal
+      title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
+      {...modalProps}
+    >
       {() => (
         <View>
           <form
@@ -62,7 +65,7 @@ export function CreateLocalAccount({
               }
             }}
           >
-            <InlineField label="Name" width="75%">
+            <InlineField label="Name" width="100%">
               <InitialFocus>
                 <Input
                   name="name"
@@ -85,7 +88,7 @@ export function CreateLocalAccount({
 
             <View
               style={{
-                width: '75%',
+                width: '100%',
                 flexDirection: 'row',
                 justifyContent: 'flex-end',
               }}
@@ -137,7 +140,7 @@ export function CreateLocalAccount({
               </View>
             </View>
 
-            <InlineField label="Balance" width="75%">
+            <InlineField label="Balance" width="100%">
               <Input
                 name="balance"
                 inputMode="decimal"
