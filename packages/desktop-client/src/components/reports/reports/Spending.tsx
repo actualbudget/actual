@@ -88,6 +88,7 @@ export function Spending() {
                 onApply={onApplyFilter}
                 compact={false}
                 hover={false}
+                exclude={['date']}
               />
               <View style={{ flex: 1 }} />
             </View>

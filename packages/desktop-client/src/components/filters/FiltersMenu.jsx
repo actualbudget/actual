@@ -243,7 +243,7 @@ function ConfigureField({
   );
 }
 
-export function FilterButton({ onApply, compact, hover }) {
+export function FilterButton({ onApply, compact, hover, exclude }) {
   const filters = useFilters();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -359,10 +359,12 @@ export function FilterButton({ onApply, compact, hover }) {
             onMenuSelect={name => {
               dispatch({ type: 'configure', field: name });
             }}
-            items={filterFields.map(([name, text]) => ({
-              name,
-              text: titleFirst(text),
-            }))}
+            items={filterFields
+              .filter(f => !exclude.includes(f[0]))
+              .map(([name, text]) => ({
+                name,
+                text: titleFirst(text),
+              }))}
           />
         </Tooltip>
       )}
