@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useState } from 'react';
 
 import { css } from 'glamor';
 import {
@@ -12,13 +12,22 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
-import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
+import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
 
 type PayloadItem = {
@@ -32,12 +41,20 @@ type PayloadItem = {
 };
 
 type CustomTooltipProps = {
+  compact: boolean;
+  tooltip: string;
   active?: boolean;
   payload?: PayloadItem[];
 };
 
-const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+const CustomTooltip = ({
+  compact,
+  tooltip,
+  active,
+  payload,
+}: CustomTooltipProps) => {
   if (active && payload && payload.length) {
+    let sumTotals = 0;
     return (
       <div
         className={`${css({
@@ -55,18 +72,33 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            <PrivacyFilter>
-              {payload
-                .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
-                .map((p: PayloadItem, index: number) => (
-                  <AlignedText
-                    key={index}
-                    left={p.dataKey}
-                    right={amountToCurrency(p.value)}
-                    style={{ color: p.color }}
-                  />
-                ))}
-            </PrivacyFilter>
+            {payload
+              .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
+              .map((p: PayloadItem, index: number) => {
+                sumTotals += p.value;
+                return (
+                  (compact ? index < 4 : true) && (
+                    <AlignedText
+                      key={index}
+                      left={p.dataKey}
+                      right={amountToCurrency(p.value)}
+                      style={{
+                        color: p.color,
+                        textDecoration:
+                          tooltip === p.dataKey ? 'underline' : 'inherit',
+                      }}
+                    />
+                  )
+                );
+              })}
+            {payload.length > 5 && compact && '...'}
+            <AlignedText
+              left="Total"
+              right={amountToCurrency(sumTotals)}
+              style={{
+                fontWeight: 600,
+              }}
+            />
           </div>
         </div>
       </div>
@@ -76,13 +108,83 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 
 type LineGraphProps = {
   style?: CSSProperties;
-  data;
+  data: GroupedEntity;
+  filters: RuleConditionEntity[];
+  groupBy: string;
   compact?: boolean;
+  balanceTypeOp: string;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
-export function LineGraph({ style, data, compact }: LineGraphProps) {
-  const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+export function LineGraph({
+  style,
+  data,
+  filters,
+  groupBy,
+  compact,
+  balanceTypeOp,
+  showHiddenCategories,
+  showOffBudget,
+}: LineGraphProps) {
+  const navigate = useNavigate();
+  const categories = useCategories();
+  const accounts = useAccounts();
+  const privacyMode = usePrivacyMode();
+  const [pointer, setPointer] = useState('');
+  const [tooltip, setTooltip] = useState('');
+
+  const largestValue = data.intervalData
+    .map(c => c[balanceTypeOp])
+    .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
+
+  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 5;
+
+  const onShowActivity = (item, id, payload) => {
+    const amount = balanceTypeOp === 'totalDebts' ? 'lte' : 'gte';
+    const field = groupBy === 'Interval' ? null : groupBy.toLowerCase();
+    const hiddenCategories = categories.list
+      .filter(f => f.hidden)
+      .map(e => e.id);
+    const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
+
+    const conditions = [
+      ...filters,
+      { field, op: 'is', value: id, type: 'id' },
+      {
+        field: 'date',
+        op: 'is',
+        value: payload.payload.dateStart,
+        options: { date: true },
+      },
+      balanceTypeOp !== 'totalTotals' && {
+        field: 'amount',
+        op: amount,
+        value: 0,
+        type: 'number',
+      },
+      hiddenCategories.length > 0 &&
+        !showHiddenCategories && {
+          field: 'category',
+          op: 'notOneOf',
+          value: hiddenCategories,
+          type: 'id',
+        },
+      offBudgetAccounts.length > 0 &&
+        !showOffBudget && {
+          field: 'account',
+          op: 'notOneOf',
+          value: offBudgetAccounts,
+          type: 'id',
+        },
+    ].filter(f => f);
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        conditions,
+        categoryId: item.id,
+      },
+    });
   };
 
   return (
@@ -101,18 +203,35 @@ export function LineGraph({ style, data, compact }: LineGraphProps) {
                 width={width}
                 height={height}
                 data={data.intervalData}
-                margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
+                style={{ cursor: pointer }}
               >
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={
+                    <CustomTooltip compact={compact} tooltip={tooltip} />
+                  }
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis name="Value" tickFormatter={tickFormatter} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                    <YAxis
+                      tickFormatter={value =>
+                        getCustomTick(
+                          amountToCurrencyNoDecimal(value),
+                          privacyMode,
+                        )
+                      }
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                      tickSize={0}
+                    />
                   </>
                 )}
                 {data.legend.map((entry, index) => {
@@ -123,6 +242,22 @@ export function LineGraph({ style, data, compact }: LineGraphProps) {
                       type="monotone"
                       dataKey={entry.name}
                       stroke={entry.color}
+                      activeDot={{
+                        r: entry.name === tooltip && !compact ? 8 : 3,
+                        onMouseEnter: () => {
+                          setTooltip(entry.name);
+                          if (!['Group', 'Interval'].includes(groupBy)) {
+                            setPointer('pointer');
+                          }
+                        },
+                        onMouseLeave: () => {
+                          setPointer('');
+                          setTooltip('');
+                        },
+                        onClick: (e, payload) =>
+                          !['Group', 'Interval'].includes(groupBy) &&
+                          onShowActivity(e, entry.id, payload),
+                      }}
                     />
                   );
                 })}
