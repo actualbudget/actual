@@ -16,11 +16,16 @@ export function calculateLegend(
   const colorScale = getColorScale('qualitative');
   const chooseData =
     groupBy === 'Interval'
-      ? intervalData.map(c => c.date)
-      : calcDataFiltered.map(c => c.name);
-  return chooseData.map((name, index) => {
+      ? intervalData.map(c => {
+          return { name: c.date, id: null };
+        })
+      : calcDataFiltered.map(c => {
+          return { name: c.name, id: c.id };
+        });
+  return chooseData.map((item, index) => {
     return {
-      name,
+      id: item.id,
+      name: item.name,
       color:
         graphType === 'DonutGraph'
           ? colorScale[index % colorScale.length]

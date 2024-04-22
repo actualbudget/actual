@@ -24,11 +24,11 @@ import { ConfirmTransactionEdit } from './modals/ConfirmTransactionEdit';
 import { ConfirmUnlinkAccount } from './modals/ConfirmUnlinkAccount';
 import { CoverModal } from './modals/CoverModal';
 import { CreateAccount } from './modals/CreateAccount';
-import { CreateEncryptionKey } from './modals/CreateEncryptionKey';
+import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccount } from './modals/CreateLocalAccount';
 import { EditField } from './modals/EditField';
 import { EditRule } from './modals/EditRule';
-import { FixEncryptionKey } from './modals/FixEncryptionKey';
+import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
 import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
 import { HoldBufferModal } from './modals/HoldBufferModal';
@@ -251,20 +251,18 @@ export function Modals() {
 
         case 'create-encryption-key':
           return (
-            <CreateEncryptionKey
+            <CreateEncryptionKeyModal
               key={name}
               modalProps={modalProps}
-              actions={actions}
               options={options}
             />
           );
 
         case 'fix-encryption-key':
           return (
-            <FixEncryptionKey
+            <FixEncryptionKeyModal
               key={name}
               modalProps={modalProps}
-              actions={actions}
               options={options}
             />
           );
