@@ -73,7 +73,7 @@ export default {
 
     return {
       ...transaction,
-      date: transaction.valueDate,
+      date: transaction.valueDate || transaction.bookingDate,
     };
   },
 
