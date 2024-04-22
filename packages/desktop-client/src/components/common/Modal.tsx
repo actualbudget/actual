@@ -52,7 +52,7 @@ export const Modal = ({
   isCurrent,
   isHidden,
   size,
-  padding = 20,
+  padding = 10,
   showHeader = true,
   leftHeaderContent,
   CloseButton: CloseButtonComponent = ModalCloseButton,
@@ -133,12 +133,13 @@ export const Modal = ({
         isCurrent={isCurrent}
         size={size}
         style={{
+          flex: 1,
           willChange: 'opacity, transform',
           maxWidth: '90vw',
           minWidth: '90vw',
           maxHeight: '90vh',
           minHeight: 0,
-          borderRadius: 4,
+          borderRadius: 6,
           //border: '1px solid ' + theme.modalBorder,
           color: theme.pageText,
           backgroundColor: theme.modalBackground,

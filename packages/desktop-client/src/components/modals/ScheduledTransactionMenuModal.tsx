@@ -23,16 +23,7 @@ export function ScheduledTransactionMenuModal({
   };
 
   return (
-    <Modal
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
-    >
+    <Modal showHeader focusAfterClose={false} {...modalProps}>
       <ScheduledTransactionMenu
         transactionId={transactionId}
         onPost={onPost}

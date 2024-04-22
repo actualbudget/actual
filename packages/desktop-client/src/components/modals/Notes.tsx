@@ -41,11 +41,8 @@ export function Notes({ modalProps, id, name, onSave }: NotesProps) {
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={10}
       style={{
-        flex: 1,
         height: '50vh',
-        borderRadius: '6px',
       }}
     >
       <View

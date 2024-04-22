@@ -78,15 +78,7 @@ export function RolloverBudgetSummaryModal({
   };
 
   return (
-    <Modal
-      title="Budget Summary"
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
-      {...modalProps}
-    >
+    <Modal title="Budget Summary" {...modalProps}>
       <NamespaceContext.Provider value={sheetForMonth(month)}>
         <TotalsList
           prevMonthName={prevMonthName}

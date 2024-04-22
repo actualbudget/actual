@@ -84,11 +84,8 @@ export function CategoryMenuModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={10}
       style={{
-        flex: 1,
         height: '45vh',
-        borderRadius: '6px',
       }}
       leftHeaderContent={
         <AdditionalCategoryMenu

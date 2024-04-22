@@ -42,11 +42,6 @@ export function HoldBufferModal({
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
     >
       <View>
         <FieldLabel title="Hold this amount:" />

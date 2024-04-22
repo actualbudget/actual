@@ -72,18 +72,8 @@ export function TransferModal({
   const toCategory = categories.find(c => c.id === toCategoryId);
 
   return (
-    <Modal
-      title={title}
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
-    >
-      <>
+    <Modal title={title} showHeader focusAfterClose={false} {...modalProps}>
+      <View>
         <View>
           <FieldLabel title="Transfer this amount:" />
           <InitialFocus>
@@ -128,7 +118,7 @@ export function TransferModal({
             Transfer
           </Button>
         </View>
-      </>
+      </View>
     </Modal>
   );
 }

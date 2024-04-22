@@ -30,11 +30,6 @@ export function SwitchBudgetTypeModal({
   return (
     <Modal
       title={<ModalTitle title="Switch budget type?" shrinkOnOverflow />}
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
       {...modalProps}
     >
       <>

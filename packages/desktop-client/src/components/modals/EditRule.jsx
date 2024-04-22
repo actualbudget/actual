@@ -894,7 +894,6 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   return (
     <Modal
       title="Rule"
-      padding={0}
       {...modalProps}
       style={{ ...modalProps.style, flex: 'inherit' }}
     >

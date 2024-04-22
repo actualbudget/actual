@@ -23,15 +23,7 @@ export function ReportBudgetSummaryModal({
 }: ReportBudgetSummaryModalProps) {
   const currentMonth = monthUtils.currentMonth();
   return (
-    <Modal
-      title="Budget Summary"
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
-      {...modalProps}
-    >
+    <Modal title="Budget Summary" {...modalProps}>
       <NamespaceContext.Provider value={sheetForMonth(month)}>
         <Stack
           spacing={2}

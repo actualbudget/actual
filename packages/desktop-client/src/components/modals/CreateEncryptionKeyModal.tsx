@@ -65,11 +65,8 @@ export function CreateEncryptionKeyModal({
     <Modal
       {...modalProps}
       style={{
-        flex: 1,
         padding: '0 10px',
-        borderRadius: '6px',
       }}
-      padding={10}
       title={isRecreating ? 'Generate new key' : 'Enable encryption'}
       onClose={modalProps.onClose}
     >

@@ -27,16 +27,7 @@ export function BudgetPageMenuModal({
   };
 
   return (
-    <Modal
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
-    >
+    <Modal showHeader focusAfterClose={false} {...modalProps}>
       <BudgetPageMenu
         getItemStyle={() => defaultMenuItemStyle}
         onAddCategoryGroup={onAddCategoryGroup}

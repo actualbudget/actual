@@ -45,11 +45,8 @@ export function PayeeAutocompleteModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={10}
       style={{
-        flex: 0,
         height: isNarrowWidth ? '85vh' : 275,
-        borderRadius: '6px',
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
       CloseButton={props => (

@@ -79,11 +79,6 @@ export function CoverModal({
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
     >
       <View>
         <FieldLabel title="Cover from category:" />

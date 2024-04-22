@@ -42,15 +42,7 @@ export function SingleInputModal({
   };
 
   return (
-    <Modal
-      title={title}
-      {...modalProps}
-      padding={10}
-      style={{
-        flex: 1,
-        borderRadius: '6px',
-      }}
-    >
+    <Modal title={title} {...modalProps}>
       <View>
         <InitialFocus>
           <InputField
