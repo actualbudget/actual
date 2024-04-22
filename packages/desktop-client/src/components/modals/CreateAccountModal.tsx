@@ -24,7 +24,7 @@ type CreateAccountProps = {
   upgradingAccountId?: string;
 };
 
-export function CreateAccount({
+export function CreateAccountModal({
   modalProps,
   syncServerStatus,
   upgradingAccountId,

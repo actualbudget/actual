@@ -95,7 +95,7 @@ export function TransactionListWithBalances({
             }}
           >
             <Label
-              title="CLEARED"
+              title="Cleared"
               style={{ textAlign: 'center', fontSize: 12 }}
             />
             <CellValue
@@ -110,7 +110,7 @@ export function TransactionListWithBalances({
             />
           </View>
           <View style={{ flexBasis: '33%' }}>
-            <Label title="BALANCE" style={{ textAlign: 'center' }} />
+            <Label title="Balance" style={{ textAlign: 'center' }} />
             <CellValue
               binding={balance}
               type="financial"
@@ -132,7 +132,7 @@ export function TransactionListWithBalances({
             }}
           >
             <Label
-              title="UNCLEARED"
+              title="Uncleared"
               style={{ textAlign: 'center', fontSize: 12 }}
             />
             <CellValue
