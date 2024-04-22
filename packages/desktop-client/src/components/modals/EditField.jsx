@@ -221,12 +221,10 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
       focusAfterClose={false}
       {...modalProps}
       onClose={onCloseInner}
-      padding={0}
       style={{
         flex: 0,
         height: isNarrowWidth ? '85vh' : 275,
         padding: '15px 10px',
-        borderRadius: '6px',
         ...(minWidth && { minWidth }),
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
