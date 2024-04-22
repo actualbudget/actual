@@ -76,21 +76,20 @@ const CustomTooltip = ({
               .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
               .map((p: PayloadItem, index: number) => {
                 sumTotals += p.value;
-                return compact
-                  ? index < 5
-                  : true && (
-                      <AlignedText
-                        key={index}
-                        left={p.dataKey}
-                        right={amountToCurrency(p.value)}
-                        style={{
-                          color: p.color,
-                          fontWeight:
-                            tooltip === p.dataKey ? 'bold' : 'inherit',
-                          fontSize: tooltip === p.dataKey ? 15 : 'inherit',
-                        }}
-                      />
-                    );
+                return (
+                  (compact ? index < 4 : true) && (
+                    <AlignedText
+                      key={index}
+                      left={p.dataKey}
+                      right={amountToCurrency(p.value)}
+                      style={{
+                        color: p.color,
+                        textDecoration:
+                          tooltip === p.dataKey ? 'underline' : 'inherit',
+                      }}
+                    />
+                  )
+                );
               })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
@@ -139,7 +138,7 @@ export function LineGraph({
     .map(c => c[balanceTypeOp])
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
-  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
+  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 5;
 
   const onShowActivity = (item, id, payload) => {
     const amount = balanceTypeOp === 'totalDebts' ? 'lte' : 'gte';
@@ -244,7 +243,7 @@ export function LineGraph({
                       dataKey={entry.name}
                       stroke={entry.color}
                       activeDot={{
-                        r: 8,
+                        r: entry.name === tooltip && !compact ? 8 : 3,
                         onMouseEnter: () => {
                           setTooltip(entry.name);
                           if (!['Group', 'Interval'].includes(groupBy)) {
