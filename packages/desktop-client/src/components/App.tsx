@@ -38,24 +38,32 @@ type AppInnerProps = {
 function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   const [initializing, setInitializing] = useState(true);
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
-  const loadingText = useSelector((state: State) => state.app.loadingText);
+  const stateLoadingText = useSelector((state: State) => state.app.loadingText);
+  const [loadingText = stateLoadingText, setLoadingText] = useState<
+    string | null
+  >(null);
   const { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
 
   async function init() {
     const socketName = await global.Actual.getServerSocket();
 
+    setLoadingText('Initializing the connection to the local database...');
     await initConnection(socketName);
 
     // Load any global prefs
+    setLoadingText('Loading global preferences...');
     await loadGlobalPrefs();
 
     // Open the last opened budget, if any
+    setLoadingText('Opening last budget...');
     const budgetId = await send('get-last-opened-backup');
     if (budgetId) {
+      setLoadingText('Loading the last budget file...');
       await loadBudget(budgetId);
 
       // Check to see if this file has been remotely deleted (but
       // don't block on this in case they are offline or something)
+      setLoadingText('Retrieving remote files...');
       send('get-remote-files').then(files => {
         if (files) {
           const remoteFile = files.find(f => f.fileId === cloudFileId);
@@ -71,6 +79,7 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
     async function initAll() {
       await Promise.all([installPolyfills(), init()]);
       setInitializing(false);
+      setLoadingText(null);
     }
 
     initAll().catch(showErrorBoundary);

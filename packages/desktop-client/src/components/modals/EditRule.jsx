@@ -1020,7 +1020,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                             }}
                           >
                             {splitIndex === 0
-                              ? 'Before split'
+                              ? 'Apply to all'
                               : `Split ${splitIndex}`}
                           </Text>
                           {splitIndex && (
@@ -1085,6 +1085,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                     onClick={() => {
                       addActionToSplitAfterIndex(actionSplits.length, -1);
                     }}
+                    data-testid="add-split-transactions"
                   >
                     {actionSplits.length > 1
                       ? 'Add another split'

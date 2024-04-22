@@ -11,6 +11,7 @@ import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
 import { BudgetMenu } from '../budget/rollover/BudgetMenu';
 import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 import { type CommonModalProps } from '../Modals';
@@ -51,9 +52,13 @@ export function RolloverBudgetMenuModal({
     setAmountFocused(true);
   }, []);
 
+  if (!category) {
+    return null;
+  }
+
   return (
     <Modal
-      title={`Budget: ${category?.name}`}
+      title={category.name}
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -72,6 +77,14 @@ export function RolloverBudgetMenuModal({
           marginBottom: 20,
         }}
       >
+        <Text
+          style={{
+            fontSize: 17,
+            fontWeight: 400,
+          }}
+        >
+          Budget
+        </Text>
         <FocusableAmountInput
           value={integerToAmount(budgeted || 0)}
           focused={amountFocused}

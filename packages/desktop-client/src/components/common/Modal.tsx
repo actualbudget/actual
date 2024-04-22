@@ -136,6 +136,7 @@ export const Modal = ({
           willChange: 'opacity, transform',
           maxWidth: '90vw',
           minWidth: '90vw',
+          maxHeight: '90vh',
           minHeight: 0,
           borderRadius: 4,
           //border: '1px solid ' + theme.modalBorder,
@@ -155,9 +156,9 @@ export const Modal = ({
             style={{
               justifyContent: 'center',
               alignItems: 'center',
-              padding: 20,
+              padding: '0 20px',
               position: 'relative',
-              height: 80,
+              height: 70,
             }}
           >
             <View

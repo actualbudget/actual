@@ -37,8 +37,7 @@ function AccountHeader({ name, amount, style = {} }) {
         <Text
           style={{
             ...styles.text,
-            textTransform: 'uppercase',
-            fontSize: 13,
+            fontSize: 14,
           }}
           data-testid="name"
         >
@@ -47,7 +46,7 @@ function AccountHeader({ name, amount, style = {} }) {
       </View>
       <CellValue
         binding={amount}
-        style={{ ...styles.text, fontSize: 13 }}
+        style={{ ...styles.text, fontSize: 14 }}
         type="financial"
       />
     </View>
@@ -220,7 +219,7 @@ function AccountList({
 
           {offbudgetAccounts.length > 0 && (
             <AccountHeader
-              name="Off budget"
+              name="Off Budget"
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />
