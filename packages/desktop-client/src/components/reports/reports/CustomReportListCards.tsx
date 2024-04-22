@@ -6,6 +6,7 @@ import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayees } from '../../../hooks/usePayees';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
@@ -78,6 +79,8 @@ export function CustomReportListCards({
   const payees = usePayees();
   const accounts = useAccounts();
   const categories = useCategories();
+  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const [isCardHovered, setIsCardHovered] = useState('');
 
@@ -227,6 +230,7 @@ export function CustomReportListCards({
                         accounts={accounts}
                         categories={categories}
                         earliestTransaction={earliestTransaction}
+                        firstDayOfWeekIdx={firstDayOfWeekIdx}
                       />
                     </View>
                   </ReportCard>

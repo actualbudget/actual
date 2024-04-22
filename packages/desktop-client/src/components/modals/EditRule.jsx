@@ -1020,7 +1020,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                             }}
                           >
                             {splitIndex === 0
-                              ? 'Before split'
+                              ? 'Apply to all'
                               : `Split ${splitIndex}`}
                           </Text>
                           {splitIndex && (

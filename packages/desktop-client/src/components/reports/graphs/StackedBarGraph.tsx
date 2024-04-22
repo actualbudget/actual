@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useState } from 'react';
 
 import { css } from 'glamor';
 import {
@@ -18,7 +18,11 @@ import {
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
@@ -41,6 +45,7 @@ type PayloadItem = {
 
 type CustomTooltipProps = {
   compact: boolean;
+  tooltip: string;
   active?: boolean;
   payload?: PayloadItem[];
   label?: string;
@@ -48,6 +53,7 @@ type CustomTooltipProps = {
 
 const CustomTooltip = ({
   compact,
+  tooltip,
   active,
   payload,
   label,
@@ -83,7 +89,11 @@ const CustomTooltip = ({
                       key={pay.name}
                       left={pay.name}
                       right={amountToCurrency(pay.value)}
-                      style={{ color: pay.color }}
+                      style={{
+                        color: pay.color,
+                        textDecoration:
+                          tooltip === pay.name ? 'underline' : 'inherit',
+                      }}
                     />
                   )
                 );
@@ -128,25 +138,86 @@ const customLabel = props => {
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data: GroupedEntity;
+  filters: RuleConditionEntity[];
+  groupBy: string;
   compact?: boolean;
   viewLabels: boolean;
   balanceTypeOp: string;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export function StackedBarGraph({
   style,
   data,
+  filters,
+  groupBy,
   compact,
   viewLabels,
   balanceTypeOp,
+  showHiddenCategories,
+  showOffBudget,
 }: StackedBarGraphProps) {
+  const navigate = useNavigate();
+  const categories = useCategories();
+  const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const [pointer, setPointer] = useState('');
+  const [tooltip, setTooltip] = useState('');
 
   const largestValue = data.intervalData
     .map(c => c[balanceTypeOp])
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
+
+  const onShowActivity = (item, id) => {
+    const amount = balanceTypeOp === 'totalDebts' ? 'lte' : 'gte';
+    const field = groupBy === 'Interval' ? null : groupBy.toLowerCase();
+    const hiddenCategories = categories.list
+      .filter(f => f.hidden)
+      .map(e => e.id);
+    const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
+
+    const conditions = [
+      ...filters,
+      { field, op: 'is', value: id, type: 'id' },
+      {
+        field: 'date',
+        op: 'is',
+        value: item.dateStart,
+        options: { date: true },
+      },
+      balanceTypeOp !== 'totalTotals' && {
+        field: 'amount',
+        op: amount,
+        value: 0,
+        type: 'number',
+      },
+      hiddenCategories.length > 0 &&
+        !showHiddenCategories && {
+          field: 'category',
+          op: 'notOneOf',
+          value: hiddenCategories,
+          type: 'id',
+        },
+      offBudgetAccounts.length > 0 &&
+        !showOffBudget && {
+          field: 'account',
+          op: 'notOneOf',
+          value: offBudgetAccounts,
+          type: 'id',
+        },
+    ].filter(f => f);
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        conditions,
+        categoryId: item.id,
+      },
+    });
+  };
+
   return (
     <Container
       style={{
@@ -164,9 +235,12 @@ export function StackedBarGraph({
                 height={height}
                 data={data.intervalData}
                 margin={{ top: 0, right: 0, left: leftMargin, bottom: 0 }}
+                style={{ cursor: pointer }}
               >
                 <Tooltip
-                  content={<CustomTooltip compact={compact} />}
+                  content={
+                    <CustomTooltip compact={compact} tooltip={tooltip} />
+                  }
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                   cursor={{ fill: 'transparent' }}
@@ -201,6 +275,20 @@ export function StackedBarGraph({
                       dataKey={entry.name}
                       stackId="a"
                       fill={entry.color}
+                      onMouseLeave={() => {
+                        setPointer('');
+                        setTooltip('');
+                      }}
+                      onMouseEnter={() => {
+                        setTooltip(entry.name);
+                        if (!['Group', 'Interval'].includes(groupBy)) {
+                          setPointer('pointer');
+                        }
+                      }}
+                      onClick={e =>
+                        !['Group', 'Interval'].includes(groupBy) &&
+                        onShowActivity(e, entry.id)
+                      }
                     >
                       {viewLabels && !compact && (
                         <LabelList dataKey={entry.name} content={customLabel} />

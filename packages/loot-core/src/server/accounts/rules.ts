@@ -622,7 +622,7 @@ export function execActions(actions: Action[], transaction) {
     }
   }
 
-  // The split index 0 is reserved for "Before split" actions.
+  // The split index 0 is reserved for "Apply to all" actions.
   // Remove that entry from the subtransactions.
   update.subtransactions = update.subtransactions.slice(1);
 

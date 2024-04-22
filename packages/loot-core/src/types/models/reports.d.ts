@@ -38,7 +38,7 @@ export interface GroupedEntity {
 
 type LegendEntity = {
   name: string;
-  id: string;
+  id: string | null;
   color: string;
 };
 

@@ -38,7 +38,7 @@ import { fromDateRepr } from '../util';
 export function CustomReport() {
   const categories = useCategories();
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || 0;
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -152,6 +152,7 @@ export function CustomReport() {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
           trans ? trans.date : monthUtils.currentDay(),
+          firstDayOfWeekIdx,
         );
         setStartDate(dateStart);
         setEndDate(dateEnd);
@@ -293,17 +294,22 @@ export function CustomReport() {
       ? defaultsList.modeGraphsMap.get(item)
       : chooseGraph;
     if (disabledList.modeGraphsMap.get(item).includes(graphType)) {
+      setSessionReport('graphType', newGraph);
       setGraphType(newGraph);
     }
 
     if (disabledList.graphSplitMap.get(item).get(newGraph).includes(groupBy)) {
-      setGroupBy(defaultsList.graphSplitMap.get(item).get(newGraph));
+      const cond = defaultsList.graphSplitMap.get(item).get(newGraph);
+      setSessionReport('groupBy', cond);
+      setGroupBy(cond);
     }
 
     if (
       disabledList.graphTypeMap.get(item).get(newGraph).includes(balanceType)
     ) {
-      setBalanceType(defaultsList.graphTypeMap.get(item).get(newGraph));
+      const cond = defaultsList.graphTypeMap.get(item).get(newGraph);
+      setSessionReport('balanceType', cond);
+      setBalanceType(cond);
     }
   };
 
@@ -312,12 +318,16 @@ export function CustomReport() {
     if (
       disabledList.graphSplitMap.get(mode).get(chooseGraph).includes(groupBy)
     ) {
-      setGroupBy(defaultsList.graphSplitMap.get(mode).get(chooseGraph));
+      const cond = defaultsList.graphSplitMap.get(mode).get(chooseGraph);
+      setSessionReport('groupBy', cond);
+      setGroupBy(cond);
     }
     if (
       disabledList.graphTypeMap.get(mode).get(chooseGraph).includes(balanceType)
     ) {
-      setBalanceType(defaultsList.graphTypeMap.get(mode).get(chooseGraph));
+      const cond = defaultsList.graphTypeMap.get(mode).get(chooseGraph);
+      setSessionReport('balanceType', cond);
+      setBalanceType(cond);
     }
   };
 

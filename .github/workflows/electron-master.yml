@@ -9,8 +9,8 @@ env:
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - v**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,6 +18,9 @@ concurrency:
 
 jobs:
   build:
+    # this is so the assets can be added to the release
+    permissions:
+      contents: write
     strategy:
       matrix:
         os:
@@ -31,6 +34,14 @@ jobs:
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: python3 -m pip install setuptools
+      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get install flatpak -y
+          sudo apt-get install flatpak-builder -y
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install org.freedesktop.Sdk/x86_64/23.08 -y
+          sudo flatpak install org.freedesktop.Platform/x86_64/23.08 -y
+          sudo flatpak install org.electronjs.Electron2.BaseApp/x86_64/23.08 -y
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron
@@ -48,3 +59,12 @@ jobs:
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
             packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.flatpak
+      - name: Add to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/*.exe
+            packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.flatpak
