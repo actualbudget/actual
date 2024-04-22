@@ -79,27 +79,25 @@ export function RolloverBudgetSummaryModal({
 
   return (
     <Modal title="Budget Summary" {...modalProps}>
-      {() => (
-        <NamespaceContext.Provider value={sheetForMonth(month)}>
-          <TotalsList
-            prevMonthName={prevMonthName}
-            style={{
-              ...styles.mediumText,
-            }}
-          />
-          <ToBudgetAmount
-            prevMonthName={prevMonthName}
-            style={{
-              ...styles.mediumText,
-              marginTop: 15,
-            }}
-            amountStyle={{
-              ...styles.underlinedText,
-            }}
-            onClick={onClick}
-          />
-        </NamespaceContext.Provider>
-      )}
+      <NamespaceContext.Provider value={sheetForMonth(month)}>
+        <TotalsList
+          prevMonthName={prevMonthName}
+          style={{
+            ...styles.mediumText,
+          }}
+        />
+        <ToBudgetAmount
+          prevMonthName={prevMonthName}
+          style={{
+            ...styles.mediumText,
+            marginTop: 15,
+          }}
+          amountStyle={{
+            ...styles.underlinedText,
+          }}
+          onClick={onClick}
+        />
+      </NamespaceContext.Provider>
     </Modal>
   );
 }

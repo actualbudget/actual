@@ -72,67 +72,53 @@ export function TransferModal({
   const toCategory = categories.find(c => c.id === toCategoryId);
 
   return (
-    <Modal
-      title={title}
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-      padding={0}
-      style={{
-        flex: 1,
-        padding: '0 10px',
-        paddingBottom: 10,
-        borderRadius: '6px',
-      }}
-    >
-      {() => (
-        <>
-          <View>
-            <FieldLabel title="Transfer this amount:" />
-            <InitialFocus>
-              <InputField
-                inputMode="decimal"
-                tabIndex={0}
-                defaultValue={_initialAmount}
-                onUpdate={setAmount}
-                onEnter={() => {
-                  if (!toCategoryId) {
-                    openCategoryModal();
-                  }
-                }}
-              />
-            </InitialFocus>
-          </View>
-
-          <FieldLabel title="To:" />
-          <TapField
-            tabIndex={0}
-            value={toCategory?.name}
-            onClick={openCategoryModal}
-          />
-
-          <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 10,
-            }}
-          >
-            <Button
-              type="primary"
+    <Modal title={title} showHeader focusAfterClose={false} {...modalProps}>
+      <View>
+        <View>
+          <FieldLabel title="Transfer this amount:" />
+          <InitialFocus>
+            <InputField
+              inputMode="decimal"
               tabIndex={0}
-              style={{
-                height: styles.mobileMinHeight,
-                marginLeft: styles.mobileEditingPadding,
-                marginRight: styles.mobileEditingPadding,
+              defaultValue={_initialAmount}
+              onUpdate={setAmount}
+              onEnter={() => {
+                if (!toCategoryId) {
+                  openCategoryModal();
+                }
               }}
-              onClick={() => _onSubmit(amount, toCategoryId)}
-            >
-              Transfer
-            </Button>
-          </View>
-        </>
-      )}
+            />
+          </InitialFocus>
+        </View>
+
+        <FieldLabel title="To:" />
+        <TapField
+          tabIndex={0}
+          value={toCategory?.name}
+          onClick={openCategoryModal}
+        />
+
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingTop: 10,
+          }}
+        >
+          <Button
+            type="primary"
+            tabIndex={0}
+            style={{
+              height: styles.mobileMinHeight,
+              marginLeft: styles.mobileEditingPadding,
+              marginRight: styles.mobileEditingPadding,
+            }}
+            onClick={() => _onSubmit(amount, toCategoryId)}
+          >
+            Transfer
+          </Button>
+        </View>
+      </View>
     </Modal>
   );
 }

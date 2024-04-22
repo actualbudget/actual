@@ -80,7 +80,6 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
   return (
     <Modal
       title="Merge payee?"
-      padding={0}
       showHeader={false}
       {...modalProps}
       style={modalProps.style}
