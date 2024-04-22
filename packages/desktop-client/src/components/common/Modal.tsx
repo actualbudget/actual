@@ -15,7 +15,6 @@ import ReactModal from 'react-modal';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
-import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
@@ -69,7 +68,6 @@ export const Modal = ({
   children,
   onClose,
 }: ModalProps) => {
-  const { isNarrowWidth } = useResponsive();
   const { enableScope, disableScope } = useHotkeysContext();
 
   // This deactivates any key handlers in the "app" scope
@@ -134,6 +132,7 @@ export const Modal = ({
         size={size}
         style={{
           flex: 1,
+          padding,
           willChange: 'opacity, transform',
           maxWidth: '90vw',
           minWidth: '90vw',
@@ -157,17 +156,14 @@ export const Modal = ({
             style={{
               justifyContent: 'center',
               alignItems: 'center',
-              padding: '0 20px',
               position: 'relative',
-              height: 70,
+              height: 60,
             }}
           >
             <View
               style={{
                 position: 'absolute',
                 left: 0,
-                marginRight: !isNarrowWidth ? 5 : undefined,
-                marginLeft: !isNarrowWidth ? 15 : 5,
               }}
             >
               {leftHeaderContent}
@@ -179,8 +175,7 @@ export const Modal = ({
                   textAlign: 'center',
                   // We need to force a width for the text-overflow
                   // ellipses to work because we are aligning center.
-                  // This effectively gives it a padding of 20px
-                  width: 'calc(100% - 40px)',
+                  width: 'calc(100% - 60px)',
                 }}
               >
                 {!title ? (
@@ -201,15 +196,13 @@ export const Modal = ({
               style={{
                 position: 'absolute',
                 right: 0,
-                marginRight: !isNarrowWidth ? 15 : 5,
-                marginLeft: !isNarrowWidth ? 5 : undefined,
               }}
             >
               <CloseButtonComponent onClick={onClose} />
             </View>
           </View>
         )}
-        <View style={{ padding, paddingTop: 0, flex: 1 }}>
+        <View style={{ paddingTop: 0, flex: 1 }}>
           {typeof children === 'function' ? children() : children}
         </View>
         {loading && (
