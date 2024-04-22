@@ -214,10 +214,17 @@ async function importTransactions(
     new Map<string, YNAB5.Subtransaction[]>(),
   );
 
+  // The comparator will be used to order transfer transactions and their
+  // corresponding tranfer subtransaction in two aligned list. Hopefully
+  // for every list index in the transactions list, the related subtransaction
+  // will be at the same index.
   const orphanTransferComparator = (
     a: YNAB5.Transaction | YNAB5.Subtransaction,
     b: YNAB5.Transaction | YNAB5.Subtransaction,
   ) => {
+    // a and b can be a YNAB5.Transaction (having a date attribute) or a
+    // YNAB5.Subtransaction (missing that date attribute)
+
     const date_a =
       'date' in a
         ? a.date
@@ -226,9 +233,13 @@ async function importTransactions(
       'date' in b
         ? b.date
         : orphanSubtransferDateByTrxIdMap.get(b.transaction_id);
+    // A transaction and the related subtransaction have inverted amounts.
+    // To have those in the same order, the subtransaction has to be reversed
+    // to have the same amount.
     const amount_a = 'date' in a ? a.amount : -a.amount;
     const amount_b = 'date' in b ? b.amount : -b.amount;
 
+    // Transaction are ordered first by date, then by amount, and lastly by memo
     if (date_a > date_b) return 1;
     if (date_a < date_b) return -1;
     if (amount_a > amount_b) return 1;
@@ -245,6 +256,8 @@ async function importTransactions(
       transactions.sort(orphanTransferComparator);
       subtransactions.sort(orphanTransferComparator);
 
+      // Iterate on the two sorted lists transactions and subtransactions and
+      // find matching data to identify the related transaction ids.
       let transactionIdx = 0;
       let subtransactionIdx = 0;
       do {
@@ -255,6 +268,8 @@ async function importTransactions(
           )
         ) {
           case 0:
+            // The current list indexes are matching: the transaction and
+            // subtransaction are related (same date, amount and memo)
             orphanTrxIdSubtrxIdMap.set(
               transactions[transactionIdx].id,
               entityIdMap.get(subtransactions[subtransactionIdx].id),
@@ -266,10 +281,18 @@ async function importTransactions(
             transactionIdx++;
             subtransactionIdx++;
             break;
-          case 1:
+          case -1:
+            // The current list indexes are not matching:
+            // The current transaction is "smaller" than the current subtransaction
+            // (earlier date, smaller amount, memo value sorted before)
+            // So we advance to the next transaction and see if it match with
+            // the current subtransaction
             transactionIdx++;
             break;
-          case -1:
+          case 1:
+            // Inverse of the previous case:
+            // The current subtransaction is "smaller" than the current transaction
+            // So we advance to the next subtransaction
             subtransactionIdx++;
             break;
         }
