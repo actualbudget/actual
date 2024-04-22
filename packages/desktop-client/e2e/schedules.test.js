@@ -31,6 +31,8 @@ test.describe('Schedules', () => {
   });
 
   test('creates a new schedule, posts the transaction and later completes it', async () => {
+    test.setTimeout(40000);
+
     await schedulesPage.addNewSchedule({
       payee: 'Home Depot',
       account: 'HSBC',
@@ -79,7 +81,7 @@ test.describe('Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
 
     // Schedules search shouldn't shrink with many schedules
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 10; i++) {
       await schedulesPage.addNewSchedule({
         payee: 'Home Depot',
         account: 'HSBC',

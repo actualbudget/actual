@@ -14,7 +14,7 @@ import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 import { ModalTitle } from './common/Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
-import { BudgetMonthMenuModal } from './modals/BudgetMonthMenuModal';
+import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
@@ -24,11 +24,11 @@ import { ConfirmTransactionEdit } from './modals/ConfirmTransactionEdit';
 import { ConfirmUnlinkAccount } from './modals/ConfirmUnlinkAccount';
 import { CoverModal } from './modals/CoverModal';
 import { CreateAccount } from './modals/CreateAccount';
-import { CreateEncryptionKey } from './modals/CreateEncryptionKey';
+import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccount } from './modals/CreateLocalAccount';
 import { EditField } from './modals/EditField';
 import { EditRule } from './modals/EditRule';
-import { FixEncryptionKey } from './modals/FixEncryptionKey';
+import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
 import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
 import { HoldBufferModal } from './modals/HoldBufferModal';
@@ -38,12 +38,13 @@ import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
 import { Notes } from './modals/Notes';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
-import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
+import { ReportBudgetMonthMenuModal } from './modals/ReportBudgetMonthMenuModal';
 import { ReportBudgetSummaryModal } from './modals/ReportBudgetSummaryModal';
 import { RolloverBalanceMenuModal } from './modals/RolloverBalanceMenuModal';
 import { RolloverBudgetMenuModal } from './modals/RolloverBudgetMenuModal';
+import { RolloverBudgetMonthMenuModal } from './modals/RolloverBudgetMonthMenuModal';
 import { RolloverBudgetSummaryModal } from './modals/RolloverBudgetSummaryModal';
 import { RolloverToBudgetMenuModal } from './modals/RolloverToBudgetMenuModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
@@ -216,20 +217,6 @@ export function Modals() {
             />
           );
 
-        case 'plaid-external-msg':
-          return (
-            <PlaidExternalMsg
-              key={name}
-              modalProps={modalProps}
-              onMoveExternal={options.onMoveExternal}
-              onClose={() => {
-                options.onClose?.();
-                send('poll-web-token-stop');
-              }}
-              onSuccess={options.onSuccess}
-            />
-          );
-
         case 'gocardless-init':
           return (
             <GoCardlessInitialise
@@ -264,20 +251,18 @@ export function Modals() {
 
         case 'create-encryption-key':
           return (
-            <CreateEncryptionKey
+            <CreateEncryptionKeyModal
               key={name}
               modalProps={modalProps}
-              actions={actions}
               options={options}
             />
           );
 
         case 'fix-encryption-key':
           return (
-            <FixEncryptionKey
+            <FixEncryptionKeyModal
               key={name}
               modalProps={modalProps}
-              actions={actions}
               options={options}
             />
           );
@@ -616,17 +601,43 @@ export function Modals() {
             />
           );
 
-        case 'budget-month-menu':
+        case 'budget-page-menu':
+          return (
+            <BudgetPageMenuModal
+              key={name}
+              modalProps={modalProps}
+              onAddCategoryGroup={options.onAddCategoryGroup}
+              onToggleHiddenCategories={options.onToggleHiddenCategories}
+              onSwitchBudgetType={options.onSwitchBudgetType}
+            />
+          );
+
+        case 'rollover-budget-month-menu':
           return (
             <NamespaceContext.Provider
               key={name}
               value={monthUtils.sheetForMonth(options.month)}
             >
-              <BudgetMonthMenuModal
+              <RolloverBudgetMonthMenuModal
                 modalProps={modalProps}
                 month={options.month}
-                onToggleHiddenCategories={options.onToggleHiddenCategories}
-                onSwitchBudgetType={options.onSwitchBudgetType}
+                onBudgetAction={options.onBudgetAction}
+                onEditNotes={options.onEditNotes}
+              />
+            </NamespaceContext.Provider>
+          );
+
+        case 'report-budget-month-menu':
+          return (
+            <NamespaceContext.Provider
+              key={name}
+              value={monthUtils.sheetForMonth(options.month)}
+            >
+              <ReportBudgetMonthMenuModal
+                modalProps={modalProps}
+                month={options.month}
+                onBudgetAction={options.onBudgetAction}
+                onEditNotes={options.onEditNotes}
               />
             </NamespaceContext.Provider>
           );
