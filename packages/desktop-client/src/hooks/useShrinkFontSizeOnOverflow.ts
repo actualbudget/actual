@@ -1,14 +1,12 @@
-import { type Ref, useEffect, useState } from 'react';
-
-import { type CSSProperties } from '../style';
+import { useEffect, useState, type RefObject } from 'react';
 
 export function useShrinkFontOnOverflow({
   textRef,
   initialFontSize,
   disabled,
 }: {
-  textRef: Ref<HTMLSpanElement>;
-  initialFontSize: CSSProperties['fontSize'];
+  textRef: RefObject<HTMLSpanElement>;
+  initialFontSize: number;
   disabled?: boolean;
 }) {
   const [fontSize, setFontSize] = useState(initialFontSize);
@@ -17,8 +15,8 @@ export function useShrinkFontOnOverflow({
       return;
     }
 
-    const containerWidth = textRef.current?.offsetWidth;
-    const textWidth = textRef.current?.scrollWidth;
+    const containerWidth = textRef.current?.offsetWidth || 0;
+    const textWidth = textRef.current?.scrollWidth || 0;
 
     if (textWidth > containerWidth) {
       const newFontSize = Math.floor((containerWidth / textWidth) * fontSize);
