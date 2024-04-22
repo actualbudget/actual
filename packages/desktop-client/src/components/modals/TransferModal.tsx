@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -92,7 +92,7 @@ export function TransferModal({
             <InitialFocus>
               <InputField
                 inputMode="decimal"
-                tabIndex={1}
+                tabIndex={0}
                 defaultValue={_initialAmount}
                 onUpdate={setAmount}
                 onEnter={() => {
@@ -106,10 +106,9 @@ export function TransferModal({
 
           <FieldLabel title="To:" />
           <TapField
-            tabIndex={2}
+            tabIndex={0}
             value={toCategory?.name}
             onClick={openCategoryModal}
-            onFocus={openCategoryModal}
           />
 
           <View
@@ -121,7 +120,7 @@ export function TransferModal({
           >
             <Button
               type="primary"
-              tabIndex={3}
+              tabIndex={0}
               style={{
                 height: styles.mobileMinHeight,
                 marginLeft: styles.mobileEditingPadding,
