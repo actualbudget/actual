@@ -1,5 +1,7 @@
 import { type ComponentType, useEffect, useState } from 'react';
 
+import promiseRetry from 'promise-retry';
+
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
 import { Block } from '../common/Block';
@@ -23,9 +25,28 @@ function LoadComponentInner<K extends string>({
   importer,
 }: LoadComponentProps<K>) {
   const [Component, setComponent] = useState<ProplessComponent | null>(null);
+  const [failedToLoad, setFailedToLoad] = useState(false);
+
   useEffect(() => {
-    importer().then(module => setComponent(() => module[name]));
+    setFailedToLoad(false);
+
+    // Load the module; if it fails - retry with exponential backoff
+    promiseRetry(
+      retry =>
+        importer()
+          .then(module => setComponent(() => module[name]))
+          .catch(retry),
+      {
+        retries: 5,
+      },
+    ).catch(() => {
+      setFailedToLoad(true);
+    });
   }, [name, importer]);
+
+  if (failedToLoad) {
+    throw new Error(`Failed loading the ${name} lazy module.`);
+  }
 
   if (!Component) {
     return (
@@ -46,8 +67,5 @@ function LoadComponentInner<K extends string>({
     );
   }
 
-  // console.log(
-  //   `rendering <${Component.displayName || Component.name} /> as ${name}`,
-  // );
   return <Component />;
 }
