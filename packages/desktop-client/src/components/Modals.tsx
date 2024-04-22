@@ -286,6 +286,7 @@ export function Modals() {
               autocompleteProps={{
                 value: null,
                 onSelect: options.onSelect,
+                categoryGroups: options.categoryGroups,
                 showHiddenCategories: options.showHiddenCategories,
               }}
               month={options.month}

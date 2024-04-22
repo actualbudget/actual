@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -32,11 +32,15 @@ export function TransferModal({
   showToBeBudgeted,
   onSubmit,
 }: TransferModalProps) {
-  const { grouped: originalCategoryGroups, list: categories } = useCategories();
-  let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
-  if (showToBeBudgeted) {
-    categoryGroups = addToBeBudgetedGroup(categoryGroups);
-  }
+  const { grouped: originalCategoryGroups } = useCategories();
+  const [categoryGroups, categories] = useMemo(() => {
+    let expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+    expenseGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(expenseGroups)
+      : expenseGroups;
+    const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
+    return [expenseGroups, expenseCategories];
+  }, [originalCategoryGroups, showToBeBudgeted]);
 
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
   const [amount, setAmount] = useState<string | null>(null);
@@ -65,6 +69,8 @@ export function TransferModal({
     modalProps.onClose();
   };
 
+  const toCategory = categories.find(c => c.id === toCategoryId);
+
   return (
     <Modal
       title={title}
@@ -86,7 +92,7 @@ export function TransferModal({
             <InitialFocus>
               <InputField
                 inputMode="decimal"
-                tabIndex={1}
+                tabIndex={0}
                 defaultValue={_initialAmount}
                 onUpdate={setAmount}
                 onEnter={() => {
@@ -100,10 +106,9 @@ export function TransferModal({
 
           <FieldLabel title="To:" />
           <TapField
-            tabIndex={2}
-            value={categories.find(c => c.id === toCategoryId)?.name}
+            tabIndex={0}
+            value={toCategory?.name}
             onClick={openCategoryModal}
-            onFocus={openCategoryModal}
           />
 
           <View
@@ -115,7 +120,7 @@ export function TransferModal({
           >
             <Button
               type="primary"
-              tabIndex={3}
+              tabIndex={0}
               style={{
                 height: styles.mobileMinHeight,
                 marginLeft: styles.mobileEditingPadding,
