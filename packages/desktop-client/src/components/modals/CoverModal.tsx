@@ -75,7 +75,7 @@ export function CoverModal({
 
   return (
     <Modal
-      title={`Cover: ${category.name}`}
+      title={category.name}
       showHeader
       focusAfterClose={false}
       {...modalProps}
