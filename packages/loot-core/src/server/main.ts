@@ -1483,18 +1483,22 @@ handlers['subscribe-change-password'] = async function ({ password }) {
 };
 
 handlers['subscribe-sign-in'] = async function ({ password }) {
+  let res;
+
   try {
-    const res = await post(getServer().SIGNUP_SERVER + '/login', {
+    res = await post(getServer().SIGNUP_SERVER + '/login', {
       password,
     });
-
-    if (res.token) {
-      await asyncStorage.setItem('user-token', res.token);
-      return {};
-    }
-  } catch (e) {
-    return { error: 'invalid-password' };
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
   }
+
+  if (!res.token) {
+    throw new Error('login: User token not set');
+  }
+
+  await asyncStorage.setItem('user-token', res.token);
+  return {};
 };
 
 handlers['subscribe-sign-out'] = async function () {
