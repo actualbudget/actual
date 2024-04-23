@@ -53,9 +53,9 @@ function getColumnWidth(show3Cols, isSidebar = false) {
 function ToBudget({ toBudget, onClick, show3Cols }) {
   const amount = useSheetValue(toBudget);
   const format = useFormat();
-  const amountTextRef = useRef();
+  const amountTextContainerRef = useRef();
   const amountFontSize = useShrinkFontSizeOnOverflow({
-    textRef: amountTextRef,
+    containerRef: amountTextContainerRef,
     initialFontSize: 12,
   });
 
@@ -80,17 +80,18 @@ function ToBudget({ toBudget, onClick, show3Cols }) {
             binding={toBudget}
             type="financial"
             formatter={value => (
-              <Text
-                innerRef={amountTextRef}
-                style={{
-                  maxWidth: getColumnWidth(show3Cols, true),
-                  fontSize: amountFontSize,
-                  fontWeight: '700',
-                  color: amount < 0 ? theme.errorText : theme.formInputText,
-                }}
-              >
-                {format(value, 'financial')}
-              </Text>
+              <View ref={amountTextContainerRef}>
+                <Text
+                  style={{
+                    maxWidth: getColumnWidth(show3Cols, true),
+                    fontSize: amountFontSize,
+                    fontWeight: '700',
+                    color: amount < 0 ? theme.errorText : theme.formInputText,
+                  }}
+                >
+                  {format(value, 'financial')}
+                </Text>
+              </View>
             )}
           />
         </View>
@@ -112,9 +113,9 @@ function Saved({ projected, onClick, show3Cols }) {
   const saved = useSheetValue(binding) || 0;
   const format = useFormat();
   const isNegative = saved < 0;
-  const amountTextRef = useRef();
+  const amountTextContainerRef = useRef();
   const amountFontSize = useShrinkFontSizeOnOverflow({
-    textRef: amountTextRef,
+    containerRef: amountTextContainerRef,
     initialFontSize: 12,
   });
 
@@ -166,21 +167,22 @@ function Saved({ projected, onClick, show3Cols }) {
             binding={binding}
             type="financial"
             formatter={value => (
-              <Text
-                innerRef={amountTextRef}
-                style={{
-                  maxWidth: getColumnWidth(show3Cols, true),
-                  fontSize: amountFontSize,
-                  fontWeight: '700',
-                  color: projected
-                    ? theme.warningText
-                    : isNegative
-                      ? theme.errorTextDark
-                      : theme.formInputText,
-                }}
-              >
-                {format(value, 'financial')}
-              </Text>
+              <View ref={amountTextContainerRef}>
+                <Text
+                  style={{
+                    maxWidth: getColumnWidth(show3Cols, true),
+                    fontSize: amountFontSize,
+                    fontWeight: '700',
+                    color: projected
+                      ? theme.warningText
+                      : isNegative
+                        ? theme.errorTextDark
+                        : theme.formInputText,
+                  }}
+                >
+                  {format(value, 'financial')}
+                </Text>
+              </View>
             )}
           />
         </View>
@@ -383,19 +385,19 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const listItemRef = useRef();
   const format = useFormat();
-  const budgetedTextRef = useRef();
+  const budgetedTextContainerRef = useRef();
   const budgetedTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: budgetedTextRef,
+    containerRef: budgetedTextContainerRef,
     initialFontSize: 12,
   });
-  const spentTextRef = useRef();
+  const spentTextContainerRef = useRef();
   const spentTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: spentTextRef,
+    containerRef: spentTextContainerRef,
     initialFontSize: 12,
   });
-  const balanceTextRef = useRef();
+  const balanceTextContainerRef = useRef();
   const balanceTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: balanceTextRef,
+    containerRef: balanceTextContainerRef,
     initialFontSize: 12,
   });
 
@@ -482,9 +484,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
               <Button
                 type="bare"
                 style={{ ...PILL_STYLE, maxWidth: getColumnWidth(show3Cols) }}
+                ref={budgetedTextContainerRef}
               >
                 <Text
-                  innerRef={budgetedTextRef}
                   style={{
                     textAlign: 'right',
                     fontSize: budgetedTextFontSize,
@@ -515,9 +517,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
               <Button
                 type="bare"
                 style={{ ...PILL_STYLE, maxWidth: getColumnWidth(show3Cols) }}
+                ref={spentTextContainerRef}
               >
                 <Text
-                  innerRef={spentTextRef}
                   style={{
                     textAlign: 'right',
                     fontSize: spentTextFontSize,
@@ -548,9 +550,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 <Button
                   type="bare"
                   style={{ ...PILL_STYLE, maxWidth: getColumnWidth(show3Cols) }}
+                  ref={balanceTextContainerRef}
                 >
                   <Text
-                    innerRef={balanceTextRef}
                     style={{
                       ...makeAmountFullStyle(value),
                       fontSize: balanceTextFontSize,
@@ -617,19 +619,19 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   const opacity = blank ? 0 : 1;
   const listItemRef = useRef();
   const format = useFormat();
-  const budgetedTextRef = useRef();
+  const budgetedTextContainerRef = useRef();
   const budgetedTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: budgetedTextRef,
+    containerRef: budgetedTextContainerRef,
     initialFontSize: 12,
   });
-  const spentTextRef = useRef();
+  const spentTextContainerRef = useRef();
   const spentTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: spentTextRef,
+    containerRef: spentTextContainerRef,
     initialFontSize: 12,
   });
-  const balanceTextRef = useRef();
+  const balanceTextContainerRef = useRef();
   const balanceTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: balanceTextRef,
+    containerRef: balanceTextContainerRef,
     initialFontSize: 12,
   });
 
@@ -723,18 +725,22 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             binding={budgeted}
             type="financial"
             formatter={value => (
-              <Text
-                innerRef={budgetedTextRef}
-                style={{
-                  maxWidth: getColumnWidth(show3Cols),
-                  fontSize: budgetedTextFontSize,
-                  fontWeight: '500',
-                  textAlign: 'right',
-                  padding: '0 5px',
-                }}
+              <View
+                ref={budgetedTextContainerRef}
+                style={{ alignItems: 'flex-end' }}
               >
-                {format(value, 'financial')}
-              </Text>
+                <Text
+                  style={{
+                    maxWidth: getColumnWidth(show3Cols),
+                    fontSize: budgetedTextFontSize,
+                    fontWeight: '500',
+                    textAlign: 'right',
+                    padding: '0 5px',
+                  }}
+                >
+                  {format(value, 'financial')}
+                </Text>
+              </View>
             )}
           />
         </View>
@@ -751,18 +757,22 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             binding={spent}
             type="financial"
             formatter={value => (
-              <Text
-                innerRef={spentTextRef}
-                style={{
-                  maxWidth: getColumnWidth(show3Cols),
-                  fontSize: spentTextFontSize,
-                  fontWeight: '500',
-                  textAlign: 'right',
-                  padding: '0 5px',
-                }}
+              <View
+                ref={spentTextContainerRef}
+                style={{ alignItems: 'flex-end' }}
               >
-                {format(value, 'financial')}
-              </Text>
+                <Text
+                  style={{
+                    maxWidth: getColumnWidth(show3Cols),
+                    fontSize: spentTextFontSize,
+                    fontWeight: '500',
+                    textAlign: 'right',
+                    padding: '0 5px',
+                  }}
+                >
+                  {format(value, 'financial')}
+                </Text>
+              </View>
             )}
           />
         </View>
@@ -777,18 +787,22 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             binding={balance}
             type="financial"
             formatter={value => (
-              <Text
-                innerRef={balanceTextRef}
-                style={{
-                  maxWidth: getColumnWidth(show3Cols),
-                  fontSize: balanceTextFontSize,
-                  fontWeight: '500',
-                  textAlign: 'right',
-                  padding: '0 5px',
-                }}
+              <View
+                ref={balanceTextContainerRef}
+                style={{ alignItems: 'flex-end' }}
               >
-                {format(value, 'financial')}
-              </Text>
+                <Text
+                  style={{
+                    maxWidth: getColumnWidth(show3Cols),
+                    fontSize: balanceTextFontSize,
+                    fontWeight: '500',
+                    textAlign: 'right',
+                    padding: '0 5px',
+                  }}
+                >
+                  {format(value, 'financial')}
+                </Text>
+              </View>
             )}
           />
         </View>
@@ -835,14 +849,14 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
-  const budgetedTextRef = useRef();
+  const budgetedTextContainerRef = useRef();
   const budgetedTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: budgetedTextRef,
+    containerRef: budgetedTextContainerRef,
     initialFontSize: 12,
   });
-  const balanceTextRef = useRef();
+  const balanceTextContainerRef = useRef();
   const balanceTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: balanceTextRef,
+    containerRef: balanceTextContainerRef,
     initialFontSize: 12,
   });
 
@@ -933,18 +947,23 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             binding={budgeted}
             type="financial"
             formatter={value => (
-              <Text
-                innerRef={budgetedTextRef}
-                style={{
-                  maxWidth: getColumnWidth(false, false),
-                  textAlign: 'right',
-                  fontSize: budgetedTextFontSize,
-                  fontWeight: '500',
-                  padding: '0 5px',
-                }}
+              <View
+                ref={budgetedTextContainerRef}
+                style={{ alignItems: 'flex-end' }}
               >
-                {format(value, 'financial')}
-              </Text>
+                <Text
+                  innerRef={budgetedTextContainerRef}
+                  style={{
+                    maxWidth: getColumnWidth(false, false),
+                    textAlign: 'right',
+                    fontSize: budgetedTextFontSize,
+                    fontWeight: '500',
+                    padding: '0 5px',
+                  }}
+                >
+                  {format(value, 'financial')}
+                </Text>
+              </View>
             )}
           />
         </View>
@@ -961,17 +980,21 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           binding={balance}
           type="financial"
           formatter={value => (
-            <Text
-              innerRef={balanceTextRef}
-              style={{
-                maxWidth: getColumnWidth(false, false),
-                textAlign: 'right',
-                fontSize: balanceTextFontSize,
-                fontWeight: '500',
-              }}
+            <View
+              ref={balanceTextContainerRef}
+              style={{ alignItems: 'flex-end' }}
             >
-              {format(value, 'financial')}
-            </Text>
+              <Text
+                style={{
+                  maxWidth: getColumnWidth(false, false),
+                  textAlign: 'right',
+                  fontSize: balanceTextFontSize,
+                  fontWeight: '500',
+                }}
+              >
+                {format(value, 'financial')}
+              </Text>
+            </View>
           )}
         />
       </View>
@@ -991,14 +1014,14 @@ const IncomeCategory = memo(function IncomeCategory({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
-  const budgetedTextRef = useRef();
+  const budgetedTextContainerRef = useRef();
   const budgetedTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: budgetedTextRef,
+    containerRef: budgetedTextContainerRef,
     initialFontSize: 12,
   });
-  const balanceTextRef = useRef();
+  const balanceTextContainerRef = useRef();
   const balanceTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: balanceTextRef,
+    containerRef: balanceTextContainerRef,
     initialFontSize: 12,
   });
 
@@ -1076,9 +1099,9 @@ const IncomeCategory = memo(function IncomeCategory({
               <Button
                 type="bare"
                 style={{ ...PILL_STYLE, maxWidth: getColumnWidth(false) }}
+                ref={budgetedTextContainerRef}
               >
                 <Text
-                  innerRef={budgetedTextRef}
                   style={{
                     textAlign: 'right',
                     fontSize: budgetedTextFontSize,
@@ -1103,16 +1126,20 @@ const IncomeCategory = memo(function IncomeCategory({
           binding={balance}
           type="financial"
           formatter={value => (
-            <Text
-              innerRef={balanceTextRef}
-              style={{
-                textAlign: 'right',
-                fontSize: balanceTextFontSize,
-                maxWidth: getColumnWidth(false),
-              }}
+            <View
+              ref={balanceTextContainerRef}
+              style={{ alignItems: 'flex-end' }}
             >
-              {format(value, 'financial')}
-            </Text>
+              <Text
+                style={{
+                  textAlign: 'right',
+                  fontSize: balanceTextFontSize,
+                  maxWidth: getColumnWidth(false),
+                }}
+              >
+                {format(value, 'financial')}
+              </Text>
+            </View>
           )}
         />
       </View>
@@ -1497,19 +1524,19 @@ export function BudgetTable({
 }) {
   const { width } = useResponsive();
   const show3Cols = width >= 360;
-  const budgetedTextRef = useRef();
+  const budgetedTextContainerRef = useRef();
   const budgetedTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: budgetedTextRef,
+    containerRef: budgetedTextContainerRef,
     initialFontSize: 12,
   });
-  const spentTextRef = useRef();
+  const spentTextContainerRef = useRef();
   const spentTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: spentTextRef,
+    containerRef: spentTextContainerRef,
     initialFontSize: 12,
   });
-  const balanceTextRef = useRef();
+  const balanceTextContainerRef = useRef();
   const balanceTextFontSize = useShrinkFontSizeOnOverflow({
-    textRef: balanceTextRef,
+    containerRef: balanceTextContainerRef,
     initialFontSize: 12,
   });
 
@@ -1646,19 +1673,23 @@ export function BudgetTable({
                     }
                     type="financial"
                     formatter={value => (
-                      <Text
-                        innerRef={budgetedTextRef}
-                        style={{
-                          maxWidth: getColumnWidth(show3Cols),
-                          color: theme.formInputText,
-                          textAlign: 'right',
-                          fontSize: budgetedTextFontSize,
-                          fontWeight: '500',
-                          padding: '0 5px',
-                        }}
+                      <View
+                        ref={budgetedTextContainerRef}
+                        style={{ alignItems: 'flex-end' }}
                       >
-                        {format(value, 'financial')}
-                      </Text>
+                        <Text
+                          style={{
+                            maxWidth: getColumnWidth(show3Cols),
+                            color: theme.formInputText,
+                            textAlign: 'right',
+                            fontSize: budgetedTextFontSize,
+                            fontWeight: '500',
+                            padding: '0 5px',
+                          }}
+                        >
+                          {format(value, 'financial')}
+                        </Text>
+                      </View>
                     )}
                   />
                 </View>
@@ -1698,19 +1729,23 @@ export function BudgetTable({
                     }
                     type="financial"
                     formatter={value => (
-                      <Text
-                        innerRef={spentTextRef}
-                        style={{
-                          maxWidth: getColumnWidth(show3Cols),
-                          color: theme.formInputText,
-                          textAlign: 'right',
-                          fontSize: spentTextFontSize,
-                          fontWeight: '500',
-                          padding: '0 5px',
-                        }}
+                      <View
+                        ref={spentTextContainerRef}
+                        style={{ alignItems: 'flex-end' }}
                       >
-                        {format(value, 'financial')}
-                      </Text>
+                        <Text
+                          style={{
+                            maxWidth: getColumnWidth(show3Cols),
+                            color: theme.formInputText,
+                            textAlign: 'right',
+                            fontSize: spentTextFontSize,
+                            fontWeight: '500',
+                            padding: '0 5px',
+                          }}
+                        >
+                          {format(value, 'financial')}
+                        </Text>
+                      </View>
                     )}
                   />
                 </View>
@@ -1732,19 +1767,23 @@ export function BudgetTable({
               }
               type="financial"
               formatter={value => (
-                <Text
-                  innerRef={balanceTextRef}
-                  style={{
-                    maxWidth: getColumnWidth(show3Cols),
-                    color: theme.formInputText,
-                    textAlign: 'right',
-                    fontSize: balanceTextFontSize,
-                    fontWeight: '500',
-                    padding: '0 5px',
-                  }}
+                <View
+                  ref={balanceTextContainerRef}
+                  style={{ alignItems: 'flex-end' }}
                 >
-                  {format(value, 'financial')}
-                </Text>
+                  <Text
+                    style={{
+                      maxWidth: getColumnWidth(show3Cols),
+                      color: theme.formInputText,
+                      textAlign: 'right',
+                      fontSize: balanceTextFontSize,
+                      fontWeight: '500',
+                      padding: '0 5px',
+                    }}
+                  >
+                    {format(value, 'financial')}
+                  </Text>
+                </View>
               )}
             />
           </View>
