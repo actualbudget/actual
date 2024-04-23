@@ -1,5 +1,4 @@
-// @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
 
 import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
 
@@ -21,17 +20,13 @@ type AppError = Error & {
 };
 
 type FatalErrorProps = {
-  buttonText: string;
   error: Error | AppError;
 };
 
-type RenderSimpleProps = {
-  error: Error | AppError;
-};
+type RenderSimpleProps = FatalErrorProps;
 
 function RenderSimple({ error }: RenderSimpleProps) {
-  let msg;
-  let showContactLink = true;
+  let msg: ReactNode;
 
   if ('IDBFailure' in error && error.IDBFailure) {
     // IndexedDB wasn't able to open the database
@@ -64,16 +59,6 @@ function RenderSimple({ error }: RenderSimpleProps) {
         to learn more. <SharedArrayBufferOverride />
       </Text>
     );
-  } else if (error instanceof LazyLoadFailedError) {
-    showContactLink = false;
-    msg = (
-      <Text>
-        There was a problem loading one of the chunks of the application. Please
-        reload the page and try again. If the issue persists - there might be an
-        issue with either your internet connection and/or the server where the
-        app is hosted.
-      </Text>
-    );
   } else {
     // This indicates the backend failed to initialize. Show the
     // user something at least so they aren't looking at a blank
@@ -92,19 +77,36 @@ function RenderSimple({ error }: RenderSimpleProps) {
       }}
     >
       <Text>{msg}</Text>
-      {showContactLink && (
-        <Text>
-          Please get{' '}
-          <Link
-            variant="external"
-            linkColor="muted"
-            to="https://actualbudget.org/contact"
-          >
-            in touch
-          </Link>{' '}
-          for support
-        </Text>
-      )}
+      <Text>
+        Please get{' '}
+        <Link
+          variant="external"
+          linkColor="muted"
+          to="https://actualbudget.org/contact"
+        >
+          in touch
+        </Link>{' '}
+        for support
+      </Text>
+    </Stack>
+  );
+}
+
+function RenderLazyLoadError() {
+  return (
+    <Stack
+      style={{
+        paddingBottom: 15,
+        lineHeight: '1.5em',
+        fontSize: 15,
+      }}
+    >
+      <Text>
+        There was a problem loading one of the chunks of the application. Please
+        reload the page and try again. If the issue persists - there might be an
+        issue with either your internet connection and/or the server where the
+        app is hosted.
+      </Text>
     </Stack>
   );
 }
@@ -167,23 +169,29 @@ function SharedArrayBufferOverride() {
   );
 }
 
-export function FatalError({ buttonText, error }: FatalErrorProps) {
+export function FatalError({ error }: FatalErrorProps) {
   const [showError, setShowError] = useState(false);
 
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
+  const isLazyLoadError = error instanceof LazyLoadFailedError;
 
   return (
-    <Modal isCurrent title="Fatal Error">
+    <Modal isCurrent title={isLazyLoadError ? 'Loading Error' : 'Fatal Error'}>
       <View
         style={{
           maxWidth: 500,
         }}
       >
-        {showSimpleRender ? <RenderSimple error={error} /> : <RenderUIError />}
+        {isLazyLoadError ? (
+          <RenderLazyLoadError />
+        ) : showSimpleRender ? (
+          <RenderSimple error={error} />
+        ) : (
+          <RenderUIError />
+        )}
+
         <Paragraph>
-          <Button onClick={() => window.Actual?.relaunch()}>
-            {buttonText}
-          </Button>
+          <Button onClick={() => window.Actual?.relaunch()}>Restart app</Button>
         </Paragraph>
         <Paragraph isLast={true} style={{ fontSize: 11 }}>
           <Link variant="text" onClick={() => setShowError(state => !state)}>
