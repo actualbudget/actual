@@ -1500,7 +1500,7 @@ handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
     return {};
   }
 
-  return { error: res.reason|| 'invalid-password' };
+  return { error: res.reason || 'invalid-password' };
 };
 
 handlers['subscribe-sign-out'] = async function () {
