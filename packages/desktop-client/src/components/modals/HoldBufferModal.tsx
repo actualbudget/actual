@@ -42,48 +42,37 @@ export function HoldBufferModal({
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      padding={0}
-      style={{
-        flex: 1,
-        padding: '0 10px',
-        paddingBottom: 10,
-        borderRadius: '6px',
-      }}
     >
-      {() => (
-        <>
-          <View>
-            <FieldLabel title="Hold this amount:" />
-            <InitialFocus>
-              <InputField
-                inputMode="decimal"
-                defaultValue={initialAmount}
-                onUpdate={value => setAmount(value)}
-                onEnter={() => _onSubmit(amount)}
-              />
-            </InitialFocus>
-          </View>
-          <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 10,
-            }}
-          >
-            <Button
-              type="primary"
-              style={{
-                height: styles.mobileMinHeight,
-                marginLeft: styles.mobileEditingPadding,
-                marginRight: styles.mobileEditingPadding,
-              }}
-              onClick={() => _onSubmit(amount)}
-            >
-              Hold
-            </Button>
-          </View>
-        </>
-      )}
+      <View>
+        <FieldLabel title="Hold this amount:" />
+        <InitialFocus>
+          <InputField
+            inputMode="decimal"
+            defaultValue={initialAmount}
+            onUpdate={value => setAmount(value)}
+            onEnter={() => _onSubmit(amount)}
+          />
+        </InitialFocus>
+      </View>
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingTop: 10,
+        }}
+      >
+        <Button
+          type="primary"
+          style={{
+            height: styles.mobileMinHeight,
+            marginLeft: styles.mobileEditingPadding,
+            marginRight: styles.mobileEditingPadding,
+          }}
+          onClick={() => _onSubmit(amount)}
+        >
+          Hold
+        </Button>
+      </View>
     </Modal>
   );
 }
