@@ -241,12 +241,12 @@ export function StackedBarGraph({
               >
                 {(!isNarrowWidth || !compact) && (
                   <Tooltip
-                  content={
-                    <CustomTooltip compact={compact} tooltip={tooltip} />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                  cursor={{ fill: 'transparent' }}
+                    content={
+                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                    cursor={{ fill: 'transparent' }}
                   />
                 )}
                 <XAxis

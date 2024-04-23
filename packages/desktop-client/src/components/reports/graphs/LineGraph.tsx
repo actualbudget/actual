@@ -19,11 +19,11 @@ import {
 import { type GroupedEntity } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
-import { useResponsive } from '../../../ResponsiveProvider';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -135,9 +135,6 @@ export function LineGraph({
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
   const { isNarrowWidth } = useResponsive();
-  const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
-  };
 
   const largestValue = data.intervalData
     .map(c => c[balanceTypeOp])
@@ -213,11 +210,11 @@ export function LineGraph({
               >
                 {(!isNarrowWidth || !compact) && (
                   <Tooltip
-                  content={
-                    <CustomTooltip compact={compact} tooltip={tooltip} />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
+                    content={
+                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
                   />
                 )}
                 {!compact && (
@@ -262,6 +259,7 @@ export function LineGraph({
                           setTooltip('');
                         },
                         onClick: (e, payload) =>
+                          !isNarrowWidth &&
                           !['Group', 'Interval'].includes(groupBy) &&
                           onShowActivity(e, entry.id, payload),
                       }}
