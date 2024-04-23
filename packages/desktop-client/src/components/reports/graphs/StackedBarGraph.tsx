@@ -241,12 +241,12 @@ export function StackedBarGraph({
               >
                 {(!isNarrowWidth || !compact) && (
                   <Tooltip
-                    content={
-                      <CustomTooltip compact={compact} tooltip={tooltip} />
-                    }
-                    formatter={numberFormatterTooltip}
-                    isAnimationActive={false}
-                    cursor={{ fill: 'transparent' }}
+                  content={
+                    <CustomTooltip compact={compact} tooltip={tooltip} />
+                  }
+                  formatter={numberFormatterTooltip}
+                  isAnimationActive={false}
+                  cursor={{ fill: 'transparent' }}
                   />
                 )}
                 <XAxis
@@ -256,6 +256,11 @@ export function StackedBarGraph({
                 />
                 {!compact && (
                   <>
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
                     <CartesianGrid strokeDasharray="3 3" />
                     <YAxis
                       tickFormatter={value =>
