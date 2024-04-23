@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
+import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
+
 import { Block } from './common/Block';
 import { Button } from './common/Button';
 import { Link } from './common/Link';
@@ -29,6 +31,8 @@ type RenderSimpleProps = {
 
 function RenderSimple({ error }: RenderSimpleProps) {
   let msg;
+  let showContactLink = true;
+
   if ('IDBFailure' in error && error.IDBFailure) {
     // IndexedDB wasn't able to open the database
     msg = (
@@ -60,6 +64,16 @@ function RenderSimple({ error }: RenderSimpleProps) {
         to learn more. <SharedArrayBufferOverride />
       </Text>
     );
+  } else if (error instanceof LazyLoadFailedError) {
+    showContactLink = false;
+    msg = (
+      <Text>
+        There was a problem loading one of the chunks of the application. Please
+        reload the page and try again. If the issue persists - there might be an
+        issue with either your internet connection and/or the server where the
+        app is hosted.
+      </Text>
+    );
   } else {
     // This indicates the backend failed to initialize. Show the
     // user something at least so they aren't looking at a blank
@@ -78,17 +92,19 @@ function RenderSimple({ error }: RenderSimpleProps) {
       }}
     >
       <Text>{msg}</Text>
-      <Text>
-        Please get{' '}
-        <Link
-          variant="external"
-          linkColor="muted"
-          to="https://actualbudget.org/contact"
-        >
-          in touch
-        </Link>{' '}
-        for support
-      </Text>
+      {showContactLink && (
+        <Text>
+          Please get{' '}
+          <Link
+            variant="external"
+            linkColor="muted"
+            to="https://actualbudget.org/contact"
+          >
+            in touch
+          </Link>{' '}
+          for support
+        </Text>
+      )}
     </Stack>
   );
 }
@@ -157,7 +173,7 @@ export function FatalError({ buttonText, error }: FatalErrorProps) {
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
 
   return (
-    <Modal isCurrent={true} CloseButton={undefined} title="Fatal Error">
+    <Modal isCurrent title="Fatal Error">
       <View
         style={{
           maxWidth: 500,
@@ -170,7 +186,7 @@ export function FatalError({ buttonText, error }: FatalErrorProps) {
           </Button>
         </Paragraph>
         <Paragraph isLast={true} style={{ fontSize: 11 }}>
-          <Link variant="text" onClick={() => setShowError(true)}>
+          <Link variant="text" onClick={() => setShowError(state => !state)}>
             Show Error
           </Link>
           {showError && (
