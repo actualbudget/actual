@@ -144,7 +144,7 @@ export function NetWorth() {
           }}
         />
 
-        <View style={{ marginTop: 30 }}>
+        <View style={{ marginTop: 30, userSelect: 'none' }}>
           <Paragraph>
             <strong>How is net worth calculated?</strong>
           </Paragraph>

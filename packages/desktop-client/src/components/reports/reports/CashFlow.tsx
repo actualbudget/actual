@@ -199,7 +199,7 @@ export function CashFlow() {
           showBalance={showBalance}
         />
 
-        <View style={{ marginTop: 30 }}>
+        <View style={{ marginTop: 30, userSelect: 'none' }}>
           <Paragraph>
             <strong>How is cash flow calculated?</strong>
           </Paragraph>
