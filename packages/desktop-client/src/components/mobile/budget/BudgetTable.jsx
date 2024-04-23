@@ -429,7 +429,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
             maxWidth: getColumnWidth(show3Cols, true),
           }}
           onClick={() => onEdit?.(category.id)}
-          data-testid="category-name"
         >
           <View
             style={{
@@ -445,6 +444,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 textAlign: 'left',
                 ...styles.smallText,
               }}
+              data-testid="category-name"
             >
               {category.name}
             </Text>
@@ -642,7 +642,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         opacity: !!group.hidden ? 0.5 : undefined,
         paddingLeft: 0,
       }}
-      data-testid="totals"
+      data-testid={`expense-group-header-${group.name}`}
       innerRef={listItemRef}
     >
       <View
@@ -675,7 +675,6 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             maxWidth: getColumnWidth(show3Cols, true),
           }}
           onClick={() => onEdit?.(group.id)}
-          data-testid="group-name"
         >
           <View
             style={{
@@ -691,6 +690,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                 textAlign: 'left',
                 ...styles.smallText,
               }}
+              data-testid="group-name"
             >
               {group.name}
             </Text>
@@ -857,6 +857,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
         paddingLeft: 0,
       }}
       innerRef={listItemRef}
+      data-testid={`income-group-header-${group.name}`}
     >
       <View
         style={{
@@ -892,7 +893,6 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             maxWidth: getColumnWidth(false, true),
           }}
           onClick={() => onEdit?.(group.id)}
-          data-testid="group-name"
         >
           <View
             style={{
@@ -908,6 +908,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
                 textAlign: 'left',
                 ...styles.smallText,
               }}
+              data-testid="group-name"
             >
               {group.name}
             </Text>
@@ -1013,6 +1014,7 @@ const IncomeCategory = memo(function IncomeCategory({
         opacity: !!category.hidden ? 0.5 : undefined,
         ...style,
       }}
+      data-testid="row"
       innerRef={listItemRef}
     >
       <View
@@ -1029,7 +1031,6 @@ const IncomeCategory = memo(function IncomeCategory({
             maxWidth: getColumnWidth(false, true),
           }}
           onClick={() => onEdit?.(category.id)}
-          data-testid="category-name"
         >
           <View
             style={{
@@ -1045,6 +1046,7 @@ const IncomeCategory = memo(function IncomeCategory({
                 textAlign: 'left',
                 ...styles.smallText,
               }}
+              data-testid="category-name"
             >
               {category.name}
             </Text>
