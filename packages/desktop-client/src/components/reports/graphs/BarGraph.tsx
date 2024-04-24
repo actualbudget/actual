@@ -26,6 +26,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { type CSSProperties } from '../../../style';
 import { theme } from '../../../style/index';
 import { AlignedText } from '../../common/AlignedText';
@@ -157,6 +158,7 @@ export function BarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
@@ -261,17 +263,19 @@ export function BarGraph({
                   bottom: 0,
                 }}
               >
-                <Tooltip
-                  cursor={{ fill: 'transparent' }}
-                  content={
-                    <CustomTooltip
-                      balanceTypeOp={balanceTypeOp}
-                      yAxis={yAxis}
-                    />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    cursor={{ fill: 'transparent' }}
+                    content={
+                      <CustomTooltip
+                        balanceTypeOp={balanceTypeOp}
+                        yAxis={yAxis}
+                      />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                  />
+                )}
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -306,7 +310,9 @@ export function BarGraph({
                     setPointer('pointer')
                   }
                   onClick={
-                    !['Group', 'Interval'].includes(groupBy) && onShowActivity
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    onShowActivity
                   }
                 >
                   {viewLabels && !compact && (

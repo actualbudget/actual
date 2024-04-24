@@ -23,6 +23,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -133,6 +134,7 @@ export function LineGraph({
   const privacyMode = usePrivacyMode();
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
+  const { isNarrowWidth } = useResponsive();
 
   const largestValue = data.intervalData
     .map(c => c[balanceTypeOp])
@@ -206,13 +208,15 @@ export function LineGraph({
                 margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
                 style={{ cursor: pointer }}
               >
-                <Tooltip
-                  content={
-                    <CustomTooltip compact={compact} tooltip={tooltip} />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    content={
+                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                  />
+                )}
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -255,6 +259,7 @@ export function LineGraph({
                           setTooltip('');
                         },
                         onClick: (e, payload) =>
+                          !isNarrowWidth &&
                           !['Group', 'Interval'].includes(groupBy) &&
                           onShowActivity(e, entry.id, payload),
                       }}
