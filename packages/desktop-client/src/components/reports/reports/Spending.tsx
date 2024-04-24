@@ -248,7 +248,7 @@ export function Spending() {
                     selected={mode === 'Average'}
                     onSelect={() => setMode('Average')}
                   >
-                    3 month average
+                    Average
                   </ModeButton>
                 )}
               </View>
@@ -267,12 +267,13 @@ export function Spending() {
               {showAverage && (
                 <View style={{ marginTop: 30 }}>
                   <Paragraph>
-                    <strong>How is three month average calculated?</strong>
+                    <strong>
+                      How are “Average” and “Spent Average MTD” calculated?
+                    </strong>
                   </Paragraph>
                   <Paragraph>
-                    Three month average takes the average cumulative spending
-                    from the last three month and divides by three. “Spent
-                    Average MTD” uses the same calculation.
+                    They are both the average cumulative spending by day for the
+                    last three months.
                   </Paragraph>
                 </View>
               )}
