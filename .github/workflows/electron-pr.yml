@@ -28,7 +28,11 @@ jobs:
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
-        run: python3 -m pip install setuptools
+        run: |
+          mkdir .venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install setuptools
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           sudo apt-get install flatpak -y
