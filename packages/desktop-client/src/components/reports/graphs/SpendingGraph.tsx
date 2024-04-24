@@ -32,6 +32,7 @@ type PayloadItem = {
     totalAssets: number | string;
     totalDebts: number | string;
     totalTotals: number | string;
+    day: string;
     months: {
       date: string;
       cumulative: number | string;
@@ -57,7 +58,7 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     const comparison =
       selection === 'average'
-        ? payload[0].payload.months[selection] * -1
+        ? payload[0].payload[selection] * -1
         : payload[0].payload.months[selection].cumulative * -1;
     return (
       <div
@@ -73,31 +74,37 @@ const CustomTooltip = ({
       >
         <div>
           <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload.months[thisMonth].date}</strong>
+            <strong>
+              Day:{' '}
+              {Number(payload[0].payload.day) >= 28
+                ? '28+'
+                : payload[0].payload.day}
+            </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {['cumulative'].includes(balanceTypeOp) &&
-              payload[0].payload.months[thisMonth].cumulative && (
-                <>
-                  <AlignedText
-                    left="This month:"
-                    right={amountToCurrency(
-                      payload[0].payload.months[thisMonth].cumulative * -1,
-                    )}
-                  />
-                  <AlignedText
-                    left={selection === 'average' ? 'Average' : 'Last month:'}
-                    right={amountToCurrency(comparison)}
-                  />
-                  <AlignedText
-                    left="Difference:"
-                    right={amountToCurrency(
-                      payload[0].payload.months[thisMonth].cumulative * -1 -
-                        comparison,
-                    )}
-                  />
-                </>
-              )}
+            {payload[0].payload.months[thisMonth].cumulative && (
+              <AlignedText
+                left="This month:"
+                right={amountToCurrency(
+                  payload[0].payload.months[thisMonth].cumulative * -1,
+                )}
+              />
+            )}
+            {['cumulative'].includes(balanceTypeOp) && (
+              <AlignedText
+                left={selection === 'average' ? 'Average' : 'Last month:'}
+                right={amountToCurrency(comparison)}
+              />
+            )}
+            {payload[0].payload.months[thisMonth].cumulative && (
+              <AlignedText
+                left="Difference:"
+                right={amountToCurrency(
+                  payload[0].payload.months[thisMonth].cumulative * -1 -
+                    comparison,
+                )}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -171,7 +178,7 @@ export function SpendingGraph({
   };
 
   const getDate = obj => {
-    return obj.months[thisMonth].date;
+    return Number(obj.day) >= 28 ? '28+' : obj.day;
   };
 
   return (
