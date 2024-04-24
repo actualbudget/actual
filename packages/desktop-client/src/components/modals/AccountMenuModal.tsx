@@ -85,12 +85,8 @@ export function AccountMenuModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 1,
         height: '45vh',
-        padding: '0 10px',
-        borderRadius: '6px',
       }}
       leftHeaderContent={
         <AdditionalAccountMenu
@@ -137,7 +133,6 @@ export function AccountMenuModal({
             justifyContent: 'space-between',
             alignContent: 'space-between',
             paddingTop: 10,
-            paddingBottom: 10,
           }}
         >
           <Button style={buttonStyle} onClick={_onEditNotes}>
