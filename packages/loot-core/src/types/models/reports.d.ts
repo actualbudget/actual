@@ -24,6 +24,16 @@ export interface CustomReportEntity {
   tombstone?: boolean;
 }
 
+export type SpendingMonthEntity = Record<
+  string | number,
+  {
+    cumulative: number;
+    daily: number;
+    date: string;
+    month: string;
+  }
+>;
+
 export interface SpendingDataEntity {
   date: string;
   totalAssets: number;
@@ -34,6 +44,7 @@ export interface SpendingDataEntity {
 
 export interface SpendingEntity {
   intervalData: {
+    months: SpendingMonthEntity;
     day: string;
     average: number;
     thisMonth: number;

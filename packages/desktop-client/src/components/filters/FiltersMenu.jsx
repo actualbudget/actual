@@ -360,7 +360,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
               dispatch({ type: 'configure', field: name });
             }}
             items={filterFields
-              .filter(f => !exclude.includes(f[0]))
+              .filter(f => (exclude ? !exclude.includes(f[0]) : true))
               .map(([name, text]) => ({
                 name,
                 text: titleFirst(text),

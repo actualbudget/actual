@@ -10,7 +10,10 @@ import {
   type RuleConditionEntity,
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
-import { type SpendingEntity } from 'loot-core/src/types/models/reports';
+import {
+  type SpendingMonthEntity,
+  type SpendingEntity,
+} from 'loot-core/src/types/models/reports';
 
 import { getSpecificRange } from '../reportRanges';
 import { index } from '../util';
@@ -150,12 +153,13 @@ export function createSpendingSpreadsheet({
         return {
           date: data[0].date,
           cumulative: maxCumulative,
+          daily: data[0].totalTotals,
           month: month.month,
         };
       });
-      const indexedData = index(dayData, 'month');
+      const indexedData: SpendingMonthEntity = index(dayData, 'month');
       return {
-        ...indexedData,
+        months: indexedData,
         day,
         average: integerToAmount(averageSum) / monthCount,
         thisMonth: dayData[3].cumulative,

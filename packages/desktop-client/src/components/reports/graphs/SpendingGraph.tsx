@@ -29,11 +29,13 @@ import { numberFormatterTooltip } from '../numberFormatter';
 type PayloadItem = {
   value: number;
   payload: {
-    date: string;
     totalAssets: number | string;
     totalDebts: number | string;
     totalTotals: number | string;
-    cumulative: number | string;
+    months: {
+      date: string;
+      cumulative: number | string;
+    };
   };
 };
 
@@ -55,8 +57,8 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     const comparison =
       selection === 'average'
-        ? payload[0].payload[selection] * -1
-        : payload[0].payload[selection].cumulative * -1;
+        ? payload[0].payload.months[selection] * -1
+        : payload[0].payload.months[selection].cumulative * -1;
     return (
       <div
         className={`${css({
@@ -71,62 +73,31 @@ const CustomTooltip = ({
       >
         <div>
           <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload[thisMonth].date}</strong>
+            <strong>{payload[0].payload.months[thisMonth].date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {['cumulative'].includes(balanceTypeOp) && (
-              <>
-                <AlignedText
-                  left={selection === 'average' ? 'Average' : 'Last month:'}
-                  right={amountToCurrency(comparison)}
-                />
-                {payload[0].payload[thisMonth].cumulative && (
-                  <>
-                    <AlignedText
-                      left="This month:"
-                      right={amountToCurrency(
-                        payload[0].payload[thisMonth].cumulative * -1,
-                      )}
-                    />
-                    <AlignedText
-                      left="Difference:"
-                      right={amountToCurrency(
-                        payload[0].payload[thisMonth].cumulative * -1 -
-                          comparison,
-                      )}
-                    />
-                  </>
-                )}
-              </>
-            )}
-            {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
-              <AlignedText
-                left="Assets:"
-                right={amountToCurrency(
-                  payload[0].payload[thisMonth].totalAssets,
-                )}
-              />
-            )}
-            {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
-              <AlignedText
-                left="Debt:"
-                right={amountToCurrency(
-                  payload[0].payload[thisMonth].totalDebts,
-                )}
-              />
-            )}
-            {['totalTotals'].includes(balanceTypeOp) && (
-              <AlignedText
-                left="Net:"
-                right={
-                  <strong>
-                    {amountToCurrency(
-                      payload[0].payload[thisMonth].totalTotals,
+            {['cumulative'].includes(balanceTypeOp) &&
+              payload[0].payload.months[thisMonth].cumulative && (
+                <>
+                  <AlignedText
+                    left="This month:"
+                    right={amountToCurrency(
+                      payload[0].payload.months[thisMonth].cumulative * -1,
                     )}
-                  </strong>
-                }
-              />
-            )}
+                  />
+                  <AlignedText
+                    left={selection === 'average' ? 'Average' : 'Last month:'}
+                    right={amountToCurrency(comparison)}
+                  />
+                  <AlignedText
+                    left="Difference:"
+                    right={amountToCurrency(
+                      payload[0].payload.months[thisMonth].cumulative * -1 -
+                        comparison,
+                    )}
+                  />
+                </>
+              )}
           </div>
         </div>
       </div>
@@ -153,14 +124,19 @@ export function SpendingGraph({
   const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
   const selection = mode.toLowerCase() === 'average' ? 'average' : lastMonth;
   const thisMonthMax = data.intervalData.reduce((a, b) =>
-    a[thisMonth][balanceTypeOp] < b[thisMonth][balanceTypeOp] ? a : b,
-  )[thisMonth][balanceTypeOp];
+    a.months[thisMonth][balanceTypeOp] < b.months[thisMonth][balanceTypeOp]
+      ? a
+      : b,
+  ).months[thisMonth][balanceTypeOp];
   const selectionMax =
     selection === 'average'
       ? data.intervalData[27].average
       : data.intervalData.reduce((a, b) =>
-          a[lastMonth][balanceTypeOp] < b[lastMonth][balanceTypeOp] ? a : b,
-        )[lastMonth][balanceTypeOp];
+          a.months[lastMonth][balanceTypeOp] <
+          b.months[lastMonth][balanceTypeOp]
+            ? a
+            : b,
+        ).months[lastMonth][balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
   const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
@@ -187,12 +163,15 @@ export function SpendingGraph({
     if (month === 'average') {
       return obj[month] && -1 * obj[month];
     } else {
-      return obj[month][balanceTypeOp] && -1 * obj[month][balanceTypeOp];
+      return (
+        obj.months[month][balanceTypeOp] &&
+        -1 * obj.months[month][balanceTypeOp]
+      );
     }
   };
 
   const getDate = obj => {
-    return obj[thisMonth].date;
+    return obj.months[thisMonth].date;
   };
 
   return (

@@ -36,7 +36,7 @@ export function Spending() {
   } = useFilters<RuleConditionEntity>();
 
   const [dataCheck, setDataCheck] = useState(false);
-  const [mode, setMode] = useState('Average');
+  const [mode, setMode] = useState('Last month');
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
@@ -53,6 +53,10 @@ export function Spending() {
   if (!data) {
     return null;
   }
+  const showAverage =
+    data.intervalData[27].months[
+      monthUtils.subMonths(monthUtils.currentDay(), 3)
+    ].daily !== 0;
 
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
@@ -158,15 +162,18 @@ export function Spending() {
                   }}
                 >
                   <AlignedText
-                    left={<Block>Spent Average MTD:</Block>}
+                    left={<Block>Spent MTD:</Block>}
                     right={
                       <Text>
                         <PrivacyFilter blurIntensity={5}>
                           {amountToCurrency(
                             Math.abs(
                               data.intervalData[
-                                monthUtils.getDay(monthUtils.currentDay()) - 1
-                              ].average,
+                                monthUtils.getDay(monthUtils.currentDay()) >= 29
+                                  ? 28
+                                  : monthUtils.getDay(monthUtils.currentDay()) -
+                                    1
+                              ].thisMonth,
                             ),
                           )}
                         </PrivacyFilter>
@@ -181,7 +188,10 @@ export function Spending() {
                           {amountToCurrency(
                             Math.abs(
                               data.intervalData[
-                                monthUtils.getDay(monthUtils.currentDay()) - 1
+                                monthUtils.getDay(monthUtils.currentDay()) >= 29
+                                  ? 28
+                                  : monthUtils.getDay(monthUtils.currentDay()) -
+                                    1
                               ].lastMonth,
                             ),
                           )}
@@ -189,43 +199,58 @@ export function Spending() {
                       </Text>
                     }
                   />
-                  <AlignedText
-                    left={<Block>Spent MTD:</Block>}
-                    right={
-                      <Text>
-                        <PrivacyFilter blurIntensity={5}>
-                          {amountToCurrency(
-                            Math.abs(
-                              data.intervalData[
-                                monthUtils.getDay(monthUtils.currentDay()) - 1
-                              ].thisMonth,
-                            ),
-                          )}
-                        </PrivacyFilter>
-                      </Text>
-                    }
-                  />
+                  {showAverage && (
+                    <AlignedText
+                      left={<Block>Spent Average MTD:</Block>}
+                      right={
+                        <Text>
+                          <PrivacyFilter blurIntensity={5}>
+                            {amountToCurrency(
+                              Math.abs(
+                                data.intervalData[
+                                  monthUtils.getDay(monthUtils.currentDay()) >=
+                                  29
+                                    ? 28
+                                    : monthUtils.getDay(
+                                        monthUtils.currentDay(),
+                                      ) - 1
+                                ].average,
+                              ),
+                            )}
+                          </PrivacyFilter>
+                        </Text>
+                      }
+                    />
+                  )}
                 </View>
               </View>
               <View
                 style={{
-                  justifyContent: 'center',
                   alignItems: 'center',
                   flexDirection: 'row',
                 }}
               >
-                <ModeButton
-                  selected={mode === 'Average'}
-                  onSelect={() => setMode('Average')}
+                <Text
+                  style={{
+                    paddingRight: 10,
+                  }}
                 >
-                  3 month average
-                </ModeButton>
+                  Compare this month to:
+                </Text>
                 <ModeButton
-                  selected={mode === 'Last Month'}
-                  onSelect={() => setMode('Last Month')}
+                  selected={mode === 'Last month'}
+                  onSelect={() => setMode('Last month')}
                 >
                   Last month
                 </ModeButton>
+                {showAverage && (
+                  <ModeButton
+                    selected={mode === 'Average'}
+                    onSelect={() => setMode('Average')}
+                  >
+                    3 month average
+                  </ModeButton>
+                )}
               </View>
 
               {dataCheck ? (
@@ -239,17 +264,18 @@ export function Spending() {
                 <LoadingIndicator message="Loading report..." />
               )}
 
-              <View style={{ marginTop: 30 }}>
-                <Paragraph>
-                  <strong>How is three month average calculated?</strong>
-                </Paragraph>
-                <Paragraph>
-                  Three month average takes the average cumulative spending from
-                  the last three month and divides by three. If you do not have
-                  3 months of data then please use the “Last month” graph until
-                  you do.
-                </Paragraph>
-              </View>
+              {showAverage && (
+                <View style={{ marginTop: 30 }}>
+                  <Paragraph>
+                    <strong>How is three month average calculated?</strong>
+                  </Paragraph>
+                  <Paragraph>
+                    Three month average takes the average cumulative spending
+                    from the last three month and divides by three. “Spent
+                    Average MTD” uses the same calculation.
+                  </Paragraph>
+                </View>
+              )}
             </View>
           </View>
         </View>
