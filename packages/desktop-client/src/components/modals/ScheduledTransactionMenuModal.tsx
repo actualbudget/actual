@@ -9,6 +9,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { format } from 'loot-core/shared/months';
+import { Query } from 'loot-core/shared/query';
 
 type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps & {
   modalProps: CommonModalProps;
@@ -28,7 +29,10 @@ export function ScheduledTransactionMenuModal({
   };
   const scheduleId = transactionId?.split('/')?.[1];
   const scheduleData = useSchedules({
-    transform: useCallback(q => q.filter({ id: scheduleId }), [scheduleId]),
+    transform: useCallback(
+      (q: Query) => q.filter({ id: scheduleId }),
+      [scheduleId],
+    ),
   });
   const schedule = scheduleData?.schedules?.[0];
 
