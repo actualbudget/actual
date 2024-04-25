@@ -24,6 +24,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -162,6 +163,7 @@ export function StackedBarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
@@ -237,14 +239,16 @@ export function StackedBarGraph({
                 margin={{ top: 0, right: 0, left: leftMargin, bottom: 0 }}
                 style={{ cursor: pointer }}
               >
-                <Tooltip
-                  content={
-                    <CustomTooltip compact={compact} tooltip={tooltip} />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                  cursor={{ fill: 'transparent' }}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    content={
+                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                    cursor={{ fill: 'transparent' }}
+                  />
+                )}
                 <XAxis
                   dataKey="date"
                   tick={{ fill: theme.pageText }}
@@ -252,6 +256,11 @@ export function StackedBarGraph({
                 />
                 {!compact && (
                   <>
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
                     <CartesianGrid strokeDasharray="3 3" />
                     <YAxis
                       tickFormatter={value =>
@@ -286,6 +295,7 @@ export function StackedBarGraph({
                         }
                       }}
                       onClick={e =>
+                        !isNarrowWidth &&
                         !['Group', 'Interval'].includes(groupBy) &&
                         onShowActivity(e, entry.id)
                       }

@@ -63,6 +63,7 @@ export namespace YNAB5 {
     memo: string;
     amount: number;
     transfer_account_id: string;
+    payee_id: string;
   }
 
   interface Month {
