@@ -24,39 +24,6 @@ export interface CustomReportEntity {
   tombstone?: boolean;
 }
 
-export type SpendingMonthEntity = Record<
-  string | number,
-  {
-    cumulative: number;
-    daily: number;
-    date: string;
-    month: string;
-  }
->;
-
-export interface SpendingDataEntity {
-  date: string;
-  totalAssets: number;
-  totalDebts: number;
-  totalTotals: number;
-  cumulative: number;
-}
-
-export interface SpendingEntity {
-  intervalData: {
-    months: SpendingMonthEntity;
-    day: string;
-    average: number;
-    thisMonth: number;
-    lastMonth: number;
-  }[];
-  startDate?: string;
-  endDate?: string;
-  totalDebts: number;
-  totalAssets: number;
-  totalTotals: number;
-}
-
 export interface GroupedEntity {
   data?: DataEntity[];
   intervalData: DataEntity[];
