@@ -24,7 +24,7 @@ type FilterExpressionProps = {
   value: string | string[] | number | boolean | undefined;
   options: RuleConditionEntity['options'];
   style?: CSSProperties;
-  onChange: (cond: RuleConditionEntity) => void;
+  onChange: (cond: RuleConditionEntity) => RuleConditionEntity;
   onDelete: () => void;
 };
 
