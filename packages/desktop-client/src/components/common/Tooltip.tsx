@@ -1,7 +1,12 @@
-import React, { useRef, type ComponentProps, type ReactNode } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import { Tooltip as AriaTooltip, TooltipTrigger } from 'react-aria-components';
-
-import { useHover } from 'usehooks-ts';
 
 import { styles } from '../../style';
 
@@ -20,10 +25,37 @@ export const Tooltip = ({
   ...props
 }: TooltipProps) => {
   const triggerRef = useRef(null);
-  const isHovered = useHover(triggerRef);
+  const [isHovered, setIsHover] = useState(false);
+
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const handlePointerEnter = useCallback(() => {
+    const timeout = setTimeout(() => {
+      setIsHover(true);
+    }, triggerProps.delay ?? 300);
+
+    hoverTimeoutRef.current = timeout;
+  }, [triggerProps.delay]);
+
+  const handlePointerLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+
+    setIsHover(false);
+  }, []);
+
+  // Force closing the tooltip whenever the disablement state changes
+  useEffect(() => {
+    setIsHover(false);
+  }, [triggerProps.isDisabled]);
 
   return (
-    <View ref={triggerRef}>
+    <View
+      ref={triggerRef}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
       <TooltipTrigger
         isOpen={isHovered && !triggerProps.isDisabled}
         {...triggerProps}
