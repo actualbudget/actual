@@ -336,13 +336,7 @@ export function BudgetList() {
           Import file
         </Button>
 
-        <Button
-          type="primary"
-          onClick={onCreate}
-          style={{
-            ...narrowButtonStyle,
-          }}
-        >
+        <Button type="primary" onClick={onCreate} style={narrowButtonStyle}>
           Create new file
         </Button>
 
@@ -351,9 +345,7 @@ export function BudgetList() {
             type="primary"
             isSubmit={false}
             onClick={() => onCreate({ testMode: true })}
-            style={{
-              ...narrowButtonStyle,
-            }}
+            style={narrowButtonStyle}
           >
             Create test file
           </Button>
