@@ -313,6 +313,7 @@ const ChildTransactionEdit = forwardRef(
           >
             <FieldLabel title="Amount" style={{ padding: 0 }} />
             <AmountInput
+              mobile={true}
               disabled={
                 editingField &&
                 editingField !== getFieldName(transaction.id, 'amount')

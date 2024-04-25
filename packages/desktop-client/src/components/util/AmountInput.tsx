@@ -8,7 +8,11 @@ import React, {
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { amountToInteger } from 'loot-core/src/shared/util';
+import {
+  amountToInteger,
+  toRelaxedNumber,
+  getNumberFormat,
+} from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
@@ -31,6 +35,7 @@ type AmountInputProps = {
   textStyle?: CSSProperties;
   focused?: boolean;
   disabled?: boolean;
+  mobile?: boolean;
 };
 
 export function AmountInput({
@@ -46,6 +51,7 @@ export function AmountInput({
   textStyle,
   focused,
   disabled = false,
+  mobile = false,
 }: AmountInputProps) {
   const format = useFormat();
   const negative = (initialValue === 0 && zeroSign === '-') || initialValue < 0;
@@ -74,8 +80,12 @@ export function AmountInput({
   }
 
   function onInputTextChange(val) {
-    setValue(val ? val : '');
-    onChangeValue?.(val);
+    let value = val;
+    if (mobile) {
+      value = val.replace(/[,.]/, getNumberFormat().separator);
+    }
+    setValue(value ? value : '');
+    onChangeValue?.(value);
   }
 
   function fireUpdate(negate) {
