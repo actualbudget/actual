@@ -14,7 +14,12 @@ export const Popover = ({
     <ReactAriaPopover
       placement="bottom end"
       offset={0}
-      style={{ ...styles.tooltip, padding: 0, ...style }}
+      style={{
+        ...styles.tooltip,
+        ...styles.darkScrollbar,
+        padding: 0,
+        ...style,
+      }}
       shouldCloseOnInteractOutside={element => {
         // Disable closing the popover when a reach listbox is clicked (Select component)
         if (
