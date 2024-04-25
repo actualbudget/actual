@@ -1,10 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import * as actions from 'loot-core/src/client/actions';
+import {
+  createBudget,
+  downloadBudget,
+  getUserData,
+  loadAllFiles,
+  loadBudget,
+  pushModal,
+} from 'loot-core/client/actions';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
-import { useActions } from '../../hooks/useActions';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import {
   SvgCloudCheck,
@@ -13,6 +19,7 @@ import {
   SvgFileDouble,
 } from '../../icons/v1';
 import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
+import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button';
@@ -247,22 +254,19 @@ function RefreshButton({ onRefresh }) {
 
 export function BudgetList() {
   const files = useSelector(state => state.budgets.allFiles || []);
-
-  const {
-    getUserData,
-    loadAllFiles,
-    pushModal,
-    loadBudget,
-    createBudget,
-    downloadBudget,
-  } = useActions();
-
+  const dispatch = useDispatch();
   const [creating, setCreating] = useState(false);
+  const { isNarrowWidth } = useResponsive();
+  const narrowButtonStyle = isNarrowWidth
+    ? {
+        height: styles.mobileMinHeight,
+      }
+    : {};
 
   const onCreate = ({ testMode } = {}) => {
     if (!creating) {
       setCreating(true);
-      createBudget({ testMode });
+      dispatch(createBudget({ testMode }));
     }
   };
 
@@ -294,47 +298,51 @@ export function BudgetList() {
         >
           <RefreshButton
             onRefresh={() => {
-              getUserData();
-              loadAllFiles();
+              dispatch(getUserData());
+              dispatch(loadAllFiles());
             }}
           />
         </View>
       </View>
       <BudgetTable
         files={files}
-        actions={actions}
         onSelect={file => {
           if (file.state === 'remote') {
-            downloadBudget(file.cloudFileId);
+            dispatch(downloadBudget(file.cloudFileId));
           } else {
-            loadBudget(file.id);
+            dispatch(loadBudget(file.id, `Loading ${file.name}...`));
           }
         }}
-        onDelete={file => pushModal('delete-budget', { file })}
+        onDelete={file => dispatch(pushModal('delete-budget', { file }))}
       />
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'flex-end',
           padding: 25,
-          paddingLeft: 5,
+          gap: 15,
         }}
       >
         <Button
           type="bare"
           style={{
-            marginLeft: 10,
+            ...narrowButtonStyle,
             color: theme.pageTextLight,
           }}
-          onClick={e => {
-            e.preventDefault();
-            pushModal('import');
+          onClick={() => {
+            dispatch(pushModal('import'));
           }}
         >
           Import file
         </Button>
 
-        <Button type="primary" onClick={onCreate} style={{ marginLeft: 15 }}>
+        <Button
+          type="primary"
+          onClick={onCreate}
+          style={{
+            ...narrowButtonStyle,
+          }}
+        >
           Create new file
         </Button>
 
@@ -343,7 +351,9 @@ export function BudgetList() {
             type="primary"
             isSubmit={false}
             onClick={() => onCreate({ testMode: true })}
-            style={{ marginLeft: 15 }}
+            style={{
+              ...narrowButtonStyle,
+            }}
           >
             Create test file
           </Button>

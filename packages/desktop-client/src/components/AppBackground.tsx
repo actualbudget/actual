@@ -22,7 +22,7 @@ export function AppBackground({
   const transitions = useTransition(loadingText, {
     from: { opacity: 0, transform: 'translateY(-100px)' },
     enter: { opacity: 1, transform: 'translateY(0)' },
-    leave: { opacity: 0, transform: 'translateY(-100px)' },
+    leave: { opacity: 0, transform: 'translateY(100)' },
     unique: true,
   });
 
