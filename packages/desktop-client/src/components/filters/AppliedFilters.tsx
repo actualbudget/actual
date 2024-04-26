@@ -12,7 +12,7 @@ type AppliedFiltersProps = {
   onUpdate: (
     filter: RuleConditionEntity,
     newFilter: RuleConditionEntity,
-  ) => RuleConditionEntity;
+  ) => void;
   onDelete: (filter: RuleConditionEntity) => void;
   conditionsOp: string;
   onCondOpChange: (value: string, filters: RuleConditionEntity[]) => void;
