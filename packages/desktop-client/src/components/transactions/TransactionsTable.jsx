@@ -2206,12 +2206,17 @@ function notesTagFormatter(value, onNoteTagClick) {
                 key={i}
                 style={{
                   display: 'inline-flex',
-                  padding: 4,
+                  padding: '3px 7px',
                   borderRadius: 16,
-                  backgroundColor: theme.tableRowBackgroundHighlight,
                   userSelect: 'none',
-                  color: theme.tableRowBackgroundHighlightText,
+                  backgroundColor: theme.noteTagBackground,
+                  color: theme.noteTagText,
                   cursor: 'pointer',
+                  fontWeight: 600,
+                }}
+                hoveredStyle={{
+                  backgroundColor: theme.noteTagBackgroundHover,
+                  color: theme.noteTagText,
                 }}
                 onClick={e => {
                   e.stopPropagation();
