@@ -10,6 +10,7 @@ import React, {
   useLayoutEffect,
   useEffect,
 } from 'react';
+import { useDispatch } from 'react-redux';
 
 import {
   format as formatDate,
@@ -17,6 +18,7 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
+import { pushModal } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   getAccountsById,
@@ -44,6 +46,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
+import { useNavigate } from '../../hooks/useNavigate';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
@@ -413,7 +416,8 @@ function HeaderCell({
       width={width}
       name={id}
       alignItems={alignItems}
-      unexposedContent={
+      value={value}
+      unexposedContent={({ value: cellValue }) => (
         <Button
           type="bare"
           onClick={onClick}
@@ -427,7 +431,7 @@ function HeaderCell({
             marginRight,
           }}
         >
-          <UnexposedCellContent value={value} />
+          <UnexposedCellContent value={cellValue} />
           {icon === 'asc' && (
             <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
           )}
@@ -435,22 +439,20 @@ function HeaderCell({
             <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
           )}
         </Button>
-      }
+      )}
     />
   );
 }
 
 function PayeeCell({
   id,
-  payeeId,
-  accountId,
+  payee,
   focused,
   inherited,
   payees,
   accounts,
   valueStyle,
   transaction,
-  payee,
   transferAcct,
   isPreview,
   onEdit,
@@ -462,16 +464,12 @@ function PayeeCell({
 }) {
   const isCreatingPayee = useRef(false);
 
-  // Filter out the account we're currently in as it is not a valid transfer
-  accounts = accounts.filter(account => account.id !== accountId);
-  payees = payees.filter(payee => payee.transfer_acct !== accountId);
-
   return (
     <CustomCell
       width="flex"
       name="payee"
       textAlign="flex"
-      value={payeeId}
+      value={payee?.id}
       valueStyle={{
         ...valueStyle,
         ...(inherited && { color: theme.tableTextInactive }),
@@ -488,7 +486,8 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-      unexposedContent={
+      formatter={() => getPayeePretty(transaction, payee, transferAcct)}
+      unexposedContent={props => (
         <>
           <PayeeIcons
             transaction={transaction}
@@ -496,12 +495,9 @@ function PayeeCell({
             onNavigateToTransferAccount={onNavigateToTransferAccount}
             onNavigateToSchedule={onNavigateToSchedule}
           />
-          <UnexposedCellContent
-            value={payeeId}
-            formatter={() => getPayeePretty(transaction, payee, transferAcct)}
-          />
+          <UnexposedCellContent {...props} />
         </>
-      }
+      )}
     >
       {({
         onBlur,
@@ -515,7 +511,7 @@ function PayeeCell({
           <PayeeAutocomplete
             payees={payees}
             accounts={accounts}
-            value={payeeId}
+            value={payee?.id}
             shouldSaveFromKey={shouldSaveFromKey}
             inputProps={{
               onBlur,
@@ -527,7 +523,7 @@ function PayeeCell({
             focused={true}
             onUpdate={(id, value) => onUpdate?.(value)}
             onSelect={onSave}
-            onManagePayees={() => onManagePayees(payeeId)}
+            onManagePayees={() => onManagePayees(payee?.id)}
             menuPortalTarget={undefined}
           />
         );
@@ -643,7 +639,9 @@ const Transaction = memo(function Transaction(props) {
     onNavigateToSchedule,
   } = props;
 
+  const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
+  const navigate = useNavigate();
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
@@ -685,13 +683,15 @@ const Transaction = memo(function Transaction(props) {
       ) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
-          props.pushModal('confirm-transaction-edit', {
-            onConfirm: () => {
-              setShowReconciliationWarning(false);
-              onUpdateAfterConfirm(name, value);
-            },
-            confirmReason: 'editReconciled',
-          });
+          dispatch(
+            pushModal('confirm-transaction-edit', {
+              onConfirm: () => {
+                setShowReconciliationWarning(false);
+                onUpdateAfterConfirm(name, value);
+              },
+              confirmReason: 'editReconciled',
+            }),
+          );
         }
       } else {
         onUpdateAfterConfirm(name, value);
@@ -700,12 +700,14 @@ const Transaction = memo(function Transaction(props) {
 
     // Allow un-reconciling (unlocking) transactions
     if (name === 'cleared' && transaction.reconciled) {
-      props.pushModal('confirm-transaction-edit', {
-        onConfirm: () => {
-          onUpdateAfterConfirm('reconciled', false);
-        },
-        confirmReason: 'unlockReconciled',
-      });
+      dispatch(
+        pushModal('confirm-transaction-edit', {
+          onConfirm: () => {
+            onUpdateAfterConfirm('reconciled', false);
+          },
+          confirmReason: 'unlockReconciled',
+        }),
+      );
     }
   }
 
@@ -755,6 +757,18 @@ const Transaction = memo(function Transaction(props) {
       onSave(deserialized, subtransactions);
     }
   }
+
+  const onNoteTagClick = noteTag => {
+    const conditions = [
+      { field: 'notes', op: 'contains', value: noteTag, type: 'string' },
+    ];
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        conditions,
+      },
+    });
+  };
 
   const {
     id,
@@ -976,15 +990,14 @@ const Transaction = memo(function Transaction(props) {
         <PayeeCell
           /* Payee field for all transactions */
           id={id}
-          payeeId={payeeId}
-          accountId={accountId}
+          payee={payee}
           focused={focusedField === 'payee'}
           inherited={inheritedFields && inheritedFields.has('payee')}
-          payees={payees}
-          accounts={accounts}
+          /* Filter out the account we're currently in as it is not a valid transfer */
+          accounts={accounts.filter(account => account.id !== accountId)}
+          payees={payees.filter(payee => payee.transfer_acct !== accountId)}
           valueStyle={valueStyle}
           transaction={transaction}
-          payee={payee}
           transferAcct={transferAcct}
           importedPayee={importedPayee}
           isPreview={isPreview}
@@ -1008,7 +1021,13 @@ const Transaction = memo(function Transaction(props) {
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
           value={notes || ''}
+          style={{
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            whiteSpace: 'nowrap',
+          }}
           valueStyle={valueStyle}
+          formatter={value => notesTagFormatter(value, onNoteTagClick)}
           onExpose={name => !isPreview && onEdit(id, name)}
           inputProps={{
             value: notes || '',
@@ -1625,7 +1644,6 @@ function TransactionTableInner({
           onToggleSplit={props.onToggleSplit}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
-          pushModal={props.pushModal}
         />
       </>
     );
@@ -2171,3 +2189,39 @@ export const TransactionTable = forwardRef((props, ref) => {
 });
 
 TransactionTable.displayName = 'TransactionTable';
+
+function notesTagFormatter(value, onNoteTagClick) {
+  const words = value.split(' ');
+  return (
+    <>
+      {words.map((word, i) => {
+        if (word.startsWith('#') && word.length > 1) {
+          return (
+            <>
+              <Button
+                type="bare"
+                key={i}
+                style={{
+                  display: 'inline-flex',
+                  padding: 4,
+                  borderRadius: 16,
+                  backgroundColor: theme.pillBackground,
+                  userSelect: 'none',
+                  color: theme.pillText,
+                }}
+                onClick={e => {
+                  e.stopPropagation();
+                  onNoteTagClick?.(word);
+                }}
+              >
+                {word}
+              </Button>{' '}
+            </>
+          );
+        }
+
+        return `${word} `;
+      })}
+    </>
+  );
+}

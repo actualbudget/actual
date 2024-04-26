@@ -1,5 +1,7 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,
@@ -76,7 +78,6 @@ export function TransactionList({
   dateFormat,
   hideFraction,
   addNotification,
-  pushModal,
   renderEmpty,
   onSort,
   sortField,
@@ -88,6 +89,7 @@ export function TransactionList({
 }) {
   const transactionsLatest = useRef();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -161,13 +163,12 @@ export function TransactionList({
   });
 
   const onNavigateToSchedule = useCallback(scheduleId => {
-    pushModal('schedule-edit', { id: scheduleId });
+    dispatch(pushModal('schedule-edit', { id: scheduleId }));
   });
 
   return (
     <TransactionTable
       ref={tableRef}
-      pushModal={pushModal}
       transactions={allTransactions}
       loadMoreTransactions={loadMoreTransactions}
       accounts={accounts}
