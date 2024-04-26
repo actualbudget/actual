@@ -12,10 +12,6 @@ import { ListBox } from './ListBox';
 import { Transaction } from './Transaction';
 
 export function TransactionList({
-  account,
-  accounts,
-  categories,
-  payees,
   transactions,
   isNew,
   onSelect,
@@ -45,9 +41,7 @@ export function TransactionList({
         });
       }
 
-      if (!transaction.is_child) {
-        sections[sections.length - 1].data.push(transaction);
-      }
+      sections[sections.length - 1].data.push(transaction);
     });
     return sections;
   }, [transactions]);
@@ -98,12 +92,8 @@ export function TransactionList({
                   >
                     <Transaction
                       transaction={transaction}
-                      account={account}
-                      categories={categories}
-                      accounts={accounts}
-                      payees={payees}
                       added={isNew(transaction.id)}
-                      onSelect={onSelect} // onSelect(transaction)}
+                      onSelect={onSelect}
                     />
                   </Item>
                 );

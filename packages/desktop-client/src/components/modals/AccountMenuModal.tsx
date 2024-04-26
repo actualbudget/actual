@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { type ComponentProps, useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { q } from 'loot-core/src/shared/query';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useNotes } from '../../hooks/useNotes';
 import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -15,11 +14,6 @@ import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
-
-type NoteEntity = {
-  id: string;
-  note: string;
-};
 
 type AccountMenuModalProps = {
   modalProps: CommonModalProps;
@@ -42,11 +36,7 @@ export function AccountMenuModal({
 }: AccountMenuModalProps) {
   const accounts = useAccounts();
   const account = accounts.find(c => c.id === accountId);
-  const data = useLiveQuery(
-    () => q('notes').filter({ id: account?.id }).select('*'),
-    [account?.id],
-  ) as NoteEntity[] | null;
-  const originalNotes = data && data.length > 0 ? data[0].note : null;
+  const originalNotes = useNotes(`account-${accountId}`);
 
   const _onClose = () => {
     modalProps?.onClose();
@@ -95,12 +85,8 @@ export function AccountMenuModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 1,
         height: '45vh',
-        padding: '0 10px',
-        borderRadius: '6px',
       }}
       leftHeaderContent={
         <AdditionalAccountMenu
@@ -146,7 +132,7 @@ export function AccountMenuModal({
             flexWrap: 'wrap',
             justifyContent: 'space-between',
             alignContent: 'space-between',
-            margin: '10px 0',
+            paddingTop: 10,
           }}
         >
           <Button style={buttonStyle} onClick={_onEditNotes}>
@@ -176,6 +162,11 @@ function AdditionalAccountMenu({
     height: styles.mobileMinHeight,
   };
 
+  const getItemStyle: ComponentProps<typeof Menu>['getItemStyle'] = item => ({
+    ...itemStyle,
+    ...(item.name === 'close' && { color: theme.errorTextMenu }),
+  });
+
   return (
     <View>
       <Button
@@ -199,7 +190,7 @@ function AdditionalAccountMenu({
             }}
           >
             <Menu
-              getItemStyle={() => itemStyle}
+              getItemStyle={getItemStyle}
               items={[
                 account.closed
                   ? {

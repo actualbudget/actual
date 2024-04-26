@@ -8,20 +8,25 @@ export function makeQuery(
   startDate: string,
   endDate: string,
   interval: string,
-  selectedCategories: CategoryEntity[],
   categoryFilter: CategoryEntity[],
   conditionsOpKey: string,
   filters: unknown[],
 ) {
   const intervalGroup =
-    interval === 'Monthly' ? { $month: '$date' } : { $year: '$date' };
+    interval === 'Monthly'
+      ? { $month: '$date' }
+      : interval === 'Yearly'
+        ? { $year: '$date' }
+        : { $day: '$date' };
   const intervalFilter =
-    '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
+    interval === 'Weekly'
+      ? '$day'
+      : '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
 
   const query = q('transactions')
     //Apply Category_Selector
     .filter(
-      selectedCategories && {
+      categoryFilter && {
         $or: [
           {
             category: null,
@@ -60,6 +65,7 @@ export function makeQuery(
       { date: intervalGroup },
       { category: { $id: '$category.id' } },
       { categoryHidden: { $id: '$category.hidden' } },
+      { categoryIncome: { $id: '$category.is_income' } },
       { categoryGroup: { $id: '$category.group.id' } },
       { categoryGroupHidden: { $id: '$category.group.hidden' } },
       { account: { $id: '$account.id' } },

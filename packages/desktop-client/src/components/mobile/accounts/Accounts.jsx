@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { SvgAdd } from '../../../icons/v1';
 import { theme, styles } from '../../../style';
+import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
@@ -38,8 +38,7 @@ function AccountHeader({ name, amount, style = {} }) {
         <Text
           style={{
             ...styles.text,
-            textTransform: 'uppercase',
-            fontSize: 13,
+            fontSize: 14,
           }}
           data-testid="name"
         >
@@ -48,7 +47,7 @@ function AccountHeader({ name, amount, style = {} }) {
       </View>
       <CellValue
         binding={amount}
-        style={{ ...styles.text, fontSize: 13 }}
+        style={{ ...styles.text, fontSize: 14 }}
         type="financial"
       />
     </View>
@@ -137,7 +136,7 @@ function AccountCard({
           binding={getBalanceQuery(account)}
           type="financial"
           style={{ fontSize: 16, color: 'inherit' }}
-          getStyle={value => value < 0 && { color: 'inherit' }}
+          getStyle={makeAmountFullStyle}
           data-testid="account-balance"
         />
       </Button>
@@ -221,7 +220,7 @@ function AccountList({
 
           {offbudgetAccounts.length > 0 && (
             <AccountHeader
-              name="Off budget"
+              name="Off Budget"
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />
@@ -247,23 +246,15 @@ function AccountList({
 export function Accounts() {
   const dispatch = useDispatch();
   const accounts = useAccounts();
-  const newTransactions = useSelector(state => state.queries.newTransactions);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
   const [_numberFormat] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false] = useLocalPref('hideFraction');
 
-  const { list: categories } = useCategories();
-
-  const transactions = useState({});
   const navigate = useNavigate();
 
   const onSelectAccount = id => {
     navigate(`/accounts/${id}`);
-  };
-
-  const onSelectTransaction = transaction => {
-    navigate(`/transaction/${transaction}`);
   };
 
   const onAddAccount = () => {
@@ -283,16 +274,12 @@ export function Accounts() {
         // format changes
         key={numberFormat + hideFraction}
         accounts={accounts.filter(account => !account.closed)}
-        categories={categories}
-        transactions={transactions || []}
         updatedAccounts={updatedAccounts}
-        newTransactions={newTransactions}
         getBalanceQuery={queries.accountBalance}
         getOnBudgetBalance={queries.budgetedAccountBalance}
         getOffBudgetBalance={queries.offbudgetAccountBalance}
         onAddAccount={onAddAccount}
         onSelectAccount={onSelectAccount}
-        onSelectTransaction={onSelectTransaction}
         onSync={onSync}
       />
     </View>

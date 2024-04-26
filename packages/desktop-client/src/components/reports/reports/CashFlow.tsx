@@ -8,6 +8,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -24,6 +25,7 @@ import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
 export function CashFlow() {
+  const { isNarrowWidth } = useResponsive();
   const {
     filters,
     conditionsOp,
@@ -160,7 +162,13 @@ export function CashFlow() {
   const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
 
   return (
-    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
+    <View
+      style={{
+        ...styles.page,
+        minWidth: isNarrowWidth ? undefined : 650,
+        overflow: 'hidden',
+      }}
+    >
       <Header
         title="Cash Flow"
         allMonths={allMonths}
@@ -257,7 +265,7 @@ export function CashFlow() {
           showBalance={showBalance}
         />
 
-        <View style={{ marginTop: 30 }}>
+        <View style={{ marginTop: 30, userSelect: 'none' }}>
           <Paragraph>
             <strong>How is cash flow calculated?</strong>
           </Paragraph>

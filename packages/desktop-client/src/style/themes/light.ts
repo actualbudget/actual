@@ -192,5 +192,6 @@ export const reportsRed = colorPalette.red300;
 export const reportsRedFaded = colorPalette.red200;
 export const reportsBlue = colorPalette.blue400;
 export const reportsBlueFaded = colorPalette.blue200;
+export const reportsGreen = colorPalette.green400;
 export const reportsLabel = colorPalette.navy900;
 export const reportsInnerLabel = colorPalette.navy800;

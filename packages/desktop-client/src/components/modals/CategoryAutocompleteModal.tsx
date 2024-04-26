@@ -1,5 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
+import * as monthUtils from 'loot-core/src/shared/months';
+
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -7,16 +9,19 @@ import { ModalCloseButton, Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { type CommonModalProps } from '../Modals';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type CategoryAutocompleteModalProps = {
   modalProps: CommonModalProps;
   autocompleteProps: ComponentPropsWithoutRef<typeof CategoryAutocomplete>;
   onClose: () => void;
+  month?: string;
 };
 
 export function CategoryAutocompleteModal({
   modalProps,
   autocompleteProps,
+  month,
   onClose,
 }: CategoryAutocompleteModalProps) {
   const _onClose = () => {
@@ -43,12 +48,8 @@ export function CategoryAutocompleteModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 0,
         height: isNarrowWidth ? '85vh' : 275,
-        padding: '15px 10px',
-        borderRadius: '6px',
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
       CloseButton={props => (
@@ -71,15 +72,19 @@ export function CategoryAutocompleteModal({
             />
           )}
           <View style={{ flex: 1 }}>
-            <CategoryAutocomplete
-              focused={true}
-              embedded={true}
-              closeOnBlur={false}
-              showSplitOption={false}
-              onClose={_onClose}
-              {...defaultAutocompleteProps}
-              {...autocompleteProps}
-            />
+            <NamespaceContext.Provider
+              value={month ? monthUtils.sheetForMonth(month) : ''}
+            >
+              <CategoryAutocomplete
+                focused={true}
+                embedded={true}
+                closeOnBlur={false}
+                showSplitOption={false}
+                onClose={_onClose}
+                {...defaultAutocompleteProps}
+                {...autocompleteProps}
+              />
+            </NamespaceContext.Provider>
           </View>
         </View>
       )}

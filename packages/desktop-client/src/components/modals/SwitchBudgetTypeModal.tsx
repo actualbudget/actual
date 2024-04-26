@@ -6,7 +6,7 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
-import { Modal } from '../common/Modal';
+import { Modal, ModalTitle } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { type CommonModalProps } from '../Modals';
@@ -28,45 +28,46 @@ export function SwitchBudgetTypeModal({
       }
     : {};
   return (
-    <Modal title="Switch budget type?" {...modalProps}>
-      {() => (
-        <>
-          <Paragraph>
-            You are currently using a{' '}
-            <Text style={{ fontWeight: 600 }}>
-              {budgetType === 'report' ? 'Report budget' : 'Rollover budget'}.
-            </Text>{' '}
-            Switching will not lose any data and you can always switch back.
-          </Paragraph>
-          <Button
-            type="primary"
-            style={{
-              ...narrowStyle,
-            }}
-            onClick={() => {
-              onSwitch?.();
-              modalProps.onClose?.();
-            }}
+    <Modal
+      title={<ModalTitle title="Switch budget type?" shrinkOnOverflow />}
+      {...modalProps}
+    >
+      <>
+        <Paragraph>
+          You are currently using a{' '}
+          <Text style={{ fontWeight: 600 }}>
+            {budgetType === 'report' ? 'Report budget' : 'Rollover budget'}.
+          </Text>{' '}
+          Switching will not lose any data and you can always switch back.
+        </Paragraph>
+        <Button
+          type="primary"
+          style={{
+            ...narrowStyle,
+          }}
+          onClick={() => {
+            onSwitch?.();
+            modalProps.onClose?.();
+          }}
+        >
+          Switch to a{' '}
+          {budgetType === 'report' ? 'Rollover budget' : 'Report budget'}
+        </Button>
+        <Paragraph
+          isLast={true}
+          style={{
+            marginTop: 10,
+          }}
+        >
+          <Link
+            variant="external"
+            to="https://actualbudget.org/docs/experimental/report-budget"
+            linkColor="muted"
           >
-            Switch to a{' '}
-            {budgetType === 'report' ? 'Rollover budget' : 'Report budget'}
-          </Button>
-          <Paragraph
-            isLast={true}
-            style={{
-              marginTop: 10,
-            }}
-          >
-            <Link
-              variant="external"
-              to="https://actualbudget.org/docs/experimental/report-budget"
-              linkColor="muted"
-            >
-              How do these types of budgeting work?
-            </Link>
-          </Paragraph>
-        </>
-      )}
+            How do these types of budgeting work?
+          </Link>
+        </Paragraph>
+      </>
     </Modal>
   );
 }

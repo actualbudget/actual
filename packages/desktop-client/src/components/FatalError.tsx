@@ -1,5 +1,6 @@
-// @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
+
+import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
 
 import { Block } from './common/Block';
 import { Button } from './common/Button';
@@ -15,19 +16,18 @@ type AppError = Error & {
   type?: string;
   IDBFailure?: boolean;
   SharedArrayBufferMissing?: boolean;
+  BackendInitFailure?: boolean;
 };
 
 type FatalErrorProps = {
-  buttonText: string;
   error: Error | AppError;
 };
 
-type RenderSimpleProps = {
-  error: Error | AppError;
-};
+type RenderSimpleProps = FatalErrorProps;
 
 function RenderSimple({ error }: RenderSimpleProps) {
-  let msg;
+  let msg: ReactNode;
+
   if ('IDBFailure' in error && error.IDBFailure) {
     // IndexedDB wasn't able to open the database
     msg = (
@@ -64,18 +64,7 @@ function RenderSimple({ error }: RenderSimpleProps) {
     // user something at least so they aren't looking at a blank
     // screen
     msg = (
-      <Text>
-        There was a problem loading the app in this browser version. If this
-        continues to be a problem, you can{' '}
-        <Link
-          variant="external"
-          linkColor="muted"
-          to="https://github.com/actualbudget/releases"
-        >
-          download the desktop app
-        </Link>
-        .
-      </Text>
+      <Text>There was a problem loading the app in this browser version.</Text>
     );
   }
 
@@ -98,6 +87,25 @@ function RenderSimple({ error }: RenderSimpleProps) {
           in touch
         </Link>{' '}
         for support
+      </Text>
+    </Stack>
+  );
+}
+
+function RenderLazyLoadError() {
+  return (
+    <Stack
+      style={{
+        paddingBottom: 15,
+        lineHeight: '1.5em',
+        fontSize: 15,
+      }}
+    >
+      <Text>
+        There was a problem loading one of the chunks of the application. Please
+        reload the page and try again. If the issue persists - there might be an
+        issue with either your internet connection and/or the server where the
+        app is hosted.
       </Text>
     </Stack>
   );
@@ -161,26 +169,32 @@ function SharedArrayBufferOverride() {
   );
 }
 
-export function FatalError({ buttonText, error }: FatalErrorProps) {
+export function FatalError({ error }: FatalErrorProps) {
   const [showError, setShowError] = useState(false);
 
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
+  const isLazyLoadError = error instanceof LazyLoadFailedError;
 
   return (
-    <Modal isCurrent={true} CloseButton={undefined} title="Fatal Error">
+    <Modal isCurrent title={isLazyLoadError ? 'Loading Error' : 'Fatal Error'}>
       <View
         style={{
           maxWidth: 500,
         }}
       >
-        {showSimpleRender ? <RenderSimple error={error} /> : <RenderUIError />}
+        {isLazyLoadError ? (
+          <RenderLazyLoadError />
+        ) : showSimpleRender ? (
+          <RenderSimple error={error} />
+        ) : (
+          <RenderUIError />
+        )}
+
         <Paragraph>
-          <Button onClick={() => window.Actual?.relaunch()}>
-            {buttonText}
-          </Button>
+          <Button onClick={() => window.Actual?.relaunch()}>Restart app</Button>
         </Paragraph>
         <Paragraph isLast={true} style={{ fontSize: 11 }}>
-          <Link variant="text" onClick={() => setShowError(true)}>
+          <Link variant="text" onClick={() => setShowError(state => !state)}>
             Show Error
           </Link>
           {showError && (

@@ -79,6 +79,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
     <Link
       variant="text"
       onClick={() => setExpanded(true)}
+      data-testid="advanced-settings"
       style={{
         flexShrink: 0,
         alignSelf: 'flex-start',

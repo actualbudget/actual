@@ -1,15 +1,11 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { q } from 'loot-core/src/shared/query';
-import {
-  type CategoryGroupEntity,
-  type CategoryEntity,
-  type NoteEntity,
-} from 'loot-core/src/types/models';
+import { type CategoryEntity } from 'loot-core/src/types/models';
 
-import { useCategories } from '../../hooks/useCategories';
+import { useCategory } from '../../hooks/useCategory';
+import { useCategoryGroup } from '../../hooks/useCategoryGroup';
+import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -24,7 +20,6 @@ import { Tooltip } from '../tooltips';
 type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
   categoryId: string;
-  categoryGroup?: CategoryGroupEntity;
   onSave: (category: CategoryEntity) => void;
   onEditNotes: (id: string) => void;
   onDelete: (categoryId: string) => void;
@@ -34,20 +29,14 @@ type CategoryMenuModalProps = {
 export function CategoryMenuModal({
   modalProps,
   categoryId,
-  categoryGroup,
   onSave,
   onEditNotes,
   onDelete,
   onClose,
 }: CategoryMenuModalProps) {
-  const { list: categories } = useCategories();
-  const category = categories.find(c => c.id === categoryId);
-  const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id: category.id }).select('*'),
-    [category.id],
-  );
-  const originalNotes = data && data.length > 0 ? data[0].note : null;
-
+  const category = useCategory(categoryId);
+  const categoryGroup = useCategoryGroup(category?.cat_group);
+  const originalNotes = useNotes(category.id);
   const _onClose = () => {
     modalProps?.onClose();
     onClose?.();
@@ -95,12 +84,8 @@ export function CategoryMenuModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 1,
         height: '45vh',
-        padding: '0 10px',
-        borderRadius: '6px',
       }}
       leftHeaderContent={
         <AdditionalCategoryMenu
@@ -143,7 +128,7 @@ export function CategoryMenuModal({
             flexWrap: 'wrap',
             justifyContent: 'space-between',
             alignContent: 'space-between',
-            margin: '10px 0',
+            paddingTop: 10,
           }}
         >
           <Button style={buttonStyle} onClick={_onEditNotes}>
@@ -168,6 +153,11 @@ function AdditionalCategoryMenu({
     height: styles.mobileMinHeight,
   };
 
+  const getItemStyle = item => ({
+    ...itemStyle,
+    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  });
+
   return (
     <View>
       <Button
@@ -191,7 +181,7 @@ function AdditionalCategoryMenu({
             }}
           >
             <Menu
-              getItemStyle={() => itemStyle}
+              getItemStyle={getItemStyle}
               items={[
                 !categoryGroup?.hidden && {
                   name: 'toggleVisibility',

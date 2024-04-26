@@ -149,7 +149,7 @@ export const errorBackground = colorPalette.red800;
 export const errorText = colorPalette.red200;
 export const errorTextDark = colorPalette.red150;
 export const errorTextDarker = errorTextDark;
-export const errorTextMenu = colorPalette.red500;
+export const errorTextMenu = colorPalette.red200;
 export const errorBorder = colorPalette.red500;
 export const upcomingBackground = colorPalette.purple700;
 export const upcomingText = colorPalette.purple100;
@@ -188,5 +188,6 @@ export const pillBorderSelected = colorPalette.purple400;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
+export const reportsGreen = colorPalette.green400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;

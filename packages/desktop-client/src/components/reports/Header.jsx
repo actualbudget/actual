@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { SvgArrowLeft } from '../../icons/v1';
+import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
@@ -42,6 +43,7 @@ export function Header({
 }) {
   const location = useLocation();
   const path = location.pathname;
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <View
@@ -64,8 +66,8 @@ export function Header({
       {path !== '/reports/custom' && (
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
+            flexDirection: isNarrowWidth ? 'column' : 'row',
+            alignItems: isNarrowWidth ? 'right' : 'center',
             marginTop: 15,
             gap: 15,
           }}
@@ -111,46 +113,54 @@ export function Header({
             />
           </View>
 
-          {filters && <FilterButton onApply={onApply} type="accounts" />}
-
-          {show1Month && (
+          {!isNarrowWidth && filters && (
+            <FilterButton onApply={onApply} type="accounts" />
+          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 15,
+            }}
+          >
+            {show1Month && (
+              <Button
+                type="bare"
+                onClick={() => onChangeDates(...getLatestRange(1), forecast)}
+              >
+                1 month
+              </Button>
+            )}
             <Button
               type="bare"
-              onClick={() => onChangeDates(...getLatestRange(1), forecast)}
+              onClick={() => onChangeDates(...getLatestRange(2), forecast)}
             >
-              1 month
+              3 months
             </Button>
-          )}
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(2), forecast)}
-          >
-            3 months
-          </Button>
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(5), forecast)}
-          >
-            6 months
-          </Button>
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(11), forecast)}
-          >
-            1 Year
-          </Button>
-          <Button
-            type="bare"
-            onClick={() =>
-              onChangeDates(
-                ...getFullRange(allMonths[allMonths.length - 1].name),
-                forecast,
-              )
-            }
-          >
-            All Time
-          </Button>
-
+            <Button
+              type="bare"
+              onClick={() => onChangeDates(...getLatestRange(5), forecast)}
+            >
+              6 months
+            </Button>
+            <Button
+              type="bare"
+              onClick={() => onChangeDates(...getLatestRange(11), forecast)}
+            >
+              1 Year
+            </Button>
+            <Button
+              type="bare"
+              onClick={() =>
+                onChangeDates(
+                  ...getFullRange(allMonths[allMonths.length - 1].name),
+                  forecast,
+                )
+              }
+            >
+              All Time
+            </Button>
+          </View>
           {children || <View style={{ flex: 1 }} />}
           <View
             style={{

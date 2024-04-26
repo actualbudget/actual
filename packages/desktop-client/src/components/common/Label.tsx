@@ -16,7 +16,7 @@ export function Label({ title, style }: LabelProps) {
         ...styles.text,
         color: theme.tableRowHeaderText,
         textAlign: 'right',
-        fontSize: 12,
+        fontSize: 14,
         marginBottom: 2,
         ...style,
       }}

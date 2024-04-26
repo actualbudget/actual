@@ -59,12 +59,6 @@ type FinanceModals = {
     targetPayeeId: string;
   };
 
-  'plaid-external-msg': {
-    onMoveExternal: () => Promise<void>;
-    onClose?: () => void;
-    onSuccess: (data: unknown) => Promise<void>;
-  };
-
   'gocardless-init': {
     onSuccess: () => void;
   };
@@ -99,6 +93,7 @@ type FinanceModals = {
 
   'edit-field': {
     name: string;
+    month: string;
     onSubmit: (name: string, value: string) => void;
     onClose: () => void;
   };
@@ -106,6 +101,7 @@ type FinanceModals = {
   'category-autocomplete': {
     categoryGroups: CategoryGroupEntity[];
     onSelect: (categoryId: string, categoryName: string) => void;
+    month?: string;
     showHiddenCategories?: boolean;
     onClose?: () => void;
   };
@@ -143,11 +139,27 @@ type FinanceModals = {
   };
   'category-menu': {
     categoryId: string;
-    categoryGroup?: CategoryGroupEntity;
     onSave: (category: CategoryEntity) => void;
     onEditNotes: (id: string) => void;
     onDelete: (categoryId: string) => void;
+    onBudgetAction: (month: string, action: string, args?: unknown) => void;
     onClose?: () => void;
+  };
+  'rollover-budget-menu': {
+    categoryId: string;
+    month: string;
+    onUpdateBudget: (amount: number) => void;
+    onCopyLastMonthAverage: () => void;
+    onSetMonthsAverage: (numberOfMonths: number) => void;
+    onApplyBudgetTemplate: () => void;
+  };
+  'report-budget-menu': {
+    categoryId: string;
+    month: string;
+    onUpdateBudget: (amount: number) => void;
+    onCopyLastMonthAverage: () => void;
+    onSetMonthsAverage: (numberOfMonths: number) => void;
+    onApplyBudgetTemplate: () => void;
   };
   'category-group-menu': {
     groupId: string;
@@ -186,7 +198,7 @@ type FinanceModals = {
     onTransfer: () => void;
     onCover: () => void;
   };
-  'rollover-to-budget-menu': {
+  'rollover-summary-to-budget-menu': {
     month: string;
     onTransfer: () => void;
     onHoldBuffer: () => void;
@@ -199,12 +211,14 @@ type FinanceModals = {
   };
   transfer: {
     title: string;
+    month: string;
     amount: number;
     onSubmit: (amount: number, toCategoryId: string) => void;
     showToBeBudgeted?: boolean;
   };
   cover: {
     categoryId: string;
+    month: string;
     onSubmit: (fromCategoryId: string) => void;
   };
   'hold-buffer': {
@@ -216,10 +230,20 @@ type FinanceModals = {
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
   };
-  'budget-menu': {
-    month: string;
+  'budget-page-menu': {
+    onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetType: () => void;
+  };
+  'rollover-budget-month-menu': {
+    month: string;
+    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+    onEditNotes: (id: string) => void;
+  };
+  'report-budget-month-menu': {
+    month: string;
+    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+    onEditNotes: (id: string) => void;
   };
 };
 

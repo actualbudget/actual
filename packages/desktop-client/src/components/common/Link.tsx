@@ -102,7 +102,9 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
       {...props}
       onClick={e => {
         props.onClick?.(e);
-        navigate(path);
+        if (!e.defaultPrevented) {
+          navigate(path);
+        }
       }}
     />
   );

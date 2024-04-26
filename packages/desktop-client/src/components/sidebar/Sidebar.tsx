@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -20,9 +20,9 @@ import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 
 import { Accounts } from './Accounts';
 import { Item } from './Item';
@@ -145,6 +145,7 @@ function EditableBudgetName() {
   const [budgetName, setBudgetNamePref] = useLocalPref('budgetName');
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef(null);
 
   function onMenuSelect(type: string) {
     setMenuOpen(false);
@@ -195,9 +196,12 @@ function EditableBudgetName() {
         />
       </InitialFocus>
     );
-  } else {
-    return (
+  }
+
+  return (
+    <>
       <Button
+        ref={triggerRef}
         type="bare"
         color={theme.buttonNormalBorder}
         style={{
@@ -212,16 +216,16 @@ function EditableBudgetName() {
           {budgetName || 'A budget has no name'}
         </Text>
         <SvgExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
-        {menuOpen && (
-          <Tooltip
-            position="bottom-left"
-            style={{ padding: 0 }}
-            onClose={() => setMenuOpen(false)}
-          >
-            <Menu onMenuSelect={onMenuSelect} items={items} />
-          </Tooltip>
-        )}
       </Button>
-    );
-  }
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+      >
+        <Menu onMenuSelect={onMenuSelect} items={items} />
+      </Popover>
+    </>
+  );
 }

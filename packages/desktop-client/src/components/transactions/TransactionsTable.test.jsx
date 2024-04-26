@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
+import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import {
   generateTransaction,
   generateAccount,
@@ -118,26 +119,28 @@ function LiveTransactionTable(props) {
   return (
     <TestProvider>
       <ResponsiveProvider>
-        <SelectedProviderWithItems
-          name="transactions"
-          items={transactions}
-          fetchAllIds={() => transactions.map(t => t.id)}
-        >
-          <SplitsExpandedProvider>
-            <TransactionTable
-              {...props}
-              transactions={transactions}
-              loadMoreTransactions={() => {}}
-              payees={payees}
-              addNotification={n => console.log(n)}
-              onSave={onSave}
-              onSplit={onSplit}
-              onAdd={onAdd}
-              onAddSplit={onAddSplit}
-              onCreatePayee={onCreatePayee}
-            />
-          </SplitsExpandedProvider>
-        </SelectedProviderWithItems>
+        <SpreadsheetProvider>
+          <SelectedProviderWithItems
+            name="transactions"
+            items={transactions}
+            fetchAllIds={() => transactions.map(t => t.id)}
+          >
+            <SplitsExpandedProvider>
+              <TransactionTable
+                {...props}
+                transactions={transactions}
+                loadMoreTransactions={() => {}}
+                payees={payees}
+                addNotification={n => console.log(n)}
+                onSave={onSave}
+                onSplit={onSplit}
+                onAdd={onAdd}
+                onAddSplit={onAddSplit}
+                onCreatePayee={onCreatePayee}
+              />
+            </SplitsExpandedProvider>
+          </SelectedProviderWithItems>
+        </SpreadsheetProvider>
       </ResponsiveProvider>
     </TestProvider>
   );
@@ -155,6 +158,10 @@ function initBasicServer() {
           throw new Error(`queried unknown table: ${query.table}`);
       }
     },
+    getCell: () => ({
+      value: 129_87,
+    }),
+    'get-categories': () => ({ grouped: categoryGroups, list: categories }),
   });
 }
 
@@ -447,7 +454,7 @@ describe('Transactions', () => {
     let items = tooltip.querySelectorAll('[data-testid*="category-item"]');
     expect(items.length).toBe(2);
     expect(items[0].textContent).toBe('Usual Expenses');
-    expect(items[1].textContent).toBe('General');
+    expect(items[1].textContent).toBe('General 129.87');
     expect(items[1].dataset['highlighted']).toBeDefined();
 
     // It should not allow filtering on group names
@@ -473,7 +480,7 @@ describe('Transactions', () => {
     // The right item should be highlighted
     highlighted = tooltip.querySelector('[data-highlighted]');
     expect(highlighted).not.toBeNull();
-    expect(highlighted.textContent).toBe('General');
+    expect(highlighted.textContent).toBe('General 129.87');
 
     expect(getTransactions()[2].category).toBe(
       categories.find(category => category.name === 'Food').id,
@@ -515,7 +522,7 @@ describe('Transactions', () => {
     // Make sure the expected category is highlighted
     highlighted = tooltip.querySelector('[data-highlighted]');
     expect(highlighted).not.toBeNull();
-    expect(highlighted.textContent).toBe('General');
+    expect(highlighted.textContent).toBe('General 129.87');
 
     // Click the item and check the before/after values
     expect(getTransactions()[2].category).toBe(
@@ -854,6 +861,7 @@ describe('Transactions', () => {
       {
         account: accounts[0].id,
         amount: -1000,
+        category: null,
         cleared: false,
         date: '2017-01-01',
         error: null,
@@ -867,6 +875,7 @@ describe('Transactions', () => {
       {
         account: accounts[0].id,
         amount: -1777,
+        category: null,
         cleared: false,
         date: '2017-01-01',
         error: null,
