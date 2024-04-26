@@ -25,6 +25,7 @@ export function Overview() {
   sessionStorage.setItem('url', location.pathname);
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
+  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const accounts = useAccounts();
   return (
@@ -62,7 +63,7 @@ export function Overview() {
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
-        <SpendingCard />
+        {spendingReportFeatureFlag && <SpendingCard />}
       </View>
       {customReportsFeatureFlag && (
         <CustomReportListCards reports={customReports} />
