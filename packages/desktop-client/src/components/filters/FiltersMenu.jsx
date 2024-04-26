@@ -240,7 +240,7 @@ function ConfigureField({
   );
 }
 
-export function FilterButton({ onApply, compact, hover }) {
+export function FilterButton({ onApply, compact, hover, exclude }) {
   const filters = useFilters();
   const triggerRef = useRef(null);
 
@@ -360,10 +360,12 @@ export function FilterButton({ onApply, compact, hover }) {
           onMenuSelect={name => {
             dispatch({ type: 'configure', field: name });
           }}
-          items={filterFields.map(([name, text]) => ({
-            name,
-            text: titleFirst(text),
-          }))}
+          items={filterFields
+            .filter(f => (exclude ? !exclude.includes(f[0]) : true))
+            .map(([name, text]) => ({
+              name,
+              text: titleFirst(text),
+            }))}
         />
       </Popover>
 
@@ -401,7 +403,6 @@ export function FilterButton({ onApply, compact, hover }) {
             onApply={onValidateAndApply}
           />
         )}
-      </Popover>
     </View>
   );
 }

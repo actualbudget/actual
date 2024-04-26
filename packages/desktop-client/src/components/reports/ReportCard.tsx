@@ -8,8 +8,8 @@ import { View } from '../common/View';
 
 type ReportCardProps = {
   to: string;
-  report: CustomReportEntity;
   children: ReactNode;
+  report?: CustomReportEntity;
   flex?: string;
   style?: CSSProperties;
 };
