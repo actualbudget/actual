@@ -136,7 +136,9 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   plain?: boolean;
   exposed?: boolean;
   children?: ReactNode | (() => ReactNode);
-  unexposedContent?: ReactNode;
+  unexposedContent?: (
+    props: ComponentProps<typeof UnexposedCellContent>,
+  ) => ReactNode;
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
@@ -228,7 +230,9 @@ export function Cell({
                   }
             }
           >
-            {unexposedContent || (
+            {unexposedContent ? (
+              unexposedContent({ value, formatter })
+            ) : (
               <UnexposedCellContent value={value} formatter={formatter} />
             )}
           </View>

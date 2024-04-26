@@ -1457,7 +1457,6 @@ class AccountInternal extends PureComponent {
       addNotification,
       accountsSyncing,
       failedAccounts,
-      pushModal,
       replaceModal,
       showExtraBalances,
       accountId,
@@ -1622,7 +1621,6 @@ class AccountInternal extends PureComponent {
                       </View>
                     ) : null
                   }
-                  pushModal={pushModal}
                   onSort={this.onSort}
                   sortField={this.state.sort.field}
                   ascDesc={this.state.sort.ascDesc}
