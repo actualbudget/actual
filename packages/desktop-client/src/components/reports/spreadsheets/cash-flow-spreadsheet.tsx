@@ -14,8 +14,6 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
-// import { makeQuery } from './makeQuery';
-
 export function simpleCashFlow(start, end) {
   return async (spreadsheet, setData) => {
     function makeQuery() {
@@ -151,10 +149,11 @@ export function cashFlowByDate(
       })
       .filter({
         $and: [
-          { date: { $transform: '$month', $lte: end } },
+          { date: { $transform: '$month', $lte: monthUtils.prevMonth(end) } },
         ],
         'account.offbudget': false,
       })
+      .filter({ 'category.name': { $notlike: 'Starting Balances' } })
       .groupBy(['date', 'payee.transfer_acct'])
       .select([
         'date',
@@ -162,12 +161,11 @@ export function cashFlowByDate(
         { amount: { $sum: '$amount' } },
       ]);
 
-    const { data: transactionData } = await runQuery(transactionQuery)
+    const { data: transactionDataAssets } = await runQuery(transactionQuery.filter({ amount: { $gt: 0 } }));
+    const { data: transactionDataDebts } = await runQuery(transactionQuery.filter({ amount: { $lt: 0 } }));
 
     const transactions = await Promise.all(
-      transactionData.map(trs => {
-        return trs
-      }),
+      transactionDataAssets.concat(transactionDataDebts)
     );
 
 
@@ -287,18 +285,23 @@ function recalculate(
       const year = monthUtils.getYear(transaction.date);
       const month = monthUtils.getMonthIndex(transaction.date); // Month is zero-indexed (0 = January)
 
+      const assets = (transaction.amount > 0) ? transaction.amount : 0;
+      const debts = (transaction.amount < 0) ? transaction.amount : 0;
+
       const yearData = {
         year: year,
-        amount: transaction.amount,
+        assets: assets,
+        debts: debts,
       }
-      const indexMonth = months.findIndex(a => a.month === month)
+      const indexMonth = months.findIndex(a => a.month === month);
 
       if (indexMonth >= 0) {
         const indexYear = months[indexMonth].data.findIndex(d => d.year === year)
         if (indexYear >= 0) {
-          months[indexMonth].data[indexYear].amount += transaction.amount
+          months[indexMonth].data[indexYear].assets += assets;
+          months[indexMonth].data[indexYear].debts += debts;
         } else {
-          months[indexMonth].data.push(yearData)
+          months[indexMonth].data.push(yearData);
         }
       } else {
         months.push({
@@ -310,41 +313,60 @@ function recalculate(
     }, []);
 
     const monthAvgs = monthTotals.reduce((arr, total) => {
-      const sum = total.data.reduce((sum, d) => sum + d.amount, 0)
-      const average = sum / total.data.length
+      const sumAssets = total.data.reduce((sum, d) => sum + d.assets, 0)
+      const sumDebts = total.data.reduce((sum, d) => sum + d.debts, 0)
+      const averageAssets = Math.floor(sumAssets / total.data.filter(d => d.assets !== 0).length);
+      const averageDebts = Math.floor(sumDebts / total.data.filter(d => d.debts !== 0).length);
       arr.push({
         month: total.month,
-        average: average,
+        averageAssets: averageAssets,
+        averageDebts: averageDebts,
       })
       return arr;
     }, []);
 
-    const totalAvg = 100000;
+    // Take an average of all months , weighted by the number of days
+    const totalAvgAssets = monthAvgs.reduce((sum, d) => sum + d.averageAssets, 0) / monthAvgs.filter(d => d.averageAssets !== 0).length;
+    const totalAvgDebts = monthAvgs.reduce((sum, d) => sum + d.averageDebts, 0) / monthAvgs.filter(d => d.averageDebts !== 0).length;
 
     monthUtils.range(end, forecast).forEach(month => {
+      const currentAssets = (month === monthUtils.currentMonth())
+        ? income.find(d => d.date === month).amount
+        : 0;
+      const currentDebts = (month === monthUtils.currentMonth())
+        ? expense.find(d => d.date === month).amount
+        : 0;
+
       const monthAvgIndex = monthAvgs.findIndex(m => (m.month === monthUtils.getMonthIndex(month)));
-      let futureTx = {}
+      let ammounts = []
       if (monthAvgIndex !== -1) {
-        futureTx = {
-          date: month,
-          isTransfer: false,
-          trasferAccount: null,
-          amount: monthAvgs[monthAvgIndex].average,
-        }
+        ammounts = [
+          monthAvgs[monthAvgIndex].averageAssets - currentAssets,
+          monthAvgs[monthAvgIndex].averageDebts - currentDebts,
+        ];
       } else {
-        // take an average of all months, weighted by the number of days
-        futureTx = {
-          date: month,
-          isTransfer: false,
-          trasferAccount: null,
-          amount: totalAvg,
-        }
+        ammounts = [
+          Math.floor(totalAvgAssets) - currentAssets,
+          Math.floor(totalAvgDebts) - currentDebts,
+        ];
       };
-      if (futureTx.amount < 0) {
-        futureExpense.push(futureTx);
-      } else {
-        futureIncome.push(futureTx);
-      }
+      ammounts.forEach(a => {
+        if (a < 0) {
+          futureExpense.push({
+            date: month,
+            isTransfer: false,
+            trasferAccount: null,
+            amount: a,
+          });
+        } else {
+          futureIncome.push({
+            date: month,
+            isTransfer: false,
+            trasferAccount: null,
+            amount: a,
+          });
+        }
+      })
     });
   }
 
