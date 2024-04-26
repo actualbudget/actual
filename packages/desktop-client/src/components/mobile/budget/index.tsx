@@ -49,11 +49,14 @@ function BudgetInner(props: BudgetInnerProps) {
   const { categoryGroups, categories, budgetType, spreadsheet } = props;
 
   const currMonth = monthUtils.currentMonth();
-
-  const [bounds, setBounds] = useState({ start: currMonth, end: currMonth });
-  const [currentMonth, setCurrentMonth] = useState(currMonth);
+  const [startMonth = currMonth, setStartMonthPref] =
+    useLocalPref('budget.startMonth');
+  const [bounds, setBounds] = useState({
+    start: startMonth,
+    end: startMonth,
+  });
   const [initialized, setInitialized] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  // const [editMode, setEditMode] = useState(false);
 
   const [_numberFormat] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
@@ -65,7 +68,7 @@ function BudgetInner(props: BudgetInnerProps) {
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
 
-      await prewarmMonth(budgetType, spreadsheet, currentMonth);
+      await prewarmMonth(budgetType, spreadsheet, startMonth);
 
       setInitialized(true);
     }
@@ -85,7 +88,7 @@ function BudgetInner(props: BudgetInnerProps) {
     });
 
     return () => unlisten();
-  }, [budgetType, currentMonth, dispatch, spreadsheet]);
+  }, [budgetType, startMonth, dispatch, spreadsheet]);
 
   const onBudgetAction = async (month, type, args) => {
     dispatch(applyBudgetAction(month, type, args));
@@ -95,31 +98,32 @@ function BudgetInner(props: BudgetInnerProps) {
     if (budgetType === 'report') {
       dispatch(
         pushModal('report-budget-summary', {
-          month: currentMonth,
+          month: startMonth,
         }),
       );
     } else {
       dispatch(
         pushModal('rollover-budget-summary', {
-          month: currentMonth,
+          month: startMonth,
           onBudgetAction,
         }),
       );
     }
   };
 
-  const onAddGroup = () => {
+  const onOpenNewCategoryGroupModal = () => {
     dispatch(
       pushModal('new-category-group', {
         onValidate: name => (!name ? 'Name is required.' : null),
         onSubmit: async name => {
+          dispatch(collapseModals('budget-page-menu'));
           dispatch(createGroup(name));
         },
       }),
     );
   };
 
-  const onAddCategory = (groupId, isIncome) => {
+  const onOpenNewCategoryModal = (groupId, isIncome) => {
     dispatch(
       pushModal('new-category', {
         onValidate: name => (!name ? 'Name is required.' : null),
@@ -233,16 +237,16 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onPrevMonth = async () => {
-    const month = monthUtils.subMonths(currentMonth, 1);
+    const month = monthUtils.subMonths(startMonth, 1);
     await prewarmMonth(budgetType, spreadsheet, month);
-    setCurrentMonth(month);
+    setStartMonthPref(month);
     setInitialized(true);
   };
 
   const onNextMonth = async () => {
-    const month = monthUtils.addMonths(currentMonth, 1);
+    const month = monthUtils.addMonths(startMonth, 1);
     await prewarmMonth(budgetType, spreadsheet, month);
-    setCurrentMonth(month);
+    setStartMonthPref(month);
     setInitialized(true);
   };
 
@@ -293,7 +297,7 @@ function BudgetInner(props: BudgetInnerProps) {
       newBudgetType,
       spreadsheet,
       bounds,
-      currentMonth,
+      startMonth,
       async () => {
         dispatch(loadPrefs());
       },
@@ -306,7 +310,7 @@ function BudgetInner(props: BudgetInnerProps) {
     await send('notes-save', { id, note: notes });
   };
 
-  const onEditGroupNotes = id => {
+  const onOpenCategoryGroupNotesModal = id => {
     const group = categoryGroups.find(g => g.id === id);
     dispatch(
       pushModal('notes', {
@@ -317,7 +321,7 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   };
 
-  const onEditCategoryNotes = id => {
+  const onOpenCategoryNotesModal = id => {
     const category = categories.find(c => c.id === id);
     dispatch(
       pushModal('notes', {
@@ -328,27 +332,78 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   };
 
-  const onEditGroup = id => {
+  const onOpenCategoryGroupMenuModal = id => {
     const group = categoryGroups.find(g => g.id === id);
     dispatch(
       pushModal('category-group-menu', {
         groupId: group.id,
         onSave: onSaveGroup,
-        onAddCategory,
-        onEditNotes: onEditGroupNotes,
+        onAddCategory: onOpenNewCategoryModal,
+        onEditNotes: onOpenCategoryGroupNotesModal,
         onDelete: onDeleteGroup,
       }),
     );
   };
 
-  const onEditCategory = id => {
+  const onOpenCategoryMenuModal = id => {
     const category = categories.find(c => c.id === id);
     dispatch(
       pushModal('category-menu', {
         categoryId: category.id,
         onSave: onSaveCategory,
-        onEditNotes: onEditCategoryNotes,
+        onEditNotes: onOpenCategoryNotesModal,
         onDelete: onDeleteCategory,
+        onBudgetAction,
+      }),
+    );
+  };
+
+  const onOpenSwitchBudgetTypeModal = () => {
+    dispatch(
+      pushModal('switch-budget-type', {
+        onSwitch: () => {
+          onSwitchBudgetType();
+          dispatch(collapseModals('budget-page-menu'));
+        },
+      }),
+    );
+  };
+
+  const [showHiddenCategories, setShowHiddenCategoriesPref] = useLocalPref(
+    'budget.showHiddenCategories',
+  );
+
+  const onToggleHiddenCategories = () => {
+    setShowHiddenCategoriesPref(!showHiddenCategories);
+    dispatch(collapseModals('budget-page-menu'));
+  };
+
+  const onOpenBudgetMonthNotesModal = id => {
+    dispatch(
+      pushModal('notes', {
+        id,
+        name: monthUtils.format(startMonth, 'MMMM ‘yy'),
+        onSave: onSaveNotes,
+      }),
+    );
+  };
+
+  const onOpenBudgetMonthMenu = month => {
+    dispatch(
+      pushModal(`${budgetType}-budget-month-menu`, {
+        month,
+        onBudgetAction,
+        onEditNotes: onOpenBudgetMonthNotesModal,
+      }),
+    );
+  };
+
+  const onOpenBudgetPageMenu = () => {
+    dispatch(
+      pushModal('budget-page-menu', {
+        onAddCategoryGroup: onOpenNewCategoryGroupModal,
+        onToggleHiddenCategories,
+        onSwitchBudgetType: onOpenSwitchBudgetTypeModal,
       }),
     );
   };
@@ -370,7 +425,7 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   return (
-    <NamespaceContext.Provider value={monthUtils.sheetForMonth(currentMonth)}>
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
       <SyncRefresh
         onSync={async () => {
           dispatch(sync());
@@ -383,27 +438,25 @@ function BudgetInner(props: BudgetInnerProps) {
             key={`${numberFormat}${hideFraction}`}
             categoryGroups={categoryGroups}
             type={budgetType}
-            month={currentMonth}
+            month={startMonth}
             monthBounds={bounds}
-            editMode={editMode}
-            onEditMode={flag => setEditMode(flag)}
+            // editMode={editMode}
             onShowBudgetSummary={onShowBudgetSummary}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
             onSaveGroup={onSaveGroup}
             onDeleteGroup={onDeleteGroup}
-            onAddGroup={onAddGroup}
-            onAddCategory={onAddCategory}
+            onAddCategory={onOpenNewCategoryModal}
             onSaveCategory={onSaveCategory}
             onDeleteCategory={onDeleteCategory}
             onReorderCategory={onReorderCategory}
             onReorderGroup={onReorderGroup}
-            onOpenMonthActionMenu={() => {}} //onOpenMonthActionMenu}
             onBudgetAction={onBudgetAction}
             onRefresh={onRefresh}
-            onSwitchBudgetType={onSwitchBudgetType}
-            onEditGroup={onEditGroup}
-            onEditCategory={onEditCategory}
+            onEditGroup={onOpenCategoryGroupMenuModal}
+            onEditCategory={onOpenCategoryMenuModal}
+            onOpenBudgetPageMenu={onOpenBudgetPageMenu}
+            onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
           />
         )}
       </SyncRefresh>

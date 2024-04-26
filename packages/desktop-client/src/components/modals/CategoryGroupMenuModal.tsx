@@ -1,20 +1,16 @@
 // @ts-strict-ignore
 import React, { type ComponentProps, useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { q } from 'loot-core/src/shared/query';
-import {
-  type CategoryGroupEntity,
-  type NoteEntity,
-} from 'loot-core/src/types/models';
+import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
+import { Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
@@ -42,11 +38,7 @@ export function CategoryGroupMenuModal({
 }: CategoryGroupMenuModalProps) {
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
-  const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id: group.id }).select('*'),
-    [group.id],
-  );
-  const notes = data && data.length > 0 ? data[0].note : null;
+  const notes = useNotes(group.id);
 
   const _onClose = () => {
     modalProps?.onClose();
@@ -94,21 +86,16 @@ export function CategoryGroupMenuModal({
 
   return (
     <Modal
-      title={group.name}
+      title={
+        <ModalTitle isEditable title={group.name} onTitleUpdate={onRename} />
+      }
       showHeader
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 1,
         height: '45vh',
-        padding: '0 10px',
-        borderRadius: '6px',
       }}
-      editableTitle={true}
-      titleStyle={styles.underlinedText}
-      onTitleUpdate={onRename}
       leftHeaderContent={
         <AdditionalCategoryGroupMenu
           group={group}
@@ -117,72 +104,52 @@ export function CategoryGroupMenuModal({
         />
       }
     >
-      {({ isEditingTitle }) => (
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+        }}
+      >
         <View
           style={{
+            overflowY: 'auto',
             flex: 1,
-            flexDirection: 'column',
           }}
         >
-          <View
-            style={{
-              overflowY: 'auto',
-              flex: 1,
-            }}
-          >
-            <Notes
-              notes={notes?.length > 0 ? notes : 'No notes'}
-              editable={false}
-              focused={false}
-              getStyle={() => ({
-                ...styles.mediumText,
-                borderRadius: 6,
-                ...((!notes || notes.length === 0) && {
-                  justifySelf: 'center',
-                  alignSelf: 'center',
-                  color: theme.pageTextSubdued,
-                }),
-              })}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignContent: 'space-between',
-              paddingTop: 10,
-              paddingBottom: 10,
-            }}
-          >
-            <Button
-              disabled={isEditingTitle}
-              style={{
-                ...buttonStyle,
-                display: isEditingTitle ? 'none' : undefined,
-              }}
-              onClick={_onAddCategory}
-            >
-              <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
-              Add category
-            </Button>
-            <Button
-              style={{
-                ...buttonStyle,
-                display: isEditingTitle ? 'none' : undefined,
-              }}
-              onClick={_onEditNotes}
-            >
-              <SvgNotesPaper
-                width={20}
-                height={20}
-                style={{ paddingRight: 5 }}
-              />
-              Edit notes
-            </Button>
-          </View>
+          <Notes
+            notes={notes?.length > 0 ? notes : 'No notes'}
+            editable={false}
+            focused={false}
+            getStyle={() => ({
+              ...styles.mediumText,
+              borderRadius: 6,
+              ...((!notes || notes.length === 0) && {
+                justifySelf: 'center',
+                alignSelf: 'center',
+                color: theme.pageTextSubdued,
+              }),
+            })}
+          />
         </View>
-      )}
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignContent: 'space-between',
+            paddingTop: 10,
+          }}
+        >
+          <Button style={buttonStyle} onClick={_onAddCategory}>
+            <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
+            Add category
+          </Button>
+          <Button style={buttonStyle} onClick={_onEditNotes}>
+            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+            Edit notes
+          </Button>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -193,6 +160,11 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
   };
+
+  const getItemStyle = item => ({
+    ...itemStyle,
+    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  });
 
   return (
     <View>
@@ -222,7 +194,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                   ...styles.mediumText,
                   color: theme.formLabelText,
                 }}
-                getItemStyle={() => itemStyle}
+                getItemStyle={getItemStyle}
                 items={
                   [
                     {
