@@ -46,7 +46,6 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
-import { useNavigate } from '../../hooks/useNavigate';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
@@ -637,11 +636,11 @@ const Transaction = memo(function Transaction(props) {
     onToggleSplit,
     onNavigateToTransferAccount,
     onNavigateToSchedule,
+    onNavigateToFilteredTagView,
   } = props;
 
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
-  const navigate = useNavigate();
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
@@ -757,18 +756,6 @@ const Transaction = memo(function Transaction(props) {
       onSave(deserialized, subtransactions);
     }
   }
-
-  const onNoteTagClick = noteTag => {
-    const conditions = [
-      { field: 'notes', op: 'contains', value: noteTag, type: 'string' },
-    ];
-    navigate('/accounts', {
-      state: {
-        goBack: true,
-        conditions,
-      },
-    });
-  };
 
   const {
     id,
@@ -1028,7 +1015,9 @@ const Transaction = memo(function Transaction(props) {
             whiteSpace: 'nowrap',
           }}
           valueStyle={valueStyle}
-          formatter={value => notesTagFormatter(value, onNoteTagClick)}
+          formatter={value =>
+            notesTagFormatter(value, onNavigateToFilteredTagView)
+          }
           onExpose={name => !isPreview && onEdit(id, name)}
           inputProps={{
             value: notes || '',
@@ -1411,6 +1400,7 @@ function NewTransaction({
   onCreatePayee,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
+  onNavigateToFilteredTagView,
   balance,
 }) {
   const error = transactions[0].error;
@@ -1464,6 +1454,7 @@ function NewTransaction({
           style={{ marginTop: -1 }}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
+          onNavigateToFilteredTagView={onNavigateToFilteredTagView}
           balance={balance}
         />
       ))}
@@ -1541,6 +1532,14 @@ function TransactionTableInner({
       props.onNavigateToSchedule(scheduleId);
     },
     [props.onCloseAddTransaction, props.onNavigateToSchedule],
+  );
+
+  const onNavigateToFilteredTagView = useCallback(
+    noteTag => {
+      props.onCloseAddTransaction();
+      props.onNavigateToFilteredTagView(noteTag);
+    },
+    [props.onCloseAddTransaction, props.onNavigateToFilteredTagView],
   );
 
   useEffect(() => {
@@ -1645,6 +1644,7 @@ function TransactionTableInner({
           onToggleSplit={props.onToggleSplit}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
+          onNavigateToFilteredTagView={onNavigateToFilteredTagView}
         />
       </>
     );
@@ -1702,6 +1702,7 @@ function TransactionTableInner({
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
+              onNavigateToFilteredTagView={onNavigateToFilteredTagView}
               onDistributeRemainder={props.onDistributeRemainder}
               balance={
                 props.transactions?.length > 0
@@ -2195,7 +2196,8 @@ function notesTagFormatter(value, onNoteTagClick) {
   const words = value.split(' ');
   return (
     <>
-      {words.map((word, i) => {
+      {words.map((word, i, arr) => {
+        const separator = arr.length - 1 === i ? '' : ' ';
         if (word.startsWith('#') && word.length > 1) {
           return (
             <>
@@ -2206,9 +2208,10 @@ function notesTagFormatter(value, onNoteTagClick) {
                   display: 'inline-flex',
                   padding: 4,
                   borderRadius: 16,
-                  backgroundColor: theme.pillBackground,
+                  backgroundColor: theme.tableRowBackgroundHighlight,
                   userSelect: 'none',
-                  color: theme.pillText,
+                  color: theme.tableRowBackgroundHighlightText,
+                  cursor: 'pointer',
                 }}
                 onClick={e => {
                   e.stopPropagation();
@@ -2216,12 +2219,12 @@ function notesTagFormatter(value, onNoteTagClick) {
                 }}
               >
                 {word}
-              </Button>{' '}
+              </Button>
+              {separator}
             </>
           );
         }
-
-        return `${word} `;
+        return `${word}${separator}`;
       })}
     </>
   );

@@ -166,6 +166,18 @@ export function TransactionList({
     dispatch(pushModal('schedule-edit', { id: scheduleId }));
   });
 
+  const onNavigateToFilteredTagView = useCallback(noteTag => {
+    const conditions = [
+      { field: 'notes', op: 'contains', value: noteTag, type: 'string' },
+    ];
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        conditions,
+      },
+    });
+  });
+
   return (
     <TransactionTable
       ref={tableRef}
@@ -201,6 +213,7 @@ export function TransactionList({
       style={{ backgroundColor: theme.tableBackground }}
       onNavigateToTransferAccount={onNavigateToTransferAccount}
       onNavigateToSchedule={onNavigateToSchedule}
+      onNavigateToFilteredTagView={onNavigateToFilteredTagView}
       onSort={onSort}
       sortField={sortField}
       ascDesc={ascDesc}
