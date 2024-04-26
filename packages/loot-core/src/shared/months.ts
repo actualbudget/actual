@@ -347,6 +347,10 @@ export function getMonth(day: string): string {
   return day.slice(0, 7);
 }
 
+export function getDay(day: string): number {
+  return Number(d.format(_parse(day), 'dd'));
+}
+
 export function getMonthEnd(day: string): string {
   return subDays(nextMonth(day.slice(0, 7)) + '-01', 1);
 }

@@ -115,7 +115,7 @@ function ErrorFallback({ error }: FallbackProps) {
   return (
     <>
       <AppBackground />
-      <FatalError error={error} buttonText="Restart app" />
+      <FatalError error={error} />
     </>
   );
 }

@@ -8,7 +8,7 @@ export function GoCardlessLink() {
   window.close();
 
   return (
-    <Modal isCurrent={true} CloseButton={undefined} title="Account sync">
+    <Modal isCurrent title="Account sync">
       {() => (
         <View style={{ maxWidth: 500 }}>
           <Paragraph>Please wait...</Paragraph>
