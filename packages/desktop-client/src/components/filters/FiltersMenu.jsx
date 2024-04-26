@@ -403,6 +403,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
             onApply={onValidateAndApply}
           />
         )}
+      </Popover>
     </View>
   );
 }
