@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { theme, styles } from '../../../style';
+import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -59,10 +59,7 @@ export function NetWorthCard({ accounts }) {
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <Change
-                  amount={data.totalChange}
-                  style={{ color: theme.tableText, fontWeight: 300 }}
-                />
+                <Change amount={data.totalChange} />
               </PrivacyFilter>
             </View>
           )}

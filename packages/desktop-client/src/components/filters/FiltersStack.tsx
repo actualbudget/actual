@@ -27,7 +27,7 @@ export function FiltersStack({
   onUpdateFilter: (
     filter: RuleConditionEntity,
     newFilter: RuleConditionEntity,
-  ) => RuleConditionEntity;
+  ) => void;
   onDeleteFilter: (filter: RuleConditionEntity) => void;
   onClearFilters: () => void;
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
