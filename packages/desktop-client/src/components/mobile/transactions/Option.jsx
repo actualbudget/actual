@@ -22,7 +22,7 @@ export function Option({ isLast, item, state }) {
         background: isSelected
           ? theme.tableRowBackgroundHighlight
           : theme.tableBackground,
-        color: isSelected ? theme.mobileModalText : null,
+        color: isSelected ? theme.tableText : null,
         outline: isFocusVisible ? '2px solid orange' : 'none',
         ...(!isLast && { borderBottom: `1px solid ${theme.tableBorder}` }),
       }}

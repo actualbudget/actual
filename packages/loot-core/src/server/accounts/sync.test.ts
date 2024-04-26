@@ -1,24 +1,12 @@
 // @ts-strict-ignore
-import snapshotDiff from 'snapshot-diff';
-
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { post } from '../post';
 import { getServer } from '../server-config';
-import * as mockSyncServer from '../tests/mockSyncServer';
 
-import {
-  syncAccount,
-  reconcileTransactions,
-  addTransactions,
-  fromPlaid,
-} from './sync';
+import { reconcileTransactions, addTransactions } from './sync';
 import { loadRules, insertRule } from './transaction-rules';
-import * as transfer from './transfer';
-
-const papaJohns = 'Papa Johns east side';
-const lowes = 'Lowe’s Store';
 
 jest.mock('../../shared/months', () => ({
   ...jest.requireActual('../../shared/months'),
@@ -27,7 +15,6 @@ jest.mock('../../shared/months', () => ({
 }));
 
 beforeEach(async () => {
-  mockSyncServer.reset();
   jest.resetAllMocks();
   (monthUtils.currentDay as jest.Mock).mockReturnValue('2017-10-15');
   (monthUtils.currentMonth as jest.Mock).mockReturnValue('2017-10');
@@ -46,37 +33,6 @@ function getAllTransactions() {
   );
 }
 
-function expectSnapshotWithDiffer(initialValue) {
-  let currentValue = initialValue;
-  expect(initialValue).toMatchSnapshot();
-  return {
-    expectToMatchDiff: value => {
-      expect(snapshotDiff(currentValue, value)).toMatchSnapshot();
-      currentValue = value;
-    },
-  };
-}
-
-function prepMockTransactions() {
-  let mockTransactions;
-  mockSyncServer.filterMockData(data => {
-    const account_id = data.accounts[0].account_id;
-    const transactions = data.transactions[account_id].filter(t => !t.pending);
-
-    mockTransactions = [
-      ...transactions.filter(t => t.date <= '2017-10-15'),
-      ...transactions.filter(t => t.date === '2017-10-16').slice(0, 1),
-      ...transactions.filter(t => t.date === '2017-10-17').slice(0, 3),
-    ];
-
-    return {
-      accounts: data.accounts,
-      transactions: { [account_id]: mockTransactions },
-    };
-  });
-  return mockTransactions;
-}
-
 async function prepareDatabase() {
   await db.insertCategoryGroup({ id: 'group1', name: 'group1', is_income: 1 });
   await db.insertCategory({
@@ -85,7 +41,7 @@ async function prepareDatabase() {
     is_income: 1,
   });
 
-  const { accounts } = await post(getServer().PLAID_SERVER + '/accounts', {
+  const { accounts } = await post(getServer().GOCARDLESS_SERVER + '/accounts', {
     client_id: '',
     group_id: '',
     item_id: '1',
@@ -134,229 +90,6 @@ describe('Account sync', () => {
     expect(transactions.find(t => t.amount === 5000).payee).toBe(
       payees.find(p => p.name === 'Kroger').id,
     );
-  });
-
-  test('reconcile matches single transaction', async () => {
-    const mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
-
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-
-    // The payee can be anything, all that matters is the amount is the same
-    const mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
-    mockTransaction.amount = 29.47;
-
-    const payeeId = await db.insertPayee({ name: 'macy' });
-    await db.insertTransaction({
-      id: 'one',
-      account: id,
-      amount: -2947,
-      date: '2017-10-15',
-      payee: payeeId,
-    });
-
-    const { added, updated } = await reconcileTransactions(
-      id,
-      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
-    );
-
-    expect(added.length).toBe(3);
-    expect(updated.length).toBe(1);
-
-    const transactions = await getAllTransactions();
-    const transaction = transactions.find(t => t.amount === -2947);
-    expect(transaction.id).toBe(updated[0]);
-
-    // The payee has not been updated - it's still the payee that the original transaction had
-    const payees = await getAllPayees();
-    expect(payees.length).toBe(18);
-    expect(transaction.payee).toBe(payeeId);
-  });
-
-  test('reconcile matches multiple transactions', async () => {
-    const mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
-
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-
-    // These should all match, but note that the one with the payee
-    // `macy` should match with the imported one with the same payee
-    // name. This should happen even though other transactions with
-    // the same amount are imported first, i.e. high fidelity matches
-    // always win
-    const mocked = mockTransactions.filter(t => t.date === '2017-10-17');
-    mocked[0].name = papaJohns;
-    mocked[0].amount = 29.47;
-    mocked[1].name = 'Lowe’s Store';
-    mocked[1].amount = 29.47;
-    mocked[2].name = 'macy';
-    mocked[2].amount = 29.47;
-
-    // Make sure that it macy is correctly matched from a different
-    // day first, and then the other two are matched based on amount.
-    // And it should never match the same transactions twice
-    await db.insertTransaction({
-      id: 'one',
-      account: id,
-      amount: -2947,
-      date: '2017-10-15',
-      payee: await db.insertPayee({ name: 'papa johns' }),
-    });
-    await db.insertTransaction({
-      id: 'two',
-      account: id,
-      amount: -2947,
-      date: '2017-10-17',
-      payee: await db.insertPayee({ name: 'lowes' }),
-    });
-    await db.insertTransaction({
-      id: 'three',
-      account: id,
-      amount: -2947,
-      date: '2017-10-17',
-      payee: await db.insertPayee({ name: 'macy' }),
-    });
-
-    const { added, updated } = await reconcileTransactions(
-      id,
-      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
-    );
-
-    const transactions = await getAllTransactions();
-    expect(updated.length).toBe(3);
-    expect(added.length).toBe(1);
-
-    expect(transactions.find(t => t.id === 'one').imported_id).toBe(
-      mocked[1].transaction_id,
-    );
-    expect(transactions.find(t => t.id === 'two').imported_id).toBe(
-      mocked[0].transaction_id,
-    );
-    expect(transactions.find(t => t.id === 'three').imported_id).toBe(
-      mocked[2].transaction_id,
-    );
-  });
-
-  test('reconcile matches multiple transactions (imported_id wins)', async () => {
-    const mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
-
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-
-    const mocked = mockTransactions.filter(t => t.date === '2017-10-17');
-    mocked[0].name = papaJohns;
-    mocked[0].amount = 29.47;
-    mocked[1].name = lowes;
-    mocked[1].amount = 29.47;
-    mocked[1].transaction_id = 'imported1';
-
-    // Technically, the amount doesn't even matter. The
-    // imported_id will always match no matter what
-    await db.insertTransaction({
-      id: 'one',
-      account: id,
-      amount: -3000,
-      date: '2017-10-15',
-      imported_id: 'imported1',
-      payee: await db.insertPayee({ name: 'papa johns' }),
-    });
-    await db.insertTransaction({
-      id: 'two',
-      account: id,
-      amount: -2947,
-      date: '2017-10-17',
-      payee: await db.insertPayee({ name: 'lowes' }),
-    });
-
-    const { added, updated } = await reconcileTransactions(
-      id,
-      mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
-    );
-
-    const transactions = await getAllTransactions();
-    expect(updated).toEqual(['two', 'one']);
-    expect(added.length).toBe(2);
-
-    // Make sure lowes, which has the imported_id, is the one that
-    // got matched with the same imported_id
-    expect(transactions.find(t => t.id === 'one').imported_payee).toBe(lowes);
-  });
-
-  test('import never matches existing with financial ids', async () => {
-    let mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
-
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-    const differ = expectSnapshotWithDiffer(await getAllTransactions());
-
-    mockTransactions = mockTransactions.filter(t => t.date === '2017-10-17');
-    mockTransactions[0].name = 'foo';
-    mockTransactions[0].amount = 29.47;
-    mockTransactions[1].name = 'bar';
-    mockTransactions[1].amount = 29.47;
-
-    // Make sure, no matter what, it never tries to match with an
-    // existing transaction that already has a financial id
-    await db.insertTransaction({
-      id: 'one',
-      account: id,
-      amount: -2947,
-      date: '2017-10-15',
-      payee: await db.insertPayee({ name: 'foo' }),
-      imported_id: 'trans1',
-    });
-
-    await db.insertTransaction({
-      id: 'two',
-      account: id,
-      amount: -2947,
-      date: '2017-10-15',
-      payee: await db.insertPayee({ name: 'bar' }),
-      imported_id: 'trans2',
-    });
-
-    differ.expectToMatchDiff(await getAllTransactions());
-
-    (monthUtils.currentDay as jest.Mock).mockReturnValue('2017-10-17');
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-
-    differ.expectToMatchDiff(await getAllTransactions());
-  });
-
-  test('import updates transfers when matched', async () => {
-    const mockTransactions = prepMockTransactions();
-    const { id, account_id } = await prepareDatabase();
-    await db.insertAccount({ id: 'two', name: 'two' });
-    await db.insertPayee({
-      id: 'transfer-two',
-      name: '',
-      transfer_acct: 'two',
-    });
-
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-    const differ = expectSnapshotWithDiffer(await getAllTransactions());
-
-    const mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
-    mockTransaction.name = '#001 fenn st Macy’s 33333 EMX';
-    mockTransaction.amount = 29.48;
-
-    const transactionId = await db.insertTransaction({
-      id: 'one',
-      account: 'two',
-      amount: 2948,
-      date: '2017-10-15',
-      payee: 'transfer-' + id,
-    });
-    await transfer.onInsert(await db.getTransaction(transactionId));
-
-    differ.expectToMatchDiff(await getAllTransactions());
-
-    (monthUtils.currentDay as jest.Mock).mockReturnValue('2017-10-17');
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-
-    // Don't use `differ.expectToMatchDiff` because there's too many
-    // changes that look too confusing
-    expect(await getAllTransactions()).toMatchSnapshot();
   });
 
   test('reconcile handles transactions with undefined fields', async () => {
@@ -608,18 +341,5 @@ describe('Account sync', () => {
       'bakkERIj2',
       'bakkerij-renamed',
     ]);
-  });
-
-  test('imports transactions for current day and adds latest', async () => {
-    const { id, account_id } = await prepareDatabase();
-
-    expect((await getAllTransactions()).length).toBe(0);
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-    expect(await getAllTransactions()).toMatchSnapshot();
-
-    (monthUtils.currentDay as jest.Mock).mockReturnValue('2017-10-17');
-
-    await syncAccount('userId', 'userKey', id, account_id, 'bank');
-    expect(await getAllTransactions()).toMatchSnapshot();
   });
 });

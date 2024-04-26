@@ -11,14 +11,12 @@ import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
+import { defaultsList } from './disabledList';
+import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
-import {
-  getSpecificRange,
-  validateEnd,
-  validateRange,
-  validateStart,
-} from './reportRanges';
+import { validateEnd, validateStart } from './reportRanges';
+import { setSessionReport } from './setSessionReport';
 
 export function ReportSidebar({
   customReportItems,
@@ -43,56 +41,32 @@ export function ReportSidebar({
   defaultItems,
   defaultModeItems,
   earliestTransaction,
+  firstDayOfWeekIdx,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
+    setSessionReport('dateRange', cond);
     onReportChange({ type: 'modify' });
     setDateRange(cond);
-    let dateStart;
-    let dateEnd;
-    switch (cond) {
-      case 'All time':
-        onChangeDates(earliestTransaction, monthUtils.currentDay());
-        break;
-      case 'Year to date':
-        [dateStart, dateEnd] = validateRange(
-          earliestTransaction,
-          monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
-          monthUtils.currentDay(),
-        );
-        onChangeDates(dateStart, dateEnd);
-        break;
-      case 'Last year':
-        [dateStart, dateEnd] = validateRange(
-          earliestTransaction,
-          monthUtils.getYearStart(
-            monthUtils.prevYear(monthUtils.currentMonth()),
-          ) + '-01',
-          monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())) +
-            '-31',
-        );
-        onChangeDates(dateStart, dateEnd);
-        break;
-      default:
-        [dateStart, dateEnd] = getSpecificRange(
-          ReportOptions.dateRangeMap.get(cond),
-          cond === 'Last month' ? 0 : null,
-        );
-        onChangeDates(dateStart, dateEnd);
-    }
+    onChangeDates(
+      ...getLiveRange(cond, earliestTransaction, firstDayOfWeekIdx),
+    );
   };
 
   const onChangeMode = cond => {
+    setSessionReport('mode', cond);
     onReportChange({ type: 'modify' });
     setMode(cond);
     let graph;
     if (cond === 'time') {
       if (customReportItems.graphType === 'BarGraph') {
+        setSessionReport('graphType', 'StackedBarGraph');
         setGraphType('StackedBarGraph');
         graph = 'StackedBarGraph';
       }
     } else {
       if (customReportItems.graphType === 'StackedBarGraph') {
+        setSessionReport('graphType', 'BarGraph');
         setGraphType('BarGraph');
         graph = 'BarGraph';
       }
@@ -101,12 +75,14 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
+    setSessionReport('groupBy', cond);
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
     defaultItems(cond);
   };
 
   const onChangeBalanceType = cond => {
+    setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
   };
@@ -206,6 +182,7 @@ export function ReportSidebar({
           <Select
             value={customReportItems.interval}
             onChange={e => {
+              setSessionReport('interval', e);
               setInterval(e);
               onReportChange({ type: 'modify' });
               if (
@@ -214,7 +191,7 @@ export function ReportSidebar({
                   .map(int => int.description)
                   .includes(customReportItems.dateRange)
               ) {
-                onSelectRange('Year to date');
+                onSelectRange(defaultsList.intervalRange.get(e));
               }
             }}
             options={ReportOptions.interval.map(option => [
@@ -255,14 +232,30 @@ export function ReportSidebar({
                     onReportChange({ type: 'modify' });
 
                     if (type === 'show-hidden-categories') {
+                      setSessionReport(
+                        'showHiddenCategories',
+                        !customReportItems.showHiddenCategories,
+                      );
                       setShowHiddenCategories(
                         !customReportItems.showHiddenCategories,
                       );
                     } else if (type === 'show-off-budget') {
+                      setSessionReport(
+                        'showOffBudget',
+                        !customReportItems.showOffBudget,
+                      );
                       setShowOffBudget(!customReportItems.showOffBudget);
                     } else if (type === 'show-empty-items') {
+                      setSessionReport(
+                        'showEmpty',
+                        !customReportItems.showEmpty,
+                      );
                       setShowEmpty(!customReportItems.showEmpty);
                     } else if (type === 'show-uncategorized') {
+                      setSessionReport(
+                        'showUncategorized',
+                        !customReportItems.showUncategorized,
+                      );
                       setShowUncategorized(
                         !customReportItems.showUncategorized,
                       );
@@ -322,6 +315,7 @@ export function ReportSidebar({
           <ModeButton
             selected={!customReportItems.isDateStatic}
             onSelect={() => {
+              setSessionReport('isDateStatic', false);
               setIsDateStatic(false);
               onSelectRange(customReportItems.dateRange);
             }}
@@ -331,6 +325,7 @@ export function ReportSidebar({
           <ModeButton
             selected={customReportItems.isDateStatic}
             onSelect={() => {
+              setSessionReport('isDateStatic', true);
               setIsDateStatic(true);
               onChangeDates(
                 customReportItems.startDate,
@@ -360,7 +355,7 @@ export function ReportSidebar({
               options={ReportOptions.dateRange
                 .filter(f => f[customReportItems.interval])
                 .map(option => [option.description, option.description])}
-              line={customReportItems.interval === 'Monthly' && dateRangeLine}
+              line={dateRangeLine > 0 && dateRangeLine}
             />
           </View>
         ) : (
@@ -383,6 +378,7 @@ export function ReportSidebar({
                       newValue,
                       customReportItems.endDate,
                       customReportItems.interval,
+                      firstDayOfWeekIdx,
                     ),
                   )
                 }
@@ -412,6 +408,7 @@ export function ReportSidebar({
                       customReportItems.startDate,
                       newValue,
                       customReportItems.interval,
+                      firstDayOfWeekIdx,
                     ),
                   )
                 }

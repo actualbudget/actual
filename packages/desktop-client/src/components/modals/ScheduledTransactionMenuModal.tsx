@@ -23,27 +23,13 @@ export function ScheduledTransactionMenuModal({
   };
 
   return (
-    <Modal
-      title="Actions"
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-      padding={0}
-      style={{
-        flex: 1,
-        padding: '0 10px',
-        paddingBottom: 10,
-        borderRadius: '6px',
-      }}
-    >
-      {() => (
-        <ScheduledTransactionMenu
-          transactionId={transactionId}
-          onPost={onPost}
-          onSkip={onSkip}
-          getItemStyle={() => defaultMenuItemStyle}
-        />
-      )}
+    <Modal showHeader focusAfterClose={false} {...modalProps}>
+      <ScheduledTransactionMenu
+        transactionId={transactionId}
+        onPost={onPost}
+        onSkip={onSkip}
+        getItemStyle={() => defaultMenuItemStyle}
+      />
     </Modal>
   );
 }

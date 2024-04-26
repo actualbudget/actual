@@ -3,7 +3,7 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
-import { Modal } from '../common/Modal';
+import { ModalCloseButton, Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { type CommonModalProps } from '../Modals';
@@ -31,23 +31,27 @@ export function AccountAutocompleteModal({
 
   return (
     <Modal
-      title="Account"
+      title={
+        <ModalTitle
+          title="Account"
+          getStyle={() => ({ color: theme.menuAutoCompleteText })}
+        />
+      }
       noAnimation={!isNarrowWidth}
       showHeader={isNarrowWidth}
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 0,
         height: isNarrowWidth ? '85vh' : 275,
-        padding: '15px 10px',
-        borderRadius: '6px',
-        ...(!isNarrowWidth && {
-          backgroundColor: theme.mobileModalBackground,
-          color: theme.mobileModalText,
-        }),
+        backgroundColor: theme.menuAutoCompleteBackground,
       }}
+      CloseButton={props => (
+        <ModalCloseButton
+          {...props}
+          style={{ color: theme.menuAutoCompleteText }}
+        />
+      )}
     >
       {() => (
         <View>
@@ -56,7 +60,7 @@ export function AccountAutocompleteModal({
               title="Account"
               style={{
                 alignSelf: 'center',
-                color: theme.mobileModalText,
+                color: theme.menuAutoCompleteText,
                 marginBottom: 10,
               }}
             />

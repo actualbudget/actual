@@ -61,6 +61,7 @@ export const menuAutoCompleteBackground = colorPalette.navy900;
 export const menuAutoCompleteBackgroundHover = colorPalette.navy600;
 export const menuAutoCompleteText = colorPalette.navy200;
 export const menuAutoCompleteTextHeader = colorPalette.purple200;
+export const menuAutoCompleteItemText = menuItemText;
 
 export const modalBackground = colorPalette.gray800;
 export const modalBorder = colorPalette.navy600;
@@ -74,8 +75,6 @@ export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = colorPalette.purple400;
 export const mobileAccountShadow = cardShadow;
 export const mobileAccountText = colorPalette.blue800;
-export const mobileModalBackground = colorPalette.navy900;
-export const mobileModalText = colorPalette.white;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = mobileHeaderBackground;
@@ -150,7 +149,7 @@ export const errorBackground = colorPalette.red800;
 export const errorText = colorPalette.red200;
 export const errorTextDark = colorPalette.red150;
 export const errorTextDarker = errorTextDark;
-export const errorTextMenu = colorPalette.red500;
+export const errorTextMenu = colorPalette.red200;
 export const errorBorder = colorPalette.red500;
 export const upcomingBackground = colorPalette.purple700;
 export const upcomingText = colorPalette.purple100;

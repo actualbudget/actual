@@ -139,8 +139,6 @@ export interface ServerHandlers {
 
   query: (query) => Promise<{ data; dependencies }>;
 
-  'bank-delete': (arg: { id }) => Promise<unknown>;
-
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
   'accounts-get': () => Promise<AccountEntity[]>;
@@ -148,13 +146,6 @@ export interface ServerHandlers {
   'account-properties': (arg: {
     id;
   }) => Promise<{ balance: number; numTransactions: number }>;
-
-  'accounts-link': (arg: {
-    institution;
-    publicToken;
-    accountId;
-    upgradingId;
-  }) => Promise<'ok'>;
 
   'gocardless-accounts-link': (arg: {
     requisitionId;
@@ -166,20 +157,6 @@ export interface ServerHandlers {
     externalAccount;
     upgradingId;
   }) => Promise<'ok'>;
-
-  'accounts-connect': (arg: {
-    institution;
-    publicToken;
-    accountIds;
-    offbudgetIds?;
-  }) => Promise<unknown>;
-
-  'gocardless-accounts-connect': (arg: {
-    institution;
-    publicToken;
-    accountIds;
-    offbudgetIds;
-  }) => Promise<unknown>;
 
   'account-create': (arg: {
     name: string;
@@ -198,17 +175,6 @@ export interface ServerHandlers {
   'account-reopen': (arg: { id }) => Promise<unknown>;
 
   'account-move': (arg: { id; targetId }) => Promise<unknown>;
-
-  'poll-web-token': (arg: { token }) => Promise<unknown>;
-
-  'poll-web-token-stop': () => Promise<'ok'>;
-
-  'accounts-sync': (arg: { id? }) => Promise<{
-    errors: unknown;
-    newTransactions: unknown;
-    matchedTransactions: unknown;
-    updatedAccounts: unknown;
-  }>;
 
   'secret-set': (arg: { name: string; value: string }) => Promise<null>;
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
@@ -260,10 +226,6 @@ export interface ServerHandlers {
   }>;
 
   'account-unlink': (arg: { id }) => Promise<'ok'>;
-
-  'make-plaid-public-token': (arg: {
-    bankId;
-  }) => Promise<{ error: ''; code; type } | { linkToken }>;
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 

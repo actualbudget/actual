@@ -20,6 +20,7 @@ import {
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -125,6 +126,7 @@ export function AreaGraph({
   viewLabels,
 }: AreaGraphProps) {
   const privacyMode = usePrivacyMode();
+  const { isNarrowWidth } = useResponsive();
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
   const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
 
@@ -211,11 +213,13 @@ export function AreaGraph({
                     tickSize={0}
                   />
                 )}
-                <Tooltip
-                  content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                  />
+                )}
                 <defs>
                   <linearGradient
                     id={`fill${balanceTypeOp}`}

@@ -7,7 +7,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import {
   format as formatDate,
@@ -56,9 +56,9 @@ import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { MobileBackButton } from '../../MobileBackButton';
 import { Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
+import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
@@ -495,10 +495,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
   };
 
   const onSave = async () => {
-    const [transaction] = unserializedTransactions;
+    const [unserializedTransaction] = unserializedTransactions;
 
     const onConfirmSave = async () => {
-      const { account: accountId } = transaction;
+      const { account: accountId } = unserializedTransaction;
       const account = accountsById[accountId];
 
       if (unserializedTransactions.find(t => t.account == null)) {
@@ -516,7 +516,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       navigate(`/accounts/${account.id}`, { replace: true });
     };
 
-    if (transaction.reconciled) {
+    if (unserializedTransaction.reconciled) {
       // On mobile any save gives the warning.
       // On the web only certain changes trigger a warning.
       // Should we bring that here as well? Or does the nature of the editing form
@@ -536,15 +536,16 @@ const TransactionEditInner = memo(function TransactionEditInner({
     onSave();
   };
 
-  const onEdit = async (transaction, name, value) => {
-    const newTransaction = { ...transaction, [name]: value };
+  const onEdit = async (serializedTransaction, name, value) => {
+    const newTransaction = { ...serializedTransaction, [name]: value };
     await props.onEdit(newTransaction);
     onClearActiveEdit();
   };
 
   const onClick = (transactionId, name) => {
     onRequestActiveEdit?.(getFieldName(transaction.id, name), () => {
-      const transaction = unserializedTransactions.find(
+      const transactionToEdit = transactions.find(t => t.id === transactionId);
+      const unserializedTransaction = unserializedTransactions.find(
         t => t.id === transactionId,
       );
       switch (name) {
@@ -552,15 +553,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('category-autocomplete', {
               categoryGroups,
+              month: monthUtils.monthFromDate(unserializedTransaction.date),
               onSelect: categoryId => {
-                // This is a deficiency of this API, need to fix. It
-                // assumes that it receives a serialized transaction,
-                // but we only have access to the raw transaction
-                onEdit(
-                  serializeTransaction(transaction, dateFormat),
-                  name,
-                  categoryId,
-                );
+                onEdit(transactionToEdit, name, categoryId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -572,14 +567,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('account-autocomplete', {
               onSelect: accountId => {
-                // This is a deficiency of this API, need to fix. It
-                // assumes that it receives a serialized transaction,
-                // but we only have access to the raw transaction
-                onEdit(
-                  serializeTransaction(transaction, dateFormat),
-                  name,
-                  accountId,
-                );
+                onEdit(transactionToEdit, name, accountId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -591,14 +579,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('payee-autocomplete', {
               onSelect: payeeId => {
-                // This is a deficiency of this API, need to fix. It
-                // assumes that it receives a serialized transaction,
-                // but we only have access to the raw transaction
-                onEdit(
-                  serializeTransaction(transaction, dateFormat),
-                  name,
-                  payeeId,
-                );
+                onEdit(transactionToEdit, name, payeeId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -610,15 +591,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('edit-field', {
               name,
+              month: monthUtils.monthFromDate(unserializedTransaction.date),
               onSubmit: (name, value) => {
-                // This is a deficiency of this API, need to fix. It
-                // assumes that it receives a serialized transaction,
-                // but we only have access to the raw transaction
-                onEdit(
-                  serializeTransaction(transaction, dateFormat),
-                  name,
-                  value,
-                );
+                onEdit(transactionToEdit, name, value);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -631,18 +606,18 @@ const TransactionEditInner = memo(function TransactionEditInner({
   };
 
   const onDelete = id => {
-    const [transaction, ..._childTransactions] = unserializedTransactions;
+    const [unserializedTransaction] = unserializedTransactions;
 
     const onConfirmDelete = () => {
       props.onDelete(id);
 
-      if (transaction.id !== id) {
+      if (unserializedTransaction.id !== id) {
         // Only a child transaction was deleted.
         onClearActiveEdit();
         return;
       }
 
-      const { account: accountId } = transaction;
+      const { account: accountId } = unserializedTransaction;
       if (accountId) {
         navigate(`/accounts/${accountId}`, { replace: true });
       } else {
@@ -650,7 +625,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       }
     };
 
-    if (transaction.reconciled) {
+    if (unserializedTransaction.reconciled) {
       dispatch(
         pushModal('confirm-transaction-edit', {
           onConfirm: onConfirmDelete,
@@ -683,9 +658,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
   };
 
   useEffect(() => {
-    const noAmountTransaction = childTransactions.find(t => t.amount === 0);
-    if (noAmountTransaction) {
-      scrollChildTransactionIntoView(noAmountTransaction.id);
+    const noAmountChildTransaction = childTransactions.find(
+      t => t.amount === 0,
+    );
+    if (noAmountChildTransaction) {
+      scrollChildTransactionIntoView(noAmountChildTransaction.id);
     }
   }, [childTransactions]);
 
@@ -748,16 +725,15 @@ const TransactionEditInner = memo(function TransactionEditInner({
             zeroSign="-"
             focused={totalAmountFocused}
             onFocus={onTotalAmountEdit}
-            onUpdate={onTotalAmountUpdate}
+            onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',
               padding: '5px',
               paddingLeft: '20px',
               paddingRight: '20px',
-              minWidth: 120,
-              transform: [{ translateY: -0.5 }],
+              minWidth: '100%',
             }}
-            textStyle={{ fontSize: 30, textAlign: 'center' }}
+            textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
           />
         </View>
 
@@ -975,21 +951,28 @@ function isTemporary(transaction) {
   return transaction.id.indexOf('temp') === 0;
 }
 
-function makeTemporaryTransactions(currentAccountId, lastDate) {
+function makeTemporaryTransactions(accountId, categoryId, lastDate) {
   return [
     {
       id: 'temp',
       date: lastDate || monthUtils.currentDay(),
-      account: currentAccountId,
+      account: accountId,
+      category: categoryId,
       amount: 0,
       cleared: false,
     },
   ];
 }
 
-function TransactionEditUnconnected(props) {
-  const { categories, accounts, payees, lastTransaction, dateFormat } = props;
-  const { id: accountId, transactionId } = useParams();
+function TransactionEditUnconnected({
+  categories,
+  accounts,
+  payees,
+  lastTransaction,
+  dateFormat,
+}) {
+  const { transactionId } = useParams();
+  const { state: locationState } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [transactions, setTransactions] = useState([]);
@@ -1019,7 +1002,7 @@ function TransactionEditUnconnected(props) {
       setTransactions(fetchedTransactions);
       setFetchedTransactions(fetchedTransactions);
     }
-    if (transactionId) {
+    if (transactionId !== 'new') {
       fetchTransaction();
     } else {
       adding.current = true;
@@ -1030,12 +1013,13 @@ function TransactionEditUnconnected(props) {
     if (adding.current) {
       setTransactions(
         makeTemporaryTransactions(
-          accountId || lastTransaction?.account || null,
+          locationState?.accountId || lastTransaction?.account || null,
+          locationState?.categoryId || lastTransaction?.category || null,
           lastTransaction?.date,
         ),
       );
     }
-  }, [accountId, lastTransaction]);
+  }, [locationState?.accountId, locationState?.categoryId, lastTransaction]);
 
   if (
     categories.length === 0 ||

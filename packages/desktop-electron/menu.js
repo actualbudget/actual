@@ -12,7 +12,7 @@ function getMenu(isDev, createWindow) {
             if (focusedWindow) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
-                  "__actionsForMenu.replaceModal('load-backup')",
+                  `__actionsForMenu.replaceModal('load-backup', { budgetId: '${item.budgetId}' })`,
                 );
               }
             }

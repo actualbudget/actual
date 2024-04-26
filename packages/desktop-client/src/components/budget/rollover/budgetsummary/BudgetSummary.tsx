@@ -8,13 +8,13 @@ import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
 import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
 import { theme, styles } from '../../../../style';
 import { Button } from '../../../common/Button';
-import { Menu } from '../../../common/Menu';
 import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../../tooltips';
 import { useRollover } from '../RolloverContext';
 
+import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
 
@@ -22,10 +22,7 @@ type BudgetSummaryProps = {
   month: string;
   isGoalTemplatesEnabled?: boolean;
 };
-export function BudgetSummary({
-  month,
-  isGoalTemplatesEnabled,
-}: BudgetSummaryProps) {
+export function BudgetSummary({ month }: BudgetSummaryProps) {
   const {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -129,7 +126,7 @@ export function BudgetSummary({
                 id={`budget-${month}`}
                 width={15}
                 height={15}
-                tooltipPosition="bottom-right"
+                tooltipPosition="bottom right"
                 defaultColor={theme.tableTextLight}
               />
             </View>
@@ -148,39 +145,35 @@ export function BudgetSummary({
                   style={{ padding: 0 }}
                   onClose={onMenuClose}
                 >
-                  <Menu
-                    onMenuSelect={type => {
+                  <BudgetMonthMenu
+                    onCopyLastMonthBudget={() => {
+                      onBudgetAction(month, 'copy-last');
                       onMenuClose();
-                      onBudgetAction(month, type);
                     }}
-                    items={[
-                      { name: 'copy-last', text: 'Copy last month’s budget' },
-                      { name: 'set-zero', text: 'Set budgets to zero' },
-                      {
-                        name: 'set-3-avg',
-                        text: 'Set budgets to 3 month average',
-                      },
-                      ...(isGoalTemplatesEnabled
-                        ? [
-                            {
-                              name: 'check-templates',
-                              text: 'Check templates',
-                            },
-                            {
-                              name: 'apply-goal-template',
-                              text: 'Apply budget template',
-                            },
-                            {
-                              name: 'overwrite-goal-template',
-                              text: 'Overwrite with budget template',
-                            },
-                            {
-                              name: 'cleanup-goal-template',
-                              text: 'End of month cleanup',
-                            },
-                          ]
-                        : []),
-                    ]}
+                    onSetBudgetsToZero={() => {
+                      onBudgetAction(month, 'set-zero');
+                      onMenuClose();
+                    }}
+                    onSetMonthsAverage={numberOfMonths => {
+                      onBudgetAction(month, `set-${numberOfMonths}-avg`);
+                      onMenuClose();
+                    }}
+                    onCheckTemplates={() => {
+                      onBudgetAction(month, 'check-templates');
+                      onMenuClose();
+                    }}
+                    onApplyBudgetTemplates={() => {
+                      onBudgetAction(month, 'apply-goal-template');
+                      onMenuClose();
+                    }}
+                    onOverwriteWithBudgetTemplates={() => {
+                      onBudgetAction(month, 'overwrite-goal-template');
+                      onMenuClose();
+                    }}
+                    onEndOfMonthCleanup={() => {
+                      onBudgetAction(month, 'cleanup-goal-template');
+                      onMenuClose();
+                    }}
                   />
                 </Tooltip>
               )}

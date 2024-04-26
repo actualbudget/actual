@@ -421,8 +421,9 @@ export function CreatePayeeButton({
       style={{
         display: 'block',
         flexShrink: 0,
-        color:
-          embedded && isNarrowWidth ? theme.menuItemText : theme.noticeTextMenu,
+        color: highlighted
+          ? theme.menuAutoCompleteTextHover
+          : theme.noticeTextMenu,
         borderRadius: embedded ? 4 : 0,
         fontSize: 11,
         fontWeight: 500,
@@ -517,6 +518,9 @@ function PayeeItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
+          color: highlighted
+            ? theme.menuAutoCompleteItemTextHover
+            : theme.menuAutoCompleteItemText,
           borderRadius: embedded ? 4 : 0,
           padding: 4,
           paddingLeft: 20,

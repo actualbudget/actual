@@ -16,6 +16,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
+import { setSessionReport } from './setSessionReport';
 
 export function ReportTopbar({
   customReportItems,
@@ -31,6 +32,13 @@ export function ReportTopbar({
   disabledItems,
   defaultItems,
 }) {
+  const onChangeGraph = cond => {
+    setSessionReport('graphType', cond);
+    onReportChange({ type: 'modify' });
+    setGraphType(cond);
+    defaultItems(cond);
+  };
+
   return (
     <View
       style={{
@@ -44,9 +52,7 @@ export function ReportTopbar({
         selected={customReportItems.graphType === 'TableGraph'}
         title="Data Table"
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType('TableGraph');
-          defaultItems('TableGraph');
+          onChangeGraph('TableGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('TableGraph')}
@@ -62,11 +68,7 @@ export function ReportTopbar({
           customReportItems.graphType === 'StackedBarGraph'
         }
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType(
-            customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
-          );
-          defaultItems(
+          onChangeGraph(
             customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
           );
         }}
@@ -81,9 +83,7 @@ export function ReportTopbar({
         title="Line Graph"
         selected={customReportItems.graphType === 'LineGraph'}
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType('LineGraph');
-          defaultItems('LineGraph');
+          onChangeGraph('LineGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('LineGraph')}
@@ -94,9 +94,7 @@ export function ReportTopbar({
         title="Area Graph"
         selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType('AreaGraph');
-          defaultItems('AreaGraph');
+          onChangeGraph('AreaGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('AreaGraph')}
@@ -107,9 +105,7 @@ export function ReportTopbar({
         title="Donut Graph"
         selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
-          onReportChange({ type: 'modify' });
-          setGraphType('DonutGraph');
-          defaultItems('DonutGraph');
+          onChangeGraph('DonutGraph');
         }}
         style={{ marginRight: 15 }}
         disabled={disabledItems('DonutGraph')}
@@ -170,6 +166,7 @@ export function ReportTopbar({
         compact
         hover
         onApply={e => {
+          setSessionReport('conditions', [...customReportItems.conditions, e]);
           onApplyFilter(e);
           onReportChange({ type: 'modify' });
         }}

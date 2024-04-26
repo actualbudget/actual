@@ -12,6 +12,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayees } from '../../../hooks/usePayees';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -21,6 +22,7 @@ import { AppliedFilters } from '../../filters/AppliedFilters';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import { defaultsList, disabledList } from '../disabledList';
+import { getLiveRange } from '../getLiveRange';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportLegend } from '../ReportLegend';
@@ -28,6 +30,7 @@ import { ReportOptions, defaultReport } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
+import { setSessionReport } from '../setSessionReport';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
@@ -35,6 +38,9 @@ import { fromDateRepr } from '../util';
 
 export function CustomReport() {
   const categories = useCategories();
+  const { isNarrowWidth } = useResponsive();
+  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -53,9 +59,19 @@ export function CustomReport() {
   } = useFilters();
 
   const location = useLocation();
-  const loadReport = location.state
+
+  const prevUrl = sessionStorage.getItem('url');
+
+  sessionStorage.setItem('prevUrl', prevUrl);
+  sessionStorage.setItem('url', location.pathname);
+
+  if (['/reports'].includes(prevUrl)) sessionStorage.clear();
+
+  const session = JSON.parse(sessionStorage.getItem('report'));
+  const combine = location.state
     ? location.state.report ?? defaultReport
     : defaultReport;
+  const loadReport = { ...combine, ...session };
 
   const [allIntervals, setAllIntervals] = useState(null);
 
@@ -90,20 +106,12 @@ export function CustomReport() {
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [report, setReport] = useState(loadReport);
   const [savedStatus, setSavedStatus] = useState(
-    location.state ? (location.state.report ? 'saved' : 'new') : 'new',
+    location.state
+      ? location.state.report
+        ? 'saved'
+        : loadReport.savedStatus ?? 'new'
+      : loadReport.savedStatus ?? 'new',
   );
-
-  useEffect(() => {
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
-
-    const dateStart = monthUtils[format](startDate);
-    const dateEnd = monthUtils[format](endDate);
-
-    setIntervals(
-      monthUtils[ReportOptions.intervalRange.get(interval)](dateStart, dateEnd),
-    );
-  }, [interval, startDate, endDate]);
 
   useEffect(() => {
     if (selectedCategories === undefined && categories.list.length !== 0) {
@@ -124,9 +132,12 @@ export function CustomReport() {
         ? monthUtils[format](d.parseISO(fromDateRepr(trans.date)))
         : currentInterval;
 
+      const rangeProps =
+        interval === 'Weekly'
+          ? [earliestInterval, currentInterval, firstDayOfWeekIdx]
+          : [earliestInterval, currentInterval];
       const allInter = monthUtils[ReportOptions.intervalRange.get(interval)](
-        earliestInterval,
-        currentInterval,
+        ...rangeProps,
       )
         .map(inter => ({
           name: inter,
@@ -138,9 +149,35 @@ export function CustomReport() {
         .reverse();
 
       setAllIntervals(allInter);
+
+      if (!isDateStatic) {
+        const [dateStart, dateEnd] = getLiveRange(
+          dateRange,
+          trans ? trans.date : monthUtils.currentDay(),
+          firstDayOfWeekIdx,
+        );
+        setStartDate(dateStart);
+        setEndDate(dateEnd);
+      }
     }
     run();
   }, [interval]);
+
+  useEffect(() => {
+    const format =
+      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+
+    const dateStart = monthUtils[format](startDate);
+    const dateEnd = monthUtils[format](endDate);
+
+    const rangeProps =
+      interval === 'Weekly'
+        ? [dateStart, dateEnd, firstDayOfWeekIdx]
+        : [dateStart, dateEnd];
+    setIntervals(
+      monthUtils[ReportOptions.intervalRange.get(interval)](...rangeProps),
+    );
+  }, [interval, startDate, endDate]);
 
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = usePayees();
@@ -160,6 +197,7 @@ export function CustomReport() {
       showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
+      firstDayOfWeekIdx,
     });
   }, [
     startDate,
@@ -178,6 +216,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     graphType,
+    firstDayOfWeekIdx,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -199,6 +238,7 @@ export function CustomReport() {
       payees,
       accounts,
       graphType,
+      firstDayOfWeekIdx,
       setDataCheck,
     });
   }, [
@@ -218,6 +258,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     graphType,
+    firstDayOfWeekIdx,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -255,17 +296,22 @@ export function CustomReport() {
       ? defaultsList.modeGraphsMap.get(item)
       : chooseGraph;
     if (disabledList.modeGraphsMap.get(item).includes(graphType)) {
+      setSessionReport('graphType', newGraph);
       setGraphType(newGraph);
     }
 
     if (disabledList.graphSplitMap.get(item).get(newGraph).includes(groupBy)) {
-      setGroupBy(defaultsList.graphSplitMap.get(item).get(newGraph));
+      const cond = defaultsList.graphSplitMap.get(item).get(newGraph);
+      setSessionReport('groupBy', cond);
+      setGroupBy(cond);
     }
 
     if (
       disabledList.graphTypeMap.get(item).get(newGraph).includes(balanceType)
     ) {
-      setBalanceType(defaultsList.graphTypeMap.get(item).get(newGraph));
+      const cond = defaultsList.graphTypeMap.get(item).get(newGraph);
+      setSessionReport('balanceType', cond);
+      setBalanceType(cond);
     }
   };
 
@@ -274,12 +320,16 @@ export function CustomReport() {
     if (
       disabledList.graphSplitMap.get(mode).get(chooseGraph).includes(groupBy)
     ) {
-      setGroupBy(defaultsList.graphSplitMap.get(mode).get(chooseGraph));
+      const cond = defaultsList.graphSplitMap.get(mode).get(chooseGraph);
+      setSessionReport('groupBy', cond);
+      setGroupBy(cond);
     }
     if (
       disabledList.graphTypeMap.get(mode).get(chooseGraph).includes(balanceType)
     ) {
-      setBalanceType(defaultsList.graphTypeMap.get(mode).get(chooseGraph));
+      const cond = defaultsList.graphTypeMap.get(mode).get(chooseGraph);
+      setSessionReport('balanceType', cond);
+      setBalanceType(cond);
     }
   };
 
@@ -309,6 +359,8 @@ export function CustomReport() {
   };
 
   const onChangeDates = (dateStart, dateEnd) => {
+    setSessionReport('startDate', dateStart);
+    setSessionReport('endDate', dateEnd);
     setStartDate(dateStart);
     setEndDate(dateEnd);
     onReportChange({ type: 'modify' });
@@ -359,6 +411,7 @@ export function CustomReport() {
   const onReportChange = ({ savedReport, type }) => {
     switch (type) {
       case 'add-update':
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(savedReport);
         break;
@@ -367,19 +420,23 @@ export function CustomReport() {
         break;
       case 'modify':
         if (report.name) {
+          setSessionReport('savedStatus', 'modified');
           setSavedStatus('modified');
         }
         break;
       case 'reload':
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReportData(report);
         break;
       case 'reset':
+        sessionStorage.clear();
         setSavedStatus('new');
         setReport(defaultReport);
         setReportData(defaultReport);
         break;
       case 'choose':
+        setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(savedReport);
         setReportData(savedReport);
@@ -389,10 +446,16 @@ export function CustomReport() {
   };
 
   return (
-    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
+    <View
+      style={{
+        ...styles.page,
+        minWidth: isNarrowWidth ? undefined : 650,
+        overflow: 'hidden',
+      }}
+    >
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: isNarrowWidth ? 'column' : 'row',
           flexShrink: 0,
         }}
       >
@@ -400,7 +463,10 @@ export function CustomReport() {
         <Text
           style={{
             ...styles.veryLargeText,
-            marginTop: 40,
+            marginTop: isNarrowWidth ? 0 : 40,
+            padding: isNarrowWidth ? 10 : 0,
+            paddingTop: 0,
+            flexShrink: 0,
             color: theme.pageTextPositive,
           }}
         >
@@ -416,49 +482,54 @@ export function CustomReport() {
           flexGrow: 1,
         }}
       >
-        <ReportSidebar
-          customReportItems={customReportItems}
-          categories={categories}
-          dateRangeLine={dateRangeLine}
-          allIntervals={allIntervals}
-          setDateRange={setDateRange}
-          setGraphType={setGraphType}
-          setGroupBy={setGroupBy}
-          setInterval={setInterval}
-          setBalanceType={setBalanceType}
-          setMode={setMode}
-          setIsDateStatic={setIsDateStatic}
-          setShowEmpty={setShowEmpty}
-          setShowOffBudget={setShowOffBudget}
-          setShowHiddenCategories={setShowHiddenCategories}
-          setShowUncategorized={setShowUncategorized}
-          setSelectedCategories={setSelectedCategories}
-          onChangeDates={onChangeDates}
-          onReportChange={onReportChange}
-          disabledItems={disabledItems}
-          defaultItems={defaultItems}
-          defaultModeItems={defaultModeItems}
-          earliestTransaction={earliestTransaction}
-        />
+        {!isNarrowWidth && (
+          <ReportSidebar
+            customReportItems={customReportItems}
+            categories={categories}
+            dateRangeLine={dateRangeLine}
+            allIntervals={allIntervals}
+            setDateRange={setDateRange}
+            setGraphType={setGraphType}
+            setGroupBy={setGroupBy}
+            setInterval={setInterval}
+            setBalanceType={setBalanceType}
+            setMode={setMode}
+            setIsDateStatic={setIsDateStatic}
+            setShowEmpty={setShowEmpty}
+            setShowOffBudget={setShowOffBudget}
+            setShowHiddenCategories={setShowHiddenCategories}
+            setShowUncategorized={setShowUncategorized}
+            setSelectedCategories={setSelectedCategories}
+            onChangeDates={onChangeDates}
+            onReportChange={onReportChange}
+            disabledItems={disabledItems}
+            defaultItems={defaultItems}
+            defaultModeItems={defaultModeItems}
+            earliestTransaction={earliestTransaction}
+            firstDayOfWeekIdx={firstDayOfWeekIdx}
+          />
+        )}
         <View
           style={{
             flexGrow: 1,
           }}
         >
-          <ReportTopbar
-            customReportItems={customReportItems}
-            report={report}
-            savedStatus={savedStatus}
-            setGraphType={setGraphType}
-            viewLegend={viewLegend}
-            viewSummary={viewSummary}
-            viewLabels={viewLabels}
-            onApplyFilter={onApplyFilter}
-            onChangeViews={onChangeViews}
-            onReportChange={onReportChange}
-            disabledItems={disabledItems}
-            defaultItems={defaultItems}
-          />
+          {!isNarrowWidth && (
+            <ReportTopbar
+              customReportItems={customReportItems}
+              report={report}
+              savedStatus={savedStatus}
+              setGraphType={setGraphType}
+              viewLegend={viewLegend}
+              viewSummary={viewSummary}
+              viewLabels={viewLabels}
+              onApplyFilter={onApplyFilter}
+              onChangeViews={onChangeViews}
+              onReportChange={onReportChange}
+              disabledItems={disabledItems}
+              defaultItems={defaultItems}
+            />
+          )}
           {filters && filters.length > 0 && (
             <View
               style={{ marginBottom: 10, marginLeft: 5, flexShrink: 0 }}
@@ -469,10 +540,21 @@ export function CustomReport() {
             >
               <AppliedFilters
                 filters={filters}
-                onUpdate={onUpdateFilter}
-                onDelete={filter =>
-                  onChangeAppliedFilter(filter, onDeleteFilter)
-                }
+                onUpdate={(oldFilter, newFilter) => {
+                  setSessionReport(
+                    'conditions',
+                    filters.map(f => (f === oldFilter ? newFilter : f)),
+                  );
+                  onReportChange({ type: 'modify' });
+                  onUpdateFilter(oldFilter, newFilter);
+                }}
+                onDelete={deletedFilter => {
+                  setSessionReport(
+                    'conditions',
+                    filters.filter(f => f !== deletedFilter),
+                  );
+                  onChangeAppliedFilter(deletedFilter, onDeleteFilter);
+                }}
                 conditionsOp={conditionsOp}
                 onCondOpChange={filter =>
                   onChangeAppliedFilter(filter, onCondOpChange)
@@ -531,9 +613,8 @@ export function CustomReport() {
 
                 {dataCheck ? (
                   <ChooseGraph
-                    startDate={startDate}
-                    endDate={endDate}
                     data={data}
+                    filters={filters}
                     mode={mode}
                     graphType={graphType}
                     balanceType={balanceType}
@@ -544,12 +625,15 @@ export function CustomReport() {
                     setScrollWidth={setScrollWidth}
                     viewLabels={viewLabels}
                     compact={false}
+                    showHiddenCategories={showHiddenCategories}
+                    showOffBudget={showOffBudget}
+                    intervalsCount={intervals.length}
                   />
                 ) : (
                   <LoadingIndicator message="Loading report..." />
                 )}
               </View>
-              {(viewLegend || viewSummary) && data && (
+              {(viewLegend || viewSummary) && data && !isNarrowWidth && (
                 <View
                   style={{
                     padding: 10,

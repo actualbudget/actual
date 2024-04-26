@@ -3,7 +3,7 @@ import React from 'react';
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
+import { Link } from '../common/Link';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -32,19 +32,21 @@ export function WelcomeScreen() {
         </Paragraph>
         <Paragraph>
           Currently, Actual implements budgeting based on a{' '}
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://actualbudget.org/docs/budgeting/"
             linkColor="purple"
           >
             monthly envelope system
-          </ExternalLink>
+          </Link>
           . Consider taking our{' '}
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://actualbudget.org/docs/tour/"
             linkColor="purple"
           >
             guided tour
-          </ExternalLink>{' '}
+          </Link>{' '}
           to help you get your bearings, and check out the rest of the
           documentation while you’re there to learn more about advanced topics.
         </Paragraph>
