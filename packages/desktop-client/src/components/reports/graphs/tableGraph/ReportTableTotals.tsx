@@ -13,6 +13,7 @@ import { theme } from '../../../../style';
 import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
+import { styles } from '../../../../style/styles';
 
 type ReportTableTotalsProps = {
   data: GroupedEntity;
@@ -74,6 +75,7 @@ export function ReportTableTotals({
           overflowX: 'auto',
           '::-webkit-scrollbar': {
             backgroundColor: theme.tableBackground,
+            height: 13,
           },
           '::-webkit-scrollbar-thumb': {
             backgroundColor: theme.sidebarItemText,
