@@ -181,7 +181,7 @@ export function StackedBarGraph({
       .map(e => e.id);
     const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
 
-    const conditions = [
+    const filterConditions = [
       ...filters,
       { field, op: 'is', value: id, type: 'id' },
       {
@@ -214,7 +214,7 @@ export function StackedBarGraph({
     navigate('/accounts', {
       state: {
         goBack: true,
-        conditions,
+        filterConditions,
         categoryId: item.id,
       },
     });

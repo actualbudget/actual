@@ -8,7 +8,7 @@ import { CondOpMenu } from './CondOpMenu';
 import { FilterExpression } from './FilterExpression';
 
 type AppliedFiltersProps = {
-  filters: RuleConditionEntity[];
+  conditions: RuleConditionEntity[];
   onUpdate: (
     filter: RuleConditionEntity,
     newFilter: RuleConditionEntity,
@@ -19,7 +19,7 @@ type AppliedFiltersProps = {
 };
 
 export function AppliedFilters({
-  filters,
+  conditions,
   onUpdate,
   onDelete,
   conditionsOp,
@@ -36,9 +36,9 @@ export function AppliedFilters({
       <CondOpMenu
         conditionsOp={conditionsOp}
         onCondOpChange={onCondOpChange}
-        filters={filters}
+        filters={conditions}
       />
-      {filters.map((filter: RuleConditionEntity, i: number) => (
+      {conditions.map((filter: RuleConditionEntity, i: number) => (
         <FilterExpression
           key={i}
           customName={filter.customName}

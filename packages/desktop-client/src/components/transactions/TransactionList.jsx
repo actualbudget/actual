@@ -86,6 +86,7 @@ export function TransactionList({
   onRefetch,
   onCloseAddTransaction,
   onCreatePayee,
+  onApplyFilters,
 }) {
   const transactionsLatest = useRef();
   const navigate = useNavigate();
@@ -167,15 +168,10 @@ export function TransactionList({
   });
 
   const onNavigateToFilteredTagView = useCallback(noteTag => {
-    const conditions = [
+    const filterConditions = [
       { field: 'notes', op: 'contains', value: noteTag, type: 'string' },
     ];
-    navigate('/accounts', {
-      state: {
-        goBack: true,
-        conditions,
-      },
-    });
+    onApplyFilters(filterConditions);
   });
 
   return (

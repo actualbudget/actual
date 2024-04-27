@@ -164,7 +164,7 @@ export function Header({
           align="flex-start"
         >
           <AppliedFilters
-            filters={filters}
+            conditions={filters}
             onUpdate={onUpdateFilter}
             onDelete={onDeleteFilter}
             conditionsOp={conditionsOp}

@@ -539,7 +539,7 @@ export function CustomReport() {
               align="flex-start"
             >
               <AppliedFilters
-                filters={filters}
+                conditions={filters}
                 onUpdate={(oldFilter, newFilter) => {
                   setSessionReport(
                     'conditions',
