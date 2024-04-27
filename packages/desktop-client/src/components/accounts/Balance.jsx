@@ -137,7 +137,6 @@ export function Balances({
   showExtraBalances,
   onToggleExtraBalances,
   account,
-  filteredItems,
   filteredAmount,
 }) {
   const selectedItems = useSelectedItems();
@@ -196,9 +195,7 @@ export function Balances({
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
       )}
-      {filteredItems.length > 0 && (
-        <FilteredBalance filteredAmount={filteredAmount} />
-      )}
+      {filteredAmount && <FilteredBalance filteredAmount={filteredAmount} />}
     </View>
   );
 }

@@ -627,7 +627,7 @@ export function CustomReport() {
               }}
             >
               <AppliedFilters
-                filters={filters}
+                conditions={filters}
                 onUpdate={(oldFilter, newFilter) => {
                   setSessionReport(
                     'conditions',

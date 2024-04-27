@@ -40,7 +40,7 @@ export function AccountHeader({
   accountName,
   account,
   filterId,
-  filtersList,
+  savedFilters,
   accountsSyncing,
   failedAccounts,
   accounts,
@@ -55,7 +55,7 @@ export function AccountHeader({
   canCalculateBalance,
   isSorted,
   search,
-  filters,
+  filterConditions,
   conditionsOp,
   pushModal,
   onSearch,
@@ -242,7 +242,6 @@ export function AccountHeader({
           showExtraBalances={showExtraBalances}
           onToggleExtraBalances={onToggleExtraBalances}
           account={account}
-          filteredItems={filters}
           filteredAmount={filteredAmount}
         />
 
@@ -321,7 +320,7 @@ export function AccountHeader({
           )}
           <Button
             type="bare"
-            disabled={search !== '' || filters.length > 0}
+            disabled={search !== '' || filterConditions.length > 0}
             style={{ padding: 6, marginLeft: 10 }}
             onClick={onToggleSplits}
             title={
@@ -376,16 +375,16 @@ export function AccountHeader({
           )}
         </Stack>
 
-        {filters && filters.length > 0 && (
+        {filterConditions?.length > 0 && (
           <FiltersStack
-            filters={filters}
+            conditions={filterConditions}
             conditionsOp={conditionsOp}
             onUpdateFilter={onUpdateFilter}
             onDeleteFilter={onDeleteFilter}
             onClearFilters={onClearFilters}
             onReloadSavedFilter={onReloadSavedFilter}
             filterId={filterId}
-            filtersList={filtersList}
+            savedFilters={savedFilters}
             onCondOpChange={onCondOpChange}
           />
         )}
