@@ -861,6 +861,7 @@ describe('Transactions', () => {
       {
         account: accounts[0].id,
         amount: -1000,
+        category: null,
         cleared: false,
         date: '2017-01-01',
         error: null,
@@ -874,6 +875,7 @@ describe('Transactions', () => {
       {
         account: accounts[0].id,
         amount: -1777,
+        category: null,
         cleared: false,
         date: '2017-01-01',
         error: null,

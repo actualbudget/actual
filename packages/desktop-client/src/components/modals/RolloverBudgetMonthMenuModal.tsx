@@ -72,11 +72,8 @@ export function RolloverBudgetMonthMenuModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={onClose}
-      padding={10}
       style={{
-        flex: 1,
         height: '50vh',
-        borderRadius: '6px',
       }}
     >
       <View

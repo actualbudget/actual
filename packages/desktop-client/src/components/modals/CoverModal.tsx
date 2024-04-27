@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -26,10 +26,14 @@ export function CoverModal({
   month,
   onSubmit,
 }: CoverModalProps) {
-  const { grouped: originalCategoryGroups, list: categories } = useCategories();
-  const categoryGroups = addToBeBudgetedGroup(
-    originalCategoryGroups.filter(g => !g.is_income),
-  );
+  const { grouped: originalCategoryGroups } = useCategories();
+  const [categoryGroups, categories] = useMemo(() => {
+    const expenseGroups = addToBeBudgetedGroup(
+      originalCategoryGroups.filter(g => !g.is_income),
+    );
+    const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
+    return [expenseGroups, expenseCategories];
+  }, [originalCategoryGroups]);
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
@@ -62,6 +66,7 @@ export function CoverModal({
     }
   }, [initialMount, onCategoryClick]);
 
+  const fromCategory = categories.find(c => c.id === fromCategoryId);
   const category = categories.find(c => c.id === categoryId);
 
   if (!category) {
@@ -70,49 +75,35 @@ export function CoverModal({
 
   return (
     <Modal
-      title={`Cover: ${category.name}`}
+      title={category.name}
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      padding={0}
-      style={{
-        flex: 1,
-        padding: '0 10px',
-        paddingBottom: 10,
-        borderRadius: '6px',
-      }}
     >
-      {() => (
-        <>
-          <View>
-            <FieldLabel title="Cover from category:" />
-            <TapField
-              value={categories.find(c => c.id === fromCategoryId)?.name}
-              onClick={onCategoryClick}
-            />
-          </View>
+      <View>
+        <FieldLabel title="Cover from category:" />
+        <TapField value={fromCategory?.name} onClick={onCategoryClick} />
+      </View>
 
-          <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 10,
-            }}
-          >
-            <Button
-              type="primary"
-              style={{
-                height: styles.mobileMinHeight,
-                marginLeft: styles.mobileEditingPadding,
-                marginRight: styles.mobileEditingPadding,
-              }}
-              onClick={() => _onSubmit(fromCategoryId)}
-            >
-              Transfer
-            </Button>
-          </View>
-        </>
-      )}
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingTop: 10,
+        }}
+      >
+        <Button
+          type="primary"
+          style={{
+            height: styles.mobileMinHeight,
+            marginLeft: styles.mobileEditingPadding,
+            marginRight: styles.mobileEditingPadding,
+          }}
+          onClick={() => _onSubmit(fromCategoryId)}
+        >
+          Transfer
+        </Button>
+      </View>
     </Modal>
   );
 }

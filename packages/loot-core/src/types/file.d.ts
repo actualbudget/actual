@@ -30,7 +30,7 @@ export type RemoteFile = {
   cloudFileId: string;
   groupId: string;
   name: string;
-  enccryptKeyId?: string;
+  encryptKeyId?: string;
   hasKey: boolean;
   state: 'remote';
 };

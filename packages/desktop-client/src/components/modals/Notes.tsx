@@ -41,57 +41,50 @@ export function Notes({ modalProps, id, name, onSave }: NotesProps) {
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 1,
         height: '50vh',
-        padding: '0 10px',
-        borderRadius: '6px',
       }}
     >
-      {() => (
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+        }}
+      >
+        <NotesComponent
+          notes={notes}
+          editable={true}
+          focused={true}
+          getStyle={() => ({
+            borderRadius: 6,
+            flex: 1,
+            minWidth: 0,
+          })}
+          onChange={setNotes}
+        />
         <View
           style={{
-            flex: 1,
             flexDirection: 'column',
+            alignItems: 'center',
+            justifyItems: 'center',
+            width: '100%',
+            paddingTop: 10,
           }}
         >
-          <NotesComponent
-            notes={notes}
-            editable={true}
-            focused={true}
-            getStyle={() => ({
-              borderRadius: 6,
-              flex: 1,
-              minWidth: 0,
-            })}
-            onChange={setNotes}
-          />
-          <View
+          <Button
+            type="primary"
             style={{
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyItems: 'center',
+              fontSize: 17,
+              fontWeight: 400,
               width: '100%',
-              paddingTop: 10,
-              paddingBottom: 10,
             }}
+            onClick={_onSave}
           >
-            <Button
-              type="primary"
-              style={{
-                fontSize: 17,
-                fontWeight: 400,
-                width: '100%',
-              }}
-              onClick={_onSave}
-            >
-              <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />
-              Save notes
-            </Button>
-          </View>
+            <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />
+            Save notes
+          </Button>
         </View>
-      )}
+      </View>
     </Modal>
   );
 }

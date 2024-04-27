@@ -139,7 +139,7 @@ export const RuleRow = memo(
                           marginBottom: 6,
                         }}
                       >
-                        {i ? `Split ${i}` : 'Before split'}
+                        {i ? `Split ${i}` : 'Apply to all'}
                       </Text>
                       {split.actions.map((action, j) => (
                         <ActionExpression

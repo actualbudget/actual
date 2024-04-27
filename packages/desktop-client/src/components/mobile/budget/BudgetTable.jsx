@@ -43,7 +43,7 @@ function ToBudget({ toBudget, onClick }) {
       onClick={onClick}
     >
       <Label
-        title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
+        title={amount < 0 ? 'Overbudgeted' : 'To Budget'}
         style={{
           ...styles.underlinedText,
           color: theme.formInputText,
@@ -82,18 +82,32 @@ function Saved({ projected, onClick }) {
       onClick={onClick}
     >
       {projected ? (
-        <Label
-          title="PROJECTED SAVINGS"
-          style={{
-            ...styles.underlinedText,
-            color: theme.formInputText,
-            textAlign: 'left',
-            fontSize: 9,
-          }}
-        />
+        <>
+          <Label
+            title="Projected"
+            style={{
+              ...styles.underlinedText,
+              color: theme.formInputText,
+              textAlign: 'left',
+              letterSpacing: 2,
+              fontSize: 8,
+              marginBottom: 0,
+            }}
+          />
+          <Label
+            title="Savings"
+            style={{
+              ...styles.underlinedText,
+              color: theme.formInputText,
+              textAlign: 'left',
+              letterSpacing: 2,
+              fontSize: 8,
+            }}
+          />
+        </>
       ) : (
         <Label
-          title={isNegative ? 'OVERSPENT' : 'SAVED'}
+          title={isNegative ? 'Overspent' : 'Saved'}
           style={{
             ...styles.underlinedText,
             color: theme.formInputText,
@@ -267,7 +281,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const onTransfer = () => {
     dispatch(
       pushModal('transfer', {
-        title: `Transfer: ${category.name}`,
+        title: category.name,
         month,
         amount: catBalance,
         onSubmit: (amount, toCategoryId) => {
@@ -993,8 +1007,8 @@ function IncomeGroup({
           marginRight: 14,
         }}
       >
-        {type === 'report' && <Label title="BUDGETED" style={{ width: 90 }} />}
-        <Label title="RECEIVED" style={{ width: 90 }} />
+        {type === 'report' && <Label title="Budgeted" style={{ width: 90 }} />}
+        <Label title="Received" style={{ width: 90 }} />
       </View>
 
       <Card style={{ marginTop: 0 }}>
@@ -1270,7 +1284,7 @@ export function BudgetTable({
               }}
             >
               <Label
-                title="BUDGETED"
+                title="Budgeted"
                 style={{ color: theme.buttonNormalText }}
               />
               <CellValue
@@ -1313,7 +1327,7 @@ export function BudgetTable({
                 alignItems: 'flex-end',
               }}
             >
-              <Label title="SPENT" style={{ color: theme.formInputText }} />
+              <Label title="Spent" style={{ color: theme.formInputText }} />
               <CellValue
                 binding={
                   type === 'report'
@@ -1338,7 +1352,7 @@ export function BudgetTable({
             alignItems: 'flex-end',
           }}
         >
-          <Label title="BALANCE" style={{ color: theme.formInputText }} />
+          <Label title="Balance" style={{ color: theme.formInputText }} />
           <CellValue
             binding={
               type === 'report'

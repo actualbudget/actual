@@ -11,6 +11,7 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { SvgAdd } from '../../../icons/v1';
 import { theme, styles } from '../../../style';
+import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
@@ -37,8 +38,7 @@ function AccountHeader({ name, amount, style = {} }) {
         <Text
           style={{
             ...styles.text,
-            textTransform: 'uppercase',
-            fontSize: 13,
+            fontSize: 14,
           }}
           data-testid="name"
         >
@@ -47,7 +47,7 @@ function AccountHeader({ name, amount, style = {} }) {
       </View>
       <CellValue
         binding={amount}
-        style={{ ...styles.text, fontSize: 13 }}
+        style={{ ...styles.text, fontSize: 14 }}
         type="financial"
       />
     </View>
@@ -136,7 +136,7 @@ function AccountCard({
           binding={getBalanceQuery(account)}
           type="financial"
           style={{ fontSize: 16, color: 'inherit' }}
-          getStyle={value => value < 0 && { color: 'inherit' }}
+          getStyle={makeAmountFullStyle}
           data-testid="account-balance"
         />
       </Button>
@@ -220,7 +220,7 @@ function AccountList({
 
           {offbudgetAccounts.length > 0 && (
             <AccountHeader
-              name="Off budget"
+              name="Off Budget"
               amount={getOffBudgetBalance()}
               style={{ marginTop: 30 }}
             />

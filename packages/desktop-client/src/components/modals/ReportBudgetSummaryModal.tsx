@@ -24,25 +24,23 @@ export function ReportBudgetSummaryModal({
   const currentMonth = monthUtils.currentMonth();
   return (
     <Modal title="Budget Summary" {...modalProps}>
-      {() => (
-        <NamespaceContext.Provider value={sheetForMonth(month)}>
-          <Stack
-            spacing={2}
-            style={{
-              alignSelf: 'center',
-              backgroundColor: 'transparent',
-              borderRadius: 4,
-            }}
-          >
-            <IncomeTotal style={{ ...styles.mediumText }} />
-            <ExpenseTotal style={{ ...styles.mediumText }} />
-          </Stack>
-          <Saved
-            projected={month >= currentMonth}
-            style={{ ...styles.mediumText, marginTop: 20 }}
-          />
-        </NamespaceContext.Provider>
-      )}
+      <NamespaceContext.Provider value={sheetForMonth(month)}>
+        <Stack
+          spacing={2}
+          style={{
+            alignSelf: 'center',
+            backgroundColor: 'transparent',
+            borderRadius: 4,
+          }}
+        >
+          <IncomeTotal style={{ ...styles.mediumText }} />
+          <ExpenseTotal style={{ ...styles.mediumText }} />
+        </Stack>
+        <Saved
+          projected={month >= currentMonth}
+          style={{ ...styles.mediumText, marginTop: 20 }}
+        />
+      </NamespaceContext.Provider>
     </Modal>
   );
 }
