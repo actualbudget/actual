@@ -133,7 +133,7 @@ export function CategorySelector({
           paddingRight: 10,
           flexGrow: 1,
           overflowY: 'auto',
-          scrollbarColor: theme.tableHeaderBackground + ' ' + theme.tableBorder
+          scrollbarColor: theme.tableBackground + ' ' + theme.pageBackground
         }}
       >
         {categoryGroups &&
