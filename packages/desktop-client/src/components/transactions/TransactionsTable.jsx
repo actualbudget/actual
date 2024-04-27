@@ -1009,11 +1009,6 @@ const Transaction = memo(function Transaction(props) {
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
           value={notes || ''}
-          style={{
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            whiteSpace: 'nowrap',
-          }}
           valueStyle={valueStyle}
           formatter={value =>
             notesTagFormatter(value, onNavigateToFilteredTagView)
