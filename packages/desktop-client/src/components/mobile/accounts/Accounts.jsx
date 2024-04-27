@@ -11,6 +11,7 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { SvgAdd } from '../../../icons/v1';
 import { theme, styles } from '../../../style';
+import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
@@ -135,7 +136,7 @@ function AccountCard({
           binding={getBalanceQuery(account)}
           type="financial"
           style={{ fontSize: 16, color: 'inherit' }}
-          getStyle={value => value < 0 && { color: 'inherit' }}
+          getStyle={makeAmountFullStyle}
           data-testid="account-balance"
         />
       </Button>

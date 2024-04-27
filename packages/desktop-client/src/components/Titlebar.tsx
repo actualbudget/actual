@@ -12,6 +12,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
+import { isDevelopmentEnvironment } from 'loot-core/src/shared/environment';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
@@ -458,7 +459,9 @@ export function Titlebar({ style }: TitlebarProps) {
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <ThemeSelector style={{ marginLeft: 10 }} />
+      {isDevelopmentEnvironment() && !Platform.isPlaywright && (
+        <ThemeSelector style={{ marginLeft: 10 }} />
+      )}
       <PrivacyButton style={{ marginLeft: 10 }} />
       {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
