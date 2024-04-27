@@ -6,6 +6,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
+import { theme } from '../../style';
 import {
   SvgCheckAll,
   SvgUncheckAll,
@@ -132,6 +133,7 @@ export function CategorySelector({
           paddingRight: 10,
           flexGrow: 1,
           overflowY: 'auto',
+          scrollbarColor: theme.tableHeaderBackground + ' ' + theme.tableBorder
         }}
       >
         {categoryGroups &&
