@@ -26,7 +26,11 @@ export interface NewTransactionEntity {
   subtransactions?: Omit<NewTransactionEntity, 'account' | 'date'>[];
 }
 
-export interface TransactionEntity extends NewTransactionEntity {
+export interface TransactionEntity
+  extends Omit<
+    NewTransactionEntity,
+    'account' | 'category' | 'payee' | 'schedule' | 'subtransactions'
+  > {
   id: string;
   account: AccountEntity;
   category?: CategoryEntity;

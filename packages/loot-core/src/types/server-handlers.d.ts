@@ -1,4 +1,3 @@
-import { GlobalPrefs, LocalPrefs } from '../client/state-types/prefs';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
@@ -17,6 +16,7 @@ import {
   SimpleFinAccount,
   PayeeEntity,
 } from './models';
+import { GlobalPrefs, LocalPrefs } from './prefs';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
