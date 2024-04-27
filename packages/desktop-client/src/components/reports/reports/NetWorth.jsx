@@ -32,7 +32,7 @@ export function NetWorth() {
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
@@ -114,7 +114,7 @@ export function NetWorth() {
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
+        onConditionsOpChange={onConditionsOpChange}
       />
 
       <View

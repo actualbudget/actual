@@ -73,7 +73,7 @@ export function CustomReport() {
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters();
 
   const location = useLocation();
@@ -487,7 +487,7 @@ export function CustomReport() {
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => onApplyFilter(condition));
-    onCondOpChange(input.conditionsOp);
+    onConditionsOpChange(input.conditionsOp);
   };
 
   const onReportChange = ({
@@ -645,8 +645,8 @@ export function CustomReport() {
                   onReportChange({ type: 'modify' });
                 }}
                 conditionsOp={conditionsOp}
-                onCondOpChange={co => {
-                  onCondOpChange(co);
+                onConditionsOpChange={co => {
+                  onConditionsOpChange(co);
                   onReportChange({ type: 'modify' });
                 }}
               />

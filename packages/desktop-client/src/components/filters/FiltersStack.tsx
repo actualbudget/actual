@@ -21,7 +21,7 @@ export function FiltersStack({
   onReloadSavedFilter,
   filterId,
   savedFilters,
-  onCondOpChange,
+  onConditionsOpChange,
 }: {
   conditions: RuleConditionEntity[];
   conditionsOp: string;
@@ -34,7 +34,7 @@ export function FiltersStack({
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
   filterId: SavedFilter;
   savedFilters: TransactionFilterEntity[];
-  onCondOpChange: () => void;
+  onConditionsOpChange: () => void;
 }) {
   return (
     <View>
@@ -47,7 +47,7 @@ export function FiltersStack({
         <AppliedFilters
           conditions={conditions}
           conditionsOp={conditionsOp}
-          onCondOpChange={onCondOpChange}
+          onConditionsOpChange={onConditionsOpChange}
           onUpdate={onUpdateFilter}
           onDelete={onDeleteFilter}
         />

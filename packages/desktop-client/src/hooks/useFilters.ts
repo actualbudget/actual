@@ -45,7 +45,7 @@ export function useFilters<T extends RuleConditionEntity>(
     [setFilters],
   );
 
-  const onCondOpChange = useCallback(
+  const onConditionsOpChange = useCallback(
     condOp => {
       setConditionsOp(condOp);
     },
@@ -60,8 +60,16 @@ export function useFilters<T extends RuleConditionEntity>(
       onApply,
       onUpdate,
       onDelete,
-      onCondOpChange,
+      onConditionsOpChange,
     }),
-    [filters, saved, onApply, onUpdate, onDelete, onCondOpChange, conditionsOp],
+    [
+      filters,
+      saved,
+      onApply,
+      onUpdate,
+      onDelete,
+      onConditionsOpChange,
+      conditionsOp,
+    ],
   );
 }
