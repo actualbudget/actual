@@ -31,7 +31,7 @@ export function Header({
   onApply,
   onUpdateFilter,
   onDeleteFilter,
-  onCondOpChange,
+  onConditionsOpChange,
   headerPrefixItems,
   children,
 }) {
@@ -168,7 +168,7 @@ export function Header({
             onUpdate={onUpdateFilter}
             onDelete={onDeleteFilter}
             conditionsOp={conditionsOp}
-            onCondOpChange={onCondOpChange}
+            onConditionsOpChange={onConditionsOpChange}
           />
         </View>
       )}

@@ -78,7 +78,7 @@ export function AccountHeader({
   onUpdateFilter,
   onClearFilters,
   onReloadSavedFilter,
-  onCondOpChange,
+  onConditionsOpChange,
   onDeleteFilter,
   onScheduleAction,
   onSetTransfer,
@@ -385,7 +385,7 @@ export function AccountHeader({
             onReloadSavedFilter={onReloadSavedFilter}
             filterId={filterId}
             savedFilters={savedFilters}
-            onCondOpChange={onCondOpChange}
+            onConditionsOpChange={onConditionsOpChange}
           />
         )}
       </View>

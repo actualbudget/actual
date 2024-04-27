@@ -1185,10 +1185,10 @@ class AccountInternal extends PureComponent {
     );
   };
 
-  onCondOpChange = (value, filters) => {
+  onConditionsOpChange = (value, conditions) => {
     this.setState({ conditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
-    this.applyFilters([...filters]);
+    this.applyFilters([...conditions]);
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
     }
@@ -1581,7 +1581,7 @@ class AccountInternal extends PureComponent {
                 onUpdateFilter={this.onUpdateFilter}
                 onClearFilters={this.onClearFilters}
                 onReloadSavedFilter={this.onReloadSavedFilter}
-                onCondOpChange={this.onCondOpChange}
+                onConditionsOpChange={this.onConditionsOpChange}
                 onDeleteFilter={this.onDeleteFilter}
                 onApplyFilter={this.onApplyFilter}
                 onScheduleAction={this.onScheduleAction}

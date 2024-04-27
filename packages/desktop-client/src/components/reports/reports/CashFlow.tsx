@@ -31,7 +31,7 @@ export function CashFlow() {
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
   const [allMonths, setAllMonths] = useState<null | Array<{
@@ -121,7 +121,7 @@ export function CashFlow() {
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
+        onConditionsOpChange={onConditionsOpChange}
         headerPrefixItems={undefined}
       >
         <View
