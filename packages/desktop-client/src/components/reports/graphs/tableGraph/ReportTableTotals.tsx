@@ -72,6 +72,12 @@ export function ReportTableTotals({
         id="total"
         style={{
           overflowX: 'auto',
+          '::-webkit-scrollbar': {
+            backgroundColor: theme.tableBackground,
+          },
+          '::-webkit-scrollbar-thumb': {
+            backgroundColor: theme.sidebarItemText,
+          },
           flexDirection: 'row',
           flex: 1,
         }}
