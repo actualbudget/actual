@@ -168,6 +168,7 @@ function onScrollbarChange() {
   };
 
   styles.darkScrollbar = !hiddenScrollbars && {
+    scrollbarColor: 'rgba(200, 200, 200, .5) rgba(0, 0, 0, 0)',
     '& ::-webkit-scrollbar': {
       width: 7,
       backgroundColor: 'rgba(0, 0, 0, 0)',
