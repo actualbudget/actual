@@ -6,13 +6,13 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import { theme } from '../../style';
 import {
   SvgCheckAll,
   SvgUncheckAll,
   SvgViewHide,
   SvgViewShow,
 } from '../../icons/v2';
+import { theme } from '../../style';
 import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
@@ -133,7 +133,7 @@ export function CategorySelector({
           paddingRight: 10,
           flexGrow: 1,
           overflowY: 'auto',
-          scrollbarColor: theme.tableBackground + ' ' + theme.pageBackground
+          scrollbarColor: theme.tableBackground + ' ' + theme.pageBackground,
         }}
       >
         {categoryGroups &&

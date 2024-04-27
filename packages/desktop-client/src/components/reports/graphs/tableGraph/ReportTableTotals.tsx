@@ -74,7 +74,7 @@ export function ReportTableTotals({
           overflowX: 'auto',
           flexDirection: 'row',
           flex: 1,
-          scrollbarColor: theme.tableBorder + ' ' + theme.tableHeaderBackground
+          scrollbarColor: theme.tableBorder + ' ' + theme.tableHeaderBackground,
         }}
       >
         <Cell
