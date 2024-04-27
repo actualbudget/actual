@@ -2211,7 +2211,6 @@ function notesTagFormatter(value, onNoteTagClick) {
                   backgroundColor: theme.noteTagBackground,
                   color: theme.noteTagText,
                   cursor: 'pointer',
-                  fontWeight: 600,
                 }}
                 hoveredStyle={{
                   backgroundColor: theme.noteTagBackgroundHover,
