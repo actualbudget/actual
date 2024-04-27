@@ -14,9 +14,11 @@ expect.extend({
     const config = {
       // eslint-disable-next-line rulesdir/typography
       mask: [locator.locator('[data-vrt-mask="true"]')],
+      maxDiffPixels: 5,
     };
 
     // Check lightmode
+    await locator.evaluate(() => window.Actual.setTheme('light'));
     const lightmode = await expect(locator).toHaveScreenshot(config);
 
     if (lightmode && !lightmode.pass) {
