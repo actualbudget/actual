@@ -16,7 +16,7 @@ export const Popover = ({
       offset={0}
       style={{
         ...styles.tooltip,
-        ...styles.darkScrollbar,
+        ...styles.lightScrollbar,
         padding: 0,
         ...style,
       }}
