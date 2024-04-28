@@ -72,7 +72,7 @@ export function ReportTableTotals({
         id="total"
         style={{
           overflowX: 'auto',
-          scrollbarWidth: compact && 'none',
+          scrollbarWidth: compact ? 'none' : 'inherit',
           '::-webkit-scrollbar': {
             backgroundColor: theme.tableBackground,
             height: 13,

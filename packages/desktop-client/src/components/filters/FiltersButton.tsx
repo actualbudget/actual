@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { SvgSettingsSliderAlternate } from '../../icons/v2/SettingsSliderAlternate';
+import { SvgSettingsSliderAlternate } from '../../icons/v2';
 import { Button } from '../common/Button';
 
 export function FiltersButton({ onClick }: { onClick: () => void }) {
