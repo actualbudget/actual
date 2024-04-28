@@ -173,11 +173,12 @@ export function Header({
             {forecast && (
               <Select
                 // style={{ backgroundColor: 'white' }}
-                onChange={newValue =>
-                  onForecastSourceChange(newValue)
-                }
+                onChange={newValue => onForecastSourceChange(newValue)}
                 value={forecastSource}
-                options={allForecastSource.map(({ name, pretty }) => [name, pretty])}
+                options={allForecastSource.map(({ name, pretty }) => [
+                  name,
+                  pretty,
+                ])}
               />
             )}
             {forecast && (

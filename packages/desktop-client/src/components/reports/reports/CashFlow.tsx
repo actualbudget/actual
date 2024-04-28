@@ -7,9 +7,9 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useFilters } from '../../../hooks/useFilters';
 import { useResponsive } from '../../../ResponsiveProvider';
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
@@ -39,8 +39,8 @@ export function CashFlow() {
     name: string;
     pretty: string;
   }>>(null);
-  const [allForecasts, setAllForecasts] = useState(null);
-  const [disabled, setDisabled] = useState([]);
+  // const [allForecasts, setAllForecasts] = useState([]);
+  const [disabled, setDisabled] = useState(['']);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
@@ -53,7 +53,7 @@ export function CashFlow() {
       : monthUtils.currentMonth(),
   );
 
-  const [forecastSource, setForecastSource] = useState(null);
+  const [forecastSource, setForecastSource] = useState('');
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -64,12 +64,21 @@ export function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, forecast, forecastSource, isConcise, filters, conditionsOp),
+    () =>
+      cashFlowByDate(
+        start,
+        end,
+        forecast,
+        forecastSource,
+        isConcise,
+        filters,
+        conditionsOp,
+      ),
     [start, end, forecast, forecastSource, isConcise, filters, conditionsOp],
   );
   const data = useReport('cash_flow', params);
 
-  const forecastMonths = [
+  const allForecasts = [
     { name: monthUtils.currentMonth(), pretty: 'None' },
     {
       name: monthUtils.addDays(monthUtils.currentDay(), 31),
@@ -120,13 +129,12 @@ export function CashFlow() {
         .reverse();
 
       setAllMonths(allMonths);
-      setAllForecasts(forecastMonths);
       setForecastSource('schedule');
     }
     run();
   }, []);
 
-  function onChangeDates(start: string, end: string, forecast) {
+  function onChangeDates(start: string, end: string, forecast: string) {
     const numDays = d.differenceInCalendarDays(
       d.max([d.parseISO(forecast), d.parseISO(end)]),
       d.parseISO(start),
@@ -149,13 +157,13 @@ export function CashFlow() {
     );
     setIsConcise(isConcise);
     if (end !== monthUtils.currentMonth()) {
-      setDisabled(forecastMonths.slice(1).map(forecast => forecast.name));
+      setDisabled(allForecasts.slice(1).map(forecast => forecast.name));
     } else {
       setDisabled([]);
     }
   }
 
-  if (!allMonths || !data || !allForecasts) {
+  if (!allMonths || !data) {
     return null;
   }
 

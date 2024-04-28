@@ -58,33 +58,37 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
         </div>
         <div style={{ lineHeight: 1.5 }}>
           {data.income > 0 && (
-            <AlignedText
-              left={"Income:"}
-              right={amountToCurrency(data.income)}
-            />
+            <AlignedText left="Income:" right={amountToCurrency(data.income)} />
           )}
           {data.futureIncome > 0 && (
             <AlignedText
-              left={"Future Income:"}
+              left="Future Income:"
               right={amountToCurrency(data.futureIncome)}
             />
           )}
           {data.expenses < 0 && (
             <AlignedText
-              left={"Expenses:"}
+              left="Expenses:"
               right={amountToCurrency(data.expenses)}
             />
           )}
           {data.futureExpenses < 0 && (
             <AlignedText
-              left={"Future Expenses:"}
+              left="Future Expenses:"
               right={amountToCurrency(data.futureExpenses)}
             />
           )}
           <AlignedText
             left="Change:"
             right={
-              <strong>{amountToCurrency(data.income + data.expenses + data.futureIncome + data.futureExpenses)}</strong>
+              <strong>
+                {amountToCurrency(
+                  data.income +
+                    data.expenses +
+                    data.futureIncome +
+                    data.futureExpenses,
+                )}
+              </strong>
             }
           />
           {data.transfers !== 0 && (
@@ -93,7 +97,10 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
               right={amountToCurrency(data.transfers)}
             />
           )}
-          <AlignedText left="Balance:" right={amountToCurrency(data.balanceTotal)} />
+          <AlignedText
+            left="Balance:"
+            right={amountToCurrency(data.balanceTotal)}
+          />
         </div>
       </div>
     </div>
@@ -102,7 +109,12 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
 
 // To ensure a smooth between solid and dashed, there are two identical lines ...
 // ... each with the  unwanted part hidden (opacity=0) using a gradient
-const gradientTwoColors = (id, col1, col2, percentChange) => (
+const gradientTwoColors = (
+  id: string,
+  col1: string,
+  col2: string,
+  percentChange: number,
+) => (
   <linearGradient id={id} x1="0" y1="0" x2="100%" y2="0">
     <stop offset="0%" stopColor={col1} />
     <stop offset={`${percentChange}%`} stopColor={col1} />
@@ -135,26 +147,55 @@ export function CashFlowGraph({
   // get all dates
   // TODO: All of this toISOString business seems excessive ...
   // but otherwise the dates cannot be correctly compared...
-  const dates = Array.from(new Set([
-    ...graphData.expenses.map(expense => expense.x.toISOString()),
-    ...graphData.income.map(expense => expense.x.toISOString()),
-    ...graphData.balances.map(expense => expense.x.toISOString()),
-    ...graphData.futureExpenses.map(expense => expense.x.toISOString()),
-    ...graphData.futureIncome.map(expense => expense.x.toISOString()),
-    ...graphData.futureBalances.map(expense => expense.x.toISOString()),
-    ...graphData.transfers.map(expense => expense.x.toISOString()),
-  ]));
+  const dates = Array.from(
+    new Set([
+      ...graphData.expenses.map(expense => expense.x.toISOString()),
+      ...graphData.income.map(expense => expense.x.toISOString()),
+      ...graphData.balances.map(expense => expense.x.toISOString()),
+      ...graphData.futureExpenses.map(expense => expense.x.toISOString()),
+      ...graphData.futureIncome.map(expense => expense.x.toISOString()),
+      ...graphData.futureBalances.map(expense => expense.x.toISOString()),
+      ...graphData.transfers.map(expense => expense.x.toISOString()),
+    ]),
+  );
 
   const data = dates.map(d => ({
     date: new Date(d),
-    expenses: (graphData.expenses.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
-    income: (graphData.income.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
-    balance: (graphData.balances.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
-    futureExpenses: (graphData.futureExpenses.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
-    futureIncome: (graphData.futureIncome.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
-    futureBalance: (graphData.futureBalances.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
-    transfers: (graphData.transfers.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
-    balanceTotal: graphData.futureBalances.find(obj => (obj.x.toISOString() === d)) ? (graphData.futureBalances.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y : (graphData.balances.find(obj => (obj.x.toISOString() === d)) || { y: 0 }).y,
+    expenses: (
+      graphData.expenses.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    income: (
+      graphData.income.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    balance: (
+      graphData.balances.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    futureExpenses: (
+      graphData.futureExpenses.find(obj => obj.x.toISOString() === d) || {
+        y: 0,
+      }
+    ).y,
+    futureIncome: (
+      graphData.futureIncome.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    futureBalance: (
+      graphData.futureBalances.find(obj => obj.x.toISOString() === d) || {
+        y: 0,
+      }
+    ).y,
+    transfers: (
+      graphData.transfers.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    balanceTotal: graphData.futureBalances.find(
+      obj => obj.x.toISOString() === d,
+    )
+      ? (
+          graphData.futureBalances.find(obj => obj.x.toISOString() === d) || {
+            y: 0,
+          }
+        ).y
+      : (graphData.balances.find(obj => obj.x.toISOString() === d) || { y: 0 })
+          .y,
   }));
 
   return (
@@ -162,17 +203,19 @@ export function CashFlowGraph({
       <ComposedChart stackOffset="sign" data={data}>
         <defs>
           {gradientTwoColors(
-            "hideFuture",
+            'hideFuture',
             theme.pageTextLight,
-            "rgba(0,0,0,0)",
+            'rgba(0,0,0,0)',
             // TODO: Basing this on date would be most clean!
-            100 * (graphData.balances.length) / (graphData.balances.length + graphData.futureBalances.length)
+            (100 * graphData.balances.length) /
+              (graphData.balances.length + graphData.futureBalances.length),
           )}
           {gradientTwoColors(
-            "showFutureOnly",
-            "rgba(0,0,0,0)",
+            'showFutureOnly',
+            'rgba(0,0,0,0)',
             theme.pageTextLight,
-            100 * (graphData.balances.length) / (graphData.balances.length + graphData.futureBalances.length)
+            (100 * graphData.balances.length) /
+              (graphData.balances.length + graphData.futureBalances.length),
           )}
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} />

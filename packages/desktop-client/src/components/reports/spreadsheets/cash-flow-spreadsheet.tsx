@@ -3,11 +3,11 @@ import React from 'react';
 
 import * as d from 'date-fns';
 
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
-import { runQuery } from 'loot-core/src/client/query-helpers';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
@@ -143,7 +143,7 @@ export function cashFlowByDate(
       }),
     );
 
-    let transactionQuery = q('transactions')
+    const transactionQuery = q('transactions')
       .filter({
         [conditionsOpKey]: filters,
       })
@@ -161,13 +161,16 @@ export function cashFlowByDate(
         { amount: { $sum: '$amount' } },
       ]);
 
-    const { data: transactionDataAssets } = await runQuery(transactionQuery.filter({ amount: { $gt: 0 } }));
-    const { data: transactionDataDebts } = await runQuery(transactionQuery.filter({ amount: { $lt: 0 } }));
-
-    const transactions = await Promise.all(
-      transactionDataAssets.concat(transactionDataDebts)
+    const { data: transactionDataAssets } = await runQuery(
+      transactionQuery.filter({ amount: { $gt: 0 } }),
+    );
+    const { data: transactionDataDebts } = await runQuery(
+      transactionQuery.filter({ amount: { $lt: 0 } }),
     );
 
+    const transactions = await Promise.all(
+      transactionDataAssets.concat(transactionDataDebts),
+    );
 
     return runAll(
       [
@@ -285,18 +288,20 @@ function recalculate(
       const year = monthUtils.getYear(transaction.date);
       const month = monthUtils.getMonthIndex(transaction.date); // Month is zero-indexed (0 = January)
 
-      const assets = (transaction.amount > 0) ? transaction.amount : 0;
-      const debts = (transaction.amount < 0) ? transaction.amount : 0;
+      const assets = transaction.amount > 0 ? transaction.amount : 0;
+      const debts = transaction.amount < 0 ? transaction.amount : 0;
 
       const yearData = {
-        year: year,
-        assets: assets,
-        debts: debts,
-      }
+        year,
+        assets,
+        debts,
+      };
       const indexMonth = months.findIndex(a => a.month === month);
 
       if (indexMonth >= 0) {
-        const indexYear = months[indexMonth].data.findIndex(d => d.year === year)
+        const indexYear = months[indexMonth].data.findIndex(
+          d => d.year === year,
+        );
         if (indexYear >= 0) {
           months[indexMonth].data[indexYear].assets += assets;
           months[indexMonth].data[indexYear].debts += debts;
@@ -305,40 +310,52 @@ function recalculate(
         }
       } else {
         months.push({
-          month: month,
-          data: [yearData]
-        })
+          month,
+          data: [yearData],
+        });
       }
       return months;
     }, []);
 
     const monthAvgs = monthTotals.reduce((arr, total) => {
-      const sumAssets = total.data.reduce((sum, d) => sum + d.assets, 0)
-      const sumDebts = total.data.reduce((sum, d) => sum + d.debts, 0)
-      const averageAssets = Math.floor(sumAssets / total.data.filter(d => d.assets !== 0).length);
-      const averageDebts = Math.floor(sumDebts / total.data.filter(d => d.debts !== 0).length);
+      const sumAssets = total.data.reduce((sum, d) => sum + d.assets, 0);
+      const sumDebts = total.data.reduce((sum, d) => sum + d.debts, 0);
+      const averageAssets = Math.floor(
+        sumAssets / total.data.filter(d => d.assets !== 0).length,
+      );
+      const averageDebts = Math.floor(
+        sumDebts / total.data.filter(d => d.debts !== 0).length,
+      );
       arr.push({
         month: total.month,
-        averageAssets: averageAssets,
-        averageDebts: averageDebts,
-      })
+        averageAssets,
+        averageDebts,
+      });
       return arr;
     }, []);
 
     // Take an average of all months , weighted by the number of days
-    const totalAvgAssets = monthAvgs.reduce((sum, d) => sum + d.averageAssets, 0) / monthAvgs.filter(d => d.averageAssets !== 0).length;
-    const totalAvgDebts = monthAvgs.reduce((sum, d) => sum + d.averageDebts, 0) / monthAvgs.filter(d => d.averageDebts !== 0).length;
+    const totalAvgAssets =
+      monthAvgs.reduce((sum, d) => sum + d.averageAssets, 0) /
+      monthAvgs.filter(d => d.averageAssets !== 0).length;
+    const totalAvgDebts =
+      monthAvgs.reduce((sum, d) => sum + d.averageDebts, 0) /
+      monthAvgs.filter(d => d.averageDebts !== 0).length;
 
     monthUtils.range(end, forecast).forEach(month => {
-      const currentAssets = (month === monthUtils.currentMonth())
-        ? income.find(d => d.date === month).amount
-        : 0;
-      const currentDebts = (month === monthUtils.currentMonth())
-        ? expense.find(d => d.date === month).amount
-        : 0;
+      const currentAssets =
+        month === monthUtils.currentMonth()
+          ? income.find(d => d.date === month).amount
+          : 0;
+      const currentDebts =
+        month === monthUtils.currentMonth()
+          ? expense.find(d => d.date === month).amount
+          : 0;
 
-      const monthAvgIndex = monthAvgs.findIndex(m => (m.month === monthUtils.getMonthIndex(month)));
-      let ammounts = []
+      const monthAvgIndex = monthAvgs.findIndex(
+        m => m.month === monthUtils.getMonthIndex(month),
+      );
+      let ammounts = [];
       if (monthAvgIndex !== -1) {
         ammounts = [
           monthAvgs[monthAvgIndex].averageAssets - currentAssets,
@@ -349,7 +366,7 @@ function recalculate(
           Math.floor(totalAvgAssets) - currentAssets,
           Math.floor(totalAvgDebts) - currentDebts,
         ];
-      };
+      }
       ammounts.forEach(a => {
         if (a < 0) {
           futureExpense.push({
@@ -366,15 +383,15 @@ function recalculate(
             amount: a,
           });
         }
-      })
+      });
     });
   }
 
   const dates = isConcise
     ? monthUtils.rangeInclusive(
-      monthUtils.getMonth(start),
-      monthUtils.getMonth(end),
-    )
+        monthUtils.getMonth(start),
+        monthUtils.getMonth(end),
+      )
     : monthUtils.dayRangeInclusive(start, end);
 
   let forecastDates;
@@ -383,9 +400,9 @@ function recalculate(
   } else {
     forecastDates = isConcise
       ? monthUtils.rangeInclusive(
-        monthUtils.getMonth(end),
-        monthUtils.getMonth(forecast),
-      )
+          monthUtils.getMonth(end),
+          monthUtils.getMonth(forecast),
+        )
       : monthUtils.dayRangeInclusive(end, forecast);
   }
 
@@ -431,7 +448,10 @@ function recalculate(
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <AlignedText left="Income:" right={integerToCurrency(income)} />
-              <AlignedText left="Expenses:" right={integerToCurrency(expense)} />
+              <AlignedText
+                left="Expenses:"
+                right={integerToCurrency(expense)}
+              />
               <AlignedText
                 left="Change:"
                 right={<strong>{integerToCurrency(income + expense)}</strong>}
