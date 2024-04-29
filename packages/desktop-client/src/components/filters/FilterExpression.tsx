@@ -83,7 +83,6 @@ export function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            margin: 4,
             margin: '4px 0',
           }}
         />
