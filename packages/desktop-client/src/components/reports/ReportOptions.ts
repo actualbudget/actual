@@ -24,6 +24,7 @@ export const defaultReport: CustomReportEntity = {
   showEmpty: false,
   showOffBudget: false,
   showHiddenCategories: false,
+  includeCurrentInterval: false,
   showUncategorized: false,
   graphType: 'BarGraph',
   conditions: [],
@@ -84,7 +85,7 @@ const dateRangeOptions = [
   {
     description: 'Last 3 months',
     type: 'Months',
-    name: 2,
+    name: 3,
     Yearly: false,
     Monthly: true,
     Daily: true,
@@ -93,7 +94,7 @@ const dateRangeOptions = [
   {
     description: 'Last 6 months',
     type: 'Months',
-    name: 5,
+    name: 6,
     Yearly: false,
     Monthly: true,
     Daily: false,
@@ -101,7 +102,7 @@ const dateRangeOptions = [
   {
     description: 'Last 12 months',
     type: 'Months',
-    name: 11,
+    name: 12,
     Yearly: false,
     Monthly: true,
     Daily: false,

@@ -33,6 +33,7 @@ export function ReportSidebar({
   setShowEmpty,
   setShowOffBudget,
   setShowHiddenCategories,
+  setIncludeCurrentInterval,
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
@@ -49,7 +50,12 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setDateRange(cond);
     onChangeDates(
-      ...getLiveRange(cond, earliestTransaction, firstDayOfWeekIdx),
+      ...getLiveRange(
+        cond,
+        earliestTransaction,
+        customReportItems.includeCurrentInterval,
+        firstDayOfWeekIdx,
+      ),
     );
   };
 
@@ -231,7 +237,15 @@ export function ReportSidebar({
                   onMenuSelect={type => {
                     onReportChange({ type: 'modify' });
 
-                    if (type === 'show-hidden-categories') {
+                    if (type === 'include-current-interval') {
+                      setSessionReport(
+                        'includeCurrentInterval',
+                        !customReportItems.includeCurrentInterval,
+                      );
+                      setIncludeCurrentInterval(
+                        !customReportItems.includeCurrentInterval,
+                      );
+                    } else if (type === 'show-hidden-categories') {
                       setSessionReport(
                         'showHiddenCategories',
                         !customReportItems.showHiddenCategories,
@@ -262,6 +276,13 @@ export function ReportSidebar({
                     }
                   }}
                   items={[
+                    {
+                      name: 'include-current-interval',
+                      text: 'Include current interval',
+                      tooltip: 'Include current interval',
+                      toggle: customReportItems.includeCurrentInterval,
+                      disabled: customReportItems.isDateStatic,
+                    },
                     {
                       name: 'show-hidden-categories',
                       text: 'Show hidden categories',
