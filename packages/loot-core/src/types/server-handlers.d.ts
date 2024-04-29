@@ -212,7 +212,7 @@ export interface ServerHandlers {
     | { error: 'failed' }
   >;
 
-  'gocardless-accounts-sync': (arg: { id: string }) => Promise<{
+  'accounts-bank-sync': (arg: { id?: string }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;

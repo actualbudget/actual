@@ -96,6 +96,8 @@ export interface ApiHandlers {
 
   'api/sync': () => Promise<void>;
 
+  'api/bank-sync': (arg?: { accountId: string }) => Promise<void>;
+
   'api/accounts-get': () => Promise<AccountEntity[]>;
 
   'api/account-create': (arg: { account; initialBalance? }) => Promise<string>;
