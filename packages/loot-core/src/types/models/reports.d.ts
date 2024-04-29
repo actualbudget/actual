@@ -11,6 +11,7 @@ export interface CustomReportEntity {
   mode: string;
   groupBy: string;
   interval: string;
+  excludeCurrentPeriod: boolean;
   balanceType: string;
   showEmpty: boolean;
   showOffBudget: boolean;
@@ -87,6 +88,7 @@ export interface CustomReportData {
   show_offbudget: number;
   show_hidden: number;
   show_uncategorized: number;
+  exclude_current_period: number;
   selected_categories?: CategoryEntity[];
   graph_type: string;
   conditions?: RuleConditionEntity[];

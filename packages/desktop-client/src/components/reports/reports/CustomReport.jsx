@@ -84,6 +84,7 @@ export function CustomReport() {
   const [isDateStatic, setIsDateStatic] = useState(loadReport.isDateStatic);
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
   const [interval, setInterval] = useState(loadReport.interval);
+  const [excludeCurrentPeriod, setExcludeCurrentPeriod] = useState(loadReport.excludeCurrentPeriod);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
@@ -155,13 +156,15 @@ export function CustomReport() {
           dateRange,
           trans ? trans.date : monthUtils.currentDay(),
           firstDayOfWeekIdx,
+          excludeCurrentPeriod,
+          interval,
         );
         setStartDate(dateStart);
         setEndDate(dateEnd);
       }
     }
     run();
-  }, [interval]);
+  }, [interval, excludeCurrentPeriod]);
 
   useEffect(() => {
     const format =
@@ -203,6 +206,7 @@ export function CustomReport() {
     startDate,
     endDate,
     interval,
+    excludeCurrentPeriod,
     groupBy,
     balanceType,
     categories,
@@ -245,6 +249,7 @@ export function CustomReport() {
     startDate,
     endDate,
     interval,
+    excludeCurrentPeriod,
     groupBy,
     balanceType,
     categories,
@@ -272,6 +277,7 @@ export function CustomReport() {
     mode,
     groupBy,
     interval,
+    excludeCurrentPeriod,
     balanceType,
     showEmpty,
     showOffBudget,
@@ -492,6 +498,7 @@ export function CustomReport() {
             setGraphType={setGraphType}
             setGroupBy={setGroupBy}
             setInterval={setInterval}
+            setExcludeCurrentPeriod={setExcludeCurrentPeriod}
             setBalanceType={setBalanceType}
             setMode={setMode}
             setIsDateStatic={setIsDateStatic}
@@ -507,6 +514,8 @@ export function CustomReport() {
             defaultModeItems={defaultModeItems}
             earliestTransaction={earliestTransaction}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
+            excludeCurrentPeriod={excludeCurrentPeriod}
+            interval={interval}
           />
         )}
         <View

@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE custom_reports ADD COLUMN exclude_current_period INTEGER DEFAULT 0;
+
+COMMIT;

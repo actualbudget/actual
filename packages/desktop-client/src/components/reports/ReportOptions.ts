@@ -20,6 +20,7 @@ export const defaultReport: CustomReportEntity = {
   mode: 'total',
   groupBy: 'Category',
   interval: 'Monthly',
+  excludeCurrentPeriod: false,
   balanceType: 'Payment',
   showEmpty: false,
   showOffBudget: false,

@@ -27,6 +27,7 @@ export function ReportSidebar({
   setGraphType,
   setGroupBy,
   setInterval,
+  setExcludeCurrentPeriod,
   setBalanceType,
   setMode,
   setIsDateStatic,
@@ -42,6 +43,8 @@ export function ReportSidebar({
   defaultModeItems,
   earliestTransaction,
   firstDayOfWeekIdx,
+  excludeCurrentPeriod,
+  interval,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
@@ -49,7 +52,7 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setDateRange(cond);
     onChangeDates(
-      ...getLiveRange(cond, earliestTransaction, firstDayOfWeekIdx),
+      ...getLiveRange(cond, earliestTransaction, firstDayOfWeekIdx, excludeCurrentPeriod, interval),
     );
   };
 
@@ -259,6 +262,14 @@ export function ReportSidebar({
                       setShowUncategorized(
                         !customReportItems.showUncategorized,
                       );
+                    } else if (type === 'exclude-current-period') {
+                      setSessionReport(
+                        'excludeCurrentPeriod',
+                        !customReportItems.excludeCurrentPeriod,
+                      );
+                      setExcludeCurrentPeriod(
+                        !customReportItems.excludeCurrentPeriod,
+                      )
                     }
                   }}
                   items={[
@@ -285,6 +296,12 @@ export function ReportSidebar({
                       text: 'Show uncategorized',
                       tooltip: 'Show uncategorized transactions',
                       toggle: customReportItems.showUncategorized,
+                    },
+                    {
+                      name: 'exclude-current-period',
+                      text: 'Exclude current period',
+                      tooltip: 'Excludes the current week/month from the live range',
+                      toggle: customReportItems.excludeCurrentPeriod ?? false,
                     },
                   ]}
                 />
