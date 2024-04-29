@@ -152,8 +152,6 @@ let hiddenScrollbars = false;
 // darkScrollbar => secondary
 function onScrollbarChange() {
   styles.lightScrollbar = !hiddenScrollbars && {
-    scrollbarColor: 'rgba(200, 200, 200, .2) #d0d0d0',
-    scrollbarWidth: 'thin',
     '& ::-webkit-scrollbar': {
       width: 11,
       backgroundColor: 'rgba(200, 200, 200, .2)',
@@ -170,8 +168,6 @@ function onScrollbarChange() {
   };
 
   styles.darkScrollbar = !hiddenScrollbars && {
-    scrollbarColor: 'rgba(200, 200, 200, .5) rgba(0, 0, 0, 0)',
-    scrollbarWidth: 'thin',
     '& ::-webkit-scrollbar': {
       width: 7,
       backgroundColor: 'rgba(0, 0, 0, 0)',
