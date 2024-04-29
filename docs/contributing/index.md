@@ -29,12 +29,11 @@ Here are some initial guidelines for how contributions will be treated:
 
 - @carkom
 - @j-f1
-- @jlongster
 - @joel-jeremy
-- @Kidglove57
 - @MatissJanis
 - @shaankhosla
 - @shall0pass
+- @teprifer
 - @twk3
 - @youngcw
 
@@ -43,6 +42,8 @@ Here are some initial guidelines for how contributions will be treated:
 (sorted alphabetically)
 
 - @albertogasparin
+- @jlongster
+- @Kidglove57
 - @rich-howell
 - @trevdor
 

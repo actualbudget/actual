@@ -168,7 +168,7 @@ console.log('Every repo must come with a mascot.');
 
 ### Issues
 
-If you know of a part of Actual that isn't documented and you would like to know more about that part of the software, open an [Issue](https://github.com/rich-howell/actual-community-docs/issues) and one of the documentation team will get to it, or have a go at writing it yourself, we could really use all the help we can get.
+If you know of a part of Actual that isn't documented and you would like to know more about that part of the software, open an [Issue](https://github.com/actualbudget/docs/issues) and one of the documentation team will get to it, or have a go at writing it yourself, we could really use all the help we can get.
 
 ### Pull Requests
 
