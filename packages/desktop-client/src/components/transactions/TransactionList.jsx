@@ -171,7 +171,7 @@ export function TransactionList({
     const filterConditions = [
       { field: 'notes', op: 'contains', value: noteTag, type: 'string' },
     ];
-    onApplyFilters(filterConditions);
+    onApplyFilters(filterConditions, true);
   });
 
   return (
