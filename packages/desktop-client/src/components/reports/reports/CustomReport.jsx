@@ -121,6 +121,7 @@ export function CustomReport() {
 
   useEffect(() => {
     async function run() {
+      onApplyFilter(null);
       report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
       setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
