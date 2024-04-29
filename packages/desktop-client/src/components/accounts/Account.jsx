@@ -1330,7 +1330,7 @@ class AccountInternal extends PureComponent {
     }
   };
 
-  applyFilters = async conditions => {
+  applyFilters = async (conditions, append = false) => {
     if (conditions.length > 0) {
       const customQueryFilters = conditions
         .filter(cond => !!cond.customName)
@@ -1350,9 +1350,16 @@ class AccountInternal extends PureComponent {
         [conditionsOpKey]: [...queryFilters, ...customQueryFilters],
       });
 
-      this.setState({ filterConditions: conditions }, () => {
-        this.updateQuery(this.currentQuery, true);
-      });
+      this.setState(
+        prevState => ({
+          filterConditions: append
+            ? [...prevState.filterConditions, ...conditions]
+            : conditions,
+        }),
+        () => {
+          this.updateQuery(this.currentQuery, true);
+        },
+      );
     } else {
       this.setState(
         {
@@ -1683,7 +1690,7 @@ class AccountInternal extends PureComponent {
                     this.setState({ isAdding: false })
                   }
                   onCreatePayee={this.onCreatePayee}
-                  onApplyFilters={conditions => this.applyFilters(conditions)}
+                  onApplyFilters={this.applyFilters}
                 />
               </View>
             </View>
