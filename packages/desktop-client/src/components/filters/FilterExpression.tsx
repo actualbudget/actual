@@ -58,7 +58,6 @@ export function FilterExpression({
         type="bare"
         disabled={customName != null}
         onClick={() => setEditing(true)}
-        style={{ marginRight: -7 }}
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
@@ -84,8 +83,8 @@ export function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            margin: 5,
-            marginLeft: 3,
+            margin: 4,
+            margin: '4px 0',
           }}
         />
       </Button>
