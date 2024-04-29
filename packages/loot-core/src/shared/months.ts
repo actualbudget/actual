@@ -5,7 +5,7 @@ import memoizeOne from 'memoize-one';
 import * as Platform from '../client/platform';
 import { type LocalPrefs } from '../types/prefs';
 
-type DateLike = string | Date;
+export type DateLike = string | Date;
 type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export function _parse(value: DateLike): Date {
@@ -188,7 +188,7 @@ export function differenceInCalendarDays(
   return d.differenceInCalendarDays(_parse(month1), _parse(month2));
 }
 
-export function subMonths(month: string | Date, n: number) {
+export function subMonths(month: DateLike, n: number) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
@@ -196,7 +196,7 @@ export function subWeeks(date: DateLike, n: number): string {
   return d.format(d.subWeeks(_parse(date), n), 'yyyy-MM-dd');
 }
 
-export function subYears(year: string | Date, n: number) {
+export function subYears(year: DateLike, n: number) {
   return d.format(d.subYears(_parse(year), n), 'yyyy');
 }
 
