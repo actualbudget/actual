@@ -2,6 +2,8 @@ import { type ComponentType, useEffect, useState } from 'react';
 
 import promiseRetry from 'promise-retry';
 
+import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
+
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
 import { Block } from '../common/Block';
@@ -19,22 +21,36 @@ export function LoadComponent<K extends string>(props: LoadComponentProps<K>) {
   return <LoadComponentInner key={props.name} {...props} />;
 }
 
+// Cache of the various modules so we would not need to
+// load the same thing multiple times.
+const localModuleCache = new Map();
+
 function LoadComponentInner<K extends string>({
   name,
   message,
   importer,
 }: LoadComponentProps<K>) {
-  const [Component, setComponent] = useState<ProplessComponent | null>(null);
+  const [Component, setComponent] = useState<ProplessComponent | null>(
+    localModuleCache.get(name) ?? null,
+  );
   const [failedToLoad, setFailedToLoad] = useState(false);
 
   useEffect(() => {
+    if (localModuleCache.has(name)) {
+      return;
+    }
+
     setFailedToLoad(false);
 
     // Load the module; if it fails - retry with exponential backoff
     promiseRetry(
       retry =>
         importer()
-          .then(module => setComponent(() => module[name]))
+          .then(module => {
+            const component = () => module[name];
+            localModuleCache.set(name, component);
+            setComponent(component);
+          })
           .catch(retry),
       {
         retries: 5,
@@ -45,7 +61,7 @@ function LoadComponentInner<K extends string>({
   }, [name, importer]);
 
   if (failedToLoad) {
-    throw new Error(`Failed loading the ${name} lazy module.`);
+    throw new LazyLoadFailedError(name);
   }
 
   if (!Component) {

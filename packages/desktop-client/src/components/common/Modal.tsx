@@ -192,14 +192,16 @@ export const Modal = ({
               </View>
             )}
 
-            <View
-              style={{
-                position: 'absolute',
-                right: 0,
-              }}
-            >
-              <CloseButtonComponent onClick={onClose} />
-            </View>
+            {onClose && (
+              <View
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                }}
+              >
+                <CloseButtonComponent onClick={onClose} />
+              </View>
+            )}
           </View>
         )}
         <View style={{ paddingTop: 0, flex: 1 }}>
