@@ -48,6 +48,7 @@ export function cashFlowByDate(
   end: string,
   forecast,
   forecastSource: string,
+  forecastDivideYears: number,
   isConcise: boolean,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or',
@@ -157,7 +158,13 @@ export function cashFlowByDate(
         })
         .filter({
           $and: [
-            { date: { $transform: '$month', $lte: monthUtils.prevMonth(end) } },
+            {
+              date: {
+                $transform: '$month',
+                $lte: monthUtils.prevMonth(end),
+                $gt: monthUtils.subMonths(end, forecastDivideYears * 12),
+              },
+            },
           ],
           'account.offbudget': false,
         })

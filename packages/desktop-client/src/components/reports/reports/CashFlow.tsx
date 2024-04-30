@@ -53,6 +53,7 @@ export function CashFlow() {
   );
 
   const [forecastSource, setForecastSource] = useState('');
+  const [forecastDivideYears, setForecastDivideYears] = useState(10);
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -69,11 +70,21 @@ export function CashFlow() {
         end,
         forecast,
         forecastSource,
+        forecastDivideYears,
         isConcise,
         filters,
         conditionsOp,
       ),
-    [start, end, forecast, forecastSource, isConcise, filters, conditionsOp],
+    [
+      start,
+      end,
+      forecast,
+      forecastSource,
+      forecastDivideYears,
+      isConcise,
+      filters,
+      conditionsOp,
+    ],
   );
   const data = useReport('cash_flow', params);
 
@@ -129,6 +140,7 @@ export function CashFlow() {
 
       setAllMonths(allMonths);
       setForecastSource('schedule');
+      setForecastDivideYears(10);
     }
     run();
   }, []);
@@ -187,6 +199,8 @@ export function CashFlow() {
         show1Month
         forecast={forecastFeatureFlag ? forecast : null}
         forecastSource={forecastFeatureFlag ? forecastSource : null}
+        forecastDivideYears={forecastDivideYears}
+        onForecastDivideYearsChange={setForecastDivideYears}
         onChangeDates={onChangeDates}
         onForecastSourceChange={setForecastSource}
         onApply={onApplyFilter}

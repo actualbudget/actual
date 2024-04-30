@@ -6,6 +6,7 @@ import { SvgArrowLeft } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button';
+import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
@@ -29,6 +30,8 @@ export function Header({
   allMonths,
   allForecasts,
   allForecastSource,
+  forecastDivideYears,
+  onForecastDivideYearsChange,
   disabled,
   onChangeDates,
   onForecastSourceChange,
@@ -201,6 +204,24 @@ export function Header({
           </View>
         </View>
       )}
+      <View
+        style={{
+          flexDirection: isNarrowWidth ? 'column' : 'row',
+          alignItems: isNarrowWidth ? 'right' : 'center',
+          marginTop: 5,
+          gap: 5,
+        }}
+      >
+        <View style={{ flex: 1 }} />
+        {forecast && forecastSource === 'average' && <View>Average last</View>}
+        {forecast && forecastSource === 'average' && (
+          <Input
+            onChangeValue={newValue => onForecastDivideYearsChange(newValue)}
+            value={forecastDivideYears}
+          />
+        )}
+        {forecast && forecastSource === 'average' && <View>years</View>}
+      </View>
       {filters && filters.length > 0 && (
         <View
           style={{ marginTop: 5 }}
