@@ -14,6 +14,7 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
+import { goalsAverage } from './goals/goalsAverage';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
@@ -607,6 +608,18 @@ async function applyCategoryTemplate(
           to_budget,
         );
         to_budget = goalsReturn.to_budget;
+        break;
+      }
+      case 'average': {
+        const goalsReturn = await goalsAverage(
+          template,
+          current_month,
+          category,
+          errors,
+          to_budget
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
         break;
       }
       case 'error':
