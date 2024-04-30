@@ -10,6 +10,7 @@ import {
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../../style';
+import { styles } from '../../../../style/styles';
 import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
@@ -73,13 +74,11 @@ export function ReportTableTotals({
         style={{
           overflowX: 'auto',
           scrollbarWidth: compact ? 'none' : 'inherit',
+          ...styles.horizontalScrollbar,
           '::-webkit-scrollbar': {
             backgroundColor: theme.tableBackground,
-            height: 13,
+            height: 12,
             dispaly: compact && 'none',
-          },
-          '::-webkit-scrollbar-thumb': {
-            backgroundColor: theme.sidebarItemText,
           },
           flexDirection: 'row',
           flex: 1,
