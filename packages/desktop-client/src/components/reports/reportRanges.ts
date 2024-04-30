@@ -134,6 +134,7 @@ export function getSpecificRange(
   firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
 ) {
   const currentDay = monthUtils.currentDay();
+  const currentWeek = monthUtils.currentWeek(firstDayOfWeekIdx);
 
   let dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
   let dateEnd = monthUtils.getMonthEnd(
@@ -142,7 +143,7 @@ export function getSpecificRange(
   );
 
   if (type === 'Weeks') {
-    dateStart = monthUtils.subWeeks(currentDay, offset);
+    dateStart = monthUtils.subWeeks(currentWeek, offset);
     dateEnd = monthUtils.getWeekEnd(
       monthUtils.addWeeks(dateStart, addNumber === null ? offset : addNumber),
       firstDayOfWeekIdx,
