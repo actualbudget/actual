@@ -40,6 +40,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template 12% of available funds|Budget 12% of your "To Budget" funds| |
 |#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transactions|
 |#template schedule full {SCHEDULE NAME}|Fund upcoming scheduled transaction only on needed month| Small schedules that are non-monthly|
+|#template average 6 months | Budget the average amount spent over the last 6 months.  Can set the number to any number > 0.  Matches the existing option on the budget page but with flexible month ranges |
 |#template remainder | Add all remaining funds to this category| See the [Remainder Template](#remainder-template) Section for info |
 
 ### Notes
