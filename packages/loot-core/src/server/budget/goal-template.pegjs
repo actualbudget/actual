@@ -22,8 +22,8 @@ expr
     { return { type: 'schedule', name, priority: +priority, full } }
   / priority: priority? _? remainder: remainder
     { return { type: 'remainder', priority: null, weight: remainder } }
-  / priority: priority? _? 'average'i _ amount: amount _ 'months'i?
-    { return { type: 'average', amount, priority: +priority }}
+  / priority: priority? _? 'average'i _ amount: positive _ 'months'i?
+    { return { type: 'average', amount: +amount, priority: +priority }}
 
 
 repeat 'repeat interval'
