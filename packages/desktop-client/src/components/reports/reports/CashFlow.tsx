@@ -39,7 +39,6 @@ export function CashFlow() {
     name: string;
     pretty: string;
   }>>(null);
-  // const [allForecasts, setAllForecasts] = useState([]);
   const [disabled, setDisabled] = useState(['']);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),

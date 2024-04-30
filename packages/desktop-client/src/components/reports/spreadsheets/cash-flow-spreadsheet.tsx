@@ -93,19 +93,26 @@ export function cashFlowByDate(
         ]);
     }
 
-    let scheduleQuery = q('schedules').select([
-      '*',
-      { isTransfer: '_payee.transfer_acct' },
-      { isAccountOffBudget: '_account.offbudget' },
-      { isPayeeOffBudget: '_payee.transfer_acct.offbudget' },
-    ]);
+    const calcForecast = !(
+      monthUtils.getMonth(forecast) === monthUtils.getMonth(end)
+    );
+    let schedules = [];
+    let transactions = [];
 
-    type ScheduleFilter = {
-      account: string;
-      payee: string;
-    };
-    const scheduleFilters = filters
-      .map((filter: ScheduleFilter) => {
+    if (calcForecast && forecastSource === 'schedule') {
+      let scheduleQuery = q('schedules').select([
+        '*',
+        { isTransfer: '_payee.transfer_acct' },
+        { isAccountOffBudget: '_account.offbudget' },
+        { isPayeeOffBudget: '_payee.transfer_acct.offbudget' },
+      ]);
+
+      type ScheduleFilter = {
+        account: string;
+        payee: string;
+        amount: string;
+      };
+      const scheduleFilters = filters.flatMap((filter: ScheduleFilter) => {
         if (filter.hasOwnProperty('account')) {
           const { account } = filter;
           return [{ _account: account }, { '_payee.transfer_acct': account }];
@@ -114,63 +121,65 @@ export function cashFlowByDate(
           const { payee } = filter;
           return { _payee: payee };
         }
-        return filter;
-      })
-      .flat();
-
-    if (scheduleFilters.length > 0) {
-      scheduleQuery = scheduleQuery.filter({
-        $or: [...scheduleFilters],
+        return [];
       });
+
+      if (scheduleFilters.length > 0) {
+        scheduleQuery = scheduleQuery.filter({
+          $or: [...scheduleFilters],
+        });
+      }
+
+      const { data: scheduledata } = await runQuery(scheduleQuery);
+
+      schedules = await Promise.all(
+        scheduledata.map(schedule => {
+          if (typeof schedule._date !== 'string') {
+            return sendCatch('schedule/get-occurrences-to-date', {
+              config: schedule._date,
+              end: forecast,
+            }).then(({ data }) => {
+              schedule._dates = data;
+              return schedule;
+            });
+          } else {
+            schedule._dates = [schedule._date];
+            return schedule;
+          }
+        }),
+      );
     }
 
-    const { data: scheduledata } = await runQuery(scheduleQuery);
+    if (calcForecast && forecastSource === 'average') {
+      const transactionQuery = q('transactions')
+        .filter({
+          [conditionsOpKey]: filters,
+        })
+        .filter({
+          $and: [
+            { date: { $transform: '$month', $lte: monthUtils.prevMonth(end) } },
+          ],
+          'account.offbudget': false,
+        })
+        .filter({ 'category.name': { $notlike: 'Starting Balances' } })
+        .groupBy(['date', 'payee.transfer_acct'])
+        .select([
+          'date',
+          { isTransfer: 'payee.transfer_acct' },
+          { amount: { $sum: '$amount' } },
+        ]);
 
-    const schedules = await Promise.all(
-      scheduledata.map(schedule => {
-        if (typeof schedule._date !== 'string') {
-          return sendCatch('schedule/get-occurrences-to-date', {
-            config: schedule._date,
-            end: forecast,
-          }).then(({ data }) => {
-            schedule._dates = data;
-            return schedule;
-          });
-        } else {
-          schedule._dates = [schedule._date];
-          return schedule;
-        }
-      }),
-    );
+      const { data: transactionDataAssets } = await runQuery(
+        transactionQuery.filter({ amount: { $gt: 0 } }),
+      );
+      const { data: transactionDataDebts } = await runQuery(
+        transactionQuery.filter({ amount: { $lt: 0 } }),
+      );
 
-    const transactionQuery = q('transactions')
-      .filter({
-        [conditionsOpKey]: filters,
-      })
-      .filter({
-        $and: [
-          { date: { $transform: '$month', $lte: monthUtils.prevMonth(end) } },
-        ],
-        'account.offbudget': false,
-      })
-      .filter({ 'category.name': { $notlike: 'Starting Balances' } })
-      .groupBy(['date', 'payee.transfer_acct'])
-      .select([
-        'date',
-        { isTransfer: 'payee.transfer_acct' },
-        { amount: { $sum: '$amount' } },
-      ]);
-
-    const { data: transactionDataAssets } = await runQuery(
-      transactionQuery.filter({ amount: { $gt: 0 } }),
-    );
-    const { data: transactionDataDebts } = await runQuery(
-      transactionQuery.filter({ amount: { $lt: 0 } }),
-    );
-
-    const transactions = await Promise.all(
-      transactionDataAssets.concat(transactionDataDebts),
-    );
+      transactions = await Promise.all(
+        transactionDataAssets.concat(transactionDataDebts),
+      );
+    }
 
     return runAll(
       [
@@ -196,6 +205,7 @@ export function cashFlowByDate(
             transactions,
             filters,
             forecastSource,
+            calcForecast,
           ),
         );
       },
@@ -213,6 +223,7 @@ function recalculate(
   transactions,
   filters,
   forecastSource: string,
+  calcForecast: boolean,
 ) {
   const [startingBalance, income, expense] = data;
   const convIncome = income.map(t => {
@@ -224,7 +235,7 @@ function recalculate(
 
   const futureIncome = [];
   const futureExpense = [];
-  if (forecastSource === 'schedule') {
+  if (calcForecast && forecastSource === 'schedule') {
     schedules.forEach(schedule => {
       schedule._dates?.forEach(date => {
         const futureTx = {
@@ -283,7 +294,8 @@ function recalculate(
       });
     });
   }
-  if (forecastSource === 'average') {
+
+  if (calcForecast && forecastSource === 'average') {
     const monthTotals = transactions.reduce((months, transaction) => {
       const year = monthUtils.getYear(transaction.date);
       const month = monthUtils.getMonthIndex(transaction.date); // Month is zero-indexed (0 = January)
@@ -320,12 +332,11 @@ function recalculate(
     const monthAvgs = monthTotals.reduce((arr, total) => {
       const sumAssets = total.data.reduce((sum, d) => sum + d.assets, 0);
       const sumDebts = total.data.reduce((sum, d) => sum + d.debts, 0);
-      const averageAssets = Math.floor(
-        sumAssets / total.data.filter(d => d.assets !== 0).length,
-      );
-      const averageDebts = Math.floor(
-        sumDebts / total.data.filter(d => d.debts !== 0).length,
-      );
+      const averageAssets =
+        Math.floor(sumAssets / total.data.filter(d => d.assets !== 0).length) |
+        0;
+      const averageDebts =
+        Math.floor(sumDebts / total.data.filter(d => d.debts !== 0).length) | 0;
       arr.push({
         month: total.month,
         averageAssets,
@@ -336,19 +347,23 @@ function recalculate(
 
     // Take an average of all months , weighted by the number of days
     const totalAvgAssets =
-      monthAvgs.reduce((sum, d) => sum + d.averageAssets, 0) /
-      monthAvgs.filter(d => d.averageAssets !== 0).length;
+      (monthAvgs.reduce((sum, d) => sum + d.averageAssets, 0) /
+        monthAvgs.filter(d => d.averageAssets !== 0).length) |
+      0;
     const totalAvgDebts =
-      monthAvgs.reduce((sum, d) => sum + d.averageDebts, 0) /
-      monthAvgs.filter(d => d.averageDebts !== 0).length;
+      (monthAvgs.reduce((sum, d) => sum + d.averageDebts, 0) /
+        monthAvgs.filter(d => d.averageDebts !== 0).length) |
+      0;
 
     monthUtils.range(end, forecast).forEach(month => {
       const currentAssets =
-        month === monthUtils.currentMonth()
+        month === monthUtils.currentMonth() &&
+        income.some(d => d.date === month)
           ? income.find(d => d.date === month).amount
           : 0;
       const currentDebts =
-        month === monthUtils.currentMonth()
+        month === monthUtils.currentMonth() &&
+        expense.some(d => d.date === month)
           ? expense.find(d => d.date === month).amount
           : 0;
 
