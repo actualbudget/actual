@@ -7,6 +7,7 @@ import { batchMessages } from '../sync';
 
 import { setBudget, getSheetValue, isReflectBudget, setGoal } from './actions';
 import { parse } from './goal-template.pegjs';
+import { goalsAverage } from './goals/goalsAverage';
 import { goalsBy } from './goals/goalsBy';
 import { goalsPercentage } from './goals/goalsPercentage';
 import { findRemainder, goalsRemainder } from './goals/goalsRemainder';
@@ -14,7 +15,6 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
-import { goalsAverage } from './goals/goalsAverage';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
@@ -616,7 +616,7 @@ async function applyCategoryTemplate(
           current_month,
           category,
           errors,
-          to_budget
+          to_budget,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;

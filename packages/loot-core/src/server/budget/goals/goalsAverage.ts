@@ -16,16 +16,16 @@ export async function goalsAverage(
     let sum = 0;
     for (let i = 1; i <= template.amount; i++) {
       // add up other months
-      let sheetName = monthUtils.sheetForMonth(
+      const sheetName = monthUtils.sheetForMonth(
         monthUtils.subMonths(month, i),
       );
       sum += await getSheetValue(sheetName, `sum-amount-${category.id}`);
     }
-    increment = sum/template.amount;
+    increment = sum / template.amount;
   } else {
     errors.push('Number of months to average is not valid');
-    return {to_budget, errors}
+    return { to_budget, errors };
   }
   to_budget += -Math.round(increment);
-  return { to_budget, errors};
+  return { to_budget, errors };
 }
