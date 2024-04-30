@@ -23,6 +23,8 @@ import {
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
+import { Text } from '../../common/Text';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 
 const MAX_BAR_SIZE = 50;
@@ -58,48 +60,89 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
         </div>
         <div style={{ lineHeight: 1.5 }}>
           {data.income > 0 && (
-            <AlignedText left="Income:" right={amountToCurrency(data.income)} />
+            <AlignedText
+              left="Income:"
+              right={
+                <Text>
+                  <PrivacyFilter>{amountToCurrency(data.income)}</PrivacyFilter>
+                </Text>
+              }
+            />
           )}
           {data.futureIncome > 0 && (
             <AlignedText
               left="Future Income:"
-              right={amountToCurrency(data.futureIncome)}
+              right={
+                <Text>
+                  <PrivacyFilter>
+                    {amountToCurrency(data.futureIncome)}
+                  </PrivacyFilter>
+                </Text>
+              }
             />
           )}
           {data.expenses < 0 && (
             <AlignedText
               left="Expenses:"
-              right={amountToCurrency(data.expenses)}
+              right={
+                <Text>
+                  <PrivacyFilter>
+                    {amountToCurrency(data.expenses)}
+                  </PrivacyFilter>
+                </Text>
+              }
             />
           )}
           {data.futureExpenses < 0 && (
             <AlignedText
               left="Future Expenses:"
-              right={amountToCurrency(data.futureExpenses)}
+              right={
+                <Text>
+                  <PrivacyFilter>
+                    {amountToCurrency(data.futureExpenses)}
+                  </PrivacyFilter>
+                </Text>
+              }
             />
           )}
           <AlignedText
             left="Change:"
             right={
-              <strong>
-                {amountToCurrency(
-                  data.income +
-                    data.expenses +
-                    data.futureIncome +
-                    data.futureExpenses,
-                )}
-              </strong>
+              <Text>
+                <PrivacyFilter>
+                  <strong>
+                    {amountToCurrency(
+                      data.income +
+                        data.expenses +
+                        data.futureIncome +
+                        data.futureExpenses,
+                    )}
+                  </strong>
+                </PrivacyFilter>
+              </Text>
             }
           />
           {data.transfers !== 0 && (
             <AlignedText
               left="Transfers:"
-              right={amountToCurrency(data.transfers)}
+              right={
+                <Text>
+                  <PrivacyFilter>
+                    {amountToCurrency(data.transfers)}
+                  </PrivacyFilter>
+                </Text>
+              }
             />
           )}
           <AlignedText
             left="Balance:"
-            right={amountToCurrency(data.balanceTotal)}
+            right={
+              <Text>
+                <PrivacyFilter>
+                  {amountToCurrency(data.balanceTotal)}
+                </PrivacyFilter>
+              </Text>
+            }
           />
         </div>
       </div>
