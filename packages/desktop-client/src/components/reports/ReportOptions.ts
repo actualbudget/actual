@@ -48,7 +48,7 @@ const groupByOptions = [
 const dateRangeOptions = [
   {
     description: 'This week',
-    type: 'Weeks',
+    type: 'Week',
     name: 0,
     Yearly: false,
     Monthly: false,
@@ -57,7 +57,7 @@ const dateRangeOptions = [
   },
   {
     description: 'Last week',
-    type: 'Weeks',
+    type: 'Week',
     name: 1,
     Yearly: false,
     Monthly: false,
@@ -66,7 +66,7 @@ const dateRangeOptions = [
   },
   {
     description: 'This month',
-    type: 'Months',
+    type: 'Month',
     name: 0,
     Yearly: false,
     Monthly: true,
@@ -75,7 +75,7 @@ const dateRangeOptions = [
   },
   {
     description: 'Last month',
-    type: 'Months',
+    type: 'Month',
     name: 1,
     Yearly: false,
     Monthly: true,
@@ -84,7 +84,7 @@ const dateRangeOptions = [
   },
   {
     description: 'Last 3 months',
-    type: 'Months',
+    type: 'Month',
     name: 3,
     Yearly: false,
     Monthly: true,
@@ -93,7 +93,7 @@ const dateRangeOptions = [
   },
   {
     description: 'Last 6 months',
-    type: 'Months',
+    type: 'Month',
     name: 6,
     Yearly: false,
     Monthly: true,
@@ -101,7 +101,7 @@ const dateRangeOptions = [
   },
   {
     description: 'Last 12 months',
-    type: 'Months',
+    type: 'Month',
     name: 12,
     Yearly: false,
     Monthly: true,

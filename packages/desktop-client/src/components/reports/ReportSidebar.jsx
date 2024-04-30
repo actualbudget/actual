@@ -278,8 +278,17 @@ export function ReportSidebar({
                   items={[
                     {
                       name: 'include-current-interval',
-                      text: 'Include current interval',
-                      tooltip: 'Include current interval',
+                      text:
+                        'Include current ' +
+                        ReportOptions.dateRangeType
+                          .get(customReportItems.dateRange)
+                          .toLowerCase(),
+                      tooltip:
+                        'Include current ' +
+                        ReportOptions.dateRangeType
+                          .get(customReportItems.dateRange)
+                          .toLowerCase() +
+                        ' in live range',
                       toggle: customReportItems.includeCurrentInterval,
                       disabled: customReportItems.isDateStatic,
                     },
