@@ -19,7 +19,7 @@ type NotesModalProps = {
 export function NotesModal({ modalProps, id, name, onSave }: NotesModalProps) {
   const originalNotes = useNotes(id);
 
-  const [notes, setNotes] = useState<string>();
+  const [notes, setNotes] = useState(originalNotes);
   useEffect(() => setNotes(originalNotes), [originalNotes]);
 
   function _onClose() {
