@@ -378,11 +378,11 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(collapseModals('budget-page-menu'));
   };
 
-  const onOpenBudgetMonthNotesModal = id => {
+  const onOpenBudgetMonthNotesModal = month => {
     dispatch(
       pushModal('notes', {
-        id,
-        name: monthUtils.format(startMonth, 'MMMM ‘yy'),
+        id: `budget-${month}`,
+        name: monthUtils.format(month, 'MMMM ‘yy'),
         onSave: onSaveNotes,
       }),
     );
