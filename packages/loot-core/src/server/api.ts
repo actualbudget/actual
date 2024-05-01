@@ -218,9 +218,9 @@ handlers['api/sync'] = async function () {
 };
 
 handlers['api/bank-sync'] = async function (args) {
-  const { errors } = await handlers['accounts-bank-sync'](
-    args ? { id: args.accountId } : undefined,
-  );
+  const { errors } = await handlers['accounts-bank-sync']({
+    id: args?.accountId,
+  });
 
   const [firstError] = errors;
   if (firstError) {
