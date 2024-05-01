@@ -8,7 +8,6 @@ import React, {
   type HTMLProps,
   type ReactNode,
   type KeyboardEvent,
-  type ChangeEvent,
 } from 'react';
 
 import Downshift, { type StateChangeTypes } from 'downshift';
@@ -27,9 +26,7 @@ type CommonAutocompleteProps<T extends Item> = {
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
   labelProps?: { id?: string };
-  inputProps?: Omit<ComponentProps<typeof Input>, 'onChange'> & {
-    onChange?: (value: string) => void;
-  };
+  inputProps?: ComponentProps<typeof Input>;
   suggestions?: T[];
   tooltipStyle?: CSSProperties;
   tooltipProps?: ComponentProps<typeof Tooltip>;
@@ -502,7 +499,7 @@ function SingleAutocomplete<T extends Item>({
                       // Handle it ourselves
                       e.stopPropagation();
                       onSelect(value, (e.target as HTMLInputElement).value);
-                      return onSelectAfter();
+                      onSelectAfter();
                     } else {
                       // No highlighted item, still allow the table to save the item
                       // as `null`, even though we're allowing the table to move
@@ -540,10 +537,6 @@ function SingleAutocomplete<T extends Item>({
                     close();
                   }
                 }
-              },
-              onChange: (e: ChangeEvent<HTMLInputElement>) => {
-                const { onChange } = inputProps || {};
-                onChange?.(e.target.value);
               },
             }),
           )}

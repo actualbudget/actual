@@ -59,6 +59,7 @@ import {
 import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { NotesTagAutocomplete } from '../autocomplete/NotesTagAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
@@ -714,7 +715,7 @@ const Transaction = memo(function Transaction(props) {
     const newTransaction = { ...transaction, [name]: value };
 
     // Don't change the note to an empty string if it's null (since they are both rendered the same)
-    if (name === 'note' && value === '' && transaction.note == null) {
+    if (name === 'notes' && value === '' && transaction.notes == null) {
       return;
     }
 
@@ -1002,23 +1003,42 @@ const Transaction = memo(function Transaction(props) {
         /* Notes field for all transactions */
         <Cell name="notes" width="flex" />
       ) : (
-        <InputCell
-          width="flex"
+        <CustomCell
           name="notes"
+          width="flex"
           textAlign="flex"
-          exposed={focusedField === 'notes'}
-          focused={focusedField === 'notes'}
           value={notes || ''}
-          valueStyle={valueStyle}
           formatter={value =>
             notesTagFormatter(value, onNavigateToFilteredTagView)
           }
+          exposed={focusedField === 'notes'}
           onExpose={name => !isPreview && onEdit(id, name)}
-          inputProps={{
-            value: notes || '',
-            onUpdate: onUpdate.bind(null, 'notes'),
+          valueStyle={valueStyle}
+          onUpdate={value => {
+            onUpdate('notes', value);
           }}
-        />
+        >
+          {({
+            onBlur,
+            onKeyDown,
+            onUpdate,
+            onSave,
+            shouldSaveFromKey,
+            inputStyle,
+          }) => (
+            <NotesTagAutocomplete
+              value={notes || ''}
+              shouldSaveFromKey={shouldSaveFromKey}
+              inputProps={{
+                onBlur,
+                onKeyDown,
+                style: inputStyle,
+              }}
+              onUpdate={(_, inputValue) => onUpdate(inputValue)}
+              onSelect={(_, inputValue) => onSave(inputValue)}
+            />
+          )}
+        </CustomCell>
       )}
 
       {isPreview ? (
@@ -2188,14 +2208,14 @@ export const TransactionTable = forwardRef((props, ref) => {
 TransactionTable.displayName = 'TransactionTable';
 
 function notesTagFormatter(value, onNoteTagClick) {
-  const words = value.split(' ');
+  const words = value?.split(' ') || [];
   return (
     <>
       {words.map((word, i, arr) => {
         const separator = arr.length - 1 === i ? '' : ' ';
         if (word.startsWith('#') && word.length > 1) {
           return (
-            <>
+            <span key={`${word}-${i}`}>
               <Button
                 type="bare"
                 key={i}
@@ -2220,7 +2240,7 @@ function notesTagFormatter(value, onNoteTagClick) {
                 {word}
               </Button>
               {separator}
-            </>
+            </span>
           );
         }
         return `${word}${separator}`;
