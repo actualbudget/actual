@@ -636,7 +636,7 @@ const Transaction = memo(function Transaction(props) {
     onToggleSplit,
     onNavigateToTransferAccount,
     onNavigateToSchedule,
-    onNavigateToFilteredTagView,
+    onNotesTagClick,
   } = props;
 
   const dispatch = useDispatch();
@@ -1009,9 +1009,7 @@ const Transaction = memo(function Transaction(props) {
           focused={focusedField === 'notes'}
           value={notes || ''}
           valueStyle={valueStyle}
-          formatter={value =>
-            notesTagFormatter(value, onNavigateToFilteredTagView)
-          }
+          formatter={value => notesTagFormatter(value, onNotesTagClick)}
           onExpose={name => !isPreview && onEdit(id, name)}
           inputProps={{
             value: notes || '',
@@ -1394,7 +1392,7 @@ function NewTransaction({
   onCreatePayee,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
-  onNavigateToFilteredTagView,
+  onNotesTagClick,
   balance,
 }) {
   const error = transactions[0].error;
@@ -1448,7 +1446,7 @@ function NewTransaction({
           style={{ marginTop: -1 }}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
-          onNavigateToFilteredTagView={onNavigateToFilteredTagView}
+          onNotesTagClick={onNotesTagClick}
           balance={balance}
         />
       ))}
@@ -1528,12 +1526,12 @@ function TransactionTableInner({
     [props.onCloseAddTransaction, props.onNavigateToSchedule],
   );
 
-  const onNavigateToFilteredTagView = useCallback(
+  const onNotesTagClick = useCallback(
     noteTag => {
       props.onCloseAddTransaction();
-      props.onNavigateToFilteredTagView(noteTag);
+      props.onNotesTagClick(noteTag);
     },
-    [props.onCloseAddTransaction, props.onNavigateToFilteredTagView],
+    [props.onCloseAddTransaction, props.onNotesTagClick],
   );
 
   useEffect(() => {
@@ -1638,7 +1636,7 @@ function TransactionTableInner({
           onToggleSplit={props.onToggleSplit}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
-          onNavigateToFilteredTagView={onNavigateToFilteredTagView}
+          onNotesTagClick={onNotesTagClick}
         />
       </>
     );
@@ -1696,7 +1694,7 @@ function TransactionTableInner({
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
-              onNavigateToFilteredTagView={onNavigateToFilteredTagView}
+              onNotesTagClick={onNotesTagClick}
               onDistributeRemainder={props.onDistributeRemainder}
               balance={
                 props.transactions?.length > 0
@@ -2186,7 +2184,7 @@ export const TransactionTable = forwardRef((props, ref) => {
 
 TransactionTable.displayName = 'TransactionTable';
 
-function notesTagFormatter(value, onNoteTagClick) {
+function notesTagFormatter(value, onNotesTagClick) {
   const words = value.split(' ');
   return (
     <>
@@ -2213,7 +2211,7 @@ function notesTagFormatter(value, onNoteTagClick) {
                 }}
                 onClick={e => {
                   e.stopPropagation();
-                  onNoteTagClick?.(word);
+                  onNotesTagClick?.(word);
                 }}
               >
                 {word}
