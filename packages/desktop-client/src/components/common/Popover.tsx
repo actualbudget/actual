@@ -1,6 +1,8 @@
 import { type ComponentProps } from 'react';
 import { Popover as ReactAriaPopover } from 'react-aria-components';
 
+import { css } from 'glamor';
+
 import { styles } from '../../style';
 
 type PopoverProps = ComponentProps<typeof ReactAriaPopover>;
@@ -14,13 +16,13 @@ export const Popover = ({
     <ReactAriaPopover
       placement="bottom end"
       offset={0}
-      style={{
+      className={`${css({
         ...styles.tooltip,
         ...styles.lightScrollbar,
         scrollbarColor: 'rgba(200, 200, 200, .2) #d0d0d0',
         padding: 0,
         ...style,
-      }}
+      })}`}
       shouldCloseOnInteractOutside={element => {
         // Disable closing the popover when a reach listbox is clicked (Select component)
         if (
