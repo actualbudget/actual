@@ -36,7 +36,7 @@ import { ImportTransactions } from './modals/ImportTransactions';
 import { LoadBackup } from './modals/LoadBackup';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
-import { Notes } from './modals/Notes';
+import { NotesModal } from './modals/NotesModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
@@ -499,7 +499,7 @@ export function Modals() {
 
         case 'notes':
           return (
-            <Notes
+            <NotesModal
               key={name}
               modalProps={modalProps}
               id={options.id}
