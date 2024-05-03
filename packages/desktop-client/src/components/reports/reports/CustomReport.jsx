@@ -121,6 +121,7 @@ export function CustomReport() {
 
   useEffect(() => {
     async function run() {
+      onApplyFilter(null);
       report.conditions.forEach(condition => onApplyFilter(condition));
       const trans = await send('get-earliest-transaction');
       setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
@@ -164,16 +165,10 @@ export function CustomReport() {
   }, [interval]);
 
   useEffect(() => {
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
-
-    const dateStart = monthUtils[format](startDate);
-    const dateEnd = monthUtils[format](endDate);
-
     const rangeProps =
       interval === 'Weekly'
-        ? [dateStart, dateEnd, firstDayOfWeekIdx]
-        : [dateStart, dateEnd];
+        ? [startDate, endDate, firstDayOfWeekIdx]
+        : [startDate, endDate];
     setIntervals(
       monthUtils[ReportOptions.intervalRange.get(interval)](...rangeProps),
     );
