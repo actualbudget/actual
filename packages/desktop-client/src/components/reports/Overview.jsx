@@ -15,6 +15,7 @@ import { View } from '../common/View';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { NetWorthCard } from './reports/NetWorthCard';
+import { SpendingCard } from './reports/SpendingCard';
 
 export function Overview() {
   const customReports = useReports();
@@ -24,6 +25,7 @@ export function Overview() {
   sessionStorage.setItem('url', location.pathname);
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
+  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const accounts = useAccounts();
   return (
@@ -61,6 +63,7 @@ export function Overview() {
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
+        {spendingReportFeatureFlag && <SpendingCard />}
       </View>
       {customReportsFeatureFlag && (
         <CustomReportListCards reports={customReports} />

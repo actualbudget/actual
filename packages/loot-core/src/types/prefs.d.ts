@@ -4,6 +4,7 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'customReports'
+  | 'spendingReport'
   | 'simpleFinSync'
   | 'splitsInRules';
 

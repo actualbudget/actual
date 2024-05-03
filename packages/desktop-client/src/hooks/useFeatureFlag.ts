@@ -7,6 +7,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
   customReports: false,
+  spendingReport: false,
   simpleFinSync: false,
   splitsInRules: false,
 };
