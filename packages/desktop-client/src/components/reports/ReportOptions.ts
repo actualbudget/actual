@@ -44,91 +44,103 @@ const groupByOptions = [
   { description: 'Interval' },
 ];
 
-const dateRangeOptions = [
+export type dateRangeEntity = {
+  description: string;
+  name: number | string;
+  type?: string;
+  Daily: boolean;
+  Weekly: boolean;
+  Monthly: boolean;
+  Yearly: boolean;
+};
+
+const dateRangeOptions: dateRangeEntity[] = [
   {
     description: 'This week',
-    type: 'Weeks',
     name: 0,
-    Yearly: false,
-    Monthly: false,
+    type: 'Weeks',
     Daily: true,
     Weekly: true,
+    Monthly: false,
+    Yearly: false,
   },
   {
     description: 'Last week',
-    type: 'Weeks',
     name: 1,
-    Yearly: false,
-    Monthly: false,
+    type: 'Weeks',
     Daily: true,
     Weekly: true,
+    Monthly: false,
+    Yearly: false,
   },
   {
     description: 'This month',
-    type: 'Months',
     name: 0,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last month',
-    type: 'Months',
     name: 1,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 3 months',
-    type: 'Months',
     name: 2,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 6 months',
-    type: 'Months',
     name: 5,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: false,
+    Weekly: false,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 12 months',
-    type: 'Months',
     name: 11,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: false,
+    Weekly: false,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Year to date',
     name: 'yearToDate',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
   {
     description: 'Last year',
     name: 'lastYear',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
   {
     description: 'All time',
     name: 'allTime',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
 ];
 
