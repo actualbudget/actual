@@ -7,6 +7,7 @@ import { type CSSProperties, theme, styles } from '../../style';
 import { BalanceWithCarryover } from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/rollover/BalanceMenu';
 import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 
@@ -38,17 +39,10 @@ export function RolloverBalanceMenuModal({
 
   return (
     <Modal
-      title={`Balance: ${category.name}`}
+      title={category.name}
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      padding={0}
-      style={{
-        flex: 1,
-        padding: '0 10px',
-        paddingBottom: 10,
-        borderRadius: '6px',
-      }}
     >
       <View
         style={{
@@ -57,6 +51,14 @@ export function RolloverBalanceMenuModal({
           marginBottom: 20,
         }}
       >
+        <Text
+          style={{
+            fontSize: 17,
+            fontWeight: 400,
+          }}
+        >
+          Balance
+        </Text>
         <BalanceWithCarryover
           disabled
           balanceStyle={{

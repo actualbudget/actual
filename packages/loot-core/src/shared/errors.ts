@@ -91,3 +91,13 @@ export function getSyncError(error, id) {
     return `We had an unknown problem opening “${id}”.`;
   }
 }
+
+export class LazyLoadFailedError extends Error {
+  type = 'app-init-failure';
+  meta = {};
+
+  constructor(name: string) {
+    super(`Error: failed loading lazy-loaded module ${name}`);
+    this.meta = { name };
+  }
+}

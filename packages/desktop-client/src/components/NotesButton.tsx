@@ -1,10 +1,8 @@
 import React, { useEffect, useRef, useState, type ComponentProps } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { q } from 'loot-core/src/shared/query';
-import { type NoteEntity } from 'loot-core/types/models';
 
+import { useNotes } from '../hooks/useNotes';
 import { SvgCustomNotesPaper } from '../icons/v2';
 import { type CSSProperties, theme } from '../style';
 
@@ -32,11 +30,7 @@ export function NotesButton({
 }: NotesButtonProps) {
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id }).select('*'),
-    [id],
-  );
-  const note = data && data.length > 0 ? data[0].note : '';
+  const note = useNotes(id) || '';
   const hasNotes = note && note !== '';
 
   const [tempNotes, setTempNotes] = useState<string>(note);

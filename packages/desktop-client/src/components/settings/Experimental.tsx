@@ -93,6 +93,7 @@ export function ExperimentalFeatures() {
           <Link
             variant="text"
             onClick={() => setExpanded(true)}
+            data-testid="experimental-settings"
             style={{
               flexShrink: 0,
               alignSelf: 'flex-start',

@@ -5,10 +5,12 @@ import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, type CSSProperties } from '../../../style';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
@@ -176,6 +178,7 @@ const customLabel = props => {
 type DonutGraphProps = {
   style?: CSSProperties;
   data: GroupedEntity;
+  filters: RuleConditionEntity[];
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
@@ -187,6 +190,7 @@ type DonutGraphProps = {
 export function DonutGraph({
   style,
   data,
+  filters,
   groupBy,
   balanceTypeOp,
   compact,
@@ -200,6 +204,7 @@ export function DonutGraph({
   const navigate = useNavigate();
   const categories = useCategories();
   const accounts = useAccounts();
+  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
 
   const onShowActivity = item => {
@@ -211,6 +216,7 @@ export function DonutGraph({
     const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
 
     const conditions = [
+      ...filters,
       { field, op: 'is', value: item.id, type: 'id' },
       {
         field: 'date',
@@ -304,7 +310,9 @@ export function DonutGraph({
                     }
                   }}
                   onClick={
-                    !['Group', 'Interval'].includes(groupBy) && onShowActivity
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    onShowActivity
                   }
                 >
                   {data.legend.map((entry, index) => (

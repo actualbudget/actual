@@ -27,6 +27,7 @@ export function createGroupedSpreadsheet({
   showHiddenCategories,
   showUncategorized,
   balanceTypeOp,
+  firstDayOfWeekIdx,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
 
@@ -51,14 +52,13 @@ export function createGroupedSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const [assets, debts] = await Promise.all([
+    let [assets, debts] = await Promise.all([
       runQuery(
         makeQuery(
           'assets',
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -70,7 +70,6 @@ export function createGroupedSpreadsheet({
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -78,11 +77,33 @@ export function createGroupedSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
+    if (interval === 'Weekly') {
+      debts = debts.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+      assets = assets.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+    }
+
     const format =
       ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
+    const rangeProps =
+      interval === 'Weekly'
+        ? [
+            monthUtils[format](startDate),
+            monthUtils[format](endDate),
+            firstDayOfWeekIdx,
+          ]
+        : [monthUtils[format](startDate), monthUtils[format](endDate)];
     const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      monthUtils[format](startDate),
-      monthUtils[format](endDate),
+      ...rangeProps,
     );
 
     const groupedData: DataEntity[] = categoryGroup.map(

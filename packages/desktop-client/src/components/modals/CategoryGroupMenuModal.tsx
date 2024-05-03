@@ -1,14 +1,10 @@
 // @ts-strict-ignore
 import React, { type ComponentProps, useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { q } from 'loot-core/src/shared/query';
-import {
-  type CategoryGroupEntity,
-  type NoteEntity,
-} from 'loot-core/src/types/models';
+import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -42,11 +38,7 @@ export function CategoryGroupMenuModal({
 }: CategoryGroupMenuModalProps) {
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
-  const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id: group.id }).select('*'),
-    [group.id],
-  );
-  const notes = data && data.length > 0 ? data[0].note : null;
+  const notes = useNotes(group.id);
 
   const _onClose = () => {
     modalProps?.onClose();
@@ -101,12 +93,8 @@ export function CategoryGroupMenuModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 1,
         height: '45vh',
-        padding: '0 10px',
-        borderRadius: '6px',
       }}
       leftHeaderContent={
         <AdditionalCategoryGroupMenu
@@ -150,7 +138,6 @@ export function CategoryGroupMenuModal({
             justifyContent: 'space-between',
             alignContent: 'space-between',
             paddingTop: 10,
-            paddingBottom: 10,
           }}
         >
           <Button style={buttonStyle} onClick={_onAddCategory}>

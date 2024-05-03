@@ -8,6 +8,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
@@ -21,6 +22,7 @@ import { fromDateRepr } from '../util';
 
 export function NetWorth() {
   const accounts = useAccounts();
+  const { isNarrowWidth } = useResponsive();
   const {
     filters,
     saved,
@@ -81,7 +83,13 @@ export function NetWorth() {
   }
 
   return (
-    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
+    <View
+      style={{
+        ...styles.page,
+        minWidth: isNarrowWidth ? undefined : 650,
+        overflow: 'hidden',
+      }}
+    >
       <Header
         title="Net Worth"
         allMonths={allMonths}
@@ -136,7 +144,7 @@ export function NetWorth() {
           }}
         />
 
-        <View style={{ marginTop: 30 }}>
+        <View style={{ marginTop: 30, userSelect: 'none' }}>
           <Paragraph>
             <strong>How is net worth calculated?</strong>
           </Paragraph>

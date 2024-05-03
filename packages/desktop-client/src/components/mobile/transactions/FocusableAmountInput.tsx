@@ -17,6 +17,7 @@ import {
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { type CSSProperties, theme } from '../../../style';
+import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -230,6 +231,9 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         onUpdateAmount={amount => onUpdateAmount(amount, isNegative)}
         focused={focused && !disabled}
         style={{
+          ...makeAmountFullStyle(value, {
+            zeroColor: isNegative ? theme.errorText : theme.noticeText,
+          }),
           width: 80,
           justifyContent: 'center',
           ...style,
@@ -276,7 +280,14 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
               ...style,
             }}
           >
-            <Text style={{ fontSize: 15, userSelect: 'none', ...textStyle }}>
+            <Text
+              style={{
+                ...makeAmountFullStyle(value),
+                fontSize: 15,
+                userSelect: 'none',
+                ...textStyle,
+              }}
+            >
               {amountToCurrency(Math.abs(value))}
             </Text>
           </View>
