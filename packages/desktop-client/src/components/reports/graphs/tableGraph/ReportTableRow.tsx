@@ -6,33 +6,63 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { useAccounts } from '../../../../hooks/useAccounts';
+import { useCategories } from '../../../../hooks/useCategories';
+import { useNavigate } from '../../../../hooks/useNavigate';
+import { useResponsive } from '../../../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../../../style';
 import { Row, Cell } from '../../../table';
+import { showActivity } from '../showActivity';
 
 type ReportTableRowProps = {
   item: DataEntity;
   balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
-  groupByItem: 'id' | 'name';
+  groupBy: string;
   mode: string;
+  filters?: RuleConditionEntity[];
+  startDate?: string;
+  endDate?: string;
   intervalsCount: number;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export const ReportTableRow = memo(
   ({
     item,
     balanceTypeOp,
-    groupByItem,
+    groupBy,
     mode,
+    filters = [],
+    startDate = '',
+    endDate,
     intervalsCount,
     compact,
     style,
     compactStyle,
+    showHiddenCategories = false,
+    showOffBudget = false,
   }: ReportTableRowProps) => {
     const average = amountToInteger(item[balanceTypeOp]) / intervalsCount;
+    const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
+
+    const navigate = useNavigate();
+    const { isNarrowWidth } = useResponsive();
+    const categories = useCategories();
+    const accounts = useAccounts();
+
+    const pointer =
+      !isNarrowWidth &&
+      !['Group', 'Interval'].includes(groupBy) &&
+      !categories.grouped.map(g => g.id).includes(item.id)
+        ? 'pointer'
+        : 'inherit';
+
     return (
       <Row
         key={item.id}
@@ -45,7 +75,7 @@ export const ReportTableRow = memo(
       >
         <Cell
           value={item[groupByItem]}
-          title={item[groupByItem].length > 12 ? item[groupByItem] : undefined}
+          title={item[groupByItem] ?? undefined}
           style={{
             width: compact ? 80 : 125,
             flexShrink: 0,
@@ -59,6 +89,7 @@ export const ReportTableRow = memo(
                   key={amountToCurrency(intervalItem[balanceTypeOp])}
                   style={{
                     minWidth: compact ? 50 : 85,
+                    cursor: pointer,
                   }}
                   valueStyle={compactStyle}
                   value={amountToCurrency(intervalItem[balanceTypeOp])}
@@ -66,6 +97,24 @@ export const ReportTableRow = memo(
                     Math.abs(intervalItem[balanceTypeOp]) > 100000
                       ? amountToCurrency(intervalItem[balanceTypeOp])
                       : undefined
+                  }
+                  onClick={() =>
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    !categories.grouped.map(g => g.id).includes(item.id) &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'time',
+                      startDate: intervalItem.dateLookup || '',
+                      field: groupBy.toLowerCase(),
+                      id: item.id,
+                    })
                   }
                   width="flex"
                   privacyFilter
@@ -85,8 +134,28 @@ export const ReportTableRow = memo(
                   privacyFilter
                   style={{
                     minWidth: compact ? 50 : 85,
+                    cursor: pointer,
                   }}
                   valueStyle={compactStyle}
+                  onClick={() =>
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    !categories.grouped.map(g => g.id).includes(item.id) &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'assets',
+                      startDate,
+                      endDate,
+                      field: groupBy.toLowerCase(),
+                      id: item.id,
+                    })
+                  }
                 />
                 <Cell
                   value={amountToCurrency(item.totalDebts)}
@@ -99,8 +168,28 @@ export const ReportTableRow = memo(
                   privacyFilter
                   style={{
                     minWidth: compact ? 50 : 85,
+                    cursor: pointer,
                   }}
                   valueStyle={compactStyle}
+                  onClick={() =>
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    !categories.grouped.map(g => g.id).includes(item.id) &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'debts',
+                      startDate,
+                      endDate,
+                      field: groupBy.toLowerCase(),
+                      id: item.id,
+                    })
+                  }
                 />
               </>
             )}
@@ -114,7 +203,27 @@ export const ReportTableRow = memo(
           style={{
             fontWeight: 600,
             minWidth: compact ? 50 : 85,
+            cursor: pointer,
           }}
+          onClick={() =>
+            !isNarrowWidth &&
+            !['Group', 'Interval'].includes(groupBy) &&
+            !categories.grouped.map(g => g.id).includes(item.id) &&
+            showActivity({
+              navigate,
+              categories,
+              accounts,
+              balanceTypeOp,
+              filters,
+              showHiddenCategories,
+              showOffBudget,
+              type: 'totals',
+              startDate,
+              endDate,
+              field: groupBy.toLowerCase(),
+              id: item.id,
+            })
+          }
           valueStyle={compactStyle}
           width="flex"
           privacyFilter

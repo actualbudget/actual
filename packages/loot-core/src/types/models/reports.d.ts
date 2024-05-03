@@ -52,6 +52,7 @@ export type ItemEntity = {
 
 export type IntervalData = {
   date: string;
+  dateLookup: string;
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
@@ -61,6 +62,7 @@ export interface DataEntity {
   id: string;
   name: string;
   date?: string;
+  dateStart?: string;
   intervalData: IntervalData[];
   categories?: ItemEntity[];
   totalAssets: number;
