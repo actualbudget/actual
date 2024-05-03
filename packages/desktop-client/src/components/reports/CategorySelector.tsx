@@ -23,7 +23,7 @@ import { GraphButton } from './GraphButton';
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;
   selectedCategories: CategoryListProps['items'];
-  setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
+  setSelectedCategories: (selectedCategories: CategoryEntity[]) => void;
   showHiddenCategories?: boolean;
 };
 
