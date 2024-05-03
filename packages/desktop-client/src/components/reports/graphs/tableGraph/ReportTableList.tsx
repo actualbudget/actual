@@ -52,8 +52,8 @@ export function ReportTableList({
   }: RenderRowProps) {
     const item =
       parent_index === undefined
-      ? metadata[index]
-      : metadata[parent_index].categories[index];
+        ? metadata[index]
+        : metadata[parent_index].categories[index];
 
     return renderItem({
       item,
