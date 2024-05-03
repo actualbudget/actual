@@ -1584,6 +1584,9 @@ handlers['get-budgets'] = async function () {
             return {
               id: name,
               ...(prefs.cloudFileId ? { cloudFileId: prefs.cloudFileId } : {}),
+              ...(prefs.encryptKeyId
+                ? { encryptKeyId: prefs.encryptKeyId }
+                : {}),
               ...(prefs.groupId ? { groupId: prefs.groupId } : {}),
               name: prefs.budgetName || '(no name)',
             } satisfies Budget;
