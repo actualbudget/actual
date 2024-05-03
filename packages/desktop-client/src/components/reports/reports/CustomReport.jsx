@@ -12,10 +12,12 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayees } from '../../../hooks/usePayees';
+import { SvgArrowLeft } from '../../../icons/v1/ArrowLeft';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
+import { Link } from '../../common/Link';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
@@ -23,7 +25,6 @@ import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import { defaultsList, disabledList } from '../disabledList';
 import { getLiveRange } from '../getLiveRange';
-import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportLegend } from '../ReportLegend';
 import { ReportOptions, defaultReport } from '../ReportOptions';
@@ -361,9 +362,9 @@ export function CustomReport() {
     onReportChange({ type: 'modify' });
   };
 
-  const onChangeViews = (viewType, status) => {
+  const onChangeViews = viewType => {
     if (viewType === 'viewLegend') {
-      setViewLegendPref(status ?? !viewLegend);
+      setViewLegendPref(!viewLegend);
     }
     if (viewType === 'viewSummary') {
       setViewSummaryPref(!viewSummary);
@@ -454,7 +455,24 @@ export function CustomReport() {
           flexShrink: 0,
         }}
       >
-        <Header title="Custom Report:" />
+        <View
+          style={{
+            padding: 10,
+            paddingTop: 0,
+            flexShrink: 0,
+          }}
+        >
+          <Link
+            variant="button"
+            type="bare"
+            to="/reports"
+            style={{ marginBottom: '15', alignSelf: 'flex-start' }}
+          >
+            <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} />{' '}
+            Back
+          </Link>
+          <View style={styles.veryLargeText}>Custom Report:</View>
+        </View>
         <Text
           style={{
             ...styles.veryLargeText,

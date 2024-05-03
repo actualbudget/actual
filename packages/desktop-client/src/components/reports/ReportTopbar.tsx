@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+
 import {
   SvgCalculator,
   SvgChart,
@@ -18,6 +21,27 @@ import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
 
+type ReportTopbarProps = {
+  customReportItems: CustomReportEntity;
+  report: CustomReportEntity;
+  savedStatus: string;
+  setGraphType: (value: string) => void;
+  viewLegend: boolean;
+  viewSummary: boolean;
+  viewLabels: boolean;
+  onApplyFilter: (newFilter: RuleConditionEntity) => void;
+  onChangeViews: (viewType: string) => void;
+  onReportChange: ({
+    savedReport,
+    type,
+  }: {
+    savedReport?: CustomReportEntity;
+    type: string;
+  }) => void;
+  disabledItems: (type: string) => boolean;
+  defaultItems: (item: string) => void;
+};
+
 export function ReportTopbar({
   customReportItems,
   report,
@@ -31,8 +55,8 @@ export function ReportTopbar({
   onReportChange,
   disabledItems,
   defaultItems,
-}) {
-  const onChangeGraph = cond => {
+}: ReportTopbarProps) {
+  const onChangeGraph = (cond: string) => {
     setSessionReport('graphType', cond);
     onReportChange({ type: 'modify' });
     setGraphType(cond);
@@ -165,11 +189,15 @@ export function ReportTopbar({
       <FilterButton
         compact
         hover
-        onApply={e => {
-          setSessionReport('conditions', [...customReportItems.conditions, e]);
+        onApply={(e: RuleConditionEntity) => {
+          setSessionReport('conditions', [
+            ...(customReportItems.conditions as []),
+            e,
+          ]);
           onApplyFilter(e);
           onReportChange({ type: 'modify' });
         }}
+        exclude={[]}
       />
       <View style={{ flex: 1 }} />
       <SaveReport
