@@ -377,48 +377,51 @@ export async function listRemoteFiles(): Promise<RemoteFile[] | null> {
 
 export async function download(fileId) {
   const userToken = await asyncStorage.getItem('user-token');
+  const syncServer = getServer().SYNC_SERVER;
 
-  let buffer;
-  try {
-    buffer = await fetch(getServer().SYNC_SERVER + '/download-user-file', {
-      headers: {
-        'X-ACTUAL-TOKEN': userToken,
-        'X-ACTUAL-FILE-ID': fileId,
-      },
+  const userFileFetch = fetch(`${syncServer}/download-user-file`, {
+    headers: {
+      'X-ACTUAL-TOKEN': userToken,
+      'X-ACTUAL-FILE-ID': fileId,
+    },
+  })
+    .then(checkHTTPStatus)
+    .then(res => {
+      if (res.arrayBuffer) {
+        return res.arrayBuffer().then(ab => Buffer.from(ab));
+      }
+      return res.buffer();
     })
-      .then(checkHTTPStatus)
-      .then(res => {
-        if (res.arrayBuffer) {
-          return res.arrayBuffer().then(ab => Buffer.from(ab));
-        }
-        return res.buffer();
-      });
-  } catch (err) {
-    console.log('Download failure', err);
-    throw FileDownloadError('download-failure');
-  }
-
-  let res;
-  try {
-    res = await fetchJSON(getServer().SYNC_SERVER + '/get-user-file-info', {
-      headers: {
-        'X-ACTUAL-TOKEN': userToken,
-        'X-ACTUAL-FILE-ID': fileId,
-      },
+    .catch(err => {
+      console.log('Download failure', err);
+      throw FileDownloadError('download-failure');
     });
-  } catch (err) {
+
+  const userFileInfoFetch = fetchJSON(`${syncServer}/get-user-file-info`, {
+    headers: {
+      'X-ACTUAL-TOKEN': userToken,
+      'X-ACTUAL-FILE-ID': fileId,
+    },
+  }).catch(err => {
     console.log('Error fetching file info', err);
     throw FileDownloadError('internal', { fileId });
-  }
+  });
 
-  if (res.status !== 'ok') {
+  const [userFileInfoRes, userFileRes] = await Promise.all([
+    userFileInfoFetch,
+    userFileFetch,
+  ]);
+
+  if (userFileInfoRes.status !== 'ok') {
     console.log(
       'Could not download file from the server. Are you sure you have the right file ID?',
-      res,
+      userFileInfoRes,
     );
     throw FileDownloadError('internal', { fileId });
   }
-  const fileData = res.data;
+
+  const fileData = userFileInfoRes.data;
+  let buffer = userFileRes;
 
   // The download process checks if the server gave us decrypt
   // information. It is assumed that this key has already been loaded
