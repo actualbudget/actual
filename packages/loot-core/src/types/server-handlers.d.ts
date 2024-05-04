@@ -264,7 +264,10 @@ export interface ServerHandlers {
     password;
   }) => Promise<{ error?: string }>;
 
-  'subscribe-sign-in': (arg: { password }) => Promise<{ error?: string }>;
+  'subscribe-sign-in': (arg: {
+    password;
+    loginMethod?: string;
+  }) => Promise<{ error?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
 
