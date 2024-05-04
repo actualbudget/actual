@@ -40,7 +40,7 @@ export async function parseFile(
       case '.qfx':
         return parseOFX(filepath, options);
       case '.xml':
-        return parseCAMT(filepath, options);
+        return parseCAMT(filepath);
       default:
     }
   }
@@ -148,7 +148,7 @@ async function parseOFX(
   };
 }
 
-async function parseCAMT(filepath: string, options: ParseFileOptions): Promise<ParseFileResult> {
+async function parseCAMT(filepath: string): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 

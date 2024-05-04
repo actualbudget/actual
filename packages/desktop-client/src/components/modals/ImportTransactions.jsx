@@ -916,9 +916,10 @@ export function ImportTransactions({ modalProps, options }) {
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      const date = (isOfxFile(filetype) || isCamtFile(filetype))
-        ? trans.date
-        : parseDate(trans.date, parseDateFormat);
+      const date =
+        isOfxFile(filetype) || isCamtFile(filetype)
+          ? trans.date
+          : parseDate(trans.date, parseDateFormat);
       if (date == null) {
         errorMessage = `Unable to parse date ${
           trans.date || '(empty)'
@@ -1110,36 +1111,32 @@ export function ImportTransactions({ modalProps, options }) {
       )}
 
       {isOfxFile(filetype) && (
-        <>
-          <CheckboxOption
-            id="form_fallback_missing_payee"
-            checked={fallbackMissingPayeeToMemo}
-            onChange={() => {
-              setFallbackMissingPayeeToMemo(state => !state);
-              parse(
-                filename,
-                getParseOptions('ofx', {
-                  fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
-                }),
-              );
-            }}
-          >
-            Use Memo as a fallback for empty Payees
-          </CheckboxOption>
-        </>
+        <CheckboxOption
+          id="form_fallback_missing_payee"
+          checked={fallbackMissingPayeeToMemo}
+          onChange={() => {
+            setFallbackMissingPayeeToMemo(state => !state);
+            parse(
+              filename,
+              getParseOptions('ofx', {
+                fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
+              }),
+            );
+          }}
+        >
+          Use Memo as a fallback for empty Payees
+        </CheckboxOption>
       )}
       {(isOfxFile(filetype) || isCamtFile(filetype)) && (
-        <>
-          <CheckboxOption
-            id="form_dont_reconcile"
-            checked={reconcile}
-            onChange={() => {
-              setReconcile(state => !state);
-            }}
-          >
-            Reconcile transactions
-          </CheckboxOption>
-        </>
+        <CheckboxOption
+          id="form_dont_reconcile"
+          checked={reconcile}
+          onChange={() => {
+            setReconcile(state => !state);
+          }}
+        >
+          Reconcile transactions
+        </CheckboxOption>
       )}
 
       {/*Import Options */}

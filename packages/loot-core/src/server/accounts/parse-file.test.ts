@@ -178,5 +178,5 @@ describe('File import', () => {
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
-  });  
+  });
 });

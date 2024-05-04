@@ -1,15 +1,15 @@
+// @ts-strict-ignore
 import { parseStringPromise } from 'xml2js';
 
 type DateRef = { DtTm: string } | { Dt: string };
+type Amt = { _: string };
 
 interface Ntry {
   AcctSvcrRef?: string;
-  Amt?: {
-    _: string;
-  };
+  Amt?: Amt;
   CdtDbtInd: 'CRDT' | 'DBIT';
-  ValDt?: DateRef
-  BookgDt?: DateRef
+  ValDt?: DateRef;
+  BookgDt?: DateRef;
   NtryDtls?: NtryDtls;
   AddtlNtryInf?: string;
   NtryRef?: string;
@@ -21,13 +21,16 @@ interface NtryDtls {
 
 interface TxDtls {
   RltdPties?: {
-    Cdtr: string;
-    Dbtr: string;
+    Cdtr: {
+      Nm: string;
+    };
+    Dbtr: {
+      Nm: string;
+    };
   };
   RmtInf?: {
     Ustrd: string | string[];
   };
-
 }
 
 interface TransactionCAMT {
@@ -39,10 +42,9 @@ interface TransactionCAMT {
   imported_id?: string;
 }
 
-
-function findKeys(obj: any, key: string): any[] {
+function findKeys(obj: object, key: string): unknown[] {
   let result = [];
-  for (let i in obj) {
+  for (const i in obj) {
     if (!obj.hasOwnProperty(i)) continue;
     if (i === key) {
       if (Array.isArray(obj[i])) {
@@ -58,11 +60,14 @@ function findKeys(obj: any, key: string): any[] {
   return result;
 }
 
-function getPayeeNameFromTxDtls(TxDtls: TxDtls, isDebit: boolean): string | null {
+function getPayeeNameFromTxDtls(
+  TxDtls: TxDtls,
+  isDebit: boolean,
+): string | null {
   if (TxDtls?.RltdPties) {
     const key = isDebit ? TxDtls.RltdPties.Cdtr : TxDtls.RltdPties.Dbtr;
-    const Nm = findKeys(key, 'Nm') as string[];
-    return Nm.length > 0 ? Nm[0] : null;
+    const Nm = findKeys(key, 'Nm');
+    return Nm.length > 0 ? (Nm[0] as string) : null;
   }
   return null;
 }
@@ -87,11 +92,13 @@ function getDtOrDtTm(Date: DateRef | null): string | null {
   return Date?.Dt;
 }
 
-export async function xmlCAMT2json(content: string): Promise<TransactionCAMT[]> {
+export async function xmlCAMT2json(
+  content: string,
+): Promise<TransactionCAMT[]> {
   const data = await parseStringPromise(content, { explicitArray: false });
   const entries = findKeys(data, 'Ntry') as Ntry[];
 
-  const transactions: TransactionCAMT[] = []
+  const transactions: TransactionCAMT[] = [];
 
   for (const entry of entries) {
     /*
@@ -100,25 +107,25 @@ export async function xmlCAMT2json(content: string): Promise<TransactionCAMT[]> 
 
     const id = entry.AcctSvcrRef;
 
-    const amount = convertToNumberOrNull(entry.Amt?._)
+    const amount = convertToNumberOrNull(entry.Amt?._);
     const isDebit = entry.CdtDbtInd === 'DBIT';
 
-    const date = getDtOrDtTm(entry.ValDt) || getDtOrDtTm(entry.BookgDt)
+    const date = getDtOrDtTm(entry.ValDt) || getDtOrDtTm(entry.BookgDt);
 
     if (Array.isArray(entry.NtryDtls?.TxDtls)) {
       // we add subtransactions as normal transactions as importing split with subtransactions is not supported
       // amount, and payee_name are not processed correctly for subtransaction.
-      entry.NtryDtls.TxDtls.forEach((TxDtls: any) => {
+      entry.NtryDtls.TxDtls.forEach((TxDtls: TxDtls) => {
         const subPayee = getPayeeNameFromTxDtls(TxDtls, isDebit);
         const subNotes = getNotesFromTxDtls(TxDtls);
-        const Amt = findKeys(TxDtls, 'Amt')
+        const Amt = findKeys(TxDtls, 'Amt') as Amt[];
         const amount = Amt.length > 0 ? convertToNumberOrNull(Amt[0]._) : null;
         transactions.push({
           amount: isDebit ? -amount : amount,
           date,
           payee_name: subPayee,
           imported_payee: subPayee,
-          notes: subNotes
+          notes: subNotes,
         });
       });
     } else {
@@ -129,7 +136,7 @@ export async function xmlCAMT2json(content: string): Promise<TransactionCAMT[]> 
         payee_name = entry.AddtlNtryInf;
       }
       notes = getNotesFromTxDtls(entry.NtryDtls?.TxDtls);
-      if (!notes && entry.AddtlNtryInf && entry.AddtlNtryInf != payee_name) {
+      if (!notes && entry.AddtlNtryInf && entry.AddtlNtryInf !== payee_name) {
         notes = entry.AddtlNtryInf;
       }
       if (!payee_name && !notes && entry.NtryRef) {
@@ -144,7 +151,7 @@ export async function xmlCAMT2json(content: string): Promise<TransactionCAMT[]> 
         date,
         payee_name,
         imported_payee: payee_name,
-        notes
+        notes,
       };
       if (id) {
         transaction.imported_id = id;
@@ -152,5 +159,7 @@ export async function xmlCAMT2json(content: string): Promise<TransactionCAMT[]> 
       transactions.push(transaction);
     }
   }
-  return transactions.filter(trans => trans.date != null && trans.amount != null);
+  return transactions.filter(
+    trans => trans.date != null && trans.amount != null,
+  );
 }
