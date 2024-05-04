@@ -888,7 +888,7 @@ export function ImportTransactions({ modalProps, options }) {
       filters: [
         {
           name: 'Financial Files',
-          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
         },
       ],
     });
@@ -916,7 +916,7 @@ export function ImportTransactions({ modalProps, options }) {
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      const date = isOfxFile(filetype)
+      const date = (isOfxFile(filetype) || isCamtFile(filetype))
         ? trans.date
         : parseDate(trans.date, parseDateFormat);
       if (date == null) {
@@ -959,7 +959,7 @@ export function ImportTransactions({ modalProps, options }) {
       return;
     }
 
-    if (!isOfxFile(filetype)) {
+    if (!isOfxFile(filetype) && !isCamtFile(filetype)) {
       const key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
     }
@@ -1126,6 +1126,10 @@ export function ImportTransactions({ modalProps, options }) {
           >
             Use Memo as a fallback for empty Payees
           </CheckboxOption>
+        </>
+      )}
+      {(isOfxFile(filetype) || isCamtFile(filetype)) && (
+        <>
           <CheckboxOption
             id="form_dont_reconcile"
             checked={reconcile}
@@ -1311,4 +1315,8 @@ function getParseOptions(fileType, options = {}) {
 
 function isOfxFile(fileType) {
   return fileType === 'ofx' || fileType === 'qfx';
+}
+
+function isCamtFile(fileType) {
+  return fileType === 'xml';
 }
