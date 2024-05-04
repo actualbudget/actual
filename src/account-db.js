@@ -25,6 +25,22 @@ export function needsBootstrap() {
   return rows.length === 0;
 }
 
+/*
+ * Get the Login Method in the following order
+ * req (the frontend can say which method in the case it wants to resort to forcing password auth)
+ * config options
+ * fall back to using password
+ */
+export function getLoginMethod(req) {
+  if (
+    typeof req !== 'undefined' &&
+    (req.body || { loginMethod: null }).loginMethod
+  ) {
+    return req.body.loginMethod;
+  }
+  return config.loginMethod || 'password';
+}
+
 export function bootstrap(password) {
   if (password === undefined || password === '') {
     return { error: 'invalid-password' };
