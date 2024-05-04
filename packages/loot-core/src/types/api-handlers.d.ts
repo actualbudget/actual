@@ -146,7 +146,7 @@ export interface ApiHandlers {
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 
-  'api/payee-rules-get': (arg: { id }) => Promise<RuleEntity[]>;
+  'api/payee-rules-get': (arg: { id: string }) => Promise<RuleEntity[]>;
 
   'api/rule-create': (arg: { rule }) => Promise<string>;
 
