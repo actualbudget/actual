@@ -44,7 +44,7 @@ const groupByOptions = [
   { description: 'Interval' },
 ];
 
-export type dateRangeEntity = {
+export type dateRangeProps = {
   description: string;
   name: number | string;
   type?: string;
@@ -54,7 +54,7 @@ export type dateRangeEntity = {
   Yearly: boolean;
 };
 
-const dateRangeOptions: dateRangeEntity[] = [
+const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'This week',
     name: 0,

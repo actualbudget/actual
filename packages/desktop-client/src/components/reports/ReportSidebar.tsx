@@ -18,7 +18,7 @@ import { CategorySelector } from './CategorySelector';
 import { defaultsList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
-import { type dateRangeEntity, ReportOptions } from './ReportOptions';
+import { type dateRangeProps, ReportOptions } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
 
@@ -223,7 +223,7 @@ export function ReportSidebar({
               onReportChange({ type: 'modify' });
               if (
                 ReportOptions.dateRange
-                  .filter(d => !d[e as keyof dateRangeEntity])
+                  .filter(d => !d[e as keyof dateRangeProps])
                   .map(int => int.description)
                   .includes(customReportItems.dateRange)
               ) {
@@ -390,7 +390,7 @@ export function ReportSidebar({
               }}
               options={ReportOptions.dateRange
                 .filter(
-                  f => f[customReportItems.interval as keyof dateRangeEntity],
+                  f => f[customReportItems.interval as keyof dateRangeProps],
                 )
                 .map(option => [option.description, option.description])}
               line={dateRangeLine > 0 ? dateRangeLine : undefined}

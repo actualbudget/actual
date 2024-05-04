@@ -42,7 +42,7 @@ import { ReportLegend } from '../ReportLegend';
 import {
   ReportOptions,
   defaultReport,
-  type dateRangeEntity,
+  type dateRangeProps,
 } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
@@ -84,7 +84,7 @@ export function CustomReport() {
 
   if (['/reports'].includes(prevUrl)) sessionStorage.clear();
 
-  const session = JSON.parse(sessionStorage.getItem('report') || '');
+  const session = JSON.parse(sessionStorage.getItem('report'));
   const combine = location.state
     ? location.state.report ?? defaultReport
     : defaultReport;
@@ -120,7 +120,7 @@ export function CustomReport() {
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine =
-    ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeEntity])
+    ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeProps])
       .length - 3;
 
   const [intervals, setIntervals] = useState(
@@ -749,7 +749,7 @@ export function CustomReport() {
                     <ReportSummary
                       startDate={startDate}
                       endDate={endDate}
-                      balanceTypeOp={balanceTypeOp || ''}
+                      balanceTypeOp={balanceTypeOp}
                       data={data}
                       interval={interval}
                       intervalsCount={intervals.length}
