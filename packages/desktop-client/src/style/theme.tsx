@@ -33,7 +33,11 @@ export function useTheme() {
 export function ThemeStyle() {
   const [theme] = useTheme();
   const [themeColors, setThemeColors] = useState<
-    typeof lightTheme | typeof darkTheme | typeof midnightTheme | undefined
+    | typeof lightTheme
+    | typeof darkTheme
+    | typeof midnightTheme
+    | typeof developmentTheme
+    | undefined
   >(undefined);
 
   useEffect(() => {
