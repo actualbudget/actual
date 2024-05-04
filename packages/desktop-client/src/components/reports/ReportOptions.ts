@@ -144,7 +144,18 @@ const dateRangeOptions: dateRangeEntity[] = [
   },
 ];
 
-const intervalOptions = [
+type intervalOptionsProps = {
+  description: string;
+  name: 'Day' | 'Week' | 'Month' | 'Year';
+  format: string;
+  range:
+    | 'dayRangeInclusive'
+    | 'weekRangeInclusive'
+    | 'rangeInclusive'
+    | 'yearRangeInclusive';
+};
+
+const intervalOptions: intervalOptionsProps[] = [
   {
     description: 'Daily',
     name: 'Day',
@@ -187,15 +198,19 @@ export const ReportOptions = {
     dateRangeOptions.map(item => [item.description, item.type]),
   ),
   interval: intervalOptions,
-  intervalMap: new Map(
+  intervalMap: new Map<string, 'Day' | 'Week' | 'Month' | 'Year'>(
     intervalOptions.map(item => [item.description, item.name]),
   ),
   intervalFormat: new Map(
     intervalOptions.map(item => [item.description, item.format]),
   ),
-  intervalRange: new Map(
-    intervalOptions.map(item => [item.description, item.range]),
-  ),
+  intervalRange: new Map<
+    string,
+    | 'dayRangeInclusive'
+    | 'weekRangeInclusive'
+    | 'rangeInclusive'
+    | 'yearRangeInclusive'
+  >(intervalOptions.map(item => [item.description, item.range])),
 };
 
 export type QueryDataEntity = {

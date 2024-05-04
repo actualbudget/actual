@@ -6,6 +6,12 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
+import { type CategoryEntity } from 'loot-core/types/models/category';
+import {
+  type GroupedEntity,
+  type CustomReportEntity,
+} from 'loot-core/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -23,11 +29,21 @@ import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
-import { defaultsList, disabledList } from '../disabledList';
+import {
+  defaultsGraphList,
+  defaultsList,
+  disabledGraphList,
+  disabledLegendLabel,
+  disabledList,
+} from '../disabledList';
 import { getLiveRange } from '../getLiveRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportLegend } from '../ReportLegend';
-import { ReportOptions, defaultReport } from '../ReportOptions';
+import {
+  ReportOptions,
+  defaultReport,
+  type dateRangeEntity,
+} from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
@@ -61,20 +77,25 @@ export function CustomReport() {
 
   const location = useLocation();
 
-  const prevUrl = sessionStorage.getItem('url');
+  const prevUrl = sessionStorage.getItem('url') || '';
 
   sessionStorage.setItem('prevUrl', prevUrl);
   sessionStorage.setItem('url', location.pathname);
 
   if (['/reports'].includes(prevUrl)) sessionStorage.clear();
 
-  const session = JSON.parse(sessionStorage.getItem('report'));
+  const session = JSON.parse(sessionStorage.getItem('report') || '');
   const combine = location.state
     ? location.state.report ?? defaultReport
     : defaultReport;
   const loadReport = { ...combine, ...session };
 
-  const [allIntervals, setAllIntervals] = useState(null);
+  type allIntervalsProps = {
+    name: string;
+    pretty: string;
+  };
+  const emptyIntervals: allIntervalsProps[] = [];
+  const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
   const [selectedCategories, setSelectedCategories] = useState(
     loadReport.selectedCategories,
@@ -99,7 +120,8 @@ export function CustomReport() {
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine =
-    ReportOptions.dateRange.filter(f => f[interval]).length - 3;
+    ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeEntity])
+      .length - 3;
 
   const [intervals, setIntervals] = useState(
     monthUtils.rangeInclusive(startDate, endDate),
@@ -123,34 +145,62 @@ export function CustomReport() {
   useEffect(() => {
     async function run() {
       onApplyFilter(null);
-      report.conditions.forEach(condition => onApplyFilter(condition));
+      report.conditions.forEach((condition: RuleConditionEntity) =>
+        onApplyFilter(condition),
+      );
       const trans = await send('get-earliest-transaction');
       setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
-      const format =
-        ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
-      const currentInterval =
-        monthUtils['current' + ReportOptions.intervalMap.get(interval)]();
-      const earliestInterval = trans
-        ? monthUtils[format](d.parseISO(fromDateRepr(trans.date)))
-        : currentInterval;
-
-      const rangeProps =
+      const fromDate =
         interval === 'Weekly'
-          ? [earliestInterval, currentInterval, firstDayOfWeekIdx]
-          : [earliestInterval, currentInterval];
-      const allInter = monthUtils[ReportOptions.intervalRange.get(interval)](
-        ...rangeProps,
-      )
-        .map(inter => ({
+          ? 'dayFromDate'
+          : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
+              'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
+
+      const currentDate =
+        interval === 'Weekly'
+          ? 'currentDay'
+          : (('current' +
+              (ReportOptions.intervalMap.get(interval) || 'Day')) as
+              | 'currentDay'
+              | 'currentMonth'
+              | 'currentYear');
+
+      const currentInterval =
+        interval === 'Weekly'
+          ? monthUtils.currentWeek(firstDayOfWeekIdx)
+          : monthUtils[currentDate]();
+      const earliestInterval =
+        interval === 'Weekly'
+          ? monthUtils.weekFromDate(
+              d.parseISO(fromDateRepr(trans.date || monthUtils.currentDay())),
+              firstDayOfWeekIdx,
+            )
+          : monthUtils[fromDate](
+              d.parseISO(fromDateRepr(trans.date || monthUtils.currentDay())),
+            );
+
+      const allIntervals =
+        interval === 'Weekly'
+          ? monthUtils.weekRangeInclusive(
+              earliestInterval,
+              currentInterval,
+              firstDayOfWeekIdx,
+            )
+          : monthUtils[
+              ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
+            ](earliestInterval, currentInterval);
+
+      const allIntervalsMap = allIntervals
+        .map((inter: string) => ({
           name: inter,
           pretty: monthUtils.format(
             inter,
-            ReportOptions.intervalFormat.get(interval),
+            ReportOptions.intervalFormat.get(interval) || '',
           ),
         }))
         .reverse();
 
-      setAllIntervals(allInter);
+      setAllIntervals(allIntervalsMap);
 
       if (!isDateStatic) {
         const [dateStart, dateEnd] = getLiveRange(
@@ -163,19 +213,32 @@ export function CustomReport() {
       }
     }
     run();
-  }, [interval]);
+  }, [
+    interval,
+    dateRange,
+    firstDayOfWeekIdx,
+    isDateStatic,
+    onApplyFilter,
+    report.conditions,
+  ]);
 
   useEffect(() => {
-    const rangeProps =
-      interval === 'Weekly'
-        ? [startDate, endDate, firstDayOfWeekIdx]
-        : [startDate, endDate];
-    setIntervals(
-      monthUtils[ReportOptions.intervalRange.get(interval)](...rangeProps),
-    );
-  }, [interval, startDate, endDate]);
+    const [start, end] = [startDate, endDate];
+    if (interval === 'Weekly') {
+      setIntervals(
+        monthUtils.weekRangeInclusive(start, end, firstDayOfWeekIdx),
+      );
+    } else {
+      setIntervals(
+        monthUtils[
+          ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
+        ](start, end),
+      );
+    }
+  }, [interval, startDate, endDate, firstDayOfWeekIdx]);
 
-  const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
+  const balanceTypeOp =
+    ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
   const payees = usePayees();
   const accounts = useAccounts();
 
@@ -199,19 +262,15 @@ export function CustomReport() {
     startDate,
     endDate,
     interval,
-    groupBy,
-    balanceType,
+    balanceTypeOp,
     categories,
     selectedCategories,
-    payees,
-    accounts,
     filters,
     conditionsOp,
     showEmpty,
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
-    graphType,
     firstDayOfWeekIdx,
   ]);
 
@@ -242,7 +301,7 @@ export function CustomReport() {
     endDate,
     interval,
     groupBy,
-    balanceType,
+    balanceTypeOp,
     categories,
     selectedCategories,
     payees,
@@ -259,8 +318,11 @@ export function CustomReport() {
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
 
-  const data = { ...graphData, groupedData };
-  const customReportItems = {
+  const data: GroupedEntity = { ...graphData, groupedData } as GroupedEntity;
+
+  const customReportItems: CustomReportEntity = {
+    id: '',
+    name: '',
     startDate,
     endDate,
     isDateStatic,
@@ -277,84 +339,105 @@ export function CustomReport() {
     graphType,
     conditions: filters,
     conditionsOp,
-    data: {},
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [scrollWidth, setScrollWidth] = useState(0);
 
   if (!allIntervals || !data) {
     return null;
   }
 
-  const defaultModeItems = (graph, item) => {
+  const defaultModeItems = (graph: string, item: string) => {
     const chooseGraph = graph || graphType;
-    const newGraph = disabledList.modeGraphsMap.get(item).includes(chooseGraph)
+    const newGraph = (disabledList.modeGraphsMap.get(item) || []).includes(
+      chooseGraph,
+    )
       ? defaultsList.modeGraphsMap.get(item)
       : chooseGraph;
-    if (disabledList.modeGraphsMap.get(item).includes(graphType)) {
+    if ((disabledList.modeGraphsMap.get(item) || []).includes(graphType)) {
       setSessionReport('graphType', newGraph);
       setGraphType(newGraph);
     }
 
-    if (disabledList.graphSplitMap.get(item).get(newGraph).includes(groupBy)) {
-      const cond = defaultsList.graphSplitMap.get(item).get(newGraph);
+    if (
+      (disabledGraphList(item, newGraph, 'disabledSplit') || []).includes(
+        groupBy,
+      )
+    ) {
+      const cond = defaultsGraphList(item, newGraph, 'defaultSplit');
       setSessionReport('groupBy', cond);
       setGroupBy(cond);
     }
 
     if (
-      disabledList.graphTypeMap.get(item).get(newGraph).includes(balanceType)
+      (disabledGraphList(item, newGraph, 'disabledType') || []).includes(
+        balanceType,
+      )
     ) {
-      const cond = defaultsList.graphTypeMap.get(item).get(newGraph);
+      const cond = defaultsGraphList(item, newGraph, 'defaultType');
       setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
   };
 
-  const defaultItems = item => {
+  const defaultItems = (item: string) => {
     const chooseGraph = ReportOptions.groupBy.includes(item) ? graphType : item;
     if (
-      disabledList.graphSplitMap.get(mode).get(chooseGraph).includes(groupBy)
+      (disabledGraphList(mode, chooseGraph, 'disabledSplit') || []).includes(
+        groupBy,
+      )
     ) {
-      const cond = defaultsList.graphSplitMap.get(mode).get(chooseGraph);
+      const cond = defaultsGraphList(mode, chooseGraph, 'defaultSplit');
       setSessionReport('groupBy', cond);
       setGroupBy(cond);
     }
     if (
-      disabledList.graphTypeMap.get(mode).get(chooseGraph).includes(balanceType)
+      (disabledGraphList(mode, chooseGraph, 'disabledType') || []).includes(
+        balanceType,
+      )
     ) {
-      const cond = defaultsList.graphTypeMap.get(mode).get(chooseGraph);
+      const cond = defaultsGraphList(mode, chooseGraph, 'defaultType');
       setSessionReport('balanceType', cond);
       setBalanceType(cond);
     }
   };
 
-  const disabledItems = type => {
+  const isItemDisabled = (type: string) => {
+    switch (type) {
+      case 'ShowLegend': {
+        if (disabledLegendLabel(mode, graphType, 'disableLegend')) {
+          setViewLegendPref(false);
+        }
+        return disabledLegendLabel(mode, graphType, 'disableLegend') || false;
+      }
+      case 'ShowLabels': {
+        if (disabledLegendLabel(mode, graphType, 'disableLabel')) {
+          setViewLabelsPref(false);
+        }
+        return disabledLegendLabel(mode, graphType, 'disableLabel') || false;
+      }
+      default:
+        return (
+          (disabledList.modeGraphsMap.get(mode) || []).includes(type) || false
+        );
+    }
+  };
+
+  const disabledItems = (type: string) => {
     switch (type) {
       case 'split':
-        return disabledList.graphSplitMap.get(mode).get(graphType);
+        return disabledGraphList(mode, graphType, 'disabledSplit') || [];
       case 'type':
         return graphType === 'BarGraph' && groupBy === 'Interval'
           ? []
-          : disabledList.graphTypeMap.get(mode).get(graphType);
-      case 'ShowLegend': {
-        if (disabledList.graphLegendMap.get(mode).get(graphType)) {
-          setViewLegendPref(false);
-        }
-        return disabledList.graphLegendMap.get(mode).get(graphType);
-      }
-      case 'ShowLabels': {
-        if (disabledList.graphLabelsMap.get(mode).get(graphType)) {
-          setViewLabelsPref(false);
-        }
-        return disabledList.graphLabelsMap.get(mode).get(graphType);
-      }
+          : disabledGraphList(mode, graphType, 'disabledType') || [];
       default:
-        return disabledList.modeGraphsMap.get(mode).includes(type);
+        return [];
     }
   };
 
-  const onChangeDates = (dateStart, dateEnd) => {
+  const onChangeDates = (dateStart: string, dateEnd: string) => {
     setSessionReport('startDate', dateStart);
     setSessionReport('endDate', dateEnd);
     setStartDate(dateStart);
@@ -362,7 +445,7 @@ export function CustomReport() {
     onReportChange({ type: 'modify' });
   };
 
-  const onChangeViews = viewType => {
+  const onChangeViews = (viewType: string) => {
     if (viewType === 'viewLegend') {
       setViewLegendPref(!viewLegend);
     }
@@ -374,10 +457,12 @@ export function CustomReport() {
     }
   };
 
-  const setReportData = input => {
-    const selectAll = [];
+  const setReportData = (input: CustomReportEntity) => {
+    const selectAll: CategoryEntity[] = [];
     categories.grouped.map(categoryGroup =>
-      categoryGroup.categories.map(category => selectAll.push(category)),
+      (categoryGroup.categories || []).map(category =>
+        selectAll.push(category),
+      ),
     );
 
     setStartDate(input.startDate);
@@ -392,19 +477,20 @@ export function CustomReport() {
     setShowOffBudget(input.showOffBudget);
     setShowHiddenCategories(input.showHiddenCategories);
     setShowUncategorized(input.showUncategorized);
-    setSelectedCategories(input.selectedCategories ?? selectAll);
+    setSelectedCategories(input.selectedCategories || selectAll);
     setGraphType(input.graphType);
     onApplyFilter(null);
-    input.conditions.forEach(condition => onApplyFilter(condition));
+    (input.conditions || []).forEach(condition => onApplyFilter(condition));
     onCondOpChange(input.conditionsOp);
   };
 
-  const onChangeAppliedFilter = (filter, changedElement) => {
-    onReportChange({ type: 'modify' });
-    return changedElement(filter);
-  };
-
-  const onReportChange = ({ savedReport, type }) => {
+  const onReportChange = ({
+    savedReport,
+    type,
+  }: {
+    savedReport?: CustomReportEntity;
+    type: string;
+  }) => {
     switch (type) {
       case 'add-update':
         setSessionReport('savedStatus', 'saved');
@@ -412,7 +498,7 @@ export function CustomReport() {
         setReport(savedReport);
         break;
       case 'rename':
-        setReport({ ...report, name: savedReport.name });
+        setReport({ ...report, name: savedReport?.name || '' });
         break;
       case 'modify':
         if (report.name) {
@@ -435,7 +521,7 @@ export function CustomReport() {
         setSessionReport('savedStatus', 'saved');
         setSavedStatus('saved');
         setReport(savedReport);
-        setReportData(savedReport);
+        setReportData(savedReport || report);
         break;
       default:
     }
@@ -539,17 +625,20 @@ export function CustomReport() {
               onApplyFilter={onApplyFilter}
               onChangeViews={onChangeViews}
               onReportChange={onReportChange}
-              disabledItems={disabledItems}
+              isItemDisabled={isItemDisabled}
               defaultItems={defaultItems}
             />
           )}
           {filters && filters.length > 0 && (
             <View
-              style={{ marginBottom: 10, marginLeft: 5, flexShrink: 0 }}
-              spacing={2}
-              direction="row"
-              justify="flex-start"
-              align="flex-start"
+              style={{
+                marginBottom: 10,
+                marginLeft: 5,
+                flexShrink: 0,
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                justifyContent: 'flex-start',
+              }}
             >
               <AppliedFilters
                 filters={filters}
@@ -566,13 +655,14 @@ export function CustomReport() {
                     'conditions',
                     filters.filter(f => f !== deletedFilter),
                   );
-                  onChangeAppliedFilter(deletedFilter, onDeleteFilter);
+                  onDeleteFilter(deletedFilter);
+                  onReportChange({ type: 'modify' });
                 }}
                 conditionsOp={conditionsOp}
-                onCondOpChange={filter =>
-                  onChangeAppliedFilter(filter, onCondOpChange)
-                }
-                onUpdateChange={onReportChange}
+                onCondOpChange={co => {
+                  onCondOpChange(co);
+                  onReportChange({ type: 'modify' });
+                }}
               />
             </View>
           )}
@@ -633,8 +723,6 @@ export function CustomReport() {
                     balanceType={balanceType}
                     groupBy={groupBy}
                     interval={interval}
-                    showEmpty={showEmpty}
-                    scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
                     viewLabels={viewLabels}
                     compact={false}
@@ -661,7 +749,7 @@ export function CustomReport() {
                     <ReportSummary
                       startDate={startDate}
                       endDate={endDate}
-                      balanceTypeOp={balanceTypeOp}
+                      balanceTypeOp={balanceTypeOp || ''}
                       data={data}
                       interval={interval}
                       intervalsCount={intervals.length}

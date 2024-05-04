@@ -17,7 +17,16 @@ const intervalOptions = [
   },
 ];
 
-const totalGraphOptions = [
+type graphOptions = {
+  description: string;
+  disabledSplit: string[];
+  defaultSplit: string;
+  disabledType: string[];
+  defaultType: string;
+  disableLegend?: boolean;
+  disableLabel?: boolean;
+};
+const totalGraphOptions: graphOptions[] = [
   {
     description: 'TableGraph',
     disabledSplit: [],
@@ -51,7 +60,7 @@ const totalGraphOptions = [
   },
 ];
 
-const timeGraphOptions = [
+const timeGraphOptions: graphOptions[] = [
   {
     description: 'TableGraph',
     disabledSplit: ['Interval'],
@@ -94,34 +103,46 @@ const modeOptions = [
   },
 ];
 
+export function disabledGraphList(
+  item: string,
+  newGraph: string,
+  type: 'disabledSplit' | 'disabledType',
+) {
+  const [graphList] = modeOptions.map(d => d.description === item && d.graphs);
+  const [disabledList] = graphList
+    ? graphList.map((e: graphOptions) => e.description === newGraph && e[type])
+    : [];
+  return disabledList;
+}
+
+export function disabledLegendLabel(
+  item: string,
+  newGraph: string,
+  type: 'disableLegend' | 'disableLabel',
+) {
+  const [graphList] = modeOptions.map(d => d.description === item && d.graphs);
+  const [disableLegendLabel] = graphList
+    ? graphList.map((e: graphOptions) => e.description === newGraph && e[type])
+    : [false];
+  return disableLegendLabel;
+}
+
+export function defaultsGraphList(
+  item: string,
+  newGraph: string,
+  type: 'defaultSplit' | 'defaultType',
+) {
+  const [graphList] = modeOptions.map(d => d.description === item && d.graphs);
+  const [defaultItem] = graphList
+    ? graphList.map((e: graphOptions) => e.description === newGraph && e[type])
+    : [''];
+  return defaultItem;
+}
+
 export const disabledList = {
   mode: modeOptions,
   modeGraphsMap: new Map(
     modeOptions.map(item => [item.description, item.disabledGraph]),
-  ),
-  graphSplitMap: new Map(
-    modeOptions.map(item => [
-      item.description,
-      new Map([...item.graphs].map(f => [f.description, f.disabledSplit])),
-    ]),
-  ),
-  graphTypeMap: new Map(
-    modeOptions.map(item => [
-      item.description,
-      new Map([...item.graphs].map(f => [f.description, f.disabledType])),
-    ]),
-  ),
-  graphLegendMap: new Map(
-    modeOptions.map(item => [
-      item.description,
-      new Map([...item.graphs].map(f => [f.description, f.disableLegend])),
-    ]),
-  ),
-  graphLabelsMap: new Map(
-    modeOptions.map(item => [
-      item.description,
-      new Map([...item.graphs].map(f => [f.description, f.disableLabel])),
-    ]),
   ),
 };
 
@@ -129,18 +150,6 @@ export const defaultsList = {
   mode: modeOptions,
   modeGraphsMap: new Map(
     modeOptions.map(item => [item.description, item.defaultGraph]),
-  ),
-  graphSplitMap: new Map(
-    modeOptions.map(item => [
-      item.description,
-      new Map([...item.graphs].map(f => [f.description, f.defaultSplit])),
-    ]),
-  ),
-  graphTypeMap: new Map(
-    modeOptions.map(item => [
-      item.description,
-      new Map([...item.graphs].map(f => [f.description, f.defaultType])),
-    ]),
   ),
   intervalRange: new Map(
     intervalOptions.map(item => [item.description, item.defaultRange]),

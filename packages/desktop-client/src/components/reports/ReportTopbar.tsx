@@ -38,7 +38,7 @@ type ReportTopbarProps = {
     savedReport?: CustomReportEntity;
     type: string;
   }) => void;
-  disabledItems: (type: string) => boolean;
+  isItemDisabled: (type: string) => boolean;
   defaultItems: (item: string) => void;
 };
 
@@ -53,7 +53,7 @@ export function ReportTopbar({
   onApplyFilter,
   onChangeViews,
   onReportChange,
-  disabledItems,
+  isItemDisabled,
   defaultItems,
 }: ReportTopbarProps) {
   const onChangeGraph = (cond: string) => {
@@ -79,7 +79,7 @@ export function ReportTopbar({
           onChangeGraph('TableGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems('TableGraph')}
+        disabled={isItemDisabled('TableGraph')}
       >
         <SvgQueue width={15} height={15} />
       </GraphButton>
@@ -97,7 +97,7 @@ export function ReportTopbar({
           );
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems(
+        disabled={isItemDisabled(
           customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
         )}
       >
@@ -110,7 +110,7 @@ export function ReportTopbar({
           onChangeGraph('LineGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems('LineGraph')}
+        disabled={isItemDisabled('LineGraph')}
       >
         <SvgChart width={15} height={15} />
       </GraphButton>
@@ -121,7 +121,7 @@ export function ReportTopbar({
           onChangeGraph('AreaGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems('AreaGraph')}
+        disabled={isItemDisabled('AreaGraph')}
       >
         <SvgChartArea width={15} height={15} />
       </GraphButton>
@@ -132,7 +132,7 @@ export function ReportTopbar({
           onChangeGraph('DonutGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems('DonutGraph')}
+        disabled={isItemDisabled('DonutGraph')}
       >
         <SvgChartPie width={15} height={15} />
       </GraphButton>
@@ -152,7 +152,7 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
         title="Show Legend"
-        disabled={disabledItems('ShowLegend')}
+        disabled={isItemDisabled('ShowLegend')}
       >
         <SvgListBullet width={15} height={15} />
       </GraphButton>
@@ -173,7 +173,7 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
         title="Show Labels"
-        disabled={disabledItems('ShowLabels')}
+        disabled={isItemDisabled('ShowLabels')}
       >
         <SvgTag width={15} height={15} />
       </GraphButton>
