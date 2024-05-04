@@ -7,16 +7,16 @@ import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
-import { Notes as NotesComponent } from '../Notes';
+import { Notes } from '../Notes';
 
-type NotesProps = {
+type NotesModalProps = {
   modalProps: CommonModalProps;
   id: string;
   name: string;
   onSave: (id: string, notes: string) => void;
 };
 
-export function Notes({ modalProps, id, name, onSave }: NotesProps) {
+export function NotesModal({ modalProps, id, name, onSave }: NotesModalProps) {
   const originalNotes = useNotes(id);
 
   const [notes, setNotes] = useState(originalNotes);
@@ -51,7 +51,7 @@ export function Notes({ modalProps, id, name, onSave }: NotesProps) {
           flexDirection: 'column',
         }}
       >
-        <NotesComponent
+        <Notes
           notes={notes}
           editable={true}
           focused={true}

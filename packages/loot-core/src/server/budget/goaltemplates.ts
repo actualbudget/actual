@@ -7,6 +7,7 @@ import { batchMessages } from '../sync';
 
 import { setBudget, getSheetValue, isReflectBudget, setGoal } from './actions';
 import { parse } from './goal-template.pegjs';
+import { goalsAverage } from './goals/goalsAverage';
 import { goalsBy } from './goals/goalsBy';
 import { goalsPercentage } from './goals/goalsPercentage';
 import { findRemainder, goalsRemainder } from './goals/goalsRemainder';
@@ -609,6 +610,18 @@ async function applyCategoryTemplate(
         to_budget = goalsReturn.to_budget;
         break;
       }
+      case 'average': {
+        const goalsReturn = await goalsAverage(
+          template,
+          current_month,
+          category,
+          errors,
+          to_budget,
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
+        break;
+      }
       case 'error':
         return { errors };
       default:
@@ -641,16 +654,32 @@ async function checkTemplates(): Promise<Notification> {
   const categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
+  let all_schedule_names = await db.all(
+    'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
+  );
+  all_schedule_names = all_schedule_names.map(v => v.name);
 
   // run through each line and see if its an error
   for (let c = 0; c < categories.length; c++) {
     const category = categories[c];
     const template = category_templates[category.id];
+
     if (template) {
       for (let l = 0; l < template.length; l++) {
+        //check for basic error
         if (template[l].type === 'error') {
-          //return { type: 'message', message: "found a bad one",};
           errors.push(category.name + ': ' + template[l].line);
+        }
+        // check schedule name error
+        if (template[l].type === 'schedule') {
+          if (!all_schedule_names.includes(template[l].name)) {
+            errors.push(
+              category.name +
+                ': Schedule “' +
+                template[l].name +
+                '” does not exist',
+            );
+          }
         }
       }
     }
