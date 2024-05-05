@@ -352,8 +352,7 @@ describe('API CRUD operations', () => {
     await api.createPayee({ name: 'test-payee2' });
 
     // create our test rules
-    const rule = {
-      id: null,
+    const rule = await api.createRule({
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [
@@ -370,12 +369,8 @@ describe('API CRUD operations', () => {
           value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
         },
       ],
-    };
-    const ruleId = await api.createRule(rule);
-    rule.id = ruleId;
-
-    const rule2 = {
-      id: null,
+    });
+    const rule2 = await api.createRule({
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [
@@ -392,12 +387,10 @@ describe('API CRUD operations', () => {
           value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
         },
       ],
-    };
-    const ruleId2 = await api.createRule(rule2);
-    rule2.id = ruleId2;
+    });
 
     // get existing rules
-    let rules = await api.getRules();
+    const rules = await api.getRules();
     expect(rules).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -418,7 +411,7 @@ describe('API CRUD operations', () => {
             }),
           ]),
           conditionsOp: 'and',
-          id: ruleId2,
+          id: rule2.id,
           stage: 'pre',
         }),
         expect.objectContaining({
@@ -439,15 +432,14 @@ describe('API CRUD operations', () => {
             }),
           ]),
           conditionsOp: 'and',
-          id: ruleId,
+          id: rule.id,
           stage: 'pre',
         }),
       ]),
     );
 
     // get by payee
-    rules = await api.getPayeeRules('test-payee');
-    expect(rules).toEqual(
+    expect(await api.getPayeeRules('test-payee')).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           actions: expect.arrayContaining([
@@ -467,14 +459,13 @@ describe('API CRUD operations', () => {
             }),
           ]),
           conditionsOp: 'and',
-          id: ruleId,
+          id: rule.id,
           stage: 'pre',
         }),
       ]),
     );
 
-    rules = await api.getPayeeRules('test-payee2');
-    expect(rules).toEqual(
+    expect(await api.getPayeeRules('test-payee2')).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           actions: expect.arrayContaining([
@@ -494,19 +485,21 @@ describe('API CRUD operations', () => {
             }),
           ]),
           conditionsOp: 'and',
-          id: ruleId2,
+          id: rule2.id,
           stage: 'pre',
         }),
       ]),
     );
 
     // update one rule
-    rule.stage = 'post';
-    rule.conditionsOp = 'or';
-    await api.updateRule(rule);
+    const updatedRule = {
+      ...rule,
+      stage: 'post',
+      conditionsOp: 'or',
+    };
+    expect(await api.updateRule(updatedRule)).toEqual(updatedRule);
 
-    rules = await api.getRules();
-    expect(rules).toEqual(
+    expect(await api.getRules()).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           actions: expect.arrayContaining([
@@ -526,7 +519,7 @@ describe('API CRUD operations', () => {
             }),
           ]),
           conditionsOp: 'or',
-          id: ruleId,
+          id: rule.id,
           stage: 'post',
         }),
         expect.objectContaining({
@@ -547,7 +540,7 @@ describe('API CRUD operations', () => {
             }),
           ]),
           conditionsOp: 'and',
-          id: ruleId2,
+          id: rule2.id,
           stage: 'pre',
         }),
       ]),

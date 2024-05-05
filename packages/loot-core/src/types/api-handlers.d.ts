@@ -1,11 +1,13 @@
 import { type batchUpdateTransactions } from '../server/accounts/transactions';
 
 import type {
-  TransactionEntity,
   AccountEntity,
-  CategoryGroupEntity,
   CategoryEntity,
+  CategoryGroupEntity,
+  NewRuleEntity,
   PayeeEntity,
+  RuleEntity,
+  TransactionEntity,
 } from './models';
 import { type ServerHandlers } from './server-handlers';
 
@@ -148,9 +150,9 @@ export interface ApiHandlers {
 
   'api/payee-rules-get': (arg: { id: string }) => Promise<RuleEntity[]>;
 
-  'api/rule-create': (arg: { rule }) => Promise<string>;
+  'api/rule-create': (arg: { rule: NewRuleEntity }) => Promise<RuleEntity>;
 
-  'api/rule-update': (arg: { rule }) => Promise<unknown>;
+  'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
 
-  'api/rule-delete': (arg: { id }) => Promise<unknown>;
+  'api/rule-delete': (arg: { id: string }) => Promise<boolean>;
 }
