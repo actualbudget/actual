@@ -139,6 +139,7 @@ export const styles = {
     overflow: 'auto',
   },
   // Dynamically set
+  horizontalScrollbar: null as CSSProperties | null,
   lightScrollbar: null as CSSProperties | null,
   darkScrollbar: null as CSSProperties | null,
   scrollbarWidth: null as number | null,
@@ -151,6 +152,20 @@ let hiddenScrollbars = false;
 // lightScrollbar => primary
 // darkScrollbar => secondary
 function onScrollbarChange() {
+  styles.horizontalScrollbar = !hiddenScrollbars && {
+    '::-webkit-scrollbar': {
+      backgroundColor: 'inherit',
+      height: 12,
+    },
+    '::-webkit-scrollbar-thumb': {
+      width: 7,
+      borderRadius: 30,
+      backgroundClip: 'padding-box',
+      border: '2px solid rgba(0, 0, 0, 0)',
+      backgroundColor: '#d0d0d0',
+    },
+  };
+
   styles.lightScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
