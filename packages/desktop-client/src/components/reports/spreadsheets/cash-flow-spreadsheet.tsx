@@ -162,6 +162,11 @@ export function cashFlowByDate(
               date: {
                 $transform: '$month',
                 $lte: monthUtils.prevMonth(end),
+              },
+            },
+            {
+              date: {
+                $transform: '$month',
                 $gt: monthUtils.subMonths(end, forecastDivideYears * 12),
               },
             },
