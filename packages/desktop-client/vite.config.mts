@@ -148,16 +148,17 @@ export default defineConfig(async ({ mode }) => {
       extensions: resolveExtensions,
     },
     plugins: [
-      VitePWA({
-        disable: true,
-        registerType: 'autoUpdate',
-        workbox: {
-          globPatterns: [
-            '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
-          ],
-          ignoreURLParametersMatching: [/^v$/],
-        },
-      }),
+      mode === 'test'
+        ? VitePWA({
+            registerType: 'autoUpdate',
+            workbox: {
+              globPatterns: [
+                '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
+              ],
+              ignoreURLParametersMatching: [/^v$/],
+            },
+          })
+        : undefined,
       injectShims(),
       addWatchers(),
       react({
