@@ -17,9 +17,6 @@
       "!node_modules/loot-core/src{,/**/*}",
       "!node_modules/loot-core/lib-dist/{browser,bundle.mobile*}",
       "!**/*.js.map",
-      "!**/*.js",
-      "!*.js",
-      "!**/*.webmanifest",
       "!node_modules/@jlongster/sql.js",
       "!node_modules/absurd-sql",
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}"

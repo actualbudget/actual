@@ -150,6 +150,7 @@ export default defineConfig(async ({ mode }) => {
     plugins: [
       VitePWA({
         registerType: 'autoUpdate',
+        injectRegister: 'inline',
         workbox: {
           globPatterns: [
             '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
