@@ -19,7 +19,6 @@ export const Popover = ({
       className={`${css({
         ...styles.tooltip,
         ...styles.lightScrollbar,
-        scrollbarColor: 'rgba(200, 200, 200, .2) #d0d0d0',
         padding: 0,
         ...style,
       })}`}
