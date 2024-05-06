@@ -61,7 +61,7 @@ export function FixEncryptionKeyModal({
         hasExistingKey ? 'Unable to decrypt file' : 'This file is encrypted'
       }
       style={{
-        padding: '0 10px',
+        padding: 10,
       }}
       onClose={modalProps.onClose}
     >
