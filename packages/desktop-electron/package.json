@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.4.0",
+  "version": "24.5.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",

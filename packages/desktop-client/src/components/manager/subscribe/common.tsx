@@ -17,7 +17,7 @@ import { useSetServerURL } from '../../ServerContext';
 // password. Both pages will redirect to the other depending on state;
 // they will also potentially redirect to other pages which do *not*
 // do any checks.
-export function useBootstrapped() {
+export function useBootstrapped(redirect = true) {
   const [checked, setChecked] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,7 +27,9 @@ export function useBootstrapped() {
     async function run() {
       const ensure = url => {
         if (location.pathname !== url) {
-          navigate(url);
+          if (redirect) {
+            navigate(url);
+          }
         } else {
           setChecked(true);
         }
@@ -41,6 +43,7 @@ export function useBootstrapped() {
         const result = await send('subscribe-needs-bootstrap', {
           url: serverURL,
         });
+
         if ('error' in result || !result.hasServer) {
           console.log('error' in result && result.error);
           navigate('/config-server');
@@ -50,7 +53,7 @@ export function useBootstrapped() {
         await setServerURL(serverURL, { validate: false });
 
         if (result.bootstrapped) {
-          ensure('/login');
+          ensure(`/login/${result.loginMethod}`);
         } else {
           ensure('/bootstrap');
         }
@@ -59,7 +62,7 @@ export function useBootstrapped() {
         if ('error' in result) {
           navigate('/error', { state: { error: result.error } });
         } else if (result.bootstrapped) {
-          ensure('/login');
+          ensure(`/login/${result.loginMethod}`);
         } else {
           ensure('/bootstrap');
         }

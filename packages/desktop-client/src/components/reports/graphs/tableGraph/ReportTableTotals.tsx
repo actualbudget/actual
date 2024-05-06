@@ -15,6 +15,7 @@ import { useCategories } from '../../../../hooks/useCategories';
 import { useNavigate } from '../../../../hooks/useNavigate';
 import { useResponsive } from '../../../../ResponsiveProvider';
 import { theme } from '../../../../style';
+import { styles } from '../../../../style/styles';
 import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
@@ -96,6 +97,13 @@ export function ReportTableTotals({
         id="total"
         style={{
           overflowX: 'auto',
+          scrollbarWidth: compact ? 'none' : 'inherit',
+          ...styles.horizontalScrollbar,
+          '::-webkit-scrollbar': {
+            backgroundColor: theme.tableBackground,
+            height: 12,
+            dispaly: compact && 'none',
+          },
           flexDirection: 'row',
           flex: 1,
         }}

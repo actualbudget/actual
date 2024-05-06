@@ -136,20 +136,21 @@ const intervalOptions = [
   {
     description: 'Daily',
     name: 'Day',
-    format: 'yyyy-MM-dd',
+    format: 'yy-MM-dd',
     range: 'dayRangeInclusive',
   },
   {
     description: 'Weekly',
     name: 'Week',
-    format: 'yyyy-MM-dd',
+    format: 'yy-MM-dd',
     range: 'weekRangeInclusive',
   },
   //{ value: 3, description: 'Fortnightly', name: 3},
   {
     description: 'Monthly',
     name: 'Month',
-    format: 'MMMM, yyyy',
+    // eslint-disable-next-line rulesdir/typography
+    format: "MMM ''yy",
     range: 'rangeInclusive',
   },
   {
