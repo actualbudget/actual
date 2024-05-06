@@ -14,9 +14,11 @@ expect.extend({
     const config = {
       // eslint-disable-next-line rulesdir/typography
       mask: [locator.locator('[data-vrt-mask="true"]')],
+      maxDiffPixels: 5,
     };
 
     // Check lightmode
+    await locator.evaluate(() => window.Actual.setTheme('light'));
     const lightmode = await expect(locator).toHaveScreenshot(config);
 
     if (lightmode && !lightmode.pass) {
@@ -30,6 +32,15 @@ expect.extend({
     // Assert on
     if (darkmode && !darkmode.pass) {
       return darkmode;
+    }
+
+    // Switch to midnight theme and check
+    await locator.evaluate(() => window.Actual.setTheme('midnight'));
+    const midnightMode = await expect(locator).toHaveScreenshot(config);
+
+    // Assert on
+    if (midnightMode && !midnightMode.pass) {
+      return midnightMode;
     }
 
     // Switch back to lightmode

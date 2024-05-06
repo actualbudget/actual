@@ -3,8 +3,10 @@ import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
 import * as Platform from '../client/platform';
+import { type LocalPrefs } from '../types/prefs';
 
 type DateLike = string | Date;
+type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export function _parse(value: DateLike): Date {
   if (typeof value === 'string') {
@@ -89,10 +91,11 @@ export function monthFromDate(date: DateLike): string {
 
 export function weekFromDate(
   date: DateLike,
-  firstDayOfWeekIdx: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+  firstDayOfWeekIdx: LocalPrefs['firstDayOfWeekIdx'],
 ): string {
+  const converted = parseInt(firstDayOfWeekIdx || '0') as Day;
   return d.format(
-    _parse(d.startOfWeek(_parse(date), { weekStartsOn: firstDayOfWeekIdx })),
+    _parse(d.startOfWeek(_parse(date), { weekStartsOn: converted })),
     'yyyy-MM-dd',
   );
 }
@@ -110,13 +113,14 @@ export function currentMonth(): string {
 }
 
 export function currentWeek(
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
 ): string {
   if (global.IS_TESTING || Platform.isPlaywright) {
     return global.currentWeek || '2017-01-01';
   } else {
+    const converted = parseInt(firstDayOfWeekIdx || '0') as Day;
     return d.format(
-      _parse(d.startOfWeek(new Date(), { weekStartsOn: firstDayOfWeekIdx })),
+      _parse(d.startOfWeek(new Date(), { weekStartsOn: converted })),
       'yyyy-MM-dd',
     );
   }
@@ -248,11 +252,12 @@ export function _weekRange(
   start: DateLike,
   end: DateLike,
   inclusive = false,
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
 ): string[] {
   const weeks: string[] = [];
   let week = weekFromDate(start, firstDayOfWeekIdx);
-  while (d.isBefore(_parse(week), _parse(end))) {
+  const endWeek = weekFromDate(end, firstDayOfWeekIdx);
+  while (d.isBefore(_parse(week), _parse(endWeek))) {
     weeks.push(week);
     week = addWeeks(week, 1);
   }
@@ -267,7 +272,7 @@ export function _weekRange(
 export function weekRangeInclusive(
   start: DateLike,
   end: DateLike,
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
 ): string[] {
   return _weekRange(start, end, true, firstDayOfWeekIdx);
 }
@@ -343,16 +348,21 @@ export function getMonth(day: string): string {
   return day.slice(0, 7);
 }
 
+export function getDay(day: string): number {
+  return Number(d.format(_parse(day), 'dd'));
+}
+
 export function getMonthEnd(day: string): string {
   return subDays(nextMonth(day.slice(0, 7)) + '-01', 1);
 }
 
 export function getWeekEnd(
   date: DateLike,
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
 ): string {
+  const converted = parseInt(firstDayOfWeekIdx || '0') as Day;
   return d.format(
-    _parse(d.endOfWeek(_parse(date), { weekStartsOn: firstDayOfWeekIdx })),
+    _parse(d.endOfWeek(_parse(date), { weekStartsOn: converted })),
     'yyyy-MM-dd',
   );
 }

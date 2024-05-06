@@ -1,11 +1,9 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { q } from 'loot-core/src/shared/query';
-import { type NoteEntity } from 'loot-core/src/types/models';
 
+import { useNotes } from '../../hooks/useNotes';
 import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -20,7 +18,7 @@ type RolloverBudgetMonthMenuModalProps = {
   modalProps: CommonModalProps;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onEditNotes: (id: string) => void;
+  onEditNotes: (month: string) => void;
 };
 
 export function RolloverBudgetMonthMenuModal({
@@ -29,19 +27,14 @@ export function RolloverBudgetMonthMenuModal({
   onBudgetAction,
   onEditNotes,
 }: RolloverBudgetMonthMenuModalProps) {
-  const notesId = `budget-${month}`;
-  const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id: notesId }).select('*'),
-    [notesId],
-  );
-  const originalNotes = data && data.length > 0 ? data[0].note : null;
+  const originalNotes = useNotes(`budget-${month}`);
 
   const onClose = () => {
     modalProps.onClose();
   };
 
   const _onEditNotes = () => {
-    onEditNotes?.(notesId);
+    onEditNotes?.(month);
   };
 
   const defaultMenuItemStyle: CSSProperties = {
@@ -72,11 +65,8 @@ export function RolloverBudgetMonthMenuModal({
       focusAfterClose={false}
       {...modalProps}
       onClose={onClose}
-      padding={10}
       style={{
-        flex: 1,
         height: '50vh',
-        borderRadius: '6px',
       }}
     >
       <View

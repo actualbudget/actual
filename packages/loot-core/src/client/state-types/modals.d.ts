@@ -238,12 +238,12 @@ type FinanceModals = {
   'rollover-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-    onEditNotes: (id: string) => void;
+    onEditNotes: (month: string) => void;
   };
   'report-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-    onEditNotes: (id: string) => void;
+    onEditNotes: (month: string) => void;
   };
 };
 

@@ -49,6 +49,7 @@ export function makeChild<T extends GenericTransactionEntity>(
   return {
     amount: 0,
     ...data,
+    category: 'category' in data ? data.category : parent.category,
     payee: 'payee' in data ? data.payee : parent.payee,
     id: 'id' in data ? data.id : prefix + uuidv4(),
     account: parent.account,

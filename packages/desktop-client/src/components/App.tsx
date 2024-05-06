@@ -6,8 +6,15 @@ import {
   type FallbackProps,
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
+import {
+  closeBudget,
+  loadBudget,
+  loadGlobalPrefs,
+  setAppState,
+  sync,
+} from 'loot-core/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import { type State } from 'loot-core/src/client/state-types';
 import {
@@ -15,7 +22,6 @@ import {
   send,
 } from 'loot-core/src/platform/client/fetch';
 
-import { useActions } from '../hooks/useActions';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
@@ -39,28 +45,48 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   const [initializing, setInitializing] = useState(true);
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const loadingText = useSelector((state: State) => state.app.loadingText);
-  const { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
+  const dispatch = useDispatch();
 
   async function init() {
     const socketName = await global.Actual.getServerSocket();
 
+    dispatch(
+      setAppState({
+        loadingText: 'Initializing the connection to the local database...',
+      }),
+    );
     await initConnection(socketName);
 
     // Load any global prefs
-    await loadGlobalPrefs();
+    dispatch(
+      setAppState({
+        loadingText: 'Loading global preferences...',
+      }),
+    );
+    await dispatch(loadGlobalPrefs());
 
     // Open the last opened budget, if any
+    dispatch(
+      setAppState({
+        loadingText: 'Opening last budget...',
+      }),
+    );
     const budgetId = await send('get-last-opened-backup');
     if (budgetId) {
-      await loadBudget(budgetId);
+      await dispatch(loadBudget(budgetId, 'Loading the last budget file...'));
 
       // Check to see if this file has been remotely deleted (but
       // don't block on this in case they are offline or something)
+      dispatch(
+        setAppState({
+          loadingText: 'Retrieving remote files...',
+        }),
+      );
       send('get-remote-files').then(files => {
         if (files) {
           const remoteFile = files.find(f => f.fileId === cloudFileId);
           if (remoteFile && remoteFile.deleted) {
-            closeBudget();
+            dispatch(closeBudget());
           }
         }
       });
@@ -71,6 +97,11 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
     async function initAll() {
       await Promise.all([installPolyfills(), init()]);
       setInitializing(false);
+      dispatch(
+        setAppState({
+          loadingText: null,
+        }),
+      );
     }
 
     initAll().catch(showErrorBoundary);
@@ -82,19 +113,15 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
 
   return (
     <>
-      {initializing ? (
+      {(initializing || !budgetId) && (
         <AppBackground initializing={initializing} loadingText={loadingText} />
-      ) : budgetId ? (
-        <FinancesApp />
-      ) : (
-        <>
-          <AppBackground
-            initializing={initializing}
-            loadingText={loadingText}
-          />
-          <ManagementApp isLoading={loadingText != null} />
-        </>
       )}
+      {!initializing &&
+        (budgetId ? (
+          <FinancesApp />
+        ) : (
+          <ManagementApp isLoading={loadingText != null} />
+        ))}
 
       <UpdateNotification />
       <MobileWebMessage />
@@ -106,7 +133,7 @@ function ErrorFallback({ error }: FallbackProps) {
   return (
     <>
       <AppBackground />
-      <FatalError error={error} buttonText="Restart app" />
+      <FatalError error={error} />
     </>
   );
 }
@@ -114,10 +141,10 @@ function ErrorFallback({ error }: FallbackProps) {
 export function App() {
   const [budgetId] = useLocalPref('id');
   const [cloudFileId] = useLocalPref('cloudFileId');
-  const { sync } = useActions();
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
+  const dispatch = useDispatch();
 
   useEffect(() => {
     function checkScrollbars() {
@@ -132,7 +159,7 @@ export function App() {
       if (!isSyncing) {
         console.debug('triggering sync because of visibility change');
         isSyncing = true;
-        await sync();
+        await dispatch(sync());
         isSyncing = false;
       }
     }
@@ -144,7 +171,7 @@ export function App() {
       window.removeEventListener('focus', checkScrollbars);
       window.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [sync]);
+  }, [dispatch]);
 
   return (
     <HotkeysProvider initiallyActiveScopes={['*']}>

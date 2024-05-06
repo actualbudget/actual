@@ -5,6 +5,7 @@ import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
@@ -14,24 +15,31 @@ import { View } from '../common/View';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { NetWorthCard } from './reports/NetWorthCard';
+import { SpendingCard } from './reports/SpendingCard';
 
 export function Overview() {
   const customReports = useReports();
+  const { isNarrowWidth } = useResponsive();
 
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
 
   const customReportsFeatureFlag = useFeatureFlag('customReports');
+  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const accounts = useAccounts();
   return (
     <View
       style={{
         ...styles.page,
-        ...{ paddingLeft: 40, paddingRight: 40, minWidth: 700 },
+        ...{
+          padding: 15,
+          paddingTop: 0,
+          minWidth: isNarrowWidth ? null : 700,
+        },
       }}
     >
-      {customReportsFeatureFlag && (
+      {customReportsFeatureFlag && !isNarrowWidth && (
         <View
           style={{
             flex: '0 0 auto',
@@ -49,12 +57,13 @@ export function Overview() {
       )}
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: isNarrowWidth ? 'column' : 'row',
           flex: '0 0 auto',
         }}
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
+        {spendingReportFeatureFlag && <SpendingCard />}
       </View>
       {customReportsFeatureFlag && (
         <CustomReportListCards reports={customReports} />

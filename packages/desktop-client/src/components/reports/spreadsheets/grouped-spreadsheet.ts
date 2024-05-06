@@ -59,7 +59,6 @@ export function createGroupedSpreadsheet({
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -71,7 +70,6 @@ export function createGroupedSpreadsheet({
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -94,16 +92,10 @@ export function createGroupedSpreadsheet({
       });
     }
 
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
     const rangeProps =
       interval === 'Weekly'
-        ? [
-            monthUtils[format](startDate),
-            monthUtils[format](endDate),
-            firstDayOfWeekIdx,
-          ]
-        : [monthUtils[format](startDate), monthUtils[format](endDate)];
+        ? [startDate, endDate, firstDayOfWeekIdx]
+        : [startDate, endDate];
     const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
       ...rangeProps,
     );

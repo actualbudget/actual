@@ -17,6 +17,7 @@ import {
   type DataEntity,
   type GroupedEntity,
 } from 'loot-core/src/types/models/reports';
+import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import {
   categoryLists,
@@ -47,7 +48,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -109,7 +110,6 @@ export function createCustomSpreadsheet({
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -121,7 +121,6 @@ export function createCustomSpreadsheet({
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -144,16 +143,10 @@ export function createCustomSpreadsheet({
       });
     }
 
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
     const rangeProps =
       interval === 'Weekly'
-        ? [
-            monthUtils[format](startDate),
-            monthUtils[format](endDate),
-            firstDayOfWeekIdx,
-          ]
-        : [monthUtils[format](startDate), monthUtils[format](endDate)];
+        ? [startDate, endDate, firstDayOfWeekIdx]
+        : [startDate, endDate];
     const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
       ...rangeProps,
     );
@@ -215,11 +208,10 @@ export function createCustomSpreadsheet({
       totalDebts += perIntervalDebts;
 
       arr.push({
-        date:
-          interval === 'Monthly'
-            ? // eslint-disable-next-line rulesdir/typography
-              d.format(d.parseISO(`${intervalItem}-01`), "MMM ''yy")
-            : intervalItem,
+        date: d.format(
+          d.parseISO(intervalItem),
+          ReportOptions.intervalFormat.get(interval),
+        ),
         ...stacked,
         dateStart: intervalItem,
         totalDebts: integerToAmount(perIntervalDebts),

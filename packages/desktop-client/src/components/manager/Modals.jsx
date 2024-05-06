@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
 import { View } from '../common/View';
-import { CreateEncryptionKey } from '../modals/CreateEncryptionKey';
-import { FixEncryptionKey } from '../modals/FixEncryptionKey';
+import { CreateEncryptionKeyModal } from '../modals/CreateEncryptionKeyModal';
+import { FixEncryptionKeyModal } from '../modals/FixEncryptionKeyModal';
 import { LoadBackup } from '../modals/LoadBackup';
 
 import { DeleteFile } from './DeleteFile';
@@ -67,19 +67,17 @@ export function Modals() {
       }
       case 'create-encryption-key':
         return (
-          <CreateEncryptionKey
+          <CreateEncryptionKeyModal
             key={name}
             modalProps={modalProps}
-            actions={actions}
             options={options}
           />
         );
       case 'fix-encryption-key':
         return (
-          <FixEncryptionKey
+          <FixEncryptionKeyModal
             key={name}
             modalProps={modalProps}
-            actions={actions}
             options={options}
           />
         );
