@@ -552,7 +552,10 @@ function SingleAutocomplete<T extends Item>({
           {isOpen &&
             filtered.length > 0 &&
             (embedded ? (
-              <View style={{ marginTop: 5 }} data-testid="autocomplete">
+              <View
+                style={{ ...styles.darkScrollbar, marginTop: 5 }}
+                data-testid="autocomplete"
+              >
                 {renderItems(
                   filtered,
                   getItemProps,
