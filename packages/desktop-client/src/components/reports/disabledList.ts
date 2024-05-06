@@ -108,10 +108,16 @@ export function disabledGraphList(
   newGraph: string,
   type: 'disabledSplit' | 'disabledType',
 ) {
-  const [graphList] = modeOptions.filter(d => d.description === item);
-  const [disabledList] = graphList
-    ? graphList.graphs.filter(e => e.description === newGraph) || []
-    : [];
+  const graphList = modeOptions.find(d => d.description === item);
+  if (!graphList) {
+    return [];
+  }
+
+  const disabledList = graphList.graphs.find(e => e.description === newGraph);
+  if (!disabledList) {
+    return [];
+  }
+
   return disabledList[type];
 }
 
@@ -120,10 +126,18 @@ export function disabledLegendLabel(
   newGraph: string,
   type: 'disableLegend' | 'disableLabel',
 ) {
-  const [graphList] = modeOptions.filter(d => d.description === item);
-  const [disableLegendLabel] = graphList
-    ? graphList.graphs.filter(e => e.description === newGraph) || []
-    : [];
+  const graphList = modeOptions.find(d => d.description === item);
+  if (!graphList) {
+    return false;
+  }
+
+  const disableLegendLabel = graphList.graphs.find(
+    e => e.description === newGraph,
+  );
+  if (!disableLegendLabel) {
+    return false;
+  }
+
   return disableLegendLabel[type];
 }
 
@@ -132,10 +146,16 @@ export function defaultsGraphList(
   newGraph: string,
   type: 'defaultSplit' | 'defaultType',
 ) {
-  const [graphList] = modeOptions.filter(d => d.description === item);
-  const [defaultItem] = graphList
-    ? graphList.graphs.filter(e => e.description === newGraph) || []
-    : [];
+  const graphList = modeOptions.find(d => d.description === item);
+  if (!graphList) {
+    return '';
+  }
+
+  const defaultItem = graphList.graphs.find(e => e.description === newGraph);
+  if (!defaultItem) {
+    return '';
+  }
+
   return defaultItem[type];
 }
 
