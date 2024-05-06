@@ -55,7 +55,7 @@ export function ScheduledTransactionMenuModal({
         }}
       >
         <Text style={{ fontSize: 17, fontWeight: 400 }}>Scheduled date</Text>
-        <Text style={styles.veryLargeText}>
+        <Text style={{ fontSize: 17, fontWeight: 600 }}>
           {format(schedule.next_date, 'MMMM dd, yyyy')}
         </Text>
       </View>
