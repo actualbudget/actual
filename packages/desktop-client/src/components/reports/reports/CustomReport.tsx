@@ -84,18 +84,21 @@ export function CustomReport() {
 
   if (['/reports'].includes(prevUrl)) sessionStorage.clear();
 
-  const session = JSON.parse(sessionStorage.getItem('report'));
+  const reportFromSessionStorage = sessionStorage.getItem('report');
+  const session = reportFromSessionStorage
+    ? JSON.parse(reportFromSessionStorage)
+    : {};
   const combine = location.state
     ? location.state.report ?? defaultReport
     : defaultReport;
   const loadReport = { ...combine, ...session };
 
-  type allIntervalsProps = {
-    name: string;
-    pretty: string;
-  };
-  const emptyIntervals: allIntervalsProps[] = [];
-  const [allIntervals, setAllIntervals] = useState(emptyIntervals);
+  const [allIntervals, setAllIntervals] = useState<
+    Array<{
+      name: string;
+      pretty: string;
+    }>
+  >([]);
 
   const [selectedCategories, setSelectedCategories] = useState(
     loadReport.selectedCategories,
@@ -341,8 +344,7 @@ export function CustomReport() {
     conditionsOp,
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [scrollWidth, setScrollWidth] = useState(0);
+  const [, setScrollWidth] = useState(0);
 
   if (!allIntervals || !data) {
     return null;

@@ -191,7 +191,7 @@ export function ReportTopbar({
         hover
         onApply={(e: RuleConditionEntity) => {
           setSessionReport('conditions', [
-            ...(customReportItems.conditions as []),
+            ...(customReportItems.conditions ?? []),
             e,
           ]);
           onApplyFilter(e);
