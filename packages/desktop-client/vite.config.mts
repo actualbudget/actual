@@ -148,8 +148,10 @@ export default defineConfig(async ({ mode }) => {
       extensions: resolveExtensions,
     },
     plugins: [
-      mode === 'test'
-        ? VitePWA({
+      // Macos electron (desktop) builds do not support PWA
+      mode === 'desktop'
+        ? undefined
+        : VitePWA({
             registerType: 'autoUpdate',
             workbox: {
               globPatterns: [
@@ -157,8 +159,7 @@ export default defineConfig(async ({ mode }) => {
               ],
               ignoreURLParametersMatching: [/^v$/],
             },
-          })
-        : undefined,
+          }),
       injectShims(),
       addWatchers(),
       react({
