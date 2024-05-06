@@ -108,11 +108,11 @@ export function disabledGraphList(
   newGraph: string,
   type: 'disabledSplit' | 'disabledType',
 ) {
-  const [graphList] = modeOptions.map(d => d.description === item && d.graphs);
+  const [graphList] = modeOptions.filter(d => d.description === item);
   const [disabledList] = graphList
-    ? graphList.map((e: graphOptions) => e.description === newGraph && e[type])
+    ? graphList.graphs.filter(e => e.description === newGraph) || []
     : [];
-  return disabledList;
+  return disabledList[type];
 }
 
 export function disabledLegendLabel(
@@ -120,11 +120,11 @@ export function disabledLegendLabel(
   newGraph: string,
   type: 'disableLegend' | 'disableLabel',
 ) {
-  const [graphList] = modeOptions.map(d => d.description === item && d.graphs);
+  const [graphList] = modeOptions.filter(d => d.description === item);
   const [disableLegendLabel] = graphList
-    ? graphList.map((e: graphOptions) => e.description === newGraph && e[type])
-    : [false];
-  return disableLegendLabel;
+    ? graphList.graphs.filter(e => e.description === newGraph) || []
+    : [];
+  return disableLegendLabel[type];
 }
 
 export function defaultsGraphList(
@@ -132,11 +132,11 @@ export function defaultsGraphList(
   newGraph: string,
   type: 'defaultSplit' | 'defaultType',
 ) {
-  const [graphList] = modeOptions.map(d => d.description === item && d.graphs);
+  const [graphList] = modeOptions.filter(d => d.description === item);
   const [defaultItem] = graphList
-    ? graphList.map((e: graphOptions) => e.description === newGraph && e[type])
-    : [''];
-  return defaultItem;
+    ? graphList.graphs.filter(e => e.description === newGraph) || []
+    : [];
+  return defaultItem[type];
 }
 
 export const disabledList = {
