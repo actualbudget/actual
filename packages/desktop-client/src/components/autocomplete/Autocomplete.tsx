@@ -440,7 +440,7 @@ function SingleAutocomplete<T extends Item>({
         // can't use a View here, but we can fake it be using the
         // className
         <div className={`view ${css({ display: 'flex' })}`} {...containerProps}>
-          <View ref={triggerRef}>
+          <View ref={triggerRef} style={{ flexShrink: 0 }}>
             {renderInput(
               getInputProps({
                 focused,
