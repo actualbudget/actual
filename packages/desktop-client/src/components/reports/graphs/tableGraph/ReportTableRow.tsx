@@ -56,6 +56,15 @@ export const ReportTableRow = memo(
     const categories = useCategories();
     const accounts = useAccounts();
 
+    const hoverUnderline =
+      !isNarrowWidth &&
+      !['Group', 'Interval'].includes(groupBy) &&
+      !categories.grouped.map(g => g.id).includes(item.id)
+        ? {
+            ':hover': { textDecoration: 'underline' },
+          }
+        : {};
+
     const pointer =
       !isNarrowWidth &&
       !['Group', 'Interval'].includes(groupBy) &&
@@ -90,6 +99,7 @@ export const ReportTableRow = memo(
                   style={{
                     minWidth: compact ? 50 : 85,
                     cursor: pointer,
+                    ...hoverUnderline,
                   }}
                   valueStyle={compactStyle}
                   value={amountToCurrency(intervalItem[balanceTypeOp])}
@@ -135,6 +145,7 @@ export const ReportTableRow = memo(
                   style={{
                     minWidth: compact ? 50 : 85,
                     cursor: pointer,
+                    ...hoverUnderline,
                   }}
                   valueStyle={compactStyle}
                   onClick={() =>
@@ -169,6 +180,7 @@ export const ReportTableRow = memo(
                   style={{
                     minWidth: compact ? 50 : 85,
                     cursor: pointer,
+                    ...hoverUnderline,
                   }}
                   valueStyle={compactStyle}
                   onClick={() =>
@@ -204,6 +216,7 @@ export const ReportTableRow = memo(
             fontWeight: 600,
             minWidth: compact ? 50 : 85,
             cursor: pointer,
+            ...hoverUnderline,
           }}
           onClick={() =>
             !isNarrowWidth &&

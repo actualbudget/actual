@@ -72,6 +72,13 @@ export function ReportTableTotals({
   const categories = useCategories();
   const accounts = useAccounts();
 
+  const hoverUnderline =
+    !isNarrowWidth && !['Group', 'Interval'].includes(groupBy)
+      ? {
+          ':hover': { textDecoration: 'underline' },
+        }
+      : {};
+
   const pointer =
     !isNarrowWidth && !['Group', 'Interval'].includes(groupBy)
       ? 'pointer'
@@ -123,6 +130,7 @@ export function ReportTableTotals({
                   style={{
                     minWidth: compact ? 50 : 85,
                     cursor: pointer,
+                    ...hoverUnderline,
                   }}
                   valueStyle={compactStyle}
                   key={amountToCurrency(item[balanceTypeOp])}
@@ -158,6 +166,7 @@ export function ReportTableTotals({
                   style={{
                     minWidth: compact ? 50 : 85,
                     cursor: pointer,
+                    ...hoverUnderline,
                   }}
                   valueStyle={compactStyle}
                   value={amountToCurrency(data.totalAssets)}
@@ -189,6 +198,7 @@ export function ReportTableTotals({
                   style={{
                     minWidth: compact ? 50 : 85,
                     cursor: pointer,
+                    ...hoverUnderline,
                   }}
                   valueStyle={compactStyle}
                   value={amountToCurrency(data.totalDebts)}
@@ -222,6 +232,7 @@ export function ReportTableTotals({
           style={{
             minWidth: compact ? 50 : 85,
             cursor: pointer,
+            ...hoverUnderline,
           }}
           valueStyle={compactStyle}
           value={amountToCurrency(data[balanceTypeOp])}
