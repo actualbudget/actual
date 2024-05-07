@@ -82,6 +82,7 @@ export function ReportTableTotals({
       ? {
           cursor: pointer,
           ':hover': { textDecoration: 'underline' },
+          flexGrow: 0,
         }
       : {};
 

@@ -118,11 +118,11 @@ export function UnexposedCellContent({
   return (
     <Text
       style={{
-        ...linkStyle,
-        flexGrow: 0,
+        flexGrow: 1,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
+        ...linkStyle,
       }}
     >
       {formatter ? formatter(value) : value}

@@ -70,6 +70,7 @@ export const ReportTableRow = memo(
         ? {
             cursor: pointer,
             ':hover': { textDecoration: 'underline' },
+            flexGrow: 0,
           }
         : {};
 
