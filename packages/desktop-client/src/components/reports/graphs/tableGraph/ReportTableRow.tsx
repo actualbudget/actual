@@ -56,21 +56,22 @@ export const ReportTableRow = memo(
     const categories = useCategories();
     const accounts = useAccounts();
 
-    const hoverUnderline =
-      !isNarrowWidth &&
-      !['Group', 'Interval'].includes(groupBy) &&
-      !categories.grouped.map(g => g.id).includes(item.id)
-        ? {
-            ':hover': { textDecoration: 'underline' },
-          }
-        : {};
-
     const pointer =
       !isNarrowWidth &&
       !['Group', 'Interval'].includes(groupBy) &&
       !categories.grouped.map(g => g.id).includes(item.id)
         ? 'pointer'
         : 'inherit';
+
+    const hoverUnderline =
+      !isNarrowWidth &&
+      !['Group', 'Interval'].includes(groupBy) &&
+      !categories.grouped.map(g => g.id).includes(item.id)
+        ? {
+            cursor: pointer,
+            ':hover': { textDecoration: 'underline' },
+          }
+        : {};
 
     return (
       <Row
@@ -98,9 +99,8 @@ export const ReportTableRow = memo(
                   key={amountToCurrency(intervalItem[balanceTypeOp])}
                   style={{
                     minWidth: compact ? 50 : 85,
-                    cursor: pointer,
-                    ...hoverUnderline,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   value={amountToCurrency(intervalItem[balanceTypeOp])}
                   title={
@@ -144,9 +144,8 @@ export const ReportTableRow = memo(
                   privacyFilter
                   style={{
                     minWidth: compact ? 50 : 85,
-                    cursor: pointer,
-                    ...hoverUnderline,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   onClick={() =>
                     !isNarrowWidth &&
@@ -179,9 +178,8 @@ export const ReportTableRow = memo(
                   privacyFilter
                   style={{
                     minWidth: compact ? 50 : 85,
-                    cursor: pointer,
-                    ...hoverUnderline,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   onClick={() =>
                     !isNarrowWidth &&
@@ -215,9 +213,9 @@ export const ReportTableRow = memo(
           style={{
             fontWeight: 600,
             minWidth: compact ? 50 : 85,
-            cursor: pointer,
-            ...hoverUnderline,
           }}
+          linkStyle={hoverUnderline}
+          valueStyle={compactStyle}
           onClick={() =>
             !isNarrowWidth &&
             !['Group', 'Interval'].includes(groupBy) &&
@@ -237,7 +235,6 @@ export const ReportTableRow = memo(
               id: item.id,
             })
           }
-          valueStyle={compactStyle}
           width="flex"
           privacyFilter
         />

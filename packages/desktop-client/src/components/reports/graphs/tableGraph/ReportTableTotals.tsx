@@ -72,17 +72,18 @@ export function ReportTableTotals({
   const categories = useCategories();
   const accounts = useAccounts();
 
-  const hoverUnderline =
-    !isNarrowWidth && !['Group', 'Interval'].includes(groupBy)
-      ? {
-          ':hover': { textDecoration: 'underline' },
-        }
-      : {};
-
   const pointer =
     !isNarrowWidth && !['Group', 'Interval'].includes(groupBy)
       ? 'pointer'
       : 'inherit';
+
+  const hoverUnderline =
+    !isNarrowWidth && !['Group', 'Interval'].includes(groupBy)
+      ? {
+          cursor: pointer,
+          ':hover': { textDecoration: 'underline' },
+        }
+      : {};
 
   return (
     <Row
@@ -129,9 +130,8 @@ export function ReportTableTotals({
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    cursor: pointer,
-                    ...hoverUnderline,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   key={amountToCurrency(item[balanceTypeOp])}
                   value={amountToCurrency(item[balanceTypeOp])}
@@ -165,9 +165,8 @@ export function ReportTableTotals({
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    cursor: pointer,
-                    ...hoverUnderline,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   value={amountToCurrency(data.totalAssets)}
                   title={
@@ -197,9 +196,8 @@ export function ReportTableTotals({
                 <Cell
                   style={{
                     minWidth: compact ? 50 : 85,
-                    cursor: pointer,
-                    ...hoverUnderline,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   value={amountToCurrency(data.totalDebts)}
                   title={
@@ -231,9 +229,8 @@ export function ReportTableTotals({
         <Cell
           style={{
             minWidth: compact ? 50 : 85,
-            cursor: pointer,
-            ...hoverUnderline,
           }}
+          linkStyle={hoverUnderline}
           valueStyle={compactStyle}
           value={amountToCurrency(data[balanceTypeOp])}
           title={
