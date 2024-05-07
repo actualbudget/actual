@@ -3,10 +3,10 @@ import { useSelector } from 'react-redux';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { BudgetList } from '../manager/BudgetList';
 import { type CommonModalProps } from '../Modals';
-import { View } from '../common/View';
-import { Text } from '../common/Text';
 
 type BudgetListModalProps = {
   modalProps: CommonModalProps;
