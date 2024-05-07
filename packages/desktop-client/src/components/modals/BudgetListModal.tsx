@@ -21,12 +21,9 @@ export function BudgetListModal({ modalProps }: BudgetListModalProps) {
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      padding={0}
       style={{
         flex: 1,
         maxHeight: '50vh',
-        padding: '0 10px',
-        paddingBottom: 10,
         borderRadius: '6px',
       }}
     >
