@@ -226,7 +226,7 @@ function File({ file, quickSwitchMode, onSelect, onDelete }) {
   );
 }
 
-function BudgetTable({ files, quickSwitchMode, onSelect, onDelete }) {
+function BudgetFiles({ files, quickSwitchMode, onSelect, onDelete }) {
   return (
     <View
       style={{
@@ -239,15 +239,27 @@ function BudgetTable({ files, quickSwitchMode, onSelect, onDelete }) {
         '& *': { userSelect: 'none' },
       }}
     >
-      {files.map(file => (
-        <File
-          key={file.id || file.cloudFileId}
-          file={file}
-          quickSwitchMode={quickSwitchMode}
-          onSelect={onSelect}
-          onDelete={onDelete}
-        />
-      ))}
+      {!files ? (
+        <Text
+          style={{
+            ...styles.mediumText,
+            textAlign: 'center',
+            color: theme.pageTextSubdued,
+          }}
+        >
+          No budget files
+        </Text>
+      ) : (
+        files.map(file => (
+          <File
+            key={file.id || file.cloudFileId}
+            file={file}
+            quickSwitchMode={quickSwitchMode}
+            onSelect={onSelect}
+            onDelete={onDelete}
+          />
+        ))
+      )}
     </View>
   );
 }
@@ -349,7 +361,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           onRefresh={refresh}
         />
       )}
-      <BudgetTable
+      <BudgetFiles
         files={files}
         quickSwitchMode={quickSwitchMode}
         onSelect={file => {

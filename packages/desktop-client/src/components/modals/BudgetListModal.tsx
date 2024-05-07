@@ -18,10 +18,6 @@ export function BudgetListModal({ modalProps }: BudgetListModalProps) {
     state.budgets.allFiles?.find(f => 'id' in f && f.id === id),
   );
 
-  if (!currentFile) {
-    return null;
-  }
-
   return (
     <Modal
       title="Switch Budget File"
@@ -33,12 +29,12 @@ export function BudgetListModal({ modalProps }: BudgetListModalProps) {
         style={{
           justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: 20,
+          margin: '20px 0',
         }}
       >
         <Text style={{ fontSize: 17, fontWeight: 400 }}>Switching from:</Text>
         <Text style={{ fontSize: 17, fontWeight: 700 }}>
-          {currentFile.name}
+          {currentFile?.name}
         </Text>
       </View>
       <BudgetList showHeader={false} quickSwitchMode={true} />
