@@ -22,7 +22,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { usePayees } from '../../hooks/usePayees';
+import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
@@ -40,10 +40,14 @@ import { ItemHeader } from './ItemHeader';
 type PayeeAutocompleteItem = PayeeEntity;
 
 function getPayeeSuggestions(
+  commonPayees: PayeeAutocompleteItem[],
   payees: PayeeAutocompleteItem[],
   focusTransferPayees: boolean,
   accounts: AccountEntity[],
 ): PayeeAutocompleteItem[] {
+  if (commonPayees.length > 0) {
+    payees = commonPayees.concat(payees.filter(p => !(commonPayees.find(cp => cp.id === p.id))));
+  }
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
 
   if (focusTransferPayees && activePayees) {
@@ -89,6 +93,19 @@ type PayeeListProps = {
   footer: ReactNode;
 };
 
+type ItemTypes = 'account' | 'payee' | 'common_payee';
+function determineItemType(item: PayeeAutocompleteItem, idx?: number): ItemTypes {
+          if (item.transfer_acct) {
+            return 'account';
+          } 
+          if (item.common) {
+            return 'common_payee';
+          }
+          else {
+            return 'payee';
+          }
+}
+
 function PayeeList({
   items,
   getItemProps,
@@ -133,16 +150,19 @@ function PayeeList({
           })}
 
         {items.map((item, idx) => {
-          const type = item.transfer_acct ? 'account' : 'payee';
+          const itemType = determineItemType(item, idx); 
           let title;
-          if (type === 'payee' && lastType !== type) {
+
+          if (itemType === 'common_payee' && lastType !== itemType) {
+            title = 'Frequently Used Payees';
+          } else if (itemType === 'payee' && lastType !== itemType) {
             title = 'Payees';
-          } else if (type === 'account' && lastType !== type) {
+          } else if (itemType === 'account' && lastType !== itemType) {
             title = 'Transfer To/From';
           }
           const showMoreMessage =
             idx === items.length - 1 && items.length > 100;
-          lastType = type;
+          lastType = itemType;
 
           return (
             <Fragment key={item.id}>
@@ -219,6 +239,7 @@ export function PayeeAutocomplete({
   payees,
   ...props
 }: PayeeAutocompleteProps) {
+  const commonPayees = useCommonPayees();
   const retrievedPayees = usePayees();
   if (!payees) {
     payees = retrievedPayees;
@@ -234,6 +255,7 @@ export function PayeeAutocomplete({
   const hasPayeeInput = !!rawPayee;
   const payeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
     const suggestions = getPayeeSuggestions(
+      commonPayees,
       payees,
       focusTransferPayees,
       accounts,
@@ -243,7 +265,7 @@ export function PayeeAutocomplete({
       return suggestions;
     }
     return [{ id: 'new', name: '' }, ...suggestions];
-  }, [payees, focusTransferPayees, accounts, hasPayeeInput]);
+  }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
   const dispatch = useDispatch();
 

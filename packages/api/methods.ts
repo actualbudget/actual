@@ -27,7 +27,7 @@ export async function loadBudget(budgetId) {
   return send('api/load-budget', { id: budgetId });
 }
 
-export async function downloadBudget(syncId, { password }: { password? } = {}) {
+export async function downloadBudget(syncId, { password }: { password?} = {}) {
   return send('api/download-budget', { syncId, password });
 }
 
@@ -155,6 +155,10 @@ export function updateCategory(id, fields) {
 
 export function deleteCategory(id, transferCategoryId?) {
   return send('api/category-delete', { id, transferCategoryId });
+}
+
+export function getCommonPayees() {
+  return send('api/common-payees-get');
 }
 
 export function getPayees() {

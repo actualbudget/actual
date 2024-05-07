@@ -446,6 +446,11 @@ handlers['payee-create'] = mutator(async function ({ name }) {
   });
 });
 
+
+handlers['common-payees-get'] = async function () {
+  return db.getCommonPayees();
+};
+
 handlers['payees-get'] = async function () {
   return db.getPayees();
 };
@@ -1254,10 +1259,10 @@ handlers['load-global-prefs'] = async function () {
     keyId: encryptKey && JSON.parse(encryptKey).id,
     theme:
       theme === 'light' ||
-      theme === 'dark' ||
-      theme === 'auto' ||
-      theme === 'development' ||
-      theme === 'midnight'
+        theme === 'dark' ||
+        theme === 'auto' ||
+        theme === 'development' ||
+        theme === 'midnight'
         ? theme
         : 'auto',
   };
@@ -1388,7 +1393,7 @@ handlers['get-did-bootstrap'] = async function () {
 
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
-}: { url? } = {}) {
+}: { url?} = {}) {
   try {
     if (!getServer(url)) {
       return { bootstrapped: true, hasServer: false };
@@ -1624,7 +1629,7 @@ handlers['reset-budget-cache'] = mutator(async function () {
   await sheet.waitOnSpreadsheet();
 });
 
-handlers['upload-budget'] = async function ({ id }: { id? } = {}) {
+handlers['upload-budget'] = async function ({ id }: { id?} = {}) {
   if (id) {
     if (prefs.getPrefs()) {
       throw new Error('upload-budget: id given but prefs already loaded');
@@ -1750,7 +1755,7 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
-    await cloudStorage.removeFile(cloudFileId).catch(() => {});
+    await cloudStorage.removeFile(cloudFileId).catch(() => { });
   }
 
   // If a local file exists, you can delete it by passing its local id

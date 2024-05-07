@@ -540,6 +540,24 @@ export function getPayees() {
   `);
 }
 
+export function getCommonPayees() {
+  const threeMonthsAgo = '20240201';
+  const limit = 10;
+  return all(`
+    SELECT 	p.id as id, p.name as name, p.category as category, TRUE as common, NULL as transfer_acct,
+    count(*) as c, 
+    max(t.date) as latest
+    FROM payees p
+    LEFT JOIN v_transactions t on t.payee == p.id
+    WHERE p.name != ""
+    GROUP BY p.id
+    HAVING latest > ${threeMonthsAgo}
+    ORDER BY c DESC ,p.transfer_acct IS NULL DESC, p.name 
+    COLLATE NOCASE
+    LIMIT ${limit}
+  `);
+}
+
 export function syncGetOrphanedPayees() {
   return all(`
   SELECT p.id FROM payees p
