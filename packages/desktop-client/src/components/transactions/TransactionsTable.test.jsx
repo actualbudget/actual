@@ -440,7 +440,6 @@ describe('Transactions', () => {
 
     const categories = categoryGroups.flatMap(group => group.categories);
     const input = await editField(container, 'category', 2);
-
     expect(
       [
         ...screen
