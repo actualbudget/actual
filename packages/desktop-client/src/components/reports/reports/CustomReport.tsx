@@ -68,7 +68,7 @@ export function CustomReport() {
     useLocalPref('reportsViewLabel');
 
   const {
-    filters,
+    conditions,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
@@ -255,7 +255,7 @@ export function CustomReport() {
       interval,
       categories,
       selectedCategories,
-      conditions: filters,
+      conditions,
       conditionsOp,
       showEmpty,
       showOffBudget,
@@ -271,7 +271,7 @@ export function CustomReport() {
     balanceTypeOp,
     categories,
     selectedCategories,
-    filters,
+    conditions,
     conditionsOp,
     showEmpty,
     showOffBudget,
@@ -288,7 +288,7 @@ export function CustomReport() {
       interval,
       categories,
       selectedCategories,
-      conditions: filters,
+      conditions,
       conditionsOp,
       showEmpty,
       showOffBudget,
@@ -312,7 +312,7 @@ export function CustomReport() {
     selectedCategories,
     payees,
     accounts,
-    filters,
+    conditions,
     conditionsOp,
     showEmpty,
     showOffBudget,
@@ -343,7 +343,7 @@ export function CustomReport() {
     showUncategorized,
     selectedCategories,
     graphType,
-    conditions: filters,
+    conditions,
     conditionsOp,
   };
 
@@ -615,7 +615,7 @@ export function CustomReport() {
               defaultItems={defaultItems}
             />
           )}
-          {filters && filters.length > 0 && (
+          {conditions && conditions.length > 0 && (
             <View
               style={{
                 marginBottom: 10,
@@ -627,11 +627,11 @@ export function CustomReport() {
               }}
             >
               <AppliedFilters
-                conditions={filters}
+                conditions={conditions}
                 onUpdate={(oldFilter, newFilter) => {
                   setSessionReport(
                     'conditions',
-                    filters.map(f => (f === oldFilter ? newFilter : f)),
+                    conditions.map(f => (f === oldFilter ? newFilter : f)),
                   );
                   onReportChange({ type: 'modify' });
                   onUpdateFilter(oldFilter, newFilter);
@@ -639,7 +639,7 @@ export function CustomReport() {
                 onDelete={deletedFilter => {
                   setSessionReport(
                     'conditions',
-                    filters.filter(f => f !== deletedFilter),
+                    conditions.filter(f => f !== deletedFilter),
                   );
                   onDeleteFilter(deletedFilter);
                   onReportChange({ type: 'modify' });
@@ -696,7 +696,7 @@ export function CustomReport() {
                 {dataCheck ? (
                   <ChooseGraph
                     data={data}
-                    filters={filters}
+                    filters={conditions}
                     mode={mode}
                     graphType={graphType}
                     balanceType={balanceType}

@@ -29,7 +29,7 @@ export function Spending() {
   const categories = useCategories();
 
   const {
-    filters,
+    conditions,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
@@ -44,11 +44,11 @@ export function Spending() {
     setDataCheck(false);
     return createSpendingSpreadsheet({
       categories,
-      conditions: filters,
+      conditions,
       conditionsOp,
       setDataCheck,
     });
-  }, [categories, filters, conditionsOp]);
+  }, [categories, conditions, conditionsOp]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ export function Spending() {
             flexShrink: 0,
           }}
         >
-          {filters && (
+          {conditions && (
             <View style={{ flexDirection: 'row' }}>
               <FilterButton
                 onApply={onApplyFilter}
@@ -126,7 +126,7 @@ export function Spending() {
             flexGrow: 1,
           }}
         >
-          {filters && filters.length > 0 && (
+          {conditions && conditions.length > 0 && (
             <View
               style={{
                 marginBottom: 10,
@@ -139,7 +139,7 @@ export function Spending() {
               }}
             >
               <AppliedFilters
-                filters={filters}
+                conditions={conditions}
                 onUpdate={onUpdateFilter}
                 onDelete={onDeleteFilter}
                 conditionsOp={conditionsOp}
