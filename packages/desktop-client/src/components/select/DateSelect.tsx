@@ -27,10 +27,10 @@ import {
 import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Input } from '../common/Input';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
@@ -174,7 +174,6 @@ function defaultShouldSaveFromKey(e) {
 type DateSelectProps = {
   containerProps?: ComponentProps<typeof View>;
   inputProps?: ComponentProps<typeof Input>;
-  tooltipStyle?: CSSProperties;
   value: string;
   isOpen?: boolean;
   embedded?: boolean;
@@ -191,7 +190,6 @@ type DateSelectProps = {
 export function DateSelect({
   containerProps,
   inputProps,
-  tooltipStyle,
   value: defaultValue,
   isOpen,
   embedded,
@@ -323,17 +321,23 @@ export function DateSelect({
   }
 
   const maybeWrapTooltip = content => {
-    return embedded ? (
-      content
-    ) : (
-      <Tooltip
-        position="bottom-left"
+    if (embedded) {
+      return open ? content : null;
+    }
+
+    return (
+      <Popover
+        triggerRef={inputRef}
+        placement="bottom start"
         offset={2}
-        style={{ padding: 0, minWidth: 225, ...tooltipStyle }}
+        isOpen={open}
+        isNonModal
+        onOpenChange={() => setOpen(false)}
+        style={{ minWidth: 225 }}
         data-testid="date-select-tooltip"
       >
         {content}
-      </Tooltip>
+      </Popover>
     );
   };
 
@@ -381,24 +385,23 @@ export function DateSelect({
           }
         }}
       />
-      {open &&
-        maybeWrapTooltip(
-          <DatePicker
-            ref={picker}
-            value={selectedValue}
-            firstDayOfWeekIdx={firstDayOfWeekIdx}
-            dateFormat={dateFormat}
-            onUpdate={date => {
-              setSelectedValue(format(date, dateFormat));
-              onUpdate?.(format(date, 'yyyy-MM-dd'));
-            }}
-            onSelect={date => {
-              setValue(format(date, dateFormat));
-              onSelect(format(date, 'yyyy-MM-dd'));
-              setOpen(false);
-            }}
-          />,
-        )}
+      {maybeWrapTooltip(
+        <DatePicker
+          ref={picker}
+          value={selectedValue}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
+          dateFormat={dateFormat}
+          onUpdate={date => {
+            setSelectedValue(format(date, dateFormat));
+            onUpdate?.(format(date, 'yyyy-MM-dd'));
+          }}
+          onSelect={date => {
+            setValue(format(date, dateFormat));
+            onSelect(format(date, 'yyyy-MM-dd'));
+            setOpen(false);
+          }}
+        />,
+      )}
     </View>
   );
 }
