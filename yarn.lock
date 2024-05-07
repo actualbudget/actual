@@ -73,6 +73,7 @@ __metadata:
     "@swc/plugin-react-remove-properties": "npm:^1.5.121"
     "@testing-library/react": "npm:14.1.2"
     "@testing-library/user-event": "npm:14.5.2"
+    "@types/lodash": "npm:^4"
     "@types/promise-retry": "npm:^1.1.6"
     "@types/react": "npm:^18.2.0"
     "@types/react-dom": "npm:^18.2.1"
@@ -93,6 +94,7 @@ __metadata:
     inter-ui: "npm:^3.19.3"
     jest: "npm:^27.5.1"
     jest-watch-typeahead: "npm:^2.2.2"
+    lodash: "npm:^4.17.21"
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
@@ -5490,6 +5492,13 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: e009a2bfb50e90ca9b7c6e8f648f8464067271fd99116f881073fa6fa76dc8d0133181dd65e6614d5fb1220d671d67b0124aef7d97dc02d7e342ab143a47779d
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:^4":
+  version: 4.17.1
+  resolution: "@types/lodash@npm:4.17.1"
+  checksum: 384bdd29348a000f8e815f94839a1a8c7f5a4ca856b016ade7f2abdc1df0b4e3e009c113b69db320a8fde51d1f38e60c19462b9bf3e82e0e2e32d3ac3e7ba2c4
   languageName: node
   linkType: hard
 
