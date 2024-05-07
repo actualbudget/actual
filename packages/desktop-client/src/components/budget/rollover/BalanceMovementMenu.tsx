@@ -8,19 +8,19 @@ import { BalanceMenu } from './BalanceMenu';
 import { CoverMenu } from './CoverMenu';
 import { TransferMenu } from './TransferMenu';
 
-type BalancePopoverContentProps = {
+type BalanceMovementMenuProps = {
   categoryId: string;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onClose?: () => void;
 };
 
-export function BalancePopoverContent({
+export function BalanceMovementMenu({
   categoryId,
   month,
   onBudgetAction,
   onClose = () => {},
-}: BalancePopoverContentProps) {
+}: BalanceMovementMenuProps) {
   const catBalance = useSheetValue(rolloverBudget.catBalance(categoryId));
   const [menu, setMenu] = useState('menu');
 

@@ -17,7 +17,7 @@ import { Row, Field, SheetCell } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
-import { BalancePopoverContent } from './BalancePopoverContent';
+import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
 
 const headerLabelStyle: CSSProperties = {
@@ -333,7 +333,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onOpenChange={() => setBalanceMenuOpen(false)}
           style={{ width: 200 }}
         >
-          <BalancePopoverContent
+          <BalanceMovementMenu
             categoryId={category.id}
             month={month}
             onBudgetAction={onBudgetAction}
