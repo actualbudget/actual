@@ -239,7 +239,7 @@ function BudgetFiles({ files, quickSwitchMode, onSelect, onDelete }) {
         '& *': { userSelect: 'none' },
       }}
     >
-      {!files ? (
+      {!files || files.length === 0 ? (
         <Text
           style={{
             ...styles.mediumText,
@@ -313,7 +313,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const allFiles = useSelector(state => state.budgets.allFiles || []);
   const [id] = useLocalPref('id');
 
-  const files = allFiles.filter(f => f.id !== id);
+  const files = id ? allFiles.filter(f => f.id !== id) : allFiles;
 
   const [creating, setCreating] = useState(false);
   const { isNarrowWidth } = useResponsive();
