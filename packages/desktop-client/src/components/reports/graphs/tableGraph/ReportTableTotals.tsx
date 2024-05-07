@@ -8,12 +8,18 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { useAccounts } from '../../../../hooks/useAccounts';
+import { useCategories } from '../../../../hooks/useCategories';
+import { useNavigate } from '../../../../hooks/useNavigate';
+import { useResponsive } from '../../../../ResponsiveProvider';
 import { theme } from '../../../../style';
 import { styles } from '../../../../style/styles';
 import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
+import { showActivity } from '../showActivity';
 
 type ReportTableTotalsProps = {
   data: GroupedEntity;
@@ -25,6 +31,10 @@ type ReportTableTotalsProps = {
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
+  groupBy: string;
+  filters?: RuleConditionEntity[];
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export function ReportTableTotals({
@@ -37,6 +47,10 @@ export function ReportTableTotals({
   compact,
   style,
   compactStyle,
+  groupBy,
+  filters = [],
+  showHiddenCategories = false,
+  showOffBudget = false,
 }: ReportTableTotalsProps) {
   const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 
@@ -44,15 +58,34 @@ export function ReportTableTotals({
     if (totalScrollRef.current) {
       const [parent, child] = [
         totalScrollRef.current.offsetParent
-          ? totalScrollRef.current.parentElement.scrollHeight
+          ? totalScrollRef.current.parentElement.scrollHeight || 0
           : 0,
         totalScrollRef.current ? totalScrollRef.current.scrollHeight : 0,
       ];
       setScrollWidthTotals(parent > 0 && child > 0 && parent - child);
     }
   });
-
   const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;
+
+  const navigate = useNavigate();
+  const { isNarrowWidth } = useResponsive();
+  const categories = useCategories();
+  const accounts = useAccounts();
+
+  const pointer =
+    !isNarrowWidth && !['Group', 'Interval'].includes(groupBy)
+      ? 'pointer'
+      : 'inherit';
+
+  const hoverUnderline =
+    !isNarrowWidth && !['Group', 'Interval'].includes(groupBy)
+      ? {
+          cursor: pointer,
+          ':hover': { textDecoration: 'underline' },
+          flexGrow: 0,
+        }
+      : {};
+
   return (
     <Row
       collapsed={true}
@@ -99,6 +132,7 @@ export function ReportTableTotals({
                   style={{
                     minWidth: compact ? 50 : 85,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   key={amountToCurrency(item[balanceTypeOp])}
                   value={amountToCurrency(item[balanceTypeOp])}
@@ -106,6 +140,21 @@ export function ReportTableTotals({
                     Math.abs(item[balanceTypeOp]) > 100000
                       ? amountToCurrency(item[balanceTypeOp])
                       : undefined
+                  }
+                  onClick={() =>
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'time',
+                      startDate: item.dateStart || '',
+                    })
                   }
                   width="flex"
                   privacyFilter
@@ -118,12 +167,29 @@ export function ReportTableTotals({
                   style={{
                     minWidth: compact ? 50 : 85,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   value={amountToCurrency(data.totalAssets)}
                   title={
                     Math.abs(data.totalAssets) > 100000
                       ? amountToCurrency(data.totalAssets)
                       : undefined
+                  }
+                  onClick={() =>
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'assets',
+                      startDate: data.startDate || '',
+                      endDate: data.endDate,
+                    })
                   }
                   width="flex"
                   privacyFilter
@@ -132,12 +198,29 @@ export function ReportTableTotals({
                   style={{
                     minWidth: compact ? 50 : 85,
                   }}
+                  linkStyle={hoverUnderline}
                   valueStyle={compactStyle}
                   value={amountToCurrency(data.totalDebts)}
                   title={
                     Math.abs(data.totalDebts) > 100000
                       ? amountToCurrency(data.totalDebts)
                       : undefined
+                  }
+                  onClick={() =>
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'debts',
+                      startDate: data.startDate || '',
+                      endDate: data.endDate,
+                    })
                   }
                   width="flex"
                   privacyFilter
@@ -148,12 +231,29 @@ export function ReportTableTotals({
           style={{
             minWidth: compact ? 50 : 85,
           }}
+          linkStyle={hoverUnderline}
           valueStyle={compactStyle}
           value={amountToCurrency(data[balanceTypeOp])}
           title={
             Math.abs(data[balanceTypeOp]) > 100000
               ? amountToCurrency(data[balanceTypeOp])
               : undefined
+          }
+          onClick={() =>
+            !isNarrowWidth &&
+            !['Group', 'Interval'].includes(groupBy) &&
+            showActivity({
+              navigate,
+              categories,
+              accounts,
+              balanceTypeOp,
+              filters,
+              showHiddenCategories,
+              showOffBudget,
+              type: 'totals',
+              startDate: data.startDate || '',
+              endDate: data.endDate,
+            })
           }
           width="flex"
           privacyFilter

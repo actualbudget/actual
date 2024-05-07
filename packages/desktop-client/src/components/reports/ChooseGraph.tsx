@@ -54,12 +54,6 @@ export function ChooseGraph({
 }: ChooseGraphProps) {
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
-  const groupByData =
-    groupBy === 'Category'
-      ? 'groupedData'
-      : groupBy === 'Interval'
-        ? 'intervalData'
-        : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -180,12 +174,15 @@ export function ChooseGraph({
           handleScroll={handleScroll}
           balanceTypeOp={balanceTypeOp}
           groupBy={groupBy}
-          data={data[groupByData]}
+          data={data}
+          filters={filters}
           mode={mode}
           intervalsCount={intervalsCount}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -197,6 +194,10 @@ export function ChooseGraph({
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          groupBy={groupBy}
+          filters={filters}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
       </View>
     );
