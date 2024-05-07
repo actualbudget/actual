@@ -1,5 +1,4 @@
-import type React from 'react';
-import { useState, type ComponentPropsWithoutRef } from 'react';
+import React, { useState } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
@@ -10,13 +9,13 @@ import { Button } from '../../common/Button';
 import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { View } from '../../common/View';
-import { Tooltip } from '../../tooltips';
 import { addToBeBudgetedGroup } from '../util';
 
-type TransferTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
+type TransferTooltipProps = {
   initialAmount?: number;
   showToBeBudgeted?: boolean;
   onSubmit: (amount: number, categoryId: string) => void;
+  onClose: () => void;
 };
 
 export function TransferTooltip({
@@ -24,38 +23,7 @@ export function TransferTooltip({
   showToBeBudgeted,
   onSubmit,
   onClose,
-  position = 'bottom-right',
-  ...props
 }: TransferTooltipProps) {
-  const _onSubmit = (amount: number, categoryId: string) => {
-    onSubmit?.(amount, categoryId);
-    onClose?.();
-  };
-
-  return (
-    <Tooltip
-      position={position}
-      width={200}
-      style={{ padding: 10 }}
-      onClose={onClose}
-      {...props}
-    >
-      <Transfer amount={initialAmount} showToBeBudgeted onSubmit={_onSubmit} />
-    </Tooltip>
-  );
-}
-
-type TransferProps = {
-  amount: number;
-  showToBeBudgeted: boolean;
-  onSubmit: (amount: number, categoryId: string) => void;
-};
-
-function Transfer({
-  amount: initialAmount,
-  showToBeBudgeted,
-  onSubmit,
-}: TransferProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
   if (showToBeBudgeted) {
@@ -71,10 +39,12 @@ function Transfer({
     if (parsedAmount && categoryId) {
       onSubmit?.(amountToInteger(parsedAmount), categoryId);
     }
+
+    onClose();
   };
 
   return (
-    <>
+    <View style={{ padding: 10 }}>
       <View style={{ marginBottom: 5 }}>Transfer this amount:</View>
       <View>
         <InitialFocus>
@@ -93,7 +63,8 @@ function Transfer({
         openOnFocus={true}
         onSelect={(id: string | undefined) => setCategoryId(id || null)}
         inputProps={{
-          onEnter: () => _onSubmit(amount, categoryId),
+          onEnter: event =>
+            !event.defaultPrevented && _onSubmit(amount, categoryId),
           placeholder: '(none)',
         }}
         showHiddenCategories={true}
@@ -117,6 +88,6 @@ function Transfer({
           Transfer
         </Button>
       </View>
-    </>
+    </View>
   );
 }

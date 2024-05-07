@@ -440,6 +440,7 @@ describe('Transactions', () => {
 
     const categories = categoryGroups.flatMap(group => group.categories);
     const input = await editField(container, 'category', 2);
+
     expect(
       [
         ...screen
@@ -506,7 +507,7 @@ describe('Transactions', () => {
     // The category field should still be editing
     expectToBeEditingField(container, 'category', 2);
     // No dropdown should be open
-    expect(container.querySelector('[data-testid="autocomplete"]')).toBe(null);
+    expect(screen.queryByTestId('autocomplete')).toBe(null);
 
     // Pressing enter should now move down
     await userEvent.type(input, '[Enter]');
