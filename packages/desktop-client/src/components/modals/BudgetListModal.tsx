@@ -13,7 +13,7 @@ type BudgetListModalProps = {
 export function BudgetListModal({ modalProps }: BudgetListModalProps) {
   const [id] = useLocalPref('id');
   const currentFile = useSelector(state =>
-    state.budgets.allFiles?.find(f => f.id === id),
+    state.budgets.allFiles?.find(f => 'id' in f && f.id === id),
   );
   return (
     <Modal
