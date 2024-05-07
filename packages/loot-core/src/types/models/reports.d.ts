@@ -60,7 +60,7 @@ export interface SpendingEntity {
 export interface GroupedEntity {
   data?: DataEntity[];
   intervalData: DataEntity[];
-  groupedData?: DataEntity[];
+  groupedData?: DataEntity[] | null;
   legend?: LegendEntity[];
   startDate?: string;
   endDate?: string;
