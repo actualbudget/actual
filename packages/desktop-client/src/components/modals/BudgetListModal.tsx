@@ -5,6 +5,8 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { Modal } from '../common/Modal';
 import { BudgetList } from '../manager/BudgetList';
 import { type CommonModalProps } from '../Modals';
+import { View } from '../common/View';
+import { Text } from '../common/Text';
 
 type BudgetListModalProps = {
   modalProps: CommonModalProps;
@@ -15,18 +17,30 @@ export function BudgetListModal({ modalProps }: BudgetListModalProps) {
   const currentFile = useSelector(state =>
     state.budgets.allFiles?.find(f => 'id' in f && f.id === id),
   );
+
+  if (!currentFile) {
+    return null;
+  }
+
   return (
     <Modal
-      title={`From: ${currentFile?.name}`}
+      title="Switch Budget File"
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      style={{
-        flex: 1,
-        maxHeight: '50vh',
-        borderRadius: '6px',
-      }}
     >
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 20,
+        }}
+      >
+        <Text style={{ fontSize: 17, fontWeight: 400 }}>Switching from:</Text>
+        <Text style={{ fontSize: 17, fontWeight: 700 }}>
+          {currentFile.name}
+        </Text>
+      </View>
       <BudgetList showHeader={false} quickSwitchMode={true} />
     </Modal>
   );
