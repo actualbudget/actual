@@ -65,6 +65,16 @@ Okay, so you have an idea for something that you think would be great in Actual 
 
 If the feature is relatively small, feel free to start the discussion by opening a PR. However, if you want to work on a larger change/feature, please open an issue or comment on an existing issue for the feature first. This lets the maintainers make sure your approach fits well both with the technical and ideological architecture of the project.
 
+### Submitting a Pull Request
+
+If you have started implementing a new feature or bugfix please open a PR so others know that you are working on that task.  This helps to not have duplicate work.
+
+When you open a PR please remember to do the following:
+- If applicable, please link the issue or feature request ticket.  The easiest way to do this is by adding the text `Fixes #<ticket_number>` in the PR description.
+- Add a release note.  These notes get used when generating the full release note at the next release.
+- Once your PR is ready for maintainers to review, remove the `[WIP]` label from the PR title.
+- Sometimes it can take some time for the maintainers to review your PR for approval.  Please keep your PR up to date with the current master branch by merging or rebasing until your PR gets merged.
+
 ### Writing Good Release Notes
 
 Create a Markdown file in the upcoming-release-notes directory of the repository you’re contributing to named after the PR number. The file should contain front matter with a category key (defining which header to put the entry under) and an authors key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is “Maintenance”). Copy-paste the template below to get started!
