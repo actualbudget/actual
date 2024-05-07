@@ -610,6 +610,7 @@ export function Modals() {
               modalProps={modalProps}
               onAddCategoryGroup={options.onAddCategoryGroup}
               onToggleHiddenCategories={options.onToggleHiddenCategories}
+              onSwitchBudgetFile={options.onSwitchBudgetFile}
               onSwitchBudgetType={options.onSwitchBudgetType}
             />
           );

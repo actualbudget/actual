@@ -12,8 +12,9 @@ type BudgetListModalProps = {
 
 export function BudgetListModal({ modalProps }: BudgetListModalProps) {
   const [id] = useLocalPref('id');
-  const allFiles = useSelector(state => state.budgets.allFiles);
-  const currentFile = allFiles.find(f => f.id === id);
+  const currentFile = useSelector(state =>
+    state.budgets.allFiles?.find(f => f.id === id),
+  );
   return (
     <Modal
       title={`From: ${currentFile?.name}`}
@@ -23,7 +24,7 @@ export function BudgetListModal({ modalProps }: BudgetListModalProps) {
       padding={0}
       style={{
         flex: 1,
-        height: '50vh',
+        maxHeight: '50vh',
         padding: '0 10px',
         paddingBottom: 10,
         borderRadius: '6px',

@@ -16,8 +16,8 @@ type BudgetPageMenuModalProps = ComponentPropsWithoutRef<
 export function BudgetPageMenuModal({
   modalProps,
   onAddCategoryGroup,
-  onSwitchBudgetFile,
   onToggleHiddenCategories,
+  onSwitchBudgetFile,
   onSwitchBudgetType,
 }: BudgetPageMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
@@ -32,8 +32,8 @@ export function BudgetPageMenuModal({
       <BudgetPageMenu
         getItemStyle={() => defaultMenuItemStyle}
         onAddCategoryGroup={onAddCategoryGroup}
-        onSwitchBudgetFile={onSwitchBudgetFile}
         onToggleHiddenCategories={onToggleHiddenCategories}
+        onSwitchBudgetFile={onSwitchBudgetFile}
         onSwitchBudgetType={onSwitchBudgetType}
       />
     </Modal>
@@ -45,15 +45,15 @@ type BudgetPageMenuProps = Omit<
   'onMenuSelect' | 'items'
 > & {
   onAddCategoryGroup: () => void;
-  onSwitchBudgetFile: () => void;
   onToggleHiddenCategories: () => void;
+  onSwitchBudgetFile: () => void;
   onSwitchBudgetType: () => void;
 };
 
 function BudgetPageMenu({
   onAddCategoryGroup,
-  onSwitchBudgetFile,
   onToggleHiddenCategories,
+  onSwitchBudgetFile,
   onSwitchBudgetType,
   ...props
 }: BudgetPageMenuProps) {
@@ -68,11 +68,11 @@ function BudgetPageMenu({
       // case 'edit-mode':
       //   onEditMode?.(true);
       //   break;
-      case 'switch-budget-file':
-        onSwitchBudgetFile?.();
-        break;
       case 'toggle-hidden-categories':
         onToggleHiddenCategories?.();
+        break;
+      case 'switch-budget-file':
+        onSwitchBudgetFile?.();
         break;
       case 'switch-budget-type':
         onSwitchBudgetType?.();
@@ -92,12 +92,12 @@ function BudgetPageMenu({
           text: 'Add category group',
         },
         {
-          name: 'switch-budget-file',
-          text: 'Switch budget file',
-        },
-        {
           name: 'toggle-hidden-categories',
           text: `${!showHiddenCategories ? 'Show' : 'Hide'} hidden categories`,
+        },
+        {
+          name: 'switch-budget-file',
+          text: 'Switch budget file',
         },
         ...(isReportBudgetEnabled
           ? [
