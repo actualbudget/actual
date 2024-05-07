@@ -11,19 +11,19 @@ import { Input } from '../../common/Input';
 import { View } from '../../common/View';
 import { addToBeBudgetedGroup } from '../util';
 
-type TransferTooltipProps = {
+type TransferMenuProps = {
   initialAmount?: number;
   showToBeBudgeted?: boolean;
   onSubmit: (amount: number, categoryId: string) => void;
   onClose: () => void;
 };
 
-export function TransferTooltip({
+export function TransferMenu({
   initialAmount = 0,
   showToBeBudgeted,
   onSubmit,
   onClose,
-}: TransferTooltipProps) {
+}: TransferMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
   if (showToBeBudgeted) {

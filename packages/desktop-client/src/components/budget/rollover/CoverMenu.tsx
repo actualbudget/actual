@@ -7,12 +7,12 @@ import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
 import { addToBeBudgetedGroup } from '../util';
 
-type CoverTooltipProps = {
+type CoverMenuProps = {
   onSubmit: (categoryId: string) => void;
   onClose: () => void;
 };
 
-export function CoverTooltip({ onSubmit, onClose }: CoverTooltipProps) {
+export function CoverMenu({ onSubmit, onClose }: CoverMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const categoryGroups = addToBeBudgetedGroup(
     originalCategoryGroups.filter(g => !g.is_income),

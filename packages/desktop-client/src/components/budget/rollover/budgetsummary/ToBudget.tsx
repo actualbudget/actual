@@ -6,8 +6,8 @@ import { type CSSProperties } from '../../../../style';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
 import { useSheetValue } from '../../../spreadsheet/useSheetValue';
-import { HoldTooltip } from '../HoldTooltip';
-import { TransferTooltip } from '../TransferTooltip';
+import { HoldMenu } from '../HoldMenu';
+import { TransferMenu } from '../TransferMenu';
 
 import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
@@ -63,7 +63,7 @@ export function ToBudget({
           />
         )}
         {menuOpen === 'buffer' && (
-          <HoldTooltip
+          <HoldMenu
             onClose={() => setMenuOpen(null)}
             onSubmit={amount => {
               onBudgetAction(month, 'hold', { amount });
@@ -71,7 +71,7 @@ export function ToBudget({
           />
         )}
         {menuOpen === 'transfer' && (
-          <TransferTooltip
+          <TransferMenu
             initialAmount={availableValue}
             onClose={() => setMenuOpen(null)}
             onSubmit={(amount, category) => {

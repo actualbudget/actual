@@ -5,8 +5,8 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 import { BalanceMenu } from './BalanceMenu';
-import { CoverTooltip } from './CoverTooltip';
-import { TransferTooltip } from './TransferTooltip';
+import { CoverMenu } from './CoverMenu';
+import { TransferMenu } from './TransferMenu';
 
 type BalanceTooltipProps = {
   categoryId: string;
@@ -42,7 +42,7 @@ export function BalanceTooltip({
       )}
 
       {menu === 'transfer' && (
-        <TransferTooltip
+        <TransferMenu
           initialAmount={catBalance}
           showToBeBudgeted={true}
           onClose={onClose}
@@ -57,7 +57,7 @@ export function BalanceTooltip({
       )}
 
       {menu === 'cover' && (
-        <CoverTooltip
+        <CoverMenu
           onClose={onClose}
           onSubmit={fromCategoryId => {
             onBudgetAction(month, 'cover', {

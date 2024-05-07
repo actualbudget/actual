@@ -15,11 +15,11 @@ import { Input } from '../../common/Input';
 import { View } from '../../common/View';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 
-type HoldTooltipProps = {
+type HoldMenuProps = {
   onSubmit: (amount: number) => void;
   onClose: () => void;
 };
-export function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
+export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
   const spreadsheet = useSpreadsheet();
   const sheetName = useContext(NamespaceContext);
 
@@ -41,7 +41,7 @@ export function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
   }
 
   if (amount === null) {
-    // See `TransferTooltip` for more info about this
+    // See `TransferMenu` for more info about this
     return null;
   }
 
