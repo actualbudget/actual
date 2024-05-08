@@ -1,16 +1,22 @@
-// @ts-strict-ignore
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
+import {
+  type GroupedEntity,
+  type IntervalEntity,
+} from 'loot-core/types/models/reports';
 
-import { type QueryDataEntity } from '../ReportOptions';
+import {
+  type UncategorizedEntity,
+  type QueryDataEntity,
+} from '../ReportOptions';
 
 import { filterHiddenItems } from './filterHiddenItems';
 
 type recalculateProps = {
-  item;
+  item: UncategorizedEntity;
   intervals: Array<string>;
   assets: QueryDataEntity[];
   debts: QueryDataEntity[];
-  groupByLabel: string;
+  groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account';
   showOffBudget?: boolean;
   showHiddenCategories?: boolean;
   showUncategorized?: boolean;
@@ -25,59 +31,62 @@ export function recalculate({
   showOffBudget,
   showHiddenCategories,
   showUncategorized,
-}: recalculateProps) {
+}: recalculateProps): GroupedEntity {
   let totalAssets = 0;
   let totalDebts = 0;
-  const intervalData = intervals.reduce((arr, intervalItem) => {
-    const last = arr.length === 0 ? null : arr[arr.length - 1];
+  const intervalData = intervals.reduce(
+    (arr: IntervalEntity[], intervalItem) => {
+      const last = arr.length === 0 ? null : arr[arr.length - 1];
 
-    const intervalAssets = filterHiddenItems(
-      item,
-      assets,
-      showOffBudget,
-      showHiddenCategories,
-      showUncategorized,
-    )
-      .filter(
-        asset =>
-          asset.date === intervalItem &&
-          asset[groupByLabel] === (item.id ?? null),
+      const intervalAssets = filterHiddenItems(
+        item,
+        assets,
+        showOffBudget,
+        showHiddenCategories,
+        showUncategorized,
       )
-      .reduce((a, v) => (a = a + v.amount), 0);
-    totalAssets += intervalAssets;
+        .filter(
+          asset =>
+            asset.date === intervalItem &&
+            asset[groupByLabel] === (item.id ?? null),
+        )
+        .reduce((a, v) => (a = a + v.amount), 0);
+      totalAssets += intervalAssets;
 
-    const intervalDebts = filterHiddenItems(
-      item,
-      debts,
-      showOffBudget,
-      showHiddenCategories,
-      showUncategorized,
-    )
-      .filter(
-        debt =>
-          debt.date === intervalItem &&
-          debt[groupByLabel] === (item.id ?? null),
+      const intervalDebts = filterHiddenItems(
+        item,
+        debts,
+        showOffBudget,
+        showHiddenCategories,
+        showUncategorized,
       )
-      .reduce((a, v) => (a = a + v.amount), 0);
-    totalDebts += intervalDebts;
+        .filter(
+          debt =>
+            debt.date === intervalItem &&
+            debt[groupByLabel] === (item.id ?? null),
+        )
+        .reduce((a, v) => (a = a + v.amount), 0);
+      totalDebts += intervalDebts;
 
-    const change = last
-      ? intervalAssets + intervalDebts - amountToInteger(last.totalTotals)
-      : 0;
+      const change = last
+        ? intervalAssets + intervalDebts - amountToInteger(last.totalTotals)
+        : 0;
 
-    arr.push({
-      totalAssets: integerToAmount(intervalAssets),
-      totalDebts: integerToAmount(intervalDebts),
-      totalTotals: integerToAmount(intervalAssets + intervalDebts),
-      change,
-      dateLookup: intervalItem,
-    });
+      arr.push({
+        totalAssets: integerToAmount(intervalAssets),
+        totalDebts: integerToAmount(intervalDebts),
+        totalTotals: integerToAmount(intervalAssets + intervalDebts),
+        change,
+        dateLookup: intervalItem,
+      });
 
-    return arr;
-  }, []);
+      return arr;
+    },
+    [],
+  );
 
   return {
-    id: item.id,
+    id: item.id || '',
     name: item.name,
     totalAssets: integerToAmount(totalAssets),
     totalDebts: integerToAmount(totalDebts),
