@@ -1,18 +1,79 @@
-// @ts-strict-ignore
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import {
+  type GroupedEntity,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row } from '../../../table';
 
+type RenderRowProps = {
+  index: number;
+  parent_index?: number;
+  compact: boolean;
+  renderItem: (arg: {
+    item: GroupedEntity;
+    mode: string;
+    intervalsCount: number;
+    compact: boolean;
+    style?: CSSProperties;
+    compactStyle?: CSSProperties;
+  }) => ReactNode;
+  intervalsCount: number;
+  mode: string;
+  metadata: GroupedEntity[];
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
+};
+
+function RenderRow({
+  index,
+  parent_index,
+  compact,
+  renderItem,
+  intervalsCount,
+  mode,
+  metadata,
+  style,
+  compactStyle,
+}: RenderRowProps) {
+  const child = metadata[index];
+  const parent =
+    parent_index !== undefined ? metadata[parent_index] : ({} as GroupedEntity);
+
+  const item =
+    parent_index === undefined
+      ? child
+      : (parent.categories && parent.categories[index]) ||
+        ({} as GroupedEntity);
+
+  const renderRow = renderItem({
+    item,
+    mode,
+    intervalsCount,
+    compact,
+    style,
+    compactStyle,
+  });
+
+  return <View>{renderRow}</View>;
+}
+
 type ReportTableListProps = {
-  data: GroupedEntity;
-  mode?: string;
-  intervalsCount?: number;
+  data: DataEntity;
+  mode: string;
+  intervalsCount: number;
   groupBy: string;
-  renderItem;
+  renderItem: (arg: {
+    item: GroupedEntity;
+    mode: string;
+    intervalsCount: number;
+    compact: boolean;
+    style?: CSSProperties;
+    compactStyle?: CSSProperties;
+  }) => ReactNode;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
@@ -28,42 +89,23 @@ export function ReportTableList({
   style,
   compactStyle,
 }: ReportTableListProps) {
-  const groupByData =
+  const metadata: GroupedEntity[] | undefined =
     groupBy === 'Category'
-      ? 'groupedData'
+      ? data.groupedData || []
       : groupBy === 'Interval'
-        ? 'intervalData'
-        : 'data';
-  const metadata = data[groupByData];
-
-  type RenderRowProps = {
-    index: number;
-    parent_index?: number;
-    compact: boolean;
-    style?: CSSProperties;
-    compactStyle?: CSSProperties;
-  };
-  function RenderRow({
-    index,
-    parent_index,
-    compact,
-    style,
-    compactStyle,
-  }: RenderRowProps) {
-    const item =
-      parent_index === undefined
-        ? metadata[index]
-        : metadata[parent_index].categories[index];
-
-    return renderItem({
-      item,
-      mode,
-      intervalsCount,
-      compact,
-      style,
-      compactStyle,
-    });
-  }
+        ? data.intervalData.map(interval => {
+            return {
+              id: '',
+              name: '',
+              date: interval.date,
+              totalAssets: interval.totalAssets,
+              totalDebts: interval.totalDebts,
+              totalTotals: interval.totalTotals,
+              intervalData: [],
+              categories: [],
+            };
+          })
+        : data.data;
 
   return (
     <View>
@@ -71,10 +113,14 @@ export function ReportTableList({
         <View>
           {metadata.map((item, index) => {
             return (
-              <View key={item.id}>
+              <View key={index}>
                 <RenderRow
                   index={index}
                   compact={compact}
+                  renderItem={renderItem}
+                  intervalsCount={intervalsCount}
+                  mode={mode}
+                  metadata={metadata}
                   style={{
                     ...(item.categories && {
                       color: theme.tableRowHeaderText,
@@ -88,18 +134,24 @@ export function ReportTableList({
                 {item.categories && (
                   <>
                     <View>
-                      {item.categories.map((category, i) => {
-                        return (
-                          <RenderRow
-                            key={category.id}
-                            index={i}
-                            compact={compact}
-                            parent_index={index}
-                            style={style}
-                            compactStyle={compactStyle}
-                          />
-                        );
-                      })}
+                      {item.categories.map(
+                        (category: GroupedEntity, i: number) => {
+                          return (
+                            <RenderRow
+                              key={category.id}
+                              index={i}
+                              compact={compact}
+                              renderItem={renderItem}
+                              intervalsCount={intervalsCount}
+                              mode={mode}
+                              metadata={metadata}
+                              parent_index={index}
+                              style={style}
+                              compactStyle={compactStyle}
+                            />
+                          );
+                        },
+                      )}
                     </View>
                     <Row height={20} />
                   </>

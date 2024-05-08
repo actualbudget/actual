@@ -57,10 +57,10 @@ export interface SpendingEntity {
   totalTotals: number;
 }
 
-export interface GroupedEntity {
-  data?: DataEntity[];
-  intervalData: DataEntity[];
-  groupedData?: DataEntity[] | null;
+export interface DataEntity {
+  data?: GroupedEntity[];
+  intervalData: IntervalEntity[];
+  groupedData?: GroupedEntity[] | null;
   legend?: LegendEntity[];
   startDate?: string;
   endDate?: string;
@@ -75,33 +75,25 @@ type LegendEntity = {
   color: string;
 };
 
-export type ItemEntity = {
-  id: string;
-  name: string;
-  intervalData: IntervalData[];
+export type IntervalEntity = {
+  date?: string;
+  dateStart?: string;
+  change?: number;
+  dateLookup?: string;
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
 };
 
-export type IntervalData = {
-  date: string;
-  dateLookup: string;
-  totalAssets: number;
-  totalDebts: number;
-  totalTotals: number;
-};
-
-export interface DataEntity {
+export interface GroupedEntity {
   id: string;
   name: string;
   date?: string;
-  dateStart?: string;
-  intervalData: IntervalData[];
-  categories?: ItemEntity[];
+  intervalData: IntervalEntity[];
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
+  categories?: GroupedEntity[];
 }
 
 export type Interval = {
