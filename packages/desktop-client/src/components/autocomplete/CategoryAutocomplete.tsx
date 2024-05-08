@@ -166,6 +166,9 @@ export function CategoryAutocomplete({
   ...props
 }: CategoryAutocompleteProps) {
   const { grouped: defaultCategoryGroups = [] } = useCategories();
+  const [autocompleteCategoryMatchGroup = false] = useLocalPref(
+    'autocompleteCategoryMatchGroup',
+  );
   const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
     () =>
       (categoryGroups || defaultCategoryGroups).reduce(
@@ -201,7 +204,10 @@ export function CategoryAutocomplete({
         return suggestions.filter(suggestion => {
           return (
             suggestion.id === 'split' ||
-            defaultFilterSuggestion(suggestion, value)
+            defaultFilterSuggestion(suggestion, value) ||
+            (autocompleteCategoryMatchGroup &&
+              suggestion.group &&
+              defaultFilterSuggestion(suggestion.group, value))
           );
         });
       }}

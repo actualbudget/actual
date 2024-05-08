@@ -55,6 +55,7 @@ export type LocalPrefs = Partial<
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
     'mobile.showSpentColumn': boolean;
+    autocompleteCategoryMatchGroup: boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
