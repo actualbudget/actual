@@ -226,7 +226,10 @@ export type QueryDataEntity = {
   amount: number;
 };
 
-export type UncategorizedEntity = Pick<CategoryEntity, 'name' | 'hidden'> & {
+export type UncategorizedEntity = Pick<
+  CategoryEntity,
+  'id' | 'name' | 'hidden'
+> & {
   /*
     When looking at uncategorized and hidden transactions we
     need a way to group them. To do this we give them a unique
@@ -241,6 +244,7 @@ export type UncategorizedEntity = Pick<CategoryEntity, 'name' | 'hidden'> & {
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
+  id: '',
   name: 'Uncategorized',
   uncategorized_id: '1',
   hidden: false,
@@ -249,6 +253,7 @@ const uncategorizedCategory: UncategorizedEntity = {
   has_category: false,
 };
 const transferCategory: UncategorizedEntity = {
+  id: '',
   name: 'Transfers',
   uncategorized_id: '2',
   hidden: false,
@@ -257,6 +262,7 @@ const transferCategory: UncategorizedEntity = {
   has_category: false,
 };
 const offBudgetCategory: UncategorizedEntity = {
+  id: '',
   name: 'Off Budget',
   uncategorized_id: '3',
   hidden: false,
@@ -283,7 +289,7 @@ export const categoryLists = (categories: {
   list: CategoryEntity[];
   grouped: CategoryGroupEntity[];
 }) => {
-  const categoryList = [
+  const categoryList: UncategorizedEntity[] = [
     ...categories.list.sort((a, b) => {
       //The point of this sorting is to make the graphs match the "budget" page
       const catGroupA = categories.grouped.find(f => f.id === a.cat_group);
@@ -304,34 +310,46 @@ export const categoryLists = (categories: {
     transferCategory,
   ];
 
-  const categoryGroup = [...categories.grouped, uncategorizedGroup];
+  const categoryGroup: UncategorizedGroupEntity[] = [
+    ...categories.grouped,
+    uncategorizedGroup,
+  ];
   return [categoryList, categoryGroup.filter(group => group !== null)] as const;
 };
 
 export const groupBySelections = (
   groupBy: string,
-  categoryList: CategoryEntity[],
+  categoryList: UncategorizedEntity[],
   categoryGroup: CategoryGroupEntity[],
   payees: PayeeEntity[],
   accounts: AccountEntity[],
-) => {
-  let groupByList;
-  let groupByLabel;
+): [
+  UncategorizedEntity[],
+  'category' | 'categoryGroup' | 'payee' | 'account',
+] => {
+  let groupByList: UncategorizedEntity[];
+  let groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account';
   switch (groupBy) {
     case 'Category':
       groupByList = categoryList;
       groupByLabel = 'category';
       break;
     case 'Group':
-      groupByList = categoryGroup;
+      groupByList = categoryGroup.map(group => {
+        return { id: group.id, name: group.name, hidden: group.hidden };
+      });
       groupByLabel = 'categoryGroup';
       break;
     case 'Payee':
-      groupByList = payees;
+      groupByList = payees.map(payee => {
+        return { id: payee.id, name: payee.name, hidden: false };
+      });
       groupByLabel = 'payee';
       break;
     case 'Account':
-      groupByList = accounts;
+      groupByList = accounts.map(account => {
+        return { id: account.id, name: account.name, hidden: false };
+      });
       groupByLabel = 'account';
       break;
     case 'Interval':
