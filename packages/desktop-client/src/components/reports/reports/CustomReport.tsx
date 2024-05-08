@@ -17,16 +17,17 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
-import { SvgArrowLeft } from '../../../icons/v1/ArrowLeft';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
-import { Link } from '../../common/Link';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
+import { MobileBackButton } from '../../mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageBackButton, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import {
@@ -344,6 +345,7 @@ export function CustomReport() {
     conditionsOp,
   };
 
+  const navigate = useNavigate();
   const [, setScrollWidth] = useState(0);
 
   if (!allIntervals || !data) {
@@ -529,51 +531,40 @@ export function CustomReport() {
     }
   };
 
+  const title = (
+    <>
+      <Text>Custom Report:</Text>
+      <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
+        {report.name || 'Unsaved report'}
+      </Text>
+    </>
+  );
+  const onBackClick = () => {
+    navigate('/reports');
+  };
+
   return (
-    <View
-      style={{
-        ...styles.page,
-        minWidth: isNarrowWidth ? undefined : 650,
-        overflow: 'hidden',
-      }}
+    <Page
+      header={
+        isNarrowWidth ? (
+          <MobilePageHeader
+            title={title}
+            leftContent={<MobileBackButton onClick={onBackClick} />}
+          />
+        ) : (
+          <PageHeader
+            title={title}
+            leftContent={
+              <PageBackButton
+                style={{ marginLeft: 10 }}
+                onClick={onBackClick}
+              />
+            }
+          />
+        )
+      }
+      padding={0}
     >
-      <View
-        style={{
-          flexDirection: isNarrowWidth ? 'column' : 'row',
-          flexShrink: 0,
-        }}
-      >
-        <View
-          style={{
-            padding: 10,
-            paddingTop: 0,
-            flexShrink: 0,
-          }}
-        >
-          <Link
-            variant="button"
-            type="bare"
-            to="/reports"
-            style={{ marginBottom: '15', alignSelf: 'flex-start' }}
-          >
-            <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} />{' '}
-            Back
-          </Link>
-          <View style={styles.veryLargeText}>Custom Report:</View>
-        </View>
-        <Text
-          style={{
-            ...styles.veryLargeText,
-            marginTop: isNarrowWidth ? 0 : 40,
-            padding: isNarrowWidth ? 10 : 0,
-            paddingTop: 0,
-            flexShrink: 0,
-            color: theme.pageTextPositive,
-          }}
-        >
-          {report.name || 'Unsaved report'}
-        </Text>
-      </View>
       <View
         style={{
           display: 'flex',
@@ -770,6 +761,6 @@ export function CustomReport() {
           </View>
         </View>
       </View>
-    </View>
+    </Page>
   );
 }

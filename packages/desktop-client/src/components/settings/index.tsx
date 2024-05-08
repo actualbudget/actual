@@ -139,9 +139,8 @@ export function Settings() {
   useSetThemeColor(theme.mobileViewTheme);
   return (
     <Page
-      title="Settings"
+      header="Settings"
       style={{
-        backgroundColor: isNarrowWidth ? theme.mobilePageBackground : undefined,
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >

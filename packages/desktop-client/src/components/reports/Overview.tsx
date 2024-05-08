@@ -6,11 +6,11 @@ import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useResponsive } from '../../ResponsiveProvider';
-import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { Page } from '../Page';
 
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
@@ -29,14 +29,7 @@ export function Overview() {
 
   const accounts = useAccounts();
   return (
-    <View
-      style={{
-        ...styles.page,
-        padding: 15,
-        paddingTop: 0,
-        minWidth: isNarrowWidth ? undefined : 700,
-      }}
-    >
+    <Page header="Reports">
       {customReportsFeatureFlag && !isNarrowWidth && (
         <View
           style={{
@@ -66,6 +59,6 @@ export function Overview() {
       {customReportsFeatureFlag && (
         <CustomReportListCards reports={customReports} />
       )}
-    </View>
+    </Page>
   );
 }

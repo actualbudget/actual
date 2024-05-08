@@ -56,7 +56,7 @@ import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { Page } from '../../Page';
+import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
@@ -684,22 +684,22 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   return (
     <Page
-      title={
-        transaction.payee == null
-          ? adding
-            ? 'New Transaction'
-            : 'Transaction'
-          : title
+      header={
+        <MobilePageHeader
+          title={
+            transaction.payee == null
+              ? adding
+                ? 'New Transaction'
+                : 'Transaction'
+              : title
+          }
+          leftContent={<MobileBackButton />}
+        />
       }
       titleStyle={{
         fontSize: 16,
         fontWeight: 500,
       }}
-      style={{
-        flex: 1,
-        backgroundColor: theme.mobilePageBackground,
-      }}
-      headerLeftContent={<MobileBackButton />}
       footer={
         <Footer
           transactions={transactions}

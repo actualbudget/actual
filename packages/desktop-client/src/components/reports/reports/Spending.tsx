@@ -6,16 +6,18 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
-import { SvgArrowLeft } from '../../../icons/v1/ArrowLeft';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
-import { Link } from '../../common/Link';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
+import { MobileBackButton } from '../../mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageBackButton, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -49,6 +51,8 @@ export function Spending() {
   }, [categories, filters, conditionsOp]);
 
   const data = useReport('default', getGraphData);
+  const navigate = useNavigate();
+  const { isNarrowWidth } = useResponsive();
 
   if (!data) {
     return null;
@@ -59,7 +63,29 @@ export function Spending() {
     ].daily !== 0;
 
   return (
-    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
+    <Page
+      header={
+        isNarrowWidth ? (
+          <MobilePageHeader
+            title="Monthly Spending"
+            leftContent={
+              <MobileBackButton onClick={() => navigate('/reports')} />
+            }
+          />
+        ) : (
+          <PageHeader
+            title="Monthly Spending"
+            leftContent={
+              <PageBackButton
+                style={{ marginLeft: 10 }}
+                onClick={() => navigate('/reports')}
+              />
+            }
+          />
+        )
+      }
+      padding={0}
+    >
       <View
         style={{
           flexDirection: 'row',
@@ -73,19 +99,6 @@ export function Spending() {
             flexShrink: 0,
           }}
         >
-          <Link
-            variant="button"
-            type="bare"
-            to="/reports"
-            style={{ marginBottom: '15', alignSelf: 'flex-start' }}
-          >
-            <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} />{' '}
-            Back
-          </Link>
-          <Text style={{ ...styles.veryLargeText, marginBottom: 10 }}>
-            Monthly Spending
-          </Text>
-
           {filters && (
             <View style={{ flexDirection: 'row' }}>
               <FilterButton
@@ -281,6 +294,6 @@ export function Spending() {
           </View>
         </View>
       </View>
-    </View>
+    </Page>
   );
 }
