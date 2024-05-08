@@ -7,7 +7,8 @@ import React, {
 } from 'react';
 import { type RefProp } from 'react-spring';
 
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
@@ -22,12 +23,15 @@ type ReportTableProps = {
   handleScroll: UIEventHandler<HTMLDivElement>;
   groupBy: string;
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
-  data: DataEntity[];
+  data: GroupedEntity;
+  filters?: RuleConditionEntity[];
   mode: string;
   intervalsCount: number;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export function ReportTable({
@@ -37,11 +41,14 @@ export function ReportTable({
   groupBy,
   balanceTypeOp,
   data,
+  filters,
   mode,
   intervalsCount,
   compact,
   style,
   compactStyle,
+  showHiddenCategories,
+  showOffBudget,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -52,25 +59,22 @@ export function ReportTable({
   });
 
   const renderItem = useCallback(
-    ({
-      item,
-      groupByItem,
-      mode,
-      intervalsCount,
-      compact,
-      style,
-      compactStyle,
-    }) => {
+    ({ item, mode, intervalsCount, compact, style, compactStyle }) => {
       return (
         <ReportTableRow
           item={item}
           balanceTypeOp={balanceTypeOp}
-          groupByItem={groupByItem}
+          groupBy={groupBy}
           mode={mode}
+          filters={filters}
+          startDate={data.startDate}
+          endDate={data.endDate}
           intervalsCount={intervalsCount}
           compact={compact}
           style={style}
           compactStyle={compactStyle}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
       );
     },

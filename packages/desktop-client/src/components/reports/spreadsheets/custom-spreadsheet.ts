@@ -143,13 +143,13 @@ export function createCustomSpreadsheet({
       });
     }
 
-    const rangeProps =
+    const intervals =
       interval === 'Weekly'
-        ? [startDate, endDate, firstDayOfWeekIdx]
-        : [startDate, endDate];
-    const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      ...rangeProps,
-    );
+        ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
+        : monthUtils[ReportOptions.intervalRange.get(interval)](
+            startDate,
+            endDate,
+          );
 
     let totalAssets = 0;
     let totalDebts = 0;

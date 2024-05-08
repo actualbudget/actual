@@ -1,7 +1,11 @@
 // @ts-strict-ignore
 import { useCallback, useMemo, useState } from 'react';
 
-export function useFilters<T>(initialFilters: T[] = []) {
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+
+export function useFilters<T extends RuleConditionEntity>(
+  initialFilters: T[] = [],
+) {
   const [filters, setFilters] = useState<T[]>(initialFilters);
   const [conditionsOp, setConditionsOp] = useState<'and' | 'or'>('and');
   const [saved, setSaved] = useState<T[]>(null);

@@ -92,13 +92,13 @@ export function createGroupedSpreadsheet({
       });
     }
 
-    const rangeProps =
+    const intervals =
       interval === 'Weekly'
-        ? [startDate, endDate, firstDayOfWeekIdx]
-        : [startDate, endDate];
-    const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      ...rangeProps,
-    );
+        ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
+        : monthUtils[ReportOptions.intervalRange.get(interval)](
+            startDate,
+            endDate,
+          );
 
     const groupedData: DataEntity[] = categoryGroup.map(
       group => {

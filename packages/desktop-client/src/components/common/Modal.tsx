@@ -12,15 +12,20 @@ import React, {
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import ReactModal from 'react-modal';
 
+import { useHover } from 'usehooks-ts';
+
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
+import { SvgClose } from '../../icons/v1';
 import { type CSSProperties, styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
 import { Button } from './Button';
 import { Input } from './Input';
 import { Text } from './Text';
+import { Tooltip } from './Tooltip';
 import { View } from './View';
 
 export type ModalProps = {
@@ -372,14 +377,42 @@ export function ModalTitle({
   shrinkOnOverflow = false,
 }: ModalTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const style = getStyle?.(isEditing);
+  const tooltipTriggerRef = useRef();
+
+  // Dynamic font size to avoid ellipsis.
+  const textRef = useRef<HTMLSpanElement>();
+  const [textOverflowed, setTextOverflowed] = useState(false);
+  const [textFontSize, setTextFontSize] = useState(25);
+
+  useEffect(() => {
+    const containerWidth = textRef.current.offsetWidth;
+    const textWidth = textRef.current.scrollWidth;
+
+    if (textWidth > containerWidth) {
+      setTextOverflowed(true);
+    } else {
+      setTextOverflowed(false);
+    }
+  }, [title]);
+
+  useEffect(() => {
+    if (textOverflowed && shrinkOnOverflow) {
+      const containerWidth = textRef.current.offsetWidth;
+      const textWidth = textRef.current.scrollWidth;
+      const newFontSize = Math.floor(
+        (containerWidth / textWidth) * textFontSize,
+      );
+      setTextFontSize(newFontSize);
+    }
+  }, [title, textFontSize, shrinkOnOverflow, textOverflowed]);
+
+  const mergedTextRef = useMergedRefs(textRef, tooltipTriggerRef);
+  const isHovered = useHover(tooltipTriggerRef);
 
   const _onEdit = () => {
-    if (!isEditable) {
-      return;
+    if (isEditable) {
+      setIsEditing(true);
     }
-
-    setIsEditing(true);
   };
 
   const _onTitleUpdate = newTitle => {
@@ -398,22 +431,7 @@ export function ModalTitle({
     }
   }, [isEditing]);
 
-  // Dynamic font size to avoid ellipsis.
-  const textRef = useRef<HTMLSpanElement>();
-  const [textFontSize, setTextFontSize] = useState(25);
-  useEffect(() => {
-    if (shrinkOnOverflow) {
-      const containerWidth = textRef.current.offsetWidth;
-      const textWidth = textRef.current.scrollWidth;
-
-      if (textWidth > containerWidth) {
-        const newFontSize = Math.floor(
-          (containerWidth / textWidth) * textFontSize,
-        );
-        setTextFontSize(newFontSize);
-      }
-    }
-  }, [textFontSize, shrinkOnOverflow]);
+  const style = getStyle?.(isEditing);
 
   return isEditing ? (
     <Input
@@ -435,22 +453,42 @@ export function ModalTitle({
       }}
     />
   ) : (
-    <Text
-      innerRef={textRef}
-      style={{
-        fontSize: textFontSize,
-        fontWeight: 700,
-        textAlign: 'center',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        ...(isEditable && styles.underlinedText),
-        ...style,
-      }}
-      onClick={_onEdit}
+    <Tooltip
+      content={
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            maxWidth: '90vw',
+          }}
+        >
+          <SvgClose style={{ width: 10, height: 10, flexShrink: 0 }} />
+          <Text style={styles.mediumText}>{title}</Text>
+        </View>
+      }
+      placement="top"
+      triggerRef={tooltipTriggerRef}
+      isOpen={textOverflowed && isHovered}
+      offset={10}
     >
-      {title}
-    </Text>
+      <Text
+        innerRef={mergedTextRef}
+        style={{
+          fontSize: textFontSize,
+          fontWeight: 700,
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          ...(isEditable && styles.underlinedText),
+          ...style,
+        }}
+        onClick={_onEdit}
+      >
+        {title}
+      </Text>
+    </Tooltip>
   );
 }
 

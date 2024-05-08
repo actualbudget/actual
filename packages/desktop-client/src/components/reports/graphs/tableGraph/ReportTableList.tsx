@@ -1,14 +1,14 @@
 // @ts-strict-ignore
 import React from 'react';
 
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row } from '../../../table';
 
 type ReportTableListProps = {
-  data: DataEntity[];
+  data: GroupedEntity;
   mode?: string;
   intervalsCount?: number;
   groupBy: string;
@@ -28,7 +28,13 @@ export function ReportTableList({
   style,
   compactStyle,
 }: ReportTableListProps) {
-  const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
+  const groupByData =
+    groupBy === 'Category'
+      ? 'groupedData'
+      : groupBy === 'Interval'
+        ? 'intervalData'
+        : 'data';
+  const metadata = data[groupByData];
 
   type RenderRowProps = {
     index: number;
@@ -46,12 +52,11 @@ export function ReportTableList({
   }: RenderRowProps) {
     const item =
       parent_index === undefined
-        ? data[index]
-        : data[parent_index].categories[index];
+        ? metadata[index]
+        : metadata[parent_index].categories[index];
 
     return renderItem({
       item,
-      groupByItem,
       mode,
       intervalsCount,
       compact,
@@ -62,9 +67,9 @@ export function ReportTableList({
 
   return (
     <View>
-      {data ? (
+      {metadata ? (
         <View>
-          {data.map((item, index) => {
+          {metadata.map((item, index) => {
             return (
               <View key={item.id}>
                 <RenderRow

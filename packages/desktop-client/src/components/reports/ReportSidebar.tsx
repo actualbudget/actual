@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
+import { type CategoryEntity } from 'loot-core/types/models/category';
+import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
+import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import { type LocalPrefs } from 'loot-core/types/prefs';
 
-import { theme } from '../../style';
+import { theme } from '../../style/theme';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Select } from '../common/Select';
@@ -14,9 +18,41 @@ import { CategorySelector } from './CategorySelector';
 import { defaultsList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
-import { ReportOptions } from './ReportOptions';
+import { type dateRangeProps, ReportOptions } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
+
+type ReportSidebarProps = {
+  customReportItems: CustomReportEntity;
+  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  dateRangeLine: number;
+  allIntervals: { name: string; pretty: string }[];
+  setDateRange: (value: string) => void;
+  setGraphType: (value: string) => void;
+  setGroupBy: (value: string) => void;
+  setInterval: (value: string) => void;
+  setBalanceType: (value: string) => void;
+  setMode: (value: string) => void;
+  setIsDateStatic: (value: boolean) => void;
+  setShowEmpty: (value: boolean) => void;
+  setShowOffBudget: (value: boolean) => void;
+  setShowHiddenCategories: (value: boolean) => void;
+  setShowUncategorized: (value: boolean) => void;
+  setSelectedCategories: (value: CategoryEntity[]) => void;
+  onChangeDates: (dateStart: string, dateEnd: string) => void;
+  onReportChange: ({
+    savedReport,
+    type,
+  }: {
+    savedReport?: CustomReportEntity;
+    type: string;
+  }) => void;
+  disabledItems: (type: string) => string[];
+  defaultItems: (item: string) => void;
+  defaultModeItems: (graph: string, item: string) => void;
+  earliestTransaction: string;
+  firstDayOfWeekIdx: LocalPrefs['firstDayOfWeekIdx'];
+};
 
 export function ReportSidebar({
   customReportItems,
@@ -42,9 +78,9 @@ export function ReportSidebar({
   defaultModeItems,
   earliestTransaction,
   firstDayOfWeekIdx,
-}) {
+}: ReportSidebarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const onSelectRange = cond => {
+  const onSelectRange = (cond: string) => {
     setSessionReport('dateRange', cond);
     onReportChange({ type: 'modify' });
     setDateRange(cond);
@@ -53,11 +89,11 @@ export function ReportSidebar({
     );
   };
 
-  const onChangeMode = cond => {
+  const onChangeMode = (cond: string) => {
     setSessionReport('mode', cond);
     onReportChange({ type: 'modify' });
     setMode(cond);
-    let graph;
+    let graph = '';
     if (cond === 'time') {
       if (customReportItems.graphType === 'BarGraph') {
         setSessionReport('graphType', 'StackedBarGraph');
@@ -74,14 +110,14 @@ export function ReportSidebar({
     defaultModeItems(graph, cond);
   };
 
-  const onChangeSplit = cond => {
+  const onChangeSplit = (cond: string) => {
     setSessionReport('groupBy', cond);
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
     defaultItems(cond);
   };
 
-  const onChangeBalanceType = cond => {
+  const onChangeBalanceType = (cond: string) => {
     setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
@@ -187,11 +223,11 @@ export function ReportSidebar({
               onReportChange({ type: 'modify' });
               if (
                 ReportOptions.dateRange
-                  .filter(int => !int[e])
+                  .filter(d => !d[e as keyof dateRangeProps])
                   .map(int => int.description)
                   .includes(customReportItems.dateRange)
               ) {
-                onSelectRange(defaultsList.intervalRange.get(e));
+                onSelectRange(defaultsList.intervalRange.get(e) || '');
               }
             }}
             options={ReportOptions.interval.map(option => [
@@ -353,9 +389,11 @@ export function ReportSidebar({
                 onSelectRange(e);
               }}
               options={ReportOptions.dateRange
-                .filter(f => f[customReportItems.interval])
+                .filter(
+                  f => f[customReportItems.interval as keyof dateRangeProps],
+                )
                 .map(option => [option.description, option.description])}
-              line={dateRangeLine > 0 && dateRangeLine}
+              line={dateRangeLine > 0 ? dateRangeLine : undefined}
             />
           </View>
         ) : (
@@ -385,7 +423,9 @@ export function ReportSidebar({
                 value={customReportItems.startDate}
                 defaultLabel={monthUtils.format(
                   customReportItems.startDate,
-                  ReportOptions.intervalFormat.get(customReportItems.interval),
+                  ReportOptions.intervalFormat.get(
+                    customReportItems.interval,
+                  ) || '',
                 )}
                 options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
@@ -415,7 +455,9 @@ export function ReportSidebar({
                 value={customReportItems.endDate}
                 defaultLabel={monthUtils.format(
                   customReportItems.endDate,
-                  ReportOptions.intervalFormat.get(customReportItems.interval),
+                  ReportOptions.intervalFormat.get(
+                    customReportItems.interval,
+                  ) || '',
                 )}
                 options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
@@ -443,7 +485,7 @@ export function ReportSidebar({
               ? true
               : false;
           })}
-          selectedCategories={customReportItems.selectedCategories}
+          selectedCategories={customReportItems.selectedCategories || []}
           setSelectedCategories={e => {
             setSelectedCategories(e);
             onReportChange({ type: 'modify' });
