@@ -110,7 +110,6 @@ export function createCustomSpreadsheet({
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -122,7 +121,6 @@ export function createCustomSpreadsheet({
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -145,19 +143,13 @@ export function createCustomSpreadsheet({
       });
     }
 
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
-    const rangeProps =
+    const intervals =
       interval === 'Weekly'
-        ? [
-            monthUtils[format](startDate),
-            monthUtils[format](endDate),
-            firstDayOfWeekIdx,
-          ]
-        : [monthUtils[format](startDate), monthUtils[format](endDate)];
-    const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      ...rangeProps,
-    );
+        ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
+        : monthUtils[ReportOptions.intervalRange.get(interval)](
+            startDate,
+            endDate,
+          );
 
     let totalAssets = 0;
     let totalDebts = 0;
@@ -216,11 +208,10 @@ export function createCustomSpreadsheet({
       totalDebts += perIntervalDebts;
 
       arr.push({
-        date:
-          interval === 'Monthly'
-            ? // eslint-disable-next-line rulesdir/typography
-              d.format(d.parseISO(`${intervalItem}-01`), "MMM ''yy")
-            : intervalItem,
+        date: d.format(
+          d.parseISO(intervalItem),
+          ReportOptions.intervalFormat.get(interval),
+        ),
         ...stacked,
         dateStart: intervalItem,
         totalDebts: integerToAmount(perIntervalDebts),

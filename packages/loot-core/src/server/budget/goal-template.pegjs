@@ -22,6 +22,8 @@ expr
     { return { type: 'schedule', name, priority: +priority, full } }
   / priority: priority? _? remainder: remainder
     { return { type: 'remainder', priority: null, weight: remainder } }
+  / priority: priority? _? 'average'i _ amount: positive _ 'months'i?
+    { return { type: 'average', amount: +amount, priority: +priority }}
 
 
 repeat 'repeat interval'
@@ -59,7 +61,7 @@ d 'digit' = [0-9]
 number 'number' = $(d+)
 positive = $([1-9][0-9]*)
 amount 'amount' = currencySymbol? _? amount: $(d+ ('.' (d d?)?)?) { return +amount }
-percent 'percentage' = percent: $(d+) _? '%' { return +percent }
+percent 'percentage' = percent: $(d+ ('.' (d+)?)?) _? '%' { return +percent }
 year 'year' = $(d d d d)
 month 'month' = $(year '-' d d)
 day 'day' = $(d d)

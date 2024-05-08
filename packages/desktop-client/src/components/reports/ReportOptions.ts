@@ -44,112 +44,136 @@ const groupByOptions = [
   { description: 'Interval' },
 ];
 
-const dateRangeOptions = [
+export type dateRangeProps = {
+  description: string;
+  name: number | string;
+  type?: string;
+  Daily: boolean;
+  Weekly: boolean;
+  Monthly: boolean;
+  Yearly: boolean;
+};
+
+const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'This week',
-    type: 'Weeks',
     name: 0,
-    Yearly: false,
-    Monthly: false,
+    type: 'Weeks',
     Daily: true,
     Weekly: true,
+    Monthly: false,
+    Yearly: false,
   },
   {
     description: 'Last week',
-    type: 'Weeks',
     name: 1,
-    Yearly: false,
-    Monthly: false,
+    type: 'Weeks',
     Daily: true,
     Weekly: true,
+    Monthly: false,
+    Yearly: false,
   },
   {
     description: 'This month',
-    type: 'Months',
     name: 0,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last month',
-    type: 'Months',
     name: 1,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 3 months',
-    type: 'Months',
     name: 2,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 6 months',
-    type: 'Months',
     name: 5,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: false,
+    Weekly: false,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 12 months',
-    type: 'Months',
     name: 11,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: false,
+    Weekly: false,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Year to date',
     name: 'yearToDate',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
   {
     description: 'Last year',
     name: 'lastYear',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
   {
     description: 'All time',
     name: 'allTime',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
 ];
 
-const intervalOptions = [
+type intervalOptionsProps = {
+  description: string;
+  name: 'Day' | 'Week' | 'Month' | 'Year';
+  format: string;
+  range:
+    | 'dayRangeInclusive'
+    | 'weekRangeInclusive'
+    | 'rangeInclusive'
+    | 'yearRangeInclusive';
+};
+
+const intervalOptions: intervalOptionsProps[] = [
   {
     description: 'Daily',
     name: 'Day',
-    format: 'yyyy-MM-dd',
+    format: 'yy-MM-dd',
     range: 'dayRangeInclusive',
   },
   {
     description: 'Weekly',
     name: 'Week',
-    format: 'yyyy-MM-dd',
+    format: 'yy-MM-dd',
     range: 'weekRangeInclusive',
   },
   //{ value: 3, description: 'Fortnightly', name: 3},
   {
     description: 'Monthly',
     name: 'Month',
-    format: 'MMMM, yyyy',
+    // eslint-disable-next-line rulesdir/typography
+    format: "MMM ''yy",
     range: 'rangeInclusive',
   },
   {
@@ -174,15 +198,19 @@ export const ReportOptions = {
     dateRangeOptions.map(item => [item.description, item.type]),
   ),
   interval: intervalOptions,
-  intervalMap: new Map(
+  intervalMap: new Map<string, 'Day' | 'Week' | 'Month' | 'Year'>(
     intervalOptions.map(item => [item.description, item.name]),
   ),
   intervalFormat: new Map(
     intervalOptions.map(item => [item.description, item.format]),
   ),
-  intervalRange: new Map(
-    intervalOptions.map(item => [item.description, item.range]),
-  ),
+  intervalRange: new Map<
+    string,
+    | 'dayRangeInclusive'
+    | 'weekRangeInclusive'
+    | 'rangeInclusive'
+    | 'yearRangeInclusive'
+  >(intervalOptions.map(item => [item.description, item.range])),
 };
 
 export type QueryDataEntity = {

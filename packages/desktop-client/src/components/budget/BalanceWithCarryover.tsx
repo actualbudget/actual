@@ -8,7 +8,7 @@ import { View } from '../common/View';
 import { CellValue } from '../spreadsheet/CellValue';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
-import { makeAmountStyle } from './util';
+import { makeBalanceAmountStyle } from './util';
 
 type BalanceWithCarryoverProps = {
   carryover: ComponentProps<typeof CellValue>['binding'];
@@ -16,7 +16,6 @@ type BalanceWithCarryoverProps = {
   goal?: ComponentProps<typeof CellValue>['binding'];
   budgeted?: ComponentProps<typeof CellValue>['binding'];
   disabled?: boolean;
-  style?: CSSProperties;
   balanceStyle?: CSSProperties;
   carryoverStyle?: CSSProperties;
 };
@@ -26,7 +25,6 @@ export function BalanceWithCarryover({
   goal,
   budgeted,
   disabled,
-  style,
   balanceStyle,
   carryoverStyle,
 }: BalanceWithCarryoverProps) {
@@ -36,12 +34,12 @@ export function BalanceWithCarryover({
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   return (
-    <View style={style}>
+    <>
       <CellValue
         binding={balance}
         type="financial"
         getStyle={value =>
-          makeAmountStyle(
+          makeBalanceAmountStyle(
             value,
             isGoalTemplatesEnabled ? goalValue : null,
             budgetedValue,
@@ -72,10 +70,14 @@ export function BalanceWithCarryover({
           <SvgArrowThinRight
             width={carryoverStyle?.width || 7}
             height={carryoverStyle?.height || 7}
-            style={makeAmountStyle(balanceValue, goalValue, budgetedValue)}
+            style={makeBalanceAmountStyle(
+              balanceValue,
+              goalValue,
+              budgetedValue,
+            )}
           />
         </View>
       )}
-    </View>
+    </>
   );
 }

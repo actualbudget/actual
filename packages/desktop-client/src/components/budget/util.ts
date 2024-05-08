@@ -45,7 +45,7 @@ export function makeAmountGrey(value: number | string): CSSProperties {
     : null;
 }
 
-export function makeAmountStyle(
+export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number,
   budgetedValue?: number,

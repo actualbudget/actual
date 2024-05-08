@@ -25,44 +25,39 @@ export const Tooltip = ({
   ...props
 }: TooltipProps) => {
   const triggerRef = useRef(null);
-  const [hover, setHover] = useState(false);
+  const [isHovered, setIsHover] = useState(false);
 
-  const [delayHandler, setDelayHandler] = useState<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const handleMouseEnter = useCallback(() => {
+  const handlePointerEnter = useCallback(() => {
     const timeout = setTimeout(() => {
-      setHover(true);
+      setIsHover(true);
     }, triggerProps.delay ?? 300);
 
-    setDelayHandler(timeout);
-    return () => {
-      clearTimeout(timeout);
-    };
+    hoverTimeoutRef.current = timeout;
   }, [triggerProps.delay]);
 
-  const handleMouseLeave = useCallback(() => {
-    if (delayHandler) {
-      clearTimeout(delayHandler);
+  const handlePointerLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
     }
 
-    setHover(false);
-  }, [delayHandler]);
+    setIsHover(false);
+  }, []);
 
   // Force closing the tooltip whenever the disablement state changes
   useEffect(() => {
-    setHover(false);
+    setIsHover(false);
   }, [triggerProps.isDisabled]);
 
   return (
     <View
       ref={triggerRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
     >
       <TooltipTrigger
-        isOpen={hover && !triggerProps.isDisabled}
+        isOpen={isHovered && !triggerProps.isDisabled}
         {...triggerProps}
       >
         {children}

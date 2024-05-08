@@ -233,18 +233,20 @@ type FinanceModals = {
   'budget-page-menu': {
     onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
+    onSwitchBudgetFile: () => void;
     onSwitchBudgetType: () => void;
   };
   'rollover-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-    onEditNotes: (id: string) => void;
+    onEditNotes: (month: string) => void;
   };
   'report-budget-month-menu': {
     month: string;
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-    onEditNotes: (id: string) => void;
+    onEditNotes: (month: string) => void;
   };
+  'budget-list';
 };
 
 export type PushModalAction = {

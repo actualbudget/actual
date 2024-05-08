@@ -256,7 +256,8 @@ export function _weekRange(
 ): string[] {
   const weeks: string[] = [];
   let week = weekFromDate(start, firstDayOfWeekIdx);
-  while (d.isBefore(_parse(week), _parse(end))) {
+  const endWeek = weekFromDate(end, firstDayOfWeekIdx);
+  while (d.isBefore(_parse(week), _parse(endWeek))) {
     weeks.push(week);
     week = addWeeks(week, 1);
   }
@@ -345,6 +346,10 @@ export function getYear(month: string): string {
 
 export function getMonth(day: string): string {
   return day.slice(0, 7);
+}
+
+export function getDay(day: string): number {
+  return Number(d.format(_parse(day), 'dd'));
 }
 
 export function getMonthEnd(day: string): string {

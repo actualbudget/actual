@@ -98,7 +98,7 @@ export function Select<Value extends string>({
       </ListboxButton>
       <ListboxPopover
         style={{
-          zIndex: 10000,
+          zIndex: 100000,
           outline: 0,
           borderRadius: styles.menuBorderRadius,
           backgroundColor: theme.menuBackground,
