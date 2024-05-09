@@ -76,10 +76,7 @@ export function Spending() {
           <PageHeader
             title="Monthly Spending"
             leftContent={
-              <PageBackButton
-                style={{ marginLeft: 10 }}
-                onClick={() => navigate('/reports')}
-              />
+              <PageBackButton onClick={() => navigate('/reports')} />
             }
           />
         )
@@ -94,7 +91,7 @@ export function Spending() {
       >
         <View
           style={{
-            padding: 10,
+            padding: 20,
             paddingTop: 0,
             flexShrink: 0,
           }}
@@ -116,7 +113,6 @@ export function Spending() {
         style={{
           display: 'flex',
           flexDirection: 'row',
-          padding: 15,
           paddingTop: 0,
           flexGrow: 1,
         }}

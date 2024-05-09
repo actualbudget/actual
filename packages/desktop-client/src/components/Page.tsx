@@ -24,24 +24,21 @@ export function PageHeader({ title, leftContent, style }: PageHeaderProps) {
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        marginBottom: 15,
+        marginLeft: 20,
         ...style,
       }}
     >
       {leftContent}
-      {typeof title === 'string' ? (
-        <Text
-          style={{
-            fontSize: 25,
-            fontWeight: 500,
-            marginLeft: leftContent ? 5 : undefined,
-          }}
-        >
-          {title}
-        </Text>
-      ) : (
-        title
-      )}
+      <View
+        style={{
+          flexDirection: 'row',
+          fontSize: 25,
+          fontWeight: 500,
+          marginLeft: leftContent ? 5 : undefined,
+        }}
+      >
+        {typeof title === 'string' ? <Text>{title}</Text> : title}
+      </View>
     </View>
   );
 }
@@ -131,19 +128,14 @@ type PageProps = {
 
 export function Page({ header, style, padding, children, footer }: PageProps) {
   const { isNarrowWidth } = useResponsive();
-  const _padding = padding != null ? padding : isNarrowWidth ? 10 : 20;
+  const childrenPadding = padding != null ? padding : isNarrowWidth ? 10 : 20;
 
   const headerToRender =
     typeof header === 'string' ? (
       isNarrowWidth ? (
         <MobilePageHeader title={header} />
       ) : (
-        <PageHeader
-          title={header}
-          style={{
-            paddingInline: _padding,
-          }}
-        />
+        <PageHeader title={header} />
       )
     ) : (
       header
@@ -161,27 +153,15 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
       }}
     >
       {headerToRender}
-      {isNarrowWidth ? (
-        <View
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: _padding,
-          }}
-        >
-          {children}
-        </View>
-      ) : (
-        <View
-          style={{
-            flex: 1,
-            paddingLeft: _padding,
-            paddingRight: _padding,
-          }}
-        >
-          {children}
-        </View>
-      )}
+      <View
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: `0 ${childrenPadding}px`,
+        }}
+      >
+        {children}
+      </View>
       {footer}
     </View>
   );

@@ -29,7 +29,7 @@ export function Overview() {
 
   const accounts = useAccounts();
   return (
-    <Page header="Reports">
+    <Page header="Reports" padding={0}>
       {customReportsFeatureFlag && !isNarrowWidth && (
         <View
           style={{

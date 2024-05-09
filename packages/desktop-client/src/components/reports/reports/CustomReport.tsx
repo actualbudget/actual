@@ -554,12 +554,7 @@ export function CustomReport() {
         ) : (
           <PageHeader
             title={title}
-            leftContent={
-              <PageBackButton
-                style={{ marginLeft: 10 }}
-                onClick={onBackClick}
-              />
-            }
+            leftContent={<PageBackButton onClick={onBackClick} />}
           />
         )
       }
@@ -567,10 +562,8 @@ export function CustomReport() {
     >
       <View
         style={{
-          display: 'flex',
           flexDirection: 'row',
-          padding: 15,
-          paddingTop: 0,
+          padding: !isNarrowWidth ? '0 20px' : undefined,
           flexGrow: 1,
         }}
       >
@@ -676,7 +669,6 @@ export function CustomReport() {
                   flexDirection: 'column',
                   flexGrow: 1,
                   padding: 10,
-                  paddingTop: 10,
                 }}
               >
                 {graphType !== 'TableGraph' && (

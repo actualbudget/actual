@@ -144,7 +144,7 @@ export function Settings() {
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
-      <View style={{ flexShrink: 0, maxWidth: 530, gap: 30 }}>
+      <View style={{ marginTop: 10, flexShrink: 0, maxWidth: 530, gap: 30 }}>
         {isNarrowWidth && (
           <View
             style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}

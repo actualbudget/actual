@@ -120,10 +120,7 @@ export function CashFlow() {
           <PageHeader
             title="Cash Flow"
             leftContent={
-              <PageBackButton
-                style={{ marginLeft: 10 }}
-                onClick={() => navigate('/reports')}
-              />
+              <PageBackButton onClick={() => navigate('/reports')} />
             }
           />
         )

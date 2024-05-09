@@ -101,10 +101,7 @@ export function NetWorth() {
           <PageHeader
             title="Net Worth"
             leftContent={
-              <PageBackButton
-                style={{ marginLeft: 10 }}
-                onClick={() => navigate('/reports')}
-              />
+              <PageBackButton onClick={() => navigate('/reports')} />
             }
           />
         )
