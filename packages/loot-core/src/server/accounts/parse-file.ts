@@ -6,6 +6,7 @@ import { looselyParseAmount } from '../../shared/util';
 
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
+import { xmlCAMT2json } from './xmlcamt2json';
 
 type ParseError = { message: string; internal: string };
 export type ParseFileResult = {
@@ -38,6 +39,8 @@ export async function parseFile(
       case '.ofx':
       case '.qfx':
         return parseOFX(filepath, options);
+      case '.xml':
+        return parseCAMT(filepath);
       default:
     }
   }
@@ -143,4 +146,23 @@ async function parseOFX(
       };
     }),
   };
+}
+
+async function parseCAMT(filepath: string): Promise<ParseFileResult> {
+  const errors = Array<ParseError>();
+  const contents = await fs.readFile(filepath);
+
+  let data;
+  try {
+    data = await xmlCAMT2json(contents);
+  } catch (err) {
+    console.error(err);
+    errors.push({
+      message: 'Failed importing file',
+      internal: err.stack,
+    });
+    return { errors };
+  }
+
+  return { errors, transactions: data };
 }
