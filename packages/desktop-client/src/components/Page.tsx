@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { type ComponentPropsWithRef, type ReactNode } from 'react';
 
 import { useNavigate } from '../hooks/useNavigate';
 import { SvgArrowLeft } from '../icons/v1';
@@ -29,20 +29,26 @@ export function PageHeader({ title, leftContent, style }: PageHeaderProps) {
       }}
     >
       {leftContent}
-      <Text
-        style={{
-          fontSize: 25,
-          fontWeight: 500,
-          marginLeft: leftContent ? 5 : undefined,
-        }}
-      >
-        {title}
-      </Text>
+      {typeof title === 'string' ? (
+        <Text
+          style={{
+            fontSize: 25,
+            fontWeight: 500,
+            marginLeft: leftContent ? 5 : undefined,
+          }}
+        >
+          {title}
+        </Text>
+      ) : (
+        title
+      )}
     </View>
   );
 }
 
-export function PageBackButton({ onClick, ...props }) {
+type PageBackButtonProps = ComponentPropsWithRef<typeof Button>;
+
+export function PageBackButton({ onClick, ...props }: PageBackButtonProps) {
   const navigate = useNavigate();
 
   return (
@@ -116,7 +122,7 @@ export function MobilePageHeader({
 }
 
 type PageProps = {
-  header: string | ReactNode;
+  header: ReactNode;
   style?: CSSProperties;
   padding?: number;
   children: ReactNode;

@@ -1376,6 +1376,7 @@ export function BudgetTable({
         <View
           data-testid="budget-table"
           style={{
+            backgroundColor: theme.pageBackground,
             paddingBottom: MOBILE_NAV_HEIGHT,
           }}
         >
