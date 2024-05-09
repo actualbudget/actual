@@ -64,12 +64,20 @@ export function ReportSummary({
           {monthUtils.format(
             startDate,
             ReportOptions.intervalFormat.get(interval),
-          )}{' '}
-          -{' '}
-          {monthUtils.format(
-            endDate,
-            ReportOptions.intervalFormat.get(interval),
           )}
+          {monthUtils.format(
+            startDate,
+            ReportOptions.intervalFormat.get(interval),
+          ) !==
+            monthUtils.format(
+              endDate,
+              ReportOptions.intervalFormat.get(interval),
+            ) &&
+            ' to ' +
+              monthUtils.format(
+                endDate,
+                ReportOptions.intervalFormat.get(interval),
+              )}
         </Text>
       </View>
       <View

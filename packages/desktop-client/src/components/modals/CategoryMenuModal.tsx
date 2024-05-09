@@ -1,20 +1,17 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import { q } from 'loot-core/src/shared/query';
-import {
-  type CategoryEntity,
-  type NoteEntity,
-} from 'loot-core/src/types/models';
+import { type CategoryEntity } from 'loot-core/src/types/models';
 
-import { useCategories } from '../../hooks/useCategories';
+import { useCategory } from '../../hooks/useCategory';
+import { useCategoryGroup } from '../../hooks/useCategoryGroup';
+import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
+import { Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
@@ -37,14 +34,9 @@ export function CategoryMenuModal({
   onDelete,
   onClose,
 }: CategoryMenuModalProps) {
-  const { list: categories } = useCategories();
-  const category = categories.find(c => c.id === categoryId);
-  const data = useLiveQuery<NoteEntity[]>(
-    () => q('notes').filter({ id: category.id }).select('*'),
-    [category.id],
-  );
-  const originalNotes = data && data.length > 0 ? data[0].note : null;
-
+  const category = useCategory(categoryId);
+  const categoryGroup = useCategoryGroup(category?.cat_group);
+  const originalNotes = useNotes(category.id);
   const _onClose = () => {
     modalProps?.onClose();
     onClose?.();
@@ -85,92 +77,86 @@ export function CategoryMenuModal({
 
   return (
     <Modal
-      title={category.name}
-      titleStyle={styles.underlinedText}
+      title={
+        <ModalTitle isEditable title={category.name} onTitleUpdate={onRename} />
+      }
       showHeader
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
-      padding={0}
       style={{
-        flex: 1,
         height: '45vh',
-        padding: '0 10px',
-        borderRadius: '6px',
       }}
-      editableTitle={true}
-      onTitleUpdate={onRename}
       leftHeaderContent={
         <AdditionalCategoryMenu
           category={category}
+          categoryGroup={categoryGroup}
           onDelete={_onDelete}
           onToggleVisibility={_onToggleVisibility}
         />
       }
     >
-      {({ isEditingTitle }) => (
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+        }}
+      >
         <View
           style={{
+            overflowY: 'auto',
             flex: 1,
-            flexDirection: 'column',
           }}
         >
-          <View
-            style={{
-              overflowY: 'auto',
-              flex: 1,
-            }}
-          >
-            <Notes
-              notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
-              editable={false}
-              focused={false}
-              getStyle={() => ({
-                borderRadius: 6,
-                ...((!originalNotes || originalNotes.length === 0) && {
-                  justifySelf: 'center',
-                  alignSelf: 'center',
-                  color: theme.pageTextSubdued,
-                }),
-              })}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignContent: 'space-between',
-              margin: '10px 0',
-            }}
-          >
-            <Button
-              style={{
-                ...buttonStyle,
-                display: isEditingTitle ? 'none' : undefined,
-              }}
-              onClick={_onEditNotes}
-            >
-              <SvgNotesPaper
-                width={20}
-                height={20}
-                style={{ paddingRight: 5 }}
-              />
-              Edit notes
-            </Button>
-          </View>
+          <Notes
+            notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
+            editable={false}
+            focused={false}
+            getStyle={() => ({
+              borderRadius: 6,
+              ...((!originalNotes || originalNotes.length === 0) && {
+                justifySelf: 'center',
+                alignSelf: 'center',
+                color: theme.pageTextSubdued,
+              }),
+            })}
+          />
         </View>
-      )}
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            alignContent: 'space-between',
+            paddingTop: 10,
+          }}
+        >
+          <Button style={buttonStyle} onClick={_onEditNotes}>
+            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+            Edit notes
+          </Button>
+        </View>
+      </View>
     </Modal>
   );
 }
 
-function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
+function AdditionalCategoryMenu({
+  category,
+  categoryGroup,
+  onDelete,
+  onToggleVisibility,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
   };
+
+  const getItemStyle = item => ({
+    ...itemStyle,
+    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  });
 
   return (
     <View>
@@ -195,15 +181,15 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
             }}
           >
             <Menu
-              getItemStyle={() => itemStyle}
+              getItemStyle={getItemStyle}
               items={[
-                {
+                !categoryGroup?.hidden && {
                   name: 'toggleVisibility',
                   text: category.hidden ? 'Show' : 'Hide',
                   icon: category.hidden ? SvgViewShow : SvgViewHide,
                   iconSize: 16,
                 },
-                Menu.line,
+                !categoryGroup?.hidden && Menu.line,
                 {
                   name: 'delete',
                   text: 'Delete',

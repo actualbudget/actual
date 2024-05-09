@@ -11,17 +11,23 @@ import React, {
 
 import { css } from 'glamor';
 
+import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
+import { useCategories } from '../../hooks/useCategories';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
+import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
@@ -30,7 +36,7 @@ type CategoryAutocompleteItem = CategoryEntity & {
   group?: CategoryGroupEntity;
 };
 
-export type CategoryListProps = {
+type CategoryListProps = {
   items: CategoryAutocompleteItem[];
   getItemProps?: (arg: {
     item: CategoryAutocompleteItem;
@@ -48,6 +54,7 @@ export type CategoryListProps = {
     props: ComponentPropsWithoutRef<typeof CategoryItem>,
   ) => ReactElement<typeof CategoryItem>;
   showHiddenItems?: boolean;
+  showBalances?: boolean;
 };
 function CategoryList({
   items,
@@ -59,8 +66,17 @@ function CategoryList({
   renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
   showHiddenItems,
+  showBalances,
 }: CategoryListProps) {
   let lastGroup: string | undefined | null = null;
+
+  const filteredItems = useMemo(
+    () =>
+      showHiddenItems
+        ? items
+        : items.filter(item => !item.hidden && !item.group?.hidden),
+    [showHiddenItems, items],
+  );
 
   return (
     <View>
@@ -71,7 +87,7 @@ function CategoryList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {items.map((item, idx) => {
+        {filteredItems.map((item, idx) => {
           if (item.id === 'split') {
             return renderSplitTransactionButton({
               key: 'split',
@@ -79,10 +95,6 @@ function CategoryList({
               highlighted: highlightedIndex === idx,
               embedded,
             });
-          }
-
-          if ((item.hidden || item.group?.hidden) && !showHiddenItems) {
-            return <Fragment key={item.id} />;
           }
 
           const showGroup = item.cat_group !== lastGroup;
@@ -111,6 +123,7 @@ function CategoryList({
                     ...(showHiddenItems &&
                       item.hidden && { color: theme.pageTextSubdued }),
                   },
+                  showBalances,
                 })}
               </Fragment>
             </Fragment>
@@ -125,7 +138,8 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<
   typeof Autocomplete<CategoryAutocompleteItem>
 > & {
-  categoryGroups: Array<CategoryGroupEntity>;
+  categoryGroups?: Array<CategoryGroupEntity>;
+  showBalances?: boolean;
   showSplitOption?: boolean;
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
@@ -141,6 +155,7 @@ type CategoryAutocompleteProps = ComponentProps<
 
 export function CategoryAutocomplete({
   categoryGroups,
+  showBalances = true,
   showSplitOption,
   embedded,
   closeOnBlur,
@@ -150,9 +165,10 @@ export function CategoryAutocomplete({
   showHiddenCategories,
   ...props
 }: CategoryAutocompleteProps) {
+  const { grouped: defaultCategoryGroups = [] } = useCategories();
   const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
     () =>
-      categoryGroups.reduce(
+      (categoryGroups || defaultCategoryGroups).reduce(
         (list, group) =>
           list.concat(
             (group.categories || [])
@@ -164,7 +180,7 @@ export function CategoryAutocomplete({
           ),
         showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
       ),
-    [showSplitOption, categoryGroups],
+    [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
   return (
@@ -200,6 +216,7 @@ export function CategoryAutocomplete({
           renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
           renderCategoryItem={renderCategoryItem}
           showHiddenItems={showHiddenCategories}
+          showBalances={showBalances}
         />
       )}
       {...props}
@@ -261,9 +278,7 @@ function SplitTransactionButton({
         alignItems: 'center',
         fontSize: 11,
         fontWeight: 500,
-        color: highlighted
-          ? theme.menuAutoCompleteTextHover
-          : theme.noticeTextMenu,
+        color: theme.noticeTextMenu,
         padding: '6px 8px',
         ':active': {
           backgroundColor: 'rgba(100, 100, 100, .25)',
@@ -297,26 +312,36 @@ type CategoryItemProps = {
   style?: CSSProperties;
   highlighted?: boolean;
   embedded?: boolean;
+  showBalances?: boolean;
 };
 
-// eslint-disable-next-line import/no-unused-modules
-export function CategoryItem({
+function CategoryItem({
   item,
   className,
   style,
   highlighted,
   embedded,
+  showBalances,
   ...props
 }: CategoryItemProps) {
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
-        color: theme.menuAutoCompleteText,
         borderRadius: 0,
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
+  const [budgetType] = useLocalPref('budgetType');
+
+  const balance = useSheetValue(
+    budgetType === 'rollover'
+      ? rolloverBudget.catBalance(item.id)
+      : reportBudget.catBalance(item.id),
+  );
+
+  const isToBeBudgetedItem = item.id === 'to-be-budgeted';
+  const toBudget = useSheetValue(rolloverBudget.toBudget);
 
   return (
     <div
@@ -331,9 +356,6 @@ export function CategoryItem({
           color: highlighted
             ? theme.menuAutoCompleteItemTextHover
             : theme.menuAutoCompleteItemText,
-          ':hover': {
-            color: theme.menuAutoCompleteItemTextHover,
-          },
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
@@ -344,10 +366,31 @@ export function CategoryItem({
       data-highlighted={highlighted || undefined}
       {...props}
     >
-      <TextOneLine>
-        {item.name}
-        {item.hidden ? ' (hidden)' : null}
-      </TextOneLine>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <TextOneLine>
+          {item.name}
+          {item.hidden ? ' (hidden)' : null}
+        </TextOneLine>
+        <TextOneLine
+          style={{
+            display: !showBalances ? 'none' : undefined,
+            marginLeft: 5,
+            flexShrink: 0,
+            ...makeAmountFullStyle(isToBeBudgetedItem ? toBudget : balance, {
+              positiveColor: theme.noticeTextMenu,
+              negativeColor: theme.errorTextMenu,
+            }),
+          }}
+        >
+          {isToBeBudgetedItem
+            ? toBudget != null
+              ? ` ${integerToCurrency(toBudget || 0)}`
+              : null
+            : balance != null
+              ? ` ${integerToCurrency(balance || 0)}`
+              : null}
+        </TextOneLine>
+      </View>
     </div>
   );
 }

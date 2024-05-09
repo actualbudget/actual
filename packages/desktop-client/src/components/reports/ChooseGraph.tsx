@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../style';
 import { styles } from '../../style/styles';
@@ -20,9 +20,8 @@ import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
-  startDate: string;
-  endDate: string;
   data: GroupedEntity;
+  filters?: RuleConditionEntity[];
   mode: string;
   graphType: string;
   balanceType: string;
@@ -34,12 +33,12 @@ type ChooseGraphProps = {
   style?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  intervalsCount?: number;
 };
 
 export function ChooseGraph({
-  startDate,
-  endDate,
   data,
+  filters,
   mode,
   graphType,
   balanceType,
@@ -51,16 +50,10 @@ export function ChooseGraph({
   style,
   showHiddenCategories,
   showOffBudget,
+  intervalsCount,
 }: ChooseGraphProps) {
-  const intervals: string[] = monthUtils.rangeInclusive(startDate, endDate);
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
-  const groupByData =
-    groupBy === 'Category'
-      ? 'groupedData'
-      : groupBy === 'Interval'
-        ? 'intervalData'
-        : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -105,6 +98,7 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
@@ -122,14 +116,28 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={graphStyle} compact={compact} data={data} />;
+    return (
+      <LineGraph
+        style={graphStyle}
+        compact={compact}
+        data={data}
+        filters={filters}
+        groupBy={groupBy}
+        balanceTypeOp={balanceTypeOp}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
+      />
+    );
   }
   if (graphType === 'StackedBarGraph') {
     return (
@@ -137,8 +145,12 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         viewLabels={viewLabels}
         balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
@@ -162,12 +174,15 @@ export function ChooseGraph({
           handleScroll={handleScroll}
           balanceTypeOp={balanceTypeOp}
           groupBy={groupBy}
-          data={data[groupByData]}
+          data={data}
+          filters={filters}
           mode={mode}
-          intervalsCount={intervals.length}
+          intervalsCount={intervalsCount}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -175,10 +190,14 @@ export function ChooseGraph({
           data={data}
           mode={mode}
           balanceTypeOp={balanceTypeOp}
-          intervalsCount={intervals.length}
+          intervalsCount={intervalsCount}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          groupBy={groupBy}
+          filters={filters}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
       </View>
     );

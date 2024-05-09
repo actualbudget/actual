@@ -80,6 +80,9 @@ export function ExperimentalFeatures() {
         expanded ? (
           <View style={{ gap: '1em' }}>
             <FeatureToggle flag="customReports">Custom reports</FeatureToggle>
+            <FeatureToggle flag="spendingReport">
+              Monthly spending
+            </FeatureToggle>
 
             <ReportBudgetFeature />
 
@@ -93,6 +96,7 @@ export function ExperimentalFeatures() {
           <Link
             variant="text"
             onClick={() => setExpanded(true)}
+            data-testid="experimental-settings"
             style={{
               flexShrink: 0,
               alignSelf: 'flex-start',

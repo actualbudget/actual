@@ -5,7 +5,6 @@ import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
-import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
@@ -16,13 +15,8 @@ import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 
-import { AccountAutocompleteModal } from './AccountAutocompleteModal';
-import { CategoryAutocompleteModal } from './CategoryAutocompleteModal';
-import { PayeeAutocompleteModal } from './PayeeAutocompleteModal';
-
 export function EditField({ modalProps, name, onSubmit, onClose }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const { grouped: categoryGroups } = useCategories();
   const onCloseInner = () => {
     modalProps.onClose();
     onClose?.();
@@ -81,50 +75,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
         />
       );
       break;
-
-    case 'category':
-      return (
-        <CategoryAutocompleteModal
-          modalProps={modalProps}
-          autocompleteProps={{
-            categoryGroups,
-            showHiddenCategories: false,
-            value: null,
-            onSelect: categoryId => {
-              onSelect(categoryId);
-            },
-          }}
-          onClose={onClose}
-        />
-      );
-
-    case 'payee':
-      return (
-        <PayeeAutocompleteModal
-          modalProps={modalProps}
-          autocompleteProps={{
-            value: null,
-            onSelect: payeeId => {
-              onSelect(payeeId);
-            },
-          }}
-          onClose={onClose}
-        />
-      );
-
-    case 'account':
-      return (
-        <AccountAutocompleteModal
-          modalProps={modalProps}
-          autocompleteProps={{
-            value: null,
-            onSelect: accountId => {
-              onSelect(accountId);
-            },
-          }}
-          onClose={onClose}
-        />
-      );
 
     case 'notes':
       label = 'Notes';
@@ -271,17 +221,12 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
       focusAfterClose={false}
       {...modalProps}
       onClose={onCloseInner}
-      padding={0}
       style={{
         flex: 0,
         height: isNarrowWidth ? '85vh' : 275,
         padding: '15px 10px',
-        borderRadius: '6px',
         ...(minWidth && { minWidth }),
-        ...(!isNarrowWidth && {
-          backgroundColor: theme.mobileModalBackground,
-          color: theme.mobileModalText,
-        }),
+        backgroundColor: theme.menuAutoCompleteBackground,
       }}
     >
       {() => (
@@ -291,7 +236,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
               title={label}
               style={{
                 alignSelf: 'center',
-                color: theme.mobileModalText,
+                color: theme.menuAutoCompleteText,
                 marginBottom: 10,
               }}
             />

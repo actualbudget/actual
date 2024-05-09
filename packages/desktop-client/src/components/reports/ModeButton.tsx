@@ -6,7 +6,7 @@ import { Button } from '../common/Button';
 type ModeButtonProps = {
   selected: boolean;
   children: ReactNode;
-  style: CSSProperties;
+  style?: CSSProperties;
   onSelect: MouseEventHandler<HTMLButtonElement>;
 };
 

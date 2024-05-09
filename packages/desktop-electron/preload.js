@@ -49,8 +49,8 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.send('apply-update');
   },
 
-  updateAppMenu: isBudgetOpen => {
-    ipcRenderer.send('update-menu', isBudgetOpen);
+  updateAppMenu: budgetId => {
+    ipcRenderer.send('update-menu', budgetId);
   },
 
   getServerSocket: () => {

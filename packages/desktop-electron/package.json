@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.4.0",
+  "version": "24.5.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -37,8 +37,15 @@
       }
     },
     "linux": {
-      "target": "AppImage",
+      "target": [
+        "flatpak",
+        "AppImage"
+      ],
       "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "flatpak": {
+      "runtimeVersion": "23.08",
+      "baseVersion": "23.08"
     },
     "win": {
       "target": "nsis",

@@ -77,8 +77,6 @@ export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
-export const mobileModalBackground = colorPalette.navy900;
-export const mobileModalText = colorPalette.white;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = mobileHeaderBackground;
@@ -192,5 +190,6 @@ export const pillBorderSelected = colorPalette.purple500;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
+export const reportsGreen = colorPalette.green400;
 export const reportsLabel = colorPalette.navy900;
 export const reportsInnerLabel = colorPalette.navy800;

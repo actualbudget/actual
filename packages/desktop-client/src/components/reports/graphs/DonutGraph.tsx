@@ -5,7 +5,12 @@ import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, type CSSProperties } from '../../../style';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
@@ -173,22 +178,89 @@ const customLabel = props => {
 type DonutGraphProps = {
   style?: CSSProperties;
   data: GroupedEntity;
+  filters: RuleConditionEntity[];
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
   viewLabels: boolean;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export function DonutGraph({
   style,
   data,
+  filters,
   groupBy,
   balanceTypeOp,
   compact,
   viewLabels,
+  showHiddenCategories,
+  showOffBudget,
 }: DonutGraphProps) {
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
+
+  const navigate = useNavigate();
+  const categories = useCategories();
+  const accounts = useAccounts();
+  const { isNarrowWidth } = useResponsive();
+  const [pointer, setPointer] = useState('');
+
+  const onShowActivity = item => {
+    const amount = balanceTypeOp === 'totalDebts' ? 'lte' : 'gte';
+    const field = groupBy === 'Interval' ? null : groupBy.toLowerCase();
+    const hiddenCategories = categories.list
+      .filter(f => f.hidden)
+      .map(e => e.id);
+    const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
+
+    const conditions = [
+      ...filters,
+      { field, op: 'is', value: item.id, type: 'id' },
+      {
+        field: 'date',
+        op: 'gte',
+        value: data.startDate,
+        options: { date: true },
+        type: 'date',
+      },
+      {
+        field: 'date',
+        op: 'lte',
+        value: data.endDate,
+        options: { date: true },
+        type: 'date',
+      },
+      balanceTypeOp !== 'totalTotals' && {
+        field: 'amount',
+        op: amount,
+        value: 0,
+        type: 'number',
+      },
+      hiddenCategories.length > 0 &&
+        !showHiddenCategories && {
+          field: 'category',
+          op: 'notOneOf',
+          value: hiddenCategories,
+          type: 'id',
+        },
+      offBudgetAccounts.length > 0 &&
+        !showOffBudget && {
+          field: 'account',
+          op: 'notOneOf',
+          value: offBudgetAccounts,
+          type: 'id',
+        },
+    ].filter(f => f);
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        conditions,
+        categoryId: item.id,
+      },
+    });
+  };
 
   const getVal = obj => {
     if (balanceTypeOp === 'totalDebts') {
@@ -199,10 +271,6 @@ export function DonutGraph({
   };
 
   const [activeIndex, setActiveIndex] = useState(0);
-
-  const onPieEnter = (_, index) => {
-    setActiveIndex(index);
-  };
 
   return (
     <Container
@@ -216,7 +284,11 @@ export function DonutGraph({
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
-              <PieChart width={width} height={height}>
+              <PieChart
+                width={width}
+                height={height}
+                style={{ cursor: pointer }}
+              >
                 <Pie
                   activeIndex={activeIndex}
                   activeShape={compact ? ActiveShapeMobile : ActiveShape}
@@ -230,7 +302,18 @@ export function DonutGraph({
                   label={e =>
                     viewLabels && !compact ? customLabel(e) : <div />
                   }
-                  onMouseEnter={onPieEnter}
+                  onMouseLeave={() => setPointer('')}
+                  onMouseEnter={(_, index) => {
+                    setActiveIndex(index);
+                    if (!['Group', 'Interval'].includes(groupBy)) {
+                      setPointer('pointer');
+                    }
+                  }}
+                  onClick={
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    onShowActivity
+                  }
                 >
                   {data.legend.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />

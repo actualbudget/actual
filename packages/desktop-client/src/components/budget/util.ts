@@ -45,7 +45,7 @@ export function makeAmountGrey(value: number | string): CSSProperties {
     : null;
 }
 
-export function makeAmountStyle(
+export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number,
   budgetedValue?: number,
@@ -67,14 +67,24 @@ export function makeAmountStyle(
   }
 }
 
-export function makeAmountFullStyle(value: number) {
+export function makeAmountFullStyle(
+  value: number,
+  colors?: {
+    positiveColor?: string;
+    negativeColor?: string;
+    zeroColor?: string;
+  },
+) {
+  const positiveColorToUse = colors?.positiveColor || theme.noticeText;
+  const negativeColorToUse = colors?.negativeColor || theme.errorText;
+  const zeroColorToUse = colors?.zeroColor || theme.tableTextSubdued;
   return {
     color:
       value < 0
-        ? theme.errorText
+        ? negativeColorToUse
         : value === 0
-          ? theme.tableTextSubdued
-          : theme.noticeText,
+          ? zeroColorToUse
+          : positiveColorToUse,
   };
 }
 

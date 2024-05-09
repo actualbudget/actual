@@ -96,13 +96,15 @@ async function parseQIF(filepath: string): Promise<ParseFileResult> {
 
   return {
     errors: [],
-    transactions: data.transactions.map(trans => ({
-      amount: trans.amount != null ? looselyParseAmount(trans.amount) : null,
-      date: trans.date,
-      payee_name: trans.payee,
-      imported_payee: trans.payee,
-      notes: trans.memo || null,
-    })),
+    transactions: data.transactions
+      .map(trans => ({
+        amount: trans.amount != null ? looselyParseAmount(trans.amount) : null,
+        date: trans.date,
+        payee_name: trans.payee,
+        imported_payee: trans.payee,
+        notes: trans.memo || null,
+      }))
+      .filter(trans => trans.date != null && trans.amount != null),
   };
 }
 
