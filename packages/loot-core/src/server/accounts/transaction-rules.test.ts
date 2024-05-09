@@ -472,7 +472,7 @@ describe('Transaction rules', () => {
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'lt', value: 102 },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['7', '4'])
+    expect(transactions.map(t => t.id)).toEqual(['7', '4']);
 
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'gte', value: 102 },
@@ -482,7 +482,7 @@ describe('Transaction rules', () => {
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'lte', value: 102 },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['6', '7', '4', '5'])
+    expect(transactions.map(t => t.id)).toEqual(['6', '7', '4', '5']);
 
     transactions = await getMatchingTransactions([
       { field: 'notes', op: 'is', value: 'FooO' },
