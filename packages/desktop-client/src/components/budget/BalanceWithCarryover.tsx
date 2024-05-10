@@ -16,7 +16,6 @@ type BalanceWithCarryoverProps = {
   goal?: ComponentProps<typeof CellValue>['binding'];
   budgeted?: ComponentProps<typeof CellValue>['binding'];
   disabled?: boolean;
-  style?: CSSProperties;
   balanceStyle?: CSSProperties;
   carryoverStyle?: CSSProperties;
 };
@@ -26,7 +25,6 @@ export function BalanceWithCarryover({
   goal,
   budgeted,
   disabled,
-  style,
   balanceStyle,
   carryoverStyle,
 }: BalanceWithCarryoverProps) {
@@ -36,7 +34,7 @@ export function BalanceWithCarryover({
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   return (
-    <View style={style}>
+    <>
       <CellValue
         binding={balance}
         type="financial"
@@ -80,6 +78,6 @@ export function BalanceWithCarryover({
           />
         </View>
       )}
-    </View>
+    </>
   );
 }

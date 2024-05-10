@@ -388,6 +388,10 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   };
 
+  const onSwitchBudgetFile = () => {
+    dispatch(pushModal('budget-list'));
+  };
+
   const onOpenBudgetMonthMenu = month => {
     dispatch(
       pushModal(`${budgetType}-budget-month-menu`, {
@@ -403,6 +407,7 @@ function BudgetInner(props: BudgetInnerProps) {
       pushModal('budget-page-menu', {
         onAddCategoryGroup: onOpenNewCategoryGroupModal,
         onToggleHiddenCategories,
+        onSwitchBudgetFile,
         onSwitchBudgetType: onOpenSwitchBudgetTypeModal,
       }),
     );

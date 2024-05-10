@@ -172,13 +172,15 @@ export function uploadBudget(id: string) {
   };
 }
 
+export function closeAndLoadBudget(fileId: string) {
+  return async (dispatch: Dispatch) => {
+    await dispatch(closeBudget());
+    dispatch(loadBudget(fileId, 'Loading...'));
+  };
+}
+
 export function closeAndDownloadBudget(cloudFileId: string) {
   return async (dispatch: Dispatch) => {
-    // It's very important that we set this loading message before
-    // closing the budget. Otherwise, the manager will ignore our
-    // loading message and clear it when it loads, showing the file
-    // list which we don't want
-    dispatch(setAppState({ loadingText: 'Downloading...' }));
     await dispatch(closeBudget());
     dispatch(downloadBudget(cloudFileId, { replace: true }));
   };
