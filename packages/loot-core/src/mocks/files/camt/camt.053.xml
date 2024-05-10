@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document
+    xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04 camt.053.001.04.xsd"
+    xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <BkToCstmrStmt>
+        <GrpHdr>
+            <MsgId>053D2014-01-03T22:01:42.0N140000001</MsgId>
+            <CreDtTm>2014-01-03T22:01:36.0+01:00</CreDtTm>
+            <MsgPgntn>
+                <PgNb>1</PgNb>
+                <LastPgInd>true</LastPgInd>
+            </MsgPgntn>
+        </GrpHdr>
+        <Stmt>
+            <Id>0352C5320140103220142</Id>
+            <ElctrncSeqNb>140000001</ElctrncSeqNb>
+            <CreDtTm>2014-01-03T22:01:36.0+01:00</CreDtTm>
+            <Acct>
+                <Id>
+                    <IBAN>DE14740618130000033626</IBAN>
+                </Id>
+                <Ccy>EUR</Ccy>
+                <Ownr>
+                    <Nm>Testkonto Nummer 1</Nm>
+                </Ownr>
+                <Svcr>
+                    <FinInstnId>
+                        <BIC>GENODEF1PFK</BIC>
+                        <Nm>VR-Bank Rottal-Inn eG</Nm>
+                        <Othr>
+                            <Id>DE 129267947</Id>
+                            <Issr>UmsStId</Issr>
+                        </Othr>
+                    </FinInstnId>
+                </Svcr>
+            </Acct>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>PRCD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="EUR">24.16</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <Dt>2014-01-03</Dt>
+                </Dt>
+            </Bal>
+            <Bal>
+                <Tp>
+                    <CdOrPrtry>
+                        <Cd>CLBD</Cd>
+                    </CdOrPrtry>
+                </Tp>
+                <Amt Ccy="EUR">27.61</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Dt>
+                    <Dt>2014-01-03</Dt>
+                </Dt>
+            </Bal>
+            <Ntry>
+                <Amt Ccy="EUR">0.60</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2013-12-30</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2013-12-30</Dt>
+                </ValDt>
+                <AcctSvcrRef>2013123001153870000</AcctSvcrRef>
+                <BkTxCd />
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <EndToEndId>STZV-EtE28122013-11:29-1</EndToEndId>
+                        </Refs>
+                        <BkTxCd>
+                            <Prtry>
+                                <Cd>NMSC+051</Cd>
+                                <Issr>ZKA</Issr>
+                            </Prtry>
+                        </BkTxCd>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>Testkonto Nummer 2</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <IBAN>DE58740618130100033626</IBAN>
+                                </Id>
+                            </DbtrAcct>
+                            <UltmtDbtr>
+                                <Nm>keine Information vorhanden</Nm>
+                            </UltmtDbtr>
+                            <Cdtr>
+                                <Nm>Testkonto Nummer 1</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <IBAN>DE14740618130000033626</IBAN>
+                                </Id>
+                            </CdtrAcct>
+                            <UltmtCdtr>
+                                <Nm>Testkonto 1</Nm>
+                            </UltmtCdtr>
+                        </RltdPties>
+                        <RltdAgts>
+                            <DbtrAgt>
+                                <FinInstnId>
+                                    <BIC>GENODEF1PFK</BIC>
+                                </FinInstnId>
+                            </DbtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Ustrd>Sammler aus Testknto 2 Zweite Ueberweisung EREF:
+                                STZV-EtE28122013-11:29-1 IBAN: DE58740618130100033626 BIC:
+                                GENODEF1PFK ABWE: Testkonto 1</Ustrd>
+                        </RmtInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <Amt Ccy="EUR">0.50</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2013-12-30</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2013-12-30</Dt>
+                </ValDt>
+                <AcctSvcrRef>2013123001153870001</AcctSvcrRef>
+                <BkTxCd />
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <EndToEndId>STZV-EtE28122013-11:29-2</EndToEndId>
+                        </Refs>
+                        <BkTxCd>
+                            <Prtry>
+                                <Cd>NMSC+051</Cd>
+                                <Issr>ZKA</Issr>
+                            </Prtry>
+                        </BkTxCd>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>Testkonto Nummer 2</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <IBAN>DE58740618130100033626</IBAN>
+                                </Id>
+                            </DbtrAcct>
+                            <UltmtDbtr>
+                                <Nm>keine Information vorhanden</Nm>
+                            </UltmtDbtr>
+                            <Cdtr>
+                                <Nm>Testkonto Nummer 1</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <IBAN>DE14740618130000033626</IBAN>
+                                </Id>
+                            </CdtrAcct>
+                            <UltmtCdtr>
+                                <Nm>Testkonto 1</Nm>
+                            </UltmtCdtr>
+                        </RltdPties>
+                        <RltdAgts>
+                            <DbtrAgt>
+                                <FinInstnId>
+                                    <BIC>GENODEF1PFK</BIC>
+                                </FinInstnId>
+                            </DbtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Ustrd>Sammler aus Testkonto 2 Erste Ueberweisung EREF:
+                                STZV-EtE28122013-11:29-2 IBAN: DE58740618130100033626 BIC:
+                                GENODEF1PFK ABWE: Testkonto 1</Ustrd>
+                        </RmtInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <Amt Ccy="EUR">89.85</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2024-03-12</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2024-03-11</Dt>
+                </ValDt>
+                <AcctSvcrRef>640387810124072/2</AcctSvcrRef>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>CCRD</Cd>
+                            <SubFmlyCd>POSD</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>494.844</MsgId>
+                            <EndToEndId>VSDB 4395 9061</EndToEndId>
+                        </Refs>
+                        <Amt Ccy="EUR">89.85</Amt>
+                        <CdtDbtInd>DBIT</CdtDbtInd>
+                    </TxDtls>
+                </NtryDtls>
+                <AddtlNtryInf>Supermarkt A</AddtlNtryInf>
+            </Ntry>
+            <Ntry>
+                <Amt Ccy="EUR">1.20</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2014-01-07</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2014-01-05</Dt>
+                </ValDt>
+                <AcctSvcrRef>2014010509572410000</AcctSvcrRef>
+                <BkTxCd />
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>20140107135635060183</MsgId>
+                            <EndToEndId>STZV-EtE27122013-11:05-2</EndToEndId>
+                            <MndtId>Mandat20131227</MndtId>
+                        </Refs>
+                        <BkTxCd>
+                            <Prtry>
+                                <Cd>NMSC+835</Cd>
+                                <Issr>ZKA</Issr>
+                            </Prtry>
+                        </BkTxCd>
+                        <RmtInf>
+                            <Ustrd>Retoure SEPA Lastschrift vom 03.01.2014, Rueckgabegrund: MD06
+                                Lastschriftwiderspruch durch den Zahlungspflichtigen EREF:
+                                STZV-EtE27122013-11</Ustrd>
+                            <Ustrd>:05-2 CRED: DE79ZZZ00000000584 IBAN: DE14740618130000033626 BIC:
+                                GENODEF1PFK ABWE: Testkonto</Ustrd>
+                        </RmtInf>
+                        <RtrInf>
+                            <OrgnlBkTxCd>
+                                <Prtry>
+                                    <Cd>105</Cd>
+                                    <Issr>ZKA</Issr>
+                                </Prtry>
+                            </OrgnlBkTxCd>
+                            <Orgtr>
+                                <Id>
+                                    <OrgId>
+                                        <BICOrBEI>GENODEF1PFK</BICOrBEI>
+                                    </OrgId>
+                                </Id>
+                            </Orgtr>
+                            <Rsn>
+                                <Cd>MD06</Cd>
+                            </Rsn>
+                        </RtrInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <Amt Ccy="EUR">80</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2024-03-12</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2024-03-12</Dt>
+                </ValDt>
+                <AcctSvcrRef>367406715024072/1</AcctSvcrRef>
+                <BkTxCd>
+                    <Domn>
+                        <Cd>PMNT</Cd>
+                        <Fmly>
+                            <Cd>ICDT</Cd>
+                            <SubFmlyCd>AUTT</SubFmlyCd>
+                        </Fmly>
+                    </Domn>
+                </BkTxCd>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>448.106.</MsgId>
+                            <InstrId>2024031109</InstrId>
+                            <EndToEndId>2024031</EndToEndId>
+                        </Refs>
+                        <Amt Ccy="EUR">80</Amt>
+                        <CdtDbtInd>DBIT</CdtDbtInd>
+                        <AmtDtls>
+                            <InstdAmt>
+                                <Amt Ccy="EUR">80</Amt>
+                            </InstdAmt>
+                        </AmtDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Rega</Nm>
+                                <PstlAdr>
+                                    <StrtNm>Postfach</StrtNm>
+                                    <BldgNb>122</BldgNb>
+                                    <PstCd>5555</PstCd>
+                                    <TwnNm>Flughafen</TwnNm>
+                                    <Ctry>CH</Ctry>
+                                </PstlAdr>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <IBAN>CH803000000</IBAN>
+                                </Id>
+                            </CdtrAcct>
+                        </RltdPties>
+                        <RltdAgts>
+                            <CdtrAgt>
+                                <FinInstnId>
+                                    <ClrSysMmbId>
+                                        <ClrSysId>
+                                            <Cd>CHSIC</Cd>
+                                        </ClrSysId>
+                                        <MmbId>1</MmbId>
+                                    </ClrSysMmbId>
+                                </FinInstnId>
+                            </CdtrAgt>
+                        </RltdAgts>
+                        <RmtInf>
+                            <Strd>
+                                <CdtrRefInf>
+                                    <Tp>
+                                        <CdOrPrtry>
+                                            <Prtry>QRR</Prtry>
+                                        </CdOrPrtry>
+                                    </Tp>
+                                    <Ref>002462</Ref>
+                                </CdtrRefInf>
+                            </Strd>
+                        </RmtInf>
+                        <RltdDts>
+                            <IntrBkSttlmDt>2024-03-12</IntrBkSttlmDt>
+                        </RltdDts>
+                    </TxDtls>
+                </NtryDtls>
+                <AddtlNtryInf>Rega</AddtlNtryInf>
+            </Ntry>
+            <Ntry>
+                <Amt Ccy="EUR">3.45</Amt>
+                <CdtDbtInd>CRDT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2014-01-03</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2014-01-03</Dt>
+                </ValDt>
+                <AcctSvcrRef>2014010303263400000</AcctSvcrRef>
+                <BkTxCd />
+                <NtryDtls>
+                    <Btch>
+                        <PmtInfId>STZV-PmInf27122013-11:05-2</PmtInfId>
+                        <NbOfTxs>2</NbOfTxs>
+                    </Btch>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>STZV-Msg27122013-11:05</MsgId>
+                            <EndToEndId>STZV-EtE27122013-11:05-1</EndToEndId>
+                            <MndtId>Mandat20131227</MndtId>
+                        </Refs>
+                        <AmtDtls>
+                            <TxAmt>
+                                <Amt Ccy="EUR">2.25</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <BkTxCd>
+                            <Prtry>
+                                <Cd>NDDT+071</Cd>
+                                <Issr>ZKA</Issr>
+                            </Prtry>
+                        </BkTxCd>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>Testkonto Nummer 2</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <IBAN>DE58740618130100033626</IBAN>
+                                </Id>
+                            </DbtrAcct>
+                            <UltmtDbtr>
+                                <Nm>Testkonto</Nm>
+                            </UltmtDbtr>
+                            <Cdtr>
+                                <Nm>Testkonto Nummer 1</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <IBAN>DE14740618130000033626</IBAN>
+                                </Id>
+                            </CdtrAcct>
+                            <UltmtCdtr>
+                                <Nm>keine Information vorhanden</Nm>
+                            </UltmtCdtr>
+                        </RltdPties>
+                        <RmtInf>
+                            <Ustrd>Lastschrift 2. Zahlung TAN:747216 </Ustrd>
+                        </RmtInf>
+                    </TxDtls>
+                    <TxDtls>
+                        <Refs>
+                            <MsgId>STZV-Msg27122013-11:05</MsgId>
+                            <EndToEndId>STZV-EtE27122013-11:05-2</EndToEndId>
+                            <MndtId>Mandat20131227</MndtId>
+                        </Refs>
+                        <AmtDtls>
+                            <TxAmt>
+                                <Amt Ccy="EUR">1.20</Amt>
+                            </TxAmt>
+                        </AmtDtls>
+                        <BkTxCd>
+                            <Prtry>
+                                <Cd>NDDT+071</Cd>
+                                <Issr>ZKA</Issr>
+                            </Prtry>
+                        </BkTxCd>
+                        <RltdPties>
+                            <Dbtr>
+                                <Nm>Testkonto Nummer 2</Nm>
+                            </Dbtr>
+                            <DbtrAcct>
+                                <Id>
+                                    <IBAN>DE58740618130100033626</IBAN>
+                                </Id>
+                            </DbtrAcct>
+                            <UltmtDbtr>
+                                <Nm>Testkonto</Nm>
+                            </UltmtDbtr>
+                            <Cdtr>
+                                <Nm>Testkonto Nummer 1</Nm>
+                            </Cdtr>
+                            <CdtrAcct>
+                                <Id>
+                                    <IBAN>DE14740618130000033626</IBAN>
+                                </Id>
+                            </CdtrAcct>
+                            <UltmtCdtr>
+                                <Nm>keine Information vorhanden</Nm>
+                            </UltmtCdtr>
+                        </RltdPties>
+                        <RmtInf>
+                            <Ustrd>Lastschrift 1. Zahlung TAN:747216 </Ustrd>
+                        </RmtInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+        </Stmt>
+    </BkToCstmrStmt>
+</Document>
