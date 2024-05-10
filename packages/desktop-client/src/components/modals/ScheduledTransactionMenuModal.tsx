@@ -42,7 +42,7 @@ export function ScheduledTransactionMenuModal({
 
   return (
     <Modal
-      title={<ModalTitle title={schedule.name} shrinkOnOverflow />}
+      title={<ModalTitle title={schedule.name || ''} shrinkOnOverflow />}
       showHeader
       focusAfterClose={false}
       {...modalProps}

@@ -83,7 +83,7 @@ function ToBudget({ month, toBudget, onClick, show3Cols }) {
             type="financial"
             formatter={value => (
               <AutoTextSize
-                key={month}
+                key={month + value}
                 as={Text}
                 minFontSizePx={8}
                 maxFontSizePx={12}
@@ -162,7 +162,7 @@ function Saved({ month, projected, onClick, show3Cols }) {
             type="financial"
             formatter={value => (
               <AutoTextSize
-                key={month}
+                key={month + value}
                 as={Text}
                 minFontSizePx={8}
                 maxFontSizePx={12}
@@ -466,7 +466,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 style={{ ...PILL_STYLE, maxWidth: getColumnWidth(show3Cols) }}
               >
                 <AutoTextSize
-                  key={month}
+                  key={month + value}
                   as={Text}
                   minFontSizePx={8}
                   maxFontSizePx={12}
@@ -501,7 +501,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 style={{ ...PILL_STYLE, maxWidth: getColumnWidth(show3Cols) }}
               >
                 <AutoTextSize
-                  key={month}
+                  key={month + value}
                   as={Text}
                   minFontSizePx={8}
                   maxFontSizePx={12}
@@ -536,7 +536,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   style={{ ...PILL_STYLE, maxWidth: getColumnWidth(show3Cols) }}
                 >
                   <AutoTextSize
-                    key={month}
+                    key={month + value}
                     as={Text}
                     minFontSizePx={8}
                     maxFontSizePx={12}
@@ -700,7 +700,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             type="financial"
             formatter={value => (
               <AutoTextSize
-                key={month}
+                key={month + value}
                 as={Text}
                 minFontSizePx={8}
                 maxFontSizePx={12}
@@ -730,7 +730,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             type="financial"
             formatter={value => (
               <AutoTextSize
-                key={month}
+                key={month + value}
                 as={Text}
                 minFontSizePx={8}
                 maxFontSizePx={12}
@@ -759,7 +759,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             type="financial"
             formatter={value => (
               <AutoTextSize
-                key={month}
+                key={month + value}
                 as={Text}
                 minFontSizePx={8}
                 maxFontSizePx={12}
@@ -916,7 +916,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
               type="financial"
               formatter={value => (
                 <AutoTextSize
-                  key={month}
+                  key={month + value}
                   as={Text}
                   minFontSizePx={8}
                   maxFontSizePx={12}
@@ -946,7 +946,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             type="financial"
             formatter={value => (
               <AutoTextSize
-                key={month}
+                key={month + value}
                 as={Text}
                 minFontSizePx={8}
                 maxFontSizePx={12}
@@ -1064,7 +1064,7 @@ const IncomeCategory = memo(function IncomeCategory({
                   style={{ ...PILL_STYLE, maxWidth: getColumnWidth(false) }}
                 >
                   <AutoTextSize
-                    key={month}
+                    key={month + value}
                     as={Text}
                     minFontSizePx={8}
                     maxFontSizePx={12}
@@ -1093,7 +1093,7 @@ const IncomeCategory = memo(function IncomeCategory({
             type="financial"
             formatter={value => (
               <AutoTextSize
-                key={month}
+                key={month + value}
                 as={Text}
                 minFontSizePx={8}
                 maxFontSizePx={12}
@@ -1681,7 +1681,7 @@ function BudgetTableHeader({
                   type="financial"
                   formatter={value => (
                     <AutoTextSize
-                      key={month}
+                      key={month + value}
                       as={Text}
                       minFontSizePx={8}
                       maxFontSizePx={12}
@@ -1732,7 +1732,7 @@ function BudgetTableHeader({
                   type="financial"
                   formatter={value => (
                     <AutoTextSize
-                      key={month}
+                      key={month + value}
                       as={Text}
                       minFontSizePx={8}
                       maxFontSizePx={12}
@@ -1769,7 +1769,7 @@ function BudgetTableHeader({
             type="financial"
             formatter={value => (
               <AutoTextSize
-                key={month}
+                key={month + value}
                 as={Text}
                 minFontSizePx={8}
                 maxFontSizePx={12}
