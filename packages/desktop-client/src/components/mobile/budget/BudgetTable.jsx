@@ -33,7 +33,7 @@ import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
-import { ListItem, ROW_HEIGHT } from './ListItem';
+import { ListItem } from './ListItem';
 
 const PILL_STYLE = {
   borderRadius: 16,
@@ -42,8 +42,8 @@ const PILL_STYLE = {
 };
 
 function getColumnWidth(show3Cols, isSidebar = false) {
-  // If show3Cols = 40vw | 20vw | 20vw | 20vw,
-  // Else = 60vw | 20vw | 20vw,
+  // If show3Cols = 30vw | 20vw | 20vw | 20vw,
+  // Else = 50vw | 20vw | 20vw,
   if (!isSidebar) {
     return '20vw';
   }
@@ -58,8 +58,9 @@ function ToBudget({ month, toBudget, onClick, show3Cols }) {
     <View
       style={{
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
+        width: getColumnWidth(show3Cols, true),
       }}
     >
       <Button
@@ -67,47 +68,43 @@ function ToBudget({ month, toBudget, onClick, show3Cols }) {
         style={{ maxWidth: getColumnWidth(show3Cols, true) }}
         onClick={onClick}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-            <Label
-              title={amount < 0 ? 'Overbudgeted' : 'To Budget'}
-              style={{
-                ...(amount < 0 ? styles.smallText : {}),
-                color: theme.formInputText,
-                flexShrink: 0,
-                textAlign: 'left',
-              }}
-            />
-            <CellValue
-              binding={toBudget}
-              type="financial"
-              formatter={value => (
-                <View>
-                  <AutoTextSize
-                    key={month}
-                    as={Text}
-                    minFontSizePx={8}
-                    maxFontSizePx={12}
-                    style={{
-                      maxWidth: getColumnWidth(show3Cols, true),
-                      fontSize: 12,
-                      fontWeight: '700',
-                      color: amount < 0 ? theme.errorText : theme.formInputText,
-                    }}
-                  >
-                    {format(value, 'financial')}
-                  </AutoTextSize>
-                </View>
-              )}
-            />
-          </View>
+        <View>
+          <Label
+            title={amount < 0 ? 'Overbudgeted' : 'To Budget'}
+            style={{
+              ...(amount < 0 ? styles.smallText : {}),
+              color: theme.formInputText,
+              flexShrink: 0,
+              textAlign: 'left',
+            }}
+          />
+          <CellValue
+            binding={toBudget}
+            type="financial"
+            formatter={value => (
+              <AutoTextSize
+                key={month}
+                as={Text}
+                minFontSizePx={8}
+                maxFontSizePx={12}
+                style={{
+                  maxWidth: getColumnWidth(show3Cols, true),
+                  fontSize: 12,
+                  fontWeight: '700',
+                  color: amount < 0 ? theme.errorText : theme.formInputText,
+                }}
+              >
+                {format(value, 'financial')}
+              </AutoTextSize>
+            )}
+          />
         </View>
+        <SvgCheveronRight
+          style={{ flexShrink: 0, color: theme.pageTextSubdued }}
+          width={14}
+          height={14}
+        />
       </Button>
-      <SvgCheveronRight
-        style={{ flexShrink: 0, color: theme.pageTextSubdued }}
-        width={14}
-        height={14}
-      />
     </View>
   );
 }
@@ -125,79 +122,72 @@ function Saved({ month, projected, onClick, show3Cols }) {
     <View
       style={{
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
+        width: getColumnWidth(show3Cols, true),
       }}
     >
       <Button
         type="bare"
-        style={{
-          maxWidth: getColumnWidth(show3Cols, true),
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-        }}
+        style={{ maxWidth: getColumnWidth(show3Cols, true) }}
         onClick={onClick}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-            <View>
-              {projected ? (
-                <AutoTextSize
-                  as={Label}
-                  minFontSizePx={8}
-                  maxFontSizePx={12}
-                  title="Projected Savings"
-                  style={{
-                    color: theme.formInputText,
-                    textAlign: 'left',
-                    fontSize: 12,
-                  }}
-                />
-              ) : (
-                <Label
-                  title={isNegative ? 'Overspent' : 'Saved'}
-                  style={{
-                    color: theme.formInputText,
-                    textAlign: 'left',
-                  }}
-                />
-              )}
-            </View>
-
-            <CellValue
-              binding={binding}
-              type="financial"
-              formatter={value => (
-                <View>
-                  <AutoTextSize
-                    key={month}
-                    as={Text}
-                    minFontSizePx={8}
-                    maxFontSizePx={12}
-                    style={{
-                      maxWidth: getColumnWidth(show3Cols, true),
-                      fontSize: 12,
-                      fontWeight: '700',
-                      color: projected
-                        ? theme.warningText
-                        : isNegative
-                          ? theme.errorTextDark
-                          : theme.formInputText,
-                    }}
-                  >
-                    {format(value, 'financial')}
-                  </AutoTextSize>
-                </View>
-              )}
-            />
+        <View>
+          <View>
+            {projected ? (
+              <AutoTextSize
+                as={Label}
+                minFontSizePx={8}
+                maxFontSizePx={12}
+                title="Projected Savings"
+                style={{
+                  color: theme.formInputText,
+                  textAlign: 'left',
+                  fontSize: 12,
+                }}
+              />
+            ) : (
+              <Label
+                title={isNegative ? 'Overspent' : 'Saved'}
+                style={{
+                  color: theme.formInputText,
+                  textAlign: 'left',
+                }}
+              />
+            )}
           </View>
+
+          <CellValue
+            binding={binding}
+            type="financial"
+            formatter={value => (
+              <AutoTextSize
+                key={month}
+                as={Text}
+                minFontSizePx={8}
+                maxFontSizePx={12}
+                style={{
+                  maxWidth: getColumnWidth(show3Cols, true),
+                  fontSize: 12,
+                  fontWeight: '700',
+                  color: projected
+                    ? theme.warningText
+                    : isNegative
+                      ? theme.errorTextDark
+                      : theme.formInputText,
+                }}
+              >
+                {format(value, 'financial')}
+              </AutoTextSize>
+            )}
+          />
         </View>
+        <SvgCheveronRight
+          style={{ flexShrink: 0, color: theme.pageTextSubdued }}
+          width={14}
+          height={14}
+        />
       </Button>
-      <SvgCheveronRight
-        style={{ flexShrink: 0, color: theme.pageTextSubdued }}
-        width={14}
-        height={14}
-      />
     </View>
   );
 }
@@ -497,7 +487,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
             justifyContent: 'center',
             alignItems: 'flex-end',
             width: getColumnWidth(show3Cols),
-            height: ROW_HEIGHT,
           }}
         >
           <CellValue
@@ -533,7 +522,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
             justifyContent: 'center',
             alignItems: 'flex-end',
             width: getColumnWidth(show3Cols),
-            height: ROW_HEIGHT,
           }}
         >
           <span role="button" onClick={() => onOpenBalanceMenu?.()}>
@@ -624,6 +612,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
     <ListItem
       style={{
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: theme.tableRowHeaderBackground,
         opacity: !!group.hidden ? 0.5 : undefined,
@@ -695,13 +684,13 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
           justifyContent: 'flex-end',
           alignItems: 'center',
           opacity,
+          paddingRight: 5,
         }}
       >
         <View
           style={{
             ...(!show3Cols && !showBudgetedCol && { display: 'none' }),
             width: getColumnWidth(show3Cols),
-            height: ROW_HEIGHT,
             justifyContent: 'center',
             alignItems: 'flex-end',
           }}
@@ -710,23 +699,21 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             binding={budgeted}
             type="financial"
             formatter={value => (
-              <View style={{ alignItems: 'flex-end' }}>
-                <AutoTextSize
-                  key={month}
-                  as={Text}
-                  minFontSizePx={8}
-                  maxFontSizePx={12}
-                  style={{
-                    maxWidth: getColumnWidth(show3Cols),
-                    fontSize: 12,
-                    fontWeight: '500',
-                    textAlign: 'right',
-                    padding: '0 5px',
-                  }}
-                >
-                  {format(value, 'financial')}
-                </AutoTextSize>
-              </View>
+              <AutoTextSize
+                key={month}
+                as={Text}
+                minFontSizePx={8}
+                maxFontSizePx={12}
+                style={{
+                  maxWidth: getColumnWidth(show3Cols),
+                  fontSize: 12,
+                  fontWeight: '500',
+                  paddingLeft: 5,
+                  textAlign: 'right',
+                }}
+              >
+                {format(value, 'financial')}
+              </AutoTextSize>
             )}
           />
         </View>
@@ -734,7 +721,6 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
           style={{
             ...(!show3Cols && showBudgetedCol && { display: 'none' }),
             width: getColumnWidth(show3Cols),
-            height: ROW_HEIGHT,
             justifyContent: 'center',
             alignItems: 'flex-end',
           }}
@@ -743,23 +729,21 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             binding={spent}
             type="financial"
             formatter={value => (
-              <View style={{ alignItems: 'flex-end' }}>
-                <AutoTextSize
-                  key={month}
-                  as={Text}
-                  minFontSizePx={8}
-                  maxFontSizePx={12}
-                  style={{
-                    maxWidth: getColumnWidth(show3Cols),
-                    fontSize: 12,
-                    fontWeight: '500',
-                    textAlign: 'right',
-                    padding: '0 5px',
-                  }}
-                >
-                  {format(value, 'financial')}
-                </AutoTextSize>
-              </View>
+              <AutoTextSize
+                key={month}
+                as={Text}
+                minFontSizePx={8}
+                maxFontSizePx={12}
+                style={{
+                  maxWidth: getColumnWidth(show3Cols),
+                  fontSize: 12,
+                  fontWeight: '500',
+                  paddingLeft: 5,
+                  textAlign: 'right',
+                }}
+              >
+                {format(value, 'financial')}
+              </AutoTextSize>
             )}
           />
         </View>
@@ -774,23 +758,21 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             binding={balance}
             type="financial"
             formatter={value => (
-              <View style={{ alignItems: 'flex-end' }}>
-                <AutoTextSize
-                  key={month}
-                  as={Text}
-                  minFontSizePx={8}
-                  maxFontSizePx={12}
-                  style={{
-                    maxWidth: getColumnWidth(show3Cols),
-                    fontSize: 12,
-                    fontWeight: '500',
-                    textAlign: 'right',
-                    padding: '0 5px',
-                  }}
-                >
-                  {format(value, 'financial')}
-                </AutoTextSize>
-              </View>
+              <AutoTextSize
+                key={month}
+                as={Text}
+                minFontSizePx={8}
+                maxFontSizePx={12}
+                style={{
+                  maxWidth: getColumnWidth(show3Cols),
+                  fontSize: 12,
+                  fontWeight: '500',
+                  paddingLeft: 5,
+                  textAlign: 'right',
+                }}
+              >
+                {format(value, 'financial')}
+              </AutoTextSize>
             )}
           />
         </View>
@@ -913,53 +895,56 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           </View>
         </Button>
       </View>
-      {budgeted && (
-        <View
-          style={{
-            justifyContent: 'center',
-            alignItems: 'flex-end',
-            width: getColumnWidth(false, false),
-            height: ROW_HEIGHT,
-          }}
-        >
-          <CellValue
-            binding={budgeted}
-            type="financial"
-            formatter={value => (
-              <View style={{ alignItems: 'flex-end' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          paddingRight: 5,
+        }}
+      >
+        {budgeted && (
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'flex-end',
+              width: getColumnWidth(false),
+            }}
+          >
+            <CellValue
+              binding={budgeted}
+              type="financial"
+              formatter={value => (
                 <AutoTextSize
                   key={month}
                   as={Text}
                   minFontSizePx={8}
                   maxFontSizePx={12}
                   style={{
-                    maxWidth: getColumnWidth(false, false),
+                    maxWidth: getColumnWidth(false),
+                    paddingLeft: 5,
                     textAlign: 'right',
                     fontSize: 12,
                     fontWeight: '500',
-                    padding: '0 5px',
                   }}
                 >
                   {format(value, 'financial')}
                 </AutoTextSize>
-              </View>
-            )}
-          />
-        </View>
-      )}
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'flex-end',
-          width: getColumnWidth(false, false),
-          height: ROW_HEIGHT,
-        }}
-      >
-        <CellValue
-          binding={balance}
-          type="financial"
-          formatter={value => (
-            <View style={{ alignItems: 'flex-end' }}>
+              )}
+            />
+          </View>
+        )}
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            width: getColumnWidth(false),
+          }}
+        >
+          <CellValue
+            binding={balance}
+            type="financial"
+            formatter={value => (
               <AutoTextSize
                 key={month}
                 as={Text}
@@ -967,6 +952,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
                 maxFontSizePx={12}
                 style={{
                   maxWidth: getColumnWidth(false, false),
+                  paddingLeft: 5,
                   textAlign: 'right',
                   fontSize: 12,
                   fontWeight: '500',
@@ -974,9 +960,9 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
               >
                 {format(value, 'financial')}
               </AutoTextSize>
-            </View>
-          )}
-        />
+            )}
+          />
+        </View>
       </View>
     </ListItem>
   );
@@ -1051,55 +1037,61 @@ const IncomeCategory = memo(function IncomeCategory({
           </View>
         </Button>
       </View>
-      {budgeted && (
-        <View
-          style={{
-            width: getColumnWidth(false),
-            justifyContent: 'center',
-            alignItems: 'flex-end',
-          }}
-        >
-          <BudgetCell
-            name="budgeted"
-            binding={budgeted}
-            categoryId={category.id}
-            month={month}
-            onBudgetAction={onBudgetAction}
-            formatter={value => (
-              <Button
-                type="bare"
-                style={{ ...PILL_STYLE, maxWidth: getColumnWidth(false) }}
-              >
-                <AutoTextSize
-                  key={month}
-                  as={Text}
-                  minFontSizePx={8}
-                  maxFontSizePx={12}
-                  style={{
-                    textAlign: 'right',
-                    fontSize: 12,
-                  }}
-                >
-                  {format(value, 'financial')}
-                </AutoTextSize>
-              </Button>
-            )}
-          />
-        </View>
-      )}
       <View
         style={{
-          justifyContent: 'center',
-          alignItems: 'flex-end',
-          width: getColumnWidth(false),
-          height: ROW_HEIGHT,
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
         }}
       >
-        <CellValue
-          binding={balance}
-          type="financial"
-          formatter={value => (
-            <View style={{ alignItems: 'flex-end' }}>
+        {budgeted && (
+          <View
+            style={{
+              width: getColumnWidth(false),
+              justifyContent: 'center',
+              alignItems: 'flex-end',
+            }}
+          >
+            <BudgetCell
+              name="budgeted"
+              binding={budgeted}
+              categoryId={category.id}
+              month={month}
+              onBudgetAction={onBudgetAction}
+              formatter={value => (
+                <Button
+                  type="bare"
+                  style={{ ...PILL_STYLE, maxWidth: getColumnWidth(false) }}
+                >
+                  <AutoTextSize
+                    key={month}
+                    as={Text}
+                    minFontSizePx={8}
+                    maxFontSizePx={12}
+                    style={{
+                      textAlign: 'right',
+                      fontSize: 12,
+                    }}
+                  >
+                    {format(value, 'financial')}
+                  </AutoTextSize>
+                </Button>
+              )}
+            />
+          </View>
+        )}
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            width: getColumnWidth(false),
+            paddingRight: 5,
+          }}
+        >
+          <CellValue
+            binding={balance}
+            type="financial"
+            formatter={value => (
               <AutoTextSize
                 key={month}
                 as={Text}
@@ -1113,9 +1105,9 @@ const IncomeCategory = memo(function IncomeCategory({
               >
                 {format(value, 'financial')}
               </AutoTextSize>
-            </View>
-          )}
-        />
+            )}
+          />
+        </View>
       </View>
     </ListItem>
   );
@@ -1319,7 +1311,7 @@ function IncomeGroup({
           justifyContent: 'flex-end',
           marginTop: 50,
           marginBottom: 5,
-          marginRight: 14,
+          marginRight: 20,
         }}
       >
         {type === 'report' && (
@@ -1502,26 +1494,18 @@ export function BudgetTable({
   const show3Cols = width >= 360;
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
-  const format = useFormat();
 
   const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
   );
 
-  const [showHiddenCategories = false] = useLocalPref(
-    'budget.showHiddenCategories',
-  );
-
-  function toggleDisplay() {
+  function toggleSpentColumn() {
     setShowSpentColumnPref(!showSpentColumn);
   }
 
-  const buttonStyle = {
-    padding: 0,
-    backgroundColor: 'transparent',
-    borderRadius: 'unset',
-  };
-
+  const [showHiddenCategories = false] = useLocalPref(
+    'budget.showHiddenCategories',
+  );
   const noBackgroundColorStyle = {
     backgroundColor: 'transparent',
     color: 'white',
@@ -1563,203 +1547,14 @@ export function BudgetTable({
         />
       }
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexShrink: 0,
-          padding: 10,
-          backgroundColor: theme.tableRowHeaderBackground,
-          borderBottomWidth: 1,
-          borderColor: theme.tableBorder,
-        }}
-      >
-        <View
-          style={{
-            width: getColumnWidth(show3Cols, true),
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-          }}
-        >
-          {type === 'report' ? (
-            <Saved
-              month={month}
-              projected={month >= monthUtils.currentMonth()}
-              onClick={onShowBudgetSummary}
-              show3Cols={show3Cols}
-            />
-          ) : (
-            <ToBudget
-              month={month}
-              toBudget={rolloverBudget.toBudget}
-              onClick={onShowBudgetSummary}
-              show3Cols={show3Cols}
-            />
-          )}
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            marginRight: 5,
-          }}
-        >
-          {(show3Cols || !showSpentColumn) && (
-            <View
-              style={{
-                width: getColumnWidth(show3Cols),
-                alignItems: 'flex-end',
-              }}
-            >
-              <Button
-                type="bare"
-                disabled={show3Cols}
-                onClick={toggleDisplay}
-                style={{
-                  maxWidth: getColumnWidth(show3Cols),
-                  ...buttonStyle,
-                  background:
-                    !showSpentColumn && !show3Cols
-                      ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 4px, transparent 0)`
-                      : null,
-                }}
-              >
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Label
-                    title="Budgeted"
-                    style={{ color: theme.buttonNormalText, padding: '0 5px' }}
-                  />
-                  <CellValue
-                    binding={
-                      type === 'report'
-                        ? reportBudget.totalBudgetedExpense
-                        : rolloverBudget.totalBudgeted
-                    }
-                    type="financial"
-                    formatter={value => (
-                      <View style={{ alignItems: 'flex-end' }}>
-                        <AutoTextSize
-                          key={month}
-                          as={Text}
-                          minFontSizePx={8}
-                          maxFontSizePx={12}
-                          style={{
-                            maxWidth: getColumnWidth(show3Cols),
-                            color: theme.formInputText,
-                            textAlign: 'right',
-                            fontSize: 12,
-                            fontWeight: '500',
-                            padding: '0 5px',
-                          }}
-                        >
-                          {format(value, 'financial')}
-                        </AutoTextSize>
-                      </View>
-                    )}
-                  />
-                </View>
-              </Button>
-            </View>
-          )}
-          {(show3Cols || showSpentColumn) && (
-            <View
-              style={{
-                width: getColumnWidth(show3Cols),
-                alignItems: 'flex-end',
-              }}
-            >
-              <Button
-                type="bare"
-                disabled={show3Cols}
-                onClick={toggleDisplay}
-                style={{
-                  maxWidth: getColumnWidth(show3Cols),
-                  ...buttonStyle,
-                  padding: '10px 0',
-                  background:
-                    showSpentColumn && !show3Cols
-                      ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 4px, transparent 0)`
-                      : null,
-                }}
-              >
-                <View>
-                  <Label
-                    title="Spent"
-                    style={{ color: theme.formInputText, padding: '0 5px' }}
-                  />
-                  <CellValue
-                    binding={
-                      type === 'report'
-                        ? reportBudget.totalSpent
-                        : rolloverBudget.totalSpent
-                    }
-                    type="financial"
-                    formatter={value => (
-                      <View style={{ alignItems: 'flex-end' }}>
-                        <AutoTextSize
-                          key={month}
-                          as={Text}
-                          minFontSizePx={8}
-                          maxFontSizePx={12}
-                          style={{
-                            maxWidth: getColumnWidth(show3Cols),
-                            color: theme.formInputText,
-                            textAlign: 'right',
-                            fontSize: 12,
-                            fontWeight: '500',
-                            padding: '0 5px',
-                          }}
-                        >
-                          {format(value, 'financial')}
-                        </AutoTextSize>
-                      </View>
-                    )}
-                  />
-                </View>
-              </Button>
-            </View>
-          )}
-          <View
-            style={{ width: getColumnWidth(show3Cols), alignItems: 'flex-end' }}
-          >
-            <Label
-              title="Balance"
-              style={{ color: theme.formInputText, padding: '0 5px' }}
-            />
-            <CellValue
-              binding={
-                type === 'report'
-                  ? reportBudget.totalLeftover
-                  : rolloverBudget.totalBalance
-              }
-              type="financial"
-              formatter={value => (
-                <View style={{ alignItems: 'flex-end' }}>
-                  <AutoTextSize
-                    key={month}
-                    as={Text}
-                    minFontSizePx={8}
-                    maxFontSizePx={12}
-                    style={{
-                      maxWidth: getColumnWidth(show3Cols),
-                      color: theme.formInputText,
-                      textAlign: 'right',
-                      fontSize: 12,
-                      fontWeight: '500',
-                      padding: '0 5px',
-                    }}
-                  >
-                    {format(value, 'financial')}
-                  </AutoTextSize>
-                </View>
-              )}
-            />
-          </View>
-        </View>
-      </View>
+      <BudgetTableHeader
+        type={type}
+        month={month}
+        show3Cols={show3Cols}
+        showSpentColumn={showSpentColumn}
+        toggleSpentColumn={toggleSpentColumn}
+        onShowBudgetSummary={onShowBudgetSummary}
+      />
       <PullToRefresh onRefresh={onRefresh}>
         <View
           data-testid="budget-table"
@@ -1791,6 +1586,209 @@ export function BudgetTable({
         </View>
       </PullToRefresh>
     </Page>
+  );
+}
+
+function BudgetTableHeader({
+  show3Cols,
+  type,
+  month,
+  onShowBudgetSummary,
+  showSpentColumn,
+  toggleSpentColumn,
+}) {
+  const format = useFormat();
+  const buttonStyle = {
+    padding: 0,
+    backgroundColor: 'transparent',
+    borderRadius: 'unset',
+  };
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexShrink: 0,
+        padding: '10px 20px',
+        paddingLeft: 10,
+        backgroundColor: theme.tableRowHeaderBackground,
+        borderBottomWidth: 1,
+        borderColor: theme.tableBorder,
+      }}
+    >
+      <View
+        style={{
+          width: getColumnWidth(show3Cols, true),
+          flexDirection: 'row',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+        }}
+      >
+        {type === 'report' ? (
+          <Saved
+            month={month}
+            projected={month >= monthUtils.currentMonth()}
+            onClick={onShowBudgetSummary}
+            show3Cols={show3Cols}
+          />
+        ) : (
+          <ToBudget
+            month={month}
+            toBudget={rolloverBudget.toBudget}
+            onClick={onShowBudgetSummary}
+            show3Cols={show3Cols}
+          />
+        )}
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+        }}
+      >
+        {(show3Cols || !showSpentColumn) && (
+          <View
+            style={{
+              width: getColumnWidth(show3Cols),
+              alignItems: 'flex-end',
+            }}
+          >
+            <Button
+              type="bare"
+              disabled={show3Cols}
+              onClick={toggleSpentColumn}
+              style={{
+                ...buttonStyle,
+                background:
+                  !showSpentColumn && !show3Cols
+                    ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 4px, transparent 0)`
+                    : null,
+              }}
+            >
+              <View style={{ alignItems: 'flex-end' }}>
+                <Label
+                  title="Budgeted"
+                  style={{ color: theme.formInputText }}
+                />
+                <CellValue
+                  binding={
+                    type === 'report'
+                      ? reportBudget.totalBudgetedExpense
+                      : rolloverBudget.totalBudgeted
+                  }
+                  type="financial"
+                  formatter={value => (
+                    <AutoTextSize
+                      key={month}
+                      as={Text}
+                      minFontSizePx={8}
+                      maxFontSizePx={12}
+                      style={{
+                        maxWidth: getColumnWidth(show3Cols),
+                        color: theme.formInputText,
+                        paddingLeft: 5,
+                        textAlign: 'right',
+                        fontSize: 12,
+                        fontWeight: '500',
+                      }}
+                    >
+                      {format(value, 'financial')}
+                    </AutoTextSize>
+                  )}
+                />
+              </View>
+            </Button>
+          </View>
+        )}
+        {(show3Cols || showSpentColumn) && (
+          <View
+            style={{
+              width: getColumnWidth(show3Cols),
+              alignItems: 'flex-end',
+            }}
+          >
+            <Button
+              type="bare"
+              disabled={show3Cols}
+              onClick={toggleSpentColumn}
+              style={{
+                ...buttonStyle,
+                background:
+                  showSpentColumn && !show3Cols
+                    ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 4px, transparent 0)`
+                    : null,
+              }}
+            >
+              <View style={{ alignItems: 'flex-end' }}>
+                <Label title="Spent" style={{ color: theme.formInputText }} />
+                <CellValue
+                  binding={
+                    type === 'report'
+                      ? reportBudget.totalSpent
+                      : rolloverBudget.totalSpent
+                  }
+                  type="financial"
+                  formatter={value => (
+                    <AutoTextSize
+                      key={month}
+                      as={Text}
+                      minFontSizePx={8}
+                      maxFontSizePx={12}
+                      style={{
+                        maxWidth: getColumnWidth(show3Cols),
+                        color: theme.formInputText,
+                        paddingLeft: 5,
+                        textAlign: 'right',
+                        fontSize: 12,
+                        fontWeight: '500',
+                      }}
+                    >
+                      {format(value, 'financial')}
+                    </AutoTextSize>
+                  )}
+                />
+              </View>
+            </Button>
+          </View>
+        )}
+        <View
+          style={{
+            width: getColumnWidth(show3Cols),
+            alignItems: 'flex-end',
+          }}
+        >
+          <Label title="Balance" style={{ color: theme.formInputText }} />
+          <CellValue
+            binding={
+              type === 'report'
+                ? reportBudget.totalLeftover
+                : rolloverBudget.totalBalance
+            }
+            type="financial"
+            formatter={value => (
+              <AutoTextSize
+                key={month}
+                as={Text}
+                minFontSizePx={8}
+                maxFontSizePx={12}
+                style={{
+                  maxWidth: getColumnWidth(show3Cols),
+                  color: theme.formInputText,
+                  paddingLeft: 5,
+                  textAlign: 'right',
+                  fontSize: 12,
+                  fontWeight: '500',
+                }}
+              >
+                {format(value, 'financial')}
+              </AutoTextSize>
+            )}
+          />
+        </View>
+      </View>
+    </View>
   );
 }
 
