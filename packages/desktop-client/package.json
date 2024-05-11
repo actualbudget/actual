@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "24.5.0",
+  "version": "24.5.1-mp",
   "license": "MIT",
   "files": [
     "build"
