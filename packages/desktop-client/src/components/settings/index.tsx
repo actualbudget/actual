@@ -6,6 +6,7 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -30,6 +31,7 @@ import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
 import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
+import { SimpleFINResetCredential } from './SimpleFINReset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -126,6 +128,8 @@ export function Settings() {
 
   const { loadPrefs, closeBudget } = useActions();
 
+  const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
+
   useEffect(() => {
     const unlisten = listen('prefs-updated', () => {
       loadPrefs();
@@ -184,6 +188,7 @@ export function Settings() {
           <AdvancedAbout />
           <ResetCache />
           <ResetSync />
+          {simpleFinSyncFeatureFlag && <SimpleFINResetCredential />}
           <FixSplits />
           <ExperimentalFeatures />
         </AdvancedToggle>
