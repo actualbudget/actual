@@ -53,6 +53,7 @@ function getColumnWidth({ show3Cols, isSidebar = false, offset = 0 } = {}) {
 function ToBudget({ month, toBudget, onClick, show3Cols }) {
   const amount = useSheetValue(toBudget);
   const format = useFormat();
+  const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
 
   return (
     <View
@@ -60,12 +61,12 @@ function ToBudget({ month, toBudget, onClick, show3Cols }) {
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        width: getColumnWidth({ show3Cols, isSidebar: true }),
+        width: sidebarColumnWidth,
       }}
     >
       <Button
         type="bare"
-        style={{ maxWidth: getColumnWidth({ show3Cols, isSidebar: true }) }}
+        style={{ maxWidth: sidebarColumnWidth }}
         onClick={onClick}
       >
         <View>
@@ -88,7 +89,7 @@ function ToBudget({ month, toBudget, onClick, show3Cols }) {
                 minFontSizePx={8}
                 maxFontSizePx={12}
                 style={{
-                  maxWidth: getColumnWidth({ show3Cols, isSidebar: true }),
+                  maxWidth: sidebarColumnWidth,
                   fontSize: 12,
                   fontWeight: '700',
                   color: amount < 0 ? theme.errorText : theme.formInputText,
@@ -117,6 +118,7 @@ function Saved({ month, projected, onClick, show3Cols }) {
   const saved = useSheetValue(binding) || 0;
   const format = useFormat();
   const isNegative = saved < 0;
+  const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
 
   return (
     <View
@@ -124,12 +126,12 @@ function Saved({ month, projected, onClick, show3Cols }) {
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        width: getColumnWidth({ show3Cols, isSidebar: true }),
+        width: sidebarColumnWidth,
       }}
     >
       <Button
         type="bare"
-        style={{ maxWidth: getColumnWidth({ show3Cols, isSidebar: true }) }}
+        style={{ maxWidth: sidebarColumnWidth }}
         onClick={onClick}
       >
         <View>
@@ -141,7 +143,7 @@ function Saved({ month, projected, onClick, show3Cols }) {
                 maxFontSizePx={12}
                 title="Projected Savings"
                 style={{
-                  maxWidth: getColumnWidth({ show3Cols, isSidebar: true }),
+                  maxWidth: sidebarColumnWidth,
                   color: theme.formInputText,
                   textAlign: 'left',
                   fontSize: 12,
@@ -168,7 +170,7 @@ function Saved({ month, projected, onClick, show3Cols }) {
                 minFontSizePx={8}
                 maxFontSizePx={12}
                 style={{
-                  maxWidth: getColumnWidth({ show3Cols, isSidebar: true }),
+                  maxWidth: sidebarColumnWidth,
                   fontSize: 12,
                   fontWeight: '700',
                   color: projected
@@ -387,6 +389,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
     navigate(`/categories/${category.id}?month=${month}`);
   };
 
+  const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
+  const columnWidth = getColumnWidth({ show3Cols });
+
   const content = (
     <ListItem
       style={{
@@ -409,7 +414,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         <Button
           type="bare"
           style={{
-            maxWidth: getColumnWidth({ show3Cols, isSidebar: true }),
+            maxWidth: sidebarColumnWidth,
           }}
           onClick={() => onEdit?.(category.id)}
         >
@@ -423,7 +428,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             <Text
               style={{
                 ...styles.lineClamp(2),
-                width: getColumnWidth({ show3Cols, isSidebar: true }),
+                width: sidebarColumnWidth,
                 textAlign: 'left',
                 ...styles.smallText,
               }}
@@ -450,7 +455,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         <View
           style={{
             ...(!show3Cols && !showBudgetedCol && { display: 'none' }),
-            width: getColumnWidth({ show3Cols }),
+            width: columnWidth,
             justifyContent: 'center',
             alignItems: 'flex-end',
           }}
@@ -466,7 +471,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 type="bare"
                 style={{
                   ...PILL_STYLE,
-                  maxWidth: getColumnWidth({ show3Cols }),
+                  maxWidth: columnWidth,
                 }}
               >
                 <AutoTextSize
@@ -475,7 +480,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   minFontSizePx={8}
                   maxFontSizePx={12}
                   style={{
-                    maxWidth: getColumnWidth({ show3Cols }),
+                    maxWidth: columnWidth,
                     textAlign: 'right',
                     fontSize: 12,
                   }}
@@ -491,7 +496,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             ...(!show3Cols && showBudgetedCol && { display: 'none' }),
             justifyContent: 'center',
             alignItems: 'flex-end',
-            width: getColumnWidth({ show3Cols }),
+            width: columnWidth,
           }}
         >
           <CellValue
@@ -505,7 +510,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 type="bare"
                 style={{
                   ...PILL_STYLE,
-                  maxWidth: getColumnWidth({ show3Cols }),
+                  maxWidth: columnWidth,
                 }}
               >
                 <AutoTextSize
@@ -514,7 +519,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   minFontSizePx={8}
                   maxFontSizePx={12}
                   style={{
-                    maxWidth: getColumnWidth({ show3Cols }),
+                    maxWidth: columnWidth,
                     textAlign: 'right',
                     fontSize: 12,
                   }}
@@ -530,7 +535,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             ...styles.noTapHighlight,
             justifyContent: 'center',
             alignItems: 'flex-end',
-            width: getColumnWidth({ show3Cols }),
+            width: columnWidth,
           }}
         >
           <span role="button" onClick={() => onOpenBalanceMenu?.()}>
@@ -544,7 +549,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   type="bare"
                   style={{
                     ...PILL_STYLE,
-                    maxWidth: getColumnWidth({ show3Cols }),
+                    maxWidth: columnWidth,
                   }}
                 >
                   <AutoTextSize
@@ -553,7 +558,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     minFontSizePx={8}
                     maxFontSizePx={12}
                     style={{
-                      maxWidth: getColumnWidth({ show3Cols }),
+                      maxWidth: columnWidth,
                       ...makeAmountFullStyle(value),
                       textAlign: 'right',
                       fontSize: 12,
@@ -621,6 +626,12 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   const opacity = blank ? 0 : 1;
   const listItemRef = useRef();
   const format = useFormat();
+  const sidebarColumnWidth = getColumnWidth({
+    show3Cols,
+    isSidebar: true,
+    offset: -3.5,
+  });
+  const columnWidth = getColumnWidth({ show3Cols });
 
   const content = (
     <ListItem
@@ -640,6 +651,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
           flex: 1,
           flexDirection: 'row',
           justifyContent: 'flex-start',
+          width: sidebarColumnWidth,
         }}
       >
         <Button
@@ -662,7 +674,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         <Button
           type="bare"
           style={{
-            maxWidth: getColumnWidth({ show3Cols, isSidebar: true }),
+            maxWidth: sidebarColumnWidth,
           }}
           onClick={() => onEdit?.(group.id)}
         >
@@ -676,11 +688,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
             <Text
               style={{
                 ...styles.lineClamp(2),
-                width: getColumnWidth({
-                  show3Cols,
-                  isSidebar: true,
-                  offset: -10,
-                }),
+                width: sidebarColumnWidth,
                 textAlign: 'left',
                 ...styles.smallText,
               }}
@@ -708,7 +716,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         <View
           style={{
             ...(!show3Cols && !showBudgetedCol && { display: 'none' }),
-            width: getColumnWidth({ show3Cols }),
+            width: columnWidth,
             justifyContent: 'center',
             alignItems: 'flex-end',
           }}
@@ -723,7 +731,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                 minFontSizePx={8}
                 maxFontSizePx={12}
                 style={{
-                  maxWidth: getColumnWidth({ show3Cols }),
+                  maxWidth: columnWidth,
                   fontSize: 12,
                   fontWeight: '500',
                   paddingLeft: 5,
@@ -738,7 +746,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         <View
           style={{
             ...(!show3Cols && showBudgetedCol && { display: 'none' }),
-            width: getColumnWidth({ show3Cols }),
+            width: columnWidth,
             justifyContent: 'center',
             alignItems: 'flex-end',
           }}
@@ -753,7 +761,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                 minFontSizePx={8}
                 maxFontSizePx={12}
                 style={{
-                  maxWidth: getColumnWidth({ show3Cols }),
+                  maxWidth: columnWidth,
                   fontSize: 12,
                   fontWeight: '500',
                   paddingLeft: 5,
@@ -767,7 +775,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         </View>
         <View
           style={{
-            width: getColumnWidth({ show3Cols }),
+            width: columnWidth,
             justifyContent: 'center',
             alignItems: 'flex-end',
           }}
@@ -782,7 +790,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                 minFontSizePx={8}
                 maxFontSizePx={12}
                 style={{
-                  maxWidth: getColumnWidth({ show3Cols }),
+                  maxWidth: columnWidth,
                   fontSize: 12,
                   fontWeight: '500',
                   paddingLeft: 5,
@@ -838,6 +846,8 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
+  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -23.5 });
+  const columnWidth = getColumnWidth();
 
   return (
     <ListItem
@@ -857,7 +867,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           flex: 1,
           flexDirection: 'row',
           justifyContent: 'flex-start',
-          width: getColumnWidth({ isSidebar: true }),
+          width: sidebarColumnWidth,
         }}
       >
         <Button
@@ -883,7 +893,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
         <Button
           type="bare"
           style={{
-            maxWidth: getColumnWidth({ isSidebar: true }),
+            maxWidth: sidebarColumnWidth,
           }}
           onClick={() => onEdit?.(group.id)}
         >
@@ -897,7 +907,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             <Text
               style={{
                 ...styles.lineClamp(2),
-                width: getColumnWidth({ isSidebar: true, offset: -29.5 }),
+                width: sidebarColumnWidth,
                 textAlign: 'left',
                 ...styles.smallText,
               }}
@@ -926,7 +936,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
             style={{
               justifyContent: 'center',
               alignItems: 'flex-end',
-              width: getColumnWidth(),
+              width: columnWidth,
             }}
           >
             <CellValue
@@ -939,7 +949,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
                   minFontSizePx={8}
                   maxFontSizePx={12}
                   style={{
-                    maxWidth: getColumnWidth(),
+                    maxWidth: columnWidth,
                     paddingLeft: 5,
                     textAlign: 'right',
                     fontSize: 12,
@@ -956,7 +966,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           style={{
             justifyContent: 'center',
             alignItems: 'flex-end',
-            width: getColumnWidth(),
+            width: columnWidth,
           }}
         >
           <CellValue
@@ -969,7 +979,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
                 minFontSizePx={8}
                 maxFontSizePx={12}
                 style={{
-                  maxWidth: getColumnWidth(),
+                  maxWidth: columnWidth,
                   paddingLeft: 5,
                   textAlign: 'right',
                   fontSize: 12,
@@ -998,6 +1008,8 @@ const IncomeCategory = memo(function IncomeCategory({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
+  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -20 });
+  const columnWidth = getColumnWidth();
 
   return (
     <ListItem
@@ -1019,13 +1031,13 @@ const IncomeCategory = memo(function IncomeCategory({
           flex: 1,
           justifyContent: 'center',
           alignItems: 'flex-start',
-          width: getColumnWidth({ isSidebar: true }),
+          width: sidebarColumnWidth,
         }}
       >
         <Button
           type="bare"
           style={{
-            maxWidth: getColumnWidth({ isSidebar: true }),
+            maxWidth: sidebarColumnWidth,
           }}
           onClick={() => onEdit?.(category.id)}
         >
@@ -1039,7 +1051,7 @@ const IncomeCategory = memo(function IncomeCategory({
             <Text
               style={{
                 ...styles.lineClamp(2),
-                width: getColumnWidth({ isSidebar: true, offset: -26 }),
+                width: sidebarColumnWidth,
                 textAlign: 'left',
                 ...styles.smallText,
               }}
@@ -1065,7 +1077,7 @@ const IncomeCategory = memo(function IncomeCategory({
         {budgeted && (
           <View
             style={{
-              width: getColumnWidth(),
+              width: columnWidth,
               justifyContent: 'center',
               alignItems: 'flex-end',
             }}
@@ -1079,7 +1091,7 @@ const IncomeCategory = memo(function IncomeCategory({
               formatter={value => (
                 <Button
                   type="bare"
-                  style={{ ...PILL_STYLE, maxWidth: getColumnWidth() }}
+                  style={{ ...PILL_STYLE, maxWidth: columnWidth }}
                 >
                   <AutoTextSize
                     key={month + value}
@@ -1087,7 +1099,7 @@ const IncomeCategory = memo(function IncomeCategory({
                     minFontSizePx={8}
                     maxFontSizePx={12}
                     style={{
-                      maxWidth: getColumnWidth(),
+                      maxWidth: columnWidth,
                       textAlign: 'right',
                       fontSize: 12,
                     }}
@@ -1103,7 +1115,7 @@ const IncomeCategory = memo(function IncomeCategory({
           style={{
             justifyContent: 'center',
             alignItems: 'flex-end',
-            width: getColumnWidth(),
+            width: columnWidth,
             paddingRight: 5,
           }}
         >
@@ -1117,7 +1129,7 @@ const IncomeCategory = memo(function IncomeCategory({
                 minFontSizePx={8}
                 maxFontSizePx={12}
                 style={{
-                  maxWidth: getColumnWidth(),
+                  maxWidth: columnWidth,
                   textAlign: 'right',
                   fontSize: 12,
                 }}
@@ -1321,6 +1333,7 @@ function IncomeGroup({
   collapsed,
   onToggleCollapse,
 }) {
+  const columnWidth = getColumnWidth();
   return (
     <View>
       <View
@@ -1334,9 +1347,9 @@ function IncomeGroup({
         }}
       >
         {type === 'report' && (
-          <Label title="Budgeted" style={{ width: getColumnWidth() }} />
+          <Label title="Budgeted" style={{ width: columnWidth }} />
         )}
-        <Label title="Received" style={{ width: getColumnWidth() }} />
+        <Label title="Received" style={{ width: columnWidth }} />
       </View>
 
       <Card style={{ marginTop: 0 }}>
@@ -1622,6 +1635,8 @@ function BudgetTableHeader({
     backgroundColor: 'transparent',
     borderRadius: 'unset',
   };
+  const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
+  const columnWidth = getColumnWidth({ show3Cols });
   return (
     <View
       style={{
@@ -1638,7 +1653,7 @@ function BudgetTableHeader({
     >
       <View
         style={{
-          width: getColumnWidth({ show3Cols, isSidebar: true }),
+          width: sidebarColumnWidth,
           flexDirection: 'row',
           justifyContent: 'flex-start',
           alignItems: 'center',
@@ -1670,7 +1685,7 @@ function BudgetTableHeader({
         {(show3Cols || !showSpentColumn) && (
           <View
             style={{
-              width: getColumnWidth({ show3Cols }),
+              width: columnWidth,
               alignItems: 'flex-end',
             }}
           >
@@ -1705,7 +1720,7 @@ function BudgetTableHeader({
                       minFontSizePx={8}
                       maxFontSizePx={12}
                       style={{
-                        maxWidth: getColumnWidth({ show3Cols }),
+                        maxWidth: columnWidth,
                         color: theme.formInputText,
                         paddingLeft: 5,
                         textAlign: 'right',
@@ -1724,7 +1739,7 @@ function BudgetTableHeader({
         {(show3Cols || showSpentColumn) && (
           <View
             style={{
-              width: getColumnWidth({ show3Cols }),
+              width: columnWidth,
               alignItems: 'flex-end',
             }}
           >
@@ -1756,7 +1771,7 @@ function BudgetTableHeader({
                       minFontSizePx={8}
                       maxFontSizePx={12}
                       style={{
-                        maxWidth: getColumnWidth({ show3Cols }),
+                        maxWidth: columnWidth,
                         color: theme.formInputText,
                         paddingLeft: 5,
                         textAlign: 'right',
@@ -1774,7 +1789,7 @@ function BudgetTableHeader({
         )}
         <View
           style={{
-            width: getColumnWidth({ show3Cols }),
+            width: columnWidth,
             alignItems: 'flex-end',
           }}
         >
@@ -1793,7 +1808,7 @@ function BudgetTableHeader({
                 minFontSizePx={8}
                 maxFontSizePx={12}
                 style={{
-                  maxWidth: getColumnWidth({ show3Cols }),
+                  maxWidth: columnWidth,
                   color: theme.formInputText,
                   paddingLeft: 5,
                   textAlign: 'right',
