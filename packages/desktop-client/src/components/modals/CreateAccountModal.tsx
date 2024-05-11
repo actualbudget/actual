@@ -210,6 +210,25 @@ export function CreateAccountModal({
                       to automatically download transactions. SimpleFIN provides
                       reliable, up-to-date information from hundreds of banks.
                     </Text>
+                    <ButtonWithLoading
+                      disabled={!isSimpleFinSetupComplete}
+                      onClick={onSimpleFinInit}
+                    >
+                      Reset SimpleFIN Credential
+                    </ButtonWithLoading>
+                    <Text
+                      style={{
+                        lineHeight: '1.4em',
+                        fontSize: 12,
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      In some cases (like importing from an existing database to
+                      a new instance), you may need to generate a new SimpleFIN
+                      setup token to receive a valid access token. If you are
+                      having trouble, generate a new setup token and enter it
+                      here.
+                    </Text>
                   </>
                 )}
               </>
