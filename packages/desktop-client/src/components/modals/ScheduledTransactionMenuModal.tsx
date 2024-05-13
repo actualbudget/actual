@@ -37,7 +37,7 @@ export function ScheduledTransactionMenuModal({
   const schedule = scheduleData?.schedules?.[0];
 
   if (!schedule) {
-    return;
+    return null;
   }
 
   return (
