@@ -79,7 +79,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = currencyToAmount(text);
+    const parsed = currencyToAmount(text) || 0;
     const newValue = editing ? parsed : value;
 
     setValue(Math.abs(newValue));
