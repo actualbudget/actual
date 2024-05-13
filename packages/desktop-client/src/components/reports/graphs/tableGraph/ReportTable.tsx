@@ -36,6 +36,15 @@ type ReportTableProps = {
   showOffBudget?: boolean;
 };
 
+export type renderRowProps = {
+  item: GroupedEntity;
+  mode: string;
+  intervalsCount: number;
+  compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
+};
+
 export function ReportTable({
   saveScrollWidth,
   listScrollRef,
@@ -60,7 +69,7 @@ export function ReportTable({
     }
   });
 
-  const renderItem = useCallback(
+  const renderRow = useCallback(
     ({
       item,
       mode,
@@ -68,14 +77,7 @@ export function ReportTable({
       compact,
       style,
       compactStyle,
-    }: {
-      item: GroupedEntity;
-      mode: string;
-      intervalsCount: number;
-      compact: boolean;
-      style?: CSSProperties;
-      compactStyle?: CSSProperties;
-    }) => {
+    }: renderRowProps) => {
       return (
         <ReportTableRow
           item={item}
@@ -125,7 +127,7 @@ export function ReportTable({
           intervalsCount={intervalsCount}
           mode={mode}
           groupBy={groupBy}
-          renderItem={renderItem}
+          renderRow={renderRow}
           compact={compact}
           style={style}
           compactStyle={compactStyle}

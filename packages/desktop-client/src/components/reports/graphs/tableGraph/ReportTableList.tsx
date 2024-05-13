@@ -9,18 +9,13 @@ import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row } from '../../../table';
 
+import { type renderRowProps } from './ReportTable';
+
 type RenderRowProps = {
   index: number;
   parent_index?: number;
   compact: boolean;
-  renderItem: (arg: {
-    item: GroupedEntity;
-    mode: string;
-    intervalsCount: number;
-    compact: boolean;
-    style?: CSSProperties;
-    compactStyle?: CSSProperties;
-  }) => ReactNode;
+  renderRow: (arg: renderRowProps) => ReactNode;
   intervalsCount: number;
   mode: string;
   metadata: GroupedEntity[];
@@ -32,7 +27,7 @@ function RenderRow({
   index,
   parent_index,
   compact,
-  renderItem,
+  renderRow,
   intervalsCount,
   mode,
   metadata,
@@ -49,16 +44,18 @@ function RenderRow({
       : (parent.categories && parent.categories[index]) ||
         ({} as GroupedEntity);
 
-  const renderRow = renderItem({
-    item,
-    mode,
-    intervalsCount,
-    compact,
-    style,
-    compactStyle,
-  });
-
-  return <View>{renderRow}</View>;
+  return (
+    <View>
+      {renderRow({
+        item,
+        mode,
+        intervalsCount,
+        compact,
+        style,
+        compactStyle,
+      })}
+    </View>
+  );
 }
 
 type ReportTableListProps = {
@@ -66,14 +63,7 @@ type ReportTableListProps = {
   mode: string;
   intervalsCount: number;
   groupBy: string;
-  renderItem: (arg: {
-    item: GroupedEntity;
-    mode: string;
-    intervalsCount: number;
-    compact: boolean;
-    style?: CSSProperties;
-    compactStyle?: CSSProperties;
-  }) => ReactNode;
+  renderRow: (arg: renderRowProps) => ReactNode;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
@@ -84,7 +74,7 @@ export function ReportTableList({
   intervalsCount,
   mode,
   groupBy,
-  renderItem,
+  renderRow,
   compact,
   style,
   compactStyle,
@@ -117,7 +107,7 @@ export function ReportTableList({
                 <RenderRow
                   index={index}
                   compact={compact}
-                  renderItem={renderItem}
+                  renderRow={renderRow}
                   intervalsCount={intervalsCount}
                   mode={mode}
                   metadata={metadata}
@@ -141,7 +131,7 @@ export function ReportTableList({
                               key={category.id}
                               index={i}
                               compact={compact}
-                              renderItem={renderItem}
+                              renderRow={renderRow}
                               intervalsCount={intervalsCount}
                               mode={mode}
                               metadata={metadata}
