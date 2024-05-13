@@ -19,6 +19,7 @@ import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
@@ -31,7 +32,6 @@ import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 
 function About() {
   const version = useServerVersion();
@@ -143,12 +143,12 @@ export function Settings() {
       header="Settings"
       style={{
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
+        paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
       <View
         style={{
           marginTop: 10,
-          paddingBottom: MOBILE_NAV_HEIGHT,
           flexShrink: 0,
           maxWidth: 530,
           gap: 30,

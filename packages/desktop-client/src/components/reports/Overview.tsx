@@ -30,7 +30,11 @@ export function Overview() {
 
   const accounts = useAccounts();
   return (
-    <Page header="Reports" padding={0}>
+    <Page
+      header="Reports"
+      padding={0}
+      style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
+    >
       {customReportsFeatureFlag && !isNarrowWidth && (
         <View
           style={{
@@ -47,21 +51,19 @@ export function Overview() {
           </Link>
         </View>
       )}
-      <View style={{ paddingBottom: MOBILE_NAV_HEIGHT }}>
-        <View
-          style={{
-            flexDirection: isNarrowWidth ? 'column' : 'row',
-            flex: '0 0 auto',
-          }}
-        >
-          <NetWorthCard accounts={accounts} />
-          <CashFlowCard />
-          {spendingReportFeatureFlag && <SpendingCard />}
-        </View>
-        {customReportsFeatureFlag && (
-          <CustomReportListCards reports={customReports} />
-        )}
+      <View
+        style={{
+          flexDirection: isNarrowWidth ? 'column' : 'row',
+          flex: '0 0 auto',
+        }}
+      >
+        <NetWorthCard accounts={accounts} />
+        <CashFlowCard />
+        {spendingReportFeatureFlag && <SpendingCard />}
       </View>
+      {customReportsFeatureFlag && (
+        <CustomReportListCards reports={customReports} />
+      )}
     </Page>
   );
 }
