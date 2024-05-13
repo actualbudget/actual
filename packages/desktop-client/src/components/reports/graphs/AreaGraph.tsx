@@ -123,7 +123,7 @@ const customLabel = ({
     ((typeof props.value === 'number' ? props.value : 0) > 0 ? 10 : -10);
   const textAnchor = props.index === 0 ? 'left' : 'middle';
   const display =
-    props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
+    props.value !== 0 ? `${amountToCurrencyNoDecimal(props.value)}` : '';
   const textSize = adjustTextSize({ sized: width, type: 'area' });
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
