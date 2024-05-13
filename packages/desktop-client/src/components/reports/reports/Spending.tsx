@@ -17,7 +17,7 @@ import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { MobilePageHeader, Page, PageBackButton, PageHeader } from '../../Page';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -73,12 +73,7 @@ export function Spending() {
             }
           />
         ) : (
-          <PageHeader
-            title="Monthly Spending"
-            leftContent={
-              <PageBackButton onClick={() => navigate('/reports')} />
-            }
-          />
+          <PageHeader title="Monthly Spending" />
         )
       }
       padding={0}
@@ -92,7 +87,6 @@ export function Spending() {
         <View
           style={{
             padding: 20,
-            paddingTop: 0,
             flexShrink: 0,
           }}
         >

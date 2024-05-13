@@ -31,6 +31,7 @@ import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 
 function About() {
   const version = useServerVersion();
@@ -144,7 +145,15 @@ export function Settings() {
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
-      <View style={{ marginTop: 10, flexShrink: 0, maxWidth: 530, gap: 30 }}>
+      <View
+        style={{
+          marginTop: 10,
+          paddingBottom: MOBILE_NAV_HEIGHT,
+          flexShrink: 0,
+          maxWidth: 530,
+          gap: 30,
+        }}
+      >
         {isNarrowWidth && (
           <View
             style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}

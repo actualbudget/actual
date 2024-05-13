@@ -27,7 +27,7 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { MobilePageHeader, Page, PageBackButton, PageHeader } from '../../Page';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import {
@@ -531,14 +531,6 @@ export function CustomReport() {
     }
   };
 
-  const title = (
-    <>
-      <Text>Custom Report:</Text>
-      <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
-        {report.name || 'Unsaved report'}
-      </Text>
-    </>
-  );
   const onBackClick = () => {
     navigate('/reports');
   };
@@ -548,13 +540,19 @@ export function CustomReport() {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title={title}
+            title={`Custom Report: ${report.name || 'Unsaved report'}`}
             leftContent={<MobileBackButton onClick={onBackClick} />}
           />
         ) : (
           <PageHeader
-            title={title}
-            leftContent={<PageBackButton onClick={onBackClick} />}
+            title={
+              <>
+                <Text>Custom Report:</Text>
+                <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
+                  {report.name || 'Unsaved report'}
+                </Text>
+              </>
+            }
           />
         )
       }
@@ -563,8 +561,8 @@ export function CustomReport() {
       <View
         style={{
           flexDirection: 'row',
-          padding: !isNarrowWidth ? '0 20px' : undefined,
-          flexGrow: 1,
+          paddingLeft: !isNarrowWidth ? 20 : undefined,
+          flex: 1,
         }}
       >
         {!isNarrowWidth && (
@@ -596,7 +594,7 @@ export function CustomReport() {
         )}
         <View
           style={{
-            flexGrow: 1,
+            flex: 1,
           }}
         >
           {!isNarrowWidth && (
@@ -655,50 +653,44 @@ export function CustomReport() {
           <View
             style={{
               backgroundColor: theme.tableBackground,
-              flexGrow: 1,
+              flexDirection: 'row',
+              flex: 1,
             }}
           >
             <View
               style={{
-                flexDirection: 'row',
-                flexGrow: 1,
+                flex: 1,
+                padding: 10,
               }}
             >
-              <View
-                style={{
-                  flexDirection: 'column',
-                  flexGrow: 1,
-                  padding: 10,
-                }}
-              >
-                {graphType !== 'TableGraph' && (
+              {graphType !== 'TableGraph' && (
+                <View
+                  style={{
+                    alignItems: 'flex-end',
+                    paddingTop: 10,
+                  }}
+                >
                   <View
                     style={{
-                      alignItems: 'flex-end',
-                      paddingTop: 10,
+                      ...styles.mediumText,
+                      fontWeight: 500,
+                      marginBottom: 5,
                     }}
                   >
-                    <View
-                      style={{
-                        ...styles.mediumText,
-                        fontWeight: 500,
-                        marginBottom: 5,
-                      }}
-                    >
-                      <AlignedText
-                        left={<Block>{balanceType}:</Block>}
-                        right={
-                          <Text>
-                            <PrivacyFilter blurIntensity={5}>
-                              {amountToCurrency(Math.abs(data[balanceTypeOp]))}
-                            </PrivacyFilter>
-                          </Text>
-                        }
-                      />
-                    </View>
+                    <AlignedText
+                      left={<Block>{balanceType}:</Block>}
+                      right={
+                        <Text>
+                          <PrivacyFilter blurIntensity={5}>
+                            {amountToCurrency(Math.abs(data[balanceTypeOp]))}
+                          </PrivacyFilter>
+                        </Text>
+                      }
+                    />
                   </View>
-                )}
-
+                </View>
+              )}
+              <View style={{ flex: 1, overflow: 'auto' }}>
                 {dataCheck ? (
                   <ChooseGraph
                     data={data}
@@ -719,37 +711,34 @@ export function CustomReport() {
                   <LoadingIndicator message="Loading report..." />
                 )}
               </View>
-              {(viewLegend || viewSummary) && data && !isNarrowWidth && (
-                <View
-                  style={{
-                    padding: 10,
-                    flexDirection: 'column',
-                    minWidth: 300,
-                    marginRight: 10,
-                    textAlign: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  {viewSummary && (
-                    <ReportSummary
-                      startDate={startDate}
-                      endDate={endDate}
-                      balanceTypeOp={balanceTypeOp}
-                      data={data}
-                      interval={interval}
-                      intervalsCount={intervals.length}
-                    />
-                  )}
-                  {viewLegend && (
-                    <ReportLegend
-                      legend={data.legend}
-                      groupBy={groupBy}
-                      interval={interval}
-                    />
-                  )}
-                </View>
-              )}
             </View>
+            {(viewLegend || viewSummary) && data && !isNarrowWidth && (
+              <View
+                style={{
+                  padding: 10,
+                  minWidth: 300,
+                  textAlign: 'center',
+                }}
+              >
+                {viewSummary && (
+                  <ReportSummary
+                    startDate={startDate}
+                    endDate={endDate}
+                    balanceTypeOp={balanceTypeOp}
+                    data={data}
+                    interval={interval}
+                    intervalsCount={intervals.length}
+                  />
+                )}
+                {viewLegend && (
+                  <ReportLegend
+                    legend={data.legend}
+                    groupBy={groupBy}
+                    interval={interval}
+                  />
+                )}
+              </View>
+            )}
           </View>
         </View>
       </View>

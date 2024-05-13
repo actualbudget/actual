@@ -14,7 +14,7 @@ import { theme, styles } from '../../../style';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { MobilePageHeader, Page, PageBackButton, PageHeader } from '../../Page';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
@@ -98,12 +98,7 @@ export function NetWorth() {
             }
           />
         ) : (
-          <PageHeader
-            title="Net Worth"
-            leftContent={
-              <PageBackButton onClick={() => navigate('/reports')} />
-            }
-          />
+          <PageHeader title="Net Worth" />
         )
       }
       padding={0}
@@ -135,7 +130,6 @@ export function NetWorth() {
           style={{
             textAlign: 'right',
             paddingTop: 20,
-            paddingRight: 20,
             flexShrink: 0,
           }}
         >
@@ -152,7 +146,7 @@ export function NetWorth() {
         </View>
 
         <NetWorthGraph
-          style={{ flexGrow: 1 }}
+          style={{ flex: 1 }}
           start={start}
           end={end}
           graphData={data.graphData}
@@ -167,10 +161,9 @@ export function NetWorth() {
           </Paragraph>
           <Paragraph>
             Net worth shows the balance of all accounts over time, including all
-            of your investments. Your “net worth” is considered to be the amount
-            you’d have if you sold all your assets and paid off as much debt as
-            possible. If you hover over the graph, you can also see the amount
-            of assets and debt individually.
+            of your investments. Your “net worth” is considered to be the debt
+            as possible. If you hover over the graph, you can also see the
+            amount of assets and debt individually.
           </Paragraph>
         </View>
       </View>

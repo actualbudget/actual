@@ -1,11 +1,8 @@
-import React, { type ComponentPropsWithRef, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
-import { useNavigate } from '../hooks/useNavigate';
-import { SvgArrowLeft } from '../icons/v1';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../style';
 
-import { Button } from './common/Button';
 import { Text } from './common/Text';
 import { View } from './common/View';
 
@@ -13,11 +10,10 @@ const HEADER_HEIGHT = 50;
 
 type PageHeaderProps = {
   title: ReactNode;
-  leftContent?: ReactNode;
   style?: CSSProperties;
 };
 
-export function PageHeader({ title, leftContent, style }: PageHeaderProps) {
+export function PageHeader({ title, style }: PageHeaderProps) {
   return (
     <View
       style={{
@@ -28,31 +24,16 @@ export function PageHeader({ title, leftContent, style }: PageHeaderProps) {
         ...style,
       }}
     >
-      {leftContent}
       <View
         style={{
           flexDirection: 'row',
           fontSize: 25,
           fontWeight: 500,
-          marginLeft: leftContent ? 5 : undefined,
         }}
       >
         {typeof title === 'string' ? <Text>{title}</Text> : title}
       </View>
     </View>
-  );
-}
-
-type PageBackButtonProps = ComponentPropsWithRef<typeof Button>;
-
-export function PageBackButton({ onClick, ...props }: PageBackButtonProps) {
-  const navigate = useNavigate();
-
-  return (
-    <Button type="bare" {...props} onClick={onClick || (() => navigate(-1))}>
-      <SvgArrowLeft width={10} height={10} />
-      <Text style={{ marginLeft: 5 }}>Back</Text>
-    </Button>
   );
 }
 
@@ -156,7 +137,7 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
       <View
         style={{
           flex: 1,
-          overflowY: 'auto',
+          overflowY: isNarrowWidth ? 'auto' : undefined,
           padding: `0 ${childrenPadding}px`,
         }}
       >

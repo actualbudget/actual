@@ -38,7 +38,7 @@ export function Header({
   return (
     <View
       style={{
-        padding: 10,
+        padding: 20,
         paddingTop: 0,
         flexShrink: 0,
       }}
@@ -47,7 +47,7 @@ export function Header({
         <View
           style={{
             flexDirection: isNarrowWidth ? 'column' : 'row',
-            alignItems: isNarrowWidth ? 'right' : 'center',
+            alignItems: isNarrowWidth ? 'flex-start' : 'center',
             marginTop: 15,
             gap: 15,
           }}
@@ -99,6 +99,7 @@ export function Header({
               flexDirection: 'row',
               alignItems: 'center',
               gap: 15,
+              flexWrap: 'wrap',
             }}
           >
             {show1Month && (

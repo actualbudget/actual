@@ -18,7 +18,7 @@ import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { MobilePageHeader, Page, PageBackButton, PageHeader } from '../../Page';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { CashFlowGraph } from '../graphs/CashFlowGraph';
@@ -117,12 +117,7 @@ export function CashFlow() {
             }
           />
         ) : (
-          <PageHeader
-            title="Cash Flow"
-            leftContent={
-              <PageBackButton onClick={() => navigate('/reports')} />
-            }
-          />
+          <PageHeader title="Cash Flow" />
         )
       }
       padding={0}
@@ -158,13 +153,12 @@ export function CashFlow() {
           backgroundColor: theme.tableBackground,
           padding: 30,
           paddingTop: 0,
-          overflow: 'auto',
+          flex: 1,
         }}
       >
         <View
           style={{
             paddingTop: 20,
-            paddingRight: 20,
             flexShrink: 0,
             alignItems: 'flex-end',
             color: theme.pageText,
@@ -211,6 +205,7 @@ export function CashFlow() {
         </View>
 
         <CashFlowGraph
+          style={{ flex: 1 }}
           graphData={graphData}
           isConcise={isConcise}
           showBalance={showBalance}

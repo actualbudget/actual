@@ -10,6 +10,7 @@ import { Button } from '../common/Button';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 
 import { CashFlowCard } from './reports/CashFlowCard';
@@ -46,19 +47,21 @@ export function Overview() {
           </Link>
         </View>
       )}
-      <View
-        style={{
-          flexDirection: isNarrowWidth ? 'column' : 'row',
-          flex: '0 0 auto',
-        }}
-      >
-        <NetWorthCard accounts={accounts} />
-        <CashFlowCard />
-        {spendingReportFeatureFlag && <SpendingCard />}
+      <View style={{ paddingBottom: MOBILE_NAV_HEIGHT }}>
+        <View
+          style={{
+            flexDirection: isNarrowWidth ? 'column' : 'row',
+            flex: '0 0 auto',
+          }}
+        >
+          <NetWorthCard accounts={accounts} />
+          <CashFlowCard />
+          {spendingReportFeatureFlag && <SpendingCard />}
+        </View>
+        {customReportsFeatureFlag && (
+          <CustomReportListCards reports={customReports} />
+        )}
       </View>
-      {customReportsFeatureFlag && (
-        <CustomReportListCards reports={customReports} />
-      )}
     </Page>
   );
 }
