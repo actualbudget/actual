@@ -46,7 +46,7 @@ export type createCustomSpreadsheetProps = {
   showHiddenCategories: boolean;
   showUncategorized: boolean;
   groupBy?: string;
-  balanceTypeOp?: keyof GroupedEntity;
+  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
@@ -67,7 +67,7 @@ export function createCustomSpreadsheet({
   showHiddenCategories,
   showUncategorized,
   groupBy = '',
-  balanceTypeOp,
+  balanceTypeOp = 'totalDebts',
   payees = [],
   accounts = [],
   graphType,

@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 
+import keyBy from 'lodash/keyBy';
+
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -16,7 +18,6 @@ import {
 } from 'loot-core/src/types/models/reports';
 
 import { getSpecificRange } from '../reportRanges';
-import { index } from '../util';
 
 import { makeQuery } from './makeQuery';
 
@@ -157,7 +158,7 @@ export function createSpendingSpreadsheet({
           month: month.month,
         };
       });
-      const indexedData: SpendingMonthEntity = index(dayData, 'month');
+      const indexedData: SpendingMonthEntity = keyBy(dayData, 'month');
       return {
         months: indexedData,
         day,
