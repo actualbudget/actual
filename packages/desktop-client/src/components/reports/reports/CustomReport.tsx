@@ -8,8 +8,8 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import {
-  type GroupedEntity,
   type CustomReportEntity,
+  type DataEntity,
 } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
@@ -240,7 +240,7 @@ export function CustomReport() {
     }
   }, [interval, startDate, endDate, firstDayOfWeekIdx]);
 
-  const balanceTypeOp =
+  const balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals' =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
   const payees = usePayees();
   const accounts = useAccounts();
@@ -321,7 +321,7 @@ export function CustomReport() {
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
 
-  const data: GroupedEntity = { ...graphData, groupedData } as GroupedEntity;
+  const data: DataEntity = { ...graphData, groupedData } as DataEntity;
 
   const customReportItems: CustomReportEntity = {
     id: '',

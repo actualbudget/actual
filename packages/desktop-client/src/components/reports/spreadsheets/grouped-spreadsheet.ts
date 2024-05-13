@@ -4,7 +4,7 @@ import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { categoryLists, ReportOptions } from '../ReportOptions';
 
@@ -41,7 +41,7 @@ export function createGroupedSpreadsheet({
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: DataEntity[]) => void,
+    setData: (data: GroupedEntity[]) => void,
   ) => {
     if (categoryList.length === 0) {
       return;
@@ -100,7 +100,7 @@ export function createGroupedSpreadsheet({
             endDate,
           );
 
-    const groupedData: DataEntity[] = categoryGroup.map(
+    const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {
         let totalAssets = 0;
         let totalDebts = 0;

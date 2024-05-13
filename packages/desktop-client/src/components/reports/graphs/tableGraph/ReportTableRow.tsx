@@ -5,7 +5,7 @@ import {
   amountToInteger,
   integerToCurrency,
 } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type GroupedEntity } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../../hooks/useAccounts';
@@ -17,7 +17,7 @@ import { Row, Cell } from '../../../table';
 import { showActivity } from '../showActivity';
 
 type ReportTableRowProps = {
-  item: DataEntity;
+  item: GroupedEntity;
   balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   groupBy: string;
   mode: string;
