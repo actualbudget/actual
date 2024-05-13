@@ -8,10 +8,17 @@ import React, {
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { amountToInteger } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  amountToInteger,
+  appendDecimals,
+  currencyToAmount,
+} from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button';
 import { InputWithContent } from '../common/InputWithContent';
@@ -57,6 +64,8 @@ export function AmountInput({
   const buttonRef = useRef();
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
+  const [hideFraction = false] = useLocalPref('hideFraction');
+  const { isNarrowWidth } = useResponsive();
 
   useEffect(() => {
     if (focused) {
@@ -74,6 +83,9 @@ export function AmountInput({
   }
 
   function onInputTextChange(val) {
+    val = isNarrowWidth
+      ? amountToCurrency(currencyToAmount(appendDecimals(val, hideFraction)))
+      : val;
     setValue(val ? val : '');
     onChangeValue?.(val);
   }

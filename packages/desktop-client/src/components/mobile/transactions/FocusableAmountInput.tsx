@@ -9,9 +9,9 @@ import React, {
 } from 'react';
 
 import {
-  toRelaxedNumber,
   amountToCurrency,
-  getNumberFormat,
+  appendDecimals,
+  currencyToAmount,
 } from 'loot-core/src/shared/util';
 
 import { useLocalPref } from '../../../hooks/useLocalPref';
@@ -67,10 +67,6 @@ const AmountInput = memo(function AmountInput({
     setValue(initialValue);
   }, [initialValue]);
 
-  const parseText = () => {
-    return toRelaxedNumber(text.replace(/[,.]/, getNumberFormat().separator));
-  };
-
   const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
       setEditing(true);
@@ -83,7 +79,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = parseText();
+    const parsed = currencyToAmount(text);
     const newValue = editing ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -111,16 +107,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
-    if (text.slice(-1) === '.') {
-      text = text.slice(0, -1);
-    }
-    if (!hideFraction) {
-      text = text.replaceAll(/[,.]/g, '');
-      text = text.replace(/^0+(?!$)/, '');
-      text = text.padStart(3, '0');
-      text = text.slice(0, -2) + '.' + text.slice(-2);
-    }
-
+    text = appendDecimals(text, hideFraction);
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
@@ -163,7 +150,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-fake-input"
       >
-        {editing ? amountToCurrency(text) : amountToCurrency(value)}
+        {editing ? text : amountToCurrency(value)}
       </Text>
     </View>
   );
