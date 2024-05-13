@@ -44,7 +44,7 @@ export interface SpendingDataEntity {
 
 export interface SpendingEntity {
   intervalData: {
-    months: SpendingMonthEntity[];
+    months: SpendingMonthEntity;
     day: string;
     average: number;
     thisMonth: number;

@@ -145,8 +145,12 @@ export function SpendingGraph({
             : b,
         ).months[lastMonth][balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
-  const dataMax = Math.max(...data.intervalData.map(i => i.months[thisMonth].cumulative));
-  const dataMin = Math.min(...data.intervalData.map(i => i.months[thisMonth].cumulative));
+  const dataMax = Math.max(
+    ...data.intervalData.map(i => i.months[thisMonth].cumulative),
+  );
+  const dataMin = Math.min(
+    ...data.intervalData.map(i => i.months[thisMonth].cumulative),
+  );
 
   const tickFormatter = tick => {
     if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
