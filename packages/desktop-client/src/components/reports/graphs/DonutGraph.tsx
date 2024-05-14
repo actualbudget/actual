@@ -180,7 +180,7 @@ type DonutGraphProps = {
   data: DataEntity;
   filters: RuleConditionEntity[];
   groupBy: string;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   compact?: boolean;
   viewLabels: boolean;
   showHiddenCategories?: boolean;

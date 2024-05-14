@@ -12,7 +12,7 @@ export function calculateLegend(
   calcDataFiltered: GroupedEntity[],
   groupBy: string,
   graphType?: string,
-  balanceTypeOp?: keyof GroupedEntity,
+  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals',
 ): LegendEntity[] {
   const colorScale = getColorScale('qualitative');
   const chooseData =
