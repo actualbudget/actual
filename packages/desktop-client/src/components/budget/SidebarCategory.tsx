@@ -70,9 +70,8 @@ export function SidebarCategory({
       >
         {category.name}
       </div>
-      <View style={{ flexShrink: 0, marginLeft: 5 }}>
+      <View style={{ flexShrink: 0, marginLeft: 5 }} ref={triggerRef}>
         <Button
-          ref={triggerRef}
           type="bare"
           className="hover-visible"
           onClick={e => {

@@ -92,9 +92,8 @@ export function SidebarGroup({
       </div>
       {!dragPreview && (
         <>
-          <View style={{ marginLeft: 5, flexShrink: 0 }}>
+          <View style={{ marginLeft: 5, flexShrink: 0 }} ref={triggerRef}>
             <Button
-              ref={triggerRef}
               type="bare"
               className="hover-visible"
               onClick={e => {
