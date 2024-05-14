@@ -15,7 +15,7 @@ export type Notification = {
   };
   messageActions?: Record<string, () => void>;
   onClose?: () => void;
-  internal?: unknown;
+  internal?: string;
 };
 type NotificationWithId = Notification & { id: string };
 

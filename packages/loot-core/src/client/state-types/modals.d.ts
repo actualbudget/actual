@@ -247,6 +247,13 @@ type FinanceModals = {
     onEditNotes: (month: string) => void;
   };
   'budget-list';
+  'confirm-transaction-edit': {
+    onConfirm: () => void;
+    confirmReason: string;
+  };
+  'confirm-transaction-delete': {
+    onConfirm: () => void;
+  };
 };
 
 export type PushModalAction = {

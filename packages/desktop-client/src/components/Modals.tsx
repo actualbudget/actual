@@ -21,6 +21,7 @@ import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
 import { ConfirmCategoryDelete } from './modals/ConfirmCategoryDelete';
+import { ConfirmTransactionDelete } from './modals/ConfirmTransactionDelete';
 import { ConfirmTransactionEdit } from './modals/ConfirmTransactionEdit';
 import { ConfirmUnlinkAccount } from './modals/ConfirmUnlinkAccount';
 import { CoverModal } from './modals/CoverModal';
@@ -174,6 +175,15 @@ export function Modals() {
               modalProps={modalProps}
               onConfirm={options.onConfirm}
               confirmReason={options.confirmReason}
+            />
+          );
+
+        case 'confirm-transaction-delete':
+          return (
+            <ConfirmTransactionDelete
+              key={name}
+              modalProps={modalProps}
+              onConfirm={options.onConfirm}
             />
           );
 
