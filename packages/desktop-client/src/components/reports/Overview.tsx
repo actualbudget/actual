@@ -11,7 +11,7 @@ import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { Page } from '../Page';
+import { Page, PageHeader } from '../Page';
 
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
@@ -31,26 +31,30 @@ export function Overview() {
   const accounts = useAccounts();
   return (
     <Page
-      header="Reports"
+      header={
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <PageHeader title="Reports" />
+          {customReportsFeatureFlag && !isNarrowWidth && (
+            <View
+              style={{
+                flex: '0 0 auto',
+                alignItems: 'flex-end',
+                marginRight: 15,
+                marginTop: 10,
+              }}
+            >
+              <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
+                <Button type="primary">
+                  <Text>Create new custom report</Text>
+                </Button>
+              </Link>
+            </View>
+          )}
+        </View>
+      }
       padding={0}
       style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
     >
-      {customReportsFeatureFlag && !isNarrowWidth && (
-        <View
-          style={{
-            flex: '0 0 auto',
-            alignItems: 'flex-end',
-            marginRight: 15,
-            marginTop: 10,
-          }}
-        >
-          <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
-            <Button type="primary">
-              <Text>Create new custom report</Text>
-            </Button>
-          </Link>
-        </View>
-      )}
       <View
         style={{
           flexDirection: isNarrowWidth ? 'column' : 'row',
