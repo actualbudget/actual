@@ -11,7 +11,7 @@ import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { Page, PageHeader } from '../Page';
+import { MobilePageHeader, Page, PageHeader } from '../Page';
 
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
@@ -32,22 +32,26 @@ export function Overview() {
   return (
     <Page
       header={
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginRight: 15,
-          }}
-        >
-          <PageHeader title="Reports" />
-          {customReportsFeatureFlag && !isNarrowWidth && (
-            <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
-              <Button type="primary">
-                <Text>Create new custom report</Text>
-              </Button>
-            </Link>
-          )}
-        </View>
+        isNarrowWidth ? (
+          <MobilePageHeader title="Reports" />
+        ) : (
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginRight: 15,
+            }}
+          >
+            <PageHeader title="Reports" />
+            {customReportsFeatureFlag && !isNarrowWidth && (
+              <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
+                <Button type="primary">
+                  <Text>Create new custom report</Text>
+                </Button>
+              </Link>
+            )}
+          </View>
+        )
       }
       padding={0}
       style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
