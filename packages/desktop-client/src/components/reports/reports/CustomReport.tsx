@@ -654,7 +654,7 @@ export function CustomReport() {
             style={{
               backgroundColor: theme.tableBackground,
               flexDirection: 'row',
-              flex: 1,
+              flex: '1 0 auto',
             }}
           >
             <View

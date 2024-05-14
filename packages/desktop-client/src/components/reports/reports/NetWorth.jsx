@@ -122,7 +122,7 @@ export function NetWorth() {
           backgroundColor: theme.tableBackground,
           padding: 20,
           paddingTop: 0,
-          flexShrink: 0,
+          flex: '1 0 auto',
           overflowY: 'auto',
         }}
       >
