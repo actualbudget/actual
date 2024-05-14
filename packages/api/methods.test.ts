@@ -346,8 +346,8 @@ describe('API CRUD operations', () => {
     );
   });
 
-  // apis: getPayeeRules, createPayeeRule, updatePayeeRule, deletePayeeRule
-  test('PayeeRules: successfully update payee rules', async () => {
+  // apis: getRules, getPayeeRules, createRule, updateRule, deleteRule
+  test('Rules: successfully update rules', async () => {
     await api.createPayee({ name: 'test-payee' });
     await api.createPayee({ name: 'test-payee2' });
 
