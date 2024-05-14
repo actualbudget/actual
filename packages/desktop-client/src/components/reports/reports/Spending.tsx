@@ -140,7 +140,10 @@ export function Spending() {
           <View
             style={{
               backgroundColor: theme.tableBackground,
-              flexGrow: 1,
+              padding: 20,
+              paddingTop: 0,
+              flexShrink: 0,
+              overflowY: 'auto',
             }}
           >
             <View

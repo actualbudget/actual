@@ -120,17 +120,16 @@ export function NetWorth() {
       <View
         style={{
           backgroundColor: theme.tableBackground,
-          padding: 30,
+          padding: 20,
           paddingTop: 0,
-          overflow: 'auto',
-          flexGrow: 1,
+          flexShrink: 0,
+          overflowY: 'auto',
         }}
       >
         <View
           style={{
             textAlign: 'right',
             paddingTop: 20,
-            flexShrink: 0,
           }}
         >
           <View
@@ -146,7 +145,6 @@ export function NetWorth() {
         </View>
 
         <NetWorthGraph
-          style={{ flex: 1 }}
           start={start}
           end={end}
           graphData={data.graphData}

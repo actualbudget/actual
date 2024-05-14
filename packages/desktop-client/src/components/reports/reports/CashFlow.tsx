@@ -151,15 +151,15 @@ export function CashFlow() {
       <View
         style={{
           backgroundColor: theme.tableBackground,
-          padding: 30,
+          padding: 20,
           paddingTop: 0,
-          flex: 1,
+          flexShrink: 0,
+          overflowY: 'auto',
         }}
       >
         <View
           style={{
             paddingTop: 20,
-            flexShrink: 0,
             alignItems: 'flex-end',
             color: theme.pageText,
           }}
@@ -205,13 +205,17 @@ export function CashFlow() {
         </View>
 
         <CashFlowGraph
-          style={{ flex: 1 }}
           graphData={graphData}
           isConcise={isConcise}
           showBalance={showBalance}
         />
 
-        <View style={{ marginTop: 30, userSelect: 'none' }}>
+        <View
+          style={{
+            marginTop: 30,
+            userSelect: 'none',
+          }}
+        >
           <Paragraph>
             <strong>How is cash flow calculated?</strong>
           </Paragraph>
