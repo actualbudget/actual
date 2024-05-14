@@ -29,9 +29,6 @@ jobs:
       - name: Install Netlify
         run: npm install netlify-cli@17.10.1 -g
     
-      - name: Install Dependencies
-        run: npm ci
-    
       - name: Build Actual
         run: ./bin/package-browser
 
