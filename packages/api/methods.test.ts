@@ -346,6 +346,214 @@ describe('API CRUD operations', () => {
     );
   });
 
+  // apis: getRules, getPayeeRules, createRule, updateRule, deleteRule
+  test('Rules: successfully update rules', async () => {
+    await api.createPayee({ name: 'test-payee' });
+    await api.createPayee({ name: 'test-payee2' });
+
+    // create our test rules
+    const rule = await api.createRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: 'test-payee',
+        },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+        },
+      ],
+    });
+    const rule2 = await api.createRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: 'test-payee2',
+        },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+        },
+      ],
+    });
+
+    // get existing rules
+    const rules = await api.getRules();
+    expect(rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule2.id,
+          stage: 'pre',
+        }),
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule.id,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    // get by payee
+    expect(await api.getPayeeRules('test-payee')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule.id,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    expect(await api.getPayeeRules('test-payee2')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule2.id,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    // update one rule
+    const updatedRule = {
+      ...rule,
+      stage: 'post',
+      conditionsOp: 'or',
+    };
+    expect(await api.updateRule(updatedRule)).toEqual(updatedRule);
+
+    expect(await api.getRules()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee',
+            }),
+          ]),
+          conditionsOp: 'or',
+          id: rule.id,
+          stage: 'post',
+        }),
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule2.id,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    // delete rules
+    await api.deleteRule(rules[1]);
+    expect(await api.getRules()).toHaveLength(1);
+
+    await api.deleteRule(rules[0]);
+    expect(await api.getRules()).toHaveLength(0);
+  });
+
   // apis: addTransactions, getTransactions, importTransactions, updateTransaction, deleteTransaction
   test('Transactions: successfully update transactions', async () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);
