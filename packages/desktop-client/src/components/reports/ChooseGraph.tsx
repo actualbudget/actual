@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../style';
@@ -20,7 +20,7 @@ import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
-  data: GroupedEntity;
+  data: DataEntity;
   filters?: RuleConditionEntity[];
   mode: string;
   graphType: string;
@@ -160,13 +160,14 @@ export function ChooseGraph({
         <ReportTableHeader
           headerScrollRef={headerScrollRef}
           handleScroll={handleScroll}
-          data={mode === 'time' && data.intervalData}
+          data={data.intervalData}
           groupBy={groupBy}
           interval={interval}
           balanceType={balanceType}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          mode={mode}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}

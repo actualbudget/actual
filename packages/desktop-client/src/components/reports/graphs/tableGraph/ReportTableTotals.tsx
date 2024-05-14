@@ -1,13 +1,16 @@
-// @ts-strict-ignore
-import React, { type UIEventHandler, useLayoutEffect, useState } from 'react';
-import { type RefProp } from 'react-spring';
+import React, {
+  type UIEventHandler,
+  useLayoutEffect,
+  useState,
+  type RefObject,
+} from 'react';
 
 import {
   amountToCurrency,
   amountToInteger,
   integerToCurrency,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../../hooks/useAccounts';
@@ -22,11 +25,11 @@ import { Row, Cell } from '../../../table';
 import { showActivity } from '../showActivity';
 
 type ReportTableTotalsProps = {
-  data: GroupedEntity;
-  balanceTypeOp: string;
+  data: DataEntity;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   mode: string;
   intervalsCount: number;
-  totalScrollRef: RefProp<HTMLDivElement>;
+  totalScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   compact: boolean;
   style?: CSSProperties;
@@ -58,11 +61,13 @@ export function ReportTableTotals({
     if (totalScrollRef.current) {
       const [parent, child] = [
         totalScrollRef.current.offsetParent
-          ? totalScrollRef.current.parentElement.scrollHeight || 0
+          ? (totalScrollRef.current.parentElement
+              ? totalScrollRef.current.parentElement.scrollHeight
+              : 0) || 0
           : 0,
         totalScrollRef.current ? totalScrollRef.current.scrollHeight : 0,
       ];
-      setScrollWidthTotals(parent > 0 && child > 0 && parent - child);
+      setScrollWidthTotals(parent > 0 && child > 0 ? parent - child : 0);
     }
   });
   const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;

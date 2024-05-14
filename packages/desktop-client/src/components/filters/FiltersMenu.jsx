@@ -362,6 +362,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
           }}
           items={filterFields
             .filter(f => (exclude ? !exclude.includes(f[0]) : true))
+            .sort()
             .map(([name, text]) => ({
               name,
               text: titleFirst(text),

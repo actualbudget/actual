@@ -13,10 +13,7 @@ import {
   type RuleConditionEntity,
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
-import {
-  type DataEntity,
-  type GroupedEntity,
-} from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import {
@@ -44,7 +41,7 @@ export type createCustomSpreadsheetProps = {
   showHiddenCategories: boolean;
   showUncategorized: boolean;
   groupBy?: string;
-  balanceTypeOp?: keyof DataEntity;
+  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
@@ -65,7 +62,7 @@ export function createCustomSpreadsheet({
   showHiddenCategories,
   showUncategorized,
   groupBy,
-  balanceTypeOp,
+  balanceTypeOp = 'totalDebts',
   payees,
   accounts,
   graphType,
@@ -92,7 +89,7 @@ export function createCustomSpreadsheet({
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: GroupedEntity) => void,
+    setData: (data: DataEntity) => void,
   ) => {
     if (groupByList.length === 0) {
       return;
