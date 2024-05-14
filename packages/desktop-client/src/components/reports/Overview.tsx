@@ -32,23 +32,20 @@ export function Overview() {
   return (
     <Page
       header={
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginRight: 15,
+          }}
+        >
           <PageHeader title="Reports" />
           {customReportsFeatureFlag && !isNarrowWidth && (
-            <View
-              style={{
-                flex: '0 0 auto',
-                alignItems: 'flex-end',
-                marginRight: 15,
-                marginTop: 10,
-              }}
-            >
-              <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
-                <Button type="primary">
-                  <Text>Create new custom report</Text>
-                </Button>
-              </Link>
-            </View>
+            <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
+              <Button type="primary">
+                <Text>Create new custom report</Text>
+              </Button>
+            </Link>
           )}
         </View>
       }
