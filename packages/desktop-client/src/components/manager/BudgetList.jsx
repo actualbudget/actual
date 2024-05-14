@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
+  closeAndDownloadBudget,
+  closeAndLoadBudget,
   createBudget,
   downloadBudget,
   getUserData,
@@ -11,6 +13,8 @@ import {
 } from 'loot-core/client/actions';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
+import { useInitialMount } from '../../hooks/useInitialMount';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import {
   SvgCloudCheck,
@@ -59,11 +63,27 @@ function FileMenu({ onDelete, onClose }) {
   }
 
   const items = [{ name: 'delete', text: 'Delete' }];
+  const { isNarrowWidth } = useResponsive();
 
-  return <Menu onMenuSelect={onMenuSelect} items={items} />;
+  const defaultMenuItemStyle = isNarrowWidth
+    ? {
+        ...styles.mobileMenuItem,
+        color: theme.menuItemText,
+        borderRadius: 0,
+        borderTop: `1px solid ${theme.pillBorder}`,
+      }
+    : {};
+
+  return (
+    <Menu
+      getItemStyle={() => defaultMenuItemStyle}
+      onMenuSelect={onMenuSelect}
+      items={items}
+    />
+  );
 }
 
-function DetailButton({ state, onDelete }) {
+function FileMenuButton({ state, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -143,7 +163,7 @@ function FileState({ file }) {
   );
 }
 
-function File({ file, onSelect, onDelete }) {
+function File({ file, quickSwitchMode, onSelect, onDelete }) {
   const selecting = useRef(false);
 
   async function _onSelect(file) {
@@ -198,13 +218,15 @@ function File({ file, onSelect, onDelete }) {
           />
         )}
 
-        <DetailButton state={file.state} onDelete={() => onDelete(file)} />
+        {!quickSwitchMode && (
+          <FileMenuButton state={file.state} onDelete={() => onDelete(file)} />
+        )}
       </View>
     </View>
   );
 }
 
-function BudgetTable({ files, onSelect, onDelete }) {
+function BudgetFiles({ files, quickSwitchMode, onSelect, onDelete }) {
   return (
     <View
       style={{
@@ -217,19 +239,32 @@ function BudgetTable({ files, onSelect, onDelete }) {
         '& *': { userSelect: 'none' },
       }}
     >
-      {files.map(file => (
-        <File
-          key={file.id || file.cloudFileId}
-          file={file}
-          onSelect={onSelect}
-          onDelete={onDelete}
-        />
-      ))}
+      {!files || files.length === 0 ? (
+        <Text
+          style={{
+            ...styles.mediumText,
+            textAlign: 'center',
+            color: theme.pageTextSubdued,
+          }}
+        >
+          No budget files
+        </Text>
+      ) : (
+        files.map(file => (
+          <File
+            key={file.id || file.cloudFileId}
+            file={file}
+            quickSwitchMode={quickSwitchMode}
+            onSelect={onSelect}
+            onDelete={onDelete}
+          />
+        ))
+      )}
     </View>
   );
 }
 
-function RefreshButton({ onRefresh }) {
+function RefreshButton({ style, onRefresh }) {
   const [loading, setLoading] = useState(false);
 
   async function _onRefresh() {
@@ -244,7 +279,7 @@ function RefreshButton({ onRefresh }) {
     <Button
       type="bare"
       aria-label="Refresh"
-      style={{ padding: 10, marginRight: 5 }}
+      style={{ padding: 10, ...style }}
       onClick={_onRefresh}
     >
       <Icon style={{ width: 18, height: 18 }} />
@@ -252,9 +287,34 @@ function RefreshButton({ onRefresh }) {
   );
 }
 
-export function BudgetList() {
-  const files = useSelector(state => state.budgets.allFiles || []);
+function BudgetListHeader({ quickSwitchMode, onRefresh }) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        margin: 20,
+      }}
+    >
+      <Text
+        style={{
+          ...styles.veryLargeText,
+        }}
+      >
+        Files
+      </Text>
+      {!quickSwitchMode && <RefreshButton onRefresh={onRefresh} />}
+    </View>
+  );
+}
+
+export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const [id] = useLocalPref('id');
+
+  const files = id ? allFiles.filter(f => f.id !== id) : allFiles;
+
   const [creating, setCreating] = useState(false);
   const { isNarrowWidth } = useResponsive();
   const narrowButtonStyle = isNarrowWidth
@@ -270,87 +330,107 @@ export function BudgetList() {
     }
   };
 
+  const refresh = () => {
+    dispatch(getUserData());
+    dispatch(loadAllFiles());
+  };
+
+  const initialMount = useInitialMount();
+  if (initialMount && quickSwitchMode) {
+    refresh();
+  }
+
   return (
     <View
       style={{
         flex: 1,
         justifyContent: 'center',
-        marginInline: -20,
-        marginTop: 20,
-        width: '100vw',
+        ...(!quickSwitchMode && {
+          marginTop: 20,
+          width: '100vw',
+        }),
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
           maxWidth: tokens.breakpoint_small,
           width: '100%',
         },
       }}
     >
-      <View>
-        <Text style={{ ...styles.veryLargeText, margin: 20 }}>Files</Text>
-        <View
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            justifyContent: 'center',
-            marginRight: 5,
-          }}
-        >
-          <RefreshButton
-            onRefresh={() => {
-              dispatch(getUserData());
-              dispatch(loadAllFiles());
-            }}
-          />
-        </View>
-      </View>
-      <BudgetTable
+      {showHeader && (
+        <BudgetListHeader
+          quickSwitchMode={quickSwitchMode}
+          onRefresh={refresh}
+        />
+      )}
+      <BudgetFiles
         files={files}
+        quickSwitchMode={quickSwitchMode}
         onSelect={file => {
-          if (file.state === 'remote') {
-            dispatch(downloadBudget(file.cloudFileId));
-          } else {
-            dispatch(loadBudget(file.id, `Loading ${file.name}...`));
+          if (!id) {
+            if (file.state === 'remote') {
+              dispatch(downloadBudget(file.cloudFileId));
+            } else {
+              dispatch(loadBudget(file.id));
+            }
+          } else if (file.id !== id) {
+            if (file.state === 'remote') {
+              dispatch(closeAndDownloadBudget(file.cloudFileId));
+            } else {
+              dispatch(closeAndLoadBudget(file.id));
+            }
           }
         }}
         onDelete={file => dispatch(pushModal('delete-budget', { file }))}
       />
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'flex-end',
-          padding: 25,
-          gap: 15,
-        }}
-      >
-        <Button
-          type="bare"
+      {!quickSwitchMode && (
+        <View
           style={{
-            ...narrowButtonStyle,
-            color: theme.pageTextLight,
-          }}
-          onClick={() => {
-            dispatch(pushModal('import'));
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            padding: 25,
           }}
         >
-          Import file
-        </Button>
+          <Button
+            type="bare"
+            style={{
+              ...narrowButtonStyle,
+              marginLeft: 10,
+              color: theme.pageTextLight,
+            }}
+            onClick={e => {
+              e.preventDefault();
+              dispatch(pushModal('import'));
+            }}
+          >
+            Import file
+          </Button>
 
-        <Button type="primary" onClick={onCreate} style={narrowButtonStyle}>
-          Create new file
-        </Button>
-
-        {isNonProductionEnvironment() && (
           <Button
             type="primary"
-            isSubmit={false}
-            onClick={() => onCreate({ testMode: true })}
-            style={narrowButtonStyle}
+            onClick={onCreate}
+            style={{
+              ...narrowButtonStyle,
+              marginLeft: 10,
+            }}
           >
-            Create test file
+            Create new file
           </Button>
-        )}
-      </View>
+
+          {isNonProductionEnvironment() && (
+            <Button
+              type="primary"
+              isSubmit={false}
+              onClick={() => onCreate({ testMode: true })}
+              style={{
+                ...narrowButtonStyle,
+                marginLeft: 10,
+              }}
+            >
+              Create test file
+            </Button>
+          )}
+        </View>
+      )}
     </View>
   );
 }

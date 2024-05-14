@@ -17,7 +17,7 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { useResponsive } from '../../../ResponsiveProvider';
@@ -105,14 +105,14 @@ const customLabel = (props, width, end) => {
   const textAnchor = props.index === 0 ? 'left' : 'middle';
   const display =
     props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
-  const textSize = adjustTextSize(width, 'area');
+  const textSize = adjustTextSize({ sized: width, type: 'area' });
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
 type AreaGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
+  data: DataEntity;
   balanceTypeOp: string;
   compact?: boolean;
   viewLabels: boolean;

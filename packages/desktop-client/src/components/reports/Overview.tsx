@@ -32,11 +32,9 @@ export function Overview() {
     <View
       style={{
         ...styles.page,
-        ...{
-          padding: 15,
-          paddingTop: 0,
-          minWidth: isNarrowWidth ? null : 700,
-        },
+        padding: 15,
+        paddingTop: 0,
+        minWidth: isNarrowWidth ? undefined : 700,
       }}
     >
       {customReportsFeatureFlag && !isNarrowWidth && (

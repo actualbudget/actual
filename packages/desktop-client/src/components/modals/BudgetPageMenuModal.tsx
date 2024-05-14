@@ -17,6 +17,7 @@ export function BudgetPageMenuModal({
   modalProps,
   onAddCategoryGroup,
   onToggleHiddenCategories,
+  onSwitchBudgetFile,
   onSwitchBudgetType,
 }: BudgetPageMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
@@ -32,6 +33,7 @@ export function BudgetPageMenuModal({
         getItemStyle={() => defaultMenuItemStyle}
         onAddCategoryGroup={onAddCategoryGroup}
         onToggleHiddenCategories={onToggleHiddenCategories}
+        onSwitchBudgetFile={onSwitchBudgetFile}
         onSwitchBudgetType={onSwitchBudgetType}
       />
     </Modal>
@@ -44,12 +46,14 @@ type BudgetPageMenuProps = Omit<
 > & {
   onAddCategoryGroup: () => void;
   onToggleHiddenCategories: () => void;
+  onSwitchBudgetFile: () => void;
   onSwitchBudgetType: () => void;
 };
 
 function BudgetPageMenu({
   onAddCategoryGroup,
   onToggleHiddenCategories,
+  onSwitchBudgetFile,
   onSwitchBudgetType,
   ...props
 }: BudgetPageMenuProps) {
@@ -61,8 +65,14 @@ function BudgetPageMenu({
       case 'add-category-group':
         onAddCategoryGroup?.();
         break;
+      // case 'edit-mode':
+      //   onEditMode?.(true);
+      //   break;
       case 'toggle-hidden-categories':
         onToggleHiddenCategories?.();
+        break;
+      case 'switch-budget-file':
+        onSwitchBudgetFile?.();
         break;
       case 'switch-budget-type':
         onSwitchBudgetType?.();
@@ -84,6 +94,10 @@ function BudgetPageMenu({
         {
           name: 'toggle-hidden-categories',
           text: `${!showHiddenCategories ? 'Show' : 'Hide'} hidden categories`,
+        },
+        {
+          name: 'switch-budget-file',
+          text: 'Switch budget file',
         },
         ...(isReportBudgetEnabled
           ? [

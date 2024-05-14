@@ -148,15 +148,18 @@ export default defineConfig(async ({ mode }) => {
       extensions: resolveExtensions,
     },
     plugins: [
-      VitePWA({
-        registerType: 'autoUpdate',
-        workbox: {
-          globPatterns: [
-            '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
-          ],
-          ignoreURLParametersMatching: [/^v$/],
-        },
-      }),
+      // Macos electron (desktop) builds do not support PWA
+      mode === 'desktop'
+        ? undefined
+        : VitePWA({
+            registerType: 'autoUpdate',
+            workbox: {
+              globPatterns: [
+                '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
+              ],
+              ignoreURLParametersMatching: [/^v$/],
+            },
+          }),
       injectShims(),
       addWatchers(),
       react({

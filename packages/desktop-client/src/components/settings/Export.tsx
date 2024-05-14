@@ -15,7 +15,7 @@ import { Setting } from './UI';
 export function ExportBudget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [budgetId] = useLocalPref('id');
+  const [budgetName] = useLocalPref('budgetName');
   const [encryptKeyId] = useLocalPref('encryptKeyId');
 
   async function onExport() {
@@ -33,7 +33,7 @@ export function ExportBudget() {
 
     window.Actual?.saveFile(
       response.data,
-      `${format(new Date(), 'yyyy-MM-dd')}-${budgetId}.zip`,
+      `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
       'Export budget',
     );
     setIsLoading(false);

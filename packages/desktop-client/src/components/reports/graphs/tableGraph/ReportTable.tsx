@@ -1,13 +1,16 @@
-// @ts-strict-ignore
 import React, {
+  type RefObject,
   useCallback,
   useLayoutEffect,
   useRef,
   type UIEventHandler,
 } from 'react';
-import { type RefProp } from 'react-spring';
 
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type GroupedEntity,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
@@ -18,11 +21,23 @@ import { ReportTableRow } from './ReportTableRow';
 
 type ReportTableProps = {
   saveScrollWidth: (value: number) => void;
-  listScrollRef: RefProp<HTMLDivElement>;
+  listScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   groupBy: string;
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
-  data: DataEntity[];
+  data: DataEntity;
+  filters?: RuleConditionEntity[];
+  mode: string;
+  intervalsCount: number;
+  compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
+};
+
+export type renderRowProps = {
+  item: GroupedEntity;
   mode: string;
   intervalsCount: number;
   compact: boolean;
@@ -37,11 +52,14 @@ export function ReportTable({
   groupBy,
   balanceTypeOp,
   data,
+  filters,
   mode,
   intervalsCount,
   compact,
   style,
   compactStyle,
+  showHiddenCategories,
+  showOffBudget,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -51,26 +69,30 @@ export function ReportTable({
     }
   });
 
-  const renderItem = useCallback(
+  const renderRow = useCallback(
     ({
       item,
-      groupByItem,
       mode,
       intervalsCount,
       compact,
       style,
       compactStyle,
-    }) => {
+    }: renderRowProps) => {
       return (
         <ReportTableRow
           item={item}
           balanceTypeOp={balanceTypeOp}
-          groupByItem={groupByItem}
+          groupBy={groupBy}
           mode={mode}
+          filters={filters}
+          startDate={data.startDate}
+          endDate={data.endDate}
           intervalsCount={intervalsCount}
           compact={compact}
           style={style}
           compactStyle={compactStyle}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
       );
     },
@@ -105,7 +127,7 @@ export function ReportTable({
           intervalsCount={intervalsCount}
           mode={mode}
           groupBy={groupBy}
-          renderItem={renderItem}
+          renderRow={renderRow}
           compact={compact}
           style={style}
           compactStyle={compactStyle}
