@@ -1,12 +1,15 @@
 import { type ScheduleEntity } from './schedule';
 
-export interface RuleEntity {
-  id?: string;
+export interface NewRuleEntity {
   stage: string;
   conditionsOp: 'any' | 'and';
   conditions: RuleConditionEntity[];
   actions: RuleActionEntity[];
   tombstone?: boolean;
+}
+
+export interface RuleEntity extends NewRuleEntity {
+  id: string;
 }
 
 export type RuleConditionOp =

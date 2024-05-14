@@ -92,7 +92,7 @@ app.method(
     }
 
     const id = await rules.insertRule(rule);
-    return { id };
+    return { id, ...rule };
   }),
 );
 
@@ -105,7 +105,7 @@ app.method(
     }
 
     await rules.updateRule(rule);
-    return {};
+    return rule;
   }),
 );
 

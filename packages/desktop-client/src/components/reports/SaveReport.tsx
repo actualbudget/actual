@@ -40,14 +40,14 @@ export function SaveReport({
   const [chooseMenuOpen, setChooseMenuOpen] = useState(false);
   const [menuItem, setMenuItem] = useState('');
   const [err, setErr] = useState('');
-  const [name, setName] = useState(report.name ?? '');
+  const [newName, setNewName] = useState(report.name ?? '');
   const inputRef = createRef<HTMLInputElement>();
 
   async function onApply(cond: string) {
     const chooseSavedReport = listReports.find(r => cond === r.id);
     onReportChange({ savedReport: chooseSavedReport, type: 'choose' });
     setChooseMenuOpen(false);
-    setName(chooseSavedReport === undefined ? '' : chooseSavedReport.name);
+    setNewName(chooseSavedReport === undefined ? '' : chooseSavedReport.name);
   }
 
   const onAddUpdate = async ({ menuChoice }: { menuChoice?: string }) => {
@@ -58,7 +58,7 @@ export function SaveReport({
       const newSavedReport = {
         ...report,
         ...customReportItems,
-        name,
+        name: newName,
       };
 
       const response = await sendCatch('report/create', newSavedReport);
@@ -80,9 +80,11 @@ export function SaveReport({
       return;
     }
 
+    const { name, id, ...props } = customReportItems;
+
     const updatedReport = {
       ...report,
-      ...(menuChoice === 'rename-report' ? { name } : customReportItems),
+      ...(menuChoice === 'rename-report' ? { name: newName } : props),
     };
 
     const response = await sendCatch('report/update', updatedReport);
@@ -100,7 +102,7 @@ export function SaveReport({
   };
 
   const onDelete = async () => {
-    setName('');
+    setNewName('');
     await send('report/delete', report.id);
     onReportChange({ type: 'reset' });
     setDeleteMenuOpen(false);
@@ -134,7 +136,7 @@ export function SaveReport({
         break;
       case 'reset-report':
         setMenuOpen(false);
-        setName('');
+        setNewName('');
         onReportChange({ type: 'reset' });
         break;
       case 'choose-report':
@@ -185,8 +187,8 @@ export function SaveReport({
         <SaveReportName
           onClose={() => setNameMenuOpen(false)}
           menuItem={menuItem}
-          name={name}
-          setName={setName}
+          name={newName}
+          setName={setNewName}
           inputRef={inputRef}
           onAddUpdate={onAddUpdate}
           err={err}
