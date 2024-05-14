@@ -5,7 +5,7 @@ import type {
   CategoryGroupEntity,
   GoCardlessToken,
 } from '../../types/models';
-import type { RuleEntity } from '../../types/models/rule';
+import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
 export type ModalType = keyof FinanceModals;
@@ -51,7 +51,7 @@ type FinanceModals = {
 
   'manage-rules': { payeeId?: string };
   'edit-rule': {
-    rule: RuleEntity;
+    rule: RuleEntity | NewRuleEntity;
     onSave: (rule: RuleEntity) => void;
   };
   'merge-unused-payees': {
@@ -233,6 +233,7 @@ type FinanceModals = {
   'budget-page-menu': {
     onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
+    onSwitchBudgetFile: () => void;
     onSwitchBudgetType: () => void;
   };
   'rollover-budget-month-menu': {
@@ -245,6 +246,7 @@ type FinanceModals = {
     onBudgetAction: (month: string, action: string, arg?: unknown) => void;
     onEditNotes: (month: string) => void;
   };
+  'budget-list';
 };
 
 export type PushModalAction = {

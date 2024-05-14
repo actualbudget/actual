@@ -36,7 +36,7 @@ type CategoryAutocompleteItem = CategoryEntity & {
   group?: CategoryGroupEntity;
 };
 
-export type CategoryListProps = {
+type CategoryListProps = {
   items: CategoryAutocompleteItem[];
   getItemProps?: (arg: {
     item: CategoryAutocompleteItem;

@@ -19,7 +19,7 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -122,18 +122,18 @@ const customLabel = (props, typeOp) => {
   const textAnchor = 'middle';
   const display =
     props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
-  const textSize = adjustTextSize(
-    props.width,
-    typeOp === 'totalTotals' ? 'default' : 'variable',
-    props.value,
-  );
+  const textSize = adjustTextSize({
+    sized: props.width,
+    type: typeOp === 'totalTotals' ? 'default' : 'variable',
+    values: props.value,
+  });
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
 type BarGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
+  data: DataEntity;
   filters: RuleConditionEntity[];
   groupBy: string;
   balanceTypeOp: string;

@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+
 import {
   SvgCalculator,
   SvgChart,
@@ -18,6 +21,27 @@ import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
 
+type ReportTopbarProps = {
+  customReportItems: CustomReportEntity;
+  report: CustomReportEntity;
+  savedStatus: string;
+  setGraphType: (value: string) => void;
+  viewLegend: boolean;
+  viewSummary: boolean;
+  viewLabels: boolean;
+  onApplyFilter: (newFilter: RuleConditionEntity) => void;
+  onChangeViews: (viewType: string) => void;
+  onReportChange: ({
+    savedReport,
+    type,
+  }: {
+    savedReport?: CustomReportEntity;
+    type: string;
+  }) => void;
+  isItemDisabled: (type: string) => boolean;
+  defaultItems: (item: string) => void;
+};
+
 export function ReportTopbar({
   customReportItems,
   report,
@@ -29,10 +53,10 @@ export function ReportTopbar({
   onApplyFilter,
   onChangeViews,
   onReportChange,
-  disabledItems,
+  isItemDisabled,
   defaultItems,
-}) {
-  const onChangeGraph = cond => {
+}: ReportTopbarProps) {
+  const onChangeGraph = (cond: string) => {
     setSessionReport('graphType', cond);
     onReportChange({ type: 'modify' });
     setGraphType(cond);
@@ -55,7 +79,7 @@ export function ReportTopbar({
           onChangeGraph('TableGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems('TableGraph')}
+        disabled={isItemDisabled('TableGraph')}
       >
         <SvgQueue width={15} height={15} />
       </GraphButton>
@@ -73,7 +97,7 @@ export function ReportTopbar({
           );
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems(
+        disabled={isItemDisabled(
           customReportItems.mode === 'total' ? 'BarGraph' : 'StackedBarGraph',
         )}
       >
@@ -86,7 +110,7 @@ export function ReportTopbar({
           onChangeGraph('LineGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems('LineGraph')}
+        disabled={isItemDisabled('LineGraph')}
       >
         <SvgChart width={15} height={15} />
       </GraphButton>
@@ -97,7 +121,7 @@ export function ReportTopbar({
           onChangeGraph('AreaGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems('AreaGraph')}
+        disabled={isItemDisabled('AreaGraph')}
       >
         <SvgChartArea width={15} height={15} />
       </GraphButton>
@@ -108,7 +132,7 @@ export function ReportTopbar({
           onChangeGraph('DonutGraph');
         }}
         style={{ marginRight: 15 }}
-        disabled={disabledItems('DonutGraph')}
+        disabled={isItemDisabled('DonutGraph')}
       >
         <SvgChartPie width={15} height={15} />
       </GraphButton>
@@ -128,7 +152,7 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
         title="Show Legend"
-        disabled={disabledItems('ShowLegend')}
+        disabled={isItemDisabled('ShowLegend')}
       >
         <SvgListBullet width={15} height={15} />
       </GraphButton>
@@ -149,7 +173,7 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
         title="Show Labels"
-        disabled={disabledItems('ShowLabels')}
+        disabled={isItemDisabled('ShowLabels')}
       >
         <SvgTag width={15} height={15} />
       </GraphButton>
@@ -165,11 +189,15 @@ export function ReportTopbar({
       <FilterButton
         compact
         hover
-        onApply={e => {
-          setSessionReport('conditions', [...customReportItems.conditions, e]);
+        onApply={(e: RuleConditionEntity) => {
+          setSessionReport('conditions', [
+            ...(customReportItems.conditions ?? []),
+            e,
+          ]);
           onApplyFilter(e);
           onReportChange({ type: 'modify' });
         }}
+        exclude={[]}
       />
       <View style={{ flex: 1 }} />
       <SaveReport

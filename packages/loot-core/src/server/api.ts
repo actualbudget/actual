@@ -600,6 +600,43 @@ handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-batch-change']({ deleted: [{ id }] });
 });
 
+handlers['api/rules-get'] = async function () {
+  checkFileOpen();
+  return handlers['rules-get']();
+};
+
+handlers['api/payee-rules-get'] = async function ({ id }) {
+  checkFileOpen();
+  return handlers['payees-get-rules']({ id });
+};
+
+handlers['api/rule-create'] = withMutation(async function ({ rule }) {
+  checkFileOpen();
+  const addedRule = await handlers['rule-add'](rule);
+
+  if ('error' in addedRule) {
+    throw APIError('Failed creating a new rule', addedRule.error);
+  }
+
+  return addedRule;
+});
+
+handlers['api/rule-update'] = withMutation(async function ({ rule }) {
+  checkFileOpen();
+  const updatedRule = handlers['rule-update'](rule);
+
+  if ('error' in updatedRule) {
+    throw APIError('Failed updating the rule', updatedRule.error);
+  }
+
+  return updatedRule;
+});
+
+handlers['api/rule-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  return handlers['rule-delete'](id);
+});
+
 export function installAPI(serverHandlers: ServerHandlers) {
   const merged = Object.assign({}, serverHandlers, handlers);
   handlers = merged as Handlers;
