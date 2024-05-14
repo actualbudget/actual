@@ -176,14 +176,16 @@ export function createGroupedSpreadsheet({
           totalTotals: integerToAmount(totalAssets + totalDebts),
           intervalData,
           categories: stackedCategories.filter(i =>
-            filterEmptyRows(showEmpty, i, balanceTypeOp),
+            filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
           ),
         };
       },
       [startDate, endDate],
     );
     setData(
-      groupedData.filter(i => filterEmptyRows(showEmpty, i, balanceTypeOp)),
+      groupedData.filter(i =>
+        filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
+      ),
     );
   };
 }

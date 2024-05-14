@@ -199,6 +199,24 @@ export function titleFirst(str: string) {
   return str[0].toUpperCase() + str.slice(1);
 }
 
+export function appendDecimals(
+  amountText: string,
+  hideDecimals = false,
+): string {
+  const { separator } = getNumberFormat();
+  let result = amountText;
+  if (result.slice(-1) === separator) {
+    result = result.slice(0, -1);
+  }
+  if (!hideDecimals) {
+    result = result.replaceAll(/[,.]/g, '');
+    result = result.replace(/^0+(?!$)/, '');
+    result = result.padStart(3, '0');
+    result = result.slice(0, -2) + separator + result.slice(-2);
+  }
+  return amountToCurrency(currencyToAmount(result));
+}
+
 type NumberFormats =
   | 'comma-dot'
   | 'dot-comma'
