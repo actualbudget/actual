@@ -5,11 +5,8 @@ import type {
   APICategoryGroupEntity,
   APIPayeeEntity,
 } from '../server/api-models';
-import type {
-  NewRuleEntity,
-  RuleEntity,
-  TransactionEntity,
-} from './models';
+
+import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
 import { type ServerHandlers } from './server-handlers';
 
 export interface ApiHandlers {
