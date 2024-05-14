@@ -15,7 +15,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
-import { type RuleEntity } from 'loot-core/src/types/models';
+import { type NewRuleEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
@@ -210,7 +210,7 @@ function ManageRulesContent({
   }, []);
 
   function onCreateRule() {
-    const rule: RuleEntity = {
+    const rule: NewRuleEntity = {
       stage: null,
       conditionsOp: 'and',
       conditions: [
