@@ -39,5 +39,5 @@ jobs:
             --dir packages/desktop-client/build \
             --site ${{ secrets.NETLIFY_SITE_ID }} \
             --auth ${{ secrets.NETLIFY_API_TOKEN }} \
-            --prod \
-            > deploy_output.txt
+            --filter @actual-app/web \
+            --prod
