@@ -167,11 +167,13 @@ export function Menu<T extends MenuItem>({
             }}
             onPointerEnter={() => setHoveredIndex(idx)}
             onPointerLeave={() => setHoveredIndex(null)}
-            onClick={() =>
-              !item.disabled &&
-              item.toggle === undefined &&
-              onMenuSelect?.(item.name)
-            }
+            onClick={e => {
+              e.stopPropagation();
+
+              if (!item.disabled && item.toggle === undefined) {
+                onMenuSelect?.(item.name);
+              }
+            }}
           >
             {/* Force it to line up evenly */}
             {item.toggle === undefined ? (

@@ -506,7 +506,7 @@ describe('Transactions', () => {
     // The category field should still be editing
     expectToBeEditingField(container, 'category', 2);
     // No dropdown should be open
-    expect(container.querySelector('[data-testid="autocomplete"]')).toBe(null);
+    expect(screen.queryByTestId('autocomplete')).toBe(null);
 
     // Pressing enter should now move down
     await userEvent.type(input, '[Enter]');
