@@ -69,7 +69,8 @@ docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/
     # If you receive an error such as "docker: invalid reference format", please instead use the following command:
     docker run --rm --network host -v ${pwd}:/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.41.1-jammy /bin/bash
 
-# Run the VRT tests: important - they MUST be ran against a HTTPS server.  Use the ip and port noted earlier
+# Once inside the docker container, run the VRT tests: important - they MUST be ran against a HTTPS server.
+# Use the ip and port noted earlier
 E2E_START_URL=https://ip:port yarn vrt
 
     # To update snapshots, use the following command:
