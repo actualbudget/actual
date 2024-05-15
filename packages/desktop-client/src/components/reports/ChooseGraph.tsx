@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../style';
@@ -20,7 +20,7 @@ import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
-  data: GroupedEntity;
+  data: DataEntity;
   filters?: RuleConditionEntity[];
   mode: string;
   graphType: string;
@@ -54,12 +54,6 @@ export function ChooseGraph({
 }: ChooseGraphProps) {
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
-  const groupByData =
-    groupBy === 'Category'
-      ? 'groupedData'
-      : groupBy === 'Interval'
-        ? 'intervalData'
-        : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -166,13 +160,14 @@ export function ChooseGraph({
         <ReportTableHeader
           headerScrollRef={headerScrollRef}
           handleScroll={handleScroll}
-          data={mode === 'time' && data.intervalData}
+          data={data.intervalData}
           groupBy={groupBy}
           interval={interval}
           balanceType={balanceType}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          mode={mode}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}
@@ -180,12 +175,15 @@ export function ChooseGraph({
           handleScroll={handleScroll}
           balanceTypeOp={balanceTypeOp}
           groupBy={groupBy}
-          data={data[groupByData]}
+          data={data}
+          filters={filters}
           mode={mode}
           intervalsCount={intervalsCount}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -197,6 +195,10 @@ export function ChooseGraph({
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          groupBy={groupBy}
+          filters={filters}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
       </View>
     );

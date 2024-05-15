@@ -4,7 +4,7 @@ import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { categoryLists, ReportOptions } from '../ReportOptions';
 
@@ -41,7 +41,7 @@ export function createGroupedSpreadsheet({
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: DataEntity[]) => void,
+    setData: (data: GroupedEntity[]) => void,
   ) => {
     if (categoryList.length === 0) {
       return;
@@ -92,21 +92,15 @@ export function createGroupedSpreadsheet({
       });
     }
 
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
-    const rangeProps =
+    const intervals =
       interval === 'Weekly'
-        ? [
-            monthUtils[format](startDate),
-            monthUtils[format](endDate),
-            firstDayOfWeekIdx,
-          ]
-        : [monthUtils[format](startDate), monthUtils[format](endDate)];
-    const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      ...rangeProps,
-    );
+        ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
+        : monthUtils[ReportOptions.intervalRange.get(interval)](
+            startDate,
+            endDate,
+          );
 
-    const groupedData: DataEntity[] = categoryGroup.map(
+    const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {
         let totalAssets = 0;
         let totalDebts = 0;
@@ -182,14 +176,16 @@ export function createGroupedSpreadsheet({
           totalTotals: integerToAmount(totalAssets + totalDebts),
           intervalData,
           categories: stackedCategories.filter(i =>
-            filterEmptyRows(showEmpty, i, balanceTypeOp),
+            filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
           ),
         };
       },
       [startDate, endDate],
     );
     setData(
-      groupedData.filter(i => filterEmptyRows(showEmpty, i, balanceTypeOp)),
+      groupedData.filter(i =>
+        filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
+      ),
     );
   };
 }

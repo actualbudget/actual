@@ -70,10 +70,10 @@ function AccountName({ account, pending, failed }) {
     await send('notes-save', { id, note: notes });
   };
 
-  const onEditNotes = () => {
+  const onEditNotes = id => {
     dispatch(
       pushModal('notes', {
-        id: account.id,
+        id: `account-${id}`,
         name: account.name,
         onSave: onSaveNotes,
       }),

@@ -333,6 +333,7 @@ const ChildTransactionEdit = forwardRef(
                   onClearActiveEdit();
                 }
               }}
+              autoDecimals={true}
             />
           </View>
         </View>
@@ -1014,7 +1015,7 @@ function TransactionEditUnconnected({
       setTransactions(
         makeTemporaryTransactions(
           locationState?.accountId || lastTransaction?.account || null,
-          locationState?.categoryId || lastTransaction?.category || null,
+          locationState?.categoryId || null,
           lastTransaction?.date,
         ),
       );

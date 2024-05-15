@@ -1,18 +1,23 @@
-// @ts-strict-ignore
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type GroupedEntity,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row } from '../../../table';
 
+import { RenderTableRow } from './RenderTableRow';
+import { type renderRowProps } from './ReportTable';
+
 type ReportTableListProps = {
-  data: DataEntity[];
-  mode?: string;
-  intervalsCount?: number;
+  data: DataEntity;
+  mode: string;
+  intervalsCount: number;
   groupBy: string;
-  renderItem;
+  renderRow: (arg: renderRowProps) => ReactNode;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
@@ -23,53 +28,43 @@ export function ReportTableList({
   intervalsCount,
   mode,
   groupBy,
-  renderItem,
+  renderRow,
   compact,
   style,
   compactStyle,
 }: ReportTableListProps) {
-  const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
-
-  type RenderRowProps = {
-    index: number;
-    parent_index?: number;
-    compact: boolean;
-    style?: CSSProperties;
-    compactStyle?: CSSProperties;
-  };
-  function RenderRow({
-    index,
-    parent_index,
-    compact,
-    style,
-    compactStyle,
-  }: RenderRowProps) {
-    const item =
-      parent_index === undefined
-        ? data[index]
-        : data[parent_index].categories[index];
-
-    return renderItem({
-      item,
-      groupByItem,
-      mode,
-      intervalsCount,
-      compact,
-      style,
-      compactStyle,
-    });
-  }
+  const metadata: GroupedEntity[] | undefined =
+    groupBy === 'Category'
+      ? data.groupedData || []
+      : groupBy === 'Interval'
+        ? data.intervalData.map(interval => {
+            return {
+              id: '',
+              name: '',
+              date: interval.date,
+              totalAssets: interval.totalAssets,
+              totalDebts: interval.totalDebts,
+              totalTotals: interval.totalTotals,
+              intervalData: [],
+              categories: [],
+            };
+          })
+        : data.data;
 
   return (
     <View>
-      {data ? (
+      {metadata ? (
         <View>
-          {data.map((item, index) => {
+          {metadata.map((item, index) => {
             return (
-              <View key={item.id}>
-                <RenderRow
+              <View key={index}>
+                <RenderTableRow
                   index={index}
                   compact={compact}
+                  renderRow={renderRow}
+                  intervalsCount={intervalsCount}
+                  mode={mode}
+                  metadata={metadata}
                   style={{
                     ...(item.categories && {
                       color: theme.tableRowHeaderText,
@@ -83,18 +78,24 @@ export function ReportTableList({
                 {item.categories && (
                   <>
                     <View>
-                      {item.categories.map((category, i) => {
-                        return (
-                          <RenderRow
-                            key={category.id}
-                            index={i}
-                            compact={compact}
-                            parent_index={index}
-                            style={style}
-                            compactStyle={compactStyle}
-                          />
-                        );
-                      })}
+                      {item.categories.map(
+                        (category: GroupedEntity, i: number) => {
+                          return (
+                            <RenderTableRow
+                              key={category.id}
+                              index={i}
+                              compact={compact}
+                              renderRow={renderRow}
+                              intervalsCount={intervalsCount}
+                              mode={mode}
+                              metadata={metadata}
+                              parent_index={index}
+                              style={style}
+                              compactStyle={compactStyle}
+                            />
+                          );
+                        },
+                      )}
                     </View>
                     <Row height={20} />
                   </>

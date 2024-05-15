@@ -28,6 +28,7 @@ import {
 } from './api-models';
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
+import { type RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError } from './errors';
 import { runMutator } from './mutators';
@@ -165,16 +166,12 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     await handlers['close-budget']();
   }
 
-  const localBudget = (await handlers['get-budgets']()).find(
-    b => b.groupId === syncId,
-  );
-  if (localBudget) {
-    await handlers['load-budget']({ id: localBudget.id });
-    const result = await handlers['sync-budget']();
-    if (result.error) {
-      throw new Error(getSyncError(result.error, localBudget.id));
-    }
-  } else {
+  const budgets = await handlers['get-budgets']();
+  const localBudget = budgets.find(b => b.groupId === syncId);
+  let remoteBudget: RemoteFile;
+
+  // Load a remote file if we could not find the file locally
+  if (!localBudget) {
     const files = await handlers['get-remote-files']();
     if (!files) {
       throw new Error('Could not get remote files');
@@ -185,28 +182,48 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
         `Budget “${syncId}” not found. Check the sync id of your budget in the Advanced section of the settings page.`,
       );
     }
-    if (file.encryptKeyId && !password) {
+
+    remoteBudget = file;
+  }
+
+  const activeFile = remoteBudget ? remoteBudget : localBudget;
+
+  // Set the e2e encryption keys
+  if (activeFile.encryptKeyId) {
+    if (!password) {
       throw new Error(
-        `File ${file.name} is encrypted. Please provide a password.`,
+        `File ${activeFile.name} is encrypted. Please provide a password.`,
       );
     }
-    if (password) {
-      const result = await handlers['key-test']({
-        fileId: file.fileId,
-        password,
-      });
-      if (result.error) {
-        throw new Error(getTestKeyError(result.error));
-      }
-    }
 
-    const result = await handlers['download-budget']({ fileId: file.fileId });
+    const result = await handlers['key-test']({
+      fileId: remoteBudget ? remoteBudget.fileId : localBudget.cloudFileId,
+      password,
+    });
     if (result.error) {
-      console.log('Full error details', result.error);
-      throw new Error(getDownloadError(result.error));
+      throw new Error(getTestKeyError(result.error));
     }
-    await handlers['load-budget']({ id: result.id });
   }
+
+  // Sync the local budget file
+  if (localBudget) {
+    await handlers['load-budget']({ id: localBudget.id });
+    const result = await handlers['sync-budget']();
+    if (result.error) {
+      throw new Error(getSyncError(result.error, localBudget.id));
+    }
+    return;
+  }
+
+  // Download the remote file (no need to perform a sync as the file will already be up-to-date)
+  const result = await handlers['download-budget']({
+    fileId: remoteBudget.fileId,
+  });
+  if (result.error) {
+    console.log('Full error details', result.error);
+    throw new Error(getDownloadError(result.error));
+  }
+  await handlers['load-budget']({ id: result.id });
 };
 
 handlers['api/sync'] = async function () {
@@ -610,6 +627,43 @@ handlers['api/payee-update'] = withMutation(async function ({ id, fields }) {
 handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
   return handlers['payees-batch-change']({ deleted: [{ id }] });
+});
+
+handlers['api/rules-get'] = async function () {
+  checkFileOpen();
+  return handlers['rules-get']();
+};
+
+handlers['api/payee-rules-get'] = async function ({ id }) {
+  checkFileOpen();
+  return handlers['payees-get-rules']({ id });
+};
+
+handlers['api/rule-create'] = withMutation(async function ({ rule }) {
+  checkFileOpen();
+  const addedRule = await handlers['rule-add'](rule);
+
+  if ('error' in addedRule) {
+    throw APIError('Failed creating a new rule', addedRule.error);
+  }
+
+  return addedRule;
+});
+
+handlers['api/rule-update'] = withMutation(async function ({ rule }) {
+  checkFileOpen();
+  const updatedRule = handlers['rule-update'](rule);
+
+  if ('error' in updatedRule) {
+    throw APIError('Failed updating the rule', updatedRule.error);
+  }
+
+  return updatedRule;
+});
+
+handlers['api/rule-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  return handlers['rule-delete'](id);
 });
 
 export function installAPI(serverHandlers: ServerHandlers) {
