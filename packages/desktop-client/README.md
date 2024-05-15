@@ -47,6 +47,21 @@ Note the network IP address and port the dev instance is listening on.
 
 Next, navigate to the root of your project folder, run the standartised docker container, and launch the visual regression tests from within it.
 
+Run via yarn:
+
+```sh
+# By default, this connects to https://localhost:3001
+yarn vrt:docker
+
+    # To use a different ip and port:
+    yarn vrt:docker --e2e-start-url https://ip:port
+
+    # To update snapshots, use the following command:
+    yarn vrt:docker --e2e-start-url https://ip:port --update-snapshots
+```
+
+Run manually:
+
 ```sh
 # Run docker container
 docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.41.1-jammy /bin/bash
@@ -65,6 +80,12 @@ E2E_START_URL=https://ip:port yarn vrt
 
 You can also run the tests against a remote server by passing the URL:
 
+Run via yarn:
+```sh
+yarn vrt:docker --e2e-start-url https://my-remote-server.com
+```
+
+Run manually:
 ```sh
 E2E_START_URL=https://my-remote-server.com yarn vrt
 ```
