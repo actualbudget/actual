@@ -27,7 +27,7 @@ __metadata:
     "@swc/jest": "npm:^0.2.36"
     "@types/jest": "npm:^27.5.2"
     "@types/uuid": "npm:^9.0.2"
-    better-sqlite3: "npm:^9.3.0"
+    better-sqlite3: "npm:^9.6.0"
     compare-versions: "npm:^6.1.0"
     jest: "npm:^27.5.1"
     node-fetch: "npm:^3.3.2"
@@ -59,7 +59,7 @@ __metadata:
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
-    "@playwright/test": "npm:^1.41.1"
+    "@playwright/test": "npm:1.41.1"
     "@reach/listbox": "npm:^0.18.0"
     "@react-aria/focus": "npm:^3.16.0"
     "@react-aria/listbox": "npm:^3.11.3"
@@ -2747,7 +2747,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.41.1":
+"@playwright/test@npm:1.41.1":
   version: 1.41.1
   resolution: "@playwright/test@npm:1.41.1"
   dependencies:
@@ -6934,14 +6934,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^9.3.0":
-  version: 9.3.0
-  resolution: "better-sqlite3@npm:9.3.0"
+"better-sqlite3@npm:^9.6.0":
+  version: 9.6.0
+  resolution: "better-sqlite3@npm:9.6.0"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 3aae2c1760a901d639b72d10e267cd6060011555f13eb3ed4194ee811e5905cd0db0b6996064ae27914bcf140af72b0775043c2469c7ca37bc9ea29a6e02c965
+  checksum: 06b3d95221071a06c2e22a9746d9b7049c0bce7962e5e3290ccf088fffbf4d4d52868f0d98b8ae2565fe33b1adab89823145f23c6f6eb63ecc4fc1b883f9082c
   languageName: node
   linkType: hard
 
@@ -8482,7 +8482,7 @@ __metadata:
     "@electron/notarize": "npm:2.2.0"
     "@electron/rebuild": "npm:3.6.0"
     cross-env: "npm:^7.0.3"
-    electron: "npm:30.0.3"
+    electron: "npm:30.0.6"
     electron-builder: "npm:24.13.3"
     electron-is-dev: "npm:2.0.0"
     electron-log: "npm:4.4.8"
@@ -8862,16 +8862,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:30.0.3":
-  version: 30.0.3
-  resolution: "electron@npm:30.0.3"
+"electron@npm:30.0.6":
+  version: 30.0.6
+  resolution: "electron@npm:30.0.6"
   dependencies:
     "@electron/get": "npm:^2.0.0"
     "@types/node": "npm:^20.9.0"
     extract-zip: "npm:^2.0.1"
   bin:
     electron: cli.js
-  checksum: 0ef0b4cab72047df675af5a3f44cb5a32f45bbced9e92eb9049be1b37c9b85c1c657d14600dbcc2a32988df7d98a24d75f50b9e89c34142ea22fa90136bb2cdf
+  checksum: 3e48725701c348d6152cbed53266bb349b93687ba241a051235af6425e509413d1430a3b50e9be9dd153996eee2c2e9ab529cc16f58b28589db679effb69a2f8
   languageName: node
   linkType: hard
 
@@ -12916,7 +12916,7 @@ __metadata:
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.10"
     assert: "npm:^2.1.0"
-    better-sqlite3: "npm:^9.3.0"
+    better-sqlite3: "npm:^9.6.0"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
     cross-env: "npm:^7.0.3"
@@ -14090,11 +14090,11 @@ __metadata:
   linkType: hard
 
 "node-abi@npm:^3.3.0, node-abi@npm:^3.45.0":
-  version: 3.47.0
-  resolution: "node-abi@npm:3.47.0"
+  version: 3.62.0
+  resolution: "node-abi@npm:3.62.0"
   dependencies:
     semver: "npm:^7.3.5"
-  checksum: 9b70640345bd85e60f64e764f3ae49d5a4742e8053c913714b2e7e150016615dd26db9af8b6fe4af08ae2f1748ef3084d39b4dea413635661594f198243ff0a9
+  checksum: 4cb9d4e6d3501bd9868230187f9f1638d777d1d2ca357389a2d411675889ee44375acbeae973b9c501fca723c9657d84684856787988a6327187f5f1e9ab6aee
   languageName: node
   linkType: hard
 

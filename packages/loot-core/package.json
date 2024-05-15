@@ -22,7 +22,7 @@
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
     "adm-zip": "^0.5.10",
-    "better-sqlite3": "^9.3.0",
+    "better-sqlite3": "^9.6.0",
     "csv-parse": "^4.16.3",
     "csv-stringify": "^5.6.5",
     "date-fns": "^2.30.0",
