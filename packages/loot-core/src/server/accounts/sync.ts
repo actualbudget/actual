@@ -320,7 +320,9 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         date: trans.date,
         notes:
           trans.remittanceInformationUnstructured ||
-          (trans.remittanceInformationUnstructuredArray || []).join(', '),
+          (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
+          trans.remittanceInformationStructured ||
+          (trans.remittanceInformationStructuredArray || []).join(', '),
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
