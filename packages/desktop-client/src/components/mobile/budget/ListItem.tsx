@@ -19,8 +19,8 @@ export const ListItem = ({ children, style, ...props }: ListItemProps) => {
         borderColor: theme.tableBorder,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: 10,
-        paddingRight: 10,
+        paddingLeft: 5,
+        paddingRight: 5,
         zIndex: 1,
         ...style,
       }}

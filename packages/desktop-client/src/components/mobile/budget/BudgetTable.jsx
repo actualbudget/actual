@@ -42,12 +42,12 @@ const PILL_STYLE = {
 };
 
 function getColumnWidth({ show3Cols, isSidebar = false, offset = 0 } = {}) {
-  // If show3Cols = 30vw | 20vw | 20vw | 20vw,
+  // If show3Cols = 35vw | 20vw | 20vw | 20vw,
   // Else = 50vw | 20vw | 20vw,
   if (!isSidebar) {
     return `${20 + offset}vw`;
   }
-  return show3Cols ? `${30 + offset}vw` : `${50 + offset}vw`;
+  return show3Cols ? `${35 + offset}vw` : `${50 + offset}vw`;
 }
 
 function ToBudget({ month, toBudget, onClick, show3Cols }) {
@@ -86,8 +86,9 @@ function ToBudget({ month, toBudget, onClick, show3Cols }) {
               <AutoTextSize
                 key={month + value}
                 as={Text}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 style={{
                   maxWidth: sidebarColumnWidth,
                   fontSize: 12,
@@ -139,8 +140,9 @@ function Saved({ month, projected, onClick, show3Cols }) {
             {projected ? (
               <AutoTextSize
                 as={Label}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 title="Projected Savings"
                 style={{
                   maxWidth: sidebarColumnWidth,
@@ -167,8 +169,9 @@ function Saved({ month, projected, onClick, show3Cols }) {
               <AutoTextSize
                 key={month + value}
                 as={Text}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 style={{
                   maxWidth: sidebarColumnWidth,
                   fontSize: 12,
@@ -477,8 +480,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 <AutoTextSize
                   key={month + value}
                   as={Text}
-                  minFontSizePx={8}
+                  minFontSizePx={6}
                   maxFontSizePx={12}
+                  mode="oneline"
                   style={{
                     maxWidth: columnWidth,
                     textAlign: 'right',
@@ -516,8 +520,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 <AutoTextSize
                   key={month + value}
                   as={Text}
-                  minFontSizePx={8}
+                  minFontSizePx={6}
                   maxFontSizePx={12}
+                  mode="oneline"
                   style={{
                     maxWidth: columnWidth,
                     textAlign: 'right',
@@ -555,8 +560,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   <AutoTextSize
                     key={month + value}
                     as={Text}
-                    minFontSizePx={8}
+                    minFontSizePx={6}
                     maxFontSizePx={12}
+                    mode="oneline"
                     style={{
                       maxWidth: columnWidth,
                       ...makeAmountFullStyle(value),
@@ -629,7 +635,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   const sidebarColumnWidth = getColumnWidth({
     show3Cols,
     isSidebar: true,
-    offset: -3.5,
+    offset: -5,
   });
   const columnWidth = getColumnWidth({ show3Cols });
 
@@ -728,8 +734,9 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
               <AutoTextSize
                 key={month + value}
                 as={Text}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 style={{
                   maxWidth: columnWidth,
                   fontSize: 12,
@@ -758,8 +765,9 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
               <AutoTextSize
                 key={month + value}
                 as={Text}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 style={{
                   maxWidth: columnWidth,
                   fontSize: 12,
@@ -787,8 +795,9 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
               <AutoTextSize
                 key={month + value}
                 as={Text}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 style={{
                   maxWidth: columnWidth,
                   fontSize: 12,
@@ -846,7 +855,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -23.5 });
+  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -20 });
   const columnWidth = getColumnWidth();
 
   return (
@@ -946,8 +955,9 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
                 <AutoTextSize
                   key={month + value}
                   as={Text}
-                  minFontSizePx={8}
+                  minFontSizePx={6}
                   maxFontSizePx={12}
+                  mode="oneline"
                   style={{
                     maxWidth: columnWidth,
                     paddingLeft: 5,
@@ -976,8 +986,9 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
               <AutoTextSize
                 key={month + value}
                 as={Text}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 style={{
                   maxWidth: columnWidth,
                   paddingLeft: 5,
@@ -1008,7 +1019,7 @@ const IncomeCategory = memo(function IncomeCategory({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -20 });
+  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -15 });
   const columnWidth = getColumnWidth();
 
   return (
@@ -1096,8 +1107,9 @@ const IncomeCategory = memo(function IncomeCategory({
                   <AutoTextSize
                     key={month + value}
                     as={Text}
-                    minFontSizePx={8}
+                    minFontSizePx={6}
                     maxFontSizePx={12}
+                    mode="oneline"
                     style={{
                       maxWidth: columnWidth,
                       textAlign: 'right',
@@ -1126,8 +1138,9 @@ const IncomeCategory = memo(function IncomeCategory({
               <AutoTextSize
                 key={month + value}
                 as={Text}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 style={{
                   maxWidth: columnWidth,
                   textAlign: 'right',
@@ -1343,7 +1356,7 @@ function IncomeGroup({
           justifyContent: 'flex-end',
           marginTop: 50,
           marginBottom: 5,
-          marginRight: 20,
+          marginRight: 15,
         }}
       >
         {type === 'report' && (
@@ -1644,7 +1657,7 @@ function BudgetTableHeader({
         justifyContent: 'space-between',
         alignItems: 'center',
         flexShrink: 0,
-        padding: '10px 20px',
+        padding: '10px 15px',
         paddingLeft: 10,
         backgroundColor: theme.tableRowHeaderBackground,
         borderBottomWidth: 1,
@@ -1717,8 +1730,9 @@ function BudgetTableHeader({
                     <AutoTextSize
                       key={month + value}
                       as={Text}
-                      minFontSizePx={8}
+                      minFontSizePx={6}
                       maxFontSizePx={12}
+                      mode="oneline"
                       style={{
                         maxWidth: columnWidth,
                         color: theme.formInputText,
@@ -1768,8 +1782,9 @@ function BudgetTableHeader({
                     <AutoTextSize
                       key={month + value}
                       as={Text}
-                      minFontSizePx={8}
+                      minFontSizePx={6}
                       maxFontSizePx={12}
+                      mode="oneline"
                       style={{
                         maxWidth: columnWidth,
                         color: theme.formInputText,
@@ -1805,8 +1820,9 @@ function BudgetTableHeader({
               <AutoTextSize
                 key={month + value}
                 as={Text}
-                minFontSizePx={8}
+                minFontSizePx={6}
                 maxFontSizePx={12}
+                mode="oneline"
                 style={{
                   maxWidth: columnWidth,
                   color: theme.formInputText,

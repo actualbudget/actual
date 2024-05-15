@@ -57,7 +57,6 @@ export function BalanceWithCarryover({
           textAlign: 'right',
           ...(!disabled && {
             cursor: 'pointer',
-            ':hover': { textDecoration: 'underline' },
           }),
           ...props.style,
         }}
