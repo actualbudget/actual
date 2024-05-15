@@ -21,7 +21,7 @@
     "clean": "rm -rf dist @types"
   },
   "dependencies": {
-    "better-sqlite3": "^9.3.0",
+    "better-sqlite3": "9.6.0",
     "compare-versions": "^6.1.0",
     "node-fetch": "^3.3.2",
     "uuid": "^9.0.1"
