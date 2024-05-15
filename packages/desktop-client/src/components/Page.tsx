@@ -1,4 +1,4 @@
-import React, { type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../style';
@@ -6,175 +6,143 @@ import { theme, styles, type CSSProperties } from '../style';
 import { Text } from './common/Text';
 import { View } from './common/View';
 
-type PageHeaderProps = {
-  title: ReactNode;
-  titleContainerProps?: ComponentPropsWithoutRef<typeof View>;
-  style?: CSSProperties;
-  leftContentContainerProps?: ComponentPropsWithoutRef<typeof View>;
-  leftContent?: ReactNode;
-  rightContentContainerProps?: ComponentPropsWithoutRef<typeof View>;
-  rightContent?: ReactNode;
-};
-
 const HEADER_HEIGHT = 50;
 
-function PageHeader({
-  title,
-  titleContainerProps,
-  style,
-  leftContentContainerProps,
-  leftContent,
-  rightContentContainerProps,
-  rightContent,
-}: PageHeaderProps) {
-  const { isNarrowWidth } = useResponsive();
+type PageHeaderProps = {
+  title: ReactNode;
+  style?: CSSProperties;
+};
 
-  if (isNarrowWidth) {
-    return (
-      <View
-        style={{
-          alignItems: 'center',
-          backgroundColor: theme.mobileHeaderBackground,
-          color: theme.mobileHeaderText,
-          flexDirection: 'row',
-          flexShrink: 0,
-          height: HEADER_HEIGHT,
-          ...style,
-        }}
-      >
-        <View
-          {...leftContentContainerProps}
-          style={{
-            flexBasis: '25%',
-            justifyContent: 'flex-start',
-            flexDirection: 'row',
-            ...leftContentContainerProps?.style,
-          }}
-        >
-          {leftContent}
-        </View>
-        <View
-          role="heading"
-          {...titleContainerProps}
-          style={{
-            textAlign: 'center',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'row',
-            flexBasis: '50%',
-            fontSize: 17,
-            fontWeight: 500,
-            overflowY: 'auto',
-            ...titleContainerProps?.style,
-          }}
-        >
-          {title}
-        </View>
-        <View
-          {...rightContentContainerProps}
-          style={{
-            flexBasis: '25%',
-            justifyContent: 'flex-end',
-            flexDirection: 'row',
-            ...rightContentContainerProps?.style,
-          }}
-        >
-          {rightContent}
-        </View>
-      </View>
-    );
-  }
-
+export function PageHeader({ title, style }: PageHeaderProps) {
   return (
-    <Text
+    <View
       style={{
-        fontSize: 25,
-        fontWeight: 500,
-        marginBottom: 15,
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginLeft: 20,
         ...style,
       }}
     >
-      {title}
-    </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          fontSize: 25,
+          fontWeight: 500,
+        }}
+      >
+        {typeof title === 'string' ? <Text>{title}</Text> : title}
+      </View>
+    </View>
+  );
+}
+
+type MobilePageHeaderProps = {
+  title: ReactNode;
+  style?: CSSProperties;
+  leftContent?: ReactNode;
+  rightContent?: ReactNode;
+};
+
+export function MobilePageHeader({
+  title,
+  style,
+  leftContent,
+  rightContent,
+}: MobilePageHeaderProps) {
+  return (
+    <View
+      style={{
+        alignItems: 'center',
+        backgroundColor: theme.mobileHeaderBackground,
+        color: theme.mobileHeaderText,
+        flexDirection: 'row',
+        flexShrink: 0,
+        height: HEADER_HEIGHT,
+        ...style,
+      }}
+    >
+      <View
+        style={{
+          flexBasis: '25%',
+          justifyContent: 'flex-start',
+          flexDirection: 'row',
+        }}
+      >
+        {leftContent}
+      </View>
+      <View
+        role="heading"
+        style={{
+          textAlign: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'row',
+          flexBasis: '50%',
+          fontSize: 17,
+          fontWeight: 500,
+          overflowY: 'auto',
+        }}
+      >
+        {title}
+      </View>
+      <View
+        style={{
+          flexBasis: '25%',
+          justifyContent: 'flex-end',
+          flexDirection: 'row',
+        }}
+      >
+        {rightContent}
+      </View>
+    </View>
   );
 }
 
 type PageProps = {
-  titleContainerProps?: PageHeaderProps['titleContainerProps'];
-  title: PageHeaderProps['title'];
-  headerStyle?: CSSProperties;
-  headerLeftContentContainerProps?: PageHeaderProps['leftContentContainerProps'];
-  headerLeftContent?: PageHeaderProps['leftContent'];
-  headerRightContentContainerProps?: PageHeaderProps['rightContentContainerProps'];
-  headerRightContent?: PageHeaderProps['rightContent'];
+  header: ReactNode;
   style?: CSSProperties;
   padding?: number;
-  childrenContainerProps?: ComponentPropsWithoutRef<typeof View>;
   children: ReactNode;
   footer?: ReactNode;
 };
 
-export function Page({
-  titleContainerProps,
-  title,
-  headerStyle,
-  headerLeftContentContainerProps,
-  headerLeftContent,
-  headerRightContentContainerProps,
-  headerRightContent,
-  style,
-  padding,
-  childrenContainerProps,
-  children,
-  footer,
-}: PageProps) {
+export function Page({ header, style, padding, children, footer }: PageProps) {
   const { isNarrowWidth } = useResponsive();
-  const _padding = padding != null ? padding : isNarrowWidth ? 10 : 20;
+  const childrenPadding = padding != null ? padding : isNarrowWidth ? 10 : 20;
+
+  const headerToRender =
+    typeof header === 'string' ? (
+      isNarrowWidth ? (
+        <MobilePageHeader title={header} />
+      ) : (
+        <PageHeader title={header} />
+      )
+    ) : (
+      header
+    );
 
   return (
     <View
       style={{
         ...(!isNarrowWidth && styles.page),
+        flex: 1,
+        backgroundColor: isNarrowWidth
+          ? theme.mobilePageBackground
+          : theme.pageBackground,
         ...style,
       }}
     >
-      <PageHeader
-        title={title}
-        titleContainerProps={titleContainerProps}
-        leftContentContainerProps={headerLeftContentContainerProps}
-        leftContent={headerLeftContent}
-        rightContentContainerProps={headerRightContentContainerProps}
-        rightContent={headerRightContent}
+      {headerToRender}
+      <View
         style={{
-          ...(!isNarrowWidth && { paddingInline: _padding }),
-          ...headerStyle,
+          flex: 1,
+          overflowY: isNarrowWidth ? 'auto' : undefined,
+          padding: `0 ${childrenPadding}px`,
         }}
-      />
-      {isNarrowWidth ? (
-        <View
-          {...childrenContainerProps}
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: _padding,
-            ...childrenContainerProps?.style,
-          }}
-        >
-          {children}
-        </View>
-      ) : (
-        <View
-          {...childrenContainerProps}
-          style={{
-            flex: 1,
-            paddingLeft: _padding,
-            paddingRight: _padding,
-            ...childrenContainerProps?.style,
-          }}
-        >
-          {children}
-        </View>
-      )}
+      >
+        {children}
+      </View>
       {footer}
     </View>
   );

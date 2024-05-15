@@ -17,16 +17,17 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
-import { SvgArrowLeft } from '../../../icons/v1/ArrowLeft';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
-import { Link } from '../../common/Link';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
+import { MobileBackButton } from '../../mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import {
@@ -344,6 +345,7 @@ export function CustomReport() {
     conditionsOp,
   };
 
+  const navigate = useNavigate();
   const [, setScrollWidth] = useState(0);
 
   if (!allIntervals || !data) {
@@ -529,58 +531,38 @@ export function CustomReport() {
     }
   };
 
+  const onBackClick = () => {
+    navigate('/reports');
+  };
+
   return (
-    <View
-      style={{
-        ...styles.page,
-        minWidth: isNarrowWidth ? undefined : 650,
-        overflow: 'hidden',
-      }}
+    <Page
+      header={
+        isNarrowWidth ? (
+          <MobilePageHeader
+            title={`Custom Report: ${report.name || 'Unsaved report'}`}
+            leftContent={<MobileBackButton onClick={onBackClick} />}
+          />
+        ) : (
+          <PageHeader
+            title={
+              <>
+                <Text>Custom Report:</Text>
+                <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
+                  {report.name || 'Unsaved report'}
+                </Text>
+              </>
+            }
+          />
+        )
+      }
+      padding={0}
     >
       <View
         style={{
-          flexDirection: isNarrowWidth ? 'column' : 'row',
-          flexShrink: 0,
-        }}
-      >
-        <View
-          style={{
-            padding: 10,
-            paddingTop: 0,
-            flexShrink: 0,
-          }}
-        >
-          <Link
-            variant="button"
-            type="bare"
-            to="/reports"
-            style={{ marginBottom: '15', alignSelf: 'flex-start' }}
-          >
-            <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} />{' '}
-            Back
-          </Link>
-          <View style={styles.veryLargeText}>Custom Report:</View>
-        </View>
-        <Text
-          style={{
-            ...styles.veryLargeText,
-            marginTop: isNarrowWidth ? 0 : 40,
-            padding: isNarrowWidth ? 10 : 0,
-            paddingTop: 0,
-            flexShrink: 0,
-            color: theme.pageTextPositive,
-          }}
-        >
-          {report.name || 'Unsaved report'}
-        </Text>
-      </View>
-      <View
-        style={{
-          display: 'flex',
           flexDirection: 'row',
-          padding: 15,
-          paddingTop: 0,
-          flexGrow: 1,
+          paddingLeft: !isNarrowWidth ? 20 : undefined,
+          flex: 1,
         }}
       >
         {!isNarrowWidth && (
@@ -612,7 +594,7 @@ export function CustomReport() {
         )}
         <View
           style={{
-            flexGrow: 1,
+            flex: 1,
           }}
         >
           {!isNarrowWidth && (
@@ -671,51 +653,44 @@ export function CustomReport() {
           <View
             style={{
               backgroundColor: theme.tableBackground,
-              flexGrow: 1,
+              flexDirection: 'row',
+              flex: '1 0 auto',
             }}
           >
             <View
               style={{
-                flexDirection: 'row',
-                flexGrow: 1,
+                flex: 1,
+                padding: 10,
               }}
             >
-              <View
-                style={{
-                  flexDirection: 'column',
-                  flexGrow: 1,
-                  padding: 10,
-                  paddingTop: 10,
-                }}
-              >
-                {graphType !== 'TableGraph' && (
+              {graphType !== 'TableGraph' && (
+                <View
+                  style={{
+                    alignItems: 'flex-end',
+                    paddingTop: 10,
+                  }}
+                >
                   <View
                     style={{
-                      alignItems: 'flex-end',
-                      paddingTop: 10,
+                      ...styles.mediumText,
+                      fontWeight: 500,
+                      marginBottom: 5,
                     }}
                   >
-                    <View
-                      style={{
-                        ...styles.mediumText,
-                        fontWeight: 500,
-                        marginBottom: 5,
-                      }}
-                    >
-                      <AlignedText
-                        left={<Block>{balanceType}:</Block>}
-                        right={
-                          <Text>
-                            <PrivacyFilter blurIntensity={5}>
-                              {amountToCurrency(Math.abs(data[balanceTypeOp]))}
-                            </PrivacyFilter>
-                          </Text>
-                        }
-                      />
-                    </View>
+                    <AlignedText
+                      left={<Block>{balanceType}:</Block>}
+                      right={
+                        <Text>
+                          <PrivacyFilter blurIntensity={5}>
+                            {amountToCurrency(Math.abs(data[balanceTypeOp]))}
+                          </PrivacyFilter>
+                        </Text>
+                      }
+                    />
                   </View>
-                )}
-
+                </View>
+              )}
+              <View style={{ flex: 1, overflow: 'auto' }}>
                 {dataCheck ? (
                   <ChooseGraph
                     data={data}
@@ -736,40 +711,37 @@ export function CustomReport() {
                   <LoadingIndicator message="Loading report..." />
                 )}
               </View>
-              {(viewLegend || viewSummary) && data && !isNarrowWidth && (
-                <View
-                  style={{
-                    padding: 10,
-                    flexDirection: 'column',
-                    minWidth: 300,
-                    marginRight: 10,
-                    textAlign: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  {viewSummary && (
-                    <ReportSummary
-                      startDate={startDate}
-                      endDate={endDate}
-                      balanceTypeOp={balanceTypeOp}
-                      data={data}
-                      interval={interval}
-                      intervalsCount={intervals.length}
-                    />
-                  )}
-                  {viewLegend && (
-                    <ReportLegend
-                      legend={data.legend}
-                      groupBy={groupBy}
-                      interval={interval}
-                    />
-                  )}
-                </View>
-              )}
             </View>
+            {(viewLegend || viewSummary) && data && !isNarrowWidth && (
+              <View
+                style={{
+                  padding: 10,
+                  minWidth: 300,
+                  textAlign: 'center',
+                }}
+              >
+                {viewSummary && (
+                  <ReportSummary
+                    startDate={startDate}
+                    endDate={endDate}
+                    balanceTypeOp={balanceTypeOp}
+                    data={data}
+                    interval={interval}
+                    intervalsCount={intervals.length}
+                  />
+                )}
+                {viewLegend && (
+                  <ReportLegend
+                    legend={data.legend}
+                    groupBy={groupBy}
+                    interval={interval}
+                  />
+                )}
+              </View>
+            )}
           </View>
         </View>
       </View>
-    </View>
+    </Page>
   );
 }

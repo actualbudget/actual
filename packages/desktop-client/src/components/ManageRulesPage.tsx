@@ -5,7 +5,7 @@ import { Page } from './Page';
 
 export function ManageRulesPage() {
   return (
-    <Page title="Rules">
+    <Page header="Rules">
       <ManageRules isModal={false} payeeId={null} />
     </Page>
   );

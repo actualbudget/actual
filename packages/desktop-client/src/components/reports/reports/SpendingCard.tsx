@@ -72,7 +72,7 @@ export function SpendingCard() {
 
         {data ? (
           <SpendingGraph
-            style={{ flexGrow: 1 }}
+            style={{ flex: 1 }}
             compact={true}
             data={data}
             mode="average"

@@ -21,9 +21,10 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { theme } from '../../../style';
+import { type CSSProperties, theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { chartTheme } from '../chart-theme';
+import { Container } from '../Container';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms
@@ -90,11 +91,13 @@ type CashFlowGraphProps = {
   };
   isConcise: boolean;
   showBalance?: boolean;
+  style?: CSSProperties;
 };
 export function CashFlowGraph({
   graphData,
   isConcise,
   showBalance = true,
+  style,
 }: CashFlowGraphProps) {
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
@@ -108,63 +111,72 @@ export function CashFlowGraph({
   }));
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <ComposedChart stackOffset="sign" data={data}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis
-          dataKey="date"
-          tick={{ fill: theme.reportsLabel }}
-          tickFormatter={x => {
-            // eslint-disable-next-line rulesdir/typography
-            return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
-          }}
-          minTickGap={50}
-        />
-        <YAxis
-          tick={{ fill: theme.reportsLabel }}
-          tickCount={8}
-          tickFormatter={value =>
-            privacyMode && !yAxisIsHovered
-              ? '...'
-              : amountToCurrencyNoDecimal(value)
-          }
-          onMouseEnter={() => setYAxisIsHovered(true)}
-          onMouseLeave={() => setYAxisIsHovered(false)}
-        />
-        <Tooltip
-          labelFormatter={x => {
-            // eslint-disable-next-line rulesdir/typography
-            return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
-          }}
-          content={<CustomTooltip isConcise={isConcise} />}
-          isAnimationActive={false}
-        />
+    <Container style={style}>
+      {(width, height) => (
+        <ResponsiveContainer>
+          <ComposedChart
+            width={width}
+            height={height}
+            stackOffset="sign"
+            data={data}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="date"
+              tick={{ fill: theme.reportsLabel }}
+              tickFormatter={x => {
+                // eslint-disable-next-line rulesdir/typography
+                return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
+              }}
+              minTickGap={50}
+            />
+            <YAxis
+              tick={{ fill: theme.reportsLabel }}
+              tickCount={8}
+              tickFormatter={value =>
+                privacyMode && !yAxisIsHovered
+                  ? '...'
+                  : amountToCurrencyNoDecimal(value)
+              }
+              onMouseEnter={() => setYAxisIsHovered(true)}
+              onMouseLeave={() => setYAxisIsHovered(false)}
+            />
+            <Tooltip
+              labelFormatter={x => {
+                // eslint-disable-next-line rulesdir/typography
+                return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
+              }}
+              content={<CustomTooltip isConcise={isConcise} />}
+              isAnimationActive={false}
+            />
 
-        <ReferenceLine y={0} stroke="#000" />
-        <Bar
-          dataKey="income"
-          stackId="a"
-          fill={chartTheme.colors.blue}
-          maxBarSize={MAX_BAR_SIZE}
-          animationDuration={ANIMATION_DURATION}
-        />
-        <Bar
-          dataKey="expenses"
-          stackId="a"
-          fill={chartTheme.colors.red}
-          maxBarSize={MAX_BAR_SIZE}
-          animationDuration={ANIMATION_DURATION}
-        />
-        <Line
-          type="monotone"
-          dataKey="balance"
-          dot={false}
-          hide={!showBalance}
-          stroke={theme.pageTextLight}
-          strokeWidth={2}
-          animationDuration={ANIMATION_DURATION}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+            <ReferenceLine y={0} stroke="#000" />
+            <Bar
+              dataKey="income"
+              stackId="a"
+              fill={chartTheme.colors.blue}
+              maxBarSize={MAX_BAR_SIZE}
+              animationDuration={ANIMATION_DURATION}
+            />
+            <Bar
+              dataKey="expenses"
+              stackId="a"
+              fill={chartTheme.colors.red}
+              maxBarSize={MAX_BAR_SIZE}
+              animationDuration={ANIMATION_DURATION}
+            />
+            <Line
+              type="monotone"
+              dataKey="balance"
+              dot={false}
+              hide={!showBalance}
+              stroke={theme.pageTextLight}
+              strokeWidth={2}
+              animationDuration={ANIMATION_DURATION}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      )}
+    </Container>
   );
 }
