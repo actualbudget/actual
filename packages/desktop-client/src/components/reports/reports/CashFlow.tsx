@@ -8,14 +8,17 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
+import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
-import { theme, styles } from '../../../style';
+import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Button } from '../../common/Button';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { MobileBackButton } from '../../mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { CashFlowGraph } from '../graphs/CashFlowGraph';
@@ -24,7 +27,6 @@ import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
 export function CashFlow() {
-  const { isNarrowWidth } = useResponsive();
   const {
     filters,
     conditionsOp,
@@ -95,6 +97,9 @@ export function CashFlow() {
     setIsConcise(isConcise);
   }
 
+  const navigate = useNavigate();
+  const { isNarrowWidth } = useResponsive();
+
   if (!allMonths || !data) {
     return null;
   }
@@ -102,15 +107,22 @@ export function CashFlow() {
   const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
 
   return (
-    <View
-      style={{
-        ...styles.page,
-        minWidth: isNarrowWidth ? undefined : 650,
-        overflow: 'hidden',
-      }}
+    <Page
+      header={
+        isNarrowWidth ? (
+          <MobilePageHeader
+            title="Cash Flow"
+            leftContent={
+              <MobileBackButton onClick={() => navigate('/reports')} />
+            }
+          />
+        ) : (
+          <PageHeader title="Cash Flow" />
+        )
+      }
+      padding={0}
     >
       <Header
-        title="Cash Flow"
         allMonths={allMonths}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
@@ -139,16 +151,15 @@ export function CashFlow() {
       <View
         style={{
           backgroundColor: theme.tableBackground,
-          padding: 30,
+          padding: 20,
           paddingTop: 0,
-          overflow: 'auto',
+          flex: '1 0 auto',
+          overflowY: 'auto',
         }}
       >
         <View
           style={{
             paddingTop: 20,
-            paddingRight: 20,
-            flexShrink: 0,
             alignItems: 'flex-end',
             color: theme.pageText,
           }}
@@ -199,7 +210,12 @@ export function CashFlow() {
           showBalance={showBalance}
         />
 
-        <View style={{ marginTop: 30, userSelect: 'none' }}>
+        <View
+          style={{
+            marginTop: 30,
+            userSelect: 'none',
+          }}
+        >
           <Paragraph>
             <strong>How is cash flow calculated?</strong>
           </Paragraph>
@@ -211,6 +227,6 @@ export function CashFlow() {
           </Paragraph>
         </View>
       </View>
-    </View>
+    </Page>
   );
 }
