@@ -8648,7 +8648,7 @@ __metadata:
     "@electron/notarize": "npm:2.2.0"
     "@electron/rebuild": "npm:3.6.0"
     cross-env: "npm:^7.0.3"
-    electron: "npm:30.0.3"
+    electron: "npm:30.0.5"
     electron-builder: "npm:24.13.3"
     electron-is-dev: "npm:2.0.0"
     electron-log: "npm:4.4.8"
@@ -9029,16 +9029,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:30.0.3":
-  version: 30.0.3
-  resolution: "electron@npm:30.0.3"
+"electron@npm:30.0.5":
+  version: 30.0.5
+  resolution: "electron@npm:30.0.5"
   dependencies:
     "@electron/get": "npm:^2.0.0"
     "@types/node": "npm:^20.9.0"
     extract-zip: "npm:^2.0.1"
   bin:
     electron: cli.js
-  checksum: 0ef0b4cab72047df675af5a3f44cb5a32f45bbced9e92eb9049be1b37c9b85c1c657d14600dbcc2a32988df7d98a24d75f50b9e89c34142ea22fa90136bb2cdf
+  checksum: 1ed4b040e7374bc816c1693eed94fb82a72e9dc1a05ad8408d01cf503f0af29308d9f80168c521d76c47a90ebf28c9dd86f39e60d08e528df761ec7f1ee64e7b
   languageName: node
   linkType: hard
 
