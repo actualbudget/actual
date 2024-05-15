@@ -17,6 +17,7 @@ import {
   SvgCheveronDown,
   SvgCheveronRight,
 } from '../../../icons/v1';
+import { SvgViewShow } from '../../../icons/v2';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
@@ -43,11 +44,11 @@ const PILL_STYLE = {
 
 function getColumnWidth({ show3Cols, isSidebar = false, offset = 0 } = {}) {
   // If show3Cols = 35vw | 20vw | 20vw | 20vw,
-  // Else = 50vw | 20vw | 20vw,
+  // Else = 45vw | 25vw | 25vw,
   if (!isSidebar) {
-    return `${20 + offset}vw`;
+    return show3Cols ? `${20 + offset}vw` : `${25 + offset}vw`;
   }
-  return show3Cols ? `${35 + offset}vw` : `${50 + offset}vw`;
+  return show3Cols ? `${35 + offset}vw` : `${45 + offset}vw`;
 }
 
 function ToBudget({ month, toBudget, onClick, show3Cols }) {
@@ -102,7 +103,7 @@ function ToBudget({ month, toBudget, onClick, show3Cols }) {
           />
         </View>
         <SvgCheveronRight
-          style={{ flexShrink: 0, color: theme.pageTextSubdued }}
+          style={{ flexShrink: 0, color: theme.pageTextSubdued, marginLeft: 5 }}
           width={14}
           height={14}
         />
@@ -189,7 +190,7 @@ function Saved({ month, projected, onClick, show3Cols }) {
           />
         </View>
         <SvgCheveronRight
-          style={{ flexShrink: 0, color: theme.pageTextSubdued }}
+          style={{ flexShrink: 0, color: theme.pageTextSubdued, marginLeft: 5 }}
           width={14}
           height={14}
         />
@@ -855,7 +856,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -20 });
+  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -15 });
   const columnWidth = getColumnWidth();
 
   return (
@@ -1019,7 +1020,7 @@ const IncomeCategory = memo(function IncomeCategory({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -15 });
+  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -10 });
   const columnWidth = getColumnWidth();
 
   return (
@@ -1706,19 +1707,25 @@ function BudgetTableHeader({
               type="bare"
               disabled={show3Cols}
               onClick={toggleSpentColumn}
-              style={{
-                ...buttonStyle,
-                background:
-                  !showSpentColumn && !show3Cols
-                    ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 4px, transparent 0)`
-                    : null,
-              }}
+              style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
-                <Label
-                  title="Budgeted"
-                  style={{ color: theme.formInputText }}
-                />
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {!show3Cols && (
+                    <SvgViewShow
+                      width={12}
+                      height={12}
+                      style={{
+                        color: theme.pageTextSubdued,
+                        marginRight: 5,
+                      }}
+                    />
+                  )}
+                  <Label
+                    title="Budgeted"
+                    style={{ color: theme.formInputText }}
+                  />
+                </View>
                 <CellValue
                   binding={
                     type === 'report'
@@ -1761,16 +1768,22 @@ function BudgetTableHeader({
               type="bare"
               disabled={show3Cols}
               onClick={toggleSpentColumn}
-              style={{
-                ...buttonStyle,
-                background:
-                  showSpentColumn && !show3Cols
-                    ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 4px, transparent 0)`
-                    : null,
-              }}
+              style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
-                <Label title="Spent" style={{ color: theme.formInputText }} />
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {!show3Cols && (
+                    <SvgViewShow
+                      width={12}
+                      height={12}
+                      style={{
+                        color: theme.pageTextSubdued,
+                        marginRight: 5,
+                      }}
+                    />
+                  )}
+                  <Label title="Spent" style={{ color: theme.formInputText }} />
+                </View>
                 <CellValue
                   binding={
                     type === 'report'
