@@ -1,4 +1,4 @@
-import BankFactory from '../bank-factory.js';
+import BankFactory, { BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
 import {
   RequisitionNotLinked,
   AccountNotLinedToRequisition,
@@ -268,7 +268,11 @@ export const goCardlessService = {
       institutionId,
       referenceId: uuid.v4(),
       accessValidForDays: bank.accessValidForDays,
-      maxHistoricalDays: institution.transaction_total_days,
+      maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
+        ? Number(institution.transaction_total_days) >= 90
+          ? '89'
+          : institution.transaction_total_days
+        : institution.transaction_total_days,
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,
