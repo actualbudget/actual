@@ -83,7 +83,10 @@ You can also run the tests against a remote server by passing the URL:
 
 Run via yarn:
 ```sh
-yarn vrt:docker --e2e-start-url https://my-remote-server.com
+E2E_START_URL=https://my-remote-server.com yarn vrt:docker
+
+    # Or pass in server URL as argument
+    yarn vrt:docker --e2e-start-url https://my-remote-server.com
 ```
 
 Run manually:

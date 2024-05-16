@@ -6,7 +6,7 @@ if [ ! -d "node_modules" ] || [ "$(ls -A node_modules)" = "" ]; then
     yarn
 fi
 
-E2E_START_URL="https://localhost:3001"
+E2E_START_URL="${E2E_START_URL:-https://localhost:3001}"
 VRT_ARGS=""
 
 # Loop through all arguments
