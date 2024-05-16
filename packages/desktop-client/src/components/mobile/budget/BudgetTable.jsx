@@ -11,10 +11,10 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgLogo } from '../../../icons/logo';
+import { SvgExpandArrow } from '../../../icons/v0';
 import {
   SvgArrowThinLeft,
   SvgArrowThinRight,
-  SvgCheveronDown,
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
@@ -636,7 +636,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   const sidebarColumnWidth = getColumnWidth({
     show3Cols,
     isSidebar: true,
-    offset: -5,
+    offset: -3.5,
   });
   const columnWidth = getColumnWidth({ show3Cols });
 
@@ -672,11 +672,15 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
           }}
           onClick={() => onToggleCollapse?.(group.id)}
         >
-          {collapsed ? (
-            <SvgCheveronRight width={14} height={14} />
-          ) : (
-            <SvgCheveronDown width={14} height={14} />
-          )}
+          <SvgExpandArrow
+            width={8}
+            height={8}
+            style={{
+              flexShrink: 0,
+              transition: 'transform .1s',
+              transform: collapsed ? 'rotate(-90deg)' : '',
+            }}
+          />
         </Button>
         <Button
           type="bare"
@@ -856,7 +860,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
 }) {
   const listItemRef = useRef();
   const format = useFormat();
-  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -15 });
+  const sidebarColumnWidth = getColumnWidth({ isSidebar: true, offset: -13.5 });
   const columnWidth = getColumnWidth();
 
   return (
@@ -894,11 +898,15 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           }}
           onClick={() => onToggleCollapse?.(group.id)}
         >
-          {collapsed ? (
-            <SvgCheveronRight width={14} height={14} />
-          ) : (
-            <SvgCheveronDown width={14} height={14} />
-          )}
+          <SvgExpandArrow
+            width={8}
+            height={8}
+            style={{
+              flexShrink: 0,
+              transition: 'transform .1s',
+              transform: collapsed ? 'rotate(-90deg)' : '',
+            }}
+          />
         </Button>
         <Button
           type="bare"
