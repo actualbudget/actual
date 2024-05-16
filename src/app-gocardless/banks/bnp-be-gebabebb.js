@@ -49,15 +49,27 @@ export default {
    *  field in the remittanceInformationUnstructuredArray field.
    */
   normalizeTransaction(transaction, _booked) {
+    // Extract the creditor name to fill it in with information from the
+    // additionalInformation field in case it's not yet defined.
+    let creditorName = transaction.creditorName;
+
     if (transaction.additionalInformation) {
       let additionalInformationObject = {};
       const additionalInfoRegex = /(, )?([^:]+): ((\[.*?\])|([^,]*))/g;
       let matches =
         transaction.additionalInformation.matchAll(additionalInfoRegex);
       if (matches) {
+        let creditorNameFromNarrative; // Possible value for creditorName
         for (let match of matches) {
           let key = match[2].trim();
           let value = (match[4] || match[5]).trim();
+          if (key === 'narrative') {
+            // Set narrativeName to the first element in the "narrative" array.
+            creditorNameFromNarrative = value
+              .matchAll(/'([a-zA-Z0-9\s]*)'/g)
+              ?.next()
+              .value[1].trim();
+          }
           // Remove square brackets and single quotes and commas
           value = value.replace(/[[\]',]/g, '');
           additionalInformationObject[key] = value;
@@ -68,11 +80,21 @@ export default {
           additionalInformationObject?.atmPosName ?? '',
           additionalInformationObject?.narrative ?? '',
         ].filter(Boolean);
+
+        // If the creditor name doesn't exist in the original transactions,
+        // set it to the atmPosName or narrativeName if they exist; otherwise
+        // leave empty and let the default rules handle it.
+        creditorName =
+          creditorName ??
+          additionalInformationObject?.atmPosName ??
+          creditorNameFromNarrative ??
+          null;
       }
     }
 
     return {
       ...transaction,
+      creditorName: creditorName,
       date: transaction.valueDate || transaction.bookingDate,
     };
   },
