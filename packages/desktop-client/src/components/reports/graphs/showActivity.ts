@@ -9,7 +9,7 @@ type showActivityProps = {
   navigate: NavigateFunction;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   accounts: AccountEntity[];
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   filters: RuleConditionEntity[];
   showHiddenCategories: boolean;
   showOffBudget: boolean;

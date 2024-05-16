@@ -113,7 +113,7 @@ type LineGraphProps = {
   filters: RuleConditionEntity[];
   groupBy: string;
   compact?: boolean;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
 };

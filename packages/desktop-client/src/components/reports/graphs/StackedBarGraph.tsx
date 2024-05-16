@@ -143,7 +143,7 @@ type StackedBarGraphProps = {
   groupBy: string;
   compact?: boolean;
   viewLabels: boolean;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
 };

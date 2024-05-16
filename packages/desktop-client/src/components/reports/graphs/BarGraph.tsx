@@ -59,7 +59,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp?: string;
+  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
   yAxis?: string;
 };
 
@@ -136,7 +136,7 @@ type BarGraphProps = {
   data: DataEntity;
   filters: RuleConditionEntity[];
   groupBy: string;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   compact?: boolean;
   viewLabels: boolean;
   showHiddenCategories?: boolean;

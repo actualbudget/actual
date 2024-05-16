@@ -7,7 +7,7 @@ export function filterEmptyRows({
 }: {
   showEmpty: boolean;
   data: GroupedEntity;
-  balanceTypeOp?: keyof GroupedEntity;
+  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
 }): boolean {
   let showHide: boolean;
   if (balanceTypeOp === 'totalTotals') {
