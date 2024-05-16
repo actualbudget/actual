@@ -3,6 +3,7 @@ import { getClock } from '@actual-app/crdt';
 
 import * as connection from '../platform/server/connection';
 import {
+  getBankSyncError,
   getDownloadError,
   getSyncError,
   getTestKeyError,
@@ -230,6 +231,17 @@ handlers['api/sync'] = async function () {
   const result = await handlers['sync-budget']();
   if (result.error) {
     throw new Error(getSyncError(result.error, id));
+  }
+};
+
+handlers['api/bank-sync'] = async function (args) {
+  const { errors } = await handlers['accounts-bank-sync']({
+    id: args?.accountId,
+  });
+
+  const [firstError] = errors;
+  if (firstError) {
+    throw new Error(getBankSyncError(firstError));
   }
 };
 
