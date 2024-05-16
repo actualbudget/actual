@@ -1625,7 +1625,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^5.51.0"
     "@typescript-eslint/parser": "npm:^5.51.0"
     bcrypt: "npm:^5.1.0"
-    better-sqlite3: "npm:^9.1.1"
+    better-sqlite3: "npm:^9.6.0"
     body-parser: "npm:^1.20.1"
     cors: "npm:^2.8.5"
     date-fns: "npm:^2.30.0"
@@ -1922,14 +1922,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^9.1.1":
-  version: 9.1.1
-  resolution: "better-sqlite3@npm:9.1.1"
+"better-sqlite3@npm:^9.6.0":
+  version: 9.6.0
+  resolution: "better-sqlite3@npm:9.6.0"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 2efb945ed741477401bd438db343db251702c7011eb1f4a5800c440afc89708ae6268c11a4331b18e0080a02fa1a2d6f48cef8df830710563fedb8b728f6d6da
+  checksum: 8db9b38f414e26a56d4c40fc16e94a253118491dae0e2c054338a9e470f1a883c7eb4cb330f2f5737db30f704d4f2e697c59071ca04e03364ee9fe04375aa9c8
   languageName: node
   linkType: hard
 
