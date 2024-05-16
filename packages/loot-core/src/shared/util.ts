@@ -255,13 +255,14 @@ export function getNumberFormat({
   format?: NumberFormats;
   hideFraction: boolean;
 } = numberFormatConfig) {
-  let locale, regex, separator;
+  let locale, regex, separator, separatorRegex;
 
   switch (format) {
     case 'space-comma':
       locale = 'en-SE';
-      regex = /[^-0-9,]/g;
+      regex = /[^-0-9,.]/g;
       separator = ',';
+      separatorRegex = /[,.]/g;
       break;
     case 'dot-comma':
       locale = 'de-DE';
@@ -270,8 +271,9 @@ export function getNumberFormat({
       break;
     case 'space-dot':
       locale = 'dje';
-      regex = /[^-0-9.]/g;
+      regex = /[^-0-9,.]/g;
       separator = '.';
+      separatorRegex = /[,.]/g;
       break;
     case 'comma-dot-in':
       locale = 'en-IN';
@@ -293,6 +295,7 @@ export function getNumberFormat({
       maximumFractionDigits: hideFraction ? 0 : 2,
     }),
     regex,
+    separatorRegex,
   };
 }
 
@@ -342,11 +345,20 @@ export function amountToCurrencyNoDecimal(n) {
 }
 
 export function currencyToAmount(str: string) {
-  const amount = parseFloat(
-    str
-      .replace(getNumberFormat().regex, '')
-      .replace(getNumberFormat().separator, '.'),
-  );
+  let amount;
+  if (getNumberFormat().separatorRegex) {
+    amount = parseFloat(
+      str
+        .replace(getNumberFormat().regex, '')
+        .replace(getNumberFormat().separatorRegex, '.'),
+    );
+  } else {
+    amount = parseFloat(
+      str
+        .replace(getNumberFormat().regex, '')
+        .replace(getNumberFormat().separator, '.'),
+    );
+  }
   return isNaN(amount) ? null : amount;
 }
 
