@@ -50,7 +50,7 @@ import {
   useSingleActiveEditForm,
 } from '../../../hooks/useSingleActiveEditForm';
 import { SvgSplit } from '../../../icons/v0';
-import { SvgAdd, SvgTrash } from '../../../icons/v1';
+import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
 import { SvgPencilWriteAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
@@ -170,6 +170,7 @@ function Footer({
   onAddSplit,
   onEmptySplitFound,
   editingField,
+  onEditField,
 }) {
   const [transaction, ...childTransactions] = transactions;
   const onClickRemainingSplit = () => {
@@ -200,7 +201,7 @@ function Footer({
       {transaction.error?.type === 'SplitTransactionError' ? (
         <Button
           type="primary"
-          style={{ height: 40 }}
+          style={{ height: styles.mobileMinHeight }}
           disabled={editingField}
           onClick={onClickRemainingSplit}
           onPointerDown={e => e.preventDefault()}
@@ -220,10 +221,28 @@ function Footer({
             )}
           </Text>
         </Button>
+      ) : !transaction.account ? (
+        <Button
+          type="primary"
+          style={{ height: styles.mobileMinHeight }}
+          disabled={editingField}
+          onClick={() => onEditField(transaction.id, 'account')}
+          onPointerDown={e => e.preventDefault()}
+        >
+          <SvgPiggyBank width={17} height={17} />
+          <Text
+            style={{
+              ...styles.text,
+              marginLeft: 6,
+            }}
+          >
+            Select account
+          </Text>
+        </Button>
       ) : adding ? (
         <Button
           type="primary"
-          style={{ height: 40 }}
+          style={{ height: styles.mobileMinHeight }}
           disabled={editingField}
           onClick={onAdd}
           onPointerDown={e => e.preventDefault()}
@@ -241,7 +260,7 @@ function Footer({
       ) : (
         <Button
           type="primary"
-          style={{ height: 40 }}
+          style={{ height: styles.mobileMinHeight }}
           disabled={editingField}
           onClick={onSave}
           onPointerDown={e => e.preventDefault()}
@@ -270,8 +289,8 @@ const ChildTransactionEdit = forwardRef(
       getPrettyPayee,
       isOffBudget,
       isBudgetTransfer,
-      onClick,
-      onEdit,
+      onEditField,
+      onUpdate,
       onDelete,
     },
     ref,
@@ -302,7 +321,7 @@ const ChildTransactionEdit = forwardRef(
                 editingField !== getFieldName(transaction.id, 'payee')
               }
               value={getPrettyPayee(transaction)}
-              onClick={() => onClick(transaction.id, 'payee')}
+              onClick={() => onEditField(transaction.id, 'payee')}
               data-testid={`payee-field-${transaction.id}`}
             />
           </View>
@@ -328,7 +347,7 @@ const ChildTransactionEdit = forwardRef(
               onUpdate={value => {
                 const amount = integerToAmount(value);
                 if (transaction.amount !== amount) {
-                  onEdit(transaction, 'amount', amount);
+                  onUpdate(transaction, 'amount', amount);
                 } else {
                   onClearActiveEdit();
                 }
@@ -355,7 +374,7 @@ const ChildTransactionEdit = forwardRef(
               isOffBudget ||
               isBudgetTransfer(transaction)
             }
-            onClick={() => onClick(transaction.id, 'category')}
+            onClick={() => onEditField(transaction.id, 'category')}
             data-testid={`category-field-${transaction.id}`}
           />
         </View>
@@ -371,7 +390,7 @@ const ChildTransactionEdit = forwardRef(
             onFocus={() =>
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'))
             }
-            onUpdate={value => onEdit(transaction, 'notes', value)}
+            onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
         </View>
 
@@ -489,7 +508,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const onTotalAmountUpdate = value => {
     if (transaction.amount !== value) {
-      onEdit(transaction, 'amount', value.toString());
+      onUpdate(transaction, 'amount', value.toString());
     } else {
       onClearActiveEdit();
     }
@@ -501,12 +520,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
     const onConfirmSave = async () => {
       const { account: accountId } = unserializedTransaction;
       const account = accountsById[accountId];
-
-      if (unserializedTransactions.find(t => t.account == null)) {
-        // Ignore transactions if any of them don't have an account
-        // TODO: Should we display validation error?
-        return;
-      }
 
       let transactionsToSave = unserializedTransactions;
       if (adding) {
@@ -537,13 +550,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
     onSave();
   };
 
-  const onEdit = async (serializedTransaction, name, value) => {
+  const onUpdate = async (serializedTransaction, name, value) => {
     const newTransaction = { ...serializedTransaction, [name]: value };
-    await props.onEdit(newTransaction);
+    await props.onUpdate(newTransaction);
     onClearActiveEdit();
   };
 
-  const onClick = (transactionId, name) => {
+  const onEditField = (transactionId, name) => {
     onRequestActiveEdit?.(getFieldName(transaction.id, name), () => {
       const transactionToEdit = transactions.find(t => t.id === transactionId);
       const unserializedTransaction = unserializedTransactions.find(
@@ -556,7 +569,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               categoryGroups,
               month: monthUtils.monthFromDate(unserializedTransaction.date),
               onSelect: categoryId => {
-                onEdit(transactionToEdit, name, categoryId);
+                onUpdate(transactionToEdit, name, categoryId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -568,7 +581,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('account-autocomplete', {
               onSelect: accountId => {
-                onEdit(transactionToEdit, name, accountId);
+                onUpdate(transactionToEdit, name, accountId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -580,7 +593,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           dispatch(
             pushModal('payee-autocomplete', {
               onSelect: payeeId => {
-                onEdit(transactionToEdit, name, payeeId);
+                onUpdate(transactionToEdit, name, payeeId);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -594,7 +607,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               name,
               month: monthUtils.monthFromDate(unserializedTransaction.date),
               onSubmit: (name, value) => {
-                onEdit(transactionToEdit, name, value);
+                onUpdate(transactionToEdit, name, value);
               },
               onClose: () => {
                 onClearActiveEdit();
@@ -610,20 +623,26 @@ const TransactionEditInner = memo(function TransactionEditInner({
     const [unserializedTransaction] = unserializedTransactions;
 
     const onConfirmDelete = () => {
-      props.onDelete(id);
+      dispatch(
+        pushModal('confirm-transaction-delete', {
+          onConfirm: () => {
+            props.onDelete(id);
 
-      if (unserializedTransaction.id !== id) {
-        // Only a child transaction was deleted.
-        onClearActiveEdit();
-        return;
-      }
+            if (unserializedTransaction.id !== id) {
+              // Only a child transaction was deleted.
+              onClearActiveEdit();
+              return;
+            }
 
-      const { account: accountId } = unserializedTransaction;
-      if (accountId) {
-        navigate(`/accounts/${accountId}`, { replace: true });
-      } else {
-        navigate(-1);
-      }
+            const { account: accountId } = unserializedTransaction;
+            if (accountId) {
+              navigate(`/accounts/${accountId}`, { replace: true });
+            } else {
+              navigate(-1);
+            }
+          },
+        }),
+      );
     };
 
     if (unserializedTransaction.reconciled) {
@@ -710,6 +729,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           onAddSplit={onAddSplit}
           onEmptySplitFound={onEmptySplitFound}
           editingField={editingField}
+          onEditField={onEditField}
         />
       }
       padding={0}
@@ -746,7 +766,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               editingField !== getFieldName(transaction.id, 'payee')
             }
             value={getPrettyPayee(transaction)}
-            onClick={() => onClick(transaction.id, 'payee')}
+            onClick={() => onEditField(transaction.id, 'payee')}
             data-testid="payee-field"
           />
         </View>
@@ -769,7 +789,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 isOffBudget ||
                 isBudgetTransfer(transaction)
               }
-              onClick={() => onClick(transaction.id, 'category')}
+              onClick={() => onEditField(transaction.id, 'category')}
               data-testid="category-field"
             />
           </View>
@@ -790,8 +810,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
             getCategory={getCategory}
             getPrettyPayee={getPrettyPayee}
             isBudgetTransfer={isBudgetTransfer}
-            onEdit={onEdit}
-            onClick={onClick}
+            onUpdate={onUpdate}
+            onEditField={onEditField}
             onDelete={onDelete}
           />
         ))}
@@ -838,7 +858,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 editingField !== getFieldName(transaction.id, 'account'))
             }
             value={account?.name}
-            onClick={() => onClick(transaction.id, 'account')}
+            onClick={() => onEditField(transaction.id, 'account')}
             data-testid="account-field"
           />
         </View>
@@ -859,7 +879,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 onRequestActiveEdit(getFieldName(transaction.id, 'date'))
               }
               onUpdate={value =>
-                onEdit(
+                onUpdate(
                   transaction,
                   'date',
                   formatDate(parseISO(value), dateFormat),
@@ -886,7 +906,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               <BooleanField
                 disabled={editingField}
                 checked={transaction.cleared}
-                onUpdate={checked => onEdit(transaction, 'cleared', checked)}
+                onUpdate={checked => onUpdate(transaction, 'cleared', checked)}
                 style={{
                   margin: 'auto',
                   width: 22,
@@ -908,7 +928,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
-            onUpdate={value => onEdit(transaction, 'notes', value)}
+            onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
         </View>
 
@@ -1030,7 +1050,7 @@ function TransactionEditUnconnected({
     return null;
   }
 
-  const onEdit = async serializedTransaction => {
+  const onUpdate = async serializedTransaction => {
     const transaction = deserializeTransaction(
       serializedTransaction,
       null,
@@ -1135,7 +1155,7 @@ function TransactionEditUnconnected({
         payees={payees}
         navigate={navigate}
         dateFormat={dateFormat}
-        onEdit={onEdit}
+        onUpdate={onUpdate}
         onSave={onSave}
         onDelete={onDelete}
         onSplit={onSplit}
