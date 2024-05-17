@@ -828,6 +828,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   lte: 1,
   contains: 0,
   doesNotContain: 0,
+  matches: 0,
 };
 
 function computeScore(rule) {
