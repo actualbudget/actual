@@ -145,8 +145,12 @@ export function SpendingGraph({
             : b,
         ).months[lastMonth][balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
-  const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
-  const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
+  const dataMax = Math.max(
+    ...data.intervalData.map(i => i.months[thisMonth].cumulative),
+  );
+  const dataMin = Math.min(
+    ...data.intervalData.map(i => i.months[thisMonth].cumulative),
+  );
 
   const tickFormatter = tick => {
     if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
@@ -154,17 +158,15 @@ export function SpendingGraph({
   };
 
   const gradientOffset = () => {
-    if (dataMax <= 0) {
+    if (!dataMax || dataMax <= 0) {
       return 0;
     }
-    if (dataMin >= 0) {
+    if (!dataMin || dataMin >= 0) {
       return 1;
     }
 
     return dataMax / (dataMax - dataMin);
   };
-
-  const off = gradientOffset();
 
   const getVal = (obj, month) => {
     if (month === 'average') {
@@ -246,7 +248,7 @@ export function SpendingGraph({
                     y2="1"
                   >
                     <stop
-                      offset={off}
+                      offset={gradientOffset()}
                       stopColor={theme.reportsGreen}
                       stopOpacity={0.2}
                     />
@@ -259,7 +261,7 @@ export function SpendingGraph({
                     y2="1"
                   >
                     <stop
-                      offset={off}
+                      offset={gradientOffset()}
                       stopColor={theme.reportsGreen}
                       stopOpacity={1}
                     />

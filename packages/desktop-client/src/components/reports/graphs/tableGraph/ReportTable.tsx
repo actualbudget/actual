@@ -1,13 +1,15 @@
-// @ts-strict-ignore
 import React, {
+  type RefObject,
   useCallback,
   useLayoutEffect,
   useRef,
   type UIEventHandler,
 } from 'react';
-import { type RefProp } from 'react-spring';
 
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import {
+  type GroupedEntity,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../../../style';
@@ -19,11 +21,11 @@ import { ReportTableRow } from './ReportTableRow';
 
 type ReportTableProps = {
   saveScrollWidth: (value: number) => void;
-  listScrollRef: RefProp<HTMLDivElement>;
+  listScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   groupBy: string;
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
-  data: GroupedEntity;
+  data: DataEntity;
   filters?: RuleConditionEntity[];
   mode: string;
   intervalsCount: number;
@@ -32,6 +34,15 @@ type ReportTableProps = {
   compactStyle?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+};
+
+export type renderRowProps = {
+  item: GroupedEntity;
+  mode: string;
+  intervalsCount: number;
+  compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
 };
 
 export function ReportTable({
@@ -58,8 +69,15 @@ export function ReportTable({
     }
   });
 
-  const renderItem = useCallback(
-    ({ item, mode, intervalsCount, compact, style, compactStyle }) => {
+  const renderRow = useCallback(
+    ({
+      item,
+      mode,
+      intervalsCount,
+      compact,
+      style,
+      compactStyle,
+    }: renderRowProps) => {
       return (
         <ReportTableRow
           item={item}
@@ -109,7 +127,7 @@ export function ReportTable({
           intervalsCount={intervalsCount}
           mode={mode}
           groupBy={groupBy}
-          renderItem={renderItem}
+          renderRow={renderRow}
           compact={compact}
           style={style}
           compactStyle={compactStyle}

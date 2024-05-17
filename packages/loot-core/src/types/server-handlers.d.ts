@@ -14,6 +14,7 @@ import {
   GoCardlessToken,
   GoCardlessInstitution,
   SimpleFinAccount,
+  RuleEntity,
   PayeeEntity,
 } from './models';
 import { GlobalPrefs, LocalPrefs } from './prefs';
@@ -118,7 +119,7 @@ export interface ServerHandlers {
 
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
 
-  'payees-get-rules': (arg: { id }) => Promise<unknown>;
+  'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
     conditions;
@@ -212,7 +213,7 @@ export interface ServerHandlers {
     | { error: 'failed' }
   >;
 
-  'gocardless-accounts-sync': (arg: { id: string }) => Promise<{
+  'accounts-bank-sync': (arg: { id?: string }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;

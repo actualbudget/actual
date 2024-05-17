@@ -6,11 +6,12 @@ import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useResponsive } from '../../ResponsiveProvider';
-import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
+import { MobilePageHeader, Page, PageHeader } from '../Page';
 
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
@@ -29,30 +30,32 @@ export function Overview() {
 
   const accounts = useAccounts();
   return (
-    <View
-      style={{
-        ...styles.page,
-        padding: 15,
-        paddingTop: 0,
-        minWidth: isNarrowWidth ? undefined : 700,
-      }}
+    <Page
+      header={
+        isNarrowWidth ? (
+          <MobilePageHeader title="Reports" />
+        ) : (
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginRight: 15,
+            }}
+          >
+            <PageHeader title="Reports" />
+            {customReportsFeatureFlag && !isNarrowWidth && (
+              <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
+                <Button type="primary">
+                  <Text>Create new custom report</Text>
+                </Button>
+              </Link>
+            )}
+          </View>
+        )
+      }
+      padding={0}
+      style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
     >
-      {customReportsFeatureFlag && !isNarrowWidth && (
-        <View
-          style={{
-            flex: '0 0 auto',
-            alignItems: 'flex-end',
-            marginRight: 15,
-            marginTop: 10,
-          }}
-        >
-          <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
-            <Button type="primary">
-              <Text>Create new custom report</Text>
-            </Button>
-          </Link>
-        </View>
-      )}
       <View
         style={{
           flexDirection: isNarrowWidth ? 'column' : 'row',
@@ -66,6 +69,6 @@ export function Overview() {
       {customReportsFeatureFlag && (
         <CustomReportListCards reports={customReports} />
       )}
-    </View>
+    </Page>
   );
 }

@@ -116,8 +116,7 @@ export function NetWorthGraph({
       {(width, height) =>
         graphData && (
           <ResponsiveContainer>
-            <div>
-              {!compact && <div style={{ marginTop: '15px' }} />}
+            <div style={{ ...(!compact && { marginTop: '15px' }) }}>
               <AreaChart
                 width={width}
                 height={height}

@@ -1,46 +1,18 @@
-import React, { type ComponentProps, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button';
 import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
-import { Tooltip } from '../../tooltips';
 import { addToBeBudgetedGroup } from '../util';
 
-type CoverTooltipProps = {
-  tooltipProps?: ComponentProps<typeof Tooltip>;
+type CoverMenuProps = {
   onSubmit: (categoryId: string) => void;
   onClose: () => void;
 };
-export function CoverTooltip({
-  tooltipProps,
-  onSubmit,
-  onClose,
-}: CoverTooltipProps) {
-  const _onSubmit = (categoryId: string) => {
-    onSubmit?.(categoryId);
-    onClose?.();
-  };
 
-  return (
-    <Tooltip
-      position="bottom-right"
-      width={200}
-      style={{ padding: 10 }}
-      {...tooltipProps}
-      onClose={onClose}
-    >
-      <Cover onSubmit={_onSubmit} />
-    </Tooltip>
-  );
-}
-
-type CoverProps = {
-  onSubmit: (categoryId: string) => void;
-};
-
-function Cover({ onSubmit }: CoverProps) {
+export function CoverMenu({ onSubmit, onClose }: CoverMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const categoryGroups = addToBeBudgetedGroup(
     originalCategoryGroups.filter(g => !g.is_income),
@@ -51,9 +23,10 @@ function Cover({ onSubmit }: CoverProps) {
     if (categoryId) {
       onSubmit(categoryId);
     }
+    onClose();
   }
   return (
-    <>
+    <View style={{ padding: 10 }}>
       <View style={{ marginBottom: 5 }}>Cover from category:</View>
 
       <InitialFocus>
@@ -94,6 +67,6 @@ function Cover({ onSubmit }: CoverProps) {
           Transfer
         </Button>
       </View>
-    </>
+    </View>
   );
 }

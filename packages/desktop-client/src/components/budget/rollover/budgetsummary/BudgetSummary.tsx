@@ -192,7 +192,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             }}
           >
             <ToBudget
-              showTotalsTooltipOnHover={true}
               prevMonthName={prevMonthName}
               month={month}
               onBudgetAction={onBudgetAction}
