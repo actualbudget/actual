@@ -43,6 +43,18 @@ export function prepare(db: Database, sql: string) {
 export function runQuery(
   db: Database,
   sql: string,
+  params?: (string | number)[],
+  fetchAll?: false,
+): { changes: unknown };
+export function runQuery(
+  db: Database,
+  sql: string,
+  params: (string | number)[],
+  fetchAll: true,
+): unknown[];
+export function runQuery(
+  db: Database,
+  sql: string,
   params: (string | number)[] = [],
   fetchAll = false,
 ): unknown[] | { changes: unknown } {
