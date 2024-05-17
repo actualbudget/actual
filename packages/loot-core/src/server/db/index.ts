@@ -7,6 +7,7 @@ import {
   makeClientId,
   Timestamp,
 } from '@actual-app/crdt';
+import { Database } from '@jlongster/sql.js';
 import LRU from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -37,8 +38,8 @@ import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
-let dbPath;
-let db;
+let dbPath: string | null = null;
+let db: Database | null = null;
 
 // Util
 
@@ -52,14 +53,13 @@ export async function openDatabase(id?) {
   }
 
   dbPath = fs.join(fs.getBudgetDir(id), 'db.sqlite');
-  setDatabase(await sqlite.openDatabase(dbPath));
+  const database = await sqlite.openDatabase(dbPath);
+  database.create_function('regexp', (regex, text) => {
+    return new RegExp(regex as string).test(text as string) ? 1 : 0;
+  });
+  setDatabase(database);
 
   // await execQuery('PRAGMA journal_mode = WAL');
-}
-
-export async function reopenDatabase() {
-  await sqlite.closeDatabase(db);
-  setDatabase(await sqlite.openDatabase(dbPath));
 }
 
 export async function closeDatabase() {

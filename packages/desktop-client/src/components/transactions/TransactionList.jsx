@@ -167,9 +167,14 @@ export function TransactionList({
     dispatch(pushModal('schedule-edit', { id: scheduleId }));
   });
 
-  const onNotesTagClick = useCallback(noteTag => {
+  const onNotesTagClick = useCallback(tag => {
     const filterConditions = [
-      { field: 'notes', op: 'contains', value: noteTag, type: 'string' },
+      {
+        field: 'notes',
+        op: 'matches',
+        value: `${tag}\\b`,
+        type: 'string',
+      },
     ];
     onApplyFilters(filterConditions, true);
   });
