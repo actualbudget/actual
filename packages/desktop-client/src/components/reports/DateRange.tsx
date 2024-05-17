@@ -15,7 +15,7 @@ type DateRangeProps = {
 function checkDate(date: string) {
   const dateParsed = new Date(date);
   if (dateParsed.toString() !== 'Invalid Date') {
-    return date;
+    return d.format(dateParsed, 'yyyy-MM-dd');
   } else {
     return null;
   }
@@ -28,8 +28,8 @@ export function DateRange({ start, end }: DateRangeProps): ReactElement {
   let startDate;
   let endDate;
   if (checkStart && checkEnd) {
-    startDate = d.parseISO(start);
-    endDate = d.parseISO(end);
+    startDate = d.parseISO(checkStart);
+    endDate = d.parseISO(checkEnd);
   } else {
     return (
       <Text style={{ ...styles.mediumText, color: theme.errorText }}>
