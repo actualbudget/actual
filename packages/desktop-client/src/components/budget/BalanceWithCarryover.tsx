@@ -60,7 +60,7 @@ export function BalanceWithCarryover({
             alignSelf: 'center',
             marginLeft: 2,
             position: 'absolute',
-            right: -8,
+            right: -4,
             top: 0,
             bottom: 0,
             justifyContent: 'center',
