@@ -9,6 +9,7 @@ import { CellValue } from '../spreadsheet/CellValue';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { makeBalanceAmountStyle } from './util';
+import { useResponsive } from '../../ResponsiveProvider';
 
 type BalanceWithCarryoverProps = {
   carryover: ComponentProps<typeof CellValue>['binding'];
@@ -33,6 +34,9 @@ export function BalanceWithCarryover({
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
+  const { isNarrowWidth } = useResponsive();
+
   return (
     <>
       <CellValue
@@ -60,7 +64,7 @@ export function BalanceWithCarryover({
             alignSelf: 'center',
             marginLeft: 2,
             position: 'absolute',
-            right: -4,
+            right: isNarrowWidth ? '-8px' : '-4px',
             top: 0,
             bottom: 0,
             justifyContent: 'center',
