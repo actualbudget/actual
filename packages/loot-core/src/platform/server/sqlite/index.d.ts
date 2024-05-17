@@ -1,10 +1,10 @@
 import { type Database } from '@jlongster/sql.js';
 
-export async function init(): unknown;
+export async function init(): Promise<void>;
 
 export function _getModule(): SqlJsStatic;
 
-export function prepare(db, sql): unknown;
+export function prepare(db: Database, sql: string): string;
 
 export function runQuery(
   db: Database,

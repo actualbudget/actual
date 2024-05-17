@@ -47,17 +47,13 @@ export function getDatabasePath() {
   return dbPath;
 }
 
-export async function openDatabase(id?) {
+export async function openDatabase(id?: string) {
   if (db) {
     await sqlite.closeDatabase(db);
   }
 
   dbPath = fs.join(fs.getBudgetDir(id), 'db.sqlite');
-  const database = await sqlite.openDatabase(dbPath);
-  database.create_function('regexp', (regex, text) => {
-    return new RegExp(regex as string).test(text as string) ? 1 : 0;
-  });
-  setDatabase(database);
+  setDatabase(await sqlite.openDatabase(dbPath));
 
   // await execQuery('PRAGMA journal_mode = WAL');
 }
@@ -69,7 +65,7 @@ export async function closeDatabase() {
   }
 }
 
-export function setDatabase(db_) {
+export function setDatabase(db_: Database) {
   db = db_;
   resetQueryCache();
 }
@@ -115,14 +111,14 @@ export function runQuery(sql, params, fetchAll) {
   return result;
 }
 
-export function execQuery(sql) {
+export function execQuery(sql: string) {
   sqlite.execQuery(db, sql);
 }
 
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
 let _queryCache = new LRU({ max: 100 });
-export function cache(sql) {
+export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
     return cached;

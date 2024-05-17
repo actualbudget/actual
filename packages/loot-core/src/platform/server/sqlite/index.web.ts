@@ -155,6 +155,10 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
   }
 }
 
+function regexp(regex: string, text: string) {
+  return new RegExp(regex).test(text) ? 1 : 0;
+}
+
 export async function openDatabase(pathOrBuffer?: string | Buffer) {
   let db = null;
   if (pathOrBuffer) {
@@ -197,6 +201,7 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
   // but SQL.js does not support this: https://github.com/sql-js/sql.js/issues/551
   db.create_function('UNICODE_LOWER', arg => arg?.toLowerCase());
   db.create_function('UNICODE_UPPER', arg => arg?.toUpperCase());
+  db.create_function('REGEXP', regexp);
   return db;
 }
 
