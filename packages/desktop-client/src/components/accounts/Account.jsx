@@ -315,7 +315,7 @@ class AccountInternal extends PureComponent {
 
   fetchTransactions = filters => {
     const query = this.makeRootQuery();
-    this.rootQuery = this.currentQuery = query;
+    this.rootQuery = this.currentQuery = this.filterQuery = query;
     if (filters) this.applyFilters(filters);
     else this.updateQuery(query);
 
@@ -677,6 +677,17 @@ class AccountInternal extends PureComponent {
     return {
       name: `balance-query-${id}`,
       query: this.makeRootQuery().calculate({ $sum: '$amount' }),
+    };
+  }
+
+  getFilterQuery(filters, conditionsOpKey) {
+    return {
+      name: `filtered-query`,
+      query: this.makeRootQuery()
+        .filter({
+          [conditionsOpKey]: [...filters],
+        })
+        .calculate({ $sum: '$amount' }),
     };
   }
 
@@ -1301,6 +1312,7 @@ class AccountInternal extends PureComponent {
         conditions: conditions.filter(cond => !cond.customName),
       });
       const conditionsOpKey = this.state.conditionsOp === 'or' ? '$or' : '$and';
+      this.filterQuery = this.getFilterQuery(filters, conditionsOpKey);
       this.currentQuery = this.rootQuery.filter({
         [conditionsOpKey]: [...filters, ...customFilters],
       });
@@ -1518,6 +1530,7 @@ class AccountInternal extends PureComponent {
           >
             <View style={styles.page}>
               <AccountHeader
+                filterQuery={this.filterQuery}
                 tableRef={this.table}
                 editingName={editingName}
                 isNameEditable={isNameEditable}
