@@ -106,7 +106,7 @@ export const ReportTableRow = memo(
         >
           <Cell
             value={item[groupByItem]}
-            title={item[groupByItem] || undefined}
+            title={item[groupByItem]}
             style={{
               width: compact ? 80 : 125,
               flexShrink: 0,
