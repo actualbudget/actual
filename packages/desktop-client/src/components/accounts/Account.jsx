@@ -542,14 +542,31 @@ class AccountInternal extends PureComponent {
   };
 
   onSaveName = name => {
-    if (name.trim().length) {
-      const accountId = this.props.accountId;
-      const account = this.props.accounts.find(
-        account => account.id === accountId,
-      );
-      this.props.updateAccount({ ...account, name });
-      this.setState({ editingName: false });
+    if (name.trim().length === 0) {
+      return;
     }
+
+    const accountId = this.props.accountId;
+
+    if (
+      this.props.accounts.find(
+        account => account.name === name && account.id !== accountId,
+      )
+    ) {
+      this.setState({
+        editingName: false,
+        error: 'This name is already in use.',
+      });
+      return;
+    }
+
+    const account = this.props.accounts.find(
+      account => account.id === accountId,
+    );
+
+    this.props.updateAccount({ ...account, name });
+
+    this.setState({ editingName: false });
   };
 
   onToggleExtraBalances = () => {
