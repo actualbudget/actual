@@ -58,7 +58,10 @@ export function CreateLocalAccountModal({
               setNameError({ error: nameError, message: 'Name is required' });
 
               if (accounts.some(account => account.name === name)) {
-                setNameError({ error: true, message: 'Name already exists' });
+                setNameError({
+                  error: true,
+                  message: `Account name: “${name}” already exists.`,
+                });
                 return;
               }
 

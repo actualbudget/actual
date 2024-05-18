@@ -190,6 +190,7 @@ class AccountInternal extends PureComponent {
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
       editingName: false,
+      error: null,
       isAdding: false,
       latestDate: null,
       filterId: [],
@@ -548,14 +549,14 @@ class AccountInternal extends PureComponent {
 
     const accountId = this.props.accountId;
 
+    // Prevent duplicate account names.
     if (
       this.props.accounts.find(
         account => account.name === name && account.id !== accountId,
       )
     ) {
       this.setState({
-        editingName: false,
-        error: 'This name is already in use.',
+        error: `Account name: “${name}” already exists.`,
       });
       return;
     }
@@ -566,7 +567,7 @@ class AccountInternal extends PureComponent {
 
     this.props.updateAccount({ ...account, name });
 
-    this.setState({ editingName: false });
+    this.setState({ editingName: false, error: null });
   };
 
   onToggleExtraBalances = () => {
@@ -1488,6 +1489,7 @@ class AccountInternal extends PureComponent {
       reconcileAmount,
       transactionsFiltered,
       editingName,
+      error,
       showBalances,
       balances,
       showCleared,
@@ -1537,6 +1539,7 @@ class AccountInternal extends PureComponent {
               <AccountHeader
                 tableRef={this.table}
                 editingName={editingName}
+                error={error}
                 isNameEditable={isNameEditable}
                 workingHard={workingHard}
                 account={account}
