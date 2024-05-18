@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { type BoundActions } from '../../hooks/useActions';
@@ -24,6 +25,21 @@ type CreateLocalAccountProps = {
   actions: BoundActions;
 };
 
+/*
+ * Ensure the name is not empty and does not already exist.
+ */
+const validateName = (name: string, accounts: AccountEntity[]) => {
+  if (!name) {
+    return { error: true, message: 'Name is required' };
+  }
+
+  if (accounts.some(account => account.name === name)) {
+    return { error: true, message: `Name: “${name}” already exists.` };
+  }
+
+  return { error: false, message: '' };
+};
+
 export function CreateLocalAccountModal({
   modalProps,
   actions,
@@ -35,7 +51,7 @@ export function CreateLocalAccountModal({
 
   const [nameError, setNameError] = useState({
     error: false,
-    message: 'Name is required',
+    message: '',
   });
   const [balanceError, setBalanceError] = useState(false);
 
@@ -54,21 +70,20 @@ export function CreateLocalAccountModal({
             onSubmit={async event => {
               event.preventDefault();
 
-              const nameError = !name;
-              setNameError({ error: nameError, message: 'Name is required' });
+              const nameError = validateName(name, accounts);
 
-              if (accounts.some(account => account.name === name)) {
-                setNameError({
-                  error: true,
-                  message: `Account name: “${name}” already exists.`,
-                });
-                return;
+              if (nameError.error) {
+                setNameError(nameError);
+              } else {
+                setNameError({ error: false, message: '' });
               }
 
+              // Balance validation
               const balanceError = !validateBalance(balance);
               setBalanceError(balanceError);
 
-              if (!nameError && !balanceError) {
+              // If there are no errors, proceed
+              if (!nameError.error && !balanceError) {
                 actions.closeModal();
                 const id = await actions.createAccount(
                   name,
@@ -88,7 +103,7 @@ export function CreateLocalAccountModal({
                   onBlur={event => {
                     const name = event.target.value.trim();
                     setName(name);
-                    if (name && nameError) {
+                    if (nameError.error) {
                       setNameError({ error: false, message: '' });
                     }
                   }}

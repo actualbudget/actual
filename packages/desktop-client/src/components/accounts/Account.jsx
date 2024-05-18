@@ -556,7 +556,7 @@ class AccountInternal extends PureComponent {
       )
     ) {
       this.setState({
-        error: `Account name: “${name}” already exists.`,
+        error: `Name: “${name}” already exists.`,
       });
       return;
     }
