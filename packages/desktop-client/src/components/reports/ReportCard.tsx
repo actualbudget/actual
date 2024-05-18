@@ -3,13 +3,13 @@ import React, { type ReactNode } from 'react';
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
 import { type CSSProperties, theme } from '../../style';
-import { AnchorLink } from '../common/AnchorLink';
+import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 type ReportCardProps = {
   to: string;
-  report: CustomReportEntity;
   children: ReactNode;
+  report?: CustomReportEntity;
   flex?: string;
   style?: CSSProperties;
 };
@@ -47,13 +47,13 @@ export function ReportCard({
 
   if (to) {
     return (
-      <AnchorLink
+      <Link
         to={to}
         report={report}
         style={{ textDecoration: 'none', ...containerProps }}
       >
         {content}
-      </AnchorLink>
+      </Link>
     );
   }
   return content;

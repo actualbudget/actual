@@ -199,6 +199,24 @@ export function titleFirst(str: string) {
   return str[0].toUpperCase() + str.slice(1);
 }
 
+export function appendDecimals(
+  amountText: string,
+  hideDecimals = false,
+): string {
+  const { separator } = getNumberFormat();
+  let result = amountText;
+  if (result.slice(-1) === separator) {
+    result = result.slice(0, -1);
+  }
+  if (!hideDecimals) {
+    result = result.replaceAll(/[,.]/g, '');
+    result = result.replace(/^0+(?!$)/, '');
+    result = result.padStart(3, '0');
+    result = result.slice(0, -2) + separator + result.slice(-2);
+  }
+  return amountToCurrency(currencyToAmount(result));
+}
+
 type NumberFormats =
   | 'comma-dot'
   | 'dot-comma'
@@ -237,13 +255,14 @@ export function getNumberFormat({
   format?: NumberFormats;
   hideFraction: boolean;
 } = numberFormatConfig) {
-  let locale, regex, separator;
+  let locale, regex, separator, separatorRegex;
 
   switch (format) {
     case 'space-comma':
       locale = 'en-SE';
-      regex = /[^-0-9,]/g;
+      regex = /[^-0-9,.]/g;
       separator = ',';
+      separatorRegex = /[,.]/g;
       break;
     case 'dot-comma':
       locale = 'de-DE';
@@ -252,8 +271,9 @@ export function getNumberFormat({
       break;
     case 'space-dot':
       locale = 'dje';
-      regex = /[^-0-9.]/g;
+      regex = /[^-0-9,.]/g;
       separator = '.';
+      separatorRegex = /[,.]/g;
       break;
     case 'comma-dot-in':
       locale = 'en-IN';
@@ -275,6 +295,7 @@ export function getNumberFormat({
       maximumFractionDigits: hideFraction ? 0 : 2,
     }),
     regex,
+    separatorRegex,
   };
 }
 
@@ -324,11 +345,20 @@ export function amountToCurrencyNoDecimal(n) {
 }
 
 export function currencyToAmount(str: string) {
-  const amount = parseFloat(
-    str
-      .replace(getNumberFormat().regex, '')
-      .replace(getNumberFormat().separator, '.'),
-  );
+  let amount;
+  if (getNumberFormat().separatorRegex) {
+    amount = parseFloat(
+      str
+        .replace(getNumberFormat().regex, '')
+        .replace(getNumberFormat().separatorRegex, '.'),
+    );
+  } else {
+    amount = parseFloat(
+      str
+        .replace(getNumberFormat().regex, '')
+        .replace(getNumberFormat().separator, '.'),
+    );
+  }
   return isNaN(amount) ? null : amount;
 }
 
@@ -379,7 +409,9 @@ export function looselyParseAmount(amount: string) {
     amount = amount.replace('(', '-').replace(')', '');
   }
 
-  const m = amount.match(/[.,][^.,]{1,2}$/);
+  //look for a decimal marker, then look for either 5 or 1-2 decimal places.
+  // This avoids matching against 3 places which may not actually be decimal
+  const m = amount.match(/[.,]([^.,]{5}|[^.,]{1,2})$/);
   if (!m || m.index === undefined || m.index === 0) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }

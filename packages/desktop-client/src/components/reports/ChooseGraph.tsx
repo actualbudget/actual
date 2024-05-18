@@ -1,8 +1,7 @@
-// @ts-strict-ignore
-import React, { useRef } from 'react';
+import React, { type UIEvent, useRef } from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../style';
 import { styles } from '../../style/styles';
@@ -20,9 +19,8 @@ import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
-  startDate: string;
-  endDate: string;
-  data: GroupedEntity;
+  data: DataEntity;
+  filters?: RuleConditionEntity[];
   mode: string;
   graphType: string;
   balanceType: string;
@@ -30,57 +28,70 @@ type ChooseGraphProps = {
   interval: string;
   setScrollWidth?: (value: number) => void;
   viewLabels?: boolean;
-  compact?: boolean;
+  compact: boolean;
   style?: CSSProperties;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
+  intervalsCount: number;
 };
 
 export function ChooseGraph({
-  startDate,
-  endDate,
   data,
+  filters = [],
   mode,
   graphType,
   balanceType,
   groupBy,
   interval,
   setScrollWidth,
-  viewLabels,
+  viewLabels = false,
   compact,
   style,
+  showHiddenCategories = false,
+  showOffBudget = false,
+  intervalsCount,
 }: ChooseGraphProps) {
-  const intervals: string[] = monthUtils.rangeInclusive(startDate, endDate);
   const graphStyle = compact ? { ...style } : { flexGrow: 1 };
-  const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
-  const groupByData =
-    groupBy === 'Category'
-      ? 'groupedData'
-      : groupBy === 'Interval'
-        ? 'intervalData'
-        : 'data';
+  const balanceTypeOp =
+    ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
 
-  const saveScrollWidth = value => {
-    setScrollWidth(!value ? 0 : value);
+  const saveScrollWidth = (value: number) => {
+    setScrollWidth?.(value || 0);
   };
 
-  const rowStyle = compact && { flex: '0 0 20px', height: 20 };
-  const compactStyle = compact && { ...styles.tinyText };
+  const rowStyle: CSSProperties = compact
+    ? { flex: '0 0 20px', height: 20 }
+    : {};
+  const compactStyle: CSSProperties = compact ? { ...styles.tinyText } : {};
 
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<HTMLDivElement>(null);
   const totalScrollRef = useRef<HTMLDivElement>(null);
 
-  const handleScroll = scroll => {
-    if (scroll.target.id === 'header') {
-      totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+  const handleScroll = (scroll: UIEvent<HTMLDivElement>) => {
+    if (
+      scroll.currentTarget.id === 'header' &&
+      totalScrollRef.current &&
+      listScrollRef.current
+    ) {
+      totalScrollRef.current.scrollLeft = scroll.currentTarget.scrollLeft;
+      listScrollRef.current.scrollLeft = scroll.currentTarget.scrollLeft;
     }
-    if (scroll.target.id === 'total') {
-      headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    if (
+      scroll.currentTarget.id === 'total' &&
+      headerScrollRef.current &&
+      listScrollRef.current
+    ) {
+      headerScrollRef.current.scrollLeft = scroll.currentTarget.scrollLeft;
+      listScrollRef.current.scrollLeft = scroll.currentTarget.scrollLeft;
     }
-    if (scroll.target.id === 'list') {
-      headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-      totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    if (
+      scroll.currentTarget.id === 'list' &&
+      totalScrollRef.current &&
+      headerScrollRef.current
+    ) {
+      headerScrollRef.current.scrollLeft = scroll.currentTarget.scrollLeft;
+      totalScrollRef.current.scrollLeft = scroll.currentTarget.scrollLeft;
     }
   };
 
@@ -101,9 +112,12 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
@@ -116,14 +130,28 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={graphStyle} compact={compact} data={data} />;
+    return (
+      <LineGraph
+        style={graphStyle}
+        compact={compact}
+        data={data}
+        filters={filters}
+        groupBy={groupBy}
+        balanceTypeOp={balanceTypeOp}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
+      />
+    );
   }
   if (graphType === 'StackedBarGraph') {
     return (
@@ -131,8 +159,12 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         viewLabels={viewLabels}
         balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
       />
     );
   }
@@ -142,13 +174,14 @@ export function ChooseGraph({
         <ReportTableHeader
           headerScrollRef={headerScrollRef}
           handleScroll={handleScroll}
-          data={mode === 'time' && data.intervalData}
+          data={data.intervalData}
           groupBy={groupBy}
           interval={interval}
           balanceType={balanceType}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          mode={mode}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}
@@ -156,12 +189,15 @@ export function ChooseGraph({
           handleScroll={handleScroll}
           balanceTypeOp={balanceTypeOp}
           groupBy={groupBy}
-          data={data[groupByData]}
+          data={data}
+          filters={filters}
           mode={mode}
-          intervalsCount={intervals.length}
+          intervalsCount={intervalsCount}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -169,10 +205,14 @@ export function ChooseGraph({
           data={data}
           mode={mode}
           balanceTypeOp={balanceTypeOp}
-          intervalsCount={intervals.length}
+          intervalsCount={intervalsCount}
           compact={compact}
           style={rowStyle}
           compactStyle={compactStyle}
+          groupBy={groupBy}
+          filters={filters}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
         />
       </View>
     );

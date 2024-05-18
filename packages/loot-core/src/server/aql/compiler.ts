@@ -600,6 +600,10 @@ const compileFunction = saveStack('function', (state, func) => {
     }
 
     // date functions
+    case '$day': {
+      validateArgLength(args, 1);
+      return castInput(state, args[0], 'date');
+    }
     case '$month': {
       validateArgLength(args, 1);
       return castInput(state, args[0], 'date-month');

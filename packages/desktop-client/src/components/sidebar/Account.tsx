@@ -7,7 +7,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { styles, theme, type CSSProperties } from '../../style';
 import { AlignedText } from '../common/AlignedText';
-import { AnchorLink } from '../common/AnchorLink';
+import { Link } from '../common/Link';
 import { View } from '../common/View';
 import {
   useDraggable,
@@ -87,7 +87,7 @@ export function Account({
       <View>
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
-          <AnchorLink
+          <Link
             to={to}
             style={{
               ...accountNameStyle,
@@ -143,7 +143,7 @@ export function Account({
               left={name}
               right={<CellValue binding={query} type="financial" />}
             />
-          </AnchorLink>
+          </Link>
         </View>
       </View>
     </View>

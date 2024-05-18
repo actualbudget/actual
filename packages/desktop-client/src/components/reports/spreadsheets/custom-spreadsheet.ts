@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import { runQuery } from 'loot-core/src/client/query-helpers';
@@ -16,12 +15,16 @@ import {
 import {
   type DataEntity,
   type GroupedEntity,
+  type IntervalEntity,
 } from 'loot-core/src/types/models/reports';
+import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import {
   categoryLists,
   groupBySelections,
+  type QueryDataEntity,
   ReportOptions,
+  type UncategorizedEntity,
 } from '../ReportOptions';
 
 import { calculateLegend } from './calculateLegend';
@@ -43,10 +46,11 @@ export type createCustomSpreadsheetProps = {
   showHiddenCategories: boolean;
   showUncategorized: boolean;
   groupBy?: string;
-  balanceTypeOp?: keyof DataEntity;
+  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -62,11 +66,12 @@ export function createCustomSpreadsheet({
   showOffBudget,
   showHiddenCategories,
   showUncategorized,
-  groupBy,
-  balanceTypeOp,
-  payees,
-  accounts,
+  groupBy = '',
+  balanceTypeOp = 'totalDebts',
+  payees = [],
+  accounts = [],
   graphType,
+  firstDayOfWeekIdx,
   setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
@@ -79,17 +84,14 @@ export function createCustomSpreadsheet({
       ),
   );
 
-  const [groupByList, groupByLabel] = groupBySelections(
-    groupBy,
-    categoryList,
-    categoryGroup,
-    payees,
-    accounts,
-  );
+  const [groupByList, groupByLabel]: [
+    groupByList: UncategorizedEntity[],
+    groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account',
+  ] = groupBySelections(groupBy, categoryList, categoryGroup, payees, accounts);
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: GroupedEntity) => void,
+    setData: (data: DataEntity) => void,
   ) => {
     if (groupByList.length === 0) {
       return;
@@ -100,14 +102,15 @@ export function createCustomSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const [assets, debts] = await Promise.all([
+    let assets: QueryDataEntity[];
+    let debts: QueryDataEntity[];
+    [assets, debts] = await Promise.all([
       runQuery(
         makeQuery(
           'assets',
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -119,7 +122,6 @@ export function createCustomSpreadsheet({
           startDate,
           endDate,
           interval,
-          selectedCategories,
           categoryFilter,
           conditionsOpKey,
           filters,
@@ -127,85 +129,103 @@ export function createCustomSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
-    const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      monthUtils[format](startDate),
-      monthUtils[format](endDate),
-    );
+    if (interval === 'Weekly') {
+      debts = debts.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+      assets = assets.map(d => {
+        return {
+          ...d,
+          date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
+        };
+      });
+    }
+
+    const intervals =
+      interval === 'Weekly'
+        ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
+        : monthUtils[
+            ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
+          ](startDate, endDate);
 
     let totalAssets = 0;
     let totalDebts = 0;
 
-    const intervalData = intervals.reduce((arr, intervalItem) => {
-      let perIntervalAssets = 0;
-      let perIntervalDebts = 0;
-      const stacked = {};
+    const intervalData = intervals.reduce(
+      (arr: IntervalEntity[], intervalItem) => {
+        let perIntervalAssets = 0;
+        let perIntervalDebts = 0;
+        const stacked: Record<string, number> = {};
 
-      groupByList.map(item => {
-        let stackAmounts = 0;
+        groupByList.map(item => {
+          let stackAmounts = 0;
 
-        const intervalAssets = filterHiddenItems(
-          item,
-          assets,
-          showOffBudget,
-          showHiddenCategories,
-          showUncategorized,
-        )
-          .filter(
-            asset =>
-              asset.date === intervalItem &&
-              asset[groupByLabel] === (item.id ?? null),
+          const intervalAssets = filterHiddenItems(
+            item,
+            assets,
+            showOffBudget,
+            showHiddenCategories,
+            showUncategorized,
           )
-          .reduce((a, v) => (a = a + v.amount), 0);
-        perIntervalAssets += intervalAssets;
+            .filter(
+              asset =>
+                asset.date === intervalItem &&
+                asset[groupByLabel] === (item.id ?? null),
+            )
+            .reduce((a, v) => (a = a + v.amount), 0);
+          perIntervalAssets += intervalAssets;
 
-        const intervalDebts = filterHiddenItems(
-          item,
-          debts,
-          showOffBudget,
-          showHiddenCategories,
-          showUncategorized,
-        )
-          .filter(
-            debt =>
-              debt.date === intervalItem &&
-              debt[groupByLabel] === (item.id ?? null),
+          const intervalDebts = filterHiddenItems(
+            item,
+            debts,
+            showOffBudget,
+            showHiddenCategories,
+            showUncategorized,
           )
-          .reduce((a, v) => (a = a + v.amount), 0);
-        perIntervalDebts += intervalDebts;
+            .filter(
+              debt =>
+                debt.date === intervalItem &&
+                debt[groupByLabel] === (item.id ?? null),
+            )
+            .reduce((a, v) => (a = a + v.amount), 0);
+          perIntervalDebts += intervalDebts;
 
-        if (balanceTypeOp === 'totalAssets') {
-          stackAmounts += intervalAssets;
-        }
-        if (balanceTypeOp === 'totalDebts') {
-          stackAmounts += intervalDebts;
-        }
-        if (stackAmounts !== 0) {
-          stacked[item.name] = integerToAmount(Math.abs(stackAmounts));
-        }
+          if (balanceTypeOp === 'totalAssets') {
+            stackAmounts += intervalAssets;
+          }
+          if (balanceTypeOp === 'totalDebts') {
+            stackAmounts += intervalDebts;
+          }
+          if (stackAmounts !== 0) {
+            stacked[item.name] = integerToAmount(Math.abs(stackAmounts));
+          }
 
-        return null;
-      });
-      totalAssets += perIntervalAssets;
-      totalDebts += perIntervalDebts;
+          return null;
+        });
+        totalAssets += perIntervalAssets;
+        totalDebts += perIntervalDebts;
 
-      arr.push({
-        date:
-          interval === 'Monthly'
-            ? // eslint-disable-next-line rulesdir/typography
-              d.format(d.parseISO(`${intervalItem}-01`), "MMM ''yy")
-            : intervalItem,
-        ...stacked,
-        totalDebts: integerToAmount(perIntervalDebts),
-        totalAssets: integerToAmount(perIntervalAssets),
-        totalTotals: integerToAmount(perIntervalDebts + perIntervalAssets),
-      });
+        arr.push({
+          date: d.format(
+            d.parseISO(intervalItem),
+            ReportOptions.intervalFormat.get(interval) || '',
+          ),
+          ...stacked,
+          dateStart: intervalItem,
+          totalDebts: integerToAmount(perIntervalDebts),
+          totalAssets: integerToAmount(perIntervalAssets),
+          totalTotals: integerToAmount(perIntervalDebts + perIntervalAssets),
+        });
 
-      return arr;
-    }, []);
+        return arr;
+      },
+      [],
+    );
 
-    const calcData = groupByList.map(item => {
+    const calcData: GroupedEntity[] = groupByList.map(item => {
       const calc = recalculate({
         item,
         intervals,
@@ -219,7 +239,7 @@ export function createCustomSpreadsheet({
       return { ...calc };
     });
     const calcDataFiltered = calcData.filter(i =>
-      filterEmptyRows(showEmpty, i, balanceTypeOp),
+      filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
 
     const legend = calculateLegend(

@@ -16,8 +16,7 @@ import { SvgDelete } from '../icons/v0';
 import { styles, theme, type CSSProperties } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button';
-import { ExternalLink } from './common/ExternalLink';
-import { LinkButton } from './common/LinkButton';
+import { Link } from './common/Link';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
 import { View } from './common/View';
@@ -43,7 +42,8 @@ function compileMessage(
                 if (href[0] === '#') {
                   const actionName = href.slice(1);
                   return (
-                    <LinkButton
+                    <Link
+                      variant="text"
                       key={idx}
                       onClick={async e => {
                         e.preventDefault();
@@ -55,14 +55,19 @@ function compileMessage(
                       }}
                     >
                       {text}
-                    </LinkButton>
+                    </Link>
                   );
                 }
 
                 return (
-                  <ExternalLink linkColor="purple" key={idx} to={match[2]}>
+                  <Link
+                    variant="external"
+                    linkColor="purple"
+                    key={idx}
+                    to={match[2]}
+                  >
                     {match[1]}
-                  </ExternalLink>
+                  </Link>
                 );
               }
               return <Text key={idx}>{part}</Text>;
@@ -90,6 +95,7 @@ function Notification({
     sticky,
     internal,
     button,
+    timeout,
   } = notification;
 
   const [loading, setLoading] = useState(false);
@@ -101,7 +107,7 @@ function Notification({
     }
 
     if (!sticky) {
-      setTimeout(onRemove, 6500);
+      setTimeout(onRemove, timeout || 6500);
     }
   }, []);
 

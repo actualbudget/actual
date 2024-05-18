@@ -141,6 +141,18 @@ export class AccountPage {
   }
 
   async _fillTransactionFields(transactionRow, transaction) {
+    if (transaction.debit) {
+      await transactionRow.getByTestId('debit').click();
+      await this.page.keyboard.type(transaction.debit);
+      await this.page.keyboard.press('Tab');
+    }
+
+    if (transaction.credit) {
+      await transactionRow.getByTestId('credit').click();
+      await this.page.keyboard.type(transaction.credit);
+      await this.page.keyboard.press('Tab');
+    }
+
     if (transaction.account) {
       await transactionRow.getByTestId('account').click();
       await this.page.keyboard.type(transaction.account);
@@ -168,18 +180,6 @@ export class AccountPage {
         await this.page.keyboard.type(transaction.category);
         await this.page.keyboard.press('Tab');
       }
-    }
-
-    if (transaction.debit) {
-      await transactionRow.getByTestId('debit').click();
-      await this.page.keyboard.type(transaction.debit);
-      await this.page.keyboard.press('Tab');
-    }
-
-    if (transaction.credit) {
-      await transactionRow.getByTestId('credit').click();
-      await this.page.keyboard.type(transaction.credit);
-      await this.page.keyboard.press('Tab');
     }
   }
 }

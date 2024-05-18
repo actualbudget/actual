@@ -146,10 +146,9 @@ module.exports = {
           'Using default React import is discouraged, please use named exports directly instead.',
       },
       {
-        // forbid <a> in favor of <LinkButton> or <ExternalLink>
+        // forbid <a> in favor of <Link>
         selector: 'JSXOpeningElement[name.name="a"]',
-        message:
-          'Using <a> is discouraged, please use <LinkButton> or <ExternalLink> instead.',
+        message: 'Using <a> is discouraged, please use <Link> instead.',
       },
     ],
     'no-restricted-imports': [
@@ -282,8 +281,8 @@ module.exports = {
         './packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx',
         './packages/desktop-client/src/components/budget/index.tsx',
         './packages/desktop-client/src/components/budget/MobileBudget.tsx',
-        './packages/desktop-client/src/components/budget/rollover/HoldTooltip.tsx',
-        './packages/desktop-client/src/components/budget/rollover/TransferTooltip.tsx',
+        './packages/desktop-client/src/components/budget/rollover/HoldMenu.tsx',
+        './packages/desktop-client/src/components/budget/rollover/TransferMenu.tsx',
         './packages/desktop-client/src/components/common/Menu.tsx',
         './packages/desktop-client/src/components/FinancesApp.tsx',
         './packages/desktop-client/src/components/GlobalKeys.ts',

@@ -2,7 +2,13 @@ import { useCallback } from 'react';
 import type { MutableRefObject, Ref, RefCallback } from 'react';
 
 export function useMergedRefs<T>(
-  ...refs: (RefCallback<T> | MutableRefObject<T> | Ref<T> | null | undefined)[]
+  ...refs: (
+    | RefCallback<T | null | undefined>
+    | MutableRefObject<T | null | undefined>
+    | Ref<T | null | undefined>
+    | null
+    | undefined
+  )[]
 ): Ref<T> {
   return useCallback(
     (value: T) => {

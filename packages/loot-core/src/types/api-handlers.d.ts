@@ -1,5 +1,12 @@
 import { type batchUpdateTransactions } from '../server/accounts/transactions';
+import type {
+  APIAccountEntity,
+  APICategoryEntity,
+  APICategoryGroupEntity,
+  APIPayeeEntity,
+} from '../server/api-models';
 
+import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
 import { type ServerHandlers } from './server-handlers';
 
 export interface ApiHandlers {
@@ -89,7 +96,9 @@ export interface ApiHandlers {
 
   'api/sync': () => Promise<void>;
 
-  'api/accounts-get': () => Promise<AccountEntity[]>;
+  'api/bank-sync': (arg?: { accountId: string }) => Promise<void>;
+
+  'api/accounts-get': () => Promise<APIAccountEntity[]>;
 
   'api/account-create': (arg: { account; initialBalance? }) => Promise<string>;
 
@@ -107,9 +116,9 @@ export interface ApiHandlers {
 
   'api/categories-get': (arg: {
     grouped;
-  }) => Promise<Array<CategoryGroupEntity> | Array<CategoryEntity>>;
+  }) => Promise<Array<APICategoryGroupEntity | APICategoryEntity>>;
 
-  'api/category-groups-get': () => Promise<CategoryGroupEntity[]>;
+  'api/category-groups-get': () => Promise<APICategoryGroupEntity[]>;
 
   'api/category-group-create': (arg: { group }) => Promise<string>;
 
@@ -129,11 +138,21 @@ export interface ApiHandlers {
     transferCategoryId?;
   }) => Promise<{ error?: string }>;
 
-  'api/payees-get': () => Promise<PayeeEntity[]>;
+  'api/payees-get': () => Promise<APIPayeeEntity[]>;
 
   'api/payee-create': (arg: { payee }) => Promise<string>;
 
   'api/payee-update': (arg: { id; fields }) => Promise<unknown>;
 
   'api/payee-delete': (arg: { id }) => Promise<unknown>;
+
+  'api/rules-get': () => Promise<RuleEntity[]>;
+
+  'api/payee-rules-get': (arg: { id: string }) => Promise<RuleEntity[]>;
+
+  'api/rule-create': (arg: { rule: NewRuleEntity }) => Promise<RuleEntity>;
+
+  'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
+
+  'api/rule-delete': (arg: { id: string }) => Promise<boolean>;
 }

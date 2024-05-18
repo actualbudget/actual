@@ -144,7 +144,6 @@ export function Menu<T extends MenuItem>({
           );
         }
 
-        const lastItem = items[idx - 1];
         const Icon = item.icon;
 
         return (
@@ -153,14 +152,9 @@ export function Menu<T extends MenuItem>({
             key={item.name}
             style={{
               cursor: 'default',
-              padding: '9px 10px',
-              marginTop:
-                idx === 0 ||
-                lastItem === Menu.line ||
-                lastItem.type === Menu.label
-                  ? 0
-                  : -3,
+              padding: 10,
               flexDirection: 'row',
+              justifyContent: 'center',
               alignItems: 'center',
               color: theme.menuItemText,
               ...(item.disabled && { color: theme.buttonBareDisabledText }),
@@ -173,11 +167,13 @@ export function Menu<T extends MenuItem>({
             }}
             onPointerEnter={() => setHoveredIndex(idx)}
             onPointerLeave={() => setHoveredIndex(null)}
-            onClick={() =>
-              !item.disabled &&
-              item.toggle === undefined &&
-              onMenuSelect?.(item.name)
-            }
+            onClick={e => {
+              e.stopPropagation();
+
+              if (!item.disabled && item.toggle === undefined) {
+                onMenuSelect?.(item.name);
+              }
+            }}
           >
             {/* Force it to line up evenly */}
             {item.toggle === undefined ? (

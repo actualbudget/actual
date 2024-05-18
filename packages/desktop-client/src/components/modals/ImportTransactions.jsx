@@ -755,6 +755,7 @@ export function ImportTransactions({ modalProps, options }) {
   const [outValue, setOutValue] = useState('');
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
+  const [reconcile, setReconcile] = useState(true);
   const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -887,7 +888,7 @@ export function ImportTransactions({ modalProps, options }) {
       filters: [
         {
           name: 'Financial Files',
-          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
         },
       ],
     });
@@ -915,9 +916,10 @@ export function ImportTransactions({ modalProps, options }) {
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      const date = isOfxFile(filetype)
-        ? trans.date
-        : parseDate(trans.date, parseDateFormat);
+      const date =
+        isOfxFile(filetype) || isCamtFile(filetype)
+          ? trans.date
+          : parseDate(trans.date, parseDateFormat);
       if (date == null) {
         errorMessage = `Unable to parse date ${
           trans.date || '(empty)'
@@ -958,7 +960,7 @@ export function ImportTransactions({ modalProps, options }) {
       return;
     }
 
-    if (!isOfxFile(filetype)) {
+    if (!isOfxFile(filetype) && !isCamtFile(filetype)) {
       const key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
     }
@@ -980,7 +982,11 @@ export function ImportTransactions({ modalProps, options }) {
       savePrefs({ [`flip-amount-${accountId}-${filetype}`]: flipAmount });
     }
 
-    const didChange = await importTransactions(accountId, finalTransactions);
+    const didChange = await importTransactions(
+      accountId,
+      finalTransactions,
+      reconcile,
+    );
     if (didChange) {
       await getPayees();
     }
@@ -1121,6 +1127,17 @@ export function ImportTransactions({ modalProps, options }) {
           Use Memo as a fallback for empty Payees
         </CheckboxOption>
       )}
+      {(isOfxFile(filetype) || isCamtFile(filetype)) && (
+        <CheckboxOption
+          id="form_dont_reconcile"
+          checked={reconcile}
+          onChange={() => {
+            setReconcile(state => !state);
+          }}
+        >
+          Reconcile transactions
+        </CheckboxOption>
+      )}
 
       {/*Import Options */}
       {(filetype === 'qif' || filetype === 'csv') && (
@@ -1201,6 +1218,15 @@ export function ImportTransactions({ modalProps, options }) {
                   }}
                 >
                   Clear transactions on import
+                </CheckboxOption>
+                <CheckboxOption
+                  id="form_dont_reconcile"
+                  checked={reconcile}
+                  onChange={() => {
+                    setReconcile(state => !state);
+                  }}
+                >
+                  Reconcile transactions
                 </CheckboxOption>
               </View>
             )}
@@ -1286,4 +1312,8 @@ function getParseOptions(fileType, options = {}) {
 
 function isOfxFile(fileType) {
   return fileType === 'ofx' || fileType === 'qfx';
+}
+
+function isCamtFile(fileType) {
+  return fileType === 'xml';
 }

@@ -16,11 +16,11 @@ import { css } from 'glamor';
 
 import { SvgRemove } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
-import { theme, type CSSProperties, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 
 type CommonAutocompleteProps<T extends Item> = {
   focused?: boolean;
@@ -31,8 +31,6 @@ type CommonAutocompleteProps<T extends Item> = {
     onChange?: (value: string) => void;
   };
   suggestions?: T[];
-  tooltipStyle?: CSSProperties;
-  tooltipProps?: ComponentProps<typeof Tooltip>;
   renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
   renderItems?: (
     items: T[],
@@ -214,8 +212,6 @@ function SingleAutocomplete<T extends Item>({
   labelProps = {},
   inputProps = {},
   suggestions,
-  tooltipStyle,
-  tooltipProps,
   renderInput = defaultRenderInput,
   renderItems = defaultRenderItems,
   itemToString = defaultItemToString,
@@ -252,6 +248,8 @@ function SingleAutocomplete<T extends Item>({
     setIsOpen(false);
     onClose?.();
   };
+
+  const triggerRef = useRef(null);
 
   const { isNarrowWidth } = useResponsive();
   const narrowInputStyle = isNarrowWidth
@@ -442,134 +440,120 @@ function SingleAutocomplete<T extends Item>({
         // can't use a View here, but we can fake it be using the
         // className
         <div className={`view ${css({ display: 'flex' })}`} {...containerProps}>
-          {renderInput(
-            getInputProps({
-              focused,
-              ...inputProps,
-              onFocus: e => {
-                inputProps.onFocus?.(e);
+          <View ref={triggerRef} style={{ flexShrink: 0 }}>
+            {renderInput(
+              getInputProps({
+                focused,
+                ...inputProps,
+                onFocus: e => {
+                  inputProps.onFocus?.(e);
 
-                if (openOnFocus) {
-                  open();
-                }
-              },
-              onBlur: e => {
-                // Should this be e.nativeEvent
-                e['preventDownshiftDefault'] = true;
-                inputProps.onBlur?.(e);
-
-                if (!closeOnBlur) return;
-
-                if (clearOnBlur) {
-                  if (e.target.value === '') {
-                    onSelect?.(null, e.target.value);
-                    setSelectedItem(null);
-                    close();
-                    return;
-                  }
-
-                  // If not using table behavior, reset the input on blur. Tables
-                  // handle saving the value on blur.
-                  const value = selectedItem ? getItemId(selectedItem) : null;
-
-                  resetState(value);
-                } else {
-                  close();
-                }
-              },
-              onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
-                const { onKeyDown } = inputProps || {};
-
-                // If the dropdown is open, an item is highlighted, and the user
-                // pressed enter, always capture that and handle it ourselves
-                if (isOpen) {
-                  if (e.key === 'Enter') {
-                    if (highlightedIndex != null) {
-                      if (
-                        inst.lastChangeType ===
-                        Downshift.stateChangeTypes.itemMouseEnter
-                      ) {
-                        // If the last thing the user did was hover an item, intentionally
-                        // ignore the default behavior of selecting the item. It's too
-                        // common to accidentally hover an item and then save it
-                        e.preventDefault();
-                      } else {
-                        // Otherwise, stop propagation so that the table navigator
-                        // doesn't handle it
-                        e.stopPropagation();
-                      }
-                    } else if (!strict) {
-                      // Handle it ourselves
-                      e.stopPropagation();
-                      onSelect(value, (e.target as HTMLInputElement).value);
-                      return onSelectAfter();
-                    } else {
-                      // No highlighted item, still allow the table to save the item
-                      // as `null`, even though we're allowing the table to move
-                      e.preventDefault();
-                      onKeyDown?.(e);
-                    }
-                  } else if (shouldSaveFromKey(e)) {
-                    e.preventDefault();
-                    onKeyDown?.(e);
-                  }
-                }
-
-                // Handle escape ourselves
-                if (e.key === 'Escape') {
-                  e.nativeEvent['preventDownshiftDefault'] = true;
-
-                  if (!embedded) {
-                    e.stopPropagation();
-                  }
-
-                  fireUpdate(
-                    onUpdate,
-                    strict,
-                    suggestions,
-                    null,
-                    getItemId(originalItem),
-                  );
-
-                  setValue(getItemName(originalItem));
-                  setSelectedItem(findItem(strict, suggestions, originalItem));
-                  setHighlightedIndex(null);
-                  if (embedded) {
+                  if (openOnFocus) {
                     open();
+                  }
+                },
+                onBlur: e => {
+                  // Should this be e.nativeEvent
+                  e['preventDownshiftDefault'] = true;
+                  inputProps.onBlur?.(e);
+
+                  if (!closeOnBlur) return;
+
+                  if (clearOnBlur) {
+                    if (e.target.value === '') {
+                      onSelect?.(null, e.target.value);
+                      setSelectedItem(null);
+                      close();
+                      return;
+                    }
+
+                    // If not using table behavior, reset the input on blur. Tables
+                    // handle saving the value on blur.
+                    const value = selectedItem ? getItemId(selectedItem) : null;
+
+                    resetState(value);
                   } else {
                     close();
                   }
-                }
-              },
-              onChange: (e: ChangeEvent<HTMLInputElement>) => {
-                const { onChange } = inputProps || {};
-                onChange?.(e.target.value);
-              },
-            }),
-          )}
+                },
+                onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
+                  const { onKeyDown } = inputProps || {};
+
+                  // If the dropdown is open, an item is highlighted, and the user
+                  // pressed enter, always capture that and handle it ourselves
+                  if (isOpen) {
+                    if (e.key === 'Enter') {
+                      if (highlightedIndex != null) {
+                        if (
+                          inst.lastChangeType ===
+                          Downshift.stateChangeTypes.itemMouseEnter
+                        ) {
+                          // If the last thing the user did was hover an item, intentionally
+                          // ignore the default behavior of selecting the item. It's too
+                          // common to accidentally hover an item and then save it
+                          e.preventDefault();
+                        } else {
+                          // Otherwise, stop propagation so that the table navigator
+                          // doesn't handle it
+                          e.stopPropagation();
+                        }
+                      } else if (!strict) {
+                        // Handle it ourselves
+                        e.stopPropagation();
+                        onSelect(value, (e.target as HTMLInputElement).value);
+                        return onSelectAfter();
+                      } else {
+                        // No highlighted item, still allow the table to save the item
+                        // as `null`, even though we're allowing the table to move
+                        e.preventDefault();
+                        onKeyDown?.(e);
+                      }
+                    } else if (shouldSaveFromKey(e)) {
+                      e.preventDefault();
+                      onKeyDown?.(e);
+                    }
+                  }
+
+                  // Handle escape ourselves
+                  if (e.key === 'Escape') {
+                    e.nativeEvent['preventDownshiftDefault'] = true;
+
+                    if (!embedded) {
+                      e.stopPropagation();
+                    }
+
+                    fireUpdate(
+                      onUpdate,
+                      strict,
+                      suggestions,
+                      null,
+                      getItemId(originalItem),
+                    );
+
+                    setValue(getItemName(originalItem));
+                    setSelectedItem(
+                      findItem(strict, suggestions, originalItem),
+                    );
+                    setHighlightedIndex(null);
+                    if (embedded) {
+                      open();
+                    } else {
+                      close();
+                    }
+                  }
+                },
+                onChange: (e: ChangeEvent<HTMLInputElement>) => {
+                  const { onChange } = inputProps || {};
+                  onChange?.(e.target.value);
+                },
+              }),
+            )}
+          </View>
           {isOpen &&
             filtered.length > 0 &&
             (embedded ? (
-              <View style={{ marginTop: 5 }} data-testid="autocomplete">
-                {renderItems(
-                  filtered,
-                  getItemProps,
-                  highlightedIndex,
-                  inputValue,
-                )}
-              </View>
-            ) : (
-              <Tooltip
-                position="bottom-stretch"
-                offset={2}
-                style={{
-                  padding: 0,
-                  backgroundColor: theme.menuAutoCompleteBackground,
-                  color: theme.menuAutoCompleteText,
-                  minWidth: 200,
-                  ...tooltipStyle,
-                }}
-                {...tooltipProps}
+              <View
+                style={{ ...styles.darkScrollbar, marginTop: 5 }}
                 data-testid="autocomplete"
               >
                 {renderItems(
@@ -578,7 +562,31 @@ function SingleAutocomplete<T extends Item>({
                   highlightedIndex,
                   inputValue,
                 )}
-              </Tooltip>
+              </View>
+            ) : (
+              <Popover
+                triggerRef={triggerRef}
+                placement="bottom start"
+                offset={2}
+                isOpen={isOpen}
+                onOpenChange={close}
+                isNonModal
+                style={{
+                  ...styles.darkScrollbar,
+                  backgroundColor: theme.menuAutoCompleteBackground,
+                  color: theme.menuAutoCompleteText,
+                  minWidth: 200,
+                  width: triggerRef.current?.clientWidth,
+                }}
+                data-testid="autocomplete"
+              >
+                {renderItems(
+                  filtered,
+                  getItemProps,
+                  highlightedIndex,
+                  inputValue,
+                )}
+              </Popover>
             ))}
         </div>
       )}
@@ -626,12 +634,7 @@ function MultiAutocomplete<T extends Item>({
   ...props
 }: MultiAutocompleteProps<T>) {
   const [focused, setFocused] = useState(false);
-  const lastSelectedItems = useRef<typeof selectedItems>();
   const selectedItemIds = selectedItems.map(getItemId);
-
-  useEffect(() => {
-    lastSelectedItems.current = selectedItems;
-  });
 
   function onRemoveItem(id: T['id']) {
     const items = selectedItemIds.filter(i => i !== id);
@@ -669,9 +672,6 @@ function MultiAutocomplete<T extends Item>({
       onSelect={onAddItem}
       highlightFirst
       strict={strict}
-      tooltipProps={{
-        forceLayout: lastSelectedItems.current !== selectedItems,
-      }}
       renderInput={inputProps => (
         <View
           style={{

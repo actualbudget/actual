@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type ComponentProps, useState } from 'react';
 
 import { styles } from '../../style';
 import { Button } from '../common/Button';
@@ -12,7 +12,7 @@ import { type CommonModalProps } from '../Modals';
 
 type SingleInputModalProps = {
   modalProps: Partial<CommonModalProps>;
-  title: string;
+  title: ComponentProps<typeof Modal>['title'];
   buttonText: string;
   onSubmit: (value: string) => void;
   onValidate?: (value: string) => string[];
@@ -42,61 +42,47 @@ export function SingleInputModal({
   };
 
   return (
-    <Modal
-      title={title}
-      {...modalProps}
-      padding={0}
-      style={{
-        flex: 1,
-        padding: '0 10px',
-        paddingBottom: 10,
-        borderRadius: '6px',
-      }}
-    >
-      {() => (
-        <>
-          <View>
-            <InitialFocus>
-              <InputField
-                placeholder={inputPlaceholder}
-                defaultValue={value}
-                onUpdate={setValue}
-                onEnter={e => _onSubmit(e.currentTarget.value)}
-              />
-            </InitialFocus>
-            {errorMessage && (
-              <FormError
-                style={{
-                  paddingTop: 5,
-                  marginLeft: styles.mobileEditingPadding,
-                  marginRight: styles.mobileEditingPadding,
-                }}
-              >
-                * {errorMessage}
-              </FormError>
-            )}
-          </View>
-          <View
+    <Modal title={title} {...modalProps}>
+      <View>
+        <InitialFocus>
+          <InputField
+            placeholder={inputPlaceholder}
+            defaultValue={value}
+            onUpdate={setValue}
+            onEnter={e => _onSubmit(e.currentTarget.value)}
+          />
+        </InitialFocus>
+        {errorMessage && (
+          <FormError
             style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 10,
+              paddingTop: 5,
+              marginLeft: styles.mobileEditingPadding,
+              marginRight: styles.mobileEditingPadding,
             }}
           >
-            <Button
-              type="primary"
-              style={{
-                height: styles.mobileMinHeight,
-                marginLeft: styles.mobileEditingPadding,
-                marginRight: styles.mobileEditingPadding,
-              }}
-              onClick={() => _onSubmit(value)}
-            >
-              {buttonText}
-            </Button>
-          </View>
-        </>
-      )}
+            * {errorMessage}
+          </FormError>
+        )}
+      </View>
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingTop: 10,
+        }}
+      >
+        <Button
+          type="primary"
+          style={{
+            height: styles.mobileMinHeight,
+            marginLeft: styles.mobileEditingPadding,
+            marginRight: styles.mobileEditingPadding,
+          }}
+          onClick={() => _onSubmit(value)}
+        >
+          {buttonText}
+        </Button>
+      </View>
     </Modal>
   );
 }

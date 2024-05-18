@@ -5,7 +5,7 @@ import { css, media } from 'glamor';
 
 import { type CSSProperties, theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button';
+import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 type SettingProps = {
@@ -76,10 +76,10 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       {children}
     </View>
   ) : (
-    <Button
-      id="advanced"
-      type="link"
+    <Link
+      variant="text"
       onClick={() => setExpanded(true)}
+      data-testid="advanced-settings"
       style={{
         flexShrink: 0,
         alignSelf: 'flex-start',
@@ -88,6 +88,6 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       }}
     >
       Show advanced settings
-    </Button>
+    </Link>
   );
 };

@@ -31,11 +31,11 @@ export const BudgetCategories = memo(
     onReorderCategory,
     onReorderGroup,
   }) => {
-    const [_collapsed, setCollapsedPref] = useLocalPref('budget.collapsed');
-    const collapsed = _collapsed || [];
+    const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
+      useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
     function onCollapse(value) {
-      setCollapsedPref(value);
+      setCollapsedGroupIdsPref(value);
     }
 
     const [isAddingGroup, setIsAddingGroup] = useState(false);
@@ -62,12 +62,14 @@ export const BudgetCategories = memo(
 
           return [
             ...items,
-            ...(collapsed.includes(group.id) ? [] : groupCategories).map(
-              cat => ({
-                type: 'expense-category',
-                value: cat,
-              }),
-            ),
+            ...(collapsedGroupIds.includes(group.id)
+              ? []
+              : groupCategories
+            ).map(cat => ({
+              type: 'expense-category',
+              value: cat,
+              group,
+            })),
           ];
         }),
       );
@@ -82,7 +84,7 @@ export const BudgetCategories = memo(
             { type: 'income-separator' },
             { type: 'income-group', value: incomeGroup },
             newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
-            ...(collapsed.includes(incomeGroup.id)
+            ...(collapsedGroupIds.includes(incomeGroup.id)
               ? []
               : incomeGroup.categories.filter(
                   cat => showHiddenCategories || !cat.hidden,
@@ -98,7 +100,7 @@ export const BudgetCategories = memo(
       return items;
     }, [
       categoryGroups,
-      collapsed,
+      collapsedGroupIds,
       newCategoryForGroup,
       isAddingGroup,
       showHiddenCategories,
@@ -124,7 +126,7 @@ export const BudgetCategories = memo(
             ...dragState,
             preview: false,
           });
-          setSavedCollapsed(collapsed);
+          setSavedCollapsed(collapsedGroupIds);
         }
       } else if (state === 'hover') {
         setDragState({
@@ -139,10 +141,10 @@ export const BudgetCategories = memo(
     }
 
     function onToggleCollapse(id) {
-      if (collapsed.includes(id)) {
-        onCollapse(collapsed.filter(id_ => id_ !== id));
+      if (collapsedGroupIds.includes(id)) {
+        onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
       } else {
-        onCollapse([...collapsed, id]);
+        onCollapse([...collapsedGroupIds, id]);
       }
     }
 
@@ -162,7 +164,7 @@ export const BudgetCategories = memo(
     }
 
     function onShowNewCategory(groupId) {
-      onCollapse(collapsed.filter(c => c !== groupId));
+      onCollapse(collapsedGroupIds.filter(c => c !== groupId));
       setNewCategoryForGroup(groupId);
     }
 
@@ -232,7 +234,7 @@ export const BudgetCategories = memo(
                 <ExpenseGroup
                   group={item.value}
                   editingCell={editingCell}
-                  collapsed={collapsed.includes(item.value.id)}
+                  collapsed={collapsedGroupIds.includes(item.value.id)}
                   MonthComponent={dataComponents.ExpenseGroupComponent}
                   dragState={dragState}
                   onEditName={onEditName}
@@ -250,6 +252,7 @@ export const BudgetCategories = memo(
               content = (
                 <ExpenseCategory
                   cat={item.value}
+                  categoryGroup={item.group}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.ExpenseCategoryComponent}
                   dragState={dragState}
@@ -285,7 +288,7 @@ export const BudgetCategories = memo(
                   group={item.value}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.IncomeGroupComponent}
-                  collapsed={collapsed.includes(item.value.id)}
+                  collapsed={collapsedGroupIds.includes(item.value.id)}
                   onEditName={onEditName}
                   onSave={_onSaveGroup}
                   onToggleCollapse={onToggleCollapse}

@@ -10,6 +10,10 @@ import { type CSSProperties } from './types';
 
 const MOBILE_MIN_HEIGHT = 40;
 
+const shadowLarge = {
+  boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
+};
+
 export const styles = {
   incomeHeaderHeight: 70,
   cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
@@ -22,6 +26,7 @@ export const styles = {
     paddingTop: 8,
     paddingBottom: 8,
     height: MOBILE_MIN_HEIGHT,
+    minHeight: MOBILE_MIN_HEIGHT,
   },
   mobileEditingPadding: 12,
   altMenuMaxHeight: 250,
@@ -85,9 +90,7 @@ export const styles = {
   shadow: {
     boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
   },
-  shadowLarge: {
-    boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
-  },
+  shadowLarge,
   tnum: {
     // eslint-disable-next-line rulesdir/typography
     fontFeatureSettings: '"tnum"',
@@ -127,7 +130,16 @@ export const styles = {
       wordBreak: 'break-word',
     };
   },
+  tooltip: {
+    padding: 5,
+    ...shadowLarge,
+    borderRadius: 4,
+    backgroundColor: theme.menuBackground,
+    color: theme.menuItemText,
+    overflow: 'auto',
+  },
   // Dynamically set
+  horizontalScrollbar: null as CSSProperties | null,
   lightScrollbar: null as CSSProperties | null,
   darkScrollbar: null as CSSProperties | null,
   scrollbarWidth: null as number | null,
@@ -140,6 +152,20 @@ let hiddenScrollbars = false;
 // lightScrollbar => primary
 // darkScrollbar => secondary
 function onScrollbarChange() {
+  styles.horizontalScrollbar = !hiddenScrollbars && {
+    '::-webkit-scrollbar': {
+      backgroundColor: 'inherit',
+      height: 12,
+    },
+    '::-webkit-scrollbar-thumb': {
+      width: 7,
+      borderRadius: 30,
+      backgroundClip: 'padding-box',
+      border: '2px solid rgba(0, 0, 0, 0)',
+      backgroundColor: '#d0d0d0',
+    },
+  };
+
   styles.lightScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,

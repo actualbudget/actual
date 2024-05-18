@@ -8,7 +8,7 @@ import { ManagePayeesWithData } from './ManagePayeesWithData';
 export function ManagePayeesPage() {
   const location = useLocation();
   return (
-    <Page title="Payees">
+    <Page header="Payees">
       <ManagePayeesWithData
         initialSelectedIds={
           location.state && location.state.selectedPayee

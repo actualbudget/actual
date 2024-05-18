@@ -113,7 +113,8 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
 export function UnexposedCellContent({
   value,
   formatter,
-}: Pick<CellProps, 'value' | 'formatter'>) {
+  linkStyle,
+}: Pick<CellProps, 'value' | 'formatter' | 'linkStyle'>) {
   return (
     <Text
       style={{
@@ -121,6 +122,7 @@ export function UnexposedCellContent({
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
+        ...linkStyle,
       }}
     >
       {formatter ? formatter(value) : value}
@@ -139,6 +141,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   unexposedContent?: ReactNode;
   value?: string;
   valueStyle?: CSSProperties;
+  linkStyle?: CSSProperties;
   onExpose?: (name: string) => void;
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
@@ -158,6 +161,7 @@ export function Cell({
   plain,
   style,
   valueStyle,
+  linkStyle,
   unexposedContent,
   privacyFilter,
   ...viewProps
@@ -229,7 +233,11 @@ export function Cell({
             }
           >
             {unexposedContent || (
-              <UnexposedCellContent value={value} formatter={formatter} />
+              <UnexposedCellContent
+                linkStyle={linkStyle}
+                value={value}
+                formatter={formatter}
+              />
             )}
           </View>
         )}
@@ -339,11 +347,25 @@ function InputValue({
     }
   }
 
+  const ops = ['+', '-', '*', '/', '^'];
+
+  function valueIsASingleOperator(text) {
+    return text?.length === 1 && ops.includes(text.charAt(0));
+  }
+
+  function setValue_(text) {
+    if (valueIsASingleOperator(text)) {
+      setValue(defaultValue + text);
+    } else {
+      setValue(text);
+    }
+  }
+
   return (
     <Input
       {...props}
       value={value}
-      onChangeValue={text => setValue(text)}
+      onChangeValue={text => setValue_(text)}
       onBlur={onBlur_}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}

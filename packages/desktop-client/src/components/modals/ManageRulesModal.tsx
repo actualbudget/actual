@@ -28,15 +28,7 @@ export function ManageRulesModal({
   }
 
   return (
-    <Modal
-      title="Rules"
-      padding={0}
-      loading={loading}
-      {...modalProps}
-      style={{
-        flex: 1,
-      }}
-    >
+    <Modal title="Rules" loading={loading} {...modalProps}>
       {() => <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />}
     </Modal>
   );

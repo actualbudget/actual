@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 
-import { Bar, BarChart, ResponsiveContainer } from 'recharts';
+import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -17,23 +17,48 @@ import { ReportCard } from '../ReportCard';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
-function CustomLabel({ value, name, position, ...props }) {
+function CustomLabel({
+  value,
+  name,
+  position,
+  x,
+  y,
+  width: barWidth,
+  height: barHeight,
+}) {
+  const valueLengthOffset = value.toString().length < 5 ? -40 : 20;
+
+  const yOffset = barHeight < 25 ? 105 : y;
+
+  const labelXOffsets = {
+    right: 6,
+    left: -valueLengthOffset + 1,
+  };
+
+  const valueXOffsets = {
+    right: 6,
+    left: -valueLengthOffset + 2,
+  };
+
+  const anchorValue = {
+    right: 'start',
+    left: 'end',
+  };
+
   return (
     <>
       <text
-        {...props}
-        dy={10}
-        dx={position === 'right' ? 20 : -5}
-        textAnchor={position === 'right' ? 'start' : 'end'}
+        x={x + barWidth + labelXOffsets[position]}
+        y={yOffset + 10}
+        textAnchor={anchorValue[position]}
         fill={theme.tableText}
       >
         {name}
       </text>
       <text
-        {...props}
-        dy={26}
-        dx={position === 'right' ? 20 : -4}
-        textAnchor={position === 'right' ? 'start' : 'end'}
+        x={x + barWidth + valueXOffsets[position]}
+        y={yOffset + 26}
+        textAnchor={anchorValue[position]}
         fill={theme.tableText}
       >
         <PrivacyFilter>{integerToCurrency(value)}</PrivacyFilter>
@@ -77,10 +102,7 @@ export function CashFlowCard() {
           {data && (
             <View style={{ textAlign: 'right' }}>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <Change
-                  amount={income - expenses}
-                  style={{ color: theme.tableText, fontWeight: 300 }}
-                />
+                <Change amount={income - expenses} />
               </PrivacyFilter>
             </View>
           )}
@@ -100,18 +122,20 @@ export function CashFlowCard() {
                 bottom: 0,
               }}
             >
-              <Bar
-                dataKey="income"
-                fill={chartTheme.colors.blue}
-                barSize={14}
-                label={<CustomLabel name="Income" position="left" />}
-              />
-              <Bar
-                dataKey="expenses"
-                fill={chartTheme.colors.red}
-                barSize={14}
-                label={<CustomLabel name="Expenses" position="right" />}
-              />
+              <Bar dataKey="income" fill={chartTheme.colors.blue} barSize={14}>
+                <LabelList
+                  dataKey="income"
+                  position="left"
+                  content={<CustomLabel name="Income" />}
+                />
+              </Bar>
+              <Bar dataKey="expenses" fill={chartTheme.colors.red} barSize={14}>
+                <LabelList
+                  dataKey="expenses"
+                  position="right"
+                  content={<CustomLabel name="Expenses" />}
+                />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         ) : (

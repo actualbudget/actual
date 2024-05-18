@@ -14,11 +14,12 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
 import { Input } from '../common/Input';
+import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
@@ -60,24 +61,26 @@ function About() {
         <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>
         {isOutdated ? (
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
             New version available: {latestVersion}
-          </ExternalLink>
+          </Link>
         ) : (
           <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
             You’re up to date!
           </Text>
         )}
         <Text>
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
             Release Notes
-          </ExternalLink>
+          </Link>
         </Text>
       </View>
     </Setting>
@@ -137,13 +140,20 @@ export function Settings() {
   useSetThemeColor(theme.mobileViewTheme);
   return (
     <Page
-      title="Settings"
+      header="Settings"
       style={{
-        backgroundColor: isNarrowWidth ? theme.mobilePageBackground : undefined,
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
+        paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
-      <View style={{ flexShrink: 0, maxWidth: 530, gap: 30 }}>
+      <View
+        style={{
+          marginTop: 10,
+          flexShrink: 0,
+          maxWidth: 530,
+          gap: 30,
+        }}
+      >
         {isNarrowWidth && (
           <View
             style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
