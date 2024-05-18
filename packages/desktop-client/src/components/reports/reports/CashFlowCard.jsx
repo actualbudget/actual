@@ -26,8 +26,6 @@ function CustomLabel({
   width: barWidth,
   height: barHeight,
 }) {
-  if (value === 0) return null;
-
   const valueLengthOffset = 20;
 
   const yOffset = barHeight < 25 ? 105 : y;
