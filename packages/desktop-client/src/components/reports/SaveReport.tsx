@@ -212,6 +212,7 @@ export function SaveReport({
         triggerRef={triggerRef}
         isOpen={chooseMenuOpen}
         onOpenChange={() => setChooseMenuOpen(false)}
+        style={{ padding: 15 }}
       >
         <SaveReportChoose onApply={onApply} />
       </Popover>
