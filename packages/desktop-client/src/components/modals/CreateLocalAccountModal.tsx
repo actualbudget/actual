@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { type BoundActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
@@ -32,8 +33,13 @@ export function CreateLocalAccountModal({
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
 
-  const [nameError, setNameError] = useState(false);
+  const [nameError, setNameError] = useState({
+    error: false,
+    message: 'Name is required',
+  });
   const [balanceError, setBalanceError] = useState(false);
+
+  const accounts = useAccounts();
 
   const validateBalance = balance => !isNaN(parseFloat(balance));
 
@@ -49,7 +55,12 @@ export function CreateLocalAccountModal({
               event.preventDefault();
 
               const nameError = !name;
-              setNameError(nameError);
+              setNameError({ error: nameError, message: 'Name is required' });
+
+              if (accounts.some(account => account.name === name)) {
+                setNameError({ error: true, message: 'Name already exists' });
+                return;
+              }
 
               const balanceError = !validateBalance(balance);
               setBalanceError(balanceError);
@@ -75,15 +86,17 @@ export function CreateLocalAccountModal({
                     const name = event.target.value.trim();
                     setName(name);
                     if (name && nameError) {
-                      setNameError(false);
+                      setNameError({ error: false, message: '' });
                     }
                   }}
                   style={{ flex: 1 }}
                 />
               </InitialFocus>
             </InlineField>
-            {nameError && (
-              <FormError style={{ marginLeft: 75 }}>Name is required</FormError>
+            {nameError.error && (
+              <FormError style={{ marginLeft: 75 }}>
+                {nameError.message}
+              </FormError>
             )}
 
             <View
