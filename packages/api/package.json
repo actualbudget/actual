@@ -9,7 +9,8 @@
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "@types"
   ],
   "scripts": {
     "build:app": "yarn workspace loot-core build:api",
@@ -21,6 +22,7 @@
     "clean": "rm -rf dist @types"
   },
   "dependencies": {
+    "@actual-app/crdt": "workspace:^",
     "better-sqlite3": "^9.6.0",
     "compare-versions": "^6.1.0",
     "node-fetch": "^3.3.2",
