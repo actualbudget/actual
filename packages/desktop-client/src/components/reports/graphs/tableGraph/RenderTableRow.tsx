@@ -10,25 +10,19 @@ import { type renderRowProps } from './ReportTable';
 type RenderTableRowProps = {
   index: number;
   parent_index?: number;
-  compact: boolean;
   renderRow: (arg: renderRowProps) => ReactNode;
-  intervalsCount: number;
   mode: string;
   metadata: GroupedEntity[];
   style?: CSSProperties;
-  compactStyle?: CSSProperties;
 };
 
 export function RenderTableRow({
   index,
   parent_index,
-  compact,
   renderRow,
-  intervalsCount,
   mode,
   metadata,
   style,
-  compactStyle,
 }: RenderTableRowProps) {
   const child = metadata[index];
   const parent =
@@ -45,10 +39,7 @@ export function RenderTableRow({
       {renderRow({
         item,
         mode,
-        intervalsCount,
-        compact,
         style,
-        compactStyle,
       })}
     </View>
   );

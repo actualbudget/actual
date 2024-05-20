@@ -12,12 +12,12 @@ type ReportTableHeaderProps = {
   groupBy: string;
   interval: string;
   data: IntervalEntity[];
-  balanceType: string;
+  balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
   headerScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   compact: boolean;
-  style: CSSProperties;
-  compactStyle: CSSProperties;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
   mode: string;
 };
 
@@ -25,7 +25,7 @@ export function ReportTableHeader({
   groupBy,
   interval,
   data,
-  balanceType,
+  balanceTypeOp,
   headerScrollRef,
   handleScroll,
   compact,
@@ -84,7 +84,7 @@ export function ReportTableHeader({
                 />
               );
             })
-          : balanceType === 'Net' && (
+          : balanceTypeOp === 'totalTotals' && (
               <>
                 <Cell
                   style={{
