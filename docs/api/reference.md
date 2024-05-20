@@ -51,6 +51,17 @@ This is the documentation of all available API methods. The API has not been rel
 "deletePayee"
 ]} />
 
+<APIList title="Rules" sections={[
+"ConditionOrAction",
+"Rule",
+"Payee rule",
+"getRules",
+"getPayeeRules",
+"createRule",
+"updateRule",
+"deleteRule"
+]} />
+
 <APIList title="Misc" sections={[
 "runBankSync"
 ]} />
@@ -430,6 +441,75 @@ Update fields of a payee. `fields` can specify any field described in [`Payee`](
 <Method name="deletePayee" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
 
 Delete a payee.
+
+## Rules
+
+#### ConditionOrAction
+
+<StructType fields={objects.condition} />
+
+#### Rule
+
+<StructType fields={objects.rule} />
+
+#### Payee rule
+
+<StructType fields={objects.payeeRule} />
+
+#### Methods
+
+#### `getRules`
+
+<Method name="getRules" args={[]} returns="Promise<Rule[]>" />
+
+Get all rules.
+
+#### `getPayeeRules`
+
+<Method name="getPayeeRules" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<PayeeRule[]>" />
+
+Get all payees rules for `payeeId`.
+
+#### `createRule`
+
+<Method name="createRule" args={[{ name: 'rule', type: 'Rule' }]} returns="Promise<Rule>" />
+
+Create a rule. Returns the new rule, including the `id`.
+
+#### `updateRule`
+
+<Method name="updateRule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<Rule>" />
+
+Update fields of a rule. `fields` can specify any field described in [`Rule`](#rule).  Returns the updated rule.
+
+#### `deleteRule`
+
+<Method name="deleteRule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+Delete a rule.
+
+#### Examples
+
+```js
+{
+  stage: 'pre',
+  conditionsOp: 'and',
+  conditions: [
+    {
+      field: 'payee',
+      op: 'is',
+      value: 'test-payee',
+    },
+  ],
+  actions: [
+    {
+      op: 'set',
+      field: 'category',
+      value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+    },
+  ],
+}
+```
 
 ## Misc
 

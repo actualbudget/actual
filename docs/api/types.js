@@ -202,24 +202,61 @@ export let objects = {
     },
   ],
 
+  condition: [
+    { name: 'field', type: 'string', required: true },
+    { name: 'op', type: 'string', required: true },
+    { name: 'value', type: 'string', required: true },
+  ],
+
+  rule: [
+    { name: 'id', type: types.id },
+    {
+        name: 'stage',
+        type: 'string',
+        required: true,
+        description: (
+          <span>
+            Must be one of <code>pre</code>, <code>default</code>, or <code>post</code>.
+          </span>
+        ),
+    },
+    {
+        name: 'conditionsOp',
+        type: 'string',
+        description: (
+          <span>
+            Must be one of <code>and</code> or <code>or</code>.
+          </span>
+        ),
+    },
+    { name: 'conditions', type: 'ConditionOrAction[]' },
+    { name: 'actions', type: 'ConditionOrAction[]' },
+  ],
+
   payeeRule: [
     { name: 'id', type: types.id },
     { name: 'payee_id', type: types.id, required: true },
     {
-      name: 'type',
-      type: 'string',
-      required: true,
-      description: (
-        <span>
-          Must be one of <code>equals</code> or <code>contains</code>
-        </span>
-      ),
+        name: 'stage',
+        type: 'string',
+        required: true,
+        description: (
+          <span>
+            Must be one of <code>pre</code>, <code>default</code>, or <code>post</code>.
+          </span>
+        ),
     },
     {
-      name: 'value',
-      type: 'string',
-      description: 'Value to match imported payee names on',
+        name: 'conditionsOp',
+        type: 'string',
+        description: (
+          <span>
+            Must be one of <code>and</code> or <code>or</code>.
+          </span>
+        ),
     },
+    { name: 'conditions', type: 'ConditionOrAction[]' },
+    { name: 'actions', type: 'ConditionOrAction[]' },
   ],
 };
 
