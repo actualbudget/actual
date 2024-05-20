@@ -4,12 +4,14 @@ sidebar_position: 1
 title: 'Introduction'
 ---
 
-Welcome to Actual’s documentation! Here you will find everything you need to know about Actual Budget (hopefully). If you see something missing, feel free to reach out to us (or, even better, click the “Edit this page” link at the bottom of any page to add any missing information yourself).
+Welcome to Actual’s documentation! This page provides you a quick introduction to Actual Budget and will help you navigate to the documentation to learn more about Actual. 
 
-## What should I read first?
+## Where to Begin?
 
-If you’re completely new to Actual, you’ll need to [install](./install/index.md) it before you can use it. Once you’ve done that, check out the [Tour of Actual](./tour/index.md) for a high-level overview of how Actual works. Then come back later to dive into the more detailed documentation in the “Using Actual” section.
+If you’re new to Actual, [install](./install/index.md) it on a computer to start. After installation, check out the [Tour of Actual](./tour/index.md) for a high-level overview of how Actual works. To dive deep into more detailed documentation, check out the “Using Actual” section from the left-nav of the Actual documentation.
 
-If you would just like to test things out, you can [download](/test-budget.zip) the test budget and [import](./migration/actual-import.md) it into Actual
+For help and support, [reach out to the maintainers and community](/contact).
 
-If you ever get stuck, don’t hesitate to [reach out to the maintainers and community](/contact) for help.
+## Want to Contribute?
+
+If you'd like to contribute to the Actual Budget's documentation, click "Edit this page" to contribute. We recommend you to go through the prerequisites You can contribute to the documentation by clicking the “Edit this page” link at the bottom of any page. We also recommend you to check out documentation standard, local setup, and guidelines on using images and screenshots from [here](https://github.com/actualbudget/docs?tab=readme-ov-file).
