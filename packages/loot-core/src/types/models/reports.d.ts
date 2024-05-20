@@ -77,9 +77,8 @@ type LegendEntity = {
 
 export type IntervalEntity = {
   date?: string;
-  dateStart?: string;
   change?: number;
-  dateLookup?: string;
+  intervalStartDate?: string;
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;

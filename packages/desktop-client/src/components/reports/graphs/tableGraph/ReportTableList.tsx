@@ -15,23 +15,17 @@ import { type renderRowProps } from './ReportTable';
 type ReportTableListProps = {
   data: DataEntity;
   mode: string;
-  intervalsCount: number;
   groupBy: string;
   renderRow: (arg: renderRowProps) => ReactNode;
-  compact: boolean;
   style?: CSSProperties;
-  compactStyle?: CSSProperties;
 };
 
 export function ReportTableList({
   data,
-  intervalsCount,
   mode,
   groupBy,
   renderRow,
-  compact,
   style,
-  compactStyle,
 }: ReportTableListProps) {
   const metadata: GroupedEntity[] | undefined =
     groupBy === 'Category'
@@ -60,9 +54,7 @@ export function ReportTableList({
               <View key={index}>
                 <RenderTableRow
                   index={index}
-                  compact={compact}
                   renderRow={renderRow}
-                  intervalsCount={intervalsCount}
                   mode={mode}
                   metadata={metadata}
                   style={{
@@ -73,7 +65,6 @@ export function ReportTableList({
                     }),
                     ...style,
                   }}
-                  compactStyle={compactStyle}
                 />
                 {item.categories && (
                   <>
@@ -84,14 +75,11 @@ export function ReportTableList({
                             <RenderTableRow
                               key={category.id}
                               index={i}
-                              compact={compact}
                               renderRow={renderRow}
-                              intervalsCount={intervalsCount}
                               mode={mode}
                               metadata={metadata}
                               parent_index={index}
                               style={style}
-                              compactStyle={compactStyle}
                             />
                           );
                         },

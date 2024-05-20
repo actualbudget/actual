@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, type RefObject, type UIEventHandler } from 'react';
 
 import {
   amountToCurrency,
@@ -13,6 +13,7 @@ import { useCategories } from '../../../../hooks/useCategories';
 import { useNavigate } from '../../../../hooks/useNavigate';
 import { useResponsive } from '../../../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../../../style';
+import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 import { showActivity } from '../showActivity';
 
@@ -28,8 +29,12 @@ type ReportTableRowProps = {
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
+  totalStyle?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  totalScrollRef?: RefObject<HTMLDivElement>;
+  handleScroll?: UIEventHandler<HTMLDivElement>;
+  height?: number;
 };
 
 export const ReportTableRow = memo(
@@ -45,8 +50,12 @@ export const ReportTableRow = memo(
     compact,
     style,
     compactStyle,
+    totalStyle,
     showHiddenCategories = false,
     showOffBudget = false,
+    totalScrollRef,
+    handleScroll,
+    height,
   }: ReportTableRowProps) => {
     const average = amountToInteger(item[balanceTypeOp]) / intervalsCount;
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
@@ -77,6 +86,7 @@ export const ReportTableRow = memo(
     return (
       <Row
         key={item.id}
+        height={height}
         collapsed={true}
         style={{
           color: theme.tableText,
@@ -84,176 +94,187 @@ export const ReportTableRow = memo(
           ...style,
         }}
       >
-        <Cell
-          value={item[groupByItem]}
-          title={item[groupByItem] ?? undefined}
+        <View
+          innerRef={totalScrollRef}
+          onScroll={handleScroll}
+          id={totalScrollRef ? 'total' : item.id}
           style={{
-            width: compact ? 80 : 125,
-            flexShrink: 0,
+            flexDirection: 'row',
+            flex: 1,
+            ...totalStyle,
           }}
-          valueStyle={compactStyle}
-        />
-        {item.intervalData && mode === 'time'
-          ? item.intervalData.map(intervalItem => {
-              return (
-                <Cell
-                  key={amountToCurrency(intervalItem[balanceTypeOp])}
-                  style={{
-                    minWidth: compact ? 50 : 85,
-                  }}
-                  linkStyle={hoverUnderline}
-                  valueStyle={compactStyle}
-                  value={amountToCurrency(intervalItem[balanceTypeOp])}
-                  title={
-                    Math.abs(intervalItem[balanceTypeOp]) > 100000
-                      ? amountToCurrency(intervalItem[balanceTypeOp])
-                      : undefined
-                  }
-                  onClick={() =>
-                    !isNarrowWidth &&
-                    !['Group', 'Interval'].includes(groupBy) &&
-                    !categories.grouped.map(g => g.id).includes(item.id) &&
-                    showActivity({
-                      navigate,
-                      categories,
-                      accounts,
-                      balanceTypeOp,
-                      filters,
-                      showHiddenCategories,
-                      showOffBudget,
-                      type: 'time',
-                      startDate: intervalItem.dateLookup || '',
-                      field: groupBy.toLowerCase(),
-                      id: item.id,
-                    })
-                  }
-                  width="flex"
-                  privacyFilter
-                />
-              );
-            })
-          : balanceTypeOp === 'totalTotals' && (
-              <>
-                <Cell
-                  value={amountToCurrency(item.totalAssets)}
-                  title={
-                    Math.abs(item.totalAssets) > 100000
-                      ? amountToCurrency(item.totalAssets)
-                      : undefined
-                  }
-                  width="flex"
-                  privacyFilter
-                  style={{
-                    minWidth: compact ? 50 : 85,
-                  }}
-                  linkStyle={hoverUnderline}
-                  valueStyle={compactStyle}
-                  onClick={() =>
-                    !isNarrowWidth &&
-                    !['Group', 'Interval'].includes(groupBy) &&
-                    !categories.grouped.map(g => g.id).includes(item.id) &&
-                    showActivity({
-                      navigate,
-                      categories,
-                      accounts,
-                      balanceTypeOp,
-                      filters,
-                      showHiddenCategories,
-                      showOffBudget,
-                      type: 'assets',
-                      startDate,
-                      endDate,
-                      field: groupBy.toLowerCase(),
-                      id: item.id,
-                    })
-                  }
-                />
-                <Cell
-                  value={amountToCurrency(item.totalDebts)}
-                  title={
-                    Math.abs(item.totalDebts) > 100000
-                      ? amountToCurrency(item.totalDebts)
-                      : undefined
-                  }
-                  width="flex"
-                  privacyFilter
-                  style={{
-                    minWidth: compact ? 50 : 85,
-                  }}
-                  linkStyle={hoverUnderline}
-                  valueStyle={compactStyle}
-                  onClick={() =>
-                    !isNarrowWidth &&
-                    !['Group', 'Interval'].includes(groupBy) &&
-                    !categories.grouped.map(g => g.id).includes(item.id) &&
-                    showActivity({
-                      navigate,
-                      categories,
-                      accounts,
-                      balanceTypeOp,
-                      filters,
-                      showHiddenCategories,
-                      showOffBudget,
-                      type: 'debts',
-                      startDate,
-                      endDate,
-                      field: groupBy.toLowerCase(),
-                      id: item.id,
-                    })
-                  }
-                />
-              </>
-            )}
-        <Cell
-          value={amountToCurrency(item[balanceTypeOp])}
-          title={
-            Math.abs(item[balanceTypeOp]) > 100000
-              ? amountToCurrency(item[balanceTypeOp])
-              : undefined
-          }
-          style={{
-            fontWeight: 600,
-            minWidth: compact ? 50 : 85,
-          }}
-          linkStyle={hoverUnderline}
-          valueStyle={compactStyle}
-          onClick={() =>
-            !isNarrowWidth &&
-            !['Group', 'Interval'].includes(groupBy) &&
-            !categories.grouped.map(g => g.id).includes(item.id) &&
-            showActivity({
-              navigate,
-              categories,
-              accounts,
-              balanceTypeOp,
-              filters,
-              showHiddenCategories,
-              showOffBudget,
-              type: 'totals',
-              startDate,
-              endDate,
-              field: groupBy.toLowerCase(),
-              id: item.id,
-            })
-          }
-          width="flex"
-          privacyFilter
-        />
-        <Cell
-          value={integerToCurrency(Math.round(average))}
-          title={
-            Math.abs(Math.round(average / 100)) > 100000
-              ? integerToCurrency(Math.round(average))
-              : undefined
-          }
-          style={{
-            fontWeight: 600,
-            minWidth: compact ? 50 : 85,
-          }}
-          valueStyle={compactStyle}
-          width="flex"
-          privacyFilter
-        />
+        >
+          <Cell
+            value={item[groupByItem]}
+            title={item[groupByItem]}
+            style={{
+              width: compact ? 80 : 125,
+              flexShrink: 0,
+            }}
+            valueStyle={compactStyle}
+          />
+          {item.intervalData && mode === 'time'
+            ? item.intervalData.map((intervalItem, index) => {
+                return (
+                  <Cell
+                    key={index}
+                    style={{
+                      minWidth: compact ? 50 : 85,
+                    }}
+                    linkStyle={hoverUnderline}
+                    valueStyle={compactStyle}
+                    value={amountToCurrency(intervalItem[balanceTypeOp])}
+                    title={
+                      Math.abs(intervalItem[balanceTypeOp]) > 100000
+                        ? amountToCurrency(intervalItem[balanceTypeOp])
+                        : undefined
+                    }
+                    onClick={() =>
+                      !isNarrowWidth &&
+                      !['Group', 'Interval'].includes(groupBy) &&
+                      !categories.grouped.map(g => g.id).includes(item.id) &&
+                      showActivity({
+                        navigate,
+                        categories,
+                        accounts,
+                        balanceTypeOp,
+                        filters,
+                        showHiddenCategories,
+                        showOffBudget,
+                        type: 'time',
+                        startDate: intervalItem.intervalStartDate || '',
+                        field: groupBy.toLowerCase(),
+                        id: item.id,
+                      })
+                    }
+                    width="flex"
+                    privacyFilter
+                  />
+                );
+              })
+            : balanceTypeOp === 'totalTotals' && (
+                <>
+                  <Cell
+                    value={amountToCurrency(item.totalAssets)}
+                    title={
+                      Math.abs(item.totalAssets) > 100000
+                        ? amountToCurrency(item.totalAssets)
+                        : undefined
+                    }
+                    width="flex"
+                    privacyFilter
+                    style={{
+                      minWidth: compact ? 50 : 85,
+                    }}
+                    linkStyle={hoverUnderline}
+                    valueStyle={compactStyle}
+                    onClick={() =>
+                      !isNarrowWidth &&
+                      !['Group', 'Interval'].includes(groupBy) &&
+                      !categories.grouped.map(g => g.id).includes(item.id) &&
+                      showActivity({
+                        navigate,
+                        categories,
+                        accounts,
+                        balanceTypeOp,
+                        filters,
+                        showHiddenCategories,
+                        showOffBudget,
+                        type: 'assets',
+                        startDate,
+                        endDate,
+                        field: groupBy.toLowerCase(),
+                        id: item.id,
+                      })
+                    }
+                  />
+                  <Cell
+                    value={amountToCurrency(item.totalDebts)}
+                    title={
+                      Math.abs(item.totalDebts) > 100000
+                        ? amountToCurrency(item.totalDebts)
+                        : undefined
+                    }
+                    width="flex"
+                    privacyFilter
+                    style={{
+                      minWidth: compact ? 50 : 85,
+                    }}
+                    linkStyle={hoverUnderline}
+                    valueStyle={compactStyle}
+                    onClick={() =>
+                      !isNarrowWidth &&
+                      !['Group', 'Interval'].includes(groupBy) &&
+                      !categories.grouped.map(g => g.id).includes(item.id) &&
+                      showActivity({
+                        navigate,
+                        categories,
+                        accounts,
+                        balanceTypeOp,
+                        filters,
+                        showHiddenCategories,
+                        showOffBudget,
+                        type: 'debts',
+                        startDate,
+                        endDate,
+                        field: groupBy.toLowerCase(),
+                        id: item.id,
+                      })
+                    }
+                  />
+                </>
+              )}
+          <Cell
+            value={amountToCurrency(item[balanceTypeOp])}
+            title={
+              Math.abs(item[balanceTypeOp]) > 100000
+                ? amountToCurrency(item[balanceTypeOp])
+                : undefined
+            }
+            style={{
+              fontWeight: 600,
+              minWidth: compact ? 50 : 85,
+            }}
+            linkStyle={hoverUnderline}
+            valueStyle={compactStyle}
+            onClick={() =>
+              !isNarrowWidth &&
+              !['Group', 'Interval'].includes(groupBy) &&
+              !categories.grouped.map(g => g.id).includes(item.id) &&
+              showActivity({
+                navigate,
+                categories,
+                accounts,
+                balanceTypeOp,
+                filters,
+                showHiddenCategories,
+                showOffBudget,
+                type: 'totals',
+                startDate,
+                endDate,
+                field: groupBy.toLowerCase(),
+                id: item.id,
+              })
+            }
+            width="flex"
+            privacyFilter
+          />
+          <Cell
+            value={integerToCurrency(Math.round(average))}
+            title={
+              Math.abs(Math.round(average / 100)) > 100000
+                ? integerToCurrency(Math.round(average))
+                : undefined
+            }
+            style={{
+              fontWeight: 600,
+              minWidth: compact ? 50 : 85,
+            }}
+            valueStyle={compactStyle}
+            width="flex"
+            privacyFilter
+          />
+        </View>
       </Row>
     );
   },
