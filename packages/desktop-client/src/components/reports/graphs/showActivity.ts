@@ -1,9 +1,12 @@
 import { type NavigateFunction } from 'react-router-dom';
 
+import * as monthUtils from 'loot-core/src/shared/months';
 import { type AccountEntity } from 'loot-core/types/models/account';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+
+import { ReportOptions } from '../ReportOptions';
 
 type showActivityProps = {
   navigate: NavigateFunction;
@@ -18,6 +21,7 @@ type showActivityProps = {
   endDate?: string;
   field?: string;
   id?: string;
+  interval?: string;
 };
 
 export function showActivity({
@@ -33,22 +37,32 @@ export function showActivity({
   endDate,
   field,
   id,
+  interval = 'Day',
 }: showActivityProps) {
   const amount =
-    balanceTypeOp === 'totalDebts' || type === 'debts' ? 'lte' : 'gte';
+    balanceTypeOp === 'totalDebts' || type === 'debts' ? true : false;
   const hiddenCategories = categories.list.filter(f => f.hidden).map(e => e.id);
   const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
+  const fromDate =
+    interval === 'Weekly'
+      ? 'dayFromDate'
+      : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
+          'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
+  let isDateOp = false;
+  if (interval === 'Weekly' || type !== 'time') {
+    isDateOp = true;
+  }
 
   const conditions = [
     ...filters,
     id && { field, op: 'is', value: id, type: 'id' },
     {
       field: 'date',
-      op: type === 'time' ? 'is' : 'gte',
-      value: startDate,
-      options: { date: true },
+      op: isDateOp ? 'gte' : 'is',
+      value: isDateOp ? startDate : monthUtils[fromDate](startDate),
+      type: 'date',
     },
-    type !== 'time' && {
+    isDateOp && {
       field: 'date',
       op: 'lte',
       value: endDate,
@@ -59,9 +73,13 @@ export function showActivity({
       (type === 'totals' || type === 'time')
     ) && {
       field: 'amount',
-      op: amount,
+      op: 'gte',
       value: 0,
-      type: 'number',
+      options: {
+        type: 'number',
+        inflow: !amount,
+        outflow: amount,
+      },
     },
     hiddenCategories.length > 0 &&
       !showHiddenCategories && {
