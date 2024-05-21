@@ -26,7 +26,7 @@ function CustomLabel({
   width: barWidth,
   height: barHeight,
 }) {
-  const valueLengthOffset = value.toString().length < 5 ? -40 : 20;
+  const valueLengthOffset = 20;
 
   const yOffset = barHeight < 25 ? 105 : y;
 
@@ -102,10 +102,7 @@ export function CashFlowCard() {
           {data && (
             <View style={{ textAlign: 'right' }}>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <Change
-                  amount={income - expenses}
-                  style={{ color: theme.tableText, fontWeight: 300 }}
-                />
+                <Change amount={income - expenses} />
               </PrivacyFilter>
             </View>
           )}

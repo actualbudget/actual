@@ -95,6 +95,7 @@ function Notification({
     sticky,
     internal,
     button,
+    timeout,
   } = notification;
 
   const [loading, setLoading] = useState(false);
@@ -106,7 +107,7 @@ function Notification({
     }
 
     if (!sticky) {
-      setTimeout(onRemove, 6500);
+      setTimeout(onRemove, timeout || 6500);
     }
   }, []);
 

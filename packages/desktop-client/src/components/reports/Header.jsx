@@ -2,10 +2,8 @@ import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { SvgArrowLeft } from '../../icons/v1';
-import { styles } from '../../style';
+import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button';
-import { Link } from '../common/Link';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
@@ -19,7 +17,6 @@ import {
 } from './reportRanges';
 
 export function Header({
-  title,
   start,
   end,
   show1Month,
@@ -36,30 +33,21 @@ export function Header({
 }) {
   const location = useLocation();
   const path = location.pathname;
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <View
       style={{
-        padding: 10,
+        padding: 20,
         paddingTop: 0,
         flexShrink: 0,
       }}
     >
-      <Link
-        variant="button"
-        type="bare"
-        to="/reports"
-        style={{ marginBottom: '15', alignSelf: 'flex-start' }}
-      >
-        <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
-      </Link>
-      <View style={styles.veryLargeText}>{title}</View>
-
-      {path !== '/reports/custom' && (
+      {!['/reports/custom', '/reports/spending'].includes(path) && (
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
+            flexDirection: isNarrowWidth ? 'column' : 'row',
+            alignItems: isNarrowWidth ? 'flex-start' : 'center',
             marginTop: 15,
             gap: 15,
           }}
@@ -103,45 +91,54 @@ export function Header({
             />
           </View>
 
-          {filters && <FilterButton onApply={onApply} type="accounts" />}
-
-          {show1Month && (
+          {!isNarrowWidth && filters && (
+            <FilterButton onApply={onApply} type="accounts" />
+          )}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 15,
+              flexWrap: 'wrap',
+            }}
+          >
+            {show1Month && (
+              <Button
+                type="bare"
+                onClick={() => onChangeDates(...getLatestRange(1))}
+              >
+                1 month
+              </Button>
+            )}
             <Button
               type="bare"
-              onClick={() => onChangeDates(...getLatestRange(1))}
+              onClick={() => onChangeDates(...getLatestRange(2))}
             >
-              1 month
+              3 months
             </Button>
-          )}
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(2))}
-          >
-            3 months
-          </Button>
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(5))}
-          >
-            6 months
-          </Button>
-          <Button
-            type="bare"
-            onClick={() => onChangeDates(...getLatestRange(11))}
-          >
-            1 Year
-          </Button>
-          <Button
-            type="bare"
-            onClick={() =>
-              onChangeDates(
-                ...getFullRange(allMonths[allMonths.length - 1].name),
-              )
-            }
-          >
-            All Time
-          </Button>
-
+            <Button
+              type="bare"
+              onClick={() => onChangeDates(...getLatestRange(5))}
+            >
+              6 months
+            </Button>
+            <Button
+              type="bare"
+              onClick={() => onChangeDates(...getLatestRange(11))}
+            >
+              1 Year
+            </Button>
+            <Button
+              type="bare"
+              onClick={() =>
+                onChangeDates(
+                  ...getFullRange(allMonths[allMonths.length - 1].name),
+                )
+              }
+            >
+              All Time
+            </Button>
+          </View>
           {children || <View style={{ flex: 1 }} />}
         </View>
       )}

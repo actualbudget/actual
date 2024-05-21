@@ -163,15 +163,7 @@ function FinancesAppWithoutContext() {
               <Routes>
                 <Route path="/" element={<Navigate to="/budget" replace />} />
 
-                <Route
-                  path="/reports/*"
-                  element={
-                    <NarrowNotSupported>
-                      {/* Has its own lazy loading logic */}
-                      <Reports />
-                    </NarrowNotSupported>
-                  }
-                />
+                <Route path="/reports/*" element={<Reports />} />
 
                 <Route
                   path="/budget"
@@ -239,6 +231,7 @@ function FinancesAppWithoutContext() {
               <Route path="/budget" element={<MobileNavTabs />} />
               <Route path="/accounts" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
+              <Route path="/reports" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
           </View>

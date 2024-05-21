@@ -33,7 +33,11 @@ jobs:
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
-        run: python3 -m pip install setuptools
+        run: |
+          mkdir .venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install setuptools
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           sudo apt-get install flatpak -y
@@ -47,8 +51,8 @@ jobs:
       - name: Build Electron
         run: ./bin/package-electron
         env:
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          CSC_LINK: ${{ secrets.CSC_LINK }}
+          # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # CSC_LINK: ${{ secrets.CSC_LINK }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
       - name: Upload Build

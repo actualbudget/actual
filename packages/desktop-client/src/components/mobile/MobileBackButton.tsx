@@ -7,10 +7,11 @@ import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 
 type MobileBackButtonProps = {
+  onClick?: () => void;
   style?: CSSProperties;
 };
 
-export function MobileBackButton({ style }: MobileBackButtonProps) {
+export function MobileBackButton({ onClick, style }: MobileBackButtonProps) {
   const navigate = useNavigate();
   return (
     <Button
@@ -28,7 +29,7 @@ export function MobileBackButton({ style }: MobileBackButtonProps) {
         color: theme.mobileHeaderText,
         background: theme.mobileHeaderTextHover,
       }}
-      onPointerUp={() => navigate(-1)}
+      onClick={onClick || (() => navigate(-1))}
     >
       <SvgCheveronLeft
         style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}

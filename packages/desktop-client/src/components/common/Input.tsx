@@ -66,6 +66,8 @@ export function Input({
       )}`}
       {...nativeProps}
       onKeyDown={e => {
+        nativeProps.onKeyDown?.(e);
+
         if (e.key === 'Enter' && onEnter) {
           onEnter(e);
         }
@@ -73,8 +75,6 @@ export function Input({
         if (e.key === 'Escape' && onEscape) {
           onEscape(e);
         }
-
-        nativeProps.onKeyDown?.(e);
       }}
       onBlur={e => {
         onUpdate?.(e.target.value);

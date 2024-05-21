@@ -17,13 +17,14 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -137,12 +138,12 @@ const customLabel = props => {
 
 type StackedBarGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
+  data: DataEntity;
   filters: RuleConditionEntity[];
   groupBy: string;
   compact?: boolean;
   viewLabels: boolean;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
 };
@@ -162,6 +163,7 @@ export function StackedBarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
@@ -237,14 +239,16 @@ export function StackedBarGraph({
                 margin={{ top: 0, right: 0, left: leftMargin, bottom: 0 }}
                 style={{ cursor: pointer }}
               >
-                <Tooltip
-                  content={
-                    <CustomTooltip compact={compact} tooltip={tooltip} />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                  cursor={{ fill: 'transparent' }}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    content={
+                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                    cursor={{ fill: 'transparent' }}
+                  />
+                )}
                 <XAxis
                   dataKey="date"
                   tick={{ fill: theme.pageText }}
@@ -252,6 +256,11 @@ export function StackedBarGraph({
                 />
                 {!compact && (
                   <>
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
                     <CartesianGrid strokeDasharray="3 3" />
                     <YAxis
                       tickFormatter={value =>
@@ -286,6 +295,7 @@ export function StackedBarGraph({
                         }
                       }}
                       onClick={e =>
+                        !isNarrowWidth &&
                         !['Group', 'Interval'].includes(groupBy) &&
                         onShowActivity(e, entry.id)
                       }

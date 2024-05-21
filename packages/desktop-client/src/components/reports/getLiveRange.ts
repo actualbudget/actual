@@ -8,9 +8,9 @@ export function getLiveRange(
   cond: string,
   earliestTransaction: string,
   firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
-) {
-  let dateStart;
-  let dateEnd;
+): [string, string] {
+  let dateStart = earliestTransaction;
+  let dateEnd = monthUtils.currentDay();
   const rangeName = ReportOptions.dateRangeMap.get(cond);
   switch (rangeName) {
     case 'yearToDate':

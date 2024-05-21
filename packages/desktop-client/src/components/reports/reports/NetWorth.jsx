@@ -8,9 +8,13 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
+import { MobileBackButton } from '../../mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
@@ -76,14 +80,30 @@ export function NetWorth() {
     setEnd(end);
   }
 
+  const navigate = useNavigate();
+  const { isNarrowWidth } = useResponsive();
+
   if (!allMonths || !data) {
     return null;
   }
 
   return (
-    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
+    <Page
+      header={
+        isNarrowWidth ? (
+          <MobilePageHeader
+            title="Net Worth"
+            leftContent={
+              <MobileBackButton onClick={() => navigate('/reports')} />
+            }
+          />
+        ) : (
+          <PageHeader title="Net Worth" />
+        )
+      }
+      padding={0}
+    >
       <Header
-        title="Net Worth"
         allMonths={allMonths}
         start={start}
         end={end}
@@ -100,18 +120,16 @@ export function NetWorth() {
       <View
         style={{
           backgroundColor: theme.tableBackground,
-          padding: 30,
+          padding: 20,
           paddingTop: 0,
-          overflow: 'auto',
-          flexGrow: 1,
+          flex: '1 0 auto',
+          overflowY: 'auto',
         }}
       >
         <View
           style={{
             textAlign: 'right',
             paddingTop: 20,
-            paddingRight: 20,
-            flexShrink: 0,
           }}
         >
           <View
@@ -127,7 +145,6 @@ export function NetWorth() {
         </View>
 
         <NetWorthGraph
-          style={{ flexGrow: 1 }}
           start={start}
           end={end}
           graphData={data.graphData}
@@ -136,7 +153,7 @@ export function NetWorth() {
           }}
         />
 
-        <View style={{ marginTop: 30 }}>
+        <View style={{ marginTop: 30, userSelect: 'none' }}>
           <Paragraph>
             <strong>How is net worth calculated?</strong>
           </Paragraph>
@@ -149,6 +166,6 @@ export function NetWorth() {
           </Paragraph>
         </View>
       </View>
-    </View>
+    </Page>
   );
 }

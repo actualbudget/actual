@@ -14,6 +14,7 @@ import {
   SvgTuning,
   SvgWallet,
 } from '../../icons/v1';
+import { SvgReports } from '../../icons/v1/Reports';
 import { SvgCalendar } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../../style';
@@ -53,6 +54,12 @@ export function MobileNavTabs() {
       path: '/accounts',
       style: navTabStyle,
       Icon: SvgPiggyBank,
+    },
+    {
+      name: 'Reports',
+      path: '/reports',
+      style: navTabStyle,
+      Icon: SvgReports,
     },
     {
       name: 'Schedules (Soon)',
