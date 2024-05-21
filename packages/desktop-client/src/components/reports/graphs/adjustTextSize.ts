@@ -1,13 +1,23 @@
-// @ts-strict-ignore
-export const adjustTextSize = (
-  sized: number,
-  type: string,
-  values?: number,
-): `${number}px` => {
-  let source;
+export const adjustTextSize = ({
+  sized,
+  type,
+  values = 0,
+}: {
+  sized: number;
+  type: string;
+  values?: number;
+}): `${number}px` => {
+  let source: {
+    size: number;
+    font: number;
+  }[] = [{ size: -1, font: -1 }];
   switch (type) {
     case 'variable':
-      source = variableLookup.find(({ value }) => values >= value).arr;
+      const findLookup = variableLookup.find(({ value }) => values >= value);
+      if (!findLookup) {
+        break;
+      }
+      source = findLookup.arr;
       break;
     case 'donut':
       source = donutLookup;
@@ -15,8 +25,12 @@ export const adjustTextSize = (
     default:
       source = defaultLookup;
   }
-  const lookup = source.find(({ size }) => sized >= size);
-  return `${lookup.font}px`;
+  const findSource = source.find(({ size }) => sized >= size);
+  if (!findSource) {
+    return '13px';
+  }
+
+  return `${findSource.font}px`;
 };
 
 const defaultLookup = [

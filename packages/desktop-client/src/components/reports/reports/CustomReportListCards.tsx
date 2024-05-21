@@ -324,11 +324,6 @@ export function CustomReportListCards({
             ))}
         </View>
       ))}
-      <View
-        style={{
-          paddingBottom: 75,
-        }}
-      />
     </View>
   );
 }

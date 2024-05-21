@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { type HTMLProps } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
@@ -10,7 +9,7 @@ import { Tooltip } from '../tooltips';
 type GraphButtonProps = HTMLProps<HTMLButtonElement> & {
   selected?: boolean;
   style?: CSSProperties;
-  onSelect?: (newValue) => void;
+  onSelect?: (newValue: string) => void;
   title?: string;
   disabled?: boolean;
 };

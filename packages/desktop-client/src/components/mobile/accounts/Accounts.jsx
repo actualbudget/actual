@@ -16,7 +16,7 @@ import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
-import { Page } from '../../Page';
+import { MobilePageHeader, Page } from '../../Page';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
@@ -177,25 +177,27 @@ function AccountList({
 
   return (
     <Page
-      title="Accounts"
-      headerRightContent={
-        <Button
-          type="bare"
-          style={{
-            color: theme.mobileHeaderText,
-            margin: 10,
-          }}
-          activeStyle={noBackgroundColorStyle}
-          hoveredStyle={noBackgroundColorStyle}
-          onClick={onAddAccount}
-        >
-          <SvgAdd width={20} height={20} />
-        </Button>
+      header={
+        <MobilePageHeader
+          title="Accounts"
+          rightContent={
+            <Button
+              type="bare"
+              style={{
+                color: theme.mobileHeaderText,
+                margin: 10,
+              }}
+              activeStyle={noBackgroundColorStyle}
+              hoveredStyle={noBackgroundColorStyle}
+              onClick={onAddAccount}
+            >
+              <SvgAdd width={20} height={20} />
+            </Button>
+          }
+        />
       }
       padding={0}
       style={{
-        flex: 1,
-        backgroundColor: theme.mobilePageBackground,
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >

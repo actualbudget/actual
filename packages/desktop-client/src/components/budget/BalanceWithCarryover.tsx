@@ -3,6 +3,7 @@ import React, { type ComponentProps } from 'react';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { CellValue } from '../spreadsheet/CellValue';
@@ -16,7 +17,6 @@ type BalanceWithCarryoverProps = {
   goal?: ComponentProps<typeof CellValue>['binding'];
   budgeted?: ComponentProps<typeof CellValue>['binding'];
   disabled?: boolean;
-  style?: CSSProperties;
   balanceStyle?: CSSProperties;
   carryoverStyle?: CSSProperties;
 };
@@ -26,7 +26,6 @@ export function BalanceWithCarryover({
   goal,
   budgeted,
   disabled,
-  style,
   balanceStyle,
   carryoverStyle,
 }: BalanceWithCarryoverProps) {
@@ -35,8 +34,11 @@ export function BalanceWithCarryover({
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
+  const { isNarrowWidth } = useResponsive();
+
   return (
-    <View style={style}>
+    <>
       <CellValue
         binding={balance}
         type="financial"
@@ -62,7 +64,7 @@ export function BalanceWithCarryover({
             alignSelf: 'center',
             marginLeft: 2,
             position: 'absolute',
-            right: -8,
+            right: isNarrowWidth ? '-8px' : '-4px',
             top: 0,
             bottom: 0,
             justifyContent: 'center',
@@ -80,6 +82,6 @@ export function BalanceWithCarryover({
           />
         </View>
       )}
-    </View>
+    </>
   );
 }
