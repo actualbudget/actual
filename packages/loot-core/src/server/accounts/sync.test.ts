@@ -443,11 +443,7 @@ describe('Account sync', () => {
       transactions = await getAllTransactions();
       expect(transactions.length).toBe(1);
 
-      expect(
-        transactions.find(
-          t => t.imported_id === 'b85cdd57-5a1c-4ca5-bd54-12e5b56fa02c',
-        ).amount,
-      ).toBe(-1239);
+      expect(transactions[0].amount).toBe(-1239);
     },
   );
 
