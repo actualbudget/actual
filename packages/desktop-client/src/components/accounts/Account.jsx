@@ -1093,11 +1093,17 @@ class AccountInternal extends PureComponent {
           value: ruleTransaction.payee,
           type: 'id',
         };
+    const amountCondition = {
+      field: 'amount',
+      op: 'isapprox',
+      value: ruleTransaction.amount,
+      type: 'number',
+    };
 
     const rule = {
       stage: null,
       conditionsOp: 'and',
-      conditions: [payeeCondition],
+      conditions: [payeeCondition, amountCondition],
       actions: [
         ...(childTransactions.length === 0
           ? [
