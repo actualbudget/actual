@@ -34,7 +34,6 @@ export function PercentInput({
   id,
   inputRef,
   value: initialValue = 0,
-  defaultValue = 100,
   onFocus,
   onBlur,
   onChangeValue,
@@ -46,15 +45,15 @@ export function PercentInput({
   const format = useFormat();
 
   const [value, setValue] = useState(() =>
-    format(clampToPercent(defaultValue), 'percentage'),
+    format(clampToPercent(initialValue), 'percentage'),
   );
   useEffect(() => {
-    const clampedDefaultValue = clampToPercent(defaultValue);
-    if (clampedDefaultValue !== initialValue) {
-      setValue(format(clampedDefaultValue, 'percentage'));
-      onUpdatePercent?.(clampedDefaultValue);
+    const clampedInitialValue = clampToPercent(initialValue);
+    if (clampedInitialValue !== initialValue) {
+      setValue(format(clampedInitialValue, 'percentage'));
+      onUpdatePercent?.(clampedInitialValue);
     }
-  }, [initialValue, onUpdatePercent, format, defaultValue]);
+  }, [initialValue, onUpdatePercent, format]);
 
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
@@ -91,11 +90,9 @@ export function PercentInput({
   }
 
   function fireUpdate() {
-    const valueOrInitial = Math.max(
-      Math.min(evalArithmetic(value.replace('%', '')), 100),
-      0,
-    );
-    onUpdatePercent?.(valueOrInitial);
+    const clampedValue = clampToPercent(evalArithmetic(value.replace('%', '')));
+    onUpdatePercent?.(clampedValue);
+    onInputTextChange(String(clampedValue));
   }
 
   function onInputAmountBlur(e: FocusEvent<HTMLInputElement>) {
