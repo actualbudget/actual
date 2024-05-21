@@ -172,7 +172,7 @@ export function TransactionList({
       {
         field: 'notes',
         op: 'matches',
-        value: `${tag}\\b`,
+        value: `(^|\\s)${tag}\\b`,
         type: 'string',
       },
     ];
