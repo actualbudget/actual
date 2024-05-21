@@ -138,11 +138,13 @@ export function SidebarGroup({
             </Popover>
           </View>
           <View style={{ flex: 1 }} />
-          <NotesButton
-            id={group.id}
-            style={dragPreview && { color: 'currentColor' }}
-            defaultColor={theme.pageTextLight}
-          />
+          <View style={{ flexShrink: 0 }}>
+            <NotesButton
+              id={group.id}
+              style={dragPreview && { color: 'currentColor' }}
+              defaultColor={theme.pageTextLight}
+            />
+          </View>
         </>
       )}
     </View>
