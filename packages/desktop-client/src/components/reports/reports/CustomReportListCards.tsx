@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useMemo, useState } from 'react';
+import React, { createRef, useEffect, useMemo, useRef, useState } from 'react';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -14,7 +14,7 @@ import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { Menu } from '../../common/Menu';
 import { MenuButton } from '../../common/MenuButton';
-import { MenuTooltip } from '../../common/MenuTooltip';
+import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { DateRange } from '../DateRange';
@@ -25,30 +25,27 @@ import { SaveReportName } from '../SaveReportName';
 import { GetCardData } from './GetCardData';
 
 type CardMenuProps = {
-  onClose: () => void;
   onMenuSelect: (item: string, report: CustomReportEntity) => void;
   report: CustomReportEntity;
 };
 
-function CardMenu({ onClose, onMenuSelect, report }: CardMenuProps) {
+function CardMenu({ onMenuSelect, report }: CardMenuProps) {
   return (
-    <MenuTooltip onClose={onClose} width={120}>
-      <Menu
-        onMenuSelect={item => {
-          onMenuSelect(item, report);
-        }}
-        items={[
-          {
-            name: 'rename',
-            text: 'Rename report',
-          },
-          {
-            name: 'delete',
-            text: 'Delete report',
-          },
-        ]}
-      />
-    </MenuTooltip>
+    <Menu
+      onMenuSelect={item => {
+        onMenuSelect(item, report);
+      }}
+      items={[
+        {
+          name: 'rename',
+          text: 'Rename report',
+        },
+        {
+          name: 'delete',
+          text: 'Delete report',
+        },
+      ]}
+    />
   );
 }
 
@@ -72,6 +69,7 @@ export function CustomReportListCards({
   const [reportMenu, setReportMenu] = useState(result);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(result);
   const [nameMenuOpen, setNameMenuOpen] = useState(result);
+  const triggerRef = useRef(null);
   const [err, setErr] = useState('');
   const [name, setName] = useState('');
   const inputRef = createRef<HTMLInputElement>();
@@ -257,6 +255,7 @@ export function CustomReportListCards({
                   }}
                 >
                   <MenuButton
+                    ref={triggerRef}
                     onClick={() =>
                       onMenuOpen(report.id === undefined ? '' : report.id, true)
                     }
@@ -265,55 +264,80 @@ export function CustomReportListCards({
                         isCardHovered === report.id ? 'inherit' : 'transparent',
                     }}
                   />
-                  {report.id === undefined
-                    ? null
-                    : reportMenu[report.id as keyof typeof reportMenu] && (
-                        <CardMenu
-                          onMenuSelect={onMenuSelect}
-                          onClose={() =>
-                            onMenuOpen(
-                              report.id === undefined ? '' : report.id,
-                              false,
-                            )
-                          }
-                          report={report}
-                        />
-                      )}
-                  {report.id === undefined
-                    ? null
-                    : nameMenuOpen[report.id as keyof typeof nameMenuOpen] && (
-                        <SaveReportName
-                          onClose={() =>
-                            onNameMenuOpen(
-                              report.id === undefined ? '' : report.id,
-                              false,
-                            )
-                          }
-                          menuItem="rename"
-                          name={name}
-                          setName={setName}
-                          inputRef={inputRef}
-                          onAddUpdate={onAddUpdate}
-                          err={err}
-                          report={report}
-                        />
-                      )}
-                  {report.id === undefined
-                    ? null
-                    : deleteMenuOpen[
-                        report.id as keyof typeof deleteMenuOpen
-                      ] && (
-                        <SaveReportDelete
-                          onDelete={() => onDelete(report.id)}
-                          onClose={() =>
-                            onDeleteMenuOpen(
-                              report.id === undefined ? '' : report.id,
-                              false,
-                            )
-                          }
-                          name={report.name}
-                        />
-                      )}
+
+                  <Popover
+                    triggerRef={triggerRef}
+                    isOpen={
+                      !!(
+                        report.id &&
+                        reportMenu[report.id as keyof typeof reportMenu]
+                      )
+                    }
+                    onOpenChange={() =>
+                      onMenuOpen(
+                        report.id === undefined ? '' : report.id,
+                        false,
+                      )
+                    }
+                    style={{ width: 120 }}
+                  >
+                    <CardMenu onMenuSelect={onMenuSelect} report={report} />
+                  </Popover>
+
+                  <Popover
+                    triggerRef={triggerRef}
+                    isOpen={
+                      !!(
+                        report.id &&
+                        nameMenuOpen[report.id as keyof typeof nameMenuOpen]
+                      )
+                    }
+                    onOpenChange={() =>
+                      onNameMenuOpen(
+                        report.id === undefined ? '' : report.id,
+                        false,
+                      )
+                    }
+                    style={{ width: 325 }}
+                  >
+                    <SaveReportName
+                      menuItem="rename"
+                      name={name}
+                      setName={setName}
+                      inputRef={inputRef}
+                      onAddUpdate={onAddUpdate}
+                      err={err}
+                      report={report}
+                    />
+                  </Popover>
+
+                  <Popover
+                    triggerRef={triggerRef}
+                    isOpen={
+                      !!(
+                        report.id &&
+                        deleteMenuOpen[report.id as keyof typeof deleteMenuOpen]
+                      )
+                    }
+                    onOpenChange={() =>
+                      onDeleteMenuOpen(
+                        report.id === undefined ? '' : report.id,
+                        false,
+                      )
+                    }
+                    style={{ width: 275, padding: 15 }}
+                  >
+                    <SaveReportDelete
+                      onDelete={() => onDelete(report.id)}
+                      onClose={() =>
+                        onDeleteMenuOpen(
+                          report.id === undefined ? '' : report.id,
+                          false,
+                        )
+                      }
+                      name={report.name}
+                    />
+                  </Popover>
                 </View>
               </View>
             ))}
@@ -324,11 +348,6 @@ export function CustomReportListCards({
             ))}
         </View>
       ))}
-      <View
-        style={{
-          paddingBottom: 75,
-        }}
-      />
     </View>
   );
 }

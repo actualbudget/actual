@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -158,7 +158,7 @@ const customLabel = props => {
   const calcY = props.cy + radius * Math.sin(-props.midAngle * RADIAN);
   const textAnchor = calcX > props.cx ? 'start' : 'end';
   const display = props.value !== 0 && `${(props.percent * 100).toFixed(0)}%`;
-  const textSize = adjustTextSize(size, 'donut');
+  const textSize = adjustTextSize({ sized: size, type: 'donut' });
   const showLabel = props.percent;
   const showLabelThreshold = 0.05;
   const fill = theme.reportsInnerLabel;
@@ -177,10 +177,10 @@ const customLabel = props => {
 
 type DonutGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
+  data: DataEntity;
   filters: RuleConditionEntity[];
   groupBy: string;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   compact?: boolean;
   viewLabels: boolean;
   showHiddenCategories?: boolean;

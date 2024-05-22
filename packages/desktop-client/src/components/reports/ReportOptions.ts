@@ -45,112 +45,136 @@ const groupByOptions = [
   { description: 'Interval' },
 ];
 
-const dateRangeOptions = [
+export type dateRangeProps = {
+  description: string;
+  name: number | string;
+  type?: string;
+  Daily: boolean;
+  Weekly: boolean;
+  Monthly: boolean;
+  Yearly: boolean;
+};
+
+const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'This week',
-    type: 'Week',
     name: 0,
-    Yearly: false,
-    Monthly: false,
+    type: 'Weeks',
     Daily: true,
     Weekly: true,
+    Monthly: false,
+    Yearly: false,
   },
   {
     description: 'Last week',
-    type: 'Week',
     name: 1,
-    Yearly: false,
-    Monthly: false,
+    type: 'Weeks',
     Daily: true,
     Weekly: true,
+    Monthly: false,
+    Yearly: false,
   },
   {
     description: 'This month',
-    type: 'Month',
     name: 0,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last month',
-    type: 'Month',
     name: 1,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 3 months',
-    type: 'Month',
     name: 3,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 6 months',
-    type: 'Month',
     name: 6,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: false,
+    Weekly: false,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Last 12 months',
-    type: 'Month',
     name: 12,
-    Yearly: false,
-    Monthly: true,
+    type: 'Months',
     Daily: false,
+    Weekly: false,
+    Monthly: true,
+    Yearly: false,
   },
   {
     description: 'Year to date',
     name: 'yearToDate',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
   {
     description: 'Last year',
     name: 'lastYear',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
   {
     description: 'All time',
     name: 'allTime',
-    Yearly: true,
-    Monthly: true,
     Daily: true,
     Weekly: true,
+    Monthly: true,
+    Yearly: true,
   },
 ];
 
-const intervalOptions = [
+type intervalOptionsProps = {
+  description: string;
+  name: 'Day' | 'Week' | 'Month' | 'Year';
+  format: string;
+  range:
+    | 'dayRangeInclusive'
+    | 'weekRangeInclusive'
+    | 'rangeInclusive'
+    | 'yearRangeInclusive';
+};
+
+const intervalOptions: intervalOptionsProps[] = [
   {
     description: 'Daily',
     name: 'Day',
-    format: 'yyyy-MM-dd',
+    format: 'yy-MM-dd',
     range: 'dayRangeInclusive',
   },
   {
     description: 'Weekly',
     name: 'Week',
-    format: 'yyyy-MM-dd',
+    format: 'yy-MM-dd',
     range: 'weekRangeInclusive',
   },
   //{ value: 3, description: 'Fortnightly', name: 3},
   {
     description: 'Monthly',
     name: 'Month',
-    format: 'MMMM, yyyy',
+    // eslint-disable-next-line rulesdir/typography
+    format: "MMM ''yy",
     range: 'rangeInclusive',
   },
   {
@@ -175,15 +199,19 @@ export const ReportOptions = {
     dateRangeOptions.map(item => [item.description, item.type]),
   ),
   interval: intervalOptions,
-  intervalMap: new Map(
+  intervalMap: new Map<string, 'Day' | 'Week' | 'Month' | 'Year'>(
     intervalOptions.map(item => [item.description, item.name]),
   ),
   intervalFormat: new Map(
     intervalOptions.map(item => [item.description, item.format]),
   ),
-  intervalRange: new Map(
-    intervalOptions.map(item => [item.description, item.range]),
-  ),
+  intervalRange: new Map<
+    string,
+    | 'dayRangeInclusive'
+    | 'weekRangeInclusive'
+    | 'rangeInclusive'
+    | 'yearRangeInclusive'
+  >(intervalOptions.map(item => [item.description, item.range])),
 };
 
 export type QueryDataEntity = {
@@ -199,7 +227,10 @@ export type QueryDataEntity = {
   amount: number;
 };
 
-export type UncategorizedEntity = Pick<CategoryEntity, 'name' | 'hidden'> & {
+export type UncategorizedEntity = Pick<
+  CategoryEntity,
+  'id' | 'name' | 'hidden'
+> & {
   /*
     When looking at uncategorized and hidden transactions we
     need a way to group them. To do this we give them a unique
@@ -214,6 +245,7 @@ export type UncategorizedEntity = Pick<CategoryEntity, 'name' | 'hidden'> & {
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
+  id: '',
   name: 'Uncategorized',
   uncategorized_id: '1',
   hidden: false,
@@ -222,6 +254,7 @@ const uncategorizedCategory: UncategorizedEntity = {
   has_category: false,
 };
 const transferCategory: UncategorizedEntity = {
+  id: '',
   name: 'Transfers',
   uncategorized_id: '2',
   hidden: false,
@@ -230,6 +263,7 @@ const transferCategory: UncategorizedEntity = {
   has_category: false,
 };
 const offBudgetCategory: UncategorizedEntity = {
+  id: '',
   name: 'Off Budget',
   uncategorized_id: '3',
   hidden: false,
@@ -256,7 +290,7 @@ export const categoryLists = (categories: {
   list: CategoryEntity[];
   grouped: CategoryGroupEntity[];
 }) => {
-  const categoryList = [
+  const categoryList: UncategorizedEntity[] = [
     ...categories.list.sort((a, b) => {
       //The point of this sorting is to make the graphs match the "budget" page
       const catGroupA = categories.grouped.find(f => f.id === a.cat_group);
@@ -277,34 +311,46 @@ export const categoryLists = (categories: {
     transferCategory,
   ];
 
-  const categoryGroup = [...categories.grouped, uncategorizedGroup];
+  const categoryGroup: UncategorizedGroupEntity[] = [
+    ...categories.grouped,
+    uncategorizedGroup,
+  ];
   return [categoryList, categoryGroup.filter(group => group !== null)] as const;
 };
 
 export const groupBySelections = (
   groupBy: string,
-  categoryList: CategoryEntity[],
+  categoryList: UncategorizedEntity[],
   categoryGroup: CategoryGroupEntity[],
   payees: PayeeEntity[],
   accounts: AccountEntity[],
-) => {
-  let groupByList;
-  let groupByLabel;
+): [
+  UncategorizedEntity[],
+  'category' | 'categoryGroup' | 'payee' | 'account',
+] => {
+  let groupByList: UncategorizedEntity[];
+  let groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account';
   switch (groupBy) {
     case 'Category':
       groupByList = categoryList;
       groupByLabel = 'category';
       break;
     case 'Group':
-      groupByList = categoryGroup;
+      groupByList = categoryGroup.map(group => {
+        return { id: group.id, name: group.name, hidden: group.hidden };
+      });
       groupByLabel = 'categoryGroup';
       break;
     case 'Payee':
-      groupByList = payees;
+      groupByList = payees.map(payee => {
+        return { id: payee.id, name: payee.name, hidden: false };
+      });
       groupByLabel = 'payee';
       break;
     case 'Account':
-      groupByList = accounts;
+      groupByList = accounts.map(account => {
+        return { id: account.id, name: account.name, hidden: false };
+      });
       groupByLabel = 'account';
       break;
     case 'Interval':

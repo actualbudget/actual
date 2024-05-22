@@ -378,14 +378,18 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(collapseModals('budget-page-menu'));
   };
 
-  const onOpenBudgetMonthNotesModal = id => {
+  const onOpenBudgetMonthNotesModal = month => {
     dispatch(
       pushModal('notes', {
-        id,
-        name: monthUtils.format(startMonth, 'MMMM ‘yy'),
+        id: `budget-${month}`,
+        name: monthUtils.format(month, 'MMMM ‘yy'),
         onSave: onSaveNotes,
       }),
     );
+  };
+
+  const onSwitchBudgetFile = () => {
+    dispatch(pushModal('budget-list'));
   };
 
   const onOpenBudgetMonthMenu = month => {
@@ -403,6 +407,7 @@ function BudgetInner(props: BudgetInnerProps) {
       pushModal('budget-page-menu', {
         onAddCategoryGroup: onOpenNewCategoryGroupModal,
         onToggleHiddenCategories,
+        onSwitchBudgetFile,
         onSwitchBudgetType: onOpenSwitchBudgetTypeModal,
       }),
     );

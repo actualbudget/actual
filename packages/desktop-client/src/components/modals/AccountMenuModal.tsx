@@ -2,7 +2,7 @@ import React, { type ComponentProps, useState } from 'react';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
+import { useAccount } from '../../hooks/useAccount';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
@@ -34,8 +34,7 @@ export function AccountMenuModal({
   onEditNotes,
   onClose,
 }: AccountMenuModalProps) {
-  const accounts = useAccounts();
-  const account = accounts.find(c => c.id === accountId);
+  const account = useAccount(accountId);
   const originalNotes = useNotes(`account-${accountId}`);
 
   const _onClose = () => {

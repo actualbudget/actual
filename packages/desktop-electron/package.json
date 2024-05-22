@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.4.0",
+  "version": "24.5.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -62,9 +62,9 @@
   },
   "devDependencies": {
     "@electron/notarize": "2.2.0",
-    "@electron/rebuild": "3.4.1",
+    "@electron/rebuild": "3.6.0",
     "cross-env": "^7.0.3",
-    "electron": "27.2.0",
-    "electron-builder": "24.10.0"
+    "electron": "30.0.6",
+    "electron-builder": "24.13.3"
   }
 }

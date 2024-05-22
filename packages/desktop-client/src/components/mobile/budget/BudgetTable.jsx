@@ -25,7 +25,7 @@ import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { Page } from '../../Page';
+import { MobilePageHeader, Page } from '../../Page';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
@@ -1212,30 +1212,33 @@ export function BudgetTable({
   return (
     <Page
       padding={0}
-      title={
-        <MonthSelector
-          month={month}
-          monthBounds={monthBounds}
-          onOpenMonthMenu={onOpenBudgetMonthMenu}
-          onPrevMonth={onPrevMonth}
-          onNextMonth={onNextMonth}
+      header={
+        <MobilePageHeader
+          title={
+            <MonthSelector
+              month={month}
+              monthBounds={monthBounds}
+              onOpenMonthMenu={onOpenBudgetMonthMenu}
+              onPrevMonth={onPrevMonth}
+              onNextMonth={onNextMonth}
+            />
+          }
+          leftContent={
+            <Button
+              type="bare"
+              style={{
+                color: theme.mobileHeaderText,
+                margin: 10,
+              }}
+              hoveredStyle={noBackgroundColorStyle}
+              activeStyle={noBackgroundColorStyle}
+              onClick={() => onOpenBudgetPageMenu?.()}
+            >
+              <SvgLogo width="20" height="20" />
+            </Button>
+          }
         />
       }
-      headerLeftContent={
-        <Button
-          type="bare"
-          style={{
-            color: theme.mobileHeaderText,
-            margin: 10,
-          }}
-          hoveredStyle={noBackgroundColorStyle}
-          activeStyle={noBackgroundColorStyle}
-          onClick={() => onOpenBudgetPageMenu?.()}
-        >
-          <SvgLogo width="20" height="20" />
-        </Button>
-      }
-      style={{ flex: 1 }}
     >
       <View
         style={{
@@ -1373,6 +1376,7 @@ export function BudgetTable({
         <View
           data-testid="budget-table"
           style={{
+            backgroundColor: theme.pageBackground,
             paddingBottom: MOBILE_NAV_HEIGHT,
           }}
         >

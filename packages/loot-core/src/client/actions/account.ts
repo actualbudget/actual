@@ -105,7 +105,7 @@ export function syncAccounts(id?: string) {
 
       // Perform sync operation
       const { errors, newTransactions, matchedTransactions, updatedAccounts } =
-        await send('gocardless-accounts-sync', {
+        await send('accounts-bank-sync', {
           id: accountId,
         });
 

@@ -167,4 +167,16 @@ describe('File import', () => {
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
   });
+
+  test('CAMT.053 import works', async () => {
+    prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../mocks/files/camt/camt.053.xml',
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
 });

@@ -14,10 +14,9 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { theme } from '../../../style';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
-import { Page } from '../../Page';
+import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
@@ -120,19 +119,21 @@ export function CategoryTransactions({ category, month }) {
 
   return (
     <Page
-      title={
-        <View>
-          <TextOneLine>{category.name}</TextOneLine>
-          <TextOneLine>({monthUtils.format(month, 'MMMM ‘yy')})</TextOneLine>
-        </View>
+      header={
+        <MobilePageHeader
+          title={
+            <View>
+              <TextOneLine>{category.name}</TextOneLine>
+              <TextOneLine>
+                ({monthUtils.format(month, 'MMMM ‘yy')})
+              </TextOneLine>
+            </View>
+          }
+          leftContent={<MobileBackButton />}
+          rightContent={<AddTransactionButton categoryId={category.id} />}
+        />
       }
-      headerLeftContent={<MobileBackButton />}
-      headerRightContent={<AddTransactionButton categoryId={category.id} />}
       padding={0}
-      style={{
-        flex: 1,
-        backgroundColor: theme.mobilePageBackground,
-      }}
     >
       <TransactionListWithBalances
         transactions={transactions}

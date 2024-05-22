@@ -1,8 +1,6 @@
-// @ts-strict-ignore
-import React, { type UIEventHandler } from 'react';
-import { type RefProp } from 'react-spring';
+import React, { type RefObject, type UIEventHandler } from 'react';
 
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type IntervalEntity } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../../style';
 import { type CSSProperties } from '../../../../style/types';
@@ -12,26 +10,28 @@ import { ReportOptions } from '../../ReportOptions';
 
 type ReportTableHeaderProps = {
   groupBy: string;
-  interval?: string;
-  data?: DataEntity[];
-  balanceType: string;
-  headerScrollRef: RefProp<HTMLDivElement>;
+  interval: string;
+  data: IntervalEntity[];
+  balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
+  headerScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
+  mode: string;
 };
 
 export function ReportTableHeader({
   groupBy,
   interval,
   data,
-  balanceType,
+  balanceTypeOp,
   headerScrollRef,
   handleScroll,
   compact,
   style,
   compactStyle,
+  mode,
 }: ReportTableHeaderProps) {
   return (
     <Row
@@ -70,7 +70,7 @@ export function ReportTableHeader({
               : groupBy
           }
         />
-        {data
+        {mode === 'time'
           ? data.map((header, index) => {
               return (
                 <Cell
@@ -84,7 +84,7 @@ export function ReportTableHeader({
                 />
               );
             })
-          : balanceType === 'Net' && (
+          : balanceTypeOp === 'totalTotals' && (
               <>
                 <Cell
                   style={{

@@ -420,7 +420,23 @@ describe('Transaction rules', () => {
       account,
       payee: lowesId,
       notes: '',
-      amount: 124,
+      amount: 102,
+    });
+    await db.insertTransaction({
+      id: '6',
+      date: '2020-10-17',
+      account,
+      payee: krogerId,
+      notes: 'baz',
+      amount: -102,
+    });
+    await db.insertTransaction({
+      id: '7',
+      date: '2020-10-17',
+      account,
+      payee: krogerId,
+      notes: 'zaz',
+      amount: -101,
     });
 
     let transactions = await getMatchingTransactions([
@@ -437,6 +453,36 @@ describe('Transaction rules', () => {
       { field: 'amount', op: 'is', value: 353 },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['1']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'amount', op: 'is', value: 102 },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['6', '5']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'amount', op: 'isapprox', value: 102 },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['6', '7', '4', '5']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'amount', op: 'gt', value: 102 },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['2', '3', '1']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'amount', op: 'lt', value: 102 },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['7', '4']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'amount', op: 'gte', value: 102 },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['6', '5', '2', '3', '1']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'amount', op: 'lte', value: 102 },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['6', '7', '4', '5']);
 
     transactions = await getMatchingTransactions([
       { field: 'notes', op: 'is', value: 'FooO' },
@@ -461,7 +507,7 @@ describe('Transaction rules', () => {
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'gt', value: 300 },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['2', '1']);
+    expect(transactions.map(t => t.id)).toEqual(['2', '3', '1']);
 
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'gt', value: 400 },
@@ -490,7 +536,7 @@ describe('Transaction rules', () => {
     transactions = await getMatchingTransactions([
       { field: 'date', op: 'gt', value: '2020-10-10' },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['4', '5', '2', '3']);
+    expect(transactions.map(t => t.id)).toEqual(['6', '7', '4', '5', '2', '3']);
 
     // todo: isapprox
   });

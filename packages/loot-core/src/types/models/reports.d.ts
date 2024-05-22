@@ -25,10 +25,43 @@ export interface CustomReportEntity {
   tombstone?: boolean;
 }
 
-export interface GroupedEntity {
-  data?: DataEntity[];
-  intervalData: DataEntity[];
-  groupedData?: DataEntity[];
+export type SpendingMonthEntity = Record<
+  string | number,
+  {
+    cumulative: number;
+    daily: number;
+    date: string;
+    month: string;
+  }
+>;
+
+export interface SpendingDataEntity {
+  date: string;
+  totalAssets: number;
+  totalDebts: number;
+  totalTotals: number;
+  cumulative: number;
+}
+
+export interface SpendingEntity {
+  intervalData: {
+    months: SpendingMonthEntity;
+    day: string;
+    average: number;
+    thisMonth: number;
+    lastMonth: number;
+  }[];
+  startDate?: string;
+  endDate?: string;
+  totalDebts: number;
+  totalAssets: number;
+  totalTotals: number;
+}
+
+export interface DataEntity {
+  data?: GroupedEntity[];
+  intervalData: IntervalEntity[];
+  groupedData?: GroupedEntity[] | null;
   legend?: LegendEntity[];
   startDate?: string;
   endDate?: string;
@@ -43,31 +76,24 @@ type LegendEntity = {
   color: string;
 };
 
-export type ItemEntity = {
-  id: string;
-  name: string;
-  intervalData: IntervalData[];
+export type IntervalEntity = {
+  date?: string;
+  change?: number;
+  intervalStartDate?: string;
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
 };
 
-export type IntervalData = {
-  date: string;
-  totalAssets: number;
-  totalDebts: number;
-  totalTotals: number;
-};
-
-export interface DataEntity {
+export interface GroupedEntity {
   id: string;
   name: string;
   date?: string;
-  intervalData: IntervalData[];
-  categories?: ItemEntity[];
+  intervalData: IntervalEntity[];
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
+  categories?: GroupedEntity[];
 }
 
 export type Interval = {

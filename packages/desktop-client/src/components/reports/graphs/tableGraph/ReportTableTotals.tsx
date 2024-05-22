@@ -1,41 +1,67 @@
-// @ts-strict-ignore
-import React, { type UIEventHandler, useLayoutEffect, useState } from 'react';
-import { type RefProp } from 'react-spring';
+import React, {
+  type ReactNode,
+  useLayoutEffect,
+  useState,
+  type RefObject,
+} from 'react';
 
 import {
-  amountToCurrency,
-  amountToInteger,
-  integerToCurrency,
-} from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+  type GroupedEntity,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../../style';
+import { styles } from '../../../../style/styles';
 import { type CSSProperties } from '../../../../style/types';
 import { View } from '../../../common/View';
-import { Row, Cell } from '../../../table';
+
+import { type renderTotalsProps } from './ReportTable';
+
+type RenderTotalsRowProps = {
+  metadata: GroupedEntity;
+  mode: string;
+  totalsStyle: CSSProperties;
+  testStyle: CSSProperties;
+  scrollWidthTotals: number;
+  renderTotals: (arg: renderTotalsProps) => ReactNode;
+};
+function RenderTotalsRow({
+  metadata,
+  mode,
+  totalsStyle,
+  testStyle,
+  scrollWidthTotals,
+  renderTotals,
+}: RenderTotalsRowProps) {
+  return (
+    <View>
+      {renderTotals({
+        metadata,
+        mode,
+        totalsStyle,
+        testStyle,
+        scrollWidthTotals,
+      })}
+    </View>
+  );
+}
 
 type ReportTableTotalsProps = {
-  data: GroupedEntity;
-  balanceTypeOp: string;
+  data: DataEntity;
   mode: string;
-  intervalsCount: number;
-  totalScrollRef: RefProp<HTMLDivElement>;
-  handleScroll: UIEventHandler<HTMLDivElement>;
+  totalScrollRef: RefObject<HTMLDivElement>;
   compact: boolean;
   style?: CSSProperties;
-  compactStyle?: CSSProperties;
+  renderTotals: (arg: renderTotalsProps) => ReactNode;
 };
 
 export function ReportTableTotals({
   data,
-  balanceTypeOp,
   mode,
-  intervalsCount,
   totalScrollRef,
-  handleScroll,
   compact,
   style,
-  compactStyle,
+  renderTotals,
 }: ReportTableTotalsProps) {
   const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 
@@ -43,128 +69,56 @@ export function ReportTableTotals({
     if (totalScrollRef.current) {
       const [parent, child] = [
         totalScrollRef.current.offsetParent
-          ? totalScrollRef.current.parentElement.scrollHeight
+          ? (totalScrollRef.current.parentElement
+              ? totalScrollRef.current.parentElement.scrollHeight
+              : 0) || 0
           : 0,
         totalScrollRef.current ? totalScrollRef.current.scrollHeight : 0,
       ];
-      setScrollWidthTotals(parent > 0 && child > 0 && parent - child);
+      setScrollWidthTotals(parent > 0 && child > 0 ? parent - child : 0);
     }
   });
 
-  const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;
+  const metadata: GroupedEntity = {
+    id: '',
+    name: 'Totals',
+    intervalData: data.intervalData,
+    totalAssets: data.totalAssets,
+    totalDebts: data.totalDebts,
+    totalTotals: data.totalTotals,
+  };
+
+  const totalsStyle: CSSProperties = {
+    borderTopWidth: 1,
+    borderColor: theme.tableBorder,
+    justifyContent: 'center',
+    color: theme.tableHeaderText,
+    backgroundColor: theme.tableHeaderBackground,
+    fontWeight: 600,
+    ...style,
+  };
+
+  const testStyle: CSSProperties = {
+    overflowX: 'auto',
+    scrollbarWidth: compact ? 'none' : 'inherit',
+    ...styles.horizontalScrollbar,
+    '::-webkit-scrollbar': {
+      backgroundColor: theme.tableBackground,
+      height: 12,
+      dispaly: compact && 'none',
+    },
+    flexDirection: 'row',
+    flex: 1,
+  };
+
   return (
-    <Row
-      collapsed={true}
-      height={32 + scrollWidthTotals}
-      style={{
-        borderTopWidth: 1,
-        borderColor: theme.tableBorder,
-        justifyContent: 'center',
-        color: theme.tableHeaderText,
-        backgroundColor: theme.tableHeaderBackground,
-        fontWeight: 600,
-        ...style,
-      }}
-    >
-      <View
-        innerRef={totalScrollRef}
-        onScroll={handleScroll}
-        id="total"
-        style={{
-          overflowX: 'auto',
-          flexDirection: 'row',
-          flex: 1,
-        }}
-      >
-        <Cell
-          style={{
-            width: compact ? 80 : 125,
-            flexShrink: 0,
-          }}
-          valueStyle={compactStyle}
-          value="Totals"
-        />
-        {mode === 'time'
-          ? data.intervalData.map(item => {
-              return (
-                <Cell
-                  style={{
-                    minWidth: compact ? 50 : 85,
-                  }}
-                  valueStyle={compactStyle}
-                  key={amountToCurrency(item[balanceTypeOp])}
-                  value={amountToCurrency(item[balanceTypeOp])}
-                  title={
-                    Math.abs(item[balanceTypeOp]) > 100000
-                      ? amountToCurrency(item[balanceTypeOp])
-                      : undefined
-                  }
-                  width="flex"
-                  privacyFilter
-                />
-              );
-            })
-          : balanceTypeOp === 'totalTotals' && (
-              <>
-                <Cell
-                  style={{
-                    minWidth: compact ? 50 : 85,
-                  }}
-                  valueStyle={compactStyle}
-                  value={amountToCurrency(data.totalAssets)}
-                  title={
-                    Math.abs(data.totalAssets) > 100000
-                      ? amountToCurrency(data.totalAssets)
-                      : undefined
-                  }
-                  width="flex"
-                  privacyFilter
-                />
-                <Cell
-                  style={{
-                    minWidth: compact ? 50 : 85,
-                  }}
-                  valueStyle={compactStyle}
-                  value={amountToCurrency(data.totalDebts)}
-                  title={
-                    Math.abs(data.totalDebts) > 100000
-                      ? amountToCurrency(data.totalDebts)
-                      : undefined
-                  }
-                  width="flex"
-                  privacyFilter
-                />
-              </>
-            )}
-        <Cell
-          style={{
-            minWidth: compact ? 50 : 85,
-          }}
-          valueStyle={compactStyle}
-          value={amountToCurrency(data[balanceTypeOp])}
-          title={
-            Math.abs(data[balanceTypeOp]) > 100000
-              ? amountToCurrency(data[balanceTypeOp])
-              : undefined
-          }
-          width="flex"
-          privacyFilter
-        />
-        <Cell
-          style={{
-            minWidth: compact ? 50 : 85,
-          }}
-          valueStyle={compactStyle}
-          value={integerToCurrency(Math.round(average))}
-          title={
-            Math.abs(Math.round(average / 100)) > 100000
-              ? integerToCurrency(Math.round(average))
-              : undefined
-          }
-          width="flex"
-          privacyFilter
-        />
-      </View>
-    </Row>
+    <RenderTotalsRow
+      metadata={metadata}
+      mode={mode}
+      totalsStyle={totalsStyle}
+      testStyle={testStyle}
+      scrollWidthTotals={scrollWidthTotals}
+      renderTotals={renderTotals}
+    />
   );
 }
