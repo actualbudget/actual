@@ -9,7 +9,11 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TableHeader, Table, Row, Field } from '../table';
 
-const addAccountOption = { id: 'new', name: 'Create new account' };
+const addOnBudgetAccountOption = { id: 'new-on', name: 'Create new account' };
+const addOffBudgetAccountOption = {
+  id: 'new-off',
+  name: 'Create new account (off-budget)',
+};
 
 export function SelectLinkedAccounts({
   modalProps,
@@ -43,6 +47,7 @@ export function SelectLinkedAccounts({
         const externalAccount = externalAccounts.find(
           account => account.account_id === chosenExternalAccountId,
         );
+        const offBudget = chosenLocalAccountId === addOffBudgetAccountOption.id;
 
         // Skip linking accounts that were previously linked with
         // a different bank.
@@ -54,17 +59,21 @@ export function SelectLinkedAccounts({
         if (syncSource === 'simpleFin') {
           actions.linkAccountSimpleFin(
             externalAccount,
-            chosenLocalAccountId !== addAccountOption.id
+            chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
               ? chosenLocalAccountId
               : undefined,
+            offBudget,
           );
         } else {
           actions.linkAccount(
             requisitionId,
             externalAccount,
-            chosenLocalAccountId !== addAccountOption.id
+            chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
               ? chosenLocalAccountId
               : undefined,
+            offBudget,
           );
         }
       },
@@ -107,9 +116,9 @@ export function SelectLinkedAccounts({
           >
             <TableHeader
               headers={[
-                { name: 'Bank Account To Sync', width: 200 },
-                { name: 'Account in Actual', width: 'flex' },
-                { name: 'Actions', width: 'flex' },
+                { name: 'Bank Account To Sync', width: '40%' },
+                { name: 'Account in Actual', width: '40%' },
+                { name: 'Action', width: '20%' },
               ]}
             />
 
@@ -122,11 +131,15 @@ export function SelectLinkedAccounts({
                   <TableRow
                     externalAccount={item}
                     chosenAccount={
-                      chosenAccounts[item.account_id] === addAccountOption.id
-                        ? addAccountOption
-                        : localAccounts.find(
-                            acc => chosenAccounts[item.account_id] === acc.id,
-                          )
+                      chosenAccounts[item.account_id] ===
+                      addOnBudgetAccountOption.id
+                        ? addOnBudgetAccountOption
+                        : chosenAccounts[item.account_id] ===
+                            addOffBudgetAccountOption.id
+                          ? addOffBudgetAccountOption
+                          : localAccounts.find(
+                              acc => chosenAccounts[item.account_id] === acc.id,
+                            )
                     }
                     unlinkedAccounts={unlinkedAccounts}
                     onSetLinkedAccount={onSetLinkedAccount}
@@ -167,15 +180,16 @@ function TableRow({
 
   const availableAccountOptions = [
     ...unlinkedAccounts,
-    chosenAccount?.id !== addAccountOption.id && chosenAccount,
-    addAccountOption,
+    chosenAccount?.id !== addOnBudgetAccountOption.id && chosenAccount,
+    addOnBudgetAccountOption,
+    addOffBudgetAccountOption,
   ].filter(Boolean);
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
-      <Field width={200}>{externalAccount.name}</Field>
+      <Field width="40%">{externalAccount.name}</Field>
       <Field
-        width="flex"
+        width="40%"
         truncate={focusedField !== 'account'}
         onClick={() => setFocusedField('account')}
       >
@@ -197,7 +211,7 @@ function TableRow({
           chosenAccount?.name
         )}
       </Field>
-      <Field width="flex">
+      <Field width="20%">
         {chosenAccount ? (
           <Button
             onClick={() => {
