@@ -1,6 +1,8 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { escapeRegExp } from 'lodash';
+
 import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
@@ -172,7 +174,7 @@ export function TransactionList({
       {
         field: 'notes',
         op: 'matches',
-        value: `(^|\\s)${tag}\\b`,
+        value: `(^|\\s)${escapeRegExp(tag)}\\b`,
         type: 'string',
       },
     ];
