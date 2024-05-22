@@ -173,7 +173,7 @@ export function TransactionList({
     onApplyFilter({
       field: 'notes',
       op: 'matches',
-      value: `(^|\\s)${escapeRegExp(tag)}($|\\s)`,
+      value: `(^|\\s|\\b)${escapeRegExp(tag)}($|\\s|\\b)`,
       type: 'string',
     });
   });

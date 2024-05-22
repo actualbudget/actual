@@ -2190,10 +2190,16 @@ function notesTagFormatter(notes, onNotesTagClick) {
     <>
       {words.map((word, i, arr) => {
         const separator = arr.length - 1 === i ? '' : ' ';
-        if (word.startsWith('#') && word.length > 1) {
-          const tag = word;
-          return (
-            <span key={i}>
+        if (word.includes('#') && word.length > 1) {
+          // Treat tags in a single word as separate tags.
+          // #tag1#tag2 => #tag1 #tag2
+          const tags = word
+            .split('#')
+            .filter(Boolean)
+            .map(tag => `#${tag}`);
+
+          return tags.map((tag, ti) => (
+            <span key={ti}>
               <Button
                 type="bare"
                 key={i}
@@ -2219,7 +2225,7 @@ function notesTagFormatter(notes, onNotesTagClick) {
               </Button>
               {separator}
             </span>
-          );
+          ));
         }
         return `${word}${separator}`;
       })}
