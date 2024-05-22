@@ -17,6 +17,34 @@ const intervalOptions = [
   },
 ];
 
+const currentIntervalOptions = [
+  {
+    description: 'This week',
+    defaultInclude: false,
+    disableInclude: true,
+  },
+  {
+    description: 'This month',
+    defaultInclude: false,
+    disableInclude: true,
+  },
+  {
+    description: 'Year to date',
+    defaultInclude: false,
+    disableInclude: true,
+  },
+  {
+    description: 'Last year',
+    defaultInclude: false,
+    disableInclude: true,
+  },
+  {
+    description: 'All time',
+    defaultInclude: false,
+    disableInclude: true,
+  },
+];
+
 type graphOptions = {
   description: string;
   disabledSplit: string[];
@@ -164,6 +192,9 @@ export const disabledList = {
   modeGraphsMap: new Map(
     modeOptions.map(item => [item.description, item.disabledGraph]),
   ),
+  currentInterval: new Map(
+    currentIntervalOptions.map(item => [item.description, item.disableInclude]),
+  ),
 };
 
 export const defaultsList = {
@@ -173,5 +204,8 @@ export const defaultsList = {
   ),
   intervalRange: new Map(
     intervalOptions.map(item => [item.description, item.defaultRange]),
+  ),
+  currentInterval: new Map(
+    currentIntervalOptions.map(item => [item.description, item.defaultInclude]),
   ),
 };

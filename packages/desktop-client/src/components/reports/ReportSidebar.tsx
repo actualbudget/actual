@@ -15,7 +15,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { CategorySelector } from './CategorySelector';
-import { defaultsList } from './disabledList';
+import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
 import { type dateRangeProps, ReportOptions } from './ReportOptions';
@@ -94,6 +94,15 @@ export function ReportSidebar({
         customReportItems.includeCurrentInterval,
         firstDayOfWeekIdx,
       ),
+    );
+    setIncludeCurrentInterval(
+      defaultsList.currentInterval.get(cond) ??
+        customReportItems.includeCurrentInterval,
+    );
+    setSessionReport(
+      'includeCurrentInterval',
+      defaultsList.currentInterval.get(cond) ??
+        customReportItems.includeCurrentInterval,
     );
   };
 
@@ -328,7 +337,11 @@ export function ReportSidebar({
                     ).toLowerCase() +
                     ' in live range',
                   toggle: customReportItems.includeCurrentInterval,
-                  disabled: customReportItems.isDateStatic,
+                  disabled:
+                    customReportItems.isDateStatic ||
+                    disabledList.currentInterval.get(
+                      customReportItems.dateRange,
+                    ),
                 },
                 {
                   name: 'show-hidden-categories',
@@ -393,6 +406,8 @@ export function ReportSidebar({
             onSelect={() => {
               setSessionReport('isDateStatic', true);
               setIsDateStatic(true);
+              setIncludeCurrentInterval(false);
+              setSessionReport('includeCurrentInterval', false);
               onChangeDates(
                 customReportItems.startDate,
                 customReportItems.endDate,

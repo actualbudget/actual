@@ -122,6 +122,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'Year to date',
     name: 'yearToDate',
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
@@ -130,6 +131,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'Last year',
     name: 'lastYear',
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
@@ -138,6 +140,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'All time',
     name: 'allTime',
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
