@@ -1,4 +1,4 @@
-import React, { createRef, useState } from 'react';
+import React, { createRef, useRef, useState } from 'react';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
@@ -6,6 +6,7 @@ import { type CustomReportEntity } from 'loot-core/src/types/models';
 
 import { SvgExpandArrow } from '../../icons/v0';
 import { Button } from '../common/Button';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -34,6 +35,7 @@ export function SaveReport({
   onReportChange,
 }: SaveReportProps) {
   const listReports = useReports();
+  const triggerRef = useRef(null);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -156,6 +158,7 @@ export function SaveReport({
       }}
     >
       <Button
+        ref={triggerRef}
         type="bare"
         onClick={() => {
           setMenuOpen(true);
@@ -175,17 +178,27 @@ export function SaveReport({
         {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
-      {menuOpen && (
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+        style={{ width: 150 }}
+      >
         <SaveReportMenu
-          onClose={() => setMenuOpen(false)}
           onMenuSelect={onMenuSelect}
           savedStatus={savedStatus}
           listReports={listReports && listReports.length}
         />
-      )}
-      {nameMenuOpen && (
+      </Popover>
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={nameMenuOpen}
+        onOpenChange={() => setNameMenuOpen(false)}
+        style={{ width: 325 }}
+      >
         <SaveReportName
-          onClose={() => setNameMenuOpen(false)}
           menuItem={menuItem}
           name={newName}
           setName={setNewName}
@@ -193,20 +206,29 @@ export function SaveReport({
           onAddUpdate={onAddUpdate}
           err={err}
         />
-      )}
-      {chooseMenuOpen && (
-        <SaveReportChoose
-          onApply={onApply}
-          onClose={() => setChooseMenuOpen(false)}
-        />
-      )}
-      {deleteMenuOpen && (
+      </Popover>
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={chooseMenuOpen}
+        onOpenChange={() => setChooseMenuOpen(false)}
+        style={{ padding: 15 }}
+      >
+        <SaveReportChoose onApply={onApply} />
+      </Popover>
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={deleteMenuOpen}
+        onOpenChange={() => setDeleteMenuOpen(false)}
+        style={{ width: 275, padding: 15 }}
+      >
         <SaveReportDelete
           onDelete={onDelete}
           onClose={() => setDeleteMenuOpen(false)}
           name={report.name}
         />
-      )}
+      </Popover>
     </View>
   );
 }
