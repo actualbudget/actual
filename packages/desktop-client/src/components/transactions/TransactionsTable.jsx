@@ -2192,40 +2192,47 @@ function notesTagFormatter(notes, onNotesTagClick) {
         const separator = arr.length - 1 === i ? '' : ' ';
         if (word.includes('#') && word.length > 1) {
           // Treat tags in a single word as separate tags.
-          // #tag1#tag2 => #tag1 #tag2
-          const tags = word
-            .split('#')
-            .filter(Boolean)
-            .map(tag => `#${tag}`);
+          // #tag1#tag2 => (#tag1)(#tag2)
+          // not-a-tag#tag2#tag3 => not-a-tag(#tag2)(#tag3)
+          return word.split('#').map((tag, ti) => {
+            if (ti === 0) {
+              return tag;
+            }
 
-          return tags.map((tag, ti) => (
-            <span key={ti}>
-              <Button
-                type="bare"
-                key={i}
-                style={{
-                  display: 'inline-flex',
-                  padding: '3px 7px',
-                  borderRadius: 16,
-                  userSelect: 'none',
-                  backgroundColor: theme.noteTagBackground,
-                  color: theme.noteTagText,
-                  cursor: 'pointer',
-                }}
-                hoveredStyle={{
-                  backgroundColor: theme.noteTagBackgroundHover,
-                  color: theme.noteTagText,
-                }}
-                onClick={e => {
-                  e.stopPropagation();
-                  onNotesTagClick?.(tag);
-                }}
-              >
-                {tag}
-              </Button>
-              {separator}
-            </span>
-          ));
+            if (!tag) {
+              return '#';
+            }
+
+            const validTag = `#${tag}`;
+            return (
+              <span key={`${validTag}${ti}`}>
+                <Button
+                  type="bare"
+                  key={i}
+                  style={{
+                    display: 'inline-flex',
+                    padding: '3px 7px',
+                    borderRadius: 16,
+                    userSelect: 'none',
+                    backgroundColor: theme.noteTagBackground,
+                    color: theme.noteTagText,
+                    cursor: 'pointer',
+                  }}
+                  hoveredStyle={{
+                    backgroundColor: theme.noteTagBackgroundHover,
+                    color: theme.noteTagText,
+                  }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    onNotesTagClick?.(validTag);
+                  }}
+                >
+                  {validTag}
+                </Button>
+                {separator}
+              </span>
+            );
+          });
         }
         return `${word}${separator}`;
       })}
