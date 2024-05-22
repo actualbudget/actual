@@ -48,7 +48,9 @@ export function ChooseGraph({
   showOffBudget = false,
   intervalsCount,
 }: ChooseGraphProps) {
-  const graphStyle = compact ? { ...style } : { flexGrow: 1 };
+  const graphStyle = compact
+    ? { ...style }
+    : { flexGrow: 1, overflow: 'hidden' };
   const balanceTypeOp =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
 
