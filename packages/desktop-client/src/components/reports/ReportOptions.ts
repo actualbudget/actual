@@ -59,7 +59,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'This week',
     name: 0,
-    type: 'Weeks',
+    type: 'Week',
     Daily: true,
     Weekly: true,
     Monthly: false,
@@ -68,7 +68,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'Last week',
     name: 1,
-    type: 'Weeks',
+    type: 'Week',
     Daily: true,
     Weekly: true,
     Monthly: false,
@@ -77,7 +77,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'This month',
     name: 0,
-    type: 'Months',
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
@@ -86,7 +86,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'Last month',
     name: 1,
-    type: 'Months',
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
@@ -95,7 +95,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'Last 3 months',
     name: 3,
-    type: 'Months',
+    type: 'Month',
     Daily: true,
     Weekly: true,
     Monthly: true,
@@ -104,7 +104,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'Last 6 months',
     name: 6,
-    type: 'Months',
+    type: 'Month',
     Daily: false,
     Weekly: false,
     Monthly: true,
@@ -113,7 +113,7 @@ const dateRangeOptions: dateRangeProps[] = [
   {
     description: 'Last 12 months',
     name: 12,
-    type: 'Months',
+    type: 'Month',
     Daily: false,
     Weekly: false,
     Monthly: true,

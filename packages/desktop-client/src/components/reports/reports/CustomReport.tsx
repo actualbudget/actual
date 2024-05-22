@@ -228,7 +228,7 @@ export function CustomReport() {
     isDateStatic,
     onApplyFilter,
     report.conditions,
-	includeCurrentInterval,
+    includeCurrentInterval,
   ]);
 
   useEffect(() => {
@@ -279,7 +279,6 @@ export function CustomReport() {
     showEmpty,
     showOffBudget,
     showHiddenCategories,
-    includeCurrentInterval,
     showUncategorized,
     firstDayOfWeekIdx,
   ]);
@@ -321,7 +320,6 @@ export function CustomReport() {
     showEmpty,
     showOffBudget,
     showHiddenCategories,
-    includeCurrentInterval,
     showUncategorized,
     graphType,
     firstDayOfWeekIdx,

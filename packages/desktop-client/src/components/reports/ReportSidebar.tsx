@@ -38,6 +38,7 @@ type ReportSidebarProps = {
   setShowOffBudget: (value: boolean) => void;
   setShowHiddenCategories: (value: boolean) => void;
   setShowUncategorized: (value: boolean) => void;
+  setIncludeCurrentInterval: (value: boolean) => void;
   setSelectedCategories: (value: CategoryEntity[]) => void;
   onChangeDates: (dateStart: string, dateEnd: string) => void;
   onReportChange: ({
@@ -275,15 +276,15 @@ export function ReportSidebar({
               onMenuSelect={type => {
                 onReportChange({ type: 'modify' });
 
-				if (type === 'include-current-interval') {
-				  setSessionReport(
-					'includeCurrentInterval',
-					!customReportItems.includeCurrentInterval,
-				  );
-				  setIncludeCurrentInterval(
-					!customReportItems.includeCurrentInterval,
-				  );
-				} else if (type === 'show-hidden-categories') {
+                if (type === 'include-current-interval') {
+                  setSessionReport(
+                    'includeCurrentInterval',
+                    !customReportItems.includeCurrentInterval,
+                  );
+                  setIncludeCurrentInterval(
+                    !customReportItems.includeCurrentInterval,
+                  );
+                } else if (type === 'show-hidden-categories') {
                   setSessionReport(
                     'showHiddenCategories',
                     !customReportItems.showHiddenCategories,
@@ -309,22 +310,26 @@ export function ReportSidebar({
                 }
               }}
               items={[
-				{
-				  name: 'include-current-interval',
-				  text:
-					'Include current ' +
-					ReportOptions.dateRangeType
-					  .get(customReportItems.dateRange)
-					  .toLowerCase(),
-				  tooltip:
-					'Include current ' +
-					ReportOptions.dateRangeType
-					  .get(customReportItems.dateRange)
-					  .toLowerCase() +
-					' in live range',
-				  toggle: customReportItems.includeCurrentInterval,
-				  disabled: customReportItems.isDateStatic,
-				},
+                {
+                  name: 'include-current-interval',
+                  text:
+                    'Include current ' +
+                    (
+                      ReportOptions.dateRangeType.get(
+                        customReportItems.dateRange,
+                      ) || ''
+                    ).toLowerCase(),
+                  tooltip:
+                    'Include current ' +
+                    (
+                      ReportOptions.dateRangeType.get(
+                        customReportItems.dateRange,
+                      ) || ''
+                    ).toLowerCase() +
+                    ' in live range',
+                  toggle: customReportItems.includeCurrentInterval,
+                  disabled: customReportItems.isDateStatic,
+                },
                 {
                   name: 'show-hidden-categories',
                   text: 'Show hidden categories',
