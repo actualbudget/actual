@@ -21,7 +21,6 @@ import {
 import { fastSetMerge } from '../../shared/util';
 import { RuleConditionEntity } from '../../types/models';
 import { RuleError } from '../errors';
-import * as prefs from '../prefs';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 function assert(test, type, msg) {
