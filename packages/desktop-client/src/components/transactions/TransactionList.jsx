@@ -174,7 +174,7 @@ export function TransactionList({
       {
         field: 'notes',
         op: 'matches',
-        value: `(^|\\s)${escapeRegExp(tag)}\\b`,
+        value: `(^|\\s)${escapeRegExp(tag)}($|\\s)`,
         type: 'string',
       },
     ];
