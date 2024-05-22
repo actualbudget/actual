@@ -91,3 +91,15 @@ If you wish to only sync one account, view the desired account and click the syn
 1. Currently, the sync pulls at most 90 days of data from each linked account. The amount of data SimpleFIN can get from each account may vary, so not all accounts may have 90 days of historical transactions that can be imported.
 
 2. SimpleFIN's data updates one time / day, roughly every 24 hours, for each linked account. The time of day that each bank updates in SimpleFIN may vary, even from day to day (based on the bank and upstream provider, MX).
+
+### Resetting the Setup Token
+
+At the moment there is no UI to reset the setup token.  If you need to reset it, you must manually edit the SQLite database.
+
+1. Shut down the server.
+2. On the server, find your data directory and open the database.  Typically this is in a file such as `actual-data/server-files/account.sqlite`.
+3. In the `secrets` table, there are two rows named `simplefin_token` and `simplefin_accessKey`.  Delete both rows.
+4. Save the database.
+5. Restart the server.
+
+You should now be able to go back in and provide a new setup token.
