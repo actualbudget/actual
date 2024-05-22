@@ -510,7 +510,7 @@ export function execActions(actions: Action[], transaction) {
 
   let update = execNonSplitActions(parentActions, transaction);
   if (totalSplitCount === 1) {
-    //
+    // No splits, no need to do anything else.
     return update;
   }
 
