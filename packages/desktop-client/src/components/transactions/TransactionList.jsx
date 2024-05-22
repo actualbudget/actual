@@ -88,7 +88,7 @@ export function TransactionList({
   onRefetch,
   onCloseAddTransaction,
   onCreatePayee,
-  onApplyFilters,
+  onApplyFilter,
 }) {
   const transactionsLatest = useRef();
   const navigate = useNavigate();
@@ -170,15 +170,12 @@ export function TransactionList({
   });
 
   const onNotesTagClick = useCallback(tag => {
-    const filterConditions = [
-      {
-        field: 'notes',
-        op: 'matches',
-        value: `(^|\\s)${escapeRegExp(tag)}($|\\s)`,
-        type: 'string',
-      },
-    ];
-    onApplyFilters(filterConditions, true);
+    onApplyFilter({
+      field: 'notes',
+      op: 'matches',
+      value: `(^|\\s)${escapeRegExp(tag)}($|\\s)`,
+      type: 'string',
+    });
   });
 
   return (

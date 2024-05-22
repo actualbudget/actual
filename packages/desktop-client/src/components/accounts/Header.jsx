@@ -56,7 +56,7 @@ export function AccountHeader({
   isSorted,
   search,
   filterConditions,
-  conditionsOp,
+  filterConditionsOp,
   pushModal,
   onSearch,
   onAddTransaction,
@@ -378,7 +378,7 @@ export function AccountHeader({
         {filterConditions?.length > 0 && (
           <FiltersStack
             conditions={filterConditions}
-            conditionsOp={conditionsOp}
+            conditionsOp={filterConditionsOp}
             onUpdateFilter={onUpdateFilter}
             onDeleteFilter={onDeleteFilter}
             onClearFilters={onClearFilters}

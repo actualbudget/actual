@@ -179,6 +179,8 @@ class AccountInternal extends PureComponent {
     this.state = {
       search: '',
       filterConditions: props.filterConditions || [],
+      filterId: [],
+      filterConditionsOp: 'and',
       loading: true,
       workingHard: false,
       reconcileAmount: null,
@@ -191,8 +193,6 @@ class AccountInternal extends PureComponent {
       editingName: false,
       isAdding: false,
       latestDate: null,
-      filterId: [],
-      conditionsOp: 'and',
       sort: [],
     };
   }
@@ -682,11 +682,11 @@ class AccountInternal extends PureComponent {
     };
   }
 
-  getFilteredAmount = async (filters, conditionsOpKey) => {
+  getFilteredAmount = async (conditions, conditionsOpKey) => {
     const filter = queries.getAccountFilter(this.props.accountId);
 
     let query = q('transactions').filter({
-      [conditionsOpKey]: [...filters],
+      [conditionsOpKey]: [...conditions],
     });
     if (filter) {
       query = query.filter(filter);
@@ -1212,7 +1212,7 @@ class AccountInternal extends PureComponent {
   };
 
   onConditionsOpChange = (value, conditions) => {
-    this.setState({ conditionsOp: value });
+    this.setState({ filterConditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
     this.applyFilters([...conditions]);
     if (this.state.search !== '') {
@@ -1225,11 +1225,11 @@ class AccountInternal extends PureComponent {
       const [savedFilter] = this.props.savedFilters.filter(
         f => f.id === this.state.filterId.id,
       );
-      this.setState({ conditionsOp: savedFilter.conditionsOp });
+      this.setState({ filterConditionsOp: savedFilter.conditionsOp });
       this.applyFilters([...savedFilter.conditions]);
     } else {
       if (savedFilter.status) {
-        this.setState({ conditionsOp: savedFilter.conditionsOp });
+        this.setState({ filterConditionsOp: savedFilter.conditionsOp });
         this.applyFilters([...savedFilter.conditions]);
       }
     }
@@ -1237,7 +1237,7 @@ class AccountInternal extends PureComponent {
   };
 
   onClearFilters = () => {
-    this.setState({ conditionsOp: 'and' });
+    this.setState({ filterConditionsOp: 'and' });
     this.setState({ filterId: [] });
     this.applyFilters([]);
     if (this.state.search !== '') {
@@ -1266,7 +1266,7 @@ class AccountInternal extends PureComponent {
     this.applyFilters(this.state.filterConditions.filter(c => c !== condition));
     if (this.state.filterConditions.length === 1) {
       this.setState({ filterId: [] });
-      this.setState({ conditionsOp: 'and' });
+      this.setState({ filterConditionsOp: 'and' });
     } else {
       this.setState({
         filterId: {
@@ -1293,7 +1293,7 @@ class AccountInternal extends PureComponent {
       this.setState({
         filterId: { ...savedFilter, status: 'saved' },
       });
-      this.setState({ conditionsOp: savedFilter.conditionsOp });
+      this.setState({ filterConditionsOp: savedFilter.conditionsOp });
       this.applyFilters([...savedFilter.conditions]);
     } else {
       // A condition was passed in.
@@ -1330,7 +1330,7 @@ class AccountInternal extends PureComponent {
     }
   };
 
-  applyFilters = async (conditions, append = false) => {
+  applyFilters = async conditions => {
     if (conditions.length > 0) {
       const customQueryFilters = conditions
         .filter(cond => !!cond.customName)
@@ -1341,9 +1341,10 @@ class AccountInternal extends PureComponent {
           conditions: conditions.filter(cond => !cond.customName),
         },
       );
-      const conditionsOpKey = this.state.conditionsOp === 'or' ? '$or' : '$and';
+      const conditionsOpKey =
+        this.state.filterConditionsOp === 'or' ? '$or' : '$and';
       this.filteredAmount = await this.getFilteredAmount(
-        filters,
+        conditions,
         conditionsOpKey,
       );
       this.currentQuery = this.rootQuery.filter({
@@ -1351,11 +1352,9 @@ class AccountInternal extends PureComponent {
       });
 
       this.setState(
-        prevState => ({
-          filterConditions: append
-            ? [...prevState.filterConditions, ...conditions]
-            : conditions,
-        }),
+        {
+          filterConditions: conditions,
+        },
         () => {
           this.updateQuery(this.currentQuery, true);
         },
@@ -1594,7 +1593,7 @@ class AccountInternal extends PureComponent {
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
                 filterConditions={this.state.filterConditions}
-                conditionsOp={this.state.conditionsOp}
+                filterConditionsOp={this.state.filterConditionsOp}
                 savePrefs={this.props.savePrefs}
                 pushModal={this.props.pushModal}
                 onSearch={this.onSearch}
@@ -1690,7 +1689,7 @@ class AccountInternal extends PureComponent {
                     this.setState({ isAdding: false })
                   }
                   onCreatePayee={this.onCreatePayee}
-                  onApplyFilters={this.applyFilters}
+                  onApplyFilter={this.onApplyFilter}
                 />
               </View>
             </View>
