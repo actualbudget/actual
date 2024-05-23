@@ -446,6 +446,4 @@ describe('Account sync', () => {
       expect(transactions[0].amount).toBe(-1239);
     },
   );
-
-
 });
