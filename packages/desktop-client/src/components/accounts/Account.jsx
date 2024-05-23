@@ -1316,7 +1316,10 @@ class AccountInternal extends PureComponent {
         conditions: conditions.filter(cond => !cond.customName),
       });
       const conditionsOpKey = this.state.conditionsOp === 'or' ? '$or' : '$and';
-      this.filteredAmount = await this.getFilteredAmount(filters, conditionsOpKey);
+      this.filteredAmount = await this.getFilteredAmount(
+        filters,
+        conditionsOpKey,
+      );
       this.currentQuery = this.rootQuery.filter({
         [conditionsOpKey]: [...filters, ...customFilters],
       });
