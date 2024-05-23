@@ -622,7 +622,7 @@ export function execActions(actions: Action[], transaction) {
     }
   }
 
-  // The split index 0 is reserved for "Before split" actions.
+  // The split index 0 is reserved for "Apply to all" actions.
   // Remove that entry from the subtransactions.
   update.subtransactions = update.subtransactions.slice(1);
 
@@ -673,17 +673,16 @@ export class Rule {
     });
   }
 
-  execActions(object) {
+  execActions<T>(object: T): Partial<T> {
     const result = execActions(this.actions, {
       ...object,
-      subtransactions: object.subtransactions,
     });
     const changes = Object.keys(result).reduce((prev, cur) => {
       if (result[cur] !== object[cur]) {
         prev[cur] = result[cur];
       }
       return prev;
-    }, {});
+    }, {} as T);
     return changes;
   }
 

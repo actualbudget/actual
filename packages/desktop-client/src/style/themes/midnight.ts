@@ -56,7 +56,7 @@ export const menuItemTextSelected = colorPalette.purple400;
 export const menuItemTextHeader = colorPalette.purple200;
 export const menuBorder = colorPalette.gray800;
 export const menuBorderHover = colorPalette.purple300;
-export const menuKeybindingText = colorPalette.gray500;
+export const menuKeybindingText = colorPalette.purple200;
 export const menuAutoCompleteBackground = colorPalette.gray600;
 export const menuAutoCompleteBackgroundHover = colorPalette.gray500;
 export const menuAutoCompleteText = colorPalette.gray100;
@@ -190,4 +190,6 @@ export const pillBorderSelected = colorPalette.purple300;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
+export const reportsGreen = colorPalette.green400;
 export const reportsLabel = pageText;
+export const reportsInnerLabel = colorPalette.navy800;

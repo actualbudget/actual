@@ -33,7 +33,7 @@ import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
 import { styles, theme } from '../../../style';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { Page } from '../../Page';
+import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
@@ -41,16 +41,16 @@ import { TransactionListWithBalances } from '../transactions/TransactionListWith
 export function AccountTransactions({ account, pending, failed }) {
   return (
     <Page
-      title={
-        <AccountName account={account} pending={pending} failed={failed} />
+      header={
+        <MobilePageHeader
+          title={
+            <AccountName account={account} pending={pending} failed={failed} />
+          }
+          leftContent={<MobileBackButton />}
+          rightContent={<AddTransactionButton accountId={account.id} />}
+        />
       }
-      headerLeftContent={<MobileBackButton />}
-      headerRightContent={<AddTransactionButton accountId={account.id} />}
       padding={0}
-      style={{
-        flex: 1,
-        backgroundColor: theme.mobilePageBackground,
-      }}
     >
       <SchedulesProvider transform={getSchedulesTransform(account.id)}>
         <TransactionListWithPreviews account={account} />
@@ -70,10 +70,10 @@ function AccountName({ account, pending, failed }) {
     await send('notes-save', { id, note: notes });
   };
 
-  const onEditNotes = () => {
+  const onEditNotes = id => {
     dispatch(
       pushModal('notes', {
-        id: account.id,
+        id: `account-${id}`,
         name: account.name,
         onSave: onSaveNotes,
       }),

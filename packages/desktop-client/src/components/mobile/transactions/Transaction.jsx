@@ -14,6 +14,7 @@ import {
   SvgLockClosed,
 } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
+import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
@@ -208,6 +209,7 @@ export const Transaction = memo(function Transaction({
             marginLeft: 25,
             marginRight: 5,
             fontSize: 14,
+            ...makeAmountFullStyle(amount),
           }}
         >
           {integerToCurrency(amount)}

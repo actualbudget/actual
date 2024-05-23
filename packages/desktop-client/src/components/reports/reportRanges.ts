@@ -1,12 +1,13 @@
 import * as monthUtils from 'loot-core/src/shared/months';
+import { type LocalPrefs } from 'loot-core/types/prefs';
 
 export function validateStart(
   earliest: string,
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
-) {
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+): [string, string] {
   let addDays;
   let dateStart;
   switch (interval) {
@@ -45,8 +46,8 @@ export function validateEnd(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
-) {
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+): [string, string] {
   let subDays;
   let dateEnd;
   switch (interval) {
@@ -96,8 +97,8 @@ function boundedRange(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
-) {
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+): [string, string] {
   let latest;
   switch (interval) {
     case 'Daily':
@@ -107,13 +108,13 @@ function boundedRange(
       latest = monthUtils.currentWeek(firstDayOfWeekIdx);
       break;
     case 'Monthly':
-      latest = monthUtils.currentMonth() + '-31';
+      latest = monthUtils.getMonthEnd(monthUtils.currentDay());
       break;
     case 'Yearly':
       latest = monthUtils.currentDay();
       break;
     default:
-      latest = monthUtils.currentMonth();
+      latest = monthUtils.currentDay();
       break;
   }
 
@@ -130,9 +131,10 @@ export function getSpecificRange(
   offset: number,
   addNumber: number | null,
   type?: string,
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
 ) {
   const currentDay = monthUtils.currentDay();
+  const currentWeek = monthUtils.currentWeek(firstDayOfWeekIdx);
 
   let dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
   let dateEnd = monthUtils.getMonthEnd(
@@ -141,7 +143,7 @@ export function getSpecificRange(
   );
 
   if (type === 'Weeks') {
-    dateStart = monthUtils.subWeeks(currentDay, offset);
+    dateStart = monthUtils.subWeeks(currentWeek, offset);
     dateEnd = monthUtils.getWeekEnd(
       monthUtils.addWeeks(dateStart, addNumber === null ? offset : addNumber),
       firstDayOfWeekIdx,

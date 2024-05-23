@@ -1,4 +1,5 @@
 import * as monthUtils from 'loot-core/src/shared/months';
+import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import { ReportOptions } from './ReportOptions';
 import { getSpecificRange, validateRange } from './reportRanges';
@@ -6,10 +7,10 @@ import { getSpecificRange, validateRange } from './reportRanges';
 export function getLiveRange(
   cond: string,
   earliestTransaction: string,
-  firstDayOfWeekIdx?: 0 | 1 | 2 | 3 | 4 | 5 | 6,
-) {
-  let dateStart;
-  let dateEnd;
+  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+): [string, string] {
+  let dateStart = earliestTransaction;
+  let dateEnd = monthUtils.currentDay();
   const rangeName = ReportOptions.dateRangeMap.get(cond);
   switch (rangeName) {
     case 'yearToDate':

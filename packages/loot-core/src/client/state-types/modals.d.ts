@@ -5,7 +5,7 @@ import type {
   CategoryGroupEntity,
   GoCardlessToken,
 } from '../../types/models';
-import type { RuleEntity } from '../../types/models/rule';
+import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
 export type ModalType = keyof FinanceModals;
@@ -51,18 +51,12 @@ type FinanceModals = {
 
   'manage-rules': { payeeId?: string };
   'edit-rule': {
-    rule: RuleEntity;
+    rule: RuleEntity | NewRuleEntity;
     onSave: (rule: RuleEntity) => void;
   };
   'merge-unused-payees': {
     payeeIds: string[];
     targetPayeeId: string;
-  };
-
-  'plaid-external-msg': {
-    onMoveExternal: () => Promise<void>;
-    onClose?: () => void;
-    onSuccess: (data: unknown) => Promise<void>;
   };
 
   'gocardless-init': {
@@ -236,10 +230,29 @@ type FinanceModals = {
     onPost: (transactionId: string) => void;
     onSkip: (transactionId: string) => void;
   };
-  'budget-month-menu': {
-    month: string;
+  'budget-page-menu': {
+    onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
+    onSwitchBudgetFile: () => void;
     onSwitchBudgetType: () => void;
+  };
+  'rollover-budget-month-menu': {
+    month: string;
+    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+    onEditNotes: (month: string) => void;
+  };
+  'report-budget-month-menu': {
+    month: string;
+    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+    onEditNotes: (month: string) => void;
+  };
+  'budget-list';
+  'confirm-transaction-edit': {
+    onConfirm: () => void;
+    confirmReason: string;
+  };
+  'confirm-transaction-delete': {
+    onConfirm: () => void;
   };
 };
 

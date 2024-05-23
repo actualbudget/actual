@@ -64,7 +64,7 @@ export function Schedules() {
   }
 
   return (
-    <Page title="Schedules">
+    <Page header="Schedules">
       <View
         style={{
           flexDirection: 'row',

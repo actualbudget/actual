@@ -19,12 +19,14 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { type CSSProperties } from '../../../style';
 import { theme } from '../../../style/index';
 import { AlignedText } from '../../common/AlignedText';
@@ -57,7 +59,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp?: string;
+  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
   yAxis?: string;
 };
 
@@ -120,20 +122,21 @@ const customLabel = (props, typeOp) => {
   const textAnchor = 'middle';
   const display =
     props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
-  const textSize = adjustTextSize(
-    props.width,
-    typeOp === 'totalTotals' ? 'default' : 'variable',
-    props.value,
-  );
+  const textSize = adjustTextSize({
+    sized: props.width,
+    type: typeOp === 'totalTotals' ? 'default' : 'variable',
+    values: props.value,
+  });
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
 type BarGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
+  data: DataEntity;
+  filters: RuleConditionEntity[];
   groupBy: string;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   compact?: boolean;
   viewLabels: boolean;
   showHiddenCategories?: boolean;
@@ -143,6 +146,7 @@ type BarGraphProps = {
 export function BarGraph({
   style,
   data,
+  filters,
   groupBy,
   balanceTypeOp,
   compact,
@@ -154,6 +158,7 @@ export function BarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
@@ -187,6 +192,7 @@ export function BarGraph({
     const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
 
     const conditions = [
+      ...filters,
       { field, op: 'is', value: item.id, type: 'id' },
       {
         field: 'date',
@@ -257,17 +263,19 @@ export function BarGraph({
                   bottom: 0,
                 }}
               >
-                <Tooltip
-                  cursor={{ fill: 'transparent' }}
-                  content={
-                    <CustomTooltip
-                      balanceTypeOp={balanceTypeOp}
-                      yAxis={yAxis}
-                    />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    cursor={{ fill: 'transparent' }}
+                    content={
+                      <CustomTooltip
+                        balanceTypeOp={balanceTypeOp}
+                        yAxis={yAxis}
+                      />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                  />
+                )}
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -302,7 +310,9 @@ export function BarGraph({
                     setPointer('pointer')
                   }
                   onClick={
-                    !['Group', 'Interval'].includes(groupBy) && onShowActivity
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    onShowActivity
                   }
                 >
                   {viewLabels && !compact && (

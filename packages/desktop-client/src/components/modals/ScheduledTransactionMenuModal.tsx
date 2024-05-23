@@ -1,8 +1,14 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React, { useCallback, type ComponentPropsWithoutRef } from 'react';
+
+import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { format } from 'loot-core/shared/months';
+import { type Query } from 'loot-core/shared/query';
 
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 
 type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps & {
@@ -21,20 +27,38 @@ export function ScheduledTransactionMenuModal({
     borderRadius: 0,
     borderTop: `1px solid ${theme.pillBorder}`,
   };
+  const scheduleId = transactionId?.split('/')?.[1];
+  const scheduleData = useSchedules({
+    transform: useCallback(
+      (q: Query) => q.filter({ id: scheduleId }),
+      [scheduleId],
+    ),
+  });
+  const schedule = scheduleData?.schedules?.[0];
+
+  if (!schedule) {
+    return null;
+  }
 
   return (
     <Modal
+      title={schedule.name}
       showHeader
       focusAfterClose={false}
       {...modalProps}
-      padding={0}
-      style={{
-        flex: 1,
-        padding: '0 10px',
-        paddingBottom: 10,
-        borderRadius: '6px',
-      }}
     >
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 20,
+        }}
+      >
+        <Text style={{ fontSize: 17, fontWeight: 400 }}>Scheduled date</Text>
+        <Text style={{ fontSize: 17, fontWeight: 700 }}>
+          {format(schedule.next_date, 'MMMM dd, yyyy')}
+        </Text>
+      </View>
       <ScheduledTransactionMenu
         transactionId={transactionId}
         onPost={onPost}

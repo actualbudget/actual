@@ -3,13 +3,11 @@ import React, { useRef, useEffect } from 'react';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
-import { MenuTooltip } from '../common/MenuTooltip';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { FormField, FormLabel } from '../forms';
 
 export function NameFilter({
-  onClose,
   menuItem,
   name,
   setName,
@@ -17,7 +15,6 @@ export function NameFilter({
   onAddUpdate,
   err,
 }: {
-  onClose: () => void;
   menuItem: string;
   name: string;
   setName: (item: string) => void;
@@ -34,7 +31,7 @@ export function NameFilter({
   }, []);
 
   return (
-    <MenuTooltip width={325} onClose={onClose}>
+    <>
       {menuItem !== 'update-filter' && (
         <form>
           <Stack
@@ -74,6 +71,6 @@ export function NameFilter({
           <Text style={{ color: theme.errorText }}>{err}</Text>
         </Stack>
       )}
-    </MenuTooltip>
+    </>
   );
 }

@@ -30,7 +30,6 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
     <Modal
       {...modalProps}
       title={'Delete ' + file.name}
-      padding={0}
       showOverlay={false}
       onClose={modalProps.onBack}
     >

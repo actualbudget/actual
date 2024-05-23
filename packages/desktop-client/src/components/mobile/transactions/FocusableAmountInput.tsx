@@ -9,14 +9,15 @@ import React, {
 } from 'react';
 
 import {
-  toRelaxedNumber,
   amountToCurrency,
-  getNumberFormat,
+  appendDecimals,
+  currencyToAmount,
 } from 'loot-core/src/shared/util';
 
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { type CSSProperties, theme } from '../../../style';
+import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -66,10 +67,6 @@ const AmountInput = memo(function AmountInput({
     setValue(initialValue);
   }, [initialValue]);
 
-  const parseText = () => {
-    return toRelaxedNumber(text.replace(/[,.]/, getNumberFormat().separator));
-  };
-
   const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
       setEditing(true);
@@ -82,7 +79,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = parseText();
+    const parsed = currencyToAmount(text) || 0;
     const newValue = editing ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -110,16 +107,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
-    if (text.slice(-1) === '.') {
-      text = text.slice(0, -1);
-    }
-    if (!hideFraction) {
-      text = text.replaceAll(/[,.]/g, '');
-      text = text.replace(/^0+(?!$)/, '');
-      text = text.padStart(3, '0');
-      text = text.slice(0, -2) + '.' + text.slice(-2);
-    }
-
+    text = appendDecimals(text, hideFraction);
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
@@ -162,7 +150,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-fake-input"
       >
-        {editing ? amountToCurrency(text) : amountToCurrency(value)}
+        {editing ? text : amountToCurrency(value)}
       </Text>
     </View>
   );
@@ -230,6 +218,9 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         onUpdateAmount={amount => onUpdateAmount(amount, isNegative)}
         focused={focused && !disabled}
         style={{
+          ...makeAmountFullStyle(value, {
+            zeroColor: isNegative ? theme.errorText : theme.noticeText,
+          }),
           width: 80,
           justifyContent: 'center',
           ...style,
@@ -276,7 +267,14 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
               ...style,
             }}
           >
-            <Text style={{ fontSize: 15, userSelect: 'none', ...textStyle }}>
+            <Text
+              style={{
+                ...makeAmountFullStyle(value),
+                fontSize: 15,
+                userSelect: 'none',
+                ...textStyle,
+              }}
+            >
               {amountToCurrency(Math.abs(value))}
             </Text>
           </View>

@@ -41,7 +41,7 @@ async function prepareDatabase() {
     is_income: 1,
   });
 
-  const { accounts } = await post(getServer().PLAID_SERVER + '/accounts', {
+  const { accounts } = await post(getServer().GOCARDLESS_SERVER + '/accounts', {
     client_id: '',
     group_id: '',
     item_id: '1',

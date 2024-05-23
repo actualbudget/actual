@@ -1,4 +1,3 @@
-import { GlobalPrefs, LocalPrefs } from '../client/state-types/prefs';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
@@ -15,8 +14,10 @@ import {
   GoCardlessToken,
   GoCardlessInstitution,
   SimpleFinAccount,
+  RuleEntity,
   PayeeEntity,
 } from './models';
+import { GlobalPrefs, LocalPrefs } from './prefs';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -118,7 +119,7 @@ export interface ServerHandlers {
 
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
 
-  'payees-get-rules': (arg: { id }) => Promise<unknown>;
+  'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
     conditions;
@@ -139,8 +140,6 @@ export interface ServerHandlers {
 
   query: (query) => Promise<{ data; dependencies }>;
 
-  'bank-delete': (arg: { id }) => Promise<unknown>;
-
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
   'accounts-get': () => Promise<AccountEntity[]>;
@@ -160,13 +159,6 @@ export interface ServerHandlers {
     upgradingId;
   }) => Promise<'ok'>;
 
-  'gocardless-accounts-connect': (arg: {
-    institution;
-    publicToken;
-    accountIds;
-    offbudgetIds;
-  }) => Promise<unknown>;
-
   'account-create': (arg: {
     name: string;
     balance?: number;
@@ -184,17 +176,6 @@ export interface ServerHandlers {
   'account-reopen': (arg: { id }) => Promise<unknown>;
 
   'account-move': (arg: { id; targetId }) => Promise<unknown>;
-
-  'poll-web-token': (arg: { token }) => Promise<unknown>;
-
-  'poll-web-token-stop': () => Promise<'ok'>;
-
-  'accounts-sync': (arg: { id? }) => Promise<{
-    errors: unknown;
-    newTransactions: unknown;
-    matchedTransactions: unknown;
-    updatedAccounts: unknown;
-  }>;
 
   'secret-set': (arg: { name: string; value: string }) => Promise<null>;
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
@@ -232,7 +213,7 @@ export interface ServerHandlers {
     | { error: 'failed' }
   >;
 
-  'gocardless-accounts-sync': (arg: { id: string }) => Promise<{
+  'accounts-bank-sync': (arg: { id?: string }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;
@@ -246,10 +227,6 @@ export interface ServerHandlers {
   }>;
 
   'account-unlink': (arg: { id }) => Promise<'ok'>;
-
-  'make-plaid-public-token': (arg: {
-    bankId;
-  }) => Promise<{ error: ''; code; type } | { linkToken }>;
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 
@@ -288,7 +265,10 @@ export interface ServerHandlers {
     password;
   }) => Promise<{ error?: string }>;
 
-  'subscribe-sign-in': (arg: { password }) => Promise<{ error?: string }>;
+  'subscribe-sign-in': (arg: {
+    password;
+    loginMethod?: string;
+  }) => Promise<{ error?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
 

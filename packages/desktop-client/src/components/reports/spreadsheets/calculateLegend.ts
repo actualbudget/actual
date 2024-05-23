@@ -1,26 +1,33 @@
 import {
-  type IntervalData,
-  type ItemEntity,
+  type LegendEntity,
+  type IntervalEntity,
+  type GroupedEntity,
 } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';
 import { getColorScale } from '../chart-theme';
 
 export function calculateLegend(
-  intervalData: IntervalData[],
-  calcDataFiltered: ItemEntity[],
+  intervalData: IntervalEntity[],
+  calcDataFiltered: GroupedEntity[],
   groupBy: string,
-  graphType: string,
-  balanceTypeOp: string,
-) {
+  graphType?: string,
+  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals',
+): LegendEntity[] {
   const colorScale = getColorScale('qualitative');
   const chooseData =
     groupBy === 'Interval'
-      ? intervalData.map(c => c.date)
-      : calcDataFiltered.map(c => c.name);
-  return chooseData.map((name, index) => {
+      ? intervalData.map(c => {
+          return { name: c.date, id: null };
+        })
+      : calcDataFiltered.map(c => {
+          return { name: c.name, id: c.id };
+        });
+
+  const legend: LegendEntity[] = chooseData.map((item, index) => {
     return {
-      name,
+      id: item.id || '',
+      name: item.name || '',
       color:
         graphType === 'DonutGraph'
           ? colorScale[index % colorScale.length]
@@ -31,4 +38,5 @@ export function calculateLegend(
             : colorScale[index % colorScale.length],
     };
   });
+  return legend;
 }

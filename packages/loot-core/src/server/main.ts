@@ -15,6 +15,7 @@ import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
+import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
@@ -567,25 +568,6 @@ handlers['query'] = async function (query) {
   return aqlQuery(query);
 };
 
-handlers['bank-delete'] = async function ({ id }) {
-  const accts = await db.runQuery(
-    'SELECT * FROM accounts WHERE bank = ?',
-    [id],
-    true,
-  );
-
-  await db.delete_('banks', id);
-  await Promise.all(
-    accts.map(async acct => {
-      // TODO: This will not sync across devices because we are bypassing
-      // the "recorded" functions
-      await db.runQuery('DELETE FROM transactions WHERE acct = ?', [acct.id]);
-      await db.delete_('accounts', acct.id);
-    }),
-  );
-  return 'ok';
-};
-
 handlers['account-update'] = mutator(async function ({ id, name }) {
   return withUndo(async () => {
     await db.update('accounts', { id, name });
@@ -720,21 +702,6 @@ handlers['simplefin-accounts-link'] = async function ({
   return 'ok';
 };
 
-handlers['gocardless-accounts-connect'] = async function ({
-  institution,
-  publicToken,
-  accountIds,
-  offbudgetIds,
-}) {
-  const bankId = await link.handoffPublicToken(institution, publicToken);
-  const ids = await link.addGoCardlessAccounts(
-    bankId,
-    accountIds,
-    offbudgetIds,
-  );
-  return ids;
-};
-
 handlers['account-create'] = mutator(async function ({
   name,
   balance,
@@ -777,8 +744,8 @@ handlers['account-close'] = mutator(async function ({
   categoryId,
   forced,
 }) {
-  // Unlink the account if it's linked. This makes sure to remove it
-  // from Plaid. (This should not be undo-able, as it mutates the
+  // Unlink the account if it's linked. This makes sure to remove it from
+  // bank-sync providers. (This should not be undo-able, as it mutates the
   // remote server and the user will have to link the account again)
   await handlers['account-unlink']({ id });
 
@@ -877,142 +844,6 @@ handlers['account-move'] = mutator(async function ({ id, targetId }) {
 });
 
 let stopPolling = false;
-
-handlers['poll-web-token'] = async function ({ token }) {
-  const [[, userId], [, key]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-
-  const startTime = Date.now();
-  stopPolling = false;
-
-  async function getData(cb) {
-    if (stopPolling) {
-      return;
-    }
-
-    if (Date.now() - startTime >= 1000 * 60 * 10) {
-      cb('timeout');
-      return;
-    }
-
-    const data = await post(
-      getServer().PLAID_SERVER + '/get-web-token-contents',
-      {
-        userId,
-        key,
-        token,
-      },
-    );
-
-    if (data) {
-      if (data.error) {
-        cb('unknown');
-      } else {
-        cb(null, data);
-      }
-    } else {
-      setTimeout(() => getData(cb), 3000);
-    }
-  }
-
-  return new Promise(resolve => {
-    getData((error, data) => {
-      if (error) {
-        resolve({ error });
-      } else {
-        resolve({ data });
-      }
-    });
-  });
-};
-
-handlers['poll-web-token-stop'] = async function () {
-  stopPolling = true;
-  return 'ok';
-};
-
-handlers['accounts-sync'] = async function ({ id }) {
-  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-  let accounts = await db.runQuery(
-    `SELECT a.*, b.id as bankId FROM accounts a
-         LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0`,
-    [],
-    true,
-  );
-
-  if (id) {
-    accounts = accounts.filter(acct => acct.id === id);
-  }
-
-  const errors = [];
-  let newTransactions = [];
-  let matchedTransactions = [];
-  let updatedAccounts = [];
-
-  for (let i = 0; i < accounts.length; i++) {
-    const acct = accounts[i];
-    if (acct.bankId) {
-      try {
-        const res = await bankSync.syncAccount(
-          userId,
-          userKey,
-          acct.id,
-          acct.account_id,
-          acct.bankId,
-        );
-        const { added, updated } = res;
-
-        newTransactions = newTransactions.concat(added);
-        matchedTransactions = matchedTransactions.concat(updated);
-
-        if (added.length > 0 || updated.length > 0) {
-          updatedAccounts = updatedAccounts.concat(acct.id);
-        }
-      } catch (err) {
-        if (err.type === 'BankSyncError') {
-          errors.push({
-            type: 'SyncError',
-            accountId: acct.id,
-            message: 'Failed syncing account “' + acct.name + '.”',
-            category: err.category,
-            code: err.code,
-          });
-        } else if (err instanceof PostError && err.reason !== 'internal') {
-          errors.push({
-            accountId: acct.id,
-            message: `Account “${acct.name}” is not linked properly. Please link it again`,
-          });
-        } else {
-          errors.push({
-            accountId: acct.id,
-            message:
-              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
-            internal: err.stack,
-          });
-
-          err.message = 'Failed syncing account: ' + err.message;
-
-          captureException(err);
-        }
-      }
-    }
-  }
-
-  if (updatedAccounts.length > 0) {
-    connection.send('sync-event', {
-      type: 'success',
-      tables: ['transactions'],
-    });
-  }
-
-  return { errors, newTransactions, matchedTransactions, updatedAccounts };
-};
 
 handlers['secret-set'] = async function ({ name, value }) {
   const userToken = await asyncStorage.getItem('user-token');
@@ -1206,7 +1037,7 @@ handlers['gocardless-create-web-token'] = async function ({
   }
 };
 
-handlers['gocardless-accounts-sync'] = async function ({ id }) {
+handlers['accounts-bank-sync'] = async function ({ id }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
@@ -1214,8 +1045,8 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
   const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0 AND a.id = ?`,
-    [id],
+         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}`,
+    id ? [id] : [],
     true,
   );
 
@@ -1228,7 +1059,7 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        console.group('Bank Sync operation');
+        console.group('Bank Sync operation for account:', acct.name);
         const res = await bankSync.syncAccount(
           userId,
           userKey,
@@ -1369,25 +1200,6 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 
   return 'ok';
 });
-
-handlers['make-plaid-public-token'] = async function ({ bankId }) {
-  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
-
-  const data = await post(getServer().PLAID_SERVER + '/make-public-token', {
-    userId,
-    key: userKey,
-    item_id: '' + bankId,
-  });
-
-  if (data.error_code) {
-    return { error: '', code: data.error_code, type: data.error_type };
-  }
-
-  return { linkToken: data.link_token };
-};
 
 handlers['save-global-prefs'] = async function (prefs) {
   if ('maxMonths' in prefs) {
@@ -1598,7 +1410,11 @@ handlers['subscribe-needs-bootstrap'] = async function ({
     return { error: res.reason };
   }
 
-  return { bootstrapped: res.data.bootstrapped, hasServer: true };
+  return {
+    bootstrapped: res.data.bootstrapped,
+    loginMethod: res.data.loginMethod || 'password',
+    hasServer: true,
+  };
 };
 
 handlers['subscribe-bootstrap'] = async function ({ password }) {
@@ -1670,17 +1486,27 @@ handlers['subscribe-change-password'] = async function ({ password }) {
   return {};
 };
 
-handlers['subscribe-sign-in'] = async function ({ password }) {
-  const res = await post(getServer().SIGNUP_SERVER + '/login', {
-    password,
-  });
+handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
+  if (typeof loginMethod !== 'string' || loginMethod == null) {
+    loginMethod = 'password';
+  }
+  let res;
 
-  if (res.token) {
-    await asyncStorage.setItem('user-token', res.token);
-    return {};
+  try {
+    res = await post(getServer().SIGNUP_SERVER + '/login', {
+      loginMethod,
+      password,
+    });
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
   }
 
-  return { error: 'invalid-password' };
+  if (!res.token) {
+    throw new Error('login: User token not set');
+  }
+
+  await asyncStorage.setItem('user-token', res.token);
+  return {};
 };
 
 handlers['subscribe-sign-out'] = async function () {
@@ -1765,10 +1591,13 @@ handlers['get-budgets'] = async function () {
           if (name !== DEMO_BUDGET_ID) {
             return {
               id: name,
-              cloudFileId: prefs.cloudFileId,
-              groupId: prefs.groupId,
+              ...(prefs.cloudFileId ? { cloudFileId: prefs.cloudFileId } : {}),
+              ...(prefs.encryptKeyId
+                ? { encryptKeyId: prefs.encryptKeyId }
+                : {}),
+              ...(prefs.groupId ? { groupId: prefs.groupId } : {}),
               name: prefs.budgetName || '(no name)',
-            };
+            } satisfies Budget;
           }
         }
 
