@@ -315,7 +315,7 @@ class AccountInternal extends PureComponent {
 
   fetchTransactions = filters => {
     const query = this.makeRootQuery();
-    this.rootQuery = this.currentQuery = this.filterQuery = query;
+    this.rootQuery = this.currentQuery = query;
     if (filters) this.applyFilters(filters);
     else this.updateQuery(query);
 
@@ -680,16 +680,20 @@ class AccountInternal extends PureComponent {
     };
   }
 
-  getFilterQuery(filters, conditionsOpKey) {
-    return {
-      name: `filtered-query`,
-      query: this.makeRootQuery()
+  getFilteredAmount = async (filters, conditionsOpKey) => {
+    const filteredQuery = await runQuery(
+      q('transactions')
         .filter({
           [conditionsOpKey]: [...filters],
         })
-        .calculate({ $sum: '$amount' }),
-    };
-  }
+        .select([{ amount: { $sum: '$amount' } }]),
+    );
+    const filteredAmount = filteredQuery.data.reduce(
+      (a, v) => (a = a + v.amount),
+      0,
+    );
+    return filteredAmount;
+  };
 
   isNew = id => {
     return this.props.newTransactions.includes(id);
@@ -1312,7 +1316,7 @@ class AccountInternal extends PureComponent {
         conditions: conditions.filter(cond => !cond.customName),
       });
       const conditionsOpKey = this.state.conditionsOp === 'or' ? '$or' : '$and';
-      this.filterQuery = this.getFilterQuery(filters, conditionsOpKey);
+      this.filteredAmount = await this.getFilteredAmount(filters, conditionsOpKey);
       this.currentQuery = this.rootQuery.filter({
         [conditionsOpKey]: [...filters, ...customFilters],
       });
@@ -1530,7 +1534,7 @@ class AccountInternal extends PureComponent {
           >
             <View style={styles.page}>
               <AccountHeader
-                filterQuery={this.filterQuery}
+                filteredAmount={this.filteredAmount}
                 tableRef={this.table}
                 editingName={editingName}
                 isNameEditable={isNameEditable}

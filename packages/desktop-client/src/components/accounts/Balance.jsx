@@ -104,16 +104,11 @@ function SelectedBalance({ selectedItems, account }) {
   );
 }
 
-function FilteredBalance({ filterQuery }) {
-  const balance = useSheetValue({
-    name: filterQuery ? filterQuery.name : '',
-    query: filterQuery ? filterQuery.query : null,
-  });
-
+function FilteredBalance({ filteredAmount }) {
   return (
     <DetailedBalance
       name="Filtered balance:"
-      balance={balance}
+      balance={filteredAmount || 0}
       isExactBalance={true}
     />
   );
@@ -143,7 +138,7 @@ export function Balances({
   onToggleExtraBalances,
   account,
   filteredItems,
-  filterQuery,
+  filteredAmount,
 }) {
   const selectedItems = useSelectedItems();
 
@@ -202,7 +197,7 @@ export function Balances({
         <SelectedBalance selectedItems={selectedItems} account={account} />
       )}
       {filteredItems.length > 0 && (
-        <FilteredBalance filterQuery={filterQuery} />
+        <FilteredBalance filteredAmount={filteredAmount} />
       )}
     </View>
   );
