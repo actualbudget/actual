@@ -235,6 +235,7 @@ function ConditionEditor({
         value={value}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
+        numberFormatType="currency"
       />
     );
   }
@@ -365,6 +366,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               op={op}
               value={value}
               onChange={v => onChange('value', v)}
+              numberFormatType="currency"
             />
           </View>
         </>

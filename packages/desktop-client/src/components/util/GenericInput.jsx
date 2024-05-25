@@ -26,7 +26,7 @@ export function GenericInput({
   field,
   subfield,
   type,
-  numberFormatType = 'currency',
+  numberFormatType = undefined,
   multi,
   value,
   inputRef,
