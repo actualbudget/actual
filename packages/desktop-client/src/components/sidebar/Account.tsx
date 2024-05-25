@@ -147,15 +147,19 @@ export function Account({
 
             <AlignedText
               left={
-                <Tooltip
-                  content={<Notes notes={note} />}
-                  placement="bottom left"
-                  triggerProps={{
-                    delay: 1000,
-                  }}
-                >
-                  {name}
-                </Tooltip>
+                !!account?.id ? (
+                  <Tooltip
+                    content={<Notes notes={note} />}
+                    placement="bottom left"
+                    triggerProps={{
+                      delay: 1000,
+                    }}
+                  >
+                    {name}
+                  </Tooltip>
+                ) : (
+                  name
+                )
               }
               right={<CellValue binding={query} type="financial" />}
             />
