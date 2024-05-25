@@ -5,10 +5,13 @@ import { css } from 'glamor';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useNotes } from '../../hooks/useNotes';
 import { styles, theme, type CSSProperties } from '../../style';
 import { AlignedText } from '../common/AlignedText';
 import { Link } from '../common/Link';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
+import { Notes } from '../Notes';
 import {
   useDraggable,
   useDroppable,
@@ -82,6 +85,9 @@ export function Account({
     onDrop,
   });
 
+  const accountNote = useNotes(`account-${account?.id}`);
+  const note = `**${name}**` + (accountNote ? `\n\n${accountNote}` : '');
+
   return (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
@@ -140,7 +146,17 @@ export function Account({
             </View>
 
             <AlignedText
-              left={name}
+              left={
+                <Tooltip
+                  content={<Notes notes={note} />}
+                  placement="bottom left"
+                  triggerProps={{
+                    delay: 1000,
+                  }}
+                >
+                  {name}
+                </Tooltip>
+              }
               right={<CellValue binding={query} type="financial" />}
             />
           </Link>
