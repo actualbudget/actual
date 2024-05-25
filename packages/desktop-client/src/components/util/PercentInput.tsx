@@ -17,11 +17,10 @@ import { useFormat } from '../spreadsheet/useFormat';
 type PercentInputProps = {
   id?: string;
   inputRef?: Ref<HTMLInputElement>;
-  value: number;
-  defaultValue?: number;
-  onChangeValue?: (value: string) => void;
+  value?: number;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
+  onChangeValue?: (value: string) => void;
   onUpdatePercent?: (percent: number) => void;
   style?: CSSProperties;
   focused?: boolean;
