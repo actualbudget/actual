@@ -99,6 +99,20 @@ export function cashFlowByDate(
     );
     let schedules = [];
     let transactions = [];
+    let budgetsForMonths = [];
+    const queries = [];
+
+    queries.push(
+      q('transactions')
+        .filter({
+          [conditionsOpKey]: filters,
+          date: { $transform: '$month', $lt: start },
+          'account.offbudget': false,
+        })
+        .calculate({ $sum: '$amount' }),
+      makeQuery().filter({ amount: { $gt: 0 } }),
+      makeQuery().filter({ amount: { $lt: 0 } }),
+    );
 
     if (calcForecast && forecastSource === 'schedule') {
       let scheduleQuery = q('schedules').select([
@@ -150,6 +164,20 @@ export function cashFlowByDate(
         }),
       );
     }
+    if (calcForecast && forecastSource === 'budget') {
+      const months = monthUtils.range(end, forecast);
+
+      budgetsForMonths = await Promise.all(
+        months.map(month => {
+          return sendCatch('report-budget-month', {
+            month,
+          }).then(values => {
+            const schedAdjustment = 0;
+            return { month, values, schedAdjustment };
+          });
+        }),
+      );
+    }
 
     if (calcForecast && forecastSource === 'average') {
       const transactionQuery = q('transactions')
@@ -193,35 +221,23 @@ export function cashFlowByDate(
       );
     }
 
-    return runAll(
-      [
-        q('transactions')
-          .filter({
-            [conditionsOpKey]: filters,
-            date: { $transform: '$month', $lt: start },
-            'account.offbudget': false,
-          })
-          .calculate({ $sum: '$amount' }),
-        makeQuery().filter({ amount: { $gt: 0 } }),
-        makeQuery().filter({ amount: { $lt: 0 } }),
-      ],
-      data => {
-        setData(
-          recalculate(
-            data,
-            start,
-            end,
-            forecast,
-            isConcise,
-            schedules,
-            transactions,
-            filters,
-            forecastSource,
-            calcForecast,
-          ),
-        );
-      },
-    );
+    return runAll(queries, data => {
+      setData(
+        recalculate(
+          data,
+          start,
+          end,
+          forecast,
+          isConcise,
+          schedules,
+          transactions,
+          filters,
+          budgetsForMonths,
+          forecastSource,
+          calcForecast,
+        ),
+      );
+    });
   };
 }
 
@@ -234,6 +250,7 @@ function recalculate(
   schedules,
   transactions,
   filters,
+  budgetsForMonths,
   forecastSource: string,
   calcForecast: boolean,
 ) {
@@ -304,6 +321,36 @@ function recalculate(
           }
         }
       });
+    });
+  }
+  if (calcForecast && forecastSource === 'budget') {
+    budgetsForMonths.forEach(budgetMonth => {
+      const month = budgetMonth.month
+      const monthsheet = monthUtils.sheetForMonth(month);
+      const monthLeftover = budgetMonth.values.data.find(
+        budgetElement => budgetElement.name === monthsheet + '!total-leftover',
+      ).value;
+
+      const budgetExpenses = {
+        date: isConcise ? monthUtils.monthFromDate(month) : monthUtils.subDays(monthUtils.nextMonth(month), 1),
+        isTransfer: false,
+        amount: -monthLeftover,
+      };
+
+      futureExpense.push(budgetExpenses);
+
+      const monthIncomeLeftover = budgetMonth.values.data.find(
+        budgetElement => budgetElement.name === monthsheet + '!total-income-leftover',
+      ).value;
+
+      const budgetIncome = {
+        date: isConcise ? monthUtils.monthFromDate(month) : monthUtils.subDays(monthUtils.nextMonth(month), 1),
+        isTransfer: false,
+        amount: monthIncomeLeftover,
+      };
+
+      futureIncome.push(budgetIncome);
+
     });
   }
 
