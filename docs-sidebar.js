@@ -243,6 +243,7 @@ const sidebars = {
           items: [
             'troubleshooting/server',
             'troubleshooting/shared-array-buffer',
+            'troubleshooting/reset_password',
             'troubleshooting/edge-browser',
           ],
         },
