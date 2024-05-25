@@ -10,12 +10,16 @@ describe('utility functions', () => {
     expect(looselyParseAmount('3.45')).toBe(3.45);
     expect(looselyParseAmount('3.456')).toBe(3456);
     expect(looselyParseAmount('3.45000')).toBe(3.45);
+    expect(looselyParseAmount('3.450000')).toBe(3.45);
+    expect(looselyParseAmount('3.450000000')).toBe(3.45);
   });
 
   test('looseParseAmount works with alternate formats', () => {
     expect(looselyParseAmount('3,45')).toBe(3.45);
     expect(looselyParseAmount('3,456')).toBe(3456);
     expect(looselyParseAmount('3,45000')).toBe(3.45);
+    expect(looselyParseAmount('3,450000')).toBe(3.45);
+    expect(looselyParseAmount('3,450000000')).toBe(3.45);
   });
 
   test('looseParseAmount works with negative numbers', () => {
