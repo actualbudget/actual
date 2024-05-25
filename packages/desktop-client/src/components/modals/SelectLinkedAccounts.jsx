@@ -7,6 +7,7 @@ import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
 
 const addAccountOption = { id: 'new', name: 'Create new account' };
@@ -176,7 +177,9 @@ function TableRow({
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
       <Field width={200}>{externalAccount.name}</Field>
-      <Field width={80}>{externalAccount.balance}</Field>
+      <Field width={80}>
+        <PrivacyFilter>{externalAccount.balance}</PrivacyFilter>
+      </Field>
       <Field
         width="flex"
         truncate={focusedField !== 'account'}
