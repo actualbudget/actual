@@ -254,9 +254,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
       throw new Error('`payeeName` is required when adding a transaction');
     }
 
-    const payee_name = trans.payeeName;
-
-    trans.imported_payee = trans.imported_payee || payee_name;
+    trans.imported_payee = trans.imported_payee || trans.payeeName;
     if (trans.imported_payee) {
       trans.imported_payee = trans.imported_payee.trim();
     }
@@ -265,12 +263,12 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     // when rules are run, they have the right data. Resolving payees
     // also simplifies the payee creation process
     trans.account = acctId;
-    trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
+    trans.payee = await resolvePayee(trans, trans.payeeName, payeesToCreate);
 
     trans.cleared = Boolean(trans.booked);
 
     normalized.push({
-      payee_name,
+      payee_name: trans.payeeName,
       trans: {
         amount: amountToInteger(trans.amount),
         payee: trans.payee,
