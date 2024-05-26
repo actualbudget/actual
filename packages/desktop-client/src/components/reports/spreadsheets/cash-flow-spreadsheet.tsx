@@ -325,14 +325,16 @@ function recalculate(
   }
   if (calcForecast && forecastSource === 'budget') {
     budgetsForMonths.forEach(budgetMonth => {
-      const month = budgetMonth.month
+      const month = budgetMonth.month;
       const monthsheet = monthUtils.sheetForMonth(month);
       const monthLeftover = budgetMonth.values.data.find(
         budgetElement => budgetElement.name === monthsheet + '!total-leftover',
       ).value;
 
       const budgetExpenses = {
-        date: isConcise ? monthUtils.monthFromDate(month) : monthUtils.subDays(monthUtils.nextMonth(month), 1),
+        date: isConcise
+          ? monthUtils.monthFromDate(month)
+          : monthUtils.subDays(monthUtils.nextMonth(month), 1),
         isTransfer: false,
         amount: -monthLeftover,
       };
@@ -340,17 +342,19 @@ function recalculate(
       futureExpense.push(budgetExpenses);
 
       const monthIncomeLeftover = budgetMonth.values.data.find(
-        budgetElement => budgetElement.name === monthsheet + '!total-income-leftover',
+        budgetElement =>
+          budgetElement.name === monthsheet + '!total-income-leftover',
       ).value;
 
       const budgetIncome = {
-        date: isConcise ? monthUtils.monthFromDate(month) : monthUtils.subDays(monthUtils.nextMonth(month), 1),
+        date: isConcise
+          ? monthUtils.monthFromDate(month)
+          : monthUtils.subDays(monthUtils.nextMonth(month), 1),
         isTransfer: false,
         amount: monthIncomeLeftover,
       };
 
       futureIncome.push(budgetIncome);
-
     });
   }
 
