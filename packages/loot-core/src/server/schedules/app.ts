@@ -400,7 +400,13 @@ async function getOccurrencesToDate({ config, end }) {
     return schedule
       .occurrences({ start: d.startOfDay(new Date()), end })
       .toArray()
-      .map(date => dayFromDate(date.date));
+      .map(date =>
+        config.skipWeekend
+          ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
+          : date.date,
+      )
+      .filter(date => !d.isPast(date))
+      .map(date => dayFromDate(date));
   } catch (err) {
     captureBreadcrumb(config);
     throw err;

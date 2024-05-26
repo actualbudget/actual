@@ -114,6 +114,10 @@ export function CashFlow() {
 
   const allForecastSource = [
     {
+      name: 'budget',
+      pretty: 'Budget',
+    },
+    {
       name: 'schedule',
       pretty: 'Schedules',
     },
