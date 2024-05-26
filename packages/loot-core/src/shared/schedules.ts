@@ -36,14 +36,14 @@ export function getHasTransactionsQuery(schedules) {
           $gte:
             dateCond && dateCond.op === 'is'
               ? schedule.next_date
-              : monthUtils.subDays(schedule.next_date, 2),
+              : monthUtils.subDays(schedule.next_date, 7),
         },
       },
     };
   });
 
   return q('transactions')
-    .options({ splits: 'grouped' })
+    .options({ splits: 'all' })
     .filter({ $or: filters })
     .orderBy({ date: 'desc' })
     .select(['schedule', 'date']);

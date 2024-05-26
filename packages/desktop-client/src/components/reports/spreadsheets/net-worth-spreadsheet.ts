@@ -1,7 +1,8 @@
-// @ts-strict-ignore
 import * as d from 'date-fns';
+import keyBy from 'lodash/keyBy';
 
 import { runQuery } from 'loot-core/src/client/query-helpers';
+import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
@@ -10,21 +11,27 @@ import {
   integerToAmount,
   amountToInteger,
 } from 'loot-core/src/shared/util';
+import {
+  type AccountEntity,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
-import { index } from '../util';
+type Balance = {
+  date: string;
+  amount: number;
+};
 
 export function createSpreadsheet(
-  start,
-  end,
-  accounts,
-  conditions = [],
-  conditionsOp,
+  start: string,
+  end: string,
+  accounts: AccountEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or',
 ) {
-  return async (spreadsheet, setData) => {
-    if (accounts.length === 0) {
-      return null;
-    }
-
+  return async (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: ReturnType<typeof recalculate>) => void,
+  ) => {
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
@@ -32,7 +39,7 @@ export function createSpreadsheet(
 
     const data = await Promise.all(
       accounts.map(async acct => {
-        const [starting, balances] = await Promise.all([
+        const [starting, balances]: [number, Balance[]] = await Promise.all([
           runQuery(
             q('transactions')
               .filter({
@@ -65,7 +72,7 @@ export function createSpreadsheet(
 
         return {
           id: acct.id,
-          balances: index(balances, 'date'),
+          balances: keyBy(balances, 'date'),
           starting,
         };
       }),
@@ -75,7 +82,15 @@ export function createSpreadsheet(
   };
 }
 
-function recalculate(data, start, end) {
+function recalculate(
+  data: Array<{
+    id: string;
+    balances: Record<string, Balance>;
+    starting: number;
+  }>,
+  start: string,
+  end: string,
+) {
   const months = monthUtils.rangeInclusive(start, end);
 
   const accountBalances = data.map(account => {
@@ -92,10 +107,20 @@ function recalculate(data, start, end) {
   let hasNegative = false;
   let startNetWorth = 0;
   let endNetWorth = 0;
-  let lowestNetWorth = null;
-  let highestNetWorth = null;
+  let lowestNetWorth: number | null = null;
+  let highestNetWorth: number | null = null;
 
-  const graphData = months.reduce((arr, month, idx) => {
+  const graphData = months.reduce<
+    Array<{
+      x: string;
+      y: number;
+      assets: string;
+      debt: string;
+      change: string;
+      networth: string;
+      date: string;
+    }>
+  >((arr, month, idx) => {
     let debt = 0;
     let assets = 0;
     let total = 0;
@@ -134,10 +159,10 @@ function recalculate(data, start, end) {
     });
 
     arr.forEach(item => {
-      if (item.y < lowestNetWorth || lowestNetWorth === null) {
+      if (lowestNetWorth === null || item.y < lowestNetWorth) {
         lowestNetWorth = item.y;
       }
-      if (item.y > highestNetWorth || highestNetWorth === null) {
+      if (highestNetWorth === null || item.y > highestNetWorth) {
         highestNetWorth = item.y;
       }
     });

@@ -116,11 +116,12 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
       {(initializing || !budgetId) && (
         <AppBackground initializing={initializing} loadingText={loadingText} />
       )}
-      {budgetId ? (
-        <FinancesApp />
-      ) : (
-        <ManagementApp isLoading={loadingText != null} />
-      )}
+      {!initializing &&
+        (budgetId ? (
+          <FinancesApp />
+        ) : (
+          <ManagementApp isLoading={loadingText != null} />
+        ))}
 
       <UpdateNotification />
       <MobileWebMessage />

@@ -95,9 +95,6 @@ export function Notes({
   getStyle,
 }: NotesProps) {
   const { isNarrowWidth } = useResponsive();
-  const _onChange = value => {
-    onChange?.(value);
-  };
 
   const textAreaRef = useRef<HTMLTextAreaElement>();
 
@@ -120,7 +117,7 @@ export function Notes({
         ...getStyle?.(editable),
       })}`}
       value={notes || ''}
-      onChange={e => _onChange(e.target.value)}
+      onChange={e => onChange?.(e.target.value)}
       onBlur={e => onBlur?.(e.target.value)}
       placeholder="Notes (markdown supported)"
     />

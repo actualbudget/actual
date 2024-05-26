@@ -335,22 +335,25 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
 
     const apply = (field, op, value) => {
       if (type === 'number') {
+        const outflowQuery = {
+          $and: [
+            { amount: { $lt: 0 } },
+            { [field]: { $transform: '$neg', [op]: value } },
+          ],
+        };
+        const inflowQuery = {
+          $and: [{ amount: { $gt: 0 } }, { [field]: { [op]: value } }],
+        };
         if (options) {
           if (options.outflow) {
-            return {
-              $and: [
-                { amount: { $lt: 0 } },
-                { [field]: { $transform: '$neg', [op]: value } },
-              ],
-            };
+            return outflowQuery;
           } else if (options.inflow) {
-            return {
-              $and: [{ amount: { $gt: 0 } }, { [field]: { [op]: value } }],
-            };
+            return inflowQuery;
           }
         }
-
-        return { amount: { [op]: value } };
+        return {
+          $or: [outflowQuery, inflowQuery],
+        };
       } else if (type === 'string') {
         return { [field]: { $transform: '$lower', [op]: value } };
       } else if (type === 'date') {

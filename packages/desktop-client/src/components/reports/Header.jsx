@@ -2,12 +2,9 @@ import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { SvgArrowLeft } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
-import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
-import { Link } from '../common/Link';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
@@ -21,7 +18,6 @@ import {
 } from './reportRanges';
 
 export function Header({
-  title,
   start,
   end,
   forecast,
@@ -51,26 +47,16 @@ export function Header({
   return (
     <View
       style={{
-        padding: 10,
+        padding: 20,
         paddingTop: 0,
         flexShrink: 0,
       }}
     >
-      <Link
-        variant="button"
-        type="bare"
-        to="/reports"
-        style={{ marginBottom: '15', alignSelf: 'flex-start' }}
-      >
-        <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
-      </Link>
-      <View style={styles.veryLargeText}>{title}</View>
-
-      {path !== '/reports/custom' && (
+      {!['/reports/custom', '/reports/spending'].includes(path) && (
         <View
           style={{
             flexDirection: isNarrowWidth ? 'column' : 'row',
-            alignItems: isNarrowWidth ? 'right' : 'center',
+            alignItems: isNarrowWidth ? 'flex-start' : 'center',
             marginTop: 15,
             gap: 15,
           }}
@@ -124,6 +110,7 @@ export function Header({
               flexDirection: 'row',
               alignItems: 'center',
               gap: 15,
+              flexWrap: 'wrap',
             }}
           >
             {show1Month && (

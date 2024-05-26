@@ -15,6 +15,7 @@ config.resolve.extensions = [
   '.json',
 ];
 config.resolve.fallback = {};
+config.externals.push('@actual-app/crdt');
 config.output.filename = 'bundle.api.js';
 config.output.sourceMapFilename = 'bundle.api.js.map';
 config.output.path = path.join(

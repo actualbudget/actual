@@ -1039,7 +1039,7 @@ handlers['gocardless-create-web-token'] = async function ({
   }
 };
 
-handlers['gocardless-accounts-sync'] = async function ({ id }) {
+handlers['accounts-bank-sync'] = async function ({ id }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
@@ -1047,8 +1047,8 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
   const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0 AND a.id = ?`,
-    [id],
+         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}`,
+    id ? [id] : [],
     true,
   );
 
@@ -1061,7 +1061,7 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        console.group('Bank Sync operation');
+        console.group('Bank Sync operation for account:', acct.name);
         const res = await bankSync.syncAccount(
           userId,
           userKey,
@@ -1412,7 +1412,11 @@ handlers['subscribe-needs-bootstrap'] = async function ({
     return { error: res.reason };
   }
 
-  return { bootstrapped: res.data.bootstrapped, hasServer: true };
+  return {
+    bootstrapped: res.data.bootstrapped,
+    loginMethod: res.data.loginMethod || 'password',
+    hasServer: true,
+  };
 };
 
 handlers['subscribe-bootstrap'] = async function ({ password }) {
@@ -1484,11 +1488,15 @@ handlers['subscribe-change-password'] = async function ({ password }) {
   return {};
 };
 
-handlers['subscribe-sign-in'] = async function ({ password }) {
+handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
+  if (typeof loginMethod !== 'string' || loginMethod == null) {
+    loginMethod = 'password';
+  }
   let res;
 
   try {
     res = await post(getServer().SIGNUP_SERVER + '/login', {
+      loginMethod,
       password,
     });
   } catch (err) {
@@ -1586,6 +1594,9 @@ handlers['get-budgets'] = async function () {
             return {
               id: name,
               ...(prefs.cloudFileId ? { cloudFileId: prefs.cloudFileId } : {}),
+              ...(prefs.encryptKeyId
+                ? { encryptKeyId: prefs.encryptKeyId }
+                : {}),
               ...(prefs.groupId ? { groupId: prefs.groupId } : {}),
               name: prefs.budgetName || '(no name)',
             } satisfies Budget;

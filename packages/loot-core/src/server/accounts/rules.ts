@@ -673,17 +673,16 @@ export class Rule {
     });
   }
 
-  execActions(object) {
+  execActions<T>(object: T): Partial<T> {
     const result = execActions(this.actions, {
       ...object,
-      subtransactions: object.subtransactions,
     });
     const changes = Object.keys(result).reduce((prev, cur) => {
       if (result[cur] !== object[cur]) {
         prev[cur] = result[cur];
       }
       return prev;
-    }, {});
+    }, {} as T);
     return changes;
   }
 

@@ -22,15 +22,28 @@ async function createScheduleList(template, current_month, category) {
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
+    const scheduleAmount =
+      amountCondition.op === 'isbetween'
+        ? Math.round(amountCondition.value.num1 + amountCondition.value.num2) /
+          2
+        : amountCondition.value;
+    const { amount: postRuleAmount, subtransactions } = rule.execActions({
+      amount: scheduleAmount,
+      category: category.id,
+      subtransactions: [],
+    });
+    const categorySubtransactions = subtransactions?.filter(
+      t => t.category === category.id,
+    );
+
+    // Unless the current category is relevant to the schedule, target the post-rule amount.
     const sign = category.is_income ? 1 : -1;
     const target =
-      amountCondition.op === 'isbetween'
-        ? (sign *
-            Math.round(
-              amountCondition.value.num1 + amountCondition.value.num2,
-            )) /
-          2
-        : sign * amountCondition.value;
+      sign *
+      (categorySubtransactions?.length
+        ? categorySubtransactions.reduce((acc, t) => acc + t.amount, 0)
+        : postRuleAmount ?? scheduleAmount);
+
     const next_date_string = getNextDate(
       dateConditions,
       monthUtils._parse(current_month),

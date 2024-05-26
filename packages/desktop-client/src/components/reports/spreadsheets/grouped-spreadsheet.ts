@@ -1,12 +1,18 @@
-// @ts-strict-ignore
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type IntervalEntity,
+  type GroupedEntity,
+} from 'loot-core/src/types/models/reports';
 
-import { categoryLists, ReportOptions } from '../ReportOptions';
+import {
+  categoryLists,
+  type QueryDataEntity,
+  ReportOptions,
+} from '../ReportOptions';
 
 import { type createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { filterEmptyRows } from './filterEmptyRows';
@@ -41,7 +47,7 @@ export function createGroupedSpreadsheet({
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: DataEntity[]) => void,
+    setData: (data: GroupedEntity[]) => void,
   ) => {
     if (categoryList.length === 0) {
       return;
@@ -52,7 +58,9 @@ export function createGroupedSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    let [assets, debts] = await Promise.all([
+    let assets: QueryDataEntity[];
+    let debts: QueryDataEntity[];
+    [assets, debts] = await Promise.all([
       runQuery(
         makeQuery(
           'assets',
@@ -92,104 +100,110 @@ export function createGroupedSpreadsheet({
       });
     }
 
-    const format =
-      ReportOptions.intervalMap.get(interval).toLowerCase() + 'FromDate';
-    const rangeProps =
+    const intervals =
       interval === 'Weekly'
-        ? [
-            monthUtils[format](startDate),
-            monthUtils[format](endDate),
-            firstDayOfWeekIdx,
-          ]
-        : [monthUtils[format](startDate), monthUtils[format](endDate)];
-    const intervals = monthUtils[ReportOptions.intervalRange.get(interval)](
-      ...rangeProps,
-    );
+        ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
+        : monthUtils[
+            ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
+          ](startDate, endDate);
 
-    const groupedData: DataEntity[] = categoryGroup.map(
+    const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {
         let totalAssets = 0;
         let totalDebts = 0;
 
-        const intervalData = intervals.reduce((arr, intervalItem) => {
-          let groupedAssets = 0;
-          let groupedDebts = 0;
+        const intervalData = intervals.reduce(
+          (arr: IntervalEntity[], intervalItem) => {
+            let groupedAssets = 0;
+            let groupedDebts = 0;
 
-          group.categories.forEach(item => {
-            const intervalAssets = filterHiddenItems(
+            if (!group.categories) {
+              return [];
+            }
+
+            group.categories.forEach(item => {
+              const intervalAssets = filterHiddenItems(
+                item,
+                assets,
+                showOffBudget,
+                showHiddenCategories,
+                showUncategorized,
+              )
+                .filter(
+                  asset =>
+                    asset.date === intervalItem &&
+                    asset.category === (item.id ?? null),
+                )
+                .reduce((a, v) => (a = a + v.amount), 0);
+              groupedAssets += intervalAssets;
+
+              const intervalDebts = filterHiddenItems(
+                item,
+                debts,
+                showOffBudget,
+                showHiddenCategories,
+                showUncategorized,
+              )
+                .filter(
+                  debts =>
+                    debts.date === intervalItem &&
+                    debts.category === (item.id ?? null),
+                )
+                .reduce((a, v) => (a = a + v.amount), 0);
+              groupedDebts += intervalDebts;
+            });
+
+            totalAssets += groupedAssets;
+            totalDebts += groupedDebts;
+
+            arr.push({
+              date: intervalItem,
+              totalAssets: integerToAmount(groupedAssets),
+              totalDebts: integerToAmount(groupedDebts),
+              totalTotals: integerToAmount(groupedDebts + groupedAssets),
+            });
+
+            return arr;
+          },
+          [],
+        );
+
+        const stackedCategories =
+          group.categories &&
+          group.categories.map(item => {
+            const calc = recalculate({
               item,
+              intervals,
               assets,
-              showOffBudget,
-              showHiddenCategories,
-              showUncategorized,
-            )
-              .filter(
-                asset =>
-                  asset.date === intervalItem &&
-                  asset.category === (item.id ?? null),
-              )
-              .reduce((a, v) => (a = a + v.amount), 0);
-            groupedAssets += intervalAssets;
-
-            const intervalDebts = filterHiddenItems(
-              item,
               debts,
+              groupByLabel: 'category',
               showOffBudget,
               showHiddenCategories,
               showUncategorized,
-            )
-              .filter(
-                debts =>
-                  debts.date === intervalItem &&
-                  debts.category === (item.id ?? null),
-              )
-              .reduce((a, v) => (a = a + v.amount), 0);
-            groupedDebts += intervalDebts;
+            });
+            return { ...calc };
           });
-
-          totalAssets += groupedAssets;
-          totalDebts += groupedDebts;
-
-          arr.push({
-            date: intervalItem,
-            totalAssets: integerToAmount(groupedAssets),
-            totalDebts: integerToAmount(groupedDebts),
-            totalTotals: integerToAmount(groupedDebts + groupedAssets),
-          });
-
-          return arr;
-        }, []);
-
-        const stackedCategories = group.categories.map(item => {
-          const calc = recalculate({
-            item,
-            intervals,
-            assets,
-            debts,
-            groupByLabel: 'category',
-            showOffBudget,
-            showHiddenCategories,
-            showUncategorized,
-          });
-          return { ...calc };
-        });
 
         return {
-          id: group.id,
+          id: group.id || '',
           name: group.name,
           totalAssets: integerToAmount(totalAssets),
           totalDebts: integerToAmount(totalDebts),
           totalTotals: integerToAmount(totalAssets + totalDebts),
           intervalData,
-          categories: stackedCategories.filter(i =>
-            filterEmptyRows(showEmpty, i, balanceTypeOp),
-          ),
+          categories:
+            stackedCategories &&
+            stackedCategories.filter(i =>
+              filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
+            ),
         };
       },
       [startDate, endDate],
     );
     setData(
-      groupedData.filter(i => filterEmptyRows(showEmpty, i, balanceTypeOp)),
+      groupedData.filter(i =>
+        filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
+      ),
     );
   };
 }
