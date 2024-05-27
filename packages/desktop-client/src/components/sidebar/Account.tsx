@@ -9,6 +9,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { styles, theme, type CSSProperties } from '../../style';
 import { AlignedText } from '../common/AlignedText';
 import { Link } from '../common/Link';
+import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
@@ -86,7 +87,7 @@ export function Account({
   });
 
   const accountNote = useNotes(`account-${account?.id}`);
-  const note = `**${name}**` + (accountNote ? `\n\n${accountNote}` : '');
+  // const note = `**${name}**` + (accountNote ? `\n\n${accountNote}` : '');
 
   return (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
@@ -149,7 +150,18 @@ export function Account({
               left={
                 !!account?.id ? (
                   <Tooltip
-                    content={<Notes notes={note} />}
+                    content={
+                      <View>
+                        <Text
+                          style={{
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {name}
+                        </Text>
+                        {accountNote && <Notes notes={accountNote} />}
+                      </View>
+                    }
                     placement="bottom left"
                     triggerProps={{
                       delay: 1000,
