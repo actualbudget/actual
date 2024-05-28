@@ -81,15 +81,18 @@ export function SelectedTransactionsButton({
     const noSplitTransactions = transactions.every(
       t => t && !t.is_parent && !t.is_child,
     );
+    const noReconciledTransactions = transactions.every(
+      t => t && !t.reconciled,
+    );
 
-    return allSameDate && noSplitTransactions;
-  }, [selectedIds]);
+    return allSameDate && noSplitTransactions && noReconciledTransactions;
+  }, [selectedIds, types]);
 
   const canMakeAsSeparateTransactions = useMemo(() => {
     if (selectedIds.length === 1 && !types.preview) {
       const selectedId = selectedIds[0];
       const transaction = getTransaction(selectedId);
-      return transaction && !!transaction.is_parent;
+      return transaction && transaction.is_parent && !transaction.reconciled;
     }
     return false;
   }, [selectedIds, types]);
