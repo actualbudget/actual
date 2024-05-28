@@ -7,6 +7,7 @@ import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
 
 const addAccountOption = { id: 'new', name: 'Create new account' };
@@ -18,6 +19,7 @@ export function SelectLinkedAccounts({
   actions,
   syncSource,
 }) {
+  externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
   const localAccounts = useAccounts().filter(a => a.closed === 0);
   const [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(
@@ -108,6 +110,7 @@ export function SelectLinkedAccounts({
             <TableHeader
               headers={[
                 { name: 'Bank Account To Sync', width: 200 },
+                { name: 'Balance', width: 80 },
                 { name: 'Account in Actual', width: 'flex' },
                 { name: 'Actions', width: 'flex' },
               ]}
@@ -174,6 +177,9 @@ function TableRow({
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
       <Field width={200}>{externalAccount.name}</Field>
+      <Field width={80}>
+        <PrivacyFilter>{externalAccount.balance}</PrivacyFilter>
+      </Field>
       <Field
         width="flex"
         truncate={focusedField !== 'account'}
