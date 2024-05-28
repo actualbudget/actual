@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useDispatch } from 'react-redux';
 
+import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
 
@@ -18,43 +20,45 @@ export function SelectedTransactionsButton({
   onCreateRule,
   onSetTransfer,
   onScheduleAction,
-  pushModal,
   showMakeTransfer,
+  onMakeAsSplitTransaction,
+  onMakeAsSeparateTransactions,
 }) {
+  const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
+  const selectedIds = [...selectedItems];
 
   const types = useMemo(() => {
-    const items = [...selectedItems];
+    const items = selectedIds;
     return {
       preview: !!items.find(id => isPreviewId(id)),
       trans: !!items.find(id => !isPreviewId(id)),
     };
-  }, [selectedItems]);
+  }, [selectedIds]);
 
   const ambiguousDuplication = useMemo(() => {
-    const transactions = [...selectedItems].map(id => getTransaction(id));
+    const transactions = selectedIds.map(id => getTransaction(id));
 
     return transactions.some(t => t && t.is_child);
-  }, [selectedItems]);
+  }, [selectedIds]);
 
   const linked = useMemo(() => {
     return (
       !types.preview &&
-      [...selectedItems].every(id => {
+      selectedIds.every(id => {
         const t = getTransaction(id);
         return t && t.schedule;
       })
     );
-  }, [types.preview, selectedItems, getTransaction]);
+  }, [types.preview, selectedIds, getTransaction]);
 
   const canBeTransfer = useMemo(() => {
     // only two selected
-    if (selectedItems.size !== 2) {
+    if (selectedIds.length !== 2) {
       return false;
     }
-    const transactions = [...selectedItems];
-    const fromTrans = getTransaction(transactions[0]);
-    const toTrans = getTransaction(transactions[1]);
+    const fromTrans = getTransaction(selectedIds[0]);
+    const toTrans = getTransaction(selectedIds[1]);
 
     // previously selected transactions aren't always present in current transaction list
     if (!fromTrans || !toTrans) {
@@ -62,39 +66,65 @@ export function SelectedTransactionsButton({
     }
 
     return validForTransfer(fromTrans, toTrans);
-  }, [selectedItems, getTransaction]);
+  }, [selectedIds, getTransaction]);
+
+  const canMakeAsSplitTransaction = useMemo(() => {
+    if (selectedIds.length <= 1 || types.preview) {
+      return false;
+    }
+
+    const transactions = selectedIds.map(id => getTransaction(id));
+
+    const allSameDate = transactions.every(
+      t => t && t.date === transactions[0].date,
+    );
+    const noSplitTransactions = transactions.every(
+      t => t && !t.is_parent && !t.is_child,
+    );
+
+    return allSameDate && noSplitTransactions;
+  }, [selectedIds]);
+
+  const canMakeAsSeparateTransactions = useMemo(() => {
+    if (selectedIds.length === 1 && !types.preview) {
+      const selectedId = selectedIds[0];
+      const transaction = getTransaction(selectedId);
+      return transaction && !!transaction.is_parent;
+    }
+    return false;
+  }, [selectedIds, types]);
 
   const hotKeyOptions = {
     enabled: types.trans,
     scopes: ['app'],
   };
-  useHotkeys('f', () => onShow([...selectedItems]), hotKeyOptions, [
+  useHotkeys('f', () => onShow(selectedIds), hotKeyOptions, [
     onShow,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('d', () => onDelete([...selectedItems]), hotKeyOptions, [
+  useHotkeys('d', () => onDelete(selectedIds), hotKeyOptions, [
     onDelete,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('a', () => onEdit('account', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('a', () => onEdit('account', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('p', () => onEdit('payee', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('p', () => onEdit('payee', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('n', () => onEdit('notes', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('n', () => onEdit('notes', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('c', () => onEdit('category', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('c', () => onEdit('category', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('l', () => onEdit('cleared', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('l', () => onEdit('cleared', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
 
   return (
@@ -115,12 +145,28 @@ export function SelectedTransactionsButton({
                 disabled: ambiguousDuplication,
               },
               { name: 'delete', text: 'Delete', key: 'D' },
+              ...(canMakeAsSplitTransaction
+                ? [
+                    {
+                      name: 'make-as-split-transaction',
+                      text: 'Make as split transaction',
+                    },
+                  ]
+                : []),
+              ...(canMakeAsSeparateTransactions
+                ? [
+                    {
+                      name: 'make-as-separate-transactions',
+                      text: 'Make as separate transactions',
+                    },
+                  ]
+                : []),
               ...(linked
                 ? [
                     {
                       name: 'view-schedule',
                       text: 'View schedule',
-                      disabled: selectedItems.size > 1,
+                      disabled: selectedIds.length > 1,
                     },
                     { name: 'unlink-schedule', text: 'Unlink schedule' },
                   ]
@@ -157,20 +203,26 @@ export function SelectedTransactionsButton({
       onSelect={name => {
         switch (name) {
           case 'show':
-            onShow([...selectedItems]);
+            onShow(selectedIds);
             break;
           case 'duplicate':
-            onDuplicate([...selectedItems]);
+            onDuplicate(selectedIds);
             break;
           case 'delete':
-            onDelete([...selectedItems]);
+            onDelete(selectedIds);
+            break;
+          case 'make-as-split-transaction':
+            onMakeAsSplitTransaction(selectedIds);
+            break;
+          case 'make-as-separate-transactions':
+            onMakeAsSeparateTransactions(selectedIds[0]);
             break;
           case 'post-transaction':
           case 'skip':
-            onScheduleAction(name, selectedItems);
+            onScheduleAction(name, selectedIds);
             break;
           case 'view-schedule':
-            const firstId = [...selectedItems][0];
+            const firstId = selectedIds[0];
             let scheduleId;
             if (isPreviewId(firstId)) {
               const parts = firstId.split('/');
@@ -181,27 +233,28 @@ export function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              pushModal('schedule-edit', { id: scheduleId });
+              dispatch(pushModal('schedule-edit', { id: scheduleId }));
             }
             break;
           case 'link-schedule':
-            pushModal('schedule-link', {
-              transactionIds: [...selectedItems],
-              getTransaction,
-              pushModal,
-            });
+            dispatch(
+              pushModal('schedule-link', {
+                transactionIds: selectedIds,
+                getTransaction,
+              }),
+            );
             break;
           case 'unlink-schedule':
-            onUnlink([...selectedItems]);
+            onUnlink(selectedIds);
             break;
           case 'create-rule':
-            onCreateRule([...selectedItems]);
+            onCreateRule(selectedIds);
             break;
           case 'set-transfer':
-            onSetTransfer([...selectedItems]);
+            onSetTransfer(selectedIds);
             break;
           default:
-            onEdit(name, [...selectedItems]);
+            onEdit(name, selectedIds);
         }
       }}
     />

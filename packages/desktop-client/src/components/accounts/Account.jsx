@@ -20,6 +20,7 @@ import {
   realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
+  makeChild,
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
@@ -1049,6 +1050,80 @@ class AccountInternal extends PureComponent {
     );
   };
 
+  onMakeAsSplitTransaction = async ids => {
+    this.setState({ workingHard: true });
+
+    const { data: transactions } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'none' }),
+    );
+
+    const [firstTransaction] = transactions;
+    const parentTransaction = {
+      is_parent: true,
+      cleared: transactions.every(t => !!t.cleared),
+      reconciled: transactions.every(t => !!t.reconciled),
+      date: firstTransaction.date,
+      account: firstTransaction.account,
+      amount: transactions
+        .map(t => t.amount)
+        .reduce((total, amount) => total + amount, 0),
+    };
+
+    const { added } = await send('transactions-batch-update', {
+      added: [parentTransaction],
+    });
+
+    const savedParentTransaction = added[0];
+
+    const childTransactions = transactions.map(t =>
+      makeChild(savedParentTransaction, t),
+    );
+
+    await send('transactions-batch-update', { updated: childTransactions });
+
+    this.refetchTransactions();
+  };
+
+  onMakeAsSeparateTransactions = async parentId => {
+    this.setState({ workingHard: true });
+
+    const { data } = await runQuery(
+      q('transactions')
+        .filter({ id: parentId })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+
+    const groupedTransaction = data[0];
+
+    if (!groupedTransaction.is_parent) {
+      return;
+    }
+
+    const [parentTransaction, ...transactions] =
+      ungroupTransaction(groupedTransaction);
+
+    const updated = transactions.map(trans => {
+      return {
+        ...trans,
+        cleared: parentTransaction.cleared,
+        reconciled: parentTransaction.reconciled,
+        is_child: false,
+        parent_id: null,
+      };
+    });
+
+    await send('transactions-batch-update', {
+      updated,
+      deleted: [parentTransaction],
+    });
+
+    this.refetchTransactions();
+  };
+
   checkForReconciledTransactions = async (ids, confirmReason, onConfirm) => {
     const { data } = await runQuery(
       q('transactions')
@@ -1610,6 +1685,8 @@ class AccountInternal extends PureComponent {
                 onApplyFilter={this.onApplyFilter}
                 onScheduleAction={this.onScheduleAction}
                 onSetTransfer={this.onSetTransfer}
+                onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
+                onMakeAsSeparateTransactions={this.onMakeAsSeparateTransactions}
               />
 
               <View style={{ flex: 1 }}>

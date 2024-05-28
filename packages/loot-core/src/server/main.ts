@@ -112,8 +112,7 @@ handlers['transactions-batch-update'] = mutator(async function ({
       learnCategories,
     });
 
-    // Return all data updates to the frontend
-    return result.updated;
+    return result;
   });
 });
 
