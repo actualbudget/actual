@@ -681,12 +681,17 @@ class AccountInternal extends PureComponent {
   }
 
   getFilteredAmount = async (filters, conditionsOpKey) => {
+    const filter = queries.getAccountFilter(this.props.accountId);
+
+    let query = q('transactions').filter({
+      [conditionsOpKey]: [...filters],
+    });
+    if (filter) {
+      query = query.filter(filter);
+    }
+
     const filteredQuery = await runQuery(
-      q('transactions')
-        .filter({
-          [conditionsOpKey]: [...filters],
-        })
-        .select([{ amount: { $sum: '$amount' } }]),
+      query.select([{ amount: { $sum: '$amount' } }]),
     );
     const filteredAmount = filteredQuery.data.reduce(
       (a, v) => (a = a + v.amount),
