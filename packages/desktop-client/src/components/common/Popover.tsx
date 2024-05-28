@@ -15,7 +15,7 @@ export const Popover = ({
   return (
     <ReactAriaPopover
       placement="bottom end"
-      offset={0}
+      offset={1}
       className={`${css({
         ...styles.tooltip,
         ...styles.lightScrollbar,
