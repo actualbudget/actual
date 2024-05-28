@@ -151,7 +151,12 @@ export function Account({
                 !!account?.id ? (
                   <Tooltip
                     content={
-                      <View>
+                      <View
+                        style={{
+                          padding: 3,
+                          paddingBottom: accountNote ? 0 : 3,
+                        }}
+                      >
                         <Text
                           style={{
                             fontWeight: 'bold',
