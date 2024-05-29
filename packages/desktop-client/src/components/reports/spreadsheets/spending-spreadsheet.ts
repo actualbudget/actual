@@ -36,7 +36,11 @@ export function createSpendingSpreadsheet({
   mode,
 }: createSpendingSpreadsheetProps) {
   const [startDate, endDate] = getSpecificRange(3, null, 'Months');
-  const [startDate2, endDate2] = getSpecificRange(13, 1, 'Months');
+  const [lastYearStartDate, lastYearEndDate] = getSpecificRange(
+    13,
+    1,
+    'Months',
+  );
   const interval = 'Daily';
 
   return async (
@@ -47,62 +51,52 @@ export function createSpendingSpreadsheet({
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-    const [assets, debts] = await Promise.all([
-      runQuery(
-        makeQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          categories.list,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-      runQuery(
-        makeQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          categories.list,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
-    if (mode === 'Last year') {
-      const [assetsLastYear, debtsLastYear] = await Promise.all([
-        runQuery(
-          makeQuery(
-            'assets',
-            startDate2,
-            endDate2,
-            interval,
-            categories.list,
-            conditionsOpKey,
-            filters,
-          ),
-        ).then(({ data }) => data),
-        runQuery(
-          makeQuery(
-            'debts',
-            startDate2,
-            endDate2,
-            interval,
-            categories.list,
-            conditionsOpKey,
-            filters,
-          ),
-        ).then(({ data }) => data),
+
+    async function fetchData(startDate, endDate) {
+      const queryAssets = makeQuery(
+        'assets',
+        startDate,
+        endDate,
+        interval,
+        categories.list,
+        conditionsOpKey,
+        filters,
+      );
+      const queryDebts = makeQuery(
+        'debts',
+        startDate,
+        endDate,
+        interval,
+        categories.list,
+        conditionsOpKey,
+        filters,
+      );
+
+      const [assets, debts] = await Promise.all([
+        runQuery(queryAssets).then(({ data }) => data),
+        runQuery(queryDebts).then(({ data }) => data),
       ]);
+
+      return { assets, debts };
+    }
+
+    const { assets, debts } = await fetchData(startDate, endDate);
+
+    if (mode === 'Last year') {
+      const { assets: assetsLastYear, debts: debtsLastYear } = await fetchData(
+        lastYearStartDate,
+        lastYearEndDate,
+      );
+
       // Add data from last year to existing arrays
       assets.push(...assetsLastYear);
       debts.push(...debtsLastYear);
     }
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
-    intervals.push(...monthUtils.dayRangeInclusive(startDate2, endDate2));
+    intervals.push(
+      ...monthUtils.dayRangeInclusive(lastYearStartDate, lastYearEndDate),
+    );
     const days = [...Array(29).keys()]
       .filter(f => f > 0)
       .map(n => n.toString().padStart(2, '0'));
