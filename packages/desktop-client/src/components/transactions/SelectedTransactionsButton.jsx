@@ -26,7 +26,7 @@ export function SelectedTransactionsButton({
 }) {
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
-  const selectedIds = [...selectedItems];
+  const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
 
   const types = useMemo(() => {
     const items = selectedIds;
@@ -40,7 +40,7 @@ export function SelectedTransactionsButton({
     const transactions = selectedIds.map(id => getTransaction(id));
 
     return transactions.some(t => t && t.is_child);
-  }, [selectedIds]);
+  }, [selectedIds, getTransaction]);
 
   const linked = useMemo(() => {
     return (
@@ -77,7 +77,10 @@ export function SelectedTransactionsButton({
     const [firstTransaction] = transactions;
 
     const allSameDateAndAccount = transactions.every(
-      t => t && (t.date === firstTransaction.date && t.account === firstTransaction.account),
+      t =>
+        t &&
+        t.date === firstTransaction.date &&
+        t.account === firstTransaction.account,
     );
     const noSplitTransactions = transactions.every(
       t => t && !t.is_parent && !t.is_child,
@@ -86,8 +89,10 @@ export function SelectedTransactionsButton({
       t => t && !t.reconciled,
     );
 
-    return allSameDateAndAccount && noSplitTransactions && noReconciledTransactions;
-  }, [selectedIds, types]);
+    return (
+      allSameDateAndAccount && noSplitTransactions && noReconciledTransactions
+    );
+  }, [selectedIds, types, getTransaction]);
 
   const canMakeAsSeparateTransactions = useMemo(() => {
     if (selectedIds.length === 1 && !types.preview) {
@@ -96,7 +101,7 @@ export function SelectedTransactionsButton({
       return transaction && transaction.is_parent && !transaction.reconciled;
     }
     return false;
-  }, [selectedIds, types]);
+  }, [selectedIds, types, getTransaction]);
 
   const hotKeyOptions = {
     enabled: types.trans,
