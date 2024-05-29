@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button';
 import { Link } from '../common/Link';
@@ -23,6 +24,7 @@ export function Overview() {
 
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
+
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const accounts = useAccounts();
@@ -40,7 +42,7 @@ export function Overview() {
             }}
           >
             <PageHeader title="Reports" />
-            {customReportsFeatureFlag && !isNarrowWidth && (
+            {!isNarrowWidth && (
               <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
                 <Button type="primary">
                   <Text>Create new custom report</Text>
@@ -53,22 +55,6 @@ export function Overview() {
       padding={0}
       style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
     >
-      {!isNarrowWidth && (
-        <View
-          style={{
-            flex: '0 0 auto',
-            alignItems: 'flex-end',
-            marginRight: 15,
-            marginTop: 10,
-          }}
-        >
-          <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
-            <Button type="primary">
-              <Text>Create new custom report</Text>
-            </Button>
-          </Link>
-        </View>
-      )}
       <View
         style={{
           flexDirection: isNarrowWidth ? 'column' : 'row',
