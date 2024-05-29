@@ -51,20 +51,20 @@ type AccountProps = {
   onDrop?: OnDropCallback;
 };
 
-export function Account({
-  name,
+function AccountRow(
   account,
-  connected,
-  pending = false,
-  failed,
-  updated,
-  to,
-  query,
-  style,
-  outerStyle,
+  outerStyle: CSSProperties,
   onDragChange,
   onDrop,
-}: AccountProps) {
+  to: string,
+  style: CSSProperties,
+  updated: boolean,
+  pending: boolean,
+  failed: boolean,
+  connected: boolean,
+  name: string,
+  query: Binding,
+) {
   const type = account
     ? account.closed
       ? 'account-closed'
@@ -85,8 +85,6 @@ export function Account({
     id: account && account.id,
     onDrop,
   });
-
-  const accountNote = useNotes(`account-${account?.id}`);
 
   return (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
@@ -145,47 +143,97 @@ export function Account({
               />
             </View>
 
-            {!!account?.id ? (
-              <Tooltip
-                content={
-                  <View
-                    style={{
-                      padding: 3,
-                      paddingBottom: accountNote ? 0 : 3,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: 'bold',
-                        borderBottom: accountNote
-                          ? `1px solid ${theme.tableBorder}`
-                          : 0,
-                      }}
-                    >
-                      {name}
-                    </Text>
-                    {accountNote && <Notes notes={accountNote} />}
-                  </View>
-                }
-                placement="right top"
-                triggerProps={{
-                  delay: 1000,
-                }}
-              >
-                <AlignedText
-                  left={name}
-                  right={<CellValue binding={query} type="financial" />}
-                />
-              </Tooltip>
-            ) : (
-              <AlignedText
-                left={name}
-                right={<CellValue binding={query} type="financial" />}
-              />
-            )}
+            <AlignedText
+              left={name}
+              right={<CellValue binding={query} type="financial" />}
+            />
           </Link>
         </View>
       </View>
     </View>
+  );
+}
+
+export function Account({
+  name,
+  account,
+  connected,
+  pending = false,
+  failed,
+  updated,
+  to,
+  query,
+  style,
+  outerStyle,
+  onDragChange,
+  onDrop,
+}: AccountProps) {
+  const accountNote = useNotes(`account-${account?.id}`);
+  const needsTooltip = !!account?.id;
+
+  return needsTooltip ? (
+    <Tooltip
+      content={
+        <View
+          style={{
+            padding: 3,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              borderBottom: accountNote ? `1px solid ${theme.tableBorder}` : 0,
+            }}
+          >
+            {name}
+          </Text>
+          {accountNote && (
+            <Notes
+              getStyle={value => ({
+                padding: 0,
+              })}
+              notes={accountNote}
+            />
+          )}
+        </View>
+      }
+      className={`${css({
+        borderRadius: '0px 5px 5px 0px ! important',
+      })}`}
+      placement="right top"
+      triggerProps={{
+        delay: 1000,
+      }}
+    >
+      {AccountRow(
+        account,
+        outerStyle,
+        onDragChange,
+        onDrop,
+        to,
+        style,
+        updated,
+        pending,
+        failed,
+        connected,
+        name,
+        query,
+      )}
+    </Tooltip>
+  ) : (
+    AccountRow(
+      account,
+      outerStyle,
+      onDragChange,
+      onDrop,
+      to,
+      style,
+      updated,
+      pending,
+      failed,
+      connected,
+      name,
+      query,
+    )
   );
 }
