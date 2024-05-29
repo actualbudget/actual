@@ -5,14 +5,12 @@ import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
-import { MenuTooltip } from '../common/MenuTooltip';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type SaveReportNameProps = {
-  onClose: () => void;
   menuItem: string;
   name: string;
   setName: (name: string) => void;
@@ -29,7 +27,6 @@ type SaveReportNameProps = {
 };
 
 export function SaveReportName({
-  onClose,
   menuItem,
   name,
   setName,
@@ -45,7 +42,7 @@ export function SaveReportName({
   }, []);
 
   return (
-    <MenuTooltip width={325} onClose={onClose}>
+    <>
       {menuItem !== 'update-report' && (
         <form>
           <Stack
@@ -91,6 +88,6 @@ export function SaveReportName({
       ) : (
         <View />
       )}
-    </MenuTooltip>
+    </>
   );
 }

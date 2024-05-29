@@ -1,4 +1,3 @@
-import { GlobalPrefs, LocalPrefs } from '../client/state-types/prefs';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
@@ -15,8 +14,10 @@ import {
   GoCardlessToken,
   GoCardlessInstitution,
   SimpleFinAccount,
+  RuleEntity,
   PayeeEntity,
 } from './models';
+import { GlobalPrefs, LocalPrefs } from './prefs';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -118,7 +119,7 @@ export interface ServerHandlers {
 
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
 
-  'payees-get-rules': (arg: { id }) => Promise<unknown>;
+  'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
     conditions;
@@ -212,7 +213,7 @@ export interface ServerHandlers {
     | { error: 'failed' }
   >;
 
-  'gocardless-accounts-sync': (arg: { id: string }) => Promise<{
+  'accounts-bank-sync': (arg: { id?: string }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;
@@ -264,7 +265,10 @@ export interface ServerHandlers {
     password;
   }) => Promise<{ error?: string }>;
 
-  'subscribe-sign-in': (arg: { password }) => Promise<{ error?: string }>;
+  'subscribe-sign-in': (arg: {
+    password;
+    loginMethod?: string;
+  }) => Promise<{ error?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
 

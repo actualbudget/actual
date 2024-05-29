@@ -18,18 +18,6 @@ export async function runAll(
   cb(data);
 }
 
-export function index<
-  T extends Record<string, string | number>,
-  K extends keyof T,
->(data: T[], field: K) {
-  const result: Record<string | number, T> = {};
-  data.forEach(item => {
-    const key = item[field];
-    result[key] = item;
-  });
-  return result;
-}
-
 export function indexCashFlow<
   T extends { date: string; isTransfer: boolean; amount: number },
 >(data: T[], date: string, isTransfer: string) {

@@ -66,7 +66,7 @@ export function NotesButton({
             setIsOpen(true);
           }}
         >
-          <SvgCustomNotesPaper style={{ width, height }} />
+          <SvgCustomNotesPaper style={{ width, height, flexShrink: 0 }} />
         </Button>
       </View>
 

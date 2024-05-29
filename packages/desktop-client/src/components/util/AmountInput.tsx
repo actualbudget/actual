@@ -8,8 +8,9 @@ import React, {
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { amountToInteger } from 'loot-core/src/shared/util';
+import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
@@ -31,6 +32,7 @@ type AmountInputProps = {
   textStyle?: CSSProperties;
   focused?: boolean;
   disabled?: boolean;
+  autoDecimals?: boolean;
 };
 
 export function AmountInput({
@@ -46,6 +48,7 @@ export function AmountInput({
   textStyle,
   focused,
   disabled = false,
+  autoDecimals = false,
 }: AmountInputProps) {
   const format = useFormat();
   const negative = (initialValue === 0 && zeroSign === '-') || initialValue < 0;
@@ -57,6 +60,7 @@ export function AmountInput({
   const buttonRef = useRef();
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
+  const [hideFraction = false] = useLocalPref('hideFraction');
 
   useEffect(() => {
     if (focused) {
@@ -74,6 +78,7 @@ export function AmountInput({
   }
 
   function onInputTextChange(val) {
+    val = autoDecimals ? appendDecimals(val, hideFraction) : val;
     setValue(val ? val : '');
     onChangeValue?.(val);
   }

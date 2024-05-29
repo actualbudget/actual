@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, type Ref, useState } from 'react';
+import React, { type CSSProperties, type Ref, useRef, useState } from 'react';
 
 import {
   type CategoryGroupEntity,
@@ -10,10 +10,10 @@ import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
-import { Tooltip } from '../tooltips';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
@@ -26,7 +26,7 @@ type SidebarCategoryProps = {
   borderColor?: string;
   isLast?: boolean;
   onEditName: (id: string) => void;
-  onSave: (group) => void;
+  onSave: (category: CategoryEntity) => void;
   onDelete: (id: string) => Promise<void>;
   onHideNewCategory?: () => void;
 };
@@ -47,6 +47,7 @@ export function SidebarCategory({
 }: SidebarCategoryProps) {
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef(null);
 
   const displayed = (
     <View
@@ -69,7 +70,7 @@ export function SidebarCategory({
       >
         {category.name}
       </div>
-      <View style={{ flexShrink: 0, marginLeft: 5 }}>
+      <View style={{ flexShrink: 0, marginLeft: 5 }} ref={triggerRef}>
         <Button
           type="bare"
           className="hover-visible"
@@ -85,42 +86,44 @@ export function SidebarCategory({
             style={{ color: 'currentColor' }}
           />
         </Button>
-        {menuOpen && (
-          <Tooltip
-            position="bottom-left"
-            width={200}
-            style={{ padding: 0 }}
-            onClose={() => setMenuOpen(false)}
-          >
-            <Menu
-              onMenuSelect={type => {
-                if (type === 'rename') {
-                  onEditName(category.id);
-                } else if (type === 'delete') {
-                  onDelete(category.id);
-                } else if (type === 'toggle-visibility') {
-                  onSave({ ...category, hidden: !category.hidden });
-                }
-                setMenuOpen(false);
-              }}
-              items={[
-                !categoryGroup?.hidden && {
-                  name: 'toggle-visibility',
-                  text: category.hidden ? 'Show' : 'Hide',
-                },
-                { name: 'rename', text: 'Rename' },
-                { name: 'delete', text: 'Delete' },
-              ]}
-            />
-          </Tooltip>
-        )}
+
+        <Popover
+          triggerRef={triggerRef}
+          placement="bottom start"
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
+          style={{ width: 200 }}
+        >
+          <Menu
+            onMenuSelect={type => {
+              if (type === 'rename') {
+                onEditName(category.id);
+              } else if (type === 'delete') {
+                onDelete(category.id);
+              } else if (type === 'toggle-visibility') {
+                onSave({ ...category, hidden: !category.hidden });
+              }
+              setMenuOpen(false);
+            }}
+            items={[
+              !categoryGroup?.hidden && {
+                name: 'toggle-visibility',
+                text: category.hidden ? 'Show' : 'Hide',
+              },
+              { name: 'rename', text: 'Rename' },
+              { name: 'delete', text: 'Delete' },
+            ]}
+          />
+        </Popover>
       </View>
       <View style={{ flex: 1 }} />
-      <NotesButton
-        id={category.id}
-        style={dragging && { color: 'currentColor' }}
-        defaultColor={theme.pageTextLight}
-      />
+      <View style={{ flexShrink: 0 }}>
+        <NotesButton
+          id={category.id}
+          style={dragging && { color: 'currentColor' }}
+          defaultColor={theme.pageTextLight}
+        />
+      </View>
     </View>
   );
 

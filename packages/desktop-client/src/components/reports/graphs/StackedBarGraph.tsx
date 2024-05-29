@@ -17,7 +17,7 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -138,12 +138,12 @@ const customLabel = props => {
 
 type StackedBarGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
+  data: DataEntity;
   filters: RuleConditionEntity[];
   groupBy: string;
   compact?: boolean;
   viewLabels: boolean;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
 };

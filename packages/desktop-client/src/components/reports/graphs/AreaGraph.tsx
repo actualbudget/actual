@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React from 'react';
 
 import { css } from 'glamor';
@@ -17,7 +16,7 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { useResponsive } from '../../../ResponsiveProvider';
@@ -25,7 +24,6 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
-import { numberFormatterTooltip } from '../numberFormatter';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
@@ -42,7 +40,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp?: string;
+  balanceTypeOp: 'totalAssets' | 'totalTotals' | 'totalDebts';
 };
 
 const CustomTooltip = ({
@@ -95,25 +93,46 @@ const CustomTooltip = ({
       </div>
     );
   }
+
+  return <div />;
 };
 
-const customLabel = (props, width, end) => {
+type PropsItem = {
+  index?: number;
+  x?: string | number;
+  y?: string | number;
+  value?: string | number;
+  width?: string | number;
+};
+
+const customLabel = ({
+  props,
+  width,
+  end,
+}: {
+  props: PropsItem;
+  width: number;
+  end: number;
+}) => {
   //Add margin to first and last object
   const calcX =
-    props.x + (props.index === end ? -10 : props.index === 0 ? 5 : 0);
-  const calcY = props.y - (props.value > 0 ? 10 : -10);
+    (typeof props.x === 'number' ? props.x : 0) +
+    (props.index === end ? -10 : props.index === 0 ? 5 : 0);
+  const calcY =
+    (typeof props.y === 'number' ? props.y : 0) -
+    ((typeof props.value === 'number' ? props.value : 0) > 0 ? 10 : -10);
   const textAnchor = props.index === 0 ? 'left' : 'middle';
   const display =
-    props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
-  const textSize = adjustTextSize(width, 'area');
+    props.value !== 0 ? `${amountToCurrencyNoDecimal(props.value)}` : '';
+  const textSize = adjustTextSize({ sized: width, type: 'area' });
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
 type AreaGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
-  balanceTypeOp: string;
+  data: DataEntity;
+  balanceTypeOp: 'totalAssets' | 'totalTotals' | 'totalDebts';
   compact?: boolean;
   viewLabels: boolean;
 };
@@ -148,7 +167,7 @@ export function AreaGraph({
       : Math.ceil((dataMax + extendRangeAmount) / 100) * 100;
   const lastLabel = data.intervalData.length - 1;
 
-  const tickFormatter = tick => {
+  const tickFormatter = (tick: number) => {
     if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
     return '...';
   };
@@ -216,7 +235,6 @@ export function AreaGraph({
                 {(!isNarrowWidth || !compact) && (
                   <Tooltip
                     content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
-                    formatter={numberFormatterTooltip}
                     isAnimationActive={false}
                   />
                 )}
@@ -272,7 +290,9 @@ export function AreaGraph({
                   {viewLabels && !compact && (
                     <LabelList
                       dataKey={balanceTypeOp}
-                      content={e => customLabel(e, width, lastLabel)}
+                      content={props =>
+                        customLabel({ props, width, end: lastLabel })
+                      }
                     />
                   )}
                 </Area>

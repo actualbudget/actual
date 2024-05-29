@@ -256,7 +256,8 @@ export function _weekRange(
 ): string[] {
   const weeks: string[] = [];
   let week = weekFromDate(start, firstDayOfWeekIdx);
-  while (d.isBefore(_parse(week), _parse(end))) {
+  const endWeek = weekFromDate(end, firstDayOfWeekIdx);
+  while (d.isBefore(_parse(week), _parse(endWeek))) {
     weeks.push(week);
     week = addWeeks(week, 1);
   }

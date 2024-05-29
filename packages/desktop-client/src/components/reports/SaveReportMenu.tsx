@@ -1,15 +1,12 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { Menu } from '../common/Menu';
-import { MenuTooltip } from '../common/MenuTooltip';
 
 export function SaveReportMenu({
-  onClose,
   onMenuSelect,
   savedStatus,
   listReports,
 }: {
-  onClose: () => void;
   onMenuSelect: (item: string) => void;
   savedStatus: string;
   listReports: number;
@@ -68,17 +65,11 @@ export function SaveReportMenu({
   };
 
   return (
-    <MenuTooltip width={150} onClose={onClose}>
-      <Menu
-        onMenuSelect={item => {
-          onMenuSelect(item);
-        }}
-        items={[
-          ...savedMenu.items,
-          ...modifiedMenu.items,
-          ...unsavedMenu.items,
-        ]}
-      />
-    </MenuTooltip>
+    <Menu
+      onMenuSelect={item => {
+        onMenuSelect(item);
+      }}
+      items={[...savedMenu.items, ...modifiedMenu.items, ...unsavedMenu.items]}
+    />
   );
 }

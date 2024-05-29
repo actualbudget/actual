@@ -1,4 +1,4 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React from 'react';
 
 import { css } from 'glamor';
 
@@ -6,20 +6,17 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 
 import { theme, styles, type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
-import { HoverTarget } from '../../../common/HoverTarget';
+import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { useSheetName } from '../../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../../spreadsheet/useSheetValue';
-import { Tooltip } from '../../../tooltips';
 
 import { TotalsList } from './TotalsList';
 
 type ToBudgetAmountProps = {
   prevMonthName: string;
-  showTotalsTooltipOnHover?: boolean;
-  totalsTooltipProps?: ComponentPropsWithoutRef<typeof Tooltip>;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
   onClick: () => void;
@@ -27,8 +24,6 @@ type ToBudgetAmountProps = {
 
 export function ToBudgetAmount({
   prevMonthName,
-  showTotalsTooltipOnHover,
-  totalsTooltipProps,
   style,
   amountStyle,
   onClick,
@@ -47,18 +42,17 @@ export function ToBudgetAmount({
     <View style={{ alignItems: 'center', ...style }}>
       <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
       <View>
-        <HoverTarget
-          disabled={!showTotalsTooltipOnHover}
-          renderContent={() => (
-            <Tooltip position="bottom-center" {...totalsTooltipProps}>
-              <TotalsList
-                prevMonthName={prevMonthName}
-                style={{
-                  padding: 7,
-                }}
-              />
-            </Tooltip>
-          )}
+        <Tooltip
+          content={
+            <TotalsList
+              prevMonthName={prevMonthName}
+              style={{
+                padding: 7,
+              }}
+            />
+          }
+          placement="bottom"
+          triggerProps={{ delay: 0 }}
         >
           <PrivacyFilter blurIntensity={7}>
             <Block
@@ -85,7 +79,7 @@ export function ToBudgetAmount({
               {format(num, 'financial')}
             </Block>
           </PrivacyFilter>
-        </HoverTarget>
+        </Tooltip>
       </View>
     </View>
   );

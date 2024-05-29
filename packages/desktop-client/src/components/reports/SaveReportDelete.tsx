@@ -5,7 +5,6 @@ import { Button } from '../common/Button';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 
 type SaveReportDeleteProps = {
   onDelete: () => void;
@@ -19,12 +18,7 @@ export function SaveReportDelete({
   name,
 }: SaveReportDeleteProps) {
   return (
-    <Tooltip
-      position="bottom-right"
-      style={{ padding: 15, color: theme.menuItemText }}
-      width={275}
-      onClose={onClose}
-    >
+    <>
       <View style={{ align: 'center' }}>
         <Text style={{ color: theme.errorText, marginBottom: 5 }}>
           Do you want to delete report:
@@ -46,6 +40,6 @@ export function SaveReportDelete({
           No
         </Button>
       </Stack>
-    </Tooltip>
+    </>
   );
 }

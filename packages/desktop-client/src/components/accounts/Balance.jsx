@@ -104,15 +104,11 @@ function SelectedBalance({ selectedItems, account }) {
   );
 }
 
-function FilteredBalance({ selectedItems }) {
-  const balance = selectedItems
-    .filter(item => !item._unmatched && !item.is_parent)
-    .reduce((sum, product) => sum + product.amount, 0);
-
+function FilteredBalance({ filteredAmount }) {
   return (
     <DetailedBalance
       name="Filtered balance:"
-      balance={balance}
+      balance={filteredAmount || 0}
       isExactBalance={true}
     />
   );
@@ -142,7 +138,7 @@ export function Balances({
   onToggleExtraBalances,
   account,
   filteredItems,
-  transactions,
+  filteredAmount,
 }) {
   const selectedItems = useSelectedItems();
 
@@ -201,7 +197,7 @@ export function Balances({
         <SelectedBalance selectedItems={selectedItems} account={account} />
       )}
       {filteredItems.length > 0 && (
-        <FilteredBalance selectedItems={transactions} />
+        <FilteredBalance filteredAmount={filteredAmount} />
       )}
     </View>
   );
