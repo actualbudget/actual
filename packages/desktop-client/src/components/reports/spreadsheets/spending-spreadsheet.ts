@@ -151,10 +151,12 @@ export function createSpendingSpreadsheet({
           a.cumulative < b.cumulative ? a : b,
         ).cumulative;
 
+        const totalDaily = data.reduce((a, v) => (a = a + v.totalTotals), 0);
+
         return {
           date: data[0].date,
           cumulative: maxCumulative,
-          daily: data[0].totalTotals,
+          daily: totalDaily,
           month: month.month,
         };
       });
