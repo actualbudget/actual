@@ -205,15 +205,8 @@ export function createSpendingSpreadsheet({
         thisMonth: dayData[3].cumulative,
         lastMonth: dayData[2].cumulative,
         lastYear: dayData[0].cumulative,
-        // test: dayData[4].cumulative,
       };
     });
-
-    console.log(intervalData);
-
-    // const intervalDataLastYear = {
-
-    // }
 
     setData({
       intervalData,

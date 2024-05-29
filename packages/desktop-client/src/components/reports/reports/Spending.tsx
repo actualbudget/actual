@@ -54,7 +54,6 @@ export function Spending() {
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
-  console.log(data);
   if (!data) {
     return null;
   }
