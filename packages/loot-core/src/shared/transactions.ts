@@ -66,6 +66,22 @@ export function makeChild<T extends GenericTransactionEntity>(
   } as unknown as T;
 }
 
+export function makeNonChild<T extends GenericTransactionEntity>(
+  parent: T,
+  data: object,
+) {
+  return {
+    amount: 0,
+    ...data,
+    cleared: parent.cleared != null ? parent.cleared : null,
+    reconciled: parent.reconciled != null ? parent.reconciled : null,
+    sort_order: parent.sort_order || null,
+    starting_balance_flag: null,
+    is_child: false,
+    parent_id: null,
+  } as unknown as T;
+}
+
 export function recalculateSplit(trans: TransactionEntity) {
   // Calculate the new total of split transactions and make sure
   // that it equals the parent amount

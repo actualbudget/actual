@@ -22,6 +22,7 @@ import {
   ungroupTransaction,
   ungroupTransactions,
   makeChild,
+  makeNonChild,
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
@@ -1107,38 +1108,90 @@ class AccountInternal extends PureComponent {
     this.refetchTransactions();
   };
 
-  onMakeAsSeparateTransactions = async parentId => {
+  onMakeAsNonSplitTransactions = async ids => {
     this.setState({ workingHard: true });
 
-    const { data } = await runQuery(
+    const { data: groupedTransactions } = await runQuery(
       q('transactions')
-        .filter({ id: parentId })
+        .filter({ id: { $oneof: ids } })
         .select('*')
         .options({ splits: 'grouped' }),
     );
 
-    const groupedTransaction = data[0];
+    let changes = {
+      updated: [],
+      deleted: [],
+    };
 
-    if (!groupedTransaction || !groupedTransaction.is_parent) {
-      return;
+    const groupedTransactionsToUpdate = groupedTransactions.filter(
+      t => t.is_parent,
+    );
+
+    for (const groupedTransaction of groupedTransactionsToUpdate) {
+      const [parentTransaction, ...childTransactions] =
+        ungroupTransaction(groupedTransaction);
+
+      if (ids.includes(parentTransaction.id)) {
+        // Extract all child transactions and delete the parent.
+        const newNonChildTransactions = childTransactions.map(t =>
+          makeNonChild(parentTransaction, t),
+        );
+
+        changes = {
+          ...changes,
+          updated: [...changes.updated, ...newNonChildTransactions],
+          deleted: [...changes.deleted, parentTransaction],
+        };
+
+        // Already processed the child transactions above, no need to process them below.
+        continue;
+      }
+
+      // Extract selected child transactions.
+
+      const selectedChildTransactions = childTransactions.filter(t =>
+        ids.includes(t.id),
+      );
+
+      if (selectedChildTransactions.length === 0) {
+        continue;
+      }
+
+      const newNonChildTransactions = selectedChildTransactions.map(t =>
+        makeNonChild(parentTransaction, t),
+      );
+
+      const remainingChildTransactions = childTransactions.filter(
+        t =>
+          !newNonChildTransactions.some(
+            updatedTrans => updatedTrans.id === t.id,
+          ),
+      );
+
+      const updatedParentTransaction = {
+        ...parentTransaction,
+        amount: remainingChildTransactions
+          .map(t => t.amount)
+          .reduce((total, amount) => total + amount, 0),
+      };
+
+      const deleteParentTransaction = remainingChildTransactions.length === 0;
+
+      changes = {
+        ...changes,
+        updated: [
+          ...changes.updated,
+          ...(!deleteParentTransaction ? [updatedParentTransaction] : []),
+          ...newNonChildTransactions,
+        ],
+        deleted: [
+          ...changes.deleted,
+          ...(deleteParentTransaction ? [updatedParentTransaction] : []),
+        ],
+      };
     }
 
-    const [parentTransaction, ...transactions] =
-      ungroupTransaction(groupedTransaction);
-
-    const updated = transactions.map(trans => {
-      return {
-        ...trans,
-        cleared: parentTransaction.cleared,
-        is_child: false,
-        parent_id: null,
-      };
-    });
-
-    await send('transactions-batch-update', {
-      updated,
-      deleted: [parentTransaction],
-    });
+    await send('transactions-batch-update', changes);
 
     this.refetchTransactions();
   };
@@ -1705,7 +1758,7 @@ class AccountInternal extends PureComponent {
                 onScheduleAction={this.onScheduleAction}
                 onSetTransfer={this.onSetTransfer}
                 onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
-                onMakeAsSeparateTransactions={this.onMakeAsSeparateTransactions}
+                onMakeAsNonSplitTransactions={this.onMakeAsNonSplitTransactions}
               />
 
               <View style={{ flex: 1 }}>

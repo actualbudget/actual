@@ -85,7 +85,7 @@ export function AccountHeader({
   onScheduleAction,
   onSetTransfer,
   onMakeAsSplitTransaction,
-  onMakeAsSeparateTransactions,
+  onMakeAsNonSplitTransactions,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
@@ -322,7 +322,7 @@ export function AccountHeader({
               pushModal={pushModal}
               showMakeTransfer={showMakeTransfer}
               onMakeAsSplitTransaction={onMakeAsSplitTransaction}
-              onMakeAsSeparateTransactions={onMakeAsSeparateTransactions}
+              onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
             />
           )}
           <Button

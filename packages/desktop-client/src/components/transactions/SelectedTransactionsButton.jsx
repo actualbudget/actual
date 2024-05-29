@@ -22,7 +22,7 @@ export function SelectedTransactionsButton({
   onScheduleAction,
   showMakeTransfer,
   onMakeAsSplitTransaction,
-  onMakeAsSeparateTransactions,
+  onMakeAsNonSplitTransactions,
 }) {
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
@@ -94,13 +94,20 @@ export function SelectedTransactionsButton({
     );
   }, [selectedIds, types, getTransaction]);
 
-  const canMakeAsSeparateTransactions = useMemo(() => {
-    if (selectedIds.length === 1 && !types.preview) {
-      const selectedId = selectedIds[0];
-      const transaction = getTransaction(selectedId);
-      return transaction && transaction.is_parent && !transaction.reconciled;
+  const canMakeAsNonSplitTransactions = useMemo(() => {
+    if (selectedIds.length === 0 || types.preview) {
+      return false;
     }
-    return false;
+
+    const transactions = selectedIds.map(id => getTransaction(id));
+
+    const noReconciledTransactions = transactions.every(
+      t => t && !t.reconciled,
+    );
+    const someSplitTransactions = transactions.some(
+      t => t && (t.is_parent || t.is_child),
+    );
+    return noReconciledTransactions && someSplitTransactions;
   }, [selectedIds, types, getTransaction]);
 
   const hotKeyOptions = {
@@ -162,11 +169,11 @@ export function SelectedTransactionsButton({
                     },
                   ]
                 : []),
-              ...(canMakeAsSeparateTransactions
+              ...(canMakeAsNonSplitTransactions
                 ? [
                     {
-                      name: 'make-as-separate-transactions',
-                      text: 'Make as separate transactions',
+                      name: 'make-as-non-split-transactions',
+                      text: 'Make as non-split transactions',
                     },
                   ]
                 : []),
@@ -223,8 +230,8 @@ export function SelectedTransactionsButton({
           case 'make-as-split-transaction':
             onMakeAsSplitTransaction(selectedIds);
             break;
-          case 'make-as-separate-transactions':
-            onMakeAsSeparateTransactions(selectedIds[0]);
+          case 'make-as-non-split-transactions':
+            onMakeAsNonSplitTransactions(selectedIds);
             break;
           case 'post-transaction':
           case 'skip':
