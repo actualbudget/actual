@@ -176,13 +176,14 @@ export function Account({
       content={
         <View
           style={{
-            padding: 3,
+            padding: 10,
           }}
         >
           <Text
             style={{
               fontWeight: 'bold',
               borderBottom: accountNote ? `1px solid ${theme.tableBorder}` : 0,
+              marginBottom: accountNote ? '0.5rem' : 0,
             }}
           >
             {name}
