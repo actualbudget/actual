@@ -146,40 +146,44 @@ export function Account({
               />
             </View>
 
-            <AlignedText
-              left={
-                !!account?.id ? (
-                  <Tooltip
-                    content={
-                      <View
-                        style={{
-                          padding: 3,
-                          paddingBottom: accountNote ? 0 : 3,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontWeight: 'bold',
-                          }}
-                        >
-                          {name}
-                        </Text>
-                        {accountNote && <Notes notes={accountNote} />}
-                      </View>
-                    }
-                    placement="bottom left"
-                    triggerProps={{
-                      delay: 1000,
+            {!!account?.id ? (
+              <Tooltip
+                content={
+                  <View
+                    style={{
+                      padding: 3,
+                      paddingBottom: accountNote ? 0 : 3,
                     }}
                   >
-                    {name}
-                  </Tooltip>
-                ) : (
-                  name
-                )
-              }
-              right={<CellValue binding={query} type="financial" />}
-            />
+                    <Text
+                      style={{
+                        fontWeight: 'bold',
+                        borderBottom: accountNote
+                          ? `1px solid ${theme.tableBorder}`
+                          : 0,
+                      }}
+                    >
+                      {name}
+                    </Text>
+                    {accountNote && <Notes notes={accountNote} />}
+                  </View>
+                }
+                placement="right top"
+                triggerProps={{
+                  delay: 1000,
+                }}
+              >
+                <AlignedText
+                  left={name}
+                  right={<CellValue binding={query} type="financial" />}
+                />
+              </Tooltip>
+            ) : (
+              <AlignedText
+                left={name}
+                right={<CellValue binding={query} type="financial" />}
+              />
+            )}
           </Link>
         </View>
       </View>
