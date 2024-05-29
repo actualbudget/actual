@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
 
 import { debounce } from 'debounce';
+import { v4 as uuidv4 } from 'uuid';
 
 import { validForTransfer } from 'loot-core/client/transfer';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
@@ -1060,28 +1061,48 @@ class AccountInternal extends PureComponent {
         .options({ splits: 'none' }),
     );
 
+    if (!transactions || transactions.length === 0) {
+      return;
+    }
+
     const [firstTransaction] = transactions;
+
+    // Use same payee if all transactions have the same payee, else use or create 'Split' payee
+    let parentPayeeId;
+    if (transactions.every(t => t.payee === firstTransaction.payee)) {
+      parentPayeeId = firstTransaction.payee;
+    } else {
+      const { data: payees } = await runQuery(
+        q('payees').filter({ name: 'Split' }).select('id'),
+      );
+      if (!payees || payees.length === 0) {
+        // Create a "Split" payee
+        const payeeId = await this.props.dispatch(actions.createPayee('Split'));
+        parentPayeeId = payeeId;
+      } else {
+        parentPayeeId = payees[0].id;
+      }
+    }
+
     const parentTransaction = {
+      id: uuidv4(),
       is_parent: true,
       cleared: transactions.every(t => !!t.cleared),
       date: firstTransaction.date,
       account: firstTransaction.account,
+      payee: parentPayeeId,
       amount: transactions
         .map(t => t.amount)
         .reduce((total, amount) => total + amount, 0),
     };
-
-    const { added } = await send('transactions-batch-update', {
-      added: [parentTransaction],
-    });
-
-    const savedParentTransaction = added[0];
-
     const childTransactions = transactions.map(t =>
-      makeChild(savedParentTransaction, t),
+      makeChild(parentTransaction, t),
     );
 
-    await send('transactions-batch-update', { updated: childTransactions });
+    await send('transactions-batch-update', {
+      added: [parentTransaction],
+      updated: childTransactions,
+    });
 
     this.refetchTransactions();
   };
@@ -1098,7 +1119,7 @@ class AccountInternal extends PureComponent {
 
     const groupedTransaction = data[0];
 
-    if (!groupedTransaction.is_parent) {
+    if (!groupedTransaction || !groupedTransaction.is_parent) {
       return;
     }
 
@@ -1760,11 +1781,13 @@ class AccountInternal extends PureComponent {
 }
 
 function AccountHack(props) {
+  const dispatch = useDispatch();
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
   const match = useMatch(props.location.pathname);
 
   return (
     <AccountInternal
+      dispatch={dispatch}
       {...props}
       match={match}
       splitsExpandedDispatch={splitsExpandedDispatch}

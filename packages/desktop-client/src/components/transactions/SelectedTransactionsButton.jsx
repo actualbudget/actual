@@ -74,9 +74,10 @@ export function SelectedTransactionsButton({
     }
 
     const transactions = selectedIds.map(id => getTransaction(id));
+    const [firstTransaction] = transactions;
 
-    const allSameDate = transactions.every(
-      t => t && t.date === transactions[0].date,
+    const allSameDateAndAccount = transactions.every(
+      t => t && (t.date === firstTransaction.date && t.account === firstTransaction.account),
     );
     const noSplitTransactions = transactions.every(
       t => t && !t.is_parent && !t.is_child,
@@ -85,7 +86,7 @@ export function SelectedTransactionsButton({
       t => t && !t.reconciled,
     );
 
-    return allSameDate && noSplitTransactions && noReconciledTransactions;
+    return allSameDateAndAccount && noSplitTransactions && noReconciledTransactions;
   }, [selectedIds, types]);
 
   const canMakeAsSeparateTransactions = useMemo(() => {
