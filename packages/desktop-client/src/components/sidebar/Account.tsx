@@ -189,7 +189,7 @@ export function Account({
           </Text>
           {accountNote && (
             <Notes
-              getStyle={value => ({
+              getStyle={() => ({
                 padding: 0,
               })}
               notes={accountNote}
