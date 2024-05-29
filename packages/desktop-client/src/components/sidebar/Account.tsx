@@ -51,20 +51,20 @@ type AccountProps = {
   onDrop?: OnDropCallback;
 };
 
-function AccountRow(
+export function Account({
+  name,
   account,
-  outerStyle: CSSProperties,
+  connected,
+  pending = false,
+  failed,
+  updated,
+  to,
+  query,
+  style,
+  outerStyle,
   onDragChange,
   onDrop,
-  to: string,
-  style: CSSProperties,
-  updated: boolean,
-  pending: boolean,
-  failed: boolean,
-  connected: boolean,
-  name: string,
-  query: Binding,
-) {
+}: AccountProps) {
   const type = account
     ? account.closed
       ? 'account-closed'
@@ -86,7 +86,10 @@ function AccountRow(
     onDrop,
   });
 
-  return (
+  const accountNote = useNotes(`account-${account?.id}`);
+  const needsTooltip = !!account?.id;
+
+  const accountRow = (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
         <DropHighlight pos={dropPos} />
@@ -152,26 +155,12 @@ function AccountRow(
       </View>
     </View>
   );
-}
 
-export function Account({
-  name,
-  account,
-  connected,
-  pending = false,
-  failed,
-  updated,
-  to,
-  query,
-  style,
-  outerStyle,
-  onDragChange,
-  onDrop,
-}: AccountProps) {
-  const accountNote = useNotes(`account-${account?.id}`);
-  const needsTooltip = !!account?.id;
+  if (!needsTooltip) {
+    return accountRow;
+  }
 
-  return needsTooltip ? (
+  return (
     <Tooltip
       content={
         <View
@@ -198,41 +187,13 @@ export function Account({
           )}
         </View>
       }
-      style={{ ...styles.tooltip,  borderRadius: '0px 5px 5px 0px', }}
+      style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
       placement="right top"
       triggerProps={{
         delay: 1000,
       }}
     >
-      {AccountRow(
-        account,
-        outerStyle,
-        onDragChange,
-        onDrop,
-        to,
-        style,
-        updated,
-        pending,
-        failed,
-        connected,
-        name,
-        query,
-      )}
+      {accountRow}
     </Tooltip>
-  ) : (
-    AccountRow(
-      account,
-      outerStyle,
-      onDragChange,
-      onDrop,
-      to,
-      style,
-      updated,
-      pending,
-      failed,
-      connected,
-      name,
-      query,
-    )
   );
 }
