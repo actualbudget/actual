@@ -198,9 +198,7 @@ export function Account({
           )}
         </View>
       }
-      className={`${css({
-        borderRadius: '0px 5px 5px 0px ! important',
-      })}`}
+      style={{ ...styles.tooltip,  borderRadius: '0px 5px 5px 0px', }}
       placement="right top"
       triggerProps={{
         delay: 1000,
