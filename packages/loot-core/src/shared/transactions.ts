@@ -332,8 +332,8 @@ export function realizeTempTransactions(transactions: TransactionEntity[]) {
 }
 
 export function makeAsNonChildTransactions(
-  childTransactionsToUpdate,
-  transactions,
+  childTransactionsToUpdate: TransactionEntity[],
+  transactions: TransactionEntity[],
 ) {
   const [parentTransaction, ...childTransactions] = transactions;
   const newNonChildTransactions = childTransactionsToUpdate.map(t =>
