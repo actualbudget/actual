@@ -1,6 +1,6 @@
 import React, { PureComponent, createRef, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
+import { Navigate, useParams, useLocation } from 'react-router-dom';
 
 import { debounce } from 'debounce';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +22,7 @@ import {
   ungroupTransaction,
   ungroupTransactions,
   makeChild,
-  makeNonChild,
+  makeAsNonChildTransactions,
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
@@ -1128,26 +1128,26 @@ class AccountInternal extends PureComponent {
     );
 
     for (const groupedTransaction of groupedTransactionsToUpdate) {
-      const [parentTransaction, ...childTransactions] =
-        ungroupTransaction(groupedTransaction);
+      const transactions = ungroupTransaction(groupedTransaction);
+      const [parentTransaction, ...childTransactions] = transactions;
 
       if (ids.includes(parentTransaction.id)) {
-        // Extract all child transactions and delete the parent.
-        const newNonChildTransactions = childTransactions.map(t =>
-          makeNonChild(parentTransaction, t),
+        // Unsplit all child transactions.
+        const diff = makeAsNonChildTransactions(
+          childTransactions,
+          transactions,
         );
 
         changes = {
-          ...changes,
-          updated: [...changes.updated, ...newNonChildTransactions],
-          deleted: [...changes.deleted, parentTransaction],
+          updated: [...changes.updated, ...diff.updated],
+          deleted: [...changes.deleted, ...diff.deleted],
         };
 
         // Already processed the child transactions above, no need to process them below.
         continue;
       }
 
-      // Extract selected child transactions.
+      // Unsplit selected child transactions.
 
       const selectedChildTransactions = childTransactions.filter(t =>
         ids.includes(t.id),
@@ -1157,43 +1157,26 @@ class AccountInternal extends PureComponent {
         continue;
       }
 
-      const newNonChildTransactions = selectedChildTransactions.map(t =>
-        makeNonChild(parentTransaction, t),
+      const diff = makeAsNonChildTransactions(
+        selectedChildTransactions,
+        transactions,
       );
-
-      const remainingChildTransactions = childTransactions.filter(
-        t =>
-          !newNonChildTransactions.some(
-            updatedTrans => updatedTrans.id === t.id,
-          ),
-      );
-
-      const updatedParentTransaction = {
-        ...parentTransaction,
-        amount: remainingChildTransactions
-          .map(t => t.amount)
-          .reduce((total, amount) => total + amount, 0),
-      };
-
-      const deleteParentTransaction = remainingChildTransactions.length === 0;
 
       changes = {
-        ...changes,
-        updated: [
-          ...changes.updated,
-          ...(!deleteParentTransaction ? [updatedParentTransaction] : []),
-          ...newNonChildTransactions,
-        ],
-        deleted: [
-          ...changes.deleted,
-          ...(deleteParentTransaction ? [updatedParentTransaction] : []),
-        ],
+        updated: [...changes.updated, ...diff.updated],
+        deleted: [...changes.deleted, ...diff.deleted],
       };
     }
 
     await send('transactions-batch-update', changes);
 
     this.refetchTransactions();
+
+    const transactionsToSelect = changes.updated.map(t => t.id);
+    this.dispatchSelected({
+      type: 'select-all',
+      ids: transactionsToSelect,
+    });
   };
 
   checkForReconciledTransactions = async (ids, confirmReason, onConfirm) => {
@@ -1834,16 +1817,12 @@ class AccountInternal extends PureComponent {
 }
 
 function AccountHack(props) {
-  const dispatch = useDispatch();
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
-  const match = useMatch(props.location.pathname);
 
   return (
     <AccountInternal
-      dispatch={dispatch}
-      {...props}
-      match={match}
       splitsExpandedDispatch={splitsExpandedDispatch}
+      {...props}
     />
   );
 }

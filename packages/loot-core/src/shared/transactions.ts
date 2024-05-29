@@ -66,7 +66,7 @@ export function makeChild<T extends GenericTransactionEntity>(
   } as unknown as T;
 }
 
-export function makeNonChild<T extends GenericTransactionEntity>(
+function makeNonChild<T extends GenericTransactionEntity>(
   parent: T,
   data: object,
 ) {
@@ -329,4 +329,48 @@ export function realizeTempTransactions(transactions: TransactionEntity[]) {
       parent_id: parent.id,
     })),
   ];
+}
+
+export function makeAsNonChildTransactions(
+  childTransactionsToUpdate,
+  transactions,
+) {
+  const [parentTransaction, ...childTransactions] = transactions;
+  const newNonChildTransactions = childTransactionsToUpdate.map(t =>
+    makeNonChild(parentTransaction, t),
+  );
+
+  const remainingChildTransactions = childTransactions.filter(
+    t =>
+      !newNonChildTransactions.some(updatedTrans => updatedTrans.id === t.id),
+  );
+
+  const nonChildTransactionsToUpdate =
+    remainingChildTransactions.length === 1
+      ? [
+          ...newNonChildTransactions,
+          makeNonChild(parentTransaction, remainingChildTransactions[0]),
+        ]
+      : newNonChildTransactions;
+
+  const deleteParentTransaction = remainingChildTransactions.length <= 1;
+
+  const updatedParentTransaction = {
+    ...parentTransaction,
+    ...(!deleteParentTransaction
+      ? {
+          amount: remainingChildTransactions
+            .map(t => t.amount)
+            .reduce((total, amount) => total + amount, 0),
+        }
+      : {}),
+  };
+
+  return {
+    updated: [
+      ...(!deleteParentTransaction ? [updatedParentTransaction] : []),
+      ...nonChildTransactionsToUpdate,
+    ],
+    deleted: [...(deleteParentTransaction ? [updatedParentTransaction] : [])],
+  };
 }

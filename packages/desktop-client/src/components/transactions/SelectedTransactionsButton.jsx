@@ -76,38 +76,40 @@ export function SelectedTransactionsButton({
     const transactions = selectedIds.map(id => getTransaction(id));
     const [firstTransaction] = transactions;
 
-    const allSameDateAndAccount = transactions.every(
+    const areAllSameDateAndAccount = transactions.every(
       t =>
         t &&
         t.date === firstTransaction.date &&
         t.account === firstTransaction.account,
     );
-    const noSplitTransactions = transactions.every(
+    const areNoSplitTransactions = transactions.every(
       t => t && !t.is_parent && !t.is_child,
     );
-    const noReconciledTransactions = transactions.every(
+    const areNoReconciledTransactions = transactions.every(
       t => t && !t.reconciled,
     );
 
     return (
-      allSameDateAndAccount && noSplitTransactions && noReconciledTransactions
+      areAllSameDateAndAccount &&
+      areNoSplitTransactions &&
+      areNoReconciledTransactions
     );
   }, [selectedIds, types, getTransaction]);
 
-  const canMakeAsNonSplitTransactions = useMemo(() => {
+  const canUnsplitTransactions = useMemo(() => {
     if (selectedIds.length === 0 || types.preview) {
       return false;
     }
 
     const transactions = selectedIds.map(id => getTransaction(id));
 
-    const noReconciledTransactions = transactions.every(
+    const areNoReconciledTransactions = transactions.every(
       t => t && !t.reconciled,
     );
-    const someSplitTransactions = transactions.some(
+    const areAllSplitTransactions = transactions.every(
       t => t && (t.is_parent || t.is_child),
     );
-    return noReconciledTransactions && someSplitTransactions;
+    return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
 
   const hotKeyOptions = {
@@ -161,22 +163,6 @@ export function SelectedTransactionsButton({
                 disabled: ambiguousDuplication,
               },
               { name: 'delete', text: 'Delete', key: 'D' },
-              ...(canMakeAsSplitTransaction
-                ? [
-                    {
-                      name: 'make-as-split-transaction',
-                      text: 'Make as split transaction',
-                    },
-                  ]
-                : []),
-              ...(canMakeAsNonSplitTransactions
-                ? [
-                    {
-                      name: 'make-as-non-split-transactions',
-                      text: 'Make as non-split transactions',
-                    },
-                  ]
-                : []),
               ...(linked
                 ? [
                     {
@@ -205,6 +191,16 @@ export function SelectedTransactionsButton({
                     },
                   ]
                 : []),
+              {
+                name: 'make-as-split-transaction',
+                text: 'Make as split transaction',
+                disabled: !canMakeAsSplitTransaction,
+              },
+              {
+                name: 'unsplit-transactions',
+                text: 'Unsplit transaction' + (selectedIds.length > 1 ? 's' : ''),
+                disabled: !canUnsplitTransactions,
+              },
               Menu.line,
               { type: Menu.label, name: 'Edit field' },
               { name: 'date', text: 'Date' },
@@ -230,7 +226,7 @@ export function SelectedTransactionsButton({
           case 'make-as-split-transaction':
             onMakeAsSplitTransaction(selectedIds);
             break;
-          case 'make-as-non-split-transactions':
+          case 'unsplit-transactions':
             onMakeAsNonSplitTransactions(selectedIds);
             break;
           case 'post-transaction':
