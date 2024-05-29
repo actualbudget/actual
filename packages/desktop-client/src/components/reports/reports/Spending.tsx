@@ -47,13 +47,14 @@ export function Spending() {
       conditions: filters,
       conditionsOp,
       setDataCheck,
+      mode,
     });
-  }, [categories, filters, conditionsOp]);
+  }, [categories, filters, conditionsOp, mode]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
-
+  console.log(data);
   if (!data) {
     return null;
   }
@@ -175,8 +176,8 @@ export function Spending() {
                           {amountToCurrency(
                             Math.abs(
                               data.intervalData[
-                                monthUtils.getDay(monthUtils.currentDay()) >= 29
-                                  ? 28
+                                monthUtils.getDay(monthUtils.currentDay()) >= 28
+                                  ? 27
                                   : monthUtils.getDay(monthUtils.currentDay()) -
                                     1
                               ].thisMonth,
@@ -194,8 +195,8 @@ export function Spending() {
                           {amountToCurrency(
                             Math.abs(
                               data.intervalData[
-                                monthUtils.getDay(monthUtils.currentDay()) >= 29
-                                  ? 28
+                                monthUtils.getDay(monthUtils.currentDay()) >= 28
+                                  ? 27
                                   : monthUtils.getDay(monthUtils.currentDay()) -
                                     1
                               ].lastMonth,
@@ -215,8 +216,8 @@ export function Spending() {
                               Math.abs(
                                 data.intervalData[
                                   monthUtils.getDay(monthUtils.currentDay()) >=
-                                  29
-                                    ? 28
+                                  28
+                                    ? 27
                                     : monthUtils.getDay(
                                         monthUtils.currentDay(),
                                       ) - 1
@@ -248,6 +249,12 @@ export function Spending() {
                   onSelect={() => setMode('Last month')}
                 >
                   Last month
+                </ModeButton>
+                <ModeButton
+                  selected={mode === 'Last year'}
+                  onSelect={() => setMode('Last year')}
+                >
+                  Last year
                 </ModeButton>
                 {showAverage && (
                   <ModeButton

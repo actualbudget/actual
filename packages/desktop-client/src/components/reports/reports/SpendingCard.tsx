@@ -27,11 +27,11 @@ export function SpendingCard() {
   }, [categories]);
 
   const data = useReport('default', getGraphData);
+  const todayDate = monthUtils.getDay(monthUtils.currentDay());
   const difference =
     data &&
-    data.intervalData[monthUtils.getDay(monthUtils.currentDay()) - 1].average -
-      data.intervalData[monthUtils.getDay(monthUtils.currentDay()) - 1]
-        .thisMonth;
+    data.intervalData[todayDate >= 28 ? 27 : todayDate - 1].average -
+      data.intervalData[todayDate >= 28 ? 27 : todayDate - 1].thisMonth;
 
   return (
     <ReportCard flex="1" to="/reports/spending">
