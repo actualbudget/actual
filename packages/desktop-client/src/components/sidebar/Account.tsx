@@ -87,7 +87,6 @@ export function Account({
   });
 
   const accountNote = useNotes(`account-${account?.id}`);
-  // const note = `**${name}**` + (accountNote ? `\n\n${accountNote}` : '');
 
   return (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
