@@ -108,13 +108,13 @@ function boundedRange(
       latest = monthUtils.currentWeek(firstDayOfWeekIdx);
       break;
     case 'Monthly':
-      latest = monthUtils.currentMonth() + '-31';
+      latest = monthUtils.getMonthEnd(monthUtils.currentDay());
       break;
     case 'Yearly':
       latest = monthUtils.currentDay();
       break;
     default:
-      latest = monthUtils.currentMonth();
+      latest = monthUtils.currentDay();
       break;
   }
 

@@ -16,12 +16,16 @@ import { type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { View } from '../../../common/View';
 
+import { ReportTableHeader } from './ReportTableHeader';
 import { ReportTableList } from './ReportTableList';
 import { ReportTableRow } from './ReportTableRow';
+import { ReportTableTotals } from './ReportTableTotals';
 
 type ReportTableProps = {
   saveScrollWidth: (value: number) => void;
+  headerScrollRef: RefObject<HTMLDivElement>;
   listScrollRef: RefObject<HTMLDivElement>;
+  totalScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   groupBy: string;
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
@@ -29,6 +33,7 @@ type ReportTableProps = {
   filters?: RuleConditionEntity[];
   mode: string;
   intervalsCount: number;
+  interval: string;
   compact: boolean;
   style?: CSSProperties;
   compactStyle?: CSSProperties;
@@ -36,18 +41,25 @@ type ReportTableProps = {
   showOffBudget?: boolean;
 };
 
+export type renderTotalsProps = {
+  metadata: GroupedEntity;
+  mode: string;
+  totalsStyle: CSSProperties;
+  testStyle: CSSProperties;
+  scrollWidthTotals: number;
+};
+
 export type renderRowProps = {
   item: GroupedEntity;
   mode: string;
-  intervalsCount: number;
-  compact: boolean;
   style?: CSSProperties;
-  compactStyle?: CSSProperties;
 };
 
 export function ReportTable({
   saveScrollWidth,
+  headerScrollRef,
   listScrollRef,
+  totalScrollRef,
   handleScroll,
   groupBy,
   balanceTypeOp,
@@ -55,6 +67,7 @@ export function ReportTable({
   filters,
   mode,
   intervalsCount,
+  interval,
   compact,
   style,
   compactStyle,
@@ -69,18 +82,37 @@ export function ReportTable({
     }
   });
 
-  const renderRow = useCallback(
+  const renderRow = useCallback(({ item, mode, style }: renderRowProps) => {
+    return (
+      <ReportTableRow
+        item={item}
+        balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        mode={mode}
+        filters={filters}
+        startDate={data.startDate}
+        endDate={data.endDate}
+        intervalsCount={intervalsCount}
+        compact={compact}
+        style={style}
+        compactStyle={compactStyle}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
+      />
+    );
+  }, []);
+
+  const renderTotals = useCallback(
     ({
-      item,
+      metadata,
       mode,
-      intervalsCount,
-      compact,
-      style,
-      compactStyle,
-    }: renderRowProps) => {
+      totalsStyle,
+      testStyle,
+      scrollWidthTotals,
+    }: renderTotalsProps) => {
       return (
         <ReportTableRow
-          item={item}
+          item={metadata}
           balanceTypeOp={balanceTypeOp}
           groupBy={groupBy}
           mode={mode}
@@ -89,10 +121,14 @@ export function ReportTable({
           endDate={data.endDate}
           intervalsCount={intervalsCount}
           compact={compact}
-          style={style}
+          style={totalsStyle}
           compactStyle={compactStyle}
           showHiddenCategories={showHiddenCategories}
           showOffBudget={showOffBudget}
+          totalStyle={testStyle}
+          totalScrollRef={totalScrollRef}
+          handleScroll={handleScroll}
+          height={32 + scrollWidthTotals}
         />
       );
     },
@@ -100,39 +136,58 @@ export function ReportTable({
   );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        outline: 'none',
-        '& .animated .animated-row': { transition: '.25s transform' },
-      }}
-      tabIndex={1}
-    >
-      <Block
-        innerRef={listScrollRef}
-        onScroll={handleScroll}
-        id="list"
+    <View>
+      <ReportTableHeader
+        headerScrollRef={headerScrollRef}
+        handleScroll={handleScroll}
+        data={data.intervalData}
+        groupBy={groupBy}
+        interval={interval}
+        balanceTypeOp={balanceTypeOp}
+        compact={compact}
+        style={style}
+        compactStyle={compactStyle}
+        mode={mode}
+      />
+      <View
         style={{
-          overflowY: 'auto',
-          scrollbarWidth: 'none',
-          '::-webkit-scrollbar': { display: 'none' },
           flex: 1,
+          flexDirection: 'row',
           outline: 'none',
           '& .animated .animated-row': { transition: '.25s transform' },
         }}
+        tabIndex={1}
       >
-        <ReportTableList
-          data={data}
-          intervalsCount={intervalsCount}
-          mode={mode}
-          groupBy={groupBy}
-          renderRow={renderRow}
-          compact={compact}
-          style={style}
-          compactStyle={compactStyle}
-        />
-      </Block>
+        <Block
+          innerRef={listScrollRef}
+          onScroll={handleScroll}
+          id="list"
+          style={{
+            overflowY: 'auto',
+            scrollbarWidth: 'none',
+            '::-webkit-scrollbar': { display: 'none' },
+            flex: 1,
+            outline: 'none',
+            '& .animated .animated-row': { transition: '.25s transform' },
+          }}
+        >
+          <ReportTableList
+            data={data}
+            mode={mode}
+            groupBy={groupBy}
+            renderRow={renderRow}
+            style={style}
+          />
+        </Block>
+      </View>
+      <ReportTableTotals
+        data={data}
+        mode={mode}
+        totalScrollRef={totalScrollRef}
+        compact={compact}
+        style={style}
+        renderTotals={renderTotals}
+      />
     </View>
   );
 }

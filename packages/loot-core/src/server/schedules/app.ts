@@ -107,7 +107,7 @@ export function getNextDate(
   return null;
 }
 
-export async function getRuleForSchedule(id) {
+export async function getRuleForSchedule(id: string | null): Promise<Rule> {
   if (id == null) {
     throw new Error('Schedule not attached to a rule');
   }

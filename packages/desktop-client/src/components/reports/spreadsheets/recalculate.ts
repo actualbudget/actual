@@ -77,7 +77,7 @@ export function recalculate({
         totalDebts: integerToAmount(intervalDebts),
         totalTotals: integerToAmount(intervalAssets + intervalDebts),
         change,
-        dateLookup: intervalItem,
+        intervalStartDate: intervalItem,
       });
 
       return arr;
