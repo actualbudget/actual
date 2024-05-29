@@ -198,7 +198,8 @@ export function SelectedTransactionsButton({
               },
               {
                 name: 'unsplit-transactions',
-                text: 'Unsplit transaction' + (selectedIds.length > 1 ? 's' : ''),
+                text:
+                  'Unsplit transaction' + (selectedIds.length > 1 ? 's' : ''),
                 disabled: !canUnsplitTransactions,
               },
               Menu.line,
