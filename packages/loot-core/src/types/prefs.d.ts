@@ -6,7 +6,8 @@ export type FeatureFlag =
   | 'customReports'
   | 'spendingReport'
   | 'simpleFinSync'
-  | 'splitsInRules';
+  | 'splitsInRules'
+  | 'cashflowForecast';
 
 export type LocalPrefs = Partial<
   {

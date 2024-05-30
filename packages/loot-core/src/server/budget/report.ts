@@ -99,6 +99,14 @@ export function createSummary(groups, categories, sheetName) {
     run: amount => amount,
   });
 
+  sheet.get().createDynamic(sheetName, 'total-income-leftover', {
+    initialValue: 0,
+    dependencies: ['total-budget-income', 'total-income'],
+    run: (budgeted, income) => {
+      return budgeted - income;
+    },
+  });
+
   sheet.get().createDynamic(sheetName, 'total-saved', {
     initialValue: 0,
     dependencies: ['total-budget-income', 'total-budgeted'],

@@ -31,4 +31,9 @@ export interface SchedulesHandlers {
     config;
     count: number;
   }) => Promise<string[]>;
+
+  'schedule/get-occurrences-to-date': (arg: {
+    config;
+    end: Date;
+  }) => Promise<string[]>;
 }

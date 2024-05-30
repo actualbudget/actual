@@ -10,6 +10,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   spendingReport: false,
   simpleFinSync: false,
   splitsInRules: false,
+  cashflowForecast: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

@@ -4,6 +4,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button';
+import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
@@ -19,9 +20,17 @@ import {
 export function Header({
   start,
   end,
+  forecast,
+  forecastSource,
   show1Month,
   allMonths,
+  allForecasts,
+  allForecastSource,
+  forecastDivideYears,
+  onForecastDivideYearsChange,
+  disabled,
   onChangeDates,
+  onForecastSourceChange,
   filters,
   conditionsOp,
   onApply,
@@ -69,6 +78,7 @@ export function Header({
                     newValue,
                     end,
                   ),
+                  forecast,
                 )
               }
               value={start}
@@ -84,6 +94,7 @@ export function Header({
                     start,
                     newValue,
                   ),
+                  forecast,
                 )
               }
               value={end}
@@ -105,26 +116,26 @@ export function Header({
             {show1Month && (
               <Button
                 type="bare"
-                onClick={() => onChangeDates(...getLatestRange(1))}
+                onClick={() => onChangeDates(...getLatestRange(1), forecast)}
               >
                 1 month
               </Button>
             )}
             <Button
               type="bare"
-              onClick={() => onChangeDates(...getLatestRange(2))}
+              onClick={() => onChangeDates(...getLatestRange(2), forecast)}
             >
               3 months
             </Button>
             <Button
               type="bare"
-              onClick={() => onChangeDates(...getLatestRange(5))}
+              onClick={() => onChangeDates(...getLatestRange(5), forecast)}
             >
               6 months
             </Button>
             <Button
               type="bare"
-              onClick={() => onChangeDates(...getLatestRange(11))}
+              onClick={() => onChangeDates(...getLatestRange(11), forecast)}
             >
               1 Year
             </Button>
@@ -133,6 +144,7 @@ export function Header({
               onClick={() =>
                 onChangeDates(
                   ...getFullRange(allMonths[allMonths.length - 1].name),
+                  forecast,
                 )
               }
             >
@@ -140,8 +152,63 @@ export function Header({
             </Button>
           </View>
           {children || <View style={{ flex: 1 }} />}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            {forecast && <View>Forecast</View>}
+            {forecast && (
+              <Select
+                // style={{ backgroundColor: 'white' }}
+                onChange={newValue => onForecastSourceChange(newValue)}
+                value={forecastSource}
+                options={allForecastSource.map(({ name, pretty }) => [
+                  name,
+                  pretty,
+                ])}
+              />
+            )}
+            {forecast && (
+              <Select
+                onChange={newValue =>
+                  onChangeDates(
+                    ...validateStart(
+                      allMonths[allMonths.length - 1].name,
+                      start,
+                      end,
+                    ),
+                    newValue,
+                  )
+                }
+                value={forecast}
+                options={allForecasts.map(({ name, pretty }) => [name, pretty])}
+                disabledKeys={disabled}
+              />
+            )}
+          </View>
         </View>
       )}
+      <View
+        style={{
+          flexDirection: isNarrowWidth ? 'column' : 'row',
+          alignItems: isNarrowWidth ? 'right' : 'center',
+          marginTop: 5,
+          gap: 5,
+        }}
+      >
+        <View style={{ flex: 1 }} />
+        {forecast && forecastSource === 'average' && <View>Average last</View>}
+        {forecast && forecastSource === 'average' && (
+          <Input
+            onChangeValue={newValue => onForecastDivideYearsChange(newValue)}
+            value={forecastDivideYears}
+          />
+        )}
+        {forecast && forecastSource === 'average' && <View>years</View>}
+      </View>
       {filters && filters.length > 0 && (
         <View
           style={{ marginTop: 5 }}

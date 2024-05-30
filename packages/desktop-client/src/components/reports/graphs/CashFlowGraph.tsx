@@ -23,6 +23,8 @@ import {
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { type CSSProperties, theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
+import { Text } from '../../common/Text';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
 
@@ -58,35 +60,121 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
           </strong>
         </div>
         <div style={{ lineHeight: 1.5 }}>
-          <AlignedText left="Income:" right={amountToCurrency(data.income)} />
-          <AlignedText
-            left="Expenses:"
-            right={amountToCurrency(data.expenses)}
-          />
+          {data.income > 0 && (
+            <AlignedText
+              left="Income:"
+              right={
+                <Text>
+                  <PrivacyFilter>{amountToCurrency(data.income)}</PrivacyFilter>
+                </Text>
+              }
+            />
+          )}
+          {data.futureIncome > 0 && (
+            <AlignedText
+              left="Future Income:"
+              right={
+                <Text>
+                  <PrivacyFilter>
+                    {amountToCurrency(data.futureIncome)}
+                  </PrivacyFilter>
+                </Text>
+              }
+            />
+          )}
+          {data.expenses < 0 && (
+            <AlignedText
+              left="Expenses:"
+              right={
+                <Text>
+                  <PrivacyFilter>
+                    {amountToCurrency(data.expenses)}
+                  </PrivacyFilter>
+                </Text>
+              }
+            />
+          )}
+          {data.futureExpenses < 0 && (
+            <AlignedText
+              left="Future Expenses:"
+              right={
+                <Text>
+                  <PrivacyFilter>
+                    {amountToCurrency(data.futureExpenses)}
+                  </PrivacyFilter>
+                </Text>
+              }
+            />
+          )}
           <AlignedText
             left="Change:"
             right={
-              <strong>{amountToCurrency(data.income + data.expenses)}</strong>
+              <Text>
+                <PrivacyFilter>
+                  <strong>
+                    {amountToCurrency(
+                      data.income +
+                        data.expenses +
+                        data.futureIncome +
+                        data.futureExpenses,
+                    )}
+                  </strong>
+                </PrivacyFilter>
+              </Text>
             }
           />
           {data.transfers !== 0 && (
             <AlignedText
               left="Transfers:"
-              right={amountToCurrency(data.transfers)}
+              right={
+                <Text>
+                  <PrivacyFilter>
+                    {amountToCurrency(data.transfers)}
+                  </PrivacyFilter>
+                </Text>
+              }
             />
           )}
-          <AlignedText left="Balance:" right={amountToCurrency(data.balance)} />
+          <AlignedText
+            left="Balance:"
+            right={
+              <Text>
+                <PrivacyFilter>
+                  {amountToCurrency(data.balanceTotal)}
+                </PrivacyFilter>
+              </Text>
+            }
+          />
         </div>
       </div>
     </div>
   );
 }
 
+// To ensure a smooth between solid and dashed, there are two identical lines ...
+// ... each with the  unwanted part hidden (opacity=0) using a gradient
+const gradientTwoColors = (
+  id: string,
+  col1: string,
+  col2: string,
+  percentChange: number,
+) => (
+  <linearGradient id={id} x1="0" y1="0" x2="100%" y2="0">
+    <stop offset="0%" stopColor={col1} />
+    <stop offset={`${percentChange}%`} stopColor={col1} />
+    <stop offset={`${percentChange}%`} stopColor={`${col2}`} />
+    <stop offset="100%" stopColor={col2} />
+  </linearGradient>
+);
+
 type CashFlowGraphProps = {
   graphData: {
     expenses: { x: Date; y: number }[];
     income: { x: Date; y: number }[];
     balances: { x: Date; y: number }[];
+    futureBalances: { x: Date; y: number }[];
+    futureExpenses: { x: Date; y: number }[];
+    futureIncome: { x: Date; y: number }[];
     transfers: { x: Date; y: number }[];
   };
   isConcise: boolean;
@@ -102,12 +190,58 @@ export function CashFlowGraph({
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
 
-  const data = graphData.expenses.map((row, idx) => ({
-    date: row.x,
-    expenses: row.y,
-    income: graphData.income[idx].y,
-    balance: graphData.balances[idx].y,
-    transfers: graphData.transfers[idx].y,
+  // get all dates
+  // TODO: All of this toISOString business seems excessive ...
+  // but otherwise the dates cannot be correctly compared...
+  const dates = Array.from(
+    new Set([
+      ...graphData.expenses.map(expense => expense.x.toISOString()),
+      ...graphData.income.map(expense => expense.x.toISOString()),
+      ...graphData.balances.map(expense => expense.x.toISOString()),
+      ...graphData.futureExpenses.map(expense => expense.x.toISOString()),
+      ...graphData.futureIncome.map(expense => expense.x.toISOString()),
+      ...graphData.futureBalances.map(expense => expense.x.toISOString()),
+      ...graphData.transfers.map(expense => expense.x.toISOString()),
+    ]),
+  );
+
+  const data = dates.map(d => ({
+    date: new Date(d),
+    expenses: (
+      graphData.expenses.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    income: (
+      graphData.income.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    balance: (
+      graphData.balances.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    futureExpenses: (
+      graphData.futureExpenses.find(obj => obj.x.toISOString() === d) || {
+        y: 0,
+      }
+    ).y,
+    futureIncome: (
+      graphData.futureIncome.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    futureBalance: (
+      graphData.futureBalances.find(obj => obj.x.toISOString() === d) || {
+        y: 0,
+      }
+    ).y,
+    transfers: (
+      graphData.transfers.find(obj => obj.x.toISOString() === d) || { y: 0 }
+    ).y,
+    balanceTotal: graphData.futureBalances.find(
+      obj => obj.x.toISOString() === d,
+    )
+      ? (
+          graphData.futureBalances.find(obj => obj.x.toISOString() === d) || {
+            y: 0,
+          }
+        ).y
+      : (graphData.balances.find(obj => obj.x.toISOString() === d) || { y: 0 })
+          .y,
   }));
 
   return (
@@ -120,6 +254,23 @@ export function CashFlowGraph({
             stackOffset="sign"
             data={data}
           >
+            <defs>
+              {gradientTwoColors(
+                'hideFuture',
+                theme.pageTextLight,
+                'rgba(0,0,0,0)',
+                // TODO: Basing this on date would be most clean!
+                (100 * graphData.balances.length) /
+                  (graphData.balances.length + graphData.futureBalances.length),
+              )}
+              {gradientTwoColors(
+                'showFutureOnly',
+                'rgba(0,0,0,0)',
+                theme.pageTextLight,
+                (100 * graphData.balances.length) /
+                  (graphData.balances.length + graphData.futureBalances.length),
+              )}
+            </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="date"
@@ -165,13 +316,37 @@ export function CashFlowGraph({
               maxBarSize={MAX_BAR_SIZE}
               animationDuration={ANIMATION_DURATION}
             />
+            <Bar
+              dataKey="futureIncome"
+              stackId="a"
+              fill={theme.reportsBlueFaded}
+              maxBarSize={MAX_BAR_SIZE}
+              animationDuration={ANIMATION_DURATION}
+            />
+            <Bar
+              dataKey="futureExpenses"
+              stackId="a"
+              fill={theme.reportsRedFaded}
+              maxBarSize={MAX_BAR_SIZE}
+              animationDuration={ANIMATION_DURATION}
+            />
             <Line
               type="monotone"
-              dataKey="balance"
+              dataKey="balanceTotal"
               dot={false}
               hide={!showBalance}
-              stroke={theme.pageTextLight}
+              stroke="url(#hideFuture)"
               strokeWidth={2}
+              animationDuration={ANIMATION_DURATION}
+            />
+            <Line
+              type="monotone"
+              dataKey="balanceTotal"
+              dot={false}
+              hide={!showBalance}
+              stroke="url(#showFutureOnly)"
+              strokeWidth={2}
+              strokeDasharray="4 3"
               animationDuration={ANIMATION_DURATION}
             />
           </ComposedChart>

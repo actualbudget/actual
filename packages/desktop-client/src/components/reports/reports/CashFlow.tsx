@@ -7,6 +7,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
@@ -40,11 +41,21 @@ export function CashFlow() {
     name: string;
     pretty: string;
   }>>(null);
+  const [disabled, setDisabled] = useState(['']);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
   const [showBalance, setShowBalance] = useState(true);
+  const forecastFeatureFlag = useFeatureFlag('cashflowForecast');
+  const [forecast, setForecast] = useState(
+    forecastFeatureFlag
+      ? monthUtils.addDays(monthUtils.currentDay(), 6 * 31)
+      : monthUtils.currentMonth(),
+  );
+
+  const [forecastSource, setForecastSource] = useState('');
+  const [forecastDivideYears, setForecastDivideYears] = useState(10);
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -55,10 +66,68 @@ export function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, filters, conditionsOp),
-    [start, end, isConcise, filters, conditionsOp],
+    () =>
+      cashFlowByDate(
+        start,
+        end,
+        forecast,
+        forecastSource,
+        forecastDivideYears,
+        isConcise,
+        filters,
+        conditionsOp,
+      ),
+    [
+      start,
+      end,
+      forecast,
+      forecastSource,
+      forecastDivideYears,
+      isConcise,
+      filters,
+      conditionsOp,
+    ],
   );
   const data = useReport('cash_flow', params);
+
+  const allForecasts = [
+    { name: monthUtils.currentMonth(), pretty: 'None' },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 31),
+      pretty: '1 Month',
+    },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 3 * 31),
+      pretty: '3 Months',
+    },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 6 * 31),
+      pretty: '6 Months',
+    },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 12 * 31),
+      pretty: '12 Months',
+    },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 24 * 31),
+      pretty: '24 Months',
+    },
+  ];
+
+  const allForecastSource = [
+    {
+      name: 'budget',
+      pretty: 'Budget',
+    },
+    {
+      name: 'schedule',
+      pretty: 'Schedules',
+    },
+    {
+      name: 'average',
+      pretty: 'Average Spending',
+    },
+  ];
 
   useEffect(() => {
     async function run() {
@@ -76,13 +145,15 @@ export function CashFlow() {
         .reverse();
 
       setAllMonths(allMonths);
+      setForecastSource('schedule');
+      setForecastDivideYears(10);
     }
     run();
   }, []);
 
-  function onChangeDates(start: string, end: string) {
+  function onChangeDates(start: string, end: string, forecast: string) {
     const numDays = d.differenceInCalendarDays(
-      d.parseISO(end),
+      d.max([d.parseISO(forecast), d.parseISO(end)]),
       d.parseISO(start),
     );
     const isConcise = numDays > 31 * 3;
@@ -94,7 +165,19 @@ export function CashFlow() {
 
     setStart(start + '-01');
     setEnd(endDay);
+    setForecast(
+      forecastFeatureFlag
+        ? end === monthUtils.currentMonth()
+          ? forecast
+          : monthUtils.currentMonth()
+        : monthUtils.currentMonth(),
+    );
     setIsConcise(isConcise);
+    if (end !== monthUtils.currentMonth()) {
+      setDisabled(allForecasts.slice(1).map(forecast => forecast.name));
+    } else {
+      setDisabled([]);
+    }
   }
 
   const navigate = useNavigate();
@@ -124,10 +207,18 @@ export function CashFlow() {
     >
       <Header
         allMonths={allMonths}
+        allForecasts={allForecasts}
+        allForecastSource={allForecastSource}
+        disabled={disabled}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
         show1Month
+        forecast={forecastFeatureFlag ? forecast : null}
+        forecastSource={forecastFeatureFlag ? forecastSource : null}
+        forecastDivideYears={forecastDivideYears}
+        onForecastDivideYearsChange={setForecastDivideYears}
         onChangeDates={onChangeDates}
+        onForecastSourceChange={setForecastSource}
         onApply={onApplyFilter}
         filters={filters}
         onUpdateFilter={onUpdateFilter}
