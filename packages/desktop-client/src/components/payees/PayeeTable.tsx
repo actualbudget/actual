@@ -15,6 +15,7 @@ import { View } from '../common/View';
 import { Table, type TableNavigator } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
+import { useCommonPayees } from '../../hooks/usePayees';
 
 // Table items require an ID to work, it's optional in the loot-core
 // model so would need to verify accuracy of that before changing there
@@ -39,6 +40,7 @@ export const PayeeTable = forwardRef<
   ) => {
     const [hovered, setHovered] = useState(null);
     const selectedItems = useSelectedItems();
+    const commonPayees = useCommonPayees();
 
     useLayoutEffect(() => {
       const firstSelected = [...selectedItems][0] as string;
@@ -62,6 +64,7 @@ export const PayeeTable = forwardRef<
             return (
               <PayeeTableRow
                 payee={item}
+                isCommon={commonPayees.find(cp => cp.id === item.id)}
                 ruleCount={ruleCounts.get(item.id) || 0}
                 selected={selectedItems.has(item.id)}
                 editing={editing}

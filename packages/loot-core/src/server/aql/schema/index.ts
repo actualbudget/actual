@@ -61,6 +61,7 @@ export const schema = {
     name: f('string', { required: true }),
     transfer_acct: f('id', { ref: 'accounts' }),
     tombstone: f('boolean'),
+    favorite: f('boolean'),
   },
   accounts: {
     id: f('id'),
