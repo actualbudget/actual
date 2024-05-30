@@ -10,12 +10,12 @@ import {
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
+import { useCommonPayees } from '../../hooks/usePayees';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { View } from '../common/View';
 import { Table, type TableNavigator } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
-import { useCommonPayees } from '../../hooks/usePayees';
 
 // Table items require an ID to work, it's optional in the loot-core
 // model so would need to verify accuracy of that before changing there

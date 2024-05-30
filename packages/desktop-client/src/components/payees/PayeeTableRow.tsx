@@ -4,10 +4,22 @@ import { memo } from 'react';
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import { SvgArrowThinRight, SvgBookmark, SvgBookmarkOutlineAdd, SvgChatBubbleDots, SvgHeart, SvgStarFull } from '../../icons/v1';
+import {
+  SvgArrowThinRight,
+  SvgBookmark,
+  SvgBookmarkOutlineAdd,
+  SvgStarFull,
+} from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
 import { Text } from '../common/Text';
-import { Cell, CellButton, CustomCell, InputCell, Row, SelectCell } from '../table';
+import {
+  Cell,
+  CellButton,
+  CustomCell,
+  InputCell,
+  Row,
+  SelectCell,
+} from '../table';
 
 type RuleButtonProps = {
   ruleCount: number;
@@ -128,24 +140,32 @@ export const PayeeTableRow = memo(
             dispatchSelected({ type: 'select', id: payee.id, event: e });
           }}
         />
-        <CustomCell 
+        <CustomCell
           width={10}
           exposed={!payee.transfer_acct}
           onBlur={() => {}}
-          onUpdate={(value) => onUpdate(id, 'favorite', Boolean(value) ? 1 : 0)}
-          onClick={() => { 
-            payee.favorite = !payee.favorite;
-            !payee.transfer_acct && onUpdate(id, 'favorite', payee.favorite ? 1: 0);
+          onUpdate={value => {
+            if (!payee.transfer_acct) {
+              onUpdate(id, 'favorite', Boolean(value) ? 1 : 0);
+            }
           }}
-          >{() => { 
+          onClick={() => {
+            payee.favorite = !payee.favorite;
+            if (!payee.transfer_acct) {
+              onUpdate(id, 'favorite', payee.favorite ? 1 : 0);
+            }
+          }}
+        >
+          {() => {
             if (payee.favorite) {
-              return <SvgBookmark/>;
+              return <SvgBookmark />;
             } else if (isCommon) {
-              return <SvgStarFull/>;
-            } else
-              return <SvgBookmarkOutlineAdd/>;
-            } 
-        }</CustomCell>
+              return <SvgStarFull />;
+            } else {
+              return <SvgBookmarkOutlineAdd />;
+            }
+          }}
+        </CustomCell>
         <InputCell
           value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
           valueStyle={

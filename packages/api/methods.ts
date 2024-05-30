@@ -27,7 +27,7 @@ export async function loadBudget(budgetId) {
   return send('api/load-budget', { id: budgetId });
 }
 
-export async function downloadBudget(syncId, { password }: { password?} = {}) {
+export async function downloadBudget(syncId, { password }: { password? } = {}) {
   return send('api/download-budget', { syncId, password });
 }
 

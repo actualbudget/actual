@@ -60,7 +60,6 @@ type LoadPayeesAction = {
   payees: State['payees'];
 };
 
-
 type LoadCommonPayeesAction = {
   type: typeof constants.LOAD_COMMON_PAYEES;
   payees: State['common_payees'];

@@ -549,7 +549,7 @@ export function getCommonPayees() {
     max(t.date) as latest
     FROM payees p
     LEFT JOIN v_transactions t on t.payee == p.id
-    WHERE p.name != ""
+    WHERE LENGTH(p.name) > 0
     GROUP BY p.id
     HAVING latest > ${threeMonthsAgo}
     ORDER BY c DESC ,p.transfer_acct IS NULL DESC, p.name 

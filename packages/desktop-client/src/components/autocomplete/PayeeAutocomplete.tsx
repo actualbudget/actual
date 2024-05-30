@@ -46,7 +46,9 @@ function getPayeeSuggestions(
   accounts: AccountEntity[],
 ): PayeeAutocompleteItem[] {
   if (commonPayees.length > 0) {
-    payees = commonPayees.concat(payees.filter(p => !(commonPayees.find(cp => cp.id === p.id))));
+    payees = commonPayees.concat(
+      payees.filter(p => !commonPayees.find(cp => cp.id === p.id)),
+    );
   }
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
 
@@ -75,6 +77,7 @@ function stripNew(value) {
 
 type PayeeListProps = {
   items: PayeeAutocompleteItem[];
+  commonPayees: PayeeEntity[];
   getItemProps: (arg: {
     item: PayeeAutocompleteItem;
   }) => ComponentProps<typeof View>;
@@ -94,20 +97,23 @@ type PayeeListProps = {
 };
 
 type ItemTypes = 'account' | 'payee' | 'common_payee';
-function determineItemType(item: PayeeAutocompleteItem, idx?: number): ItemTypes {
-          if (item.transfer_acct) {
-            return 'account';
-          } 
-          if (item.common) {
-            return 'common_payee';
-          }
-          else {
-            return 'payee';
-          }
+function determineItemType(
+  item: PayeeAutocompleteItem,
+  isCommon: boolean,
+): ItemTypes {
+  if (item.transfer_acct) {
+    return 'account';
+  }
+  if (item.favorite || isCommon) {
+    return 'common_payee';
+  } else {
+    return 'payee';
+  }
 }
 
 function PayeeList({
   items,
+  commonPayees,
   getItemProps,
   highlightedIndex,
   embedded,
@@ -150,7 +156,8 @@ function PayeeList({
           })}
 
         {items.map((item, idx) => {
-          const itemType = determineItemType(item, idx); 
+          const isCommon = commonPayees.includes(item);
+          const itemType = determineItemType(item, isCommon, idx);
           let title;
 
           if (itemType === 'common_payee' && lastType !== itemType) {
@@ -264,7 +271,7 @@ export function PayeeAutocomplete({
     if (!hasPayeeInput) {
       return suggestions;
     }
-    return [{ id: 'new', name: '' }, ...suggestions];
+    return [{ id: 'new', favorite: false, name: '' }, ...suggestions];
   }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
   const dispatch = useDispatch();
@@ -377,6 +384,7 @@ export function PayeeAutocomplete({
       renderItems={(items, getItemProps, highlightedIndex, inputValue) => (
         <PayeeList
           items={items}
+          commonPayees={commonPayees}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
           inputValue={inputValue}

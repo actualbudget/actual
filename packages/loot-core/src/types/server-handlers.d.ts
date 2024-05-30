@@ -88,7 +88,7 @@ export interface ServerHandlers {
 
   'category-move': (arg: { id; groupId; targetId }) => Promise<unknown>;
 
-  'category-delete': (arg: { id; transferId?}) => Promise<{ error?: string }>;
+  'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
 
   'category-group-create': (arg: {
     name;
@@ -210,9 +210,9 @@ export interface ServerHandlers {
     accessValidForDays: number;
   }) => Promise<
     | {
-      requisitionId: string;
-      link: string;
-    }
+        requisitionId: string;
+        link: string;
+      }
     | { error: 'unauthorized' }
     | { error: 'failed' }
   >;
@@ -298,7 +298,7 @@ export interface ServerHandlers {
 
   'upload-budget': (arg: { id }) => Promise<{ error?: string }>;
 
-  'download-budget': (arg: { fileId; replace?}) => Promise<{ error; id }>;
+  'download-budget': (arg: { fileId; replace? }) => Promise<{ error; id }>;
 
   'sync-budget': () => Promise<{
     error?: { message: string; reason: string; meta: unknown };
