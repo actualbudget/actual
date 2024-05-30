@@ -46,3 +46,6 @@ bundle.mobile.js.map
 
 # Misc
 .#*
+
+# Local Netlify folder
+.netlify

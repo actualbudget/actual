@@ -5,15 +5,13 @@ import { Button } from '../common/Button';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 import { GenericInput } from '../util/GenericInput';
 
 type SaveReportChooseProps = {
   onApply: (cond: string) => void;
-  onClose: () => void;
 };
 
-export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
+export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
   const inputRef = createRef<HTMLInputElement>();
   const [err, setErr] = useState('');
   const [value, setValue] = useState('');
@@ -25,12 +23,7 @@ export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
   });
 
   return (
-    <Tooltip
-      position="bottom-right"
-      style={{ padding: 15, color: theme.menuItemText }}
-      width={275}
-      onClose={onClose}
-    >
+    <>
       <form>
         <View style={{ flexDirection: 'row', align: 'center' }}>
           <Text style={{ userSelect: 'none', flex: 1 }}>Choose Report</Text>
@@ -77,6 +70,6 @@ export function SaveReportChoose({ onApply, onClose }: SaveReportChooseProps) {
       ) : (
         <View />
       )}
-    </Tooltip>
+    </>
   );
 }

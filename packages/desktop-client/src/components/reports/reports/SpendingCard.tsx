@@ -5,6 +5,7 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { styles } from '../../../style/styles';
+import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -27,11 +28,14 @@ export function SpendingCard() {
   }, [categories]);
 
   const data = useReport('default', getGraphData);
-  const todayDate = monthUtils.getDay(monthUtils.currentDay());
+  const todayDay =
+    monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+      ? 27
+      : monthUtils.getDay(monthUtils.currentDay()) - 1;
   const difference =
     data &&
-    data.intervalData[todayDate >= 28 ? 27 : todayDate - 1].average -
-      data.intervalData[todayDate >= 28 ? 27 : todayDate - 1].thisMonth;
+    data.intervalData[todayDay].lastMonth -
+      data.intervalData[todayDay].thisMonth;
 
   return (
     <ReportCard flex="1" to="/reports/spending">
@@ -60,10 +64,17 @@ export function SpendingCard() {
                   ...styles.mediumText,
                   fontWeight: 500,
                   marginBottom: 5,
+                  color: !difference
+                    ? 'inherit'
+                    : difference <= 0
+                      ? theme.noticeTextLight
+                      : theme.errorText,
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {data && amountToCurrency(difference)}
+                  {data &&
+                    (difference && difference > 0 ? '+' : '') +
+                      amountToCurrency(difference)}
                 </PrivacyFilter>
               </Block>
             </View>
@@ -75,7 +86,7 @@ export function SpendingCard() {
             style={{ flex: 1 }}
             compact={true}
             data={data}
-            mode="average"
+            mode="lastMonth"
           />
         ) : (
           <LoadingIndicator />

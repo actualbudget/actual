@@ -117,11 +117,13 @@ export function SidebarCategory({
         </Popover>
       </View>
       <View style={{ flex: 1 }} />
-      <NotesButton
-        id={category.id}
-        style={dragging && { color: 'currentColor' }}
-        defaultColor={theme.pageTextLight}
-      />
+      <View style={{ flexShrink: 0 }}>
+        <NotesButton
+          id={category.id}
+          style={dragging && { color: 'currentColor' }}
+          defaultColor={theme.pageTextLight}
+        />
+      </View>
     </View>
   );
 

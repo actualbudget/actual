@@ -220,7 +220,7 @@ export function SpendingGraph({
                 height={height}
                 data={data.intervalData}
                 margin={{
-                  top: 0,
+                  top: 10,
                   right: 0,
                   left: 0,
                   bottom: 0,
