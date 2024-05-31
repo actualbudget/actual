@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
@@ -9,10 +9,10 @@ import { type LocalPrefs } from 'loot-core/types/prefs';
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList } from './disabledList';
@@ -80,6 +80,7 @@ export function ReportSidebar({
   firstDayOfWeekIdx,
 }: ReportSidebarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef(null);
   const onSelectRange = (cond: string) => {
     setSessionReport('dateRange', cond);
     onReportChange({ type: 'modify' });
@@ -246,6 +247,7 @@ export function ReportSidebar({
         >
           <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }} />
           <Button
+            ref={triggerRef}
             onClick={() => {
               setMenuOpen(true);
             }}
@@ -255,78 +257,71 @@ export function ReportSidebar({
             }}
           >
             Options
-            {menuOpen && (
-              <Tooltip
-                position="bottom-left"
-                style={{ padding: 0 }}
-                onClose={() => {
-                  setMenuOpen(false);
-                }}
-              >
-                <Menu
-                  onMenuSelect={type => {
-                    onReportChange({ type: 'modify' });
-
-                    if (type === 'show-hidden-categories') {
-                      setSessionReport(
-                        'showHiddenCategories',
-                        !customReportItems.showHiddenCategories,
-                      );
-                      setShowHiddenCategories(
-                        !customReportItems.showHiddenCategories,
-                      );
-                    } else if (type === 'show-off-budget') {
-                      setSessionReport(
-                        'showOffBudget',
-                        !customReportItems.showOffBudget,
-                      );
-                      setShowOffBudget(!customReportItems.showOffBudget);
-                    } else if (type === 'show-empty-items') {
-                      setSessionReport(
-                        'showEmpty',
-                        !customReportItems.showEmpty,
-                      );
-                      setShowEmpty(!customReportItems.showEmpty);
-                    } else if (type === 'show-uncategorized') {
-                      setSessionReport(
-                        'showUncategorized',
-                        !customReportItems.showUncategorized,
-                      );
-                      setShowUncategorized(
-                        !customReportItems.showUncategorized,
-                      );
-                    }
-                  }}
-                  items={[
-                    {
-                      name: 'show-hidden-categories',
-                      text: 'Show hidden categories',
-                      tooltip: 'Show hidden categories',
-                      toggle: customReportItems.showHiddenCategories,
-                    },
-                    {
-                      name: 'show-empty-items',
-                      text: 'Show empty rows',
-                      tooltip: 'Show rows that are zero or blank',
-                      toggle: customReportItems.showEmpty,
-                    },
-                    {
-                      name: 'show-off-budget',
-                      text: 'Show off budget',
-                      tooltip: 'Show off budget accounts',
-                      toggle: customReportItems.showOffBudget,
-                    },
-                    {
-                      name: 'show-uncategorized',
-                      text: 'Show uncategorized',
-                      tooltip: 'Show uncategorized transactions',
-                      toggle: customReportItems.showUncategorized,
-                    },
-                  ]}
-                />
-              </Tooltip>
-            )}
           </Button>
+
+          <Popover
+            triggerRef={triggerRef}
+            placement="bottom start"
+            isOpen={menuOpen}
+            onOpenChange={() => setMenuOpen(false)}
+          >
+            <Menu
+              onMenuSelect={type => {
+                onReportChange({ type: 'modify' });
+
+                if (type === 'show-hidden-categories') {
+                  setSessionReport(
+                    'showHiddenCategories',
+                    !customReportItems.showHiddenCategories,
+                  );
+                  setShowHiddenCategories(
+                    !customReportItems.showHiddenCategories,
+                  );
+                } else if (type === 'show-off-budget') {
+                  setSessionReport(
+                    'showOffBudget',
+                    !customReportItems.showOffBudget,
+                  );
+                  setShowOffBudget(!customReportItems.showOffBudget);
+                } else if (type === 'show-empty-items') {
+                  setSessionReport('showEmpty', !customReportItems.showEmpty);
+                  setShowEmpty(!customReportItems.showEmpty);
+                } else if (type === 'show-uncategorized') {
+                  setSessionReport(
+                    'showUncategorized',
+                    !customReportItems.showUncategorized,
+                  );
+                  setShowUncategorized(!customReportItems.showUncategorized);
+                }
+              }}
+              items={[
+                {
+                  name: 'show-hidden-categories',
+                  text: 'Show hidden categories',
+                  tooltip: 'Show hidden categories',
+                  toggle: customReportItems.showHiddenCategories,
+                },
+                {
+                  name: 'show-empty-items',
+                  text: 'Show empty rows',
+                  tooltip: 'Show rows that are zero or blank',
+                  toggle: customReportItems.showEmpty,
+                },
+                {
+                  name: 'show-off-budget',
+                  text: 'Show off budget',
+                  tooltip: 'Show off budget accounts',
+                  toggle: customReportItems.showOffBudget,
+                },
+                {
+                  name: 'show-uncategorized',
+                  text: 'Show uncategorized',
+                  tooltip: 'Show uncategorized transactions',
+                  toggle: customReportItems.showUncategorized,
+                },
+              ]}
+            />
+          </Popover>
         </View>
         <View
           style={{

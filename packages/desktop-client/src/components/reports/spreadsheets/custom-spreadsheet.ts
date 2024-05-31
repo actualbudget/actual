@@ -214,7 +214,7 @@ export function createCustomSpreadsheet({
             ReportOptions.intervalFormat.get(interval) || '',
           ),
           ...stacked,
-          dateStart: intervalItem,
+          intervalStartDate: intervalItem,
           totalDebts: integerToAmount(perIntervalDebts),
           totalAssets: integerToAmount(perIntervalAssets),
           totalTotals: integerToAmount(perIntervalDebts + perIntervalAssets),
