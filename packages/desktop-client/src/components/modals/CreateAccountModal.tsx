@@ -71,6 +71,7 @@ export function CreateAccountModal({
       name: string;
       institution: string;
       orgDomain: string;
+      balance: number;
     };
 
     for (const oldAccount of results.accounts) {
@@ -79,6 +80,7 @@ export function CreateAccountModal({
         name: oldAccount.name,
         institution: oldAccount.org.name,
         orgDomain: oldAccount.org.domain,
+        balance: oldAccount.balance,
       };
 
       newAccounts.push(newAccount);

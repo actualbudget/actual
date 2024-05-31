@@ -680,6 +680,26 @@ class AccountInternal extends PureComponent {
     };
   }
 
+  getFilteredAmount = async (filters, conditionsOpKey) => {
+    const filter = queries.getAccountFilter(this.props.accountId);
+
+    let query = q('transactions').filter({
+      [conditionsOpKey]: [...filters],
+    });
+    if (filter) {
+      query = query.filter(filter);
+    }
+
+    const filteredQuery = await runQuery(
+      query.select([{ amount: { $sum: '$amount' } }]),
+    );
+    const filteredAmount = filteredQuery.data.reduce(
+      (a, v) => (a = a + v.amount),
+      0,
+    );
+    return filteredAmount;
+  };
+
   isNew = id => {
     return this.props.newTransactions.includes(id);
   };
@@ -1307,6 +1327,10 @@ class AccountInternal extends PureComponent {
         conditions: conditions.filter(cond => !cond.customName),
       });
       const conditionsOpKey = this.state.conditionsOp === 'or' ? '$or' : '$and';
+      this.filteredAmount = await this.getFilteredAmount(
+        filters,
+        conditionsOpKey,
+      );
       this.currentQuery = this.rootQuery.filter({
         [conditionsOpKey]: [...filters, ...customFilters],
       });
@@ -1524,6 +1548,7 @@ class AccountInternal extends PureComponent {
           >
             <View style={styles.page}>
               <AccountHeader
+                filteredAmount={this.filteredAmount}
                 tableRef={this.table}
                 editingName={editingName}
                 isNameEditable={isNameEditable}
