@@ -596,6 +596,7 @@ handlers['gocardless-accounts-link'] = async function ({
   requisitionId,
   account,
   upgradingId,
+  offBudget,
 }) {
   let id;
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
@@ -620,6 +621,7 @@ handlers['gocardless-accounts-link'] = async function ({
       name: account.name,
       official_name: account.official_name,
       bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
       account_sync_source: 'goCardless',
     });
     await db.insertPayee({
@@ -647,6 +649,7 @@ handlers['gocardless-accounts-link'] = async function ({
 handlers['simplefin-accounts-link'] = async function ({
   externalAccount,
   upgradingId,
+  offBudget,
 }) {
   let id;
 
@@ -678,6 +681,7 @@ handlers['simplefin-accounts-link'] = async function ({
       name: externalAccount.name,
       official_name: externalAccount.name,
       bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
       account_sync_source: 'simpleFin',
     });
     await db.insertPayee({
