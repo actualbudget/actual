@@ -100,7 +100,7 @@ export interface ApiHandlers {
 
   'api/accounts-get': () => Promise<APIAccountEntity[]>;
 
-  'api/account-create': (arg: { account; initialBalance? }) => Promise<string>;
+  'api/account-create': (arg: { account; initialBalance?}) => Promise<string>;
 
   'api/account-update': (arg: { id; fields }) => Promise<void>;
 
@@ -139,6 +139,8 @@ export interface ApiHandlers {
   }) => Promise<{ error?: string }>;
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
+
+  'api/common-payees-get': () => Promise<APIPayeeEntity[]>;
 
   'api/payee-create': (arg: { payee }) => Promise<string>;
 

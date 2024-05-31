@@ -157,7 +157,7 @@ function PayeeList({
 
         {items.map((item, idx) => {
           const isCommon = commonPayees.includes(item);
-          const itemType = determineItemType(item, isCommon, idx);
+          const itemType = determineItemType(item, isCommon);
           let title;
 
           if (itemType === 'common_payee' && lastType !== itemType) {
