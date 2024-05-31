@@ -193,3 +193,7 @@ export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
+
+export const tooltipText = colorPalette.gray100;
+export const tooltipBackground = colorPalette.gray800;
+export const tooltipBorder = colorPalette.gray600;

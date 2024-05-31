@@ -133,9 +133,12 @@ export const styles = {
   tooltip: {
     padding: 5,
     ...shadowLarge,
+    borderWidth: 2,
     borderRadius: 4,
-    backgroundColor: theme.menuBackground,
-    color: theme.menuItemText,
+    borderStyle: 'solid',
+    borderColor: theme.tooltipBorder,
+    backgroundColor: theme.tooltipBackground,
+    color: theme.tooltipText,
     overflow: 'auto',
   },
   // Dynamically set
