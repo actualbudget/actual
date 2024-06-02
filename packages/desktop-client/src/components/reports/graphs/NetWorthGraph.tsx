@@ -121,7 +121,12 @@ export function NetWorthGraph({
                 width={width}
                 height={height}
                 data={graphData.data}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                margin={{
+                  top: 0,
+                  right: 0,
+                  left: computePadding(graphData.data),
+                  bottom: 0,
+                }}
               >
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -179,4 +184,26 @@ export function NetWorthGraph({
       }
     </Container>
   );
+}
+
+/**
+ * Add left padding for Y-axis for when large amounts get clipped
+ * @param netWorthData
+ * @returns left padding for Net worth graph
+ */
+function computePadding(netWorthData: Array<{ y: number }>) {
+  /**
+   * Convert to string notation, get longest string length
+   */
+  const maxLength = Math.max(
+    ...netWorthData.map(({ y }) => {
+      return Math.round(y).toLocaleString().length;
+    }),
+  );
+
+  if (maxLength < 5) {
+    return 0;
+  }
+
+  return (maxLength - 5) * 5;
 }
