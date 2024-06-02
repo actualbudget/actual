@@ -39,7 +39,7 @@ export function showActivity({
   id,
   interval = 'Day',
 }: showActivityProps) {
-  const amount =
+  const isOutFlow =
     balanceTypeOp === 'totalDebts' || type === 'debts' ? true : false;
   const hiddenCategories = categories.list.filter(f => f.hidden).map(e => e.id);
   const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
@@ -48,10 +48,7 @@ export function showActivity({
       ? 'dayFromDate'
       : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
           'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
-  let isDateOp = false;
-  if (interval === 'Weekly' || type !== 'time') {
-    isDateOp = true;
-  }
+  const isDateOp = interval === 'Weekly' || type !== 'time';
 
   const conditions = [
     ...filters,
@@ -77,8 +74,8 @@ export function showActivity({
       value: 0,
       options: {
         type: 'number',
-        inflow: !amount,
-        outflow: amount,
+        inflow: !isOutFlow,
+        outflow: isOutFlow,
       },
     },
     hiddenCategories.length > 0 &&
