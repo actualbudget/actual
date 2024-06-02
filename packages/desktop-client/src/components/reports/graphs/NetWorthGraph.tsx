@@ -201,7 +201,8 @@ function computePadding(netWorthData: Array<{ y: number }>) {
     }),
   );
 
-  if (maxLength < 5) {
+  if (maxLength <= 5) {
+    // No additional left padding is required for upto 5 characters
     return 0;
   }
 
