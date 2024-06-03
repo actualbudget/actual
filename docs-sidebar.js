@@ -208,6 +208,7 @@ const sidebars = {
           },
           items: [
             'advanced/bank-sync',
+            'advanced/http-header-auth',
             {
               type: 'category',
               label: 'Scripts',
