@@ -42,7 +42,7 @@ type GenericTransactionEntity =
 
 export function makeChild<T extends GenericTransactionEntity>(
   parent: T,
-  data: T = {},
+  data: object = {},
 ) {
   const prefix = parent.id === 'temp' ? 'temp' : '';
 
