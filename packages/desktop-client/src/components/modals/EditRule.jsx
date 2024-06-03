@@ -30,7 +30,6 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgInformationOutline } from '../../icons/v1';
@@ -655,7 +654,6 @@ const conditionFields = [
   ]);
 
 export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
-  const splitsEnabled = useFeatureFlag('splitsInRules');
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse),
   );
@@ -883,9 +881,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   };
 
   // Enable editing existing split rules even if the feature has since been disabled.
-  const showSplitButton = splitsEnabled
-    ? actionSplits.length > 0
-    : actionSplits.length > 1;
+  const showSplitButton = actionSplits.length > 0;
 
   return (
     <Modal

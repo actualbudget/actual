@@ -5,10 +5,14 @@ import { css } from 'glamor';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useNotes } from '../../hooks/useNotes';
 import { styles, theme, type CSSProperties } from '../../style';
 import { AlignedText } from '../common/AlignedText';
 import { Link } from '../common/Link';
+import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
+import { Notes } from '../Notes';
 import {
   useDraggable,
   useDroppable,
@@ -82,7 +86,10 @@ export function Account({
     onDrop,
   });
 
-  return (
+  const accountNote = useNotes(`account-${account?.id}`);
+  const needsTooltip = !!account?.id;
+
+  const accountRow = (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
         <DropHighlight pos={dropPos} />
@@ -147,5 +154,46 @@ export function Account({
         </View>
       </View>
     </View>
+  );
+
+  if (!needsTooltip) {
+    return accountRow;
+  }
+
+  return (
+    <Tooltip
+      content={
+        <View
+          style={{
+            padding: 10,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              borderBottom: accountNote ? `1px solid ${theme.tableBorder}` : 0,
+              marginBottom: accountNote ? '0.5rem' : 0,
+            }}
+          >
+            {name}
+          </Text>
+          {accountNote && (
+            <Notes
+              getStyle={() => ({
+                padding: 0,
+              })}
+              notes={accountNote}
+            />
+          )}
+        </View>
+      }
+      style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+      placement="right top"
+      triggerProps={{
+        delay: 1000,
+      }}
+    >
+      {accountRow}
+    </Tooltip>
   );
 }
