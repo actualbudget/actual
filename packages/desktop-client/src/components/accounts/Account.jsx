@@ -1067,31 +1067,12 @@ class AccountInternal extends PureComponent {
     }
 
     const [firstTransaction] = transactions;
-
-    // Use same payee if all transactions have the same payee, else use or create 'Split' payee
-    let parentPayeeId;
-    if (transactions.every(t => t.payee === firstTransaction.payee)) {
-      parentPayeeId = firstTransaction.payee;
-    } else {
-      const { data: payees } = await runQuery(
-        q('payees').filter({ name: 'Split' }).select('id'),
-      );
-      if (!payees || payees.length === 0) {
-        // Create a "Split" payee
-        const payeeId = await this.props.dispatch(actions.createPayee('Split'));
-        parentPayeeId = payeeId;
-      } else {
-        parentPayeeId = payees[0].id;
-      }
-    }
-
     const parentTransaction = {
       id: uuidv4(),
       is_parent: true,
       cleared: transactions.every(t => !!t.cleared),
       date: firstTransaction.date,
       account: firstTransaction.account,
-      payee: parentPayeeId,
       amount: transactions
         .map(t => t.amount)
         .reduce((total, amount) => total + amount, 0),
