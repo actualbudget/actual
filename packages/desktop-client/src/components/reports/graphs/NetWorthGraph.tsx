@@ -19,6 +19,7 @@ import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
+import { integerToCurrency } from 'loot-core/shared/util';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -35,7 +36,7 @@ export function NetWorthGraph({
   const { isNarrowWidth } = useResponsive();
 
   const tickFormatter = tick => {
-    return privacyMode ? '...' : `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    return privacyMode ? '...' : `${integerToCurrency(Math.round(tick))}`; // Formats the tick values as strings with commas
   };
 
   const gradientOffset = () => {
@@ -197,7 +198,7 @@ function computePadding(netWorthData: Array<{ y: number }>) {
    */
   const maxLength = Math.max(
     ...netWorthData.map(({ y }) => {
-      return Math.round(y).toLocaleString().length;
+      return integerToCurrency(Math.round(y)).length;
     }),
   );
 
