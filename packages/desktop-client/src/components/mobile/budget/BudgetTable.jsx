@@ -103,7 +103,11 @@ function ToBudget({ toBudget, onClick, show3Cols }) {
           />
         </View>
         <SvgCheveronRight
-          style={{ flexShrink: 0, color: theme.pageTextSubdued, marginLeft: 5 }}
+          style={{
+            flexShrink: 0,
+            color: theme.mobileHeaderTextSubdued,
+            marginLeft: 5,
+          }}
           width={14}
           height={14}
         />
@@ -190,7 +194,11 @@ function Saved({ projected, onClick, show3Cols }) {
           />
         </View>
         <SvgCheveronRight
-          style={{ flexShrink: 0, color: theme.pageTextSubdued, marginLeft: 5 }}
+          style={{
+            flexShrink: 0,
+            color: theme.mobileHeaderTextSubdued,
+            marginLeft: 5,
+          }}
           width={14}
           height={14}
         />
@@ -441,7 +449,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
               {category.name}
             </Text>
             <SvgCheveronRight
-              style={{ flexShrink: 0, color: theme.pageTextSubdued }}
+              style={{ flexShrink: 0, color: theme.tableTextSubdued }}
               width={14}
               height={14}
             />
@@ -664,7 +672,11 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       >
         <Button
           type="bare"
-          style={{ flexShrink: 0, ...styles.noTapHighlight }}
+          style={{
+            flexShrink: 0,
+            color: theme.pageTextSubdued,
+            ...styles.noTapHighlight,
+          }}
           activeStyle={{
             backgroundColor: 'transparent',
           }}
@@ -709,7 +721,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
               {group.name}
             </Text>
             <SvgCheveronRight
-              style={{ flexShrink: 0, color: theme.pageTextSubdued }}
+              style={{ flexShrink: 0, color: theme.tableTextSubdued }}
               width={14}
               height={14}
             />
@@ -888,6 +900,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           type="bare"
           style={{
             flexShrink: 0,
+            color: theme.pageTextSubdued,
             ...styles.noTapHighlight,
           }}
           activeStyle={{
@@ -934,7 +947,7 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
               {group.name}
             </Text>
             <SvgCheveronRight
-              style={{ flexShrink: 0, color: theme.pageTextSubdued }}
+              style={{ flexShrink: 0, color: theme.tableTextSubdued }}
               width={14}
               height={14}
             />
@@ -1080,7 +1093,7 @@ const IncomeCategory = memo(function IncomeCategory({
               {category.name}
             </Text>
             <SvgCheveronRight
-              style={{ flexShrink: 0, color: theme.pageTextSubdued }}
+              style={{ flexShrink: 0, color: theme.tableTextSubdued }}
               width={14}
               height={14}
             />
