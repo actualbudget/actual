@@ -103,7 +103,7 @@ export function OpSelect({
   onChange,
 }) {
   let line;
-  // We don't support the `contains, `doesNotContain` operator for the id type for
+  // We don't support the `contains, `doesNotContain`, `matches` operators for the id type for
   // rules yet
   // TODO: Add matches op support for payees, accounts, categories.
   if (type === 'id') {
