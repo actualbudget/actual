@@ -1,8 +1,11 @@
 AESUDEF
+BANKINTER
 Belfius
 Biedenkopf
+BKBKESMM
 BNP
 Caddyfile
+CAMT
 cashflow
 crt
 Danske
@@ -12,6 +15,7 @@ Fintro
 gernes
 gocardless
 INVSTMTMSGSRS
+KORT
 lightmode
 modals
 murmurhash
@@ -21,12 +25,13 @@ Paribas
 prefs
 qfx
 simplefin
+SKHSFI
 Sparkasse
 statestore
 SVGR
 swc
 Synology
 ubuntu
-VRT
+vrt
 websecure
 youngcw
