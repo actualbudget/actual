@@ -42,7 +42,7 @@ type GenericTransactionEntity =
 
 export function makeChild<T extends GenericTransactionEntity>(
   parent: T,
-  data: object,
+  data: T = {},
 ) {
   const prefix = parent.id === 'temp' ? 'temp' : '';
 
@@ -277,17 +277,27 @@ export function deleteTransaction(
 export function splitTransaction(
   transactions: TransactionEntity[],
   id: string,
+  createSubtransactions?: (
+    parentTransaction: TransactionEntity,
+  ) => TransactionEntity[],
 ) {
   return replaceTransactions(transactions, id, trans => {
     if (trans.is_parent || trans.is_child) {
       return trans;
     }
 
+    const subtransactions = createSubtransactions?.(trans) || [
+      makeChild(trans),
+    ];
+
     return {
       ...trans,
       is_parent: true,
       error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
-      subtransactions: [makeChild(trans, { amount: 0, sort_order: -1 })],
+      subtransactions: subtransactions.map(t => ({
+        ...t,
+        sort_order: t.sort_order || -1,
+      })),
     } as TransactionEntityWithError;
   });
 }
