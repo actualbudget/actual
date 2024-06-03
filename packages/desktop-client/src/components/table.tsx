@@ -42,7 +42,6 @@ import {
 import { type Binding } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
-import { IntersectionBoundary } from './tooltips';
 
 export const ROW_HEIGHT = 32;
 
@@ -276,16 +275,13 @@ type RowProps = ComponentProps<typeof View> & {
   inset?: number;
   collapsed?: boolean;
 };
-export function Row({
-  inset = 0,
-  collapsed,
-  children,
-  height,
-  style,
-  ...nativeProps
-}: RowProps) {
+export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
+  { inset = 0, collapsed, children, height, style, ...nativeProps },
+  ref,
+) {
   return (
     <View
+      ref={ref}
       style={{
         flexDirection: 'row',
         height: height || ROW_HEIGHT,
@@ -302,7 +298,7 @@ export function Row({
       {inset !== 0 && <Field width={inset} />}
     </View>
   );
-}
+});
 
 const inputCellStyle = {
   padding: '5px 3px',
@@ -896,7 +892,6 @@ type TableProps<T extends TableItem = TableItem> = {
   navigator?: ReturnType<typeof useTableNavigator<T>>;
   listRef?: unknown;
   onScroll?: () => void;
-  allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
 };
@@ -918,7 +913,6 @@ export const Table = forwardRef(
       style,
       navigator,
       onScroll,
-      allowPopupsEscape,
       isSelected,
       saveScrollWidth,
       ...props
@@ -1134,37 +1128,33 @@ export const Table = forwardRef(
                 }
 
                 return (
-                  <IntersectionBoundary.Provider
-                    value={!allowPopupsEscape && listContainer}
-                  >
-                    <AvoidRefocusScrollProvider>
-                      <FixedSizeList
-                        ref={list}
-                        header={contentHeader}
-                        innerRef={listContainer}
-                        outerRef={scrollContainer}
-                        width={width}
-                        height={height}
-                        renderRow={renderRow}
-                        itemCount={count || items.length}
-                        itemSize={rowHeight - 1}
-                        itemKey={
-                          getItemKey || ((index: number) => items[index].id)
-                        }
-                        indexForKey={key =>
-                          items.findIndex(item => item.id === key)
-                        }
-                        initialScrollOffset={
-                          initialScrollTo.current
-                            ? getScrollOffset(height, initialScrollTo.current)
-                            : 0
-                        }
-                        overscanCount={5}
-                        onItemsRendered={onItemsRendered}
-                        onScroll={onScroll}
-                      />
-                    </AvoidRefocusScrollProvider>
-                  </IntersectionBoundary.Provider>
+                  <AvoidRefocusScrollProvider>
+                    <FixedSizeList
+                      ref={list}
+                      header={contentHeader}
+                      innerRef={listContainer}
+                      outerRef={scrollContainer}
+                      width={width}
+                      height={height}
+                      renderRow={renderRow}
+                      itemCount={count || items.length}
+                      itemSize={rowHeight - 1}
+                      itemKey={
+                        getItemKey || ((index: number) => items[index].id)
+                      }
+                      indexForKey={key =>
+                        items.findIndex(item => item.id === key)
+                      }
+                      initialScrollOffset={
+                        initialScrollTo.current
+                          ? getScrollOffset(height, initialScrollTo.current)
+                          : 0
+                      }
+                      overscanCount={5}
+                      onItemsRendered={onItemsRendered}
+                      onScroll={onScroll}
+                    />
+                  </AvoidRefocusScrollProvider>
                 );
               }}
             </AutoSizer>

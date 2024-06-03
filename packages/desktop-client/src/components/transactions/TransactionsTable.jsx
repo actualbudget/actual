@@ -59,6 +59,7 @@ import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
@@ -77,7 +78,6 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
-import { Tooltip } from '../tooltips';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -641,9 +641,11 @@ const Transaction = memo(function Transaction(props) {
     onToggleSplit,
     onNavigateToTransferAccount,
     onNavigateToSchedule,
+    splitError,
   } = props;
 
   const dispatchSelected = useSelectedDispatch();
+  const triggerRef = useRef(null);
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
@@ -803,6 +805,7 @@ const Transaction = memo(function Transaction(props) {
 
   return (
     <Row
+      ref={triggerRef}
       style={{
         backgroundColor: selected
           ? theme.tableRowBackgroundHighlight
@@ -829,6 +832,18 @@ const Transaction = memo(function Transaction(props) {
         ...(_unmatched && { opacity: 0.5 }),
       }}
     >
+      {splitError && (
+        <Popover
+          triggerRef={triggerRef}
+          isOpen
+          isNonModal
+          style={{ width: 375, padding: 5 }}
+          shouldUpdatePosition
+        >
+          {splitError}
+        </Popover>
+      )}
+
       {isChild && (
         <Field
           /* Checkmark blank placeholder for Child transaction */
@@ -1529,7 +1544,7 @@ function TransactionTableInner({
     }
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
-  const renderRow = ({ item, index, position, editing }) => {
+  const renderRow = ({ item, index, editing }) => {
     const {
       transactions,
       selectedItems,
@@ -1573,15 +1588,41 @@ function TransactionTableInner({
     );
 
     return (
-      <>
-        {hasSplitError && (
-          <Tooltip
-            position="bottom-right"
-            width={350}
-            forceTop={position}
-            forceLayout={true}
-            style={{ transform: 'translate(-5px, 2px)' }}
-          >
+      <Transaction
+        editing={editing}
+        transaction={trans}
+        showAccount={showAccount}
+        showCategory={showCategory}
+        showBalance={showBalances}
+        showCleared={showCleared}
+        selected={selected}
+        highlighted={false}
+        added={isNew?.(trans.id)}
+        expanded={isExpanded?.(trans.id)}
+        matched={isMatched?.(trans.id)}
+        showZeroInDeposit={isChildDeposit}
+        balance={balances?.[trans.id]?.balance}
+        focusedField={editing && tableNavigator.focusedField}
+        accounts={accounts}
+        categoryGroups={categoryGroups}
+        payees={payees}
+        inheritedFields={
+          parent?.payee === trans.payee ? new Set(['payee']) : new Set()
+        }
+        dateFormat={dateFormat}
+        hideFraction={hideFraction}
+        onEdit={tableNavigator.onEdit}
+        onSave={props.onSave}
+        onDelete={props.onDelete}
+        onSplit={props.onSplit}
+        onManagePayees={props.onManagePayees}
+        onCreatePayee={props.onCreatePayee}
+        onToggleSplit={props.onToggleSplit}
+        onNavigateToTransferAccount={onNavigateToTransferAccount}
+        onNavigateToSchedule={onNavigateToSchedule}
+        pushModal={props.pushModal}
+        splitError={
+          hasSplitError && (
             <TransactionError
               error={error}
               isDeposit={isChildDeposit}
@@ -1591,43 +1632,9 @@ function TransactionTableInner({
               }
               canDistributeRemainder={emptyChildTransactions.length > 0}
             />
-          </Tooltip>
-        )}
-        <Transaction
-          editing={editing}
-          transaction={trans}
-          showAccount={showAccount}
-          showCategory={showCategory}
-          showBalance={showBalances}
-          showCleared={showCleared}
-          selected={selected}
-          highlighted={false}
-          added={isNew?.(trans.id)}
-          expanded={isExpanded?.(trans.id)}
-          matched={isMatched?.(trans.id)}
-          showZeroInDeposit={isChildDeposit}
-          balance={balances?.[trans.id]?.balance}
-          focusedField={editing && tableNavigator.focusedField}
-          accounts={accounts}
-          categoryGroups={categoryGroups}
-          payees={payees}
-          inheritedFields={
-            parent?.payee === trans.payee ? new Set(['payee']) : new Set()
-          }
-          dateFormat={dateFormat}
-          hideFraction={hideFraction}
-          onEdit={tableNavigator.onEdit}
-          onSave={props.onSave}
-          onDelete={props.onDelete}
-          onSplit={props.onSplit}
-          onManagePayees={props.onManagePayees}
-          onCreatePayee={props.onCreatePayee}
-          onToggleSplit={props.onToggleSplit}
-          onNavigateToTransferAccount={onNavigateToTransferAccount}
-          onNavigateToSchedule={onNavigateToSchedule}
-          pushModal={props.pushModal}
-        />
-      </>
+          )
+        }
+      />
     );
   };
 
