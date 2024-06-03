@@ -40,9 +40,9 @@ import { Modal } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { StatusBadge } from '../schedules/StatusBadge';
-import { Tooltip } from '../tooltips';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
 import { DisplayId } from '../util/DisplayId';
@@ -415,33 +415,29 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
 }
 
 function StageInfo() {
-  const [open, setOpen] = useState();
-
   return (
     <View style={{ position: 'relative', marginLeft: 5 }}>
-      <View
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
+      <Tooltip
+        content={
+          <>
+            The stage of a rule allows you to force a specific order. Pre rules
+            always run first, and post rules always run last. Within each stage
+            rules are automatically ordered from least to most specific.
+          </>
+        }
+        placement="bottom start"
+        style={{
+          ...styles.tooltip,
+          padding: 10,
+          color: theme.pageTextLight,
+          maxWidth: 450,
+          lineHeight: 1.5,
+        }}
       >
         <SvgInformationOutline
           style={{ width: 11, height: 11, color: theme.pageTextLight }}
         />
-      </View>
-      {open && (
-        <Tooltip
-          position="bottom-left"
-          style={{
-            padding: 10,
-            color: theme.pageTextLight,
-            maxWidth: 450,
-            lineHeight: 1.5,
-          }}
-        >
-          The stage of a rule allows you to force a specific order. Pre rules
-          always run first, and post rules always run last. Within each stage
-          rules are automatically ordered from least to most specific.
-        </Tooltip>
-      )}
+      </Tooltip>
     </View>
   );
 }

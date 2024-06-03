@@ -1,4 +1,4 @@
-import React, { type ComponentProps, useState } from 'react';
+import React, { type ComponentProps, useRef, useState } from 'react';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -10,10 +10,10 @@ import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Modal, ModalTitle } from '../common/Modal';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
-import { Tooltip } from '../tooltips';
 
 type AccountMenuModalProps = {
   modalProps: CommonModalProps;
@@ -155,6 +155,7 @@ function AdditionalAccountMenu({
   onClose,
   onReopen,
 }: AdditionalAccountMenuProps) {
+  const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
@@ -169,6 +170,7 @@ function AdditionalAccountMenu({
   return (
     <View>
       <Button
+        ref={triggerRef}
         type="bare"
         aria-label="Menu"
         onClick={() => {
@@ -180,47 +182,44 @@ function AdditionalAccountMenu({
           height={17}
           style={{ color: 'currentColor' }}
         />
-        {menuOpen && (
-          <Tooltip
-            position="bottom-left"
-            style={{ padding: 0 }}
-            onClose={() => {
+        <Popover
+          triggerRef={triggerRef}
+          isOpen={menuOpen}
+          placement="bottom start"
+          onOpenChange={() => setMenuOpen(false)}
+        >
+          <Menu
+            getItemStyle={getItemStyle}
+            items={[
+              account.closed
+                ? {
+                    name: 'reopen',
+                    text: 'Reopen account',
+                    icon: SvgLockOpen,
+                    iconSize: 15,
+                  }
+                : {
+                    name: 'close',
+                    text: 'Close account',
+                    icon: SvgClose,
+                    iconSize: 15,
+                  },
+            ]}
+            onMenuSelect={name => {
               setMenuOpen(false);
+              switch (name) {
+                case 'close':
+                  onClose?.(account.id);
+                  break;
+                case 'reopen':
+                  onReopen?.(account.id);
+                  break;
+                default:
+                  throw new Error(`Unrecognized menu option: ${name}`);
+              }
             }}
-          >
-            <Menu
-              getItemStyle={getItemStyle}
-              items={[
-                account.closed
-                  ? {
-                      name: 'reopen',
-                      text: 'Reopen account',
-                      icon: SvgLockOpen,
-                      iconSize: 15,
-                    }
-                  : {
-                      name: 'close',
-                      text: 'Close account',
-                      icon: SvgClose,
-                      iconSize: 15,
-                    },
-              ]}
-              onMenuSelect={name => {
-                setMenuOpen(false);
-                switch (name) {
-                  case 'close':
-                    onClose?.(account.id);
-                    break;
-                  case 'reopen':
-                    onReopen?.(account.id);
-                    break;
-                  default:
-                    throw new Error(`Unrecognized menu option: ${name}`);
-                }
-              }}
-            />
-          </Tooltip>
-        )}
+          />
+        </Popover>
       </Button>
     </View>
   );
