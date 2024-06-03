@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
@@ -12,10 +12,10 @@ import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Modal, ModalTitle } from '../common/Modal';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
-import { Tooltip } from '../tooltips';
 
 type CategoryMenuModalProps = {
   modalProps: CommonModalProps;
@@ -147,6 +147,7 @@ function AdditionalCategoryMenu({
   onDelete,
   onToggleVisibility,
 }) {
+  const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
@@ -161,6 +162,7 @@ function AdditionalCategoryMenu({
   return (
     <View>
       <Button
+        ref={triggerRef}
         type="bare"
         aria-label="Menu"
         onClick={() => {
@@ -172,42 +174,39 @@ function AdditionalCategoryMenu({
           height={17}
           style={{ color: 'currentColor' }}
         />
-        {menuOpen && (
-          <Tooltip
-            position="bottom-left"
-            style={{ padding: 0 }}
-            onClose={() => {
+        <Popover
+          triggerRef={triggerRef}
+          isOpen={menuOpen}
+          placement="bottom start"
+          onOpenChange={() => setMenuOpen(false)}
+        >
+          <Menu
+            getItemStyle={getItemStyle}
+            items={[
+              !categoryGroup?.hidden && {
+                name: 'toggleVisibility',
+                text: category.hidden ? 'Show' : 'Hide',
+                icon: category.hidden ? SvgViewShow : SvgViewHide,
+                iconSize: 16,
+              },
+              !categoryGroup?.hidden && Menu.line,
+              {
+                name: 'delete',
+                text: 'Delete',
+                icon: SvgTrash,
+                iconSize: 15,
+              },
+            ]}
+            onMenuSelect={itemName => {
               setMenuOpen(false);
+              if (itemName === 'delete') {
+                onDelete();
+              } else if (itemName === 'toggleVisibility') {
+                onToggleVisibility();
+              }
             }}
-          >
-            <Menu
-              getItemStyle={getItemStyle}
-              items={[
-                !categoryGroup?.hidden && {
-                  name: 'toggleVisibility',
-                  text: category.hidden ? 'Show' : 'Hide',
-                  icon: category.hidden ? SvgViewShow : SvgViewHide,
-                  iconSize: 16,
-                },
-                !categoryGroup?.hidden && Menu.line,
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                  icon: SvgTrash,
-                  iconSize: 15,
-                },
-              ]}
-              onMenuSelect={itemName => {
-                setMenuOpen(false);
-                if (itemName === 'delete') {
-                  onDelete();
-                } else if (itemName === 'toggleVisibility') {
-                  onToggleVisibility();
-                }
-              }}
-            />
-          </Tooltip>
-        )}
+          />
+        </Popover>
       </Button>
     </View>
   );
