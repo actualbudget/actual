@@ -511,7 +511,8 @@ class AccountInternal extends PureComponent {
     return (
       account &&
       this.state.search === '' &&
-      this.state.filters.length === 0 &&
+      (this.state.filters.length === 0 ||
+        this.state.filters.every(e => e.field === 'date')) &&
       (this.state.sort.length === 0 ||
         (this.state.sort.field === 'date' &&
           this.state.sort.ascDesc === 'desc'))
