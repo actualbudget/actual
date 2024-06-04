@@ -34,9 +34,7 @@ export function PayeeAutocompleteModal({
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
-  const onManagePayees = id => {
-    navigate('/payees', { state: { selectedPayee: id } });
-  };
+  const onManagePayees = () => navigate('/payees');
 
   return (
     <Modal
@@ -62,21 +60,19 @@ export function PayeeAutocompleteModal({
         />
       )}
     >
-      {() => (
-        <PayeeAutocomplete
-          payees={payees}
-          accounts={accounts}
-          focused={true}
-          embedded={true}
-          closeOnBlur={false}
-          onClose={_onClose}
-          onManagePayees={onManagePayees}
-          showManagePayees={!isNarrowWidth}
-          showMakeTransfer={!isNarrowWidth}
-          {...defaultAutocompleteProps}
-          {...autocompleteProps}
-        />
-      )}
+      <PayeeAutocomplete
+        payees={payees}
+        accounts={accounts}
+        focused={true}
+        embedded={true}
+        closeOnBlur={false}
+        onClose={_onClose}
+        onManagePayees={onManagePayees}
+        showManagePayees={!isNarrowWidth}
+        showMakeTransfer={!isNarrowWidth}
+        {...defaultAutocompleteProps}
+        {...autocompleteProps}
+      />
     </Modal>
   );
 }
