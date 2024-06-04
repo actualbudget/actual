@@ -49,6 +49,7 @@ export interface SpendingEntity {
     average: number;
     thisMonth: number;
     lastMonth: number;
+    lastYear: number;
   }[];
   startDate?: string;
   endDate?: string;

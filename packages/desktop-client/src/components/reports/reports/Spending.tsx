@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -54,17 +54,46 @@ export function Spending() {
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
-  if (!data) {
-    return null;
-  }
+
+  // Move the conditional logic outside of the hooks
   const showAverage =
+    data &&
     data.intervalData[27].months[
       monthUtils.subMonths(monthUtils.currentDay(), 3)
     ].daily !== 0;
+
   const todayDay =
     monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1;
+
+  const showLastYear = data && Math.abs(data.intervalData[27].lastYear) > 0;
+  const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
+  const showGraph = showLastMonth || showLastYear || showAverage;
+  useEffect(() => {
+    if (mode === 'Last month' && !showLastMonth) {
+      if (showLastYear) {
+        setMode('Last year');
+      } else if (showAverage) {
+        setMode('Average');
+      }
+    } else if (mode === 'Last year' && !showLastYear) {
+      if (showLastMonth) {
+        setMode('Last month');
+      } else if (showAverage) {
+        setMode('Average');
+      }
+    } else if (mode === 'Average' && !showAverage) {
+      if (showLastMonth) {
+        setMode('Last month');
+      } else if (showLastYear) {
+        setMode('Last year');
+      }
+    }
+  }, [mode, showLastMonth, showLastYear, showAverage]);
+  if (!data) {
+    return null;
+  }
 
   return (
     <Page
@@ -224,18 +253,22 @@ export function Spending() {
                 >
                   Compare this month to:
                 </Text>
-                <ModeButton
-                  selected={mode === 'Last month'}
-                  onSelect={() => setMode('Last month')}
-                >
-                  Last month
-                </ModeButton>
-                <ModeButton
-                  selected={mode === 'Last year'}
-                  onSelect={() => setMode('Last year')}
-                >
-                  Last year
-                </ModeButton>
+                {showLastMonth && (
+                  <ModeButton
+                    selected={mode === 'Last month'}
+                    onSelect={() => setMode('Last month')}
+                  >
+                    Last month
+                  </ModeButton>
+                )}
+                {showLastYear && (
+                  <ModeButton
+                    selected={mode === 'Last year'}
+                    onSelect={() => setMode('Last year')}
+                  >
+                    Last year
+                  </ModeButton>
+                )}
                 {showAverage && (
                   <ModeButton
                     selected={mode === 'Average'}
@@ -245,14 +278,25 @@ export function Spending() {
                   </ModeButton>
                 )}
               </View>
+              {!showGraph && (
+                <View style={{ marginTop: 30 }}>
+                  <h1>Please input more data to reveal the graph</h1>
+                  <Paragraph>
+                    As of right now there is not enough data to show any
+                    information regarding your spending
+                  </Paragraph>
+                </View>
+              )}
 
               {dataCheck ? (
-                <SpendingGraph
-                  style={{ flexGrow: 1 }}
-                  compact={false}
-                  data={data}
-                  mode={mode}
-                />
+                showGraph ? (
+                  <SpendingGraph
+                    style={{ flexGrow: 1 }}
+                    compact={false}
+                    data={data}
+                    mode={mode}
+                  />
+                ) : null
               ) : (
                 <LoadingIndicator message="Loading report..." />
               )}

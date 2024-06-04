@@ -33,7 +33,6 @@ export function createSpendingSpreadsheet({
   conditions = [],
   conditionsOp,
   setDataCheck,
-  mode,
 }: createSpendingSpreadsheetProps) {
   const [startDate, endDate] = getSpecificRange(3, null, 'Months');
   const [lastYearStartDate, lastYearEndDate] = getSpecificRange(
@@ -82,16 +81,14 @@ export function createSpendingSpreadsheet({
 
     const { assets, debts } = await fetchData(startDate, endDate);
 
-    if (mode === 'Last year') {
-      const { assets: assetsLastYear, debts: debtsLastYear } = await fetchData(
-        lastYearStartDate,
-        lastYearEndDate,
-      );
+    const { assets: assetsLastYear, debts: debtsLastYear } = await fetchData(
+      lastYearStartDate,
+      lastYearEndDate,
+    );
 
-      // Add data from last year to existing arrays
-      assets.push(...assetsLastYear);
-      debts.push(...debtsLastYear);
-    }
+    // Add data from last year to existing arrays
+    assets.push(...assetsLastYear);
+    debts.push(...debtsLastYear);
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
     intervals.push(
