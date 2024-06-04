@@ -682,11 +682,11 @@ class AccountInternal extends PureComponent {
     };
   }
 
-  getFilteredAmount = async (conditions, conditionsOpKey) => {
+  getFilteredAmount = async (queryFilters, conditionsOpKey) => {
     const filter = queries.getAccountFilter(this.props.accountId);
 
     let query = q('transactions').filter({
-      [conditionsOpKey]: [...conditions],
+      [conditionsOpKey]: [...queryFilters],
     });
     if (filter) {
       query = query.filter(filter);
@@ -1344,7 +1344,7 @@ class AccountInternal extends PureComponent {
       const conditionsOpKey =
         this.state.filterConditionsOp === 'or' ? '$or' : '$and';
       this.filteredAmount = await this.getFilteredAmount(
-        conditions,
+        queryFilters,
         conditionsOpKey,
       );
       this.currentQuery = this.rootQuery.filter({
