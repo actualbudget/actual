@@ -206,7 +206,7 @@ export function AreaGraph({
                   top: 0,
                   right: labelsMargin,
                   left: leftMargin,
-                  bottom: 0,
+                  bottom: 10,
                 }}
               >
                 {compact ? null : (

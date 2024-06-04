@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ComponentProps, useState } from 'react';
+import React, { type ComponentProps, useRef, useState } from 'react';
 
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
@@ -11,10 +11,10 @@ import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Modal, ModalTitle } from '../common/Modal';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
-import { Tooltip } from '../tooltips';
 
 type CategoryGroupMenuModalProps = {
   modalProps: CommonModalProps;
@@ -155,6 +155,7 @@ export function CategoryGroupMenuModal({
 }
 
 function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
+  const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
     ...styles.mediumText,
@@ -170,6 +171,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
     <View>
       {!group.is_income && (
         <Button
+          ref={triggerRef}
           type="bare"
           aria-label="Menu"
           onClick={() => {
@@ -181,52 +183,47 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
             height={17}
             style={{ color: 'currentColor' }}
           />
-          {menuOpen && (
-            <Tooltip
-              position="bottom-left"
-              style={{ padding: 0 }}
-              onClose={() => {
-                setMenuOpen(false);
+          <Popover
+            triggerRef={triggerRef}
+            isOpen={menuOpen}
+            placement="bottom start"
+            onOpenChange={() => setMenuOpen(false)}
+          >
+            <Menu
+              style={{
+                ...styles.mediumText,
+                color: theme.formLabelText,
               }}
-            >
-              <Menu
-                style={{
-                  ...styles.mediumText,
-                  color: theme.formLabelText,
-                }}
-                getItemStyle={getItemStyle}
-                items={
-                  [
+              getItemStyle={getItemStyle}
+              items={
+                [
+                  {
+                    name: 'toggleVisibility',
+                    text: group.hidden ? 'Show' : 'Hide',
+                    icon: group.hidden ? SvgViewShow : SvgViewHide,
+                    iconSize: 16,
+                  },
+                  ...(!group.is_income && [
+                    Menu.line,
                     {
-                      name: 'toggleVisibility',
-                      text: group.hidden ? 'Show' : 'Hide',
-                      icon: group.hidden ? SvgViewShow : SvgViewHide,
-                      iconSize: 16,
+                      name: 'delete',
+                      text: 'Delete',
+                      icon: SvgTrash,
+                      iconSize: 15,
                     },
-                    ...(!group.is_income && [
-                      Menu.line,
-                      {
-                        name: 'delete',
-                        text: 'Delete',
-                        icon: SvgTrash,
-                        iconSize: 15,
-                      },
-                    ]),
-                  ].filter(i => i != null) as ComponentProps<
-                    typeof Menu
-                  >['items']
+                  ]),
+                ].filter(i => i != null) as ComponentProps<typeof Menu>['items']
+              }
+              onMenuSelect={itemName => {
+                setMenuOpen(false);
+                if (itemName === 'delete') {
+                  onDelete();
+                } else if (itemName === 'toggleVisibility') {
+                  onToggleVisibility();
                 }
-                onMenuSelect={itemName => {
-                  setMenuOpen(false);
-                  if (itemName === 'delete') {
-                    onDelete();
-                  } else if (itemName === 'toggleVisibility') {
-                    onToggleVisibility();
-                  }
-                }}
-              />
-            </Tooltip>
-          )}
+              }}
+            />
+          </Popover>
         </Button>
       )}
     </View>

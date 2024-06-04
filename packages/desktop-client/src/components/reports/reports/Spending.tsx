@@ -61,6 +61,10 @@ export function Spending() {
     data.intervalData[27].months[
       monthUtils.subMonths(monthUtils.currentDay(), 3)
     ].daily !== 0;
+  const todayDay =
+    monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+      ? 27
+      : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
   return (
     <Page
@@ -173,14 +177,7 @@ export function Spending() {
                       <Text>
                         <PrivacyFilter blurIntensity={5}>
                           {amountToCurrency(
-                            Math.abs(
-                              data.intervalData[
-                                monthUtils.getDay(monthUtils.currentDay()) >= 29
-                                  ? 28
-                                  : monthUtils.getDay(monthUtils.currentDay()) -
-                                    1
-                              ].thisMonth,
-                            ),
+                            Math.abs(data.intervalData[todayDay].thisMonth),
                           )}
                         </PrivacyFilter>
                       </Text>
@@ -192,14 +189,7 @@ export function Spending() {
                       <Text>
                         <PrivacyFilter blurIntensity={5}>
                           {amountToCurrency(
-                            Math.abs(
-                              data.intervalData[
-                                monthUtils.getDay(monthUtils.currentDay()) >= 29
-                                  ? 28
-                                  : monthUtils.getDay(monthUtils.currentDay()) -
-                                    1
-                              ].lastMonth,
-                            ),
+                            Math.abs(data.intervalData[todayDay].lastMonth),
                           )}
                         </PrivacyFilter>
                       </Text>
@@ -212,16 +202,7 @@ export function Spending() {
                         <Text>
                           <PrivacyFilter blurIntensity={5}>
                             {amountToCurrency(
-                              Math.abs(
-                                data.intervalData[
-                                  monthUtils.getDay(monthUtils.currentDay()) >=
-                                  29
-                                    ? 28
-                                    : monthUtils.getDay(
-                                        monthUtils.currentDay(),
-                                      ) - 1
-                                ].average,
-                              ),
+                              Math.abs(data.intervalData[todayDay].average),
                             )}
                           </PrivacyFilter>
                         </Text>

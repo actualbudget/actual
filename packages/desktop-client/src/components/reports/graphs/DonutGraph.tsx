@@ -17,6 +17,7 @@ import { Container } from '../Container';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
+import { showActivity } from './showActivity';
 
 const RADIAN = Math.PI / 180;
 
@@ -207,61 +208,6 @@ export function DonutGraph({
   const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
 
-  const onShowActivity = item => {
-    const amount = balanceTypeOp === 'totalDebts' ? 'lte' : 'gte';
-    const field = groupBy === 'Interval' ? null : groupBy.toLowerCase();
-    const hiddenCategories = categories.list
-      .filter(f => f.hidden)
-      .map(e => e.id);
-    const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
-
-    const conditions = [
-      ...filters,
-      { field, op: 'is', value: item.id, type: 'id' },
-      {
-        field: 'date',
-        op: 'gte',
-        value: data.startDate,
-        options: { date: true },
-        type: 'date',
-      },
-      {
-        field: 'date',
-        op: 'lte',
-        value: data.endDate,
-        options: { date: true },
-        type: 'date',
-      },
-      balanceTypeOp !== 'totalTotals' && {
-        field: 'amount',
-        op: amount,
-        value: 0,
-        type: 'number',
-      },
-      hiddenCategories.length > 0 &&
-        !showHiddenCategories && {
-          field: 'category',
-          op: 'notOneOf',
-          value: hiddenCategories,
-          type: 'id',
-        },
-      offBudgetAccounts.length > 0 &&
-        !showOffBudget && {
-          field: 'account',
-          op: 'notOneOf',
-          value: offBudgetAccounts,
-          type: 'id',
-        },
-    ].filter(f => f);
-    navigate('/accounts', {
-      state: {
-        goBack: true,
-        conditions,
-        categoryId: item.id,
-      },
-    });
-  };
-
   const getVal = obj => {
     if (balanceTypeOp === 'totalDebts') {
       return -1 * obj[balanceTypeOp];
@@ -309,10 +255,23 @@ export function DonutGraph({
                       setPointer('pointer');
                     }
                   }}
-                  onClick={
+                  onClick={item =>
                     !isNarrowWidth &&
                     !['Group', 'Interval'].includes(groupBy) &&
-                    onShowActivity
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'totals',
+                      startDate: data.startDate,
+                      endDate: data.endDate,
+                      field: groupBy.toLowerCase(),
+                      id: item.id,
+                    })
                   }
                 >
                   {data.legend.map((entry, index) => (

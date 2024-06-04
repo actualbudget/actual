@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useMemo, type CSSProperties } from 'react';
+import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
 
 import {
   type ScheduleStatusType,
@@ -18,11 +18,11 @@ import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
-import { Tooltip } from '../tooltips';
 import { DisplayId } from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
@@ -60,6 +60,7 @@ function OverflowMenu({
   status: ScheduleStatusType;
   onAction: SchedulesTableProps['onAction'];
 }) {
+  const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
 
   const getMenuItems = () => {
@@ -96,6 +97,7 @@ function OverflowMenu({
   return (
     <View>
       <Button
+        ref={triggerRef}
         type="bare"
         aria-label="Menu"
         onClick={e => {
@@ -109,22 +111,20 @@ function OverflowMenu({
           style={{ transform: 'rotateZ(90deg)' }}
         />
       </Button>
-      {open && (
-        <Tooltip
-          position="bottom-right"
-          width={150}
-          style={{ padding: 0 }}
-          onClose={() => setOpen(false)}
-        >
-          <Menu
-            onMenuSelect={name => {
-              onAction(name, schedule.id);
-              setOpen(false);
-            }}
-            items={getMenuItems()}
-          />
-        </Tooltip>
-      )}
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={open}
+        onOpenChange={() => setOpen(false)}
+      >
+        <Menu
+          onMenuSelect={name => {
+            onAction(name, schedule.id);
+            setOpen(false);
+          }}
+          items={getMenuItems()}
+        />
+      </Popover>
     </View>
   );
 }

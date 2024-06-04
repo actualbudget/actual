@@ -69,11 +69,6 @@ test.describe('Rules', () => {
   });
 
   test('creates a split transaction rule and makes sure it is applied when creating a transaction', async () => {
-    const settingsPage = await navigation.goToSettingsPage();
-    await settingsPage.enableExperimentalFeature('splits in rules');
-
-    await expect(settingsPage.page.getByLabel('splits in rules')).toBeChecked();
-
     rulesPage = await navigation.goToRulesPage();
 
     await rulesPage.createRule({

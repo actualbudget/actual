@@ -71,6 +71,7 @@ export function CreateAccountModal({
       name: string;
       institution: string;
       orgDomain: string;
+      balance: number;
     };
 
     for (const oldAccount of results.accounts) {
@@ -79,6 +80,7 @@ export function CreateAccountModal({
         name: oldAccount.name,
         institution: oldAccount.org.name,
         orgDomain: oldAccount.org.domain,
+        balance: oldAccount.balance,
       };
 
       newAccounts.push(newAccount);
@@ -180,7 +182,7 @@ export function CreateAccountModal({
                 </ButtonWithLoading>
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <strong>
-                    Link a <u>European</u> bank account
+                    Link a <em>European</em> bank account
                   </strong>{' '}
                   to automatically download transactions. GoCardless provides
                   reliable, up-to-date information from hundreds of banks.
@@ -205,7 +207,7 @@ export function CreateAccountModal({
                     </ButtonWithLoading>
                     <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                       <strong>
-                        Link a <u>North American</u> bank account
+                        Link a <em>North American</em> bank account
                       </strong>{' '}
                       to automatically download transactions. SimpleFIN provides
                       reliable, up-to-date information from hundreds of banks.

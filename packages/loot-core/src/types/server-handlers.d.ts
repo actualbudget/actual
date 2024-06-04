@@ -152,11 +152,13 @@ export interface ServerHandlers {
     requisitionId;
     account;
     upgradingId;
+    offBudget;
   }) => Promise<'ok'>;
 
   'simplefin-accounts-link': (arg: {
     externalAccount;
     upgradingId;
+    offBudget;
   }) => Promise<'ok'>;
 
   'account-create': (arg: {

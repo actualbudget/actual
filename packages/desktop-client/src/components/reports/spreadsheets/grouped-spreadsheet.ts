@@ -180,6 +180,8 @@ export function createGroupedSpreadsheet({
               showOffBudget,
               showHiddenCategories,
               showUncategorized,
+              startDate,
+              endDate,
             });
             return { ...calc };
           });

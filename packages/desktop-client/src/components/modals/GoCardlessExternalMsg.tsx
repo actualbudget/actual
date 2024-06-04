@@ -20,10 +20,10 @@ import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { type CommonModalProps } from '../Modals';
-import { Tooltip } from '../tooltips';
 
 import { COUNTRY_OPTIONS } from './countries';
 
@@ -103,6 +103,7 @@ export function GoCardlessExternalMsg({
   >(null);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const data = useRef<GoCardlessToken | null>(null);
+  const triggerRef = useRef(null);
 
   const {
     data: bankOptions,
@@ -230,6 +231,7 @@ export function GoCardlessExternalMsg({
             Link bank in browser &rarr;
           </Button>
           <Button
+            ref={triggerRef}
             type="bare"
             onClick={() => setMenuOpen(true)}
             aria-label="Menu"
@@ -239,28 +241,27 @@ export function GoCardlessExternalMsg({
               height={15}
               style={{ transform: 'rotateZ(90deg)' }}
             />
-            {menuOpen && (
-              <Tooltip
-                position="bottom-right"
-                width={200}
-                style={{ padding: 0 }}
-                onClose={() => setMenuOpen(false)}
-              >
-                <Menu
-                  onMenuSelect={item => {
-                    if (item === 'reconfigure') {
-                      onGoCardlessInit();
-                    }
-                  }}
-                  items={[
-                    {
-                      name: 'reconfigure',
-                      text: 'Set new API secrets',
-                    },
-                  ]}
-                />
-              </Tooltip>
-            )}
+
+            <Popover
+              triggerRef={triggerRef}
+              isOpen={menuOpen}
+              style={{ width: 200 }}
+              onOpenChange={() => setMenuOpen(false)}
+            >
+              <Menu
+                onMenuSelect={item => {
+                  if (item === 'reconfigure') {
+                    onGoCardlessInit();
+                  }
+                }}
+                items={[
+                  {
+                    name: 'reconfigure',
+                    text: 'Set new API secrets',
+                  },
+                ]}
+              />
+            </Popover>
           </Button>
         </View>
       </View>

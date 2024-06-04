@@ -28,6 +28,7 @@ import {
   splitTransaction,
   addSplitTransaction,
   deleteTransaction,
+  makeChild,
 } from 'loot-core/src/shared/transactions';
 import {
   titleFirst,
@@ -284,6 +285,7 @@ const ChildTransactionEdit = forwardRef(
   (
     {
       transaction,
+      amountFocused,
       amountSign,
       getCategory,
       getPrettyPayee,
@@ -336,7 +338,7 @@ const ChildTransactionEdit = forwardRef(
                 editingField &&
                 editingField !== getFieldName(transaction.id, 'amount')
               }
-              focused={transaction.amount === 0}
+              focused={amountFocused}
               value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
               style={{ marginRight: 8 }}
@@ -795,10 +797,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
           </View>
         )}
 
-        {childTransactions.map(childTrans => (
+        {childTransactions.map((childTrans, i, arr) => (
           <ChildTransactionEdit
             key={childTrans.id}
             transaction={childTrans}
+            amountFocused={arr.findIndex(c => c.amount === 0) === i}
             amountSign={childAmountSign}
             ref={r => {
               childTransactionElementRefMap.current = {
@@ -1136,7 +1139,11 @@ function TransactionEditUnconnected({
   };
 
   const onSplit = id => {
-    const changes = splitTransaction(transactions, id);
+    const changes = splitTransaction(transactions, id, parent => [
+      makeChild(parent),
+      makeChild(parent),
+    ]);
+
     setTransactions(changes.data);
   };
 

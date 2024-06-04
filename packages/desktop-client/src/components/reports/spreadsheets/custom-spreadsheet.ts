@@ -155,7 +155,7 @@ export function createCustomSpreadsheet({
     let totalDebts = 0;
 
     const intervalData = intervals.reduce(
-      (arr: IntervalEntity[], intervalItem) => {
+      (arr: IntervalEntity[], intervalItem, index) => {
         let perIntervalAssets = 0;
         let perIntervalDebts = 0;
         const stacked: Record<string, number> = {};
@@ -214,7 +214,11 @@ export function createCustomSpreadsheet({
             ReportOptions.intervalFormat.get(interval) || '',
           ),
           ...stacked,
-          intervalStartDate: intervalItem,
+          intervalStartDate: index === 0 ? startDate : intervalItem,
+          intervalEndDate:
+            index + 1 === intervals.length
+              ? endDate
+              : monthUtils.subDays(intervals[index + 1], 1),
           totalDebts: integerToAmount(perIntervalDebts),
           totalAssets: integerToAmount(perIntervalAssets),
           totalTotals: integerToAmount(perIntervalDebts + perIntervalAssets),
@@ -235,6 +239,8 @@ export function createCustomSpreadsheet({
         showOffBudget,
         showHiddenCategories,
         showUncategorized,
+        startDate,
+        endDate,
       });
       return { ...calc };
     });
