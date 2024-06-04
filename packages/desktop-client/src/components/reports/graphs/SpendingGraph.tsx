@@ -155,7 +155,7 @@ export function SpendingGraph({
     selection === 'average'
       ? data.intervalData[27].average
       : data.intervalData.reduce((a, b) =>
-          a.months[selection === lastMonth ? lastMonth : lastYear][
+          a.months[selection][balanceTypeOp] <
             balanceTypeOp
           ] <
           b.months[selection === lastMonth ? lastMonth : lastYear][
