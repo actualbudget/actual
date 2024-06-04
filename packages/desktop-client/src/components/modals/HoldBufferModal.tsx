@@ -23,7 +23,7 @@ export function HoldBufferModal({
   onSubmit,
 }: HoldBufferModalProps) {
   const available = useSheetValue(rolloverBudget.toBudget);
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<number>(0);
 
   const _onSubmit = (newAmount: number) => {
     if (newAmount) {

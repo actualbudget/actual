@@ -41,7 +41,7 @@ export function TransferModal({
     return [expenseGroups, expenseCategories];
   }, [originalCategoryGroups, showToBeBudgeted]);
 
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<number>(0);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
