@@ -3,6 +3,7 @@ import React from 'react';
 
 import { css } from 'glamor';
 
+import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useNotes } from '../../hooks/useNotes';
@@ -156,7 +157,7 @@ export function Account({
     </View>
   );
 
-  if (!needsTooltip) {
+  if (!needsTooltip || Platform.isPlaywright) {
     return accountRow;
   }
 
