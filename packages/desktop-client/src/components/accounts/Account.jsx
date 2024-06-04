@@ -194,6 +194,7 @@ class AccountInternal extends PureComponent {
       isAdding: false,
       latestDate: null,
       sort: [],
+      filteredAmount: null,
     };
   }
 
@@ -370,6 +371,7 @@ class AccountInternal extends PureComponent {
             balances: this.state.showBalances
               ? await this.calculateBalances()
               : null,
+            filteredAmount: await this.getFilteredAmount(),
           },
           () => {
             if (firstLoad) {
@@ -682,24 +684,11 @@ class AccountInternal extends PureComponent {
     };
   }
 
-  getFilteredAmount = async (queryFilters, conditionsOpKey) => {
-    const filter = queries.getAccountFilter(this.props.accountId);
-
-    let query = q('transactions').filter({
-      [conditionsOpKey]: [...queryFilters],
-    });
-    if (filter) {
-      query = query.filter(filter);
-    }
-
-    const filteredQuery = await runQuery(
-      query.select([{ amount: { $sum: '$amount' } }]),
+  getFilteredAmount = async () => {
+    const { data: amount } = await runQuery(
+      this.paged.getQuery().calculate({ $sum: '$amount' }),
     );
-    const filteredAmount = filteredQuery.data.reduce(
-      (a, v) => (a = a + v.amount),
-      0,
-    );
-    return filteredAmount;
+    return amount;
   };
 
   isNew = id => {
@@ -1343,10 +1332,6 @@ class AccountInternal extends PureComponent {
       );
       const conditionsOpKey =
         this.state.filterConditionsOp === 'or' ? '$or' : '$and';
-      this.filteredAmount = await this.getFilteredAmount(
-        queryFilters,
-        conditionsOpKey,
-      );
       this.currentQuery = this.rootQuery.filter({
         [conditionsOpKey]: [...queryFilters, ...customQueryFilters],
       });
@@ -1525,6 +1510,7 @@ class AccountInternal extends PureComponent {
       balances,
       showCleared,
       showReconciled,
+      filteredAmount,
     } = this.state;
 
     const account = accounts.find(account => account.id === accountId);
@@ -1568,7 +1554,6 @@ class AccountInternal extends PureComponent {
           >
             <View style={styles.page}>
               <AccountHeader
-                filteredAmount={this.filteredAmount}
                 tableRef={this.table}
                 editingName={editingName}
                 isNameEditable={isNameEditable}
@@ -1589,6 +1574,8 @@ class AccountInternal extends PureComponent {
                 showEmptyMessage={showEmptyMessage}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this.canCalculateBalance}
+                filteredAmount={filteredAmount}
+                isFiltered={transactionsFiltered}
                 isSorted={this.state.sort.length !== 0}
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
@@ -1651,10 +1638,7 @@ class AccountInternal extends PureComponent {
                   isAdding={this.state.isAdding}
                   isNew={this.isNew}
                   isMatched={this.isMatched}
-                  isFiltered={
-                    this.state.search !== '' ||
-                    this.state.filterConditions.length > 0
-                  }
+                  isFiltered={transactionsFiltered}
                   dateFormat={dateFormat}
                   hideFraction={hideFraction}
                   addNotification={addNotification}

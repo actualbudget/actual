@@ -32,7 +32,6 @@ import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileTooltip } from './Reconcile';
 
 export function AccountHeader({
-  filteredAmount,
   tableRef,
   editingName,
   isNameEditable,
@@ -53,6 +52,8 @@ export function AccountHeader({
   balanceQuery,
   reconcileAmount,
   canCalculateBalance,
+  isFiltered,
+  filteredAmount,
   isSorted,
   search,
   filterConditions,
@@ -242,6 +243,7 @@ export function AccountHeader({
           showExtraBalances={showExtraBalances}
           onToggleExtraBalances={onToggleExtraBalances}
           account={account}
+          isFiltered={isFiltered}
           filteredAmount={filteredAmount}
         />
 
