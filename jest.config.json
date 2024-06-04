@@ -7,7 +7,7 @@
   "testEnvironment": "node",
   "collectCoverage": true,
   "collectCoverageFrom": ["**/*.{js,ts,tsx}"],
-  "coveragePathIgnorePatterns": ["dist", "/node_modules/", "/build/"],
+  "coveragePathIgnorePatterns": ["dist", "/node_modules/", "/build/", "/coverage/"],
   "coverageReporters": ["html", "lcov", "text", "text-summary"],
   "resetMocks": true,
   "restoreMocks": true
