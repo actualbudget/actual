@@ -1,6 +1,7 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useNavigate } from '../../hooks/useNavigate';
 import { usePayees } from '../../hooks/usePayees';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
@@ -21,6 +22,7 @@ export function PayeeAutocompleteModal({
 }: PayeeAutocompleteModalProps) {
   const payees = usePayees() || [];
   const accounts = useAccounts() || [];
+  const navigate = useNavigate();
 
   const _onClose = () => {
     modalProps.onClose();
@@ -30,6 +32,10 @@ export function PayeeAutocompleteModal({
   const { isNarrowWidth } = useResponsive();
   const defaultAutocompleteProps = {
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
+  };
+
+  const onManagePayees = id => {
+    navigate('/payees', { selectedPayee: id });
   };
 
   return (
@@ -64,7 +70,8 @@ export function PayeeAutocompleteModal({
           embedded={true}
           closeOnBlur={false}
           onClose={_onClose}
-          showManagePayees={false}
+          onManagePayees={onManagePayees}
+          showManagePayees={!isNarrowWidth}
           showMakeTransfer={!isNarrowWidth}
           {...defaultAutocompleteProps}
           {...autocompleteProps}
