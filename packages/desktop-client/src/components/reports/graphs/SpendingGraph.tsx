@@ -139,12 +139,16 @@ export function SpendingGraph({
   const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
   const lastYear = monthUtils.prevYear(monthUtils.currentMonth());
   let selection;
-  if (mode.toLowerCase() === 'average') {
-    selection = 'average';
-  } else if (mode.toLowerCase() === 'last month') {
-    selection = lastMonth;
-  } else {
-    selection = lastYear;
+  switch (mode.toLowerCase()) {
+    case 'average':
+      selection = 'average';
+      break;
+    case 'last month':
+      selection = lastMonth;
+      break;
+    default:
+      selection = lastYear;
+      break;
   }
   const thisMonthMax = data.intervalData.reduce((a, b) =>
     a.months[thisMonth][balanceTypeOp] < b.months[thisMonth][balanceTypeOp]
@@ -156,14 +160,10 @@ export function SpendingGraph({
       ? data.intervalData[27].average
       : data.intervalData.reduce((a, b) =>
           a.months[selection][balanceTypeOp] <
-            balanceTypeOp
-          ] <
-          b.months[selection === lastMonth ? lastMonth : lastYear][
-            balanceTypeOp
-          ]
+          b.months[selection][balanceTypeOp]
             ? a
             : b,
-        ).months[selection === lastMonth ? lastMonth : lastYear][balanceTypeOp];
+        ).months[selection][balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(
     ...data.intervalData.map(i => i.months[thisMonth].cumulative),

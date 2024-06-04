@@ -36,8 +36,8 @@ export function createSpendingSpreadsheet({
 }: createSpendingSpreadsheetProps) {
   const [startDate, endDate] = getSpecificRange(3, null, 'Months');
   const [lastYearStartDate, lastYearEndDate] = getSpecificRange(
-    13,
-    1,
+    12,
+    0,
     'Months',
   );
   const interval = 'Daily';
@@ -195,8 +195,8 @@ export function createSpendingSpreadsheet({
         months: indexedData,
         day,
         average: integerToAmount(averageSum) / monthCount,
-        thisMonth: dayData[3].cumulative,
-        lastMonth: dayData[2].cumulative,
+        thisMonth: dayData[4].cumulative,
+        lastMonth: dayData[3].cumulative,
         lastYear: dayData[0].cumulative,
       };
     });

@@ -94,7 +94,7 @@ export function Spending() {
   if (!data) {
     return null;
   }
-
+  console.log(data);
   return (
     <Page
       header={
