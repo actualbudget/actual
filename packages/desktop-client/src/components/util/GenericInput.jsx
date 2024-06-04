@@ -244,22 +244,18 @@ export function GenericInput({
             onSelect={onChange}
           />
         );
+      } else if (type === 'number') {
+        content = getNumberInputByFormatType(numberFormatType);
       } else {
-        switch (type) {
-          case 'number':
-            content = getNumberInputByFormatType(numberFormatType);
-            break;
-          default:
-            content = (
-              <Input
-                inputRef={inputRef}
-                defaultValue={value || ''}
-                placeholder="nothing"
-                onEnter={e => onChange(e.target.value)}
-                onBlur={e => onChange(e.target.value)}
-              />
-            );
-        }
+        content = (
+          <Input
+            inputRef={inputRef}
+            defaultValue={value || ''}
+            placeholder="nothing"
+            onEnter={e => onChange(e.target.value)}
+            onBlur={e => onChange(e.target.value)}
+          />
+        );
       }
       break;
   }
