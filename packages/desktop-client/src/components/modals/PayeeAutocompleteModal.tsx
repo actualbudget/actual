@@ -35,7 +35,7 @@ export function PayeeAutocompleteModal({
   };
 
   const onManagePayees = id => {
-    navigate('/payees', { selectedPayee: id });
+    navigate('/payees', { state: { selectedPayee: id } });
   };
 
   return (
