@@ -3,7 +3,7 @@ import React, { type ComponentProps, type ReactNode } from 'react';
 import { type CSSProperties, theme } from '../../../style';
 import { View } from '../../common/View';
 
-export const ROW_HEIGHT = 50;
+const ROW_HEIGHT = 50;
 
 type ListItemProps = ComponentProps<typeof View> & {
   children?: ReactNode;
@@ -19,8 +19,8 @@ export const ListItem = ({ children, style, ...props }: ListItemProps) => {
         borderColor: theme.tableBorder,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingLeft: 10,
-        paddingRight: 10,
+        paddingLeft: 5,
+        paddingRight: 5,
         zIndex: 1,
         ...style,
       }}

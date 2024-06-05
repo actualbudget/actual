@@ -30,7 +30,6 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgInformationOutline } from '../../icons/v1';
@@ -236,6 +235,7 @@ function ConditionEditor({
         value={value}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
+        numberFormatType="currency"
       />
     );
   }
@@ -366,6 +366,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               op={op}
               value={value}
               onChange={v => onChange('value', v)}
+              numberFormatType="currency"
             />
           </View>
         </>
@@ -387,6 +388,9 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
                 key={inputKey}
                 field={field}
                 type="number"
+                numberFormatType={
+                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                }
                 value={value}
                 onChange={v => onChange('value', v)}
               />
@@ -655,7 +659,6 @@ const conditionFields = [
   ]);
 
 export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
-  const splitsEnabled = useFeatureFlag('splitsInRules');
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse),
   );
@@ -883,9 +886,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   };
 
   // Enable editing existing split rules even if the feature has since been disabled.
-  const showSplitButton = splitsEnabled
-    ? actionSplits.length > 0
-    : actionSplits.length > 1;
+  const showSplitButton = actionSplits.length > 0;
 
   return (
     <Modal
@@ -1010,7 +1011,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                         >
                           <Text
                             style={{
-                              ...styles.verySmallText,
+                              ...styles.smallText,
                               marginBottom: '10px',
                             }}
                           >

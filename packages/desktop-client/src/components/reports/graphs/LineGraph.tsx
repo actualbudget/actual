@@ -31,6 +31,8 @@ import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
 
+import { showActivity } from './showActivity';
+
 type PayloadItem = {
   dataKey: string;
   value: number;
@@ -116,6 +118,7 @@ type LineGraphProps = {
   balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  interval?: string;
 };
 
 export function LineGraph({
@@ -127,6 +130,7 @@ export function LineGraph({
   balanceTypeOp,
   showHiddenCategories,
   showOffBudget,
+  interval,
 }: LineGraphProps) {
   const navigate = useNavigate();
   const categories = useCategories();
@@ -143,49 +147,20 @@ export function LineGraph({
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 5;
 
   const onShowActivity = (item, id, payload) => {
-    const amount = balanceTypeOp === 'totalDebts' ? 'lte' : 'gte';
-    const field = groupBy === 'Interval' ? null : groupBy.toLowerCase();
-    const hiddenCategories = categories.list
-      .filter(f => f.hidden)
-      .map(e => e.id);
-    const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
-
-    const conditions = [
-      ...filters,
-      { field, op: 'is', value: id, type: 'id' },
-      {
-        field: 'date',
-        op: 'is',
-        value: payload.payload.dateStart,
-        options: { date: true },
-      },
-      balanceTypeOp !== 'totalTotals' && {
-        field: 'amount',
-        op: amount,
-        value: 0,
-        type: 'number',
-      },
-      hiddenCategories.length > 0 &&
-        !showHiddenCategories && {
-          field: 'category',
-          op: 'notOneOf',
-          value: hiddenCategories,
-          type: 'id',
-        },
-      offBudgetAccounts.length > 0 &&
-        !showOffBudget && {
-          field: 'account',
-          op: 'notOneOf',
-          value: offBudgetAccounts,
-          type: 'id',
-        },
-    ].filter(f => f);
-    navigate('/accounts', {
-      state: {
-        goBack: true,
-        conditions,
-        categoryId: item.id,
-      },
+    showActivity({
+      navigate,
+      categories,
+      accounts,
+      balanceTypeOp,
+      filters,
+      showHiddenCategories,
+      showOffBudget,
+      type: 'time',
+      startDate: payload.payload.intervalStartDate,
+      endDate: payload.payload.intervalEndDate,
+      field: groupBy.toLowerCase(),
+      id,
+      interval,
     });
   };
 
