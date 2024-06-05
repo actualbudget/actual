@@ -77,6 +77,7 @@ export class Tooltip extends Component<TooltipProps> {
   contentRef: RefObject<HTMLDivElement>;
   cleanup: () => void;
   target: HTMLDivElement;
+  // @ts-expect-error the Tooltip component will soon be removed; OK to ignore issues for now..
   context: ContextType<typeof IntersectionBoundary> = this.context; // assign type to context without using declare.
 
   constructor(props) {
