@@ -941,9 +941,7 @@ export function ImportTransactions({ modalProps, options }) {
       }
 
       const category_id = parseCategoryFields(trans, categories.list);
-      if (category_id != null) {
-        trans.category = category_id;
-      }
+      trans.category = category_id;
 
       const { inflow, outflow, inOut, ...finalTransaction } = trans;
       finalTransactions.push({

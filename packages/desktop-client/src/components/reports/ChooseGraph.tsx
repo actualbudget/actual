@@ -48,7 +48,9 @@ export function ChooseGraph({
   showOffBudget = false,
   intervalsCount,
 }: ChooseGraphProps) {
-  const graphStyle = compact ? { ...style } : { flexGrow: 1 };
+  const graphStyle = compact
+    ? { ...style }
+    : { flexGrow: 1, overflow: 'hidden' };
   const balanceTypeOp =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
 
@@ -147,6 +149,7 @@ export function ChooseGraph({
         balanceTypeOp={balanceTypeOp}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        interval={interval}
       />
     );
   }
@@ -162,6 +165,7 @@ export function ChooseGraph({
         groupBy={groupBy}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        interval={interval}
       />
     );
   }
