@@ -2,13 +2,11 @@ import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['BELFIUS_GKCCBEBB'],
 
   accessValidForDays: 180,
-
-  normalizeAccount(account) {
-    return Fallback.normalizeAccount(account);
-  },
 
   // The problem is that we have transaction with duplicated transaction ids.
   // This is not expected and the nordigen api has a work-around for some backs
@@ -19,13 +17,5 @@ export default {
       transactionId: transaction.internalTransactionId,
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return Fallback.sortTransactions(transactions);
-  },
-
-  calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return Fallback.calculateStartingBalance(sortedTransactions, balances);
   },
 };

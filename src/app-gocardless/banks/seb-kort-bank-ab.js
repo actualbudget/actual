@@ -1,11 +1,11 @@
-import {
-  printIban,
-  amountToInteger,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+import Fallback from './integration-bank.js';
+
+import { printIban, amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['SEB_KORT_AB_NO_SKHSFI21', 'SEB_KORT_AB_SE_SKHSFI21'],
 
   accessValidForDays: 180,
@@ -37,10 +37,6 @@ export default {
         currency: transaction.transactionAmount.currency,
       },
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   /**

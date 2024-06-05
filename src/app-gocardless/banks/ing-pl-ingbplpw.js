@@ -1,7 +1,11 @@
+import Fallback from './integration-bank.js';
+
 import { printIban, amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['ING_PL_INGBPLPW'],
 
   accessValidForDays: 180,

@@ -1,7 +1,11 @@
-import { amountToInteger, sortByBookingDateOrValueDate } from '../utils.js';
+import Fallback from './integration-bank.js';
+
+import { amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['AMERICAN_EXPRESS_AESUDEF1'],
 
   accessValidForDays: 180,
@@ -27,10 +31,6 @@ export default {
       ...transaction,
       date: transaction.bookingDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   /**

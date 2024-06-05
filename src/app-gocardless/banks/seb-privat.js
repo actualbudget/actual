@@ -1,29 +1,15 @@
+import Fallback from './integration-bank.js';
+
 import * as d from 'date-fns';
-import {
-  sortByBookingDateOrValueDate,
-  amountToInteger,
-  printIban,
-} from '../utils.js';
+import { amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['SEB_ESSESESS_PRIVATE'],
 
   accessValidForDays: 180,
-
-  normalizeAccount(account) {
-    return {
-      account_id: account.id,
-      institution: account.institution,
-      mask: (account?.iban || '0000').slice(-4),
-      iban: account?.iban || null,
-      name: [account.name, printIban(account), account.currency]
-        .filter(Boolean)
-        .join(' '),
-      official_name: `integration-${account.institution_id}`,
-      type: 'checking',
-    };
-  },
 
   normalizeTransaction(transaction, _booked) {
     const date =
@@ -43,10 +29,6 @@ export default {
       creditorName: transaction.additionalInformation,
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {

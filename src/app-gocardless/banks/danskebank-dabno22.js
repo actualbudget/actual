@@ -1,11 +1,11 @@
-import {
-  printIban,
-  amountToInteger,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+import Fallback from './integration-bank.js';
+
+import { printIban, amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['DANSKEBANK_DABANO22'],
 
   accessValidForDays: 180,
@@ -44,10 +44,6 @@ export default {
       ...transaction,
       date: transaction.bookingDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {

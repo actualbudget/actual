@@ -1,11 +1,11 @@
-import {
-  printIban,
-  amountToInteger,
-  sortByBookingDateOrValueDate,
-} from '../utils.js';
+import Fallback from './integration-bank.js';
+
+import { printIban, amountToInteger } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
+  ...Fallback,
+
   institutionIds: ['SANDBOXFINANCE_SFIN0000'],
 
   accessValidForDays: 90,
@@ -35,10 +35,6 @@ export default {
       ...transaction,
       date: transaction.bookingDate || transaction.valueDate,
     };
-  },
-
-  sortTransactions(transactions = []) {
-    return sortByBookingDateOrValueDate(transactions);
   },
 
   /**
