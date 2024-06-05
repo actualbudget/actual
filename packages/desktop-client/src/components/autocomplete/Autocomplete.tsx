@@ -92,10 +92,16 @@ export function defaultFilterSuggestion<T extends Item>(
   suggestion: T,
   value: string,
 ) {
-  return getItemName(suggestion).toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "")
-            .includes(
-                        value.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "")
-                     );
+  return getItemName(suggestion)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .includes(
+      value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, ''),
+    );
 }
 
 function defaultFilterSuggestions<T extends Item>(
