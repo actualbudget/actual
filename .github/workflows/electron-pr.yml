@@ -32,7 +32,7 @@ jobs:
           mkdir .venv
           python3 -m venv .venv
           source .venv/bin/activate
-          python3 -m pip install setuptools
+          python3 -m pip install --break-system-packages setuptools
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: |
           sudo apt-get install flatpak -y
