@@ -7,7 +7,7 @@
   ],
   "devDependencies": {
     "@juggle/resize-observer": "^3.4.0",
-    "@playwright/test": "1.41.1",
+    "@playwright/test": "^1.41.1",
     "@reach/listbox": "^0.18.0",
     "@react-aria/focus": "^3.16.0",
     "@react-aria/listbox": "^3.11.3",
