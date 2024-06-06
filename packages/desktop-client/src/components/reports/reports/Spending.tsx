@@ -55,7 +55,6 @@ export function Spending() {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
-  // Move the conditional logic outside of the hooks
   const showAverage =
     data &&
     data.intervalData[27].months[
@@ -94,7 +93,6 @@ export function Spending() {
   if (!data) {
     return null;
   }
-  console.log(data);
   return (
     <Page
       header={

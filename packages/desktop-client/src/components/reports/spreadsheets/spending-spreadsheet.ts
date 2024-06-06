@@ -79,16 +79,7 @@ export function createSpendingSpreadsheet({
       return { assets, debts };
     }
 
-    const { assets, debts } = await fetchData(startDate, endDate);
-
-    const { assets: assetsLastYear, debts: debtsLastYear } = await fetchData(
-      lastYearStartDate,
-      lastYearEndDate,
-    );
-
-    // Add data from last year to existing arrays
-    assets.push(...assetsLastYear);
-    debts.push(...debtsLastYear);
+    const { assets, debts } = await fetchData(lastYearStartDate, endDate);
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
     intervals.push(
