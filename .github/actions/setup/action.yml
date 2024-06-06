@@ -7,6 +7,7 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: 18.16.0
+        architecture: x86
     - name: Cache
       uses: actions/cache@v4
       id: cache
