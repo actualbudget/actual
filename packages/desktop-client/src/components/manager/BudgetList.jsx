@@ -28,9 +28,9 @@ import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -84,11 +84,13 @@ function FileMenu({ onDelete, onClose }) {
 }
 
 function FileMenuButton({ state, onDelete }) {
+  const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <View>
       <Button
+        ref={triggerRef}
         type="bare"
         aria-label="Menu"
         onClick={e => {
@@ -98,19 +100,18 @@ function FileMenuButton({ state, onDelete }) {
       >
         <SvgDotsHorizontalTriple style={{ width: 16, height: 16 }} />
       </Button>
-      {menuOpen && (
-        <Tooltip
-          position="bottom-right"
-          style={{ padding: 0 }}
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+      >
+        <FileMenu
+          state={state}
+          onDelete={onDelete}
           onClose={() => setMenuOpen(false)}
-        >
-          <FileMenu
-            state={state}
-            onDelete={onDelete}
-            onClose={() => setMenuOpen(false)}
-          />
-        </Tooltip>
-      )}
+        />
+      </Popover>
     </View>
   );
 }
