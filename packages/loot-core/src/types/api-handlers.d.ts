@@ -100,7 +100,7 @@ export interface ApiHandlers {
 
   'api/accounts-get': () => Promise<APIAccountEntity[]>;
 
-  'api/account-create': (arg: { account; initialBalance?}) => Promise<string>;
+  'api/account-create': (arg: { account; initialBalance? }) => Promise<string>;
 
   'api/account-update': (arg: { id; fields }) => Promise<void>;
 
