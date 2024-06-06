@@ -62,7 +62,7 @@ export function Accounts({
   return (
     <View>
       <Account
-        name="All accounts"
+        name="All Accounts"
         to="/accounts"
         query={queries.allAccountBalance()}
         style={{ fontWeight, marginTop: 15 }}
@@ -70,10 +70,15 @@ export function Accounts({
 
       {budgetedAccounts.length > 0 && (
         <Account
-          name="For budget"
+          name="For Budget"
           to="/accounts/budgeted"
           query={queries.budgetedAccountBalance()}
-          style={{ fontWeight, marginTop: 13 }}
+          style={{
+            fontWeight,
+            marginTop: 13,
+            borderBottom: '2px solid',
+            marginBottom: 5,
+          }}
         />
       )}
 
@@ -96,10 +101,15 @@ export function Accounts({
 
       {offbudgetAccounts.length > 0 && (
         <Account
-          name="Off budget"
+          name="Off Budget"
           to="/accounts/offbudget"
           query={queries.offbudgetAccountBalance()}
-          style={{ fontWeight, marginTop: 13 }}
+          style={{
+            fontWeight,
+            marginTop: 13,
+            borderBottom: '2px solid',
+            marginBottom: 5,
+          }}
         />
       )}
 
@@ -123,7 +133,7 @@ export function Accounts({
       {closedAccounts.length > 0 && (
         <SecondaryItem
           style={{ marginTop: 15 }}
-          title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
+          title={'Closed Accounts' + (showClosedAccounts ? '' : '...')}
           onClick={onToggleClosedAccounts}
           bold
         />
@@ -149,7 +159,7 @@ export function Accounts({
         }}
         onClick={onAddAccount}
         Icon={SvgAdd}
-        title="Add account"
+        title="Add Account"
       />
     </View>
   );
