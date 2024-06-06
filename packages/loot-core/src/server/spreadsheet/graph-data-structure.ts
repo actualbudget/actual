@@ -77,18 +77,28 @@ export function Graph() {
   }
 
   function topologicalSortUntil(name, visited, sorted) {
-    visited.add(name);
+    const stack = [name];
+    const tempStack = [];
 
-    const iter = adjacent(name).values();
-    let cur = iter.next();
-    while (!cur.done) {
-      if (!visited.has(cur.value)) {
-        topologicalSortUntil(cur.value, visited, sorted);
+    while (stack.length > 0) {
+      const current = stack.pop();
+      if (!visited.has(current)) {
+        visited.add(current);
+        tempStack.push(current);
+        const iter = adjacent(current).values();
+        let cur = iter.next();
+        while (!cur.done) {
+          if (!visited.has(cur.value)) {
+            stack.push(cur.value);
+          }
+          cur = iter.next();
+        }
       }
-      cur = iter.next();
     }
 
-    sorted.unshift(name);
+    while (tempStack.length > 0) {
+      sorted.unshift(tempStack.pop());
+    }
   }
 
   function topologicalSort(sourceNodes) {
@@ -113,9 +123,9 @@ export function Graph() {
     });
 
     return `
-      digraph G {
-       ${edgeStrings.join('\n').replace(/!/g, '_')}
-      }
+    digraph G {
+      ${edgeStrings.join('\n').replace(/!/g, '_')}
+    }
     `;
   }
 
