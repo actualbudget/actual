@@ -42,6 +42,9 @@ test.describe('Mobile', () => {
       'Mortgage',
       'Water',
       'Power',
+      'Starting Balances',
+      'Misc',
+      'Income',
     ]);
     await expect(page).toMatchThemeScreenshots();
   });
