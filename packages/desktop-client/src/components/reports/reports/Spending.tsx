@@ -68,28 +68,7 @@ export function Spending() {
 
   const showLastYear = data && Math.abs(data.intervalData[27].lastYear) > 0;
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
-  const showGraph = showLastMonth || showLastYear || showAverage;
-  useEffect(() => {
-    if (mode === 'Last month' && !showLastMonth) {
-      if (showLastYear) {
-        setMode('Last year');
-      } else if (showAverage) {
-        setMode('Average');
-      }
-    } else if (mode === 'Last year' && !showLastYear) {
-      if (showLastMonth) {
-        setMode('Last month');
-      } else if (showAverage) {
-        setMode('Average');
-      }
-    } else if (mode === 'Average' && !showAverage) {
-      if (showLastMonth) {
-        setMode('Last month');
-      } else if (showLastYear) {
-        setMode('Last year');
-      }
-    }
-  }, [mode, showLastMonth, showLastYear, showAverage]);
+
   if (!data) {
     return null;
   }
@@ -259,7 +238,7 @@ export function Spending() {
                     Last month
                   </ModeButton>
                 )}
-                {showLastYear && (
+                {showLastMonth && showLastYear && (
                   <ModeButton
                     selected={mode === 'Last year'}
                     onSelect={() => setMode('Last year')}
@@ -267,7 +246,7 @@ export function Spending() {
                     Last year
                   </ModeButton>
                 )}
-                {showAverage && (
+                {showLastMonth && showAverage && (
                   <ModeButton
                     selected={mode === 'Average'}
                     onSelect={() => setMode('Average')}
@@ -276,18 +255,19 @@ export function Spending() {
                   </ModeButton>
                 )}
               </View>
-              {!showGraph && (
+              {!showLastMonth && (
                 <View style={{ marginTop: 30 }}>
-                  <h1>Please input more data to reveal the graph</h1>
+                  <h1>Additional Data Required to Generate Graph</h1>
                   <Paragraph>
-                    As of right now there is not enough data to show any
-                    information regarding your spending
+                    Currently, there is insufficient data to display any
+                    information regarding your spending. Please input
+                    transactions from last month to enable graph visualization.
                   </Paragraph>
                 </View>
               )}
 
               {dataCheck ? (
-                showGraph ? (
+                showLastMonth ? (
                   <SpendingGraph
                     style={{ flexGrow: 1 }}
                     compact={false}

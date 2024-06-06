@@ -34,9 +34,10 @@ export function SpendingCard() {
       : monthUtils.getDay(monthUtils.currentDay()) - 1;
   const difference =
     data &&
-    data.intervalData[todayDay].lastMonth -
-      data.intervalData[todayDay].thisMonth;
+    data.intervalData[todayDay].average - data.intervalData[todayDay].thisMonth;
+  const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
+  console.log(data);
   return (
     <ReportCard flex="1" to="/reports/spending">
       <View
@@ -80,16 +81,29 @@ export function SpendingCard() {
             </View>
           )}
         </View>
-
+        {!showLastMonth && (
+          <View style={{ padding: 5 }}>
+            <h2 style={{ margin: 0, textAlign: 'center' }}>
+              Additional Data Required to Graph
+            </h2>
+            <p style={{ marginTop: 10, textAlign: 'center' }}>
+              Currently, there is insufficient data to display any information
+              regarding your spending. Please input transactions from last month
+              to enable graph visualization.
+            </p>
+          </View>
+        )}
         {data ? (
-          <SpendingGraph
-            style={{ flex: 1 }}
-            compact={true}
-            data={data}
-            mode="lastMonth"
-          />
+          showLastMonth ? (
+            <SpendingGraph
+              style={{ flex: 1 }}
+              compact={true}
+              data={data}
+              mode="average"
+            />
+          ) : null
         ) : (
-          <LoadingIndicator />
+          <LoadingIndicator message="Loading report..." />
         )}
       </View>
     </ReportCard>
