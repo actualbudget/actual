@@ -37,7 +37,6 @@ export function SpendingCard() {
     data.intervalData[todayDay].average - data.intervalData[todayDay].thisMonth;
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
-  console.log(data);
   return (
     <ReportCard flex="1" to="/reports/spending">
       <View
