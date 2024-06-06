@@ -64,7 +64,11 @@ export const PayeeTable = forwardRef<
             return (
               <PayeeTableRow
                 payee={item}
-                isCommon={commonPayees.findIndex((cp: PayeeEntity) => cp.id === item.id) >= 0}
+                isCommon={
+                  commonPayees.findIndex(
+                    (cp: PayeeEntity) => cp.id === item.id,
+                  ) >= 0
+                }
                 ruleCount={ruleCounts.get(item.id) || 0}
                 selected={selectedItems.has(item.id)}
                 editing={editing}
