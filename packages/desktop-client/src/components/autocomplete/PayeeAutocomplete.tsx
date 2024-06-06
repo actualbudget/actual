@@ -45,9 +45,9 @@ function getPayeeSuggestions(
   focusTransferPayees: boolean,
   accounts: AccountEntity[],
 ): PayeeAutocompleteItem[] {
-  if (commonPayees.length > 0) {
+  if (commonPayees?.length > 0) {
     payees = commonPayees.concat(
-      payees.filter(p => !commonPayees.find(cp => cp.id === p.id)),
+      payees.filter(p => !commonPayees?.find(cp => cp.id === p.id)),
     );
   }
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
@@ -156,7 +156,7 @@ function PayeeList({
           })}
 
         {items.map((item, idx) => {
-          const isCommon = commonPayees.includes(item);
+          const isCommon = commonPayees?.includes(item);
           const itemType = determineItemType(item, isCommon);
           let title;
 

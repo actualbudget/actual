@@ -32,8 +32,8 @@ vi.mock('../../hooks/useFeatureFlag', () => vi.fn().mockReturnValue(false));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
-  { id: 'payed-to', name: 'Payed To' },
-  { id: 'guy', name: 'This guy on the side of the road' },
+  { id: 'payed-to', favorite: true, name: 'Payed To' },
+  { id: 'guy', favorite: false, name: 'This guy on the side of the road' },
 ];
 const categoryGroups = generateCategoryGroups([
   {
@@ -130,6 +130,7 @@ function LiveTransactionTable(props) {
                 {...props}
                 transactions={transactions}
                 loadMoreTransactions={() => {}}
+                commonPayees={[]}
                 payees={payees}
                 addNotification={n => console.log(n)}
                 onSave={onSave}
