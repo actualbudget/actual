@@ -76,7 +76,7 @@ export function Accounts({
           style={{
             fontWeight,
             marginTop: 13,
-            borderBottom: '2px solid',
+            borderBottom: `1.5px solid rgba(255, 255, 255, 0.6)`, // Adjusted opacity only
             marginBottom: 5,
           }}
         />
@@ -107,7 +107,7 @@ export function Accounts({
           style={{
             fontWeight,
             marginTop: 13,
-            borderBottom: '2px solid',
+            borderBottom: `1.5px solid rgba(255, 255, 255, 0.6)`, // Adjusted opacity only
             marginBottom: 5,
           }}
         />
@@ -133,7 +133,7 @@ export function Accounts({
       {closedAccounts.length > 0 && (
         <SecondaryItem
           style={{ marginTop: 15 }}
-          title={'Closed Accounts' + (showClosedAccounts ? '' : '...')}
+          title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
           onClick={onToggleClosedAccounts}
           bold
         />
