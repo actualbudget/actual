@@ -14,7 +14,7 @@ Releasing @actual-app/api
 cd packages/api
 vim package.json # bump the version
 yarn build
-npm publish
+yarn npm publish --access public
 ```
 
 ### Releasing @actual-app/web
@@ -29,7 +29,7 @@ This will compile both the backend and the frontend into a single directory in `
 
 ```bash
 cd packages/desktop-client
-npm publish
+yarn npm publish --access public
 ```
 
 ### Versioning strategy
