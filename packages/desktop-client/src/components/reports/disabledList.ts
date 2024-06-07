@@ -55,7 +55,7 @@ const totalGraphOptions: graphOptions[] = [
     description: 'DonutGraph',
     disabledSplit: [],
     defaultSplit: 'Category',
-    disabledType: ['Net'],
+    disabledType: [],
     defaultType: 'Payment',
   },
 ];
