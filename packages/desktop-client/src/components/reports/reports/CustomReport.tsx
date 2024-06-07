@@ -124,8 +124,10 @@ export function CustomReport() {
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine =
-    ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeProps])
-      .length - 3;
+    interval === 'Daily'
+      ? 0
+      : ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeProps])
+          .length - 3;
 
   const [intervals, setIntervals] = useState(
     monthUtils.rangeInclusive(startDate, endDate),

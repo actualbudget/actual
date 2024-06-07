@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/client/queries';
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { amountToInteger, integerToCurrency } from 'loot-core/shared/util';
 
 import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
-import { FieldLabel, InputField } from '../mobile/MobileForms';
+import { FieldLabel } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
+import { AmountInput } from '../util/AmountInput';
 
 type HoldBufferModalProps = {
   modalProps: CommonModalProps;
@@ -24,13 +23,11 @@ export function HoldBufferModal({
   onSubmit,
 }: HoldBufferModalProps) {
   const available = useSheetValue(rolloverBudget.toBudget);
-  const initialAmount = integerToCurrency(Math.max(available, 0));
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<number>(0);
 
-  const _onSubmit = (newAmount: string | null) => {
-    const parsedAmount = evalArithmetic(newAmount || '');
-    if (parsedAmount) {
-      onSubmit?.(amountToInteger(parsedAmount));
+  const _onSubmit = (newAmount: number) => {
+    if (newAmount) {
+      onSubmit?.(newAmount);
     }
 
     modalProps.onClose();
@@ -46,10 +43,17 @@ export function HoldBufferModal({
       <View>
         <FieldLabel title="Hold this amount:" />
         <InitialFocus>
-          <InputField
-            inputMode="decimal"
-            defaultValue={initialAmount}
-            onUpdate={value => setAmount(value)}
+          <AmountInput
+            value={available}
+            autoDecimals={true}
+            style={{
+              marginLeft: styles.mobileEditingPadding,
+              marginRight: styles.mobileEditingPadding,
+            }}
+            inputStyle={{
+              height: styles.mobileMinHeight,
+            }}
+            onUpdate={setAmount}
             onEnter={() => _onSubmit(amount)}
           />
         </InitialFocus>
