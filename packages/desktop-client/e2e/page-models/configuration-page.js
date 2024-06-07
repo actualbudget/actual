@@ -1,0 +1,64 @@
+import { BudgetPage } from './budget-page';
+
+export class ConfigurationPage {
+  constructor(page) {
+    this.page = page;
+
+    this.heading = page.getByRole('heading');
+  }
+
+  async createTestFile() {
+    await this.page.getByRole('button', { name: 'Create test file' }).click();
+    return new BudgetPage(this.page);
+  }
+
+  async clickOnNoServer() {
+    await this.page.getByRole('button', { name: 'Don’t use a server' }).click();
+  }
+
+  async startFresh() {
+    await this.page.getByRole('button', { name: 'Start fresh' }).click();
+  }
+
+  async importBudget(type, file) {
+    const fileChooserPromise = this.page.waitForEvent('filechooser');
+    await this.page.getByRole('button', { name: 'Import my budget' }).click();
+
+    switch (type) {
+      case 'YNAB4':
+        await this.page
+          .getByRole('button', {
+            name: 'YNAB4 The old unsupported desktop app',
+          })
+          .click();
+        await this.page
+          .getByRole('button', { name: 'Select zip file...' })
+          .click();
+        break;
+
+      case 'nYNAB':
+        await this.page
+          .getByRole('button', { name: 'nYNAB The newer web app' })
+          .click();
+        await this.page.getByRole('button', { name: 'Select file...' }).click();
+        break;
+
+      case 'Actual':
+        await this.page
+          .getByRole('button', {
+            name: 'Actual Import a file exported from Actual',
+          })
+          .click();
+        await this.page.getByRole('button', { name: 'Select file...' }).click();
+        break;
+
+      default:
+        throw new Error(`Unrecognized import type: ${type}`);
+    }
+
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles(file);
+
+    return new BudgetPage(this.page);
+  }
+}
