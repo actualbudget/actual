@@ -599,6 +599,7 @@ export function Modals() {
               modalProps={modalProps}
               title={options.title}
               month={options.month}
+              showToBeBudgeted={options.showToBeBudgeted}
               onSubmit={options.onSubmit}
             />
           );

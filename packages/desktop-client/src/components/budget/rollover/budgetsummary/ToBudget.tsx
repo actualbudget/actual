@@ -86,6 +86,7 @@ export function ToBudget({
         )}
         {menuOpen === 'cover' && (
           <CoverMenu
+            showToBeBudgeted={false}
             onClose={() => setMenuOpen(null)}
             onSubmit={categoryId => {
               onBudgetAction(month, 'cover-overbudgeted', {

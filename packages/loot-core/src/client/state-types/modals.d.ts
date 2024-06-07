@@ -217,8 +217,9 @@ type FinanceModals = {
     showToBeBudgeted?: boolean;
   };
   cover: {
-    categoryId: string;
+    title: string;
     month: string;
+    showToBeBudgeted?: boolean;
     onSubmit: (fromCategoryId: string) => void;
   };
   'hold-buffer': {

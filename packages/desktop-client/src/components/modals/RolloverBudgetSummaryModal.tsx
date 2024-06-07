@@ -54,6 +54,7 @@ export function RolloverBudgetSummaryModal({
       pushModal('cover', {
         title: 'Cover: Overbudgeted',
         month,
+        showToBeBudgeted: false,
         onSubmit: categoryId => {
           onBudgetAction(month, 'cover-overbudgeted', {
             category: categoryId,

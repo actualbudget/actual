@@ -17,6 +17,7 @@ type CoverModalProps = {
   modalProps: CommonModalProps;
   title: string;
   month: string;
+  showToBeBudgeted?: boolean;
   onSubmit: (categoryId: string) => void;
 };
 
@@ -24,16 +25,18 @@ export function CoverModal({
   modalProps,
   title,
   month,
+  showToBeBudgeted = true,
   onSubmit,
 }: CoverModalProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
-    const expenseGroups = addToBeBudgetedGroup(
-      originalCategoryGroups.filter(g => !g.is_income),
-    );
+    let expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+    expenseGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(expenseGroups)
+      : expenseGroups;
     const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
-  }, [originalCategoryGroups]);
+  }, [originalCategoryGroups, showToBeBudgeted]);
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
