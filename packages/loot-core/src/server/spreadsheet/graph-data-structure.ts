@@ -77,7 +77,6 @@ export function Graph() {
   }
 
   function topologicalSort(sourceNodes) {
-    debugger;
     const visited = new Set();
     const sorted = [];
 
