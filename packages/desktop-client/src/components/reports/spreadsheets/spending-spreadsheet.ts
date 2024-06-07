@@ -25,7 +25,6 @@ type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];
   conditionsOp?: string;
   setDataCheck?: (value: boolean) => void;
-  mode?: string;
 };
 
 export function createSpendingSpreadsheet({
@@ -51,35 +50,30 @@ export function createSpendingSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    async function fetchData(startDate, endDate) {
-      const queryAssets = makeQuery(
-        'assets',
-        startDate,
-        endDate,
-        interval,
-        categories.list,
-        conditionsOpKey,
-        filters,
-      );
-      const queryDebts = makeQuery(
-        'debts',
-        startDate,
-        endDate,
-        interval,
-        categories.list,
-        conditionsOpKey,
-        filters,
-      );
-
-      const [assets, debts] = await Promise.all([
-        runQuery(queryAssets).then(({ data }) => data),
-        runQuery(queryDebts).then(({ data }) => data),
-      ]);
-
-      return { assets, debts };
-    }
-
-    const { assets, debts } = await fetchData(lastYearStartDate, endDate);
+    const [assets, debts] = await Promise.all([
+      runQuery(
+        makeQuery(
+          'assets',
+          lastYearStartDate,
+          endDate,
+          interval,
+          categories.list,
+          conditionsOpKey,
+          filters,
+        ),
+      ).then(({ data }) => data),
+      runQuery(
+        makeQuery(
+          'debts',
+          lastYearStartDate,
+          endDate,
+          interval,
+          categories.list,
+          conditionsOpKey,
+          filters,
+        ),
+      ).then(({ data }) => data),
+    ]);
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
     intervals.push(
@@ -115,6 +109,7 @@ export function createSpendingSpreadsheet({
               : intervalItem.substring(8, 10);
           let perIntervalAssets = 0;
           let perIntervalDebts = 0;
+
           if (
             month.month === monthUtils.getMonth(intervalItem) &&
             day === offsetDay
