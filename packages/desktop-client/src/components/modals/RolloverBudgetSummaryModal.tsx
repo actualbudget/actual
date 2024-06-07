@@ -31,19 +31,34 @@ export function RolloverBudgetSummaryModal({
     value: 0,
   });
 
-  const openTransferModal = () => {
+  const openTransferAvailableModal = () => {
     dispatch(
       pushModal('transfer', {
         title: 'Transfer: To Budget',
         month,
         amount: sheetValue,
         onSubmit: (amount, toCategoryId) => {
-          onBudgetAction?.(month, 'transfer-available', {
+          onBudgetAction(month, 'transfer-available', {
             amount,
             month,
             category: toCategoryId,
           });
           dispatch(collapseModals('transfer'));
+        },
+      }),
+    );
+  };
+
+  const openCoverOverbudgetedModal = () => {
+    dispatch(
+      pushModal('cover', {
+        title: 'Cover: Overbudgeted',
+        month,
+        onSubmit: categoryId => {
+          onBudgetAction(month, 'cover-overbudgeted', {
+            category: categoryId,
+          });
+          dispatch(collapseModals('cover'));
         },
       }),
     );
@@ -62,7 +77,7 @@ export function RolloverBudgetSummaryModal({
   };
 
   const onResetHoldBuffer = () => {
-    onBudgetAction?.(month, 'reset-hold');
+    onBudgetAction(month, 'reset-hold');
     modalProps.onClose();
   };
 
@@ -70,7 +85,8 @@ export function RolloverBudgetSummaryModal({
     dispatch(
       pushModal('rollover-summary-to-budget-menu', {
         month,
-        onTransfer: openTransferModal,
+        onTransfer: openTransferAvailableModal,
+        onCover: openCoverOverbudgetedModal,
         onResetHoldBuffer,
         onHoldBuffer,
       }),

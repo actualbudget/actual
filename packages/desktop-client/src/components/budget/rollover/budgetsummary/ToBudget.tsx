@@ -6,6 +6,7 @@ import { type CSSProperties } from '../../../../style';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
 import { useSheetValue } from '../../../spreadsheet/useSheetValue';
+import { CoverMenu } from '../CoverMenu';
 import { HoldMenu } from '../HoldMenu';
 import { TransferMenu } from '../TransferMenu';
 
@@ -55,6 +56,7 @@ export function ToBudget({
         {menuOpen === 'actions' && (
           <ToBudgetMenu
             onTransfer={() => setMenuOpen('transfer')}
+            onCover={() => setMenuOpen('cover')}
             onHoldBuffer={() => setMenuOpen('buffer')}
             onResetHoldBuffer={() => {
               onBudgetAction(month, 'reset-hold');
@@ -74,10 +76,20 @@ export function ToBudget({
           <TransferMenu
             initialAmount={availableValue}
             onClose={() => setMenuOpen(null)}
-            onSubmit={(amount, category) => {
+            onSubmit={(amount, categoryId) => {
               onBudgetAction(month, 'transfer-available', {
                 amount,
-                category,
+                category: categoryId,
+              });
+            }}
+          />
+        )}
+        {menuOpen === 'cover' && (
+          <CoverMenu
+            onClose={() => setMenuOpen(null)}
+            onSubmit={categoryId => {
+              onBudgetAction(month, 'cover-overbudgeted', {
+                category: categoryId,
               });
             }}
           />
