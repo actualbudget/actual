@@ -400,8 +400,15 @@ export async function reconcileTransactions(
       // fields.
       fuzzyDataset = await db.all(
         `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
-           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
+           WHERE
+             -- If both ids are set, and we didn't match earlier then skip dedup
+             ( imported_id IS NULL OR ? IS NULL )
+             -- Look 7 days ahead, 7 days behind
+             AND date >= ? AND date <= ? AND amount = ?
+             AND account = ?
+        `,
         [
+          trans.imported_id || null,
           db.toDateRepr(monthUtils.subDays(trans.date, 7)),
           db.toDateRepr(monthUtils.addDays(trans.date, 7)),
           trans.amount || 0,
