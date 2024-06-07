@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
