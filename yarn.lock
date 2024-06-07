@@ -23,7 +23,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
-    "@actual-app/crdt": "workspace:^"
+    "@actual-app/crdt": "npm:^2.1.0"
     "@swc/core": "npm:^1.5.3"
     "@swc/jest": "npm:^0.2.36"
     "@types/jest": "npm:^27.5.2"
@@ -38,7 +38,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/crdt@npm:*, @actual-app/crdt@workspace:^, @actual-app/crdt@workspace:packages/crdt":
+"@actual-app/crdt@npm:*, @actual-app/crdt@npm:^2.1.0, @actual-app/crdt@workspace:packages/crdt":
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:

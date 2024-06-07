@@ -22,7 +22,7 @@
     "clean": "rm -rf dist @types"
   },
   "dependencies": {
-    "@actual-app/crdt": "workspace:^",
+    "@actual-app/crdt": "^2.1.0",
     "better-sqlite3": "^9.6.0",
     "compare-versions": "^6.1.0",
     "node-fetch": "^3.3.2",
