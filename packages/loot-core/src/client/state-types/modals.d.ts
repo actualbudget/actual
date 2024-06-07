@@ -201,6 +201,7 @@ type FinanceModals = {
   'rollover-summary-to-budget-menu': {
     month: string;
     onTransfer: () => void;
+    onCover: () => void;
     onHoldBuffer: () => void;
     onResetHoldBuffer: () => void;
   };
