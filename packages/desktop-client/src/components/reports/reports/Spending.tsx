@@ -47,9 +47,8 @@ export function Spending() {
       conditions: filters,
       conditionsOp,
       setDataCheck,
-      mode,
     });
-  }, [categories, filters, conditionsOp, mode]);
+  }, [categories, filters, conditionsOp]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
