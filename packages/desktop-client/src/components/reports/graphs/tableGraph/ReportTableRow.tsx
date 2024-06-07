@@ -32,6 +32,7 @@ type ReportTableRowProps = {
   totalStyle?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  interval: string;
   totalScrollRef?: RefObject<HTMLDivElement>;
   handleScroll?: UIEventHandler<HTMLDivElement>;
   height?: number;
@@ -56,6 +57,7 @@ export const ReportTableRow = memo(
     totalScrollRef,
     handleScroll,
     height,
+    interval,
   }: ReportTableRowProps) => {
     const average = amountToInteger(item[balanceTypeOp]) / intervalsCount;
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
@@ -68,6 +70,7 @@ export const ReportTableRow = memo(
     const pointer =
       !isNarrowWidth &&
       !['Group', 'Interval'].includes(groupBy) &&
+      !compact &&
       !categories.grouped.map(g => g.id).includes(item.id)
         ? 'pointer'
         : 'inherit';
@@ -75,6 +78,7 @@ export const ReportTableRow = memo(
     const hoverUnderline =
       !isNarrowWidth &&
       !['Group', 'Interval'].includes(groupBy) &&
+      !compact &&
       !categories.grouped.map(g => g.id).includes(item.id)
         ? {
             cursor: pointer,
@@ -132,6 +136,7 @@ export const ReportTableRow = memo(
                     onClick={() =>
                       !isNarrowWidth &&
                       !['Group', 'Interval'].includes(groupBy) &&
+                      !compact &&
                       !categories.grouped.map(g => g.id).includes(item.id) &&
                       showActivity({
                         navigate,
@@ -143,8 +148,10 @@ export const ReportTableRow = memo(
                         showOffBudget,
                         type: 'time',
                         startDate: intervalItem.intervalStartDate || '',
+                        endDate: intervalItem.intervalEndDate || '',
                         field: groupBy.toLowerCase(),
                         id: item.id,
+                        interval,
                       })
                     }
                     width="flex"
@@ -171,6 +178,7 @@ export const ReportTableRow = memo(
                     onClick={() =>
                       !isNarrowWidth &&
                       !['Group', 'Interval'].includes(groupBy) &&
+                      !compact &&
                       !categories.grouped.map(g => g.id).includes(item.id) &&
                       showActivity({
                         navigate,
@@ -205,6 +213,7 @@ export const ReportTableRow = memo(
                     onClick={() =>
                       !isNarrowWidth &&
                       !['Group', 'Interval'].includes(groupBy) &&
+                      !compact &&
                       !categories.grouped.map(g => g.id).includes(item.id) &&
                       showActivity({
                         navigate,
@@ -240,6 +249,7 @@ export const ReportTableRow = memo(
             onClick={() =>
               !isNarrowWidth &&
               !['Group', 'Interval'].includes(groupBy) &&
+              !compact &&
               !categories.grouped.map(g => g.id).includes(item.id) &&
               showActivity({
                 navigate,

@@ -334,6 +334,9 @@ export const CategoryMonth = memo(function CategoryMonth({
               balance={reportBudget.catBalance(category.id)}
               goal={reportBudget.catGoal(category.id)}
               budgeted={reportBudget.catBudgeted(category.id)}
+              style={{
+                ':hover': { textDecoration: 'underline' },
+              }}
             />
           </span>
 
@@ -341,7 +344,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             triggerRef={triggerBalanceMenuRef}
             isOpen={balanceMenuOpen}
             onOpenChange={() => setBalanceMenuOpen(false)}
-            placement="bottom start"
+            placement="bottom end"
           >
             <BalanceMenu
               categoryId={category.id}
