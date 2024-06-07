@@ -76,38 +76,60 @@ export function Graph() {
     return graph;
   }
 
-  function topologicalSortUntil(name, visited, sorted) {
-    const stack = [name];
-    const tempStack = [];
-
-    while (stack.length > 0) {
-      const current = stack.pop();
-      if (!visited.has(current)) {
-        visited.add(current);
-        tempStack.push(current);
-        const iter = adjacent(current).values();
-        let cur = iter.next();
-        while (!cur.done) {
-          if (!visited.has(cur.value)) {
-            stack.push(cur.value);
-          }
-          cur = iter.next();
-        }
-      }
-    }
-
-    while (tempStack.length > 0) {
-      sorted.unshift(tempStack.pop());
-    }
-  }
-
   function topologicalSort(sourceNodes) {
+    debugger;
     const visited = new Set();
     const sorted = [];
 
     sourceNodes.forEach(name => {
       if (!visited.has(name)) {
-        topologicalSortUntil(name, visited, sorted);
+        const stackTrace: StackItem[] = [];
+
+        stackTrace.push({
+          count: -1,
+          value: name,
+          parent: '',
+          level: 0,
+        });
+
+        while (stackTrace.length > 0) {
+          const current = stackTrace.slice(-1)[0];
+
+          const adjacents = adjacent(current.value);
+          if (current.count === -1) {
+            current.count = adjacents.size;
+          }
+
+          if (current.count > 0) {
+            const iter = adjacents.values();
+            let cur = iter.next();
+            while (!cur.done) {
+              if (!visited.has(cur.value)) {
+                stackTrace.push({
+                  count: -1,
+                  parent: current.value,
+                  value: cur.value,
+                  level: current.level + 1,
+                });
+              } else {
+                current.count--;
+              }
+              cur = iter.next();
+            }
+          } else {
+            if (!visited.has(current.value)) {
+              visited.add(current.value);
+              sorted.unshift(current.value);
+            }
+
+            const removed = stackTrace.pop();
+            for (let i = 0; i < stackTrace.length; i++) {
+              if (stackTrace[i].value === removed.parent) {
+                stackTrace[i].count--;
+              }
+            }
+          }
+        }
       }
     });
 
@@ -130,4 +152,11 @@ export function Graph() {
   }
 
   return graph;
+}
+
+interface StackItem {
+  count: number;
+  value: string;
+  parent: string;
+  level: number;
 }
