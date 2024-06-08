@@ -231,29 +231,22 @@ export function BudgetTable(props) {
             }}
             onKeyDown={onKeyDown}
           >
-            <View
-              style={{
-                flexShrink: 0,
-              }}
-              onKeyDown={onKeyDown}
-            >
-              <BudgetCategories
-                categoryGroups={categoryGroups}
-                editingCell={editing}
-                dataComponents={dataComponents}
-                onEditMonth={onEditMonth}
-                onEditName={onEditName}
-                onSaveCategory={onSaveCategory}
-                onSaveGroup={onSaveGroup}
-                onDeleteCategory={onDeleteCategory}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={_onReorderCategory}
-                onReorderGroup={_onReorderGroup}
-                onBudgetAction={onBudgetAction}
-                onShowActivity={onShowActivity}
-                scrollToPosition={scrollToPosition}
-              />
-            </View>
+            <BudgetCategories
+              categoryGroups={categoryGroups}
+              editingCell={editing}
+              dataComponents={dataComponents}
+              onEditMonth={onEditMonth}
+              onEditName={onEditName}
+              onSaveCategory={onSaveCategory}
+              onSaveGroup={onSaveGroup}
+              onDeleteCategory={onDeleteCategory}
+              onDeleteGroup={onDeleteGroup}
+              onReorderCategory={_onReorderCategory}
+              onReorderGroup={_onReorderGroup}
+              onBudgetAction={onBudgetAction}
+              onShowActivity={onShowActivity}
+              scrollToPosition={scrollToPosition}
+            />
           </View>
         </View>
       </MonthsProvider>
