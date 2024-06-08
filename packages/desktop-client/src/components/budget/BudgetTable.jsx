@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
+import { IntersectionBoundary } from '../tooltips';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
@@ -29,6 +30,7 @@ export function BudgetTable(props) {
     onBudgetAction,
   } = props;
 
+  const budgetCategoriesRef = useRef();
   const { grouped: categoryGroups } = useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
@@ -215,40 +217,43 @@ export function BudgetTable(props) {
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
         />
-        <View
-          style={{
-            overflowY: 'scroll',
-            overflowAnchor: 'none',
-            flex: 1,
-            paddingLeft: 5,
-            paddingRight: 5,
-          }}
-        >
+        <IntersectionBoundary.Provider value={budgetCategoriesRef}>
           <View
             id="scrollableDiv"
             style={{
-              flexShrink: 0,
+              overflowY: 'scroll',
+              overflowAnchor: 'none',
+              flex: 1,
+              paddingLeft: 5,
+              paddingRight: 5,
             }}
-            onKeyDown={onKeyDown}
+            innerRef={budgetCategoriesRef}
           >
-            <BudgetCategories
-              categoryGroups={categoryGroups}
-              editingCell={editing}
-              dataComponents={dataComponents}
-              onEditMonth={onEditMonth}
-              onEditName={onEditName}
-              onSaveCategory={onSaveCategory}
-              onSaveGroup={onSaveGroup}
-              onDeleteCategory={onDeleteCategory}
-              onDeleteGroup={onDeleteGroup}
-              onReorderCategory={_onReorderCategory}
-              onReorderGroup={_onReorderGroup}
-              onBudgetAction={onBudgetAction}
-              onShowActivity={onShowActivity}
-              scrollToPosition={scrollToPosition}
-            />
+            <View
+              style={{
+                flexShrink: 0,
+              }}
+              onKeyDown={onKeyDown}
+            >
+              <BudgetCategories
+                categoryGroups={categoryGroups}
+                editingCell={editing}
+                dataComponents={dataComponents}
+                onEditMonth={onEditMonth}
+                onEditName={onEditName}
+                onSaveCategory={onSaveCategory}
+                onSaveGroup={onSaveGroup}
+                onDeleteCategory={onDeleteCategory}
+                onDeleteGroup={onDeleteGroup}
+                onReorderCategory={_onReorderCategory}
+                onReorderGroup={_onReorderGroup}
+                onBudgetAction={onBudgetAction}
+                onShowActivity={onShowActivity}
+                scrollToPosition={scrollToPosition}
+              />
+            </View>
           </View>
-        </View>
+        </IntersectionBoundary.Provider>
       </MonthsProvider>
     </View>
   );

@@ -166,8 +166,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   const triggerBalanceMenuRef = useRef(null);
 
   const handleButtonClick = (categoryId: string, month: string) => {
-    scrollToPosition(); // Adjust the scroll position as needed
-    console.log(scrollToPosition);
+    scrollToPosition();
     onShowActivity(categoryId, month);
   };
 
