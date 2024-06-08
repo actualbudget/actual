@@ -27,7 +27,6 @@ export function RenderMonths({
   style,
 }: RenderMonthsProps) {
   const { months } = useContext(MonthsContext);
-
   return months.map((month, index) => {
     const editing = editingMonth === month;
 

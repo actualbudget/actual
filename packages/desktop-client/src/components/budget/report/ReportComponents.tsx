@@ -147,6 +147,7 @@ type CategoryMonthProps = {
   onEdit: (id: string | null, month?: string) => void;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
+  scrollToPosition: () => void;
 };
 export const CategoryMonth = memo(function CategoryMonth({
   month,
@@ -155,10 +156,17 @@ export const CategoryMonth = memo(function CategoryMonth({
   onEdit,
   onBudgetAction,
   onShowActivity,
+  scrollToPosition,
 }: CategoryMonthProps) {
   const balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
+
+  const handleButtonClick = (categoryId: string, month: string) => {
+    scrollToPosition(); // Adjust the scroll position as needed
+    console.log(scrollToPosition);
+    onShowActivity(categoryId, month);
+  };
 
   return (
     <View
@@ -300,7 +308,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
           data-testid="category-month-spent"
-          onClick={() => onShowActivity(category.id, month)}
+          onClick={() => handleButtonClick(category.id, month)}
         >
           <CellValue
             binding={reportBudget.catSumAmount(category.id)}

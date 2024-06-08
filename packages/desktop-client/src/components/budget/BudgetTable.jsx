@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -37,6 +37,21 @@ export function BudgetTable(props) {
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
     'budget.showHiddenCategories',
   );
+
+  const scrollToPosition = () => {
+    localStorage.setItem(
+      'scrollPosition',
+      document.getElementById('scrollableDiv').scrollTop,
+    );
+  };
+
+  useEffect(() => {
+    const savedPosition = parseInt(localStorage.getItem('scrollPosition'), 10);
+    if (savedPosition) {
+      document.getElementById('scrollableDiv').scrollTop = savedPosition;
+    }
+  }, []);
+
   const [editing, setEditing] = useState(null);
 
   const onEditMonth = (id, month) => {
@@ -204,6 +219,7 @@ export function BudgetTable(props) {
         />
         <IntersectionBoundary.Provider value={budgetCategoriesRef}>
           <View
+            id="scrollableDiv"
             style={{
               overflowY: 'scroll',
               overflowAnchor: 'none',
@@ -233,6 +249,7 @@ export function BudgetTable(props) {
                 onReorderGroup={_onReorderGroup}
                 onBudgetAction={onBudgetAction}
                 onShowActivity={onShowActivity}
+                scrollToPosition={scrollToPosition}
               />
             </View>
           </View>
