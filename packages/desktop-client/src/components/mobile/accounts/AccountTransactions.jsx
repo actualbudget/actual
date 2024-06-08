@@ -144,6 +144,7 @@ const getSchedulesTransform = memoizeOne(id => {
 function TransactionListWithPreviews({ account }) {
   const [currentQuery, setCurrentQuery] = useState();
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const prependTransactions = usePreviewTransactions();
   const allTransactions = useMemo(
@@ -170,10 +171,14 @@ function TransactionListWithPreviews({ account }) {
 
   const updateQuery = useCallback(query => {
     paged.current?.unsubscribe();
+    setIsLoading(true);
     paged.current = pagedQuery(
       query.options({ splits: 'none' }).select('*'),
-      data => setTransactions(data),
-      { pageCount: 10 },
+      data => {
+        setTransactions(data);
+        setIsLoading(false);
+      },
+      { pageCount: 50 },
     );
   }, []);
 
@@ -267,6 +272,7 @@ function TransactionListWithPreviews({ account }) {
 
   return (
     <TransactionListWithBalances
+      isLoading={isLoading}
       transactions={allTransactions}
       balance={balance}
       balanceCleared={balanceCleared}

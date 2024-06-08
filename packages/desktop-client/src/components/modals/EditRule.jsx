@@ -235,6 +235,7 @@ function ConditionEditor({
         value={value}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
+        numberFormatType="currency"
       />
     );
   }
@@ -365,6 +366,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               op={op}
               value={value}
               onChange={v => onChange('value', v)}
+              numberFormatType="currency"
             />
           </View>
         </>
@@ -386,6 +388,9 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
                 key={inputKey}
                 field={field}
                 type="number"
+                numberFormatType={
+                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                }
                 value={value}
                 onChange={v => onChange('value', v)}
               />
@@ -1006,7 +1011,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                         >
                           <Text
                             style={{
-                              ...styles.verySmallText,
+                              ...styles.smallText,
                               marginBottom: '10px',
                             }}
                           >

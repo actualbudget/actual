@@ -32,6 +32,7 @@
     "@use-gesture/react": "^10.3.0",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@vitejs/plugin-react-swc": "^3.6.0",
+    "auto-text-size": "^0.2.3",
     "chokidar": "^3.5.3",
     "cross-env": "^7.0.3",
     "date-fns": "^2.30.0",

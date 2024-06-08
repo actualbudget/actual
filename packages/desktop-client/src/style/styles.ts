@@ -54,7 +54,7 @@ export const styles = {
     fontSize: 13,
   },
   verySmallText: {
-    fontSize: 13,
+    fontSize: 12,
   },
   tinyText: {
     fontSize: 10,

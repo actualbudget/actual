@@ -63,6 +63,10 @@ async function importCategories(
       findIdByName(data.category_groups, 'Credit Card Payments')
     ) {
       return 'creditCard';
+    } else if (
+      cat.category_group_id === findIdByName(data.category_groups, 'Income')
+    ) {
+      return 'income';
     }
   }
   // Can't be done in parallel to have
@@ -74,12 +78,18 @@ async function importCategories(
       // Ignores internal category and credit cards
       if (
         !equalsIgnoreCase(group.name, 'Internal Master Category') &&
-        !equalsIgnoreCase(group.name, 'Credit Card Payments')
+        !equalsIgnoreCase(group.name, 'Credit Card Payments') &&
+        !equalsIgnoreCase(group.name, 'Income')
       ) {
         groupId = await actual.createCategoryGroup({
           name: group.name,
           is_income: false,
         });
+        entityIdMap.set(group.id, groupId);
+      }
+
+      if (equalsIgnoreCase(group.name, 'Income')) {
+        groupId = incomeCatId;
         entityIdMap.set(group.id, groupId);
       }
 

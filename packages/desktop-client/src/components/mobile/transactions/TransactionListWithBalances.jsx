@@ -56,6 +56,7 @@ function TransactionSearchInput({ placeholder, onSearch }) {
 }
 
 export function TransactionListWithBalances({
+  isLoading,
   transactions,
   balance,
   balanceCleared,
@@ -154,8 +155,9 @@ export function TransactionListWithBalances({
       </View>
       <PullToRefresh isPullable={!!onRefresh} onRefresh={onRefresh}>
         <TransactionList
+          isLoading={isLoading}
           transactions={transactions}
-          isNew={isNewTransaction}
+          isNewTransaction={isNewTransaction}
           onLoadMore={onLoadMore}
           onSelect={onSelectTransaction}
         />

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
+import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -18,10 +19,14 @@ import { Checkbox } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 
+import { AmountInput } from './AmountInput';
+import { PercentInput } from './PercentInput';
+
 export function GenericInput({
   field,
   subfield,
   type,
+  numberFormatType = undefined,
   multi,
   value,
   inputRef,
@@ -32,6 +37,37 @@ export function GenericInput({
   const savedReports = useReports();
   const saved = useSelector(state => state.queries.saved);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
+  const getNumberInputByFormatType = numberFormatType => {
+    switch (numberFormatType) {
+      case 'currency':
+        return (
+          <AmountInput
+            inputRef={inputRef}
+            value={amountToInteger(value)}
+            onUpdate={v => onChange(integerToAmount(v))}
+          />
+        );
+      case 'percentage':
+        return (
+          <PercentInput
+            inputRef={inputRef}
+            value={value}
+            onUpdatePercent={onChange}
+          />
+        );
+      default:
+        return (
+          <Input
+            inputRef={inputRef}
+            defaultValue={value || ''}
+            placeholder="nothing"
+            onEnter={e => onChange(e.target.value)}
+            onBlur={e => onChange(e.target.value)}
+          />
+        );
+    }
+  };
 
   // This makes the UI more resilient in case of faulty data
   if (multi && !Array.isArray(value)) {
@@ -208,6 +244,8 @@ export function GenericInput({
             onSelect={onChange}
           />
         );
+      } else if (type === 'number') {
+        content = getNumberInputByFormatType(numberFormatType);
       } else {
         content = (
           <Input
