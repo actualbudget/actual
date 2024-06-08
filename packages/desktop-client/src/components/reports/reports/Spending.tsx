@@ -38,7 +38,7 @@ export function Spending() {
   } = useFilters<RuleConditionEntity>();
 
   const [dataCheck, setDataCheck] = useState(false);
-  const [mode, setMode] = useState('Last month');
+  const [mode, setMode] = useState('lastMonth');
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
@@ -176,31 +176,41 @@ export function Spending() {
                     marginBottom: 5,
                   }}
                 >
-                  <AlignedText
-                    left={<Block>Spent MTD:</Block>}
-                    right={
-                      <Text>
-                        <PrivacyFilter blurIntensity={5}>
-                          {amountToCurrency(
-                            Math.abs(data.intervalData[todayDay].thisMonth),
-                          )}
-                        </PrivacyFilter>
-                      </Text>
-                    }
-                  />
-                  <AlignedText
-                    left={<Block>Spent Last MTD:</Block>}
-                    right={
-                      <Text>
-                        <PrivacyFilter blurIntensity={5}>
-                          {amountToCurrency(
-                            Math.abs(data.intervalData[todayDay].lastMonth),
-                          )}
-                        </PrivacyFilter>
-                      </Text>
-                    }
-                  />
-                  {showAverage && (
+                  {showLastMonth && (
+                    <View
+                      style={{
+                        ...styles.mediumText,
+                        fontWeight: 500,
+                        marginBottom: 5,
+                      }}
+                    >
+                      <AlignedText
+                        left={<Block>Spent MTD:</Block>}
+                        right={
+                          <Text>
+                            <PrivacyFilter blurIntensity={5}>
+                              {amountToCurrency(
+                                Math.abs(data.intervalData[todayDay].thisMonth),
+                              )}
+                            </PrivacyFilter>
+                          </Text>
+                        }
+                      />
+                      <AlignedText
+                        left={<Block>Spent Last MTD:</Block>}
+                        right={
+                          <Text>
+                            <PrivacyFilter blurIntensity={5}>
+                              {amountToCurrency(
+                                Math.abs(data.intervalData[todayDay].lastMonth),
+                              )}
+                            </PrivacyFilter>
+                          </Text>
+                        }
+                      />
+                    </View>
+                  )}
+                  {data && showAverage && (
                     <AlignedText
                       left={<Block>Spent Average MTD:</Block>}
                       right={
@@ -216,47 +226,47 @@ export function Spending() {
                   )}
                 </View>
               </View>
-              <View
-                style={{
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                }}
-              >
-                <Text
+              {data && showLastMonth && (
+                <View
                   style={{
-                    paddingRight: 10,
+                    alignItems: 'center',
+                    flexDirection: 'row',
                   }}
                 >
-                  Compare this month to:
-                </Text>
-                {showLastMonth && (
+                  <Text
+                    style={{
+                      paddingRight: 10,
+                    }}
+                  >
+                    Compare this month to:
+                  </Text>
                   <ModeButton
-                    selected={mode === 'Last month'}
-                    onSelect={() => setMode('Last month')}
+                    selected={mode === 'lastMonth'}
+                    onSelect={() => setMode('lastMonth')}
                   >
                     Last month
                   </ModeButton>
-                )}
-                {showLastMonth && showLastYear && (
-                  <ModeButton
-                    selected={mode === 'Last year'}
-                    onSelect={() => setMode('Last year')}
-                  >
-                    Last year
-                  </ModeButton>
-                )}
-                {showLastMonth && showAverage && (
-                  <ModeButton
-                    selected={mode === 'Average'}
-                    onSelect={() => setMode('Average')}
-                  >
-                    Average
-                  </ModeButton>
-                )}
-              </View>
+                  {showLastYear && (
+                    <ModeButton
+                      selected={mode === 'lastYear'}
+                      onSelect={() => setMode('lastYear')}
+                    >
+                      Last year
+                    </ModeButton>
+                  )}
+                  {showAverage && (
+                    <ModeButton
+                      selected={mode === 'average'}
+                      onSelect={() => setMode('average')}
+                    >
+                      Average
+                    </ModeButton>
+                  )}
+                </View>
+              )}
               {!showLastMonth && (
                 <View style={{ marginTop: 30 }}>
-                  <h1>Additional Data Required to Generate Graph</h1>
+                  <h1>Additional data required to generate graph</h1>
                   <Paragraph>
                     Currently, there is insufficient data to display any
                     information regarding your spending. Please input

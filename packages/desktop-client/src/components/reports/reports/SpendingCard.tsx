@@ -57,7 +57,7 @@ export function SpendingCard() {
               end={monthUtils.currentMonth()}
             />
           </View>
-          {data && (
+          {data && showLastMonth && (
             <View style={{ textAlign: 'right' }}>
               <Block
                 style={{
@@ -80,27 +80,19 @@ export function SpendingCard() {
             </View>
           )}
         </View>
-        {!showLastMonth && (
+        {!showLastMonth ? (
           <View style={{ padding: 5 }}>
-            <h2 style={{ margin: 0, textAlign: 'center' }}>
-              Additional Data Required to Graph
-            </h2>
-            <p style={{ marginTop: 10, textAlign: 'center' }}>
-              Currently, there is insufficient data to display any information
-              regarding your spending. Please input transactions from last month
-              to enable graph visualization.
+            <p style={{ margin: 0, textAlign: 'center' }}>
+              Additional data required to generate graph
             </p>
           </View>
-        )}
-        {data ? (
-          showLastMonth ? (
-            <SpendingGraph
-              style={{ flex: 1 }}
-              compact={true}
-              data={data}
-              mode="average"
-            />
-          ) : null
+        ) : data ? (
+          <SpendingGraph
+            style={{ flex: 1 }}
+            compact={true}
+            data={data}
+            mode="lastMonth"
+          />
         ) : (
           <LoadingIndicator message="Loading report..." />
         )}

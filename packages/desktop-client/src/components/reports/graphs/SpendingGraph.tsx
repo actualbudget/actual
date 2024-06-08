@@ -84,14 +84,14 @@ const CustomTooltip = ({
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload[0].payload.months[thisMonth].cumulative && (
+            {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
                 left="This month:"
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1,
                 )}
               />
-            )}
+            ) : null}
             {['cumulative'].includes(balanceTypeOp) && (
               <AlignedText
                 left={
@@ -104,7 +104,7 @@ const CustomTooltip = ({
                 right={amountToCurrency(comparison)}
               />
             )}
-            {payload[0].payload.months[thisMonth].cumulative && (
+            {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
                 left="Difference:"
                 right={amountToCurrency(
@@ -112,7 +112,7 @@ const CustomTooltip = ({
                     comparison,
                 )}
               />
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -139,17 +139,18 @@ export function SpendingGraph({
   const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
   const lastYear = monthUtils.prevYear(monthUtils.currentMonth());
   let selection;
-  switch (mode.toLowerCase()) {
+  switch (mode) {
     case 'average':
       selection = 'average';
       break;
-    case 'last month':
+    case 'lastMonth':
       selection = lastMonth;
       break;
     default:
       selection = lastYear;
       break;
   }
+
   const thisMonthMax = data.intervalData.reduce((a, b) =>
     a.months[thisMonth][balanceTypeOp] < b.months[thisMonth][balanceTypeOp]
       ? a
@@ -171,6 +172,38 @@ export function SpendingGraph({
   const dataMin = Math.min(
     ...data.intervalData.map(i => i.months[thisMonth].cumulative),
   );
+
+  const lowestYAxisValue = {
+    average: Infinity,
+    lastMonth: -Infinity,
+    thisMonth: -Infinity,
+    lastYear: -Infinity,
+  };
+
+  data.intervalData.forEach(data => {
+    lowestYAxisValue.average = Math.min(lowestYAxisValue.average, data.average);
+    lowestYAxisValue.lastMonth = Math.max(
+      lowestYAxisValue.lastMonth,
+      data.lastMonth,
+    );
+    lowestYAxisValue.thisMonth = Math.max(
+      lowestYAxisValue.thisMonth,
+      data.thisMonth,
+    );
+    lowestYAxisValue.lastYear = Math.max(
+      lowestYAxisValue.lastYear,
+      data.lastYear,
+    );
+  });
+
+  const setLowestYAxis =
+    mode === 'average'
+      ? -lowestYAxisValue.thisMonth < -lowestYAxisValue.average
+        ? -lowestYAxisValue.thisMonth
+        : lowestYAxisValue.average
+      : -lowestYAxisValue[mode] > -lowestYAxisValue.thisMonth
+        ? -lowestYAxisValue.thisMonth
+        : -lowestYAxisValue.lastMonth;
 
   const tickFormatter = tick => {
     if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
@@ -241,7 +274,7 @@ export function SpendingGraph({
                     dataKey={val =>
                       getVal(val, maxYAxis ? thisMonth : selection)
                     }
-                    domain={[0, 'auto']}
+                    domain={[setLowestYAxis * 1.05, 'auto']}
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}
