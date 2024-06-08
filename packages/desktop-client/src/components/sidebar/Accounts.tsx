@@ -76,7 +76,6 @@ export function Accounts({
           style={{
             fontWeight,
             marginTop: 13,
-            borderBottom: `1.5px solid rgba(255, 255, 255, 0.6)`,
             marginBottom: 5,
           }}
         />
@@ -107,7 +106,6 @@ export function Accounts({
           style={{
             fontWeight,
             marginTop: 13,
-            borderBottom: `1.5px solid rgba(255, 255, 255, 0.6)`,
             marginBottom: 5,
           }}
         />
