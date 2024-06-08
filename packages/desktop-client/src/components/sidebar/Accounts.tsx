@@ -159,7 +159,7 @@ export function Accounts({
         }}
         onClick={onAddAccount}
         Icon={SvgAdd}
-        title="Add Account"
+        title="Add account"
       />
     </View>
   );
