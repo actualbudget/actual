@@ -79,6 +79,7 @@ export type IntervalEntity = {
   date?: string;
   change?: number;
   intervalStartDate?: string;
+  intervalEndDate?: string;
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;

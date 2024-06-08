@@ -4,7 +4,6 @@ import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
-import { IntersectionBoundary } from '../tooltips';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
@@ -30,7 +29,6 @@ export function BudgetTable(props) {
     onBudgetAction,
   } = props;
 
-  const budgetCategoriesRef = useRef();
   const { grouped: categoryGroups } = useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
@@ -217,17 +215,21 @@ export function BudgetTable(props) {
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
         />
-        <IntersectionBoundary.Provider value={budgetCategoriesRef}>
+        <View
+          style={{
+            overflowY: 'scroll',
+            overflowAnchor: 'none',
+            flex: 1,
+            paddingLeft: 5,
+            paddingRight: 5,
+          }}
+        >
           <View
             id="scrollableDiv"
             style={{
-              overflowY: 'scroll',
-              overflowAnchor: 'none',
-              flex: 1,
-              paddingLeft: 5,
-              paddingRight: 5,
+              flexShrink: 0,
             }}
-            innerRef={budgetCategoriesRef}
+            onKeyDown={onKeyDown}
           >
             <View
               style={{
@@ -253,7 +255,7 @@ export function BudgetTable(props) {
               />
             </View>
           </View>
-        </IntersectionBoundary.Provider>
+        </View>
       </MonthsProvider>
     </View>
   );
