@@ -62,7 +62,7 @@ export function Accounts({
   return (
     <View>
       <Account
-        name="All Accounts"
+        name="All accounts"
         to="/accounts"
         query={queries.allAccountBalance()}
         style={{ fontWeight, marginTop: 15 }}
@@ -70,7 +70,7 @@ export function Accounts({
 
       {budgetedAccounts.length > 0 && (
         <Account
-          name="For Budget"
+          name="For budget"
           to="/accounts/budgeted"
           query={queries.budgetedAccountBalance()}
           style={{
@@ -101,7 +101,7 @@ export function Accounts({
 
       {offbudgetAccounts.length > 0 && (
         <Account
-          name="Off Budget"
+          name="Off budget"
           to="/accounts/offbudget"
           query={queries.offbudgetAccountBalance()}
           style={{
