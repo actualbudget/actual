@@ -250,15 +250,15 @@ export function Spending() {
                       Compare this month to:
                     </Text>
                     <ModeButton
-                      selected={mode === 'Last month'}
-                      onSelect={() => setMode('Last month')}
+                      selected={mode === 'lastMonth'}
+                      onSelect={() => setMode('lastMonth')}
                     >
                       Last month
                     </ModeButton>
                     {showLastYear && (
                       <ModeButton
-                        selected={mode === 'Last year'}
-                        onSelect={() => setMode('Last year')}
+                        selected={mode === 'lastYear'}
+                        onSelect={() => setMode('lastYear')}
                       >
                         Last year
                       </ModeButton>

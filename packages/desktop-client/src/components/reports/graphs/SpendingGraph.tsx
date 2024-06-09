@@ -140,7 +140,7 @@ export function SpendingGraph({
   const lastYear = monthUtils.prevYear(monthUtils.currentMonth());
   let selection;
   switch (mode) {
-    case 'average':
+    case 'Average':
       selection = 'average';
       break;
     case 'lastMonth':
@@ -150,6 +150,8 @@ export function SpendingGraph({
       selection = lastYear;
       break;
   }
+
+  console.log(mode);
 
   const thisMonthMax = data.intervalData.reduce((a, b) =>
     a.months[thisMonth][balanceTypeOp] < b.months[thisMonth][balanceTypeOp]
