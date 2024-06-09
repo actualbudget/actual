@@ -225,45 +225,7 @@ export function Spending() {
                   )}
                 </View>
               </View>
-              {showLastMonth && (
-                <View
-                  style={{
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                  }}
-                >
-                  <Text
-                    style={{
-                      paddingRight: 10,
-                    }}
-                  >
-                    Compare this month to:
-                  </Text>
-                  <ModeButton
-                    selected={mode === 'lastMonth'}
-                    onSelect={() => setMode('lastMonth')}
-                  >
-                    Last month
-                  </ModeButton>
-                  {showLastYear && (
-                    <ModeButton
-                      selected={mode === 'lastYear'}
-                      onSelect={() => setMode('lastYear')}
-                    >
-                      Last year
-                    </ModeButton>
-                  )}
-                  {showAverage && (
-                    <ModeButton
-                      selected={mode === 'average'}
-                      onSelect={() => setMode('average')}
-                    >
-                      Average
-                    </ModeButton>
-                  )}
-                </View>
-              )}
-              {!showLastMonth && (
+              {!showLastMonth ? (
                 <View style={{ marginTop: 30 }}>
                   <h1>Additional data required to generate graph</h1>
                   <Paragraph>
@@ -272,21 +234,57 @@ export function Spending() {
                     transactions from last month to enable graph visualization.
                   </Paragraph>
                 </View>
-              )}
-
-              {dataCheck ? (
-                showLastMonth ? (
-                  <SpendingGraph
-                    style={{ flexGrow: 1 }}
-                    compact={false}
-                    data={data}
-                    mode={mode}
-                  />
-                ) : null
               ) : (
-                <LoadingIndicator message="Loading report..." />
-              )}
+                <>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        paddingRight: 10,
+                      }}
+                    >
+                      Compare this month to:
+                    </Text>
+                    <ModeButton
+                      selected={mode === 'Last month'}
+                      onSelect={() => setMode('Last month')}
+                    >
+                      Last month
+                    </ModeButton>
+                    {showLastYear && (
+                      <ModeButton
+                        selected={mode === 'Last year'}
+                        onSelect={() => setMode('Last year')}
+                      >
+                        Last year
+                      </ModeButton>
+                    )}
+                    {showAverage && (
+                      <ModeButton
+                        selected={mode === 'Average'}
+                        onSelect={() => setMode('Average')}
+                      >
+                        Average
+                      </ModeButton>
+                    )}
+                  </View>
 
+                  {dataCheck ? (
+                    <SpendingGraph
+                      style={{ flexGrow: 1 }}
+                      compact={false}
+                      data={data}
+                      mode={mode}
+                    />
+                  ) : (
+                    <LoadingIndicator message="Loading report..." />
+                  )}
+                </>
+              )}
               {showAverage && (
                 <View style={{ marginTop: 30 }}>
                   <Paragraph>
