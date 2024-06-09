@@ -98,6 +98,7 @@ export function ReportTable({
         compactStyle={compactStyle}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        interval={interval}
       />
     );
   }, []);
@@ -129,6 +130,7 @@ export function ReportTable({
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}
           height={32 + scrollWidthTotals}
+          interval={interval}
         />
       );
     },

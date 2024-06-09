@@ -134,7 +134,7 @@ export const RuleRow = memo(
                     >
                       <Text
                         style={{
-                          ...styles.verySmallText,
+                          ...styles.smallText,
                           color: theme.pageTextLight,
                           marginBottom: 6,
                         }}
