@@ -77,7 +77,6 @@ function CategoryList({
         : items.filter(item => !item.hidden && !item.group?.hidden),
     [showHiddenItems, items],
   );
-
   return (
     <View>
       <View
@@ -183,6 +182,8 @@ export function CategoryAutocomplete({
     [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
+  const [autoCompleteCategories] = useLocalPref('autoCompleteCategories');
+
   return (
     <Autocomplete
       strict={true}
@@ -199,10 +200,14 @@ export function CategoryAutocomplete({
       }}
       filterSuggestions={(suggestions, value) => {
         return suggestions.filter(suggestion => {
-          return (
-            suggestion.id === 'split' ||
-            defaultFilterSuggestion(suggestion, value)
-          );
+          console.log(suggestion);
+          return autoCompleteCategories
+            ? suggestion.id === 'split' ||
+                suggestion.group.name
+                  .toLowerCase()
+                  .includes(value.toLowerCase()) ||
+                defaultFilterSuggestion(suggestion, value)
+            : defaultFilterSuggestion(suggestion, value);
         });
       }}
       suggestions={categorySuggestions}

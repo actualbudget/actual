@@ -30,7 +30,7 @@ import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
 import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
-import { ThemeSettings } from './Themes';
+import { ToggleableSettings } from './ToggleableSettings';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
@@ -175,7 +175,7 @@ export function Settings() {
 
         {!Platform.isBrowser && <GlobalSettings />}
 
-        <ThemeSettings />
+        <ToggleableSettings />
         <FormatSettings />
         <EncryptionSettings />
         <ExportBudget />
