@@ -35,7 +35,7 @@ type ExpenseCategoryProps = {
   onBudgetAction: (month: number, action: string, arg: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
   onReorder: OnDropCallback;
-  scrollToPosition: number;
+  scrollToPosition: () => void;
 };
 
 export function ExpenseCategory({

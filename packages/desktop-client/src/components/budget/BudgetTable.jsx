@@ -39,14 +39,17 @@ export function BudgetTable(props) {
   );
 
   const scrollToPosition = () => {
-    localStorage.setItem(
+    sessionStorage.setItem(
       'scrollPosition',
       document.getElementById('scrollableDiv').scrollTop,
     );
   };
 
   useEffect(() => {
-    const savedPosition = parseInt(localStorage.getItem('scrollPosition'), 10);
+    const savedPosition = parseInt(
+      sessionStorage.getItem('scrollPosition'),
+      10,
+    );
     if (savedPosition) {
       document.getElementById('scrollableDiv').scrollTop = savedPosition;
     }
