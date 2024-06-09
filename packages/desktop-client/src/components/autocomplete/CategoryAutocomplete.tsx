@@ -203,7 +203,7 @@ export function CategoryAutocomplete({
           console.log(suggestion);
           return autoCompleteCategories
             ? suggestion.id === 'split' ||
-                suggestion.group.name
+                suggestion.group?.name
                   .toLowerCase()
                   .includes(value.toLowerCase()) ||
                 defaultFilterSuggestion(suggestion, value)

@@ -9,8 +9,6 @@ import { Setting } from './UI';
 export function ToggleableSettings() {
   const [autoCompleteCategories = false, setAutoCompleteCategoriesPref] =
     useLocalPref('autoCompleteCategories');
-
-  console.log(autoCompleteCategories);
   return (
     <Setting
       primaryAction={
