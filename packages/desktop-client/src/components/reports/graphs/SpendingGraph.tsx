@@ -151,8 +151,6 @@ export function SpendingGraph({
       break;
   }
 
-  console.log(mode);
-
   const thisMonthMax = data.intervalData.reduce((a, b) =>
     a.months[thisMonth][balanceTypeOp] < b.months[thisMonth][balanceTypeOp]
       ? a
