@@ -23,6 +23,7 @@ import { useStableCallback } from '../../hooks/useStableCallback';
 import { SvgExpandArrow } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
+import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
 import { View } from '../common/View';
 import { TableHeader, Cell, SelectCell, useTableNavigator } from '../table';
@@ -102,6 +103,7 @@ export const ManagePayees = forwardRef(
     const [filter, setFilter] = useState('');
     const table = useRef(null);
     const scrollTo = useRef(null);
+    const triggerRef = useRef(null);
     const resetAnimation = useRef(false);
     const [orphanedOnly, setOrphanedOnly] = useState(false);
 
@@ -233,6 +235,7 @@ export const ManagePayees = forwardRef(
         >
           <View style={{ flexShrink: 0 }}>
             <Button
+              ref={triggerRef}
               type="bare"
               style={{ marginRight: 10 }}
               disabled={buttonsDisabled}
@@ -245,7 +248,14 @@ export const ManagePayees = forwardRef(
                   plural(selected.items.size, 'payee', 'payees')}
               <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
             </Button>
-            {menuOpen && (
+
+            <Popover
+              triggerRef={triggerRef}
+              isOpen={menuOpen}
+              placement="bottom start"
+              style={{ width: 250 }}
+              onOpenChange={() => setMenuOpen(false)}
+            >
               <PayeeMenu
                 payeesById={payeesById}
                 selectedPayees={selected.items}
@@ -253,7 +263,7 @@ export const ManagePayees = forwardRef(
                 onDelete={onDelete}
                 onMerge={onMerge}
               />
-            )}
+            </Popover>
           </View>
           <View
             style={{
