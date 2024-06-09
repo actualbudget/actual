@@ -173,38 +173,6 @@ export function SpendingGraph({
     ...data.intervalData.map(i => i.months[thisMonth].cumulative),
   );
 
-  const lowestYAxisValue = {
-    average: Infinity,
-    lastMonth: -Infinity,
-    thisMonth: -Infinity,
-    lastYear: -Infinity,
-  };
-
-  data.intervalData.forEach(data => {
-    lowestYAxisValue.average = Math.min(lowestYAxisValue.average, data.average);
-    lowestYAxisValue.lastMonth = Math.max(
-      lowestYAxisValue.lastMonth,
-      data.lastMonth,
-    );
-    lowestYAxisValue.thisMonth = Math.max(
-      lowestYAxisValue.thisMonth,
-      data.thisMonth,
-    );
-    lowestYAxisValue.lastYear = Math.max(
-      lowestYAxisValue.lastYear,
-      data.lastYear,
-    );
-  });
-
-  const setLowestYAxis =
-    mode === 'average'
-      ? -lowestYAxisValue.thisMonth < -lowestYAxisValue.average
-        ? -lowestYAxisValue.thisMonth
-        : lowestYAxisValue.average
-      : -lowestYAxisValue[mode] > -lowestYAxisValue.thisMonth
-        ? -lowestYAxisValue.thisMonth
-        : -lowestYAxisValue.lastMonth;
-
   const tickFormatter = tick => {
     if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
     return '...';
@@ -274,7 +242,7 @@ export function SpendingGraph({
                     dataKey={val =>
                       getVal(val, maxYAxis ? thisMonth : selection)
                     }
-                    domain={[setLowestYAxis * 1.05, 'auto']}
+                    domain={[0, 'auto']}
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}

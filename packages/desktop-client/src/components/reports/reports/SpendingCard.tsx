@@ -34,7 +34,8 @@ export function SpendingCard() {
       : monthUtils.getDay(monthUtils.currentDay()) - 1;
   const difference =
     data &&
-    data.intervalData[todayDay].average - data.intervalData[todayDay].thisMonth;
+    data.intervalData[todayDay].lastMonth -
+      data.intervalData[todayDay].thisMonth;
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
   return (

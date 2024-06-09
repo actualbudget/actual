@@ -54,8 +54,11 @@ export function Spending() {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
+  if (!data) {
+    return null;
+  }
+
   const showAverage =
-    data &&
     data.intervalData[27].months[
       monthUtils.subMonths(monthUtils.currentDay(), 3)
     ].daily !== 0;
@@ -65,12 +68,8 @@ export function Spending() {
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
-  const showLastYear = data && Math.abs(data.intervalData[27].lastYear) > 0;
-  const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
-
-  if (!data) {
-    return null;
-  }
+  const showLastYear = Math.abs(data.intervalData[27].lastYear) > 0;
+  const showLastMonth = Math.abs(data.intervalData[27].lastMonth) > 0;
   return (
     <Page
       header={
@@ -210,7 +209,7 @@ export function Spending() {
                       />
                     </View>
                   )}
-                  {data && showAverage && (
+                  {showAverage && (
                     <AlignedText
                       left={<Block>Spent Average MTD:</Block>}
                       right={
@@ -226,7 +225,7 @@ export function Spending() {
                   )}
                 </View>
               </View>
-              {data && showLastMonth && (
+              {showLastMonth && (
                 <View
                   style={{
                     alignItems: 'center',
