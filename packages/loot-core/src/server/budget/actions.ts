@@ -278,6 +278,10 @@ export async function setNMonthAvg({
   N: number;
   category: string;
 }): Promise<void> {
+  const categoryDb = await db.first('SELECT is_income FROM v_categories WHERE id = ?', [
+    category,
+  ]);
+
   let prevMonth = monthUtils.prevMonth(month);
   let sumAmount = 0;
   for (let l = 0; l < N; l++) {
@@ -288,8 +292,13 @@ export async function setNMonthAvg({
     prevMonth = monthUtils.prevMonth(prevMonth);
   }
   await batchMessages(async () => {
-    const avg = Math.round(sumAmount / N);
-    setBudget({ category, month, amount: -avg });
+    let avg = Math.round(sumAmount / N);
+
+    if (categoryDb.is_income === 0) {
+      avg *= -1;
+    }
+
+    setBudget({ category, month, amount: avg });
   });
 }
 
