@@ -295,7 +295,7 @@ export async function setNMonthAvg({
   await batchMessages(async () => {
     let avg = Math.round(sumAmount / N);
 
-    if (categoryDb.is_income === 0) {
+    if (categoryFromDb.is_income === 0) {
       avg *= -1;
     }
 
