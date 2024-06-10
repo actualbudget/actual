@@ -120,7 +120,6 @@ export function ScheduleLink({
           schedules={schedules}
           statuses={statuses}
           style={null}
-          tableStyle={{ marginInline: -20 }}
         />
       </View>
     </Modal>
