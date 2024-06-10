@@ -258,8 +258,13 @@ export async function set3MonthAvg({
         'sum-amount-' + cat.id,
       );
 
-      const avg = Math.round((spent1 + spent2 + spent3) / 3);
-      setBudget({ category: cat.id, month, amount: -avg });
+      let avg = Math.round((spent1 + spent2 + spent3) / 3);
+
+      if (cat.is_income === 0) {
+        avg *= -1;
+      }
+
+      setBudget({ category: cat.id, month, amount: avg });
     }
   });
 }
