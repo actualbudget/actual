@@ -278,9 +278,10 @@ export async function setNMonthAvg({
   N: number;
   category: string;
 }): Promise<void> {
-  const categoryDb = await db.first('SELECT is_income FROM v_categories WHERE id = ?', [
-    category,
-  ]);
+  const categoryFromDb = await db.first(
+    'SELECT is_income FROM v_categories WHERE id = ?',
+    [category],
+  );
 
   let prevMonth = monthUtils.prevMonth(month);
   let sumAmount = 0;
