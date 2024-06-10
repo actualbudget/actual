@@ -373,6 +373,20 @@ export async function transferAvailable({
   await setBudget({ category, month, amount: budgeted + amount });
 }
 
+export async function coverOverbudgeted({
+  month,
+  category,
+}: {
+  month: string;
+  category: string;
+}): Promise<void> {
+  const sheetName = monthUtils.sheetForMonth(month);
+  const toBudget = await getSheetValue(sheetName, 'to-budget');
+
+  const categoryBudget = await getSheetValue(sheetName, 'budget-' + category);
+  await setBudget({ category, month, amount: categoryBudget + toBudget });
+}
+
 export async function transferCategory({
   month,
   amount,
