@@ -59,9 +59,9 @@ export function Spending() {
   }
 
   const showAverage =
-    data.intervalData[27].months[
+    Math.abs(data.intervalData[27].months[
       monthUtils.subMonths(monthUtils.currentDay(), 3)
-    ].cumulative > 0;
+    ].cumulative) > 0;
 
   const todayDay =
     monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
