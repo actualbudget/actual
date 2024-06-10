@@ -143,11 +143,11 @@ export function SpendingGraph({
     case 'Average':
       selection = 'average';
       break;
-    case 'lastMonth':
-      selection = lastMonth;
+    case 'lastYear':
+      selection = lastYear;
       break;
     default:
-      selection = lastYear;
+      selection = lastMonth;
       break;
   }
 
