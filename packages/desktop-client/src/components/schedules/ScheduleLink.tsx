@@ -66,7 +66,7 @@ export function ScheduleLink({
   }
 
   return (
-    <Modal title="Link Schedule" size={{ width: 600 }} {...modalProps}>
+    <Modal title="Link Schedule" size={{ width: 800 }} {...modalProps}>
       <View
         style={{
           flexDirection: 'row',
