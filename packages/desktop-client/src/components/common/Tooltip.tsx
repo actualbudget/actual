@@ -52,7 +52,7 @@ export const Tooltip = ({
 
   return (
     <View
-      style={{minHeight: 'auto'}}
+      style={{ minHeight: 'auto' }}
       ref={triggerRef}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
