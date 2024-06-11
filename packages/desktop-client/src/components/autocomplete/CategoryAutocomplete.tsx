@@ -56,7 +56,6 @@ type CategoryListProps = {
   showHiddenItems?: boolean;
   showBalances?: boolean;
   isChanged?: boolean;
-  value?: string;
 };
 function CategoryList({
   items,
@@ -69,8 +68,6 @@ function CategoryList({
   renderCategoryItem = defaultRenderCategoryItem,
   showHiddenItems,
   showBalances,
-  isChanged,
-  value,
 }: CategoryListProps) {
   let lastGroup: string | undefined | null = null;
   const filteredItems = useMemo(
@@ -126,11 +123,6 @@ function CategoryList({
                     ...(showHiddenItems &&
                       item.hidden && {
                         color: theme.pageTextSubdued,
-                      }),
-                    ...(isChanged &&
-                      value &&
-                      item.name?.includes(value) && {
-                        borderBottom: '5px solid rgba(255,255,255,0.6)',
                       }),
                   },
                   showBalances,
@@ -220,7 +212,7 @@ export function CategoryAutocomplete({
       }}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex, ...args) => {
-        const [value, isChanged] = args;
+        const [, isChanged] = args;
         return (
           <CategoryList
             items={items}
@@ -233,7 +225,6 @@ export function CategoryAutocomplete({
             showHiddenItems={showHiddenCategories}
             showBalances={showBalances}
             isChanged={isChanged}
-            value={value}
           />
         );
       }}
