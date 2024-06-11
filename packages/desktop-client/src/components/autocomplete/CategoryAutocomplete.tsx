@@ -128,7 +128,7 @@ function CategoryList({
                         color: theme.pageTextSubdued,
                       }),
                     ...(isChanged &&
-                      item.name.includes(value) && {
+                      item.name?.includes(value) && {
                         borderBottom: '5px solid rgba(255,255,255,0.6)',
                       }),
                   },
