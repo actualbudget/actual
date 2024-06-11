@@ -1019,8 +1019,8 @@ export const Table = forwardRef(
 
     function saveScrollDelayed() {
       saveScrollWidth(
-        scrollContainer.current.offsetParent
-          ? scrollContainer.current.offsetParent.clientWidth
+        scrollContainer.current?.offsetParent
+          ? scrollContainer.current?.offsetParent.clientWidth
           : 0,
         scrollContainer.current ? scrollContainer.current.clientWidth : 0,
       );
