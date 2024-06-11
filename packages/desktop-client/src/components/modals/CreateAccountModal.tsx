@@ -71,6 +71,7 @@ export function CreateAccountModal({
       name: string;
       institution: string;
       orgDomain: string;
+      orgId: string;
       balance: number;
     };
 
@@ -80,6 +81,7 @@ export function CreateAccountModal({
         name: oldAccount.name,
         institution: oldAccount.org.name,
         orgDomain: oldAccount.org.domain,
+        orgId: oldAccount.org.id,
         balance: oldAccount.balance,
       };
 
