@@ -55,6 +55,8 @@ type CategoryListProps = {
   ) => ReactElement<typeof CategoryItem>;
   showHiddenItems?: boolean;
   showBalances?: boolean;
+  isChanged?: boolean;
+  value?: string;
 };
 function CategoryList({
   items,
@@ -67,9 +69,10 @@ function CategoryList({
   renderCategoryItem = defaultRenderCategoryItem,
   showHiddenItems,
   showBalances,
+  isChanged,
+  value,
 }: CategoryListProps) {
   let lastGroup: string | undefined | null = null;
-
   const filteredItems = useMemo(
     () =>
       showHiddenItems
@@ -99,6 +102,7 @@ function CategoryList({
           const showGroup = item.cat_group !== lastGroup;
           const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
           lastGroup = item.cat_group;
+
           return (
             <Fragment key={item.id}>
               {showGroup && item.group?.name && (
@@ -120,7 +124,13 @@ function CategoryList({
                   embedded,
                   style: {
                     ...(showHiddenItems &&
-                      item.hidden && { color: theme.pageTextSubdued }),
+                      item.hidden && {
+                        color: theme.pageTextSubdued,
+                      }),
+                    ...(isChanged &&
+                      item.name.includes(value) && {
+                        borderBottom: '5px solid rgba(255,255,255,0.6)',
+                      }),
                   },
                   showBalances,
                 })}
@@ -140,6 +150,7 @@ type CategoryAutocompleteProps = ComponentProps<
   categoryGroups?: Array<CategoryGroupEntity>;
   showBalances?: boolean;
   showSplitOption?: boolean;
+  value?: string;
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
@@ -182,8 +193,6 @@ export function CategoryAutocomplete({
     [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
-  const [autoCompleteCategories] = useLocalPref('autoCompleteCategories');
-
   return (
     <Autocomplete
       strict={true}
@@ -200,30 +209,34 @@ export function CategoryAutocomplete({
       }}
       filterSuggestions={(suggestions, value) => {
         return suggestions.filter(suggestion => {
-          console.log(suggestion);
-          return autoCompleteCategories
-            ? suggestion.id === 'split' ||
-                suggestion.group?.name
-                  .toLowerCase()
-                  .includes(value.toLowerCase()) ||
-                defaultFilterSuggestion(suggestion, value)
-            : defaultFilterSuggestion(suggestion, value);
+          return (
+            suggestion.id === 'split' ||
+            suggestion.group?.name
+              .toLowerCase()
+              .includes(value.toLowerCase()) ||
+            defaultFilterSuggestion(suggestion, value)
+          );
         });
       }}
       suggestions={categorySuggestions}
-      renderItems={(items, getItemProps, highlightedIndex) => (
-        <CategoryList
-          items={items}
-          embedded={embedded}
-          getItemProps={getItemProps}
-          highlightedIndex={highlightedIndex}
-          renderSplitTransactionButton={renderSplitTransactionButton}
-          renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
-          renderCategoryItem={renderCategoryItem}
-          showHiddenItems={showHiddenCategories}
-          showBalances={showBalances}
-        />
-      )}
+      renderItems={(items, getItemProps, highlightedIndex, ...args) => {
+        const [value, isChanged] = args;
+        return (
+          <CategoryList
+            items={items}
+            embedded={embedded}
+            getItemProps={getItemProps}
+            highlightedIndex={highlightedIndex}
+            renderSplitTransactionButton={renderSplitTransactionButton}
+            renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
+            renderCategoryItem={renderCategoryItem}
+            showHiddenItems={showHiddenCategories}
+            showBalances={showBalances}
+            isChanged={isChanged}
+            value={value}
+          />
+        );
+      }}
       {...props}
     />
   );
