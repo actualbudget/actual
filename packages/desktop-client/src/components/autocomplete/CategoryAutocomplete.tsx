@@ -150,7 +150,6 @@ type CategoryAutocompleteProps = ComponentProps<
   categoryGroups?: Array<CategoryGroupEntity>;
   showBalances?: boolean;
   showSplitOption?: boolean;
-  value?: string;
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
