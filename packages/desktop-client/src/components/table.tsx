@@ -1013,12 +1013,14 @@ export const Table = forwardRef(
       }
 
       if (scrollContainer.current && saveScrollWidth) {
-        saveScrollWidth(
-          scrollContainer.current.offsetParent
-            ? scrollContainer.current.offsetParent.clientWidth
-            : 0,
-          scrollContainer.current ? scrollContainer.current.clientWidth : 0,
-        );
+        setTimeout(() => {
+          saveScrollWidth(
+            scrollContainer.current.offsetParent
+              ? scrollContainer.current.offsetParent.clientWidth
+              : 0,
+            scrollContainer.current ? scrollContainer.current.clientWidth : 0,
+          );
+        }, 200);
       }
     });
 
