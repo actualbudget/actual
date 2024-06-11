@@ -46,6 +46,11 @@ export interface BudgetHandlers {
     category: string;
   }) => Promise<void>;
 
+  'budget/cover-overbudgeted': (arg: {
+    month: string;
+    category: string;
+  }) => Promise<void>;
+
   'budget/transfer-category': (arg: {
     month: string;
     amount: number;
