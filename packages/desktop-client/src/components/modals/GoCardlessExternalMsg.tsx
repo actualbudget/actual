@@ -99,7 +99,6 @@ export function GoCardlessExternalMsg({
     boolean | null
   >(null);
   const data = useRef<GoCardlessToken | null>(null);
-  const triggerRef = useRef(null);
 
   const {
     data: bankOptions,

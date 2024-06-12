@@ -9,6 +9,7 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
 import { Link } from '../common/Link';
@@ -16,10 +17,9 @@ import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
-import { Tooltip } from '../tooltips';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
-import { SvgDotsHorizontalTriple } from '../../icons/v1';
+import { Tooltip } from '../tooltips';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -114,18 +114,18 @@ export function CreateAccountModal({
   };
 
   const onGoCardlessReset = () => {
+    send('secret-set', {
+      name: 'gocardless_secretId',
+      value: null,
+    }).then(() => {
       send('secret-set', {
-        name: 'gocardless_secretId',
+        name: 'gocardless_secretKey',
         value: null,
       }).then(() => {
-        send('secret-set', {
-          name: 'gocardless_secretKey',
-          value: null,
-        }).then(() => {
-          setIsGoCardlessSetupComplete(false);
-          setGoCardlessMenuOpen(false);
-        });
+        setIsGoCardlessSetupComplete(false);
+        setGoCardlessMenuOpen(false);
       });
+    });
   };
 
   const onSimpleFinReset = () => {
@@ -203,7 +203,13 @@ export function CreateAccountModal({
           <View style={{ gap: 10 }}>
             {syncServerStatus === 'online' ? (
               <>
-                <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: 10,
+                    alignItems: 'center',
+                  }}
+                >
                   <ButtonWithLoading
                     disabled={syncServerStatus !== 'online'}
                     style={{
@@ -263,7 +269,14 @@ export function CreateAccountModal({
                 </Text>
                 {simpleFinSyncFeatureFlag === true && (
                   <>
-                    <View style={{ flexDirection: 'row', gap: 10, marginTop: '18px', alignItems: 'center' }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        gap: 10,
+                        marginTop: '18px',
+                        alignItems: 'center',
+                      }}
+                    >
                       <ButtonWithLoading
                         disabled={syncServerStatus !== 'online'}
                         loading={loadingSimpleFinAccounts}
