@@ -18,7 +18,6 @@ export type LocalPrefs = Partial<
       | 'dd.MM.yyyy';
     numberFormat: (typeof numberFormats)[number]['value'];
     hideFraction: boolean;
-    autoCompleteCategories: boolean;
     hideClosedAccounts: boolean;
     hideMobileMessage: boolean;
     isPrivacyEnabled: boolean;

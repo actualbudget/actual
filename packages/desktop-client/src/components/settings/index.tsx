@@ -174,6 +174,7 @@ export function Settings() {
         <About />
 
         {!Platform.isBrowser && <GlobalSettings />}
+
         <ThemeSettings />
         <FormatSettings />
         <EncryptionSettings />
