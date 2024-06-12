@@ -357,8 +357,9 @@ export function CreateAccountModal({
                     to="https://actualbudget.org/docs/advanced/bank-sync"
                     linkColor="muted"
                   >
-                    automatic syncing.
+                    automatic syncing
                   </Link>
+                  .
                 </Paragraph>
               </>
             )}
