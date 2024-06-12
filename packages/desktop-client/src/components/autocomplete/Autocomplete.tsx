@@ -50,6 +50,7 @@ type CommonAutocompleteProps<T extends Item> = {
   clearOnSelect?: boolean;
   closeOnBlur?: boolean;
   onClose?: () => void;
+  customOnSelect?: (selectedItem: Item | null, value: string) => boolean;
 };
 
 type Item = {
@@ -235,6 +236,7 @@ function SingleAutocomplete<T extends Item>({
   clearOnBlur = true,
   clearOnSelect = false,
   closeOnBlur = true,
+  customOnSelect,
   onClose,
   value: initialValue,
 }: SingleAutocompleteProps<T>) {
@@ -307,6 +309,11 @@ function SingleAutocomplete<T extends Item>({
       onSelect={(item, { inputValue }) => {
         setSelectedItem(item);
         setHighlightedIndex(null);
+
+        if(customOnSelect != null && !customOnSelect(item, inputValue)) {
+          setValue('');
+          return;
+        }
 
         if (clearOnSelect) {
           setValue('');

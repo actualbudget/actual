@@ -7,6 +7,7 @@ import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  useState,
 } from 'react';
 
 import { css } from 'glamor';
@@ -20,7 +21,7 @@ import {
 
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
-import { SvgSplit } from '../../icons/v0';
+import { SvgLeftArrow2, SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
 import { makeAmountFullStyle } from '../budget/util';
@@ -47,6 +48,9 @@ type CategoryListProps = {
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
+  renderClearFilterButton?: (
+    props: ComponentPropsWithoutRef<typeof ClearFilterButton>,
+  ) => ReactElement<typeof ClearFilterButton>;
   renderCategoryItemGroupHeader?: (
     props: ComponentPropsWithoutRef<typeof ItemHeader>,
   ) => ReactElement<typeof ItemHeader>;
@@ -63,8 +67,8 @@ function CategoryList({
   embedded,
   footer,
   renderSplitTransactionButton = defaultRenderSplitTransactionButton,
-  renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
+  renderClearFilterButton = defaultRenderClearFilterButton,
   showHiddenItems,
   showBalances,
 }: CategoryListProps) {
@@ -97,35 +101,37 @@ function CategoryList({
             });
           }
 
-          const showGroup = item.cat_group !== lastGroup;
+          if (item.id === 'clearFilter') {
+            return renderClearFilterButton({
+              key: 'clearFilter',
+              ...(getItemProps ? getItemProps({ item }) : null),
+              highlighted: highlightedIndex === idx,
+              embedded,
+            })
+          }
+
+          const showGroup = item.is_group;
           const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
-              {showGroup && item.group?.name && (
-                <Fragment key={item.group.name}>
-                  {renderCategoryItemGroupHeader({
-                    title: groupName,
-                    style: {
-                      ...(showHiddenItems &&
-                        item.group?.hidden && { color: theme.pageTextSubdued }),
-                    },
-                  })}
-                </Fragment>
-              )}
-              <Fragment key={item.id}>
+              {
+                (<Fragment key={item.id}>
                 {renderCategoryItem({
                   ...(getItemProps ? getItemProps({ item }) : null),
                   item,
                   highlighted: highlightedIndex === idx,
                   embedded,
+                  isHeader: item.is_group,
                   style: {
                     ...(showHiddenItems &&
                       item.hidden && { color: theme.pageTextSubdued }),
                   },
                   showBalances,
                 })}
-              </Fragment>
+                </Fragment>
+                )}
+              
             </Fragment>
           );
         })}
@@ -144,6 +150,9 @@ type CategoryAutocompleteProps = ComponentProps<
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
+  renderClearFilterButton?: (
+    props: ComponentPropsWithoutRef<typeof ClearFilterButton>,
+  ) => ReactElement<typeof ClearFilterButton>;
   renderCategoryItemGroupHeader?: (
     props: ComponentPropsWithoutRef<typeof ItemHeader>,
   ) => ReactElement<typeof ItemHeader>;
@@ -162,15 +171,20 @@ export function CategoryAutocomplete({
   renderSplitTransactionButton,
   renderCategoryItemGroupHeader,
   renderCategoryItem,
+  renderClearFilterButton,
   showHiddenCategories,
   ...props
 }: CategoryAutocompleteProps) {
   const { grouped: defaultCategoryGroups = [] } = useCategories();
+  const [filteredCategories, setFilteredCategories] = useState<CategoryAutocompleteItem[]>([]);
+
   const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
-    () =>
+    () => {
+      return (filteredCategories.length > 0 && filteredCategories ) ||
       (categoryGroups || defaultCategoryGroups).reduce(
         (list, group) =>
-          list.concat(
+          list.concat({...group, is_group: true})
+              .concat(
             (group.categories || [])
               .filter(category => category.cat_group === group.id)
               .map(category => ({
@@ -179,8 +193,9 @@ export function CategoryAutocomplete({
               })),
           ),
         showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
-      ),
-    [defaultCategoryGroups, categoryGroups, showSplitOption],
+      )
+    },
+    [defaultCategoryGroups, categoryGroups, showSplitOption, filteredCategories],
   );
 
   return (
@@ -189,6 +204,7 @@ export function CategoryAutocomplete({
       highlightFirst={true}
       embedded={embedded}
       closeOnBlur={closeOnBlur}
+      onClose={() => setFilteredCategories([])}
       getHighlightedIndex={suggestions => {
         if (suggestions.length === 0) {
           return null;
@@ -206,6 +222,21 @@ export function CategoryAutocomplete({
         });
       }}
       suggestions={categorySuggestions}
+      customOnSelect={(item: CategoryAutocompleteItem, _) => {
+        if (item.id == 'clearFilter') {
+          setFilteredCategories([]);
+          return false;
+
+        } else if (item.is_group) {
+          const newFilteredCategories = [...categoryGroups.find(group => group.id === item.id)?.categories];
+          newFilteredCategories.unshift({ id: 'clearFilter', name: '' } as CategoryEntity);
+          setFilteredCategories(newFilteredCategories);
+          return false;
+        }
+
+        setFilteredCategories([]);
+        return true;
+      }}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList
           items={items}
@@ -215,6 +246,7 @@ export function CategoryAutocomplete({
           renderSplitTransactionButton={renderSplitTransactionButton}
           renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
           renderCategoryItem={renderCategoryItem}
+          renderClearFilterButton={renderClearFilterButton}
           showHiddenItems={showHiddenCategories}
           showBalances={showBalances}
         />
@@ -228,6 +260,59 @@ function defaultRenderCategoryItemGroupHeader(
   props: ComponentPropsWithoutRef<typeof ItemHeader>,
 ): ReactElement<typeof ItemHeader> {
   return <ItemHeader {...props} type="category" />;
+}
+
+type ClearFilterButtonProps = {
+  Icon?: ComponentType<SVGProps<SVGElement>>;
+  highlighted?: boolean;
+  embedded?: boolean;
+  style?: CSSProperties;
+};
+
+function ClearFilterButton({
+  Icon,
+  highlighted,
+  embedded,
+  style,
+  ...props
+}: ClearFilterButtonProps) {
+  return (<View
+    role="button"
+    style={{
+      backgroundColor: highlighted
+        ? theme.menuAutoCompleteBackgroundHover
+        : 'transparent',
+      borderRadius: embedded ? 4 : 0,
+      flexShrink: 0,
+      flexDirection: 'row',
+      alignItems: 'center',
+      fontSize: 11,
+      fontWeight: 500,
+      color: theme.noticeTextMenu,
+      padding: '6px 8px',
+      ':active': {
+        backgroundColor: 'rgba(100, 100, 100, .25)',
+      },
+      ...style,
+    }}
+    data-testid="clear-filter-button"
+    {...props}
+  >
+    <Text style={{ lineHeight: 0 }}>
+      {Icon ? (
+        <Icon style={{ marginRight: 5 }} />
+      ) : (
+        <SvgLeftArrow2 width={10} height={10} style={{ marginRight: 5 }} />
+      )}
+    </Text>
+    Clear Filter
+  </View>)
+}
+
+function defaultRenderClearFilterButton(
+  props: ClearFilterButtonProps,
+): ReactElement<typeof ClearFilterButton> {
+  return <ClearFilterButton {...props} />;
 }
 
 type SplitTransactionButtonProps = {
@@ -313,6 +398,7 @@ type CategoryItemProps = {
   highlighted?: boolean;
   embedded?: boolean;
   showBalances?: boolean;
+  isHeader?: boolean;
 };
 
 function CategoryItem({
@@ -322,6 +408,7 @@ function CategoryItem({
   highlighted,
   embedded,
   showBalances,
+  isHeader,
   ...props
 }: CategoryItemProps) {
   const { isNarrowWidth } = useResponsive();
@@ -353,9 +440,10 @@ function CategoryItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
-          color: highlighted
-            ? theme.menuAutoCompleteItemTextHover
-            : theme.menuAutoCompleteItemText,
+          color: isHeader ? theme.menuAutoCompleteTextHeader :
+                            (highlighted
+                              ? theme.menuAutoCompleteItemTextHover
+                              : theme.menuAutoCompleteItemText),
           padding: 4,
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
