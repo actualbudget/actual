@@ -359,7 +359,6 @@ export function CreateAccountModal({
                   >
                     automatic syncing.
                   </Link>
-                  .
                 </Paragraph>
               </>
             )}
