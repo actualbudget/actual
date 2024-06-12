@@ -43,6 +43,7 @@ export function BudgetTable(props) {
       'scrollPosition',
       document.getElementById('scrollableDiv').scrollTop,
     );
+    sessionStorage.setItem('scrollPositionSetBySpentColumn', true);
   };
 
   useEffect(() => {
@@ -50,8 +51,12 @@ export function BudgetTable(props) {
       sessionStorage.getItem('scrollPosition'),
       10,
     );
-    if (savedPosition) {
+    const scrollPositionSetBySpentColumn = sessionStorage.getItem(
+      'scrollPositionSetBySpentColumn',
+    );
+    if (savedPosition && scrollPositionSetBySpentColumn) {
       document.getElementById('scrollableDiv').scrollTop = savedPosition;
+      sessionStorage.removeItem('scrollPositionSetBySpentColumn');
     }
   }, []);
 

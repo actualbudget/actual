@@ -165,11 +165,6 @@ export const CategoryMonth = memo(function CategoryMonth({
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
 
-  const handleButtonClick = (categoryId: string, month: string) => {
-    scrollToPosition();
-    onShowActivity(categoryId, month);
-  };
-
   return (
     <View
       style={{
@@ -306,7 +301,10 @@ export const CategoryMonth = memo(function CategoryMonth({
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
           data-testid="category-month-spent"
-          onClick={() => handleButtonClick(category.id, month)}
+          onClick={() => {
+            scrollToPosition();
+            onShowActivity(category.id, month);
+          }}
         >
           <CellValue
             binding={reportBudget.catSumAmount(category.id)}

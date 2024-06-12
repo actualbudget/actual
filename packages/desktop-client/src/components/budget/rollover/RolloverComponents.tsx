@@ -143,6 +143,7 @@ type ExpenseCategoryMonthProps = {
   onEdit: (id: string | null, month?: string) => void;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
+  scrollToPosition: () => void;
 };
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   month,
@@ -151,6 +152,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onEdit,
   onBudgetAction,
   onShowActivity,
+  scrollToPosition,
 }: ExpenseCategoryMonthProps) {
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
@@ -295,7 +297,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
           data-testid="category-month-spent"
-          onClick={() => onShowActivity(category.id, month)}
+          onClick={() => {
+            scrollToPosition();
+            onShowActivity(category.id, month);
+          }}
         >
           <CellValue
             binding={rolloverBudget.catSumAmount(category.id)}
