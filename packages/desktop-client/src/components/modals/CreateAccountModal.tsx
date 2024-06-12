@@ -263,12 +263,11 @@ export function CreateAccountModal({
                 </Text>
                 {simpleFinSyncFeatureFlag === true && (
                   <>
-                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', gap: 10, marginTop: '18px', alignItems: 'center' }}>
                       <ButtonWithLoading
                         disabled={syncServerStatus !== 'online'}
                         loading={loadingSimpleFinAccounts}
                         style={{
-                          marginTop: '18px',
                           padding: '10px 0',
                           fontSize: 15,
                           fontWeight: 600,
