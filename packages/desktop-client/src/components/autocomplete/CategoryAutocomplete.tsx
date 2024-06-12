@@ -68,6 +68,8 @@ function CategoryList({
   showHiddenItems,
   showBalances,
 }: CategoryListProps) {
+  let lastGroup: string | undefined | null = null;
+
   const filteredItems = useMemo(
     () =>
       showHiddenItems
@@ -104,6 +106,8 @@ function CategoryList({
             });
           }
 
+          const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
+          lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
               <Fragment key={item.id}>
@@ -203,12 +207,23 @@ export function CategoryAutocomplete({
         return 0;
       }}
       filterSuggestions={(suggestions, value) => {
-        return suggestions.filter(suggestion => {
+        let preFilter = suggestions.filter(suggestion => {
           return (
             suggestion.id === 'split' ||
+            suggestion.is_group === true ||
             defaultFilterSuggestion(suggestion, value)
           );
         });
+
+        preFilter = preFilter.filter(
+          suggestion =>
+            suggestion.is_group !== true ||
+            (suggestion.is_group === true &&
+              preFilter.findIndex(item => item.cat_group === suggestion.id) >
+                -1),
+        );
+
+        return preFilter;
       }}
       suggestions={categorySuggestions}
       customOnSelect={(item: CategoryAutocompleteItem) => {
