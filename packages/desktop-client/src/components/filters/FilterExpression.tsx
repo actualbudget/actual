@@ -76,7 +76,9 @@ export function FilterExpression({
                 value={value}
                 field={field}
                 inline={true}
-                valueIsRaw={op === 'contains' || op === 'doesNotContain'}
+                valueIsRaw={
+                  op === 'contains' || op === 'doesNotContain' || op === 'tags'
+                }
               />
             </>
           )}

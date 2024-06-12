@@ -106,7 +106,9 @@ export function OpSelect({
   // We don't support the `contains` operator for the id type for
   // rules yet
   if (type === 'id') {
-    ops = ops.filter(op => op !== 'contains' && op !== 'doesNotContain');
+    ops = ops.filter(
+      op => (op !== 'contains' && op !== 'doesNotContain') || op !== 'tags',
+    );
     line = ops.length / 2;
   }
   if (type === 'string') {
@@ -548,8 +550,7 @@ function ConditionsList({
           // clear the value
           if (
             cond.op !== 'oneOf' &&
-            cond.op !== 'notOneOf' &&
-            (op === 'oneOf' || op === 'notOneOf')
+            cond.op !== 'notOneOf'(op === 'oneOf' || op === 'notOneOf')
           ) {
             return newInput(
               makeValue(cond.value != null ? [cond.value] : [], {

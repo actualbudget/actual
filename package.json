@@ -69,5 +69,8 @@
   "browserslist": [
     "electron 24.0",
     "defaults"
-  ]
+  ],
+  "dependencies": {
+    "react-contenteditable": "^3.3.7"
+  }
 }

@@ -467,6 +467,16 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           return { id: null };
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
+
+      case 'tags':
+        const tagValues = value
+          .split(/(\s+)/)
+          .filter(tag => tag.startsWith('#'));
+
+        return {
+          $and: tagValues.map(v => apply(field, '$like', '%' + v + '%')),
+        };
+
       case 'notOneOf':
         const notValues = value;
         if (notValues.length === 0) {

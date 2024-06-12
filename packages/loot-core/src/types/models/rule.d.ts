@@ -24,7 +24,8 @@ export type RuleConditionOp =
   | 'lt'
   | 'lte'
   | 'contains'
-  | 'doesNotContain';
+  | 'doesNotContain'
+  | 'tags';
 
 export interface RuleConditionEntity {
   field?: string;

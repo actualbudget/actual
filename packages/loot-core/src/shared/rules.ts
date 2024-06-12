@@ -9,7 +9,15 @@ export const TYPE_INFO = {
     nullable: false,
   },
   id: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+      'tags',
+    ],
     nullable: true,
   },
   saved: {
@@ -17,7 +25,15 @@ export const TYPE_INFO = {
     nullable: false,
   },
   string: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+      'tags',
+    ],
     nullable: true,
   },
   number: {
@@ -91,6 +107,8 @@ export function friendlyOp(op, type?) {
       return 'is between';
     case 'contains':
       return 'contains';
+    case 'tags':
+      return 'has tags';
     case 'doesNotContain':
       return 'does not contain';
     case 'gt':

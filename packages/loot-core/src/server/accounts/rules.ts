@@ -138,7 +138,15 @@ const CONDITION_TYPES = {
     },
   },
   string: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+      'tags',
+    ],
     nullable: true,
     parse(op, value, fieldName) {
       if (op === 'oneOf' || op === 'notOneOf') {
@@ -152,7 +160,7 @@ const CONDITION_TYPES = {
         return value.filter(Boolean).map(val => val.toLowerCase());
       }
 
-      if (op === 'contains' || op === 'doesNotContain') {
+      if (op === 'contains' || op === 'doesNotContain' || op === 'tags') {
         assert(
           typeof value === 'string' && value.length > 0,
           'no-empty-string',
@@ -362,6 +370,13 @@ export class Condition {
           return false;
         }
         return this.value.indexOf(fieldValue) !== -1;
+
+      case 'tags':
+        if (fieldValue === null) {
+          return false;
+        }
+        return fieldValue.indexOf(this.value) !== -1;
+
       case 'notOneOf':
         if (fieldValue === null) {
           return false;
@@ -804,6 +819,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   isNot: 10,
   oneOf: 9,
   notOneOf: 9,
+  tags: 9,
   isapprox: 5,
   isbetween: 5,
   gt: 1,
