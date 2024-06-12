@@ -61,6 +61,7 @@ type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
   balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
+  groupBy: string;
   yAxis?: string;
 };
 
@@ -68,9 +69,27 @@ const CustomTooltip = ({
   active,
   payload,
   balanceTypeOp,
+  groupBy,
   yAxis,
 }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
+    const assetName =
+      groupBy === 'Interval'
+        ? balanceTypeOp === 'totalTotals'
+          ? 'totalAssets'
+          : 'totalTotals'
+        : balanceTypeOp === 'totalTotals'
+          ? 'totalAssets'
+          : 'netAssets';
+    const debtName =
+      groupBy === 'Interval'
+        ? balanceTypeOp === 'totalTotals'
+          ? 'totalDebts'
+          : 'totalTotals'
+        : balanceTypeOp === 'totalTotals'
+          ? 'totalDebts'
+          : 'netDebts';
+
     return (
       <div
         className={`${css({
@@ -91,13 +110,13 @@ const CustomTooltip = ({
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left="Assets:"
-                right={amountToCurrency(payload[0].payload.totalAssets)}
+                right={amountToCurrency(payload[0].payload[assetName] || 0)}
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left="Debt:"
-                right={amountToCurrency(payload[0].payload.totalDebts)}
+                right={amountToCurrency(payload[0].payload[debtName] || 0)}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
@@ -168,10 +187,18 @@ export function BarGraph({
 
   const getVal = obj => {
     if (balanceTypeOp === 'totalDebts') {
-      return -1 * obj.totalDebts;
-    } else {
+      if (groupBy === 'Interval') {
+        return obj.totalTotals < 0 && Math.abs(obj.totalTotals);
+      }
+      return -1 * obj.netDebts;
+    }
+    if (balanceTypeOp === 'totalTotals') {
       return obj.totalAssets;
     }
+    if (groupBy === 'Interval') {
+      return obj.totalTotals > 0 && Math.abs(obj.totalTotals);
+    }
+    return obj.netAssets;
   };
 
   const longestLabelLength = data[splitData]
@@ -215,6 +242,7 @@ export function BarGraph({
                     content={
                       <CustomTooltip
                         balanceTypeOp={balanceTypeOp}
+                        groupBy={groupBy}
                         yAxis={yAxis}
                       />
                     }
@@ -250,6 +278,7 @@ export function BarGraph({
                 <Bar
                   dataKey={val => getVal(val)}
                   stackId="a"
+                  //radius={[5, 5, 0, 0]}
                   onMouseLeave={() => setPointer('')}
                   onMouseEnter={() =>
                     !['Group', 'Interval'].includes(groupBy) &&
@@ -301,6 +330,26 @@ export function BarGraph({
                         key={`cell-${index}`}
                         fill={theme.reportsRed}
                         name={entry.name}
+                      />
+                    ))}
+                  </Bar>
+                )}
+                {yAxis !== 'date' && balanceTypeOp === 'totalTotals' && (
+                  <Bar dataKey="totalDebts" stackId="a">
+                    {viewLabels && !compact && (
+                      <LabelList
+                        dataKey="totalDebts"
+                        content={e => customLabel(e, balanceTypeOp)}
+                      />
+                    )}
+                    {data.legend.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        opacity={0.7}
+                        name={entry.name}
+                        stroke={theme.reportsRed}
+                        strokeWidth={3}
                       />
                     ))}
                   </Bar>

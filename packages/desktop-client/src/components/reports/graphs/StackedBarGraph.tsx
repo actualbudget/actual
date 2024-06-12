@@ -194,6 +194,7 @@ export function StackedBarGraph({
                 data={data.intervalData}
                 margin={{ top: 0, right: 0, left: leftMargin, bottom: 10 }}
                 style={{ cursor: pointer }}
+                stackOffset="sign" //stacked by sign
               >
                 {(!isNarrowWidth || !compact) && (
                   <Tooltip
