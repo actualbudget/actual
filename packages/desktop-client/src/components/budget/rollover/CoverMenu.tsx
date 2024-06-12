@@ -8,15 +8,21 @@ import { View } from '../../common/View';
 import { addToBeBudgetedGroup } from '../util';
 
 type CoverMenuProps = {
+  showToBeBudgeted?: boolean;
   onSubmit: (categoryId: string) => void;
   onClose: () => void;
 };
 
-export function CoverMenu({ onSubmit, onClose }: CoverMenuProps) {
+export function CoverMenu({
+  showToBeBudgeted = true,
+  onSubmit,
+  onClose,
+}: CoverMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
-  const categoryGroups = addToBeBudgetedGroup(
-    originalCategoryGroups.filter(g => !g.is_income),
-  );
+  let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
+  categoryGroups = showToBeBudgeted
+    ? addToBeBudgetedGroup(categoryGroups)
+    : categoryGroups;
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   function submit() {

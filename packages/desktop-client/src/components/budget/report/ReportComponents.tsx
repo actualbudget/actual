@@ -230,6 +230,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                   onBudgetAction?.(month, 'copy-single-last', {
                     category: category.id,
                   });
+                  setMenuOpen(false);
                 }}
                 onSetMonthsAverage={numberOfMonths => {
                   if (
@@ -243,11 +244,13 @@ export const CategoryMonth = memo(function CategoryMonth({
                   onBudgetAction?.(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
+                  setMenuOpen(false);
                 }}
                 onApplyBudgetTemplate={() => {
                   onBudgetAction?.(month, 'apply-single-category-template', {
                     category: category.id,
                   });
+                  setMenuOpen(false);
                 }}
               />
             </Popover>
