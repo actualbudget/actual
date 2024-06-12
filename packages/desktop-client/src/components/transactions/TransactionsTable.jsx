@@ -252,7 +252,7 @@ const TransactionHeader = memo(
         )}
         <HeaderCell
           value="Payment"
-          width={90}
+          width={100}
           alignItems="flex-end"
           marginRight={-5}
           id="payment"
@@ -263,7 +263,7 @@ const TransactionHeader = memo(
         />
         <HeaderCell
           value="Deposit"
-          width={85}
+          width={100}
           alignItems="flex-end"
           marginRight={-5}
           id="deposit"
@@ -824,7 +824,6 @@ const Transaction = memo(function Transaction(props) {
         ...style,
         ...(isPreview && {
           color: theme.tableTextInactive,
-          backgroundColor: !selected ? theme.tableBackground : undefined,
           fontStyle: 'italic',
         }),
         ...(_unmatched && { opacity: 0.5 }),
@@ -1199,7 +1198,7 @@ const Transaction = memo(function Transaction(props) {
       <InputCell
         /* Debit field for all transactions */
         type="input"
-        width={90}
+        width={100}
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
@@ -1225,7 +1224,7 @@ const Transaction = memo(function Transaction(props) {
       <InputCell
         /* Credit field for all transactions */
         type="input"
-        width={85}
+        width={100}
         name="credit"
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}

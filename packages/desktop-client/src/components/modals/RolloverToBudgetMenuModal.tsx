@@ -14,6 +14,7 @@ type RolloverToBudgetMenuModalProps = ComponentPropsWithoutRef<
 export function RolloverToBudgetMenuModal({
   modalProps,
   onTransfer,
+  onCover,
   onHoldBuffer,
   onResetHoldBuffer,
 }: RolloverToBudgetMenuModalProps) {
@@ -29,6 +30,7 @@ export function RolloverToBudgetMenuModal({
       <ToBudgetMenu
         getItemStyle={() => defaultMenuItemStyle}
         onTransfer={onTransfer}
+        onCover={onCover}
         onHoldBuffer={onHoldBuffer}
         onResetHoldBuffer={onResetHoldBuffer}
       />
