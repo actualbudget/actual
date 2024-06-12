@@ -310,7 +310,7 @@ function SingleAutocomplete<T extends Item>({
         setSelectedItem(item);
         setHighlightedIndex(null);
 
-        if(customOnSelect != null && !customOnSelect(item, inputValue)) {
+        if (customOnSelect != null && !customOnSelect(item, inputValue)) {
           setValue('');
           return;
         }

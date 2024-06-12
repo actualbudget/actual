@@ -31,7 +31,6 @@ import { View } from '../common/View';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
-import { ItemHeader } from './ItemHeader';
 
 type CategoryAutocompleteItem = CategoryEntity & {
   group?: CategoryGroupEntity;
@@ -51,9 +50,6 @@ type CategoryListProps = {
   renderClearFilterButton?: (
     props: ComponentPropsWithoutRef<typeof ClearFilterButton>,
   ) => ReactElement<typeof ClearFilterButton>;
-  renderCategoryItemGroupHeader?: (
-    props: ComponentPropsWithoutRef<typeof ItemHeader>,
-  ) => ReactElement<typeof ItemHeader>;
   renderCategoryItem?: (
     props: ComponentPropsWithoutRef<typeof CategoryItem>,
   ) => ReactElement<typeof CategoryItem>;
@@ -72,8 +68,6 @@ function CategoryList({
   showHiddenItems,
   showBalances,
 }: CategoryListProps) {
-  let lastGroup: string | undefined | null = null;
-
   const filteredItems = useMemo(
     () =>
       showHiddenItems
@@ -107,16 +101,12 @@ function CategoryList({
               ...(getItemProps ? getItemProps({ item }) : null),
               highlighted: highlightedIndex === idx,
               embedded,
-            })
+            });
           }
 
-          const showGroup = item.is_group;
-          const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
-          lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
-              {
-                (<Fragment key={item.id}>
+              <Fragment key={item.id}>
                 {renderCategoryItem({
                   ...(getItemProps ? getItemProps({ item }) : null),
                   item,
@@ -129,9 +119,7 @@ function CategoryList({
                   },
                   showBalances,
                 })}
-                </Fragment>
-                )}
-              
+              </Fragment>
             </Fragment>
           );
         })}
@@ -153,9 +141,6 @@ type CategoryAutocompleteProps = ComponentProps<
   renderClearFilterButton?: (
     props: ComponentPropsWithoutRef<typeof ClearFilterButton>,
   ) => ReactElement<typeof ClearFilterButton>;
-  renderCategoryItemGroupHeader?: (
-    props: ComponentPropsWithoutRef<typeof ItemHeader>,
-  ) => ReactElement<typeof ItemHeader>;
   renderCategoryItem?: (
     props: ComponentPropsWithoutRef<typeof CategoryItem>,
   ) => ReactElement<typeof CategoryItem>;
@@ -169,22 +154,22 @@ export function CategoryAutocomplete({
   embedded,
   closeOnBlur,
   renderSplitTransactionButton,
-  renderCategoryItemGroupHeader,
   renderCategoryItem,
   renderClearFilterButton,
   showHiddenCategories,
   ...props
 }: CategoryAutocompleteProps) {
   const { grouped: defaultCategoryGroups = [] } = useCategories();
-  const [filteredCategories, setFilteredCategories] = useState<CategoryAutocompleteItem[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<
+    CategoryAutocompleteItem[]
+  >([]);
 
-  const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
-    () => {
-      return (filteredCategories.length > 0 && filteredCategories ) ||
+  const categorySuggestions: CategoryAutocompleteItem[] = useMemo(() => {
+    return (
+      (filteredCategories.length > 0 && filteredCategories) ||
       (categoryGroups || defaultCategoryGroups).reduce(
         (list, group) =>
-          list.concat({...group, is_group: true})
-              .concat(
+          list.concat({ ...group, is_group: true }).concat(
             (group.categories || [])
               .filter(category => category.cat_group === group.id)
               .map(category => ({
@@ -194,9 +179,13 @@ export function CategoryAutocomplete({
           ),
         showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
       )
-    },
-    [defaultCategoryGroups, categoryGroups, showSplitOption, filteredCategories],
-  );
+    );
+  }, [
+    defaultCategoryGroups,
+    categoryGroups,
+    showSplitOption,
+    filteredCategories,
+  ]);
 
   return (
     <Autocomplete
@@ -222,14 +211,18 @@ export function CategoryAutocomplete({
         });
       }}
       suggestions={categorySuggestions}
-      customOnSelect={(item: CategoryAutocompleteItem, _) => {
-        if (item.id == 'clearFilter') {
+      customOnSelect={(item: CategoryAutocompleteItem) => {
+        if (item.id === 'clearFilter') {
           setFilteredCategories([]);
           return false;
-
         } else if (item.is_group) {
-          const newFilteredCategories = [...categoryGroups.find(group => group.id === item.id)?.categories];
-          newFilteredCategories.unshift({ id: 'clearFilter', name: '' } as CategoryEntity);
+          const newFilteredCategories = [
+            ...categoryGroups.find(group => group.id === item.id)?.categories,
+          ];
+          newFilteredCategories.unshift({
+            id: 'clearFilter',
+            name: '',
+          } as CategoryEntity);
           setFilteredCategories(newFilteredCategories);
           return false;
         }
@@ -244,7 +237,6 @@ export function CategoryAutocomplete({
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
           renderSplitTransactionButton={renderSplitTransactionButton}
-          renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
           renderCategoryItem={renderCategoryItem}
           renderClearFilterButton={renderClearFilterButton}
           showHiddenItems={showHiddenCategories}
@@ -254,12 +246,6 @@ export function CategoryAutocomplete({
       {...props}
     />
   );
-}
-
-function defaultRenderCategoryItemGroupHeader(
-  props: ComponentPropsWithoutRef<typeof ItemHeader>,
-): ReactElement<typeof ItemHeader> {
-  return <ItemHeader {...props} type="category" />;
 }
 
 type ClearFilterButtonProps = {
@@ -276,37 +262,39 @@ function ClearFilterButton({
   style,
   ...props
 }: ClearFilterButtonProps) {
-  return (<View
-    role="button"
-    style={{
-      backgroundColor: highlighted
-        ? theme.menuAutoCompleteBackgroundHover
-        : 'transparent',
-      borderRadius: embedded ? 4 : 0,
-      flexShrink: 0,
-      flexDirection: 'row',
-      alignItems: 'center',
-      fontSize: 11,
-      fontWeight: 500,
-      color: theme.noticeTextMenu,
-      padding: '6px 8px',
-      ':active': {
-        backgroundColor: 'rgba(100, 100, 100, .25)',
-      },
-      ...style,
-    }}
-    data-testid="clear-filter-button"
-    {...props}
-  >
-    <Text style={{ lineHeight: 0 }}>
-      {Icon ? (
-        <Icon style={{ marginRight: 5 }} />
-      ) : (
-        <SvgLeftArrow2 width={10} height={10} style={{ marginRight: 5 }} />
-      )}
-    </Text>
-    Clear Filter
-  </View>)
+  return (
+    <View
+      role="button"
+      style={{
+        backgroundColor: highlighted
+          ? theme.menuAutoCompleteBackgroundHover
+          : 'transparent',
+        borderRadius: embedded ? 4 : 0,
+        flexShrink: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+        fontSize: 11,
+        fontWeight: 500,
+        color: theme.noticeTextMenu,
+        padding: '6px 8px',
+        ':active': {
+          backgroundColor: 'rgba(100, 100, 100, .25)',
+        },
+        ...style,
+      }}
+      data-testid="clear-filter-button"
+      {...props}
+    >
+      <Text style={{ lineHeight: 0 }}>
+        {Icon ? (
+          <Icon style={{ marginRight: 5 }} />
+        ) : (
+          <SvgLeftArrow2 width={10} height={10} style={{ marginRight: 5 }} />
+        )}
+      </Text>
+      Clear Filter
+    </View>
+  );
 }
 
 function defaultRenderClearFilterButton(
@@ -440,12 +428,13 @@ function CategoryItem({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
-          color: isHeader ? theme.menuAutoCompleteTextHeader :
-                            (highlighted
-                              ? theme.menuAutoCompleteItemTextHover
-                              : theme.menuAutoCompleteItemText),
+          color: isHeader
+            ? theme.menuAutoCompleteTextHeader
+            : highlighted
+              ? theme.menuAutoCompleteItemTextHover
+              : theme.menuAutoCompleteItemText,
           padding: 4,
-          paddingLeft: 20,
+          paddingLeft: isHeader ? 9 : 20,
           borderRadius: embedded ? 4 : 0,
           ...narrowStyle,
         },
