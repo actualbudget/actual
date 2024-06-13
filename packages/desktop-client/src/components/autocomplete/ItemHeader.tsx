@@ -11,7 +11,13 @@ type ItemHeaderProps = {
   isGroupHeader?: boolean;
 };
 
-export function ItemHeader({ title, style, type, isGroupHeader, ...props }: ItemHeaderProps) {
+export function ItemHeader({
+  title,
+  style,
+  type,
+  isGroupHeader,
+  ...props
+}: ItemHeaderProps) {
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -27,7 +33,9 @@ export function ItemHeader({ title, style, type, isGroupHeader, ...props }: Item
         fontSize: isGroupHeader ? 11 : 'auto',
         fontWeight: isGroupHeader ? 500 : 'auto',
         opacity: isGroupHeader ? 0.7 : 'auto',
-        color: isGroupHeader ? theme.noticeTextMenu : theme.menuAutoCompleteTextHeader,
+        color: isGroupHeader
+          ? theme.noticeTextMenu
+          : theme.menuAutoCompleteTextHeader,
         padding: '4px 9px',
         ...narrowStyle,
         ...style,

@@ -236,21 +236,34 @@ export function CategoryAutocomplete({
           );
         });
 
-        if(value.length > 0) {
+        if (value.length > 0) {
           const groupItems = categoryGroups
-          .filter(group => group.name?.toLowerCase()
-          .normalize('NFD')
-          .replace(/\p{Diacritic}/gu, '')
-          .includes(
-            value
-              .toLowerCase()
-              .normalize('NFD')
-              .replace(/\p{Diacritic}/gu, '')) ?? false)
-          .map(group => ({...group, group: {name: 'Groups'}, name:  `${group.name} ${group.is_income ? '' : '(Expense)'}`,is_group: true} as CategoryEntity));
+            .filter(
+              group =>
+                group.name
+                  ?.toLowerCase()
+                  .normalize('NFD')
+                  .replace(/\p{Diacritic}/gu, '')
+                  .includes(
+                    value
+                      .toLowerCase()
+                      .normalize('NFD')
+                      .replace(/\p{Diacritic}/gu, ''),
+                  ) ?? false,
+            )
+            .map(
+              group =>
+                ({
+                  ...group,
+                  group: { name: 'Groups' },
+                  name: `${group.name} ${group.is_income ? '' : '(Expense)'}`,
+                  is_group: true,
+                }) as CategoryEntity,
+            );
 
           preFilter = preFilter.concat(groupItems);
         }
-        
+
         return preFilter;
       }}
       suggestions={categorySuggestions}
@@ -259,9 +272,17 @@ export function CategoryAutocomplete({
           setFilteredCategories([]);
           return false;
         } else if (item.is_group) {
-          const selectedGroup = categoryGroups.find(group => group.id === item.id);
+          const selectedGroup = categoryGroups.find(
+            group => group.id === item.id,
+          );
           const newFilteredCategories = [
-            ...selectedGroup.categories.map(category => ({...category, group: selectedGroup} as CategoryAutocompleteItem)),
+            ...selectedGroup.categories.map(
+              category =>
+                ({
+                  ...category,
+                  group: selectedGroup,
+                }) as CategoryAutocompleteItem,
+            ),
           ];
 
           newFilteredCategories.unshift({
