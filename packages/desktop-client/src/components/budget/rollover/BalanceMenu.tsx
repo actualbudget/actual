@@ -43,16 +43,14 @@ export function BalanceMenu({
         }
       }}
       items={[
-        {
-          name: 'transfer',
-          text: 'Transfer to another category',
-        },
-        {
-          name: 'carryover',
-          text: carryover
-            ? 'Remove overspending rollover'
-            : 'Rollover overspending',
-        },
+        ...(balance > 0
+          ? [
+              {
+                name: 'transfer',
+                text: 'Transfer to another category',
+              },
+            ]
+          : []),
         ...(balance < 0
           ? [
               {
@@ -61,6 +59,12 @@ export function BalanceMenu({
               },
             ]
           : []),
+        {
+          name: 'carryover',
+          text: carryover
+            ? 'Remove overspending rollover'
+            : 'Rollover overspending',
+        },
       ]}
     />
   );

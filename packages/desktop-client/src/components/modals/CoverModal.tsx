@@ -15,25 +15,28 @@ import { type CommonModalProps } from '../Modals';
 
 type CoverModalProps = {
   modalProps: CommonModalProps;
-  categoryId: string;
+  title: string;
   month: string;
+  showToBeBudgeted?: boolean;
   onSubmit: (categoryId: string) => void;
 };
 
 export function CoverModal({
   modalProps,
-  categoryId,
+  title,
   month,
+  showToBeBudgeted = true,
   onSubmit,
 }: CoverModalProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
-    const expenseGroups = addToBeBudgetedGroup(
-      originalCategoryGroups.filter(g => !g.is_income),
-    );
+    let expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+    expenseGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(expenseGroups)
+      : expenseGroups;
     const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
-  }, [originalCategoryGroups]);
+  }, [originalCategoryGroups, showToBeBudgeted]);
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
@@ -67,19 +70,9 @@ export function CoverModal({
   }, [initialMount, onCategoryClick]);
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
-  const category = categories.find(c => c.id === categoryId);
-
-  if (!category) {
-    return null;
-  }
 
   return (
-    <Modal
-      title={category.name}
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-    >
+    <Modal title={title} showHeader focusAfterClose={false} {...modalProps}>
       <View>
         <FieldLabel title="Cover from category:" />
         <TapField value={fromCategory?.name} onClick={onCategoryClick} />
