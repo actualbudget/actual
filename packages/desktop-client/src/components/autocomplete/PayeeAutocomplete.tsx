@@ -36,20 +36,38 @@ import {
   AutocompleteFooter,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
+import { filter } from 'lodash';
 
 type PayeeAutocompleteItem = PayeeEntity;
 
 function getPayeeSuggestions(
   commonPayees: PayeeAutocompleteItem[],
   payees: PayeeAutocompleteItem[],
-  focusTransferPayees: boolean,
-  accounts: AccountEntity[],
-): PayeeAutocompleteItem[] {
+): (PayeeAutocompleteItem & PayeeItemType)[] {
   if (commonPayees?.length > 0) {
-    payees = commonPayees.concat(
-      payees.filter(p => !commonPayees?.find(cp => cp.id === p.id)),
-    );
-  }
+    function isCommonPayee(payee: PayeeEntity, commonPayees: PayeeAutocompleteItem[]): boolean {
+      return commonPayees.find(cp => cp.id === payee.id) !== undefined;
+    }
+
+    const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] = commonPayees
+      .concat(
+        payees.filter(p => !isCommonPayee(p, commonPayees) && p.favorite),
+      )
+      .map(p => { return {...p, itemType: 'common_payee' }});
+
+    const filteredPayees: (PayeeAutocompleteItem & PayeeItemType)[] = payees
+      .filter(p => !isCommonPayee(p, commonPayees) && !p.favorite)
+      .map<PayeeAutocompleteItem & PayeeItemType>(p => { return { ...p, itemType: determineItemType(p, false)}})
+
+    return frequentPayees
+      .sort((a,b) => a.name.localeCompare(b.name))
+      .concat(filteredPayees);
+  } 
+
+  return payees.map(p => { return { ...p, itemType: determineItemType(p, false)}});
+}
+
+function filterActivePayees(payees: PayeeAutocompleteItem[], focusTransferPayees: boolean, accounts: AccountEntity[]) {
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
 
   if (focusTransferPayees && activePayees) {
@@ -76,7 +94,7 @@ function stripNew(value) {
 }
 
 type PayeeListProps = {
-  items: PayeeAutocompleteItem[];
+  items: (PayeeAutocompleteItem & PayeeItemType)[];
   commonPayees: PayeeEntity[];
   getItemProps: (arg: {
     item: PayeeAutocompleteItem;
@@ -97,6 +115,10 @@ type PayeeListProps = {
 };
 
 type ItemTypes = 'account' | 'payee' | 'common_payee';
+interface PayeeItemType {
+  itemType: ItemTypes;
+}
+
 function determineItemType(
   item: PayeeAutocompleteItem,
   isCommon: boolean,
@@ -104,7 +126,7 @@ function determineItemType(
   if (item.transfer_acct) {
     return 'account';
   }
-  if (item.favorite || isCommon) {
+  if (isCommon) {
     return 'common_payee';
   } else {
     return 'payee';
@@ -113,7 +135,6 @@ function determineItemType(
 
 function PayeeList({
   items,
-  commonPayees,
   getItemProps,
   highlightedIndex,
   embedded,
@@ -156,12 +177,11 @@ function PayeeList({
           })}
 
         {items.map((item, idx) => {
-          const isCommon = commonPayees?.includes(item);
-          const itemType = determineItemType(item, isCommon);
+          const itemType = item.itemType;
           let title;
 
           if (itemType === 'common_payee' && lastType !== itemType) {
-            title = 'Frequently Used Payees';
+            title = 'Frequent Payees';
           } else if (itemType === 'payee' && lastType !== itemType) {
             title = 'Payees';
           } else if (itemType === 'account' && lastType !== itemType) {
@@ -252,6 +272,7 @@ export function PayeeAutocomplete({
     payees = retrievedPayees;
   }
 
+
   const cachedAccounts = useAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
@@ -263,15 +284,14 @@ export function PayeeAutocomplete({
   const payeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
     const suggestions = getPayeeSuggestions(
       commonPayees,
-      payees,
-      focusTransferPayees,
-      accounts,
+      payees
     );
+    const filteredSuggestions = filterActivePayees(suggestions, focusTransferPayees, accounts);
 
     if (!hasPayeeInput) {
-      return suggestions;
+      return filteredSuggestions;
     }
-    return [{ id: 'new', favorite: false, name: '' }, ...suggestions];
+    return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
   }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
   const dispatch = useDispatch();
@@ -297,6 +317,7 @@ export function PayeeAutocomplete({
 
   const [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
 
+  console.log(payeeSuggestions.length);
   return (
     <Autocomplete
       key={focusTransferPayees ? 'transfers' : 'all'}
