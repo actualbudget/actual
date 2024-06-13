@@ -5,15 +5,18 @@ import { Item, Section } from '@react-stately/collections';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
 
+import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
 import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 import { ListBox } from './ListBox';
 import { Transaction } from './Transaction';
 
 export function TransactionList({
+  isLoading,
   transactions,
-  isNew,
+  isNewTransaction,
   onSelect,
   scrollProps = {},
   onLoadMore,
@@ -45,6 +48,20 @@ export function TransactionList({
     });
     return sections;
   }, [transactions]);
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <AnimatedLoading width={25} height={25} />
+      </View>
+    );
+  }
 
   return (
     <>
@@ -92,7 +109,7 @@ export function TransactionList({
                   >
                     <Transaction
                       transaction={transaction}
-                      added={isNew(transaction.id)}
+                      added={isNewTransaction(transaction.id)}
                       onSelect={onSelect}
                     />
                   </Item>

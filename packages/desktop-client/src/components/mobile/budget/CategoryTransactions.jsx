@@ -24,6 +24,7 @@ import { TransactionListWithBalances } from '../transactions/TransactionListWith
 export function CategoryTransactions({ category, month }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   const [currentQuery, setCurrentQuery] = useState();
   const [transactions, setTransactions] = useState([]);
 
@@ -42,10 +43,14 @@ export function CategoryTransactions({ category, month }) {
 
   const updateQuery = useCallback(query => {
     paged.current?.unsubscribe();
+    setIsLoading(true);
     paged.current = pagedQuery(
       query.options({ splits: 'inline' }).select('*'),
-      data => setTransactions(data),
-      { pageCount: 10 },
+      data => {
+        setTransactions(data);
+        setIsLoading(false);
+      },
+      { pageCount: 50 },
     );
   }, []);
 
@@ -136,6 +141,7 @@ export function CategoryTransactions({ category, month }) {
       padding={0}
     >
       <TransactionListWithBalances
+        isLoading={isLoading}
         transactions={transactions}
         balance={balance}
         balanceCleared={balanceCleared}
