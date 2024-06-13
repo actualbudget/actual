@@ -237,29 +237,30 @@ export function CategoryAutocomplete({
         });
 
         if (value.length > 0) {
-          const groupItems: CategoryAutocompleteItem[] = categoryGroups
-            ?.filter(
-              group =>
-                group.name
-                  ?.toLowerCase()
-                  .normalize('NFD')
-                  .replace(/\p{Diacritic}/gu, '')
-                  .includes(
-                    value
-                      .toLowerCase()
-                      .normalize('NFD')
-                      .replace(/\p{Diacritic}/gu, ''),
-                  ) ?? false,
-            )
-            ?.map(
-              group =>
-                ({
-                  ...group,
-                  group: { name: 'Groups' },
-                  name: `${group.name} ${group.is_income ? '' : '(Expense)'}`,
-                  is_group: true,
-                }) as CategoryAutocompleteItem,
-            ) || [];
+          const groupItems: CategoryAutocompleteItem[] =
+            categoryGroups
+              ?.filter(
+                group =>
+                  group.name
+                    ?.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/\p{Diacritic}/gu, '')
+                    .includes(
+                      value
+                        .toLowerCase()
+                        .normalize('NFD')
+                        .replace(/\p{Diacritic}/gu, ''),
+                    ) ?? false,
+              )
+              ?.map(
+                group =>
+                  ({
+                    ...group,
+                    group: { name: 'Groups' },
+                    name: `${group.name} ${group.is_income ? '' : '(Expense)'}`,
+                    is_group: true,
+                  }) as CategoryAutocompleteItem,
+              ) || [];
 
           preFilter = preFilter.concat(groupItems);
         }
@@ -267,7 +268,7 @@ export function CategoryAutocomplete({
         return preFilter;
       }}
       suggestions={categorySuggestions}
-      customOnSelect={(item, value) => {
+      customOnSelect={item => {
         const categoryAutocompleteItem = item as CategoryAutocompleteItem;
         if (item?.id === 'clearFilter') {
           setFilteredCategories([]);
@@ -277,13 +278,13 @@ export function CategoryAutocomplete({
             group => group.id === item?.id,
           );
           const newFilteredCategories = [
-            ...selectedGroup?.categories?.map(
+            ...(selectedGroup?.categories?.map(
               category =>
                 ({
                   ...category,
                   group: selectedGroup,
                 }) as CategoryAutocompleteItem,
-            ) || [],
+            ) || []),
           ];
 
           newFilteredCategories.unshift({
