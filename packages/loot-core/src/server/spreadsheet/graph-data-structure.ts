@@ -98,7 +98,7 @@ export function Graph() {
 
   function topologicalSortUntil(name, visited, sorted, level) {
     visited.add(name);
-    if(level > 2500) {
+    if (level > 2500) {
       console.error('Limit of recursions reached while sorting budget: 2500');
       return;
     }
