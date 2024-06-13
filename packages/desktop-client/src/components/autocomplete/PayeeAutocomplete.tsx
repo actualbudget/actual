@@ -13,6 +13,7 @@ import React, {
 import { useDispatch } from 'react-redux';
 
 import { css } from 'glamor';
+import { filter } from 'lodash';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
@@ -36,7 +37,6 @@ import {
   AutocompleteFooter,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
-import { filter } from 'lodash';
 
 type PayeeAutocompleteItem = PayeeEntity;
 
@@ -50,25 +50,37 @@ function getPayeeSuggestions(
     const favoritePayees = payees.filter(p => p.favorite);
     let additionalCommonPayees: PayeeAutocompleteItem[] = [];
     if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
-      additionalCommonPayees = commonPayees.slice(0, MAX_AUTO_SUGGESTIONS - favoritePayees.length);
+      additionalCommonPayees = commonPayees.slice(
+        0,
+        MAX_AUTO_SUGGESTIONS - favoritePayees.length,
+      );
     }
-    const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] = favoritePayees
-      .concat(additionalCommonPayees)
-      .map(p => { return {...p, itemType: 'common_payee' }});
+    const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] =
+      favoritePayees.concat(additionalCommonPayees).map(p => {
+        return { ...p, itemType: 'common_payee' };
+      });
 
     const filteredPayees: (PayeeAutocompleteItem & PayeeItemType)[] = payees
       .filter(p => !frequentPayees.find(fp => fp.id === p.id))
-      .map<PayeeAutocompleteItem & PayeeItemType>(p => { return { ...p, itemType: determineItemType(p, false)}})
+      .map<PayeeAutocompleteItem & PayeeItemType>(p => {
+        return { ...p, itemType: determineItemType(p, false) };
+      });
 
     return frequentPayees
-      .sort((a,b) => a.name.localeCompare(b.name))
+      .sort((a, b) => a.name.localeCompare(b.name))
       .concat(filteredPayees);
-  } 
+  }
 
-  return payees.map(p => { return { ...p, itemType: determineItemType(p, false)}});
+  return payees.map(p => {
+    return { ...p, itemType: determineItemType(p, false) };
+  });
 }
 
-function filterActivePayees(payees: PayeeAutocompleteItem[], focusTransferPayees: boolean, accounts: AccountEntity[]) {
+function filterActivePayees(
+  payees: PayeeAutocompleteItem[],
+  focusTransferPayees: boolean,
+  accounts: AccountEntity[],
+) {
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
 
   if (focusTransferPayees && activePayees) {
@@ -116,9 +128,9 @@ type PayeeListProps = {
 };
 
 type ItemTypes = 'account' | 'payee' | 'common_payee';
-interface PayeeItemType {
+type PayeeItemType = {
   itemType: ItemTypes;
-}
+};
 
 function determineItemType(
   item: PayeeAutocompleteItem,
@@ -273,7 +285,6 @@ export function PayeeAutocomplete({
     payees = retrievedPayees;
   }
 
-
   const cachedAccounts = useAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
@@ -283,11 +294,12 @@ export function PayeeAutocomplete({
   const [rawPayee, setRawPayee] = useState('');
   const hasPayeeInput = !!rawPayee;
   const payeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
-    const suggestions = getPayeeSuggestions(
-      commonPayees,
-      payees
+    const suggestions = getPayeeSuggestions(commonPayees, payees);
+    const filteredSuggestions = filterActivePayees(
+      suggestions,
+      focusTransferPayees,
+      accounts,
     );
-    const filteredSuggestions = filterActivePayees(suggestions, focusTransferPayees, accounts);
 
     if (!hasPayeeInput) {
       return filteredSuggestions;
