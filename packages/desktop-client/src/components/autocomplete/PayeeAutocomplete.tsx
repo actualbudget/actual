@@ -40,23 +40,24 @@ import { filter } from 'lodash';
 
 type PayeeAutocompleteItem = PayeeEntity;
 
+const MAX_AUTO_SUGGESTIONS = 10;
+
 function getPayeeSuggestions(
   commonPayees: PayeeAutocompleteItem[],
   payees: PayeeAutocompleteItem[],
 ): (PayeeAutocompleteItem & PayeeItemType)[] {
   if (commonPayees?.length > 0) {
-    function isCommonPayee(payee: PayeeEntity, commonPayees: PayeeAutocompleteItem[]): boolean {
-      return commonPayees.find(cp => cp.id === payee.id) !== undefined;
+    const favoritePayees = payees.filter(p => p.favorite);
+    let additionalCommonPayees: PayeeAutocompleteItem[] = [];
+    if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
+      additionalCommonPayees = commonPayees.slice(0, MAX_AUTO_SUGGESTIONS - favoritePayees.length);
     }
-
-    const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] = commonPayees
-      .concat(
-        payees.filter(p => !isCommonPayee(p, commonPayees) && p.favorite),
-      )
+    const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] = favoritePayees
+      .concat(additionalCommonPayees)
       .map(p => { return {...p, itemType: 'common_payee' }});
 
     const filteredPayees: (PayeeAutocompleteItem & PayeeItemType)[] = payees
-      .filter(p => !isCommonPayee(p, commonPayees) && !p.favorite)
+      .filter(p => !frequentPayees.find(fp => fp.id === p.id))
       .map<PayeeAutocompleteItem & PayeeItemType>(p => { return { ...p, itemType: determineItemType(p, false)}})
 
     return frequentPayees
