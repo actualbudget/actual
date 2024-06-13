@@ -374,7 +374,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         categoryId: category.id,
         month,
         onSubmit: fromCategoryId => {
-          onBudgetAction(month, 'cover', {
+          onBudgetAction(month, 'cover-overspending', {
             to: category.id,
             from: fromCategoryId,
           });
