@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // Using ES2021 because that’s the newest version where
+    // the latest Node 16.x release supports all of the features
+    "target": "ES2021",
+    "module": "CommonJS",
+    "noEmit": false,
+    "declaration": true,
+    "outDir": "dist",
+    // "declarationDir": "@types",
+    // "paths": {
+    //   "loot-core/src/*": ["./loot-core/*"],
+    //   "loot-core/*": ["./@types/loot-core/*"],
+    // }
+  },
+  "include": ["."],
+  "exclude": ["**/node_modules/*", "dist", "client-build"] // , "@types"
+}
