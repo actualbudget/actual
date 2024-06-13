@@ -31,6 +31,7 @@ import { View } from '../common/View';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
+import { ItemHeader } from './ItemHeader';
 
 type CategoryAutocompleteItem = CategoryEntity & {
   group?: CategoryGroupEntity;
@@ -47,6 +48,9 @@ type CategoryListProps = {
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
+  renderCategoryItemGroupHeader?: (
+    props: ComponentPropsWithoutRef<typeof ItemHeader>,
+  ) => ReactElement<typeof ItemHeader>;
   renderClearFilterButton?: (
     props: ComponentPropsWithoutRef<typeof ClearFilterButton>,
   ) => ReactElement<typeof ClearFilterButton>;
@@ -63,6 +67,7 @@ function CategoryList({
   embedded,
   footer,
   renderSplitTransactionButton = defaultRenderSplitTransactionButton,
+  renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
   renderClearFilterButton = defaultRenderClearFilterButton,
   showHiddenItems,
@@ -106,17 +111,30 @@ function CategoryList({
             });
           }
 
+          const showGroup = item.cat_group !== lastGroup;
           const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
+              {showGroup && item.group?.name && (
+                <Fragment key={item.group.name}>
+                  {renderCategoryItemGroupHeader({
+                    title: groupName,
+                    isGroupHeader: item.is_group,
+                    style: {
+                      ...(showHiddenItems &&
+                        item.group?.hidden && { color: theme.pageTextSubdued }),
+                    },
+                  })}
+                </Fragment>
+              )}
               <Fragment key={item.id}>
                 {renderCategoryItem({
                   ...(getItemProps ? getItemProps({ item }) : null),
                   item,
                   highlighted: highlightedIndex === idx,
                   embedded,
-                  isHeader: item.is_group,
+                  isGroup: item.is_group,
                   style: {
                     ...(showHiddenItems &&
                       item.hidden && { color: theme.pageTextSubdued }),
@@ -142,6 +160,9 @@ type CategoryAutocompleteProps = ComponentProps<
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
+  renderCategoryItemGroupHeader?: (
+    props: ComponentPropsWithoutRef<typeof ItemHeader>,
+  ) => ReactElement<typeof ItemHeader>;
   renderClearFilterButton?: (
     props: ComponentPropsWithoutRef<typeof ClearFilterButton>,
   ) => ReactElement<typeof ClearFilterButton>;
@@ -158,6 +179,7 @@ export function CategoryAutocomplete({
   embedded,
   closeOnBlur,
   renderSplitTransactionButton,
+  renderCategoryItemGroupHeader,
   renderCategoryItem,
   renderClearFilterButton,
   showHiddenCategories,
@@ -173,7 +195,7 @@ export function CategoryAutocomplete({
       (filteredCategories.length > 0 && filteredCategories) ||
       (categoryGroups || defaultCategoryGroups).reduce(
         (list, group) =>
-          list.concat({ ...group, is_group: true }).concat(
+          list.concat(
             (group.categories || [])
               .filter(category => category.cat_group === group.id)
               .map(category => ({
@@ -210,19 +232,25 @@ export function CategoryAutocomplete({
         let preFilter = suggestions.filter(suggestion => {
           return (
             suggestion.id === 'split' ||
-            suggestion.is_group === true ||
             defaultFilterSuggestion(suggestion, value)
           );
         });
 
-        preFilter = preFilter.filter(
-          suggestion =>
-            suggestion.is_group !== true ||
-            (suggestion.is_group === true &&
-              preFilter.findIndex(item => item.cat_group === suggestion.id) >
-                -1),
-        );
+        if(value.length > 0) {
+          const groupItems = categoryGroups
+          .filter(group => group.name?.toLowerCase()
+          .normalize('NFD')
+          .replace(/\p{Diacritic}/gu, '')
+          .includes(
+            value
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/\p{Diacritic}/gu, '')) ?? false)
+          .map(group => ({...group, group: {name: 'Groups'}, name:  `${group.name} ${group.is_income ? '' : '(Expense)'}`,is_group: true} as CategoryEntity));
 
+          preFilter = preFilter.concat(groupItems);
+        }
+        
         return preFilter;
       }}
       suggestions={categorySuggestions}
@@ -231,13 +259,16 @@ export function CategoryAutocomplete({
           setFilteredCategories([]);
           return false;
         } else if (item.is_group) {
+          const selectedGroup = categoryGroups.find(group => group.id === item.id);
           const newFilteredCategories = [
-            ...categoryGroups.find(group => group.id === item.id)?.categories,
+            ...selectedGroup.categories.map(category => ({...category, group: selectedGroup} as CategoryAutocompleteItem)),
           ];
+
           newFilteredCategories.unshift({
             id: 'clearFilter',
             name: '',
-          } as CategoryEntity);
+          } as CategoryAutocompleteItem);
+
           setFilteredCategories(newFilteredCategories);
           return false;
         }
@@ -252,6 +283,7 @@ export function CategoryAutocomplete({
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
           renderSplitTransactionButton={renderSplitTransactionButton}
+          renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
           renderCategoryItem={renderCategoryItem}
           renderClearFilterButton={renderClearFilterButton}
           showHiddenItems={showHiddenCategories}
@@ -310,6 +342,12 @@ function ClearFilterButton({
       Clear Filter
     </View>
   );
+}
+
+function defaultRenderCategoryItemGroupHeader(
+  props: ComponentPropsWithoutRef<typeof ItemHeader>,
+): ReactElement<typeof ItemHeader> {
+  return <ItemHeader {...props} type="category" />;
 }
 
 function defaultRenderClearFilterButton(
@@ -401,7 +439,7 @@ type CategoryItemProps = {
   highlighted?: boolean;
   embedded?: boolean;
   showBalances?: boolean;
-  isHeader?: boolean;
+  isGroup?: boolean;
 };
 
 function CategoryItem({
@@ -411,7 +449,7 @@ function CategoryItem({
   highlighted,
   embedded,
   showBalances,
-  isHeader,
+  isGroup,
   ...props
 }: CategoryItemProps) {
   const { isNarrowWidth } = useResponsive();
@@ -440,16 +478,19 @@ function CategoryItem({
       role="button"
       className={`${className} ${css([
         {
+          fontSize: isGroup ? 11 : 'auto',
+          fontWeight: isGroup ? 500 : 'auto',
+
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
-          color: isHeader
-            ? theme.menuAutoCompleteTextHeader
+          color: isGroup
+            ? theme.noticeTextMenu
             : highlighted
               ? theme.menuAutoCompleteItemTextHover
               : theme.menuAutoCompleteItemText,
           padding: 4,
-          paddingLeft: isHeader ? 9 : 20,
+          paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
           ...narrowStyle,
         },

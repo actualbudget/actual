@@ -8,9 +8,10 @@ type ItemHeaderProps = {
   title: string;
   style?: CSSProperties;
   type?: string;
+  isGroupHeader?: boolean;
 };
 
-export function ItemHeader({ title, style, type, ...props }: ItemHeaderProps) {
+export function ItemHeader({ title, style, type, isGroupHeader, ...props }: ItemHeaderProps) {
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -23,7 +24,10 @@ export function ItemHeader({ title, style, type, ...props }: ItemHeaderProps) {
   return (
     <div
       style={{
-        color: theme.menuAutoCompleteTextHeader,
+        fontSize: isGroupHeader ? 11 : 'auto',
+        fontWeight: isGroupHeader ? 500 : 'auto',
+        opacity: isGroupHeader ? 0.7 : 'auto',
+        color: isGroupHeader ? theme.noticeTextMenu : theme.menuAutoCompleteTextHeader,
         padding: '4px 9px',
         ...narrowStyle,
         ...style,
