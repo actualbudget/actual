@@ -36,6 +36,7 @@ export function SpendingCard() {
     data &&
     data.intervalData[todayDay].lastMonth -
       data.intervalData[todayDay].thisMonth;
+  const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
   return (
     <ReportCard flex="1" to="/reports/spending">
@@ -57,7 +58,7 @@ export function SpendingCard() {
               end={monthUtils.currentMonth()}
             />
           </View>
-          {data && (
+          {data && showLastMonth && (
             <View style={{ textAlign: 'right' }}>
               <Block
                 style={{
@@ -80,8 +81,13 @@ export function SpendingCard() {
             </View>
           )}
         </View>
-
-        {data ? (
+        {!showLastMonth ? (
+          <View style={{ padding: 5 }}>
+            <p style={{ margin: 0, textAlign: 'center' }}>
+              Additional data required to generate graph
+            </p>
+          </View>
+        ) : data ? (
           <SpendingGraph
             style={{ flex: 1 }}
             compact={true}
@@ -89,7 +95,7 @@ export function SpendingCard() {
             mode="lastMonth"
           />
         ) : (
-          <LoadingIndicator />
+          <LoadingIndicator message="Loading report..." />
         )}
       </View>
     </ReportCard>
