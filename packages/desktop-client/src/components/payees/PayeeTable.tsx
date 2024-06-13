@@ -10,7 +10,6 @@ import {
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
-import { useCommonPayees } from '../../hooks/usePayees';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { View } from '../common/View';
 import { Table, type TableNavigator } from '../table';
@@ -40,7 +39,6 @@ export const PayeeTable = forwardRef<
   ) => {
     const [hovered, setHovered] = useState(null);
     const selectedItems = useSelectedItems();
-    const commonPayees = useCommonPayees();
 
     useLayoutEffect(() => {
       const firstSelected = [...selectedItems][0] as string;
@@ -64,11 +62,6 @@ export const PayeeTable = forwardRef<
             return (
               <PayeeTableRow
                 payee={item}
-                isCommon={
-                  commonPayees.findIndex(
-                    (cp: PayeeEntity) => cp.id === item.id,
-                  ) >= 0
-                }
                 ruleCount={ruleCounts.get(item.id) || 0}
                 selected={selectedItems.has(item.id)}
                 editing={editing}

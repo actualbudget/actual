@@ -68,7 +68,6 @@ type EditablePayeeFields = keyof Pick<PayeeEntity, 'name' | 'favorite'>;
 
 type PayeeTableRowProps = {
   payee: PayeeEntity;
-  isCommon: boolean;
   ruleCount: number;
   selected: boolean;
   hovered: boolean;
@@ -89,7 +88,6 @@ type PayeeTableRowProps = {
 export const PayeeTableRow = memo(
   ({
     payee,
-    isCommon,
     ruleCount,
     selected,
     hovered,
@@ -144,25 +142,14 @@ export const PayeeTableRow = memo(
           width={10}
           exposed={!payee.transfer_acct}
           onBlur={() => {}}
-          onUpdate={value => {
-            if (!payee.transfer_acct) {
-              onUpdate(id, 'favorite', Boolean(value) ? 1 : 0);
-            }
-          }}
-          onClick={() => {
-            payee.favorite = !payee.favorite;
-            if (!payee.transfer_acct) {
-              onUpdate(id, 'favorite', payee.favorite ? 1 : 0);
-            }
-          }}
+          onUpdate={value => {}}
+          onClick={() => {}}
         >
           {() => {
             if (payee.favorite) {
               return <SvgBookmark />;
-            } else if (isCommon) {
-              return <SvgStarFull />;
             } else {
-              return <SvgBookmarkOutlineAdd />;
+              return;
             }
           }}
         </CustomCell>
