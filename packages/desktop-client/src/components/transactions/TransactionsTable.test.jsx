@@ -461,14 +461,14 @@ describe('Transactions', () => {
     expect(items[1].textContent).toBe('General 129.87');
     expect(items[1].dataset['highlighted']).toBeDefined();
 
-    // It should not allow filtering on group names
+    // It should allow filtering on group names
     await userEvent.clear(input);
     await userEvent.type(input, 'Usual Expenses');
 
     items = screen
       .getByTestId('autocomplete')
       .querySelectorAll('[data-testid$="category-item"]');
-    expect(items.length).toBe(0);
+    expect(items.length).toBe(1);
   });
 
   test('dropdown selects an item with keyboard', async () => {
