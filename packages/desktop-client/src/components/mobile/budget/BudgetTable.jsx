@@ -1,4 +1,4 @@
-import React, { memo, useRef } from 'react';
+import React, { memo, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { AutoTextSize } from 'auto-text-size';
@@ -328,6 +328,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   onBudgetAction,
   show3Cols,
   showBudgetedCol,
+  scrollToPosition,
 }) {
   const opacity = blank ? 0 : 1;
 
@@ -517,7 +518,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
             binding={spent}
             getStyle={makeAmountGrey}
             type="financial"
-            onClick={onShowActivity}
+            onClick={() => {
+              scrollToPosition();
+              onShowActivity();
+            }}
             formatter={value => (
               <Button
                 type="bare"
@@ -1235,6 +1239,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
   showHiddenCategories,
   collapsed,
   onToggleCollapse,
+  scrollToPosition,
 }) {
   function editable(content) {
     if (!editMode) {
@@ -1347,6 +1352,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
               month={month}
               // onReorder={onReorderCategory}
               onBudgetAction={onBudgetAction}
+              scrollToPosition={scrollToPosition}
             />
           );
         })}
@@ -1458,6 +1464,7 @@ function BudgetGroups({
   showBudgetedCol,
   show3Cols,
   showHiddenCategories,
+  scrollToPosition,
 }) {
   const separateGroups = memoizeOne(groups => {
     return {
@@ -1507,6 +1514,7 @@ function BudgetGroups({
               showHiddenCategories={showHiddenCategories}
               collapsed={collapsedGroupIds.includes(group.id)}
               onToggleCollapse={onToggleCollapse}
+              scrollToPosition={scrollToPosition}
             />
           );
         })}
@@ -1563,6 +1571,28 @@ export function BudgetTable({
   const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
   );
+
+  const scrollToPosition = () => {
+    sessionStorage.setItem(
+      'scrollPosition',
+      document.getElementById('scrollableDiv').scrollTop,
+    );
+    sessionStorage.setItem('scrollPositionSetBySpentColumn', true);
+  };
+
+  useEffect(() => {
+    const savedPosition = parseInt(
+      sessionStorage.getItem('scrollPosition'),
+      10,
+    );
+    const scrollPositionSetBySpentColumn = sessionStorage.getItem(
+      'scrollPositionSetBySpentColumn',
+    );
+    if (savedPosition && scrollPositionSetBySpentColumn) {
+      document.getElementById('scrollableDiv').scrollTop = savedPosition;
+      sessionStorage.removeItem('scrollPositionSetBySpentColumn');
+    }
+  }, []);
 
   function toggleSpentColumn() {
     setShowSpentColumnPref(!showSpentColumn);
@@ -1623,9 +1653,12 @@ export function BudgetTable({
       <PullToRefresh onRefresh={onRefresh}>
         <View
           data-testid="budget-table"
+          id="scrollableDiv"
           style={{
             backgroundColor: theme.pageBackground,
             paddingBottom: MOBILE_NAV_HEIGHT,
+            overflowY: 'auto',
+            height: '100%',
           }}
         >
           <BudgetGroups
@@ -1647,6 +1680,7 @@ export function BudgetTable({
             onReorderCategory={onReorderCategory}
             onReorderGroup={onReorderGroup}
             onBudgetAction={onBudgetAction}
+            scrollToPosition={scrollToPosition}
           />
         </View>
       </PullToRefresh>
