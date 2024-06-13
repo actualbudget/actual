@@ -237,8 +237,8 @@ export function CategoryAutocomplete({
         });
 
         if (value.length > 0) {
-          const groupItems = categoryGroups
-            .filter(
+          const groupItems: CategoryAutocompleteItem[] = categoryGroups
+            ?.filter(
               group =>
                 group.name
                   ?.toLowerCase()
@@ -251,15 +251,15 @@ export function CategoryAutocomplete({
                       .replace(/\p{Diacritic}/gu, ''),
                   ) ?? false,
             )
-            .map(
+            ?.map(
               group =>
                 ({
                   ...group,
                   group: { name: 'Groups' },
                   name: `${group.name} ${group.is_income ? '' : '(Expense)'}`,
                   is_group: true,
-                }) as CategoryEntity,
-            );
+                }) as CategoryAutocompleteItem,
+            ) || [];
 
           preFilter = preFilter.concat(groupItems);
         }
@@ -267,22 +267,23 @@ export function CategoryAutocomplete({
         return preFilter;
       }}
       suggestions={categorySuggestions}
-      customOnSelect={(item: CategoryAutocompleteItem) => {
-        if (item.id === 'clearFilter') {
+      customOnSelect={(item, value) => {
+        const categoryAutocompleteItem = item as CategoryAutocompleteItem;
+        if (item?.id === 'clearFilter') {
           setFilteredCategories([]);
           return false;
-        } else if (item.is_group) {
-          const selectedGroup = categoryGroups.find(
-            group => group.id === item.id,
+        } else if (categoryAutocompleteItem.is_group) {
+          const selectedGroup = categoryGroups?.find(
+            group => group.id === item?.id,
           );
           const newFilteredCategories = [
-            ...selectedGroup.categories.map(
+            ...selectedGroup?.categories?.map(
               category =>
                 ({
                   ...category,
                   group: selectedGroup,
                 }) as CategoryAutocompleteItem,
-            ),
+            ) || [],
           ];
 
           newFilteredCategories.unshift({
