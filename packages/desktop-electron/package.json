@@ -7,11 +7,12 @@
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
-    "build": "yarn typecheck && electron-builder",
-    "typecheck": "tsc --noEmit --p tsconfig.dist.json",
-    "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
+    "build": "yarn build:dist && electron-builder",
+    "build:dist": "rm -rf electron-dist && tsc --p tsconfig.dist.json && yarn copy-assets",
+    "copy-assets": "copyfiles --exclude 'client-build/**/*' **/*.html electron-dist",
+    "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
-  "main": "dist/index.js",
+  "main": "electron-dist/index.js",
   "build": {
     "appId": "com.actualbudget.actual",
     "files": [
@@ -21,7 +22,8 @@
       "!node_modules/@jlongster/sql.js",
       "!node_modules/absurd-sql",
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
-      "dist/index.js"
+      "electron-dist",
+      "client-build"
     ],
     "publish": {
       "provider": "github",
@@ -65,6 +67,8 @@
   "devDependencies": {
     "@electron/notarize": "2.2.0",
     "@electron/rebuild": "3.6.0",
+    "@types/copyfiles": "^2",
+    "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "electron": "30.0.6",
     "electron-builder": "24.13.3",
