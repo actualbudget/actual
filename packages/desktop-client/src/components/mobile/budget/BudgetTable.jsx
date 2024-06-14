@@ -488,7 +488,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 }}
               >
                 <AutoTextSize
-                  key={value}
+                  key={`${value}|${show3Cols}|${showBudgetedCol}`}
                   as={Text}
                   minFontSizePx={6}
                   maxFontSizePx={12}
@@ -531,7 +531,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 }}
               >
                 <AutoTextSize
-                  key={value}
+                  key={`${value}|${show3Cols}|${showBudgetedCol}`}
                   as={Text}
                   minFontSizePx={6}
                   maxFontSizePx={12}
