@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-
 import keyBy from 'lodash/keyBy';
 
 import { runQuery } from 'loot-core/src/client/query-helpers';
@@ -35,6 +34,11 @@ export function createSpendingSpreadsheet({
   setDataCheck,
 }: createSpendingSpreadsheetProps) {
   const [startDate, endDate] = getSpecificRange(3, null, 'Months');
+  const [lastYearStartDate, lastYearEndDate] = getSpecificRange(
+    12,
+    0,
+    'Months',
+  );
   const interval = 'Daily';
 
   return async (
@@ -50,7 +54,7 @@ export function createSpendingSpreadsheet({
       runQuery(
         makeQuery(
           'assets',
-          startDate,
+          lastYearStartDate,
           endDate,
           interval,
           categories.list,
@@ -61,7 +65,7 @@ export function createSpendingSpreadsheet({
       runQuery(
         makeQuery(
           'debts',
-          startDate,
+          lastYearStartDate,
           endDate,
           interval,
           categories.list,
@@ -72,6 +76,9 @@ export function createSpendingSpreadsheet({
     ]);
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
+    intervals.push(
+      ...monthUtils.dayRangeInclusive(lastYearStartDate, lastYearEndDate),
+    );
     const days = [...Array(29).keys()]
       .filter(f => f > 0)
       .map(n => n.toString().padStart(2, '0'));
@@ -84,6 +91,12 @@ export function createSpendingSpreadsheet({
       .map(month => {
         return { month, perMonthAssets: 0, perMonthDebts: 0 };
       });
+
+    months.unshift({
+      month: monthUtils.prevYear(monthUtils.currentMonth()),
+      perMonthAssets: 0,
+      perMonthDebts: 0,
+    });
 
     const intervalData = days.map(day => {
       let averageSum = 0;
@@ -102,13 +115,13 @@ export function createSpendingSpreadsheet({
             day === offsetDay
           ) {
             const intervalAssets = assets
-              .filter(e => !e.categoryIncome)
+              .filter(e => !e.categoryIncome && !e.accountOffBudget)
               .filter(asset => asset.date === intervalItem)
               .reduce((a, v) => (a = a + v.amount), 0);
             perIntervalAssets += intervalAssets;
 
             const intervalDebts = debts
-              .filter(e => !e.categoryIncome)
+              .filter(e => !e.categoryIncome && !e.accountOffBudget)
               .filter(debt => debt.date === intervalItem)
               .reduce((a, v) => (a = a + v.amount), 0);
             perIntervalDebts += intervalDebts;
@@ -126,7 +139,10 @@ export function createSpendingSpreadsheet({
               }
               return null;
             });
-            if (month.month !== monthUtils.currentMonth()) {
+            if (
+              month.month !== monthUtils.currentMonth() &&
+              month.month !== monthUtils.prevYear(monthUtils.currentMonth())
+            ) {
               averageSum += cumulativeAssets + cumulativeDebts;
               monthCount += 1;
             }
@@ -165,8 +181,9 @@ export function createSpendingSpreadsheet({
         months: indexedData,
         day,
         average: integerToAmount(averageSum) / monthCount,
-        thisMonth: dayData[3].cumulative,
-        lastMonth: dayData[2].cumulative,
+        thisMonth: dayData[4].cumulative,
+        lastMonth: dayData[3].cumulative,
+        lastYear: dayData[0].cumulative,
       };
     });
 

@@ -659,7 +659,7 @@ handlers['simplefin-accounts-link'] = async function ({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain,
+    externalAccount.orgDomain ?? externalAccount.orgId,
   );
 
   if (upgradingId) {
