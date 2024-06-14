@@ -81,7 +81,9 @@ export function Graph() {
   function topologicalSort(sourceNodes) {
     const visited = new Set();
     const sorted = [];
-    const iterableTopologicalSort = getPrefs()['flags.iterableTopologicalSort'];
+    const prefs = getPrefs();
+    const iterableTopologicalSort =
+      prefs != null ? prefs['flags.iterableTopologicalSort'] : false;
 
     sourceNodes.forEach(name => {
       if (!visited.has(name)) {
