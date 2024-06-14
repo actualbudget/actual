@@ -1,11 +1,7 @@
-/* eslint-disable import/order */
-// (I have no idea why the imports are like this. Not touching them.)
-const isDev = require('electron-is-dev');
-const fs = require('fs');
+import fs from 'fs';
+import path from 'path';
 
-require('module').globalPaths.push(__dirname + '/..');
-
-const {
+import {
   app,
   ipcMain,
   BrowserWindow,
@@ -14,8 +10,17 @@ const {
   shell,
   protocol,
   utilityProcess,
-} = require('electron');
-const promiseRetry = require('promise-retry');
+} from 'electron';
+import isDev from 'electron-is-dev';
+import promiseRetry from 'promise-retry';
+
+import about from './about';
+import getMenu from './menu';
+import updater from './updater';
+
+require('module').globalPaths.push(__dirname + '/..');
+
+console.info('dirname entry', __dirname);
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -25,13 +30,7 @@ protocol.registerSchemesAsPrivileged([
 
 global.fetch = require('node-fetch');
 
-const about = require('./about');
-const getMenu = require('./menu');
-const updater = require('./updater');
-
 require('./security');
-
-const path = require('path');
 
 require('./setRequireHook');
 
@@ -113,7 +112,7 @@ async function createWindow() {
       nodeIntegrationInWorker: false,
       nodeIntegrationInSubFrames: false,
       contextIsolation: true,
-      enableRemoteModule: false,
+      // enableRemoteModule: false,
       preload: __dirname + '/preload.js',
     },
   });
@@ -132,6 +131,7 @@ async function createWindow() {
       promiseRetry(retry => win.loadURL('http://localhost:3001/').catch(retry));
     }, 3000);
   } else {
+    console.info('loading url app://actual/', 'dirname', __dirname);
     win.loadURL(`app://actual/`);
   }
 
@@ -187,7 +187,7 @@ function isExternalUrl(url) {
   return !url.includes('localhost:') && !url.includes('app://');
 }
 
-function updateMenu(budgetId) {
+function updateMenu(budgetId?) {
   const isBudgetOpen = !!budgetId;
   const menu = getMenu(isDev, createWindow);
   const file = menu.items.filter(item => item.label === 'File')[0];
@@ -196,7 +196,9 @@ function updateMenu(budgetId) {
     .filter(item => item.label === 'Load Backup...')
     .forEach(item => {
       item.enabled = isBudgetOpen;
-      item.budgetId = budgetId;
+      // remove eslint disable and figure out how to pass this if it's even right to do so
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (item as any).budgetId = budgetId;
     });
 
   const tools = menu.items.filter(item => item.label === 'Tools')[0];
@@ -312,7 +314,7 @@ ipcMain.handle(
   (event, { title, defaultPath, fileContents }) => {
     const fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       if (fileLocation) {
         fs.writeFile(fileLocation, fileContents, error => {
           return reject(error);
