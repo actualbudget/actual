@@ -20,8 +20,6 @@ import updater from './updater';
 
 require('module').globalPaths.push(__dirname + '/..');
 
-console.info('dirname entry', __dirname);
-
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
 protocol.registerSchemesAsPrivileged([
@@ -131,7 +129,6 @@ async function createWindow() {
       promiseRetry(retry => win.loadURL('http://localhost:3001/').catch(retry));
     }, 3000);
   } else {
-    console.info('loading url app://actual/', 'dirname', __dirname);
     win.loadURL(`app://actual/`);
   }
 
