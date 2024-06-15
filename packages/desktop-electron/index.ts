@@ -10,6 +10,7 @@ import {
   shell,
   protocol,
   utilityProcess,
+  net,
 } from 'electron';
 import isDev from 'electron-is-dev';
 import promiseRetry from 'promise-retry';
@@ -224,33 +225,49 @@ app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
-  protocol.registerFileProtocol('app', (request, callback) => {
+  console.info('ready, trying to load file protocol app');
+  protocol.handle('app', (request) => {
     if (request.method !== 'GET') {
-      callback({ error: -322 }); // METHOD_NOT_SUPPORTED from chromium/src/net/base/net_error_list.h
+      console.info('error', -322);
+
+      // callback({ error: -322 }); // METHOD_NOT_SUPPORTED from chromium/src/net/base/net_error_list.h
       return null;
     }
 
     const parsedUrl = new URL(request.url);
     if (parsedUrl.protocol !== 'app:') {
-      callback({ error: -302 }); // UNKNOWN_URL_SCHEME
+      console.info('error', -302);
+      // callback({ error: -302 }); // UNKNOWN_URL_SCHEME
       return;
     }
 
     if (parsedUrl.host !== 'actual') {
-      callback({ error: -105 }); // NAME_NOT_RESOLVED
+      console.info('error', -105);
+      // callback({ error: -105 }); // NAME_NOT_RESOLVED
       return;
     }
 
     const pathname = parsedUrl.pathname;
+    console.info('pathname', pathname);
 
     if (pathname.startsWith('/static')) {
-      callback({
-        path: path.normalize(`${__dirname}/client-build${pathname}`),
-      });
+      console.info('static', 'file:///' + path.normalize(`${__dirname}/../client-build${pathname}`));
+      return net.fetch(
+        'file:///' + path.normalize(`${__dirname}/../client-build${pathname}`),
+      );
+
+      // callback({
+      //   path: path.normalize(`${__dirname}/client-build${pathname}`),
+      // });
     } else {
-      callback({
-        path: path.normalize(`${__dirname}/client-build/index.html`),
-      });
+      console.info('else', 'file:///' + path.normalize(`${__dirname}/../client-build/index.html`));
+      return net.fetch(
+        'file:///' + path.normalize(`${__dirname}/../client-build/index.html`),
+      );
+
+      // callback({
+      //   path: path.normalize(`${__dirname}/client-build/index.html`),
+      // });
     }
   });
 
