@@ -40,7 +40,7 @@ import { ItemHeader } from './ItemHeader';
 
 type PayeeAutocompleteItem = PayeeEntity;
 
-const MAX_AUTO_SUGGESTIONS = 10;
+const MAX_AUTO_SUGGESTIONS = 5;
 
 function getPayeeSuggestions(
   commonPayees: PayeeAutocompleteItem[],
@@ -50,13 +50,16 @@ function getPayeeSuggestions(
     const favoritePayees = payees.filter(p => p.favorite);
     let additionalCommonPayees: PayeeAutocompleteItem[] = [];
     if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
-      additionalCommonPayees = commonPayees.slice(
+      additionalCommonPayees = commonPayees
+      .filter(p => !p.favorite)
+      .slice(
         0,
         MAX_AUTO_SUGGESTIONS - favoritePayees.length,
       );
     }
     const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] =
-      favoritePayees.concat(additionalCommonPayees).map(p => {
+      favoritePayees.concat(additionalCommonPayees)
+      .map(p => {
         return { ...p, itemType: 'common_payee' };
       });
 
@@ -304,6 +307,9 @@ export function PayeeAutocomplete({
     if (!hasPayeeInput) {
       return filteredSuggestions;
     }
+    filteredSuggestions.forEach(s => {
+      console.log(s.name + " " + s.id)
+    })
     return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
   }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
@@ -330,7 +336,6 @@ export function PayeeAutocomplete({
 
   const [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
 
-  console.log(payeeSuggestions.length);
   return (
     <Autocomplete
       key={focusTransferPayees ? 'transfers' : 'all'}
