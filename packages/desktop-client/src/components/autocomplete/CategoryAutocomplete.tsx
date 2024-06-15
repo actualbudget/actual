@@ -55,7 +55,6 @@ type CategoryListProps = {
   ) => ReactElement<typeof CategoryItem>;
   showHiddenItems?: boolean;
   showBalances?: boolean;
-  isChanged?: boolean;
 };
 function CategoryList({
   items,
@@ -211,8 +210,7 @@ export function CategoryAutocomplete({
         });
       }}
       suggestions={categorySuggestions}
-      renderItems={(items, getItemProps, highlightedIndex, ...args) => {
-        const [, isChanged] = args;
+      renderItems={(items, getItemProps, highlightedIndex) => {
         return (
           <CategoryList
             items={items}
@@ -224,7 +222,6 @@ export function CategoryAutocomplete({
             renderCategoryItem={renderCategoryItem}
             showHiddenItems={showHiddenCategories}
             showBalances={showBalances}
-            isChanged={isChanged}
           />
         );
       }}

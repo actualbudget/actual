@@ -37,7 +37,6 @@ type CommonAutocompleteProps<T extends Item> = {
     getItemProps: (arg: { item: T }) => ComponentProps<typeof View>,
     idx: number,
     value?: string,
-    isChanged?: boolean,
   ) => ReactNode;
   itemToString?: (item: T) => string;
   shouldSaveFromKey?: (e: KeyboardEvent) => boolean;
@@ -592,7 +591,6 @@ function SingleAutocomplete<T extends Item>({
                   getItemProps,
                   highlightedIndex,
                   inputValue,
-                  isChanged,
                 )}
               </View>
             ) : (
@@ -617,7 +615,6 @@ function SingleAutocomplete<T extends Item>({
                   getItemProps,
                   highlightedIndex,
                   inputValue,
-                  isChanged,
                 )}
               </Popover>
             ))}
