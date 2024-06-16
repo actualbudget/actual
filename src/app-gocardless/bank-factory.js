@@ -8,6 +8,7 @@ import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
 import MbankRetailBrexplpw from './banks/mbank-retail-brexplpw.js';
+import NationwideNaiaGB21 from './banks/nationwide-naiagb21.js';
 import NorwegianXxNorwnok1 from './banks/norwegian-xx-norwnok1.js';
 import SEBKortBankAB from './banks/seb-kort-bank-ab.js';
 import SEBPrivat from './banks/seb-privat.js';
@@ -27,6 +28,7 @@ export const banks = [
   IngIngddeff,
   IngPlIngbplpw,
   MbankRetailBrexplpw,
+  NationwideNaiaGB21,
   NorwegianXxNorwnok1,
   SEBKortBankAB,
   SEBPrivat,
