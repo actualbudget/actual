@@ -195,7 +195,6 @@ function updateMenu(budgetId?: string) {
     .filter(item => item.label === 'Load Backup...')
     .forEach(item => {
       item.enabled = isBudgetOpen;
-      // remove eslint disable and figure out how to pass this if it's even right to do so
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (item as any).budgetId = budgetId;
     });
