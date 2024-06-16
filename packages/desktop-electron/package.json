@@ -5,7 +5,7 @@
   "description": "A simple and powerful personal finance system",
   "version": "24.6.0",
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist && rm -rf build",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
     "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-html",
