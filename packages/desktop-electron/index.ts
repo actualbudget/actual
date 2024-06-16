@@ -248,11 +248,11 @@ app.on('ready', async () => {
 
     if (pathname.startsWith('/static')) {
       callback({
-        path: path.normalize(`${__dirname}/client-build${pathname}`),
+        path: path.normalize(`${__dirname}/../client-build${pathname}`),
       });
     } else {
       callback({
-        path: path.normalize(`${__dirname}/client-build/index.html`),
+        path: path.normalize(`${__dirname}/../client-build/index.html`),
       });
     }
   });
