@@ -111,7 +111,6 @@ async function createWindow() {
       nodeIntegrationInWorker: false,
       nodeIntegrationInSubFrames: false,
       contextIsolation: true,
-      // enableRemoteModule: false,
       preload: __dirname + '/preload.js',
     },
   });
