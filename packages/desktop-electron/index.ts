@@ -10,7 +10,7 @@ import {
   shell,
   protocol,
   utilityProcess,
-  net,
+  UtilityProcess,
 } from 'electron';
 import isDev from 'electron-is-dev';
 import promiseRetry from 'promise-retry';
@@ -46,10 +46,10 @@ const WindowState = require('./window-state.js');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let clientWin;
-let serverProcess;
+let clientWin: BrowserWindow | null;
+let serverProcess: UtilityProcess | null;
 
-updater.onEvent((type, data) => {
+updater.onEvent((type: string, data) => {
   // Notify both the app and the about window
   if (clientWin) {
     clientWin.webContents.send(type, data);
@@ -146,9 +146,11 @@ async function createWindow() {
   });
 
   win.on('focus', async () => {
-    const url = clientWin.webContents.getURL();
-    if (url.includes('app://') || url.includes('localhost:')) {
-      clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
+    if (clientWin) {
+      const url = clientWin.webContents.getURL();
+      if (url.includes('app://') || url.includes('localhost:')) {
+        clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
+      }
     }
   });
 
@@ -181,15 +183,15 @@ async function createWindow() {
   clientWin = win;
 }
 
-function isExternalUrl(url) {
+function isExternalUrl(url: string) {
   return !url.includes('localhost:') && !url.includes('app://');
 }
 
-function updateMenu(budgetId?) {
+function updateMenu(budgetId?: string) {
   const isBudgetOpen = !!budgetId;
   const menu = getMenu(isDev, createWindow);
   const file = menu.items.filter(item => item.label === 'File')[0];
-  const fileItems = file.submenu.items;
+  const fileItems = file.submenu?.items || [];
   fileItems
     .filter(item => item.label === 'Load Backup...')
     .forEach(item => {
@@ -200,12 +202,12 @@ function updateMenu(budgetId?) {
     });
 
   const tools = menu.items.filter(item => item.label === 'Tools')[0];
-  tools.submenu.items.forEach(item => {
+  tools.submenu?.items.forEach(item => {
     item.enabled = isBudgetOpen;
   });
 
   const edit = menu.items.filter(item => item.label === 'Edit')[0];
-  const editItems = edit.submenu.items;
+  const editItems = edit.submenu?.items || [];
   editItems
     .filter(item => item.label === 'Undo' || item.label === 'Redo')
     .map(item => (item.enabled = isBudgetOpen));
@@ -344,8 +346,10 @@ ipcMain.on('screenshot', () => {
     const width = 1100;
 
     // This is for the main screenshot inside the frame
-    clientWin.setSize(width, Math.floor(width * (427 / 623)));
-    // clientWin.setSize(width, Math.floor(width * (495 / 700)));
+    if (clientWin) {
+      clientWin.setSize(width, Math.floor(width * (427 / 623)));
+      // clientWin.setSize(width, Math.floor(width * (495 / 700)));
+    }
   }
 });
 
@@ -372,8 +376,9 @@ ipcMain.on('update-menu', (event, budgetId) => {
 
 ipcMain.on('set-theme', theme => {
   const obj = { theme };
-
-  clientWin.webContents.executeJavaScript(
-    `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${obj})`,
-  );
+  if (clientWin) {
+    clientWin.webContents.executeJavaScript(
+      `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${obj})`,
+    );
+  }
 });
