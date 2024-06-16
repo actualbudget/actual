@@ -10,5 +10,5 @@
     "outDir": "build",
   },
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "client-build", "build"]
+  "exclude": ["**/node_modules/*", "client-build"]
 }
