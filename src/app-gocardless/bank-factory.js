@@ -15,6 +15,7 @@ import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
 import SpkMarburgBiedenkopfHeladef1mar from './banks/spk-marburg-biedenkopf-heladef1mar.js';
 import SpkKarlsruhekarsde66 from './banks/spk-karlsruhe-karsde66.js';
+import VirginNrnbgb22 from './banks/virgin_nrnbgb22.js';
 
 export const banks = [
   AbancaCaglesmm,
@@ -33,6 +34,7 @@ export const banks = [
   SparNordSpNoDK22,
   SpkMarburgBiedenkopfHeladef1mar,
   SpkKarlsruhekarsde66,
+  VirginNrnbgb22,
 ];
 
 export default (institutionId) =>
