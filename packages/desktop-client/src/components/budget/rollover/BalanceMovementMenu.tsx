@@ -60,7 +60,7 @@ export function BalanceMovementMenu({
         <CoverMenu
           onClose={onClose}
           onSubmit={fromCategoryId => {
-            onBudgetAction(month, 'cover', {
+            onBudgetAction(month, 'cover-overspending', {
               to: categoryId,
               from: fromCategoryId,
             });

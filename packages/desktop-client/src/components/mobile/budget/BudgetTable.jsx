@@ -373,7 +373,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         categoryId: category.id,
         month,
         onSubmit: fromCategoryId => {
-          onBudgetAction(month, 'cover', {
+          onBudgetAction(month, 'cover-overspending', {
             to: category.id,
             from: fromCategoryId,
           });
@@ -487,7 +487,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 }}
               >
                 <AutoTextSize
-                  key={value}
+                  key={`${value}|${show3Cols}|${showBudgetedCol}`}
                   as={Text}
                   minFontSizePx={6}
                   maxFontSizePx={12}
@@ -527,7 +527,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 }}
               >
                 <AutoTextSize
-                  key={value}
+                  key={`${value}|${show3Cols}|${showBudgetedCol}`}
                   as={Text}
                   minFontSizePx={6}
                   maxFontSizePx={12}
