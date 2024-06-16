@@ -346,7 +346,6 @@ ipcMain.on('screenshot', () => {
     // This is for the main screenshot inside the frame
     if (clientWin) {
       clientWin.setSize(width, Math.floor(width * (427 / 623)));
-      // clientWin.setSize(width, Math.floor(width * (495 / 700)));
     }
   }
 });
