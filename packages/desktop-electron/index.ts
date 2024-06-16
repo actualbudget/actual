@@ -49,7 +49,7 @@ const WindowState = require('./window-state.js');
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 
-updater.onEvent((type: string, data) => {
+updater.onEvent((type: string, data: Record<string, string> | string) => {
   // Notify both the app and the about window
   if (clientWin) {
     clientWin.webContents.send(type, data);
