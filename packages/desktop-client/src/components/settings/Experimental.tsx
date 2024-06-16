@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from 'react';
 
-import type { FeatureFlag } from 'loot-core/src/types/prefs';
+import type { LocalFeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -13,7 +13,7 @@ import { Checkbox } from '../forms';
 import { Setting } from './UI';
 
 type FeatureToggleProps = {
-  flag: FeatureFlag;
+  flag: LocalFeatureFlag;
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;

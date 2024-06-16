@@ -1,11 +1,14 @@
 import { type numberFormats } from '../shared/util';
 
-export type FeatureFlag =
+export type LocalFeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'customReports'
   | 'spendingReport'
   | 'simpleFinSync';
+export type GlobalOnlyFeatureFlag = 'multiUser';
+
+export type FeatureFlag = LocalFeatureFlag | GlobalOnlyFeatureFlag;
 
 export type LocalPrefs = Partial<
   {
@@ -54,15 +57,18 @@ export type LocalPrefs = Partial<
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
     'mobile.showSpentColumn': boolean;
-  } & Record<`flags.${FeatureFlag}`, boolean>
+  } & Record<`flags.${LocalFeatureFlag}`, boolean>
 >;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
-export type GlobalPrefs = Partial<{
-  floatingSidebar: boolean;
-  maxMonths: number;
-  autoUpdate: boolean;
-  keyId?: string;
-  theme: Theme;
-  documentDir: string; // Electron only
-}>;
+export type GlobalPrefs = Partial<
+  {
+    floatingSidebar: boolean;
+    maxMonths: number;
+    autoUpdate: boolean;
+    keyId?: string;
+    theme: Theme;
+    documentDir: string; // Electron only
+  } & Record<`flags.${LocalFeatureFlag}`, boolean> &
+    Record<`flags.${GlobalOnlyFeatureFlag}`, boolean>
+>;
