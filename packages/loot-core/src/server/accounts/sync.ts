@@ -12,6 +12,7 @@ import { hasFieldsChanged, amountToInteger } from '../../shared/util';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { post } from '../post';
+import { createSchedule } from '../schedules/app';
 import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
 
@@ -19,7 +20,6 @@ import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
-import { createSchedule } from '../schedules/app';
 
 function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
@@ -619,26 +619,35 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export async function createScheduleForTransaction(fromTrans, detectInstallments, updateDetectedInstallmentDate, ignoreAlreadyDetectedInstallments) {
-  const trans = await db.first(
-    'SELECT * FROM v_transactions WHERE id = ?',
-    [fromTrans],
-  );
+export async function createScheduleForTransaction(
+  fromTrans,
+  detectInstallments,
+  updateDetectedInstallmentDate,
+  ignoreAlreadyDetectedInstallments,
+) {
+  const trans = await db.first('SELECT * FROM v_transactions WHERE id = ?', [
+    fromTrans,
+  ]);
 
-  let dateValue = db.fromDateRepr(trans.date);
-  if(detectInstallments && dateValue !== null && dateValue !== undefined) {
-    var matches = trans.notes?.match(/\((\d{2})\/(\d{2})\)/);
+  const dateValue = db.fromDateRepr(trans.date);
+  if (detectInstallments && dateValue !== null && dateValue !== undefined) {
+    const matches = trans.notes?.match(/\((\d{2})\/(\d{2})\)/);
 
-    if(matches) {
+    if (matches) {
       const installmentParcel = parseInt(matches[1]);
       const installmentParcelTotal = parseInt(matches[2]);
 
       let beginOfInstallment = dateValue;
-      if(updateDetectedInstallmentDate && installmentParcel > 1) {
-        beginOfInstallment = dateFns.format(dateFns.addMonths(monthUtils._parse(dateValue), 1 - installmentParcel),'yyyy-MM-dd')
-      } 
-      const scheduleName = `${trans.notes.replace(matches[0], "").trim()} (at ${beginOfInstallment})`
-
+      if (updateDetectedInstallmentDate && installmentParcel > 1) {
+        beginOfInstallment = dateFns.format(
+          dateFns.addMonths(
+            monthUtils._parse(dateValue),
+            1 - installmentParcel,
+          ),
+          'yyyy-MM-dd',
+        );
+      }
+      const scheduleName = `${trans.notes.replace(matches[0], '').trim()} (at ${beginOfInstallment})`;
 
       const scheduleFromDb = await db.first(
         'SELECT * FROM schedules WHERE name = ? AND tombstone = 0',
@@ -647,7 +656,7 @@ export async function createScheduleForTransaction(fromTrans, detectInstallments
 
       let scheduleId = null;
 
-      if(scheduleFromDb === null || ignoreAlreadyDetectedInstallments) {
+      if (scheduleFromDb === null || ignoreAlreadyDetectedInstallments) {
         const date = {
           start: dateValue,
           interval: 1,
@@ -656,30 +665,37 @@ export async function createScheduleForTransaction(fromTrans, detectInstallments
           skipWeekend: false,
           weekendSolveMode: 'after',
           endMode: 'after_n_occurrences',
-          endOccurrences: (installmentParcelTotal - installmentParcel) + 1,
+          endOccurrences: installmentParcelTotal - installmentParcel + 1,
           endDate: monthUtils.currentDay(),
-          occurrences: Array((installmentParcelTotal - installmentParcel) + 1).fill(dateValue).map((value, idx) => dateFns.format(dateFns.addMonths(monthUtils._parse(value), idx),'yyyy-MM-dd'))
+          occurrences: Array(installmentParcelTotal - installmentParcel + 1)
+            .fill(dateValue)
+            .map((value, idx) =>
+              dateFns.format(
+                dateFns.addMonths(monthUtils._parse(value), idx),
+                'yyyy-MM-dd',
+              ),
+            ),
         };
-        
+
         const schedule = {
-            posts_transaction: false,
-            _conditions: [{ op: 'isapprox', field: 'date', value: dateValue }],
-            _actions: [],
-            _account: trans.account,
-            _amount: trans.amount,
-            _amountOp: 'is',
-            name: scheduleName,
-            _payee: trans.payee ? trans.payee : '',
-            _date: {
-              ...date,
-              frequency: 'monthly',
-              start: dateValue,
-              patterns: [],
-            },
-          };
-          
+          posts_transaction: false,
+          _conditions: [{ op: 'isapprox', field: 'date', value: dateValue }],
+          _actions: [],
+          _account: trans.account,
+          _amount: trans.amount,
+          _amountOp: 'is',
+          name: scheduleName,
+          _payee: trans.payee ? trans.payee : '',
+          _date: {
+            ...date,
+            frequency: 'monthly',
+            start: dateValue,
+            patterns: [],
+          },
+        };
+
         const state = {
-          schedule: schedule,
+          schedule,
           isCustom: false,
           fields: {
             payee: schedule._payee,
@@ -690,36 +706,38 @@ export async function createScheduleForTransaction(fromTrans, detectInstallments
             date: schedule._date,
             posts_transaction: schedule.posts_transaction,
             name: schedule.name,
-          }
+          },
         };
-  
-        const { error, conditions } = updateScheduleConditions(
+
+        const { conditions } = updateScheduleConditions(
           state.schedule,
           state.fields,
         );
-  
-        scheduleId = await createSchedule(
-          {
-            schedule: {
-              id: null,
-              posts_transaction: state.fields.posts_transaction,
-              name: state.fields.name,
-            },
-            conditions,
+
+        scheduleId = await createSchedule({
+          schedule: {
+            id: null,
+            posts_transaction: state.fields.posts_transaction,
+            name: state.fields.name,
           },
-        );
+          conditions,
+        });
       } else {
         scheduleId = scheduleFromDb.id;
       }
-      
-      await db.updateTransaction({...trans, date: monthUtils._parse(dateValue), schedule: scheduleId});
+
+      await db.updateTransaction({
+        ...trans,
+        date: monthUtils._parse(dateValue),
+        schedule: scheduleId,
+      });
     }
   }
 
   //query from db the inserted transaction:
   // action.transactions.sort(a => {
   //   return transaction.id === a.id ? -1 : 1;
-  // });      
+  // });
 }
 
 // This is similar to `reconcileTransactions` except much simpler: it

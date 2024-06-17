@@ -413,10 +413,16 @@ handlers['api/transactions-import'] = withMutation(async function ({
   transactions,
   detectInstallments,
   updateDetectInstallmentDate,
-  ignoreAlreadyDetectedInstallments
+  ignoreAlreadyDetectedInstallments,
 }) {
   checkFileOpen();
-  return handlers['transactions-import']({ accountId, transactions, detectInstallments, updateDetectInstallmentDate, ignoreAlreadyDetectedInstallments });
+  return handlers['transactions-import']({
+    accountId,
+    transactions,
+    detectInstallments,
+    updateDetectInstallmentDate,
+    ignoreAlreadyDetectedInstallments,
+  });
 });
 
 handlers['api/transactions-add'] = withMutation(async function ({

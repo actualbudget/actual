@@ -343,9 +343,6 @@ export async function findSchedules() {
     );
 
     if (latestTrans) {
-      debugger;
-      const query = db.runQuery("SELECT * FROM v_transactions WHERE account = ? AND schedule IS NULL AND notes REGEXP '\((\d{2})\/(\d{2})\)'", [account.id])
-
       const latestDate = fromDateRepr(latestTrans.date);
       allSchedules = allSchedules.concat(
         await weekly(latestDate, account.id),
