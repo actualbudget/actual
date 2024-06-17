@@ -1124,6 +1124,9 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 handlers['transactions-import'] = mutator(function ({
   accountId,
   transactions,
+  detectInstallments,
+  updateDetectInstallmentDate,
+  ignoreAlreadyDetectedInstallments,
 }) {
   return withUndo(async () => {
     if (typeof accountId !== 'string') {
@@ -1131,7 +1134,23 @@ handlers['transactions-import'] = mutator(function ({
     }
 
     try {
-      return await bankSync.reconcileTransactions(accountId, transactions);
+      const result = await bankSync.reconcileTransactions(
+        accountId,
+        transactions,
+      );
+
+      await Promise.all(
+        result.added?.map(async transaction => {
+          await bankSync.createScheduleForTransaction(
+            transaction,
+            detectInstallments,
+            updateDetectInstallmentDate,
+            ignoreAlreadyDetectedInstallments,
+          );
+        }),
+      );
+
+      return result;
     } catch (err) {
       if (err instanceof TransactionError) {
         return { errors: [{ message: err.message }], added: [], updated: [] };
