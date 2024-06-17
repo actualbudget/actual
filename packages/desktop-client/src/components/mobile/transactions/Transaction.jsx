@@ -6,6 +6,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccount } from '../../../hooks/useAccount';
 import { useCategories } from '../../../hooks/useCategories';
+import { useLongPress } from '../../../hooks/useLongPress';
 import { usePayee } from '../../../hooks/usePayee';
 import { SvgSplit } from '../../../icons/v0';
 import {
@@ -46,8 +47,10 @@ ListItem.displayName = 'ListItem';
 
 export const Transaction = memo(function Transaction({
   transaction,
-  added,
-  onSelect,
+  isAdded,
+  isSelected,
+  onPress,
+  onLongPress,
   style,
 }) {
   const { list: categories } = useCategories();
@@ -68,6 +71,10 @@ export const Transaction = memo(function Transaction({
   const payee = usePayee(payeeId);
   const account = useAccount(accountId);
   const transferAcct = useAccount(payee?.transfer_acct);
+
+  const longPressEvents = useLongPress(() => {
+    onLongPress(transaction);
+  });
 
   const isPreview = isPreviewId(id);
   let amount = originalAmount;
@@ -101,11 +108,16 @@ export const Transaction = memo(function Transaction({
   return (
     <Button
       onPress={() => {
-        onSelect(transaction);
+        onPress(transaction);
       }}
+      {...longPressEvents}
       style={{
         backgroundColor: theme.tableBackground,
         border: 'none',
+        ...(isSelected && {
+          borderLeft: `4px solid ${theme.pillBorderSelected}`,
+        }),
+        userSelect: 'none',
         width: '100%',
         height: 60,
         ...(isPreview && {
@@ -136,7 +148,7 @@ export const Transaction = memo(function Transaction({
                 ...styles.text,
                 ...textStyle,
                 fontSize: 14,
-                fontWeight: added ? '600' : '400',
+                fontWeight: isAdded ? '600' : '400',
                 ...(prettyDescription === '' && {
                   color: theme.tableTextLight,
                   fontStyle: 'italic',

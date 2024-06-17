@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { Item, Section } from '@react-stately/collections';
 
@@ -48,6 +48,20 @@ export function TransactionList({
     });
     return sections;
   }, [transactions]);
+
+  const [selectedTransactions, setSelectedTransaction] = useState([]);
+
+  const onTransactionPress = (transaction, isLongPress = false) => {
+    if (isLongPress || selectedTransactions.length > 0) {
+      setSelectedTransaction(prev =>
+        prev.includes(transaction.id)
+          ? prev.filter(id => id !== transaction.id)
+          : [...prev, transaction.id],
+      );
+    } else {
+      onSelect(transaction);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -109,8 +123,10 @@ export function TransactionList({
                   >
                     <Transaction
                       transaction={transaction}
-                      added={isNewTransaction(transaction.id)}
-                      onSelect={onSelect}
+                      isAdded={isNewTransaction(transaction.id)}
+                      isSelected={selectedTransactions.includes(transaction.id)}
+                      onPress={trans => onTransactionPress(trans)}
+                      onLongPress={trans => onTransactionPress(trans, true)}
                     />
                   </Item>
                 );
