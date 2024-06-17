@@ -832,13 +832,17 @@ const Transaction = memo(function Transaction(props) {
         ...(_unmatched && { opacity: 0.5 }),
       }}
     >
-      {splitError && (
+      {splitError && triggerRef?.current?.parentNode.parentNode && (
         <Popover
           triggerRef={triggerRef}
           isOpen
           isNonModal
           style={{ width: 375, padding: 5 }}
-          shouldUpdatePosition
+          shouldFlip={false}
+          placement="bottom end"
+          // shouldUpdatePosition
+          // TODO: this is a crappy implementation.. make it better
+          UNSTABLE_portalContainer={triggerRef?.current?.parentNode.parentNode}
         >
           {splitError}
         </Popover>
