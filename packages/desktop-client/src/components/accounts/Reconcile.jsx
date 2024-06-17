@@ -12,7 +12,6 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-import { Tooltip } from '../tooltips';
 
 export function ReconcilingMessage({
   balanceQuery,
@@ -95,7 +94,7 @@ export function ReconcilingMessage({
   );
 }
 
-export function ReconcileTooltip({ account, onReconcile, onClose }) {
+export function ReconcileMenu({ account, onReconcile, onClose }) {
   const balanceQuery = queries.accountBalance(account);
   const clearedBalance = useSheetValue({
     name: balanceQuery.name + '-cleared',
@@ -117,24 +116,22 @@ export function ReconcileTooltip({ account, onReconcile, onClose }) {
   }
 
   return (
-    <Tooltip position="bottom-right" width={275} onClose={onClose}>
-      <View style={{ padding: '5px 8px' }}>
-        <Text>
-          Enter the current balance of your bank account that you want to
-          reconcile with:
-        </Text>
-        <form onSubmit={onSubmit}>
-          {clearedBalance != null && (
-            <InitialFocus>
-              <Input
-                defaultValue={format(clearedBalance, 'financial')}
-                style={{ margin: '7px 0' }}
-              />
-            </InitialFocus>
-          )}
-          <Button type="primary">Reconcile</Button>
-        </form>
-      </View>
-    </Tooltip>
+    <View style={{ padding: '5px 8px' }}>
+      <Text>
+        Enter the current balance of your bank account that you want to
+        reconcile with:
+      </Text>
+      <form onSubmit={onSubmit}>
+        {clearedBalance != null && (
+          <InitialFocus>
+            <Input
+              defaultValue={format(clearedBalance, 'financial')}
+              style={{ margin: '7px 0' }}
+            />
+          </InitialFocus>
+        )}
+        <Button type="primary">Reconcile</Button>
+      </form>
+    </View>
   );
 }
