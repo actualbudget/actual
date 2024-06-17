@@ -38,6 +38,9 @@ function getErrorMessage(type, code) {
     case 'INVALID_ACCESS_TOKEN':
       return 'Your SimpleFIN Access Token is no longer valid.  Please reset and generate a new token.';
 
+    case 'ACCOUNT_NEEDS_ATTENTION':
+      return 'The account needs your attention at <a href="https://beta-bridge.simplefin.org/auth/login">SimpleFIN</a>.';
+  
     default:
   }
 
