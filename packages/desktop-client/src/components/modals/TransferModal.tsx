@@ -2,8 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { amountToInteger, integerToCurrency } from 'loot-core/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
 import { styles } from '../../style';
@@ -12,8 +10,9 @@ import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
-import { FieldLabel, InputField, TapField } from '../mobile/MobileForms';
+import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
+import { AmountInput } from '../util/AmountInput';
 
 type TransferModalProps = {
   modalProps: CommonModalProps;
@@ -42,8 +41,7 @@ export function TransferModal({
     return [expenseGroups, expenseCategories];
   }, [originalCategoryGroups, showToBeBudgeted]);
 
-  const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<number>(0);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
@@ -60,10 +58,9 @@ export function TransferModal({
     );
   };
 
-  const _onSubmit = (newAmount: string | null, categoryId: string | null) => {
-    const parsedAmount = evalArithmetic(newAmount || '');
-    if (parsedAmount && categoryId) {
-      onSubmit?.(amountToInteger(parsedAmount), categoryId);
+  const _onSubmit = (newAmount: number, categoryId: string | null) => {
+    if (newAmount && categoryId) {
+      onSubmit?.(newAmount, categoryId);
     }
 
     modalProps.onClose();
@@ -77,10 +74,16 @@ export function TransferModal({
         <View>
           <FieldLabel title="Transfer this amount:" />
           <InitialFocus>
-            <InputField
-              inputMode="decimal"
-              tabIndex={0}
-              defaultValue={_initialAmount}
+            <AmountInput
+              value={initialAmount}
+              autoDecimals={true}
+              style={{
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+              }}
+              inputStyle={{
+                height: styles.mobileMinHeight,
+              }}
               onUpdate={setAmount}
               onEnter={() => {
                 if (!toCategoryId) {

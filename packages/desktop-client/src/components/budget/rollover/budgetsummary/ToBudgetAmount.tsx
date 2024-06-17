@@ -20,6 +20,7 @@ type ToBudgetAmountProps = {
   style?: CSSProperties;
   amountStyle?: CSSProperties;
   onClick: () => void;
+  isTotalsListTooltipDisabled?: boolean;
 };
 
 export function ToBudgetAmount({
@@ -27,6 +28,7 @@ export function ToBudgetAmount({
   style,
   amountStyle,
   onClick,
+  isTotalsListTooltipDisabled = false,
 }: ToBudgetAmountProps) {
   const sheetName = useSheetName(rolloverBudget.toBudget);
   const sheetValue = useSheetValue({
@@ -52,7 +54,8 @@ export function ToBudgetAmount({
             />
           }
           placement="bottom"
-          triggerProps={{ delay: 0 }}
+          offset={3}
+          triggerProps={{ isDisabled: isTotalsListTooltipDisabled }}
         >
           <PrivacyFilter blurIntensity={7}>
             <Block
