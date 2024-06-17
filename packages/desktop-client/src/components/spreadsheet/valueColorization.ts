@@ -1,11 +1,14 @@
+// @ts-strict-ignore
 import { useSelector } from 'react-redux';
 
-import { selectValueColorization } from 'loot-core/client/selectors';
+import { type State } from 'loot-core/src/client/state-types';
 
 import { type CSSProperties, theme } from '../../style';
 
 export function useBalanceValueColorization() {
-  return useSelector(selectValueColorization);
+  return useSelector(
+    (state: State) => state.prefs.local?.colorizeBalances ?? true,
+  );
 }
 
 export function makeAmountGrey(value: number | string): CSSProperties {
