@@ -989,7 +989,7 @@ handlers['simplefin-accounts'] = async function () {
       {
         'X-ACTUAL-TOKEN': userToken,
       },
-      1000,
+      60000,
     );
   } catch (error) {
     return { error_code: 'TIMED_OUT' };
