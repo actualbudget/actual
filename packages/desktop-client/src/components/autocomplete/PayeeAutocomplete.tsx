@@ -13,7 +13,6 @@ import React, {
 import { useDispatch } from 'react-redux';
 
 import { css } from 'glamor';
-import { filter } from 'lodash';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';

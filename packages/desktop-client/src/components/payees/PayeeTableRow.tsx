@@ -7,8 +7,6 @@ import { useSelectedDispatch } from '../../hooks/useSelected';
 import {
   SvgArrowThinRight,
   SvgBookmark,
-  SvgBookmarkOutlineAdd,
-  SvgStarFull,
 } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
 import { Text } from '../common/Text';
@@ -142,7 +140,7 @@ export const PayeeTableRow = memo(
           width={10}
           exposed={!payee.transfer_acct}
           onBlur={() => {}}
-          onUpdate={value => {}}
+          onUpdate={() => {}}
           onClick={() => {}}
         >
           {() => {
