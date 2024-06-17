@@ -4,10 +4,7 @@ import { memo } from 'react';
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import {
-  SvgArrowThinRight,
-  SvgBookmark,
-} from '../../icons/v1';
+import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
 import { Text } from '../common/Text';
 import {
