@@ -62,36 +62,43 @@ export function CreateAccountModal({
 
     setLoadingSimpleFinAccounts(true);
 
-    const results = await send('simplefin-accounts');
+    try {
+      const results = await send('simplefin-accounts');
+      if (results.error_code) {
+        throw new Error(results.reason);
+      }
 
-    const newAccounts = [];
+      const newAccounts = [];
 
-    type NormalizedAccount = {
-      account_id: string;
-      name: string;
-      institution: string;
-      orgDomain: string;
-      orgId: string;
-      balance: number;
-    };
-
-    for (const oldAccount of results.accounts) {
-      const newAccount: NormalizedAccount = {
-        account_id: oldAccount.id,
-        name: oldAccount.name,
-        institution: oldAccount.org.name,
-        orgDomain: oldAccount.org.domain,
-        orgId: oldAccount.org.id,
-        balance: oldAccount.balance,
+      type NormalizedAccount = {
+        account_id: string;
+        name: string;
+        institution: string;
+        orgDomain: string;
+        orgId: string;
+        balance: number;
       };
 
-      newAccounts.push(newAccount);
-    }
+      for (const oldAccount of results.accounts) {
+        const newAccount: NormalizedAccount = {
+          account_id: oldAccount.id,
+          name: oldAccount.name,
+          institution: oldAccount.org.name,
+          orgDomain: oldAccount.org.domain,
+          orgId: oldAccount.org.id,
+          balance: oldAccount.balance,
+        };
 
-    actions.pushModal('select-linked-accounts', {
-      accounts: newAccounts,
-      syncSource: 'simpleFin',
-    });
+        newAccounts.push(newAccount);
+      }
+
+      actions.pushModal('select-linked-accounts', {
+        accounts: newAccounts,
+        syncSource: 'simpleFin',
+      });
+    } catch (err) {
+      console.error(err);
+    }
 
     setLoadingSimpleFinAccounts(false);
   };
