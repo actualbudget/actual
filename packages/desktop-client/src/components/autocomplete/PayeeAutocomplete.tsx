@@ -51,15 +51,11 @@ function getPayeeSuggestions(
     let additionalCommonPayees: PayeeAutocompleteItem[] = [];
     if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
       additionalCommonPayees = commonPayees
-      .filter(p => !p.favorite)
-      .slice(
-        0,
-        MAX_AUTO_SUGGESTIONS - favoritePayees.length,
-      );
+        .filter(p => !p.favorite)
+        .slice(0, MAX_AUTO_SUGGESTIONS - favoritePayees.length);
     }
     const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] =
-      favoritePayees.concat(additionalCommonPayees)
-      .map(p => {
+      favoritePayees.concat(additionalCommonPayees).map(p => {
         return { ...p, itemType: 'common_payee' };
       });
 
@@ -308,8 +304,8 @@ export function PayeeAutocomplete({
       return filteredSuggestions;
     }
     filteredSuggestions.forEach(s => {
-      console.log(s.name + " " + s.id)
-    })
+      console.log(s.name + ' ' + s.id);
+    });
     return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
   }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
