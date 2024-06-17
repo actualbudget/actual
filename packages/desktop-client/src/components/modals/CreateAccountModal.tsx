@@ -98,6 +98,9 @@ export function CreateAccountModal({
       });
     } catch (err) {
       console.error(err);
+      actions.pushModal('simplefin-init', {
+        onSuccess: () => setIsSimpleFinSetupComplete(true),
+      });
     }
 
     setLoadingSimpleFinAccounts(false);
