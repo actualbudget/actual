@@ -1095,7 +1095,7 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
             accountId: acct.id,
             message: err.reason
               ? err.reason
-              : `Account “${acct.name}” is not linked properly. Please link it again`,
+              : `Account “${acct.name}” is not linked properly. Please link it again.`,
           });
         } else {
           errors.push({

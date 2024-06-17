@@ -35,6 +35,9 @@ function getErrorMessage(type, code) {
     case 'RATE_LIMIT_EXCEEDED':
       return 'Rate limit exceeded for this item. Please try again later.';
 
+    case 'INVALID_ACCESS_TOKEN':
+      return 'Your SimpleFIN Access Token is no longer valid.  Please reset and generate a new token.';
+
     default:
   }
 
