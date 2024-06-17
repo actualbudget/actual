@@ -19,6 +19,7 @@ type ToBudgetProps = {
   prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
+  isCollapsed?: boolean;
 };
 export function ToBudget({
   month,
@@ -26,6 +27,7 @@ export function ToBudget({
   onBudgetAction,
   style,
   amountStyle,
+  isCollapsed = false,
 }: ToBudgetProps) {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const triggerRef = useRef(null);
@@ -34,6 +36,7 @@ export function ToBudget({
     value: 0,
   });
   const availableValue = parseInt(sheetValue);
+  const isMenuOpen = Boolean(menuOpen);
 
   return (
     <>
@@ -43,13 +46,14 @@ export function ToBudget({
           prevMonthName={prevMonthName}
           style={style}
           amountStyle={amountStyle}
+          isTotalsListTooltipDisabled={!isCollapsed || isMenuOpen}
         />
       </View>
 
       <Popover
         triggerRef={triggerRef}
         placement="bottom"
-        isOpen={!!menuOpen}
+        isOpen={isMenuOpen}
         onOpenChange={() => setMenuOpen(null)}
         style={{ width: 200 }}
       >
