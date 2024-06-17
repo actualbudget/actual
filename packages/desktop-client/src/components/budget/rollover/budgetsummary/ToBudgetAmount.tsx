@@ -39,6 +39,7 @@ export function ToBudgetAmount({
   const availableValue = parseInt(sheetValue);
   const num = isNaN(availableValue) ? 0 : availableValue;
   const isNegative = num < 0;
+
   return (
     <View style={{ alignItems: 'center', ...style }}>
       <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
@@ -53,7 +54,8 @@ export function ToBudgetAmount({
             />
           }
           placement="bottom"
-          triggerProps={{ delay: 0, isDisabled: isTotalsListTooltipDisabled }}
+          offset={3}
+          triggerProps={{ isDisabled: isTotalsListTooltipDisabled }}
         >
           <PrivacyFilter blurIntensity={7}>
             <Block
