@@ -95,15 +95,6 @@ export function ReportSidebar({
         firstDayOfWeekIdx,
       ),
     );
-    setIncludeCurrentInterval(
-      defaultsList.currentInterval.get(cond) ??
-        customReportItems.includeCurrentInterval,
-    );
-    setSessionReport(
-      'includeCurrentInterval',
-      defaultsList.currentInterval.get(cond) ??
-        customReportItems.includeCurrentInterval,
-    );
   };
 
   const onChangeMode = (cond: string) => {
@@ -406,8 +397,6 @@ export function ReportSidebar({
             onSelect={() => {
               setSessionReport('isDateStatic', true);
               setIsDateStatic(true);
-              setIncludeCurrentInterval(false);
-              setSessionReport('includeCurrentInterval', false);
               onChangeDates(
                 customReportItems.startDate,
                 customReportItems.endDate,

@@ -20,27 +20,22 @@ const intervalOptions = [
 const currentIntervalOptions = [
   {
     description: 'This week',
-    defaultInclude: false,
     disableInclude: true,
   },
   {
     description: 'This month',
-    defaultInclude: false,
     disableInclude: true,
   },
   {
     description: 'Year to date',
-    defaultInclude: false,
     disableInclude: true,
   },
   {
     description: 'Last year',
-    defaultInclude: false,
     disableInclude: true,
   },
   {
     description: 'All time',
-    defaultInclude: false,
     disableInclude: true,
   },
 ];
@@ -204,8 +199,5 @@ export const defaultsList = {
   ),
   intervalRange: new Map(
     intervalOptions.map(item => [item.description, item.defaultRange]),
-  ),
-  currentInterval: new Map(
-    currentIntervalOptions.map(item => [item.description, item.defaultInclude]),
   ),
 };
