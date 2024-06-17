@@ -39,8 +39,8 @@ function getErrorMessage(type, code) {
       return 'Your SimpleFIN Access Token is no longer valid.  Please reset and generate a new token.';
 
     case 'ACCOUNT_NEEDS_ATTENTION':
-      return 'The account needs your attention at <a href="https://beta-bridge.simplefin.org/auth/login">SimpleFIN</a>.';
-  
+      return 'The account needs your attention at [SimpleFIN](https://beta-bridge.simplefin.org/auth/login).';
+
     default:
   }
 
