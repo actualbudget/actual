@@ -203,3 +203,6 @@ export const budgetOtherMonth = colorPalette.gray700;
 export const budgetCurrentMonth = tableBackground;
 export const budgetHeaderOtherMonth = colorPalette.gray800;
 export const budgetHeaderCurrentMonth = tableHeaderBackground;
+
+export const floatingActionBarBackground = colorPalette.gray900;
+export const floatingActionBarText = colorPalette.purple200;

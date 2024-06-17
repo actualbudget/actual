@@ -8,7 +8,7 @@ import { isPreviewId } from 'loot-core/src/shared/transactions';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
-import { theme } from '../../../style';
+import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Menu } from '../../common/Menu';
 import { Popover } from '../../common/Popover';
@@ -160,14 +160,28 @@ function FloatingActionBar({
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
   const getMenuItemStyle = item => ({
+    color: theme.mobileHeaderText,
     ...(item.name === 'delete' && { color: theme.errorTextMenu }),
   });
+
+  const buttonProps = {
+    style: {
+      color: 'currentColor',
+      height: styles.mobileMinHeight,
+    },
+    activeStyle: {
+      color: 'currentColor',
+    },
+    hoveredStyle: {
+      color: 'currentColor',
+    },
+  };
 
   return (
     <View
       style={{
-        backgroundColor: theme.modalBackground,
-        border: `1px solid ${theme.tableRowBackgroundHighlight}`,
+        backgroundColor: theme.floatingActionBarBackground,
+        color: theme.floatingActionBarText,
         position: 'fixed',
         bottom: 10,
         margin: '0 10px',
@@ -190,7 +204,8 @@ function FloatingActionBar({
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Button
             type="bare"
-            style={{ marginRight: 4 }}
+            {...buttonProps}
+            style={{ ...buttonProps.style, marginRight: 4 }}
             onClick={() => onClearSelectedTransactions?.()}
           >
             <SvgDelete width={10} height={10} />
@@ -204,8 +219,12 @@ function FloatingActionBar({
         <View
           style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 4 }}
         >
-          <Button type="bare">Edit</Button>
-          <Button type="bare">Duplicate</Button>
+          <Button type="bare" {...buttonProps}>
+            Edit
+          </Button>
+          <Button type="bare" {...buttonProps}>
+            Duplicate
+          </Button>
           <Button
             ref={triggerRef}
             type="bare"
@@ -213,12 +232,16 @@ function FloatingActionBar({
             onClick={() => {
               setMenuOpen(true);
             }}
-            style={{ color: 'currentColor', padding: 3 }}
+            {...buttonProps}
+            style={{
+              ...buttonProps.style,
+              padding: 4,
+            }}
           >
             <SvgDotsHorizontalTriple
               width={15}
               height={15}
-              style={{ color: theme.pageTextLight }}
+              style={{ color: 'currentColor' }}
             />
           </Button>
 
@@ -230,6 +253,7 @@ function FloatingActionBar({
           >
             <Menu
               getItemStyle={getMenuItemStyle}
+              style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
                 if (type === 'delete') {
                 }
