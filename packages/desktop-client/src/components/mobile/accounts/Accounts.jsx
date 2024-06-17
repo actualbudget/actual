@@ -11,17 +11,21 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { SvgAdd } from '../../../icons/v1';
 import { theme, styles } from '../../../style';
-import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
 import { CellValue } from '../../spreadsheet/CellValue';
+import {
+  makeAmountFullStyle,
+  useBalanceValueColorization,
+} from '../../spreadsheet/valueColorization';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
 function AccountHeader({ name, amount, style = {} }) {
+  const colorizeBalances = useBalanceValueColorization();
   return (
     <View
       style={{
@@ -49,6 +53,7 @@ function AccountHeader({ name, amount, style = {} }) {
         binding={amount}
         style={{ ...styles.text, fontSize: 14 }}
         type="financial"
+        getStyle={value => makeAmountFullStyle(colorizeBalances, value)}
       />
     </View>
   );
@@ -63,6 +68,8 @@ function AccountCard({
   getBalanceQuery,
   onSelect,
 }) {
+  const colorizeBalances = useBalanceValueColorization();
+
   return (
     <View
       style={{
@@ -136,7 +143,7 @@ function AccountCard({
           binding={getBalanceQuery(account)}
           type="financial"
           style={{ fontSize: 16, color: 'inherit' }}
-          getStyle={makeAmountFullStyle}
+          getStyle={value => makeAmountFullStyle(colorizeBalances, value)}
           data-testid="account-balance"
         />
       </Button>
@@ -252,6 +259,7 @@ export function Accounts() {
   const [_numberFormat] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false] = useLocalPref('hideFraction');
+  const [colorizeBalances = true] = useLocalPref('colorizeBalances');
 
   const navigate = useNavigate();
 
@@ -274,7 +282,7 @@ export function Accounts() {
       <AccountList
         // This key forces the whole table rerender when the number
         // format changes
-        key={numberFormat + hideFraction}
+        key={numberFormat + hideFraction + colorizeBalances}
         accounts={accounts.filter(account => !account.closed)}
         updatedAccounts={updatedAccounts}
         getBalanceQuery={queries.accountBalance}

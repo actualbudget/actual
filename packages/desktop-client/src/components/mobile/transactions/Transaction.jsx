@@ -14,11 +14,11 @@ import {
   SvgLockClosed,
 } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
-import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
+import { makeAmountFullStyle } from '../../spreadsheet/valueColorization';
 
 import { lookupName, getDescriptionPretty, Status } from './TransactionEdit';
 
@@ -209,7 +209,7 @@ export const Transaction = memo(function Transaction({
             marginLeft: 25,
             marginRight: 5,
             fontSize: 14,
-            ...makeAmountFullStyle(amount),
+            ...makeAmountFullStyle(true, amount),
           }}
         >
           {integerToCurrency(amount)}

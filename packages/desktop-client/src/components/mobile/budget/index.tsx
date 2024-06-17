@@ -61,6 +61,7 @@ function BudgetInner(props: BudgetInnerProps) {
   const [_numberFormat] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false] = useLocalPref('hideFraction');
+  const [colorizeBalances = true] = useLocalPref('colorizeBalances');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -440,7 +441,7 @@ function BudgetInner(props: BudgetInnerProps) {
           <BudgetTable
             // This key forces the whole table rerender when the number
             // format changes
-            key={`${numberFormat}${hideFraction}`}
+            key={`${numberFormat}${hideFraction}${colorizeBalances}`}
             categoryGroups={categoryGroups}
             type={budgetType}
             month={startMonth}

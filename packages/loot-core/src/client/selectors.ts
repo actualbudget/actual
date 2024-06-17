@@ -16,3 +16,8 @@ export const selectNumberFormat = createSelector(getLocalPrefsState, prefs =>
     hideFraction: prefs.hideFraction,
   }),
 );
+
+export const selectValueColorization = createSelector(
+  getLocalPrefsState,
+  prefs => prefs.colorizeBalances,
+);

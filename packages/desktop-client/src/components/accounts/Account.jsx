@@ -1706,6 +1706,7 @@ export function Account() {
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction = false] = useLocalPref('hideFraction');
+  const [colorizeBalances = true] = useLocalPref('colorizeBalances');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showBalances] = useLocalPref(`show-balances-${params.id}`);
   const [hideCleared] = useLocalPref(`hide-cleared-${params.id}`);
@@ -1728,6 +1729,7 @@ export function Account() {
     failedAccounts,
     dateFormat,
     hideFraction,
+    colorizeBalances,
     expandSplits,
     showBalances,
     showCleared: !hideCleared,

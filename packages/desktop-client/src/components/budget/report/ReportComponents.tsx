@@ -13,9 +13,13 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
+import {
+  makeAmountGrey,
+  useBalanceValueColorization,
+  makeAmountFullStyle,
+} from '../../spreadsheet/valueColorization';
 import { Field, SheetCell } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
-import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -27,6 +31,7 @@ const headerLabelStyle: CSSProperties = {
 };
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   const format = useFormat();
+  const colorizeBalanceValues = useBalanceValueColorization();
   return (
     <View
       style={{
@@ -61,7 +66,10 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <CellValue
           binding={reportBudget.totalLeftover}
           type="financial"
-          style={{ color: theme.pageTextLight, fontWeight: 600 }}
+          style={{ fontWeight: 600 }}
+          getStyle={(value: number) =>
+            makeAmountFullStyle(colorizeBalanceValues, value)
+          }
         />
       </View>
     </View>
@@ -92,6 +100,7 @@ type GroupMonthProps = {
 };
 export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
   const { id } = group;
+  const colorizeBalanceValues = useBalanceValueColorization();
 
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -128,6 +137,8 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           valueProps={{
             binding: reportBudget.groupBalance(id),
             type: 'financial',
+            getValueStyle: value =>
+              makeAmountFullStyle(colorizeBalanceValues, value),
             privacyFilter: {
               style: {
                 paddingRight: styles.monthRightPadding,

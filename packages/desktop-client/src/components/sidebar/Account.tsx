@@ -23,6 +23,10 @@ import {
 } from '../sort';
 import { type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
+import {
+  makeBalanceAmountStyle,
+  useBalanceValueColorization,
+} from '../spreadsheet/valueColorization';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -89,6 +93,7 @@ export function Account({
 
   const accountNote = useNotes(`account-${account?.id}`);
   const needsTooltip = !!account?.id;
+  const colorizeBalanceValues = useBalanceValueColorization();
 
   const accountRow = (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
@@ -155,7 +160,15 @@ export function Account({
                 }
               }
               left={name}
-              right={<CellValue binding={query} type="financial" />}
+              right={
+                <CellValue
+                  binding={query}
+                  type="financial"
+                  getStyle={(value: number) =>
+                    makeBalanceAmountStyle(colorizeBalanceValues, value)
+                  }
+                />
+              }
             />
           </Link>
         </View>
