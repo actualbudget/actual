@@ -66,7 +66,7 @@ export interface ApiHandlers {
     payees;
   }) => Promise<unknown>;
 
-  'api/transactions-import': (arg: { accountId; transactions }) => Promise<{
+  'api/transactions-import': (arg: { accountId; transactions, detectInstallments, updateDetectInstallmentDate, ignoreAlreadyDetectedInstallments }) => Promise<{
     errors?: { message: string }[];
     added;
     updated;

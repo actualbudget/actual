@@ -185,7 +185,7 @@ export function parseTransactions(filepath, options) {
   };
 }
 
-export function importTransactions(id: string, transactions, reconcile = true) {
+export function importTransactions(id: string, transactions, reconcile = true, detectInstallments = false, updateDetectInstallmentDate = false, ignoreAlreadyDetectedInstallments = false) {
   return async (dispatch: Dispatch): Promise<boolean> => {
     if (!reconcile) {
       await send('api/transactions-add', {
@@ -203,6 +203,9 @@ export function importTransactions(id: string, transactions, reconcile = true) {
     } = await send('transactions-import', {
       accountId: id,
       transactions,
+      detectInstallments,
+      updateDetectInstallmentDate,
+      ignoreAlreadyDetectedInstallments
     });
 
     errors.forEach(error => {
