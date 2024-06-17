@@ -200,6 +200,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               prevMonthName={prevMonthName}
               month={month}
               onBudgetAction={onBudgetAction}
+              isCollapsed
             />
           </View>
         ) : (
