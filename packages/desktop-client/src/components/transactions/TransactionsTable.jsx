@@ -642,6 +642,7 @@ const Transaction = memo(function Transaction(props) {
     onNavigateToTransferAccount,
     onNavigateToSchedule,
     splitError,
+    listContainerRef,
   } = props;
 
   const dispatchSelected = useSelectedDispatch();
@@ -832,7 +833,7 @@ const Transaction = memo(function Transaction(props) {
         ...(_unmatched && { opacity: 0.5 }),
       }}
     >
-      {splitError && triggerRef?.current?.parentNode.parentNode && (
+      {splitError && listContainerRef.current && (
         <Popover
           triggerRef={triggerRef}
           isOpen
@@ -840,9 +841,12 @@ const Transaction = memo(function Transaction(props) {
           style={{ width: 375, padding: 5 }}
           shouldFlip={false}
           placement="bottom end"
-          // shouldUpdatePosition
-          // TODO: this is a crappy implementation.. make it better
-          UNSTABLE_portalContainer={triggerRef?.current?.parentNode.parentNode}
+          shouldUpdatePosition // TODO: do we need this?
+          UNSTABLE_portalContainer={listContainerRef.current}
+          boundaryElement={
+            triggerRef?.current?.parentNode.parentNode.parentNode.parentNode
+              .parentNode.parentNode
+          }
         >
           {splitError}
         </Popover>
@@ -1510,10 +1514,12 @@ function NewTransaction({
 function TransactionTableInner({
   tableNavigator,
   tableRef,
+  listContainerRef,
   dateFormat = 'MM/dd/yyyy',
   newNavigator,
   renderEmpty,
   onScroll,
+  isLoading,
   ...props
 }) {
   const containerRef = createRef();
@@ -1638,6 +1644,7 @@ function TransactionTableInner({
             />
           )
         }
+        listContainerRef={listContainerRef}
       />
     );
   };
@@ -1714,6 +1721,7 @@ function TransactionTableInner({
         <Table
           navigator={tableNavigator}
           ref={tableRef}
+          listContainerRef={listContainerRef}
           items={props.transactions}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
@@ -1722,6 +1730,7 @@ function TransactionTableInner({
           onKeyDown={e => props.onCheckEnter(e)}
           onScroll={onScroll}
           saveScrollWidth={saveScrollWidth}
+          loading={isLoading}
         />
 
         {props.isAdding && (
@@ -1750,6 +1759,7 @@ export const TransactionTable = forwardRef((props, ref) => {
   const prevSplitsExpanded = useRef(null);
 
   const tableRef = useRef(null);
+  const listContainerRef = useRef(null);
   const mergedRef = useMergedRefs(tableRef, ref);
 
   const transactions = useMemo(() => {
@@ -2159,6 +2169,7 @@ export const TransactionTable = forwardRef((props, ref) => {
   return (
     <TransactionTableInner
       tableRef={mergedRef}
+      listContainerRef={listContainerRef}
       {...props}
       transactions={transactions}
       transactionMap={transactionMap}

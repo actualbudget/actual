@@ -14,6 +14,7 @@ import React, {
   type UIEvent,
   type ReactElement,
   type Ref,
+  type MutableRefObject,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -890,7 +891,7 @@ type TableProps<T extends TableItem = TableItem> = {
   loadMore?: () => void;
   style?: CSSProperties;
   navigator?: ReturnType<typeof useTableNavigator<T>>;
-  listRef?: unknown;
+  listContainerRef?: MutableRefObject<HTMLDivElement>;
   onScroll?: () => void;
   isSelected?: (id: TableItem['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
@@ -915,6 +916,7 @@ export const Table = forwardRef(
       onScroll,
       isSelected,
       saveScrollWidth,
+      listContainerRef,
       ...props
     },
     ref,
@@ -930,7 +932,8 @@ export const Table = forwardRef(
 
     const { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
     const list = useRef(null);
-    const listContainer = useRef(null);
+    const listContainerInnerRef = useRef<HTMLDivElement>(null);
+    const listContainer = listContainerRef || listContainerInnerRef;
     const scrollContainer = useRef(null);
     const initialScrollTo = useRef(null);
     const listInitialized = useRef(false);
