@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import { Item, Section } from '@react-stately/collections';
 
@@ -6,7 +6,12 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
+import { SvgDelete } from '../../../icons/v0';
+import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { theme } from '../../../style';
+import { Button } from '../../common/Button';
+import { Menu } from '../../common/Menu';
+import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
@@ -49,11 +54,11 @@ export function TransactionList({
     return sections;
   }, [transactions]);
 
-  const [selectedTransactions, setSelectedTransaction] = useState([]);
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
 
   const onTransactionPress = (transaction, isLongPress = false) => {
     if (isLongPress || selectedTransactions.length > 0) {
-      setSelectedTransaction(prev =>
+      setSelectedTransactions(prev =>
         prev.includes(transaction.id)
           ? prev.filter(id => id !== transaction.id)
           : [...prev, transaction.id],
@@ -135,6 +140,119 @@ export function TransactionList({
           );
         })}
       </ListBox>
+      {selectedTransactions?.length > 0 && (
+        <FloatingActionBar
+          selectedTransactions={selectedTransactions}
+          onClearSelectedTransactions={() => {
+            setSelectedTransactions([]);
+          }}
+        />
+      )}
     </>
+  );
+}
+
+function FloatingActionBar({
+  selectedTransactions,
+  onClearSelectedTransactions,
+  style,
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef(null);
+  const getMenuItemStyle = item => ({
+    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  });
+
+  return (
+    <View
+      style={{
+        backgroundColor: theme.modalBackground,
+        border: `1px solid ${theme.tableRowBackgroundHighlight}`,
+        position: 'fixed',
+        bottom: 10,
+        margin: '0 10px',
+        width: '95vw',
+        height: 60,
+        zIndex: 100,
+        borderRadius: 8,
+        ...style,
+      }}
+    >
+      <View
+        style={{
+          flex: 1,
+          padding: 8,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Button
+            type="bare"
+            style={{ marginRight: 4 }}
+            onClick={() => onClearSelectedTransactions?.()}
+          >
+            <SvgDelete width={10} height={10} />
+          </Button>
+          <Text style={{ fontWeight: 500 }}>
+            {selectedTransactions.length}{' '}
+            {selectedTransactions.length > 1 ? 'transactions' : 'transaction'}{' '}
+            selected
+          </Text>
+        </View>
+        <View
+          style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 4 }}
+        >
+          <Button type="bare">Edit</Button>
+          <Button type="bare">Duplicate</Button>
+          <Button
+            ref={triggerRef}
+            type="bare"
+            aria-label="Menu"
+            onClick={() => {
+              setMenuOpen(true);
+            }}
+            style={{ color: 'currentColor', padding: 3 }}
+          >
+            <SvgDotsHorizontalTriple
+              width={15}
+              height={15}
+              style={{ color: theme.pageTextLight }}
+            />
+          </Button>
+
+          <Popover
+            triggerRef={triggerRef}
+            isOpen={menuOpen}
+            onOpenChange={() => setMenuOpen(false)}
+            style={{ width: 200 }}
+          >
+            <Menu
+              getItemStyle={getMenuItemStyle}
+              onMenuSelect={type => {
+                if (type === 'delete') {
+                }
+                setMenuOpen(false);
+              }}
+              items={[
+                {
+                  name: 'filter-selected',
+                  text: 'Filter selected',
+                },
+                {
+                  name: 'link-schedule',
+                  text: 'Link schedule',
+                },
+                {
+                  name: 'delete',
+                  text: 'Delete',
+                },
+              ]}
+            />
+          </Popover>
+        </View>
+      </View>
+    </View>
   );
 }
