@@ -7,6 +7,7 @@ import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  useCallback,
 } from 'react';
 
 import { css } from 'glamor';
@@ -135,19 +136,9 @@ function CategoryList({
   );
 }
 
-type Suggestion = {
-  id: string;
-  name: string;
-  group?: {
-    name: string;
-  };
-};
-
-function customSort(obj: Suggestion, value: string): number {
+function customSort(obj: CategoryAutocompleteItem, value: string): number {
   const name = obj.name.toLowerCase();
   const groupName = obj.group ? obj.group.name.toLowerCase() : '';
-  value = value.toLowerCase();
-
   if (obj.id === 'split') {
     return -2;
   }
@@ -208,37 +199,32 @@ export function CategoryAutocomplete({
     [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
-  const filterSuggestions = useMemo(
-    () =>
-      (
-        suggestions: (Suggestion | CategoryAutocompleteItem)[],
-        value: string,
-      ) => {
-        return suggestions
-          .filter((suggestion: Suggestion | CategoryAutocompleteItem) => {
-            const suggestionAsSuggestion = suggestion as Suggestion; // Cast to Suggestion
-            return (
-              suggestionAsSuggestion.id === 'split' ||
-              suggestionAsSuggestion.group?.name
-                .toLowerCase()
-                .includes(value.toLowerCase()) ||
-              (
-                suggestionAsSuggestion.group?.name +
-                ' ' +
-                suggestionAsSuggestion.name
-              )
-                .toLowerCase()
-                .includes(value.toLowerCase()) ||
-              defaultFilterSuggestion(suggestionAsSuggestion, value)
-            );
-          })
-          .sort(
-            (a, b) =>
-              customSort(a as Suggestion, value.toLowerCase()) -
-              customSort(b as Suggestion, value.toLowerCase()),
+  const filterSuggestions = useCallback(
+    (
+      suggestions: CategoryAutocompleteItem[],
+      value: string,
+    ): CategoryAutocompleteItem[] => {
+      return suggestions
+        .filter(suggestion => {
+          const suggestionAsItem = suggestion as CategoryAutocompleteItem; // No need for casting to Suggestion here
+          return (
+            suggestionAsItem.id === 'split' ||
+            suggestionAsItem.group?.name
+              .toLowerCase()
+              .includes(value.toLowerCase()) ||
+            (suggestionAsItem.group?.name + ' ' + suggestionAsItem.name)
+              .toLowerCase()
+              .includes(value.toLowerCase()) ||
+            defaultFilterSuggestion(suggestionAsItem, value)
           );
-      },
-    [],
+        })
+        .toSorted(
+          (a, b) =>
+            customSort(a, value.toLowerCase()) -
+            customSort(b, value.toLowerCase()),
+        );
+    },
+    [], // Dependencies array
   );
 
   return (
