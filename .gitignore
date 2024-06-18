@@ -21,7 +21,6 @@ packages/api/dist
 packages/api/@types
 packages/crdt/dist
 packages/desktop-electron/build
-packages/desktop-electron/client-build
 packages/desktop-electron/.electron-symbols
 packages/desktop-electron/dist
 packages/desktop-electron/loot-core
