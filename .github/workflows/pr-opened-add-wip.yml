@@ -1,0 +1,35 @@
+name: Autolabel a new PR
+
+on:
+  pull_request:
+    types:
+      - reopened
+      - opened
+      - ready_for_review
+
+jobs:
+  prepend-wip:
+    if: github.event.pull_request.draft != true
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          TITLE: ${{ github.event.pull_request.title }}
+          REVIEWERS: ${{ join(github.event.pull_request.requested_reviewers) }}
+        run: |
+          if [[ "$REVIEWERS" = "" ]]; then
+            if [[ "$TITLE" != "[WIP]"* ]]; then
+              gh pr edit "$NUMBER" --title "[WIP] $TITLE"
+            fi
+
+            gh issue edit $NUMBER --add-label ":construction: WIP" || true
+          else
+            gh issue edit $NUMBER --add-label ":mag: Ready for Review" || true
+          fi
