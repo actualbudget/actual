@@ -1,0 +1,37 @@
+name: Autolabel PR from new title
+
+on:
+  pull_request:
+    types:
+      - edited
+
+jobs:
+  check-title-label:
+    if: github.event.pull_request.state == 'open'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+    - env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_REPO: ${{ github.repository }}
+        NUMBER: ${{ github.event.pull_request.number }}
+        TITLE: ${{ github.event.pull_request.title }}
+      run: |
+        if [[ "$TITLE" == "[WIP]"* ]]; then
+          # Remove "Ready for Review" label if it exists
+          gh issue edit $NUMBER --remove-label ":mag: Ready for Review" || true
+
+          # Add "WIP" label if it doesn't exist
+          gh issue edit $NUMBER --add-label ":construction: WIP" || true
+        else
+          # Remove "WIP" label if it exists
+          gh issue edit $NUMBER --remove-label ":construction: WIP" || true
+
+          # Add "Ready for Review" label if it doesn't exist
+          gh issue edit $NUMBER --add-label ":mag: Ready for Review" || true
+        fi
