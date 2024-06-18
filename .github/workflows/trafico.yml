@@ -1,0 +1,18 @@
+name: Trafico Reviews
+
+on:
+  pull_request_target:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  manage-review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actualbudget/trafico@move-to-action
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
