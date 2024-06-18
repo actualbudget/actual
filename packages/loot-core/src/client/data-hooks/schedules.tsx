@@ -60,8 +60,6 @@ export function useSchedules({
       if (statusQuery) {
         statusQuery.unsubscribe();
       }
-
-      setData(null);
     };
   }, [transform]);
 

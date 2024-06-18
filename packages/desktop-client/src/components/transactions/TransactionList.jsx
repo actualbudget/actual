@@ -55,7 +55,6 @@ async function saveDiffAndApply(diff, changes, onChange) {
 }
 
 export function TransactionList({
-  isLoading,
   tableRef,
   transactions,
   allTransactions,
@@ -168,7 +167,6 @@ export function TransactionList({
   return (
     <TransactionTable
       ref={tableRef}
-      isLoading={isLoading}
       pushModal={pushModal}
       transactions={allTransactions}
       loadMoreTransactions={loadMoreTransactions}

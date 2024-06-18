@@ -11,10 +11,7 @@ export function usePreviewTransactions() {
 
   return useMemo(() => {
     if (!scheduleData) {
-      return {
-        isLoading: true,
-        data: [],
-      };
+      return [];
     }
 
     const schedules =
@@ -22,19 +19,16 @@ export function usePreviewTransactions() {
         isForPreview(s, scheduleData.statuses),
       ) || [];
 
-    return {
-      isLoading: false,
-      data: schedules.map(schedule => ({
-        id: 'preview/' + schedule.id,
-        payee: schedule._payee,
-        account: schedule._account,
-        amount: schedule._amount,
-        date: schedule.next_date,
-        notes: scheduleData.statuses.get(schedule.id),
-        schedule: schedule.id,
-      })),
-    };
-  }, [scheduleData]);
+    return schedules.map(schedule => ({
+      id: 'preview/' + schedule.id,
+      payee: schedule._payee,
+      account: schedule._account,
+      amount: schedule._amount,
+      date: schedule.next_date,
+      notes: scheduleData.statuses.get(schedule.id),
+      schedule: schedule.id,
+    }));
+  });
 }
 
 function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {

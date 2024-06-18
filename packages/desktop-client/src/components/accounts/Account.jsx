@@ -94,15 +94,10 @@ function AllTransactions({
   children,
 }) {
   const accountId = account.id;
-  const { isLoading, data: previewTransactionsList } = usePreviewTransactions();
-  const prependTransactions = useMemo(
-    () =>
-      previewTransactionsList.map(trans => ({
-        ...trans,
-        _inverse: accountId ? accountId !== trans.account : false,
-      })),
-    [accountId, previewTransactionsList],
-  );
+  const prependTransactions = usePreviewTransactions().map(trans => ({
+    ...trans,
+    _inverse: accountId ? accountId !== trans.account : false,
+  }));
 
   transactions ??= [];
 
@@ -151,10 +146,11 @@ function AllTransactions({
     }
     return balances;
   }, [filtered, prependBalances, balances]);
+
   if (!prependTransactions) {
-    return children(transactions, balances, isLoading);
+    return children(transactions, balances);
   }
-  return children(allTransactions, allBalances, isLoading);
+  return children(allTransactions, allBalances);
 }
 
 function getField(field) {
@@ -1542,7 +1538,7 @@ class AccountInternal extends PureComponent {
         showBalances={showBalances}
         filtered={transactionsFiltered}
       >
-        {(allTransactions, allBalances, isLoading) => (
+        {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
             name="transactions"
             items={allTransactions}
@@ -1611,7 +1607,6 @@ class AccountInternal extends PureComponent {
 
               <View style={{ flex: 1 }}>
                 <TransactionList
-                  isLoading={isLoading}
                   tableRef={this.table}
                   account={account}
                   transactions={transactions}

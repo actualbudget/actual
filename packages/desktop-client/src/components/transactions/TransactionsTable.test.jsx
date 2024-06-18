@@ -925,6 +925,7 @@ describe('Transactions', () => {
     await waitForAutocomplete();
     await userEvent.click(screen.getByTestId('add-split-button'));
     expect(getTransactions().length).toBe(7);
+
     // The debit field should show the zeros
     expect(queryField(container, 'debit', '', 1).textContent).toBe('0.00');
     expect(queryField(container, 'credit', '', 1).textContent).toBe('');

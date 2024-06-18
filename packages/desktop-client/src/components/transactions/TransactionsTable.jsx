@@ -1519,7 +1519,6 @@ function TransactionTableInner({
   newNavigator,
   renderEmpty,
   onScroll,
-  isLoading,
   ...props
 }) {
   const containerRef = createRef();
@@ -1730,7 +1729,6 @@ function TransactionTableInner({
           onKeyDown={e => props.onCheckEnter(e)}
           onScroll={onScroll}
           saveScrollWidth={saveScrollWidth}
-          loading={isLoading}
         />
 
         {props.isAdding && (
