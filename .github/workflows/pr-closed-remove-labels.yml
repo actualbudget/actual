@@ -1,7 +1,7 @@
 name: Remove all PR labels on close
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - closed
       - converted_to_draft
