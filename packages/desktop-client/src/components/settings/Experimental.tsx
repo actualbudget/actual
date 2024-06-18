@@ -90,6 +90,9 @@ export function ExperimentalFeatures() {
               Goal templates
             </FeatureToggle>
             <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
+            <FeatureToggle flag="iterableTopologicalSort">
+              Iterable topological sort budget
+            </FeatureToggle>
           </View>
         ) : (
           <Link

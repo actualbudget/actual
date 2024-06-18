@@ -17,6 +17,29 @@ const intervalOptions = [
   },
 ];
 
+const currentIntervalOptions = [
+  {
+    description: 'This week',
+    disableInclude: true,
+  },
+  {
+    description: 'This month',
+    disableInclude: true,
+  },
+  {
+    description: 'Year to date',
+    disableInclude: true,
+  },
+  {
+    description: 'Last year',
+    disableInclude: true,
+  },
+  {
+    description: 'All time',
+    disableInclude: true,
+  },
+];
+
 type graphOptions = {
   description: string;
   disabledSplit: string[];
@@ -163,6 +186,9 @@ export const disabledList = {
   mode: modeOptions,
   modeGraphsMap: new Map(
     modeOptions.map(item => [item.description, item.disabledGraph]),
+  ),
+  currentInterval: new Map(
+    currentIntervalOptions.map(item => [item.description, item.disableInclude]),
   ),
 };
 
