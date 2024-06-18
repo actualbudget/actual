@@ -1,0 +1,28 @@
+name: Remove all PR labels on close
+
+on:
+  pull_request:
+    types:
+      - closed
+      - converted_to_draft
+
+jobs:
+  remove-labels:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+    - name: Remove all labels from PR
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_REPO: ${{ github.repository }}
+        NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        LABELS=$(gh issue view $NUMBER --json labels --jq ".labels[].name")
+
+        echo "$LABELS" | while read -r LABEL; do
+          gh issue edit $NUMBER --remove-label "$LABEL" || true
+        done
