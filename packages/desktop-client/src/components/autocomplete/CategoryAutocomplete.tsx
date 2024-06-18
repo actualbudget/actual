@@ -69,6 +69,7 @@ function CategoryList({
   showBalances,
 }: CategoryListProps) {
   let lastGroup: string | undefined | null = null;
+
   const filteredItems = useMemo(
     () =>
       showHiddenItems
@@ -76,6 +77,7 @@ function CategoryList({
         : items.filter(item => !item.hidden && !item.group?.hidden),
     [showHiddenItems, items],
   );
+
   return (
     <View>
       <View
@@ -98,7 +100,6 @@ function CategoryList({
           const showGroup = item.cat_group !== lastGroup;
           const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
           lastGroup = item.cat_group;
-
           return (
             <Fragment key={item.id}>
               {showGroup && item.group?.name && (
@@ -258,21 +259,19 @@ export function CategoryAutocomplete({
       }}
       filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
-      renderItems={(items, getItemProps, highlightedIndex) => {
-        return (
-          <CategoryList
-            items={items}
-            embedded={embedded}
-            getItemProps={getItemProps}
-            highlightedIndex={highlightedIndex}
-            renderSplitTransactionButton={renderSplitTransactionButton}
-            renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
-            renderCategoryItem={renderCategoryItem}
-            showHiddenItems={showHiddenCategories}
-            showBalances={showBalances}
-          />
-        );
-      }}
+      renderItems={(items, getItemProps, highlightedIndex) => (
+        <CategoryList
+          items={items}
+          embedded={embedded}
+          getItemProps={getItemProps}
+          highlightedIndex={highlightedIndex}
+          renderSplitTransactionButton={renderSplitTransactionButton}
+          renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
+          renderCategoryItem={renderCategoryItem}
+          showHiddenItems={showHiddenCategories}
+          showBalances={showBalances}
+        />
+      )}
       {...props}
     />
   );
