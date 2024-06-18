@@ -1,3 +1,14 @@
+##########################################################################################
+# WARNING! This workflow uses the 'pull_request_target' event. That mans that it will    #
+# always run in the context of the main actualbudget/actual repo, even if the PR is from #
+# a fork. This is necessary to get access to a GitHub token that can modify the PR.      #
+# Be VERY CAREFUL about adding things to this workflow, since forks can inject           #
+# arbitrary code into their branch, and can pollute the artifacts we download. Arbitrary #
+# code execution in this workflow could lead to a compromise of the main repo.           #
+##########################################################################################
+# See: https://securitylab.github.com/research/github-actions-preventing-pwn-requests    #
+##########################################################################################
+
 name: Trafico Reviews
 
 on:
@@ -23,6 +34,6 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actualbudget/trafico@move-to-action
+      - uses: actualbudget/trafico@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
