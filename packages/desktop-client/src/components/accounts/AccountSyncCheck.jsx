@@ -36,7 +36,7 @@ function getErrorMessage(type, code) {
       return 'Rate limit exceeded for this item. Please try again later.';
 
     case 'INVALID_ACCESS_TOKEN':
-      return 'Your SimpleFIN Access Token is no longer valid.  Please reset and generate a new token.';
+      return 'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.';
 
     case 'ACCOUNT_NEEDS_ATTENTION':
       return 'The account needs your attention at [SimpleFIN](https://beta-bridge.simplefin.org/auth/login).';
