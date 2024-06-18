@@ -28,7 +28,7 @@ export function usePreviewTransactions() {
       notes: scheduleData.statuses.get(schedule.id),
       schedule: schedule.id,
     }));
-  });
+  }, [scheduleData]);
 }
 
 function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {
