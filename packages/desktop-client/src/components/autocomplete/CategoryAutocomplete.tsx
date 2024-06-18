@@ -223,7 +223,7 @@ export function CategoryAutocomplete({
             customSort(b, value.toLowerCase()),
         );
     },
-    [], // Dependencies array
+    [],
   );
 
   return (
