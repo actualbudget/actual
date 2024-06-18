@@ -611,6 +611,7 @@ function PayeeIcons({
 
 const Transaction = memo(function Transaction(props) {
   const {
+    allTransactions = [],
     transaction: originalTransaction,
     subtransactions,
     editing,
@@ -804,6 +805,28 @@ const Transaction = memo(function Transaction(props) {
     ? balance
     : balance + (_inverse ? -1 : 1) * amount;
 
+  // Ok this entire logic is a dirty, dirty hack.. but let me explain.
+  // Problem: the split-error Popover (which has the buttons to distribute/add split)
+  // renders before schedules are added to the table. After schedules finally load
+  // the entire table gets pushed down. But the Popover does not re-calculate
+  // its positioning. This is because there is nothing in react-aria that would be
+  // watching for the position of the trigger element.
+  // Solution: when transactions (this includes schedules) change - we increment
+  // a variable (with a small delay in order for the next render cycle to pick up
+  // the change instead of the current). We pass the integer to the Popover which
+  // causes it to re-calculate the positioning. Thus fixing the problem.
+  const [updateId, setUpdateId] = useState(1);
+  useEffect(() => {
+    // The hack applies to only transactions with split errors
+    if (!splitError) {
+      return;
+    }
+
+    setTimeout(() => {
+      setUpdateId(state => state + 1);
+    }, 1);
+  }, [splitError, allTransactions]);
+
   return (
     <Row
       ref={triggerRef}
@@ -838,15 +861,11 @@ const Transaction = memo(function Transaction(props) {
           triggerRef={triggerRef}
           isOpen
           isNonModal
-          style={{ width: 375, padding: 5 }}
+          style={{ width: 375, padding: 5, maxHeight: '38px !important' }}
           shouldFlip={false}
           placement="bottom end"
-          shouldUpdatePosition // TODO: do we need this?
+          arrowSize={updateId}
           UNSTABLE_portalContainer={listContainerRef.current}
-          boundaryElement={
-            triggerRef?.current?.parentNode.parentNode.parentNode.parentNode
-              .parentNode.parentNode
-          }
         >
           {splitError}
         </Popover>
@@ -1598,6 +1617,7 @@ function TransactionTableInner({
 
     return (
       <Transaction
+        allTransactions={props.transactions}
         editing={editing}
         transaction={trans}
         showAccount={showAccount}
