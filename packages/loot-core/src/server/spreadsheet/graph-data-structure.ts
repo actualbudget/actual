@@ -1,3 +1,5 @@
+import { getPrefs } from '../prefs';
+
 // @ts-strict-ignore
 export function Graph() {
   const graph = {
@@ -76,14 +78,38 @@ export function Graph() {
     return graph;
   }
 
-  function topologicalSortUntil(name, visited, sorted) {
+  function topologicalSort(sourceNodes) {
+    const visited = new Set();
+    const sorted = [];
+    const prefs = getPrefs();
+    const iterableTopologicalSort =
+      prefs != null ? prefs['flags.iterableTopologicalSort'] : false;
+
+    sourceNodes.forEach(name => {
+      if (!visited.has(name)) {
+        if (iterableTopologicalSort) {
+          topologicalSortIterable(name, visited, sorted);
+        } else {
+          topologicalSortUntil(name, visited, sorted, 0);
+        }
+      }
+    });
+
+    return sorted;
+  }
+
+  function topologicalSortUntil(name, visited, sorted, level) {
     visited.add(name);
+    if (level > 2500) {
+      console.error('Limit of recursions reached while sorting budget: 2500');
+      return;
+    }
 
     const iter = adjacent(name).values();
     let cur = iter.next();
     while (!cur.done) {
       if (!visited.has(cur.value)) {
-        topologicalSortUntil(cur.value, visited, sorted);
+        topologicalSortUntil(cur.value, visited, sorted, level + 1);
       }
       cur = iter.next();
     }
@@ -91,17 +117,54 @@ export function Graph() {
     sorted.unshift(name);
   }
 
-  function topologicalSort(sourceNodes) {
-    const visited = new Set();
-    const sorted = [];
+  function topologicalSortIterable(name, visited, sorted) {
+    const stackTrace: StackItem[] = [];
 
-    sourceNodes.forEach(name => {
-      if (!visited.has(name)) {
-        topologicalSortUntil(name, visited, sorted);
-      }
+    stackTrace.push({
+      count: -1,
+      value: name,
+      parent: '',
+      level: 0,
     });
 
-    return sorted;
+    while (stackTrace.length > 0) {
+      const current = stackTrace.slice(-1)[0];
+
+      const adjacents = adjacent(current.value);
+      if (current.count === -1) {
+        current.count = adjacents.size;
+      }
+
+      if (current.count > 0) {
+        const iter = adjacents.values();
+        let cur = iter.next();
+        while (!cur.done) {
+          if (!visited.has(cur.value)) {
+            stackTrace.push({
+              count: -1,
+              parent: current.value,
+              value: cur.value,
+              level: current.level + 1,
+            });
+          } else {
+            current.count--;
+          }
+          cur = iter.next();
+        }
+      } else {
+        if (!visited.has(current.value)) {
+          visited.add(current.value);
+          sorted.unshift(current.value);
+        }
+
+        const removed = stackTrace.pop();
+        for (let i = 0; i < stackTrace.length; i++) {
+          if (stackTrace[i].value === removed.parent) {
+            stackTrace[i].count--;
+          }
+        }
+      }
+    }
   }
 
   function generateDOT() {
@@ -113,11 +176,18 @@ export function Graph() {
     });
 
     return `
-      digraph G {
-       ${edgeStrings.join('\n').replace(/!/g, '_')}
-      }
+    digraph G {
+      ${edgeStrings.join('\n').replace(/!/g, '_')}
+    }
     `;
   }
 
   return graph;
+}
+
+interface StackItem {
+  count: number;
+  value: string;
+  parent: string;
+  level: number;
 }
