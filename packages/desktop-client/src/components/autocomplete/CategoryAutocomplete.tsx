@@ -218,7 +218,7 @@ export function CategoryAutocomplete({
             defaultFilterSuggestion(suggestionAsItem, value)
           );
         })
-        .toSorted(
+        .sort(
           (a, b) =>
             customSort(a, value.toLowerCase()) -
             customSort(b, value.toLowerCase()),
