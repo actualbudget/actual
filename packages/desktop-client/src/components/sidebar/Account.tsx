@@ -151,7 +151,7 @@ export function Account({
               style={
                 (name === 'Off budget' || name === 'For budget') && {
                   borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
-                  paddingBottom: '3px;',
+                  paddingBottom: '3px',
                 }
               }
               left={name}
