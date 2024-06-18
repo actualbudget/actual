@@ -206,7 +206,6 @@ export function CategoryAutocomplete({
     ): CategoryAutocompleteItem[] => {
       return suggestions
         .filter(suggestion => {
-          const suggestionAsItem = suggestion as CategoryAutocompleteItem; // No need for casting to Suggestion here
           return (
             suggestionAsItem.id === 'split' ||
             suggestionAsItem.group?.name
@@ -224,7 +223,7 @@ export function CategoryAutocomplete({
             customSort(b, value.toLowerCase()),
         );
     },
-    [], // Dependencies array
+    [],
   );
 
   return (
