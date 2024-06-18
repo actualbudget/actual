@@ -136,6 +136,31 @@ function CategoryList({
   );
 }
 
+type Suggestion = {
+  id: string;
+  name: string;
+  group?: {
+    name: string;
+  };
+};
+
+function customSort(obj: Suggestion, value: string): number {
+  const name = obj.name.toLowerCase();
+  const groupName = obj.group ? obj.group.name.toLowerCase() : '';
+  value = value.toLowerCase();
+
+  if (obj.id === 'split') {
+    return -2;
+  }
+  if (name.includes(value)) {
+    return -1;
+  }
+  if (groupName.includes(value)) {
+    return 0;
+  }
+  return 1;
+}
+
 type CategoryAutocompleteProps = ComponentProps<
   typeof Autocomplete<CategoryAutocompleteItem>
 > & {
@@ -184,6 +209,39 @@ export function CategoryAutocomplete({
     [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
+  const filterSuggestions = useMemo(
+    () =>
+      (
+        suggestions: (Suggestion | CategoryAutocompleteItem)[],
+        value: string,
+      ) => {
+        return suggestions
+          .filter((suggestion: Suggestion | CategoryAutocompleteItem) => {
+            const suggestionAsSuggestion = suggestion as Suggestion; // Cast to Suggestion
+            return (
+              suggestionAsSuggestion.id === 'split' ||
+              suggestionAsSuggestion.group?.name
+                .toLowerCase()
+                .includes(value.toLowerCase()) ||
+              (
+                suggestionAsSuggestion.group?.name +
+                ' ' +
+                suggestionAsSuggestion.name
+              )
+                .toLowerCase()
+                .includes(value.toLowerCase()) ||
+              defaultFilterSuggestion(suggestionAsSuggestion, value)
+            );
+          })
+          .sort(
+            (a, b) =>
+              customSort(a as Suggestion, value.toLowerCase()) -
+              customSort(b as Suggestion, value.toLowerCase()),
+          );
+      },
+    [],
+  );
+
   return (
     <Autocomplete
       strict={true}
@@ -198,17 +256,7 @@ export function CategoryAutocomplete({
         }
         return 0;
       }}
-      filterSuggestions={(suggestions, value) => {
-        return suggestions.filter(suggestion => {
-          return (
-            suggestion.id === 'split' ||
-            suggestion.group?.name
-              .toLowerCase()
-              .includes(value.toLowerCase()) ||
-            defaultFilterSuggestion(suggestion, value)
-          );
-        });
-      }}
+      filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => {
         return (

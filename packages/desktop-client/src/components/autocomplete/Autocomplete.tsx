@@ -302,27 +302,6 @@ function SingleAutocomplete<T extends Item>({
 
   const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
 
-  function customSort(obj, value) {
-    const name = obj.name.toLowerCase();
-    const groupName = obj.group ? obj.group.name.toLowerCase() : '';
-    value = value.toLowerCase();
-
-    if (obj.id === 'split') {
-      return -2;
-    }
-    if (name.includes(value)) {
-      return -1;
-    }
-    if (groupName.includes(value)) {
-      return 0;
-    }
-    return 1;
-  }
-
-  if (isChanged) {
-    filtered.sort((a, b) => customSort(a, value) - customSort(b, value));
-  }
-
   return (
     <Downshift
       onSelect={(item, { inputValue }) => {
