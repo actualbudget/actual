@@ -5,11 +5,16 @@
   "description": "A simple and powerful personal finance system",
   "version": "24.6.0",
   "scripts": {
-    "clean": "rm -rf dist && rm -rf build",
+    "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
+<<<<<<< Updated upstream
     "build:dist": "rm -rf build && tsc --p tsconfig.dist.json && yarn copy-static-html",
     "copy-static-html": "copyfiles --exclude 'client-build/**/*' **/*.html icons/**/* build",
+=======
+    "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-html",
+    "copy-static-html": "copyfiles --exclude 'build/**/*' **/*.html build",
+>>>>>>> Stashed changes
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
   "main": "build/index.js",
@@ -22,8 +27,7 @@
       "!node_modules/@jlongster/sql.js",
       "!node_modules/absurd-sql",
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
-      "build",
-      "client-build"
+      "build"
     ],
     "publish": {
       "provider": "github",
