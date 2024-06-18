@@ -121,9 +121,7 @@ function CategoryList({
                   embedded,
                   style: {
                     ...(showHiddenItems &&
-                      item.hidden && {
-                        color: theme.pageTextSubdued,
-                      }),
+                      item.hidden && { color: theme.pageTextSubdued }),
                   },
                   showBalances,
                 })}
