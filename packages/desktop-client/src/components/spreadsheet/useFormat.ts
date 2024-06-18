@@ -7,6 +7,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 export type FormatType =
   | 'string'
   | 'number'
+  | 'percentage'
   | 'financial'
   | 'financial-with-sign';
 
@@ -25,6 +26,8 @@ function format(
       return val;
     case 'number':
       return '' + value;
+    case 'percentage':
+      return value + '%';
     case 'financial-with-sign':
       const formatted = format(value, 'financial', formatter);
       if (typeof value === 'number' && value >= 0) {

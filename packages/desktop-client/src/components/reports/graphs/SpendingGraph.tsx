@@ -45,6 +45,7 @@ type CustomTooltipProps = {
   payload?: PayloadItem[];
   balanceTypeOp?: string;
   thisMonth?: string;
+  lastYear?: string;
   selection?: string;
 };
 
@@ -53,6 +54,7 @@ const CustomTooltip = ({
   payload,
   balanceTypeOp,
   thisMonth,
+  lastYear,
   selection,
 }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
@@ -82,21 +84,27 @@ const CustomTooltip = ({
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload[0].payload.months[thisMonth].cumulative && (
+            {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
                 left="This month:"
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1,
                 )}
               />
-            )}
+            ) : null}
             {['cumulative'].includes(balanceTypeOp) && (
               <AlignedText
-                left={selection === 'average' ? 'Average' : 'Last month:'}
+                left={
+                  selection === 'average'
+                    ? 'Average'
+                    : selection === lastYear
+                      ? 'Last year'
+                      : 'Last month'
+                }
                 right={amountToCurrency(comparison)}
               />
             )}
-            {payload[0].payload.months[thisMonth].cumulative && (
+            {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
                 left="Difference:"
                 right={amountToCurrency(
@@ -104,7 +112,7 @@ const CustomTooltip = ({
                     comparison,
                 )}
               />
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -129,7 +137,20 @@ export function SpendingGraph({
   const balanceTypeOp = 'cumulative';
   const thisMonth = monthUtils.currentMonth();
   const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
-  const selection = mode.toLowerCase() === 'average' ? 'average' : lastMonth;
+  const lastYear = monthUtils.prevYear(monthUtils.currentMonth());
+  let selection;
+  switch (mode) {
+    case 'Average':
+      selection = 'average';
+      break;
+    case 'lastYear':
+      selection = lastYear;
+      break;
+    default:
+      selection = lastMonth;
+      break;
+  }
+
   const thisMonthMax = data.intervalData.reduce((a, b) =>
     a.months[thisMonth][balanceTypeOp] < b.months[thisMonth][balanceTypeOp]
       ? a
@@ -139,11 +160,11 @@ export function SpendingGraph({
     selection === 'average'
       ? data.intervalData[27].average
       : data.intervalData.reduce((a, b) =>
-          a.months[lastMonth][balanceTypeOp] <
-          b.months[lastMonth][balanceTypeOp]
+          a.months[selection][balanceTypeOp] <
+          b.months[selection][balanceTypeOp]
             ? a
             : b,
-        ).months[lastMonth][balanceTypeOp];
+        ).months[selection][balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(
     ...data.intervalData.map(i => i.months[thisMonth].cumulative),
@@ -233,6 +254,7 @@ export function SpendingGraph({
                     <CustomTooltip
                       balanceTypeOp={balanceTypeOp}
                       thisMonth={thisMonth}
+                      lastYear={lastYear}
                       selection={selection}
                     />
                   }

@@ -113,6 +113,9 @@ export function CustomReport() {
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
+  const [includeCurrentInterval, setIncludeCurrentInterval] = useState(
+    loadReport.includeCurrentInterval,
+  );
   const [showHiddenCategories, setShowHiddenCategories] = useState(
     loadReport.showHiddenCategories,
   );
@@ -124,8 +127,10 @@ export function CustomReport() {
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine =
-    ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeProps])
-      .length - 3;
+    interval === 'Daily'
+      ? 0
+      : ReportOptions.dateRange.filter(f => f[interval as keyof dateRangeProps])
+          .length - 3;
 
   const [intervals, setIntervals] = useState(
     monthUtils.rangeInclusive(startDate, endDate),
@@ -210,6 +215,7 @@ export function CustomReport() {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
           trans ? trans.date : monthUtils.currentDay(),
+          includeCurrentInterval,
           firstDayOfWeekIdx,
         );
         setStartDate(dateStart);
@@ -224,6 +230,7 @@ export function CustomReport() {
     isDateStatic,
     onApplyFilter,
     report.conditions,
+    includeCurrentInterval,
   ]);
 
   useEffect(() => {
@@ -338,6 +345,7 @@ export function CustomReport() {
     showEmpty,
     showOffBudget,
     showHiddenCategories,
+    includeCurrentInterval,
     showUncategorized,
     selectedCategories,
     graphType,
@@ -480,6 +488,7 @@ export function CustomReport() {
     setShowEmpty(input.showEmpty);
     setShowOffBudget(input.showOffBudget);
     setShowHiddenCategories(input.showHiddenCategories);
+    setIncludeCurrentInterval(input.includeCurrentInterval);
     setShowUncategorized(input.showUncategorized);
     setSelectedCategories(input.selectedCategories || selectAll);
     setGraphType(input.graphType);
@@ -581,6 +590,7 @@ export function CustomReport() {
             setShowEmpty={setShowEmpty}
             setShowOffBudget={setShowOffBudget}
             setShowHiddenCategories={setShowHiddenCategories}
+            setIncludeCurrentInterval={setIncludeCurrentInterval}
             setShowUncategorized={setShowUncategorized}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}

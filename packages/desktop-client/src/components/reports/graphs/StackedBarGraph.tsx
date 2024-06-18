@@ -33,6 +33,7 @@ import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
 
 import { renderCustomLabel } from './renderCustomLabel';
+import { showActivity } from './showActivity';
 
 type PayloadItem = {
   name: string;
@@ -146,6 +147,7 @@ type StackedBarGraphProps = {
   balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  interval?: string;
 };
 
 export function StackedBarGraph({
@@ -158,6 +160,7 @@ export function StackedBarGraph({
   balanceTypeOp,
   showHiddenCategories,
   showOffBudget,
+  interval,
 }: StackedBarGraphProps) {
   const navigate = useNavigate();
   const categories = useCategories();
@@ -172,53 +175,6 @@ export function StackedBarGraph({
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
-
-  const onShowActivity = (item, id) => {
-    const amount = balanceTypeOp === 'totalDebts' ? 'lte' : 'gte';
-    const field = groupBy === 'Interval' ? null : groupBy.toLowerCase();
-    const hiddenCategories = categories.list
-      .filter(f => f.hidden)
-      .map(e => e.id);
-    const offBudgetAccounts = accounts.filter(f => f.offbudget).map(e => e.id);
-
-    const conditions = [
-      ...filters,
-      { field, op: 'is', value: id, type: 'id' },
-      {
-        field: 'date',
-        op: 'is',
-        value: item.dateStart,
-        options: { date: true },
-      },
-      balanceTypeOp !== 'totalTotals' && {
-        field: 'amount',
-        op: amount,
-        value: 0,
-        type: 'number',
-      },
-      hiddenCategories.length > 0 &&
-        !showHiddenCategories && {
-          field: 'category',
-          op: 'notOneOf',
-          value: hiddenCategories,
-          type: 'id',
-        },
-      offBudgetAccounts.length > 0 &&
-        !showOffBudget && {
-          field: 'account',
-          op: 'notOneOf',
-          value: offBudgetAccounts,
-          type: 'id',
-        },
-    ].filter(f => f);
-    navigate('/accounts', {
-      state: {
-        goBack: true,
-        conditions,
-        categoryId: item.id,
-      },
-    });
-  };
 
   return (
     <Container
@@ -236,7 +192,7 @@ export function StackedBarGraph({
                 width={width}
                 height={height}
                 data={data.intervalData}
-                margin={{ top: 0, right: 0, left: leftMargin, bottom: 0 }}
+                margin={{ top: 0, right: 0, left: leftMargin, bottom: 10 }}
                 style={{ cursor: pointer }}
               >
                 {(!isNarrowWidth || !compact) && (
@@ -297,7 +253,21 @@ export function StackedBarGraph({
                       onClick={e =>
                         !isNarrowWidth &&
                         !['Group', 'Interval'].includes(groupBy) &&
-                        onShowActivity(e, entry.id)
+                        showActivity({
+                          navigate,
+                          categories,
+                          accounts,
+                          balanceTypeOp,
+                          filters,
+                          showHiddenCategories,
+                          showOffBudget,
+                          type: 'time',
+                          startDate: e.intervalStartDate,
+                          endDate: e.intervalEndDate,
+                          field: groupBy.toLowerCase(),
+                          id: entry.id,
+                          interval,
+                        })
                       }
                     >
                       {viewLabels && !compact && (

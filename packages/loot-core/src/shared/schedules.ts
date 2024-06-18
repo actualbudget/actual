@@ -36,7 +36,7 @@ export function getHasTransactionsQuery(schedules) {
           $gte:
             dateCond && dateCond.op === 'is'
               ? schedule.next_date
-              : monthUtils.subDays(schedule.next_date, 7),
+              : monthUtils.subDays(schedule.next_date, 2),
         },
       },
     };

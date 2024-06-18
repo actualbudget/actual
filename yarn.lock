@@ -85,6 +85,7 @@ __metadata:
     "@use-gesture/react": "npm:^10.3.0"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
     "@vitejs/plugin-react-swc": "npm:^3.6.0"
+    auto-text-size: "npm:^0.2.3"
     chokidar: "npm:^3.5.3"
     cross-env: "npm:^7.0.3"
     date-fns: "npm:^2.30.0"
@@ -6707,6 +6708,15 @@ __metadata:
   version: 1.0.0
   resolution: "at-least-node@npm:1.0.0"
   checksum: 463e2f8e43384f1afb54bc68485c436d7622acec08b6fad269b421cb1d29cebb5af751426793d0961ed243146fe4dc983402f6d5a51b720b277818dbf6f2e49e
+  languageName: node
+  linkType: hard
+
+"auto-text-size@npm:^0.2.3":
+  version: 0.2.3
+  resolution: "auto-text-size@npm:0.2.3"
+  peerDependencies:
+    react: "*"
+  checksum: 229f20d6801d074ee4dfa542eac41d9a6e95880761f79f6fc4c31bebfc35bd045d6aeb8dc8bdc846154ce8d28e10e9bbb013a5b574f6a3254027988b789b1514
   languageName: node
   linkType: hard
 

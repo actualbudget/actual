@@ -5,7 +5,7 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'spendingReport'
   | 'simpleFinSync'
-  | 'splitsInRules';
+  | 'iterableTopologicalSort';
 
 export type LocalPrefs = Partial<
   {

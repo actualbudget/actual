@@ -73,7 +73,9 @@ module.exports = {
         // `terserOptions` options will be passed to `swc` (`@swc/core`)
         // Link to options - https://swc.rs/docs/config-js-minify
         terserOptions: {
-          compress: false,
+          compress: {
+            drop_debugger: false,
+          },
           mangle: true,
         },
       }),
