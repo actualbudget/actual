@@ -59,12 +59,6 @@ export const ReportTableRow = memo(
     height,
     interval,
   }: ReportTableRowProps) => {
-    const balanceName =
-      balanceTypeOp === 'totalAssets'
-        ? 'netAssets'
-        : balanceTypeOp === 'totalDebts'
-          ? 'netDebts'
-          : 'totalTotals';
     const average = amountToInteger(item[balanceTypeOp]) / intervalsCount;
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
 
@@ -133,7 +127,7 @@ export const ReportTableRow = memo(
                     }}
                     linkStyle={hoverUnderline}
                     valueStyle={compactStyle}
-                    value={amountToCurrency(intervalItem[balanceName] || 0)}
+                    value={amountToCurrency(intervalItem[balanceTypeOp])}
                     title={
                       Math.abs(intervalItem[balanceTypeOp]) > 100000
                         ? amountToCurrency(intervalItem[balanceTypeOp])
@@ -168,7 +162,7 @@ export const ReportTableRow = memo(
             : balanceTypeOp === 'totalTotals' && (
                 <>
                   <Cell
-                    value={amountToCurrency(item.netAssets || 0)}
+                    value={amountToCurrency(item.totalAssets)}
                     title={
                       Math.abs(item.totalAssets) > 100000
                         ? amountToCurrency(item.totalAssets)
@@ -203,7 +197,7 @@ export const ReportTableRow = memo(
                     }
                   />
                   <Cell
-                    value={amountToCurrency(item.netDebts || 0)}
+                    value={amountToCurrency(item.totalDebts)}
                     title={
                       Math.abs(item.totalDebts) > 100000
                         ? amountToCurrency(item.totalDebts)
@@ -240,7 +234,7 @@ export const ReportTableRow = memo(
                 </>
               )}
           <Cell
-            value={amountToCurrency(item[balanceName])}
+            value={amountToCurrency(item[balanceTypeOp])}
             title={
               Math.abs(item[balanceTypeOp]) > 100000
                 ? amountToCurrency(item[balanceTypeOp])
