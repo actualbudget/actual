@@ -148,7 +148,7 @@ export function Menu<T extends MenuItem>({
 
         return (
           <View
-            role="button"
+            role="option"
             key={item.name}
             style={{
               cursor: 'default',

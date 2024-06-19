@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react';
 
 import { SvgExpandArrow } from '../../icons/v0';
+import { type CSSProperties } from '../../style';
 
 import { Button } from './Button';
 import { Menu } from './Menu';
 import { Popover } from './Popover';
+import { View } from './View';
 
 function isValueOption<Value extends string>(
   option: [Value, string] | typeof Menu.line,
@@ -18,7 +20,9 @@ type SelectProps<Value extends string> = {
   value: Value;
   defaultLabel?: string;
   onChange?: (newValue: Value) => void;
+  disabled?: boolean;
   disabledKeys?: Value[];
+  buttonStyle?: CSSProperties;
 };
 
 /**
@@ -40,7 +44,9 @@ export function Select<Value extends string>({
   value,
   defaultLabel = '',
   onChange,
+  disabled = false,
   disabledKeys = [],
+  buttonStyle = {},
 }: SelectProps<Value>) {
   const targetOption = options
     .filter(isValueOption)
@@ -54,26 +60,44 @@ export function Select<Value extends string>({
       <Button
         ref={triggerRef}
         type={bare ? 'bare' : 'normal'}
+        disabled={disabled}
         onClick={() => {
           setIsOpen(true);
         }}
-        hoveredStyle={
-          bare
-            ? {
-                backgroundColor: 'transparent',
-              }
-            : undefined
-        }
+        style={buttonStyle}
+        hoveredStyle={{
+          backgroundColor: bare ? 'transparent' : undefined,
+          ...buttonStyle,
+        }}
       >
-        {targetOption ? targetOption[1] : defaultLabel}
-        <SvgExpandArrow
+        <View
           style={{
-            width: 7,
-            height: 7,
-            color: 'inherit',
-            marginLeft: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 5,
+            width: '100%',
           }}
-        />
+        >
+          <span
+            style={{
+              textAlign: 'left',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              width: 'calc(100% - 7px)',
+            }}
+          >
+            {targetOption ? targetOption[1] : defaultLabel}
+          </span>
+          <SvgExpandArrow
+            style={{
+              width: 7,
+              height: 7,
+              color: 'inherit',
+            }}
+          />
+        </View>
       </Button>
 
       <Popover

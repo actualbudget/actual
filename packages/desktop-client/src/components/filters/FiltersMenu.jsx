@@ -110,7 +110,6 @@ function ConfigureField({
                   dispatch({ type: 'set-op', op: 'is' });
                 }
               }}
-              style={{ borderWidth: 1 }}
             />
           ) : (
             titleFirst(mapField(field))
