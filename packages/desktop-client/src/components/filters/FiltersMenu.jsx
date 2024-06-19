@@ -87,7 +87,6 @@ function ConfigureField({
         <Stack direction="row" align="flex-start">
           {field === 'amount' || field === 'date' ? (
             <Select
-              bare
               options={
                 field === 'amount'
                   ? [

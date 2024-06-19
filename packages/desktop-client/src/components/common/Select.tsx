@@ -54,13 +54,17 @@ export function Select<Value extends string>({
     <>
       <Button
         ref={triggerRef}
-        type={bare ? 'bare' : undefined}
+        type={bare ? 'bare' : 'normal'}
         onClick={() => {
           setIsOpen(true);
         }}
-        hoveredStyle={{
-          backgroundColor: bare ? 'transparent' : theme.cardBackground,
-        }}
+        hoveredStyle={
+          bare
+            ? {
+                backgroundColor: 'transparent',
+              }
+            : undefined
+        }
       >
         {targetOption ? targetOption[1] : defaultLabel}
         <SvgExpandArrow
@@ -79,7 +83,10 @@ export function Select<Value extends string>({
         onOpenChange={() => setIsOpen(false)}
       >
         <Menu
-          onMenuSelect={onChange}
+          onMenuSelect={item => {
+            onChange?.(item);
+            setIsOpen(false);
+          }}
           items={options.map(item =>
             item === Menu.line
               ? Menu.line
