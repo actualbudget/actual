@@ -184,11 +184,15 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
+    if (balanceTypeOp === 'totalTotals') {
+      return obj.totalAssets;
+    }
+
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
-    } else {
-      return obj[balanceTypeOp];
     }
+
+    return obj[balanceTypeOp];
   };
 
   const longestLabelLength = data[splitData]
