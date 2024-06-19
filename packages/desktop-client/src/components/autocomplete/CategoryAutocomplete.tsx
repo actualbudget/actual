@@ -7,6 +7,7 @@ import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  useCallback,
 } from 'react';
 
 import { css } from 'glamor';
@@ -135,6 +136,21 @@ function CategoryList({
   );
 }
 
+function customSort(obj: CategoryAutocompleteItem, value: string): number {
+  const name = obj.name.toLowerCase();
+  const groupName = obj.group ? obj.group.name.toLowerCase() : '';
+  if (obj.id === 'split') {
+    return -2;
+  }
+  if (name.includes(value)) {
+    return -1;
+  }
+  if (groupName.includes(value)) {
+    return 0;
+  }
+  return 1;
+}
+
 type CategoryAutocompleteProps = ComponentProps<
   typeof Autocomplete<CategoryAutocompleteItem>
 > & {
@@ -183,6 +199,33 @@ export function CategoryAutocomplete({
     [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
+  const filterSuggestions = useCallback(
+    (
+      suggestions: CategoryAutocompleteItem[],
+      value: string,
+    ): CategoryAutocompleteItem[] => {
+      return suggestions
+        .filter(suggestion => {
+          return (
+            suggestion.id === 'split' ||
+            suggestion.group?.name
+              .toLowerCase()
+              .includes(value.toLowerCase()) ||
+            (suggestion.group?.name + ' ' + suggestion.name)
+              .toLowerCase()
+              .includes(value.toLowerCase()) ||
+            defaultFilterSuggestion(suggestion, value)
+          );
+        })
+        .sort(
+          (a, b) =>
+            customSort(a, value.toLowerCase()) -
+            customSort(b, value.toLowerCase()),
+        );
+    },
+    [],
+  );
+
   return (
     <Autocomplete
       strict={true}
@@ -197,14 +240,7 @@ export function CategoryAutocomplete({
         }
         return 0;
       }}
-      filterSuggestions={(suggestions, value) => {
-        return suggestions.filter(suggestion => {
-          return (
-            suggestion.id === 'split' ||
-            defaultFilterSuggestion(suggestion, value)
-          );
-        });
-      }}
+      filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList
