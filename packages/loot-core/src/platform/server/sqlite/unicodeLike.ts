@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import LRU from 'lru-cache';
 
 const likePatternCache = new LRU({ max: 500 });
@@ -10,7 +11,7 @@ export function UnicodeLike(
     return 0;
   }
 
-  if (!value){
+  if (!value) {
     value = '';
   }
 
