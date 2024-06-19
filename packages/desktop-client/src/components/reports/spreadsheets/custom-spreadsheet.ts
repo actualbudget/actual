@@ -13,7 +13,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 import {
-  balanceTypeOpType,
+  type balanceTypeOpType,
   type DataEntity,
   type GroupedEntity,
   type IntervalEntity,

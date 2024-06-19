@@ -25,8 +25,12 @@ export interface CustomReportEntity {
   tombstone?: boolean;
 }
 
-export type balanceTypeOpType = 
-  'totalAssets' | 'totalDebts' | 'totalTotals'| 'netAssets' | 'netDebts';
+export type balanceTypeOpType =
+  | 'totalAssets'
+  | 'totalDebts'
+  | 'totalTotals'
+  | 'netAssets'
+  | 'netDebts';
 
 export type SpendingMonthEntity = Record<
   string | number,

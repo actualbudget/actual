@@ -1,4 +1,7 @@
-import { balanceTypeOpType, type GroupedEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type GroupedEntity,
+} from 'loot-core/src/types/models/reports';
 
 export function filterEmptyRows({
   showEmpty,

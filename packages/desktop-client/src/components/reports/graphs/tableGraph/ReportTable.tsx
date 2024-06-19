@@ -9,7 +9,7 @@ import React, {
 import {
   type GroupedEntity,
   type DataEntity,
-  balanceTypeOpType,
+  type balanceTypeOpType,
 } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 

@@ -35,6 +35,8 @@ const balanceTypeOptions = [
   { description: 'Payment', format: 'totalDebts' as const },
   { description: 'Deposit', format: 'totalAssets' as const },
   { description: 'Net', format: 'totalTotals' as const },
+  { description: 'Net Payment', format: 'netDebts' as const },
+  { description: 'Net Deposit', format: 'netAssets' as const },
 ];
 
 const groupByOptions = [

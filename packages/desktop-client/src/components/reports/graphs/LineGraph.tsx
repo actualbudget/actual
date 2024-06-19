@@ -16,7 +16,10 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { balanceTypeOpType, type DataEntity } from 'loot-core/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';

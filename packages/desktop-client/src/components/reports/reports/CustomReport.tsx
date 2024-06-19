@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import {
-  balanceTypeOpType,
+  type balanceTypeOpType,
   type CustomReportEntity,
   type DataEntity,
 } from 'loot-core/types/models/reports';

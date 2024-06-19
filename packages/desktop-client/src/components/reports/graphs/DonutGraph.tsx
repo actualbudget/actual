@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
-import { balanceTypeOpType, type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';

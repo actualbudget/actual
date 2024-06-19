@@ -4,10 +4,10 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { type AccountEntity } from 'loot-core/types/models/account';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
+import { type balanceTypeOpType } from 'loot-core/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { ReportOptions } from '../ReportOptions';
-import { balanceTypeOpType } from 'loot-core/types/models/reports';
 
 type showActivityProps = {
   navigate: NavigateFunction;

@@ -2,7 +2,7 @@ import {
   type LegendEntity,
   type IntervalEntity,
   type GroupedEntity,
-  balanceTypeOpType,
+  type balanceTypeOpType,
 } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';

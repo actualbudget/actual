@@ -1,6 +1,9 @@
 import React, { type RefObject, type UIEventHandler } from 'react';
 
-import { balanceTypeOpType, type IntervalEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type IntervalEntity,
+} from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../../style';
 import { type CSSProperties } from '../../../../style/types';
