@@ -271,7 +271,7 @@ export function AccountHeader({
                     }
                     style={{ marginRight: 4 }}
                   />{' '}
-                  {isServerOffline ? 'Sync offline' : 'Sync'}
+                  {isServerOffline ? 'Bank Sync Offline' : 'Bank Sync'}
                 </>
               ) : (
                 <>
