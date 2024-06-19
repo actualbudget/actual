@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 
 import { SvgExpandArrow } from '../../icons/v0';
-import { theme } from '../../style';
 
 import { Button } from './Button';
 import { Menu } from './Menu';
