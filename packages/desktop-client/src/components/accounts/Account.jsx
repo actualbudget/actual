@@ -1176,25 +1176,45 @@ class AccountInternal extends PureComponent {
       const [fromTrans, toTrans] = transactions;
 
       if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
-        const fromPayee = payees.find(
-          p => p.transfer_acct === fromTrans.account,
-        );
-        const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+        let changes = {};
+        const transfers = [fromTrans, toTrans].filter(t => t.transfer_id);
 
-        const changes = {
-          updated: [
-            {
-              ...fromTrans,
-              payee: toPayee.id,
-              transfer_id: toTrans.id,
-            },
-            {
-              ...toTrans,
-              payee: fromPayee.id,
-              transfer_id: fromTrans.id,
-            },
-          ],
-        };
+        if (transfers.length === 0) {
+          // Converting 2 transactions into 1 transfer
+          const fromPayee = payees.find(
+            p => p.transfer_acct === fromTrans.account,
+          );
+          const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+          changes = {
+            updated: [
+              {
+                ...fromTrans,
+                payee: toPayee.id,
+                transfer_id: toTrans.id,
+              },
+              {
+                ...toTrans,
+                payee: fromPayee.id,
+                transfer_id: fromTrans.id,
+              },
+            ],
+          };
+        } else if (transfers.length === 1) {
+          // Merging transfer with a transaction
+          const [transfer] = transfers;
+          const [mergedTrans] = transactions.filter(t => t.id !== transfer.id);
+          changes = {
+            updated: [
+              {
+                ...mergedTrans,
+                id: transfer.id,
+                payee: transfer.payee,
+                transfer_id: transfer.transfer_id,
+              },
+            ],
+            deleted: [{ id: mergedTrans.id, payee: mergedTrans.payee }],
+          };
+        }
 
         await send('transactions-batch-update', changes);
       }

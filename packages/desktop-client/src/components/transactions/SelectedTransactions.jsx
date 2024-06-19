@@ -19,7 +19,6 @@ export function SelectedTransactionsButton({
   onSetTransfer,
   onScheduleAction,
   pushModal,
-  showMakeTransfer,
 }) {
   const selectedItems = useSelectedItems();
 
@@ -134,15 +133,11 @@ export function SelectedTransactionsButton({
                       text: 'Create rule',
                     },
                   ]),
-              ...(showMakeTransfer
-                ? [
-                    {
-                      name: 'set-transfer',
-                      text: 'Make transfer',
-                      disabled: !canBeTransfer,
-                    },
-                  ]
-                : []),
+              {
+                name: 'set-transfer',
+                text: 'Make transfer',
+                disabled: !canBeTransfer,
+              },
               Menu.line,
               { type: Menu.label, name: 'Edit field' },
               { name: 'date', text: 'Date' },
