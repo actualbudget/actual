@@ -18,12 +18,9 @@ export function ThemeSettings() {
         <Button bounce={false} style={{ padding: 0 }}>
           <Select<Theme>
             bare
-            onChange={value => {
-              switchTheme(value);
-            }}
+            onChange={switchTheme}
             value={theme}
             options={themeOptions}
-            style={{ padding: '2px 10px', fontSize: 15 }}
           />
         </Button>
       }
