@@ -1,6 +1,6 @@
 import React, { type RefObject, type UIEventHandler } from 'react';
 
-import { type IntervalEntity } from 'loot-core/src/types/models/reports';
+import { balanceTypeOpType, type IntervalEntity } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../../style';
 import { type CSSProperties } from '../../../../style/types';
@@ -12,7 +12,7 @@ type ReportTableHeaderProps = {
   groupBy: string;
   interval: string;
   data: IntervalEntity[];
-  balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
+  balanceTypeOp: balanceTypeOpType;
   headerScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   compact: boolean;

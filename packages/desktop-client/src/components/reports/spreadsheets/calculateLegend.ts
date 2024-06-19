@@ -2,6 +2,7 @@ import {
   type LegendEntity,
   type IntervalEntity,
   type GroupedEntity,
+  balanceTypeOpType,
 } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';
@@ -12,7 +13,7 @@ export function calculateLegend(
   calcDataFiltered: GroupedEntity[],
   groupBy: string,
   graphType?: string,
-  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals',
+  balanceTypeOp?: balanceTypeOpType,
 ): LegendEntity[] {
   const colorScale = getColorScale('qualitative');
   const chooseData =

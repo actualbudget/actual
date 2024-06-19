@@ -6,7 +6,7 @@ import {
   integerToCurrency,
   amountToInteger,
 } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { balanceTypeOpType, type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
@@ -19,7 +19,7 @@ type ReportSummaryProps = {
   startDate: string;
   endDate: string;
   data: DataEntity;
-  balanceTypeOp: 'totalDebts' | 'totalAssets' | 'totalTotals';
+  balanceTypeOp: balanceTypeOpType;
   interval: string;
   intervalsCount: number;
 };

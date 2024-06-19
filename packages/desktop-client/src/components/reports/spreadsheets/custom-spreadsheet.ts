@@ -13,6 +13,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 import {
+  balanceTypeOpType,
   type DataEntity,
   type GroupedEntity,
   type IntervalEntity,
@@ -46,7 +47,7 @@ export type createCustomSpreadsheetProps = {
   showHiddenCategories: boolean;
   showUncategorized: boolean;
   groupBy?: string;
-  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
+  balanceTypeOp?: balanceTypeOpType;
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;

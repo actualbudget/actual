@@ -16,7 +16,7 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import { balanceTypeOpType, type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { useResponsive } from '../../../ResponsiveProvider';
@@ -40,7 +40,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp: 'totalAssets' | 'totalTotals' | 'totalDebts';
+  balanceTypeOp: balanceTypeOpType;
 };
 
 const CustomTooltip = ({
@@ -132,7 +132,7 @@ const customLabel = ({
 type AreaGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
-  balanceTypeOp: 'totalAssets' | 'totalTotals' | 'totalDebts';
+  balanceTypeOp: balanceTypeOpType;
   compact?: boolean;
   viewLabels: boolean;
 };
