@@ -19,6 +19,7 @@ import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
+import { integerToCurrency } from 'loot-core/shared/util';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -35,7 +36,7 @@ export function NetWorthGraph({
   const { isNarrowWidth } = useResponsive();
 
   const tickFormatter = tick => {
-    return privacyMode ? '...' : `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    return privacyMode ? '...' : `${integerToCurrency(Math.round(tick))}`; // Formats the tick values as strings with commas
   };
 
   const gradientOffset = () => {
@@ -121,7 +122,12 @@ export function NetWorthGraph({
                 width={width}
                 height={height}
                 data={graphData.data}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                margin={{
+                  top: 0,
+                  right: 0,
+                  left: computePadding(graphData.data),
+                  bottom: 0,
+                }}
               >
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -179,4 +185,27 @@ export function NetWorthGraph({
       }
     </Container>
   );
+}
+
+/**
+ * Add left padding for Y-axis for when large amounts get clipped
+ * @param netWorthData
+ * @returns left padding for Net worth graph
+ */
+function computePadding(netWorthData: Array<{ y: number }>) {
+  /**
+   * Convert to string notation, get longest string length
+   */
+  const maxLength = Math.max(
+    ...netWorthData.map(({ y }) => {
+      return integerToCurrency(Math.round(y)).length;
+    }),
+  );
+
+  if (maxLength <= 5) {
+    // No additional left padding is required for upto 5 characters
+    return 0;
+  }
+
+  return (maxLength - 5) * 5;
 }
