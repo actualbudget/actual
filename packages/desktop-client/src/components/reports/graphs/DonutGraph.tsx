@@ -212,10 +212,10 @@ export function DonutGraph({
   const [pointer, setPointer] = useState('');
 
   const getVal = obj => {
-    if (balanceTypeOp === 'totalDebts') {
-      return obj.totalTotals < 0 && Math.abs(obj.totalTotals);
+    if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+      return -1 * obj[balanceTypeOp];
     } else {
-      return obj.totalTotals > 0 && Math.abs(obj.totalTotals);
+      return obj[balanceTypeOp];
     }
   };
 

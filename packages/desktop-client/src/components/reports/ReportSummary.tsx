@@ -36,9 +36,13 @@ export function ReportSummary({
   intervalsCount,
 }: ReportSummaryProps) {
   const net =
-    Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
-      ? 'PAYMENT'
-      : 'DEPOSIT';
+    balanceTypeOp === 'netAssets'
+      ? 'DEPOSIT'
+      : balanceTypeOp === 'netDebts'
+        ? 'PAYMENT'
+        : Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
+          ? 'PAYMENT'
+          : 'DEPOSIT';
   const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;
   return (
     <View

@@ -154,11 +154,16 @@ export function createCustomSpreadsheet({
 
     let totalAssets = 0;
     let totalDebts = 0;
+    let netAssets = 0;
+    let netDebts = 0;
 
     const intervalData = intervals.reduce(
       (arr: IntervalEntity[], intervalItem, index) => {
         let perIntervalAssets = 0;
         let perIntervalDebts = 0;
+        let perIntervalNetAssets = 0;
+        let perIntervalNetDebts = 0;
+        let perIntervalTotals = 0;
         const stacked: Record<string, number> = {};
 
         groupByList.map(item => {
@@ -194,20 +199,45 @@ export function createCustomSpreadsheet({
             .reduce((a, v) => (a = a + v.amount), 0);
           perIntervalDebts += intervalDebts;
 
+          const netAmounts = intervalAssets + intervalDebts;
+
           if (balanceTypeOp === 'totalAssets') {
             stackAmounts += intervalAssets;
           }
           if (balanceTypeOp === 'totalDebts') {
-            stackAmounts += intervalDebts;
+            stackAmounts += Math.abs(intervalDebts);
+          }
+          if (balanceTypeOp === 'netAssets') {
+            stackAmounts += netAmounts > 0 ? netAmounts : 0;
+          }
+          if (balanceTypeOp === 'netDebts') {
+            stackAmounts = netAmounts < 0 ? Math.abs(netAmounts) : 0;
+          }
+          if (balanceTypeOp === 'totalTotals') {
+            stackAmounts += netAmounts;
           }
           if (stackAmounts !== 0) {
-            stacked[item.name] = integerToAmount(Math.abs(stackAmounts));
+            stacked[item.name] = integerToAmount(stackAmounts);
           }
+
+          const intervalTotals = intervalAssets + intervalDebts;
+
+          perIntervalNetAssets =
+            intervalTotals > 0
+              ? perIntervalNetAssets + intervalTotals
+              : perIntervalNetAssets;
+          perIntervalNetDebts =
+            intervalTotals < 0
+              ? perIntervalNetDebts + intervalTotals
+              : perIntervalNetDebts;
+          perIntervalTotals += intervalTotals;
 
           return null;
         });
         totalAssets += perIntervalAssets;
         totalDebts += perIntervalDebts;
+        netAssets += perIntervalNetAssets;
+        netDebts += perIntervalNetDebts;
 
         arr.push({
           date: d.format(
@@ -220,9 +250,11 @@ export function createCustomSpreadsheet({
             index + 1 === intervals.length
               ? endDate
               : monthUtils.subDays(intervals[index + 1], 1),
-          totalDebts: integerToAmount(perIntervalDebts),
           totalAssets: integerToAmount(perIntervalAssets),
-          totalTotals: integerToAmount(perIntervalDebts + perIntervalAssets),
+          totalDebts: integerToAmount(perIntervalDebts),
+          netAssets: integerToAmount(perIntervalNetAssets),
+          netDebts: integerToAmount(perIntervalNetDebts),
+          totalTotals: integerToAmount(perIntervalTotals),
         });
 
         return arr;
@@ -249,6 +281,8 @@ export function createCustomSpreadsheet({
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
 
+    const totalTotals = totalAssets + totalDebts;
+
     const legend = calculateLegend(
       intervalData,
       calcDataFiltered,
@@ -263,9 +297,11 @@ export function createCustomSpreadsheet({
       legend,
       startDate,
       endDate,
-      totalDebts: integerToAmount(totalDebts),
       totalAssets: integerToAmount(totalAssets),
-      totalTotals: integerToAmount(totalAssets + totalDebts),
+      totalDebts: integerToAmount(totalDebts),
+      netAssets: integerToAmount(netAssets),
+      netDebts: integerToAmount(netDebts),
+      totalTotals: integerToAmount(totalTotals),
     });
     setDataCheck?.(true);
   };

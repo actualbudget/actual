@@ -53,6 +53,8 @@ type PayloadItem = {
     name: string;
     totalAssets: number | string;
     totalDebts: number | string;
+    netAssets: number | string;
+    netDebts: number | string;
     totalTotals: number | string;
     networth: number | string;
     totalChange: number | string;
@@ -99,8 +101,20 @@ const CustomTooltip = ({
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Debt:"
+                left="Debts:"
                 right={amountToCurrency(payload[0].payload.totalDebts)}
+              />
+            )}
+            {['netAssets'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net Assets:"
+                right={amountToCurrency(payload[0].payload.netAssets)}
+              />
+            )}
+            {['netDebts'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net Debts:"
+                right={amountToCurrency(payload[0].payload.netDebts)}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
@@ -170,10 +184,10 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (balanceTypeOp === 'totalDebts') {
-      return -1 * obj.totalDebts;
+    if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+      return -1 * obj[balanceTypeOp];
     } else {
-      return obj.totalAssets;
+      return obj[balanceTypeOp];
     }
   };
 

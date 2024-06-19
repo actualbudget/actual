@@ -88,7 +88,7 @@ const timeGraphOptions: graphOptions[] = [
     description: 'TableGraph',
     disabledSplit: ['Interval'],
     defaultSplit: 'Category',
-    disabledType: [],
+    disabledType: ['Net Payment', 'Net Deposit'],
     defaultType: 'Payment',
     disableLegend: true,
     disableLabel: true,

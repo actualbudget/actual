@@ -75,8 +75,8 @@ export interface DataEntity {
   endDate?: string;
   totalDebts: number;
   totalAssets: number;
-  netAssets?: number;
-  netDebts?: number;
+  netAssets: number;
+  netDebts: number;
   totalTotals: number;
 }
 
@@ -93,8 +93,8 @@ export type IntervalEntity = {
   intervalEndDate?: string;
   totalAssets: number;
   totalDebts: number;
-  netAssets?: number;
-  netDebts?: number;
+  netAssets: number;
+  netDebts: number;
   totalTotals: number;
 };
 
@@ -106,8 +106,8 @@ export interface GroupedEntity {
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
-  netAssets?: number;
-  netDebts?: number;
+  netAssets: number;
+  netDebts: number;
   categories?: GroupedEntity[];
 }
 
