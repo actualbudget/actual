@@ -9,6 +9,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   customReports: false,
   spendingReport: false,
   simpleFinSync: false,
+  iterableTopologicalSort: true,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

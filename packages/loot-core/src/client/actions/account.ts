@@ -243,5 +243,6 @@ export function moveAccount(id, targetId) {
   return async (dispatch: Dispatch) => {
     await send('account-move', { id, targetId });
     dispatch(getAccounts());
+    dispatch(getPayees());
   };
 }
