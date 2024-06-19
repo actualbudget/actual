@@ -666,6 +666,68 @@ handlers['api/rule-delete'] = withMutation(async function ({ id }) {
   return handlers['rule-delete'](id);
 });
 
+handlers['api/schedules-get'] = async function () {
+  checkFileOpen();
+  const { data } = await aqlQuery(
+    q('schedules').select('*')
+  );
+
+  return data;
+};
+
+handlers['api/schedule-create'] = withMutation(async function ({
+  schedule = null,
+  conditions = []
+}) {
+  checkFileOpen();
+  return handlers['schedule/create']({
+    schedule,
+    conditions,
+  });
+});
+
+handlers['api/schedule-update'] = withMutation(async function ({
+  schedule,
+  conditions = [],
+  resetNextDate = false
+}) {
+  checkFileOpen();
+  return handlers['schedule/update']({
+    schedule,
+    conditions,
+    resetNextDate
+  });
+});
+
+handlers['api/schedule-delete'] = withMutation(async function ({
+  id,
+}) {
+  checkFileOpen();
+  return handlers['schedule/delete']({
+    id,
+  });
+});
+
+handlers['api/schedule-skip-next-date'] = withMutation(async function ({
+  id,
+}) {
+  checkFileOpen();
+  return handlers['schedule/skip-next-date']({
+    id,
+  });
+});
+
+handlers['api/schedule-get-upcoming-dates'] = withMutation(async function ({
+  config,
+  count,
+}) {
+  checkFileOpen();
+  return handlers['schedule/get-upcoming-dates']({
+    config,
+    count,
+  });
+});
+
 export function installAPI(serverHandlers: ServerHandlers) {
   const merged = Object.assign({}, serverHandlers, handlers);
   handlers = merged as Handlers;
