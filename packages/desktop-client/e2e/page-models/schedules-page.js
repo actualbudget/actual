@@ -84,6 +84,7 @@ export class SchedulesPage {
 
     if (data.amount) {
       await this.page.getByLabel('Amount').fill(String(data.amount));
+      await this.page.keyboard.press('Enter');
     }
   }
 }
