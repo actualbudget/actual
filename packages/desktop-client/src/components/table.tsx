@@ -31,6 +31,7 @@ import { type CSSProperties, styles, theme } from '../style';
 import { Button } from './common/Button';
 import { Input } from './common/Input';
 import { Menu } from './common/Menu';
+import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { FixedSizeList } from './FixedSizeList';
@@ -41,7 +42,7 @@ import {
 import { type Binding } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
-import { Tooltip, IntersectionBoundary } from './tooltips';
+import { IntersectionBoundary } from './tooltips';
 
 export const ROW_HEIGHT = 32;
 
@@ -383,38 +384,24 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   onUpdate?: ComponentProps<typeof InputValue>['onUpdate'];
   onBlur?: ComponentProps<typeof InputValue>['onBlur'];
   textAlign?: CSSProperties['textAlign'];
-  error?: ReactNode;
 };
 export function InputCell({
   inputProps,
   onUpdate,
   onBlur,
   textAlign,
-  error,
   ...props
 }: InputCellProps) {
   return (
     <Cell textAlign={textAlign} {...props}>
       {() => (
-        <>
-          <InputValue
-            value={props.value}
-            onUpdate={onUpdate}
-            onBlur={onBlur}
-            style={{ textAlign, ...(inputProps && inputProps.style) }}
-            {...inputProps}
-          />
-          {error && (
-            <Tooltip
-              key="error"
-              targetHeight={ROW_HEIGHT}
-              width={180}
-              position="bottom-left"
-            >
-              {error}
-            </Tooltip>
-          )}
-        </>
+        <InputValue
+          value={props.value}
+          onUpdate={onUpdate}
+          onBlur={onBlur}
+          style={{ textAlign, ...(inputProps && inputProps.style) }}
+          {...inputProps}
+        />
       )}
     </Cell>
   );
@@ -809,6 +796,7 @@ export function TableHeader({
 export function SelectedItemsButton({ name, items, onSelect }) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(null);
+  const triggerRef = useRef(null);
 
   if (selectedItems.size === 0) {
     return null;
@@ -817,6 +805,7 @@ export function SelectedItemsButton({ name, items, onSelect }) {
   return (
     <View style={{ marginLeft: 10, flexShrink: 0 }}>
       <Button
+        ref={triggerRef}
         type="bare"
         style={{ color: theme.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
@@ -830,23 +819,25 @@ export function SelectedItemsButton({ name, items, onSelect }) {
         {selectedItems.size} {name}
       </Button>
 
-      {menuOpen && (
-        <Tooltip
-          position="bottom-right"
-          width={200}
-          style={{ padding: 0, backgroundColor: theme.menuBackground }}
-          onClose={() => setMenuOpen(false)}
-          data-testid={name + '-select-tooltip'}
-        >
-          <Menu
-            onMenuSelect={name => {
-              onSelect(name, [...selectedItems]);
-              setMenuOpen(false);
-            }}
-            items={items}
-          />
-        </Tooltip>
-      )}
+      <Popover
+        triggerRef={triggerRef}
+        style={{
+          width: 200,
+          padding: 0,
+          backgroundColor: theme.menuBackground,
+        }}
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+        data-testid={name + '-select-tooltip'}
+      >
+        <Menu
+          onMenuSelect={name => {
+            onSelect(name, [...selectedItems]);
+            setMenuOpen(false);
+          }}
+          items={items}
+        />
+      </Popover>
     </View>
   );
 }

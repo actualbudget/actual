@@ -3,9 +3,9 @@ import { type numberFormats } from '../shared/util';
 export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'customReports'
   | 'spendingReport'
-  | 'simpleFinSync';
+  | 'simpleFinSync'
+  | 'iterableTopologicalSort';
 
 export type LocalPrefs = Partial<
   {
