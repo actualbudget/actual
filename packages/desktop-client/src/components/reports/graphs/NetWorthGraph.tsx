@@ -124,7 +124,7 @@ export function NetWorthGraph({
                 margin={{
                   top: 0,
                   right: 0,
-                  left: computePadding(graphData.data),
+                  left: compact ? 0 : computePadding(graphData.data),
                   bottom: 0,
                 }}
               >
