@@ -1,0 +1,74 @@
+name: Electron Master
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+on:
+  push:
+    tags:
+      - v**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # this is so the assets can be added to the release
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - if: ${{ startsWith(matrix.os, 'windows') }}
+        run: pip.exe install setuptools
+      - if: ${{ ! startsWith(matrix.os, 'windows') }}
+        run: |
+          mkdir .venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install setuptools
+      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get install flatpak -y
+          sudo apt-get install flatpak-builder -y
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install org.freedesktop.Sdk/x86_64/23.08 -y
+          sudo flatpak install org.freedesktop.Platform/x86_64/23.08 -y
+          sudo flatpak install org.electronjs.Electron2.BaseApp/x86_64/23.08 -y
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Electron
+        run: ./bin/package-electron
+        env:
+          # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # CSC_LINK: ${{ secrets.CSC_LINK }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: actual-electron-${{ matrix.os }}
+          path: |
+            packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/*.exe
+            packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.flatpak
+      - name: Add to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/*.exe
+            packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.flatpak

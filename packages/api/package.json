@@ -1,27 +1,40 @@
 {
   "name": "@actual-app/api",
-  "version": "6.2.1",
+  "version": "6.8.1",
   "license": "MIT",
   "description": "An API for Actual",
+  "engines": {
+    "node": ">=18.12.0"
+  },
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "@types/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "@types"
   ],
   "scripts": {
     "build:app": "yarn workspace loot-core build:api",
-    "build:node": "tsc --p tsconfig.dist.json",
+    "build:node": "tsc --p tsconfig.dist.json && tsc-alias -p tsconfig.dist.json",
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
-    "build": "rm -rf dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db"
+    "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
+    "test": "yarn run build:app && jest -c jest.config.js",
+    "clean": "rm -rf dist @types"
   },
   "dependencies": {
-    "better-sqlite3": "^8.6.0",
+    "@actual-app/crdt": "workspace:^",
+    "better-sqlite3": "^9.6.0",
+    "compare-versions": "^6.1.0",
     "node-fetch": "^3.3.2",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@swc/core": "^1.5.3",
+    "@swc/jest": "^0.2.36",
+    "@types/jest": "^27.5.2",
     "@types/uuid": "^9.0.2",
+    "jest": "^27.5.1",
+    "tsc-alias": "^1.8.8",
     "typescript": "^5.0.2"
   }
 }

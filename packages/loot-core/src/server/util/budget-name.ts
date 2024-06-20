@@ -1,9 +1,10 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
 
 export async function uniqueFileName(existingFiles) {
-  let initialName = 'My Finances';
+  const initialName = 'My Finances';
   let idx = 1;
 
   // If there is a conflict, keep appending an index until there is no

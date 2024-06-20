@@ -1,5 +1,5 @@
+// @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import {
   isNonProductionEnvironment,
@@ -7,28 +7,29 @@ import {
 } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
-import Button, { ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button';
 import { BigInput } from '../common/Input';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
 
-export default function ConfigServer() {
+export function ConfigServer() {
   useSetThemeColor(theme.mobileConfigServerViewTheme);
-  let { createBudget, signOut, loggedIn } = useActions();
-  let navigate = useNavigate();
-  let [url, setUrl] = useState('');
-  let currentUrl = useServerURL();
-  let setServerUrl = useSetServerURL();
+  const { createBudget, signOut, loggedIn } = useActions();
+  const navigate = useNavigate();
+  const [url, setUrl] = useState('');
+  const currentUrl = useServerURL();
+  const setServerUrl = useSetServerURL();
   useEffect(() => {
     setUrl(currentUrl);
   }, [currentUrl]);
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function getErrorMessage(error: string) {
     switch (error) {
@@ -46,14 +47,14 @@ export default function ConfigServer() {
 
     setError(null);
     setLoading(true);
-    let { error } = await setServerUrl(url);
+    const { error } = await setServerUrl(url);
 
     if (
       ['network-failure', 'get-server-failure'].includes(error) &&
       !url.startsWith('http://') &&
       !url.startsWith('https://')
     ) {
-      let { error } = await setServerUrl('https://' + url);
+      const { error } = await setServerUrl('https://' + url);
       if (error) {
         setUrl('https://' + url);
         setError(error);
@@ -137,7 +138,7 @@ export default function ConfigServer() {
           autoFocus={true}
           placeholder="https://example.com"
           value={url || ''}
-          onUpdate={setUrl}
+          onChangeValue={setUrl}
           style={{ flex: 1, marginRight: 10 }}
         />
         <ButtonWithLoading

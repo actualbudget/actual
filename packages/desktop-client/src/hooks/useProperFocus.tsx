@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   createContext,
   useRef,
@@ -13,7 +14,7 @@ function getFocusedKey(el: HTMLElement): string | null {
   let node: HTMLElement | ParentNode = el;
   // Search up to 10 parent nodes
   for (let i = 0; i < 10 && node; i++) {
-    let key = 'dataset' in node ? node.dataset?.focusKey : undefined;
+    const key = 'dataset' in node ? node.dataset?.focusKey : undefined;
     if (key) {
       return key;
     }
@@ -28,7 +29,7 @@ function focusElement(
   refocusContext: AvoidRefocusScrollContextValue,
 ): void {
   if (refocusContext) {
-    let key = getFocusedKey(el);
+    const key = getFocusedKey(el);
     el.focus({ preventScroll: key && key === refocusContext.keyRef.current });
     refocusContext.onKeyChange(key);
   } else {
@@ -45,7 +46,7 @@ type AvoidRefocusScrollContextValue = {
   onKeyChange: (key: string) => void;
 };
 
-let AvoidRefocusScrollContext =
+const AvoidRefocusScrollContext =
   createContext<AvoidRefocusScrollContextValue>(null);
 
 type AvoidRefocusScrollProviderProps = {
@@ -55,9 +56,9 @@ type AvoidRefocusScrollProviderProps = {
 export function AvoidRefocusScrollProvider({
   children,
 }: AvoidRefocusScrollProviderProps) {
-  let keyRef = useRef<string>(null);
+  const keyRef = useRef<string>(null);
 
-  let value = useMemo<AvoidRefocusScrollContextValue>(
+  const value = useMemo<AvoidRefocusScrollContextValue>(
     () => ({
       keyRef,
       onKeyChange: key => {
@@ -76,18 +77,18 @@ export function AvoidRefocusScrollProvider({
 
 export function useProperFocus(
   ref: RefObject<HTMLElement>,
-  shouldFocus: boolean,
+  shouldFocus = false,
 ): void {
-  let context = useContext(AvoidRefocusScrollContext);
-  let prevShouldFocus = useRef(null);
+  const context = useContext(AvoidRefocusScrollContext);
+  const prevShouldFocus = useRef(null);
 
   useLayoutEffect(() => {
-    let prev = prevShouldFocus.current;
-    let view = ref.current;
+    const prev = prevShouldFocus.current;
+    const view = ref.current;
 
     if (view && shouldFocus && (prev === null || prev === false)) {
-      let selector = 'input,button,div[tabindex]';
-      let focusEl = view.matches(selector)
+      const selector = 'input,button,div[tabindex]';
+      const focusEl = view.matches(selector)
         ? view
         : view.querySelector<HTMLElement>(selector);
 

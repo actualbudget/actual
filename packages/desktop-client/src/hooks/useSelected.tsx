@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   createContext,
   useContext,
@@ -7,9 +8,11 @@ import React, {
   useRef,
   type Dispatch,
   type ReactElement,
+  type MouseEvent,
 } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type UndoState } from 'loot-core/src/server/undo';
@@ -19,15 +22,15 @@ type Range<T> = { start: T; end: T | null };
 type Item = { id: string };
 
 function iterateRange(range: Range<number>, func: (i: number) => void): void {
-  let from = Math.min(range.start, range.end);
-  let to = Math.max(range.start, range.end);
+  const from = Math.min(range.start, range.end);
+  const to = Math.max(range.start, range.end);
 
   for (let i = from; i <= to; i++) {
     func(i);
   }
 }
 
-type State = {
+type SelectedState = {
   selectedRange: Range<string> | null;
   selectedItems: Set<string>;
 };
@@ -49,23 +52,24 @@ type SelectAllAction = {
 
 type Actions = SelectAction | SelectNoneAction | SelectAllAction;
 
-export default function useSelected<T extends Item>(
+export function useSelected<T extends Item>(
   name: string,
   items: T[],
   initialSelectedIds: string[],
+  selectAllFilter?: (item: T) => boolean,
 ) {
-  let [state, dispatch] = useReducer(
-    (state: State, action: Actions) => {
+  const [state, dispatch] = useReducer(
+    (state: SelectedState, action: Actions) => {
       switch (action.type) {
         case 'select': {
-          let { selectedRange } = state;
-          let selectedItems = new Set(state.selectedItems);
-          let { id, event } = action;
+          const { selectedRange } = state;
+          const selectedItems = new Set(state.selectedItems);
+          const { id, event } = action;
 
           if (event.shiftKey && selectedRange) {
-            let idx = items.findIndex(p => p.id === id);
-            let startIdx = items.findIndex(p => p.id === selectedRange.start);
-            let endIdx = items.findIndex(p => p.id === selectedRange.end);
+            const idx = items.findIndex(p => p.id === id);
+            const startIdx = items.findIndex(p => p.id === selectedRange.start);
+            const endIdx = items.findIndex(p => p.id === selectedRange.end);
             let range: Range<number>;
             let deleteUntil: Range<number>;
 
@@ -128,9 +132,20 @@ export default function useSelected<T extends Item>(
           return { ...state, selectedItems: new Set<string>() };
 
         case 'select-all':
+          let selectedItems: string[] = [];
+          if (action.ids && items && selectAllFilter) {
+            const idsToInclude = new Set(
+              items.filter(selectAllFilter).map(item => item.id),
+            );
+            selectedItems = action.ids.filter(id => idsToInclude.has(id));
+          } else if (items && selectAllFilter) {
+            selectedItems = items.filter(selectAllFilter).map(item => item.id);
+          } else {
+            selectedItems = action.ids || items.map(item => item.id);
+          }
           return {
             ...state,
-            selectedItems: new Set(action.ids || items.map(item => item.id)),
+            selectedItems: new Set(selectedItems),
             selectedRange:
               action.ids && action.ids.length === 1
                 ? { start: action.ids[0], end: null }
@@ -151,7 +166,7 @@ export default function useSelected<T extends Item>(
     }),
   );
 
-  let prevItems = useRef(items);
+  const prevItems = useRef(items);
   useEffect(() => {
     if (state.selectedItems.size > 0) {
       // We need to make sure there are no ids in the selection that
@@ -169,14 +184,14 @@ export default function useSelected<T extends Item>(
       // selected item too early (because the component rerenders
       // multiple times)
 
-      let ids = new Set(items.map(item => item.id));
-      let isSame =
+      const ids = new Set(items.map(item => item.id));
+      const isSame =
         prevItems.current.length === items.length &&
         prevItems.current.every(item => ids.has(item.id));
 
       if (!isSame) {
-        let selected = [...state.selectedItems];
-        let filtered = selected.filter(id => ids.has(id));
+        const selected = [...state.selectedItems];
+        const filtered = selected.filter(id => ids.has(id));
 
         // If the selected items has changed, update the selection
         if (selected.length !== filtered.length) {
@@ -189,18 +204,18 @@ export default function useSelected<T extends Item>(
   }, [items, state.selectedItems]);
 
   useEffect(() => {
-    let prevState = undo.getUndoState('selectedItems');
+    const prevState = undo.getUndoState('selectedItems');
     undo.setUndoState('selectedItems', { name, items: state.selectedItems });
     return () => undo.setUndoState('selectedItems', prevState);
   }, [state.selectedItems]);
 
-  let lastUndoState = useSelector(state => state.app.lastUndoState);
+  const lastUndoState = useSelector((state: State) => state.app.lastUndoState);
 
   useEffect(() => {
     function onUndo({ messages, undoTag }: UndoState) {
-      let tagged = undo.getTaggedState(undoTag);
+      const tagged = undo.getTaggedState(undoTag);
 
-      let deletedIds = new Set(
+      const deletedIds = new Set(
         messages
           .filter(msg => msg.column === 'tombstone' && msg.value === 1)
           .map(msg => msg.row),
@@ -230,8 +245,8 @@ export default function useSelected<T extends Item>(
   };
 }
 
-let SelectedDispatch = createContext<(action: Actions) => void>(null);
-let SelectedItems = createContext<Set<unknown>>(null);
+const SelectedDispatch = createContext<(action: Actions) => void>(null);
+const SelectedItems = createContext<Set<unknown>>(null);
 
 export function useSelectedDispatch() {
   return useContext(SelectedDispatch);
@@ -252,13 +267,13 @@ export function SelectedProvider<T extends Item>({
   fetchAllIds,
   children,
 }: SelectedProviderProps<T>) {
-  let latestItems = useRef(null);
+  const latestItems = useRef(null);
 
   useEffect(() => {
     latestItems.current = instance.items;
   }, [instance.items]);
 
-  let dispatch = useCallback(
+  const dispatch = useCallback(
     async (action: Actions) => {
       if (!action.event && isNonProductionEnvironment()) {
         throw new Error('SelectedDispatch actions must have an event');
@@ -300,6 +315,7 @@ type SelectedProviderWithItemsProps<T extends Item> = {
   initialSelectedIds: string[];
   fetchAllIds: () => Promise<string[]>;
   registerDispatch?: (dispatch: Dispatch<Actions>) => void;
+  selectAllFilter?: (item: T) => boolean;
   children: ReactElement;
 };
 
@@ -311,19 +327,23 @@ export function SelectedProviderWithItems<T extends Item>({
   initialSelectedIds,
   fetchAllIds,
   registerDispatch,
+  selectAllFilter,
   children,
 }: SelectedProviderWithItemsProps<T>) {
-  let selected = useSelected<T>(name, items, initialSelectedIds);
+  const selected = useSelected<T>(
+    name,
+    items,
+    initialSelectedIds,
+    selectAllFilter,
+  );
 
   useEffect(() => {
     registerDispatch?.(selected.dispatch);
   }, [registerDispatch]);
 
   return (
-    <SelectedProvider<T>
-      instance={selected}
-      fetchAllIds={fetchAllIds}
-      children={children}
-    />
+    <SelectedProvider<T> instance={selected} fetchAllIds={fetchAllIds}>
+      {children}
+    </SelectedProvider>
   );
 }

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // We have to bundle in JS migrations manually to avoid having to `eval`
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
@@ -10,7 +11,7 @@ import * as sqlite from '../../platform/server/sqlite';
 
 let MIGRATIONS_DIR = fs.migrationsPath;
 
-let javascriptMigrations = {
+const javascriptMigrations = {
   1632571489012: m1632571489012,
 };
 
@@ -18,7 +19,7 @@ export async function withMigrationsDir(
   dir: string,
   func: () => Promise<void>,
 ): Promise<void> {
-  let oldDir = MIGRATIONS_DIR;
+  const oldDir = MIGRATIONS_DIR;
   MIGRATIONS_DIR = dir;
   await func();
   MIGRATIONS_DIR = oldDir;
@@ -33,7 +34,7 @@ function getMigrationId(name: string): number {
 }
 
 export function getUpMigration(id, names) {
-  for (let m of names) {
+  for (const m of names) {
     if (getMigrationId(m) === id) {
       return m;
     }
@@ -41,9 +42,9 @@ export function getUpMigration(id, names) {
 }
 
 async function patchBadMigrations(db: Database) {
-  let badFiltersMigration = 1685375406832;
-  let newFiltersMigration = 1688749527273;
-  let appliedIds = await getAppliedMigrations(db);
+  const badFiltersMigration = 1685375406832;
+  const newFiltersMigration = 1688749527273;
+  const appliedIds = await getAppliedMigrations(db);
   if (appliedIds.includes(badFiltersMigration)) {
     await sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
       badFiltersMigration,
@@ -101,7 +102,7 @@ async function applyJavaScript(db, id) {
     throw new Error('Could not find JS migration code to run for ' + id);
   }
 
-  let run = javascriptMigrations[id];
+  const run = javascriptMigrations[id];
   return run(dbInterface, () => uuidv4());
 }
 
@@ -150,14 +151,14 @@ function checkDatabaseValidity(
 
 export async function migrate(db: Database): Promise<string[]> {
   await patchBadMigrations(db);
-  let appliedIds = await getAppliedMigrations(db);
-  let available = await getMigrationList(MIGRATIONS_DIR);
+  const appliedIds = await getAppliedMigrations(db);
+  const available = await getMigrationList(MIGRATIONS_DIR);
 
   checkDatabaseValidity(appliedIds, available);
 
   const pending = getPending(appliedIds, available);
 
-  for (let migration of pending) {
+  for (const migration of pending) {
     await applyMigration(db, migration, MIGRATIONS_DIR);
   }
 

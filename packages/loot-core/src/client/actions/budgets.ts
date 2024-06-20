@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 import { getDownloadError, getSyncError } from '../../shared/errors';
 import type { Handlers } from '../../types/handlers';
@@ -7,19 +8,6 @@ import { setAppState } from './app';
 import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
 import type { Dispatch, GetState } from './types';
-
-export function updateStatusText(text: string | null) {
-  return (dispatch: Dispatch, getState: GetState) => {
-    const { loadingText } = getState().app;
-    // The presence of any loading text puts the app in a "loading"
-    // state. We only ever want to update the text, we never want to
-    // set the app into a loading state. It's expected for workflows
-    // to set a blank loading text to show the loading screen.
-    if (loadingText != null) {
-      dispatch(setAppState({ loadingText: text }));
-    }
-  };
-}
 
 export function loadBudgets() {
   return async (dispatch: Dispatch) => {
@@ -63,14 +51,14 @@ export function loadBudget(id: string, loadingText = '', options = {}) {
     dispatch(setAppState({ loadingText }));
 
     // Loading a budget may fail
-    let { error } = await send('load-budget', { id, ...options });
+    const { error } = await send('load-budget', { id, ...options });
 
     if (error) {
-      let message = getSyncError(error, id);
+      const message = getSyncError(error, id);
       if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
         // confirm is not available on iOS
         if (typeof window.confirm !== 'undefined') {
-          let showBackups = window.confirm(
+          const showBackups = window.confirm(
             message +
               ' Make sure the app is up-to-date. Do you want to load a backup?',
           );
@@ -116,17 +104,14 @@ export function closeBudget() {
 
 export function closeBudgetUI() {
   return async (dispatch: Dispatch, getState: GetState) => {
-    let prefs = getState().prefs.local;
+    const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       dispatch({ type: constants.CLOSE_BUDGET });
     }
   };
 }
 
-export function deleteBudget(
-  id: string | undefined,
-  cloudFileId: string | undefined,
-) {
+export function deleteBudget(id?: string, cloudFileId?: string) {
   return async (dispatch: Dispatch) => {
     await send('delete-budget', { id, cloudFileId });
     await dispatch(loadAllFiles());
@@ -177,7 +162,7 @@ export function importBudget(
 
 export function uploadBudget(id: string) {
   return async (dispatch: Dispatch) => {
-    let { error } = await send('upload-budget', { id });
+    const { error } = await send('upload-budget', { id });
     if (error) {
       return { error };
     }
@@ -187,13 +172,15 @@ export function uploadBudget(id: string) {
   };
 }
 
+export function closeAndLoadBudget(fileId: string) {
+  return async (dispatch: Dispatch) => {
+    await dispatch(closeBudget());
+    dispatch(loadBudget(fileId, 'Loading...'));
+  };
+}
+
 export function closeAndDownloadBudget(cloudFileId: string) {
   return async (dispatch: Dispatch) => {
-    // It's very important that we set this loading message before
-    // closing the budget. Otherwise, the manager will ignore our
-    // loading message and clear it when it loads, showing the file
-    // list which we don't want
-    dispatch(setAppState({ loadingText: 'Downloading...' }));
     await dispatch(closeBudget());
     dispatch(downloadBudget(cloudFileId, { replace: true }));
   };
@@ -203,14 +190,14 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
   return async (dispatch: Dispatch) => {
     dispatch(setAppState({ loadingText: 'Downloading...' }));
 
-    let { id, error } = await send('download-budget', {
+    const { id, error } = await send('download-budget', {
       fileId: cloudFileId,
       replace,
     });
 
     if (error) {
       if (error.reason === 'decrypt-failure') {
-        let opts = {
+        const opts = {
           hasExistingKey: error.meta && error.meta.isMissingKey,
           cloudFileId,
           onSuccess: () => {

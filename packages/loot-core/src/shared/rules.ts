@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 
 // For now, this info is duplicated from the backend. Figure out how
@@ -41,11 +42,18 @@ export const FIELD_TYPES = new Map(
     category: 'id',
     account: 'id',
     cleared: 'boolean',
+    reconciled: 'boolean',
     saved: 'saved',
   }),
 );
 
-export function mapField(field, opts) {
+export const ALLOCATION_METHODS = {
+  'fixed-amount': 'a fixed amount',
+  'fixed-percent': 'a fixed percent',
+  remainder: 'an equal portion of the remainder',
+};
+
+export function mapField(field, opts?) {
   opts = opts || {};
 
   switch (field) {
@@ -111,6 +119,8 @@ export function friendlyOp(op, type?) {
       return 'is false';
     case 'set':
       return 'set';
+    case 'set-split-amount':
+      return 'allocate';
     case 'link-schedule':
       return 'link schedule';
     case 'and':
@@ -157,6 +167,13 @@ export function sortNumbers(num1, num2) {
 }
 
 export function parse(item) {
+  if (item.op === 'set-split-amount') {
+    if (item.options.method === 'fixed-amount') {
+      return { ...item, value: item.value && integerToAmount(item.value) };
+    }
+    return item;
+  }
+
   switch (item.type) {
     case 'number': {
       let parsed = item.value;
@@ -170,11 +187,11 @@ export function parse(item) {
       return { ...item, value: parsed };
     }
     case 'string': {
-      let parsed = item.value == null ? '' : item.value;
+      const parsed = item.value == null ? '' : item.value;
       return { ...item, value: parsed };
     }
     case 'boolean': {
-      let parsed = item.value;
+      const parsed = item.value;
       return { ...item, value: parsed };
     }
     default:
@@ -184,6 +201,22 @@ export function parse(item) {
 }
 
 export function unparse({ error, inputKey, ...item }) {
+  if (item.op === 'set-split-amount') {
+    if (item.options.method === 'fixed-amount') {
+      return {
+        ...item,
+        value: item.value && amountToInteger(item.value),
+      };
+    }
+    if (item.options.method === 'fixed-percent') {
+      return {
+        ...item,
+        value: item.value && parseFloat(item.value),
+      };
+    }
+    return item;
+  }
+
   switch (item.type) {
     case 'number': {
       let unparsed = item.value;
@@ -194,11 +227,11 @@ export function unparse({ error, inputKey, ...item }) {
       return { ...item, value: unparsed };
     }
     case 'string': {
-      let unparsed = item.value == null ? '' : item.value;
+      const unparsed = item.value == null ? '' : item.value;
       return { ...item, value: unparsed };
     }
     case 'boolean': {
-      let unparsed = item.value == null ? false : item.value;
+      const unparsed = item.value == null ? false : item.value;
       return { ...item, value: unparsed };
     }
     default:

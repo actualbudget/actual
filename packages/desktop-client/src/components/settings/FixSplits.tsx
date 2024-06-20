@@ -5,16 +5,16 @@ import { type Handlers } from 'loot-core/src/types/handlers';
 
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 import { Setting } from './UI';
 
 type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
 
 function renderResults(results: Results) {
-  let { numBlankPayees, numCleared, numDeleted } = results;
+  const { numBlankPayees, numCleared, numDeleted } = results;
   let result = '';
   if (numBlankPayees === 0 && numCleared === 0 && numDeleted === 0) {
     result = 'No split transactions found needing repair.';
@@ -39,7 +39,7 @@ function renderResults(results: Results) {
   return (
     <Paragraph
       style={{
-        color: theme.alt3NoticeText,
+        color: theme.noticeTextLight,
         marginBottom: 0,
         marginLeft: '1em',
         textAlign: 'right',
@@ -51,13 +51,13 @@ function renderResults(results: Results) {
   );
 }
 
-export default function FixSplitsTool() {
-  let [loading, setLoading] = useState(false);
-  let [results, setResults] = useState<Results>(null);
+export function FixSplits() {
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<Results | null>(null);
 
   async function onFix() {
     setLoading(true);
-    let res = await send('tools/fix-split-transactions');
+    const res = await send('tools/fix-split-transactions');
     setResults(res);
     setLoading(false);
   }

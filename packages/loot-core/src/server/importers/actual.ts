@@ -1,10 +1,11 @@
+// @ts-strict-ignore
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as cloudStorage from '../cloud-storage';
 import { handlers } from '../main';
 import { waitOnSpreadsheet } from '../sheet';
 
-export default async function importActual(_filepath: string, buffer: Buffer) {
+export async function importActual(_filepath: string, buffer: Buffer) {
   // Importing Actual files is a special case because we can directly
   // write down the files, but because it doesn't go through the API
   // layer we need to duplicate some of the workflow
@@ -25,7 +26,7 @@ export default async function importActual(_filepath: string, buffer: Buffer) {
 
   // We never want to load cached data from imported files, so
   // delete the cache
-  let sqliteDb = await sqlite.openDatabase(
+  const sqliteDb = await sqlite.openDatabase(
     fs.join(fs.getBudgetDir(id), 'db.sqlite'),
   );
   sqlite.execQuery(
@@ -42,5 +43,5 @@ export default async function importActual(_filepath: string, buffer: Buffer) {
   await handlers['load-budget']({ id });
   await handlers['get-budget-bounds']();
   await waitOnSpreadsheet();
-  await cloudStorage.upload().catch(err => {});
+  await cloudStorage.upload().catch(() => {});
 }

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   createContext,
   type Dispatch,
@@ -12,7 +13,8 @@ type BudgetMonthCountContextValue = {
   setDisplayMax: Dispatch<SetStateAction<number>>;
 };
 
-let BudgetMonthCountContext = createContext<BudgetMonthCountContextValue>(null);
+const BudgetMonthCountContext =
+  createContext<BudgetMonthCountContextValue>(null);
 
 type BudgetMonthCountProviderProps = {
   children: ReactNode;
@@ -21,7 +23,7 @@ type BudgetMonthCountProviderProps = {
 export function BudgetMonthCountProvider({
   children,
 }: BudgetMonthCountProviderProps) {
-  let [displayMax, setDisplayMax] = useState(1);
+  const [displayMax, setDisplayMax] = useState(1);
 
   return (
     <BudgetMonthCountContext.Provider value={{ displayMax, setDisplayMax }}>

@@ -1,22 +1,21 @@
-import { type ChangeEvent, type Ref } from 'react';
+import { type Ref } from 'react';
 
-import SvgRemove from '../../icons/v2/Remove';
-import SearchAlternate from '../../icons/v2/SearchAlternate';
+import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
 
-import Button from './Button';
-import InputWithContent from './InputWithContent';
+import { Button } from './Button';
+import { InputWithContent } from './InputWithContent';
 
 type SearchProps = {
   inputRef?: Ref<HTMLInputElement>;
   value: string;
-  onChange: (value: string) => unknown;
+  onChange: (value: string) => void;
   placeholder: string;
   isInModal?: boolean;
   width?: number;
 };
 
-export default function Search({
+export function Search({
   inputRef,
   value,
   onChange,
@@ -30,24 +29,24 @@ export default function Search({
       style={{
         width,
         flex: '',
-        borderColor: isInModal ? null : 'transparent',
-        backgroundColor: isInModal ? null : theme.formInputBackground,
+        borderColor: isInModal ? undefined : 'transparent',
+        backgroundColor: isInModal ? undefined : theme.formInputBackground,
       }}
       focusStyle={
         isInModal
-          ? null
+          ? undefined
           : {
               boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
               backgroundColor: theme.formInputBackgroundSelected,
             }
       }
       leftContent={
-        <SearchAlternate
+        <SvgSearchAlternate
           style={{
             width: 13,
             height: 13,
             flexShrink: 0,
-            color: value ? theme.altMenuItemTextSelected : 'inherit',
+            color: value ? theme.menuItemTextSelected : 'inherit',
             margin: 5,
             marginRight: 0,
           }}
@@ -83,7 +82,7 @@ export default function Search({
       onKeyDown={e => {
         if (e.key === 'Escape') onChange('');
       }}
-      onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+      onChangeValue={value => onChange(value)}
     />
   );
 }

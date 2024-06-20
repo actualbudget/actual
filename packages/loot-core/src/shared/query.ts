@@ -1,5 +1,6 @@
+// @ts-strict-ignore
 export type QueryState = {
-  filterExpressions: Array<unknown>;
+  filterExpressions: Array<string>;
   selectExpressions: Array<unknown>;
   groupExpressions: Array<unknown>;
   orderExpressions: Array<unknown>;
@@ -38,7 +39,7 @@ export class Query {
   }
 
   unfilter(exprs) {
-    let exprSet = new Set(exprs);
+    const exprSet = new Set(exprs);
     return new Query({
       ...this.state,
       filterExpressions: this.state.filterExpressions.filter(
@@ -52,13 +53,13 @@ export class Query {
       exprs = [exprs];
     }
 
-    let query = new Query({ ...this.state, selectExpressions: exprs });
+    const query = new Query({ ...this.state, selectExpressions: exprs });
     query.state.calculation = false;
     return query;
   }
 
   calculate(expr) {
-    let query = this.select({ result: expr });
+    const query = this.select({ result: expr });
     query.state.calculation = true;
     return query;
   }
@@ -115,7 +116,7 @@ export class Query {
 }
 
 export function getPrimaryOrderBy(query, defaultOrderBy) {
-  let orderExprs = query.serialize().orderExpressions;
+  const orderExprs = query.serialize().orderExpressions;
   if (orderExprs.length === 0) {
     if (defaultOrderBy) {
       return { order: 'asc', ...defaultOrderBy };
@@ -123,15 +124,15 @@ export function getPrimaryOrderBy(query, defaultOrderBy) {
     return null;
   }
 
-  let firstOrder = orderExprs[0];
+  const firstOrder = orderExprs[0];
   if (typeof firstOrder === 'string') {
     return { field: firstOrder, order: 'asc' };
   }
   // Handle this form: { field: 'desc' }
-  let [field] = Object.keys(firstOrder);
+  const [field] = Object.keys(firstOrder);
   return { field, order: firstOrder[field] };
 }
 
-export default function q(table) {
+export function q(table) {
   return new Query({ table });
 }

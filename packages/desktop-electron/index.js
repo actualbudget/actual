@@ -5,11 +5,6 @@ const fs = require('fs');
 
 require('module').globalPaths.push(__dirname + '/..');
 
-// Allow unsecure in dev
-if (isDev) {
-  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
-}
-
 const {
   app,
   ipcMain,
@@ -18,6 +13,7 @@ const {
   dialog,
   shell,
   protocol,
+  utilityProcess,
 } = require('electron');
 const promiseRetry = require('promise-retry');
 
@@ -30,13 +26,11 @@ protocol.registerSchemesAsPrivileged([
 global.fetch = require('node-fetch');
 
 const about = require('./about');
-const { getRandomPort } = require('get-port-please');
 const getMenu = require('./menu');
 const updater = require('./updater');
 
 require('./security');
 
-const { fork } = require('child_process');
 const path = require('path');
 
 require('./setRequireHook');
@@ -55,10 +49,7 @@ const WindowState = require('./window-state.js');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin;
-let serverWin; // eslint-disable-line @typescript-eslint/no-unused-vars
 let serverProcess;
-let serverSocket;
-let IS_QUITTING = false;
 
 updater.onEvent((type, data) => {
   // Notify both the app and the about window
@@ -75,10 +66,10 @@ if (isDev) {
   process.traceProcessWarnings = true;
 }
 
-function createBackgroundProcess(socketName) {
-  serverProcess = fork(
+function createBackgroundProcess() {
+  serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
-    ['--subprocess', app.getVersion(), socketName],
+    ['--subprocess', app.getVersion()],
     isDev ? { execArgv: ['--inspect'] } : undefined,
   );
 
@@ -92,6 +83,13 @@ function createBackgroundProcess(socketName) {
           updater.start();
         } else {
           updater.stop();
+        }
+        break;
+      case 'reply':
+      case 'error':
+      case 'push':
+        if (clientWin) {
+          clientWin.webContents.send('message', msg);
         }
         break;
       default:
@@ -137,18 +135,9 @@ async function createWindow() {
     win.loadURL(`app://actual/`);
   }
 
-  win.on('close', () => {
-    // We don't want to close the budget on exit because that will
-    // clear the state which re-opens the last budget automatically on
-    // startup
-    if (!IS_QUITTING) {
-      clientWin.webContents.executeJavaScript('__actionsForMenu.closeBudget()');
-    }
-  });
-
   win.on('closed', () => {
     clientWin = null;
-    updateMenu(false);
+    updateMenu();
     unlistenToState();
   });
 
@@ -159,14 +148,10 @@ async function createWindow() {
   });
 
   win.on('focus', async () => {
-    let url = clientWin.webContents.getURL();
+    const url = clientWin.webContents.getURL();
     if (url.includes('app://') || url.includes('localhost:')) {
       clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
     }
-  });
-
-  win.webContents.on('did-finish-load', () => {
-    win.webContents.send('set-socket', { name: serverSocket });
   });
 
   // hit when middle-clicking buttons or <a href/> with a target set to _blank
@@ -202,15 +187,19 @@ function isExternalUrl(url) {
   return !url.includes('localhost:') && !url.includes('app://');
 }
 
-function updateMenu(isBudgetOpen) {
+function updateMenu(budgetId) {
+  const isBudgetOpen = !!budgetId;
   const menu = getMenu(isDev, createWindow);
   const file = menu.items.filter(item => item.label === 'File')[0];
   const fileItems = file.submenu.items;
   fileItems
     .filter(item => item.label === 'Load Backup...')
-    .map(item => (item.enabled = isBudgetOpen));
+    .forEach(item => {
+      item.enabled = isBudgetOpen;
+      item.budgetId = budgetId;
+    });
 
-  let tools = menu.items.filter(item => item.label === 'Tools')[0];
+  const tools = menu.items.filter(item => item.label === 'Tools')[0];
   tools.submenu.items.forEach(item => {
     item.enabled = isBudgetOpen;
   });
@@ -230,11 +219,9 @@ function updateMenu(isBudgetOpen) {
   }
 }
 
-app.setAppUserModelId('com.shiftreset.actual');
+app.setAppUserModelId('com.actualbudget.actual');
 
 app.on('ready', async () => {
-  serverSocket = await getRandomPort();
-
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
@@ -278,7 +265,7 @@ app.on('ready', async () => {
     console.log('Suspending', new Date());
   });
 
-  createBackgroundProcess(serverSocket);
+  createBackgroundProcess();
 });
 
 app.on('window-all-closed', () => {
@@ -289,7 +276,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-  IS_QUITTING = true;
   if (serverProcess) {
     serverProcess.kill();
     serverProcess = null;
@@ -324,7 +310,7 @@ ipcMain.handle('open-file-dialog', (event, { filters, properties }) => {
 ipcMain.handle(
   'save-file-dialog',
   (event, { title, defaultPath, fileContents }) => {
-    let fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
+    const fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
 
     return new Promise((resolve, reject) => {
       if (fileLocation) {
@@ -345,9 +331,17 @@ ipcMain.on('show-about', () => {
   about.openAboutWindow();
 });
 
+ipcMain.on('message', (_event, msg) => {
+  if (!serverProcess) {
+    return;
+  }
+
+  serverProcess.postMessage(msg.args);
+});
+
 ipcMain.on('screenshot', () => {
   if (isDev) {
-    let width = 1100;
+    const width = 1100;
 
     // This is for the main screenshot inside the frame
     clientWin.setSize(width, Math.floor(width * (427 / 623)));
@@ -372,6 +366,14 @@ ipcMain.on('apply-update', () => {
   updater.apply();
 });
 
-ipcMain.on('update-menu', (event, isBudgetOpen) => {
-  updateMenu(isBudgetOpen);
+ipcMain.on('update-menu', (event, budgetId) => {
+  updateMenu(budgetId);
+});
+
+ipcMain.on('set-theme', theme => {
+  const obj = { theme };
+
+  clientWin.webContents.executeJavaScript(
+    `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${obj})`,
+  );
 });

@@ -7,12 +7,12 @@ import type { BudgetsState } from '../state-types/budgets';
 
 function sortFiles(arr: File[]) {
   arr.sort((x, y) => {
-    let name1 = x.name.toLowerCase();
-    let name2 = y.name.toLowerCase();
+    const name1 = x.name.toLowerCase();
+    const name2 = y.name.toLowerCase();
     let i = name1 < name2 ? -1 : name1 > name2 ? 1 : 0;
     if (i === 0) {
-      let xId = x.state === 'remote' ? x.cloudFileId : x.id;
-      let yId = x.state === 'remote' ? x.cloudFileId : x.id;
+      const xId = x.state === 'remote' ? x.cloudFileId : x.id;
+      const yId = x.state === 'remote' ? x.cloudFileId : x.id;
       i = xId < yId ? -1 : xId > yId ? 1 : 0;
     }
     return i;
@@ -31,11 +31,10 @@ function reconcileFiles(
   localFiles: Budget[],
   remoteFiles: RemoteFile[] | null,
 ): File[] {
-  console.log({ localFiles, remoteFiles });
-  let reconciled = new Set();
+  const reconciled = new Set();
 
-  let files = localFiles.map((localFile): File & { deleted: boolean } => {
-    let { cloudFileId, groupId } = localFile;
+  const files = localFiles.map((localFile): File & { deleted: boolean } => {
+    const { cloudFileId, groupId } = localFile;
     if (cloudFileId && groupId) {
       // This is the case where for some reason getting the files from
       // the server failed. We don't want to scare the user, just show
@@ -51,7 +50,7 @@ function reconcileFiles(
         };
       }
 
-      let remote = remoteFiles.find(f => localFile.cloudFileId === f.fileId);
+      const remote = remoteFiles.find(f => localFile.cloudFileId === f.fileId);
       if (remote) {
         // Mark reconciled
         reconciled.add(remote.fileId);
@@ -93,7 +92,7 @@ function reconcileFiles(
     }
   });
 
-  let sorted = sortFiles(
+  const sorted = sortFiles(
     files
       .concat(
         (remoteFiles || [])
@@ -126,10 +125,7 @@ const initialState: BudgetsState = {
   allFiles: null,
 };
 
-export default function update(
-  state = initialState,
-  action: Action,
-): BudgetsState {
+export function update(state = initialState, action: Action): BudgetsState {
   switch (action.type) {
     case constants.SET_BUDGETS:
       return {

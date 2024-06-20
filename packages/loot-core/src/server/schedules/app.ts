@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 import { v4 as uuidv4 } from 'uuid';
@@ -5,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
-import q from '../../shared/query';
+import { q } from '../../shared/query';
 import {
   extractScheduleConds,
   recurConfigToRSchedule,
@@ -37,7 +38,7 @@ import { SchedulesHandlers } from './types/handlers';
 // Utilities
 
 function zip(arr1, arr2) {
-  let result = [];
+  const result = [];
   for (let i = 0; i < arr1.length; i++) {
     result.push([arr1[i], arr2[i]]);
   }
@@ -45,46 +46,56 @@ function zip(arr1, arr2) {
 }
 
 export function updateConditions(conditions, newConditions) {
-  let scheduleConds = extractScheduleConds(conditions);
-  let newScheduleConds = extractScheduleConds(newConditions);
+  const scheduleConds = extractScheduleConds(conditions);
+  const newScheduleConds = extractScheduleConds(newConditions);
 
-  let replacements = zip(
+  const replacements = zip(
     Object.values(scheduleConds),
     Object.values(newScheduleConds),
   );
 
-  let updated = conditions.map(cond => {
-    let r = replacements.find(r => cond === r[0]);
+  const updated = conditions.map(cond => {
+    const r = replacements.find(r => cond === r[0]);
     return r && r[1] ? r[1] : cond;
   });
 
-  let added = replacements
+  const added = replacements
     .filter(x => x[0] == null && x[1] != null)
     .map(x => x[1]);
 
   return updated.concat(added);
 }
 
-export function getNextDate(dateCond, start = new Date(currentDay())) {
+export function getNextDate(
+  dateCond,
+  start = new Date(currentDay()),
+  noSkipWeekend = false,
+) {
   start = d.startOfDay(start);
 
-  let cond = new Condition(
+  const cond = new Condition(
     dateCond.op,
     'date',
     dateCond.value,
     null,
     new Map(Object.entries({ date: 'date' })),
   );
-  let value = cond.getValue();
+  const value = cond.getValue();
 
   if (value.type === 'date') {
     return value.date;
   } else if (value.type === 'recur') {
     let dates = value.schedule.occurrences({ start, take: 1 }).toArray();
 
+    if (dates.length === 0) {
+      // Could be a schedule with limited occurrences, so we try to
+      // find the last occurrence
+      dates = value.schedule.occurrences({ reverse: true, take: 1 }).toArray();
+    }
+
     if (dates.length > 0) {
       let date = dates[0].date;
-      if (value.schedule.data.skipWeekend) {
+      if (value.schedule.data.skipWeekend && !noSkipWeekend) {
         date = getDateWithSkippedWeekend(
           date,
           value.schedule.data.weekendSolve,
@@ -96,19 +107,19 @@ export function getNextDate(dateCond, start = new Date(currentDay())) {
   return null;
 }
 
-export async function getRuleForSchedule(id) {
+export async function getRuleForSchedule(id: string | null): Promise<Rule> {
   if (id == null) {
     throw new Error('Schedule not attached to a rule');
   }
 
-  let { data: ruleId } = await aqlQuery(
+  const { data: ruleId } = await aqlQuery(
     q('schedules').filter({ id }).calculate('rule'),
   );
   return getRules().find(rule => rule.id === ruleId);
 }
 
 async function fixRuleForSchedule(id) {
-  let { data: ruleId } = await aqlQuery(
+  const { data: ruleId } = await aqlQuery(
     q('schedules').filter({ id }).calculate('rule'),
   );
 
@@ -118,7 +129,7 @@ async function fixRuleForSchedule(id) {
     await db.delete_('rules', ruleId);
   }
 
-  let newId = await insertRule({
+  const newId = await insertRule({
     stage: null,
     conditionsOp: 'and',
     conditions: [
@@ -145,22 +156,22 @@ export async function setNextDate({
   reset?: boolean;
 }) {
   if (conditions == null) {
-    let rule = await getRuleForSchedule(id);
+    const rule = await getRuleForSchedule(id);
     if (rule == null) {
       throw new Error('No rule found for schedule');
     }
     conditions = rule.serialize().conditions;
   }
 
-  let { date: dateCond } = extractScheduleConds(conditions);
+  const { date: dateCond } = extractScheduleConds(conditions);
 
-  let { data: nextDate } = await aqlQuery(
+  const { data: nextDate } = await aqlQuery(
     q('schedules').filter({ id }).calculate('next_date'),
   );
 
   // Only do this if a date condition exists
   if (dateCond) {
-    let newNextDate = getNextDate(
+    const newNextDate = getNextDate(
       dateCond,
       start ? start(nextDate) : new Date(),
     );
@@ -168,7 +179,7 @@ export async function setNextDate({
     if (newNextDate !== nextDate) {
       // Our `update` functon requires the id of the item and we don't
       // have it, so we need to query it
-      let nd = await db.first(
+      const nd = await db.first(
         'SELECT id, base_next_date_ts FROM schedules_next_date WHERE schedule_id = ?',
         [id],
       );
@@ -194,7 +205,7 @@ export async function setNextDate({
 // Methods
 
 async function checkIfScheduleExists(name, scheduleId) {
-  let idForName = await db.first(
+  const idForName = await db.first(
     'SELECT id from schedules WHERE tombstone = 0 AND name = ?',
     [name],
   );
@@ -212,9 +223,9 @@ export async function createSchedule({
   schedule = null,
   conditions = [],
 } = {}) {
-  let scheduleId = schedule?.id || uuidv4();
+  const scheduleId = schedule?.id || uuidv4();
 
-  let { date: dateCond } = extractScheduleConds(conditions);
+  const { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
     throw new Error('A date condition is required to create a schedule');
   }
@@ -222,8 +233,8 @@ export async function createSchedule({
     throw new Error('Date is required');
   }
 
-  let nextDate = getNextDate(dateCond);
-  let nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
+  const nextDate = getNextDate(dateCond);
+  const nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
   if (schedule) {
     if (schedule.name) {
       if (await checkIfScheduleExists(schedule.name, scheduleId)) {
@@ -235,14 +246,14 @@ export async function createSchedule({
   }
 
   // Create the rule here based on the info
-  let ruleId = await insertRule({
+  const ruleId = await insertRule({
     stage: null,
     conditionsOp: 'and',
     conditions,
     actions: [{ op: 'link-schedule', value: scheduleId }],
   });
 
-  let now = Date.now();
+  const now = Date.now();
   await db.insertWithUUID('schedules_next_date', {
     schedule_id: scheduleId,
     local_next_date: nextDateRepr,
@@ -279,7 +290,7 @@ export async function updateSchedule({
   // This must be outside the `batchMessages` call because we change
   // and then read data
   if (conditions) {
-    let { date: dateCond } = extractScheduleConds(conditions);
+    const { date: dateCond } = extractScheduleConds(conditions);
     if (dateCond && dateCond.value == null) {
       throw new Error('Date is required');
     }
@@ -299,13 +310,13 @@ export async function updateSchedule({
 
   await batchMessages(async () => {
     if (conditions) {
-      let oldConditions = rule.serialize().conditions;
-      let newConditions = updateConditions(oldConditions, conditions);
+      const oldConditions = rule.serialize().conditions;
+      const newConditions = updateConditions(oldConditions, conditions);
 
       await updateRule({ id: rule.id, conditions: newConditions });
 
       // Annoyingly, sometimes it has `type` and sometimes it doesn't
-      let stripType = ({ type, ...fields }) => fields;
+      const stripType = ({ type, ...fields }) => fields;
 
       // Update `next_date` if the user forced it, or if the account
       // or date changed. We check account because we don't update
@@ -337,7 +348,7 @@ export async function updateSchedule({
 }
 
 export async function deleteSchedule({ id }) {
-  let { data: ruleId } = await aqlQuery(
+  const { data: ruleId } = await aqlQuery(
     q('schedules').filter({ id }).calculate('rule'),
   );
 
@@ -360,10 +371,10 @@ function discoverSchedules() {
 }
 
 async function getUpcomingDates({ config, count }) {
-  let rules = recurConfigToRSchedule(config);
+  const rules = recurConfigToRSchedule(config);
 
   try {
-    let schedule = new RSchedule({ rrules: rules });
+    const schedule = new RSchedule({ rrules: rules });
 
     return schedule
       .occurrences({ start: d.startOfDay(new Date()), take: count })
@@ -383,19 +394,19 @@ async function getUpcomingDates({ config, count }) {
 // Services
 
 function onRuleUpdate(rule) {
-  let { actions, conditions } =
+  const { actions, conditions } =
     rule instanceof Rule ? rule.serialize() : ruleModel.toJS(rule);
 
   if (actions && actions.find(a => a.op === 'link-schedule')) {
-    let scheduleId = actions.find(a => a.op === 'link-schedule').value;
+    const scheduleId = actions.find(a => a.op === 'link-schedule').value;
 
     if (scheduleId) {
-      let conds = extractScheduleConds(conditions);
+      const conds = extractScheduleConds(conditions);
 
-      let payeeIdx = conditions.findIndex(c => c === conds.payee);
-      let accountIdx = conditions.findIndex(c => c === conds.account);
-      let amountIdx = conditions.findIndex(c => c === conds.amount);
-      let dateIdx = conditions.findIndex(c => c === conds.date);
+      const payeeIdx = conditions.findIndex(c => c === conds.payee);
+      const accountIdx = conditions.findIndex(c => c === conds.account);
+      const amountIdx = conditions.findIndex(c => c === conds.amount);
+      const dateIdx = conditions.findIndex(c => c === conds.date);
 
       db.runQuery(
         'INSERT OR REPLACE INTO schedules_json_paths (schedule_id, payee, account, amount, date) VALUES (?, ?, ?, ?, ?)',
@@ -436,13 +447,13 @@ function onApplySync(oldValues, newValues) {
 // posts transactions
 
 async function postTransactionForSchedule({ id }: { id: string }) {
-  let { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
-  let schedule = data[0];
+  const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
+  const schedule = data[0];
   if (schedule == null || schedule._account == null) {
     return;
   }
 
-  let transaction = {
+  const transaction = {
     payee: schedule._payee,
     account: schedule._account,
     amount: getScheduledAmount(schedule._amount),
@@ -460,21 +471,23 @@ async function postTransactionForSchedule({ id }: { id: string }) {
 
 async function advanceSchedulesService(syncSuccess) {
   // Move all paid schedules
-  let { data: schedules } = await aqlQuery(
+  const { data: schedules } = await aqlQuery(
     q('schedules')
       .filter({ completed: false, '_account.closed': false })
       .select('*'),
   );
-  let { data: hasTransData } = await aqlQuery(
+  const { data: hasTransData } = await aqlQuery(
     getHasTransactionsQuery(schedules),
   );
-  let hasTrans = new Set(hasTransData.filter(Boolean).map(row => row.schedule));
+  const hasTrans = new Set(
+    hasTransData.filter(Boolean).map(row => row.schedule),
+  );
 
-  let failedToPost = [];
+  const failedToPost = [];
   let didPost = false;
 
-  for (let schedule of schedules) {
-    let status = getStatus(
+  for (const schedule of schedules) {
+    const status = getStatus(
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
@@ -531,7 +544,7 @@ async function advanceSchedulesService(syncSuccess) {
 }
 
 // Expose functions to the client
-let app = createApp<SchedulesHandlers>();
+export const app = createApp<SchedulesHandlers>();
 
 app.method('schedule/create', mutator(undoable(createSchedule)));
 app.method('schedule/update', mutator(undoable(updateSchedule)));
@@ -550,12 +563,12 @@ app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
 app.service(trackJSONPaths);
 
-app.events.on('sync', ({ type, subtype }) => {
-  let completeEvent =
+app.events.on('sync', ({ type }) => {
+  const completeEvent =
     type === 'success' || type === 'error' || type === 'unauthorized';
 
   if (completeEvent && prefs.getPrefs()) {
-    let { lastScheduleRun } = prefs.getPrefs();
+    const { lastScheduleRun } = prefs.getPrefs();
 
     if (lastScheduleRun !== currentDay()) {
       runMutator(() => advanceSchedulesService(type === 'success'));
@@ -565,7 +578,10 @@ app.events.on('sync', ({ type, subtype }) => {
   }
 });
 
-function getDateWithSkippedWeekend(date, solveMode) {
+export function getDateWithSkippedWeekend(
+  date: Date,
+  solveMode: 'after' | 'before',
+) {
   if (d.isWeekend(date)) {
     if (solveMode === 'after') {
       return d.nextMonday(date);
@@ -577,5 +593,3 @@ function getDateWithSkippedWeekend(date, solveMode) {
   }
   return date;
 }
-
-export default app;

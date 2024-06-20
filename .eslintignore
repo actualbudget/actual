@@ -1,5 +1,6 @@
 packages/api/app/bundle.api.js
 packages/api/dist
+packages/api/@types
 packages/api/migrations
 
 packages/crdt/dist
@@ -24,7 +25,3 @@ packages/import-ynab5/**/node_modules/*
 packages/loot-core/**/node_modules/*
 packages/loot-core/**/lib-dist/*
 packages/loot-core/**/proto/*
-
-packages/node-libofx/libofx.*.js
-packages/node-libofx/libofx/
-packages/node-libofx/OpenSP-*/

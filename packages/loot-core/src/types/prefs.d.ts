@@ -1,11 +1,11 @@
 import { type numberFormats } from '../shared/util';
 
 export type FeatureFlag =
-  | 'categorySpendingReport'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'themes'
-  | 'experimentalOfxParser';
+  | 'spendingReport'
+  | 'simpleFinSync'
+  | 'iterableTopologicalSort';
 
 export type LocalPrefs = Partial<
   {
@@ -26,9 +26,11 @@ export type LocalPrefs = Partial<
     'expand-splits': boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
-    'budget.collapsed': boolean;
+    [key: `hide-reconciled-${string}`]: boolean;
+    'budget.collapsed': string[];
     'budget.summaryCollapsed': boolean;
     'budget.showHiddenCategories': boolean;
+    'budget.startMonth': string;
     // TODO: pull from src/components/modals/ImportTransactions.js
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
@@ -48,13 +50,19 @@ export type LocalPrefs = Partial<
     userId: string;
     resetClock: boolean;
     lastScheduleRun: string;
+    reportsViewLegend: boolean;
+    reportsViewSummary: boolean;
+    reportsViewLabel: boolean;
+    'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
+  autoUpdate: boolean;
+  keyId?: string;
   theme: Theme;
   documentDir: string; // Electron only
 }>;

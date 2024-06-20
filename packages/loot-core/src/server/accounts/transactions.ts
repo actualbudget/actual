@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as connection from '../../platform/server/connection';
 import { TransactionEntity } from '../../types/models';
 import * as db from '../db';
@@ -8,12 +9,12 @@ import * as rules from './transaction-rules';
 import * as transfer from './transfer';
 
 async function idsWithChildren(ids: string[]) {
-  let whereIds = whereIn(ids, 'parent_id');
-  let rows = await db.all(
+  const whereIds = whereIn(ids, 'parent_id');
+  const rows = await db.all(
     `SELECT id FROM v_transactions_internal WHERE ${whereIds}`,
   );
-  let set = new Set(ids);
-  for (let row of rows) {
+  const set = new Set(ids);
+  for (const row of rows) {
     set.add(row.id);
   }
   return [...set];
@@ -40,6 +41,7 @@ export async function batchUpdateTransactions({
   updated,
   learnCategories = false,
   detectOrphanPayees = true,
+  runTransfers = true,
 }: {
   added?: Array<{ id: string; payee: unknown; category: unknown }>;
   deleted?: Array<{ id: string; payee: unknown }>;
@@ -51,23 +53,26 @@ export async function batchUpdateTransactions({
   }>;
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
+  runTransfers?: boolean;
 }) {
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
-  let updatedIds = updated ? updated.map(u => u.id) : [];
-  let deletedIds = deleted ? await idsWithChildren(deleted.map(d => d.id)) : [];
+  const updatedIds = updated ? updated.map(u => u.id) : [];
+  const deletedIds = deleted
+    ? await idsWithChildren(deleted.map(d => d.id))
+    : [];
 
-  let oldPayees = new Set();
-  let accounts = await db.all('SELECT * FROM accounts WHERE tombstone = 0');
+  const oldPayees = new Set();
+  const accounts = await db.all('SELECT * FROM accounts WHERE tombstone = 0');
 
   // We need to get all the payees of updated transactions _before_
   // making changes
   if (updated) {
-    let descUpdatedIds = updated
+    const descUpdatedIds = updated
       .filter(update => update.payee)
       .map(update => update.id);
 
-    let transactions = await getTransactionsByIds(descUpdatedIds);
+    const transactions = await getTransactionsByIds(descUpdatedIds);
 
     for (let i = 0; i < transactions.length; i++) {
       oldPayees.add(transactions[i].payee);
@@ -101,7 +106,7 @@ export async function batchUpdateTransactions({
           if (t.account) {
             // Moving transactions off budget should always clear the
             // category
-            let account = accounts.find(acct => acct.id === t.account);
+            const account = accounts.find(acct => acct.id === t.account);
             if (account.offbudget === 1) {
               t.category = null;
             }
@@ -117,32 +122,35 @@ export async function batchUpdateTransactions({
   // needed to run any cascading logic that depends on the full
   // transaction. Things like transfers, analyzing rule updates, and
   // more
-  let allAdded = await getTransactionsByIds(addedIds);
-  let allUpdated = await getTransactionsByIds(updatedIds);
-  let allDeleted = await getTransactionsByIds(deletedIds);
+  const allAdded = await getTransactionsByIds(addedIds);
+  const allUpdated = await getTransactionsByIds(updatedIds);
+  const allDeleted = await getTransactionsByIds(deletedIds);
 
   // Post-processing phase: first do any updates to transfers.
   // Transfers update the transactions and we need to return updates
   // to the client so that can apply them. Note that added
   // transactions just return the full transaction.
-  let resultAdded = allAdded;
-  let resultUpdated: Awaited<ReturnType<typeof transfer.onUpdate>>[];
+  const resultAdded = allAdded;
+  const resultUpdated = allUpdated;
+  let transfersUpdated: Awaited<ReturnType<typeof transfer.onUpdate>>[];
 
-  await batchMessages(async () => {
-    await Promise.all(allAdded.map(t => transfer.onInsert(t)));
+  if (runTransfers) {
+    await batchMessages(async () => {
+      await Promise.all(allAdded.map(t => transfer.onInsert(t)));
 
-    // Return any updates from here
-    resultUpdated = (
-      await Promise.all(allUpdated.map(t => transfer.onUpdate(t)))
-    ).filter(Boolean);
+      // Return any updates from here
+      transfersUpdated = (
+        await Promise.all(allUpdated.map(t => transfer.onUpdate(t)))
+      ).filter(Boolean);
 
-    await Promise.all(allDeleted.map(t => transfer.onDelete(t)));
-  });
+      await Promise.all(allDeleted.map(t => transfer.onDelete(t)));
+    });
+  }
 
   if (learnCategories) {
     // Analyze any updated categories and update rules to learn from
     // the user's activity
-    let ids = new Set([
+    const ids = new Set([
       ...(added ? added.filter(add => add.category).map(add => add.id) : []),
       ...(updated
         ? updated.filter(update => update.category).map(update => update.id)
@@ -158,11 +166,11 @@ export async function batchUpdateTransactions({
     // them
 
     if (updated) {
-      let newPayeeIds = updated.map(u => u.payee).filter(Boolean);
+      const newPayeeIds = updated.map(u => u.payee).filter(Boolean);
       if (newPayeeIds.length > 0) {
-        let allOrphaned = new Set(await db.getOrphanedPayees());
+        const allOrphaned = new Set(await db.getOrphanedPayees());
 
-        let orphanedIds = [...oldPayees].filter(id => allOrphaned.has(id));
+        const orphanedIds = [...oldPayees].filter(id => allOrphaned.has(id));
 
         if (orphanedIds.length > 0) {
           connection.send('orphaned-payees', {
@@ -176,6 +184,6 @@ export async function batchUpdateTransactions({
 
   return {
     added: resultAdded,
-    updated: resultUpdated,
+    updated: runTransfers ? transfersUpdated : resultUpdated,
   };
 }

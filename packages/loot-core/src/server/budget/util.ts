@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { safeNumber } from '../../shared/util';
 import { number } from '../spreadsheet/globals';
 
@@ -16,7 +17,7 @@ export function flatten2(arr) {
 }
 
 export function unflatten2(arr) {
-  let res = [];
+  const res = [];
   for (let i = 0; i < arr.length; i += 2) {
     res.push([arr[i], arr[i + 1]]);
   }

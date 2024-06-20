@@ -1,22 +1,24 @@
 const { ipcRenderer, contextBridge } = require('electron');
 
-let { version: VERSION, isDev: IS_DEV } =
+const { version: VERSION, isDev: IS_DEV } =
   ipcRenderer.sendSync('get-bootstrap-data');
-
-let resolveSocketPromise;
-let socketPromise = new Promise(resolve => {
-  resolveSocketPromise = resolve;
-});
-
-ipcRenderer.on('set-socket', (event, { name }) => {
-  resolveSocketPromise(name);
-});
 
 contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
   ACTUAL_VERSION: VERSION,
   logToTerminal: (...args) => {
     require('console').log(...args);
+  },
+
+  ipcConnect: func => {
+    func({
+      on(name, handler) {
+        return ipcRenderer.on(name, (_event, value) => handler(value));
+      },
+      emit(name, data) {
+        return ipcRenderer.send('message', { name, args: data });
+      },
+    });
   },
 
   relaunch: () => {
@@ -47,11 +49,15 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.send('apply-update');
   },
 
-  updateAppMenu: isBudgetOpen => {
-    ipcRenderer.send('update-menu', isBudgetOpen);
+  updateAppMenu: budgetId => {
+    ipcRenderer.send('update-menu', budgetId);
   },
 
   getServerSocket: () => {
-    return socketPromise;
+    return null;
+  },
+
+  setTheme: theme => {
+    ipcRenderer.send('set-theme', theme);
   },
 });

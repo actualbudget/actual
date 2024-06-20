@@ -1,9 +1,12 @@
+// @ts-strict-ignore
+import { DiscoverScheduleEntity } from '../../../types/models';
+
 export interface SchedulesHandlers {
   'schedule/create': (arg: {
     schedule: {
       id?: string;
       name?: string;
-      post_transaction?: boolean;
+      posts_transaction?: boolean;
     };
     conditions: unknown[];
   }) => Promise<string>;
@@ -22,7 +25,7 @@ export interface SchedulesHandlers {
 
   'schedule/force-run-service': () => Promise<unknown>;
 
-  'schedule/discover': () => Promise<unknown>;
+  'schedule/discover': () => Promise<DiscoverScheduleEntity[]>;
 
   'schedule/get-upcoming-dates': (arg: {
     config;

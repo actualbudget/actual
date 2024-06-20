@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 
 import * as fs from '../platform/server/fs';
@@ -28,7 +29,7 @@ export async function loadPrefs(id?: string): Promise<LocalPrefs> {
   }
 
   // delete released feature flags
-  let releasedFeatures = ['syncAccount'];
+  const releasedFeatures = ['syncAccount'];
   for (const feature of releasedFeatures) {
     delete prefs[`flags.${feature}`];
   }
@@ -75,7 +76,7 @@ export async function savePrefs(
   }
 
   if (process.env.NODE_ENV !== 'test') {
-    let prefsPath = fs.join(fs.getBudgetDir(prefs.id), 'metadata.json');
+    const prefsPath = fs.join(fs.getBudgetDir(prefs.id), 'metadata.json');
     await fs.writeFile(prefsPath, JSON.stringify(prefs));
   }
 }

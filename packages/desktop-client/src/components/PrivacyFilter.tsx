@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useCallback,
@@ -6,13 +7,12 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import usePrivacyMode from 'loot-core/src/client/privacy';
-
+import { usePrivacyMode } from '../hooks/usePrivacyMode';
 import { useResponsive } from '../ResponsiveProvider';
 
-import View from './common/View';
+import { View } from './common/View';
 
-export type ConditionalPrivacyFilterProps = {
+type ConditionalPrivacyFilterProps = {
   children: ReactNode;
   privacyFilter?: boolean | PrivacyFilterProps;
   defaultPrivacyFilterProps?: PrivacyFilterProps;
@@ -22,7 +22,7 @@ export function ConditionalPrivacyFilter({
   privacyFilter,
   defaultPrivacyFilterProps,
 }: ConditionalPrivacyFilterProps) {
-  let renderPrivacyFilter = (children, mergedProps) => (
+  const renderPrivacyFilter = (children, mergedProps) => (
     <PrivacyFilter {...mergedProps}>{children}</PrivacyFilter>
   );
   return privacyFilter ? (
@@ -46,16 +46,16 @@ type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
   activationFilters?: (boolean | (() => boolean))[];
   blurIntensity?: number;
 };
-export default function PrivacyFilter({
+export function PrivacyFilter({
   activationFilters,
   blurIntensity,
   children,
   ...props
 }: PrivacyFilterProps) {
-  let privacyMode = usePrivacyMode();
+  const privacyMode = usePrivacyMode();
   // Limit mobile support for now.
-  let { isNarrowWidth } = useResponsive();
-  let activate =
+  const { isNarrowWidth } = useResponsive();
+  const activate =
     privacyMode &&
     !isNarrowWidth &&
     (!activationFilters ||
@@ -63,7 +63,7 @@ export default function PrivacyFilter({
         typeof value === 'boolean' ? value : value(),
       ));
 
-  let blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
+  const blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
 
   return !activate ? (
     <>{Children.toArray(children)}</>
@@ -75,11 +75,11 @@ export default function PrivacyFilter({
 }
 
 function BlurredOverlay({ blurIntensity, children, ...props }) {
-  let [hovered, setHovered] = useState(false);
-  let onHover = useCallback(() => setHovered(true), [setHovered]);
-  let onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
+  const [hovered, setHovered] = useState(false);
+  const onHover = useCallback(() => setHovered(true), [setHovered]);
+  const onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
 
-  let blurStyle = {
+  const blurStyle = {
     ...(!hovered && {
       filter: `blur(${blurIntensity})`,
       WebkitFilter: `blur(${blurIntensity})`,
@@ -89,7 +89,7 @@ function BlurredOverlay({ blurIntensity, children, ...props }) {
     }),
   };
 
-  let { style, ...restProps } = props;
+  const { style, ...restProps } = props;
 
   return (
     <View

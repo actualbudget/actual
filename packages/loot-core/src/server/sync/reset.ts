@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
@@ -6,14 +7,14 @@ import * as db from '../db';
 import { runMutator } from '../mutators';
 import * as prefs from '../prefs';
 
-export default async function resetSync(
+export async function resetSync(
   keyState?,
 ): Promise<{ error?: { reason: string; meta?: unknown } }> {
   if (!keyState) {
     // If we aren't resetting the key, make sure our key is up-to-date
     // so we don't accidentally upload a file encrypted with the wrong
     // key (or not encrypted at all)
-    let { valid, error } = await cloudStorage.checkKey();
+    const { valid, error } = await cloudStorage.checkKey();
     if (error) {
       return { error };
     } else if (!valid) {
@@ -21,7 +22,7 @@ export default async function resetSync(
     }
   }
 
-  let { error } = await cloudStorage.resetSyncState(keyState);
+  const { error } = await cloudStorage.resetSyncState(keyState);
   if (error) {
     return { error };
   }
@@ -55,14 +56,16 @@ export default async function resetSync(
   });
 
   if (keyState) {
-    let { key } = keyState;
-    let { cloudFileId } = prefs.getPrefs();
+    const { key } = keyState;
+    const { cloudFileId } = prefs.getPrefs();
 
     // The key has changed, we need to update our local data to
     // store the new key
 
     // Persist key in async storage
-    let keys = JSON.parse((await asyncStorage.getItem(`encrypt-keys`)) || '{}');
+    const keys = JSON.parse(
+      (await asyncStorage.getItem(`encrypt-keys`)) || '{}',
+    );
     keys[cloudFileId] = key.serialize();
     await asyncStorage.setItem('encrypt-keys', JSON.stringify(keys));
 

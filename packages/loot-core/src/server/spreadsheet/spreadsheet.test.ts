@@ -1,7 +1,8 @@
+// @ts-strict-ignore
 import { generateTransaction } from '../../mocks';
 import * as db from '../db';
 
-import Spreadsheet from './spreadsheet';
+import { Spreadsheet } from './spreadsheet';
 
 beforeEach(global.emptyDatabase());
 
@@ -127,7 +128,7 @@ describe('Spreadsheet', () => {
   test('querying deep join works', async () => {
     const spreadsheet = new Spreadsheet(db);
     await db.insertPayee({ name: '', transfer_acct: '1' });
-    let payeeId2 = await db.insertPayee({ name: '', transfer_acct: '2' });
+    const payeeId2 = await db.insertPayee({ name: '', transfer_acct: '2' });
     await insertTransactions(payeeId2);
 
     spreadsheet.set(

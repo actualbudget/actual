@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as db from './index';
 
 beforeEach(global.emptyDatabase());
@@ -31,6 +32,21 @@ async function getTransactions(latestDate) {
 describe('Database', () => {
   test('inserting a category works', async () => {
     await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    await db.insertCategory({
+      name: 'foo',
+      cat_group: 'group1',
+    });
+    expect((await db.getCategories()).length).toBe(1);
+  });
+
+  test('using a deleted category name works', async () => {
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    const id = await db.insertCategory({
+      name: 'foo',
+      cat_group: 'group1',
+    });
+    await db.deleteCategory({ id });
+    expect((await db.getCategories()).length).toBe(0);
     await db.insertCategory({
       name: 'foo',
       cat_group: 'group1',

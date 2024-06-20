@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { type Database } from 'better-sqlite3';
 
 import { captureBreadcrumb } from '../platform/exceptions';
@@ -6,7 +7,7 @@ import { sheetForMonth } from '../shared/months';
 
 import * as Platform from './platform';
 import * as prefs from './prefs';
-import Spreadsheet from './spreadsheet/spreadsheet';
+import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
 
 let globalSheet: Spreadsheet;
@@ -41,7 +42,7 @@ function setCacheStatus(
 ) {
   if (clean) {
     // Generate random number and stick in both places
-    let num = Math.random() * 10000000;
+    const num = Math.random() * 10000000;
     sqlite.runQuery(
       cacheDb,
       'INSERT OR REPLACE INTO kvcache_key (id, key) VALUES (1, ?)',
@@ -67,14 +68,14 @@ function isCacheDirty(mainDb: Database, cacheDb: Database): boolean {
     [],
     true,
   );
-  let num = rows.length === 0 ? null : rows[0].key;
+  const num = rows.length === 0 ? null : rows[0].key;
 
   if (num == null) {
     return true;
   }
 
   if (mainDb) {
-    let rows = sqlite.runQuery<{ key?: number }>(
+    const rows = sqlite.runQuery<{ key?: number }>(
       mainDb,
       'SELECT key FROM kvcache_key WHERE id = 1',
       [],
@@ -95,8 +96,8 @@ export async function loadSpreadsheet(
   db,
   onSheetChange?,
 ): Promise<Spreadsheet> {
-  let cacheEnabled = process.env.NODE_ENV !== 'test';
-  let mainDb = db.getDatabase();
+  const cacheEnabled = process.env.NODE_ENV !== 'test';
+  const mainDb = db.getDatabase();
   let cacheDb;
 
   if (Platform.isDesktop && cacheEnabled) {
@@ -104,7 +105,9 @@ export async function loadSpreadsheet(
     // much more likely to directly work with files on desktop, and this makes
     // it a lot clearer what the true filesize of the main db is (and avoid
     // copying the cache data around).
-    let cachePath = db.getDatabasePath().replace(/db\.sqlite$/, 'cache.sqlite');
+    const cachePath = db
+      .getDatabasePath()
+      .replace(/db\.sqlite$/, 'cache.sqlite');
     globalCacheDb = cacheDb = sqlite.openDatabase(cachePath);
 
     sqlite.execQuery(
@@ -142,7 +145,7 @@ export async function loadSpreadsheet(
   }
 
   if (cacheEnabled && !isCacheDirty(mainDb, cacheDb)) {
-    let cachedRows = await sqlite.runQuery<{ key?: number; value: string }>(
+    const cachedRows = await sqlite.runQuery<{ key?: number; value: string }>(
       cacheDb,
       'SELECT * FROM kvcache',
       [],
@@ -150,8 +153,8 @@ export async function loadSpreadsheet(
     );
     console.log(`Loaded spreadsheet from cache (${cachedRows.length} items)`);
 
-    for (let row of cachedRows) {
-      let parsed = JSON.parse(row.value);
+    for (const row of cachedRows) {
+      const parsed = JSON.parse(row.value);
       sheet.load(row.key, parsed);
     }
   } else {
@@ -188,15 +191,15 @@ export async function reloadSpreadsheet(db): Promise<Spreadsheet> {
 }
 
 export async function loadUserBudgets(db): Promise<void> {
-  let sheet = globalSheet;
+  const sheet = globalSheet;
 
   // TODO: Clear out the cache here so make sure future loads of the app
   // don't load any extra values that aren't set here
 
-  let { budgetType } = prefs.getPrefs() || {};
+  const { budgetType } = prefs.getPrefs() || {};
 
-  let table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
-  let budgets = await db.all(`
+  const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
+  const budgets = await db.all(`
       SELECT * FROM ${table} b
       LEFT JOIN categories c ON c.id = b.category
       WHERE c.tombstone = 0
@@ -205,22 +208,23 @@ export async function loadUserBudgets(db): Promise<void> {
   sheet.startTransaction();
 
   // Load all the budget amounts and carryover values
-  for (let budget of budgets) {
+  for (const budget of budgets) {
     if (budget.month && budget.category) {
-      let sheetName = `budget${budget.month}`;
+      const sheetName = `budget${budget.month}`;
       sheet.set(`${sheetName}!budget-${budget.category}`, budget.amount);
       sheet.set(
         `${sheetName}!carryover-${budget.category}`,
         budget.carryover === 1 ? true : false,
       );
+      sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
     }
   }
 
   // For zero-based budgets, load the buffered amounts
   if (budgetType !== 'report') {
-    let budgetMonths = await db.all('SELECT * FROM zero_budget_months');
-    for (let budgetMonth of budgetMonths) {
-      let sheetName = sheetForMonth(budgetMonth.id);
+    const budgetMonths = await db.all('SELECT * FROM zero_budget_months');
+    for (const budgetMonth of budgetMonths) {
+      const sheetName = sheetForMonth(budgetMonth.id);
       sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);
     }
   }

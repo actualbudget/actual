@@ -1,20 +1,20 @@
+// @ts-strict-ignore
 import { listen, send } from '../platform/client/fetch';
 import { once } from '../shared/async';
-import q, { getPrimaryOrderBy } from '../shared/query';
-export default q;
+import { getPrimaryOrderBy } from '../shared/query';
 
 export async function runQuery(query) {
   return send('query', query.serialize());
 }
 
 export function liveQuery(query, onData?, opts?): LiveQuery {
-  let q = new LiveQuery(query, onData, opts);
+  const q = new LiveQuery(query, onData, opts);
   q.run();
   return q;
 }
 
 export function pagedQuery(query, onData?, opts?): PagedQuery {
-  let q = new PagedQuery(query, onData, opts);
+  const q = new PagedQuery(query, onData, opts);
   q.run();
   return q;
 }
@@ -90,10 +90,10 @@ export class LiveQuery {
     // backend. could give a query an id which makes it cacheable via
     // an LRU cache
 
-    let reqId = Math.random();
+    const reqId = Math.random();
     this.inflightRequestId = reqId;
 
-    let { data, dependencies } = await makeRequest();
+    const { data, dependencies } = await makeRequest();
 
     // Regardless if this request was cancelled or not, save the
     // dependencies. The query can't change so all requests will
@@ -105,7 +105,7 @@ export class LiveQuery {
     // Only fire events if this hasn't been cancelled and if we're
     // still subscribed (`this._subscribe` will exist)
     if (this.inflightRequestId === reqId && this._unsubscribe) {
-      let prevData = this.mappedData;
+      const prevData = this.mappedData;
       this.data = data;
       this.mappedData = this.mapData(data);
       this.onData(this.mappedData, prevData);
@@ -124,7 +124,7 @@ export class LiveQuery {
         // always update to all changes.
         //
         // TODO: errors?
-        let syncTypes = this.onlySync ? ['success'] : ['applied', 'success'];
+        const syncTypes = this.onlySync ? ['success'] : ['applied', 'success'];
 
         if (syncTypes.indexOf(type) !== -1) {
           this.onUpdate(tables);
@@ -169,7 +169,7 @@ export class LiveQuery {
   };
 
   optimisticUpdate = (dataFunc, mappedDataFunc) => {
-    let prevMappedData = this.mappedData;
+    const prevMappedData = this.mappedData;
     this._optimisticUpdate(dataFunc, mappedDataFunc);
     this.onData(this.mappedData, prevMappedData);
   };
@@ -232,12 +232,12 @@ class PagedQuery extends LiveQuery {
       // Also fetch the total count
       this._fetchCount();
 
-      let orderDesc = getPrimaryOrderBy(this.query, defaultOrderBy);
+      const orderDesc = getPrimaryOrderBy(this.query, defaultOrderBy);
       if (orderDesc == null) {
         throw new Error(`refetchUpToRow requires a query with orderBy`);
       }
 
-      let { field, order } = orderDesc;
+      const { field, order } = orderDesc;
 
       let result = await runQuery(this.query.filter({ id }).select(field));
       if (result.data.length === 0) {
@@ -246,7 +246,7 @@ class PagedQuery extends LiveQuery {
         // data that we don't need
         return;
       }
-      let fullRow = result.data[0];
+      const fullRow = result.data[0];
 
       result = await runQuery(
         this.query.filter({
@@ -255,7 +255,7 @@ class PagedQuery extends LiveQuery {
           },
         }),
       );
-      let data = result.data;
+      const data = result.data;
 
       // Load in an extra page to make room for the UI to show some
       // data after it
@@ -285,10 +285,10 @@ class PagedQuery extends LiveQuery {
       await this.runPromise;
     }
 
-    let previousData = this.data;
+    const previousData = this.data;
 
     if (!this.done) {
-      let { data } = await runQuery(
+      const { data } = await runQuery(
         this.query.limit(this.pageCount).offset(previousData.length),
       );
 
@@ -305,8 +305,8 @@ class PagedQuery extends LiveQuery {
           this.done = data.length < this.pageCount;
           this.data = this.data.concat(data);
 
-          let prevData = this.mappedData;
-          let mapped = this.mapData(data);
+          const prevData = this.mappedData;
+          const mapped = this.mapData(data);
           this.mappedData = this.mappedData.concat(mapped);
           this.onPageData(mapped);
           this.onData(this.mappedData, prevData);
@@ -326,8 +326,8 @@ class PagedQuery extends LiveQuery {
   };
 
   optimisticUpdate = (dataFunc, mappedDataFunc) => {
-    let prevData = this.data;
-    let prevMappedData = this.mappedData;
+    const prevData = this.data;
+    const prevMappedData = this.mappedData;
 
     this._optimisticUpdate(dataFunc, mappedDataFunc);
     this.totalCount += this.data.length - prevData.length;

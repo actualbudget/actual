@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import { isAggregateQuery } from '../compiler';
@@ -8,7 +9,7 @@ import { convertOutputType } from '../schema-helpers';
 
 function toGroup(parents, children, mapper = x => x) {
   return parents.reduce((list, parent) => {
-    let childs = children.get(parent.id) || [];
+    const childs = children.get(parent.id) || [];
     list.push({
       ...mapper(parent),
       subtransactions: childs.map(mapper),
@@ -27,8 +28,8 @@ function toGroup(parents, children, mapper = x => x) {
 // (or non-split) transactions
 
 function execTransactions(state, query, sql, params, outputTypes) {
-  let tableOptions = query.tableOptions || {};
-  let splitType = tableOptions.splits || 'inline';
+  const tableOptions = query.tableOptions || {};
+  const splitType = tableOptions.splits || 'inline';
 
   if (['all', 'inline', 'none', 'grouped'].indexOf(splitType) === -1) {
     throw new Error(`Invalid “splits” option for transactions: “${splitType}”`);
@@ -58,7 +59,7 @@ function execTransactions(state, query, sql, params, outputTypes) {
 function _isUnhappy(filter) {
   // These fields can be filtered - all split transactions will
   // still be returned regardless
-  for (let key of Object.keys(filter)) {
+  for (const key of Object.keys(filter)) {
     if (key === '$or' || key === '$and') {
       if (filter[key] && _isUnhappy(filter[key])) {
         return true;
@@ -82,8 +83,8 @@ async function execTransactionsGrouped(
   splitType,
   outputTypes,
 ) {
-  let { withDead } = queryState;
-  let whereDead = withDead ? '' : `AND ${sql.from}.tombstone = 0`;
+  const { withDead } = queryState;
+  const whereDead = withDead ? '' : `AND ${sql.from}.tombstone = 0`;
 
   // Aggregate queries don't make sense for a grouped transactions
   // query. We never should include both parent and children
@@ -91,7 +92,7 @@ async function execTransactionsGrouped(
   // would never make sense. In this case, switch back to the "inline"
   // type where only non-parent transactions are considered
   if (isAggregateQuery(queryState)) {
-    let s = { ...sql };
+    const s = { ...sql };
 
     // Modify the where to only include non-parents
     s.where = `${s.where} AND ${s.from}.is_parent = 0`;
@@ -115,7 +116,7 @@ async function execTransactionsGrouped(
   if (isHappyPathQuery(queryState)) {
     // This is just an optimization - we can just filter out children
     // directly and only list parents
-    let rowSql = `
+    const rowSql = `
       SELECT ${sql.from}.id as group_id
       FROM ${sql.from}
       ${sql.joins}
@@ -129,7 +130,7 @@ async function execTransactionsGrouped(
     // TODO: phew, what a doozy. write docs why it works this way
     //
     // prettier-ignore
-    let rowSql = `
+    const rowSql = `
       SELECT group_id, matched FROM (
         SELECT
           group_id,
@@ -159,29 +160,29 @@ async function execTransactionsGrouped(
     );
   }
 
-  let where = whereIn(
+  const where = whereIn(
     rows.map(row => row.group_id),
     `IFNULL(${sql.from}.parent_id, ${sql.from}.id)`,
   );
-  let finalSql = `
+  const finalSql = `
     SELECT ${sql.select}, parent_id AS _parent_id FROM ${sql.from}
     ${sql.joins}
     WHERE ${where} ${whereDead}
     ${sql.orderBy}
   `;
 
-  let allRows = await db.all(finalSql);
+  const allRows = await db.all(finalSql);
 
   // Group the parents and children up
-  let { parents, children } = allRows.reduce(
+  const { parents, children } = allRows.reduce(
     (acc, trans) => {
-      let pid = trans._parent_id;
+      const pid = trans._parent_id;
       delete trans._parent_id;
 
       if (pid == null) {
         acc.parents.push(trans);
       } else {
-        let arr = acc.children.get(pid) || [];
+        const arr = acc.children.get(pid) || [];
         arr.push(trans);
         acc.children.set(pid, arr);
       }
@@ -190,7 +191,7 @@ async function execTransactionsGrouped(
     { parents: [], children: new Map() },
   );
 
-  let mapper = trans => {
+  const mapper = trans => {
     Object.keys(trans).forEach(name => {
       trans[name] = convertOutputType(trans[name], outputTypes.get(name));
     });
@@ -212,7 +213,7 @@ async function execTransactionsBasic(
   splitType,
   outputTypes,
 ) {
-  let s = { ...sql };
+  const s = { ...sql };
 
   if (splitType !== 'all') {
     if (splitType === 'none') {

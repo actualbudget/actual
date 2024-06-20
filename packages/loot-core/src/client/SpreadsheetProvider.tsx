@@ -1,10 +1,12 @@
+// @ts-strict-ignore
 import React, { createContext, useEffect, useMemo, useContext } from 'react';
 
 import LRU from 'lru-cache';
 
 import { listen, send } from '../platform/client/fetch';
 
-const SpreadsheetContext = createContext(undefined);
+type SpreadsheetContextValue = ReturnType<typeof makeSpreadsheet>;
+const SpreadsheetContext = createContext<SpreadsheetContextValue>(undefined);
 
 export function useSpreadsheet() {
   return useContext(SpreadsheetContext);
@@ -64,8 +66,8 @@ function makeSpreadsheet() {
       binding =
         typeof binding === 'string' ? { name: binding, value: null } : binding;
 
-      let resolvedName = `${sheetName}!${binding.name}`;
-      let cleanup = this.observeCell(resolvedName, cb);
+      const resolvedName = `${sheetName}!${binding.name}`;
+      const cleanup = this.observeCell(resolvedName, cb);
 
       // Always synchronously call with the existing value if it has one.
       // This is a display optimization to avoid flicker. The LRU cache
@@ -117,7 +119,7 @@ function makeSpreadsheet() {
 }
 
 export function SpreadsheetProvider({ children }) {
-  let spreadsheet = useMemo(() => makeSpreadsheet(), []);
+  const spreadsheet = useMemo(() => makeSpreadsheet(), []);
 
   useEffect(() => {
     return spreadsheet.listen();

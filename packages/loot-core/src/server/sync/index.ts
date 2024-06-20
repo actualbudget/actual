@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   serializeClock,
   deserializeClock,
@@ -9,14 +10,14 @@ import {
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
-import logger from '../../platform/server/log';
+import { logger } from '../../platform/server/log';
 import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
 import { LocalPrefs } from '../../types/prefs';
 import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';
-import app from '../main-app';
+import { app } from '../main-app';
 import { runMutator } from '../mutators';
 import { postBinary } from '../post';
 import * as prefs from '../prefs';
@@ -28,16 +29,16 @@ import * as encoder from './encoder';
 import { rebuildMerkleHash } from './repair';
 import { isError } from './utils';
 
-export { default as makeTestMessage } from './make-test-message';
-export { default as resetSync } from './reset';
-export { default as repairSync } from './repair';
+export { makeTestMessage } from './make-test-message';
+export { resetSync } from './reset';
+export { repairSync } from './repair';
 
-let FULL_SYNC_DELAY = 1000;
+const FULL_SYNC_DELAY = 1000;
 let SYNCING_MODE = 'enabled';
 type SyncingMode = 'enabled' | 'offline' | 'disabled' | 'import';
 
 export function setSyncingMode(mode: SyncingMode) {
-  let prevMode = SYNCING_MODE;
+  const prevMode = SYNCING_MODE;
   switch (mode) {
     case 'enabled':
       SYNCING_MODE = 'enabled';
@@ -73,7 +74,7 @@ export function checkSyncingMode(mode: SyncingMode): boolean {
 }
 
 function apply(msg: Message, prev?: boolean) {
-  let { dataset, row, column, value } = msg;
+  const { dataset, row, column, value } = msg;
 
   if (dataset === 'prefs') {
     // Do nothing, it doesn't exist in the db
@@ -107,10 +108,10 @@ async function fetchAll(table, ids) {
   let results = [];
 
   // was 500, but that caused a stack overflow in Safari
-  let batchSize = 100;
+  const batchSize = 100;
 
   for (let i = 0; i < ids.length; i += batchSize) {
-    let partIds = ids.slice(i, i + batchSize);
+    const partIds = ids.slice(i, i + batchSize);
     let sql;
     let column = `${table}.id`;
 
@@ -130,10 +131,10 @@ async function fetchAll(table, ids) {
     }
 
     sql += ` WHERE `;
-    sql += partIds.map(id => `${column} = ?`).join(' OR ');
+    sql += partIds.map(() => `${column} = ?`).join(' OR ');
 
     try {
-      let rows = await db.runQuery(sql, partIds, true);
+      const rows = await db.runQuery(sql, partIds, true);
       results = results.concat(rows);
     } catch (error) {
       throw new SyncError('invalid-schema', {
@@ -141,8 +142,7 @@ async function fetchAll(table, ids) {
           message: error.message,
           stack: error.stack,
         },
-        sql,
-        params: partIds,
+        query: { sql, params: partIds },
       });
     }
   }
@@ -191,14 +191,14 @@ export function addSyncListener(func: SyncListener) {
 }
 
 async function compareMessages(messages: Message[]): Promise<Message[]> {
-  let newMessages = [];
+  const newMessages = [];
 
   for (let i = 0; i < messages.length; i++) {
-    let message = messages[i];
-    let { dataset, row, column, timestamp } = message;
-    let timestampStr = timestamp.toString();
+    const message = messages[i];
+    const { dataset, row, column, timestamp } = message;
+    const timestampStr = timestamp.toString();
 
-    let res = db.runQuery(
+    const res = db.runQuery(
       db.cache(
         'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?',
       ),
@@ -227,8 +227,8 @@ async function compareMessages(messages: Message[]): Promise<Message[]> {
 function applyMessagesForImport(messages: Message[]): void {
   db.transaction(() => {
     for (let i = 0; i < messages.length; i++) {
-      let msg = messages[i];
-      let { dataset } = msg;
+      const msg = messages[i];
+      const { dataset } = msg;
 
       if (!msg.old) {
         try {
@@ -267,8 +267,8 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   }
 
   messages = [...messages].sort((m1, m2) => {
-    let t1 = m1.timestamp ? m1.timestamp.toString() : '';
-    let t2 = m2.timestamp ? m2.timestamp.toString() : '';
+    const t1 = m1.timestamp ? m1.timestamp.toString() : '';
+    const t2 = m2.timestamp ? m2.timestamp.toString() : '';
     if (t1 < t2) {
       return -1;
     } else if (t1 > t2) {
@@ -277,7 +277,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     return 0;
   });
 
-  let idsPerTable = {};
+  const idsPerTable = {};
   messages.forEach(msg => {
     if (msg.dataset === 'prefs') {
       return;
@@ -290,13 +290,13 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   });
 
   async function fetchData(): Promise<DataMap> {
-    let data = new Map();
+    const data = new Map();
 
-    for (let table of Object.keys(idsPerTable)) {
+    for (const table of Object.keys(idsPerTable)) {
       const rows = await fetchAll(table, idsPerTable[table]);
 
       for (let i = 0; i < rows.length; i++) {
-        let row = rows[i];
+        const row = rows[i];
         setIn(data, [table, row.id], row);
       }
     }
@@ -304,8 +304,8 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     return data;
   }
 
-  let prefsToSet: LocalPrefs = {};
-  let oldData = await fetchData();
+  const prefsToSet: LocalPrefs = {};
+  const oldData = await fetchData();
 
   undo.appendMessages(messages, oldData);
 
@@ -332,7 +332,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   // also avoid any side effects to in-memory objects, and apply them
   // after this succeeds.
   db.transaction(() => {
-    let added = new Set();
+    const added = new Set();
 
     for (const msg of messages) {
       const { dataset, row, column, timestamp, value } = msg;
@@ -392,7 +392,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     connection.send('prefs-updated');
   }
 
-  let newData = await fetchData();
+  const newData = await fetchData();
 
   // In testing, sometimes the spreadsheet isn't loaded, and that's ok
   if (sheet.get()) {
@@ -409,7 +409,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
   _syncListeners.forEach(func => func(oldData, newData));
 
-  let tables = getTablesFromMessages(messages.filter(msg => !msg.old));
+  const tables = getTablesFromMessages(messages.filter(msg => !msg.old));
   app.events.emit('sync', {
     type: 'applied',
     tables,
@@ -524,7 +524,7 @@ export function scheduleFullSync(): Promise<
 
 function getTablesFromMessages(messages: Message[]): string[] {
   return messages.reduce((acc, message) => {
-    let dataset =
+    const dataset =
       message.dataset === 'schedules_next_date' ? 'schedules' : message.dataset;
 
     if (!acc.includes(dataset)) {
@@ -541,7 +541,7 @@ function getTablesFromMessages(messages: Message[]): string[] {
 export async function initialFullSync(): Promise<{
   error?: { message: string; reason: string; meta: unknown };
 }> {
-  let result = await fullSync();
+  const result = await fullSync();
   if (isError(result)) {
     // Make sure to wait for anything in the spreadsheet to process
     await sheet.waitOnSpreadsheet();
@@ -610,7 +610,7 @@ export const fullSync = once(async function (): Promise<
     return { error: { message: e.message, reason: e.reason, meta: e.meta } };
   }
 
-  let tables = getTablesFromMessages(messages);
+  const tables = getTablesFromMessages(messages);
 
   app.events.emit('sync', {
     type: 'success',
@@ -625,7 +625,7 @@ async function _fullSync(
   count: number,
   prevDiffTime: number,
 ): Promise<Message[]> {
-  let { cloudFileId, groupId, lastSyncedTimestamp } = prefs.getPrefs() || {};
+  const { cloudFileId, groupId, lastSyncedTimestamp } = prefs.getPrefs() || {};
 
   clearFullSyncTimeout();
 
@@ -634,17 +634,17 @@ async function _fullSync(
   }
 
   // Snapshot the point at which we are currently syncing
-  let currentTime = getClock().timestamp.toString();
+  const currentTime = getClock().timestamp.toString();
 
-  let since =
+  const since =
     sinceTimestamp ||
     lastSyncedTimestamp ||
     // Default to 5 minutes ago
     new Timestamp(Date.now() - 5 * 60 * 1000, 0, '0').toString();
 
-  let messages = getMessagesSince(since);
+  const messages = getMessagesSince(since);
 
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
 
   logger.info(
     'Syncing since',
@@ -653,15 +653,19 @@ async function _fullSync(
     '(attempt: ' + count + ')',
   );
 
-  let buffer = await encoder.encode(groupId, cloudFileId, since, messages);
+  const buffer = await encoder.encode(groupId, cloudFileId, since, messages);
 
   // TODO: There a limit on how many messages we can send because of
   // the payload size. Right now it's at 20MB on the server. We should
   // check the worst case here and make multiple requests if it's
   // really large.
-  let resBuffer = await postBinary(getServer().SYNC_SERVER + '/sync', buffer, {
-    'X-ACTUAL-TOKEN': userToken,
-  });
+  const resBuffer = await postBinary(
+    getServer().SYNC_SERVER + '/sync',
+    buffer,
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
 
   // Abort if the file is either no longer loaded, the group id has
   // changed because of a sync reset
@@ -669,11 +673,11 @@ async function _fullSync(
     return [];
   }
 
-  let res = await encoder.decode(resBuffer);
+  const res = await encoder.decode(resBuffer);
 
   logger.info('Got messages from server', res.messages.length);
 
-  let localTimeChanged = getClock().timestamp.toString() !== currentTime;
+  const localTimeChanged = getClock().timestamp.toString() !== currentTime;
 
   // Apply the new messages
   let receivedMessages: Message[] = [];
@@ -686,7 +690,7 @@ async function _fullSync(
     );
   }
 
-  let diffTime = merkle.diff(res.merkle, getClock().merkle);
+  const diffTime = merkle.diff(res.merkle, getClock().merkle);
 
   if (diffTime !== null) {
     // This is a bit wonky, but we loop until we are in sync with the
@@ -709,7 +713,7 @@ async function _fullSync(
       logger.info('RECEIVED -------');
       logger.info(JSON.stringify(res.messages));
 
-      let rebuiltMerkle = rebuildMerkleHash();
+      const rebuiltMerkle = rebuildMerkleHash();
 
       console.log(
         count,
@@ -740,11 +744,11 @@ async function _fullSync(
 
       if (rebuiltMerkle.trie.hash === res.merkle.hash) {
         // Rebuilding the merkle worked... but why?
-        let clocks = await db.all('SELECT * FROM messages_clock');
+        const clocks = await db.all('SELECT * FROM messages_clock');
         if (clocks.length !== 1) {
           console.log('Bad number of clocks:', clocks.length);
         }
-        let hash = deserializeClock(clocks[0]).merkle.hash;
+        const hash = deserializeClock(clocks[0]).merkle.hash;
         console.log('Merkle hash in db:', hash);
       }
 

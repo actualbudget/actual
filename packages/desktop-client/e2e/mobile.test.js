@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Mobile', () => {
   let page;
@@ -43,47 +42,52 @@ test.describe('Mobile', () => {
       'Mortgage',
       'Water',
       'Power',
+      'Starting Balances',
+      'Misc',
+      'Income',
     ]);
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('opens the accounts page and asserts on balances', async () => {
     const accountsPage = await navigation.goToAccountsPage();
 
-    const account = await accountsPage.getNthAccount(0);
+    const account = await accountsPage.getNthAccount(1);
 
     await expect(account.name).toHaveText('Ally Savings');
     await expect(account.balance).toHaveText('7,653.00');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('opens individual account page and checks that filtering is working', async () => {
     const accountsPage = await navigation.goToAccountsPage();
-    const accountPage = await accountsPage.openNthAccount(1);
+    const accountPage = await accountsPage.openNthAccount(0);
 
     await expect(accountPage.heading).toHaveText('Bank of America');
     expect(await accountPage.getBalance()).toBeGreaterThan(0);
 
     await expect(accountPage.noTransactionsFoundError).not.toBeVisible();
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     await accountPage.searchByText('nothing should be found');
     await expect(accountPage.noTransactionsFoundError).toBeVisible();
     await expect(accountPage.transactions).toHaveCount(0);
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     await accountPage.searchByText('Kroger');
     await expect(accountPage.transactions).not.toHaveCount(0);
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a transaction via footer button', async () => {
     const transactionEntryPage = await navigation.goToTransactionEntryPage();
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
 
     await transactionEntryPage.amountField.fill('12.34');
+    // Click anywhere to cancel active edit.
+    await transactionEntryPage.header.click();
     await transactionEntryPage.fillField(
       page.getByTestId('payee-field'),
       'Kroger',
@@ -96,14 +100,14 @@ test.describe('Mobile', () => {
       page.getByTestId('account-field'),
       'Ally Savings',
     );
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     const accountPage = await transactionEntryPage.createTransaction();
 
     await expect(accountPage.transactions.nth(0)).toHaveText(
       'KrogerClothing-12.34',
     );
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a transaction from `/accounts/:id` page', async () => {
@@ -112,9 +116,11 @@ test.describe('Mobile', () => {
     const transactionEntryPage = await accountPage.clickCreateTransaction();
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     await transactionEntryPage.amountField.fill('12.34');
+    // Click anywhere to cancel active edit.
+    await transactionEntryPage.header.click();
     await transactionEntryPage.fillField(
       page.getByTestId('payee-field'),
       'Kroger',
@@ -133,7 +139,7 @@ test.describe('Mobile', () => {
 
   test('checks that settings page can be opened', async () => {
     const settingsPage = await navigation.goToSettingsPage();
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     const downloadPromise = page.waitForEvent('download');
 
@@ -144,6 +150,6 @@ test.describe('Mobile', () => {
     expect(await download.suggestedFilename()).toMatch(
       /^\d{4}-\d{2}-\d{2}-.*.zip$/,
     );
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 });

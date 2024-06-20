@@ -1,33 +1,27 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/src/client/state-types';
+
 import { useActions } from '../hooks/useActions';
-import Close from '../icons/v1/Close';
+import { SvgClose } from '../icons/v1';
 import { theme } from '../style';
 
-import Button from './common/Button';
-import LinkButton from './common/LinkButton';
-import Text from './common/Text';
-import View from './common/View';
+import { Button } from './common/Button';
+import { Link } from './common/Link';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
-function closeNotification(setAppState) {
-  // Set a flag to never show an update notification again for this session
-  setAppState({
-    updateInfo: null,
-    showUpdateNotification: false,
-  });
-}
-
-export default function UpdateNotification() {
-  let updateInfo = useSelector(state => state.app.updateInfo);
-  let showUpdateNotification = useSelector(
-    state => state.app.showUpdateNotification,
+export function UpdateNotification() {
+  const updateInfo = useSelector((state: State) => state.app.updateInfo);
+  const showUpdateNotification = useSelector(
+    (state: State) => state.app.showUpdateNotification,
   );
 
-  let { updateApp, setAppState } = useActions();
+  const { updateApp, setAppState } = useActions();
 
   if (updateInfo && showUpdateNotification) {
-    let notes = updateInfo.releaseNotes;
+    const notes = updateInfo.releaseNotes;
 
     return (
       <View
@@ -36,7 +30,7 @@ export default function UpdateNotification() {
           bottom: 0,
           right: 0,
           margin: '15px 17px',
-          backgroundColor: theme.altPageTextPositive,
+          backgroundColor: theme.pageTextPositive,
           color: theme.tableBackground,
           padding: '7px 10px',
           borderRadius: 4,
@@ -51,7 +45,8 @@ export default function UpdateNotification() {
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
-              <LinkButton
+              <Link
+                variant="text"
                 onClick={updateApp}
                 style={{
                   color: theme.buttonPrimaryText,
@@ -59,28 +54,39 @@ export default function UpdateNotification() {
                 }}
               >
                 Restart
-              </LinkButton>{' '}
+              </Link>{' '}
               (
-              <LinkButton
+              <Link
+                variant="text"
                 style={{
                   color: theme.buttonPrimaryText,
                   textDecoration: 'underline',
                 }}
                 onClick={() =>
-                  window.Actual.openURLInBrowser(
+                  window.Actual?.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
                   )
                 }
               >
                 notes
-              </LinkButton>
+              </Link>
               )
               <Button
                 type="bare"
+                aria-label="Close"
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
-                onClick={() => closeNotification(setAppState)}
+                onClick={() => {
+                  // Set a flag to never show an update notification again for this session
+                  setAppState({
+                    updateInfo: null,
+                    showUpdateNotification: false,
+                  });
+                }}
               >
-                <Close width={9} style={{ color: theme.buttonPrimaryText }} />
+                <SvgClose
+                  width={9}
+                  style={{ color: theme.buttonPrimaryText }}
+                />
               </Button>
             </Text>
           </View>

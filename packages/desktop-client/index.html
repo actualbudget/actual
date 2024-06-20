@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Actual</title>
+    <link rel="canonical" href="/" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/site.webmanifest" crossorigin="use-credentials"/>
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <style type="text/css">
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-size: 13px;
+      }
+
+      html,
+      body,
+      button,
+      input {
+        font-family: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+          'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+      }
+
+      a {
+        color: inherit;
+        text-decoration-skip: ink;
+      }
+
+      * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      *:focus {
+        /* colors.b5 */
+        outline-color: #2b8fed;
+      }
+
+      input,
+      textarea {
+        font-size: 1em;
+        font-family: 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+          'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+      }
+
+      html,
+      body,
+      #root {
+        height: 100%;
+      }
+      body {
+        overflow: hidden;
+      }
+
+      .view {
+        align-items: stretch;
+        border-width: 0;
+        border-style: solid;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        /* fix flexbox bugs */
+        min-height: 0;
+        min-width: 0;
+      }
+
+      .js-focus-visible :focus:not(.focus-visible) {
+        outline: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>

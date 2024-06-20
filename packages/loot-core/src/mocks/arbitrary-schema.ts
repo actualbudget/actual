@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import fc, { type Arbitrary } from 'fast-check';
 
 import { schema } from '../server/aql';
@@ -52,8 +53,8 @@ export function typeArbitrary(typeDesc, name?) {
 }
 
 export function flattenSortTransactions(arr) {
-  let flattened = arr.reduce((list, trans) => {
-    let { subtransactions, ...fields } = trans;
+  const flattened = arr.reduce((list, trans) => {
+    const { subtransactions, ...fields } = trans;
 
     if (subtransactions.length > 0) {
       list.push({
@@ -101,7 +102,7 @@ function tableArbitrary<
   extraArbs?: E,
   requiredKeys: Array<Extract<keyof T | keyof E, string>> = [],
 ) {
-  let arb = fc.record(
+  const arb = fc.record(
     {
       ...Object.fromEntries<T>(
         Object.entries(tableSchema).map(([name, field]) => {
@@ -128,11 +129,11 @@ export function makeTransaction({
   splitFreq = 1,
   payeeIds,
 }: { splitFreq?: number; payeeIds?: string[] } = {}) {
-  let payeeField = payeeIds
+  const payeeField = payeeIds
     ? { payee: fc.oneof(...payeeIds.map(id => fc.constant(id))) }
     : null;
 
-  let subtrans = tableArbitrary(schema.transactions, payeeField);
+  const subtrans = tableArbitrary(schema.transactions, payeeField);
 
   return tableArbitrary(
     schema.transactions,
@@ -150,7 +151,7 @@ export function makeTransaction({
 export const makeTransactionArray = (
   options: { minLength?; maxLength?; splitFreq?; payeeIds? } = {},
 ) => {
-  let { minLength, maxLength, ...transOpts } = options;
+  const { minLength, maxLength, ...transOpts } = options;
   return fc
     .array(makeTransaction(transOpts), { minLength, maxLength })
     .map(arr => flattenSortTransactions(arr));

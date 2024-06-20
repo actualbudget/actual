@@ -23,7 +23,7 @@ class Query {
   }
 
   unfilter(exprs) {
-    let exprSet = new Set(exprs);
+    const exprSet = new Set(exprs);
     return new Query({
       ...this.state,
       filterExpressions: this.state.filterExpressions.filter(
@@ -37,13 +37,13 @@ class Query {
       exprs = [exprs];
     }
 
-    let query = new Query({ ...this.state, selectExpressions: exprs });
+    const query = new Query({ ...this.state, selectExpressions: exprs });
     query.state.calculation = false;
     return query;
   }
 
   calculate(expr) {
-    let query = this.select({ result: expr });
+    const query = this.select({ result: expr });
     query.state.calculation = true;
     return query;
   }
@@ -99,6 +99,6 @@ class Query {
   }
 }
 
-export default function q(table) {
+export function q(table) {
   return new Query({ table });
 }

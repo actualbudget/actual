@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { dayFromDate } from '../../shared/months';
 import { toDateRepr, fromDateRepr } from '../models';
 
@@ -91,15 +92,15 @@ export function conform(
   obj,
   { skipNull = false } = {},
 ) {
-  let tableSchema = schema[table];
+  const tableSchema = schema[table];
   if (tableSchema == null) {
     throw new Error(`Table “${table}” does not exist`);
   }
 
-  let views = schemaConfig.views || {};
+  const views = schemaConfig.views || {};
 
   // Rename fields if necessary
-  let fieldRef = field => {
+  const fieldRef = field => {
     if (views[table] && views[table].fields) {
       return views[table].fields[field] || field;
     }
@@ -114,7 +115,7 @@ export function conform(
           return null;
         }
 
-        let fieldDesc = tableSchema[field];
+        const fieldDesc = tableSchema[field];
         if (fieldDesc == null) {
           throw new Error(
             `Field “${field}” does not exist on table ${table}: ${JSON.stringify(
@@ -143,9 +144,9 @@ export function conform(
 }
 
 export function convertForInsert(schema, schemaConfig, table, rawObj) {
-  let obj = { ...rawObj };
+  const obj = { ...rawObj };
 
-  let tableSchema = schema[table];
+  const tableSchema = schema[table];
   if (tableSchema == null) {
     throw new Error(`Error inserting: table “${table}” does not exist`);
   }
@@ -153,7 +154,7 @@ export function convertForInsert(schema, schemaConfig, table, rawObj) {
   // Inserting checks all the fields in the table and adds any default
   // values necessary
   Object.keys(tableSchema).forEach(field => {
-    let fieldDesc = tableSchema[field];
+    const fieldDesc = tableSchema[field];
 
     if (obj[field] == null) {
       if (fieldDesc.default !== undefined) {
@@ -179,9 +180,9 @@ export function convertForInsert(schema, schemaConfig, table, rawObj) {
 }
 
 export function convertForUpdate(schema, schemaConfig, table, rawObj) {
-  let obj = { ...rawObj };
+  const obj = { ...rawObj };
 
-  let tableSchema = schema[table];
+  const tableSchema = schema[table];
   if (tableSchema == null) {
     throw new Error(`Error updating: table “${table}” does not exist`);
   }
@@ -190,16 +191,16 @@ export function convertForUpdate(schema, schemaConfig, table, rawObj) {
 }
 
 export function convertFromSelect(schema, schemaConfig, table, obj) {
-  let tableSchema = schema[table];
+  const tableSchema = schema[table];
   if (tableSchema == null) {
     throw new Error(`Table “${table}” does not exist`);
   }
 
-  let fields = Object.keys(tableSchema);
-  let result = {};
+  const fields = Object.keys(tableSchema);
+  const result = {};
   for (let i = 0; i < fields.length; i++) {
-    let fieldName = fields[i];
-    let fieldDesc = tableSchema[fieldName];
+    const fieldName = fields[i];
+    const fieldDesc = tableSchema[fieldName];
 
     result[fieldName] = convertOutputType(obj[fieldName], fieldDesc.type);
   }

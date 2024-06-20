@@ -12,7 +12,7 @@ function getMenu(isDev, createWindow) {
             if (focusedWindow) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
-                  "__actionsForMenu.replaceModal('load-backup')",
+                  `__actionsForMenu.replaceModal('load-backup', { budgetId: '${item.budgetId}' })`,
                 );
               }
             }
@@ -211,7 +211,7 @@ function getMenu(isDev, createWindow) {
       ].filter(x => x),
     });
     // Edit menu.
-    let editIdx = template.findIndex(t => t.label === 'Edit');
+    const editIdx = template.findIndex(t => t.label === 'Edit');
     template[editIdx].submenu.push(
       {
         type: 'separator',
@@ -229,7 +229,7 @@ function getMenu(isDev, createWindow) {
       },
     );
     // Window menu.
-    let windowIdx = template.findIndex(t => t.role === 'window');
+    const windowIdx = template.findIndex(t => t.role === 'window');
     template[windowIdx].submenu = [
       {
         label: 'Close',

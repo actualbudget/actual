@@ -1,16 +1,21 @@
-export function last(arr) {
+// @ts-strict-ignore
+export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
 
-export function getChangedValues(obj1, obj2) {
-  // Keep the id field because this is mostly used to diff database
-  // objects
-  const diff = obj1.id ? { id: obj1.id } : {};
+export function getChangedValues<T extends { id?: string }>(obj1: T, obj2: T) {
+  const diff: Partial<T> = {};
   const keys = Object.keys(obj2);
   let hasChanged = false;
 
+  // Keep the id field because this is mostly used to diff database
+  // objects
+  if (obj1.id) {
+    diff.id = obj1.id;
+  }
+
   for (let i = 0; i < keys.length; i++) {
-    let key = keys[i];
+    const key = keys[i];
 
     if (obj1[key] !== obj2[key]) {
       diff[key] = obj2[key];
@@ -21,10 +26,14 @@ export function getChangedValues(obj1, obj2) {
   return hasChanged ? diff : null;
 }
 
-export function hasFieldsChanged(obj1, obj2, fields) {
+export function hasFieldsChanged<T extends object>(
+  obj1: T,
+  obj2: T,
+  fields: Array<keyof T>,
+) {
   let changed = false;
   for (let i = 0; i < fields.length; i++) {
-    let field = fields[i];
+    const field = fields[i];
     if (obj1[field] !== obj2[field]) {
       changed = true;
       break;
@@ -33,7 +42,14 @@ export function hasFieldsChanged(obj1, obj2, fields) {
   return changed;
 }
 
-export function applyChanges(changes, items) {
+export function applyChanges<T extends { id: string }>(
+  changes: {
+    added?: T[];
+    updated?: T[];
+    deleted?: T[];
+  },
+  items: T[],
+) {
   items = [...items];
 
   if (changes.added) {
@@ -64,13 +80,13 @@ export function applyChanges(changes, items) {
   return items;
 }
 
-export function partitionByField(data, field) {
-  let res = new Map();
+export function partitionByField<T, K extends keyof T>(data: T[], field: K) {
+  const res = new Map();
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
-    let key = item[field];
+    const item = data[i];
+    const key = item[field];
 
-    let items = res.get(key) || [];
+    const items = res.get(key) || [];
     items.push(item);
 
     res.set(key, items);
@@ -79,11 +95,11 @@ export function partitionByField(data, field) {
 }
 
 export function groupBy<T, K extends keyof T>(data: T[], field: K) {
-  let res = new Map<T[K], T[]>();
+  const res = new Map<T[K], T[]>();
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
-    let key = item[field];
-    let existing = res.get(key) || [];
+    const item = data[i];
+    const key = item[field];
+    const existing = res.get(key) || [];
     res.set(key, existing.concat([item]));
   }
   return res;
@@ -93,27 +109,27 @@ export function groupBy<T, K extends keyof T>(data: T[], field: K) {
 // `Map` is better, but we can't swap it out because `Map` has a
 // different API and we need to go through and update everywhere that
 // uses it.
-function _groupById(data) {
-  let res = new Map();
+function _groupById<T extends { id: string }>(data: T[]) {
+  const res = new Map<string, T>();
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
+    const item = data[i];
     res.set(item.id, item);
   }
   return res;
 }
 
-export function diffItems(items, newItems) {
-  let grouped = _groupById(items);
-  let newGrouped = _groupById(newItems);
-  let added = [];
-  let updated = [];
+export function diffItems<T extends { id: string }>(items: T[], newItems: T[]) {
+  const grouped = _groupById(items);
+  const newGrouped = _groupById(newItems);
+  const added: T[] = [];
+  const updated: Partial<T>[] = [];
 
-  let deleted = items
+  const deleted = items
     .filter(item => !newGrouped.has(item.id))
     .map(item => ({ id: item.id }));
 
   newItems.forEach(newItem => {
-    let item = grouped.get(newItem.id);
+    const item = grouped.get(newItem.id);
     if (!item) {
       added.push(newItem);
     } else {
@@ -127,10 +143,10 @@ export function diffItems(items, newItems) {
   return { added, updated, deleted };
 }
 
-export function groupById(data) {
-  let res = {};
+export function groupById<T extends { id: string }>(data: T[]) {
+  const res: { [key: string]: T } = {};
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
+    const item = data[i];
     res[item.id] = item;
   }
   return res;
@@ -168,9 +184,9 @@ export function getIn(map, keys) {
   return item;
 }
 
-export function fastSetMerge(set1, set2) {
-  let finalSet = new Set(set1);
-  let iter = set2.values();
+export function fastSetMerge<T>(set1: Set<T>, set2: Set<T>) {
+  const finalSet = new Set(set1);
+  const iter = set2.values();
   let value = iter.next();
   while (!value.done) {
     finalSet.add(value.value);
@@ -181,6 +197,24 @@ export function fastSetMerge(set1, set2) {
 
 export function titleFirst(str: string) {
   return str[0].toUpperCase() + str.slice(1);
+}
+
+export function appendDecimals(
+  amountText: string,
+  hideDecimals = false,
+): string {
+  const { separator } = getNumberFormat();
+  let result = amountText;
+  if (result.slice(-1) === separator) {
+    result = result.slice(0, -1);
+  }
+  if (!hideDecimals) {
+    result = result.replaceAll(/[,.]/g, '');
+    result = result.replace(/^0+(?!$)/, '');
+    result = result.padStart(3, '0');
+    result = result.slice(0, -2) + separator + result.slice(-2);
+  }
+  return amountToCurrency(currencyToAmount(result));
 }
 
 type NumberFormats =
@@ -214,14 +248,21 @@ export function setNumberFormat(config: typeof numberFormatConfig) {
   numberFormatConfig = config;
 }
 
-export function getNumberFormat({ format, hideFraction } = numberFormatConfig) {
-  let locale, regex, separator;
+export function getNumberFormat({
+  format,
+  hideFraction,
+}: {
+  format?: NumberFormats;
+  hideFraction: boolean;
+} = numberFormatConfig) {
+  let locale, regex, separator, separatorRegex;
 
   switch (format) {
     case 'space-comma':
-      locale = 'en-ZA';
-      regex = /[^-0-9,]/g;
+      locale = 'en-SE';
+      regex = /[^-0-9,.]/g;
       separator = ',';
+      separatorRegex = /[,.]/g;
       break;
     case 'dot-comma':
       locale = 'de-DE';
@@ -230,8 +271,9 @@ export function getNumberFormat({ format, hideFraction } = numberFormatConfig) {
       break;
     case 'space-dot':
       locale = 'dje';
-      regex = /[^-0-9.]/g;
+      regex = /[^-0-9,.]/g;
       separator = '.';
+      separatorRegex = /[,.]/g;
       break;
     case 'comma-dot-in':
       locale = 'en-IN';
@@ -253,6 +295,7 @@ export function getNumberFormat({ format, hideFraction } = numberFormatConfig) {
       maximumFractionDigits: hideFraction ? 0 : 2,
     }),
     regex,
+    separatorRegex,
   };
 }
 
@@ -282,11 +325,14 @@ export function safeNumber(value: number) {
   return value;
 }
 
-export function toRelaxedNumber(value) {
+export function toRelaxedNumber(value: string) {
   return integerToAmount(currencyToInteger(value) || 0);
 }
 
-export function integerToCurrency(n, formatter = getNumberFormat().formatter) {
+export function integerToCurrency(
+  n: number,
+  formatter = getNumberFormat().formatter,
+) {
   return formatter.format(safeNumber(n) / 100);
 }
 
@@ -294,29 +340,42 @@ export function amountToCurrency(n) {
   return getNumberFormat().formatter.format(n);
 }
 
-export function currencyToAmount(str) {
-  let amount = parseFloat(
-    str
-      .replace(getNumberFormat().regex, '')
-      .replace(getNumberFormat().separator, '.'),
-  );
+export function amountToCurrencyNoDecimal(n) {
+  return getNumberFormat({ hideFraction: true }).formatter.format(n);
+}
+
+export function currencyToAmount(str: string) {
+  let amount;
+  if (getNumberFormat().separatorRegex) {
+    amount = parseFloat(
+      str
+        .replace(getNumberFormat().regex, '')
+        .replace(getNumberFormat().separatorRegex, '.'),
+    );
+  } else {
+    amount = parseFloat(
+      str
+        .replace(getNumberFormat().regex, '')
+        .replace(getNumberFormat().separator, '.'),
+    );
+  }
   return isNaN(amount) ? null : amount;
 }
 
-export function currencyToInteger(str) {
-  let amount = currencyToAmount(str);
+export function currencyToInteger(str: string) {
+  const amount = currencyToAmount(str);
   return amount == null ? null : amountToInteger(amount);
 }
 
-export function stringToInteger(str) {
-  let amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
+export function stringToInteger(str: string) {
+  const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
   if (!isNaN(amount)) {
     return amount;
   }
   return null;
 }
 
-export function amountToInteger(n) {
+export function amountToInteger(n: number) {
   return Math.round(n * 100);
 }
 
@@ -328,12 +387,21 @@ export function integerToAmount(n) {
 // financial files and we don't want to parse based on the user's
 // number format, because the user could be importing from many
 // currencies. We extract out the numbers and just ignore separators.
-export function looselyParseAmount(amount) {
-  function safeNumber(v) {
-    return isNaN(v) ? null : v;
+export function looselyParseAmount(amount: string) {
+  function safeNumber(v: number): null | number {
+    if (isNaN(v)) {
+      return null;
+    }
+
+    const value = v * 100;
+    if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
+      return null;
+    }
+
+    return v;
   }
 
-  function extractNumbers(v) {
+  function extractNumbers(v: string): string {
     return v.replace(/[^0-9-]/g, '');
   }
 
@@ -341,13 +409,15 @@ export function looselyParseAmount(amount) {
     amount = amount.replace('(', '-').replace(')', '');
   }
 
-  let m = amount.match(/[.,][^.,]*$/);
-  if (!m || m.index === 0) {
+  // Look for a decimal marker, then look for either 1-2 or 5-9 decimal places.
+  // This avoids matching against 3 places which may not actually be decimal
+  const m = amount.match(/[.,]([^.,]{5,9}|[^.,]{1,2})$/);
+  if (!m || m.index === undefined || m.index === 0) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
 
-  let left = extractNumbers(amount.slice(0, m.index));
-  let right = extractNumbers(amount.slice(m.index + 1));
+  const left = extractNumbers(amount.slice(0, m.index));
+  const right = extractNumbers(amount.slice(m.index + 1));
 
   return safeNumber(parseFloat(left + '.' + right));
 }

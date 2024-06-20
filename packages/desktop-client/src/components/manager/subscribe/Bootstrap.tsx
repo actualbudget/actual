@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -6,23 +7,23 @@ import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../../style';
-import Button from '../../common/Button';
-import ExternalLink from '../../common/ExternalLink';
-import Paragraph from '../../common/Paragraph';
-import Text from '../../common/Text';
-import View from '../../common/View';
+import { Button } from '../../common/Button';
+import { Link } from '../../common/Link';
+import { Paragraph } from '../../common/Paragraph';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 import { OpenIdForm } from './OpenIdForm';
 
-export default function Bootstrap() {
-  let dispatch = useDispatch();
-  let [error, setError] = useState(null);
-  let [loginMethod, setLoginMethod] = useState('password');
+export function Bootstrap() {
+  const dispatch = useDispatch();
+  const [error, setError] = useState(null);
+  const [loginMethod, setLoginMethod] = useState('password');
 
-  let { checked } = useBootstrapped();
-  let navigate = useNavigate();
+  const { checked } = useBootstrapped();
+  const navigate = useNavigate();
 
   function getErrorMessage(error) {
     switch (error) {
@@ -45,7 +46,7 @@ export default function Bootstrap() {
 
   async function onSetPassword(password) {
     setError(null);
-    let { error } = await send('subscribe-bootstrap', { password });
+    const { error } = await send('subscribe-bootstrap', { password });
 
     if (error) {
       setError(error);
@@ -83,9 +84,9 @@ export default function Bootstrap() {
 
       <Paragraph isLast style={{ fontSize: 16, color: theme.pageTextDark }}>
         Consider opening{' '}
-        <ExternalLink to="https://actualbudget.org/docs/tour/">
+        <Link variant="external" to="https://actualbudget.org/docs/tour/">
           our tour
-        </ExternalLink>{' '}
+        </Link>{' '}
         in a new tab for some guidance on what to do when you’ve set your
         password.
       </Paragraph>

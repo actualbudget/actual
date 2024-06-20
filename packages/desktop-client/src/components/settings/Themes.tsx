@@ -1,27 +1,29 @@
 import React from 'react';
 
-import { useActions } from '../../hooks/useActions';
-import { themeNames, useTheme } from '../../style';
-import Button from '../common/Button';
-import Select from '../common/Select';
-import Text from '../common/Text';
+import { type Theme } from 'loot-core/types/prefs';
+
+import { themeOptions, useTheme } from '../../style';
+import { Button } from '../common/Button';
+import { Select } from '../common/Select';
+import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 
-export default function ThemeSettings() {
-  let theme = useTheme();
-  let { saveGlobalPrefs } = useActions();
+export function ThemeSettings() {
+  const [theme, switchTheme] = useTheme();
 
   return (
     <Setting
       primaryAction={
         <Button bounce={false} style={{ padding: 0 }}>
-          <Select
+          <Select<Theme>
+            bare
             onChange={value => {
-              saveGlobalPrefs({ theme: value });
+              switchTheme(value);
             }}
             value={theme}
-            options={themeNames.map(name => [name, name])}
+            options={themeOptions}
+            style={{ padding: '2px 10px', fontSize: 15 }}
           />
         </Button>
       }

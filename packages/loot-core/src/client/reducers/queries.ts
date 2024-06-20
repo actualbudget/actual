@@ -1,6 +1,8 @@
+// @ts-strict-ignore
 import memoizeOne from 'memoize-one';
 
 import { groupById } from '../../shared/util';
+import { type AccountEntity, type PayeeEntity } from '../../types/models';
 import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { QueriesState } from '../state-types/queries';
@@ -11,18 +13,18 @@ const initialState: QueriesState = {
   lastTransaction: null,
   updatedAccounts: [],
   accounts: [],
+  accountsLoaded: false,
   categories: {
     grouped: [],
     list: [],
   },
+  categoriesLoaded: false,
   payees: [],
+  payeesLoaded: false,
   earliestTransaction: null,
 };
 
-export default function update(
-  state = initialState,
-  action: Action,
-): QueriesState {
+export function update(state = initialState, action: Action): QueriesState {
   switch (action.type) {
     case constants.SET_NEW_TRANSACTIONS:
       return {
@@ -57,14 +59,13 @@ export default function update(
       return {
         ...state,
         accounts: action.accounts,
+        accountsLoaded: true,
       };
     case constants.UPDATE_ACCOUNT: {
       return {
         ...state,
         accounts: state.accounts.map(account => {
-          // @ts-expect-error Not typed yet
           if (account.id === action.account.id) {
-            // @ts-expect-error Not typed yet
             return { ...account, ...action.account };
           }
           return account;
@@ -75,21 +76,27 @@ export default function update(
       return {
         ...state,
         categories: action.categories,
+        categoriesLoaded: true,
       };
     case constants.LOAD_PAYEES:
       return {
         ...state,
         payees: action.payees,
+        payeesLoaded: true,
       };
     default:
   }
   return state;
 }
 
-export const getAccountsById = memoizeOne(accounts => groupById(accounts));
-export const getPayeesById = memoizeOne(payees => groupById(payees));
+export const getAccountsById = memoizeOne((accounts: AccountEntity[]) =>
+  groupById(accounts),
+);
+export const getPayeesById = memoizeOne((payees: PayeeEntity[]) =>
+  groupById(payees),
+);
 export const getCategoriesById = memoizeOne(categoryGroups => {
-  let res = {};
+  const res = {};
   categoryGroups.forEach(group => {
     group.categories.forEach(cat => {
       res[cat.id] = cat;
@@ -98,14 +105,16 @@ export const getCategoriesById = memoizeOne(categoryGroups => {
   return res;
 });
 
-export const getActivePayees = memoizeOne((payees, accounts) => {
-  let accountsById = getAccountsById(accounts);
+export const getActivePayees = memoizeOne(
+  (payees: PayeeEntity[], accounts: AccountEntity[]) => {
+    const accountsById = getAccountsById(accounts);
 
-  return payees.filter(payee => {
-    if (payee.transfer_acct) {
-      let account = accountsById[payee.transfer_acct];
-      return account != null && !account.closed;
-    }
-    return true;
-  });
-});
+    return payees.filter(payee => {
+      if (payee.transfer_acct) {
+        const account = accountsById[payee.transfer_acct];
+        return account != null && !account.closed;
+      }
+      return true;
+    });
+  },
+);

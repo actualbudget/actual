@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
 import type {

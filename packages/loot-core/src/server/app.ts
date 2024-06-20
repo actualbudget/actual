@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import mitt from 'mitt';
 
 import { captureException } from '../platform/exceptions';
@@ -37,7 +38,7 @@ class App<Handlers> {
   }
 
   combine(...apps) {
-    for (let app of apps) {
+    for (const app of apps) {
       Object.keys(app.handlers).forEach(name => {
         this.method(name as string & keyof Handlers, app.handlers[name]);
       });
@@ -46,8 +47,8 @@ class App<Handlers> {
         this.service(service);
       });
 
-      for (let [name, listeners] of app.events.all.entries()) {
-        for (let listener of listeners) {
+      for (const [name, listeners] of app.events.all.entries()) {
+        for (const listener of listeners) {
           this.events.on(name, listener);
         }
       }

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { join, dirname, basename } from 'path';
 
 import snapshotDiff from 'snapshot-diff';
@@ -42,7 +43,7 @@ export function debugDOM(node) {
         str += node.textContent + '\n';
       }
 
-      for (let child of node.childNodes) {
+      for (const child of node.childNodes) {
         str += debugDOM(child, indent + 2);
       }
     }

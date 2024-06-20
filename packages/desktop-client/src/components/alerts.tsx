@@ -1,11 +1,11 @@
+// @ts-strict-ignore
 import React, { type ComponentType, type ReactNode } from 'react';
 
-import ExclamationOutline from '../icons/v1/ExclamationOutline';
-import InformationOutline from '../icons/v1/InformationOutline';
+import { SvgExclamationOutline, SvgInformationOutline } from '../icons/v1';
 import { styles, theme, type CSSProperties } from '../style';
 
-import Text from './common/Text';
-import View from './common/View';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
 type AlertProps = {
   icon?: ComponentType<{ width?: number; style?: CSSProperties }>;
@@ -33,7 +33,7 @@ const Alert = ({
         padding: 10,
         flexDirection: 'row',
         '& a, & a:active, & a:visited': {
-          color: theme.altFormLabelText,
+          color: theme.formLabelText,
         },
         ...style,
       }}
@@ -62,7 +62,7 @@ type ScopedAlertProps = {
 export const Information = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
-      icon={InformationOutline}
+      icon={SvgInformationOutline}
       color={theme.pageTextLight}
       backgroundColor="transparent"
       style={{
@@ -79,7 +79,7 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
 export const Warning = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
-      icon={ExclamationOutline}
+      icon={SvgExclamationOutline}
       color={theme.warningText}
       backgroundColor={theme.warningBackground}
       style={style}
@@ -92,9 +92,9 @@ export const Warning = ({ style, children }: ScopedAlertProps) => {
 export const Error = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
-      icon={ExclamationOutline}
-      color={theme.altErrorText}
-      backgroundColor={theme.altErrorBackground}
+      icon={SvgExclamationOutline}
+      color={theme.errorTextDarker}
+      backgroundColor={theme.errorBackground}
       style={style}
     >
       {children}

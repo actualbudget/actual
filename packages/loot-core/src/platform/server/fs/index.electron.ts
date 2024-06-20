@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -136,7 +137,7 @@ export const removeDir = dirpath => {
 
 export const removeDirRecursively = async dirpath => {
   if (await exists(dirpath)) {
-    for (let file of await listDir(dirpath)) {
+    for (const file of await listDir(dirpath)) {
       const fullpath = join(dirpath, file);
       if (fs.statSync(fullpath).isDirectory()) {
         await removeDirRecursively(fullpath);

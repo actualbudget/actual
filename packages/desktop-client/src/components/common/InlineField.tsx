@@ -8,11 +8,11 @@ type InlineFieldProps = {
   label: ReactNode;
   labelWidth?: number;
   children?: ReactNode;
-  width: number;
+  width: number | string;
   style?: CSSProperties;
 };
 
-export default function InlineField({
+export function InlineField({
   label,
   labelWidth,
   children,

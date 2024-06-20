@@ -1,6 +1,8 @@
 import type { BudgetHandlers } from '../server/budget/types/handlers';
 import type { FiltersHandlers } from '../server/filters/types/handlers';
 import type { NotesHandlers } from '../server/notes/types/handlers';
+import type { ReportsHandlers } from '../server/reports/types/handlers';
+import type { RulesHandlers } from '../server/rules/types/handlers';
 import type { SchedulesHandlers } from '../server/schedules/types/handlers';
 import type { ToolsHandlers } from '../server/tools/types/handlers';
 
@@ -13,5 +15,9 @@ export interface Handlers
     BudgetHandlers,
     FiltersHandlers,
     NotesHandlers,
+    ReportsHandlers,
+    RulesHandlers,
     SchedulesHandlers,
     ToolsHandlers {}
+
+export type HandlerFunctions = Handlers[keyof Handlers];

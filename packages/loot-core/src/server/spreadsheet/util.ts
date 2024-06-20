@@ -1,5 +1,6 @@
+// @ts-strict-ignore
 export function unresolveName(name) {
-  let idx = name.indexOf('!');
+  const idx = name.indexOf('!');
   if (idx !== -1) {
     return {
       sheet: name.slice(0, idx),

@@ -2,27 +2,29 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
+import { type State } from 'loot-core/src/client/state-types';
+
 import { theme, styles } from '../style';
 
-import AnimatedRefresh from './AnimatedRefresh';
-import Text from './common/Text';
-import View from './common/View';
+import { AnimatedRefresh } from './AnimatedRefresh';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
-export default function BankSyncStatus() {
-  let accountsSyncing = useSelector(state => state.account.accountsSyncing);
+export function BankSyncStatus() {
+  const accountsSyncing = useSelector(
+    (state: State) => state.account.accountsSyncing,
+  );
+  const accountsSyncingCount = accountsSyncing.length;
 
-  let name = accountsSyncing
-    ? accountsSyncing === '__all'
-      ? 'accounts'
-      : accountsSyncing
-    : null;
-
-  const transitions = useTransition(name, {
-    from: { opacity: 0, transform: 'translateY(-100px)' },
-    enter: { opacity: 1, transform: 'translateY(0)' },
-    leave: { opacity: 0, transform: 'translateY(-100px)' },
-    unique: true,
-  });
+  const transitions = useTransition(
+    accountsSyncingCount > 0 ? 'syncing' : null,
+    {
+      from: { opacity: 0, transform: 'translateY(-100px)' },
+      enter: { opacity: 1, transform: 'translateY(0)' },
+      leave: { opacity: 0, transform: 'translateY(-100px)' },
+      unique: true,
+    },
+  );
 
   return (
     <View
@@ -52,10 +54,13 @@ export default function BankSyncStatus() {
                 }}
               >
                 <AnimatedRefresh
-                  animating={true}
+                  animating
                   iconStyle={{ color: theme.pillTextSelected }}
                 />
-                <Text>Syncing {item}</Text>
+                <Text style={{ marginLeft: 5 }}>
+                  Syncing... {accountsSyncingCount} account
+                  {accountsSyncingCount > 1 && 's'} remaining
+                </Text>
               </View>
             </animated.div>
           ),

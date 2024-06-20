@@ -1,21 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
 
-import { useActions } from '../../hooks/useActions';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { theme } from '../../style';
 import { Information } from '../alerts';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 import { Setting } from './UI';
 
-export default function GlobalSettings() {
-  let documentDir = useSelector(state => state.prefs.global.documentDir);
-  let { saveGlobalPrefs } = useActions();
+export function GlobalSettings() {
+  const [documentDir, setDocumentDirPref] = useGlobalPref('documentDir');
 
-  let [documentDirChanged, setDirChanged] = useState(false);
-  let dirScrolled = useRef<HTMLSpanElement>(null);
+  const [documentDirChanged, setDirChanged] = useState(false);
+  const dirScrolled = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (dirScrolled.current) {
@@ -24,11 +22,11 @@ export default function GlobalSettings() {
   }, []);
 
   async function onChooseDocumentDir() {
-    let res = await window.Actual.openFileDialog({
+    const res = await window.Actual?.openFileDialog({
       properties: ['openDirectory'],
     });
     if (res) {
-      saveGlobalPrefs({ documentDir: res[0] });
+      setDocumentDirPref(res[0]);
       setDirChanged(true);
     }
   }

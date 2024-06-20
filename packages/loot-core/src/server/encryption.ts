@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import * as internals from './encryption-internals';
@@ -82,7 +83,7 @@ export function unloadAllKeys() {
 }
 
 export async function createKey({ id, password, salt }) {
-  let key = new Key({ id });
+  const key = new Key({ id });
   await key.createFromPassword({ password, salt });
   return key;
 }

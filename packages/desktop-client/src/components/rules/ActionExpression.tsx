@@ -1,38 +1,40 @@
 import React from 'react';
 
-import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import {
+  mapField,
+  friendlyOp,
+  ALLOCATION_METHODS,
+} from 'loot-core/src/shared/rules';
+import {
+  type SetSplitAmountRuleActionEntity,
   type LinkScheduleRuleActionEntity,
   type RuleActionEntity,
   type SetRuleActionEntity,
 } from 'loot-core/src/types/models';
 
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
-import ScheduleValue from './ScheduleValue';
-import Value from './Value';
+import { ScheduleValue } from './ScheduleValue';
+import { Value } from './Value';
 
-let valueStyle = {
-  color: theme.pageTextPositive,
+const valueStyle = {
+  color: theme.pillTextHighlighted,
 };
 
 type ActionExpressionProps = RuleActionEntity & {
   style?: CSSProperties;
 };
 
-export default function ActionExpression({
-  style,
-  ...props
-}: ActionExpressionProps) {
+export function ActionExpression({ style, ...props }: ActionExpressionProps) {
   return (
     <View
       style={{
         display: 'block',
         maxWidth: '100%',
-        color: theme.altPillText,
-        backgroundColor: theme.altPillBackground,
+        color: theme.pillText,
+        backgroundColor: theme.pillBackgroundLight,
         borderRadius: 4,
         padding: '3px 5px',
         whiteSpace: 'nowrap',
@@ -43,6 +45,8 @@ export default function ActionExpression({
     >
       {props.op === 'set' ? (
         <SetActionExpression {...props} />
+      ) : props.op === 'set-split-amount' ? (
+        <SetSplitAmountActionExpression {...props} />
       ) : props.op === 'link-schedule' ? (
         <LinkScheduleActionExpression {...props} />
       ) : null}
@@ -61,7 +65,30 @@ function SetActionExpression({
       <Text>{friendlyOp(op)}</Text>{' '}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>to </Text>
-      <Value value={value} field={field} />
+      <Value style={valueStyle} value={value} field={field} />
+    </>
+  );
+}
+
+function SetSplitAmountActionExpression({
+  op,
+  value,
+  options,
+}: SetSplitAmountRuleActionEntity) {
+  const method = options?.method;
+  if (!method) {
+    return null;
+  }
+
+  return (
+    <>
+      <Text>{friendlyOp(op)}</Text>{' '}
+      <Text style={valueStyle}>{ALLOCATION_METHODS[method]}</Text>
+      {method !== 'remainder' && ': '}
+      {method === 'fixed-amount' && (
+        <Value style={valueStyle} value={value} field="amount" />
+      )}
+      {method === 'fixed-percent' && <Text style={valueStyle}>{value}%</Text>}
     </>
   );
 }

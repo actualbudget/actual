@@ -1,17 +1,33 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
+import { type CSSProperties } from '../../style';
 
-import Button from './Button';
+import { Button } from './Button';
 
-export default function MenuButton({ onClick }) {
-  return (
-    <Button type="bare" onClick={onClick} aria-label="Menu">
-      <DotsHorizontalTriple
-        width={15}
-        height={15}
-        style={{ transform: 'rotateZ(90deg)' }}
-      />
-    </Button>
-  );
-}
+type MenuButtonProps = {
+  onClick: () => void;
+  style?: CSSProperties;
+};
+
+export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(
+  ({ onClick, style }, ref) => {
+    return (
+      <Button
+        ref={ref}
+        type="bare"
+        onClick={onClick}
+        aria-label="Menu"
+        style={style}
+      >
+        <SvgDotsHorizontalTriple
+          width={15}
+          height={15}
+          style={{ transform: 'rotateZ(90deg)' }}
+        />
+      </Button>
+    );
+  },
+);
+
+MenuButton.displayName = 'MenuButton';

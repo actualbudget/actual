@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import { parseConditionsOrActions } from '../accounts/transaction-rules';
@@ -23,7 +24,7 @@ const filterModel = {
   },
 
   toJS(row) {
-    let { conditions, conditions_op, ...fields } = row;
+    const { conditions, conditions_op, ...fields } = row;
     return {
       ...fields,
       conditionsOp: conditions_op,
@@ -32,7 +33,7 @@ const filterModel = {
   },
 
   fromJS(filter) {
-    let { conditionsOp, ...row } = filter;
+    const { conditionsOp, ...row } = filter;
     if (conditionsOp) {
       row.conditions_op = conditionsOp;
     }
@@ -41,7 +42,7 @@ const filterModel = {
 };
 
 async function filterNameExists(name, filterId, newItem) {
-  let idForName = await db.first(
+  const idForName = await db.first(
     'SELECT id from transaction_filters WHERE tombstone = 0 AND name = ?',
     [name],
   );
@@ -58,7 +59,7 @@ async function filterNameExists(name, filterId, newItem) {
 //TODO: Possible to simplify this?
 //use filters and maps
 function conditionExists(item, filters, newItem) {
-  let { conditions, conditionsOp } = item;
+  const { conditions, conditionsOp } = item;
   let condCheck = [];
   let fCondCheck = false;
   let fCondFound;
@@ -102,8 +103,8 @@ function conditionExists(item, filters, newItem) {
 }
 
 async function createFilter(filter) {
-  let filterId = uuidv4();
-  let item = {
+  const filterId = uuidv4();
+  const item = {
     id: filterId,
     conditions: filter.state.conditions,
     conditionsOp: filter.state.conditionsOp,
@@ -119,7 +120,7 @@ async function createFilter(filter) {
   }
 
   if (item.conditions.length > 0) {
-    let condExists = conditionExists(item, filter.filters, true);
+    const condExists = conditionExists(item, filter.filters, true);
     if (condExists) {
       throw new Error(
         'Duplicate filter warning: conditions already exist. Filter name: ' +
@@ -137,7 +138,7 @@ async function createFilter(filter) {
 }
 
 async function updateFilter(filter) {
-  let item = {
+  const item = {
     id: filter.state.id,
     conditions: filter.state.conditions,
     conditionsOp: filter.state.conditionsOp,
@@ -152,7 +153,7 @@ async function updateFilter(filter) {
   }
 
   if (item.conditions.length > 0) {
-    let condExists = conditionExists(item, filter.filters, false);
+    const condExists = conditionExists(item, filter.filters, false);
     if (condExists) {
       throw new Error(
         'Duplicate filter warning: conditions already exist. Filter name: ' +
@@ -170,10 +171,8 @@ async function deleteFilter(id) {
   await db.delete_('transaction_filters', id);
 }
 
-let app = createApp<FiltersHandlers>();
+export const app = createApp<FiltersHandlers>();
 
 app.method('filter-create', mutator(createFilter));
 app.method('filter-update', mutator(updateFilter));
 app.method('filter-delete', mutator(undoable(deleteFilter)));
-
-export default app;

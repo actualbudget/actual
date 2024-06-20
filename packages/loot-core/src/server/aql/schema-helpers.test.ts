@@ -5,7 +5,7 @@ import {
   convertFromSelect,
 } from './schema-helpers';
 
-let basicSchema = {
+const basicSchema = {
   transactions: {
     id: { type: 'id' },
     date: { type: 'date', required: true },
@@ -19,7 +19,7 @@ let basicSchema = {
 
 describe('schema-helpers', () => {
   test('select converts field types', () => {
-    let trans = convertFromSelect(basicSchema, {}, 'transactions', {
+    const trans = convertFromSelect(basicSchema, {}, 'transactions', {
       amount: 5,
       cleared: 0,
       date: 20200101,
@@ -32,7 +32,7 @@ describe('schema-helpers', () => {
   });
 
   test('a basic insert works', () => {
-    let trans = convertForInsert(basicSchema, {}, 'transactions', {
+    const trans = convertForInsert(basicSchema, {}, 'transactions', {
       id: 't1',
       account: 'foo',
       amount: 5,
@@ -49,7 +49,7 @@ describe('schema-helpers', () => {
   });
 
   test('a basic update works', () => {
-    let trans = convertForUpdate(basicSchema, {}, 'transactions', {
+    const trans = convertForUpdate(basicSchema, {}, 'transactions', {
       id: 'foo',
       amount: 5001,
     });
@@ -120,7 +120,7 @@ describe('schema-helpers', () => {
   });
 
   test('conform converts types to db representations', () => {
-    let obj = conform(basicSchema, {}, 'transactions', {
+    const obj = conform(basicSchema, {}, 'transactions', {
       date: '2020-01-01',
       cleared: false,
     });
@@ -129,7 +129,7 @@ describe('schema-helpers', () => {
   });
 
   test('conform renames fields', () => {
-    let obj = conform(
+    const obj = conform(
       basicSchema,
       {
         views: {

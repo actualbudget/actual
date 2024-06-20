@@ -1,6 +1,6 @@
 export const SORT_INCREMENT = 16384;
 
-function midpoint(items, to) {
+function midpoint<T extends { sort_order: number }>(items: T[], to: number) {
   const below = items[to - 1];
   const above = items[to];
 
@@ -13,11 +13,14 @@ function midpoint(items, to) {
   }
 }
 
-export function shoveSortOrders(items, targetId?: string) {
+export function shoveSortOrders<T extends { id: string; sort_order: number }>(
+  items: T[],
+  targetId?: string,
+) {
   const to = items.findIndex(item => item.id === targetId);
   const target = items[to];
   const before = items[to - 1];
-  let updates = [];
+  const updates: Array<{ id: string; sort_order: number }> = [];
 
   // If no target is specified, append at the end
   if (!targetId || to === -1) {

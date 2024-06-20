@@ -1,4 +1,5 @@
-import q from '../../shared/query';
+// @ts-strict-ignore
+import { q } from '../../shared/query';
 import { runQuery } from '../aql';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
@@ -27,8 +28,8 @@ beforeEach(async () => {
 });
 
 async function getMatchingTransactions(conds) {
-  let { filters } = conditionsToAQL(conds);
-  let { data } = await runQuery(
+  const { filters } = conditionsToAQL(conds);
+  const { data } = await runQuery(
     q('transactions').filter({ $and: filters }).select('*'),
   );
   return data;
@@ -125,7 +126,7 @@ describe('Transaction rules', () => {
     spy.mockRestore();
 
     // Finally make sure the rule is actually in place and runs
-    let transaction = runRules({
+    const transaction = runRules({
       date: '2019-05-10',
       notes: '',
       category: null,
@@ -137,7 +138,7 @@ describe('Transaction rules', () => {
 
   test('update a rule in the database', async () => {
     await loadRules();
-    let id = await insertRule({
+    const id = await insertRule({
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'kroger' }],
@@ -189,7 +190,7 @@ describe('Transaction rules', () => {
 
   test('delete a rule in the database', async () => {
     await loadRules();
-    let id = await insertRule({
+    const id = await insertRule({
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'kroger' }],
@@ -369,14 +370,17 @@ describe('Transaction rules', () => {
 
   test('transactions can be queried by rule', async () => {
     await loadRules();
-    let account = await db.insertAccount({ name: 'bank' });
-    let categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
-    let categoryId = await db.insertCategory({
+    const account = await db.insertAccount({ name: 'bank' });
+    const categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
+    const categoryId = await db.insertCategory({
       name: 'food',
       cat_group: categoryGroupId,
     });
-    let krogerId = await db.insertPayee({ name: 'kroger' });
-    let lowesId = await db.insertPayee({ name: 'lowes', category: categoryId });
+    const krogerId = await db.insertPayee({ name: 'kroger' });
+    const lowesId = await db.insertPayee({
+      name: 'lowes',
+      category: categoryId,
+    });
 
     await db.insertTransaction({
       id: '1',
@@ -803,9 +807,9 @@ describe('Learning categories', () => {
     await updateCategoryRules([{ ...trans, id: 'three' }]);
     expect(getRules()).toMatchSnapshot();
 
-    let rules = getRules();
-    let getPayees = cat => {
-      let arr = rules
+    const rules = getRules();
+    const getPayees = cat => {
+      const arr = rules
         .filter(rule => rule.actions[0].value === cat)
         .map(r => r.conditions.map(c => c.value));
       return Array.prototype.concat.apply([], arr);
@@ -823,7 +827,7 @@ describe('Learning categories', () => {
     await loadData();
 
     expect(getRules().length).toBe(0);
-    let trans = {
+    const trans = {
       date: '2016-12-01',
       account: 'acct',
       payee: null,
@@ -853,7 +857,7 @@ describe('Learning categories', () => {
     });
 
     expect(getRules().length).toBe(2);
-    let trans = {
+    const trans = {
       date: '2016-12-01',
       account: 'acct',
       payee: null,
@@ -866,7 +870,7 @@ describe('Learning categories', () => {
 
     // This should not have changed the category! This is tested
     // because this was a bug when rules were released
-    let rules = getRules();
+    const rules = getRules();
     expect(rules.length).toBe(2);
     expect(rules[0].actions[0].value).toBe('unknown1');
     expect(rules[1].actions[0].value).toBe('unknown1');
@@ -887,7 +891,7 @@ describe('Learning categories', () => {
 
     // Internally, it should still be stored with the internal names
     // so that it's backwards compatible
-    let rawRule = await db.first('SELECT * FROM rules');
+    const rawRule = await db.first('SELECT * FROM rules');
     rawRule.conditions = JSON.parse(rawRule.conditions);
     rawRule.actions = JSON.parse(rawRule.actions);
     expect(rawRule.conditions[0].field).toBe('imported_description');
@@ -917,13 +921,13 @@ describe('Learning categories', () => {
     // This rule internally has been stored with the public names.
     // Making this work now allows us to switch to it by default in
     // the future
-    let rawRule = await db.first('SELECT * FROM rules');
+    const rawRule = await db.first('SELECT * FROM rules');
     rawRule.conditions = JSON.parse(rawRule.conditions);
     rawRule.actions = JSON.parse(rawRule.actions);
     expect(rawRule.conditions[0].field).toBe('imported_payee');
     expect(rawRule.actions[0].field).toBe('payee');
 
-    let [rule] = getRules();
+    const [rule] = getRules();
     expect(rule.conditions[0].field).toBe('imported_payee');
     expect(rule.actions[0].field).toBe('payee');
   });

@@ -1,15 +1,22 @@
 import {
+  type ReactElement,
   type ReactNode,
-  createElement,
   useEffect,
   useRef,
   useState,
+  type ComponentType,
+  type SVGProps,
 } from 'react';
 
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 
-import Text from './Text';
-import View from './View';
+import { Text } from './Text';
+import { Toggle } from './Toggle';
+import { View } from './View';
+
+const MenuLine: unique symbol = Symbol('menu-line');
+Menu.line = MenuLine;
+Menu.label = Symbol('menu-label');
 
 type KeybindingProps = {
   keyName: ReactNode;
@@ -27,40 +34,46 @@ type MenuItem = {
   type?: string | symbol;
   name: string;
   disabled?: boolean;
-  icon?;
+  icon?: ComponentType<SVGProps<SVGSVGElement>>;
   iconSize?: number;
   text: string;
   key?: string;
+  toggle?: boolean;
+  tooltip?: string;
 };
 
-type MenuProps = {
+type MenuProps<T extends MenuItem = MenuItem> = {
   header?: ReactNode;
   footer?: ReactNode;
-  items: Array<MenuItem | typeof Menu.line>;
-  onMenuSelect: (itemName: MenuItem['name']) => void;
+  items: Array<T | typeof Menu.line>;
+  onMenuSelect?: (itemName: T['name']) => void;
+  style?: CSSProperties;
+  getItemStyle?: (item: T) => CSSProperties;
 };
 
-export default function Menu({
+export function Menu<T extends MenuItem>({
   header,
   footer,
   items: allItems,
   onMenuSelect,
-}: MenuProps) {
-  let elRef = useRef(null);
-  let items = allItems.filter(x => x);
-  let [hoveredIndex, setHoveredIndex] = useState(null);
+  style,
+  getItemStyle,
+}: MenuProps<T>) {
+  const elRef = useRef<HTMLDivElement>(null);
+  const items = allItems.filter(x => x);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const el = elRef.current;
-    el.focus();
+    el?.focus();
 
-    let onKeyDown = e => {
-      let filteredItems = items.filter(
+    const onKeyDown = (e: KeyboardEvent) => {
+      const filteredItems = items.filter(
         item => item && item !== Menu.line && item.type !== Menu.label,
       );
-      let currentIndex = filteredItems.indexOf(items[hoveredIndex]);
+      const currentIndex = filteredItems.indexOf(items[hoveredIndex || 0]);
 
-      let transformIndex = idx => items.indexOf(filteredItems[idx]);
+      const transformIndex = (idx: number) => items.indexOf(filteredItems[idx]);
 
       switch (e.key) {
         case 'ArrowUp':
@@ -83,7 +96,7 @@ export default function Menu({
           break;
         case 'Enter':
           e.preventDefault();
-          const item = items[hoveredIndex];
+          const item = items[hoveredIndex || 0];
           if (hoveredIndex !== null && item !== Menu.line) {
             onMenuSelect?.(item.name);
           }
@@ -92,16 +105,16 @@ export default function Menu({
       }
     };
 
-    el.addEventListener('keydown', onKeyDown);
+    el?.addEventListener('keydown', onKeyDown);
 
     return () => {
-      el.removeEventListener('keydown', onKeyDown);
+      el?.removeEventListener('keydown', onKeyDown);
     };
   }, [hoveredIndex]);
 
   return (
     <View
-      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
+      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
       tabIndex={1}
       innerRef={elRef}
     >
@@ -118,7 +131,7 @@ export default function Menu({
             <Text
               key={item.name}
               style={{
-                color: theme.altMenuItemTextHeader,
+                color: theme.menuItemTextHeader,
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',
@@ -131,7 +144,7 @@ export default function Menu({
           );
         }
 
-        let lastItem = items[idx - 1];
+        const Icon = item.icon;
 
         return (
           <View
@@ -139,14 +152,9 @@ export default function Menu({
             key={item.name}
             style={{
               cursor: 'default',
-              padding: '9px 10px',
-              marginTop:
-                idx === 0 ||
-                lastItem === Menu.line ||
-                lastItem.type === Menu.label
-                  ? 0
-                  : -3,
+              padding: 10,
               flexDirection: 'row',
+              justifyContent: 'center',
               alignItems: 'center',
               color: theme.menuItemText,
               ...(item.disabled && { color: theme.buttonBareDisabledText }),
@@ -155,24 +163,50 @@ export default function Menu({
                   backgroundColor: theme.menuItemBackgroundHover,
                   color: theme.menuItemTextHover,
                 }),
+              ...getItemStyle?.(item),
             }}
-            onMouseEnter={() => setHoveredIndex(idx)}
-            onMouseLeave={() => setHoveredIndex(null)}
-            onClick={e =>
-              !item.disabled && onMenuSelect && onMenuSelect(item.name)
-            }
+            onPointerEnter={() => setHoveredIndex(idx)}
+            onPointerLeave={() => setHoveredIndex(null)}
+            onClick={e => {
+              e.stopPropagation();
+
+              if (!item.disabled && item.toggle === undefined) {
+                onMenuSelect?.(item.name);
+              }
+            }}
           >
             {/* Force it to line up evenly */}
-            <Text style={{ lineHeight: 0 }}>
-              {item.icon &&
-                createElement(item.icon, {
-                  width: item.iconSize || 10,
-                  height: item.iconSize || 10,
-                  style: { marginRight: 7, width: 10 },
-                })}
-            </Text>
-            <Text>{item.text}</Text>
-            <View style={{ flex: 1 }} />
+            {item.toggle === undefined ? (
+              <>
+                {Icon && (
+                  <Icon
+                    width={item.iconSize || 10}
+                    height={item.iconSize || 10}
+                    style={{ marginRight: 7, width: item.iconSize || 10 }}
+                  />
+                )}
+                <Text title={item.tooltip}>{item.text}</Text>
+                <View style={{ flex: 1 }} />
+              </>
+            ) : (
+              <>
+                <label htmlFor={item.name} title={item.tooltip}>
+                  {item.text}
+                </label>
+                <View style={{ flex: 1 }} />
+                <Toggle
+                  id={item.name}
+                  checked={item.toggle}
+                  onColor={theme.pageTextPositive}
+                  style={{ marginLeft: 5 }}
+                  onToggle={() =>
+                    !item.disabled &&
+                    item.toggle !== undefined &&
+                    onMenuSelect?.(item.name)
+                  }
+                />
+              </>
+            )}
             {item.key && <Keybinding keyName={item.key} />}
           </View>
         );
@@ -181,7 +215,3 @@ export default function Menu({
     </View>
   );
 }
-
-const MenuLine: unique symbol = Symbol('menu-line');
-Menu.line = MenuLine;
-Menu.label = Symbol('menu-label');

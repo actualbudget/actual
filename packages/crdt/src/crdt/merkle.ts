@@ -36,7 +36,7 @@ export function getKeys(trie: TrieNode): NumberTrieNodeKey[] {
 export function keyToTimestamp(key: string): number {
   // 16 is the length of the base 3 value of the current time in
   // minutes. Ensure it's padded to create the full value
-  let fullkey = key + '0'.repeat(16 - key.length);
+  const fullkey = key + '0'.repeat(16 - key.length);
 
   // Parse the base 3 representation
   return parseInt(fullkey, 3) * 1000 * 60;
@@ -46,8 +46,8 @@ export function keyToTimestamp(key: string): number {
  * Mutates `trie` to insert a node at `timestamp`
  */
 export function insert(trie: TrieNode, timestamp: Timestamp) {
-  let hash = timestamp.hash();
-  let key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
+  const hash = timestamp.hash();
+  const key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
   trie = Object.assign({}, trie, { hash: (trie.hash || 0) ^ hash });
   return insertKey(trie, key, hash);
@@ -68,8 +68,8 @@ function insertKey(trie: TrieNode, key: string, hash: number): TrieNode {
 }
 
 export function build(timestamps: Timestamp[]) {
-  let trie = emptyTrie();
-  for (let timestamp of timestamps) {
+  const trie = emptyTrie();
+  for (const timestamp of timestamps) {
     insert(trie, timestamp);
   }
   return trie;
@@ -89,11 +89,11 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
   // left (this shouldn't happen, if that's the case the hash check at
   // the top of this function should pass)
   while (1) {
-    let keyset = new Set([...getKeys(node1), ...getKeys(node2)]);
-    let keys = [...keyset.values()];
+    const keyset = new Set([...getKeys(node1), ...getKeys(node2)]);
+    const keys = [...keyset.values()];
     keys.sort();
 
-    let diffkey = null;
+    let diffkey: null | '0' | '1' | '2' = null;
 
     // Traverse down the trie through keys that aren't the same. We
     // traverse down the keys in order. Stop in two cases: either one
@@ -110,10 +110,10 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
     // changed time that we know of, because of pruning it might take
     // multiple passes to sync up a trie.
     for (let i = 0; i < keys.length; i++) {
-      let key = keys[i];
+      const key = keys[i];
 
-      let next1 = node1[key];
-      let next2 = node2[key];
+      const next1 = node1[key];
+      const next2 = node2[key];
 
       if (!next1 || !next2) {
         break;
@@ -143,13 +143,13 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
     return trie;
   }
 
-  let keys = getKeys(trie);
+  const keys = getKeys(trie);
   keys.sort();
 
-  let next: TrieNode = { hash: trie.hash };
+  const next: TrieNode = { hash: trie.hash };
 
   // Prune child nodes.
-  for (let k of keys.slice(-n)) {
+  for (const k of keys.slice(-n)) {
     const node = trie[k];
 
     if (!node) {

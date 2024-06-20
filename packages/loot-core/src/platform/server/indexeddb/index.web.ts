@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type * as T from '.';
 
 let openedDb = _openDatabase();
@@ -5,12 +6,12 @@ let openedDb = _openDatabase();
 // The web version uses IndexedDB to store data
 function _openDatabase() {
   return new Promise((resolve, reject) => {
-    let dbVersion = 9;
-    let openRequest = indexedDB.open('actual', dbVersion);
+    const dbVersion = 9;
+    const openRequest = indexedDB.open('actual', dbVersion);
 
     openRequest.onupgradeneeded = function (e) {
       // @ts-expect-error EventTarget needs refinement
-      let db: IDBDatabase = e.target.result;
+      const db: IDBDatabase = e.target.result;
 
       // Remove old stores
       if (db.objectStoreNames.contains('filesystem')) {
@@ -33,14 +34,14 @@ function _openDatabase() {
 
     openRequest.onblocked = e => console.log('blocked', e);
 
-    openRequest.onerror = event => {
+    openRequest.onerror = () => {
       console.log('openRequest error');
       reject(new Error('indexeddb-failure: Could not open IndexedDB'));
     };
 
     openRequest.onsuccess = function (e) {
       // @ts-expect-error EventTarget needs refinement
-      let db = e.target.result;
+      const db = e.target.result;
 
       db.onversionchange = () => {
         // TODO: Notify the user somehow
@@ -51,7 +52,7 @@ function _openDatabase() {
         console.log('Database error: ' + (event.target && event.target.error));
 
         if (event.target && event.target.error) {
-          let e = event.target.error;
+          const e = event.target.error;
           if (e.name === 'QuotaExceededError') {
             // Don't try to get the sized used -- too brittle. Is there
             // a better way to do it?
@@ -94,14 +95,14 @@ function _openDatabase() {
 }
 
 export const getStore: T.GetStore = function (db, name) {
-  let trans = db.transaction([name], 'readwrite');
+  const trans = db.transaction([name], 'readwrite');
   return { trans, store: trans.objectStore(name) };
 };
 
 export const get: T.Get = async function (store, key, mapper = x => x) {
   return new Promise((resolve, reject) => {
-    let req = store.get(key);
-    req.onsuccess = e => {
+    const req = store.get(key);
+    req.onsuccess = () => {
       resolve(mapper(req.result));
     };
     req.onerror = e => reject(e);
@@ -110,16 +111,16 @@ export const get: T.Get = async function (store, key, mapper = x => x) {
 
 export const set: T.Set = async function (store, item) {
   return new Promise((resolve, reject) => {
-    let req = store.put(item);
-    req.onsuccess = e => resolve(undefined);
+    const req = store.put(item);
+    req.onsuccess = () => resolve(undefined);
     req.onerror = e => reject(e);
   });
 };
 
 export const del: T.Del = async function (store, key) {
   return new Promise((resolve, reject) => {
-    let req = store.delete(key);
-    req.onsuccess = e => resolve(undefined);
+    const req = store.delete(key);
+    req.onsuccess = () => resolve(undefined);
     req.onerror = e => reject(e);
   });
 };

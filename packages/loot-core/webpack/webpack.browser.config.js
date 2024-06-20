@@ -1,7 +1,7 @@
-let path = require('path');
+const path = require('path');
 
 const TerserPlugin = require('terser-webpack-plugin');
-let webpack = require('webpack');
+const webpack = require('webpack');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 /** @type {webpack.Configuration} */
@@ -73,7 +73,9 @@ module.exports = {
         // `terserOptions` options will be passed to `swc` (`@swc/core`)
         // Link to options - https://swc.rs/docs/config-js-minify
         terserOptions: {
-          compress: false,
+          compress: {
+            drop_debugger: false,
+          },
           mangle: true,
         },
       }),

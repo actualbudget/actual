@@ -80,7 +80,7 @@ export function makeClientId() {
   return uuidv4().replace(/-/g, '').slice(-16);
 }
 
-let config = {
+const config = {
   // Allow 5 minutes of clock drift
   maxDrift: 5 * 60 * 1000,
 };
@@ -96,9 +96,9 @@ export class Timestamp {
 
   constructor(millis: number, counter: number, node: string) {
     this._state = {
-      millis: millis,
-      counter: counter,
-      node: node,
+      millis,
+      counter,
+      node,
     };
   }
 
@@ -168,11 +168,11 @@ export class Timestamp {
       return timestamp;
     }
     if (typeof timestamp === 'string') {
-      let parts = timestamp.split('-');
+      const parts = timestamp.split('-');
       if (parts && parts.length === 5) {
-        let millis = Date.parse(parts.slice(0, 3).join('-')).valueOf();
-        let counter = parseInt(parts[3], 16);
-        let node = parts[4];
+        const millis = Date.parse(parts.slice(0, 3).join('-')).valueOf();
+        const counter = parseInt(parts[3], 16);
+        const node = parts[4];
         if (
           !isNaN(millis) &&
           millis >= 0 &&
@@ -198,17 +198,17 @@ export class Timestamp {
     }
 
     // retrieve the local wall time
-    let phys = Date.now();
+    const phys = Date.now();
 
     // unpack the clock.timestamp logical time and counter
-    let lOld = clock.timestamp.millis();
-    let cOld = clock.timestamp.counter();
+    const lOld = clock.timestamp.millis();
+    const cOld = clock.timestamp.counter();
 
     // calculate the next logical time and counter
     // * ensure that the logical time never goes backward
     // * increment the counter if phys time does not advance
-    let lNew = Math.max(lOld, phys);
-    let cNew = lOld === lNew ? cOld + 1 : 0;
+    const lNew = Math.max(lOld, phys);
+    const cNew = lOld === lNew ? cOld + 1 : 0;
 
     // check the result for drift and counter overflow
     if (lNew - phys > config.maxDrift) {
@@ -238,11 +238,11 @@ export class Timestamp {
     }
 
     // retrieve the local wall time
-    let phys = Date.now();
+    const phys = Date.now();
 
     // unpack the message wall time/counter
-    let lMsg = msg.millis();
-    let cMsg = msg.counter();
+    const lMsg = msg.millis();
+    const cMsg = msg.counter();
 
     // assert the node id and remote clock drift
     // if (msg.node() === clock.timestamp.node()) {
@@ -253,8 +253,8 @@ export class Timestamp {
     }
 
     // unpack the clock.timestamp logical time and counter
-    let lOld = clock.timestamp.millis();
-    let cOld = clock.timestamp.counter();
+    const lOld = clock.timestamp.millis();
+    const cOld = clock.timestamp.counter();
 
     // calculate the next logical time and counter
     // . ensure that the logical time never goes backward
@@ -262,15 +262,15 @@ export class Timestamp {
     // . if max = old > message, increment local counter
     // . if max = messsage > old, increment message counter
     // . otherwise, clocks are monotonic, reset counter
-    let lNew = Math.max(Math.max(lOld, phys), lMsg);
-    let cNew =
+    const lNew = Math.max(Math.max(lOld, phys), lMsg);
+    const cNew =
       lNew === lOld && lNew === lMsg
         ? Math.max(cOld, cMsg) + 1
         : lNew === lOld
-        ? cOld + 1
-        : lNew === lMsg
-        ? cMsg + 1
-        : 0;
+          ? cOld + 1
+          : lNew === lMsg
+            ? cMsg + 1
+            : 0;
 
     // check the result for drift and counter overflow
     if (lNew - phys > config.maxDrift) {

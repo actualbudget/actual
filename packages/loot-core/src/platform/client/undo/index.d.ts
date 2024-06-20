@@ -1,7 +1,9 @@
+import { type ModalType } from '../../client/state-types/modals';
+
 export type UndoState = {
   id?: string;
   url: unknown;
-  openModal: unknown;
+  openModal: ModalType;
   selectedItems: {
     name: string;
     items: Set<string>;

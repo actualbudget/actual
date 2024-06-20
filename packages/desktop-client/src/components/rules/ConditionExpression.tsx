@@ -3,13 +3,13 @@ import React from 'react';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
-import Value from './Value';
+import { Value } from './Value';
 
-let valueStyle = {
-  color: theme.pageTextPositive,
+const valueStyle = {
+  color: theme.pillTextHighlighted,
 };
 
 type ConditionExpressionProps = {
@@ -22,7 +22,7 @@ type ConditionExpressionProps = {
   inline?: boolean;
 };
 
-export default function ConditionExpression({
+export function ConditionExpression({
   field,
   op,
   value,
@@ -36,8 +36,8 @@ export default function ConditionExpression({
       style={{
         display: 'block',
         maxWidth: '100%',
-        color: theme.altPillText,
-        backgroundColor: theme.altPillBackground,
+        color: theme.pillText,
+        backgroundColor: theme.pillBackgroundLight,
         borderRadius: 4,
         padding: '3px 5px',
         whiteSpace: 'nowrap',
@@ -49,7 +49,7 @@ export default function ConditionExpression({
       {prefix && <Text>{prefix} </Text>}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Value value={value} field={field} inline={inline} />
+      <Value style={valueStyle} value={value} field={field} inline={inline} />
     </View>
   );
 }

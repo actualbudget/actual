@@ -1,8 +1,9 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import { dayFromDate, parseDate } from '../../shared/months';
-import q from '../../shared/query';
+import { q } from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import { groupBy } from '../../shared/util';
@@ -12,8 +13,10 @@ import * as db from '../db';
 import { fromDateRepr } from '../models';
 import { Schedule as RSchedule } from '../util/rschedule';
 
+import { SchedulesHandlers } from './types/handlers';
+
 function takeDates(config) {
-  let schedule = new RSchedule({ rrules: recurConfigToRSchedule(config) });
+  const schedule = new RSchedule({ rrules: recurConfigToRSchedule(config) });
   return schedule
     .occurrences({ take: 3 })
     .toArray()
@@ -21,7 +24,7 @@ function takeDates(config) {
 }
 
 async function getTransactions(date, account) {
-  let { data } = await aqlQuery(
+  const { data } = await aqlQuery(
     q('transactions')
       .filter({
         account,
@@ -40,7 +43,9 @@ async function getTransactions(date, account) {
 }
 
 function getRank(day1, day2) {
-  let dayDiff = Math.abs(d.differenceInDays(parseDate(day1), parseDate(day2)));
+  const dayDiff = Math.abs(
+    d.differenceInDays(parseDate(day1), parseDate(day2)),
+  );
 
   // The amount of days off determines the rank: exact same day
   // is highest rank 1, 1 day off is .5, etc. This will find the
@@ -48,17 +53,17 @@ function getRank(day1, day2) {
   return 1 / (dayDiff + 1);
 }
 
-function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
+function matchSchedules(allOccurs, config) {
   allOccurs = [...allOccurs].reverse();
-  let baseOccur = allOccurs[0];
-  let occurs = allOccurs.slice(1);
-  let schedules = [];
+  const baseOccur = allOccurs[0];
+  const occurs = allOccurs.slice(1);
+  const schedules = [];
 
-  for (let trans of baseOccur.transactions) {
-    let threshold = getApproxNumberThreshold(trans.amount);
-    let payee = trans.payee;
+  for (const trans of baseOccur.transactions) {
+    const threshold = getApproxNumberThreshold(trans.amount);
+    const payee = trans.payee;
 
-    let found = occurs.map(occur => {
+    const found = occurs.map(occur => {
       let matched = occur.transactions.find(
         t =>
           t.amount >= trans.amount - threshold &&
@@ -76,12 +81,12 @@ function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
       continue;
     }
 
-    let rank = found.reduce(
+    const rank = found.reduce(
       (total, match) => total + match.rank,
       getRank(baseOccur.date, trans.date),
     );
 
-    let exactAmount = found.reduce(
+    const exactAmount = found.reduce(
       (exact, match) => exact && match.trans.amount === trans.amount,
       true,
     );
@@ -102,17 +107,11 @@ function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
   return schedules;
 }
 
-async function schedulesForPattern(
-  baseStart,
-  numDays,
-  baseConfig,
-  accountId,
-  partialMatchRank?: number,
-) {
+async function schedulesForPattern(baseStart, numDays, baseConfig, accountId) {
   let schedules = [];
 
   for (let i = 0; i < numDays; i++) {
-    let start = d.addDays(baseStart, i);
+    const start = d.addDays(baseStart, i);
     let config;
     if (typeof baseConfig === 'function') {
       config = baseConfig(start);
@@ -128,18 +127,16 @@ async function schedulesForPattern(
     // Our recur config expects a day string, not a native date format
     config.start = dayFromDate(config.start);
 
-    let data = [];
-    let dates = takeDates(config);
-    for (let date of dates) {
+    const data = [];
+    const dates = takeDates(config);
+    for (const date of dates) {
       data.push({
         date: dayFromDate(date),
         transactions: await getTransactions(date, accountId),
       });
     }
 
-    schedules = schedules.concat(
-      matchSchedules(data, config, partialMatchRank),
-    );
+    schedules = schedules.concat(matchSchedules(data, config));
   }
   return schedules;
 }
@@ -186,22 +183,18 @@ async function monthly(startDate, accountId) {
 async function monthlyLastDay(startDate, accountId) {
   // We do two separate calls because this pattern doesn't fit into
   // how `schedulesForPattern` works
-  let s1 = await schedulesForPattern(
+  const s1 = await schedulesForPattern(
     d.subMonths(parseDate(startDate), 3),
     1,
     { frequency: 'monthly', patterns: [{ type: 'day', value: -1 }] },
     accountId,
-    // Last day patterns should win over day-specific ones that just
-    // happen to match
-    0.75,
   );
 
-  let s2 = await schedulesForPattern(
+  const s2 = await schedulesForPattern(
     d.subMonths(parseDate(startDate), 4),
     1,
     { frequency: 'monthly', patterns: [{ type: 'day', value: -1 }] },
     accountId,
-    0.75,
   );
 
   return s1.concat(s2);
@@ -212,8 +205,8 @@ async function monthly1stor3rd(startDate, accountId) {
     d.subWeeks(parseDate(startDate), 8),
     14,
     start => {
-      let day = d.format(new Date(), 'iiii');
-      let dayValue = day.slice(0, 2).toUpperCase();
+      const day = d.format(new Date(), 'iiii');
+      const dayValue = day.slice(0, 2).toUpperCase();
 
       return {
         start,
@@ -233,8 +226,8 @@ async function monthly2ndor4th(startDate, accountId) {
     d.subMonths(parseDate(startDate), 8),
     14,
     start => {
-      let day = d.format(new Date(), 'iiii');
-      let dayValue = day.slice(0, 2).toUpperCase();
+      const day = d.format(new Date(), 'iiii');
+      const dayValue = day.slice(0, 2).toUpperCase();
 
       return {
         start,
@@ -250,12 +243,12 @@ async function monthly2ndor4th(startDate, accountId) {
 }
 
 async function findStartDate(schedule) {
-  let conditions = schedule._conditions;
-  let dateCond = conditions.find(c => c.field === 'date');
+  const conditions = schedule._conditions;
+  const dateCond = conditions.find(c => c.field === 'date');
   let currentConfig = dateCond.value;
 
   while (1) {
-    let prevConfig = currentConfig;
+    const prevConfig = currentConfig;
     currentConfig = { ...prevConfig };
 
     switch (currentConfig.frequency) {
@@ -288,11 +281,11 @@ async function findStartDate(schedule) {
         throw new Error('findStartDate: invalid frequency');
     }
 
-    let newConditions = conditions.map(c =>
+    const newConditions = conditions.map(c =>
       c.field === 'date' ? { ...c, value: currentConfig } : c,
     );
 
-    let { filters, errors } = conditionsToAQL(newConditions, {
+    const { filters, errors } = conditionsToAQL(newConditions, {
       recurDateBounds: 1,
     });
     if (errors.length > 0) {
@@ -302,7 +295,7 @@ async function findStartDate(schedule) {
       break;
     }
 
-    let { data } = await aqlQuery(
+    const { data } = await aqlQuery(
       q('transactions').filter({ $and: filters }).select('*'),
     );
 
@@ -336,21 +329,21 @@ export async function findSchedules() {
   // Search for them approx (+- 2 days) but track which transactions
   // and find the best one...
 
-  let { data: accounts } = await aqlQuery(
+  const { data: accounts } = await aqlQuery(
     q('accounts').filter({ closed: false }).select('*'),
   );
 
   let allSchedules = [];
 
-  for (let account of accounts) {
+  for (const account of accounts) {
     // Find latest transaction-ish to start with
-    let latestTrans = await db.first(
+    const latestTrans = await db.first(
       'SELECT * FROM v_transactions WHERE account = ? AND parent_id IS NULL ORDER BY date DESC LIMIT 1',
       [account.id],
     );
 
     if (latestTrans) {
-      let latestDate = fromDateRepr(latestTrans.date);
+      const latestDate = fromDateRepr(latestTrans.date);
       allSchedules = allSchedules.concat(
         await weekly(latestDate, account.id),
         await every2weeks(latestDate, account.id),
@@ -362,10 +355,10 @@ export async function findSchedules() {
     }
   }
 
-  let schedules = [...groupBy(allSchedules, 'payee').entries()].map(
-    ([payeeId, schedules]) => {
+  const schedules = [...groupBy(allSchedules, 'payee').entries()].map(
+    ([, schedules]) => {
       schedules.sort((s1, s2) => s2.rank - s1.rank);
-      let winner = schedules[0];
+      const winner = schedules[0];
 
       // Convert to schedule and return it
       return {
@@ -392,8 +385,9 @@ export async function findSchedules() {
     },
   );
 
-  let finalized = [];
-  for (let schedule of schedules) {
+  const finalized: Awaited<ReturnType<SchedulesHandlers['schedule/discover']>> =
+    [];
+  for (const schedule of schedules) {
     finalized.push(await findStartDate(schedule));
   }
   return finalized;

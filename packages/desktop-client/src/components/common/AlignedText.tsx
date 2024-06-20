@@ -1,19 +1,19 @@
-import { type ComponentProps } from 'react';
+import { type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties } from '../../style';
 
-import Block from './Block';
-import View from './View';
+import { Block } from './Block';
+import { View } from './View';
 
 type AlignedTextProps = ComponentProps<typeof View> & {
-  left;
-  right;
+  left: ReactNode;
+  right: ReactNode;
   style?: CSSProperties;
   leftStyle?: CSSProperties;
   rightStyle?: CSSProperties;
   truncate?: 'left' | 'right';
 };
-export default function AlignedText({
+export function AlignedText({
   left,
   right,
   style,

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   createContext,
   useState,
@@ -29,7 +30,7 @@ export const useServerVersion = () => useContext(ServerContext).version;
 export const useSetServerURL = () => useContext(ServerContext).setURL;
 
 async function getServerVersion() {
-  let result = await send('get-server-version');
+  const result = await send('get-server-version');
   if ('version' in result) {
     return result.version;
   }
@@ -37,8 +38,8 @@ async function getServerVersion() {
 }
 
 export function ServerProvider({ children }: { children: ReactNode }) {
-  let [serverURL, setServerURL] = useState('');
-  let [version, setVersion] = useState('');
+  const [serverURL, setServerURL] = useState('');
+  const [version, setVersion] = useState('');
 
   useEffect(() => {
     async function run() {
@@ -48,9 +49,9 @@ export function ServerProvider({ children }: { children: ReactNode }) {
     run();
   }, []);
 
-  let setURL = useCallback(
+  const setURL = useCallback(
     async (url: string, opts: { validate?: boolean } = {}) => {
-      let { error } = await send('set-server-url', { ...opts, url });
+      const { error } = await send('set-server-url', { ...opts, url });
       if (!error) {
         setServerURL(await send('get-server-url'));
         setVersion(await getServerVersion());

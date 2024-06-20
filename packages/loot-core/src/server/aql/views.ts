@@ -1,10 +1,11 @@
+// @ts-strict-ignore
 import { quoteAlias } from './compiler';
 
 function selectFields(fields) {
   return Object.keys(fields)
     .map(as => {
       let field = fields[as];
-      let needsAs = field !== as;
+      const needsAs = field !== as;
       // If it's just an identifier, we automatically prefix it with
       // `_.` which makes sure it references the root table
       if (!field.match(/[ .]/)) {
@@ -16,24 +17,24 @@ function selectFields(fields) {
 }
 
 export function makeViews(schema, schemaConfig) {
-  let views = schemaConfig.views;
-  let viewStrs = [];
+  const views = schemaConfig.views;
+  const viewStrs = [];
 
   Object.keys(views).forEach(table => {
-    let { fields: fieldMappings = {}, ...tableViews } = views[table];
+    const { fields: fieldMappings = {}, ...tableViews } = views[table];
 
-    let publicFields = Object.fromEntries(
+    const publicFields = Object.fromEntries(
       Object.keys(schema[table]).map(name => [name, name]),
     );
-    let internalFields = { ...publicFields, ...fieldMappings };
+    const internalFields = { ...publicFields, ...fieldMappings };
 
     Object.keys(tableViews).forEach(viewName => {
-      let publicMaker = overrides => {
-        let fields = { ...publicFields, ...overrides };
+      const publicMaker = overrides => {
+        const fields = { ...publicFields, ...overrides };
         return selectFields(fields);
       };
-      let internalMaker = overrides => {
-        let fields = { ...internalFields, ...overrides };
+      const internalMaker = overrides => {
+        const fields = { ...internalFields, ...overrides };
         return selectFields(fields);
       };
 

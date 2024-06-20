@@ -9,8 +9,8 @@ import bundle from './lib-dist/bundle.desktop.js';
 global.fetch = fetch;
 
 async function init(budgetPath) {
-  let dir = dirname(budgetPath);
-  let budgetId = basename(budgetPath);
+  const dir = dirname(budgetPath);
+  const budgetId = basename(budgetPath);
   await bundle.initEmbedded('0.0.147', true, dir);
   await bundle.lib.send('load-budget', { id: budgetId });
 
@@ -18,8 +18,8 @@ async function init(budgetPath) {
 }
 
 async function run() {
-  let { send } = await init('/tmp/_test-budget');
-  let accounts = await send('accounts-get');
+  const { send } = await init('/tmp/_test-budget');
+  const accounts = await send('accounts-get');
 
   await send('transaction-add', {
     date: '2022-03-20',

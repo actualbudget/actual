@@ -1,8 +1,9 @@
 {
   "name": "desktop-electron",
+  "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "23.9.0",
+  "version": "24.6.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -11,31 +12,40 @@
   },
   "main": "index.js",
   "build": {
-    "appId": "com.shiftreset.actual",
+    "appId": "com.actualbudget.actual",
     "files": [
       "!node_modules/loot-core/src{,/**/*}",
       "!node_modules/loot-core/lib-dist/{browser,bundle.mobile*}",
       "!**/*.js.map",
       "!node_modules/@jlongster/sql.js",
       "!node_modules/absurd-sql",
-      "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
-      "!node_modules/node-libofx/{OpenSP-1.5.2,libofx,libofx.web.js,libofx.web.wasm,emscripten.cpp,Makefile}"
+      "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}"
     ],
     "publish": {
       "provider": "github",
-      "repo": "releases",
+      "repo": "actual",
       "owner": "actualbudget",
-      "vPrefixedTagName": false
+      "vPrefixedTagName": true
     },
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
       "hardenedRuntime": true,
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "notarize": {
+        "teamId": "79ANZ983YF"
+      }
     },
     "linux": {
-      "target": "AppImage",
+      "target": [
+        "flatpak",
+        "AppImage"
+      ],
       "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "flatpak": {
+      "runtimeVersion": "23.08",
+      "baseVersion": "23.08"
     },
     "win": {
       "target": "nsis",
@@ -45,18 +55,16 @@
   "dependencies": {
     "electron-is-dev": "2.0.0",
     "electron-log": "4.4.8",
-    "electron-updater": "6.1.4",
-    "get-port-please": "3.0.1",
+    "electron-updater": "6.1.7",
     "loot-core": "*",
-    "node-fetch": "^2.6.9",
-    "promise-retry": "^2.0.1",
-    "ws": "8.13.0"
+    "node-fetch": "^2.7.0",
+    "promise-retry": "^2.0.1"
   },
   "devDependencies": {
-    "@electron/notarize": "2.1.0",
-    "@electron/rebuild": "3.3.0",
+    "@electron/notarize": "2.2.0",
+    "@electron/rebuild": "3.6.0",
     "cross-env": "^7.0.3",
-    "electron": "26.2.0",
-    "electron-builder": "24.6.4"
+    "electron": "30.0.6",
+    "electron-builder": "24.13.3"
   }
 }

@@ -1,9 +1,10 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import * as monthUtils from '../shared/months';
 import type { TransactionEntity } from '../types/models';
 
-import random from './random';
+import { random } from './random';
 
 export function generateAccount(name, isConnected, offbudget) {
   return {
@@ -22,7 +23,7 @@ let sortOrder = 1;
 export function generateCategory(name, group, isIncome = false) {
   return {
     id: uuidv4(),
-    name: name,
+    name,
     cat_group: group,
     is_income: isIncome ? 1 : 0,
     sort_order: sortOrder++,
@@ -33,7 +34,7 @@ let groupSortOrder = 1;
 export function generateCategoryGroup(name, isIncome = false) {
   return {
     id: uuidv4(),
-    name: name,
+    name,
     is_income: isIncome ? 1 : 0,
     sort_order: groupSortOrder++,
   };

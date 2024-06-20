@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Schedules', () => {
   let page;
@@ -28,10 +27,12 @@ test.describe('Schedules', () => {
   });
 
   test('checks the page visuals', async () => {
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a new schedule, posts the transaction and later completes it', async () => {
+    test.setTimeout(40000);
+
     await schedulesPage.addNewSchedule({
       payee: 'Home Depot',
       account: 'HSBC',
@@ -43,11 +44,11 @@ test.describe('Schedules', () => {
     await expect(schedule.account).toHaveText('HSBC');
     await expect(schedule.amount).toHaveText('~25.00');
     await expect(schedule.status).toHaveText('Due');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     await schedulesPage.postNthSchedule(2);
     await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Paid');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     // Go to transactions page
     const accountPage = await navigation.goToAccountPage('HSBC');
@@ -77,16 +78,16 @@ test.describe('Schedules', () => {
     await expect(schedulesPage.getNthScheduleRow(4)).toHaveText(
       'Show completed schedules',
     );
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     // Schedules search shouldn't shrink with many schedules
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 10; i++) {
       await schedulesPage.addNewSchedule({
         payee: 'Home Depot',
         account: 'HSBC',
         amount: 0,
       });
     }
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 });

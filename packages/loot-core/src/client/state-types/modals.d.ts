@@ -1,8 +1,13 @@
-import type { AccountEntity } from '../../types/models';
-import type { RuleEntity } from '../../types/models/rule';
+import { type File } from '../../types/file';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  GoCardlessToken,
+} from '../../types/models';
+import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
-
 export type ModalType = keyof FinanceModals;
 
 export type OptionlessModal = {
@@ -33,10 +38,11 @@ type FinanceModals = {
   'select-linked-accounts': {
     accounts: unknown[];
     requisitionId: string;
-    upgradingAccountId: string;
+    upgradingAccountId?: string;
+    syncSource?: AccountSyncSource;
   };
 
-  'confirm-category-delete': { onDelete: () => void } & (
+  'confirm-category-delete': { onDelete: (categoryId: string) => void } & (
     | { category: string }
     | { group: string }
   );
@@ -45,7 +51,7 @@ type FinanceModals = {
 
   'manage-rules': { payeeId?: string };
   'edit-rule': {
-    rule: RuleEntity;
+    rule: RuleEntity | NewRuleEntity;
     onSave: (rule: RuleEntity) => void;
   };
   'merge-unused-payees': {
@@ -53,22 +59,30 @@ type FinanceModals = {
     targetPayeeId: string;
   };
 
-  'plaid-external-msg': {
-    onMoveExternal: () => Promise<void>;
-    onClose?: () => void;
-    onSuccess: (data: unknown) => Promise<void>;
-  };
-
   'gocardless-init': {
     onSuccess: () => void;
   };
+  'simplefin-init': {
+    onSuccess: () => void;
+  };
+
   'gocardless-external-msg': {
     onMoveExternal: (arg: {
       institutionId: string;
     }) => Promise<{ error: string } | { data: unknown }>;
     onClose?: () => void;
-    onSuccess: (data: unknown) => Promise<void>;
+    onSuccess: (data: GoCardlessToken) => Promise<void>;
   };
+
+  'delete-budget': { file: File };
+
+  import: null;
+
+  'import-ynab4': null;
+
+  'import-ynab5': null;
+
+  'import-actual': null;
 
   'create-encryption-key': { recreate?: boolean };
   'fix-encryption-key': {
@@ -79,7 +93,28 @@ type FinanceModals = {
 
   'edit-field': {
     name: string;
+    month: string;
     onSubmit: (name: string, value: string) => void;
+    onClose: () => void;
+  };
+
+  'category-autocomplete': {
+    categoryGroups: CategoryGroupEntity[];
+    onSelect: (categoryId: string, categoryName: string) => void;
+    month?: string;
+    showHiddenCategories?: boolean;
+    onClose?: () => void;
+  };
+
+  'account-autocomplete': {
+    onSelect: (accountId: string, accountName: string) => void;
+    includeClosedAccounts?: boolean;
+    onClose?: () => void;
+  };
+
+  'payee-autocomplete': {
+    onSelect: (payeeId: string) => void;
+    onClose?: () => void;
   };
 
   'budget-summary': {
@@ -93,6 +128,134 @@ type FinanceModals = {
   'schedules-discover': null;
 
   'schedule-posts-offline-notification': null;
+  'switch-budget-type': { onSwitch: () => void };
+  'account-menu': {
+    accountId: string;
+    onSave: (account: AccountEntity) => void;
+    onCloseAccount: (accountId: string) => void;
+    onReopenAccount: (accountId: string) => void;
+    onEditNotes: (id: string) => void;
+    onClose?: () => void;
+  };
+  'category-menu': {
+    categoryId: string;
+    onSave: (category: CategoryEntity) => void;
+    onEditNotes: (id: string) => void;
+    onDelete: (categoryId: string) => void;
+    onBudgetAction: (month: string, action: string, args?: unknown) => void;
+    onClose?: () => void;
+  };
+  'rollover-budget-menu': {
+    categoryId: string;
+    month: string;
+    onUpdateBudget: (amount: number) => void;
+    onCopyLastMonthAverage: () => void;
+    onSetMonthsAverage: (numberOfMonths: number) => void;
+    onApplyBudgetTemplate: () => void;
+  };
+  'report-budget-menu': {
+    categoryId: string;
+    month: string;
+    onUpdateBudget: (amount: number) => void;
+    onCopyLastMonthAverage: () => void;
+    onSetMonthsAverage: (numberOfMonths: number) => void;
+    onApplyBudgetTemplate: () => void;
+  };
+  'category-group-menu': {
+    groupId: string;
+    onSave: (group: CategoryGroupEntity) => void;
+    onAddCategory: (groupId: string, isIncome: boolean) => void;
+    onEditNotes: (id: string) => void;
+    onDelete: (groupId: string) => void;
+    onClose?: () => void;
+  };
+  notes: {
+    id: string;
+    name: string;
+    onSave: (id: string, notes: string) => void;
+  };
+  'report-budget-summary': { month: string };
+  'rollover-budget-summary': {
+    month: string;
+    onBudgetAction: (
+      month: string,
+      type: string,
+      args: unknown,
+    ) => Promise<void>;
+  };
+  'new-category-group': {
+    onValidate?: (value: string) => string;
+    onSubmit: (value: string) => Promise<void>;
+  };
+  'new-category': {
+    onValidate?: (value: string) => string;
+    onSubmit: (value: string) => Promise<void>;
+  };
+  'rollover-balance-menu': {
+    categoryId: string;
+    month: string;
+    onCarryover: (carryover: boolean) => void;
+    onTransfer: () => void;
+    onCover: () => void;
+  };
+  'rollover-summary-to-budget-menu': {
+    month: string;
+    onTransfer: () => void;
+    onCover: () => void;
+    onHoldBuffer: () => void;
+    onResetHoldBuffer: () => void;
+  };
+  'report-balance-menu': {
+    categoryId: string;
+    month: string;
+    onCarryover: (carryover: boolean) => void;
+  };
+  transfer: {
+    title: string;
+    month: string;
+    amount: number;
+    onSubmit: (amount: number, toCategoryId: string) => void;
+    showToBeBudgeted?: boolean;
+  };
+  cover: {
+    title: string;
+    month: string;
+    showToBeBudgeted?: boolean;
+    onSubmit: (fromCategoryId: string) => void;
+  };
+  'hold-buffer': {
+    month: string;
+    onSubmit: (amount: number) => void;
+  };
+  'scheduled-transaction-menu': {
+    transactionId: string;
+    onPost: (transactionId: string) => void;
+    onSkip: (transactionId: string) => void;
+  };
+  'budget-page-menu': {
+    onAddCategoryGroup: () => void;
+    onToggleHiddenCategories: () => void;
+    onSwitchBudgetFile: () => void;
+    onSwitchBudgetType: () => void;
+  };
+  'rollover-budget-month-menu': {
+    month: string;
+    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+    onEditNotes: (month: string) => void;
+  };
+  'report-budget-month-menu': {
+    month: string;
+    onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+    onEditNotes: (month: string) => void;
+  };
+  'budget-list';
+  'confirm-transaction-edit': {
+    onConfirm: () => void;
+    confirmReason: string;
+  };
+  'confirm-transaction-delete': {
+    onConfirm: () => void;
+  };
 };
 
 export type PushModalAction = {
@@ -113,11 +276,17 @@ export type CloseModalAction = {
   type: typeof constants.CLOSE_MODAL;
 };
 
+export type CollapseModalsAction = {
+  type: typeof constants.COLLAPSE_MODALS;
+  rootModalName: string;
+};
+
 export type ModalsActions =
   | PushModalAction
   | ReplaceModalAction
   | PopModalAction
-  | CloseModalAction;
+  | CloseModalAction
+  | CollapseModalsAction;
 
 export type ModalsState = {
   modalStack: Modal[];

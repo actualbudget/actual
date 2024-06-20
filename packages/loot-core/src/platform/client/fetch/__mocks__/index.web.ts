@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type * as T from '..';
 
 let listeners = new Map();
@@ -5,10 +6,10 @@ let serverHandler = null;
 
 export const initServer: T.InitServer = handlers => {
   serverHandler = msg => {
-    let { name, args, catchErrors } = msg;
+    const { name, args, catchErrors } = msg;
     if (handlers[name]) {
       return Promise.resolve().then(() => {
-        let promise = handlers[name](args);
+        const promise = handlers[name](args);
 
         if (catchErrors) {
           return promise.then(
@@ -57,7 +58,7 @@ export const listen = (name, cb) => {
   listeners.get(name).push(cb);
 
   return () => {
-    let arr = listeners.get(name);
+    const arr = listeners.get(name);
     listeners.set(
       name,
       arr.filter(cb_ => cb_ !== cb),

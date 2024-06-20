@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   makeClock,
   setClock,
@@ -12,6 +13,11 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import { groupById } from '../../shared/util';
+import {
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+} from '../../types/models';
 import {
   schema,
   schemaConfig,
@@ -73,15 +79,15 @@ export function getDatabase() {
 }
 
 export async function loadClock() {
-  let row = await first('SELECT * FROM messages_clock');
+  const row = await first('SELECT * FROM messages_clock');
   if (row) {
-    let clock = deserializeClock(row.clock);
+    const clock = deserializeClock(row.clock);
     setClock(clock);
   } else {
     // No clock exists yet (first run of the app), so create a default
     // one.
-    let timestamp = new Timestamp(0, 0, makeClientId());
-    let clock = makeClock(timestamp);
+    const timestamp = new Timestamp(0, 0, makeClientId());
+    const clock = makeClock(timestamp);
     setClock(clock);
 
     await runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
@@ -117,12 +123,12 @@ export function execQuery(sql) {
 // only needed in hot spots when you are running lots of queries.
 let _queryCache = new LRU({ max: 100 });
 export function cache(sql) {
-  let cached = _queryCache.get(sql);
+  const cached = _queryCache.get(sql);
   if (cached) {
     return cached;
   }
 
-  let prepared = sqlite.prepare(db, sql);
+  const prepared = sqlite.prepare(db, sql);
   _queryCache.set(sql, prepared);
   return prepared;
 }
@@ -175,7 +181,7 @@ export async function select(table, id) {
 }
 
 export async function update(table, params) {
-  let fields = Object.keys(params).filter(k => k !== 'id');
+  const fields = Object.keys(params).filter(k => k !== 'id');
 
   if (params.id == null) {
     throw new Error('update: id is required');
@@ -208,7 +214,7 @@ export async function insertWithUUID(table, row) {
 }
 
 export async function insert(table, row) {
-  let fields = Object.keys(row).filter(k => k !== 'id');
+  const fields = Object.keys(row).filter(k => k !== 'id');
 
   if (row.id == null) {
     throw new Error('insert: id is required');
@@ -240,14 +246,14 @@ export async function delete_(table, id) {
 }
 
 export async function selectWithSchema(table, sql, params) {
-  let rows = await runQuery(sql, params, true);
+  const rows = await runQuery(sql, params, true);
   return rows
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
 }
 
 export async function selectFirstWithSchema(table, sql, params) {
-  let rows = await selectWithSchema(table, sql, params);
+  const rows = await selectWithSchema(table, sql, params);
   return rows.length > 0 ? rows[0] : null;
 }
 
@@ -271,33 +277,44 @@ export function updateWithSchema(table, fields) {
 // Data-specific functions. Ideally this would be split up into
 // different files
 
-export async function getCategories() {
-  return all(`
-    SELECT c.* FROM categories c
-      LEFT JOIN category_groups cg ON c.cat_group = cg.id
-      WHERE c.tombstone = 0
-      ORDER BY cg.sort_order, cg.id, c.sort_order, c.id
+export async function getCategories(): Promise<CategoryEntity[]> {
+  return await all(`
+    SELECT c.* FROM categories c WHERE c.tombstone = 0
+      ORDER BY c.sort_order, c.id
   `);
 }
 
-export async function getCategoriesGrouped() {
-  const groups = await all(
-    'SELECT * FROM category_groups WHERE tombstone = 0 ORDER BY is_income, sort_order, id',
-  );
-  const rows = await all(`
-    SELECT * FROM categories WHERE tombstone = 0
-      ORDER BY sort_order, id
+export async function getCategoriesGrouped(): Promise<
+  Array<CategoryGroupEntity>
+> {
+  const groups = await all(`
+    SELECT cg.* FROM category_groups cg WHERE cg.tombstone = 0 ORDER BY cg.is_income, cg.sort_order, cg.id
+  `);
+  const categories = await all(`
+    SELECT c.* FROM categories c WHERE c.tombstone = 0
+      ORDER BY c.sort_order, c.id
   `);
 
   return groups.map(group => {
     return {
       ...group,
-      categories: rows.filter(row => row.cat_group === group.id),
+      categories: categories.filter(c => c.cat_group === group.id),
     };
   });
 }
 
 export async function insertCategoryGroup(group) {
+  // Don't allow duplicate group
+  const existingGroup = await first(
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase()],
+  );
+  if (existingGroup) {
+    throw new Error(
+      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
+    );
+  }
+
   const lastGroup = await first(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
@@ -305,7 +322,7 @@ export async function insertCategoryGroup(group) {
 
   group = {
     ...categoryGroupModel.validate(group),
-    sort_order: sort_order,
+    sort_order,
   };
   return insertWithUUID('category_groups', group);
 }
@@ -321,7 +338,7 @@ export async function moveCategoryGroup(id, targetId) {
   );
 
   const { updates, sort_order } = shoveSortOrders(groups, targetId);
-  for (let info of updates) {
+  for (const info of updates) {
     await update('category_groups', info);
   }
   await update('category_groups', { id, sort_order });
@@ -345,6 +362,17 @@ export async function insertCategory(
 
   let id_;
   await batchMessages(async () => {
+    // Dont allow duplicated names in groups
+    const existingCatInGroup = await first(
+      `SELECT id FROM categories WHERE cat_group = ? and UPPER(name) = ? and tombstone = 0 LIMIT 1`,
+      [category.cat_group, category.name.toUpperCase()],
+    );
+    if (existingCatInGroup) {
+      throw new Error(
+        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’`,
+      );
+    }
+
     if (atEnd) {
       const lastCat = await first(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
@@ -362,7 +390,7 @@ export async function insertCategory(
         categories,
         categories.length > 0 ? categories[0].id : null,
       );
-      for (let info of updates) {
+      for (const info of updates) {
         await update('categories', info);
       }
       sort_order = order;
@@ -370,7 +398,7 @@ export async function insertCategory(
 
     category = {
       ...categoryModel.validate(category),
-      sort_order: sort_order,
+      sort_order,
     };
 
     const id = await insertWithUUID('categories', category);
@@ -397,7 +425,7 @@ export async function moveCategory(id, groupId, targetId?: string) {
   );
 
   const { updates, sort_order } = shoveSortOrders(categories, targetId);
-  for (let info of updates) {
+  for (const info of updates) {
     await update('categories', info);
   }
   await update('categories', { id, sort_order, cat_group: groupId });
@@ -412,7 +440,7 @@ export async function deleteCategory(category, transferId?: string) {
       'SELECT * FROM category_mapping WHERE transferId = ?',
       [category.id],
     );
-    for (let mapping of existingTransfers) {
+    for (const mapping of existingTransfers) {
       await update('category_mapping', { id: mapping.id, transferId });
     }
 
@@ -438,7 +466,7 @@ export async function insertPayee(payee) {
 }
 
 export async function deletePayee(payee) {
-  let { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
+  const { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
     payee.id,
   ]);
   if (transfer_acct) {
@@ -466,9 +494,10 @@ export function updatePayee(payee) {
   return update('payees', payee);
 }
 
-export async function mergePayees(target, ids) {
+export async function mergePayees(target: string, ids: string[]) {
   // Load in payees so we can check some stuff
-  let payees = groupById(await all('SELECT * FROM payees'));
+  const dbPayees: PayeeEntity[] = await all('SELECT * FROM payees');
+  const payees = groupById(dbPayees);
 
   // Filter out any transfer payees
   if (payees[target].transfer_acct != null) {
@@ -479,7 +508,7 @@ export async function mergePayees(target, ids) {
   await batchMessages(async () => {
     await Promise.all(
       ids.map(async id => {
-        let mappings = await all(
+        const mappings = await all(
           'SELECT id FROM payee_mapping WHERE targetId = ?',
           [id],
         );
@@ -507,7 +536,7 @@ export function getPayees() {
     SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
     WHERE p.tombstone = 0 AND (p.transfer_acct IS NULL OR a.id IS NOT NULL)
-    ORDER BY p.transfer_acct IS NULL DESC, p.name COLLATE NOCASE
+    ORDER BY p.transfer_acct IS NULL DESC, p.name COLLATE NOCASE, a.offbudget, a.sort_order
   `);
 }
 
@@ -521,7 +550,7 @@ export function syncGetOrphanedPayees() {
 }
 
 export async function getOrphanedPayees() {
-  let rows = await all(`
+  const rows = await all(`
     SELECT p.id FROM payees p
     LEFT JOIN payee_mapping pm ON pm.id = p.id
     LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
@@ -553,7 +582,7 @@ export async function insertAccount(account) {
   );
 
   // Don't pass a target in, it will default to appending at the end
-  let { sort_order } = shoveSortOrders(accounts);
+  const { sort_order } = shoveSortOrders(accounts);
 
   account = accountModel.validate({ ...account, sort_order });
   return insertWithUUID('accounts', account);
@@ -569,7 +598,7 @@ export function deleteAccount(account) {
 }
 
 export async function moveAccount(id, targetId) {
-  let account = await first('SELECT * FROM accounts WHERE id = ?', [id]);
+  const account = await first('SELECT * FROM accounts WHERE id = ?', [id]);
   let accounts;
   if (account.closed) {
     accounts = await all(
@@ -584,7 +613,7 @@ export async function moveAccount(id, targetId) {
 
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
   await batchMessages(async () => {
-    for (let info of updates) {
+    for (const info of updates) {
       update('accounts', info);
     }
     update('accounts', { id, sort_order });
@@ -592,21 +621,12 @@ export async function moveAccount(id, targetId) {
 }
 
 export async function getTransaction(id) {
-  let rows = await selectWithSchema(
+  const rows = await selectWithSchema(
     'transactions',
     'SELECT * FROM v_transactions WHERE id = ?',
     [id],
   );
   return rows[0];
-}
-
-export async function getTransactionsByDate(
-  accountId,
-  startDate,
-  endDate,
-  options = {},
-) {
-  throw new Error('`getTransactionsByDate` is deprecated');
 }
 
 export async function getTransactions(accountId) {

@@ -1,9 +1,9 @@
-let path = require('path');
+const path = require('path');
 
-let webpack = require('webpack');
+const webpack = require('webpack');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
-let browser = require('./webpack.browser.config');
+const browser = require('./webpack.browser.config');
 
 /** @type {webpack.Configuration} */
 module.exports = {
@@ -28,14 +28,7 @@ module.exports = {
       'pegjs',
     ],
   },
-  externals: [
-    'better-sqlite3',
-    'electron-log',
-    'node-fetch',
-    'node-libofx',
-    'ws',
-    'fs',
-  ],
+  externals: ['better-sqlite3', 'electron-log', 'node-fetch'],
   plugins: [
     new webpack.IgnorePlugin({
       resourceRegExp: /original-fs/,

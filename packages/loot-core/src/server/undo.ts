@@ -1,7 +1,9 @@
+// @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 
 import * as connection from '../platform/server/connection';
 import { getIn } from '../shared/util';
+import { type HandlerFunctions } from '../types/handlers';
 
 import { withMutatorContext, getMutatorContext } from './mutators';
 import { Message, sendMessages } from './sync';
@@ -19,7 +21,7 @@ let MESSAGE_HISTORY: Array<MarkerMessage | MessagesMessage> = [
   { type: 'marker' },
 ];
 let CURSOR = 0;
-let HISTORY_SIZE = 20;
+const HISTORY_SIZE = 20;
 
 export type UndoState = {
   messages: Message[];
@@ -31,22 +33,22 @@ export type UndoState = {
 function trimHistory() {
   MESSAGE_HISTORY = MESSAGE_HISTORY.slice(0, CURSOR + 1);
 
-  let markers = MESSAGE_HISTORY.filter(item => item.type === 'marker');
+  const markers = MESSAGE_HISTORY.filter(item => item.type === 'marker');
   if (markers.length > HISTORY_SIZE) {
-    let slice = markers.slice(-HISTORY_SIZE);
-    let cutoff = MESSAGE_HISTORY.indexOf(slice[0]);
+    const slice = markers.slice(-HISTORY_SIZE);
+    const cutoff = MESSAGE_HISTORY.indexOf(slice[0]);
     MESSAGE_HISTORY = MESSAGE_HISTORY.slice(cutoff);
     CURSOR = MESSAGE_HISTORY.length - 1;
   }
 }
 
 export function appendMessages(messages, oldData) {
-  let context = getMutatorContext();
+  const context = getMutatorContext();
 
   if (context.undoListening && messages.length > 0) {
     trimHistory();
 
-    let { undoTag } = context;
+    const { undoTag } = context;
 
     MESSAGE_HISTORY.push({
       type: 'messages',
@@ -67,14 +69,14 @@ export function withUndo<T>(
   func: () => Promise<T>,
   meta?: unknown,
 ): Promise<T> {
-  let context = getMutatorContext();
+  const context = getMutatorContext();
   if (context.undoDisabled || context.undoListening) {
     return func();
   }
 
   MESSAGE_HISTORY = MESSAGE_HISTORY.slice(0, CURSOR + 1);
 
-  let marker: MarkerMessage = { type: 'marker', meta };
+  const marker: MarkerMessage = { type: 'marker', meta };
 
   if (MESSAGE_HISTORY[MESSAGE_HISTORY.length - 1].type === 'marker') {
     MESSAGE_HISTORY[MESSAGE_HISTORY.length - 1] = marker;
@@ -89,18 +91,10 @@ export function withUndo<T>(
   );
 }
 
-// for some reason `void` is not inferred properly without this overload
-export function undoable<Args extends unknown[]>(
-  func: (...args: Args) => Promise<void>,
-): (...args: Args) => Promise<void>;
-export function undoable<
-  Args extends unknown[],
-  Return extends Promise<unknown>,
->(func: (...args: Args) => Return): (...args: Args) => Return;
-export function undoable(func: (...args: unknown[]) => Promise<unknown>) {
-  return (...args: unknown[]) => {
-    return withUndo(() => {
-      return func(...args);
+export function undoable<T extends HandlerFunctions>(func: T) {
+  return (...args: Parameters<T>) => {
+    return withUndo<Awaited<ReturnType<T>>>(() => {
+      return func.apply(null, args);
     });
   };
 }
@@ -128,7 +122,7 @@ async function applyUndoAction(messages, meta, undoTag) {
 }
 
 export async function undo() {
-  let end = CURSOR;
+  const end = CURSOR;
   CURSOR = Math.max(CURSOR - 1, 0);
 
   // Walk back to the nearest marker
@@ -136,14 +130,14 @@ export async function undo() {
     CURSOR--;
   }
 
-  let meta = MESSAGE_HISTORY[CURSOR].meta;
-  let start = Math.max(CURSOR, 0);
-  let entries = MESSAGE_HISTORY.slice(start, end + 1).filter(
+  const meta = MESSAGE_HISTORY[CURSOR].meta;
+  const start = Math.max(CURSOR, 0);
+  const entries = MESSAGE_HISTORY.slice(start, end + 1).filter(
     (entry): entry is MessagesMessage => entry.type === 'messages',
   );
 
   if (entries.length > 0) {
-    let toApply = entries
+    const toApply = entries
       .reduce((acc, entry) => {
         return acc.concat(
           entry.messages
@@ -158,7 +152,7 @@ export async function undo() {
 }
 
 function undoMessage(message, oldData) {
-  let oldItem = getIn(oldData, [message.dataset, message.row]);
+  const oldItem = getIn(oldData, [message.dataset, message.row]);
   if (oldItem) {
     let column = message.column;
     if (message.dataset === 'spreadsheet_cells') {
@@ -203,12 +197,12 @@ function undoMessage(message, oldData) {
 }
 
 export async function redo() {
-  let meta =
+  const meta =
     MESSAGE_HISTORY[CURSOR].type === 'marker'
       ? MESSAGE_HISTORY[CURSOR].meta
       : null;
 
-  let start = CURSOR;
+  const start = CURSOR;
   CURSOR = Math.min(CURSOR + 1, MESSAGE_HISTORY.length - 1);
 
   // Walk forward to the nearest marker
@@ -219,13 +213,13 @@ export async function redo() {
     CURSOR++;
   }
 
-  let end = CURSOR;
-  let entries = MESSAGE_HISTORY.slice(start + 1, end + 1).filter(
+  const end = CURSOR;
+  const entries = MESSAGE_HISTORY.slice(start + 1, end + 1).filter(
     (entry): entry is MessagesMessage => entry.type === 'messages',
   );
 
   if (entries.length > 0) {
-    let toApply = entries.reduce((acc, entry) => {
+    const toApply = entries.reduce((acc, entry) => {
       return acc
         .concat(entry.messages)
         .concat(redoResurrections(entry.messages, entry.oldData));
@@ -236,12 +230,12 @@ export async function redo() {
 }
 
 function redoResurrections(messages, oldData): Message[] {
-  let resurrect = new Set<string>();
+  const resurrect = new Set<string>();
 
   messages.forEach(message => {
     // If any of the ids didn't exist before, we need to "resurrect"
     // them by resetting their tombstones to 0
-    let oldItem = getIn(oldData, [message.dataset, message.row]);
+    const oldItem = getIn(oldData, [message.dataset, message.row]);
     if (
       !oldItem &&
       ![
@@ -258,7 +252,7 @@ function redoResurrections(messages, oldData): Message[] {
   });
 
   return [...resurrect].map(desc => {
-    let [table, row] = desc.split('.');
+    const [table, row] = desc.split('.');
     return {
       dataset: table,
       row,

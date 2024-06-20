@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import { captureException, captureBreadcrumb } from '../../exceptions';
@@ -5,8 +6,8 @@ import * as undo from '../undo';
 
 import type * as T from '.';
 
-let replyHandlers = new Map();
-let listeners = new Map();
+const replyHandlers = new Map();
+const listeners = new Map();
 let messageQueue = [];
 
 let globalWorker = null;
@@ -65,7 +66,7 @@ function handleMessage(msg) {
     const listens = listeners.get(name);
     if (listens) {
       for (let i = 0; i < listens.length; i++) {
-        let stop = listens[i](args);
+        const stop = listens[i](args);
         if (stop === true) {
           break;
         }
@@ -86,7 +87,7 @@ function connectWorker(worker, onOpen, onError) {
   globalWorker = worker;
 
   worker.onmessage = event => {
-    let msg = event.data;
+    const msg = event.data;
 
     // The worker implementation implements its own concept of a
     // 'connect' event because the worker is immediately
@@ -148,10 +149,10 @@ export const send: T.Send = function (
   { catchErrors = false } = {},
 ) {
   return new Promise((resolve, reject) => {
-    let id = uuidv4();
+    const id = uuidv4();
 
     replyHandlers.set(id, { resolve, reject });
-    let message = {
+    const message = {
       id,
       name,
       args,
@@ -178,7 +179,7 @@ export const listen: T.Listen = function (name, cb) {
   listeners.get(name).push(cb);
 
   return () => {
-    let arr = listeners.get(name);
+    const arr = listeners.get(name);
     listeners.set(
       name,
       arr.filter(cb_ => cb_ !== cb),

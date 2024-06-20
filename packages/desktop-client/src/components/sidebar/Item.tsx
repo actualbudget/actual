@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   type ComponentType,
   type MouseEventHandler,
@@ -6,14 +7,16 @@ import React, {
 } from 'react';
 
 import { styles, theme, type CSSProperties } from '../../style';
-import Block from '../common/Block';
-import View from '../common/View';
+import { Block } from '../common/Block';
+import { View } from '../common/View';
 
-import ItemContent from './ItemContent';
+import { ItemContent } from './ItemContent';
 
 type ItemProps = {
   title: string;
-  Icon: ComponentType<SVGProps<SVGElement>>;
+  Icon:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
   to?: string;
   children?: ReactNode;
   style?: CSSProperties;
@@ -23,7 +26,7 @@ type ItemProps = {
   forceActive?: boolean;
 };
 
-function Item({
+export function Item({
   children,
   Icon,
   title,
@@ -81,5 +84,3 @@ function Item({
     </View>
   );
 }
-
-export default Item;

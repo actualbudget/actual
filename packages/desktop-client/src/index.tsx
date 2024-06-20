@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // This file will initialize the app if we are in a real browser
 // environment (not electron)
 import './browser-preload';
@@ -21,14 +22,16 @@ import thunk from 'redux-thunk';
 
 import * as actions from 'loot-core/src/client/actions';
 import * as constants from 'loot-core/src/client/constants';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import reducers from 'loot-core/src/client/reducers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
+import { reducers } from 'loot-core/src/client/reducers';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { q } from 'loot-core/src/shared/query';
 
-import App from './components/App';
+import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
+import { type BoundActions } from './hooks/useActions';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
@@ -57,7 +60,10 @@ function rootReducer(state, action) {
 }
 
 const store = createStore(rootReducer, undefined, applyMiddleware(thunk));
-const boundActions = bindActionCreators(actions, store.dispatch);
+const boundActions = bindActionCreators(
+  actions,
+  store.dispatch,
+) as unknown as BoundActions;
 
 // Listen for global events from the server or main process
 handleGlobalEvents(boundActions, store);
@@ -65,7 +71,7 @@ handleGlobalEvents(boundActions, store);
 declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
-    __actionsForMenu: typeof actions;
+    __actionsForMenu: BoundActions;
 
     $send: typeof send;
     $query: typeof runQuery;

@@ -37,7 +37,7 @@ export function replaceModal<M extends ModalType>(
   options?: FinanceModals[M],
 ): ReplaceModalAction {
   // @ts-expect-error TS is unable to determine that `name` and `options` match
-  let modal: M = { name, options };
+  const modal: M = { name, options };
   return { type: constants.REPLACE_MODAL, modal };
 }
 
@@ -47,4 +47,8 @@ export function popModal(): PopModalAction {
 
 export function closeModal(): CloseModalAction {
   return { type: constants.CLOSE_MODAL };
+}
+
+export function collapseModals(rootModalName: string) {
+  return { type: constants.COLLAPSE_MODALS, rootModalName };
 }

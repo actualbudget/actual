@@ -1,32 +1,42 @@
+// @ts-strict-ignore
 import React, {
   useEffect,
   useRef,
   useLayoutEffect,
   type ReactNode,
+  useState,
+  type ComponentProps,
+  type ComponentType,
+  type ComponentPropsWithRef,
 } from 'react';
+import { useHotkeysContext } from 'react-hotkeys-hook';
 import ReactModal from 'react-modal';
 
-import hotkeys from 'hotkeys-js';
+import { AutoTextSize } from 'auto-text-size';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
-import Delete from '../../icons/v0/Delete';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { SvgLogo } from '../../icons/logo';
+import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, styles, theme } from '../../style';
-import tokens from '../../tokens';
+import { tokens } from '../../tokens';
 
-import Button from './Button';
-import Text from './Text';
-import View from './View';
+import { Button } from './Button';
+import { Input } from './Input';
+import { Text } from './Text';
+import { TextOneLine } from './TextOneLine';
+import { View } from './View';
 
 export type ModalProps = {
-  title: string;
+  title?: ReactNode;
   isCurrent?: boolean;
   isHidden?: boolean;
   children: ReactNode | (() => ReactNode);
-  size?: { width?: number; height?: number };
-  padding?: number;
+  size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
+  padding?: CSSProperties['padding'];
   showHeader?: boolean;
+  leftHeaderContent?: ReactNode;
+  CloseButton?: ComponentType<ComponentPropsWithRef<typeof ModalCloseButton>>;
   showTitle?: boolean;
-  showClose?: boolean;
   showOverlay?: boolean;
   loading?: boolean;
   noAnimation?: boolean;
@@ -39,15 +49,16 @@ export type ModalProps = {
   onClose?: () => void;
 };
 
-const Modal = ({
+export const Modal = ({
   title,
   isCurrent,
   isHidden,
   size,
-  padding = 20,
+  padding = 10,
   showHeader = true,
+  leftHeaderContent,
+  CloseButton: CloseButtonComponent = ModalCloseButton,
   showTitle = true,
-  showClose = true,
   showOverlay = true,
   loading = false,
   noAnimation = false,
@@ -60,31 +71,34 @@ const Modal = ({
   children,
   onClose,
 }: ModalProps) => {
+  const { enableScope, disableScope } = useHotkeysContext();
+
+  // This deactivates any key handlers in the "app" scope
+  const scopeId = `modal-${stackIndex}-${title}`;
   useEffect(() => {
-    // This deactivates any key handlers in the "app" scope. Ideally
-    // each modal would have a name so they could each have their own
-    // key handlers, but we'll do that later
-    let prevScope = hotkeys.getScope();
-    hotkeys.setScope('modal');
-    return () => hotkeys.setScope(prevScope);
-  }, []);
+    enableScope(scopeId);
+    return () => disableScope(scopeId);
+  }, [enableScope, disableScope, scopeId]);
 
   return (
     <ReactModal
       isOpen={true}
       onRequestClose={onClose}
-      shouldCloseOnOverlayClick={false}
-      shouldFocusAfterRender={!global.IS_DESIGN_MODE}
+      shouldCloseOnOverlayClick={true}
+      shouldFocusAfterRender
       shouldReturnFocusAfterClose={focusAfterClose}
       appElement={document.querySelector('#root') as HTMLElement}
       parentSelector={parent && (() => parent)}
       style={{
         content: {
+          display: 'flex',
+          height: 'fit-content',
+          width: 'fit-content',
+          position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           overflow: 'visible',
@@ -93,9 +107,11 @@ const Modal = ({
           backgroundColor: 'transparent',
           padding: 0,
           pointerEvents: 'auto',
+          margin: 'auto',
           ...contentStyle,
         },
         overlay: {
+          display: 'flex',
           zIndex: 3000,
           backgroundColor:
             showOverlay && stackIndex === 0 ? 'rgba(0, 0, 0, .1)' : 'none',
@@ -118,10 +134,14 @@ const Modal = ({
         isCurrent={isCurrent}
         size={size}
         style={{
+          flex: 1,
+          padding,
           willChange: 'opacity, transform',
-          minWidth: '100%',
+          maxWidth: '90vw',
+          minWidth: '90vw',
+          maxHeight: '90vh',
           minHeight: 0,
-          borderRadius: 4,
+          borderRadius: 6,
           //border: '1px solid ' + theme.modalBorder,
           color: theme.pageText,
           backgroundColor: theme.modalBackground,
@@ -137,68 +157,57 @@ const Modal = ({
         {showHeader && (
           <View
             style={{
-              padding: 20,
+              justifyContent: 'center',
+              alignItems: 'center',
               position: 'relative',
-              flexShrink: 0,
+              height: 60,
             }}
           >
-            {showTitle && (
-              <View
-                style={{
-                  flex: 1,
-                  alignSelf: 'center',
-                  textAlign: 'center',
-                  // We need to force a width for the text-overflow
-                  // ellipses to work because we are aligning center.
-                  // This effectively gives it a padding of 20px
-                  width: 'calc(100% - 40px)',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 25,
-                    fontWeight: 700,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {title}
-                </Text>
-              </View>
-            )}
-
             <View
               style={{
                 position: 'absolute',
-                right: 0,
-                top: 0,
-                bottom: 0,
-                justifyContent: 'center',
-                alignItems: 'center',
+                left: 0,
               }}
             >
+              {leftHeaderContent}
+            </View>
+
+            {showTitle && (
               <View
                 style={{
-                  flexDirection: 'row',
-                  marginRight: 15,
+                  textAlign: 'center',
+                  // We need to force a width for the text-overflow
+                  // ellipses to work because we are aligning center.
+                  width: 'calc(100% - 60px)',
                 }}
               >
-                {showClose && (
-                  <Button
-                    type="bare"
-                    onClick={onClose}
-                    style={{ padding: '10px 10px' }}
-                    aria-label="Close"
-                  >
-                    <Delete width={10} style={{ color: 'inherit' }} />
-                  </Button>
+                {!title ? (
+                  <SvgLogo
+                    width={30}
+                    height={30}
+                    style={{ justifyContent: 'center', alignSelf: 'center' }}
+                  />
+                ) : typeof title === 'string' || typeof title === 'number' ? (
+                  <ModalTitle title={`${title}`} />
+                ) : (
+                  title
                 )}
               </View>
-            </View>
+            )}
+
+            {onClose && (
+              <View
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                }}
+              >
+                <CloseButtonComponent onClick={onClose} />
+              </View>
+            )}
           </View>
         )}
-        <View style={{ padding, paddingTop: 0, flex: 1 }}>
+        <View style={{ paddingTop: 0, flex: 1 }}>
           {typeof children === 'function' ? children() : children}
         </View>
         {loading && (
@@ -243,9 +252,9 @@ const ModalContent = ({
   stackIndex,
   children,
 }: ModalContentProps) => {
-  let contentRef = useRef(null);
-  let mounted = useRef(false);
-  let rotateFactor = useRef(Math.random() * 10 - 5);
+  const contentRef = useRef(null);
+  const mounted = useRef(false);
+  const rotateFactor = useRef(Math.random() * 10 - 5);
 
   useLayoutEffect(() => {
     if (contentRef.current == null) {
@@ -319,11 +328,11 @@ export const ModalButtons = ({
   focusButton = false,
   children,
 }: ModalButtonsProps) => {
-  let containerRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     if (focusButton && containerRef.current) {
-      let button = containerRef.current.querySelector(
+      const button = containerRef.current.querySelector(
         'button:not([data-hidden])',
       );
 
@@ -349,4 +358,123 @@ export const ModalButtons = ({
   );
 };
 
-export default Modal;
+type ModalTitleProps = {
+  title: string;
+  isEditable?: boolean;
+  getStyle?: (isEditing: boolean) => CSSProperties;
+  onEdit?: (isEditing: boolean) => void;
+  onTitleUpdate?: (newName: string) => void;
+  shrinkOnOverflow?: boolean;
+};
+
+export function ModalTitle({
+  title,
+  isEditable,
+  getStyle,
+  onTitleUpdate,
+  shrinkOnOverflow = false,
+}: ModalTitleProps) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const onTitleClick = () => {
+    if (isEditable) {
+      setIsEditing(true);
+    }
+  };
+
+  const _onTitleUpdate = newTitle => {
+    if (newTitle !== title) {
+      onTitleUpdate?.(newTitle);
+    }
+    setIsEditing(false);
+  };
+
+  const inputRef = useRef<HTMLInputElement>();
+  useEffect(() => {
+    if (isEditing) {
+      if (inputRef.current) {
+        inputRef.current.scrollLeft = 0;
+      }
+    }
+  }, [isEditing]);
+
+  const style = getStyle?.(isEditing);
+
+  return isEditing ? (
+    <Input
+      inputRef={inputRef}
+      style={{
+        fontSize: 25,
+        fontWeight: 700,
+        textAlign: 'center',
+        ...style,
+      }}
+      focused={isEditing}
+      defaultValue={title}
+      onUpdate={_onTitleUpdate}
+      onKeyDown={e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          _onTitleUpdate?.(e.currentTarget.value);
+        }
+      }}
+    />
+  ) : (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      {shrinkOnOverflow ? (
+        <AutoTextSize
+          as={Text}
+          minFontSizePx={15}
+          maxFontSizePx={25}
+          onClick={onTitleClick}
+          style={{
+            fontSize: 25,
+            fontWeight: 700,
+            textAlign: 'center',
+            ...(isEditable && styles.underlinedText),
+            ...style,
+          }}
+        >
+          {title}
+        </AutoTextSize>
+      ) : (
+        <TextOneLine
+          onClick={onTitleClick}
+          style={{
+            fontSize: 25,
+            fontWeight: 700,
+            textAlign: 'center',
+            ...(isEditable && styles.underlinedText),
+            ...style,
+          }}
+        >
+          {title}
+        </TextOneLine>
+      )}
+    </View>
+  );
+}
+
+type ModalCloseButtonProps = {
+  onClick: ComponentProps<typeof Button>['onClick'];
+  style?: CSSProperties;
+};
+
+export function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
+  return (
+    <Button
+      type="bare"
+      onClick={onClick}
+      style={{ padding: '10px 10px' }}
+      aria-label="Close"
+    >
+      <SvgDelete width={10} style={style} />
+    </Button>
+  );
+}

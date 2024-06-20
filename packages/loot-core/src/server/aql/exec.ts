@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as db from '../db';
 
 import { compileQuery, defaultConstructQuery } from './compiler';
@@ -17,7 +18,7 @@ import { convertInputType, convertOutputType } from './schema-helpers';
 
 function applyTypes(data, outputTypes) {
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
+    const item = data[i];
     Object.keys(item).forEach(name => {
       item[name] = convertOutputType(item[name], outputTypes.get(name));
     });
@@ -31,8 +32,8 @@ export async function execQuery(
   params,
   outputTypes,
 ) {
-  let sql = defaultConstructQuery(queryState, state, sqlPieces);
-  let data = await db.all(sql, params);
+  const sql = defaultConstructQuery(queryState, state, sqlPieces);
+  const data = await db.all(sql, params);
   applyTypes(data, outputTypes);
   return data;
 }
@@ -43,8 +44,8 @@ export async function runCompiledQuery(
   state,
   { params = {}, executors = {} } = {},
 ) {
-  let paramArray = state.namedParameters.map(param => {
-    let name = param.paramName;
+  const paramArray = state.namedParameters.map(param => {
+    const name = param.paramName;
     if (params[name] === undefined) {
       throw new Error(`Parameter ${name} not provided to query`);
     }
@@ -66,8 +67,8 @@ export async function runCompiledQuery(
 
   if (query.calculation) {
     if (data.length > 0) {
-      let row = data[0];
-      let k = Object.keys(row)[0];
+      const row = data[0];
+      const k = Object.keys(row)[0];
       // TODO: the function being run should be the one to
       // determine the default value, not hardcoded as 0
       data = row[k] || 0;
@@ -79,7 +80,7 @@ export async function runCompiledQuery(
 }
 
 export async function runQuery(schema, schemaConfig, query, options) {
-  let { sqlPieces, state } = compileQuery(query, schema, schemaConfig);
-  let data = await runCompiledQuery(query, sqlPieces, state, options);
+  const { sqlPieces, state } = compileQuery(query, schema, schemaConfig);
+  const data = await runCompiledQuery(query, sqlPieces, state, options);
   return { data, dependencies: state.dependencies };
 }

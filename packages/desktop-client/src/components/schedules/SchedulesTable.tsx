@@ -1,8 +1,6 @@
-import React, { useState, useMemo, type CSSProperties } from 'react';
-import { useSelector } from 'react-redux';
+// @ts-strict-ignore
+import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
 
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import {
   type ScheduleStatusType,
   type ScheduleStatuses,
@@ -12,17 +10,20 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import Check from '../../icons/v2/Check';
+import { useAccounts } from '../../hooks/useAccounts';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePayees } from '../../hooks/usePayees';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
+import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
-import Text from '../common/Text';
-import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
+import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
-import { Tooltip } from '../tooltips';
-import DisplayId from '../util/DisplayId';
+import { DisplayId } from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
 
@@ -59,17 +60,16 @@ function OverflowMenu({
   status: ScheduleStatusType;
   onAction: SchedulesTableProps['onAction'];
 }) {
+  const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
 
   const getMenuItems = () => {
     const menuItems: { name: ScheduleItemAction; text: string }[] = [];
 
-    if (status === 'due') {
-      menuItems.push({
-        name: 'post-transaction',
-        text: 'Post transaction',
-      });
-    }
+    menuItems.push({
+      name: 'post-transaction',
+      text: 'Post transaction',
+    });
 
     if (status === 'completed') {
       menuItems.push({
@@ -97,34 +97,34 @@ function OverflowMenu({
   return (
     <View>
       <Button
+        ref={triggerRef}
         type="bare"
+        aria-label="Menu"
         onClick={e => {
           e.stopPropagation();
           setOpen(true);
         }}
       >
-        <DotsHorizontalTriple
+        <SvgDotsHorizontalTriple
           width={15}
           height={15}
           style={{ transform: 'rotateZ(90deg)' }}
         />
       </Button>
-      {open && (
-        <Tooltip
-          position="bottom-right"
-          width={150}
-          style={{ padding: 0 }}
-          onClose={() => setOpen(false)}
-        >
-          <Menu
-            onMenuSelect={(name: ScheduleItemAction) => {
-              onAction(name, schedule.id);
-              setOpen(false);
-            }}
-            items={getMenuItems()}
-          />
-        </Tooltip>
-      )}
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={open}
+        onOpenChange={() => setOpen(false)}
+      >
+        <Menu
+          onMenuSelect={name => {
+            onAction(name, schedule.id);
+            setOpen(false);
+          }}
+          items={getMenuItems()}
+        />
+      </Popover>
     </View>
   );
 }
@@ -168,7 +168,7 @@ export function ScheduleAmountCell({
       <Text
         style={{
           flex: 1,
-          color: num > 0 ? theme.noticeText : theme.tableText,
+          color: num > 0 ? theme.noticeTextLight : theme.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -192,14 +192,11 @@ export function SchedulesTable({
   onAction,
   tableStyle,
 }: SchedulesTableProps) {
-  const dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
-
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const payees = useCachedPayees();
-  const accounts = useCachedAccounts();
+  const payees = usePayees();
+  const accounts = useAccounts();
 
   const filteredSchedules = useMemo(() => {
     if (!filter) {
@@ -234,7 +231,7 @@ export function SchedulesTable({
         filterIncludes(dateStr)
       );
     });
-  }, [schedules, filter, statuses]);
+  }, [payees, accounts, schedules, filter, statuses]);
 
   const items: SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);
@@ -296,7 +293,7 @@ export function SchedulesTable({
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
             {schedule._date && schedule._date.frequency && (
-              <Check style={{ width: 13, height: 13 }} />
+              <SvgCheck style={{ width: 13, height: 13 }} />
             )}
           </Field>
         )}
@@ -344,7 +341,7 @@ export function SchedulesTable({
 
   return (
     <View style={{ flex: 1, ...tableStyle }}>
-      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+      <TableHeader height={ROW_HEIGHT} inset={15}>
         <Field width="flex">Name</Field>
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
@@ -363,7 +360,6 @@ export function SchedulesTable({
       <Table
         rowHeight={ROW_HEIGHT}
         backgroundColor="transparent"
-        version="v2"
         style={{ flex: 1, backgroundColor: 'transparent', ...style }}
         items={items as ScheduleEntity[]}
         renderItem={renderItem}

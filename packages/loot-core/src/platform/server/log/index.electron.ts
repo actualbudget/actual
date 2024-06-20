@@ -1,12 +1,12 @@
-import logger from 'electron-log';
+import electronLogger from 'electron-log';
 
 import type * as T from '.';
 
-if (logger.transports) {
-  logger.transports.file.appName = 'Actual';
-  logger.transports.file.level = 'info';
-  logger.transports.file.maxSize = 7 * 1024 * 1024;
-  logger.transports.console.level = false;
+if (electronLogger.transports) {
+  electronLogger.transports.file.appName = 'Actual';
+  electronLogger.transports.file.level = 'info';
+  electronLogger.transports.file.maxSize = 7 * 1024 * 1024;
+  electronLogger.transports.console.level = false;
 }
 
-export default logger as T.Logger;
+export const logger: T.Logger = electronLogger;

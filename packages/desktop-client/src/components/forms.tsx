@@ -4,8 +4,8 @@ import { css } from 'glamor';
 
 import { type CSSProperties, theme } from '../style';
 
-import Text from './common/Text';
-import View from './common/View';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
 type SectionLabelProps = {
   title?: string;
@@ -18,7 +18,7 @@ export const SectionLabel = ({ title, style }: SectionLabelProps) => {
       style={{
         fontWeight: 500,
         textTransform: 'uppercase',
-        color: theme.altFormLabelText,
+        color: theme.formLabelText,
         marginBottom: 5,
         lineHeight: '1em',
         ...style,
@@ -89,15 +89,15 @@ export const Checkbox = (props: CheckboxProps) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: theme.tableBackground,
+            color: theme.checkboxText,
             backgroundColor: theme.tableBackground,
             ':checked': {
-              border: '1px solid ' + theme.altFormInputBorderSelected,
-              backgroundColor: theme.tableTextEditingBackground,
+              border: '1px solid ' + theme.checkboxBorderSelected,
+              backgroundColor: theme.checkboxBackgroundSelected,
               '::after': {
                 display: 'block',
                 background:
-                  theme.tableTextEditingBackground +
+                  theme.checkboxBackgroundSelected +
                   // eslint-disable-next-line rulesdir/typography
                   ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
                 width: 9,
@@ -112,7 +112,7 @@ export const Checkbox = (props: CheckboxProps) => {
                 bottom: -5,
                 left: -5,
                 right: -5,
-                border: '2px solid ' + theme.altFormInputBorderSelected,
+                border: '2px solid ' + theme.checkboxBorderSelected,
                 borderRadius: 6,
                 content: ' ',
               },

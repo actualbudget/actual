@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Transactions', () => {
   let page;
@@ -28,7 +27,7 @@ test.describe('Transactions', () => {
   });
 
   test('checks the page visuals', async () => {
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test.describe('filters transactions', () => {
@@ -39,32 +38,32 @@ test.describe('Transactions', () => {
 
     test('by date', async () => {
       const filterTooltip = await accountPage.filterBy('Date');
-      await expect(filterTooltip.page).toHaveScreenshot(screenshotConfig(page));
+      await expect(filterTooltip.page).toMatchThemeScreenshots();
 
       // Open datepicker
       await page.keyboard.press('Space');
       const datepicker = page.getByTestId('date-select-tooltip');
-      await expect(datepicker).toHaveScreenshot(screenshotConfig(page));
+      await expect(datepicker).toMatchThemeScreenshots();
 
       // Select "is xxxxx"
-      await datepicker.getByRole('button', { name: '20' }).click();
+      await datepicker.getByText('20', { exact: true }).click();
       await filterTooltip.applyButton.click();
 
       // Assert that there are no transactions
       await expect(accountPage.transactionTable).toHaveText('No transactions');
-      await expect(page).toHaveScreenshot(screenshotConfig(page));
+      await expect(page).toMatchThemeScreenshots();
     });
 
     test('by category', async () => {
       const filterTooltip = await accountPage.filterBy('Category');
-      await expect(filterTooltip.page).toHaveScreenshot(screenshotConfig(page));
+      await expect(filterTooltip.page).toMatchThemeScreenshots();
 
       // Type in the autocomplete box
       const autocomplete = page.getByTestId('autocomplete');
-      await expect(autocomplete).toHaveScreenshot(screenshotConfig(page));
+      await expect(autocomplete).toMatchThemeScreenshots();
 
       // Select the active item
-      await page.getByRole('button', { name: 'Clothing' }).click();
+      await page.getByTestId('Clothing-category-item').click();
       await filterTooltip.applyButton.click();
 
       // Assert that there are only clothing transactions
@@ -83,7 +82,7 @@ test.describe('Transactions', () => {
       await expect(accountPage.getNthTransaction(4).category).toHaveText(
         'Clothing',
       );
-      await expect(page).toHaveScreenshot(screenshotConfig(page));
+      await expect(page).toMatchThemeScreenshots();
     });
   });
 
@@ -101,7 +100,7 @@ test.describe('Transactions', () => {
     await expect(transaction.category).toHaveText('Food');
     await expect(transaction.debit).toHaveText('12.34');
     await expect(transaction.credit).toHaveText('');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a split test transaction', async () => {
@@ -140,6 +139,6 @@ test.describe('Transactions', () => {
     await expect(thirdTransaction.category).toHaveText('Categorize');
     await expect(thirdTransaction.debit).toHaveText('111.11');
     await expect(thirdTransaction.credit).toHaveText('');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 });

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import md5 from 'md5';
 
 import { schema, schemaConfig, makeViews } from './aql';
@@ -11,14 +12,14 @@ async function runMigrations() {
 }
 
 async function updateViews() {
-  let hashKey = 'view-hash';
-  let row = await db.first('SELECT value FROM __meta__ WHERE key = ?', [
+  const hashKey = 'view-hash';
+  const row = await db.first('SELECT value FROM __meta__ WHERE key = ?', [
     hashKey,
   ]);
-  let { value: hash } = row || {};
+  const { value: hash } = row || {};
 
-  let views = makeViews(schema, schemaConfig);
-  let currentHash = md5(views);
+  const views = makeViews(schema, schemaConfig);
+  const currentHash = md5(views);
 
   if (hash !== currentHash) {
     await db.execQuery(views);

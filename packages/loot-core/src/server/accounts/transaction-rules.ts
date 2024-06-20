@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   currentDay,
   addDays,
@@ -10,8 +11,13 @@ import {
   sortNumbers,
   getApproxNumberThreshold,
 } from '../../shared/rules';
+import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';
-import { type RuleActionEntity, type RuleEntity } from '../../types/models';
+import {
+  type TransactionEntity,
+  type RuleActionEntity,
+  type RuleEntity,
+} from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
 import { getMappings } from '../db/mappings';
@@ -27,6 +33,7 @@ import {
   rankRules,
   migrateIds,
   iterateIds,
+  execActions,
 } from './rules';
 import { batchUpdateTransactions } from './transactions';
 
@@ -61,8 +68,8 @@ function invert(obj) {
   );
 }
 
-let internalFields = schemaConfig.views.transactions.fields;
-let publicFields = invert(schemaConfig.views.transactions.fields);
+const internalFields = schemaConfig.views.transactions.fields;
+const publicFields = invert(schemaConfig.views.transactions.fields);
 
 function fromInternalField<T extends { field: string }>(obj: T): T {
   return {
@@ -123,7 +130,7 @@ export const ruleModel = {
   },
 
   toJS(row) {
-    let { conditions, conditions_op, actions, ...fields } = row;
+    const { conditions, conditions_op, actions, ...fields } = row;
     return {
       ...fields,
       conditionsOp: conditions_op,
@@ -133,7 +140,7 @@ export const ruleModel = {
   },
 
   fromJS(rule) {
-    let { conditions, conditionsOp, actions, ...row } = rule;
+    const { conditions, conditionsOp, actions, ...row } = rule;
     if (conditionsOp) {
       row.conditions_op = conditionsOp;
     }
@@ -173,19 +180,19 @@ export function makeRule(data) {
 export async function loadRules() {
   resetState();
 
-  let rules = await db.all(`
+  const rules = await db.all(`
     SELECT * FROM rules
       WHERE conditions IS NOT NULL AND actions IS NOT NULL AND tombstone = 0
   `);
 
   for (let i = 0; i < rules.length; i++) {
-    let desc = rules[i];
+    const desc = rules[i];
     // These are old stages, can be removed before release
     if (desc.stage === 'cleanup' || desc.stage === 'modify') {
       desc.stage = 'pre';
     }
 
-    let rule = makeRule(desc);
+    const rule = makeRule(desc);
     if (rule) {
       allRules.set(rule.id, rule);
       firstcharIndexer.index(rule);
@@ -217,7 +224,7 @@ export async function updateRule(rule) {
 }
 
 export async function deleteRule<T extends { id: string }>(rule: T) {
-  let schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
+  const schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
     rule.id,
   ]);
 
@@ -234,11 +241,11 @@ function onApplySync(oldValues, newValues) {
   newValues.forEach((items, table) => {
     if (table === 'rules') {
       items.forEach(newValue => {
-        let oldRule = allRules.get(newValue.id);
+        const oldRule = allRules.get(newValue.id);
 
         if (newValue.tombstone === 1) {
           // Deleted, need to remove it from in-memory
-          let rule = allRules.get(newValue.id);
+          const rule = allRules.get(newValue.id);
           if (rule) {
             allRules.delete(rule.getId());
             firstcharIndexer.remove(rule);
@@ -246,7 +253,7 @@ function onApplySync(oldValues, newValues) {
           }
         } else {
           // Inserted/updated
-          let rule = makeRule(newValue);
+          const rule = makeRule(newValue);
           if (rule) {
             if (oldRule) {
               firstcharIndexer.remove(oldRule);
@@ -263,7 +270,7 @@ function onApplySync(oldValues, newValues) {
 
   // If any of the mapping tables have changed, we need to refresh the
   // ids
-  let tables = [...newValues.keys()];
+  const tables = [...newValues.keys()];
   if (tables.find(table => table.indexOf('mapping') !== -1)) {
     getRules().forEach(rule => {
       migrateIds(rule, getMappings());
@@ -275,7 +282,7 @@ function onApplySync(oldValues, newValues) {
 export function runRules(trans) {
   let finalTrans = { ...trans };
 
-  let rules = rankRules(
+  const rules = rankRules(
     fastSetMerge(
       firstcharIndexer.getApplicableRules(trans),
       payeeIndexer.getApplicableRules(trans),
@@ -291,7 +298,7 @@ export function runRules(trans) {
 
 // This does the inverse: finds all the transactions matching a rule
 export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
-  let errors = [];
+  const errors = [];
 
   conditions = conditions
     .map(cond => {
@@ -316,17 +323,17 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
     .filter(Boolean);
 
   // rule -> actualql
-  let filters = conditions.map(cond => {
-    let { type, field, op, value, options } = cond;
+  const filters = conditions.map(cond => {
+    const { type, field, op, value, options } = cond;
 
-    let getValue = value => {
+    const getValue = value => {
       if (type === 'number') {
         return value.value;
       }
       return value;
     };
 
-    let apply = (field, op, value) => {
+    const apply = (field, op, value) => {
       if (type === 'number') {
         if (options) {
           if (options.outflow) {
@@ -357,7 +364,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
       case 'is':
         if (type === 'date') {
           if (value.type === 'recur') {
-            let dates = value.schedule
+            const dates = value.schedule
               .occurrences({ take: recurDateBounds })
               .toArray()
               .map(d => dayFromDate(d.date));
@@ -377,9 +384,9 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
             };
           } else {
             if (op === 'isapprox') {
-              let fullDate = parseDate(value.date);
-              let high = addDays(fullDate, 2);
-              let low = subDays(fullDate, 2);
+              const fullDate = parseDate(value.date);
+              const high = addDays(fullDate, 2);
+              const low = subDays(fullDate, 2);
 
               return {
                 $and: [{ date: { $gte: low } }, { date: { $lte: high } }],
@@ -389,15 +396,15 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
                 case 'date':
                   return { date: value.date };
                 case 'month': {
-                  let low = value.date + '-00';
-                  let high = value.date + '-99';
+                  const low = value.date + '-00';
+                  const high = value.date + '-99';
                   return {
                     $and: [{ date: { $gte: low } }, { date: { $lte: high } }],
                   };
                 }
                 case 'year': {
-                  let low = value.date + '-00-00';
-                  let high = value.date + '-99-99';
+                  const low = value.date + '-00-00';
+                  const high = value.date + '-99-99';
                   return {
                     $and: [{ date: { $gte: low } }, { date: { $lte: high } }],
                   };
@@ -407,9 +414,9 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
             }
           }
         } else if (type === 'number') {
-          let number = value.value;
+          const number = value.value;
           if (op === 'isapprox') {
-            let threshold = getApproxNumberThreshold(number);
+            const threshold = getApproxNumberThreshold(number);
 
             return {
               $and: [
@@ -433,7 +440,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
       case 'isbetween':
         // This operator is only applicable to the specific `between`
         // number type so we don't use `apply`
-        let [low, high] = sortNumbers(value.num1, value.num2);
+        const [low, high] = sortNumbers(value.num1, value.num2);
         return {
           [field]: [{ $gte: low }, { $lte: high }],
         };
@@ -454,14 +461,14 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           '%' + value + '%',
         );
       case 'oneOf':
-        let values = value;
+        const values = value;
         if (values.length === 0) {
           // This forces it to match nothing
           return { id: null };
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
       case 'notOneOf':
-        let notValues = value;
+        const notValues = value;
         if (notValues.length === 0) {
           // This forces it to match nothing
           return { id: null };
@@ -487,18 +494,26 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
   return { filters, errors };
 }
 
-export function applyActions(
-  transactionIds: string[],
+export async function applyActions(
+  transactions: TransactionEntity[],
   actions: Array<Action | RuleActionEntity>,
 ) {
-  let parsedActions = actions
+  const parsedActions = actions
     .map(action => {
       if (action instanceof Action) {
         return action;
       }
 
       try {
-        if (action.op === 'link-schedule') {
+        if (action.op === 'set-split-amount') {
+          return new Action(
+            action.op,
+            null,
+            action.value,
+            action.options,
+            FIELD_TYPES,
+          );
+        } else if (action.op === 'link-schedule') {
           return new Action(action.op, null, action.value, null, FIELD_TYPES);
         }
 
@@ -521,19 +536,15 @@ export function applyActions(
     return null;
   }
 
-  let updated = transactionIds.map(id => {
-    let update = { id };
-    for (let action of parsedActions) {
-      action.exec(update);
-    }
-    return update;
+  const updated = transactions.flatMap(trans => {
+    return ungroupTransaction(execActions(parsedActions, trans));
   });
 
   return batchUpdateTransactions({ updated });
 }
 
 export function getRulesForPayee(payeeId) {
-  let rules = new Set();
+  const rules = new Set();
   iterateIds(getRules(), 'payee', (rule, id) => {
     if (id === payeeId) {
       rules.add(rule);
@@ -549,9 +560,9 @@ function* getIsSetterRules(
   actionField,
   { condValue, actionValue }: { condValue?: string; actionValue?: string },
 ) {
-  let rules = getRules();
+  const rules = getRules();
   for (let i = 0; i < rules.length; i++) {
-    let rule = rules[i];
+    const rule = rules[i];
 
     if (
       rule.stage === stage &&
@@ -577,9 +588,9 @@ function* getOneOfSetterRules(
   actionField,
   { condValue, actionValue }: { condValue?: string; actionValue: string },
 ) {
-  let rules = getRules();
+  const rules = getRules();
   for (let i = 0; i < rules.length; i++) {
-    let rule = rules[i];
+    const rule = rules[i];
 
     if (
       rule.stage === stage &&
@@ -601,7 +612,7 @@ function* getOneOfSetterRules(
 }
 
 export async function updatePayeeRenameRule(fromNames: string[], to: string) {
-  let renameRule = getOneOfSetterRules('pre', 'imported_payee', 'payee', {
+  const renameRule = getOneOfSetterRules('pre', 'imported_payee', 'payee', {
     actionValue: to,
   }).next().value;
 
@@ -612,21 +623,21 @@ export async function updatePayeeRenameRule(fromNames: string[], to: string) {
   // case we could improve in the future, but this is fine for now.
 
   if (renameRule) {
-    let condition = renameRule.conditions[0];
-    let newValue = [
+    const condition = renameRule.conditions[0];
+    const newValue = [
       ...fastSetMerge(
         new Set(condition.value),
         new Set(fromNames.filter(name => name !== '')),
       ),
     ];
-    let rule = {
+    const rule = {
       ...renameRule,
       conditions: [{ ...condition, value: newValue }],
     };
     await updateRule(rule);
     return renameRule.id;
   } else {
-    let rule = new Rule({
+    const rule = new Rule({
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [{ op: 'oneOf', field: 'imported_payee', value: fromNames }],
@@ -638,7 +649,7 @@ export async function updatePayeeRenameRule(fromNames: string[], to: string) {
 }
 
 export function getProbableCategory(transactions) {
-  let scores = new Map();
+  const scores = new Map();
 
   transactions.forEach(trans => {
     if (trans.category) {
@@ -646,8 +657,8 @@ export function getProbableCategory(transactions) {
     }
   });
 
-  let winner = transactions.reduce((winner, trans) => {
-    let score = scores.get(trans.category);
+  const winner = transactions.reduce((winner, trans) => {
+    const score = scores.get(trans.category);
     if (!winner || score > winner.score) {
       return { score, category: trans.category };
     }
@@ -662,8 +673,8 @@ export async function updateCategoryRules(transactions) {
     return;
   }
 
-  let payeeIds = new Set(transactions.map(trans => trans.payee));
-  let transIds = new Set(transactions.map(trans => trans.id));
+  const payeeIds = new Set(transactions.map(trans => trans.payee));
+  const transIds = new Set(transactions.map(trans => trans.id));
 
   // It's going to be quickest to get the oldest date and then query
   // all transactions since then so we can work in memory
@@ -682,7 +693,7 @@ export async function updateCategoryRules(transactions) {
 
   // Also look 180 days in the future to get any future transactions
   // (this might change when we think about scheduled transactions)
-  let register = await db.all(
+  const register: TransactionEntity[] = await db.all(
     `SELECT t.* FROM v_transactions t
      LEFT JOIN accounts a ON a.id = t.account
      WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0
@@ -690,18 +701,18 @@ export async function updateCategoryRules(transactions) {
     [toDateRepr(oldestDate), toDateRepr(addDays(currentDay(), 180))],
   );
 
-  let allTransactions = partitionByField(register, 'payee');
-  let categoriesToSet = new Map();
+  const allTransactions = partitionByField(register, 'payee');
+  const categoriesToSet = new Map();
 
-  for (let payeeId of payeeIds) {
+  for (const payeeId of payeeIds) {
     // Don't do anything if payee is null
     if (payeeId) {
-      let latestTrans = (allTransactions.get(payeeId) || []).slice(0, 5);
+      const latestTrans = (allTransactions.get(payeeId) || []).slice(0, 5);
 
       // Check if one of the latest transactions was one that was
       // updated. We only want to update anything if so.
       if (latestTrans.find(trans => transIds.has(trans.id))) {
-        let category = getProbableCategory(latestTrans);
+        const category = getProbableCategory(latestTrans);
         if (category) {
           categoriesToSet.set(payeeId, category);
         }
@@ -710,8 +721,8 @@ export async function updateCategoryRules(transactions) {
   }
 
   await batchMessages(async () => {
-    for (let [payeeId, category] of categoriesToSet.entries()) {
-      let ruleSetters = [
+    for (const [payeeId, category] of categoriesToSet.entries()) {
+      const ruleSetters = [
         ...getIsSetterRules(null, 'payee', 'category', {
           condValue: payeeId,
         }),
@@ -724,8 +735,8 @@ export async function updateCategoryRules(transactions) {
         // because 2 clients made them independently. Not really a big
         // deal, but to make sure our update gets applied set it to
         // all of them
-        for (let rule of ruleSetters) {
-          let action = rule.actions[0];
+        for (const rule of ruleSetters) {
+          const action = rule.actions[0];
           if (action.value !== category) {
             await updateRule({
               ...rule,
@@ -735,7 +746,7 @@ export async function updateCategoryRules(transactions) {
         }
       } else {
         // No existing rules, so create one
-        let newRule = new Rule({
+        const newRule = new Rule({
           stage: null,
           conditionsOp: 'and',
           conditions: [{ op: 'is', field: 'payee', value: payeeId }],

@@ -38,19 +38,27 @@ module.exports = {
   extends: [
     'react-app',
     'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:prettier/recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:import/typescript',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
   reportUnusedDisableDirectives: true,
+  globals: {
+    globalThis: false,
+    vi: true,
+  },
   rules: {
     'prettier/prettier': 'warn',
+
+    // Note: base rule explicitly disabled in favor of the TS one
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
       'warn',
       {
-        args: 'none',
-        varsIgnorePattern: '^_',
+        varsIgnorePattern: '^(_|React)',
         ignoreRestSiblings: true,
       },
     ],
@@ -61,8 +69,16 @@ module.exports = {
       require('confusing-browser-globals').filter(g => g !== 'self'),
     ),
 
+    'react/jsx-filename-extension': [
+      'warn',
+      { extensions: ['.jsx', '.tsx'], allow: 'as-needed' },
+    ],
     'react/jsx-no-useless-fragment': 'warn',
     'react/self-closing-comp': 'warn',
+    'react/no-unstable-nested-components': [
+      'warn',
+      { allowAsProps: true, customValidators: ['formatter'] },
+    ],
 
     'rulesdir/typography': 'warn',
     'rulesdir/prefer-if-statement': 'warn',
@@ -75,16 +91,11 @@ module.exports = {
     'react/prop-types': 'off',
 
     // TODO: re-enable these rules
-    'react-hooks/exhaustive-deps': 'off',
-    'react/no-children-prop': 'off',
-    'react/display-name': 'off',
     'react/react-in-jsx-scope': 'off',
-    // 'react-hooks/exhaustive-deps': [
-    //   'warn',
-    //   {
-    //     additionalHooks: 'useLiveQuery',
-    //   },
-    // ],
+
+    'no-var': 'warn',
+    'react/jsx-curly-brace-presence': 'warn',
+    'object-shorthand': ['warn', 'properties'],
 
     'import/extensions': [
       'warn',
@@ -135,10 +146,9 @@ module.exports = {
           'Using default React import is discouraged, please use named exports directly instead.',
       },
       {
-        // forbid <a> in favor of <LinkButton> or <ExternalLink>
+        // forbid <a> in favor of <Link>
         selector: 'JSXOpeningElement[name.name="a"]',
-        message:
-          'Using <a> is discouraged, please use <LinkButton> or <ExternalLink> instead.',
+        message: 'Using <a> is discouraged, please use <Link> instead.',
       },
     ],
     'no-restricted-imports': [
@@ -146,11 +156,17 @@ module.exports = {
       { patterns: [...restrictedImportPatterns, ...restrictedImportColors] },
     ],
 
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      { 'ts-ignore': 'allow-with-description' },
+    ],
+
     // Rules disable during TS migration
     '@typescript-eslint/no-var-requires': 'off',
-    'prefer-const': 'off',
+    'prefer-const': 'warn',
     'prefer-spread': 'off',
     '@typescript-eslint/no-empty-function': 'off',
+    'import/no-default-export': 'warn',
   },
   overrides: [
     {
@@ -182,6 +198,26 @@ module.exports = {
               FC: { message: ruleFCMsg },
             },
             extendDefaults: true,
+          },
+        ],
+      },
+    },
+    {
+      files: ['./packages/desktop-client/**/*'],
+      excludedFiles: [
+        './packages/desktop-client/src/hooks/useNavigate.{ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            patterns: [
+              {
+                group: ['react-router-dom'],
+                importNames: ['useNavigate'],
+                message: 'Please use Actual’s useNavigate() hook instead.',
+              },
+            ],
           },
         ],
       },
@@ -224,11 +260,80 @@ module.exports = {
         'no-restricted-imports': ['off', { patterns: restrictedImportColors }],
       },
     },
+    {
+      files: [
+        './packages/api/migrations/*',
+        './packages/loot-core/migrations/*',
+      ],
+      rules: {
+        'import/no-default-export': 'off',
+      },
+    },
+    {
+      // TODO: fix the issues in these files
+      files: [
+        './packages/desktop-client/src/components/accounts/Account.jsx',
+        './packages/desktop-client/src/components/accounts/MobileAccount.jsx',
+        './packages/desktop-client/src/components/accounts/MobileAccounts.jsx',
+        './packages/desktop-client/src/components/App.tsx',
+        './packages/desktop-client/src/components/budget/BudgetCategories.jsx',
+        './packages/desktop-client/src/components/budget/BudgetSummaries.tsx',
+        './packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx',
+        './packages/desktop-client/src/components/budget/index.tsx',
+        './packages/desktop-client/src/components/budget/MobileBudget.tsx',
+        './packages/desktop-client/src/components/budget/rollover/HoldMenu.tsx',
+        './packages/desktop-client/src/components/budget/rollover/TransferMenu.tsx',
+        './packages/desktop-client/src/components/common/Menu.tsx',
+        './packages/desktop-client/src/components/FinancesApp.tsx',
+        './packages/desktop-client/src/components/GlobalKeys.ts',
+        './packages/desktop-client/src/components/LoggedInUser.tsx',
+        './packages/desktop-client/src/components/manager/ManagementApp.jsx',
+        './packages/desktop-client/src/components/manager/subscribe/common.tsx',
+        './packages/desktop-client/src/components/ManageRules.tsx',
+        './packages/desktop-client/src/components/mobile/MobileAmountInput.jsx',
+        './packages/desktop-client/src/components/mobile/MobileNavTabs.tsx',
+        './packages/desktop-client/src/components/Modals.tsx',
+        './packages/desktop-client/src/components/modals/EditRule.jsx',
+        './packages/desktop-client/src/components/modals/ImportTransactions.jsx',
+        './packages/desktop-client/src/components/modals/MergeUnusedPayees.jsx',
+        './packages/desktop-client/src/components/Notifications.tsx',
+        './packages/desktop-client/src/components/payees/ManagePayees.jsx',
+        './packages/desktop-client/src/components/payees/ManagePayeesWithData.jsx',
+        './packages/desktop-client/src/components/payees/PayeeTable.tsx',
+        './packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTable.tsx',
+        './packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableTotals.tsx',
+        './packages/desktop-client/src/components/reports/reports/CashFlowCard.jsx',
+        './packages/desktop-client/src/components/reports/reports/CustomReport.jsx',
+        './packages/desktop-client/src/components/reports/reports/NetWorthCard.jsx',
+        './packages/desktop-client/src/components/reports/SaveReportName.tsx',
+        './packages/desktop-client/src/components/reports/useReport.ts',
+        './packages/desktop-client/src/components/schedules/ScheduleDetails.jsx',
+        './packages/desktop-client/src/components/schedules/SchedulesTable.tsx',
+        './packages/desktop-client/src/components/select/DateSelect.tsx',
+        './packages/desktop-client/src/components/sidebar/Tools.tsx',
+        './packages/desktop-client/src/components/sort.tsx',
+        './packages/desktop-client/src/components/spreadsheet/useSheetValue.ts',
+        './packages/desktop-client/src/components/table.tsx',
+        './packages/desktop-client/src/components/Titlebar.tsx',
+        './packages/desktop-client/src/components/transactions/MobileTransaction.jsx',
+        './packages/desktop-client/src/components/transactions/SelectedTransactions.jsx',
+        './packages/desktop-client/src/components/transactions/SimpleTransactionsTable.jsx',
+        './packages/desktop-client/src/components/transactions/TransactionList.jsx',
+        './packages/desktop-client/src/components/transactions/TransactionsTable.jsx',
+        './packages/desktop-client/src/components/transactions/TransactionsTable.test.jsx',
+        './packages/desktop-client/src/hooks/useAccounts.ts',
+        './packages/desktop-client/src/hooks/useCategories.ts',
+        './packages/desktop-client/src/hooks/usePayees.ts',
+        './packages/desktop-client/src/hooks/useProperFocus.tsx',
+        './packages/desktop-client/src/hooks/useSelected.tsx',
+        './packages/loot-core/src/client/query-hooks.tsx',
+      ],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+      },
+    },
   ],
   settings: {
-    'import/parsers': {
-      '@typescript-eslint/parser': ['.ts', '.tsx'],
-    },
     'import/resolver': {
       typescript: {
         alwaysTryTypes: true,

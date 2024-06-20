@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { sequential, once } from './async';
 
 function timeout(n) {
@@ -59,7 +60,7 @@ describe('async', () => {
   test('sequential fn should still flush queue when error is thrown', async () => {
     const test = async fn => {
       fn(1);
-      fn(2, { throwError: true }).catch(err => {});
+      fn(2, { throwError: true }).catch(() => {});
       await fn(3);
     };
 
@@ -85,7 +86,7 @@ describe('async', () => {
       // happened in here, it wouldn't effect anything else)
       expect(data).toEqual([1, 1, 1, 2]);
     });
-    fn(2, { throwError: true }).catch(err => {
+    fn(2, { throwError: true }).catch(() => {
       // Same as above
       expect(data).toEqual([1, 1, 1, 2, 3]);
     });
@@ -119,7 +120,7 @@ describe('async', () => {
       return {};
     });
 
-    let results = await Promise.all([fn(), fn(), fn()]);
+    const results = await Promise.all([fn(), fn(), fn()]);
 
     // It should only have been called once
     expect(timesCalled).toBe(1);

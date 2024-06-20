@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import * as sheet from '../sheet';
@@ -18,7 +19,7 @@ describe('Base budget', () => {
       name: 'income',
       is_income: 1,
     });
-    let catId = await db.insertCategory({
+    const catId = await db.insertCategory({
       name: 'foo',
       cat_group: 'group1',
     });

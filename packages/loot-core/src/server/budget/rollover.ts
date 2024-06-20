@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { safeNumber } from '../../shared/util';
 import * as sheet from '../sheet';
@@ -6,13 +7,13 @@ import { resolveName } from '../spreadsheet/util';
 import { number, sumAmounts, flatten2, unflatten2 } from './util';
 
 function getBlankSheet(months) {
-  let blankMonth = monthUtils.prevMonth(months[0]);
+  const blankMonth = monthUtils.prevMonth(months[0]);
   return monthUtils.sheetForMonth(blankMonth);
 }
 
 export function createBlankCategory(cat, months) {
   if (months.length > 0) {
-    let sheetName = getBlankSheet(months);
+    const sheetName = getBlankSheet(months);
     sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
     sheet.get().createStatic(sheetName, `leftover-${cat.id}`, 0);
     sheet.get().createStatic(sheetName, `leftover-pos-${cat.id}`, 0);
@@ -71,8 +72,8 @@ export function createCategory(cat, sheetName, prevSheetName) {
 }
 
 export function createSummary(groups, categories, prevSheetName, sheetName) {
-  let incomeGroup = groups.filter(group => group.is_income)[0];
-  let expenseCategories = categories.filter(cat => !cat.is_income);
+  const incomeGroup = groups.filter(group => group.is_income)[0];
+  const expenseCategories = categories.filter(cat => !cat.is_income);
 
   sheet.get().createStatic(sheetName, 'buffered', 0);
 
@@ -170,7 +171,7 @@ export function createBudget(meta, categories, months) {
   // The spreadsheet is now strict - so we need to fill in some
   // default values for the month before the first month. Only do this
   // if it doesn't already exist
-  let blankSheet = getBlankSheet(months);
+  const blankSheet = getBlankSheet(months);
   if (meta.blankSheet !== blankSheet) {
     sheet.get().clearSheet(meta.blankSheet);
     createBlankMonth(categories, blankSheet, months);

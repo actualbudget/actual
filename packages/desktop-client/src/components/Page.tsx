@@ -3,88 +3,147 @@ import React, { type ReactNode } from 'react';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../style';
 
-import Text from './common/Text';
-import View from './common/View';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
-function PageTitle({
-  name,
-  style,
-}: {
-  name: ReactNode;
+const HEADER_HEIGHT = 50;
+
+type PageHeaderProps = {
+  title: ReactNode;
   style?: CSSProperties;
-}) {
-  const { isNarrowWidth } = useResponsive();
+};
 
-  if (isNarrowWidth) {
-    return (
-      <View
-        style={{
-          alignItems: 'center',
-          backgroundColor: theme.sidebarItemBackground,
-          color: theme.mobileModalText,
-          flexDirection: 'row',
-          flex: '1 0 auto',
-          fontSize: 18,
-          fontWeight: 500,
-          height: 50,
-          justifyContent: 'center',
-          overflowY: 'auto',
-          ...style,
-        }}
-      >
-        {name}
-      </View>
-    );
-  }
-
+export function PageHeader({ title, style }: PageHeaderProps) {
   return (
-    <Text
+    <View
       style={{
-        fontSize: 25,
-        fontWeight: 500,
-        marginBottom: 15,
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginLeft: 20,
         ...style,
       }}
     >
-      {name}
-    </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          fontSize: 25,
+          fontWeight: 500,
+        }}
+      >
+        {typeof title === 'string' ? <Text>{title}</Text> : title}
+      </View>
+    </View>
   );
 }
 
-export function Page({
-  title,
-  children,
-  titleStyle,
-}: {
+type MobilePageHeaderProps = {
   title: ReactNode;
+  style?: CSSProperties;
+  leftContent?: ReactNode;
+  rightContent?: ReactNode;
+};
+
+export function MobilePageHeader({
+  title,
+  style,
+  leftContent,
+  rightContent,
+}: MobilePageHeaderProps) {
+  return (
+    <View
+      style={{
+        alignItems: 'center',
+        backgroundColor: theme.mobileHeaderBackground,
+        color: theme.mobileHeaderText,
+        flexDirection: 'row',
+        flexShrink: 0,
+        height: HEADER_HEIGHT,
+        ...style,
+      }}
+    >
+      <View
+        style={{
+          flexBasis: '25%',
+          justifyContent: 'flex-start',
+          flexDirection: 'row',
+        }}
+      >
+        {leftContent}
+      </View>
+      <View
+        role="heading"
+        style={{
+          textAlign: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'row',
+          flexBasis: '50%',
+          fontSize: 17,
+          fontWeight: 500,
+          overflowY: 'auto',
+        }}
+      >
+        {title}
+      </View>
+      <View
+        style={{
+          flexBasis: '25%',
+          justifyContent: 'flex-end',
+          flexDirection: 'row',
+        }}
+      >
+        {rightContent}
+      </View>
+    </View>
+  );
+}
+
+type PageProps = {
+  header: ReactNode;
+  style?: CSSProperties;
+  padding?: number;
   children: ReactNode;
-  titleStyle?: CSSProperties;
-}) {
-  let { isNarrowWidth } = useResponsive();
-  let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
+  footer?: ReactNode;
+};
+
+export function Page({ header, style, padding, children, footer }: PageProps) {
+  const { isNarrowWidth } = useResponsive();
+  const childrenPadding = padding != null ? padding : isNarrowWidth ? 10 : 20;
+
+  const headerToRender =
+    typeof header === 'string' ? (
+      isNarrowWidth ? (
+        <MobilePageHeader title={header} />
+      ) : (
+        <PageHeader title={header} />
+      )
+    ) : (
+      header
+    );
 
   return (
-    <View style={isNarrowWidth ? undefined : styles.page}>
-      <PageTitle
-        name={title}
-        style={{
-          ...titleStyle,
-          paddingInline: HORIZONTAL_PADDING,
-        }}
-      />
+    <View
+      style={{
+        ...(!isNarrowWidth && styles.page),
+        flex: 1,
+        backgroundColor: isNarrowWidth
+          ? theme.mobilePageBackground
+          : theme.pageBackground,
+        ...style,
+      }}
+    >
+      {headerToRender}
       <View
-        style={
-          isNarrowWidth
-            ? { overflowY: 'auto', padding: HORIZONTAL_PADDING }
-            : {
-                paddingLeft: HORIZONTAL_PADDING,
-                paddingRight: HORIZONTAL_PADDING,
-                flex: 1,
-              }
-        }
+        style={{
+          flex: 1,
+          overflowY: isNarrowWidth ? 'auto' : undefined,
+          padding: `0 ${childrenPadding}px`,
+        }}
       >
         {children}
       </View>
+      {footer}
     </View>
   );
 }

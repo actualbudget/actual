@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { fetch } from '../platform/server/fetch';
 
 import { PostError } from './errors';
@@ -9,28 +10,33 @@ function throwIfNot200(res, text) {
       throw new PostError(res.status === 500 ? 'internal' : text);
     }
 
-    let contentType = res.headers.get('Content-Type');
+    const contentType = res.headers.get('Content-Type');
     if (contentType.toLowerCase().indexOf('application/json') !== -1) {
-      let json = JSON.parse(text);
+      const json = JSON.parse(text);
       throw new PostError(json.reason);
     }
     throw new PostError(text);
   }
 }
 
-export async function post(url, data, headers = {}) {
+export async function post(url, data, headers = {}, timeout = null) {
   let text;
   let res;
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    const signal = timeout ? controller.signal : null;
     res = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(data),
+      signal,
       headers: {
         ...headers,
         'Content-Type': 'application/json',
       },
     });
+    clearTimeout(timeoutId);
     text = await res.text();
   } catch (err) {
     throw new PostError('network-failure');

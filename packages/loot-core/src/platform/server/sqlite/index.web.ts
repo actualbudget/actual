@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import initSqlJS, { type SqlJsStatic, type Database } from '@jlongster/sql.js';
 
 let SQL: SqlJsStatic | null = null;
@@ -56,12 +57,12 @@ export function runQuery(db, sql, params = [], fetchAll = false) {
     verifyParamTypes(sql, params);
   }
 
-  let stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
+  const stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
 
   if (fetchAll) {
     try {
       stmt.bind(params);
-      let rows = [];
+      const rows = [];
 
       while (stmt.step()) {
         rows.push(stmt.getAsObject());
@@ -156,11 +157,11 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
     if (typeof pathOrBuffer !== 'string') {
       db = new SQL.Database(pathOrBuffer);
     } else {
-      let path = pathOrBuffer;
+      const path = pathOrBuffer;
       if (path !== ':memory:') {
         if (typeof SharedArrayBuffer === 'undefined') {
           // @ts-expect-error FS missing in sql.js types
-          let stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
+          const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
           await stream.node.contents.readIfFallback();
           // @ts-expect-error FS missing in sql.js types
           SQL.FS.close(stream);

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import SQL from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -38,7 +39,7 @@ export function runQuery(
 
   if (fetchAll) {
     try {
-      let result = stmt.all(...params);
+      const result = stmt.all(...params);
       return result;
     } catch (e) {
       console.log('error', sql);
@@ -46,7 +47,7 @@ export function runQuery(
     }
   } else {
     try {
-      let info = stmt.run(...params);
+      const info = stmt.run(...params);
       return { changes: info.changes, insertId: info.lastInsertRowid };
     } catch (e) {
       // console.log('error', sql);
@@ -95,12 +96,14 @@ export async function asyncTransaction(
 }
 
 export function openDatabase(pathOrBuffer: string | Buffer) {
-  let db = new SQL(pathOrBuffer);
+  const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER and UPPER implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('UNICODE_LOWER', { deterministic: true }, (arg: string | null) =>
     arg?.toLowerCase(),
   );
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('UNICODE_UPPER', { deterministic: true }, (arg: string | null) =>
     arg?.toUpperCase(),
   );
@@ -114,11 +117,11 @@ export function closeDatabase(db: SQL.Database) {
 export async function exportDatabase(db: SQL.Database) {
   // electron does not support better-sqlite serialize since v21
   // save to file and read in the raw data.
-  let name = `backup-for-export-${uuidv4()}.db`;
+  const name = `backup-for-export-${uuidv4()}.db`;
 
   await db.backup(name);
 
-  let data = await readFile(name, 'binary');
+  const data = await readFile(name, 'binary');
   await removeFile(name);
 
   return data;

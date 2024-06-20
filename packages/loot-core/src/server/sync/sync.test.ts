@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getClock, Timestamp } from '@actual-app/crdt';
 
 import * as db from '../db';
@@ -146,8 +147,8 @@ describe('Sync', () => {
 });
 
 async function registerBudgetMonths(months) {
-  let createdMonths = new Set();
-  for (let month of months) {
+  const createdMonths = new Set();
+  for (const month of months) {
     createdMonths.add(month);
   }
   sheet.get().meta().createdMonths = months;
@@ -170,12 +171,12 @@ async function asSecondClient(func) {
 }
 
 function expectCellToExist(sheetName, name) {
-  let value = sheet.get().getCellValueLoose(sheetName, name);
+  const value = sheet.get().getCellValueLoose(sheetName, name);
   expect(value).not.toBe(null);
 }
 
 function expectCellNotToExist(sheetName, name, voided?: boolean) {
-  let value = sheet.get().getCellValueLoose(sheetName, name);
+  const value = sheet.get().getCellValueLoose(sheetName, name);
   expect(value).toBe(voided ? 0 : null);
 }
 
@@ -240,7 +241,7 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages();
+    const messages = mockSyncServer.getMessages();
 
     // Apply all but the last message (which deletes the category)
     await applyMessages(messages.slice(0, -1));
@@ -291,10 +292,10 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages();
+    const messages = mockSyncServer.getMessages();
 
-    let firstMessages = messages.filter(m => m.column !== 'tombstone');
-    let secondMessages = messages.filter(m => m.column === 'tombstone');
+    const firstMessages = messages.filter(m => m.column !== 'tombstone');
+    const secondMessages = messages.filter(m => m.column === 'tombstone');
 
     // Apply all the good messages
     await applyMessages(firstMessages);
@@ -325,14 +326,14 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages();
+    const messages = mockSyncServer.getMessages();
 
-    let firstMessages = messages.slice(0, -2);
-    let secondMessages = messages.slice(-2);
+    const firstMessages = messages.slice(0, -2);
+    const secondMessages = messages.slice(-2);
 
     // Apply all the good messages
     await applyMessages(firstMessages);
-    let [cat] = await db.getCategories();
+    const [cat] = await db.getCategories();
     expect(cat.cat_group).toBe('group1');
     expectCellToExist('budget201701', 'group-sum-amount-' + groupId);
 

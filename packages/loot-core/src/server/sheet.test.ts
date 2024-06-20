@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { generateTransaction } from '../mocks';
 
 import * as db from './db';
@@ -41,7 +42,7 @@ async function insertTransactions() {
 
 describe('Spreadsheet', () => {
   test('transferring a category triggers an update', async () => {
-    let spreadsheet = await sheet.loadSpreadsheet(db);
+    const spreadsheet = await sheet.loadSpreadsheet(db);
     await insertTransactions();
 
     spreadsheet.startTransaction();
@@ -69,7 +70,7 @@ describe('Spreadsheet', () => {
   });
 
   test('updating still works after transferring categories', async () => {
-    let spreadsheet = await sheet.loadSpreadsheet(db);
+    const spreadsheet = await sheet.loadSpreadsheet(db);
     await insertTransactions();
 
     await db.deleteCategory({ id: 'cat1' }, 'cat2');

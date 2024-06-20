@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import crypto from 'crypto';
 
-let ENCRYPTION_ALGORITHM = 'aes-256-gcm' as const;
+const ENCRYPTION_ALGORITHM = 'aes-256-gcm' as const;
 
 export async function sha256String(str) {
   return crypto.createHash('sha256').update(str).digest('base64');
@@ -11,14 +12,18 @@ export function randomBytes(n) {
 }
 
 export function encrypt(masterKey, value) {
-  let masterKeyBuffer = masterKey.getValue().raw;
+  const masterKeyBuffer = masterKey.getValue().raw;
   // let iv = createKeyBuffer({ numBytes: 12, secret: masterKeyBuffer });
-  let iv = crypto.randomBytes(12);
-  let cipher = crypto.createCipheriv(ENCRYPTION_ALGORITHM, masterKeyBuffer, iv);
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv(
+    ENCRYPTION_ALGORITHM,
+    masterKeyBuffer,
+    iv,
+  );
   let encrypted = cipher.update(value);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
 
-  let authTag = cipher.getAuthTag();
+  const authTag = cipher.getAuthTag();
 
   return {
     value: encrypted,
@@ -32,13 +37,12 @@ export function encrypt(masterKey, value) {
 }
 
 export function decrypt(masterKey, encrypted, meta) {
-  let masterKeyBuffer = masterKey.getValue().raw;
-  let { algorithm, iv, authTag } = meta;
-  iv = Buffer.from(iv, 'base64');
+  const masterKeyBuffer = masterKey.getValue().raw;
+  const { algorithm, iv: originalIv, authTag: originalAuthTag } = meta;
+  const iv = Buffer.from(originalIv, 'base64');
+  const authTag = Buffer.from(originalAuthTag, 'base64');
 
-  authTag = Buffer.from(authTag, 'base64');
-
-  let decipher = crypto.createDecipheriv(algorithm, masterKeyBuffer, iv);
+  const decipher = crypto.createDecipheriv(algorithm, masterKeyBuffer, iv);
   decipher.setAuthTag(authTag);
 
   let decrypted = decipher.update(encrypted);
@@ -47,7 +51,7 @@ export function decrypt(masterKey, encrypted, meta) {
 }
 
 export function createKey({ secret, salt }) {
-  let buffer = createKeyBuffer({ secret, salt });
+  const buffer = createKeyBuffer({ secret, salt });
   return {
     raw: buffer,
     base64: buffer.toString('base64'),

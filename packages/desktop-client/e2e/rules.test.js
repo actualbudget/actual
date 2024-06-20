@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Rules', () => {
   let page;
@@ -29,7 +28,7 @@ test.describe('Rules', () => {
 
   test('checks the page visuals', async () => {
     await rulesPage.searchFor('Dominion');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a rule and makes sure it is applied when creating a transaction', async () => {
@@ -53,7 +52,7 @@ test.describe('Rules', () => {
     const rule = rulesPage.getNthRule(0);
     await expect(rule.conditions).toHaveText(['payee is Fast Internet']);
     await expect(rule.actions).toHaveText(['set category to General']);
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     const accountPage = await navigation.goToAccountPage('HSBC');
 
@@ -66,6 +65,75 @@ test.describe('Rules', () => {
     await expect(transaction.payee).toHaveText('Fast Internet');
     await expect(transaction.category).toHaveText('General');
     await expect(transaction.debit).toHaveText('12.34');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('creates a split transaction rule and makes sure it is applied when creating a transaction', async () => {
+    rulesPage = await navigation.goToRulesPage();
+
+    await rulesPage.createRule({
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: 'Ikea',
+        },
+      ],
+      splits: {
+        beforeSplitActions: [
+          {
+            field: 'notes',
+            value: 'food / entertainment',
+          },
+        ],
+        splitActions: [
+          [
+            {
+              field: 'a fixed percent',
+              value: '90',
+            },
+            {
+              field: 'category',
+              value: 'Entertainment',
+            },
+          ],
+          [
+            {
+              field: 'an equal portion of the remainder',
+            },
+            {
+              field: 'category',
+              value: 'Food',
+            },
+          ],
+        ],
+      },
+    });
+
+    const accountPage = await navigation.goToAccountPage(
+      'Capital One Checking',
+    );
+
+    await accountPage.createSingleTransaction({
+      debit: '100.00',
+      payee: 'Ikea',
+    });
+
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.payee).toHaveText('Ikea');
+    await expect(transaction.notes).toHaveText('food / entertainment');
+    await expect(transaction.category).toHaveText('Split');
+    await expect(transaction.debit).toHaveText('100.00');
+    await expect(page).toMatchThemeScreenshots();
+
+    const firstSplitTransaction = accountPage.getNthTransaction(1);
+    await expect(firstSplitTransaction.payee).toHaveText('Ikea');
+    await expect(firstSplitTransaction.debit).toHaveText('90.00');
+    await expect(firstSplitTransaction.category).toHaveText('Entertainment');
+
+    const secondSplitTransaction = accountPage.getNthTransaction(2);
+    await expect(secondSplitTransaction.payee).toHaveText('Ikea');
+    await expect(secondSplitTransaction.debit).toHaveText('10.00');
+    await expect(secondSplitTransaction.category).toHaveText('Food');
   });
 });

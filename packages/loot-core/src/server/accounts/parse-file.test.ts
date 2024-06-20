@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import { amountToInteger } from '../../shared/util';
@@ -12,7 +13,7 @@ beforeEach(global.emptyDatabase());
 // libofx spits out errors that contain the entire
 // source code of the file in the stack which makes
 // it hard to test.
-let old = console.warn;
+const old = console.warn;
 beforeAll(() => {
   console.warn = () => {};
 });
@@ -35,11 +36,11 @@ async function importFileWithRealTime(
 ) {
   // Emscripten requires a real Date.now!
   global.restoreDateNow();
-  let { errors, transactions } = await parseFile(filepath, {
-    enableExperimentalOfxParser: true,
-  });
+  const { errors, transactions: originalTransactions } =
+    await parseFile(filepath);
   global.restoreFakeDateNow();
 
+  let transactions = originalTransactions;
   if (transactions) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transactions = (transactions as any[]).map(trans => ({
@@ -50,12 +51,11 @@ async function importFileWithRealTime(
         : trans.date,
     }));
   }
-
   if (errors.length > 0) {
     return { errors, added: [] };
   }
 
-  let { added } = await reconcileTransactions(accountId, transactions);
+  const { added } = await reconcileTransactions(accountId, transactions);
   return { errors, added };
 }
 
@@ -63,7 +63,7 @@ describe('File import', () => {
   test('qif import works', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qif',
       'MM/dd/yy',
@@ -76,7 +76,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.ofx',
     );
@@ -84,11 +84,23 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   }, 45000);
 
+  test('ofx import works with multiple decimals in amount', async () => {
+    const ofxFile = __dirname + '/../../mocks/files/data-multi-decimal.ofx';
+
+    const { transactions } = (await parseFile(ofxFile)) as {
+      transactions: { amount: number }[];
+    };
+
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0].amount).toBe(-30.0);
+    expect(transactions[1].amount).toBe(-3.77);
+  }, 45000);
+
   test('ofx import works (credit card)', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/credit-card.ofx',
     );
@@ -100,7 +112,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qfx',
     );
@@ -134,10 +146,35 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/8859-1.qfx',
       'yyyy-MM-dd',
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
+
+  test('handles html escaped plaintext', async () => {
+    prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../mocks/files/html-vals.qfx',
+      'yyyy-MM-dd',
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
+
+  test('CAMT.053 import works', async () => {
+    prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../mocks/files/camt/camt.053.xml',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();

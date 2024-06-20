@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Budget', () => {
   let page;
@@ -34,7 +33,7 @@ test.describe('Budget', () => {
     await expect(summary.getByText(/^Overspent in /)).toBeVisible();
     await expect(summary.getByText('Budgeted')).toBeVisible();
     await expect(summary.getByText('For Next Month')).toBeVisible();
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('transfer funds to another category', async () => {
@@ -47,7 +46,7 @@ test.describe('Budget', () => {
     expect(await budgetPage.getBalanceForRow(2)).toEqual(
       currentFundsA + currentFundsB,
     );
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('budget table is rendered', async () => {
@@ -60,12 +59,9 @@ test.describe('Budget', () => {
   });
 
   test('clicking on spent amounts opens a transaction page', async () => {
-    let categoryName = await budgetPage.getCategoryNameForRow(1);
-    let accountPage = await budgetPage.clickOnSpentAmountForRow(1);
+    const accountPage = await budgetPage.clickOnSpentAmountForRow(1);
     expect(page.url()).toContain('/accounts');
-    expect(await accountPage.accountName.textContent()).toMatch(
-      new RegExp(String.raw`${categoryName} \(\w+ \d+\)`),
-    );
+    expect(await accountPage.accountName.textContent()).toMatch('All Accounts');
     await page.getByRole('button', { name: 'Back' }).click();
   });
 });

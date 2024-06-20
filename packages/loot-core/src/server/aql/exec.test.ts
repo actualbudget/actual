@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import query from '../../shared/query';
+import { q } from '../../shared/query';
 import { makeChild } from '../../shared/transactions';
 import * as db from '../db';
 
@@ -23,28 +24,28 @@ function runQuery(query, options?: unknown) {
 
 async function insertTransactions(repeatTimes = 1) {
   let transactions = [];
-  let group = await db.insertCategoryGroup({ name: 'group' });
+  const group = await db.insertCategoryGroup({ name: 'group' });
 
   for (let i = 0; i < repeatTimes; i++) {
-    let cat1 = await db.insertCategory({
+    const cat1 = await db.insertCategory({
       id: 'cat' + i + 'a',
       name: 'cat' + i + 'a',
       cat_group: group,
     });
-    let cat2 = await db.insertCategory({
+    const cat2 = await db.insertCategory({
       id: 'cat' + i + 'b',
       name: 'cat' + i + 'b',
       cat_group: group,
     });
 
-    let parent = {
+    const parent = {
       id: uuidv4(),
       account: 'acct',
       date: '2020-01-04',
       amount: -100,
       is_parent: true,
     };
-    let parent2 = {
+    const parent2 = {
       id: uuidv4(),
       account: 'acct',
       date: '2020-01-01',
@@ -65,7 +66,7 @@ async function insertTransactions(repeatTimes = 1) {
     ]);
   }
 
-  for (let trans of transactions) {
+  for (const trans of transactions) {
     await db.insertTransaction(trans);
   }
 }
@@ -75,15 +76,13 @@ describe('runQuery', () => {
     await insertTransactions();
 
     // date
-    let { data } = await runQuery(
-      query('transactions').select('date').serialize(),
-    );
+    let { data } = await runQuery(q('transactions').select('date').serialize());
     expect(data[0].date).toBe('2020-01-04');
 
     // date-month
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .select({ month: { $month: '$date' } })
           .serialize(),
       )
@@ -93,7 +92,7 @@ describe('runQuery', () => {
     // date-year
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .select({ year: { $year: '$date' } })
           .serialize(),
       )
@@ -103,10 +102,7 @@ describe('runQuery', () => {
     // boolean
     data = (
       await runQuery(
-        query('transactions')
-          .select(['is_child', 'is_parent'])
-          .raw()
-          .serialize(),
+        q('transactions').select(['is_child', 'is_parent']).raw().serialize(),
       )
     ).data;
     expect(data[0].is_child).toBe(false);
@@ -116,7 +112,7 @@ describe('runQuery', () => {
   });
 
   it('provides named parameters and converts types', async () => {
-    let transId = uuidv4();
+    const transId = uuidv4();
     await db.insertTransaction({
       id: transId,
       account: 'acct',
@@ -126,7 +122,7 @@ describe('runQuery', () => {
     });
 
     let { data } = await runQuery(
-      query('transactions')
+      q('transactions')
         .filter({ amount: { $lt: { $neg: ':amount' } } })
         .select()
         .serialize(),
@@ -136,7 +132,7 @@ describe('runQuery', () => {
 
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .filter({ date: { $transform: '$month', $eq: { $month: ':month' } } })
           .select('date')
           .serialize(),
@@ -147,7 +143,7 @@ describe('runQuery', () => {
 
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .filter({ date: { $transform: '$year', $eq: { $year: ':month' } } })
           .select('date')
           .serialize(),
@@ -158,7 +154,7 @@ describe('runQuery', () => {
 
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .filter({ cleared: ':cleared' })
           .select('date')
           .serialize(),
@@ -171,20 +167,20 @@ describe('runQuery', () => {
   it('allows null as a parameter', async () => {
     await db.insertCategoryGroup({ id: 'group', name: 'group' });
     await db.insertCategory({ id: 'cat', name: 'cat', cat_group: 'group' });
-    let transNoCat = await db.insertTransaction({
+    const transNoCat = await db.insertTransaction({
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
       category: null,
     });
-    let transCat = await db.insertTransaction({
+    const transCat = await db.insertTransaction({
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
       category: 'cat',
     });
 
-    let queryState = query('transactions')
+    const queryState = q('transactions')
       .filter({ category: ':category' })
       .select()
       .serialize();
@@ -197,7 +193,7 @@ describe('runQuery', () => {
   });
 
   it('parameters have the correct order', async () => {
-    let transId = uuidv4();
+    const transId = uuidv4();
     await db.insertTransaction({
       id: transId,
       account: 'acct',
@@ -205,8 +201,8 @@ describe('runQuery', () => {
       amount: -5001,
     });
 
-    let { data } = await runQuery(
-      query('transactions')
+    const { data } = await runQuery(
+      q('transactions')
         .filter({
           amount: { $lt: { $neg: ':amount' } },
           date: [{ $lte: ':date' }, { $gte: ':date' }],
@@ -221,12 +217,12 @@ describe('runQuery', () => {
   it('fetches all data required for $oneof', async () => {
     await insertTransactions();
 
-    let rows = await db.all('SELECT id FROM transactions WHERE amount < -50');
-    let ids = rows.slice(0, 3).map(row => row.id);
+    const rows = await db.all('SELECT id FROM transactions WHERE amount < -50');
+    const ids = rows.slice(0, 3).map(row => row.id);
     ids.sort();
 
-    let { data } = await runQuery(
-      query('transactions')
+    const { data } = await runQuery(
+      q('transactions')
         .filter({ id: { $oneof: repeat(ids, 1000) }, amount: { $lt: 50 } })
         .select('id')
         .raw()

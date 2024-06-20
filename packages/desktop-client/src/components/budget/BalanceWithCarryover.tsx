@@ -1,55 +1,87 @@
-import React, { type ComponentProps } from 'react';
+// @ts-strict-ignore
+import React, { type ComponentPropsWithoutRef } from 'react';
 
-import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import View from '../common/View';
-import CellValue from '../spreadsheet/CellValue';
-import useSheetValue from '../spreadsheet/useSheetValue';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { SvgArrowThinRight } from '../../icons/v1';
+import { useResponsive } from '../../ResponsiveProvider';
+import { type CSSProperties } from '../../style';
+import { View } from '../common/View';
+import { type Binding } from '../spreadsheet';
+import { CellValue } from '../spreadsheet/CellValue';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 
-import { makeAmountStyle } from './util';
+import { makeBalanceAmountStyle } from './util';
 
-type BalanceWithCarryoverProps = {
-  carryover: ComponentProps<typeof CellValue>['binding'];
-  balance: ComponentProps<typeof CellValue>['binding'];
+type BalanceWithCarryoverProps = Omit<
+  ComponentPropsWithoutRef<typeof CellValue>,
+  'binding'
+> & {
+  carryover: Binding;
+  balance: Binding;
+  goal?: Binding;
+  budgeted?: Binding;
   disabled?: boolean;
+  carryoverStyle?: CSSProperties;
 };
-export default function BalanceWithCarryover({
+export function BalanceWithCarryover({
   carryover,
   balance,
+  goal,
+  budgeted,
   disabled,
+  carryoverStyle,
+  ...props
 }: BalanceWithCarryoverProps) {
-  let carryoverValue = useSheetValue(carryover);
-  let balanceValue = useSheetValue(balance);
+  const carryoverValue = useSheetValue(carryover);
+  const balanceValue = useSheetValue(balance);
+  const goalValue = useSheetValue(goal);
+  const budgetedValue = useSheetValue(budgeted);
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
+  const { isNarrowWidth } = useResponsive();
 
   return (
     <>
       <CellValue
+        {...props}
         binding={balance}
         type="financial"
-        getStyle={makeAmountStyle}
+        getStyle={value =>
+          makeBalanceAmountStyle(
+            value,
+            isGoalTemplatesEnabled ? goalValue : null,
+            budgetedValue,
+          )
+        }
         style={{
           textAlign: 'right',
           ...(!disabled && {
             cursor: 'pointer',
-            ':hover': { textDecoration: 'underline' },
           }),
+          ...props.style,
         }}
       />
-      {carryoverValue === true && (
+      {carryoverValue && (
         <View
           style={{
             alignSelf: 'center',
             marginLeft: 2,
             position: 'absolute',
-            right: -4,
+            right: isNarrowWidth ? '-8px' : '-4px',
             top: 0,
             bottom: 0,
             justifyContent: 'center',
+            ...carryoverStyle,
           }}
         >
-          <ArrowThinRight
-            width={7}
-            height={7}
-            style={makeAmountStyle(balanceValue)}
+          <SvgArrowThinRight
+            width={carryoverStyle?.width || 7}
+            height={carryoverStyle?.height || 7}
+            style={makeBalanceAmountStyle(
+              balanceValue,
+              goalValue,
+              budgetedValue,
+            )}
           />
         </View>
       )}

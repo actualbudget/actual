@@ -61,6 +61,27 @@ export class RulesPage {
         this.page.getByTestId('action-list'),
       );
     }
+
+    if (data.splits) {
+      if (data.splits.beforeSplitActions) {
+        await this._fillEditorFields(
+          data.splits.beforeSplitActions,
+          this.page.getByTestId('action-list'),
+        );
+      }
+
+      if (data.splits.splitActions) {
+        let idx = data.splits?.beforeSplitActions.length ?? 0;
+        for (const splitActions of data.splits.splitActions) {
+          await this.page.getByTestId('add-split-transactions').click();
+          await this._fillEditorFields(
+            splitActions,
+            this.page.getByTestId('action-list').nth(idx),
+          );
+          idx++;
+        }
+      }
+    }
   }
 
   async _fillEditorFields(data, rootElement) {

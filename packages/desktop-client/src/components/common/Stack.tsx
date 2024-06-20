@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   Children,
   type ComponentProps,
@@ -9,24 +10,27 @@ import React, {
 
 import { type CSSProperties } from '../../style';
 
-import Text from './Text';
-import View from './View';
+import { Text } from './Text';
+import { View } from './View';
 
 function getChildren(key, children) {
-  return Children.toArray(children).reduce((list, child) => {
-    if (child) {
-      if (
-        typeof child === 'object' &&
-        'type' in child &&
-        child.type === Fragment
-      ) {
-        return list.concat(getChildren(child.key, child.props.children));
+  return Children.toArray(children).reduce(
+    (list, child) => {
+      if (child) {
+        if (
+          typeof child === 'object' &&
+          'type' in child &&
+          child.type === Fragment
+        ) {
+          return list.concat(getChildren(child.key, child.props.children));
+        }
+        list.push({ key: key + child['key'], child });
+        return list;
       }
-      list.push({ key: key + child['key'], child });
       return list;
-    }
-    return list;
-  }, [] as Array<{ key: string; child: ReactNode }>);
+    },
+    [] as Array<{ key: string; child: ReactNode }>,
+  );
 }
 
 type StackProps = ComponentProps<typeof View> & {
@@ -36,7 +40,7 @@ type StackProps = ComponentProps<typeof View> & {
   spacing?: number;
   debug?: boolean;
 };
-const Stack = forwardRef<HTMLDivElement, StackProps>(
+export const Stack = forwardRef<HTMLDivElement, StackProps>(
   (
     {
       direction = 'column',
@@ -66,7 +70,7 @@ const Stack = forwardRef<HTMLDivElement, StackProps>(
         {...props}
       >
         {validChildren.map(({ key, child }, index) => {
-          let isLastChild = validChildren.length === index + 1;
+          const isLastChild = validChildren.length === index + 1;
 
           let marginProp;
           if (isHorizontal) {
@@ -92,4 +96,4 @@ const Stack = forwardRef<HTMLDivElement, StackProps>(
   },
 );
 
-export default Stack;
+Stack.displayName = 'Stack';

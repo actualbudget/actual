@@ -1,7 +1,7 @@
+// @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
 import type {
-  AccountSyncFailuresAction,
   AccountSyncStatusAction,
   SetAccountsSyncingAction,
 } from '../state-types/account';
@@ -16,11 +16,11 @@ import { getPayees, getAccounts } from './queries';
 import type { Dispatch, GetState } from './types';
 
 export function setAccountsSyncing(
-  name: SetAccountsSyncingAction['name'],
+  ids: SetAccountsSyncingAction['ids'],
 ): SetAccountsSyncingAction {
   return {
     type: constants.SET_ACCOUNTS_SYNCING,
-    name,
+    ids,
   };
 }
 
@@ -46,14 +46,6 @@ export function markAccountSuccess(
     failed: false,
   };
 }
-export function setFailedAccounts(
-  syncErrors: AccountSyncFailuresAction['syncErrors'],
-): AccountSyncFailuresAction {
-  return {
-    type: constants.ACCOUNT_SYNC_FAILURES,
-    syncErrors,
-  };
-}
 
 export function unlinkAccount(id: string) {
   return async (dispatch: Dispatch) => {
@@ -63,128 +55,114 @@ export function unlinkAccount(id: string) {
   };
 }
 
-export function linkAccount(requisitionId, account, upgradingId) {
+export function linkAccount(requisitionId, account, upgradingId, offBudget) {
   return async (dispatch: Dispatch) => {
     await send('gocardless-accounts-link', {
       requisitionId,
       account,
       upgradingId,
+      offBudget,
     });
     await dispatch(getPayees());
     await dispatch(getAccounts());
   };
 }
 
-// TODO: type correctly or remove (unused)
-export function connectAccounts(
-  institution,
-  publicToken,
-  accountIds,
-  offbudgetIds,
-) {
+export function linkAccountSimpleFin(externalAccount, upgradingId, offBudget) {
   return async (dispatch: Dispatch) => {
-    let ids = await send('accounts-connect', {
-      institution,
-      publicToken,
-      accountIds,
-      offbudgetIds,
+    await send('simplefin-accounts-link', {
+      externalAccount,
+      upgradingId,
+      offBudget,
     });
     await dispatch(getPayees());
     await dispatch(getAccounts());
-    return ids;
   };
 }
 
-// TODO: type correctly or remove (unused)
-export function connectGoCardlessAccounts(
-  institution,
-  publicToken,
-  accountIds,
-  offbudgetIds,
-) {
-  return async (dispatch: Dispatch) => {
-    let ids = await send('gocardless-accounts-connect', {
-      institution,
-      publicToken,
-      accountIds,
-      offbudgetIds,
-    });
-    await dispatch(getPayees());
-    await dispatch(getAccounts());
-    return ids;
-  };
-}
-
-export function syncAccounts(id: string) {
+export function syncAccounts(id?: string) {
   return async (dispatch: Dispatch, getState: GetState) => {
-    if (getState().account.accountsSyncing) {
+    // Disallow two parallel sync operations
+    if (getState().account.accountsSyncing.length > 0) {
       return false;
     }
 
-    if (id) {
-      let account = getState().queries.accounts.find(a => a.id === id);
-      dispatch(setAccountsSyncing(account.name));
-    } else {
-      dispatch(setAccountsSyncing('__all'));
-    }
+    // Build an array of IDs for accounts to sync.. if no `id` provided
+    // then we assume that all accounts should be synced
+    const accountIdsToSync = id
+      ? [id]
+      : getState()
+          .queries.accounts.filter(
+            ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
+          )
+          .map(({ id }) => id);
 
-    const { errors, newTransactions, matchedTransactions, updatedAccounts } =
-      await send('gocardless-accounts-sync', { id });
-    dispatch(setAccountsSyncing(null));
+    dispatch(setAccountsSyncing(accountIdsToSync));
 
-    if (id) {
-      let error = errors.find(error => error.accountId === id);
+    let isSyncSuccess = false;
 
+    // Loop through the accounts and perform sync operation.. one by one
+    for (let idx = 0; idx < accountIdsToSync.length; idx++) {
+      const accountId = accountIdsToSync[idx];
+
+      // Perform sync operation
+      const { errors, newTransactions, matchedTransactions, updatedAccounts } =
+        await send('accounts-bank-sync', {
+          id: accountId,
+        });
+
+      // Mark the account as failed or succeeded (depending on sync output)
+      const [error] = errors;
       if (error) {
         // We only want to mark the account as having problem if it
         // was a real syncing error.
         if (error.type === 'SyncError') {
-          dispatch(markAccountFailed(id, error.category, error.code));
+          dispatch(markAccountFailed(accountId, error.category, error.code));
         }
       } else {
-        dispatch(markAccountSuccess(id));
+        dispatch(markAccountSuccess(accountId));
       }
-    } else {
-      dispatch(
-        setFailedAccounts(
-          errors
-            .filter(error => error.type === 'SyncError')
-            .map(error => ({
-              id: error.accountId,
-              type: error.category,
-              code: error.code,
-            })),
-        ),
-      );
+
+      // Dispatch errors (if any)
+      errors.forEach(error => {
+        if (error.type === 'SyncError') {
+          dispatch(
+            addNotification({
+              type: 'error',
+              message: error.message,
+            }),
+          );
+        } else {
+          dispatch(
+            addNotification({
+              type: 'error',
+              message: error.message,
+              internal: error.internal,
+            }),
+          );
+        }
+      });
+
+      // Set new transactions
+      dispatch({
+        type: constants.SET_NEW_TRANSACTIONS,
+        newTransactions,
+        matchedTransactions,
+        updatedAccounts,
+      });
+
+      // Dispatch the ids for the accounts that are yet to be synced
+      dispatch(setAccountsSyncing(accountIdsToSync.slice(idx + 1)));
+
+      if (newTransactions.length > 0 || matchedTransactions.length > 0) {
+        isSyncSuccess = true;
+      }
     }
 
-    errors.forEach(error => {
-      if (error.type === 'SyncError') {
-        dispatch(
-          addNotification({
-            type: 'error',
-            message: error.message,
-          }),
-        );
-      } else {
-        dispatch(
-          addNotification({
-            type: 'error',
-            message: error.message,
-            internal: error.internal,
-          }),
-        );
-      }
-    });
-
-    dispatch({
-      type: constants.SET_NEW_TRANSACTIONS,
-      newTransactions,
-      matchedTransactions,
-      updatedAccounts,
-    });
-
-    return newTransactions.length > 0 || matchedTransactions.length > 0;
+    // Rest the sync state back to empty (fallback in case something breaks
+    // in the logic above)
+    dispatch(setAccountsSyncing([]));
+    return isSyncSuccess;
   };
 }
 
@@ -199,7 +177,7 @@ export function setLastTransaction(
 }
 
 export function parseTransactions(filepath, options) {
-  return async (dispatch: Dispatch) => {
+  return async () => {
     return await send('transactions-parse-file', {
       filepath,
       options,
@@ -207,15 +185,34 @@ export function parseTransactions(filepath, options) {
   };
 }
 
-export function importTransactions(id, transactions) {
-  return async (dispatch: Dispatch) => {
-    let {
+export function importTransactions(
+  id: string,
+  transactions,
+  reconcile = true,
+  detectInstallments = false,
+  updateDetectInstallmentDate = false,
+  ignoreAlreadyDetectedInstallments = false,
+) {
+  return async (dispatch: Dispatch): Promise<boolean> => {
+    if (!reconcile) {
+      await send('api/transactions-add', {
+        accountId: id,
+        transactions,
+      });
+
+      return true;
+    }
+
+    const {
       errors = [],
       added,
       updated,
     } = await send('transactions-import', {
       accountId: id,
       transactions,
+      detectInstallments,
+      updateDetectInstallmentDate,
+      ignoreAlreadyDetectedInstallments,
     });
 
     errors.forEach(error => {
@@ -248,6 +245,14 @@ export function updateNewTransactions(changedId): UpdateNewTransactionsAction {
 export function markAccountRead(accountId): MarkAccountReadAction {
   return {
     type: constants.MARK_ACCOUNT_READ,
-    accountId: accountId,
+    accountId,
+  };
+}
+
+export function moveAccount(id, targetId) {
+  return async (dispatch: Dispatch) => {
+    await send('account-move', { id, targetId });
+    dispatch(getAccounts());
+    dispatch(getPayees());
   };
 }

@@ -1,12 +1,12 @@
 import React, { useState, type ReactNode } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation } from 'react-router-dom';
 
 import { css, media } from 'glamor';
 
 import { type CSSProperties, theme } from '../../style';
-import tokens from '../../tokens';
-import Button from '../common/Button';
-import View from '../common/View';
+import { tokens } from '../../tokens';
+import { Link } from '../common/Link';
+import { View } from '../common/View';
 
 type SettingProps = {
   primaryAction?: ReactNode;
@@ -24,7 +24,7 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
           alignItems: 'flex-start',
           padding: 15,
           borderRadius: 4,
-          border: '1px solid ' + theme.altPillBorder,
+          border: '1px solid ' + theme.pillBorderDark,
           width: '100%',
         },
         style,
@@ -33,7 +33,6 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
       <View
         style={{
           marginBottom: primaryAction ? 10 : 0,
-          maxWidth: 500,
           lineHeight: 1.5,
           gap: 10,
         }}
@@ -50,8 +49,8 @@ type AdvancedToggleProps = {
 };
 
 export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
-  let location = useLocation();
-  let [expanded, setExpanded] = useState(location.hash === '#advanced');
+  const location = useLocation();
+  const [expanded, setExpanded] = useState(location.hash === '#advanced');
 
   return expanded ? (
     <View
@@ -77,10 +76,10 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       {children}
     </View>
   ) : (
-    <Button
-      id="advanced"
-      type="link"
+    <Link
+      variant="text"
       onClick={() => setExpanded(true)}
+      data-testid="advanced-settings"
       style={{
         flexShrink: 0,
         alignSelf: 'flex-start',
@@ -89,6 +88,6 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       }}
     >
       Show advanced settings
-    </Button>
+    </Link>
   );
 };

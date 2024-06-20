@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 import fc from 'fast-check';
 
@@ -19,21 +20,21 @@ afterEach(() => {
   unlisten();
 });
 
-let tableSchema = schema.transactions;
-let fields = Object.keys(tableSchema);
+const tableSchema = schema.transactions;
+const fields = Object.keys(tableSchema);
 
 function toInternalField(publicField) {
   return schemaConfig.views.transactions.fields[publicField];
 }
 
-let messageArb: fc.Arbitrary<Message> = fc
+const messageArb: fc.Arbitrary<Message> = fc
   .oneof(...fields.filter(f => f !== 'id').map(field => fc.constant(field)))
   .chain(field => {
-    let value = arbs
+    const value = arbs
       .typeArbitrary(tableSchema[field])
       .map(v => convertInputType(v, tableSchema[field].type));
 
-    let timestamp = fc
+    const timestamp = fc
       .date({
         min: new Date('2020-01-01T00:00:00.000Z'),
         max: new Date('2020-05-01T00:00:00.000Z'),
@@ -44,7 +45,7 @@ let messageArb: fc.Arbitrary<Message> = fc
       .map(Timestamp.parse);
 
     return fc.record<Message>({
-      timestamp: timestamp,
+      timestamp,
       dataset: fc.constant('transactions'),
       column: fc.constant(toInternalField(field) || field),
       row: fc.oneof(
@@ -53,17 +54,17 @@ let messageArb: fc.Arbitrary<Message> = fc
           return fc.integer({ min: 0, max: 5 }).map(j => `id${i}/child${j}`);
         }),
       ),
-      value: value,
+      value,
     });
   });
 
 describe('sync migrations', () => {
   it('should set the parent_id', async () => {
-    let tracer = execTracer();
+    const tracer = execTracer();
     tracer.start();
 
-    let cleanup = addSyncListener((oldValues, newValues) => {
-      let transactionsMap = newValues.get('transactions') as Map<
+    const cleanup = addSyncListener((oldValues, newValues) => {
+      const transactionsMap = newValues.get('transactions') as Map<
         string,
         unknown
       >;
@@ -78,7 +79,7 @@ describe('sync migrations', () => {
     tracer.expectNow('applied', ['trans1/child1']);
     await tracer.expectWait('applied', ['trans1/child1']);
 
-    let transactions = db.runQuery('SELECT * FROM transactions', [], true);
+    const transactions = db.runQuery('SELECT * FROM transactions', [], true);
     expect(transactions.length).toBe(1);
     expect(transactions[0].parent_id).toBe('trans1');
 
@@ -90,10 +91,10 @@ describe('sync migrations', () => {
     await fc.assert(
       fc
         .asyncProperty(fc.array(messageArb, { maxLength: 100 }), async msgs => {
-          let tracer = execTracer();
+          const tracer = execTracer();
           tracer.start();
-          let cleanup = addSyncListener((oldValues, newValues) => {
-            let ts = newValues.get('transactions') as Map<
+          const cleanup = addSyncListener((oldValues, newValues) => {
+            const ts = newValues.get('transactions') as Map<
               string,
               { isChild: number; parent_id: string | null; id: string }
             >;
@@ -112,13 +113,13 @@ describe('sync migrations', () => {
           await sendMessages(msgs);
           await tracer.expect('applied');
 
-          let transactions = await db.all('SELECT * FROM transactions', []);
-          for (let trans of transactions) {
-            let transMsgs = msgs
+          const transactions = await db.all('SELECT * FROM transactions', []);
+          for (const trans of transactions) {
+            const transMsgs = msgs
               .filter(msg => msg.row === trans.id)
               .sort((m1, m2) => {
-                let t1 = m1.timestamp.toString();
-                let t2 = m2.timestamp.toString();
+                const t1 = m1.timestamp.toString();
+                const t2 = m2.timestamp.toString();
                 if (t1 < t2) {
                   return 1;
                 } else if (t1 > t2) {
@@ -126,7 +127,7 @@ describe('sync migrations', () => {
                 }
                 return 0;
               });
-            let msg = transMsgs.find(m => m.column === 'parent_id');
+            const msg = transMsgs.find(m => m.column === 'parent_id');
 
             if (
               trans.isChild === 1 &&
@@ -136,7 +137,7 @@ describe('sync migrations', () => {
               // This is a child transaction didn't have a `parent_id`
               // set in the messages. It should have gotten set from
               // the `id`
-              let [parentId] = trans.id.split('/');
+              const [parentId] = trans.id.split('/');
               expect(parentId).not.toBe(null);
               expect(trans.parent_id).toBe(parentId);
             } else if (msg) {

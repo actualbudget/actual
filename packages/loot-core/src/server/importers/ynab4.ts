@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // This is a special usage of the API because this package is embedded
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
@@ -68,7 +69,7 @@ async function importCategories(
 
           // This can't be done in parallel because sort order depends
           // on insertion order
-          for (let category of subCategories) {
+          for (const category of subCategories) {
             if (!category.isTombstone) {
               const id = await actual.createCategory({
                 name: category.name,
@@ -90,9 +91,9 @@ async function importPayees(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
 ) {
-  for (let payee of data.payees) {
+  for (const payee of data.payees) {
     if (!payee.isTombstone) {
-      let id = await actual.createPayee({
+      const id = await actual.createPayee({
         name: payee.name,
         category: entityIdMap.get(payee.autoFillCategoryId) || null,
         transfer_acct: entityIdMap.get(payee.targetAccountId) || null,
@@ -129,7 +130,7 @@ async function importTransactions(
   }
 
   function isOffBudget(acctId: string) {
-    let acct = accounts.find(acct => acct.id === acctId);
+    const acct = accounts.find(acct => acct.id === acctId);
     if (!acct) {
       throw new Error('Could not find account for transaction when importing');
     }
@@ -138,32 +139,32 @@ async function importTransactions(
 
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
-  for (let transaction of data.transactions) {
+  for (const transaction of data.transactions) {
     entityIdMap.set(transaction.entityId, uuidv4());
 
     if (transaction.subTransactions) {
-      for (let subTransaction of transaction.subTransactions) {
+      for (const subTransaction of transaction.subTransactions) {
         entityIdMap.set(subTransaction.entityId, uuidv4());
       }
     }
   }
 
-  let transactionsGrouped = groupBy(data.transactions, 'accountId');
+  const transactionsGrouped = groupBy(data.transactions, 'accountId');
 
   await Promise.all(
     [...transactionsGrouped.keys()].map(async accountId => {
-      let transactions = transactionsGrouped.get(accountId);
+      const transactions = transactionsGrouped.get(accountId);
 
-      let toImport = transactions
+      const toImport = transactions
         .map(transaction => {
           if (transaction.isTombstone) {
             return null;
           }
 
-          let id = entityIdMap.get(transaction.entityId);
+          const id = entityIdMap.get(transaction.entityId);
 
           function transferProperties(t: YNAB4.SubTransaction) {
-            let transferId = entityIdMap.get(t.transferTransactionId) || null;
+            const transferId = entityIdMap.get(t.transferTransactionId) || null;
 
             let payee = null;
             let imported_payee = null;
@@ -181,11 +182,11 @@ async function importTransactions(
             return {
               transfer_id: transferId,
               payee,
-              imported_payee: imported_payee,
+              imported_payee,
             };
           }
 
-          let newTransaction = {
+          const newTransaction = {
             id,
             amount: amountToInteger(transaction.amount),
             category: isOffBudget(entityIdMap.get(accountId))
@@ -193,12 +194,15 @@ async function importTransactions(
               : getCategory(transaction.categoryId),
             date: transaction.date,
             notes: transaction.memo || null,
-            cleared: transaction.cleared === 'Cleared',
+            cleared:
+              transaction.cleared === 'Cleared' ||
+              transaction.cleared === 'Reconciled',
+            reconciled: transaction.cleared === 'Reconciled',
             ...transferProperties(transaction),
 
             subtransactions:
               transaction.subTransactions &&
-              transaction.subTransactions.map((t, i) => {
+              transaction.subTransactions.map(t => {
                 return {
                   id: entityIdMap.get(t.entityId),
                   amount: amountToInteger(t.amount),
@@ -213,7 +217,9 @@ async function importTransactions(
         })
         .filter(x => x);
 
-      await actual.addTransactions(entityIdMap.get(accountId), toImport);
+      await actual.addTransactions(entityIdMap.get(accountId), toImport, {
+        learnCategories: true,
+      });
     }),
   );
 }
@@ -252,20 +258,20 @@ async function importBudgets(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
 ) {
-  let budgets = sortByKey(data.monthlyBudgets, 'month');
+  const budgets = sortByKey(data.monthlyBudgets, 'month');
 
   await actual.batchBudgetUpdates(async () => {
-    for (let budget of budgets) {
-      let filled = fillInBudgets(
+    for (const budget of budgets) {
+      const filled = fillInBudgets(
         data,
         budget.monthlySubCategoryBudgets.filter(b => !b.isTombstone),
       );
 
       await Promise.all(
         filled.map(async catBudget => {
-          let amount = amountToInteger(catBudget.budgeted);
-          let catId = entityIdMap.get(catBudget.categoryId);
-          let month = monthUtils.monthFromDate(budget.month);
+          const amount = amountToInteger(catBudget.budgeted);
+          const catId = entityIdMap.get(catBudget.categoryId);
+          const month = monthUtils.monthFromDate(budget.month);
           if (!catId) {
             return;
           }
@@ -343,7 +349,7 @@ export async function doImport(data: YNAB4.YFull) {
   console.log('Setting up...');
 }
 
-export function getBudgetName(filepath, _data) {
+export function getBudgetName(filepath) {
   let unixFilepath = normalizePathSep(filepath);
 
   if (!/\.zip/.test(unixFilepath)) {
@@ -355,7 +361,7 @@ export function getBudgetName(filepath, _data) {
   // Most budgets are named like "Budget~51938D82.ynab4" but sometimes
   // they are only "Budget.ynab4". We only want to grab the name
   // before the ~ if it exists.
-  let m = unixFilepath.match(/([^/~]+)[^/]*$/);
+  const m = unixFilepath.match(/([^/~]+)[^/]*$/);
   if (!m) {
     return null;
   }
@@ -363,7 +369,7 @@ export function getBudgetName(filepath, _data) {
 }
 
 function getFile(entries: AdmZip.IZipEntry[], path: string) {
-  let files = entries.filter(e => e.entryName === path);
+  const files = entries.filter(e => e.entryName === path);
   if (files.length === 0) {
     throw new Error('Could not find file: ' + path);
   }
@@ -374,29 +380,32 @@ function getFile(entries: AdmZip.IZipEntry[], path: string) {
 }
 
 function join(...paths: string[]): string {
-  return paths.slice(1).reduce((full, path) => {
-    return full + '/' + path.replace(/^\//, '');
-  }, paths[0].replace(/\/$/, ''));
+  return paths.slice(1).reduce(
+    (full, path) => {
+      return full + '/' + path.replace(/^\//, '');
+    },
+    paths[0].replace(/\/$/, ''),
+  );
 }
 
 export function parseFile(buffer: Buffer): YNAB4.YFull {
-  let zipped = new AdmZip(buffer);
-  let entries = zipped.getEntries();
+  const zipped = new AdmZip(buffer);
+  const entries = zipped.getEntries();
 
   let root = '';
-  let dirMatch = entries[0].entryName.match(/([^/]*\.ynab4)/);
+  const dirMatch = entries[0].entryName.match(/([^/]*\.ynab4)/);
   if (dirMatch) {
     root = dirMatch[1] + '/';
   }
 
-  let metaStr = zipped.readFile(getFile(entries, root + 'Budget.ymeta'));
-  let meta = JSON.parse(metaStr.toString('utf8'));
-  let budgetPath = join(root, meta.relativeDataFolderName);
+  const metaStr = zipped.readFile(getFile(entries, root + 'Budget.ymeta'));
+  const meta = JSON.parse(metaStr.toString('utf8'));
+  const budgetPath = join(root, meta.relativeDataFolderName);
 
-  let deviceFiles = entries.filter(e =>
+  const deviceFiles = entries.filter(e =>
     e.entryName.startsWith(join(budgetPath, 'devices')),
   );
-  let deviceGUID = findLatestDevice(zipped, deviceFiles);
+  const deviceGUID = findLatestDevice(zipped, deviceFiles);
 
   const yfullPath = join(budgetPath, deviceGUID, 'Budget.yfull');
   let contents;

@@ -1,3 +1,0 @@
-sx_inst.o: sx_inst.cxx ../config.h
-
-../config.h:

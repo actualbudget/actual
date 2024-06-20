@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import { handlers } from '../main';
 
-import importActual from './actual';
+import { importActual } from './actual';
 import * as YNAB4 from './ynab4';
 import * as YNAB5 from './ynab5';
 
@@ -12,7 +13,7 @@ type Importer = {
   doImport(data: unknown): Promise<void>;
 };
 
-let importers: Record<Exclude<ImportableBudgetType, 'actual'>, Importer> = {
+const importers: Record<Exclude<ImportableBudgetType, 'actual'>, Importer> = {
   ynab4: YNAB4,
   ynab5: YNAB5,
 };
@@ -25,7 +26,7 @@ export async function handleBudgetImport(
   if (type === 'actual') {
     return importActual(filepath, buffer);
   }
-  let importer = importers[type];
+  const importer = importers[type];
   try {
     let data;
     let budgetName: string;

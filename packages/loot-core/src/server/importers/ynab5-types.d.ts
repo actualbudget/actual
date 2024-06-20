@@ -25,6 +25,7 @@ export namespace YNAB5 {
     id: string;
     name: string;
     deleted: boolean;
+    transfer_acct?: string;
   }
 
   interface CategoryGroup {
@@ -61,6 +62,8 @@ export namespace YNAB5 {
     category_id: string;
     memo: string;
     amount: number;
+    transfer_account_id: string;
+    payee_id: string;
   }
 
   interface Month {

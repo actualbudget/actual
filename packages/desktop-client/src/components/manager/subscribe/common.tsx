@@ -1,8 +1,10 @@
+// @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import { useSetServerURL } from '../../ServerContext';
 
@@ -15,30 +17,33 @@ import { useSetServerURL } from '../../ServerContext';
 // password. Both pages will redirect to the other depending on state;
 // they will also potentially redirect to other pages which do *not*
 // do any checks.
-export function useBootstrapped() {
-  let [checked, setChecked] = useState(false);
-  let navigate = useNavigate();
-  let location = useLocation();
-  let setServerURL = useSetServerURL();
+export function useBootstrapped(redirect = true) {
+  const [checked, setChecked] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const setServerURL = useSetServerURL();
 
   useEffect(() => {
     async function run() {
-      let ensure = url => {
+      const ensure = url => {
         if (location.pathname !== url) {
-          navigate(url);
+          if (redirect) {
+            navigate(url);
+          }
         } else {
           setChecked(true);
         }
       };
 
-      let url = await send('get-server-url');
-      let bootstrapped = await send('get-did-bootstrap');
+      const url = await send('get-server-url');
+      const bootstrapped = await send('get-did-bootstrap');
       if (url == null && !bootstrapped) {
         // A server hasn't been specified yet
-        let serverURL = window.location.origin;
-        let result = await send('subscribe-needs-bootstrap', {
+        const serverURL = window.location.origin;
+        const result = await send('subscribe-needs-bootstrap', {
           url: serverURL,
         });
+
         if ('error' in result || !result.hasServer) {
           console.log('error' in result && result.error);
           navigate('/config-server');
@@ -48,16 +53,16 @@ export function useBootstrapped() {
         await setServerURL(serverURL, { validate: false });
 
         if (result.bootstrapped) {
-          ensure('/login');
+          ensure(`/login/${result.loginMethod}`);
         } else {
           ensure('/bootstrap');
         }
       } else {
-        let result = await send('subscribe-needs-bootstrap');
+        const result = await send('subscribe-needs-bootstrap');
         if ('error' in result) {
           navigate('/error', { state: { error: result.error } });
         } else if (result.bootstrapped) {
-          ensure('/login');
+          ensure(`/login/${result.loginMethod}`);
         } else {
           ensure('/bootstrap');
         }

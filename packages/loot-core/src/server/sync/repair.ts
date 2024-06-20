@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { serializeClock, getClock, Timestamp, merkle } from '@actual-app/crdt';
 
 import * as db from '../db';
@@ -6,7 +7,7 @@ export function rebuildMerkleHash(): {
   numMessages: number;
   trie: merkle.TrieNode;
 } {
-  let rows: { timestamp: string }[] = db.runQuery(
+  const rows: { timestamp: string }[] = db.runQuery(
     'SELECT timestamp FROM messages_crdt',
     [],
     true,
@@ -19,13 +20,13 @@ export function rebuildMerkleHash(): {
 
   return {
     numMessages: rows.length,
-    trie: trie,
+    trie,
   };
 }
 
-export default async function repairSync(): Promise<void> {
-  let rebuilt = rebuildMerkleHash();
-  let clock = getClock();
+export async function repairSync(): Promise<void> {
+  const rebuilt = rebuildMerkleHash();
+  const clock = getClock();
 
   // Save it locally
   clock.merkle = rebuilt.trie;

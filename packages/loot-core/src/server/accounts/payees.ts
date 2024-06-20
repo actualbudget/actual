@@ -1,10 +1,11 @@
+// @ts-strict-ignore
 import * as db from '../db';
 
 /* eslint-disable import/no-unused-modules */
 export async function createPayee(description) {
   // Check to make sure no payee already exists with exactly the same
   // name
-  let row = await db.first(
+  const row = await db.first(
     `SELECT id FROM payees WHERE UNICODE_LOWER(name) = ? AND tombstone = 0`,
     [description.toLowerCase()],
   );
@@ -29,7 +30,7 @@ export async function getStartingBalancePayee() {
     );
   }
 
-  let id = await createPayee('Starting Balance');
+  const id = await createPayee('Starting Balance');
   return {
     id,
     category: category ? category.id : null,

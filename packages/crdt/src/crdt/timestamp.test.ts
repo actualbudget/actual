@@ -28,7 +28,7 @@ describe('Timestamp', function () {
 
   describe('parsing', function () {
     it('should not parse', function () {
-      let invalidInputs = [
+      const invalidInputs = [
         null,
         undefined,
         {},
@@ -44,19 +44,19 @@ describe('Timestamp', function () {
         '9999-12-31T23:59:59.999Z-10000-FFFFFFFFFFFFFFFF',
         '9999-12-31T23:59:59.999Z-FFFF-10000000000000000',
       ];
-      for (let invalidInput of invalidInputs) {
+      for (const invalidInput of invalidInputs) {
         expect(Timestamp.parse(invalidInput as string)).toBe(null);
       }
     });
 
     it('should parse', function () {
-      let validInputs = [
+      const validInputs = [
         '1970-01-01T00:00:00.000Z-0000-0000000000000000',
         '2015-04-24T22:23:42.123Z-1000-0123456789ABCDEF',
         '9999-12-31T23:59:59.999Z-FFFF-FFFFFFFFFFFFFFFF',
       ];
-      for (let validInput of validInputs) {
-        let parsed = Timestamp.parse(validInput)!;
+      for (const validInput of validInputs) {
+        const parsed = Timestamp.parse(validInput)!;
         expect(typeof parsed).toBe('object');
         expect(parsed.millis() >= 0).toBeTruthy();
         expect(parsed.millis() < 253402300800000).toBeTruthy();

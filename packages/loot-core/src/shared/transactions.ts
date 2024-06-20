@@ -1,18 +1,32 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import {
+  type TransactionEntity,
+  type NewTransactionEntity,
+} from '../types/models';
+
 import { last, diffItems, applyChanges } from './util';
 
-export function isPreviewId(id) {
+interface TransactionEntityWithError extends TransactionEntity {
+  error: ReturnType<typeof SplitTransactionError> | null;
+  _deleted?: boolean;
+}
+
+export function isTemporaryId(id: string) {
+  return id.indexOf('temp') !== -1;
+}
+
+export function isPreviewId(id: string) {
   return id.indexOf('preview/') !== -1;
 }
 
 // The amount might be null when adding a new transaction
-function num(n) {
+function num(n: number | null | undefined) {
   return typeof n === 'number' ? n : 0;
 }
 
-function SplitTransactionError(total, parent) {
-  let difference = num(parent.amount) - total;
+function SplitTransactionError(total: number, parent: TransactionEntity) {
+  const difference = num(parent.amount) - total;
 
   return {
     type: 'SplitTransactionError',
@@ -21,17 +35,27 @@ function SplitTransactionError(total, parent) {
   };
 }
 
-export function makeChild(parent, data) {
-  let prefix = parent.id === 'temp' ? 'temp' : '';
+type GenericTransactionEntity =
+  | NewTransactionEntity
+  | TransactionEntity
+  | TransactionEntityWithError;
+
+export function makeChild<T extends GenericTransactionEntity>(
+  parent: T,
+  data: object = {},
+) {
+  const prefix = parent.id === 'temp' ? 'temp' : '';
 
   return {
     amount: 0,
     ...data,
-    payee: data.payee || parent.payee,
-    id: data.id ? data.id : prefix + uuidv4(),
+    category: 'category' in data ? data.category : parent.category,
+    payee: 'payee' in data ? data.payee : parent.payee,
+    id: 'id' in data ? data.id : prefix + uuidv4(),
     account: parent.account,
     date: parent.date,
     cleared: parent.cleared != null ? parent.cleared : null,
+    reconciled: 'reconciled' in data ? data.reconciled : parent.reconciled,
     starting_balance_flag:
       parent.starting_balance_flag != null
         ? parent.starting_balance_flag
@@ -39,13 +63,13 @@ export function makeChild(parent, data) {
     is_child: true,
     parent_id: parent.id,
     error: null,
-  };
+  } as unknown as T;
 }
 
-export function recalculateSplit(trans) {
+export function recalculateSplit(trans: TransactionEntity) {
   // Calculate the new total of split transactions and make sure
   // that it equals the parent amount
-  const total = trans.subtransactions.reduce(
+  const total = (trans.subtransactions || []).reduce(
     (acc, t) => acc + num(t.amount),
     0,
   );
@@ -53,15 +77,15 @@ export function recalculateSplit(trans) {
     ...trans,
     error:
       total === num(trans.amount) ? null : SplitTransactionError(total, trans),
-  };
+  } as TransactionEntityWithError;
 }
 
-function findParentIndex(transactions, idx) {
+function findParentIndex(transactions: TransactionEntity[], idx: number) {
   // This relies on transactions being sorted in a way where parents
   // are always before children, which is enforced in the db layer.
   // Walk backwards and find the last parent;
   while (idx >= 0) {
-    let trans = transactions[idx];
+    const trans = transactions[idx];
     if (trans.is_parent) {
       return idx;
     }
@@ -70,8 +94,8 @@ function findParentIndex(transactions, idx) {
   return null;
 }
 
-function getSplit(transactions, parentIndex) {
-  let split = [transactions[parentIndex]];
+function getSplit(transactions: TransactionEntity[], parentIndex: number) {
+  const split = [transactions[parentIndex]];
   let curr = parentIndex + 1;
   while (curr < transactions.length && transactions[curr].is_child) {
     split.push(transactions[curr]);
@@ -80,62 +104,75 @@ function getSplit(transactions, parentIndex) {
   return split;
 }
 
-export function ungroupTransactions(transactions) {
-  let x = transactions.reduce((list, parent) => {
-    let { subtransactions, ...trans } = parent;
-    subtransactions = subtransactions || [];
+export function ungroupTransactions(transactions: TransactionEntity[]) {
+  return transactions.reduce<TransactionEntity[]>((list, parent) => {
+    const { subtransactions, ...trans } = parent;
+    const _subtransactions = subtransactions || [];
 
     list.push(trans);
 
-    for (let i = 0; i < subtransactions.length; i++) {
-      list.push(subtransactions[i]);
+    for (let i = 0; i < _subtransactions.length; i++) {
+      list.push(_subtransactions[i]);
     }
     return list;
   }, []);
-  return x;
 }
 
-function groupTransaction(split) {
-  return { ...split[0], subtransactions: split.slice(1) };
+export function groupTransaction(split: TransactionEntity[]) {
+  return { ...split[0], subtransactions: split.slice(1) } as TransactionEntity;
 }
 
-export function ungroupTransaction(split) {
+export function ungroupTransaction(split: TransactionEntity | null) {
   if (split == null) {
     return null;
   }
   return ungroupTransactions([split]);
 }
 
-export function applyTransactionDiff(groupedTrans, diff) {
-  return groupTransaction(applyChanges(diff, ungroupTransaction(groupedTrans)));
+export function applyTransactionDiff(
+  groupedTrans: Parameters<typeof ungroupTransaction>[0],
+  diff: Parameters<typeof applyChanges>[0],
+) {
+  return groupTransaction(
+    applyChanges(
+      diff,
+      ungroupTransaction(groupedTrans) || [],
+    ) as TransactionEntity[],
+  );
 }
 
-function replaceTransactions(transactions, id, func) {
-  let idx = transactions.findIndex(t => t.id === id);
-  let trans = transactions[idx];
-  let transactionsCopy = [...transactions];
+function replaceTransactions(
+  transactions: TransactionEntity[],
+  id: string,
+  func: (
+    transaction: TransactionEntity,
+  ) => TransactionEntity | TransactionEntityWithError | null,
+) {
+  const idx = transactions.findIndex(t => t.id === id);
+  const trans = transactions[idx];
+  const transactionsCopy = [...transactions];
 
   if (idx === -1) {
     throw new Error('Tried to edit unknown transaction id: ' + id);
   }
 
   if (trans.is_parent || trans.is_child) {
-    let parentIndex = findParentIndex(transactions, idx);
+    const parentIndex = findParentIndex(transactions, idx);
     if (parentIndex == null) {
       console.log('Cannot find parent index');
-      return { diff: { deleted: [], updated: [] } };
+      return { data: [], diff: { deleted: [], updated: [] } };
     }
 
-    let split = getSplit(transactions, parentIndex);
+    const split = getSplit(transactions, parentIndex);
     let grouped = func(groupTransaction(split));
-    let newSplit = ungroupTransaction(grouped);
+    const newSplit = ungroupTransaction(grouped);
 
     let diff;
     if (newSplit == null) {
       // If everything was deleted, just delete the parent which will
       // delete everything
       diff = { deleted: [{ id: split[0].id }], updated: [] };
-      grouped = { id: split[0].id, _deleted: true };
+      grouped = { ...split[0], _deleted: true };
       transactionsCopy.splice(parentIndex, split.length);
     } else {
       diff = diffItems(split, newSplit);
@@ -144,8 +181,8 @@ function replaceTransactions(transactions, id, func) {
 
     return { data: transactionsCopy, newTransaction: grouped, diff };
   } else {
-    let grouped = func(trans);
-    let newTrans = ungroupTransaction(grouped) || [];
+    const grouped = func(trans);
+    const newTrans = ungroupTransaction(grouped) || [];
     if (grouped) {
       grouped.subtransactions = grouped.subtransactions || [];
     }
@@ -153,19 +190,25 @@ function replaceTransactions(transactions, id, func) {
 
     return {
       data: transactionsCopy,
-      newTransaction: grouped || { id: trans.id, _deleted: true },
+      newTransaction: grouped || {
+        ...trans,
+        _deleted: true,
+      },
       diff: diffItems([trans], newTrans),
     };
   }
 }
 
-export function addSplitTransaction(transactions, id) {
+export function addSplitTransaction(
+  transactions: TransactionEntity[],
+  id: string,
+) {
   return replaceTransactions(transactions, id, trans => {
     if (!trans.is_parent) {
       return trans;
     }
-    let prevSub = last(trans.subtransactions);
-    trans.subtransactions.push(
+    const prevSub = last(trans.subtransactions || []);
+    trans.subtransactions?.push(
       makeChild(trans, {
         amount: 0,
         sort_order: num(prevSub && prevSub.sort_order) - 1,
@@ -175,11 +218,14 @@ export function addSplitTransaction(transactions, id) {
   });
 }
 
-export function updateTransaction(transactions, transaction) {
+export function updateTransaction(
+  transactions: TransactionEntity[],
+  transaction: TransactionEntity,
+) {
   return replaceTransactions(transactions, transaction.id, trans => {
     if (trans.is_parent) {
-      let parent = trans.id === transaction.id ? transaction : trans;
-      let sub = trans.subtransactions.map(t => {
+      const parent = trans.id === transaction.id ? transaction : trans;
+      const sub = trans.subtransactions?.map(t => {
         // Make sure to update the children to reflect the updated
         // properties (if the parent updated)
 
@@ -203,20 +249,23 @@ export function updateTransaction(transactions, transaction) {
   });
 }
 
-export function deleteTransaction(transactions, id) {
+export function deleteTransaction(
+  transactions: TransactionEntity[],
+  id: string,
+) {
   return replaceTransactions(transactions, id, trans => {
     if (trans.is_parent) {
       if (trans.id === id) {
         return null;
-      } else if (trans.subtransactions.length === 1) {
+      } else if (trans.subtransactions?.length === 1) {
         return {
           ...trans,
-          subtransactions: null,
+          subtransactions: undefined,
           is_parent: false,
           error: null,
-        };
+        } as TransactionEntityWithError;
       } else {
-        let sub = trans.subtransactions.filter(t => t.id !== id);
+        const sub = trans.subtransactions?.filter(t => t.id !== id);
         return recalculateSplit({ ...trans, subtransactions: sub });
       }
     } else {
@@ -225,26 +274,37 @@ export function deleteTransaction(transactions, id) {
   });
 }
 
-export function splitTransaction(transactions, id) {
+export function splitTransaction(
+  transactions: TransactionEntity[],
+  id: string,
+  createSubtransactions?: (
+    parentTransaction: TransactionEntity,
+  ) => TransactionEntity[],
+) {
   return replaceTransactions(transactions, id, trans => {
     if (trans.is_parent || trans.is_child) {
       return trans;
     }
 
+    const subtransactions = createSubtransactions?.(trans) || [
+      makeChild(trans),
+    ];
+
     return {
       ...trans,
       is_parent: true,
       error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
-      subtransactions: [makeChild(trans, { amount: 0, sort_order: -1 })],
-    };
+      subtransactions: subtransactions.map(t => ({
+        ...t,
+        sort_order: t.sort_order || -1,
+      })),
+    } as TransactionEntityWithError;
   });
 }
 
-export function realizeTempTransactions(transactions) {
-  let parent = transactions.find(t => !t.is_child);
-  parent = { ...parent, id: uuidv4() };
-
-  let children = transactions.filter(t => t.is_child);
+export function realizeTempTransactions(transactions: TransactionEntity[]) {
+  const parent = { ...transactions.find(t => !t.is_child), id: uuidv4() };
+  const children = transactions.filter(t => t.is_child);
   return [
     parent,
     ...children.map(child => ({

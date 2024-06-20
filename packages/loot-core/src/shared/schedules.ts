@@ -1,10 +1,15 @@
+// @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 
 import * as monthUtils from './months';
-import q from './query';
+import { q } from './query';
 
-export function getStatus(nextDate, completed, hasTrans) {
-  let today = monthUtils.currentDay();
+export function getStatus(
+  nextDate: string,
+  completed: boolean,
+  hasTrans: boolean,
+) {
+  const today = monthUtils.currentDay();
 
   if (completed) {
     return 'completed';
@@ -22,8 +27,8 @@ export function getStatus(nextDate, completed, hasTrans) {
 }
 
 export function getHasTransactionsQuery(schedules) {
-  let filters = schedules.map(schedule => {
-    let dateCond = schedule._conditions.find(c => c.field === 'date');
+  const filters = schedules.map(schedule => {
+    const dateCond = schedule._conditions.find(c => c.field === 'date');
     return {
       $and: {
         schedule: schedule.id,
@@ -38,20 +43,20 @@ export function getHasTransactionsQuery(schedules) {
   });
 
   return q('transactions')
+    .options({ splits: 'all' })
     .filter({ $or: filters })
     .orderBy({ date: 'desc' })
-    .groupBy('schedule')
     .select(['schedule', 'date']);
 }
 
-function makeNumberSuffix(num) {
+function makeNumberSuffix(num: number) {
   // Slight abuse of date-fns to turn a number like "1" into the full
   // form "1st" but formatting a date with that number
   return monthUtils.format(new Date(2020, 0, num, 12), 'do');
 }
 
 function prettyDayName(day) {
-  let days = {
+  const days = {
     SU: 'Sunday',
     MO: 'Monday',
     TU: 'Tuesday',
@@ -63,20 +68,43 @@ function prettyDayName(day) {
   return days[day];
 }
 
-export function getRecurringDescription(config) {
-  let interval = config.interval || 1;
+export function getRecurringDescription(config, dateFormat) {
+  const interval = config.interval || 1;
+
+  let endModeSuffix = '';
+  switch (config.endMode) {
+    case 'after_n_occurrences':
+      if (config.endOccurrences === 1) {
+        endModeSuffix = `, once`;
+      } else {
+        endModeSuffix = `, ${config.endOccurrences} times`;
+      }
+      break;
+    case 'on_date':
+      endModeSuffix = `, until ${monthUtils.format(
+        config.endDate,
+        dateFormat,
+      )}`;
+      break;
+    default:
+  }
+
+  const weekendSolveSuffix = config.skipWeekend
+    ? ` (${config.weekendSolveMode} weekend) `
+    : '';
+  const suffix = endModeSuffix + weekendSolveSuffix;
 
   switch (config.frequency) {
     case 'daily': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} days` : 'day';
-      return desc;
+      return desc + suffix;
     }
     case 'weekly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} weeks` : 'week';
       desc += ' on ' + monthUtils.format(config.start, 'EEEE');
-      return desc;
+      return desc + suffix;
     }
     case 'monthly': {
       let desc = 'Every ';
@@ -88,9 +116,9 @@ export function getRecurringDescription(config) {
         // sort would put them first
         let patterns = [...config.patterns]
           .sort((p1, p2) => {
-            let typeOrder =
+            const typeOrder =
               (p1.type === 'day' ? 1 : 0) - (p2.type === 'day' ? 1 : 0);
-            let valOrder = p1.value - p2.value;
+            const valOrder = p1.value - p2.value;
 
             if (typeOrder === 0) {
               return valOrder;
@@ -104,12 +132,12 @@ export function getRecurringDescription(config) {
 
         desc += ' on the ';
 
-        let strs = [];
+        const strs: string[] = [];
 
-        let uniqueDays = new Set(patterns.map(p => p.type));
-        let isSameDay = uniqueDays.size === 1 && !uniqueDays.has('day');
+        const uniqueDays = new Set(patterns.map(p => p.type));
+        const isSameDay = uniqueDays.size === 1 && !uniqueDays.has('day');
 
-        for (let pattern of patterns) {
+        for (const pattern of patterns) {
           if (pattern.type === 'day') {
             if (pattern.value === -1) {
               strs.push('last day');
@@ -118,7 +146,7 @@ export function getRecurringDescription(config) {
               strs.push(makeNumberSuffix(pattern.value));
             }
           } else {
-            let dayName = isSameDay ? '' : ' ' + prettyDayName(pattern.type);
+            const dayName = isSameDay ? '' : ' ' + prettyDayName(pattern.type);
 
             if (pattern.value === -1) {
               // Example: last Monday
@@ -145,13 +173,13 @@ export function getRecurringDescription(config) {
         desc += ' on the ' + monthUtils.format(config.start, 'do');
       }
 
-      return desc;
+      return desc + suffix;
     }
     case 'yearly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} years` : 'year';
       desc += ' on ' + monthUtils.format(config.start, 'LLL do');
-      return desc;
+      return desc + suffix;
     }
     default:
       return 'Recurring error';
@@ -159,17 +187,29 @@ export function getRecurringDescription(config) {
 }
 
 export function recurConfigToRSchedule(config) {
-  let base: IRuleOptions = {
+  const base: IRuleOptions = {
     start: monthUtils.parseDate(config.start),
+    // @ts-ignore: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],
   };
 
   if (config.interval) {
+    // @ts-ignore: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     base.interval = config.interval;
   }
 
-  let abbrevDay = name => name.slice(0, 2).toUpperCase();
+  switch (config.endMode) {
+    case 'after_n_occurrences':
+      base.count = config.endOccurrences;
+      break;
+    case 'on_date':
+      base.end = monthUtils.parseDate(config.endDate);
+      break;
+    default:
+  }
+
+  const abbrevDay = name => name.slice(0, 2).toUpperCase();
 
   switch (config.frequency) {
     case 'daily':
@@ -180,8 +220,8 @@ export function recurConfigToRSchedule(config) {
       return [base];
     case 'monthly':
       if (config.patterns && config.patterns.length > 0) {
-        let days = config.patterns.filter(p => p.type === 'day');
-        let dayNames = config.patterns.filter(p => p.type !== 'day');
+        const days = config.patterns.filter(p => p.type === 'day');
+        const dayNames = config.patterns.filter(p => p.type !== 'day');
 
         return [
           days.length > 0 && { ...base, byDayOfMonth: days.map(p => p.value) },

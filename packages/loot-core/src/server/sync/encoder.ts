@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Timestamp, SyncProtoBuf } from '@actual-app/crdt';
 
 import * as encryption from '../encryption';
@@ -23,23 +24,23 @@ export async function encode(
   since: Timestamp | string,
   messages: Message[],
 ): Promise<Uint8Array> {
-  let { encryptKeyId } = prefs.getPrefs();
-  let requestPb = new SyncProtoBuf.SyncRequest();
+  const { encryptKeyId } = prefs.getPrefs();
+  const requestPb = new SyncProtoBuf.SyncRequest();
 
   for (let i = 0; i < messages.length; i++) {
-    let msg = messages[i];
-    let envelopePb = new SyncProtoBuf.MessageEnvelope();
+    const msg = messages[i];
+    const envelopePb = new SyncProtoBuf.MessageEnvelope();
     envelopePb.setTimestamp(msg.timestamp.toString());
 
-    let messagePb = new SyncProtoBuf.Message();
+    const messagePb = new SyncProtoBuf.Message();
     messagePb.setDataset(msg.dataset);
     messagePb.setRow(msg.row);
     messagePb.setColumn(msg.column);
     messagePb.setValue(msg.value as string);
-    let binaryMsg = messagePb.serializeBinary();
+    const binaryMsg = messagePb.serializeBinary();
 
     if (encryptKeyId) {
-      let encrypted = new SyncProtoBuf.EncryptedData();
+      const encrypted = new SyncProtoBuf.EncryptedData();
 
       let result;
       try {
@@ -74,21 +75,21 @@ export async function encode(
 export async function decode(
   data: Uint8Array,
 ): Promise<{ messages: Message[]; merkle: { hash: number } }> {
-  let { encryptKeyId } = prefs.getPrefs();
+  const { encryptKeyId } = prefs.getPrefs();
 
-  let responsePb = SyncProtoBuf.SyncResponse.deserializeBinary(data);
-  let merkle = JSON.parse(responsePb.getMerkle());
-  let list = responsePb.getMessagesList();
-  let messages = [];
+  const responsePb = SyncProtoBuf.SyncResponse.deserializeBinary(data);
+  const merkle = JSON.parse(responsePb.getMerkle());
+  const list = responsePb.getMessagesList();
+  const messages = [];
 
   for (let i = 0; i < list.length; i++) {
-    let envelopePb = list[i];
-    let timestamp = Timestamp.parse(envelopePb.getTimestamp());
-    let encrypted = envelopePb.getIsencrypted();
+    const envelopePb = list[i];
+    const timestamp = Timestamp.parse(envelopePb.getTimestamp());
+    const encrypted = envelopePb.getIsencrypted();
     let msg;
 
     if (encrypted) {
-      let binary = SyncProtoBuf.EncryptedData.deserializeBinary(
+      const binary = SyncProtoBuf.EncryptedData.deserializeBinary(
         envelopePb.getContent() as Uint8Array,
       );
 
@@ -115,7 +116,7 @@ export async function decode(
     }
 
     messages.push({
-      timestamp: timestamp,
+      timestamp,
       dataset: msg.getDataset(),
       row: msg.getRow(),
       column: msg.getColumn(),

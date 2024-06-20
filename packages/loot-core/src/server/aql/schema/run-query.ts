@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Query, type QueryState } from '../../../shared/query';
 import {
   runQuery as _runQuery,

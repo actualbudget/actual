@@ -2,3 +2,4 @@ app/bundle.api.js*
 app/stats.json
 migrations
 default-db.sqlite
+mocks/budgets/**/*

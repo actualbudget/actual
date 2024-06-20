@@ -1,3 +1,14 @@
+import { type batchUpdateTransactions } from '../server/accounts/transactions';
+import type {
+  APIAccountEntity,
+  APICategoryEntity,
+  APICategoryGroupEntity,
+  APIPayeeEntity,
+} from '../server/api-models';
+
+import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
+import { type ServerHandlers } from './server-handlers';
+
 export interface ApiHandlers {
   'api/batch-budget-start': () => Promise<unknown>;
 
@@ -5,22 +16,25 @@ export interface ApiHandlers {
 
   'api/load-budget': (
     ...args: Parameters<ServerHandlers['load-budget']>
-  ) => Promise<unknown>;
+  ) => Promise<void>;
 
-  'api/download-budget': (arg: { syncId; password }) => Promise<unknown>;
+  'api/download-budget': (arg: {
+    syncId: string;
+    password?: string;
+  }) => Promise<void>;
 
-  'api/start-import': (arg: { budgetName }) => Promise<unknown>;
+  'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 
-  'api/finish-import': () => Promise<unknown>;
+  'api/finish-import': () => Promise<void>;
 
-  'api/abort-import': () => Promise<unknown>;
+  'api/abort-import': () => Promise<void>;
 
   'api/query': (arg: { query }) => Promise<unknown>;
 
-  'api/budget-months': () => Promise<unknown>;
+  'api/budget-months': () => Promise<string[]>;
 
   'api/budget-month': (arg: { month }) => Promise<{
-    month;
+    month: string;
     incomeAvailable: number;
     lastMonthOverspent: number;
     forNextMonth: number;
@@ -35,16 +49,16 @@ export interface ApiHandlers {
   }>;
 
   'api/budget-set-amount': (arg: {
-    month;
-    categoryId;
-    amount;
-  }) => Promise<unknown>;
+    month: string;
+    categoryId: string;
+    amount: number;
+  }) => Promise<void>;
 
   'api/budget-set-carryover': (arg: {
-    month;
-    categoryId;
-    flag;
-  }) => Promise<unknown>;
+    month: string;
+    categoryId: string;
+    flag: boolean;
+  }) => Promise<void>;
 
   'api/transactions-export': (arg: {
     transactions;
@@ -55,28 +69,46 @@ export interface ApiHandlers {
   'api/transactions-import': (arg: {
     accountId;
     transactions;
-  }) => Promise<unknown>;
+    detectInstallments;
+    updateDetectInstallmentDate;
+    ignoreAlreadyDetectedInstallments;
+  }) => Promise<{
+    errors?: { message: string }[];
+    added;
+    updated;
+  }>;
 
-  'api/transactions-add': (arg: { accountId; transactions }) => Promise<'ok'>;
+  'api/transactions-add': (arg: {
+    accountId;
+    transactions;
+    runTransfers?: boolean;
+    learnCategories?: boolean;
+  }) => Promise<'ok'>;
 
   'api/transactions-get': (arg: {
-    accountId;
-    startDate;
-    endDate;
-  }) => Promise<unknown>;
+    accountId?: string;
+    startDate?: string;
+    endDate?: string;
+  }) => Promise<TransactionEntity[]>;
 
-  /** @deprecated `filterTransactions` is deprecated, use `runQuery` instead' */
-  'api/transactions-filter': (arg: { text; accountId }) => Promise<void>;
+  'api/transaction-update': (arg: {
+    id;
+    fields;
+  }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
 
-  'api/transaction-update': (arg: { id; fields }) => Promise<unknown>;
+  'api/transaction-delete': (arg: {
+    id;
+  }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
 
-  'api/transaction-delete': (arg: { id }) => Promise<unknown>;
+  'api/sync': () => Promise<void>;
 
-  'api/accounts-get': () => Promise<unknown>;
+  'api/bank-sync': (arg?: { accountId: string }) => Promise<void>;
 
-  'api/account-create': (arg: { account; initialBalance }) => Promise<unknown>;
+  'api/accounts-get': () => Promise<APIAccountEntity[]>;
 
-  'api/account-update': (arg: { id; fields }) => Promise<unknown>;
+  'api/account-create': (arg: { account; initialBalance? }) => Promise<string>;
+
+  'api/account-update': (arg: { id; fields }) => Promise<void>;
 
   'api/account-close': (arg: {
     id;
@@ -88,9 +120,13 @@ export interface ApiHandlers {
 
   'api/account-delete': (arg: { id }) => Promise<unknown>;
 
-  'api/categories-get': (arg: { grouped }) => Promise<unknown>;
+  'api/categories-get': (arg: {
+    grouped;
+  }) => Promise<Array<APICategoryGroupEntity | APICategoryEntity>>;
 
-  'api/category-group-create': (arg: { group }) => Promise<unknown>;
+  'api/category-groups-get': () => Promise<APICategoryGroupEntity[]>;
+
+  'api/category-group-create': (arg: { group }) => Promise<string>;
 
   'api/category-group-update': (arg: { id; fields }) => Promise<unknown>;
 
@@ -99,17 +135,30 @@ export interface ApiHandlers {
     transferCategoryId;
   }) => Promise<unknown>;
 
-  'api/category-create': (arg: { category }) => Promise<unknown>;
+  'api/category-create': (arg: { category }) => Promise<string>;
 
   'api/category-update': (arg: { id; fields }) => Promise<unknown>;
 
-  'api/category-delete': (arg: { id; transferCategoryId }) => Promise<unknown>;
+  'api/category-delete': (arg: {
+    id;
+    transferCategoryId?;
+  }) => Promise<{ error?: string }>;
 
-  'api/payees-get': () => Promise<unknown>;
+  'api/payees-get': () => Promise<APIPayeeEntity[]>;
 
-  'api/payee-create': (arg: { payee }) => Promise<unknown>;
+  'api/payee-create': (arg: { payee }) => Promise<string>;
 
   'api/payee-update': (arg: { id; fields }) => Promise<unknown>;
 
   'api/payee-delete': (arg: { id }) => Promise<unknown>;
+
+  'api/rules-get': () => Promise<RuleEntity[]>;
+
+  'api/payee-rules-get': (arg: { id: string }) => Promise<RuleEntity[]>;
+
+  'api/rule-create': (arg: { rule: NewRuleEntity }) => Promise<RuleEntity>;
+
+  'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
+
+  'api/rule-delete': (arg: { id: string }) => Promise<boolean>;
 }

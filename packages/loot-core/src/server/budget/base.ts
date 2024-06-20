@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { getChangedValues } from '../../shared/util';
 import * as db from '../db';
@@ -10,7 +11,7 @@ import * as rollover from './rollover';
 import { sumAmounts } from './util';
 
 export function getBudgetType() {
-  let meta = sheet.get().meta();
+  const meta = sheet.get().meta();
   return meta.budgetType || 'rollover';
 }
 
@@ -40,7 +41,7 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
     initialValue: 0,
     run: () => {
       // Making this sync is faster!
-      let rows = db.runQuery(
+      const rows = db.runQuery(
         `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
@@ -48,8 +49,8 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
         [],
         true,
       );
-      let row = rows[0];
-      let amount = row ? row.amount : 0;
+      const row = rows[0];
+      const amount = row ? row.amount : 0;
       return amount || 0;
     },
   });
@@ -85,7 +86,7 @@ function createCategoryGroup(group, sheetName) {
 
 function handleAccountChange(months, oldValue, newValue) {
   if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
-    let rows = db.runQuery(
+    const rows = db.runQuery(
       `
         SELECT DISTINCT(category) as category FROM transactions
         WHERE acct = ?
@@ -95,7 +96,7 @@ function handleAccountChange(months, oldValue, newValue) {
     );
 
     months.forEach(month => {
-      let sheetName = monthUtils.sheetForMonth(month);
+      const sheetName = monthUtils.sheetForMonth(month);
 
       rows.forEach(row => {
         sheet
@@ -117,8 +118,8 @@ function handleTransactionChange(transaction, changedFields) {
     transaction.date &&
     transaction.category
   ) {
-    let month = monthUtils.monthFromDate(db.fromDateRepr(transaction.date));
-    let sheetName = monthUtils.sheetForMonth(month);
+    const month = monthUtils.monthFromDate(db.fromDateRepr(transaction.date));
+    const sheetName = monthUtils.sheetForMonth(month);
 
     sheet
       .get()
@@ -128,7 +129,7 @@ function handleTransactionChange(transaction, changedFields) {
 
 function handleCategoryMappingChange(months, oldValue, newValue) {
   months.forEach(month => {
-    let sheetName = monthUtils.sheetForMonth(month);
+    const sheetName = monthUtils.sheetForMonth(month);
     if (oldValue) {
       sheet
         .get()
@@ -177,14 +178,14 @@ function handleCategoryChange(months, oldValue, newValue) {
       ]);
   }
 
-  let budgetType = getBudgetType();
+  const budgetType = getBudgetType();
 
   if (oldValue && oldValue.tombstone === 0 && newValue.tombstone === 1) {
-    let id = newValue.id;
-    let groupId = newValue.cat_group;
+    const id = newValue.id;
+    const groupId = newValue.cat_group;
 
     months.forEach(month => {
-      let sheetName = monthUtils.sheetForMonth(month);
+      const sheetName = monthUtils.sheetForMonth(month);
       removeDeps(sheetName, groupId, id);
     });
   } else if (
@@ -196,15 +197,15 @@ function handleCategoryChange(months, oldValue, newValue) {
     }
 
     months.forEach(month => {
-      let prevMonth = monthUtils.prevMonth(month);
-      let prevSheetName = monthUtils.sheetForMonth(prevMonth);
-      let sheetName = monthUtils.sheetForMonth(month);
-      let { start, end } = monthUtils.bounds(month);
+      const prevMonth = monthUtils.prevMonth(month);
+      const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+      const sheetName = monthUtils.sheetForMonth(month);
+      const { start, end } = monthUtils.bounds(month);
 
       createCategory(newValue, sheetName, prevSheetName, start, end);
 
-      let id = newValue.id;
-      let groupId = newValue.cat_group;
+      const id = newValue.id;
+      const groupId = newValue.cat_group;
 
       if (getBudgetType() === 'rollover') {
         sheet
@@ -219,10 +220,10 @@ function handleCategoryChange(months, oldValue, newValue) {
     });
   } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
     // The category moved so we need to update the dependencies
-    let id = newValue.id;
+    const id = newValue.id;
 
     months.forEach(month => {
-      let sheetName = monthUtils.sheetForMonth(month);
+      const sheetName = monthUtils.sheetForMonth(month);
       removeDeps(sheetName, oldValue.cat_group, id);
       addDeps(sheetName, newValue.cat_group, id);
     });
@@ -230,7 +231,7 @@ function handleCategoryChange(months, oldValue, newValue) {
 }
 
 function handleCategoryGroupChange(months, oldValue, newValue) {
-  let budgetType = getBudgetType();
+  const budgetType = getBudgetType();
 
   function addDeps(sheetName, groupId) {
     sheet
@@ -269,26 +270,26 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
   }
 
   if (newValue.tombstone === 1 && oldValue && oldValue.tombstone === 0) {
-    let id = newValue.id;
+    const id = newValue.id;
     months.forEach(month => {
-      let sheetName = monthUtils.sheetForMonth(month);
+      const sheetName = monthUtils.sheetForMonth(month);
       removeDeps(sheetName, id);
     });
   } else if (
     newValue.tombstone === 0 &&
     (!oldValue || oldValue.tombstone === 1)
   ) {
-    let group = newValue;
+    const group = newValue;
 
     if (!group.is_income || budgetType !== 'rollover') {
       months.forEach(month => {
-        let sheetName = monthUtils.sheetForMonth(month);
+        const sheetName = monthUtils.sheetForMonth(month);
 
         // Dirty, dirty hack. These functions should not be async, but this is
         // OK because we're leveraging the sync nature of queries. Ideally we
         // wouldn't be querying here. But I think we have to. At least for now
         // we do
-        let categories = db.runQuery(
+        const categories = db.runQuery(
           'SELECT * FROM categories WHERE tombstone = 0 AND cat_group = ?',
           [group.id],
           true,
@@ -302,13 +303,13 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
 }
 
 function handleBudgetMonthChange(budget) {
-  let sheetName = monthUtils.sheetForMonth(budget.id);
+  const sheetName = monthUtils.sheetForMonth(budget.id);
   sheet.get().set(`${sheetName}!buffered`, budget.buffered);
 }
 
 function handleBudgetChange(budget) {
   if (budget.category) {
-    let sheetName = monthUtils.sheetForMonth(budget.month.toString());
+    const sheetName = monthUtils.sheetForMonth(budget.month.toString());
     sheet
       .get()
       .set(`${sheetName}!budget-${budget.category}`, budget.amount || 0);
@@ -318,26 +319,27 @@ function handleBudgetChange(budget) {
         `${sheetName}!carryover-${budget.category}`,
         budget.carryover === 1 ? true : false,
       );
+    sheet.get().set(`${sheetName}!goal-${budget.category}`, budget.goal);
   }
 }
 
 export function triggerBudgetChanges(oldValues, newValues) {
-  let { createdMonths = new Set() } = sheet.get().meta();
+  const { createdMonths = new Set() } = sheet.get().meta();
   sheet.startTransaction();
 
   try {
     newValues.forEach((items, table) => {
-      let old = oldValues.get(table);
+      const old = oldValues.get(table);
 
       items.forEach(newValue => {
-        let oldValue = old && old.get(newValue.id);
+        const oldValue = old && old.get(newValue.id);
 
         if (table === 'zero_budget_months') {
           handleBudgetMonthChange(newValue);
         } else if (table === 'zero_budgets' || table === 'reflect_budgets') {
           handleBudgetChange(newValue);
         } else if (table === 'transactions') {
-          let changed = new Set(
+          const changed = new Set(
             Object.keys(getChangedValues(oldValue || {}, newValue) || {}),
           );
 
@@ -362,16 +364,16 @@ export function triggerBudgetChanges(oldValues, newValues) {
 }
 
 export async function doTransfer(categoryIds, transferId) {
-  let { createdMonths: months } = sheet.get().meta();
+  const { createdMonths: months } = sheet.get().meta();
 
   [...months].forEach(month => {
-    let totalValue = categoryIds
+    const totalValue = categoryIds
       .map(id => {
         return budgetActions.getBudget({ month, category: id });
       })
       .reduce((total, value) => total + value, 0);
 
-    let transferValue = budgetActions.getBudget({
+    const transferValue = budgetActions.getBudget({
       month,
       category: transferId,
     });
@@ -389,10 +391,10 @@ export async function createBudget(months) {
   const groups = await db.getCategoriesGrouped();
 
   sheet.startTransaction();
-  let meta = sheet.get().meta();
+  const meta = sheet.get().meta();
   meta.createdMonths = meta.createdMonths || new Set();
 
-  let budgetType = getBudgetType();
+  const budgetType = getBudgetType();
 
   if (budgetType === 'rollover') {
     rollover.createBudget(meta, categories, months);
@@ -400,10 +402,10 @@ export async function createBudget(months) {
 
   months.forEach(month => {
     if (!meta.createdMonths.has(month)) {
-      let prevMonth = monthUtils.prevMonth(month);
-      let { start, end } = monthUtils.bounds(month);
-      let sheetName = monthUtils.sheetForMonth(month);
-      let prevSheetName = monthUtils.sheetForMonth(prevMonth);
+      const prevMonth = monthUtils.prevMonth(month);
+      const { start, end } = monthUtils.bounds(month);
+      const sheetName = monthUtils.sheetForMonth(month);
+      const prevSheetName = monthUtils.sheetForMonth(prevMonth);
 
       categories.forEach(cat => {
         createCategory(cat, sheetName, prevSheetName, start, end);
@@ -432,24 +434,24 @@ export async function createBudget(months) {
 }
 
 export async function createAllBudgets() {
-  let earliestTransaction = await db.first(
+  const earliestTransaction = await db.first(
     'SELECT * FROM transactions WHERE isChild=0 AND date IS NOT NULL ORDER BY date ASC LIMIT 1',
   );
-  let earliestDate =
+  const earliestDate =
     earliestTransaction && db.fromDateRepr(earliestTransaction.date);
-  let currentMonth = monthUtils.currentMonth();
+  const currentMonth = monthUtils.currentMonth();
 
   // Get the range based off of the earliest transaction and the
   // current month. If no transactions currently exist the current
   // month is also used as the starting month
-  let { start, end, range } = getBudgetRange(
+  const { start, end, range } = getBudgetRange(
     earliestDate || currentMonth,
     currentMonth,
   );
 
-  let meta = sheet.get().meta();
-  let createdMonths = meta.createdMonths || new Set();
-  let newMonths = range.filter(m => !createdMonths.has(m));
+  const meta = sheet.get().meta();
+  const createdMonths = meta.createdMonths || new Set();
+  const newMonths = range.filter(m => !createdMonths.has(m));
 
   if (newMonths.length > 0) {
     await createBudget(range);
@@ -459,7 +461,7 @@ export async function createAllBudgets() {
 }
 
 export async function setType(type) {
-  let meta = sheet.get().meta();
+  const meta = sheet.get().meta();
   if (type === meta.budgetType) {
     return;
   }
@@ -468,10 +470,10 @@ export async function setType(type) {
   meta.createdMonths = new Set();
 
   // Go through and force all the cells to be recomputed
-  let nodes = sheet.get().getNodes();
+  const nodes = sheet.get().getNodes();
   db.transaction(() => {
-    for (let name of nodes.keys()) {
-      let [sheetName, cellName] = name.split('!');
+    for (const name of nodes.keys()) {
+      const [sheetName, cellName] = name.split('!');
       if (sheetName.match(/^budget\d+/)) {
         sheet.get().deleteCell(sheetName, cellName);
       }
@@ -480,7 +482,7 @@ export async function setType(type) {
 
   sheet.get().startCacheBarrier();
   sheet.loadUserBudgets(db);
-  let bounds = await createAllBudgets();
+  const bounds = await createAllBudgets();
   sheet.get().endCacheBarrier();
 
   return bounds;

@@ -1,31 +1,35 @@
-import React, { useState, useEffect } from 'react';
+// @ts-strict-ignore
+import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
+
+import { type State } from 'loot-core/src/client/state-types';
 
 import { useActions } from '../hooks/useActions';
 import { theme, styles, type CSSProperties } from '../style';
 
-import Button from './common/Button';
-import Menu from './common/Menu';
-import Text from './common/Text';
-import View from './common/View';
+import { Button } from './common/Button';
+import { Menu } from './common/Menu';
+import { Popover } from './common/Popover';
+import { Text } from './common/Text';
+import { View } from './common/View';
 import { useServerURL } from './ServerContext';
-import { Tooltip } from './tooltips';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
   style?: CSSProperties;
   color?: string;
 };
-export default function LoggedInUser({
+export function LoggedInUser({
   hideIfNoServer,
   style,
   color,
 }: LoggedInUserProps) {
-  let userData = useSelector(state => state.user.data);
-  let { getUserData, signOut, closeBudget } = useActions();
-  let [loading, setLoading] = useState(true);
-  let [menuOpen, setMenuOpen] = useState(false);
+  const userData = useSelector((state: State) => state.user.data);
+  const { getUserData, signOut, closeBudget } = useActions();
+  const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
+  const triggerRef = useRef(null);
 
   useEffect(() => {
     getUserData().then(() => setLoading(false));
@@ -78,7 +82,7 @@ export default function LoggedInUser({
     return (
       <Text
         style={{
-          color: theme.altpageTextSubdued,
+          color: theme.pageTextLight,
           fontStyle: 'italic',
           ...styles.delayedFadeIn,
           ...style,
@@ -91,33 +95,36 @@ export default function LoggedInUser({
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
-      <Button type="bare" onClick={() => setMenuOpen(true)} style={{ color }}>
+      <Button
+        ref={triggerRef}
+        type="bare"
+        onClick={() => setMenuOpen(true)}
+        style={color && { color }}
+      >
         {serverMessage()}
       </Button>
 
-      {menuOpen && (
-        <Tooltip
-          position="bottom-right"
-          style={{ padding: 0 }}
-          onClose={() => setMenuOpen(false)}
-        >
-          <Menu
-            onMenuSelect={onMenuSelect}
-            items={[
-              serverUrl &&
-                !userData?.offline && {
-                  name: 'change-password',
-                  text: 'Change password',
-                },
-              serverUrl && { name: 'sign-out', text: 'Sign out' },
-              {
-                name: 'config-server',
-                text: serverUrl ? 'Change server URL' : 'Start using a server',
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+      >
+        <Menu
+          onMenuSelect={onMenuSelect}
+          items={[
+            serverUrl &&
+              !userData?.offline && {
+                name: 'change-password',
+                text: 'Change password',
               },
-            ]}
-          />
-        </Tooltip>
-      )}
+            serverUrl && { name: 'sign-out', text: 'Sign out' },
+            {
+              name: 'config-server',
+              text: serverUrl ? 'Change server URL' : 'Start using a server',
+            },
+          ]}
+        />
+      </Popover>
     </View>
   );
 }

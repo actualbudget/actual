@@ -1,33 +1,67 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
-import { useActions } from '../hooks/useActions';
-import MoonStars from '../icons/v2/MoonStars';
-import Sun from '../icons/v2/Sun';
+import type { Theme } from 'loot-core/src/types/prefs';
+
+import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
-import { useTheme } from '../style';
+import { type CSSProperties, themeOptions, useTheme } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
+import { Menu } from './common/Menu';
+import { Popover } from './common/Popover';
 
-export function ThemeSelector() {
-  let theme = useTheme();
-  let { saveGlobalPrefs } = useActions();
+type ThemeSelectorProps = {
+  style?: CSSProperties;
+};
 
-  let { isNarrowWidth } = useResponsive();
+export function ThemeSelector({ style }: ThemeSelectorProps) {
+  const [theme, switchTheme] = useTheme();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef(null);
 
-  return isNarrowWidth ? null : (
-    <Button
-      type="bare"
-      onClick={() => {
-        saveGlobalPrefs({
-          theme: theme === 'dark' ? 'light' : 'dark',
-        });
-      }}
-    >
-      {theme === 'light' ? (
-        <MoonStars style={{ width: 13, height: 13, color: 'inherit' }} />
-      ) : (
-        <Sun style={{ width: 13, height: 13, color: 'inherit' }} />
-      )}
-    </Button>
+  const { isNarrowWidth } = useResponsive();
+
+  const themeIcons = {
+    light: SvgSun,
+    dark: SvgMoonStars,
+    auto: SvgSystem,
+    midnight: SvgMoonStars,
+    development: SvgMoonStars,
+  } as const;
+
+  function onMenuSelect(newTheme: Theme) {
+    setMenuOpen(false);
+    switchTheme(newTheme);
+  }
+
+  const Icon = themeIcons[theme] || SvgSun;
+
+  if (isNarrowWidth) {
+    return null;
+  }
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        type="bare"
+        aria-label="Switch theme"
+        onClick={() => setMenuOpen(true)}
+        style={style}
+      >
+        <Icon style={{ width: 13, height: 13, color: 'inherit' }} />
+      </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={menuOpen}
+        onOpenChange={() => setMenuOpen(false)}
+      >
+        <Menu
+          onMenuSelect={onMenuSelect}
+          items={themeOptions.map(([name, text]) => ({ name, text }))}
+        />
+      </Popover>
+    </>
   );
 }

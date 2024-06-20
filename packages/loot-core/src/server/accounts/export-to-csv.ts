@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import csvStringify from 'csv-stringify/lib/sync';
 
 import { integerToAmount } from '../../shared/util';
@@ -31,13 +32,24 @@ export async function exportToCSV(
   }, {});
 
   const transactionsForExport = transactions.map(
-    ({ account, date, payee, notes, category, amount }) => ({
+    ({
+      account,
+      date,
+      payee,
+      notes,
+      category,
+      amount,
+      cleared,
+      reconciled,
+    }) => ({
       Account: accountNamesById[account],
       Date: date,
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
       Amount: amount == null ? 0 : integerToAmount(amount),
+      Cleared: cleared,
+      Reconciled: reconciled,
     }),
   );
 
@@ -45,7 +57,7 @@ export async function exportToCSV(
 }
 
 export async function exportQueryToCSV(query) {
-  let { data: transactions } = await aqlQuery(
+  const { data: transactions } = await aqlQuery(
     query
       .select([
         { Id: 'id' },
@@ -57,22 +69,24 @@ export async function exportQueryToCSV(query) {
         { Notes: 'notes' },
         { Category: 'category.name' },
         { Amount: 'amount' },
+        { Cleared: 'cleared' },
+        { Reconciled: 'reconciled' },
       ])
       .options({ splits: 'all' }),
   );
 
-  let parentsPayees = new Map();
-  for (let trans of transactions) {
+  const parentsPayees = new Map();
+  for (const trans of transactions) {
     if (trans.IsParent) {
       parentsPayees.set(trans.Id, trans.Payee);
     }
   }
 
   // filter out any parent transactions
-  let noParents = transactions.filter(t => !t.IsParent);
+  const noParents = transactions.filter(t => !t.IsParent);
 
   // map final properties for export and grab the payee for splits from their parent transaction
-  let transactionsForExport = noParents.map(trans => {
+  const transactionsForExport = noParents.map(trans => {
     return {
       Account: trans.Account,
       Date: trans.Date,
@@ -80,6 +94,12 @@ export async function exportQueryToCSV(query) {
       Notes: trans.Notes,
       Category: trans.Category,
       Amount: trans.Amount == null ? 0 : integerToAmount(trans.Amount),
+      Cleared:
+        trans.Reconciled === true
+          ? 'Reconciled'
+          : trans.Cleared === true
+            ? 'Cleared'
+            : 'Not cleared',
     };
   });
 

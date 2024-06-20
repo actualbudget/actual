@@ -1,0 +1,27 @@
+name: Add WIP
+
+on:
+  pull_request_target:
+    types:
+      - opened
+
+jobs:
+  add_wip_prefix:
+    if: |
+      join(github.event.pull_request.requested_reviewers) == ''
+        && !contains(github.event.pull_request.title, 'WIP')
+        && !contains(github.event.pull_request.labels.*.name, 'WIP')
+        && github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Add WIP
+      env:
+          TITLE: ${{ github.event.pull_request.title }}
+      shell: bash
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
+        gh pr edit ${{ github.event.pull_request.number }} -t "[WIP] ${TITLE}"

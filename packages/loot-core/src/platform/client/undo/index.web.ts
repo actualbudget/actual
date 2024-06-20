@@ -4,10 +4,10 @@ import type * as T from '.';
 
 // List of recently used states. We don't use a true MRU structure
 // because our needs are simple and we also do some custom reordering.
-let HISTORY_SIZE = 40;
+const HISTORY_SIZE = 40;
 let UNDO_STATE_MRU: T.UndoState[] = [];
 
-let currentUndoState: T.UndoState = {
+const currentUndoState: T.UndoState = {
   url: null,
   openModal: null,
   selectedItems: null,
@@ -27,7 +27,7 @@ export const getTaggedState: T.GetTaggedState = function (id) {
 };
 
 export const snapshot: T.Snapshot = function () {
-  let tagged = { ...currentUndoState, id: uuidv4() };
+  const tagged = { ...currentUndoState, id: uuidv4() };
   UNDO_STATE_MRU.unshift(tagged);
   UNDO_STATE_MRU = UNDO_STATE_MRU.slice(0, HISTORY_SIZE);
   return tagged.id;

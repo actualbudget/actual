@@ -37,7 +37,6 @@ if [ $NODE_ENV == 'development' ]; then
 fi
 
 cp ../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm "$PUBLIC_DIR"/sql-wasm.wasm
-cp ../../node-libofx/libofx.web.wasm "$PUBLIC_DIR"/libofx.web.wasm
 
 yarn webpack --config ../webpack/webpack.browser.config.js \
   --target "webworker" \

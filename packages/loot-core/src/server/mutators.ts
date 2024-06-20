@@ -1,17 +1,17 @@
+// @ts-strict-ignore
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import { sequential } from '../shared/async';
+import { type HandlerFunctions, type Handlers } from '../types/handlers';
 
-let runningMethods = new Set();
+const runningMethods = new Set();
 
 let currentContext = null;
-let mutatingMethods = new WeakMap();
+const mutatingMethods = new WeakMap();
 let globalMutationsEnabled = false;
 
 let _latestHandlerNames = [];
 
-export function mutator<T extends (...args: unknown[]) => unknown>(
-  handler: T,
-): T {
+export function mutator<T extends HandlerFunctions>(handler: T): T {
   mutatingMethods.set(handler, true);
   return handler;
 }
@@ -38,11 +38,11 @@ function wait(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export async function runHandler(
-  handler,
-  args?,
+export async function runHandler<T extends Handlers[keyof Handlers]>(
+  handler: T,
+  args?: Parameters<T>[0],
   { undoTag, name }: { undoTag?; name? } = {},
-) {
+): Promise<ReturnType<T>> {
   // For debug reasons, track the latest handlers that have been
   // called
   _latestHandlerNames.push(name);
@@ -51,7 +51,9 @@ export async function runHandler(
   }
 
   if (mutatingMethods.has(handler)) {
-    return runMutator(() => handler(args), { undoTag });
+    return runMutator(() => handler(args), { undoTag }) as Promise<
+      ReturnType<T>
+    >;
   }
 
   // When closing a file, it clears out all global state for the file. That
@@ -62,12 +64,12 @@ export async function runHandler(
     await flushRunningMethods();
   }
 
-  let promise = handler(args);
+  const promise = handler(args);
   runningMethods.add(promise);
   promise.then(() => {
     runningMethods.delete(promise);
   });
-  return promise;
+  return promise as Promise<ReturnType<T>>;
 }
 
 // These are useful for tests. Only use them in tests.
@@ -108,7 +110,7 @@ export function withMutatorContext<T>(
     return func();
   }
 
-  let prevContext = currentContext;
+  const prevContext = currentContext;
   currentContext = { ...currentContext, ...context };
   return func().finally(() => {
     currentContext = prevContext;

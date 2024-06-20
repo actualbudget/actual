@@ -1,16 +1,33 @@
+// @ts-strict-ignore
 import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
-import tokens from '../tokens';
+import { tokens } from '../tokens';
 
+import { theme } from './theme';
 import { type CSSProperties } from './types';
+
+const MOBILE_MIN_HEIGHT = 40;
+
+const shadowLarge = {
+  boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
+};
 
 export const styles = {
   incomeHeaderHeight: 70,
   cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
   monthRightPadding: 5,
   menuBorderRadius: 4,
+  mobileMinHeight: MOBILE_MIN_HEIGHT,
+  mobileMenuItem: {
+    fontSize: 17,
+    fontWeight: 400,
+    paddingTop: 8,
+    paddingBottom: 8,
+    height: MOBILE_MIN_HEIGHT,
+    minHeight: MOBILE_MIN_HEIGHT,
+  },
   mobileEditingPadding: 12,
   altMenuMaxHeight: 250,
   altMenuText: {
@@ -37,7 +54,10 @@ export const styles = {
     fontSize: 13,
   },
   verySmallText: {
-    fontSize: 13,
+    fontSize: 12,
+  },
+  tinyText: {
+    fontSize: 10,
   },
   page: {
     flex: 1,
@@ -70,9 +90,7 @@ export const styles = {
   shadow: {
     boxShadow: '0 2px 4px 0 rgba(0,0,0,0.1)',
   },
-  shadowLarge: {
-    boxShadow: '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
-  },
+  shadowLarge,
   tnum: {
     // eslint-disable-next-line rulesdir/typography
     fontFeatureSettings: '"tnum"',
@@ -82,7 +100,6 @@ export const styles = {
     fontSize: 16,
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
-
   delayedFadeIn: {
     animationName: keyframes({
       '0%': { opacity: 0 },
@@ -92,7 +109,37 @@ export const styles = {
     animationFillMode: 'both',
     animationDelay: '0.5s',
   },
+  underlinedText: {
+    textDecoration: 'underline',
+    textDecorationThickness: 2,
+    textDecorationColor: theme.pillBorder,
+  },
+  noTapHighlight: {
+    WebkitTapHighlightColor: 'transparent',
+    ':focus': {
+      outline: 'none',
+    },
+  },
+  lineClamp: (lines: number) => {
+    return {
+      display: '-webkit-box',
+      WebkitLineClamp: lines,
+      WebkitBoxOrient: 'vertical',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      wordBreak: 'break-word',
+    };
+  },
+  tooltip: {
+    padding: 5,
+    ...shadowLarge,
+    borderRadius: 4,
+    backgroundColor: theme.menuBackground,
+    color: theme.menuItemText,
+    overflow: 'auto',
+  },
   // Dynamically set
+  horizontalScrollbar: null as CSSProperties | null,
   lightScrollbar: null as CSSProperties | null,
   darkScrollbar: null as CSSProperties | null,
   scrollbarWidth: null as number | null,
@@ -105,6 +152,20 @@ let hiddenScrollbars = false;
 // lightScrollbar => primary
 // darkScrollbar => secondary
 function onScrollbarChange() {
+  styles.horizontalScrollbar = !hiddenScrollbars && {
+    '::-webkit-scrollbar': {
+      backgroundColor: 'inherit',
+      height: 12,
+    },
+    '::-webkit-scrollbar-thumb': {
+      width: 7,
+      borderRadius: 30,
+      backgroundClip: 'padding-box',
+      border: '2px solid rgba(0, 0, 0, 0)',
+      backgroundColor: '#d0d0d0',
+    },
+  };
+
   styles.lightScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
       width: 11,
@@ -136,11 +197,11 @@ function onScrollbarChange() {
 
 if (Platform.env === 'web') {
   function testScrollbars() {
-    let el = document.createElement('div');
+    const el = document.createElement('div');
     el.innerHTML =
       '<div style="width:100px;height:100px;overflow:scroll;position:absolute;top:-9999px;"/>';
     document.body.appendChild(el);
-    let testNode = el.childNodes[0] as HTMLDivElement;
+    const testNode = el.childNodes[0] as HTMLDivElement;
     if (testNode.offsetWidth === testNode.clientWidth) {
       return true;
     }

@@ -1,4 +1,4 @@
-export default async function runMigration(db, uuid) {
+export default async function runMigration(db) {
   function getValue(node) {
     return node.expr != null ? node.expr : node.cachedValue;
   }
@@ -31,14 +31,14 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
 `);
 
   // Migrate budget amounts and carryover
-  let budget = db.runQuery(
+  const budget = db.runQuery(
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'budget%!budget-%'`,
     [],
     true,
   );
   db.transaction(() => {
     budget.forEach(monthBudget => {
-      let match = monthBudget.name.match(
+      const match = monthBudget.name.match(
         /^(budget-report|budget)(\d+)!budget-(.+)$/,
       );
       if (match == null) {
@@ -46,24 +46,25 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
         return;
       }
 
-      let type = match[1];
-      let month = match[2].slice(0, 4) + '-' + match[2].slice(4);
-      let dbmonth = parseInt(match[2]);
-      let cat = match[3];
+      const type = match[1];
+      const month = match[2].slice(0, 4) + '-' + match[2].slice(4);
+      const dbmonth = parseInt(match[2]);
+      const cat = match[3];
 
       let amount = parseInt(getValue(monthBudget));
       if (isNaN(amount)) {
         amount = 0;
       }
 
-      let sheetName = monthBudget.name.split('!')[0];
-      let carryover = db.runQuery(
+      const sheetName = monthBudget.name.split('!')[0];
+      const carryover = db.runQuery(
         'SELECT * FROM spreadsheet_cells WHERE name = ?',
         [`${sheetName}!carryover-${cat}`],
         true,
       );
 
-      let table = type === 'budget-report' ? 'reflect_budgets' : 'zero_budgets';
+      const table =
+        type === 'budget-report' ? 'reflect_budgets' : 'zero_budgets';
       db.runQuery(
         `INSERT INTO ${table} (id, month, category, amount, carryover) VALUES (?, ?, ?, ?, ?)`,
         [
@@ -78,16 +79,16 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
   });
 
   // Migrate buffers
-  let buffers = db.runQuery(
+  const buffers = db.runQuery(
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'budget%!buffered'`,
     [],
     true,
   );
   db.transaction(() => {
     buffers.forEach(buffer => {
-      let match = buffer.name.match(/^budget(\d+)!buffered$/);
+      const match = buffer.name.match(/^budget(\d+)!buffered$/);
       if (match) {
-        let month = match[1].slice(0, 4) + '-' + match[1].slice(4);
+        const month = match[1].slice(0, 4) + '-' + match[1].slice(4);
         let amount = parseInt(getValue(buffer));
         if (isNaN(amount)) {
           amount = 0;
@@ -102,15 +103,15 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
   });
 
   // Migrate notes
-  let notes = db.runQuery(
+  const notes = db.runQuery(
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'notes!%'`,
     [],
     true,
   );
 
-  let parseNote = str => {
+  const parseNote = str => {
     try {
-      let value = JSON.parse(str);
+      const value = JSON.parse(str);
       return value && value !== '' ? value : null;
     } catch (e) {
       return null;
@@ -119,9 +120,9 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
 
   db.transaction(() => {
     notes.forEach(note => {
-      let parsed = parseNote(getValue(note));
+      const parsed = parseNote(getValue(note));
       if (parsed) {
-        let [, id] = note.name.split('!');
+        const [, id] = note.name.split('!');
         db.runQuery(`INSERT INTO notes (id, note) VALUES (?, ?)`, [id, parsed]);
       }
     });

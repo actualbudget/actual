@@ -1,15 +1,17 @@
+// @ts-strict-ignore
+import { APIError } from '../../../server/errors';
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
 import type * as T from '.';
 
 function getGlobalObject() {
-  let obj =
+  const obj =
     typeof window !== 'undefined'
       ? window
       : typeof self !== 'undefined'
-      ? self
-      : null;
+        ? self
+        : null;
   if (!obj) {
     throw new Error('Cannot get global object');
   }
@@ -35,32 +37,28 @@ export const init: T.Init = function (serverChn, handlers) {
   serverChannel.addEventListener(
     'message',
     e => {
-      let data = e.data;
-      let msg = typeof data === 'string' ? JSON.parse(data) : data;
+      const data = e.data;
+      const msg = typeof data === 'string' ? JSON.parse(data) : data;
 
       if (msg.type && (msg.type === 'init' || msg.type.startsWith('__'))) {
         return;
       }
 
-      let { id, name, args, undoTag, catchErrors } = msg;
+      const { id, name, args, undoTag, catchErrors } = msg;
 
       if (handlers[name]) {
         runHandler(handlers[name], args, { undoTag, name }).then(
           result => {
-            if (catchErrors) {
-              result = { data: result, error: null };
-            }
-
             serverChannel.postMessage({
               type: 'reply',
               id,
-              result,
+              result: catchErrors ? { data: result, error: null } : result,
               mutated: isMutating(handlers[name]),
               undoTag,
             });
           },
           nativeError => {
-            let error = coerceError(nativeError);
+            const error = coerceError(nativeError);
 
             if (name.startsWith('api/')) {
               // The API is newer and does automatically forward
@@ -93,7 +91,7 @@ export const init: T.Init = function (serverChn, handlers) {
           type: 'reply',
           id,
           result: null,
-          error: { type: 'APIError', message: 'Unknown method: ' + name },
+          error: APIError('Unknown method: ' + name),
         });
       }
     },

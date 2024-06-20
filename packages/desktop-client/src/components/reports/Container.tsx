@@ -2,13 +2,17 @@ import React, { useRef, type ReactNode } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { type CSSProperties } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 type ContainerProps = {
   style?: CSSProperties;
-  children: (width: number, height: number, host: HTMLDivElement) => ReactNode;
+  children: (
+    width: number,
+    height: number,
+    host: HTMLDivElement | null,
+  ) => ReactNode;
 };
-export default function Container({ style, children }: ContainerProps) {
+export function Container({ style, children }: ContainerProps) {
   const portalHost = useRef<HTMLDivElement>(null);
 
   return (
@@ -17,7 +21,7 @@ export default function Container({ style, children }: ContainerProps) {
     >
       <div ref={portalHost} />
       <AutoSizer>
-        {({ width, height }) => (
+        {({ width, height }: { width: number; height: number }) => (
           <div style={{ width, height }}>
             {children(width, height, portalHost.current)}
           </div>

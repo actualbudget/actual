@@ -1,20 +1,21 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
-import Button from '../../common/Button';
-import Text from '../../common/Text';
-import View from '../../common/View';
+import { Button } from '../../common/Button';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
-export default function ChangePassword() {
-  let navigate = useNavigate();
-  let [error, setError] = useState(null);
-  let [msg, setMessage] = useState(null);
+export function ChangePassword() {
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+  const [msg, setMessage] = useState(null);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -31,7 +32,7 @@ export default function ChangePassword() {
 
   async function onSetPassword(password) {
     setError(null);
-    let { error } = await send('subscribe-change-password', { password });
+    const { error } = await send('subscribe-change-password', { password });
 
     if (error) {
       setError(error);
@@ -73,7 +74,7 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: theme.noticeText,
+            color: theme.noticeTextLight,
             borderRadius: 4,
             fontSize: 15,
           }}

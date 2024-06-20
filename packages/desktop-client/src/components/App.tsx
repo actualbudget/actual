@@ -1,76 +1,92 @@
+// @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
 import {
   ErrorBoundary,
   useErrorBoundary,
   type FallbackProps,
 } from 'react-error-boundary';
-import { useSelector } from 'react-redux';
+import { HotkeysProvider } from 'react-hotkeys-hook';
+import { useDispatch, useSelector } from 'react-redux';
 
+import {
+  closeBudget,
+  loadBudget,
+  loadGlobalPrefs,
+  setAppState,
+  sync,
+} from 'loot-core/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
+import { type State } from 'loot-core/src/client/state-types';
 import {
   init as initConnection,
   send,
 } from 'loot-core/src/platform/client/fetch';
-import { type GlobalPrefs } from 'loot-core/src/types/prefs';
 
-import { useActions } from '../hooks/useActions';
-import installPolyfills from '../polyfills';
+import { useLocalPref } from '../hooks/useLocalPref';
+import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
-import AppBackground from './AppBackground';
-import View from './common/View';
-import DevelopmentTopBar from './DevelopmentTopBar';
-import FatalError from './FatalError';
-import FinancesApp from './FinancesApp';
-import ManagementApp from './manager/ManagementApp';
-import MobileWebMessage from './MobileWebMessage';
-import UpdateNotification from './UpdateNotification';
+import { AppBackground } from './AppBackground';
+import { View } from './common/View';
+import { DevelopmentTopBar } from './DevelopmentTopBar';
+import { FatalError } from './FatalError';
+import { FinancesApp } from './FinancesApp';
+import { ManagementApp } from './manager/ManagementApp';
+import { MobileWebMessage } from './mobile/MobileWebMessage';
+import { UpdateNotification } from './UpdateNotification';
 
-type AppProps = {
+type AppInnerProps = {
   budgetId: string;
   cloudFileId: string;
-  loadingText: string;
-  loadBudget: (
-    id: string,
-    loadingText?: string,
-    options?: object,
-  ) => Promise<void>;
-  closeBudget: () => Promise<void>;
-  loadGlobalPrefs: () => Promise<GlobalPrefs>;
 };
 
-function App({
-  budgetId,
-  cloudFileId,
-  loadingText,
-  loadBudget,
-  closeBudget,
-  loadGlobalPrefs,
-}: AppProps) {
+function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   const [initializing, setInitializing] = useState(true);
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
+  const loadingText = useSelector((state: State) => state.app.loadingText);
+  const dispatch = useDispatch();
 
   async function init() {
     const socketName = await global.Actual.getServerSocket();
 
+    dispatch(
+      setAppState({
+        loadingText: 'Initializing the connection to the local database...',
+      }),
+    );
     await initConnection(socketName);
 
     // Load any global prefs
-    await loadGlobalPrefs();
+    dispatch(
+      setAppState({
+        loadingText: 'Loading global preferences...',
+      }),
+    );
+    await dispatch(loadGlobalPrefs());
 
     // Open the last opened budget, if any
+    dispatch(
+      setAppState({
+        loadingText: 'Opening last budget...',
+      }),
+    );
     const budgetId = await send('get-last-opened-backup');
     if (budgetId) {
-      await loadBudget(budgetId);
+      await dispatch(loadBudget(budgetId, 'Loading the last budget file...'));
 
       // Check to see if this file has been remotely deleted (but
       // don't block on this in case they are offline or something)
+      dispatch(
+        setAppState({
+          loadingText: 'Retrieving remote files...',
+        }),
+      );
       send('get-remote-files').then(files => {
         if (files) {
-          let remoteFile = files.find(f => f.fileId === cloudFileId);
+          const remoteFile = files.find(f => f.fileId === cloudFileId);
           if (remoteFile && remoteFile.deleted) {
-            closeBudget();
+            dispatch(closeBudget());
           }
         }
       });
@@ -81,30 +97,31 @@ function App({
     async function initAll() {
       await Promise.all([installPolyfills(), init()]);
       setInitializing(false);
+      dispatch(
+        setAppState({
+          loadingText: null,
+        }),
+      );
     }
 
     initAll().catch(showErrorBoundary);
   }, []);
 
   useEffect(() => {
-    global.Actual.updateAppMenu(!!budgetId);
+    global.Actual.updateAppMenu(budgetId);
   }, [budgetId]);
 
   return (
     <>
-      {initializing ? (
+      {(initializing || !budgetId) && (
         <AppBackground initializing={initializing} loadingText={loadingText} />
-      ) : budgetId ? (
-        <FinancesApp />
-      ) : (
-        <>
-          <AppBackground
-            initializing={initializing}
-            loadingText={loadingText}
-          />
-          <ManagementApp isLoading={loadingText != null} />
-        </>
       )}
+      {!initializing &&
+        (budgetId ? (
+          <FinancesApp />
+        ) : (
+          <ManagementApp isLoading={loadingText != null} />
+        ))}
 
       <UpdateNotification />
       <MobileWebMessage />
@@ -116,23 +133,18 @@ function ErrorFallback({ error }: FallbackProps) {
   return (
     <>
       <AppBackground />
-      <FatalError error={error} buttonText="Restart app" />
+      <FatalError error={error} />
     </>
   );
 }
 
-function AppWrapper() {
-  let budgetId = useSelector(
-    state => state.prefs.local && state.prefs.local.id,
-  );
-  let cloudFileId = useSelector(
-    state => state.prefs.local && state.prefs.local.cloudFileId,
-  );
-  let loadingText = useSelector(state => state.app.loadingText);
-  let { loadBudget, closeBudget, loadGlobalPrefs, sync } = useActions();
+export function App() {
+  const [budgetId] = useLocalPref('id');
+  const [cloudFileId] = useLocalPref('cloudFileId');
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
+  const dispatch = useDispatch();
 
   useEffect(() => {
     function checkScrollbars() {
@@ -147,7 +159,7 @@ function AppWrapper() {
       if (!isSyncing) {
         console.debug('triggering sync because of visibility change');
         isSyncing = true;
-        await sync();
+        await dispatch(sync());
         isSyncing = false;
       }
     }
@@ -159,39 +171,32 @@ function AppWrapper() {
       window.removeEventListener('focus', checkScrollbars);
       window.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [sync]);
+  }, [dispatch]);
 
   return (
-    <ResponsiveProvider>
-      <View
-        style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-      >
+    <HotkeysProvider initiallyActiveScopes={['*']}>
+      <ResponsiveProvider>
         <View
-          key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-          style={{
-            flexGrow: 1,
-            overflow: 'hidden',
-            ...styles.lightScrollbar,
-          }}
+          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
         >
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
-              <DevelopmentTopBar />
-            )}
-            <App
-              budgetId={budgetId}
-              cloudFileId={cloudFileId}
-              loadingText={loadingText}
-              loadBudget={loadBudget}
-              closeBudget={closeBudget}
-              loadGlobalPrefs={loadGlobalPrefs}
-            />
-          </ErrorBoundary>
-          <ThemeStyle />
+          <View
+            key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+            style={{
+              flexGrow: 1,
+              overflow: 'hidden',
+              ...styles.lightScrollbar,
+            }}
+          >
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
+                <DevelopmentTopBar />
+              )}
+              <AppInner budgetId={budgetId} cloudFileId={cloudFileId} />
+            </ErrorBoundary>
+            <ThemeStyle />
+          </View>
         </View>
-      </View>
-    </ResponsiveProvider>
+      </ResponsiveProvider>
+    </HotkeysProvider>
   );
 }
-
-export default AppWrapper;

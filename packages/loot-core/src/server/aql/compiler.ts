@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 let _uid = 0;
 function resetUid() {
   _uid = 0;
@@ -11,7 +12,7 @@ function uid(tableName) {
 class CompileError extends Error {}
 
 function nativeDateToInt(date) {
-  let pad = x => (x < 10 ? '0' : '') + x;
+  const pad = x => (x < 10 ? '0' : '') + x;
   return date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate());
 }
 
@@ -20,12 +21,12 @@ function dateToInt(date) {
 }
 
 function addTombstone(schema, tableName, tableId, whereStr) {
-  let hasTombstone = schema[tableName].tombstone != null;
+  const hasTombstone = schema[tableName].tombstone != null;
   return hasTombstone ? `${whereStr} AND ${tableId}.tombstone = 0` : whereStr;
 }
 
 function popPath(path) {
-  let parts = path.split('.');
+  const parts = path.split('.');
   return { path: parts.slice(0, -1).join('.'), field: parts[parts.length - 1] };
 }
 
@@ -47,7 +48,7 @@ function getFieldDescription(schema, tableName, field) {
     throw new CompileError(`Table “${tableName}” does not exist in the schema`);
   }
 
-  let fieldDesc = schema[tableName][field];
+  const fieldDesc = schema[tableName][field];
   if (fieldDesc == null) {
     throw new CompileError(
       `Field “${field}” does not exist in table “${tableName}”`,
@@ -57,17 +58,17 @@ function getFieldDescription(schema, tableName, field) {
 }
 
 function makePath(state, path) {
-  let { schema, paths } = state;
+  const { schema, paths } = state;
 
-  let parts = path.split('.');
+  const parts = path.split('.');
   if (parts.length < 2) {
     throw new CompileError('Invalid path: ' + path);
   }
 
-  let initialTable = parts[0];
+  const initialTable = parts[0];
 
-  let tableName = parts.slice(1).reduce((tableName, field) => {
-    let table = schema[tableName];
+  const tableName = parts.slice(1).reduce((tableName, field) => {
+    const table = schema[tableName];
 
     if (table == null) {
       throw new CompileError(`Path error: ${tableName} table does not exist`);
@@ -83,12 +84,12 @@ function makePath(state, path) {
   }, initialTable);
 
   let joinTable;
-  let parentParts = parts.slice(0, -1);
+  const parentParts = parts.slice(0, -1);
   if (parentParts.length === 1) {
     joinTable = parentParts[0];
   } else {
-    let parentPath = parentParts.join('.');
-    let parentDesc = paths.get(parentPath);
+    const parentPath = parentParts.join('.');
+    const parentDesc = paths.get(parentPath);
     if (!parentDesc) {
       throw new CompileError('Path does not exist: ' + parentPath);
     }
@@ -96,7 +97,7 @@ function makePath(state, path) {
   }
 
   return {
-    tableName: tableName,
+    tableName,
     tableId: uid(tableName),
     joinField: parts[parts.length - 1],
     joinTable,
@@ -108,7 +109,7 @@ function resolvePath(state, path) {
 
   paths = paths.reduce(
     (acc, name) => {
-      let fullName = acc.context + '.' + name;
+      const fullName = acc.context + '.' + name;
       return {
         context: fullName,
         path: [...acc.path, fullName],
@@ -123,7 +124,7 @@ function resolvePath(state, path) {
     }
   });
 
-  let pathInfo = state.paths.get(paths[paths.length - 1]);
+  const pathInfo = state.paths.get(paths[paths.length - 1]);
   return pathInfo;
 }
 
@@ -132,8 +133,9 @@ function transformField(state, name) {
     throw new CompileError('Invalid field name, must be a string');
   }
 
-  let { path, field } = popPath(name);
+  const { path, field: originalField } = popPath(name);
 
+  let field = originalField;
   let pathInfo;
   if (path === '') {
     pathInfo = {
@@ -144,7 +146,11 @@ function transformField(state, name) {
     pathInfo = resolvePath(state, path);
   }
 
-  let fieldDesc = getFieldDescription(state.schema, pathInfo.tableName, field);
+  const fieldDesc = getFieldDescription(
+    state.schema,
+    pathInfo.tableName,
+    field,
+  );
 
   // If this is a field that references an item in another table, that
   // item could have been deleted. If that's the case, we want to
@@ -158,7 +164,7 @@ function transformField(state, name) {
     fieldDesc.type === 'id' &&
     field !== 'id'
   ) {
-    let refPath = state.implicitTableName + '.' + name;
+    const refPath = state.implicitTableName + '.' + name;
     let refPathInfo = state.paths.get(refPath);
 
     if (!refPathInfo) {
@@ -171,12 +177,12 @@ function transformField(state, name) {
     pathInfo = refPathInfo;
   }
 
-  let fieldStr = pathInfo.tableId + '.' + field;
+  const fieldStr = pathInfo.tableId + '.' + field;
   return typed(fieldStr, fieldDesc.type);
 }
 
 function parseDate(str) {
-  let m = str.match(/^(\d{4}-\d{2}-\d{2})$/);
+  const m = str.match(/^(\d{4}-\d{2}-\d{2})$/);
   if (m) {
     return typed(dateToInt(m[1]), 'date', { literal: true });
   }
@@ -184,7 +190,7 @@ function parseDate(str) {
 }
 
 function parseMonth(str) {
-  let m = str.match(/^(\d{4}-\d{2})$/);
+  const m = str.match(/^(\d{4}-\d{2})$/);
   if (m) {
     return typed(dateToInt(m[1]), 'date', { literal: true });
   }
@@ -192,7 +198,7 @@ function parseMonth(str) {
 }
 
 function parseYear(str) {
-  let m = str.match(/^(\d{4})$/);
+  const m = str.match(/^(\d{4})$/);
   if (m) {
     return typed(dateToInt(m[1]), 'date', { literal: true });
   }
@@ -204,9 +210,9 @@ function badDateFormat(str, type) {
 }
 
 function inferParam(param, type) {
-  let existingType = param.paramType;
+  const existingType = param.paramType;
   if (existingType) {
-    let casts = {
+    const casts = {
       date: ['string'],
       'date-month': ['date'],
       'date-year': ['date', 'date-month'],
@@ -338,7 +344,7 @@ function val(state, expr, type?: string) {
       return `'${castedExpr.value}'`;
     } else if (castedExpr.type === 'string') {
       // Escape quotes
-      let value = castedExpr.value.replace(/'/g, "''");
+      const value = castedExpr.value.replace(/'/g, "''");
       return `'${value}'`;
     }
     /* eslint-enable rulesdir/typography */
@@ -376,7 +382,7 @@ function saveStack(type, func) {
     }
 
     state.compileStack.push({ type, args });
-    let ret = func(state, ...args);
+    const ret = func(state, ...args);
     state.compileStack.pop();
     return ret;
   };
@@ -389,9 +395,9 @@ function prettyValue(value) {
     return 'undefined';
   }
 
-  let str = JSON.stringify(value);
+  const str = JSON.stringify(value);
   if (str.length > 70) {
-    let expanded = JSON.stringify(value, null, 2);
+    const expanded = JSON.stringify(value, null, 2);
     return expanded.split('\n').join('\n  ');
   }
   return str;
@@ -411,7 +417,7 @@ function getCompileError(error, stack) {
         case 'function':
           return prettyValue(entry.args[0]);
         case 'op': {
-          let [fieldRef, opData] = entry.args;
+          const [fieldRef, opData] = entry.args;
           return prettyValue({ [fieldRef]: opData });
         }
         case 'value':
@@ -474,7 +480,7 @@ const compileExpr = saveStack('expr', (state, expr) => {
   if (typeof expr === 'string') {
     // Field reference
     if (expr[0] === '$') {
-      let fieldRef = expr === '$' ? state.implicitField : expr.slice(1);
+      const fieldRef = expr === '$' ? state.implicitField : expr.slice(1);
 
       if (fieldRef == null || fieldRef === '') {
         throw new CompileError('Invalid field reference: ' + expr);
@@ -485,7 +491,7 @@ const compileExpr = saveStack('expr', (state, expr) => {
 
     // Named parameter
     if (expr[0] === ':') {
-      let param = { value: '?', type: 'param', paramName: expr.slice(1) };
+      const param = { value: '?', type: 'param', paramName: expr.slice(1) };
       state.namedParameters.push(param);
       return param;
     }
@@ -507,7 +513,7 @@ const compileExpr = saveStack('expr', (state, expr) => {
 });
 
 const compileFunction = saveStack('function', (state, func) => {
-  let [name] = Object.keys(func);
+  const [name] = Object.keys(func);
   let argExprs = func[name];
   if (!Array.isArray(argExprs)) {
     argExprs = [argExprs];
@@ -529,13 +535,13 @@ const compileFunction = saveStack('function', (state, func) => {
     // aggregate functions
     case '$sum': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['float']);
+      const [arg1] = valArray(state, args, ['float']);
       return typed(`SUM(${arg1})`, args[0].type);
     }
 
     case '$sumOver': {
-      let [arg1] = valArray(state, args, ['float']);
-      let order = state.orders
+      const [arg1] = valArray(state, args, ['float']);
+      const order = state.orders
         ? 'ORDER BY ' + compileOrderBy(state, state.orders)
         : '';
 
@@ -547,14 +553,14 @@ const compileFunction = saveStack('function', (state, func) => {
 
     case '$count': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args);
+      const [arg1] = valArray(state, args);
       return typed(`COUNT(${arg1})`, 'integer');
     }
 
     // string functions
     case '$substr': {
       validateArgLength(args, 2, 3);
-      let [arg1, arg2, arg3] = valArray(state, args, [
+      const [arg1, arg2, arg3] = valArray(state, args, [
         'string',
         'integer',
         'integer',
@@ -563,7 +569,7 @@ const compileFunction = saveStack('function', (state, func) => {
     }
     case '$lower': {
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['string']);
+      const [arg1] = valArray(state, args, ['string']);
       return typed(`UNICODE_LOWER(${arg1})`, 'string');
     }
 
@@ -587,7 +593,17 @@ const compileFunction = saveStack('function', (state, func) => {
       );
     }
 
+    // id functions
+    case '$id': {
+      validateArgLength(args, 1);
+      return typed(val(state, args[0]), args[0].type);
+    }
+
     // date functions
+    case '$day': {
+      validateArgLength(args, 1);
+      return castInput(state, args[0], 'date');
+    }
     case '$month': {
       validateArgLength(args, 1);
       return castInput(state, args[0], 'date-month');
@@ -600,12 +616,12 @@ const compileFunction = saveStack('function', (state, func) => {
     // various functions
     case '$condition':
       validateArgLength(args, 1);
-      let conds = compileConditions(state, args[0]);
+      const conds = compileConditions(state, args[0]);
       return typed(conds.join(' AND '), 'boolean');
 
     case '$nocase':
       validateArgLength(args, 1);
-      let [arg1] = valArray(state, args, ['string']);
+      const [arg1] = valArray(state, args, ['string']);
       return typed(`${arg1} COLLATE NOCASE`, args[0].type);
 
     case '$literal': {
@@ -621,10 +637,10 @@ const compileFunction = saveStack('function', (state, func) => {
 });
 
 const compileOp = saveStack('op', (state, fieldRef, opData) => {
-  let { $transform, ...opExpr } = opData;
-  let [op] = Object.keys(opExpr);
+  const { $transform, ...opExpr } = opData;
+  const [op] = Object.keys(opExpr);
 
-  let rhs = compileExpr(state, opData[op]);
+  const rhs = compileExpr(state, opData[op]);
 
   let lhs;
   if ($transform) {
@@ -638,19 +654,19 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
 
   switch (op) {
     case '$gte': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      const [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
       return `${left} >= ${right}`;
     }
     case '$lte': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      const [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
       return `${left} <= ${right}`;
     }
     case '$gt': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      const [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
       return `${left} > ${right}`;
     }
     case '$lt': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      const [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
       return `${left} < ${right}`;
     }
     case '$eq': {
@@ -658,10 +674,10 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
         return `${val(state, lhs)} IS NULL`;
       }
 
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      const [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
 
       if (rhs.type === 'param') {
-        let orders = state.namedParameters.map(param => {
+        const orders = state.namedParameters.map(param => {
           return param === rhs || param === lhs ? [param, { ...param }] : param;
         });
         state.namedParameters = [].concat.apply([], orders);
@@ -679,10 +695,10 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
         return `${val(state, lhs)} IS NULL`;
       }
 
-      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+      const [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
 
       if (rhs.type === 'param') {
-        let orders = state.namedParameters.map(param => {
+        const orders = state.namedParameters.map(param => {
           return param === rhs || param === lhs ? [param, { ...param }] : param;
         });
         state.namedParameters = [].concat.apply([], orders);
@@ -696,18 +712,18 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       return `${left} != ${right}`;
     }
     case '$oneof': {
-      let [left, right] = valArray(state, [lhs, rhs], [null, 'array']);
+      const [left, right] = valArray(state, [lhs, rhs], [null, 'array']);
       // Dedupe the ids
-      let ids = [...new Set(right)];
+      const ids = [...new Set(right)];
       // eslint-disable-next-line rulesdir/typography
       return `${left} IN (` + ids.map(id => `'${id}'`).join(',') + ')';
     }
     case '$like': {
-      let [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
+      const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `${left} LIKE ${right}`;
     }
     case '$notlike': {
-      let [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
+      const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `(${left} NOT LIKE ${right}\n OR ${left} IS NULL)`;
     }
     default:
@@ -725,7 +741,7 @@ function compileConditions(state, conds) {
   }
 
   return conds.filter(Boolean).reduce((res, condsObj) => {
-    let compiled = Object.entries(condsObj)
+    const compiled = Object.entries(condsObj)
       .map(([field, cond]) => {
         // Allow a falsy value in the lhs of $and and $or to allow for
         // quick forms like `$or: amount != 0 && ...`
@@ -768,7 +784,7 @@ function compileOr(state, conds) {
   if (!conds) {
     return '0';
   }
-  let res = compileConditions(state, conds);
+  const res = compileConditions(state, conds);
   if (res.length === 0) {
     return '0';
   }
@@ -780,7 +796,7 @@ function compileAnd(state, conds) {
   if (!conds) {
     return '1';
   }
-  let res = compileConditions(state, conds);
+  const res = compileConditions(state, conds);
   if (res.length === 0) {
     return '1';
   }
@@ -792,14 +808,14 @@ const compileWhere = saveStack('filter', (state, conds) => {
 });
 
 function compileJoins(state, tableRef, internalTableFilters) {
-  let joins = [];
+  const joins = [];
   state.paths.forEach((desc, path) => {
-    let { tableName, tableId, joinField, joinTable, noMapping } =
+    const { tableName, tableId, joinField, joinTable, noMapping } =
       state.paths.get(path);
 
     let on = `${tableId}.id = ${tableRef(joinTable)}.${quoteAlias(joinField)}`;
 
-    let filters = internalTableFilters(tableName);
+    const filters = internalTableFilters(tableName);
     if (filters.length > 0) {
       on +=
         ' AND ' +
@@ -831,12 +847,12 @@ function expandStar(state, expr) {
       tableId: state.implicitTableId,
     };
   } else if (expr.match(/\.\*$/)) {
-    let result = popPath(expr);
+    const result = popPath(expr);
     path = result.path;
     pathInfo = resolvePath(state, result.path);
   }
 
-  let table = state.schema[pathInfo.tableName];
+  const table = state.schema[pathInfo.tableName];
   if (table == null) {
     throw new Error(`Table “${pathInfo.tableName}” does not exist`);
   }
@@ -852,26 +868,26 @@ const compileSelect = saveStack(
       exprs = exprs.concat(['id']);
     }
 
-    let select = exprs.map(expr => {
+    const select = exprs.map(expr => {
       if (typeof expr === 'string') {
         if (expr.indexOf('*') !== -1) {
-          let fields = expandStar(state, expr);
+          const fields = expandStar(state, expr);
 
           return fields
             .map(field => {
-              let compiled = compileExpr(state, '$' + field);
+              const compiled = compileExpr(state, '$' + field);
               state.outputTypes.set(field, compiled.type);
               return compiled.value + ' AS ' + quoteAlias(field);
             })
             .join(', ');
         }
 
-        let compiled = compileExpr(state, '$' + expr);
+        const compiled = compileExpr(state, '$' + expr);
         state.outputTypes.set(expr, compiled.type);
         return compiled.value + ' AS ' + quoteAlias(expr);
       }
 
-      let [name, value] = Object.entries(expr)[0];
+      const [name, value] = Object.entries(expr)[0];
       if (name[0] === '$') {
         state.compileStack.push({ type: 'value', value: expr });
         throw new CompileError(
@@ -880,12 +896,12 @@ const compileSelect = saveStack(
       }
 
       if (typeof value === 'string') {
-        let compiled = compileExpr(state, '$' + value);
+        const compiled = compileExpr(state, '$' + value);
         state.outputTypes.set(name, compiled.type);
         return `${compiled.value} AS ${quoteAlias(name)}`;
       }
 
-      let compiled = compileFunction({ ...state, orders }, value);
+      const compiled = compileFunction({ ...state, orders }, value);
       state.outputTypes.set(name, compiled.type);
       return compiled.value + ` AS ${quoteAlias(name)}`;
     });
@@ -895,7 +911,7 @@ const compileSelect = saveStack(
 );
 
 const compileGroupBy = saveStack('groupBy', (state, exprs) => {
-  let groupBy = exprs.map(expr => {
+  const groupBy = exprs.map(expr => {
     if (typeof expr === 'string') {
       return compileExpr(state, '$' + expr).value;
     }
@@ -907,15 +923,15 @@ const compileGroupBy = saveStack('groupBy', (state, exprs) => {
 });
 
 const compileOrderBy = saveStack('orderBy', (state, exprs) => {
-  let orderBy = exprs.map(expr => {
+  const orderBy = exprs.map(expr => {
     let compiled;
     let dir = null;
 
     if (typeof expr === 'string') {
       compiled = compileExpr(state, '$' + expr).value;
     } else {
-      let entries = Object.entries(expr);
-      let entry = entries[0];
+      const entries = Object.entries(expr);
+      const entry = entries[0];
 
       // Check if this is a field reference
       if (entries.length === 1 && entry[0][0] !== '$') {
@@ -923,7 +939,7 @@ const compileOrderBy = saveStack('orderBy', (state, exprs) => {
         compiled = compileExpr(state, '$' + entry[0]).value;
       } else {
         // Otherwise it's a function
-        let { $dir, ...func } = expr;
+        const { $dir, ...func } = expr;
         dir = $dir;
         compiled = compileFunction(state, func).value;
       }
@@ -941,13 +957,14 @@ const compileOrderBy = saveStack('orderBy', (state, exprs) => {
   return orderBy.join(', ');
 });
 
-let AGGREGATE_FUNCTIONS = ['$sum', '$count'];
+const AGGREGATE_FUNCTIONS = ['$sum', '$count'];
 function isAggregateFunction(expr) {
   if (typeof expr !== 'object' || Array.isArray(expr)) {
     return false;
   }
 
-  let [name, argExprs] = Object.entries(expr)[0];
+  const [name, originalArgExprs] = Object.entries(expr)[0];
+  let argExprs = originalArgExprs;
   if (!Array.isArray(argExprs)) {
     argExprs = [argExprs];
   }
@@ -970,35 +987,46 @@ export function isAggregateQuery(queryState) {
 
   return !!queryState.selectExpressions.find(expr => {
     if (typeof expr !== 'string') {
-      let [_, value] = Object.entries(expr)[0];
+      const [_, value] = Object.entries(expr)[0];
       return isAggregateFunction(value);
     }
     return false;
   });
 }
 
-type SchemaConfig = {
-  tableViews?: Record<string, unknown> | ((...args: unknown[]) => unknown);
+export type SchemaConfig = {
+  tableViews?:
+    | Record<string, unknown>
+    | ((name: string, config: { withDead; isJoin; tableOptions }) => unknown);
   tableFilters?: (name: string) => unknown[];
-  customizeQuery?: <T>(queryString: T) => T;
+  customizeQuery?: <T extends { table: string; orderExpressions: unknown[] }>(
+    queryString: T,
+  ) => T;
+  views?: Record<
+    string,
+    {
+      fields?: Record<string, string>;
+      [key: `v_${string}`]: string | ((internalFields, publicFields) => string);
+    }
+  >;
 };
 export function compileQuery(
   queryState,
   schema,
   schemaConfig: SchemaConfig = {},
 ) {
-  let { withDead, validateRefs = true, tableOptions, rawMode } = queryState;
+  const { withDead, validateRefs = true, tableOptions, rawMode } = queryState;
 
-  let {
+  const {
     tableViews = {},
-    tableFilters = name => [],
+    tableFilters = () => [],
     customizeQuery = queryState => queryState,
   } = schemaConfig;
 
-  let internalTableFilters = name => {
-    let filters = tableFilters(name);
+  const internalTableFilters = name => {
+    const filters = tableFilters(name);
     // These filters cannot join tables and must be simple strings
-    for (let filter of filters) {
+    for (const filter of filters) {
       if (Array.isArray(filter)) {
         throw new CompileError(
           'Invalid internal table filter: only object filters are supported',
@@ -1013,17 +1041,17 @@ export function compileQuery(
     return filters;
   };
 
-  let tableRef = (name: string, isJoin?: boolean) => {
-    let view =
+  const tableRef = (name: string, isJoin?: boolean) => {
+    const view =
       typeof tableViews === 'function'
         ? tableViews(name, { withDead, isJoin, tableOptions })
         : tableViews[name];
     return view || name;
   };
 
-  let tableName = queryState.table;
+  const tableName = queryState.table;
 
-  let {
+  const {
     filterExpressions,
     selectExpressions,
     groupExpressions,
@@ -1037,7 +1065,7 @@ export function compileQuery(
   let joins = '';
   let groupBy = '';
   let orderBy = '';
-  let state = {
+  const state = {
     schema,
     implicitTableName: tableName,
     implicitTableId: tableRef(tableName),
@@ -1060,27 +1088,27 @@ export function compileQuery(
     );
 
     if (filterExpressions.length > 0) {
-      let result = compileWhere(state, filterExpressions);
+      const result = compileWhere(state, filterExpressions);
       where = 'WHERE ' + result;
     } else {
       where = 'WHERE 1';
     }
 
     if (!rawMode) {
-      let filters = internalTableFilters(tableName);
+      const filters = internalTableFilters(tableName);
       if (filters.length > 0) {
         where += ' AND ' + compileAnd(state, filters);
       }
     }
 
     if (groupExpressions.length > 0) {
-      let result = compileGroupBy(state, groupExpressions);
+      const result = compileGroupBy(state, groupExpressions);
       groupBy = 'GROUP BY ' + result;
     }
 
     // Orders don't matter if doing a single calculation
     if (orderExpressions.length > 0) {
-      let result = compileOrderBy(state, orderExpressions);
+      const result = compileOrderBy(state, orderExpressions);
       orderBy = 'ORDER BY ' + result;
     }
 
@@ -1095,7 +1123,7 @@ export function compileQuery(
     throw e;
   }
 
-  let sqlPieces = {
+  const sqlPieces = {
     select,
     from: tableRef(tableName),
     joins,
@@ -1113,9 +1141,9 @@ export function compileQuery(
 }
 
 export function defaultConstructQuery(queryState, state, sqlPieces) {
-  let s = sqlPieces;
+  const s = sqlPieces;
 
-  let where = queryState.withDead
+  const where = queryState.withDead
     ? s.where
     : addTombstone(
         state.schema,
@@ -1140,6 +1168,6 @@ export function generateSQLWithState(
   schema?: unknown,
   schemaConfig?: unknown,
 ) {
-  let { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
+  const { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   return { sql: defaultConstructQuery(queryState, state, sqlPieces), state };
 }

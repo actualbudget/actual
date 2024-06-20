@@ -3,74 +3,83 @@ import React from 'react';
 import { type ScheduleStatusType } from 'loot-core/src/client/data-hooks/schedules';
 import { titleFirst } from 'loot-core/src/shared/util';
 
-import AlertTriangle from '../../icons/v2/AlertTriangle';
-import CalendarIcon from '../../icons/v2/Calendar';
-import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
-import EditSkull1 from '../../icons/v2/EditSkull1';
-import FavoriteStar from '../../icons/v2/FavoriteStar';
-import ValidationCheck from '../../icons/v2/ValidationCheck';
+import {
+  SvgAlertTriangle,
+  SvgCalendar,
+  SvgCheckCircle1,
+  SvgCheckCircleHollow,
+  SvgEditSkull1,
+  SvgFavoriteStar,
+  SvgLockClosed,
+  SvgValidationCheck,
+} from '../../icons/v2';
 import { theme } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 // Consists of Schedule Statuses + Transaction statuses
-type StatusTypes = ScheduleStatusType | 'cleared' | 'pending';
+type StatusTypes = ScheduleStatusType | 'cleared' | 'pending' | 'reconciled';
 export function getStatusProps(status: StatusTypes) {
   switch (status) {
     case 'missed':
       return {
-        color: theme.altErrorText,
-        backgroundColor: theme.altErrorBackground,
-        Icon: EditSkull1,
+        color: theme.errorTextDarker,
+        backgroundColor: theme.errorBackground,
+        Icon: SvgEditSkull1,
       };
     case 'due':
       return {
-        color: theme.altWarningText,
-        backgroundColor: theme.altWarningBackground,
-        Icon: AlertTriangle,
+        color: theme.warningTextDark,
+        backgroundColor: theme.warningBackground,
+        Icon: SvgAlertTriangle,
       };
     case 'upcoming':
       return {
         color: theme.upcomingText,
         backgroundColor: theme.upcomingBackground,
-        Icon: CalendarIcon,
+        Icon: SvgCalendar,
       };
     case 'paid':
       return {
-        color: theme.alt2NoticeText,
-        backgroundColor: theme.altNoticeBackground,
-        Icon: ValidationCheck,
+        color: theme.noticeText,
+        backgroundColor: theme.noticeBackgroundLight,
+        Icon: SvgValidationCheck,
       };
     case 'completed':
       return {
-        color: theme.alt2TableText,
-        backgroundColor: theme.altTableBackground,
-        Icon: FavoriteStar,
+        color: theme.tableHeaderText,
+        backgroundColor: theme.tableRowHeaderBackground,
+        Icon: SvgFavoriteStar,
       };
     case 'pending':
       return {
-        color: theme.alt3NoticeText,
-        backgroundColor: theme.alt2NoticeBackground,
-        Icon: CalendarIcon,
+        color: theme.noticeTextLight,
+        backgroundColor: theme.noticeBackgroundLight,
+        Icon: SvgCalendar,
       };
     case 'scheduled':
       return {
-        color: theme.menuItemText,
-        backgroundColor: theme.altTableBackground,
-        Icon: CalendarIcon,
+        color: theme.tableRowHeaderText,
+        backgroundColor: theme.tableRowHeaderBackground,
+        Icon: SvgCalendar,
       };
     case 'cleared':
       return {
-        color: theme.noticeText,
-        backgroundColor: theme.altTableBackground,
-        Icon: CheckCircle1,
+        color: theme.noticeTextLight,
+        backgroundColor: theme.tableRowHeaderBackground,
+        Icon: SvgCheckCircle1,
+      };
+    case 'reconciled':
+      return {
+        color: theme.noticeTextLight,
+        backgroundColor: theme.tableRowHeaderBackground,
+        Icon: SvgLockClosed,
       };
     default:
       return {
         color: theme.buttonNormalDisabledText,
-        backgroundColor: theme.altTableBackground,
-        Icon: CheckCircleHollow,
+        backgroundColor: theme.tableRowHeaderBackground,
+        Icon: SvgCheckCircleHollow,
       };
   }
 }

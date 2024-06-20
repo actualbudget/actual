@@ -46,7 +46,7 @@ jobs:
           echo "Build failed on PR branch or ${{github.base_ref}}"
           exit 1
       - name: Download build artifact from ${{github.base_ref}}
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         id: pr-build
         with:
           branch: ${{github.base_ref}}
@@ -55,7 +55,7 @@ jobs:
           path: base
 
       - name: Download build artifact from PR
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
@@ -64,13 +64,17 @@ jobs:
 
       - name: Strip content hashes from stats files
         run: |
+          sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./head/web-stats.json
+          sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./head/web-stats.json
           sed -i -E 's/\.[0-9a-f]{8,}\././g' ./head/*.json
+          sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./base/web-stats.json
+          sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./base/web-stats.json
           sed -i -E 's/\.[0-9a-f]{8,}\././g' ./base/*.json
-      - uses: github/webpack-bundlesize-compare-action@v1.8.2
+      - uses: twk3/rollup-size-compare-action@v1.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          current-stats-json-path: ./head/desktop-client-stats.json
-          base-stats-json-path: ./base/desktop-client-stats.json
+          current-stats-json-path: ./head/web-stats.json
+          base-stats-json-path: ./base/web-stats.json
           title: desktop-client
 
       - uses: github/webpack-bundlesize-compare-action@v1.8.2

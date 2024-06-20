@@ -1,41 +1,238 @@
+// @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
-import { setBudget, getSheetValue } from './actions';
+import { setBudget, getSheetValue, setGoal } from './actions';
 import { parse } from './cleanup-template.pegjs';
 
 export function cleanupTemplate({ month }: { month: string }) {
   return processCleanup(month);
 }
 
+async function applyGroupCleanups(
+  month: string,
+  sourceGroups,
+  sinkGroups,
+  generalGroups,
+) {
+  const sheetName = monthUtils.sheetForMonth(month);
+  const warnings = [];
+  const db_month = parseInt(month.replace('-', ''));
+  let groupLength = sourceGroups.length;
+  while (groupLength > 0) {
+    //function for each unique group
+    const groupName = sourceGroups[0].group;
+    const tempSourceGroups = sourceGroups.filter(c => c.group === groupName);
+    const sinkGroup = sinkGroups.filter(c => c.group === groupName);
+    const generalGroup = generalGroups.filter(c => c.group === groupName);
+    let total_weight = 0;
+
+    if (sinkGroup.length > 0 || generalGroup.length > 0) {
+      //only return group source funds to To Budget if there are corresponding sinking groups or underfunded included groups
+      for (let ii = 0; ii < tempSourceGroups.length; ii++) {
+        const balance = await getSheetValue(
+          sheetName,
+          `leftover-${tempSourceGroups[ii].category}`,
+        );
+        const budgeted = await getSheetValue(
+          sheetName,
+          `budget-${tempSourceGroups[ii].category}`,
+        );
+        await setBudget({
+          category: tempSourceGroups[ii].category,
+          month,
+          amount: budgeted - balance,
+        });
+      }
+
+      //calculate total weight for sinking funds
+      for (let ii = 0; ii < sinkGroup.length; ii++) {
+        total_weight += sinkGroup[ii].weight;
+      }
+
+      //fill underfunded categories within the group first
+      for (let ii = 0; ii < generalGroup.length; ii++) {
+        const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+        const balance = await getSheetValue(
+          sheetName,
+          `leftover-${generalGroup[ii].category}`,
+        );
+        const budgeted = await getSheetValue(
+          sheetName,
+          `budget-${generalGroup[ii].category}`,
+        );
+        const to_budget = budgeted + Math.abs(balance);
+        const categoryId = generalGroup[ii].category;
+        let carryover = await db.first(
+          `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
+          [db_month, categoryId],
+        );
+
+        if (carryover === null) {
+          carryover = { carryover: 0 };
+        }
+
+        if (
+          balance < 0 &&
+          Math.abs(balance) <= budgetAvailable &&
+          !generalGroup[ii].category.is_income &&
+          carryover.carryover === 0
+        ) {
+          await setBudget({
+            category: generalGroup[ii].category,
+            month,
+            amount: to_budget,
+          });
+        } else if (
+          balance < 0 &&
+          !generalGroup[ii].category.is_income &&
+          carryover.carryover === 0 &&
+          Math.abs(balance) > budgetAvailable
+        ) {
+          await setBudget({
+            category: generalGroup[ii].category,
+            month,
+            amount: budgeted + budgetAvailable,
+          });
+        }
+      }
+      const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+      for (let ii = 0; ii < sinkGroup.length; ii++) {
+        const budgeted = await getSheetValue(
+          sheetName,
+          `budget-${sinkGroup[ii].category}`,
+        );
+        const to_budget =
+          budgeted +
+          Math.round((sinkGroup[ii].weight / total_weight) * budgetAvailable);
+        await setBudget({
+          category: sinkGroup[ii].category,
+          month,
+          amount: to_budget,
+        });
+      }
+    } else {
+      warnings.push(groupName + ' has no matching sink categories.');
+    }
+    sourceGroups = sourceGroups.filter(c => c.group !== groupName);
+    groupLength = sourceGroups.length;
+  }
+  return warnings;
+}
+
 async function processCleanup(month: string): Promise<Notification> {
   let num_sources = 0;
   let num_sinks = 0;
   let total_weight = 0;
-  let errors = [];
-  let sinkCategory = [];
+  const errors = [];
+  const warnings = [];
+  const sinkCategory = [];
+  const sourceWithRollover = [];
+  const db_month = parseInt(month.replace('-', ''));
 
-  let category_templates = await getCategoryTemplates();
-  let categories = await db.all(
+  const category_templates = await getCategoryTemplates();
+  const categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
-  let sheetName = monthUtils.sheetForMonth(month);
+  const sheetName = monthUtils.sheetForMonth(month);
+  const groupSource = [];
+  const groupSink = [];
+  const groupGeneral = [];
+
+  //filter out category groups
   for (let c = 0; c < categories.length; c++) {
-    let category = categories[c];
-    let template = category_templates[category.id];
+    const category = categories[c];
+    const template = category_templates[category.id];
+
+    //filter out source and sink groups for processing
     if (template) {
-      if (template.filter(t => t.type === 'source').length > 0) {
-        let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
-        let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
-        await setBudget({
+      if (
+        template.filter(t => t.type === 'source' && t.group !== null).length > 0
+      ) {
+        groupSource.push({
           category: category.id,
-          month,
-          amount: budgeted - balance,
+          group: template.filter(
+            t => t.type === 'source' && t.group !== null,
+          )[0].group,
         });
-        num_sources += 1;
       }
-      if (template.filter(t => t.type === 'sink').length > 0) {
+      if (
+        template.filter(t => t.type === 'sink' && t.group !== null).length > 0
+      ) {
+        //only supports 1 sink reference per category.  Need more?
+        groupSink.push({
+          category: category.id,
+          group: template.filter(t => t.type === 'sink' && t.group !== null)[0]
+            .group,
+          weight: template.filter(t => t.type === 'sink' && t.group !== null)[0]
+            .weight,
+        });
+      }
+      if (
+        template.filter(t => t.type === null && t.group !== null).length > 0
+      ) {
+        groupGeneral.push({ category: category.id, group: template[0].group });
+      }
+    }
+  }
+  //run category groups
+  const newWarnings = await applyGroupCleanups(
+    month,
+    groupSource,
+    groupSink,
+    groupGeneral,
+  );
+  warnings.splice(1, 0, ...newWarnings);
+
+  for (let c = 0; c < categories.length; c++) {
+    const category = categories[c];
+    const template = category_templates[category.id];
+    if (template) {
+      if (
+        template.filter(t => t.type === 'source' && t.group === null).length > 0
+      ) {
+        const balance = await getSheetValue(
+          sheetName,
+          `leftover-${category.id}`,
+        );
+        const budgeted = await getSheetValue(
+          sheetName,
+          `budget-${category.id}`,
+        );
+        if (balance >= 0) {
+          // const spent = await getSheetValue(
+          //   sheetName,
+          //   `sum-amount-${category.id}`,
+          // );
+          await setBudget({
+            category: category.id,
+            month,
+            amount: budgeted - balance,
+          });
+          await setGoal({
+            category: category.id,
+            month,
+            goal: budgeted - balance,
+          });
+          num_sources += 1;
+        } else {
+          warnings.push(category.name + ' does not have available funds.');
+        }
+        const carryover = await db.first(
+          `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
+          [db_month, category.id],
+        );
+        if (carryover !== null) {
+          //keep track of source categories with rollover enabled
+          if (carryover.carryover === 1) {
+            sourceWithRollover.push({ cat: category, temp: template });
+          }
+        }
+      }
+      if (
+        template.filter(t => t.type === 'sink' && t.group === null).length > 0
+      ) {
         sinkCategory.push({ cat: category, temp: template });
         num_sinks += 1;
         total_weight += template.filter(w => w.type === 'sink')[0].weight;
@@ -44,18 +241,21 @@ async function processCleanup(month: string): Promise<Notification> {
   }
 
   //funds all underfunded categories first unless the overspending rollover is checked
-  let db_month = parseInt(month.replace('-', ''));
   for (let c = 0; c < categories.length; c++) {
-    let category = categories[c];
-    let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
-    let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
-    let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
-    let to_budget = budgeted + Math.abs(balance);
-    let categoryId = category.id;
+    const category = categories[c];
+    const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+    const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+    const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
+    const to_budget = budgeted + Math.abs(balance);
+    const categoryId = category.id;
     let carryover = await db.first(
       `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
       [db_month, categoryId],
     );
+
+    if (carryover === null) {
+      carryover = { carryover: 0 };
+    }
 
     if (
       balance < 0 &&
@@ -68,26 +268,41 @@ async function processCleanup(month: string): Promise<Notification> {
         month,
         amount: to_budget,
       });
+    } else if (
+      balance < 0 &&
+      !category.is_income &&
+      carryover.carryover === 0 &&
+      Math.abs(balance) > budgetAvailable
+    ) {
+      await setBudget({
+        category: category.id,
+        month,
+        amount: budgeted + budgetAvailable,
+      });
     }
   }
 
-  let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
-
+  const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   if (budgetAvailable <= 0) {
-    errors.push('No funds are available to reallocate.');
+    warnings.push('Global: No funds are available to reallocate.');
   }
 
+  //fill sinking categories
   for (let c = 0; c < sinkCategory.length; c++) {
-    let budgeted = await getSheetValue(
+    const budgeted = await getSheetValue(
       sheetName,
       `budget-${sinkCategory[c].cat.id}`,
     );
-    let categoryId = sinkCategory[c].cat.id;
-    let weight = sinkCategory[c].temp.filter(w => w.type === 'sink')[0].weight;
+    const categoryId = sinkCategory[c].cat.id;
+    const weight = sinkCategory[c].temp.filter(w => w.type === 'sink')[0]
+      .weight;
     let to_budget =
       budgeted + Math.round((weight / total_weight) * budgetAvailable);
     if (c === sinkCategory.length - 1) {
-      let currentBudgetAvailable = await getSheetValue(sheetName, `to-budget`);
+      const currentBudgetAvailable = await getSheetValue(
+        sheetName,
+        `to-budget`,
+      );
       if (to_budget > currentBudgetAvailable) {
         to_budget = budgeted + currentBudgetAvailable;
       }
@@ -107,11 +322,20 @@ async function processCleanup(month: string): Promise<Notification> {
         message: `There were errors interpreting some templates:`,
         pre: errors.join('\n\n'),
       };
+    } else if (warnings.length) {
+      return {
+        type: 'warning',
+        message: 'Global: Funds not available:',
+        pre: warnings.join('\n\n'),
+      };
     } else {
-      return { type: 'message', message: 'All categories were up to date.' };
+      return {
+        type: 'message',
+        message: 'All categories were up to date.',
+      };
     }
   } else {
-    let applied = `Successfully returned funds from ${num_sources} ${
+    const applied = `Successfully returned funds from ${num_sources} ${
       num_sources === 1 ? 'source' : 'sources'
     } and funded ${num_sinks} sinking ${num_sinks === 1 ? 'fund' : 'funds'}.`;
     if (errors.length) {
@@ -119,6 +343,12 @@ async function processCleanup(month: string): Promise<Notification> {
         sticky: true,
         message: `${applied} There were errors interpreting some templates:`,
         pre: errors.join('\n\n'),
+      };
+    } else if (warnings.length) {
+      return {
+        type: 'warning',
+        message: 'Global: Funds not available:',
+        pre: warnings.join('\n\n'),
       };
     } else {
       return {
@@ -131,21 +361,21 @@ async function processCleanup(month: string): Promise<Notification> {
 
 const TEMPLATE_PREFIX = '#cleanup ';
 async function getCategoryTemplates() {
-  let templates = {};
+  const templates = {};
 
-  let notes = await db.all(
+  const notes = await db.all(
     `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
 
   for (let n = 0; n < notes.length; n++) {
-    let lines = notes[n].note.split('\n');
-    let template_lines = [];
+    const lines = notes[n].note.split('\n');
+    const template_lines = [];
     for (let l = 0; l < lines.length; l++) {
-      let line = lines[l].trim();
+      const line = lines[l].trim();
       if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
-      let expression = line.slice(TEMPLATE_PREFIX.length);
+      const expression = line.slice(TEMPLATE_PREFIX.length);
       try {
-        let parsed = parse(expression);
+        const parsed = parse(expression);
         template_lines.push(parsed);
       } catch (e) {
         template_lines.push({ type: 'error', line, error: e });

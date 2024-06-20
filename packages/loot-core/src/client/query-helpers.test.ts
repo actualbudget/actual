@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import { initServer, serverPush } from '../platform/client/fetch';
 import { subDays } from '../shared/months';
-import q from '../shared/query';
+import { q } from '../shared/query';
 import { tracer } from '../shared/test-helpers';
 
 import { runQuery, liveQuery, pagedQuery } from './query-helpers';
@@ -11,7 +12,7 @@ function wait(n) {
 
 function isCountQuery(query) {
   if (query.selectExpressions.length === 1) {
-    let select = query.selectExpressions[0];
+    const select = query.selectExpressions[0];
     return select.result && select.result.$count === '*';
   }
 
@@ -29,8 +30,8 @@ function selectData(data, selectExpressions) {
 }
 
 function limitOffset(data, limit, offset) {
-  let start = offset != null ? offset : 0;
-  let end = limit != null ? limit : data.length;
+  const start = offset != null ? offset : 0;
+  const end = limit != null ? limit : data.length;
   return data.slice(start, start + end);
 }
 
@@ -40,13 +41,13 @@ function runPagedQuery(query, data) {
   }
 
   if (query.filterExpressions.length > 0) {
-    let filter = query.filterExpressions[0];
+    const filter = query.filterExpressions[0];
     if (filter.id != null) {
       return [data.find(row => row.id === filter.id)];
     }
 
     if (filter.date != null) {
-      let op = Object.keys(filter.date)[0];
+      const op = Object.keys(filter.date)[0];
 
       return limitOffset(
         data
@@ -54,12 +55,12 @@ function runPagedQuery(query, data) {
             return op === '$gte'
               ? row.date >= filter.date[op]
               : op === '$lte'
-              ? row.date <= filter.date[op]
-              : op === '$lt'
-              ? row.date < filter.date[op]
-              : op === '$gt'
-              ? row.date > filter.date[op]
-              : false;
+                ? row.date <= filter.date[op]
+                : op === '$lt'
+                  ? row.date < filter.date[op]
+                  : op === '$gt'
+                    ? row.date > filter.date[op]
+                    : false;
           })
           .map(row => select(row, query.selectExpressions)),
         query.limit,
@@ -95,7 +96,7 @@ function initPagingServer(
   dataLength,
   { delay, eventType = 'select' }: { delay?: number; eventType?: string } = {},
 ) {
-  let data = [];
+  const data = [];
   for (let i = 0; i < dataLength; i++) {
     data.push({ id: i, date: subDays('2020-05-01', Math.floor(i / 5)) });
   }
@@ -123,19 +124,19 @@ describe('query helpers', () => {
   it('runQuery runs a query', async () => {
     initServer({ query: query => ({ data: query, dependencies: [] }) });
 
-    let query = q('transactions').select('*');
-    let { data } = await runQuery(query);
+    const query = q('transactions').select('*');
+    const { data } = await runQuery(query);
     expect(data).toEqual(query.serialize());
   });
 
   ['liveQuery', 'pagedQuery'].forEach(queryType => {
-    let doQuery = queryType === 'liveQuery' ? liveQuery : pagedQuery;
+    const doQuery = queryType === 'liveQuery' ? liveQuery : pagedQuery;
 
     it(`${queryType} runs and subscribes to a query`, async () => {
       initBasicServer();
       tracer.start();
 
-      let query = q('transactions').select('*');
+      const query = q('transactions').select('*');
       doQuery(query, data => tracer.event('data', data));
 
       await tracer.expect('server-query');
@@ -151,14 +152,14 @@ describe('query helpers', () => {
       initBasicServer();
       tracer.start();
 
-      let query = q('transactions').select('*');
+      const query = q('transactions').select('*');
       doQuery(query, data => tracer.event('data', data), { onlySync: true });
 
       await tracer.expect('server-query');
       await tracer.expect('data', ['*']);
       serverPush('sync-event', { type: 'applied', tables: ['transactions'] });
 
-      let p = Promise.race([tracer.wait('server-query'), wait(100)]);
+      const p = Promise.race([tracer.wait('server-query'), wait(100)]);
       expect(await p).toEqual('wait(100)');
     });
 
@@ -166,7 +167,7 @@ describe('query helpers', () => {
       initBasicServer();
       tracer.start();
 
-      let query = q('transactions').select('*');
+      const query = q('transactions').select('*');
       doQuery(query, data => tracer.event('data', data), { onlySync: true });
 
       await tracer.expect('server-query');
@@ -189,8 +190,8 @@ describe('query helpers', () => {
       });
 
       tracer.start();
-      let query = q('transactions').select('*');
-      let lq = doQuery(query, data => tracer.event('data', data), {
+      const query = q('transactions').select('*');
+      const lq = doQuery(query, data => tracer.event('data', data), {
         onlySync: true,
       });
 
@@ -217,7 +218,7 @@ describe('query helpers', () => {
       initBasicServer();
       tracer.start();
 
-      let query = q('transactions').select('*');
+      const query = q('transactions').select('*');
 
       doQuery(query, data => tracer.event('data', data), { onlySync: true });
 
@@ -238,7 +239,7 @@ describe('query helpers', () => {
       initBasicServer(500);
       tracer.start();
 
-      let query = q('transactions').select('*');
+      const query = q('transactions').select('*');
 
       doQuery(query, data => tracer.event('data', data), { onlySync: true });
 
@@ -260,9 +261,9 @@ describe('query helpers', () => {
       initBasicServer();
       tracer.start();
 
-      let query = q('transactions').select('*');
+      const query = q('transactions').select('*');
 
-      let lq = doQuery(query, data => tracer.event('data', data));
+      const lq = doQuery(query, data => tracer.event('data', data));
 
       await tracer.expect('server-query');
       await tracer.expect('data', ['*']);
@@ -271,17 +272,17 @@ describe('query helpers', () => {
       serverPush('sync-event', { type: 'success', tables: ['transactions'] });
 
       // Wait a bit and make sure nothing comes through
-      let p = Promise.race([tracer.expect('server-query'), wait(100)]);
+      const p = Promise.race([tracer.expect('server-query'), wait(100)]);
       expect(await p).toEqual('wait(100)');
     });
   });
 
   it('pagedQuery makes requests in pages', async () => {
-    let data = initPagingServer(1502);
+    const data = initPagingServer(1502);
     tracer.start();
 
-    let query = q('transactions').select('id');
-    let paged = pagedQuery(query, data => tracer.event('data', data), {
+    const query = q('transactions').select('id');
+    const paged = pagedQuery(query, data => tracer.event('data', data), {
       onPageData: data => tracer.event('page-data', data),
     });
 
@@ -332,15 +333,15 @@ describe('query helpers', () => {
 
     await paged.fetchNext();
     // Wait a bit and make sure nothing comes through
-    let p = Promise.race([tracer.expect('server-query'), wait(100)]);
+    const p = Promise.race([tracer.expect('server-query'), wait(100)]);
     expect(await p).toEqual('wait(100)');
   });
 
   it('pagedQuery allows customizing page count', async () => {
-    let data = initPagingServer(50);
+    const data = initPagingServer(50);
     tracer.start();
 
-    let query = q('transactions').select('id');
+    const query = q('transactions').select('id');
     pagedQuery(query, data => tracer.event('data', data), {
       pageCount: 10,
     });
@@ -356,12 +357,12 @@ describe('query helpers', () => {
     initPagingServer(1000, { delay: 200 });
     tracer.start();
 
-    let query = q('transactions').select('id');
-    let paged = pagedQuery(query, data => tracer.event('data', data));
+    const query = q('transactions').select('id');
+    const paged = pagedQuery(query, data => tracer.event('data', data));
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
     await tracer.expect('server-query', ['id']);
-    await tracer.expect('data', data => {});
+    await tracer.expect('data', () => {});
 
     paged.fetchNext();
     paged.fetchNext();
@@ -369,19 +370,19 @@ describe('query helpers', () => {
     paged.fetchNext();
 
     await tracer.expect('server-query', ['id']);
-    await tracer.expect('data', data => {});
+    await tracer.expect('data', () => {});
 
     // Wait a bit and make sure nothing comes through
-    let p = Promise.race([tracer.expect('server-query'), wait(200)]);
+    const p = Promise.race([tracer.expect('server-query'), wait(200)]);
     expect(await p).toEqual('wait(200)');
   });
 
   it('pagedQuery refetches all paged data on update', async () => {
-    let data = initPagingServer(500, { delay: 200 });
+    const data = initPagingServer(500, { delay: 200 });
     tracer.start();
 
-    let query = q('transactions').select('id');
-    let paged = pagedQuery(query, data => tracer.event('data', data), {
+    const query = q('transactions').select('id');
+    const paged = pagedQuery(query, data => tracer.event('data', data), {
       pageCount: 20,
       onPageData: data => tracer.event('page-data', data),
     });
@@ -414,9 +415,9 @@ describe('query helpers', () => {
   });
 
   it('pagedQuery reruns `fetchNext` if data changed underneath it', async () => {
-    let data = initPagingServer(500, { delay: 10 });
-    let query = q('transactions').select('id');
-    let paged = pagedQuery(query, data => tracer.event('data', data), {
+    const data = initPagingServer(500, { delay: 10 });
+    const query = q('transactions').select('id');
+    const paged = pagedQuery(query, data => tracer.event('data', data), {
       pageCount: 20,
       onPageData: data => tracer.event('page-data', data),
     });
@@ -457,9 +458,9 @@ describe('query helpers', () => {
   });
 
   it('pagedQuery fetches up to a specific row', async () => {
-    let data = initPagingServer(500, { delay: 10, eventType: 'all' });
-    let query = q('transactions').select(['id', 'date']);
-    let paged = pagedQuery(query, data => tracer.event('data', data), {
+    const data = initPagingServer(500, { delay: 10, eventType: 'all' });
+    const query = q('transactions').select(['id', 'date']);
+    const paged = pagedQuery(query, data => tracer.event('data', data), {
       pageCount: 20,
       onPageData: data => tracer.event('page-data', data),
     });
@@ -467,7 +468,7 @@ describe('query helpers', () => {
 
     tracer.start();
 
-    let item = data.find(row => row.id === 300);
+    const item = data.find(row => row.id === 300);
     paged.refetchUpToRow(item.id, { field: 'date', order: 'desc' });
 
     await tracer.expect(

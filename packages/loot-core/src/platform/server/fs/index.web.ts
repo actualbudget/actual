@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { SQLiteFS } from 'absurd-sql';
 import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
@@ -5,11 +6,11 @@ import * as connection from '../connection';
 import * as idb from '../indexeddb';
 import { _getModule } from '../sqlite';
 
-import join from './path-join';
+import { join } from './path-join';
 
 let FS = null;
 let BFS = null;
-let NO_PERSIST = false;
+const NO_PERSIST = false;
 
 export const bundledDatabasePath = '/default-db.sqlite';
 export const migrationsPath = '/migrations';
@@ -36,9 +37,9 @@ function _exists(filepath) {
 }
 
 function _mkdirRecursively(dir) {
-  let parts = dir.split('/').filter(str => str !== '');
+  const parts = dir.split('/').filter(str => str !== '');
   let path = '';
-  for (let part of parts) {
+  for (const part of parts) {
     path += '/' + part;
     if (!_exists(path)) {
       FS.mkdir(path);
@@ -80,8 +81,8 @@ async function _readFile(filepath, opts?: { encoding?: string }) {
     }
 
     // Grab contents from IDB
-    let { store } = idb.getStore(await idb.getDatabase(), 'files');
-    let item = await idb.get(store, filepath);
+    const { store } = idb.getStore(await idb.getDatabase(), 'files');
+    const item = await idb.get(store, filepath);
 
     if (item == null) {
       throw new Error('File does not exist: ' + filepath);
@@ -102,7 +103,7 @@ async function _readFile(filepath, opts?: { encoding?: string }) {
 
 function resolveLink(path) {
   try {
-    let { node } = FS.lookupPath(path, { follow: false });
+    const { node } = FS.lookupPath(path, { follow: false });
     return node.link ? FS.readlink(path) : path;
   } catch (e) {
     return path;
@@ -121,10 +122,10 @@ async function _writeFile(filepath, contents) {
   _createFile(filepath);
 
   if (!NO_PERSIST && filepath.startsWith('/documents')) {
-    let isDb = filepath.endsWith('.sqlite');
+    const isDb = filepath.endsWith('.sqlite');
 
     // Write to IDB
-    let { store } = idb.getStore(await idb.getDatabase(), 'files');
+    const { store } = idb.getStore(await idb.getDatabase(), 'files');
 
     if (isDb) {
       // We never write the contents of the database to idb ourselves.
@@ -149,16 +150,16 @@ async function _writeFile(filepath, contents) {
 
 async function _removeFile(filepath) {
   if (!NO_PERSIST && filepath.startsWith('/documents')) {
-    let isDb = filepath.endsWith('.sqlite');
+    const isDb = filepath.endsWith('.sqlite');
 
     // Remove from IDB
-    let { store } = idb.getStore(await idb.getDatabase(), 'files');
+    const { store } = idb.getStore(await idb.getDatabase(), 'files');
     await idb.del(store, filepath);
 
     // If this is the database, is has been symlinked and we want to
     // remove the actual contents
     if (isDb) {
-      let linked = resolveLink(filepath);
+      const linked = resolveLink(filepath);
       // Be resilient to fs corruption: don't throw an error by trying
       // to remove a file that doesn't exist. For some reason the db
       // file is gone? It's ok, just ignore it
@@ -174,14 +175,14 @@ async function _removeFile(filepath) {
 
 // Load files from the server that should exist by default
 async function populateDefaultFilesystem() {
-  let index = await (
+  const index = await (
     await fetch(process.env.PUBLIC_URL + 'data-file-index.txt')
   ).text();
-  let files = index
+  const files = index
     .split('\n')
     .map(name => name.trim())
     .filter(name => name !== '');
-  let fetchFile = url => fetch(url).then(res => res.arrayBuffer());
+  const fetchFile = url => fetch(url).then(res => res.arrayBuffer());
 
   // This is hardcoded. We know we must create the migrations
   // directory, it's not worth complicating the index to support
@@ -191,28 +192,28 @@ async function populateDefaultFilesystem() {
 
   await Promise.all(
     files.map(async file => {
-      let contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
+      const contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
       _writeFile('/' + file, contents);
     }),
   );
 }
 
 export const populateFileHeirarchy = async function () {
-  let { store } = idb.getStore(await idb.getDatabase(), 'files');
-  let req = store.getAllKeys();
-  let paths: string[] = await new Promise((resolve, reject) => {
+  const { store } = idb.getStore(await idb.getDatabase(), 'files');
+  const req = store.getAllKeys();
+  const paths: string[] = await new Promise((resolve, reject) => {
     req.onsuccess = e => resolve(e.target.result);
     req.onerror = e => reject(e);
   });
 
-  for (let path of paths) {
+  for (const path of paths) {
     _mkdirRecursively(basename(path));
     _createFile(path);
   }
 };
 
 export const init = async function () {
-  let Module = _getModule();
+  const Module = _getModule();
   FS = Module.FS;
 
   // When a user "uploads" a file, we just put it in memory in this
@@ -234,7 +235,7 @@ export const init = async function () {
   // the blocked fs enough. Additionally, we don't populate the
   // default files in testing.
   if (process.env.NODE_ENV !== 'test') {
-    let backend = new IndexedDBBackend(() => {
+    const backend = new IndexedDBBackend(() => {
       connection.send('fallback-write-error');
     });
     BFS = new SQLiteFS(FS, backend);
@@ -249,12 +250,12 @@ export const init = async function () {
 };
 
 export const basename = function (filepath) {
-  let parts = filepath.split('/');
+  const parts = filepath.split('/');
   return parts.slice(0, -1).join('/');
 };
 
 export const listDir = async function (filepath) {
-  let paths = FS.readdir(filepath);
+  const paths = FS.readdir(filepath);
   return paths.filter(p => p !== '.' && p !== '..');
 };
 
@@ -267,14 +268,14 @@ export const mkdir = async function (filepath) {
 };
 
 export const size = async function (filepath) {
-  let attrs = FS.stat(resolveLink(filepath));
+  const attrs = FS.stat(resolveLink(filepath));
   return attrs.size;
 };
 
 export const copyFile = async function (frompath, topath) {
   // TODO: This reads the whole file into memory, but that's probably
   // not a problem. This could be optimized
-  let contents = await _readFile(frompath);
+  const contents = await _readFile(frompath);
   return _writeFile(topath, contents);
 };
 
@@ -296,10 +297,10 @@ export const removeDir = async function (filepath) {
 
 export const removeDirRecursively = async function (dirpath) {
   if (await exists(dirpath)) {
-    for (let file of await listDir(dirpath)) {
-      let fullpath = join(dirpath, file);
+    for (const file of await listDir(dirpath)) {
+      const fullpath = join(dirpath, file);
       // `true` here means to not follow symlinks
-      let attr = FS.stat(fullpath, true);
+      const attr = FS.stat(fullpath, true);
 
       if (FS.isDir(attr.mode)) {
         await removeDirRecursively(fullpath);
@@ -312,7 +313,7 @@ export const removeDirRecursively = async function (dirpath) {
   }
 };
 
-export const getModifiedTime = async function (filepath) {
+export const getModifiedTime = async function () {
   throw new Error(
     'getModifiedTime not supported on the web (only used for backups)',
   );

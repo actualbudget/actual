@@ -1,6 +1,6 @@
-let path = require('path');
+const path = require('path');
 
-let config = require('./webpack.desktop.config');
+const config = require('./webpack.desktop.config');
 
 config.resolve.extensions = [
   '.api.js',
@@ -15,6 +15,7 @@ config.resolve.extensions = [
   '.json',
 ];
 config.resolve.fallback = {};
+config.externals.push('@actual-app/crdt');
 config.output.filename = 'bundle.api.js';
 config.output.sourceMapFilename = 'bundle.api.js.map';
 config.output.path = path.join(

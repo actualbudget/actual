@@ -7,7 +7,7 @@ import * as cleanupActions from './cleanup-template';
 import * as goalActions from './goaltemplates';
 import { BudgetHandlers } from './types/handlers';
 
-let app = createApp<BudgetHandlers>();
+export const app = createApp<BudgetHandlers>();
 
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
 app.method(
@@ -55,6 +55,10 @@ app.method(
   mutator(undoable(actions.transferAvailable)),
 );
 app.method(
+  'budget/cover-overbudgeted',
+  mutator(undoable(actions.coverOverbudgeted)),
+);
+app.method(
   'budget/transfer-category',
   mutator(undoable(actions.transferCategory)),
 );
@@ -62,5 +66,3 @@ app.method(
   'budget/set-carryover',
   mutator(undoable(actions.setCategoryCarryover)),
 );
-
-export default app;

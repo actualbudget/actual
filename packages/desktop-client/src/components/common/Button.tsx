@@ -2,10 +2,10 @@ import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
 import { css } from 'glamor';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
-import View from './View';
+import { View } from './View';
 
 type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
@@ -22,9 +22,11 @@ type ButtonProps = HTMLProps<HTMLButtonElement> & {
   as?: ElementType;
 };
 
-type ButtonType = 'normal' | 'primary' | 'bare' | 'link';
+type ButtonType = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
-const backgroundColor = {
+const backgroundColor: {
+  [key in ButtonType | `${ButtonType}Disabled`]?: string;
+} = {
   normal: theme.buttonNormalBackground,
   normalDisabled: theme.buttonNormalDisabledBackground,
   primary: theme.buttonPrimaryBackground,
@@ -33,29 +35,30 @@ const backgroundColor = {
   bareDisabled: theme.buttonBareDisabledBackground,
   menu: theme.buttonMenuBackground,
   menuSelected: theme.buttonMenuSelectedBackground,
-  link: theme.buttonBareBackground,
 };
 
-const backgroundColorHover = {
+const backgroundColorHover: Record<ButtonType, string> = {
   normal: theme.buttonNormalBackgroundHover,
   primary: theme.buttonPrimaryBackgroundHover,
   bare: theme.buttonBareBackgroundHover,
   menu: theme.buttonMenuBackgroundHover,
   menuSelected: theme.buttonMenuSelectedBackgroundHover,
-  link: theme.buttonBareBackground,
 };
 
-const borderColor = {
+const borderColor: {
+  [key in ButtonType | `${ButtonType}Disabled`]?: string;
+} = {
   normal: theme.buttonNormalBorder,
   normalDisabled: theme.buttonNormalDisabledBorder,
   primary: theme.buttonPrimaryBorder,
   primaryDisabled: theme.buttonPrimaryDisabledBorder,
   menu: theme.buttonMenuBorder,
   menuSelected: theme.buttonMenuSelectedBorder,
-  link: theme.buttonBareBackground,
 };
 
-const textColor = {
+const textColor: {
+  [key in ButtonType | `${ButtonType}Disabled`]?: string;
+} = {
   normal: theme.buttonNormalText,
   normalDisabled: theme.buttonNormalDisabledText,
   primary: theme.buttonPrimaryText,
@@ -64,10 +67,11 @@ const textColor = {
   bareDisabled: theme.buttonBareDisabledText,
   menu: theme.buttonMenuText,
   menuSelected: theme.buttonMenuSelectedText,
-  link: theme.pageTextLink,
 };
 
-const textColorHover = {
+const textColorHover: {
+  [key in ButtonType]?: string;
+} = {
   normal: theme.buttonNormalTextHover,
   primary: theme.buttonPrimaryTextHover,
   bare: theme.buttonBareTextHover,
@@ -75,15 +79,12 @@ const textColorHover = {
   menuSelected: theme.buttonMenuSelectedTextHover,
 };
 
-const linkButtonHoverStyles = {
-  textDecoration: 'underline',
-  boxShadow: 'none',
-};
-
-const _getBorder = (type, typeWithDisabled) => {
+const _getBorder = (
+  type: ButtonType,
+  typeWithDisabled: keyof typeof borderColor,
+): string => {
   switch (type) {
     case 'bare':
-    case 'link':
       return 'none';
 
     default:
@@ -91,29 +92,22 @@ const _getBorder = (type, typeWithDisabled) => {
   }
 };
 
-const _getPadding = type => {
+const _getPadding = (type: ButtonType): string => {
   switch (type) {
     case 'bare':
       return '5px';
-    case 'link':
-      return '0';
     default:
       return '5px 10px';
   }
 };
 
-const _getActiveStyles = (type, bounce) => {
+const _getActiveStyles = (type: ButtonType, bounce: boolean): CSSProperties => {
   switch (type) {
     case 'bare':
       return { backgroundColor: theme.buttonBareBackgroundActive };
-    case 'link':
-      return {
-        transform: 'none',
-        boxShadow: 'none',
-      };
     default:
       return {
-        transform: bounce && 'translateY(1px)',
+        transform: bounce ? 'translateY(1px)' : undefined,
         boxShadow: `0 1px 4px 0 ${
           type === 'primary'
             ? theme.buttonPrimaryShadow
@@ -124,7 +118,7 @@ const _getActiveStyles = (type, bounce) => {
   }
 };
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
@@ -143,11 +137,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    let typeWithDisabled = disabled ? type + 'Disabled' : type;
+    const typeWithDisabled: ButtonType | `${ButtonType}Disabled` = disabled
+      ? `${type}Disabled`
+      : type;
 
     hoveredStyle = {
       ...(type !== 'bare' && styles.shadow),
-      ...(type === 'link' && linkButtonHoverStyles),
       backgroundColor: backgroundColorHover[type],
       color: color || textColorHover[type],
       ...hoveredStyle,
@@ -157,15 +152,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ...activeStyle,
     };
 
-    let Component = as;
-    let buttonStyle = {
+    const Component = as;
+    const buttonStyle = {
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
       padding: _getPadding(type),
       margin: 0,
       overflow: 'hidden',
-      display: type === 'link' ? 'inline' : 'flex',
+      display: 'flex',
       borderRadius: 4,
       backgroundColor: backgroundColor[typeWithDisabled],
       border: _getBorder(type, typeWithDisabled),
@@ -197,6 +192,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 
+Button.displayName = 'Button';
+
 type ButtonWithLoadingProps = ButtonProps & {
   loading?: boolean;
 };
@@ -205,7 +202,7 @@ export const ButtonWithLoading = forwardRef<
   HTMLButtonElement,
   ButtonWithLoadingProps
 >((props, ref) => {
-  let { loading, children, ...buttonProps } = props;
+  const { loading, children, ...buttonProps } = props;
   return (
     <Button
       {...buttonProps}
@@ -240,4 +237,4 @@ export const ButtonWithLoading = forwardRef<
   );
 });
 
-export default Button;
+ButtonWithLoading.displayName = 'ButtonWithLoading';

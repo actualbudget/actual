@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as nativeFs from 'fs';
 
 import * as fetchClient from '../platform/client/fetch';
@@ -29,7 +30,7 @@ process.on('unhandledRejection', reason => {
 global.IS_TESTING = true;
 
 let _time = 123456789;
-let _oldDateNow = global.Date.now;
+const _oldDateNow = global.Date.now;
 global.Date.now = () => _time;
 
 global.restoreDateNow = () => (global.Date.now = _oldDateNow);
@@ -99,7 +100,7 @@ global.getDatabaseDump = async function (tables) {
     }),
   );
 
-  let grouped = {};
+  const grouped = {};
   data.forEach(table => (grouped[table[0]] = table[1]));
   return grouped;
 };
@@ -110,13 +111,13 @@ global.getDatabaseDump = async function (tables) {
 
 global.emptyDatabase = function (avoidUpdate) {
   return async () => {
-    let path = ':memory:';
+    const path = ':memory:';
     // let path = `/tmp/foo-${Math.random()}.sqlite`;
     // console.log('Using db ' + path);
 
     await sqlite.init();
 
-    let memoryDB = await sqlite.openDatabase(path);
+    const memoryDB = await sqlite.openDatabase(path);
     sqlite.execQuery(
       memoryDB,
       nativeFs.readFileSync(__dirname + '/../server/sql/init.sql', 'utf8'),

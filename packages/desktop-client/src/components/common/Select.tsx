@@ -7,7 +7,7 @@ import {
 } from '@reach/listbox';
 import { css } from 'glamor';
 
-import ExpandArrow from '../../icons/v0/ExpandArrow';
+import { SvgExpandArrow } from '../../icons/v0';
 import { theme, styles, type CSSProperties } from '../../style';
 
 type SelectProps<Value extends string> = {
@@ -19,6 +19,7 @@ type SelectProps<Value extends string> = {
   style?: CSSProperties;
   wrapperStyle?: CSSProperties;
   line?: number;
+  disabled?: boolean;
   disabledKeys?: Value[];
 };
 
@@ -37,7 +38,7 @@ type SelectProps<Value extends string> = {
  * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
 
-export default function Select<Value extends string>({
+export function Select<Value extends string>({
   bare,
   options,
   value,
@@ -46,6 +47,7 @@ export default function Select<Value extends string>({
   style,
   wrapperStyle,
   line,
+  disabled,
   disabledKeys = [],
 }: SelectProps<Value>) {
   const arrowSize = 7;
@@ -55,6 +57,7 @@ export default function Select<Value extends string>({
     <ListboxInput
       value={value}
       onChange={onChange}
+      disabled={disabled}
       style={{
         color: bare ? 'inherit' : theme.formInputText,
         backgroundColor: bare ? 'transparent' : theme.cardBackground,
@@ -70,7 +73,7 @@ export default function Select<Value extends string>({
           style,
         ])}`}
         arrow={
-          <ExpandArrow
+          <SvgExpandArrow
             style={{
               width: arrowSize,
               height: arrowSize,
@@ -87,7 +90,7 @@ export default function Select<Value extends string>({
             whiteSpace: 'nowrap',
             maxWidth: `calc(100% - ${arrowSize + 5}px)`,
             alignItems: 'center',
-            minHeight: minHeight,
+            minHeight,
           }}
         >
           {targetOption.length !== 0 ? targetOption[0][1] : defaultLabel}
@@ -95,7 +98,7 @@ export default function Select<Value extends string>({
       </ListboxButton>
       <ListboxPopover
         style={{
-          zIndex: 10000,
+          zIndex: 100000,
           outline: 0,
           borderRadius: styles.menuBorderRadius,
           backgroundColor: theme.menuBackground,

@@ -1,11 +1,12 @@
-function makeSpreadsheet() {
+// @ts-strict-ignore
+export function makeSpreadsheet() {
   const cells = {};
   return {
     observers: [],
     _getNode(sheetName, name) {
-      let resolvedName = `${sheetName}!${name}`;
+      const resolvedName = `${sheetName}!${name}`;
 
-      let existing = cells[resolvedName];
+      const existing = cells[resolvedName];
       if (existing) {
         return existing;
       }
@@ -23,14 +24,14 @@ function makeSpreadsheet() {
     },
 
     bind(sheetName, binding, fields, cb) {
-      let { name } = binding;
-      let resolvedName = `${sheetName}!${name}`;
+      const { name } = binding;
+      const resolvedName = `${sheetName}!${name}`;
       if (!this.observers[resolvedName]) {
         this.observers[resolvedName] = [];
       }
       this.observers[resolvedName].push(cb);
 
-      let node = this._getNode(sheetName, name);
+      const node = this._getNode(sheetName, name);
       cb(node);
 
       // bind returns a function which unsubscribes itself. In this mock
@@ -98,5 +99,3 @@ function makeSpreadsheet() {
     },
   };
 }
-
-export default makeSpreadsheet;

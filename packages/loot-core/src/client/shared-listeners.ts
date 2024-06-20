@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { listen, send } from '../platform/client/fetch';
 
 import type { Notification } from './state-types/notifications';
@@ -6,9 +7,9 @@ export function listenForSyncEvent(actions, store) {
   let attemptedSyncRepair = false;
 
   listen('sync-event', info => {
-    let { type, subtype, meta, tables } = info;
+    const { type, subtype, meta, tables } = info;
 
-    let prefs = store.getState().prefs.local;
+    const prefs = store.getState().prefs.local;
     if (!prefs || !prefs.id) {
       // Do nothing if no budget is loaded
       return;
@@ -46,7 +47,7 @@ export function listenForSyncEvent(actions, store) {
       }
     } else if (type === 'error') {
       let notif: Notification | null = null;
-      let learnMore =
+      const learnMore =
         '[Learn more](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)';
       const githubIssueLink =
         'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug&template=bug-report.yml&title=%5BBug%5D%3A+';
@@ -174,7 +175,7 @@ export function listenForSyncEvent(actions, store) {
           // the server does not match the local one. This can mean a
           // few things depending on the state, and we try to show an
           // appropriate message and call to action to fix it.
-          let { cloudFileId } = store.getState().prefs.local;
+          const { cloudFileId } = store.getState().prefs.local;
 
           notif = {
             title: 'Syncing has been reset on this cloud file',

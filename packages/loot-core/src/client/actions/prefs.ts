@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 import type * as prefs from '../../types/prefs';
 import * as constants from '../constants';
@@ -7,10 +8,10 @@ import type { Dispatch, GetState } from './types';
 
 export function loadPrefs() {
   return async (dispatch: Dispatch, getState: GetState) => {
-    let prefs = await send('load-prefs');
+    const prefs = await send('load-prefs');
 
     // Remove any modal state if switching between budgets
-    let currentPrefs = getState().prefs.local;
+    const currentPrefs = getState().prefs.local;
     if (prefs && prefs.id && !currentPrefs) {
       dispatch(closeModal());
     }
@@ -25,7 +26,7 @@ export function loadPrefs() {
   };
 }
 
-export function savePrefs(prefs: Partial<prefs.LocalPrefs>) {
+export function savePrefs(prefs: prefs.LocalPrefs) {
   return async (dispatch: Dispatch) => {
     await send('save-prefs', prefs);
     dispatch({
@@ -37,7 +38,7 @@ export function savePrefs(prefs: Partial<prefs.LocalPrefs>) {
 
 export function loadGlobalPrefs() {
   return async (dispatch: Dispatch, getState: GetState) => {
-    let globalPrefs = await send('load-global-prefs');
+    const globalPrefs = await send('load-global-prefs');
     dispatch({
       type: constants.SET_PREFS,
       prefs: getState().prefs.local,
@@ -47,7 +48,7 @@ export function loadGlobalPrefs() {
   };
 }
 
-export function saveGlobalPrefs(prefs: Partial<prefs.GlobalPrefs>) {
+export function saveGlobalPrefs(prefs: prefs.GlobalPrefs) {
   return async (dispatch: Dispatch) => {
     await send('save-global-prefs', prefs);
     dispatch({

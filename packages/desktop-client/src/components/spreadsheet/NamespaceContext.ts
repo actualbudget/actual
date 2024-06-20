@@ -1,3 +1,3 @@
 import { createContext } from 'react';
 
-export default createContext(undefined);
+export const NamespaceContext = createContext<string | undefined>(undefined);

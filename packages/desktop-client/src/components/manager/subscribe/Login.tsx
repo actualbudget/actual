@@ -1,26 +1,53 @@
+// @ts-strict-ignore
 import React, { type ChangeEvent, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
-import Button, { ButtonWithLoading } from '../../common/Button';
+import { Button, ButtonWithLoading } from '../../common/Button';
 import { BigInput } from '../../common/Input';
-import Text from '../../common/Text';
-import View from '../../common/View';
+import { Link } from '../../common/Link';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 
 export default function Login() {
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const { method = 'password' } = useParams();
   let [loginMethods, setLoginMethods] = useState(['password']);
-  let [password, setPassword] = useState('');
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState(null);
+  const [searchParams, _setSearchParams] = useSearchParams();
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { checked } = useBootstrapped(!searchParams.has('error'));
 
-  let { checked } = useBootstrapped();
+  useEffect(() => {
+    if (checked && !searchParams.has('error')) {
+      (async () => {
+        if (method === 'header') {
+          setError(null);
+          setLoading(true);
+          const { error } = await send('subscribe-sign-in', {
+            password: '',
+            loginMethod: method,
+          });
+          setLoading(false);
+
+          if (error) {
+            setError(error);
+          } else {
+            dispatch(loggedIn());
+          }
+        }
+      })();
+    }
+  }, [checked, searchParams, method, dispatch]);
 
   useEffect(() => {
     send('subscribe-get-login-methods')
@@ -30,6 +57,10 @@ export default function Login() {
 
   function getErrorMessage(error) {
     switch (error) {
+      case 'invalid-header':
+        return 'Auto login failed - No header sent';
+      case 'proxy-not-trusted':
+        return 'Auto login failed - Proxy not trusted';
       case 'invalid-password':
         return 'Invalid password';
       case 'network-failure':
@@ -49,7 +80,10 @@ export default function Login() {
 
     setError(null);
     setLoading(true);
-    let { error } = await send('subscribe-sign-in', { password });
+    const { error } = await send('subscribe-sign-in', {
+      password,
+      loginMethod: method,
+    });
     setLoading(false);
 
     if (error) {
@@ -133,12 +167,38 @@ export default function Login() {
 
       {loginMethods.includes('openid') && (
         <form style={{ marginTop: 20 }} onSubmit={onSubmitOpenId}>
-          <Button primary style={{ fontSize: 15 }}>
+          <Button style={{ fontSize: 15 }}>
             Sign in with OpenId
           </Button>
         </form>
       )}
 
+      {method === 'header' && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 15,
+          }}
+        >
+          {error && (
+            <Link
+              variant="button"
+              type="primary"
+              style={{ fontSize: 15 }}
+              to={'/login/password?error=' + error}
+            >
+              Login with Password
+            </Link>
+          )}
+          {!error && (
+            <span>
+              Checking Header Token Login ...{' '}
+              <AnimatedLoading style={{ width: 20, height: 20 }} />
+            </span>
+          )}
+        </View>
+      )}
       <View
         style={{
           flexDirection: 'row',

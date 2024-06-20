@@ -1,45 +1,127 @@
-import React, { Fragment, useState } from 'react';
+// @ts-strict-ignore
+import React, { Fragment, useMemo, useState } from 'react';
 
-import Eye from '../../icons/v2/Eye';
-import EyeSlashed from '../../icons/v2/EyeSlashed';
 import {
-  type Category,
-  type CategoryGroup,
-  type CategoryListProps,
-} from '../autocomplete/CategoryAutocomplete';
-import Button from '../common/Button';
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
+
+import {
+  SvgCheckAll,
+  SvgUncheckAll,
+  SvgViewHide,
+  SvgViewShow,
+} from '../../icons/v2';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
+import { GraphButton } from './GraphButton';
+
 type CategorySelectorProps = {
-  categoryGroups: Array<CategoryGroup>;
-  selectedCategories: CategoryListProps['items'];
-  setSelectedCategories: (selectedCategories: Category[]) => null;
+  categoryGroups: Array<CategoryGroupEntity>;
+  selectedCategories: CategoryEntity[];
+  setSelectedCategories: (selectedCategories: CategoryEntity[]) => void;
+  showHiddenCategories?: boolean;
 };
 
-export default function CategorySelector({
+export function CategorySelector({
   categoryGroups,
   selectedCategories,
   setSelectedCategories,
+  showHiddenCategories = true,
 }: CategorySelectorProps) {
   const [uncheckedHidden, setUncheckedHidden] = useState(false);
+  const filteredGroup = (categoryGroup: CategoryGroupEntity) => {
+    return categoryGroup.categories.filter(f => {
+      return showHiddenCategories || !f.hidden ? true : false;
+    });
+  };
+
+  const selectAll: CategoryEntity[] = [];
+  categoryGroups.map(categoryGroup =>
+    filteredGroup(categoryGroup).map(category => selectAll.push(category)),
+  );
+
+  if (selectedCategories === undefined) {
+    selectedCategories = categoryGroups.flatMap(cg => cg.categories);
+  }
+
+  const selectedCategoryMap = useMemo(
+    () => selectedCategories.map(selected => selected.id),
+    [selectedCategories],
+  );
+
+  const allCategoriesSelected = selectAll.every(category =>
+    selectedCategoryMap.includes(category.id),
+  );
+
+  const allCategoriesUnselected = !selectAll.some(category =>
+    selectedCategoryMap.includes(category.id),
+  );
 
   return (
-    <>
-      <div>
-        <Button onClick={() => setUncheckedHidden(state => !state)}>
-          {uncheckedHidden ? (
-            <>
-              <Eye width={20} height={20} />
-              Show unchecked
-            </>
-          ) : (
-            <>
-              <EyeSlashed width={20} height={20} />
-              Hide unchecked
-            </>
-          )}
+    <View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 5,
+          flexShrink: 0,
+        }}
+      >
+        <Button
+          type="bare"
+          onClick={() => setUncheckedHidden(state => !state)}
+          style={{ padding: 8 }}
+        >
+          <View>
+            {uncheckedHidden ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <SvgViewShow
+                  width={15}
+                  height={15}
+                  style={{ marginRight: 5 }}
+                />
+                <Text>Show unchecked</Text>
+              </View>
+            ) : (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <SvgViewHide
+                  width={15}
+                  height={15}
+                  style={{ marginRight: 5 }}
+                />
+                <Text>Hide unchecked</Text>
+              </View>
+            )}
+          </View>
         </Button>
-      </div>
+        <View style={{ flex: 1 }} />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <GraphButton
+            selected={allCategoriesSelected}
+            title="Select All"
+            onSelect={() => {
+              setSelectedCategories(selectAll);
+            }}
+            style={{ marginRight: 5, padding: 8 }}
+          >
+            <SvgCheckAll width={15} height={15} />
+          </GraphButton>
+          <GraphButton
+            selected={allCategoriesUnselected}
+            title="Unselect All"
+            onSelect={() => {
+              setSelectedCategories([]);
+            }}
+            style={{ padding: 8 }}
+          >
+            <SvgUncheckAll width={15} height={15} />
+          </GraphButton>
+        </View>
+      </View>
 
       <ul
         style={{
@@ -47,20 +129,20 @@ export default function CategorySelector({
           marginLeft: 0,
           paddingLeft: 0,
           paddingRight: 10,
-          height: 320,
           flexGrow: 1,
-          overflowY: 'scroll',
+          overflowY: 'auto',
         }}
       >
         {categoryGroups &&
           categoryGroups.map(categoryGroup => {
-            const allCategoriesInGroupSelected = categoryGroup.categories.every(
-              category =>
-                selectedCategories.some(
-                  selectedCategory => selectedCategory.id === category.id,
-                ),
+            const allCategoriesInGroupSelected = filteredGroup(
+              categoryGroup,
+            ).every(category =>
+              selectedCategories.some(
+                selectedCategory => selectedCategory.id === category.id,
+              ),
             );
-            const noCategorySelected = categoryGroup.categories.every(
+            const noCategorySelected = filteredGroup(categoryGroup).every(
               category =>
                 !selectedCategories.some(
                   selectedCategory => selectedCategory.id === category.id,
@@ -79,11 +161,11 @@ export default function CategorySelector({
                   <Checkbox
                     id={`form_${categoryGroup.id}`}
                     checked={allCategoriesInGroupSelected}
-                    onChange={e => {
+                    onChange={() => {
                       const selectedCategoriesExcludingGroupCategories =
                         selectedCategories.filter(
                           selectedCategory =>
-                            !categoryGroup.categories.some(
+                            !filteredGroup(categoryGroup).some(
                               groupCategory =>
                                 groupCategory.id === selectedCategory.id,
                             ),
@@ -95,7 +177,7 @@ export default function CategorySelector({
                       } else {
                         setSelectedCategories(
                           selectedCategoriesExcludingGroupCategories.concat(
-                            categoryGroup.categories,
+                            filteredGroup(categoryGroup),
                           ),
                         );
                       }
@@ -117,7 +199,7 @@ export default function CategorySelector({
                       paddingLeft: 10,
                     }}
                   >
-                    {categoryGroup.categories.map((category, index) => {
+                    {filteredGroup(categoryGroup).map(category => {
                       const isChecked = selectedCategories.some(
                         selectedCategory => selectedCategory.id === category.id,
                       );
@@ -134,7 +216,7 @@ export default function CategorySelector({
                           <Checkbox
                             id={`form_${category.id}`}
                             checked={isChecked}
-                            onChange={e => {
+                            onChange={() => {
                               if (isChecked) {
                                 setSelectedCategories(
                                   selectedCategories.filter(
@@ -165,6 +247,6 @@ export default function CategorySelector({
             );
           })}
       </ul>
-    </>
+    </View>
   );
 }

@@ -5,7 +5,6 @@ import { test, expect } from '@playwright/test';
 import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Onboarding', () => {
   let page;
@@ -26,10 +25,10 @@ test.describe('Onboarding', () => {
 
   test('checks the page visuals', async () => {
     await expect(configurationPage.heading).toHaveText('Where’s the server?');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     await configurationPage.clickOnNoServer();
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a new budget file by importing YNAB4 budget', async () => {
@@ -60,10 +59,10 @@ test.describe('Onboarding', () => {
     await expect(budgetPage.budgetTable).toBeVisible({ timeout: 30000 });
 
     const accountPage = await navigation.goToAccountPage('Checking');
-    await expect(accountPage.accountBalance).toHaveText('700.00');
+    await expect(accountPage.accountBalance).toHaveText('2,600.00');
 
     await navigation.goToAccountPage('Saving');
-    await expect(accountPage.accountBalance).toHaveText('200.00');
+    await expect(accountPage.accountBalance).toHaveText('250.00');
   });
 
   test('creates a new budget file by importing Actual budget', async () => {

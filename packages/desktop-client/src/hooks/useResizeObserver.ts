@@ -1,16 +1,17 @@
+// @ts-strict-ignore
 import { useRef, useCallback } from 'react';
 
-export default function useResizeObserver(
-  func: (contentRect: DOMRectReadOnly) => ResizeObserver,
+export function useResizeObserver(
+  func: (contentRect: DOMRectReadOnly) => void,
 ): (el: unknown) => void {
-  let observer = useRef(null);
+  const observer = useRef(null);
   if (!observer.current) {
     observer.current = new ResizeObserver(entries => {
       func(entries[0].contentRect);
     });
   }
 
-  let elementRef = useCallback(el => {
+  const elementRef = useCallback(el => {
     observer.current.disconnect();
     if (el) {
       observer.current.observe(el, { box: 'border-box' });

@@ -1,5 +1,4 @@
 import React, { type ReactNode, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 
 import { media } from 'glamor';
 
@@ -7,29 +6,31 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
-import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
+import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
-import tokens from '../../tokens';
-import Button from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import Input from '../common/Input';
-import Text from '../common/Text';
-import View from '../common/View';
+import { tokens } from '../../tokens';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
+import { Link } from '../common/Link';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
-import EncryptionSettings from './Encryption';
-import ExperimentalFeatures from './Experimental';
-import ExportBudget from './Export';
-import FixSplitsTool from './FixSplits';
-import FormatSettings from './Format';
-import GlobalSettings from './Global';
+import { EncryptionSettings } from './Encryption';
+import { ExperimentalFeatures } from './Experimental';
+import { ExportBudget } from './Export';
+import { FixSplits } from './FixSplits';
+import { FormatSettings } from './Format';
+import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
-import ThemeSettings from './Themes';
+import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
@@ -57,24 +58,29 @@ function About() {
         })}`}
         data-vrt-mask
       >
-        <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
+        <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>
         {isOutdated ? (
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
             New version available: {latestVersion}
-          </ExternalLink>
+          </Link>
         ) : (
-          <Text style={{ color: theme.alt2NoticeText, fontWeight: 600 }}>
+          <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
             You’re up to date!
           </Text>
         )}
         <Text>
-          <ExternalLink to="https://actualbudget.org/docs/releases">
+          <Link
+            variant="external"
+            to="https://actualbudget.org/docs/releases"
+            linkColor="purple"
+          >
             Release Notes
-          </ExternalLink>
+          </Link>
         </Text>
       </View>
     </Setting>
@@ -86,8 +92,8 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  let budgetId = useSelector(state => state.prefs.local.id);
-  let groupId = useSelector(state => state.prefs.local.groupId);
+  const [budgetId] = useLocalPref('id');
+  const [groupId] = useLocalPref('groupId');
 
   return (
     <Setting>
@@ -114,16 +120,14 @@ function AdvancedAbout() {
   );
 }
 
-export default function Settings() {
-  let floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
-  );
-  let budgetName = useSelector(state => state.prefs.local.budgetName);
+export function Settings() {
+  const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const [budgetName] = useLocalPref('budgetName');
 
-  let { loadPrefs, closeBudget } = useActions();
+  const { loadPrefs, closeBudget } = useActions();
 
   useEffect(() => {
-    let unlisten = listen('prefs-updated', () => {
+    const unlisten = listen('prefs-updated', () => {
       loadPrefs();
     });
 
@@ -132,62 +136,58 @@ export default function Settings() {
   }, [loadPrefs]);
 
   const { isNarrowWidth } = useResponsive();
-  const themesFlag = useFeatureFlag('themes');
 
-  useSetThemeColor(theme.mobileSettingsViewTheme);
+  useSetThemeColor(theme.mobileViewTheme);
   return (
-    <View
+    <Page
+      header="Settings"
       style={{
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
+        paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
-      <Page
-        title="Settings"
-        titleStyle={
-          isNarrowWidth
-            ? {
-                backgroundColor: theme.menuItemBackground,
-                color: theme.menuItemText,
-              }
-            : undefined
-        }
+      <View
+        style={{
+          marginTop: 10,
+          flexShrink: 0,
+          maxWidth: 530,
+          gap: 30,
+        }}
       >
-        <View style={{ flexShrink: 0, gap: 30 }}>
-          {isNarrowWidth && (
-            <View
-              style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
-            >
-              {/* The only spot to close a budget on mobile */}
-              <FormField>
-                <FormLabel title="Budget Name" />
-                <Input
-                  value={budgetName}
-                  disabled
-                  style={{ color: theme.buttonNormalDisabledText }}
-                />
-              </FormField>
-              <Button onClick={closeBudget}>Close Budget</Button>
-            </View>
-          )}
+        {isNarrowWidth && (
+          <View
+            style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
+          >
+            {/* The only spot to close a budget on mobile */}
+            <FormField>
+              <FormLabel title="Budget Name" />
+              <Input
+                value={budgetName}
+                disabled
+                style={{ color: theme.buttonNormalDisabledText }}
+              />
+            </FormField>
+            <Button onClick={closeBudget}>Close Budget</Button>
+          </View>
+        )}
 
-          <About />
+        <About />
 
-          {!Platform.isBrowser && <GlobalSettings />}
+        {!Platform.isBrowser && <GlobalSettings />}
 
-          {themesFlag && <ThemeSettings />}
-          <FormatSettings />
-          <EncryptionSettings />
-          <ExportBudget />
+        <ThemeSettings />
+        <FormatSettings />
+        <EncryptionSettings />
+        <ExportBudget />
 
-          <AdvancedToggle>
-            <AdvancedAbout />
-            <ResetCache />
-            <ResetSync />
-            <FixSplitsTool />
-            <ExperimentalFeatures />
-          </AdvancedToggle>
-        </View>
-      </Page>
-    </View>
+        <AdvancedToggle>
+          <AdvancedAbout />
+          <ResetCache />
+          <ResetSync />
+          <FixSplits />
+          <ExperimentalFeatures />
+        </AdvancedToggle>
+      </View>
+    </Page>
   );
 }

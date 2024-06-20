@@ -1,14 +1,13 @@
 import { type ReactNode, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
-import { useActions } from '../../hooks/useActions';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
-import { theme, useTheme } from '../../style';
-import LinkButton from '../common/LinkButton';
-import Text from '../common/Text';
-import View from '../common/View';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { theme } from '../../style';
+import { Link } from '../common/Link';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
@@ -21,23 +20,20 @@ type FeatureToggleProps = {
 };
 
 function FeatureToggle({
-  flag,
+  flag: flagName,
   disableToggle = false,
   error,
   children,
 }: FeatureToggleProps) {
-  let { savePrefs } = useActions();
-  let enabled = useFeatureFlag(flag);
+  const enabled = useFeatureFlag(flagName);
+  const [_, setFlagPref] = useLocalPref(`flags.${flagName}`);
 
   return (
     <label style={{ display: 'flex' }}>
       <Checkbox
         checked={enabled}
         onChange={() => {
-          // @ts-expect-error key type is not correctly inferred
-          savePrefs({
-            [`flags.${flag}`]: !enabled,
-          });
+          setFlagPref(!enabled);
         }}
         disabled={disableToggle}
       />
@@ -61,9 +57,9 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  let budgetType = useSelector(state => state.prefs.local?.budgetType);
-  let enabled = useFeatureFlag('reportBudget');
-  let blockToggleOff = budgetType === 'report' && enabled;
+  const [budgetType] = useLocalPref('budgetType');
+  const enabled = useFeatureFlag('reportBudget');
+  const blockToggleOff = budgetType === 'report' && enabled;
   return (
     <FeatureToggle
       flag="reportBudget"
@@ -75,31 +71,16 @@ function ReportBudgetFeature() {
   );
 }
 
-function ThemeFeature() {
-  let theme = useTheme();
-  let enabled = useFeatureFlag('themes');
-  let blockToggleOff = theme !== 'light' && enabled;
-  return (
-    <FeatureToggle
-      flag="themes"
-      disableToggle={blockToggleOff}
-      error="Switch to the light theme before turning off this feature"
-    >
-      Dark mode
-    </FeatureToggle>
-  );
-}
-
-export default function ExperimentalFeatures() {
-  let [expanded, setExpanded] = useState(false);
+export function ExperimentalFeatures() {
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <Setting
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <FeatureToggle flag="categorySpendingReport">
-              Category spending report
+            <FeatureToggle flag="spendingReport">
+              Monthly spending
             </FeatureToggle>
 
             <ReportBudgetFeature />
@@ -107,16 +88,16 @@ export default function ExperimentalFeatures() {
             <FeatureToggle flag="goalTemplatesEnabled">
               Goal templates
             </FeatureToggle>
-
-            <FeatureToggle flag="experimentalOfxParser">
-              Experimental OFX parser
+            <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
+            <FeatureToggle flag="iterableTopologicalSort">
+              Iterable topological sort budget
             </FeatureToggle>
-
-            <ThemeFeature />
           </View>
         ) : (
-          <LinkButton
+          <Link
+            variant="text"
             onClick={() => setExpanded(true)}
+            data-testid="experimental-settings"
             style={{
               flexShrink: 0,
               alignSelf: 'flex-start',
@@ -124,7 +105,7 @@ export default function ExperimentalFeatures() {
             }}
           >
             I understand the risks, show experimental features
-          </LinkButton>
+          </Link>
         )
       }
     >

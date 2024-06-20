@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { theme } from '../style';
 
-let linesTop = theme.pageBackgroundLineTop; // lines top
-let linesMid = theme.pageBackgroundLineMid; // lines mid
-let linesBottom = theme.pageBackgroundLineBottom; // lines bottom
+const linesTop = theme.pageBackgroundLineTop; // lines top
+const linesMid = theme.pageBackgroundLineMid; // lines mid
+const linesBottom = theme.pageBackgroundLineBottom; // lines bottom
 
 export function BackgroundImage() {
   return (

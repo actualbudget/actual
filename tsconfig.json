@@ -7,7 +7,11 @@
   "compilerOptions": {
     // "composite": true,
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -15,24 +19,52 @@
     "downlevelIteration": true,
     // TODO: enable once every file is ts
     // "strict": true,
+    "strictFunctionTypes": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",
+    "types": [
+      "vite/client",
+      "jest"
+    ],
     // Check JS files too
     "allowJs": true,
     "checkJs": false,
     // Used for temp builds
     "outDir": "build",
-    "moduleResolution": "Node",
+    "moduleResolution": "Node10",
     "module": "ES2022",
     // Until/if we build using tsc
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      // until we turn on composite/references
+      "loot-core/*": [
+        "./packages/loot-core/src/*"
+      ],
+    },
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "path": [
+          "./packages"
+        ]
+      }
+    ]
   },
-  "include": ["packages/**/*"],
-  "exclude": ["**/node_modules/*", "**/build/*", "**/lib-dist/*"],
+  "include": [
+    "packages/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules/*",
+    "**/build/*",
+    "**/client-build/*",
+    "**/dist/*",
+    "**/lib-dist/*"
+  ],
   "ts-node": {
     "compilerOptions": {
-      "module": "commonjs"
+      "module": "CommonJS"
     }
   }
 }

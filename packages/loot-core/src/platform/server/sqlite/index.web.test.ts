@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // eslint-disable-next-line no-restricted-imports
 import {
   init,
@@ -13,13 +14,13 @@ beforeAll(() => {
   return init();
 });
 
-let initSQL = `
+const initSQL = `
 CREATE TABLE numbers (id TEXT PRIMARY KEY, number INTEGER);
 `;
 
 describe('Web sqlite', () => {
   it('should rollback transactions', async () => {
-    let db = await openDatabase();
+    const db = await openDatabase();
     execQuery(db, initSQL);
 
     runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 4)");
@@ -29,7 +30,7 @@ describe('Web sqlite', () => {
     // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[0].number).toBe(4);
 
-    let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     expect(() => {
       transaction(db, () => {
         runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id2', 5)");
@@ -48,7 +49,7 @@ describe('Web sqlite', () => {
   });
 
   it('should support nested transactions', async () => {
-    let db = await openDatabase();
+    const db = await openDatabase();
     execQuery(db, initSQL);
 
     runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 4)");
@@ -63,7 +64,7 @@ describe('Web sqlite', () => {
       runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id3', 6)");
 
       // Only this transaction should fail
-      let consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       expect(() => {
         transaction(db, () => {
           runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id4', 7)");

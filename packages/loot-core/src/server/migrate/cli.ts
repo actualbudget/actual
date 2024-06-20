@@ -1,4 +1,5 @@
 #!/usr/bin/env node --trace-warnings
+// @ts-strict-ignore
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -47,7 +48,7 @@ function create(migrationName) {
 
 async function list(db) {
   const migrationsDir = getMigrationsDir();
-  const applied = await getAppliedMigrations(getDatabase());
+  const applied = await getAppliedMigrations(db);
   const all = await getMigrationList(migrationsDir);
   const pending = getPending(applied, all);
 

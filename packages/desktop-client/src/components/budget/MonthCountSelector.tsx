@@ -1,8 +1,8 @@
 import React from 'react';
 
-import CalendarIcon from '../../icons/v2/Calendar';
+import { SvgCalendar } from '../../icons/v2';
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 
@@ -13,7 +13,7 @@ type CalendarProps = {
 
 function Calendar({ color, onClick }: CalendarProps) {
   return (
-    <CalendarIcon
+    <SvgCalendar
       style={{ width: 13, height: 13, color, marginRight: 5 }}
       onClick={onClick}
     />
@@ -22,14 +22,14 @@ function Calendar({ color, onClick }: CalendarProps) {
 
 type MonthCountSelectorProps = {
   maxMonths: number;
-  onChange: (value: number) => Promise<void>;
+  onChange: (value: number) => void;
 };
 
 export function MonthCountSelector({
   maxMonths,
   onChange,
 }: MonthCountSelectorProps) {
-  let { displayMax } = useBudgetMonthCount();
+  const { displayMax } = useBudgetMonthCount();
 
   // It doesn't make sense to show anything if we can only fit one
   // month
@@ -37,14 +37,12 @@ export function MonthCountSelector({
     return null;
   }
 
-  let calendars = [];
+  const calendars = [];
   for (let i = 1; i <= displayMax; i++) {
     calendars.push(
       <Calendar
         key={i}
-        color={
-          maxMonths >= i ? theme.altpageTextSubdued : theme.altButtonBareText
-        }
+        color={maxMonths >= i ? theme.pageTextLight : theme.pageTextSubdued}
         onClick={() => onChange(i)}
       />,
     );

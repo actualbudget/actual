@@ -1,8 +1,9 @@
+// @ts-strict-ignore
 import { setClock } from '@actual-app/crdt';
 import fc from 'fast-check';
 
 import * as arbs from '../../../mocks/arbitrary-schema';
-import query from '../../../shared/query';
+import { q } from '../../../shared/query';
 import { groupById } from '../../../shared/util';
 import * as db from '../../db';
 import { batchMessages, setSyncingMode } from '../../sync/index';
@@ -22,20 +23,20 @@ function repeat(arr, times) {
 
 function isAlive(trans, allById) {
   if (trans.parent_id) {
-    let parent = allById[trans.parent_id];
+    const parent = allById[trans.parent_id];
     return !trans.tombstone && parent && !parent.tombstone;
   }
   return !trans.tombstone;
 }
 
 function aliveTransactions(arr) {
-  let all = groupById(arr);
+  const all = groupById(arr);
   return arr.filter(t => isAlive(t, all));
 }
 
 async function insertTransactions(transactions, payeeIds?: string[]) {
   return batchMessages(async () => {
-    for (let trans of transactions) {
+    for (const trans of transactions) {
       db.insertTransaction(trans);
     }
 
@@ -61,19 +62,19 @@ function expectTransactionOrder(
     'id',
   ];
 
-  let sorted = [...data].sort((i1, i2) => {
+  const sorted = [...data].sort((i1, i2) => {
     for (let field of expectedFields) {
       let order = 'asc';
       if (!(typeof field === 'string')) {
-        let entries = Object.entries(field)[0];
+        const entries = Object.entries(field)[0];
         field = entries[0];
         order = entries[1];
       }
 
-      let f1 = i1[field];
-      let f2 = i2[field];
-      let before = order === 'asc' ? -1 : 1;
-      let after = order === 'asc' ? 1 : -1;
+      const f1 = i1[field];
+      const f2 = i2[field];
+      const before = order === 'asc' ? -1 : 1;
+      const after = order === 'asc' ? 1 : -1;
 
       expect(f1).not.toBeUndefined();
       expect(f2).not.toBeUndefined();
@@ -95,7 +96,7 @@ function expectTransactionOrder(
 }
 
 async function expectPagedData(query, numTransactions, allData) {
-  let pageCount = Math.max(Math.floor(numTransactions / 3), 3);
+  const pageCount = Math.max(Math.floor(numTransactions / 3), 3);
   let pagedData = [];
   let done = false;
 
@@ -106,7 +107,7 @@ async function expectPagedData(query, numTransactions, allData) {
     expect(i).toBeLessThanOrEqual(100);
 
     // Pull in all the data via pages
-    let { data } = await runQuery(
+    const { data } = await runQuery(
       query.limit(pageCount).offset(pagedData.length).serialize(),
     );
 
@@ -138,8 +139,8 @@ describe('transaction executors', () => {
         async arr => {
           await insertTransactions(arr);
 
-          let { data } = await runQuery(
-            query('transactions')
+          const { data } = await runQuery(
+            q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
               .options({ splits: 'inline' })
@@ -149,8 +150,8 @@ describe('transaction executors', () => {
           expect(data.filter(t => t.is_parent).length).toBe(0);
           expect(data.filter(t => t.tombstone).length).toBe(0);
 
-          let { data: defaultData } = await runQuery(
-            query('transactions')
+          const { data: defaultData } = await runQuery(
+            q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
               .serialize(),
@@ -175,8 +176,8 @@ describe('transaction executors', () => {
         async arr => {
           await insertTransactions(arr);
 
-          let { data } = await runQuery(
-            query('transactions')
+          const { data } = await runQuery(
+            q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
               .options({ splits: 'none' })
@@ -191,7 +192,7 @@ describe('transaction executors', () => {
   });
 
   it('aggregate queries work with `splits: grouped`', async () => {
-    let payeeIds = ['payee1', 'payee2', 'payee3', 'payee4', 'payee5'];
+    const payeeIds = ['payee1', 'payee2', 'payee3', 'payee4', 'payee5'];
 
     await fc.assert(
       fc
@@ -200,7 +201,7 @@ describe('transaction executors', () => {
           async arr => {
             await insertTransactions(arr, payeeIds);
 
-            let aggQuery = query('transactions')
+            const aggQuery = q('transactions')
               .filter({
                 $or: [{ amount: { $lt: -5 } }, { amount: { $gt: -2 } }],
                 'payee.name': { $gt: '' },
@@ -208,11 +209,12 @@ describe('transaction executors', () => {
               .options({ splits: 'grouped' })
               .calculate({ $sum: '$amount' });
 
-            let { data } = await runQuery(aggQuery.serialize());
+            const { data } = await runQuery(aggQuery.serialize());
 
-            let sum = aliveTransactions(arr).reduce((sum, trans) => {
-              let amount = trans.amount || 0;
-              let matched = (amount < -5 || amount > -2) && trans.payee != null;
+            const sum = aliveTransactions(arr).reduce((sum, trans) => {
+              const amount = trans.amount || 0;
+              const matched =
+                (amount < -5 || amount > -2) && trans.payee != null;
               if (!trans.tombstone && !trans.is_parent && matched) {
                 return sum + amount;
               }
@@ -235,40 +237,40 @@ describe('transaction executors', () => {
   });
 
   function runTest(makeQuery) {
-    let payeeIds = ['payee1', 'payee2', 'payee3', 'payee4', 'payee5'];
+    const payeeIds = ['payee1', 'payee2', 'payee3', 'payee4', 'payee5'];
 
     async function check(arr) {
-      let orderFields = ['payee.name', 'amount', 'id'];
+      const orderFields = ['payee.name', 'amount', 'id'];
 
       // Insert transactions and get a list of all the alive
       // ones to make it easier to check the data later (don't
       // have to always be filtering out dead ones)
       await insertTransactions(arr, payeeIds);
-      let allTransactions = aliveTransactions(arr);
+      const allTransactions = aliveTransactions(arr);
 
       // Query time
-      let { query, expectedIds, expectedMatchedIds } = makeQuery(arr);
+      const { query, expectedIds, expectedMatchedIds } = makeQuery(arr);
 
       // First to a query without order to make sure the default
       // order works
-      let { data: defaultOrderData } = await runQuery(query.serialize());
+      const { data: defaultOrderData } = await runQuery(query.serialize());
       expectTransactionOrder(defaultOrderData);
       expect(new Set(defaultOrderData.map(t => t.id))).toEqual(expectedIds);
 
       // Now do the full test, and add a custom order to make
       // sure that doesn't effect anything
-      let orderedQuery = query.orderBy(orderFields);
-      let { data } = await runQuery(orderedQuery.serialize());
+      const orderedQuery = query.orderBy(orderFields);
+      const { data } = await runQuery(orderedQuery.serialize());
       expect(new Set(data.map(t => t.id))).toEqual(expectedIds);
 
       // Validate paging and ordering
       await expectPagedData(orderedQuery, arr.length, data);
       expectTransactionOrder(data, orderFields);
 
-      let matchedIds = new Set();
+      const matchedIds = new Set();
 
       // Check that all the subtransactions were returned
-      for (let trans of data) {
+      for (const trans of data) {
         expect(trans.tombstone).toBe(false);
 
         if (expectedMatchedIds) {
@@ -338,14 +340,14 @@ describe('transaction executors', () => {
 
   it('queries the correct transactions without filters', async () => {
     return runTest(arr => {
-      let expectedIds = new Set(
+      const expectedIds = new Set(
         arr.filter(t => !t.tombstone && !t.is_child).map(t => t.id),
       );
 
       // Even though we're applying some filters, these are always
       // guaranteed to return the full split transaction so they
       // should take the optimized path
-      let happyQuery = query('transactions')
+      const happyQuery = q('transactions')
         .filter({
           date: { $gt: '2017-01-01' },
         })
@@ -364,21 +366,21 @@ describe('transaction executors', () => {
 
   it(`queries the correct transactions with a filter`, async () => {
     return runTest(arr => {
-      let expectedIds = new Set();
+      const expectedIds = new Set();
 
       // let parents = toGroup(
       //   arr.filter(t => t.is_parent),
       //   new Map(Object.entries(groupById(arr.filter(t => t.parent_id))))
       // );
 
-      let parents = groupById(arr.filter(t => t.is_parent && !t.tombstone));
-      let matched = new Set();
+      const parents = groupById(arr.filter(t => t.is_parent && !t.tombstone));
+      const matched = new Set();
 
       // Pick out some ids to query
       let ids = arr.reduce((ids, trans, idx) => {
         if (idx % 2 === 0) {
-          let amount = trans.amount == null ? 0 : trans.amount;
-          let matches = (amount < -2 || amount > -1) && trans.payee > '';
+          const amount = trans.amount == null ? 0 : trans.amount;
+          const matches = (amount < -2 || amount > -1) && trans.payee > '';
 
           if (matches && isAlive(trans, parents)) {
             expectedIds.add(trans.parent_id || trans.id);
@@ -394,7 +396,7 @@ describe('transaction executors', () => {
       // Because why not? It should deduplicate them
       ids = repeat(ids, 100);
 
-      let unhappyQuery = query('transactions')
+      const unhappyQuery = q('transactions')
         .filter({
           id: [{ $oneof: ids }],
           payee: { $gt: '' },

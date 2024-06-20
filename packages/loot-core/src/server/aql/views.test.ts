@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as db from '../db';
 
 import { makeViews } from './views';
@@ -20,7 +21,7 @@ const schemaConfig = {
       },
 
       v_transactions1: internalFields => {
-        let fields = internalFields({
+        const fields = internalFields({
           transfer_id: 'CASE WHEN amount < 4 THEN null ELSE transfer_id END',
         });
 
@@ -28,7 +29,7 @@ const schemaConfig = {
       },
 
       v_transactions2: (_, publicFields) => {
-        let fields = publicFields({
+        const fields = publicFields({
           // eslint-disable-next-line rulesdir/typography
           transfer_id: 'COERCE(transfer_id, "foo")',
         });
@@ -41,7 +42,7 @@ const schemaConfig = {
 
 describe('schema views', () => {
   test('generates views with all the right fields', () => {
-    let str = makeViews(schema, schemaConfig);
+    const str = makeViews(schema, schemaConfig);
     expect(str).toMatch('DROP VIEW IF EXISTS v_transactions1;');
     expect(str).toMatch(
       'CREATE VIEW v_transactions1 AS SELECT _.id, _.a_mo_unt AS amount, CASE WHEN amount < 4 THEN null ELSE transfer_id END AS transfer_id FROM transactions;',

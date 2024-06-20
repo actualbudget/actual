@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import 'fake-indexeddb/auto';
 import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
 
@@ -30,9 +31,9 @@ describe('web filesystem', () => {
     expect(await readFile('/documents/foo.txt')).toBe('hello');
 
     // Binary file
-    let str = 'hello, world';
-    let buf = new ArrayBuffer(str.length * 2);
-    let view = new Uint16Array(buf);
+    const str = 'hello, world';
+    const buf = new ArrayBuffer(str.length * 2);
+    const view = new Uint16Array(buf);
     for (let i = 0, strLen = str.length; i < strLen; i++) {
       view[i] = str.charCodeAt(i);
     }
@@ -40,8 +41,8 @@ describe('web filesystem', () => {
     await writeFile('/documents/foo.bin', buf);
     expect(await readFile('/documents/foo.bin')).toBe('hello, world');
 
-    let db = await idb.openDatabase();
-    let { store } = await idb.getStore(db, 'files');
+    const db = await idb.openDatabase();
+    const { store } = await idb.getStore(db, 'files');
 
     // Make sure they are in idb
     expect(await idb.get(store, '/documents/foo.txt')).toEqual({
@@ -75,8 +76,8 @@ describe('web filesystem', () => {
   });
 
   test('files are restored from idb', async () => {
-    let db = await idb.openDatabase();
-    let { store } = await idb.getStore(db, 'files');
+    const db = await idb.openDatabase();
+    const { store } = await idb.getStore(db, 'files');
     idb.set(store, { filepath: '/documents/ok.txt', contents: 'oh yeah' });
     idb.set(store, {
       filepath: '/documents/deep/nested/file/ok.txt',
@@ -94,8 +95,8 @@ describe('web filesystem', () => {
     expect(await exists('/documents/deep')).toBe(true);
     expect(await readFile('/documents/deep/nested/file/ok.txt')).toBe('deeper');
 
-    let FS = sqlite._getModule().FS;
-    let { node } = FS.lookupPath('/documents/deep/nested/db.sqlite');
+    const FS = sqlite._getModule().FS;
+    const { node } = FS.lookupPath('/documents/deep/nested/db.sqlite');
     expect(node.link).toBe(
       '/blocked/' + pathToId('/documents/deep/nested/db.sqlite'),
     );

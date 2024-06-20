@@ -7,7 +7,7 @@ const initialState: ModalsState = {
   isHidden: false,
 };
 
-function update(state = initialState, action: Action): ModalsState {
+export function update(state = initialState, action: Action): ModalsState {
   switch (action.type) {
     case constants.PUSH_MODAL:
       return {
@@ -22,7 +22,18 @@ function update(state = initialState, action: Action): ModalsState {
     case constants.POP_MODAL:
       return { ...state, modalStack: state.modalStack.slice(0, -1) };
     case constants.CLOSE_MODAL:
-      return { ...state, modalStack: [] };
+      return {
+        ...state,
+        modalStack: [],
+      };
+    case constants.COLLAPSE_MODALS:
+      const idx = state.modalStack.findIndex(
+        m => m.name === action.rootModalName,
+      );
+      return {
+        ...state,
+        modalStack: idx < 0 ? state.modalStack : state.modalStack.slice(0, idx),
+      };
     case constants.SET_APP_STATE:
       if ('loadingText' in action.state) {
         return {
@@ -38,5 +49,3 @@ function update(state = initialState, action: Action): ModalsState {
 
   return state;
 }
-
-export default update;
