@@ -1004,14 +1004,18 @@ export const Table = forwardRef(
       }
 
       if (scrollContainer.current && saveScrollWidth) {
-        saveScrollWidth(
-          scrollContainer.current.offsetParent
-            ? scrollContainer.current.offsetParent.clientWidth
-            : 0,
-          scrollContainer.current ? scrollContainer.current.clientWidth : 0,
-        );
+        setTimeout(saveScrollDelayed, 200);
       }
     });
+
+    function saveScrollDelayed() {
+      saveScrollWidth(
+        scrollContainer.current?.offsetParent
+          ? scrollContainer.current?.offsetParent.clientWidth
+          : 0,
+        scrollContainer.current ? scrollContainer.current.clientWidth : 0,
+      );
+    }
 
     function renderRow({ index, style, key }) {
       const item = items[index];
