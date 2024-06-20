@@ -536,7 +536,7 @@ export function getPayees() {
     SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
     WHERE p.tombstone = 0 AND (p.transfer_acct IS NULL OR a.id IS NOT NULL)
-    ORDER BY p.transfer_acct IS NULL DESC, p.name COLLATE NOCASE
+    ORDER BY p.transfer_acct IS NULL DESC, p.name COLLATE NOCASE, a.offbudget, a.sort_order
   `);
 }
 
