@@ -982,13 +982,18 @@ handlers['simplefin-accounts'] = async function () {
     return { error: 'unauthorized' };
   }
 
-  return post(
-    getServer().SIMPLEFIN_SERVER + '/accounts',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  try {
+    return await post(
+      getServer().SIMPLEFIN_SERVER + '/accounts',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      60000,
+    );
+  } catch (error) {
+    return { error_code: 'TIMED_OUT' };
+  }
 };
 
 handlers['gocardless-get-banks'] = async function (country) {
@@ -1093,7 +1098,9 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account “${acct.name}” is not linked properly. Please link it again`,
+            message: err.reason
+              ? err.reason
+              : `Account “${acct.name}” is not linked properly. Please link it again.`,
           });
         } else {
           errors.push({

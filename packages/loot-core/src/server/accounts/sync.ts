@@ -143,6 +143,7 @@ async function downloadSimpleFinTransactions(acctId, since) {
     {
       'X-ACTUAL-TOKEN': userToken,
     },
+    60000,
   );
 
   if (res.error_code) {
