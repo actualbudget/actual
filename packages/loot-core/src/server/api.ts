@@ -668,16 +668,14 @@ handlers['api/rule-delete'] = withMutation(async function ({ id }) {
 
 handlers['api/schedules-get'] = async function () {
   checkFileOpen();
-  const { data } = await aqlQuery(
-    q('schedules').select('*')
-  );
+  const { data } = await aqlQuery(q('schedules').select('*'));
 
   return data;
 };
 
 handlers['api/schedule-create'] = withMutation(async function ({
   schedule = null,
-  conditions = []
+  conditions = [],
 }) {
   checkFileOpen();
   return handlers['schedule/create']({
@@ -689,28 +687,24 @@ handlers['api/schedule-create'] = withMutation(async function ({
 handlers['api/schedule-update'] = withMutation(async function ({
   schedule,
   conditions = [],
-  resetNextDate = false
+  resetNextDate = false,
 }) {
   checkFileOpen();
   return handlers['schedule/update']({
     schedule,
     conditions,
-    resetNextDate
+    resetNextDate,
   });
 });
 
-handlers['api/schedule-delete'] = withMutation(async function ({
-  id,
-}) {
+handlers['api/schedule-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
   return handlers['schedule/delete']({
     id,
   });
 });
 
-handlers['api/schedule-skip-next-date'] = withMutation(async function ({
-  id,
-}) {
+handlers['api/schedule-skip-next-date'] = withMutation(async function ({ id }) {
   checkFileOpen();
   return handlers['schedule/skip-next-date']({
     id,

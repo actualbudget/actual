@@ -6,7 +6,12 @@ import type {
   APIPayeeEntity,
 } from '../server/api-models';
 
-import type { NewRuleEntity, RuleEntity, ScheduleEntity, TransactionEntity } from './models';
+import type {
+  NewRuleEntity,
+  RuleEntity,
+  ScheduleEntity,
+  TransactionEntity,
+} from './models';
 import { type ServerHandlers } from './server-handlers';
 
 export interface ApiHandlers {
@@ -158,9 +163,16 @@ export interface ApiHandlers {
 
   'api/schedules-get': () => Promise<ScheduleEntity[]>;
 
-  'api/schedule-create': (arg: {schedule: ScheduleEntity, conditions: unknown[]}) => Promise<string>;
+  'api/schedule-create': (arg: {
+    schedule: ScheduleEntity;
+    conditions: unknown[];
+  }) => Promise<string>;
 
-  'api/schedule-update': (arg: {schedule: ScheduleEntity, conditions?: unknown[], resetNextDate?: boolean}) => Promise<void>;
+  'api/schedule-update': (arg: {
+    schedule: ScheduleEntity;
+    conditions?: unknown[];
+    resetNextDate?: boolean;
+  }) => Promise<void>;
 
   'api/schedule-delete': (arg: { id: string }) => Promise<void>;
 
