@@ -84,6 +84,9 @@ export class SchedulesPage {
 
     if (data.amount) {
       await this.page.getByLabel('Amount').fill(String(data.amount));
+      // For some readon, the input field does not trigger the change event on tests
+      // but it works on the browser. We can revisit this once migration to
+      // react aria components is complete.
       await this.page.keyboard.press('Enter');
     }
   }
