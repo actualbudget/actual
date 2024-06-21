@@ -191,17 +191,24 @@ export function SelectedTransactionsButton({
                     },
                   ]
                 : []),
-              {
-                name: 'make-as-split-transaction',
-                text: 'Make as split transaction',
-                disabled: !canMakeAsSplitTransaction,
-              },
-              {
-                name: 'unsplit-transactions',
-                text:
-                  'Unsplit transaction' + (selectedIds.length > 1 ? 's' : ''),
-                disabled: !canUnsplitTransactions,
-              },
+              ...(canMakeAsSplitTransaction
+                ? [
+                    {
+                      name: 'make-as-split-transaction',
+                      text: 'Make as split transaction',
+                    },
+                  ]
+                : []),
+              ...(canUnsplitTransactions
+                ? [
+                    {
+                      name: 'unsplit-transactions',
+                      text:
+                        'Unsplit transaction' +
+                        (selectedIds.length > 1 ? 's' : ''),
+                    },
+                  ]
+                : []),
               Menu.line,
               { type: Menu.label, name: 'Edit field' },
               { name: 'date', text: 'Date' },
