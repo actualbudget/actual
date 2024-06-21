@@ -9,7 +9,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Modal, ModalTitle } from '../common/Modal';
 import { Popover } from '../common/Popover';
@@ -131,7 +131,11 @@ export function CategoryMenuModal({
             paddingTop: 10,
           }}
         >
-          <Button style={buttonStyle} onClick={_onEditNotes}>
+          <Button
+            aria-label="Edit notes"
+            style={buttonStyle}
+            onPress={_onEditNotes}
+          >
             <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
             Edit notes
           </Button>
@@ -163,9 +167,9 @@ function AdditionalCategoryMenu({
     <View>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         aria-label="Menu"
-        onClick={() => {
+        onPress={() => {
           setMenuOpen(true);
         }}
       >

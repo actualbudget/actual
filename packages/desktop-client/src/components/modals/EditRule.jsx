@@ -40,7 +40,7 @@ import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgInformationOutline } from '../../icons/v1';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Select } from '../common/Select';
@@ -157,8 +157,8 @@ function EditorButtons({ onAdd, onDelete }) {
     <>
       {onDelete && (
         <Button
-          type="bare"
-          onClick={onDelete}
+          variant="bare"
+          onPress={onDelete}
           style={{ padding: 7 }}
           aria-label="Delete entry"
         >
@@ -167,8 +167,8 @@ function EditorButtons({ onAdd, onDelete }) {
       )}
       {onAdd && (
         <Button
-          type="bare"
-          onClick={onAdd}
+          variant="bare"
+          onPress={onAdd}
           style={{ padding: 7 }}
           aria-label="Add entry"
         >
@@ -462,7 +462,7 @@ function StageInfo() {
 function StageButton({ selected, children, style, onSelect }) {
   return (
     <Button
-      type="bare"
+      variant="bare"
       style={{
         fontSize: 'inherit',
         ...(selected && {
@@ -471,7 +471,7 @@ function StageButton({ selected, children, style, onSelect }) {
         }),
         ...style,
       }}
-      onClick={onSelect}
+      onPress={onSelect}
     >
       {children}
     </Button>
@@ -611,7 +611,11 @@ function ConditionsList({
   }
 
   return conditions.length === 0 ? (
-    <Button style={{ alignSelf: 'flex-start' }} onClick={addInitialCondition}>
+    <Button
+      aria-label="Add condition"
+      style={{ alignSelf: 'flex-start' }}
+      onPress={addInitialCondition}
+    >
       Add condition
     </Button>
   ) : (
@@ -995,8 +999,9 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
               <View style={{ flex: 1 }}>
                 {actionSplits.length === 0 && (
                   <Button
+                    aria-label="Add action"
                     style={{ alignSelf: 'flex-start' }}
-                    onClick={addInitialAction}
+                    onPress={addInitialAction}
                   >
                     Add action
                   </Button>
@@ -1034,8 +1039,8 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                           </Text>
                           {splitIndex && (
                             <Button
-                              type="bare"
-                              onClick={() => onRemoveSplit(splitIndex)}
+                              variant="bare"
+                              onPress={() => onRemoveSplit(splitIndex)}
                               style={{
                                 width: 20,
                                 height: 20,
@@ -1077,8 +1082,9 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
 
                       {actions.length === 0 && (
                         <Button
+                          aria-label="Add action"
                           style={{ alignSelf: 'flex-start', marginTop: 5 }}
-                          onClick={() =>
+                          onPress={() =>
                             addActionToSplitAfterIndex(splitIndex, -1)
                           }
                         >
@@ -1090,8 +1096,13 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                 </Stack>
                 {showSplitButton && (
                   <Button
+                    aria-label={
+                      actionSplits.length > 1
+                        ? 'Add another split'
+                        : 'Split into multiple transactions'
+                    }
                     style={{ alignSelf: 'flex-start', marginTop: 15 }}
-                    onClick={() => {
+                    onPress={() => {
                       addActionToSplitAfterIndex(actionSplits.length, -1);
                     }}
                     data-testid="add-split-transactions"
@@ -1120,8 +1131,9 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
 
                 <View style={{ flex: 1 }} />
                 <Button
-                  disabled={selectedInst.items.size === 0}
-                  onClick={onApply}
+                  aria-label={`Apply actions (${selectedInst.items.size})`}
+                  isDisabled={selectedInst.items.size === 0}
+                  onPress={onApply}
                 >
                   Apply actions ({selectedInst.items.size})
                 </Button>
@@ -1144,8 +1156,17 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                 justify="flex-end"
                 style={{ marginTop: 20 }}
               >
-                <Button onClick={() => modalProps.onClose()}>Cancel</Button>
-                <Button type="primary" onClick={() => onSave()}>
+                <Button
+                  aria-label="Cancel"
+                  onPress={() => modalProps.onClose()}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  aria-label="Save"
+                  onPress={() => onSave()}
+                >
                   Save
                 </Button>
               </Stack>

@@ -10,7 +10,7 @@ import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
-import { ButtonWithLoading } from '../common/Button';
+import { ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
@@ -187,11 +187,12 @@ export function CreateEncryptionKeyModal({
 
         <ModalButtons style={{ marginTop: 20 }}>
           <ButtonWithLoading
+            variant="primary"
+            aria-label="Enable encryption"
             style={{
               height: isNarrowWidth ? styles.mobileMinHeight : undefined,
             }}
-            loading={loading}
-            type="primary"
+            isLoading={loading}
           >
             Enable
           </ButtonWithLoading>

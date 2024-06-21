@@ -2,7 +2,7 @@
 import React from 'react';
 
 import { Block } from '../common/Block';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -74,8 +74,9 @@ export function ConfirmTransactionEdit({
               }}
             >
               <Button
+                aria-label="Cancel"
                 style={{ marginRight: 10 }}
-                onClick={() => {
+                onPress={() => {
                   modalProps.onClose();
                   onCancel();
                 }}
@@ -83,8 +84,9 @@ export function ConfirmTransactionEdit({
                 Cancel
               </Button>
               <Button
-                type="primary"
-                onClick={() => {
+                variant="primary"
+                aria-label="Confirm"
+                onPress={() => {
                   modalProps.onClose();
                   onConfirm();
                 }}

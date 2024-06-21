@@ -5,7 +5,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Block } from '../common/Block';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -118,8 +118,9 @@ export function ConfirmCategoryDelete({
             </View>
 
             <Button
-              type="primary"
-              onClick={() => {
+              variant="primary"
+              aria-label="Delete"
+              onPress={() => {
                 if (!transferCategory) {
                   setError('required-transfer');
                 } else {
