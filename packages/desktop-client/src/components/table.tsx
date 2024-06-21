@@ -114,8 +114,9 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
 export function UnexposedCellContent({
   value,
   formatter,
-  linkStyle,
-}: Pick<CellProps, 'value' | 'formatter' | 'linkStyle'>) {
+  style,
+  ...props
+}: Pick<CellProps, 'value' | 'formatter' | 'style'>) {
   return (
     <Text
       style={{
@@ -123,7 +124,8 @@ export function UnexposedCellContent({
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        ...linkStyle,
+        ...style,
+        ...props,
       }}
     >
       {formatter ? formatter(value) : value}
@@ -139,10 +141,11 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   plain?: boolean;
   exposed?: boolean;
   children?: ReactNode | (() => ReactNode);
-  unexposedContent?: ReactNode;
+  unexposedContent?: (
+    props: ComponentProps<typeof UnexposedCellContent>,
+  ) => ReactNode;
   value?: string;
   valueStyle?: CSSProperties;
-  linkStyle?: CSSProperties;
   onExpose?: (name: string) => void;
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
@@ -162,7 +165,6 @@ export function Cell({
   plain,
   style,
   valueStyle,
-  linkStyle,
   unexposedContent,
   privacyFilter,
   ...viewProps
@@ -233,12 +235,10 @@ export function Cell({
                   }
             }
           >
-            {unexposedContent || (
-              <UnexposedCellContent
-                linkStyle={linkStyle}
-                value={value}
-                formatter={formatter}
-              />
+            {unexposedContent ? (
+              unexposedContent({ value, formatter })
+            ) : (
+              <UnexposedCellContent value={value} formatter={formatter} />
             )}
           </View>
         )}
