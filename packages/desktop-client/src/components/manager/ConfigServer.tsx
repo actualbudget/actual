@@ -10,7 +10,7 @@ import { useActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -127,37 +127,35 @@ export function ConfigServer() {
         </Text>
       )}
 
-      <form
-        style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-        onSubmit={e => {
-          e.preventDefault();
-          onSubmit();
-        }}
-      >
+      <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
         <BigInput
           autoFocus={true}
           placeholder="https://example.com"
           value={url || ''}
           onChangeValue={setUrl}
           style={{ flex: 1, marginRight: 10 }}
+          onEnter={onSubmit}
         />
         <ButtonWithLoading
-          type="primary"
-          loading={loading}
+          variant="primary"
+          aria-label="OK"
+          isLoading={loading}
           style={{ fontSize: 15 }}
+          onPress={onSubmit}
         >
           OK
         </ButtonWithLoading>
         {currentUrl && (
           <Button
-            type="bare"
+            variant="bare"
+            aria-label="Cancel"
             style={{ fontSize: 15, marginLeft: 10 }}
-            onClick={() => navigate(-1)}
+            onPress={() => navigate(-1)}
           >
             Cancel
           </Button>
         )}
-      </form>
+      </View>
 
       <View
         style={{
@@ -169,9 +167,10 @@ export function ConfigServer() {
       >
         {currentUrl ? (
           <Button
-            type="bare"
+            variant="bare"
+            aria-label="Stop using a server"
             style={{ color: theme.pageTextLight }}
-            onClick={onSkip}
+            onPress={onSkip}
           >
             Stop using a server
           </Button>
@@ -179,30 +178,33 @@ export function ConfigServer() {
           <>
             {!isElectron() && (
               <Button
-                type="bare"
+                variant="bare"
+                aria-label="Use current domain"
                 style={{
                   color: theme.pageTextLight,
                   margin: 5,
                   marginRight: 15,
                 }}
-                onClick={onSameDomain}
+                onPress={onSameDomain}
               >
                 Use current domain
               </Button>
             )}
             <Button
-              type="bare"
+              variant="bare"
+              aria-label="Don’t use a server"
               style={{ color: theme.pageTextLight, margin: 5 }}
-              onClick={onSkip}
+              onPress={onSkip}
             >
               Don’t use a server
             </Button>
 
             {isNonProductionEnvironment() && (
               <Button
-                type="primary"
+                variant="primary"
+                aria-label="Create test file"
                 style={{ marginLeft: 15 }}
-                onClick={onCreateTestFile}
+                onPress={onCreateTestFile}
               >
                 Create test file
               </Button>

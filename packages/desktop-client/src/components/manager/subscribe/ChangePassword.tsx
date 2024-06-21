@@ -5,7 +5,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
@@ -86,9 +86,10 @@ export function ChangePassword() {
       <ConfirmPasswordForm
         buttons={
           <Button
-            type="bare"
+            variant="bare"
+            aria-label="Cancel"
             style={{ fontSize: 15, marginRight: 10 }}
-            onClick={() => navigate('/')}
+            onPress={() => navigate('/')}
           >
             Cancel
           </Button>

@@ -4,7 +4,7 @@ import { type File } from 'loot-core/src/types/file';
 
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
-import { ButtonWithLoading } from '../common/Button';
+import { ButtonWithLoading } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -54,8 +54,9 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
               </Text>
 
               <ButtonWithLoading
-                type="primary"
-                loading={loadingState === 'cloud'}
+                variant="primary"
+                aria-label="Delete file from all devices"
+                isLoading={loadingState === 'cloud'}
                 style={{
                   backgroundColor: theme.errorText,
                   alignSelf: 'center',
@@ -63,7 +64,7 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
                   padding: '10px 30px',
                   fontSize: 14,
                 }}
-                onClick={async () => {
+                onPress={async () => {
                   setLoadingState('cloud');
                   await actions.deleteBudget(
                     'id' in file ? file.id : undefined,
@@ -105,8 +106,9 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
               )}
 
               <ButtonWithLoading
-                type={isCloudFile ? 'normal' : 'primary'}
-                loading={loadingState === 'local'}
+                variant={isCloudFile ? 'normal' : 'primary'}
+                aria-label="Delete file locally"
+                isLoading={loadingState === 'local'}
                 style={{
                   alignSelf: 'center',
                   marginTop: 10,
@@ -122,7 +124,7 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
                         backgroundColor: theme.errorText,
                       }),
                 }}
-                onClick={async () => {
+                onPress={async () => {
                   setLoadingState('local');
                   await actions.deleteBudget(file.id);
                   setLoadingState(null);

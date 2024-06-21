@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ChangeEvent, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -9,7 +9,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
-import { Button, ButtonWithLoading } from '../../common/Button';
+import { Button, ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
 import { Link } from '../../common/Link';
 import { Text } from '../../common/Text';
@@ -63,8 +63,7 @@ export function Login() {
     }
   }
 
-  async function onSubmit(e) {
-    e.preventDefault();
+  async function onSubmit() {
     if (password === '' || loading) {
       return;
     }
@@ -120,27 +119,25 @@ export function Login() {
       )}
 
       {method === 'password' && (
-        <form
-          style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-          onSubmit={onSubmit}
-        >
+        <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
           <BigInput
             autoFocus={true}
             placeholder="Password"
             type="password"
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setPassword(e.target.value)
-            }
+            onChangeValue={setPassword}
             style={{ flex: 1, marginRight: 10 }}
+            onEnter={onSubmit}
           />
           <ButtonWithLoading
-            type="primary"
-            loading={loading}
+            variant="primary"
+            aria-label="Sign in"
+            isLoading={loading}
             style={{ fontSize: 15 }}
+            onPress={onSubmit}
           >
             Sign in
           </ButtonWithLoading>
-        </form>
+        </View>
       )}
       {method === 'header' && (
         <View
@@ -176,9 +173,10 @@ export function Login() {
         }}
       >
         <Button
-          type="bare"
+          variant="bare"
+          aria-label="Try Demo"
           style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
-          onClick={onDemo}
+          onPress={onDemo}
         >
           Try Demo &rarr;
         </Button>

@@ -6,7 +6,7 @@ import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, theme } from '../../style';
 import { Block } from '../common/Block';
-import { ButtonWithLoading } from '../common/Button';
+import { ButtonWithLoading } from '../common/Button2';
 import { Modal, type ModalProps } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
@@ -72,9 +72,10 @@ export function ImportYNAB4({ modalProps }: ImportProps) {
             </Paragraph>
             <View>
               <ButtonWithLoading
-                type="primary"
-                loading={importing}
-                onClick={onImport}
+                variant="primary"
+                aria-label="Select zip file"
+                isLoading={importing}
+                onPress={onImport}
               >
                 Select zip file...
               </ButtonWithLoading>

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
@@ -64,7 +64,12 @@ export function WelcomeScreen() {
           flexShrink: 0,
         }}
       >
-        <Button onClick={() => pushModal('import')}>Import my budget</Button>
+        <Button
+          aria-label="Import my budget"
+          onPress={() => pushModal('import')}
+        >
+          Import my budget
+        </Button>
         <View
           style={{
             flexDirection: 'row',
@@ -72,10 +77,17 @@ export function WelcomeScreen() {
             gap: 10,
           }}
         >
-          <Button onClick={() => createBudget({ testMode: true })}>
+          <Button
+            aria-label="View demo"
+            onPress={() => createBudget({ testMode: true })}
+          >
             View demo
           </Button>
-          <Button type="primary" onClick={() => createBudget()}>
+          <Button
+            variant="primary"
+            aria-label="Start fresh"
+            onPress={() => createBudget()}
+          >
             Start fresh
           </Button>
         </View>

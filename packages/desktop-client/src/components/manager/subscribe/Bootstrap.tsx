@@ -7,7 +7,7 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
@@ -87,9 +87,10 @@ export function Bootstrap() {
       <ConfirmPasswordForm
         buttons={
           <Button
-            type="bare"
+            variant="bare"
+            aria-label="Try Demo"
             style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
-            onClick={onDemo}
+            onPress={onDemo}
           >
             Try Demo
           </Button>

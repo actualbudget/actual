@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import React, { type ChangeEvent, useState } from 'react';
+import React, { useState } from 'react';
 
-import { ButtonWithLoading } from '../../common/Button';
+import { ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
 import { View } from '../../common/View';
 
@@ -11,8 +11,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e) {
-    e.preventDefault();
+  async function onSubmit() {
     if (loading) {
       return;
     }
@@ -31,32 +30,27 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
   }
 
   return (
-    <form
+    <View
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'stretch',
         marginTop: 30,
       }}
-      onSubmit={onSubmit}
     >
       <BigInput
         autoFocus={true}
         placeholder="Password"
         type={showPassword ? 'text' : 'password'}
         value={password1}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setPassword1(e.target.value)
-        }
+        onChangeValue={setPassword1}
         onEnter={onSubmit}
       />
       <BigInput
         placeholder="Confirm password"
         type={showPassword ? 'text' : 'password'}
         value={password2}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setPassword2(e.target.value)
-        }
+        onChangeValue={setPassword2}
         style={{ marginTop: 10 }}
         onEnter={onSubmit}
       />
@@ -74,10 +68,15 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         </label>
         <View style={{ flex: 1 }} />
         {buttons}
-        <ButtonWithLoading type="primary" loading={loading}>
+        <ButtonWithLoading
+          variant="primary"
+          aria-label="OK"
+          isLoading={loading}
+          onPress={onSubmit}
+        >
           OK
         </ButtonWithLoading>
       </View>
-    </form>
+    </View>
   );
 }
