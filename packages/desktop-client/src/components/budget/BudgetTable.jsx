@@ -4,7 +4,6 @@ import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
-import { IntersectionBoundary } from '../tooltips';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
@@ -225,43 +224,41 @@ export function BudgetTable(props) {
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
         />
-        <IntersectionBoundary.Provider value={budgetCategoriesRef}>
+        <View
+          id="scrollableDiv"
+          style={{
+            overflowY: 'scroll',
+            overflowAnchor: 'none',
+            flex: 1,
+            paddingLeft: 5,
+            paddingRight: 5,
+          }}
+          innerRef={budgetCategoriesRef}
+        >
           <View
-            id="scrollableDiv"
             style={{
-              overflowY: 'scroll',
-              overflowAnchor: 'none',
-              flex: 1,
-              paddingLeft: 5,
-              paddingRight: 5,
+              flexShrink: 0,
             }}
-            innerRef={budgetCategoriesRef}
+            onKeyDown={onKeyDown}
           >
-            <View
-              style={{
-                flexShrink: 0,
-              }}
-              onKeyDown={onKeyDown}
-            >
-              <BudgetCategories
-                categoryGroups={categoryGroups}
-                editingCell={editing}
-                dataComponents={dataComponents}
-                onEditMonth={onEditMonth}
-                onEditName={onEditName}
-                onSaveCategory={onSaveCategory}
-                onSaveGroup={onSaveGroup}
-                onDeleteCategory={onDeleteCategory}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={_onReorderCategory}
-                onReorderGroup={_onReorderGroup}
-                onBudgetAction={onBudgetAction}
-                onShowActivity={onShowActivity}
-                scrollToPosition={scrollToPosition}
-              />
-            </View>
+            <BudgetCategories
+              categoryGroups={categoryGroups}
+              editingCell={editing}
+              dataComponents={dataComponents}
+              onEditMonth={onEditMonth}
+              onEditName={onEditName}
+              onSaveCategory={onSaveCategory}
+              onSaveGroup={onSaveGroup}
+              onDeleteCategory={onDeleteCategory}
+              onDeleteGroup={onDeleteGroup}
+              onReorderCategory={_onReorderCategory}
+              onReorderGroup={_onReorderGroup}
+              onBudgetAction={onBudgetAction}
+              onShowActivity={onShowActivity}
+              scrollToPosition={scrollToPosition}
+            />
           </View>
-        </IntersectionBoundary.Provider>
+        </View>
       </MonthsProvider>
     </View>
   );
