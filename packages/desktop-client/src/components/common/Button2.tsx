@@ -1,4 +1,4 @@
-import React, { type ComponentProps, forwardRef } from 'react';
+import React, { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import {
   Button as ReactAriaButton,
   type ButtonProps as ReactAriaButtonProps,
@@ -116,7 +116,7 @@ const _getActiveStyles = (
   }
 };
 
-type ButtonProps = ReactAriaButtonProps & {
+type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
 };
@@ -146,7 +146,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ..._getActiveStyles(variant, bounce),
     };
 
-    const buttonStyle: ComponentProps<typeof Button>['style'] = props => ({
+    const buttonStyle: ComponentPropsWithoutRef<
+      typeof Button
+    >['style'] = props => ({
       ...props.defaultStyle,
       alignItems: 'center',
       justifyContent: 'center',
