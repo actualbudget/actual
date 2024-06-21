@@ -19,7 +19,7 @@ import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
-import { MenuTooltip } from '../common/MenuTooltip';
+import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
@@ -29,7 +29,7 @@ import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
 
 import { Balances } from './Balance';
-import { ReconcilingMessage, ReconcileTooltip } from './Reconcile';
+import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 
 export function AccountHeader({
   filteredAmount,
@@ -86,6 +86,7 @@ export function AccountHeader({
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
+  const triggerRef = useRef(null);
   const splitsExpanded = useSplitsExpanded();
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
@@ -270,7 +271,7 @@ export function AccountHeader({
                     }
                     style={{ marginRight: 4 }}
                   />{' '}
-                  {isServerOffline ? 'Sync offline' : 'Sync'}
+                  {isServerOffline ? 'Bank Sync Offline' : 'Bank Sync'}
                 </>
               ) : (
                 <>
@@ -338,9 +339,14 @@ export function AccountHeader({
           </Button>
           {account ? (
             <View>
-              <MenuButton onClick={() => setMenuOpen(true)} />
+              <MenuButton ref={triggerRef} onClick={() => setMenuOpen(true)} />
 
-              {menuOpen && (
+              <Popover
+                triggerRef={triggerRef}
+                style={{ width: 275 }}
+                isOpen={menuOpen}
+                onOpenChange={() => setMenuOpen(false)}
+              >
                 <AccountMenu
                   account={account}
                   canSync={canSync}
@@ -356,22 +362,31 @@ export function AccountHeader({
                   onReconcile={onReconcile}
                   onClose={() => setMenuOpen(false)}
                 />
-              )}
+              </Popover>
             </View>
           ) : (
             <View>
-              <MenuButton onClick={() => setMenuOpen(true)} />
+              <MenuButton ref={triggerRef} onClick={() => setMenuOpen(true)} />
 
-              {menuOpen && (
-                <CategoryMenu
+              <Popover
+                triggerRef={triggerRef}
+                isOpen={menuOpen}
+                onOpenChange={() => setMenuOpen(false)}
+              >
+                <Menu
                   onMenuSelect={item => {
                     setMenuOpen(false);
                     onMenuSelect(item);
                   }}
-                  onClose={() => setMenuOpen(false)}
-                  isSorted={isSorted}
+                  items={[
+                    isSorted && {
+                      name: 'remove-sorting',
+                      text: 'Remove all sorting',
+                    },
+                    { name: 'export', text: 'Export' },
+                  ]}
                 />
-              )}
+              </Popover>
             </View>
           )}
         </Stack>
@@ -418,76 +433,54 @@ function AccountMenu({
   const syncServerStatus = useSyncServerStatus();
 
   return tooltip === 'reconcile' ? (
-    <ReconcileTooltip
+    <ReconcileMenu
       account={account}
       onClose={onClose}
       onReconcile={onReconcile}
     />
   ) : (
-    <MenuTooltip width={200} onClose={onClose}>
-      <Menu
-        onMenuSelect={item => {
-          if (item === 'reconcile') {
-            setTooltip('reconcile');
-          } else {
-            onMenuSelect(item);
-          }
-        }}
-        items={[
-          isSorted && {
-            name: 'remove-sorting',
-            text: 'Remove all sorting',
-          },
-          canShowBalances && {
-            name: 'toggle-balance',
-            text: (showBalances ? 'Hide' : 'Show') + ' running balance',
-          },
-          {
-            name: 'toggle-cleared',
-            text: (showCleared ? 'Hide' : 'Show') + ' “cleared” checkboxes',
-          },
-          {
-            name: 'toggle-reconciled',
-            text:
-              (showReconciled ? 'Hide' : 'Show') + ' reconciled transactions',
-          },
-          { name: 'export', text: 'Export' },
-          { name: 'reconcile', text: 'Reconcile' },
-          account &&
-            !account.closed &&
-            (canSync
-              ? {
-                  name: 'unlink',
-                  text: 'Unlink account',
-                }
-              : syncServerStatus === 'online' && {
-                  name: 'link',
-                  text: 'Link account',
-                }),
-          account.closed
-            ? { name: 'reopen', text: 'Reopen account' }
-            : { name: 'close', text: 'Close account' },
-        ].filter(x => x)}
-      />
-    </MenuTooltip>
-  );
-}
-
-function CategoryMenu({ onClose, onMenuSelect, isSorted }) {
-  return (
-    <MenuTooltip width={200} onClose={onClose}>
-      <Menu
-        onMenuSelect={item => {
+    <Menu
+      onMenuSelect={item => {
+        if (item === 'reconcile') {
+          setTooltip('reconcile');
+        } else {
           onMenuSelect(item);
-        }}
-        items={[
-          isSorted && {
-            name: 'remove-sorting',
-            text: 'Remove all sorting',
-          },
-          { name: 'export', text: 'Export' },
-        ]}
-      />
-    </MenuTooltip>
+        }
+      }}
+      items={[
+        isSorted && {
+          name: 'remove-sorting',
+          text: 'Remove all sorting',
+        },
+        canShowBalances && {
+          name: 'toggle-balance',
+          text: (showBalances ? 'Hide' : 'Show') + ' running balance',
+        },
+        {
+          name: 'toggle-cleared',
+          text: (showCleared ? 'Hide' : 'Show') + ' “cleared” checkboxes',
+        },
+        {
+          name: 'toggle-reconciled',
+          text: (showReconciled ? 'Hide' : 'Show') + ' reconciled transactions',
+        },
+        { name: 'export', text: 'Export' },
+        { name: 'reconcile', text: 'Reconcile' },
+        account &&
+          !account.closed &&
+          (canSync
+            ? {
+                name: 'unlink',
+                text: 'Unlink account',
+              }
+            : syncServerStatus === 'online' && {
+                name: 'link',
+                text: 'Link account',
+              }),
+        account.closed
+          ? { name: 'reopen', text: 'Reopen account' }
+          : { name: 'close', text: 'Close account' },
+      ].filter(x => x)}
+    />
   );
 }

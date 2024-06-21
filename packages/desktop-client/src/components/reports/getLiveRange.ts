@@ -7,6 +7,7 @@ import { getSpecificRange, validateRange } from './reportRanges';
 export function getLiveRange(
   cond: string,
   earliestTransaction: string,
+  includeCurrentInterval: boolean,
   firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
 ): [string, string] {
   let dateStart = earliestTransaction;
@@ -38,7 +39,9 @@ export function getLiveRange(
       if (typeof rangeName === 'number') {
         [dateStart, dateEnd] = getSpecificRange(
           rangeName,
-          cond === 'Last month' || cond === 'Last week' ? 0 : null,
+          ['This month', 'This week'].includes(cond)
+            ? null
+            : rangeName - (includeCurrentInterval ? 0 : 1),
           ReportOptions.dateRangeType.get(cond),
           firstDayOfWeekIdx,
         );
