@@ -8,7 +8,7 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -153,8 +153,8 @@ export function Balances({
     >
       <Button
         data-testid="account-balance"
-        type="bare"
-        onClick={onToggleExtraBalances}
+        variant="bare"
+        onPress={onToggleExtraBalances}
         style={{
           '& svg': {
             opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0,
