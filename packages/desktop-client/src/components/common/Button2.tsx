@@ -1,8 +1,7 @@
-import React, { forwardRef } from 'react';
+import React, { type ComponentProps, forwardRef } from 'react';
 import {
-  Button as AriaButton,
-  type ButtonRenderProps,
-  type ButtonProps as AriaButtonProps,
+  Button as ReactAriaButton,
+  type ButtonProps as ReactAriaButtonProps,
 } from 'react-aria-components';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -117,7 +116,7 @@ const _getActiveStyles = (
   }
 };
 
-type ButtonProps = AriaButtonProps & {
+type ButtonProps = ReactAriaButtonProps & {
   variant?: ButtonVariant;
   bounce?: boolean;
 };
@@ -147,7 +146,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ..._getActiveStyles(variant, bounce),
     };
 
-    const buttonStyle = (props: ButtonRenderProps) => ({
+    const buttonStyle: ComponentProps<typeof Button>['style'] = props => ({
+      ...props.defaultStyle,
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
@@ -168,9 +168,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     });
 
     return (
-      <AriaButton ref={ref} style={buttonStyle} {...restProps}>
+      <ReactAriaButton ref={ref} style={buttonStyle} {...restProps}>
         {children}
-      </AriaButton>
+      </ReactAriaButton>
     );
   },
 );
