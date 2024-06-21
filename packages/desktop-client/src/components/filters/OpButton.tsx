@@ -3,7 +3,7 @@ import React from 'react';
 import { friendlyOp } from 'loot-core/src/shared/rules';
 
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 
 type OpButtonProps = {
   op: string;
@@ -15,7 +15,7 @@ type OpButtonProps = {
 export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
   return (
     <Button
-      type="bare"
+      variant="bare"
       style={{
         backgroundColor: theme.pillBackground,
         marginBottom: 5,
@@ -28,7 +28,7 @@ export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
           },
         }),
       }}
-      onClick={onClick}
+      onPress={onClick}
     >
       {friendlyOp(op)}
     </Button>

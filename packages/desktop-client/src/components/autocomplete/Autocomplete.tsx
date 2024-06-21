@@ -17,7 +17,7 @@ import { css } from 'glamor';
 import { SvgRemove } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
@@ -621,7 +621,7 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
       }}
     >
       {name}
-      <Button type="bare" style={{ marginLeft: 1 }} onClick={onRemove}>
+      <Button variant="bare" style={{ marginLeft: 1 }} onPress={onRemove}>
         <SvgRemove style={{ width: 8, height: 8 }} />
       </Button>
     </View>
