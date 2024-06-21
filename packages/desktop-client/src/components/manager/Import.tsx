@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { type BoundActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
 import { Block } from '../common/Block';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -64,19 +64,31 @@ export function Import({ modalProps, actions }: ImportProps) {
             process.
           </Text>
 
-          <Button style={itemStyle} onClick={() => onSelectType('ynab4')}>
+          <Button
+            aria-label="YNAB4"
+            style={itemStyle}
+            onPress={() => onSelectType('ynab4')}
+          >
             <span style={{ fontWeight: 700 }}>YNAB4</span>
             <View style={{ color: theme.pageTextLight }}>
               The old unsupported desktop app
             </View>
           </Button>
-          <Button style={itemStyle} onClick={() => onSelectType('ynab5')}>
+          <Button
+            aria-label="nYNAB"
+            style={itemStyle}
+            onPress={() => onSelectType('ynab5')}
+          >
             <span style={{ fontWeight: 700 }}>nYNAB</span>
             <View style={{ color: theme.pageTextLight }}>
               <div>The newer web app</div>
             </View>
           </Button>
-          <Button style={itemStyle} onClick={() => onSelectType('actual')}>
+          <Button
+            aria-label="Actual"
+            style={itemStyle}
+            onPress={() => onSelectType('actual')}
+          >
             <span style={{ fontWeight: 700 }}>Actual</span>
             <View style={{ color: theme.pageTextLight }}>
               <div>Import a file exported from Actual</div>
