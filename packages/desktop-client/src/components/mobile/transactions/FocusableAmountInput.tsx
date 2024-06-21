@@ -17,10 +17,10 @@ import {
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { type CSSProperties, theme } from '../../../style';
-import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { makeAmountFullStyle } from '../../spreadsheet/valueColorization';
 
 type AmountInputProps = {
   value: number;
@@ -218,7 +218,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         onUpdateAmount={amount => onUpdateAmount(amount, isNegative)}
         focused={focused && !disabled}
         style={{
-          ...makeAmountFullStyle(value, {
+          ...makeAmountFullStyle(true, value, {
             zeroColor: isNegative ? theme.errorText : theme.noticeText,
           }),
           width: 80,
@@ -269,7 +269,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
           >
             <Text
               style={{
-                ...makeAmountFullStyle(value),
+                ...makeAmountFullStyle(true, value),
                 fontSize: 15,
                 userSelect: 'none',
                 ...textStyle,

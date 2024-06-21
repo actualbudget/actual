@@ -24,11 +24,14 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
-import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
+import {
+  makeAmountFullStyle,
+  useBalanceValueColorization,
+} from '../spreadsheet/valueColorization';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
@@ -378,6 +381,7 @@ function CategoryItem({
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
   const toBudget = useSheetValue(rolloverBudget.toBudget);
+  const colorizeBalanceValues = useBalanceValueColorization();
 
   return (
     <div
@@ -412,10 +416,14 @@ function CategoryItem({
             display: !showBalances ? 'none' : undefined,
             marginLeft: 5,
             flexShrink: 0,
-            ...makeAmountFullStyle(isToBeBudgetedItem ? toBudget : balance, {
-              positiveColor: theme.noticeTextMenu,
-              negativeColor: theme.errorTextMenu,
-            }),
+            ...makeAmountFullStyle(
+              colorizeBalanceValues,
+              isToBeBudgetedItem ? toBudget : balance,
+              {
+                positiveColor: theme.noticeTextMenu,
+                negativeColor: theme.errorTextMenu,
+              },
+            ),
           }}
         >
           {isToBeBudgetedItem

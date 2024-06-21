@@ -12,7 +12,7 @@ import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { useSheetValue } from '../../../spreadsheet/useSheetValue';
-import { makeAmountFullStyle } from '../../util';
+import { makeAmountFullStyle } from '../../../spreadsheet/valueColorization';
 
 type SavedProps = {
   projected: boolean;
@@ -45,7 +45,7 @@ export function Saved({ projected, style }: SavedProps) {
               right={
                 <Text
                   style={{
-                    ...makeAmountFullStyle(budgetedSaved),
+                    ...makeAmountFullStyle(true, budgetedSaved),
                     ...styles.tnum,
                   }}
                 >
@@ -56,7 +56,9 @@ export function Saved({ projected, style }: SavedProps) {
             <AlignedText
               left="Difference:"
               right={
-                <Text style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}>
+                <Text
+                  style={{ ...makeAmountFullStyle(true, diff), ...styles.tnum }}
+                >
                   {format(diff, 'financial-with-sign')}
                 </Text>
               }

@@ -15,6 +15,7 @@ export function Category() {
   const [_numberFormat] = useLocalPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false] = useLocalPref('hideFraction');
+  const [colorizeBalances = true] = useLocalPref('colorizeBalances');
 
   const { id: categoryId } = useParams();
   const [searchParams] = useSearchParams();
@@ -30,7 +31,7 @@ export function Category() {
     <CategoryTransactions
       // This key forces the whole table rerender when the number
       // format changes
-      key={numberFormat + hideFraction}
+      key={numberFormat + hideFraction + colorizeBalances}
       category={category}
       month={month}
     />

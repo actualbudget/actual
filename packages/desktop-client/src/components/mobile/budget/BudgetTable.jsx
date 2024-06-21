@@ -21,7 +21,6 @@ import { SvgViewShow } from '../../../icons/v2';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
-import { makeAmountFullStyle, makeAmountGrey } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
@@ -31,6 +30,11 @@ import { MobilePageHeader, Page } from '../../Page';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
+import {
+  makeAmountFullStyle,
+  makeAmountGrey,
+  useBalanceValueColorization,
+} from '../../spreadsheet/valueColorization';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
@@ -397,6 +401,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const listItemRef = useRef();
   const format = useFormat();
   const navigate = useNavigate();
+  const colorizeValues = useBalanceValueColorization();
   const onShowActivity = () => {
     navigate(`/categories/${category.id}?month=${month}`);
   };
@@ -574,7 +579,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     mode="oneline"
                     style={{
                       maxWidth: columnWidth,
-                      ...makeAmountFullStyle(value, {
+                      ...makeAmountFullStyle(colorizeValues, value, {
                         zeroColor: theme.pillTextSubdued,
                       }),
                       textAlign: 'right',
@@ -642,6 +647,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
   const opacity = blank ? 0 : 1;
   const listItemRef = useRef();
   const format = useFormat();
+  const colorizeValues = useBalanceValueColorization();
   const sidebarColumnWidth = getColumnWidth({
     show3Cols,
     isSidebar: true,
@@ -822,6 +828,9 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                   fontWeight: '500',
                   paddingLeft: 5,
                   textAlign: 'right',
+                  ...makeAmountFullStyle(colorizeValues, value, {
+                    zeroColor: theme.pillTextSubdued,
+                  }),
                 }}
               >
                 {format(value, 'financial')}
@@ -1663,6 +1672,7 @@ function BudgetTableHeader({
   toggleSpentColumn,
 }) {
   const format = useFormat();
+  const colorizeValues = useBalanceValueColorization();
   const buttonStyle = {
     padding: 0,
     backgroundColor: 'transparent',
@@ -1855,11 +1865,11 @@ function BudgetTableHeader({
                 mode="oneline"
                 style={{
                   maxWidth: columnWidth,
-                  color: theme.formInputText,
                   paddingLeft: 5,
                   textAlign: 'right',
                   fontSize: 12,
                   fontWeight: '500',
+                  ...makeAmountFullStyle(colorizeValues, value),
                 }}
               >
                 {format(value, 'financial')}

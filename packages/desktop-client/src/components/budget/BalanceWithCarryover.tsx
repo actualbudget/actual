@@ -9,8 +9,10 @@ import { View } from '../common/View';
 import { type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-
-import { makeBalanceAmountStyle } from './util';
+import {
+  makeBalanceAmountStyle,
+  useBalanceValueColorization,
+} from '../spreadsheet/valueColorization';
 
 type BalanceWithCarryoverProps = Omit<
   ComponentPropsWithoutRef<typeof CellValue>,
@@ -37,6 +39,7 @@ export function BalanceWithCarryover({
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const colorizeValues = useBalanceValueColorization();
 
   const { isNarrowWidth } = useResponsive();
 
@@ -48,6 +51,7 @@ export function BalanceWithCarryover({
         type="financial"
         getStyle={value =>
           makeBalanceAmountStyle(
+            colorizeValues,
             value,
             isGoalTemplatesEnabled ? goalValue : null,
             budgetedValue,
@@ -78,6 +82,7 @@ export function BalanceWithCarryover({
             width={carryoverStyle?.width || 7}
             height={carryoverStyle?.height || 7}
             style={makeBalanceAmountStyle(
+              colorizeValues,
               balanceValue,
               goalValue,
               budgetedValue,

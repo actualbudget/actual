@@ -14,7 +14,7 @@ import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
-import { Setting } from './UI';
+import { Column, Setting } from './UI';
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday
@@ -36,22 +36,6 @@ const dateFormats: { value: LocalPrefs['dateFormat']; label: string }[] = [
   { value: 'MM.dd.yyyy', label: 'MM.DD.YYYY' },
   { value: 'dd.MM.yyyy', label: 'DD.MM.YYYY' },
 ];
-
-function Column({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <View
-      style={{
-        alignItems: 'flex-start',
-        flexGrow: 1,
-        gap: '0.5em',
-        width: '100%',
-      }}
-    >
-      <Text style={{ fontWeight: 500 }}>{title}</Text>
-      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
-    </View>
-  );
-}
 
 export function FormatSettings() {
   const sidebar = useSidebar();

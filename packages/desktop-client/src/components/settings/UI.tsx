@@ -6,6 +6,7 @@ import { css, media } from 'glamor';
 import { type CSSProperties, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Link } from '../common/Link';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 type SettingProps = {
@@ -91,3 +92,25 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
     </Link>
   );
 };
+
+export function Column({
+  title,
+  children,
+}: {
+  title?: string;
+  children: ReactNode;
+}) {
+  return (
+    <View
+      style={{
+        alignItems: 'flex-start',
+        flexGrow: 1,
+        gap: '0.5em',
+        width: '100%',
+      }}
+    >
+      {title && <Text style={{ fontWeight: 500 }}>{title}</Text>}
+      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
+    </View>
+  );
+}
