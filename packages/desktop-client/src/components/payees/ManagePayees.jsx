@@ -22,7 +22,7 @@ import {
 import { useStableCallback } from '../../hooks/useStableCallback';
 import { SvgExpandArrow } from '../../icons/v0';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
 import { View } from '../common/View';
@@ -236,10 +236,10 @@ export const ManagePayees = forwardRef(
           <View style={{ flexShrink: 0 }}>
             <Button
               ref={triggerRef}
-              type="bare"
+              variant="bare"
               style={{ marginRight: 10 }}
-              disabled={buttonsDisabled}
-              onClick={() => setMenuOpen(true)}
+              isDisabled={buttonsDisabled}
+              onPress={() => setMenuOpen(true)}
             >
               {buttonsDisabled
                 ? 'No payees selected'
@@ -273,9 +273,9 @@ export const ManagePayees = forwardRef(
             {(orphanedOnly ||
               (orphanedPayees && orphanedPayees.length > 0)) && (
               <Button
-                type="bare"
+                variant="bare"
                 style={{ marginRight: 10 }}
-                onClick={() => {
+                onPress={() => {
                   setOrphanedOnly(!orphanedOnly);
                   applyFilter(filter);
                   tableNavigator.onEdit(null);
