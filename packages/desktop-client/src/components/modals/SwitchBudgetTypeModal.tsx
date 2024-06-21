@@ -4,7 +4,7 @@ import React from 'react';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Modal, ModalTitle } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
@@ -41,11 +41,10 @@ export function SwitchBudgetTypeModal({
           Switching will not lose any data and you can always switch back.
         </Paragraph>
         <Button
-          type="primary"
-          style={{
-            ...narrowStyle,
-          }}
-          onClick={() => {
+          variant="primary"
+          aria-label={`Switch to a ${budgetType === 'report' ? 'Rollover budget' : 'Report budget'}`}
+          style={narrowStyle}
+          onPress={() => {
             onSwitch?.();
             modalProps.onClose?.();
           }}

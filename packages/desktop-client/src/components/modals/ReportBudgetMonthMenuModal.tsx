@@ -8,7 +8,7 @@ import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal, ModalTitle } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -106,7 +106,11 @@ export function ReportBudgetMonthMenuModal({
               alignContent: 'space-between',
             }}
           >
-            <Button style={buttonStyle} onClick={_onEditNotes}>
+            <Button
+              aria-label="Edit notes"
+              style={buttonStyle}
+              onPress={_onEditNotes}
+            >
               <SvgNotesPaper
                 width={20}
                 height={20}
@@ -117,17 +121,15 @@ export function ReportBudgetMonthMenuModal({
           </View>
           <View>
             <Button
-              type="bare"
-              style={buttonStyle}
-              activeStyle={{
-                backgroundColor: 'transparent',
-                color: buttonStyle.color,
-              }}
-              hoveredStyle={{
-                backgroundColor: 'transparent',
-                color: buttonStyle.color,
-              }}
-              onClick={onShowMore}
+              variant="bare"
+              aria-label="Show more actions"
+              style={({ isPressed, isHovered }) => ({
+                ...buttonStyle,
+                ...(isPressed || isHovered
+                  ? { backgroundColor: 'transparent', color: buttonStyle.color }
+                  : {}),
+              })}
+              onPress={onShowMore}
             >
               {!showMore ? (
                 <SvgCheveronUp

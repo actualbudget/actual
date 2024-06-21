@@ -11,7 +11,7 @@ import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
@@ -184,13 +184,14 @@ export function CreateAccountModal({
           {upgradingAccountId == null && (
             <View style={{ gap: 10 }}>
               <Button
-                type="primary"
+                variant="primary"
+                aria-label="Create local account"
                 style={{
                   padding: '10px 0',
                   fontSize: 15,
                   fontWeight: 600,
                 }}
-                onClick={onCreateLocalAccount}
+                onPress={onCreateLocalAccount}
               >
                 Create local account
               </Button>
@@ -221,14 +222,19 @@ export function CreateAccountModal({
                   }}
                 >
                   <ButtonWithLoading
-                    disabled={syncServerStatus !== 'online'}
+                    aria-label={
+                      isGoCardlessSetupComplete
+                        ? 'Link bank account with GoCardless'
+                        : 'Set up GoCardless for bank sync'
+                    }
+                    isDisabled={syncServerStatus !== 'online'}
                     style={{
                       padding: '10px 0',
                       fontSize: 15,
                       fontWeight: 600,
                       flex: 1,
                     }}
-                    onClick={onConnectGoCardless}
+                    onPress={onConnectGoCardless}
                   >
                     {isGoCardlessSetupComplete
                       ? 'Link bank account with GoCardless'
@@ -236,8 +242,8 @@ export function CreateAccountModal({
                   </ButtonWithLoading>
                   {isGoCardlessSetupComplete && (
                     <Button
-                      type="bare"
-                      onClick={() => setGoCardlessMenuOpen(true)}
+                      variant="bare"
+                      onPress={() => setGoCardlessMenuOpen(true)}
                       aria-label="Menu"
                     >
                       <SvgDotsHorizontalTriple
@@ -288,15 +294,20 @@ export function CreateAccountModal({
                       }}
                     >
                       <ButtonWithLoading
-                        disabled={syncServerStatus !== 'online'}
-                        loading={loadingSimpleFinAccounts}
+                        aria-label={
+                          isSimpleFinSetupComplete
+                            ? 'Link bank account with SimpleFIN'
+                            : 'Set up SimpleFIN for bank sync'
+                        }
+                        isDisabled={syncServerStatus !== 'online'}
+                        isLoading={loadingSimpleFinAccounts}
                         style={{
                           padding: '10px 0',
                           fontSize: 15,
                           fontWeight: 600,
                           flex: 1,
                         }}
-                        onClick={onConnectSimpleFin}
+                        onPress={onConnectSimpleFin}
                       >
                         {isSimpleFinSetupComplete
                           ? 'Link bank account with SimpleFIN'
@@ -304,8 +315,8 @@ export function CreateAccountModal({
                       </ButtonWithLoading>
                       {isSimpleFinSetupComplete && (
                         <Button
-                          type="bare"
-                          onClick={() => setSimplefinMenuOpen(true)}
+                          variant="bare"
+                          onPress={() => setSimplefinMenuOpen(true)}
                           aria-label="Menu"
                         >
                           <SvgDotsHorizontalTriple
@@ -351,7 +362,8 @@ export function CreateAccountModal({
             ) : (
               <>
                 <Button
-                  disabled
+                  aria-label="Set up bank sync"
+                  isDisabled
                   style={{
                     padding: '10px 0',
                     fontSize: 15,

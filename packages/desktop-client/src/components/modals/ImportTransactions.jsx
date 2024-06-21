@@ -1090,7 +1090,9 @@ export function ImportTransactions({ modalProps, options }) {
             <strong>Error:</strong> {error.message}
           </Text>
           {error.parsed && (
-            <Button onClick={() => onNewFile()}>Select new file...</Button>
+            <Button aria-label="Select new file" onPress={() => onNewFile()}>
+              Select new file...
+            </Button>
           )}
         </View>
       )}
@@ -1284,10 +1286,11 @@ export function ImportTransactions({ modalProps, options }) {
           }}
         >
           <ButtonWithLoading
-            type="primary"
-            disabled={transactions.length === 0}
-            loading={loadingState === 'importing'}
-            onClick={onImport}
+            variant="primary"
+            aria-label={`Import ${transactions.length} transactions`}
+            isDisabled={transactions.length === 0}
+            isLoading={loadingState === 'importing'}
+            onPress={onImport}
           >
             Import {transactions.length} transactions
           </ButtonWithLoading>
