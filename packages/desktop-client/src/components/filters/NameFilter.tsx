@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -54,12 +54,9 @@ export function NameFilter({
               />
             </FormField>
             <Button
-              type="primary"
+              variant="primary"
               style={{ marginTop: 18 }}
-              onClick={e => {
-                e.preventDefault();
-                onAddUpdate();
-              }}
+              onPress={onAddUpdate}
             >
               {adding ? 'Add' : 'Update'}
             </Button>

@@ -22,7 +22,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
@@ -219,9 +219,8 @@ function ConfigureField({
         >
           <View style={{ flex: 1 }} />
           <Button
-            type="primary"
-            onClick={e => {
-              e.preventDefault();
+            variant="primary"
+            onPress={() => {
               onApply({
                 field,
                 op,
