@@ -35,7 +35,7 @@ type ExpenseCategoryProps = {
   onBudgetAction: (month: number, action: string, arg: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
   onReorder: OnDropCallback;
-  scrollToPosition: () => void;
+  setScrollPosition: () => void;
 };
 
 export function ExpenseCategory({
@@ -52,7 +52,7 @@ export function ExpenseCategory({
   onShowActivity,
   onDragChange,
   onReorder,
-  scrollToPosition,
+  setScrollPosition,
 }: ExpenseCategoryProps) {
   let dragging = dragState && dragState.item === cat;
 
@@ -111,7 +111,7 @@ export function ExpenseCategory({
             onEdit: onEditMonth,
             onBudgetAction,
             onShowActivity,
-            scrollToPosition,
+            setScrollPosition,
           }}
         />
       </View>

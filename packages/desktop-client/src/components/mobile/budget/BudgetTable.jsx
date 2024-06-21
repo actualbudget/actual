@@ -328,7 +328,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   onBudgetAction,
   show3Cols,
   showBudgetedCol,
-  scrollToPosition,
+  setScrollPosition,
 }) {
   const opacity = blank ? 0 : 1;
 
@@ -519,7 +519,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             getStyle={makeAmountGrey}
             type="financial"
             onClick={() => {
-              scrollToPosition();
+              setScrollPosition();
               onShowActivity();
             }}
             formatter={value => (
@@ -1239,7 +1239,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
   showHiddenCategories,
   collapsed,
   onToggleCollapse,
-  scrollToPosition,
+  setScrollPosition,
 }) {
   function editable(content) {
     if (!editMode) {
@@ -1352,7 +1352,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
               month={month}
               // onReorder={onReorderCategory}
               onBudgetAction={onBudgetAction}
-              scrollToPosition={scrollToPosition}
+              setScrollPosition={setScrollPosition}
             />
           );
         })}
@@ -1464,7 +1464,7 @@ function BudgetGroups({
   showBudgetedCol,
   show3Cols,
   showHiddenCategories,
-  scrollToPosition,
+  setScrollPosition,
 }) {
   const separateGroups = memoizeOne(groups => {
     return {
@@ -1514,7 +1514,7 @@ function BudgetGroups({
               showHiddenCategories={showHiddenCategories}
               collapsed={collapsedGroupIds.includes(group.id)}
               onToggleCollapse={onToggleCollapse}
-              scrollToPosition={scrollToPosition}
+              setScrollPosition={setScrollPosition}
             />
           );
         })}
@@ -1572,7 +1572,7 @@ export function BudgetTable({
     'mobile.showSpentColumn',
   );
 
-  const scrollToPosition = () => {
+  const setScrollPosition = () => {
     sessionStorage.setItem(
       'scrollPosition',
       document.getElementById('scrollableDiv').scrollTop,
@@ -1680,7 +1680,7 @@ export function BudgetTable({
             onReorderCategory={onReorderCategory}
             onReorderGroup={onReorderGroup}
             onBudgetAction={onBudgetAction}
-            scrollToPosition={scrollToPosition}
+            setScrollPosition={setScrollPosition}
           />
         </View>
       </PullToRefresh>

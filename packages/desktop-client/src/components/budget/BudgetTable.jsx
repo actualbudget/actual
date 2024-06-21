@@ -37,7 +37,7 @@ export function BudgetTable(props) {
     'budget.showHiddenCategories',
   );
 
-  const scrollToPosition = () => {
+  const setScrollPosition = () => {
     sessionStorage.setItem(
       'scrollPosition',
       document.getElementById('scrollableDiv').scrollTop,
@@ -255,7 +255,7 @@ export function BudgetTable(props) {
               onReorderGroup={_onReorderGroup}
               onBudgetAction={onBudgetAction}
               onShowActivity={onShowActivity}
-              scrollToPosition={scrollToPosition}
+              setScrollPosition={setScrollPosition}
             />
           </View>
         </View>

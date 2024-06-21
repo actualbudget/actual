@@ -147,7 +147,7 @@ type CategoryMonthProps = {
   onEdit: (id: string | null, month?: string) => void;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
-  scrollToPosition: () => void;
+  setScrollPosition: () => void;
 };
 export const CategoryMonth = memo(function CategoryMonth({
   month,
@@ -156,7 +156,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   onEdit,
   onBudgetAction,
   onShowActivity,
-  scrollToPosition,
+  setScrollPosition,
 }: CategoryMonthProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
@@ -305,7 +305,7 @@ export const CategoryMonth = memo(function CategoryMonth({
         <span
           data-testid="category-month-spent"
           onClick={() => {
-            scrollToPosition();
+            setScrollPosition();
             onShowActivity(category.id, month);
           }}
         >

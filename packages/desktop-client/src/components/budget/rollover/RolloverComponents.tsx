@@ -143,7 +143,7 @@ type ExpenseCategoryMonthProps = {
   onEdit: (id: string | null, month?: string) => void;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
-  scrollToPosition: () => void;
+  setScrollPosition: () => void;
 };
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   month,
@@ -152,7 +152,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onEdit,
   onBudgetAction,
   onShowActivity,
-  scrollToPosition,
+  setScrollPosition,
 }: ExpenseCategoryMonthProps) {
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
@@ -298,7 +298,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         <span
           data-testid="category-month-spent"
           onClick={() => {
-            scrollToPosition();
+            setScrollPosition();
             onShowActivity(category.id, month);
           }}
         >
