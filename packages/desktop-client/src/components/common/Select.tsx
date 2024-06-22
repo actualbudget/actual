@@ -102,6 +102,7 @@ export function Select<Value extends string>({
 
       <Popover
         triggerRef={triggerRef}
+        placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
       >
