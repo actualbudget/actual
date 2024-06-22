@@ -111,10 +111,11 @@ export function OpSelect({
 }) {
   const opOptions = useMemo(() => {
     const options = ops
-      // We don't support the `contains` operator for the id type for
-      // rules yet
+      // We don't support the `contains`, `doesNotContain`, `matches` operators
+      // for the id type rules yet
+      // TODO: Add matches op support for payees, accounts, categories.
       .filter(op =>
-        type === 'id' ? op !== 'contains' && op !== 'doesNotContain' : true,
+        type === 'id' ? !['contains', 'matches', 'doesNotContain'].includes(op) : true,
       )
       .map(op => [op, formatOp(op, type)]);
 
