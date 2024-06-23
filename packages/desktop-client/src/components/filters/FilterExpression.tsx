@@ -61,7 +61,6 @@ export function FilterExpression({
         type="bare"
         disabled={customName != null}
         onClick={() => setEditing(true)}
-        style={{ marginRight: -7 }}
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
@@ -76,7 +75,11 @@ export function FilterExpression({
                 value={value}
                 field={field}
                 inline={true}
-                valueIsRaw={op === 'contains' || op === 'doesNotContain'}
+                valueIsRaw={
+                  op === 'contains' ||
+                  op === 'matches' ||
+                  op === 'doesNotContain'
+                }
               />
             </>
           )}
@@ -87,8 +90,7 @@ export function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            margin: 5,
-            marginLeft: 3,
+            margin: 4,
           }}
         />
       </Button>
