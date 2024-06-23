@@ -452,6 +452,10 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           '$like',
           '%' + value + '%',
         );
+      case 'matches':
+        // Running contains with id will automatically reach into
+        // the `name` of the referenced table and do a regex match
+        return apply(type === 'id' ? field + '.name' : field, '$regexp', value);
       case 'doesNotContain':
         // Running contains with id will automatically reach into
         // the `name` of the referenced table and do a string match

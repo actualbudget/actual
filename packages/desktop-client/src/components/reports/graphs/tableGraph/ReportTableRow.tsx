@@ -16,6 +16,7 @@ import { useCategories } from '../../../../hooks/useCategories';
 import { useNavigate } from '../../../../hooks/useNavigate';
 import { useResponsive } from '../../../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../../../style';
+import { Text } from '../../../common/Text';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 import { showActivity } from '../showActivity';
@@ -128,7 +129,9 @@ export const ReportTableRow = memo(
                     style={{
                       minWidth: compact ? 50 : 85,
                     }}
-                    linkStyle={hoverUnderline}
+                    unexposedContent={({ value }) => (
+                      <Text style={hoverUnderline}>{value}</Text>
+                    )}
                     valueStyle={compactStyle}
                     value={amountToCurrency(intervalItem[balanceTypeOp])}
                     title={
@@ -176,7 +179,9 @@ export const ReportTableRow = memo(
                     style={{
                       minWidth: compact ? 50 : 85,
                     }}
-                    linkStyle={hoverUnderline}
+                    unexposedContent={({ value }) => (
+                      <Text style={hoverUnderline}>{value}</Text>
+                    )}
                     valueStyle={compactStyle}
                     onClick={() =>
                       !isNarrowWidth &&
@@ -211,7 +216,9 @@ export const ReportTableRow = memo(
                     style={{
                       minWidth: compact ? 50 : 85,
                     }}
-                    linkStyle={hoverUnderline}
+                    unexposedContent={({ value }) => (
+                      <Text style={hoverUnderline}>{value}</Text>
+                    )}
                     valueStyle={compactStyle}
                     onClick={() =>
                       !isNarrowWidth &&
@@ -247,7 +254,9 @@ export const ReportTableRow = memo(
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
             }}
-            linkStyle={hoverUnderline}
+            unexposedContent={({ value }) => (
+              <Text style={hoverUnderline}>{value}</Text>
+            )}
             valueStyle={compactStyle}
             onClick={() =>
               !isNarrowWidth &&
