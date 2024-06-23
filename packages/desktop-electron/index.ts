@@ -1,4 +1,5 @@
 import fs from 'fs';
+import NodeModule from 'module';
 import path from 'path';
 
 import {
@@ -18,8 +19,20 @@ import promiseRetry from 'promise-retry';
 import about from './about';
 import getMenu from './menu';
 import updater from './updater';
+import {
+  get as getWindowState,
+  listen as listenToWindowState,
+} from './window-state';
 
-require('module').globalPaths.push(__dirname + '/..');
+import './setRequireHook';
+
+import './security';
+
+const Module: typeof NodeModule & { globalPaths: string[] } =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  NodeModule as unknown as any;
+
+Module.globalPaths.push(__dirname + '/..');
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -29,10 +42,6 @@ protocol.registerSchemesAsPrivileged([
 
 global.fetch = require('node-fetch');
 
-require('./security');
-
-require('./setRequireHook');
-
 if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
   process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
 }
@@ -40,9 +49,6 @@ if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
 if (!isDev || !process.env.ACTUAL_DATA_DIR) {
   process.env.ACTUAL_DATA_DIR = app.getPath('userData');
 }
-
-// eslint-disable-next-line import/extensions
-const WindowState = require('./window-state.js');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -97,7 +103,7 @@ function createBackgroundProcess() {
 }
 
 async function createWindow() {
-  const windowState = await WindowState.get();
+  const windowState = await getWindowState();
 
   // Create the browser window.
   const win = new BrowserWindow({
@@ -120,7 +126,7 @@ async function createWindow() {
     win.webContents.openDevTools();
   }
 
-  const unlistenToState = WindowState.listen(win, windowState);
+  const unlistenToState = listenToWindowState(win, windowState);
 
   if (isDev) {
     win.loadURL(`file://${__dirname}/loading.html`);
