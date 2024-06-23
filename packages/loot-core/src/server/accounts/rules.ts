@@ -123,7 +123,15 @@ const CONDITION_TYPES = {
     },
   },
   id: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
     nullable: true,
     parse(op, value, fieldName) {
       if (op === 'oneOf' || op === 'notOneOf') {
@@ -138,7 +146,15 @@ const CONDITION_TYPES = {
     },
   },
   string: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
     nullable: true,
     parse(op, value, fieldName) {
       if (op === 'oneOf' || op === 'notOneOf') {
@@ -152,7 +168,7 @@ const CONDITION_TYPES = {
         return value.filter(Boolean).map(val => val.toLowerCase());
       }
 
-      if (op === 'contains' || op === 'doesNotContain') {
+      if (op === 'contains' || op === 'matches' || op === 'doesNotContain') {
         assert(
           typeof value === 'string' && value.length > 0,
           'no-empty-string',
@@ -812,6 +828,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   lte: 1,
   contains: 0,
   doesNotContain: 0,
+  matches: 0,
 };
 
 function computeScore(rule) {

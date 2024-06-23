@@ -73,7 +73,11 @@ export function Accounts({
           name="For budget"
           to="/accounts/budgeted"
           query={queries.budgetedAccountBalance()}
-          style={{ fontWeight, marginTop: 13 }}
+          style={{
+            fontWeight,
+            marginTop: 13,
+            marginBottom: 5,
+          }}
         />
       )}
 
@@ -99,7 +103,11 @@ export function Accounts({
           name="Off budget"
           to="/accounts/offbudget"
           query={queries.offbudgetAccountBalance()}
-          style={{ fontWeight, marginTop: 13 }}
+          style={{
+            fontWeight,
+            marginTop: 13,
+            marginBottom: 5,
+          }}
         />
       )}
 

@@ -25,7 +25,6 @@ export function Overview() {
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
 
-  const customReportsFeatureFlag = useFeatureFlag('customReports');
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const accounts = useAccounts();
@@ -43,7 +42,7 @@ export function Overview() {
             }}
           >
             <PageHeader title="Reports" />
-            {customReportsFeatureFlag && !isNarrowWidth && (
+            {!isNarrowWidth && (
               <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
                 <Button type="primary">
                   <Text>Create new custom report</Text>
@@ -66,9 +65,7 @@ export function Overview() {
         <CashFlowCard />
         {spendingReportFeatureFlag && <SpendingCard />}
       </View>
-      {customReportsFeatureFlag && (
-        <CustomReportListCards reports={customReports} />
-      )}
+      <CustomReportListCards reports={customReports} />
     </Page>
   );
 }

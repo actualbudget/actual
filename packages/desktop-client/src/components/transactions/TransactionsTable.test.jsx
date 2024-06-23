@@ -468,7 +468,7 @@ describe('Transactions', () => {
     items = screen
       .getByTestId('autocomplete')
       .querySelectorAll('[data-testid$="category-item"]');
-    expect(items.length).toBe(0);
+    expect(items.length).toBe(3);
   });
 
   test('dropdown selects an item with keyboard', async () => {

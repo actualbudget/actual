@@ -23,6 +23,7 @@ function toJS(rows: CustomReportData[]) {
       showEmpty: row.show_empty === 1,
       showOffBudget: row.show_offbudget === 1,
       showHiddenCategories: row.show_hidden === 1,
+      includeCurrentInterval: row.include_current === 1,
       showUncategorized: row.show_uncategorized === 1,
       selectedCategories: row.selected_categories,
       graphType: row.graph_type,

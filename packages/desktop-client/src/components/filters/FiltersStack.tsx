@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { type TransactionFilterEntity } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { Stack } from '../common/Stack';
@@ -12,17 +13,17 @@ import {
 } from './SavedFilterMenuButton';
 
 export function FiltersStack({
-  filters,
+  conditions,
   conditionsOp,
   onUpdateFilter,
   onDeleteFilter,
   onClearFilters,
   onReloadSavedFilter,
   filterId,
-  filtersList,
-  onCondOpChange,
+  savedFilters,
+  onConditionsOpChange,
 }: {
-  filters: RuleConditionEntity[];
+  conditions: RuleConditionEntity[];
   conditionsOp: string;
   onUpdateFilter: (
     filter: RuleConditionEntity,
@@ -32,8 +33,8 @@ export function FiltersStack({
   onClearFilters: () => void;
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
   filterId: SavedFilter;
-  filtersList: RuleConditionEntity[];
-  onCondOpChange: () => void;
+  savedFilters: TransactionFilterEntity[];
+  onConditionsOpChange: () => void;
 }) {
   return (
     <View>
@@ -44,20 +45,20 @@ export function FiltersStack({
         align="flex-start"
       >
         <AppliedFilters
-          filters={filters}
+          conditions={conditions}
           conditionsOp={conditionsOp}
-          onCondOpChange={onCondOpChange}
+          onConditionsOpChange={onConditionsOpChange}
           onUpdate={onUpdateFilter}
           onDelete={onDeleteFilter}
         />
         <View style={{ flex: 1 }} />
         <SavedFilterMenuButton
-          filters={filters}
+          conditions={conditions}
           conditionsOp={conditionsOp}
           filterId={filterId}
           onClearFilters={onClearFilters}
           onReloadSavedFilter={onReloadSavedFilter}
-          filtersList={filtersList}
+          savedFilters={savedFilters}
         />
       </Stack>
     </View>

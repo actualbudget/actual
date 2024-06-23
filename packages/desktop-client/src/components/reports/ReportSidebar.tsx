@@ -15,7 +15,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { CategorySelector } from './CategorySelector';
-import { defaultsList } from './disabledList';
+import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
 import { type dateRangeProps, ReportOptions } from './ReportOptions';
@@ -38,6 +38,7 @@ type ReportSidebarProps = {
   setShowOffBudget: (value: boolean) => void;
   setShowHiddenCategories: (value: boolean) => void;
   setShowUncategorized: (value: boolean) => void;
+  setIncludeCurrentInterval: (value: boolean) => void;
   setSelectedCategories: (value: CategoryEntity[]) => void;
   onChangeDates: (dateStart: string, dateEnd: string) => void;
   onReportChange: ({
@@ -69,6 +70,7 @@ export function ReportSidebar({
   setShowEmpty,
   setShowOffBudget,
   setShowHiddenCategories,
+  setIncludeCurrentInterval,
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
@@ -86,7 +88,12 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setDateRange(cond);
     onChangeDates(
-      ...getLiveRange(cond, earliestTransaction, firstDayOfWeekIdx),
+      ...getLiveRange(
+        cond,
+        earliestTransaction,
+        customReportItems.includeCurrentInterval,
+        firstDayOfWeekIdx,
+      ),
     );
   };
 
@@ -269,7 +276,15 @@ export function ReportSidebar({
               onMenuSelect={type => {
                 onReportChange({ type: 'modify' });
 
-                if (type === 'show-hidden-categories') {
+                if (type === 'include-current-interval') {
+                  setSessionReport(
+                    'includeCurrentInterval',
+                    !customReportItems.includeCurrentInterval,
+                  );
+                  setIncludeCurrentInterval(
+                    !customReportItems.includeCurrentInterval,
+                  );
+                } else if (type === 'show-hidden-categories') {
                   setSessionReport(
                     'showHiddenCategories',
                     !customReportItems.showHiddenCategories,
@@ -295,6 +310,30 @@ export function ReportSidebar({
                 }
               }}
               items={[
+                {
+                  name: 'include-current-interval',
+                  text:
+                    'Include current ' +
+                    (
+                      ReportOptions.dateRangeType.get(
+                        customReportItems.dateRange,
+                      ) || ''
+                    ).toLowerCase(),
+                  tooltip:
+                    'Include current ' +
+                    (
+                      ReportOptions.dateRangeType.get(
+                        customReportItems.dateRange,
+                      ) || ''
+                    ).toLowerCase() +
+                    ' in live range',
+                  toggle: customReportItems.includeCurrentInterval,
+                  disabled:
+                    customReportItems.isDateStatic ||
+                    disabledList.currentInterval.get(
+                      customReportItems.dateRange,
+                    ),
+                },
                 {
                   name: 'show-hidden-categories',
                   text: 'Show hidden categories',

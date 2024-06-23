@@ -55,6 +55,10 @@ app.method(
   mutator(undoable(actions.transferAvailable)),
 );
 app.method(
+  'budget/cover-overbudgeted',
+  mutator(undoable(actions.coverOverbudgeted)),
+);
+app.method(
   'budget/transfer-category',
   mutator(undoable(actions.transferCategory)),
 );

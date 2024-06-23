@@ -81,6 +81,7 @@ export function GetCardData({
     const [dateStart, dateEnd] = getLiveRange(
       report.dateRange,
       earliestTransaction,
+      report.includeCurrentInterval,
       firstDayOfWeekIdx,
     );
     startDate = dateStart || report.startDate;

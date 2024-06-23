@@ -27,7 +27,7 @@ export function Header({
   onApply,
   onUpdateFilter,
   onDeleteFilter,
-  onCondOpChange,
+  onConditionsOpChange,
   headerPrefixItems,
   children,
 }) {
@@ -151,11 +151,11 @@ export function Header({
           align="flex-start"
         >
           <AppliedFilters
-            filters={filters}
+            conditions={filters}
             onUpdate={onUpdateFilter}
             onDelete={onDeleteFilter}
             conditionsOp={conditionsOp}
-            onCondOpChange={onCondOpChange}
+            onConditionsOpChange={onConditionsOpChange}
           />
         </View>
       )}

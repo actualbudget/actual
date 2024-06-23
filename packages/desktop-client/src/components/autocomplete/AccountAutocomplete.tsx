@@ -122,13 +122,12 @@ export function AccountAutocomplete({
     .filter(item => {
       return includeClosedAccounts ? item : !item.closed;
     })
-    .sort((a, b) => {
-      if (a.closed === b.closed) {
-        return a.offbudget === b.offbudget ? 0 : a.offbudget ? 1 : -1;
-      } else {
-        return a.closed ? 1 : -1;
-      }
-    });
+    .sort(
+      (a, b) =>
+        a.closed - b.closed ||
+        a.offbudget - b.offbudget ||
+        a.sort_order - b.sort_order,
+    );
 
   return (
     <Autocomplete

@@ -277,7 +277,7 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onShowActivity = (categoryId, month) => {
-    const conditions = [
+    const filterConditions = [
       { field: 'category', op: 'is', value: categoryId, type: 'id' },
       {
         field: 'date',
@@ -290,7 +290,7 @@ function BudgetInner(props: BudgetInnerProps) {
     navigate('/accounts', {
       state: {
         goBack: true,
-        conditions,
+        filterConditions,
         categoryId,
       },
     });

@@ -7,16 +7,16 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FieldSelect } from '../modals/EditRule';
 
-export function CondOpMenu({
+export function ConditionsOpMenu({
   conditionsOp,
-  onCondOpChange,
-  filters,
+  onChange,
+  conditions,
 }: {
   conditionsOp: string;
-  onCondOpChange: (value: string, filters: RuleConditionEntity[]) => void;
-  filters: RuleConditionEntity[];
+  onChange: (value: string, conditions: RuleConditionEntity[]) => void;
+  conditions: RuleConditionEntity[];
 }) {
-  return filters.length > 1 ? (
+  return conditions.length > 1 ? (
     <Text style={{ color: theme.pageText, marginTop: 11, marginRight: 5 }}>
       <FieldSelect
         style={{ display: 'inline-flex' }}
@@ -25,9 +25,7 @@ export function CondOpMenu({
           ['or', 'any'],
         ]}
         value={conditionsOp}
-        onChange={(name: string, value: string) =>
-          onCondOpChange(value, filters)
-        }
+        onChange={(name: string, value: string) => onChange(value, conditions)}
       />
       of:
     </Text>

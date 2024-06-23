@@ -194,3 +194,7 @@ export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
+
+export const noteTagBackground = colorPalette.purple800;
+export const noteTagBackgroundHover = colorPalette.purple600;
+export const noteTagText = colorPalette.purple100;

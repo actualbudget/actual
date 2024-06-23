@@ -722,6 +722,10 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `${left} LIKE ${right}`;
     }
+    case '$regexp': {
+      const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
+      return `REGEXP(${right}, ${left})`;
+    }
     case '$notlike': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `(${left} NOT LIKE ${right}\n OR ${left} IS NULL)`;

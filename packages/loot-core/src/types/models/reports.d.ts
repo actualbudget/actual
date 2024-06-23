@@ -15,6 +15,7 @@ export interface CustomReportEntity {
   showEmpty: boolean;
   showOffBudget: boolean;
   showHiddenCategories: boolean;
+  includeCurrentInterval: boolean;
   showUncategorized: boolean;
   selectedCategories?: CategoryEntity[];
   graphType: string;
@@ -49,6 +50,7 @@ export interface SpendingEntity {
     average: number;
     thisMonth: number;
     lastMonth: number;
+    lastYear: number;
   }[];
   startDate?: string;
   endDate?: string;
@@ -113,6 +115,7 @@ export interface CustomReportData {
   show_empty: number;
   show_offbudget: number;
   show_hidden: number;
+  include_current: number;
   show_uncategorized: number;
   selected_categories?: CategoryEntity[];
   graph_type: string;

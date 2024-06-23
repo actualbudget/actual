@@ -19,19 +19,24 @@ function throwIfNot200(res, text) {
   }
 }
 
-export async function post(url, data, headers = {}) {
+export async function post(url, data, headers = {}, timeout = null) {
   let text;
   let res;
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    const signal = timeout ? controller.signal : null;
     res = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(data),
+      signal,
       headers: {
         ...headers,
         'Content-Type': 'application/json',
       },
     });
+    clearTimeout(timeoutId);
     text = await res.text();
   } catch (err) {
     throw new PostError('network-failure');

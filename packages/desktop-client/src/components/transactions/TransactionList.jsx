@@ -1,5 +1,9 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
+import escapeRegExp from 'lodash/escapeRegExp';
+
+import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,
@@ -76,7 +80,6 @@ export function TransactionList({
   dateFormat,
   hideFraction,
   addNotification,
-  pushModal,
   renderEmpty,
   onSort,
   sortField,
@@ -85,9 +88,11 @@ export function TransactionList({
   onRefetch,
   onCloseAddTransaction,
   onCreatePayee,
+  onApplyFilter,
 }) {
   const transactionsLatest = useRef();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -180,13 +185,21 @@ export function TransactionList({
   });
 
   const onNavigateToSchedule = useCallback(scheduleId => {
-    pushModal('schedule-edit', { id: scheduleId });
+    dispatch(pushModal('schedule-edit', { id: scheduleId }));
+  });
+
+  const onNotesTagClick = useCallback(tag => {
+    onApplyFilter({
+      field: 'notes',
+      op: 'matches',
+      value: `(^|\\s|\\w|#)${escapeRegExp(tag)}($|\\s|#)`,
+      type: 'string',
+    });
   });
 
   return (
     <TransactionTable
       ref={tableRef}
-      pushModal={pushModal}
       transactions={allTransactions}
       loadMoreTransactions={loadMoreTransactions}
       accounts={accounts}
@@ -219,6 +232,7 @@ export function TransactionList({
       style={{ backgroundColor: theme.tableBackground }}
       onNavigateToTransferAccount={onNavigateToTransferAccount}
       onNavigateToSchedule={onNavigateToSchedule}
+      onNotesTagClick={onNotesTagClick}
       onSort={onSort}
       sortField={sortField}
       ascDesc={ascDesc}

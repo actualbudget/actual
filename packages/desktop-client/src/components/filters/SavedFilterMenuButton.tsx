@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
+import { type TransactionFilterEntity } from 'loot-core/types/models';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { SvgExpandArrow } from '../../icons/v0';
@@ -21,19 +22,19 @@ export type SavedFilter = {
 };
 
 export function SavedFilterMenuButton({
-  filters,
+  conditions,
   conditionsOp,
   filterId,
   onClearFilters,
   onReloadSavedFilter,
-  filtersList,
+  savedFilters,
 }: {
-  filters: RuleConditionEntity[];
+  conditions: RuleConditionEntity[];
   conditionsOp: string;
   filterId: SavedFilter;
   onClearFilters: () => void;
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
-  filtersList: RuleConditionEntity[];
+  savedFilters: TransactionFilterEntity[];
 }) {
   const [nameOpen, setNameOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -64,7 +65,7 @@ export function SavedFilterMenuButton({
         setAdding(false);
         setMenuOpen(false);
         savedFilter = {
-          conditions: filters,
+          conditions,
           conditionsOp,
           id: filterId.id,
           name: filterId.name,
@@ -72,7 +73,7 @@ export function SavedFilterMenuButton({
         };
         const response = await sendCatch('filter-update', {
           state: savedFilter,
-          filters: [...filtersList],
+          filters: [...savedFilters],
         });
 
         if (response.error) {
@@ -108,7 +109,7 @@ export function SavedFilterMenuButton({
   async function onAddUpdate() {
     if (adding) {
       const newSavedFilter = {
-        conditions: filters,
+        conditions,
         conditionsOp,
         name,
         status: 'saved',
@@ -116,7 +117,7 @@ export function SavedFilterMenuButton({
 
       const response = await sendCatch('filter-create', {
         state: newSavedFilter,
-        filters: [...filtersList],
+        filters: [...savedFilters],
       });
 
       if (response.error) {
@@ -142,7 +143,7 @@ export function SavedFilterMenuButton({
 
     const response = await sendCatch('filter-update', {
       state: updatedFilter,
-      filters: [...filtersList],
+      filters: [...savedFilters],
     });
 
     if (response.error) {
@@ -157,7 +158,7 @@ export function SavedFilterMenuButton({
 
   return (
     <View>
-      {filters.length > 0 && (
+      {conditions.length > 0 && (
         <Button
           ref={triggerRef}
           type="bare"
