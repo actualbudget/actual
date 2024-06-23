@@ -336,6 +336,7 @@ function StatusCell({
   selected,
   status,
   isChild,
+  isPreview,
   onEdit,
   onUpdate,
 }) {
@@ -378,12 +379,19 @@ function StatusCell({
           border: '1px solid transparent',
           borderRadius: 50,
           ':focus': {
-            border: '1px solid ' + theme.formInputBorderSelected,
-            boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+            ...(isPreview
+              ? {
+                  boxShadow: 'none',
+                }
+              : {
+                  border: '1px solid ' + theme.formInputBorderSelected,
+                  boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+                }),
           },
           cursor: isClearedField ? 'pointer' : 'default',
           ...(isChild && { visibility: 'hidden' }),
         }}
+        disabled={isPreview || isChild}
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
       >
