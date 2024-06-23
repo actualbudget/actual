@@ -1110,6 +1110,8 @@ const Transaction = memo(function Transaction({
         ) : (
           <Cell width={20} />
         )
+      ) : isPreview && isChild ? (
+        <Cell width={20} />
       ) : (
         <SelectCell
           /* Checkmark field for non-child transaction */
