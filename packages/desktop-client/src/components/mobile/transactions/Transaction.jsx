@@ -61,7 +61,6 @@ export const Transaction = memo(function Transaction({
     cleared,
     is_parent: isParent,
     is_child: isChild,
-    notes,
     schedule,
   } = transaction;
 
@@ -144,63 +143,65 @@ export const Transaction = memo(function Transaction({
               {prettyDescription || 'Empty'}
             </TextOneLine>
           </View>
-          {isPreview ? (
-            <Status status={notes} />
-          ) : (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: 3,
-              }}
-            >
-              {isReconciled ? (
-                <SvgLockClosed
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 3,
+            }}
+          >
+            {isPreview ? (
+              <Status status={categoryId} isSplit={isParent || isChild} />
+            ) : (
+              <>
+                {isReconciled ? (
+                  <SvgLockClosed
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: theme.noticeTextLight,
+                      marginRight: 5,
+                    }}
+                  />
+                ) : (
+                  <SvgCheckCircle1
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: cleared
+                        ? theme.noticeTextLight
+                        : theme.pageTextSubdued,
+                      marginRight: 5,
+                    }}
+                  />
+                )}
+                {(isParent || isChild) && (
+                  <SvgSplit
+                    style={{
+                      width: 12,
+                      height: 12,
+                      marginRight: 5,
+                    }}
+                  />
+                )}
+                <TextOneLine
                   style={{
-                    width: 11,
-                    height: 11,
-                    color: theme.noticeTextLight,
-                    marginRight: 5,
+                    fontSize: 11,
+                    marginTop: 1,
+                    fontWeight: '400',
+                    color: prettyCategory
+                      ? theme.tableText
+                      : theme.menuItemTextSelected,
+                    fontStyle:
+                      specialCategory || !prettyCategory ? 'italic' : undefined,
+                    textAlign: 'left',
                   }}
-                />
-              ) : (
-                <SvgCheckCircle1
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: cleared
-                      ? theme.noticeTextLight
-                      : theme.pageTextSubdued,
-                    marginRight: 5,
-                  }}
-                />
-              )}
-              {(isParent || isChild) && (
-                <SvgSplit
-                  style={{
-                    width: 12,
-                    height: 12,
-                    marginRight: 5,
-                  }}
-                />
-              )}
-              <TextOneLine
-                style={{
-                  fontSize: 11,
-                  marginTop: 1,
-                  fontWeight: '400',
-                  color: prettyCategory
-                    ? theme.tableText
-                    : theme.menuItemTextSelected,
-                  fontStyle:
-                    specialCategory || !prettyCategory ? 'italic' : undefined,
-                  textAlign: 'left',
-                }}
-              >
-                {prettyCategory || 'Uncategorized'}
-              </TextOneLine>
-            </View>
-          )}
+                >
+                  {prettyCategory || 'Uncategorized'}
+                </TextOneLine>
+              </>
+            )}
+          </View>
         </View>
         <Text
           style={{
