@@ -70,6 +70,7 @@ import { app as toolsApp } from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';
+import { dayFromDate } from '../shared/months';
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
@@ -577,6 +578,14 @@ handlers['account-update'] = mutator(async function ({ id, name }) {
 
 handlers['accounts-get'] = async function () {
   return db.getAccounts();
+};
+
+handlers['account-balance'] = async function ({ id, cutoff }) {
+  const { balance } = await db.first(
+    'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
+    [id, db.toDateRepr(dayFromDate(cutoff))],
+  );
+  return balance ? balance : 0;
 };
 
 handlers['account-properties'] = async function ({ id }) {

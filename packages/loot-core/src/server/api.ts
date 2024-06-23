@@ -533,6 +533,14 @@ handlers['api/account-delete'] = withMutation(async function ({ id }) {
   return handlers['account-close']({ id, forced: true });
 });
 
+handlers['api/account-balance'] = withMutation(async function ({
+  id,
+  cutoff = new Date(),
+}) {
+  checkFileOpen();
+  return handlers['account-balance']({ id, cutoff });
+});
+
 handlers['api/categories-get'] = async function ({
   grouped,
 }: { grouped? } = {}) {
