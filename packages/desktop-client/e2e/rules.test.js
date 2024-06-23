@@ -89,7 +89,7 @@ test.describe('Rules', () => {
         splitActions: [
           [
             {
-              field: 'a fixed percent',
+              field: 'a fixed percent of the remainder',
               value: '90',
             },
             {
