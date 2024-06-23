@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type Database } from 'better-sqlite3';
+import { type Database } from '@jlongster/sql.js';
 
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
