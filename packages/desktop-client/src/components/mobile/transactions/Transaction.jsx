@@ -61,7 +61,6 @@ export const Transaction = memo(function Transaction({
     cleared,
     is_parent: isParent,
     is_child: isChild,
-    notes,
     schedule,
   } = transaction;
 
@@ -152,7 +151,7 @@ export const Transaction = memo(function Transaction({
             }}
           >
             {isPreview ? (
-              <Status status={notes} isSplit={isParent || isChild} />
+              <Status status={categoryId} isSplit={isParent || isChild} />
             ) : (
               <>
                 {isReconciled ? (
