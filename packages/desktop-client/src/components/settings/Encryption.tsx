@@ -30,7 +30,7 @@ export function EncryptionSettings() {
         <Text style={{ color: theme.noticeTextLight, fontWeight: 600 }}>
           End-to-end Encryption is turned on.
         </Text>{' '}
-        Your data is encrypted with a key that only you have before sending it
+        Your data is encrypted with a key that only you have before sending
         it out to the cloud. Local data remains unencrypted so if you forget
         your password you can re-encrypt it.{' '}
         <Link
