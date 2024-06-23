@@ -1899,7 +1899,7 @@ export const TransactionTable = forwardRef((props, ref) => {
         );
 
     if (isPreviewId(item.id)) {
-      fields = ['select', 'cleared'];
+      fields = ['select'];
     }
     if (isTemporaryId(item.id)) {
       // You can't focus the select/delete button of temporary
