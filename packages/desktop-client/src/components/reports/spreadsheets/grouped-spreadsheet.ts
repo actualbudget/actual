@@ -110,15 +110,15 @@ export function createGroupedSpreadsheet({
     const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {
         let totalAssets = 0;
-        let netAssets = 0;
         let totalDebts = 0;
+        let netAssets = 0;
         let netDebts = 0;
 
         const intervalData = intervals.reduce(
           (arr: IntervalEntity[], intervalItem) => {
             let groupedAssets = 0;
-            let groupedNetAssets = 0;
             let groupedDebts = 0;
+            let groupedNetAssets = 0;
             let groupedNetDebts = 0;
             let groupedTotals = 0;
 
@@ -188,7 +188,6 @@ export function createGroupedSpreadsheet({
           },
           [],
         );
-        const totalTotals = totalAssets + totalDebts;
 
         const stackedCategories =
           group.categories &&
@@ -215,7 +214,7 @@ export function createGroupedSpreadsheet({
           totalDebts: integerToAmount(totalDebts),
           netAssets: integerToAmount(netAssets),
           netDebts: integerToAmount(netDebts),
-          totalTotals: integerToAmount(totalTotals),
+          totalTotals: integerToAmount(totalAssets + totalDebts),
           intervalData,
           categories:
             stackedCategories &&

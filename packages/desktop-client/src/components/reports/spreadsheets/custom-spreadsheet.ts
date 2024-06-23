@@ -220,17 +220,15 @@ export function createCustomSpreadsheet({
             stacked[item.name] = integerToAmount(stackAmounts);
           }
 
-          const intervalTotals = intervalAssets + intervalDebts;
-
           perIntervalNetAssets =
-            intervalTotals > 0
-              ? perIntervalNetAssets + intervalTotals
+            netAmounts > 0
+              ? perIntervalNetAssets + netAmounts
               : perIntervalNetAssets;
           perIntervalNetDebts =
-            intervalTotals < 0
-              ? perIntervalNetDebts + intervalTotals
+            netAmounts < 0
+              ? perIntervalNetDebts + netAmounts
               : perIntervalNetDebts;
-          perIntervalTotals += intervalTotals;
+          perIntervalTotals += netAmounts;
 
           return null;
         });
@@ -281,8 +279,6 @@ export function createCustomSpreadsheet({
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
 
-    const totalTotals = totalAssets + totalDebts;
-
     const legend = calculateLegend(
       intervalData,
       calcDataFiltered,
@@ -301,7 +297,7 @@ export function createCustomSpreadsheet({
       totalDebts: integerToAmount(totalDebts),
       netAssets: integerToAmount(netAssets),
       netDebts: integerToAmount(netDebts),
-      totalTotals: integerToAmount(totalTotals),
+      totalTotals: integerToAmount(totalAssets + totalDebts),
     });
     setDataCheck?.(true);
   };

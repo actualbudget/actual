@@ -51,7 +51,7 @@ export function showActivity({
           'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
   const isDateOp = interval === 'Weekly' || type !== 'time';
 
-  const conditions = [
+  const filterConditions = [
     ...filters,
     id && { field, op: 'is', value: id, type: 'id' },
     {
@@ -67,8 +67,9 @@ export function showActivity({
       options: { date: true },
     },
     !(
-      balanceTypeOp === 'totalTotals' &&
-      (type === 'totals' || type === 'time')
+      ['netAssets', 'netDebts'].includes(balanceTypeOp) ||
+      (balanceTypeOp === 'totalTotals' &&
+        (type === 'totals' || type === 'time'))
     ) && {
       field: 'amount',
       op: 'gte',
@@ -97,7 +98,7 @@ export function showActivity({
   navigate('/accounts', {
     state: {
       goBack: true,
-      conditions,
+      filterConditions,
     },
   });
 }

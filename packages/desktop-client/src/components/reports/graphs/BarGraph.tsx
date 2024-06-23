@@ -184,7 +184,7 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (balanceTypeOp === 'totalTotals') {
+    if (balanceTypeOp === 'totalTotals' && groupBy === 'Interval') {
       return obj.totalAssets;
     }
 
