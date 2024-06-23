@@ -226,6 +226,10 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   await handlers['load-budget']({ id: result.id });
 };
 
+handlers['api/get-budgets'] = async function () {
+  return await handlers['get-budgets']();
+};
+
 handlers['api/sync'] = async function () {
   const { id } = prefs.getPrefs();
   const result = await handlers['sync-budget']();

@@ -6,6 +6,7 @@ import type {
   APIPayeeEntity,
 } from '../server/api-models';
 
+import type { Budget } from './budget';
 import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
 import { type ServerHandlers } from './server-handlers';
 
@@ -22,6 +23,8 @@ export interface ApiHandlers {
     syncId: string;
     password?: string;
   }) => Promise<void>;
+
+  'api/get-budgets': () => Promise<Budget[]>;
 
   'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 
