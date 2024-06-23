@@ -30,7 +30,6 @@ Here are some initial guidelines for how contributions will be treated:
 - @carkom
 - @joel-jeremy
 - @MatissJanis
-- @shall0pass
 - @teprifer
 - @twk3
 - @youngcw
@@ -44,6 +43,7 @@ Here are some initial guidelines for how contributions will be treated:
 - @jlongster
 - @Kidglove57
 - @rich-howell
+- @shall0pass
 - @trevdor
 - @shaankhosla
 
