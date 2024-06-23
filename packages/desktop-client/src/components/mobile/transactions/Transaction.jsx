@@ -183,7 +183,7 @@ export const Transaction = memo(function Transaction({
               </TextOneLine>
             </View>
             {isPreview ? (
-              <Status status={notes} />
+              <Status status={notes} isSplit={isParent || isChild} />
             ) : (
               <View
                 style={{

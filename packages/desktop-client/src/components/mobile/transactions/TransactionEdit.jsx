@@ -132,7 +132,7 @@ export function lookupName(items, id) {
   return items.find(item => item.id === id)?.name;
 }
 
-export function Status({ status }) {
+export function Status({ status, isSplit }) {
   let color;
 
   switch (status) {
@@ -157,7 +157,7 @@ export function Status({ status }) {
         textAlign: 'left',
       }}
     >
-      {titleFirst(status)}
+      {titleFirst(status) + (isSplit ? ' (Split)' : '')}
     </Text>
   );
 }
