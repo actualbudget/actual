@@ -1248,26 +1248,21 @@ const Transaction = memo(function Transaction({
         />
       ))()}
 
-      {isPreview ? (
-        /* Notes field for all transactions */
-        <Cell name="notes" width="flex" />
-      ) : (
-        <InputCell
-          width="flex"
-          name="notes"
-          textAlign="flex"
-          exposed={focusedField === 'notes'}
-          focused={focusedField === 'notes'}
-          value={notes || ''}
-          valueStyle={valueStyle}
-          formatter={value => notesTagFormatter(value, onNotesTagClick)}
-          onExpose={name => !isPreview && onEdit(id, name)}
-          inputProps={{
-            value: notes || '',
-            onUpdate: onUpdate.bind(null, 'notes'),
-          }}
-        />
-      )}
+      <InputCell
+        width="flex"
+        name="notes"
+        textAlign="flex"
+        exposed={focusedField === 'notes'}
+        focused={focusedField === 'notes'}
+        value={notes || ''}
+        valueStyle={valueStyle}
+        formatter={value => notesTagFormatter(value, onNotesTagClick)}
+        onExpose={name => !isPreview && onEdit(id, name)}
+        inputProps={{
+          value: notes || '',
+          onUpdate: onUpdate.bind(null, 'notes'),
+        }}
+      />
 
       {isParent ? (
         <Cell
