@@ -693,7 +693,7 @@ export function CustomReport() {
                       right={
                         <Text>
                           <PrivacyFilter blurIntensity={5}>
-                            {amountToCurrency(Math.abs(data[balanceTypeOp]))}
+                            {amountToCurrency(data[balanceTypeOp])}
                           </PrivacyFilter>
                         </Text>
                       }
