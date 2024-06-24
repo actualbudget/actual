@@ -45,7 +45,6 @@ const DynamicBudgetTableInner = ({
 
   const numPossible = getNumPossibleMonths(width);
   const numMonths = Math.min(numPossible, maxMonths);
-  const maxWidth = 200 + 500 * numMonths;
 
   useEffect(() => {
     setDisplayMax(numPossible);
@@ -64,7 +63,7 @@ const DynamicBudgetTableInner = ({
         opacity: width <= 0 || height <= 0 ? 0 : 1,
       }}
     >
-      <View style={{ width: '100%', maxWidth }}>
+      <View style={{ width: '100%' }}>
         <BudgetPageHeader
           startMonth={prewarmStartMonth}
           numMonths={numMonths}
