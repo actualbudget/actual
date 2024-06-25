@@ -34,6 +34,8 @@ import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+
 import { ListItem } from './ListItem';
 
 const PILL_STYLE = {
@@ -331,6 +333,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
 }) {
   const opacity = blank ? 0 : 1;
 
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
   const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const dispatch = useDispatch();
 
@@ -576,8 +580,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
                       maxWidth: columnWidth,
                       ...makeBalanceAmountStyle(
                         value,
-                        useSheetValue(goal),
-                        useSheetValue(budgeted)
+                        isGoalTemplatesEnabled? useSheetValue(goal): null,
+                        isGoalTemplatesEnabled? useSheetValue(budgeted): null,
                       ),
                       textAlign: 'right',
                       fontSize: 12,
