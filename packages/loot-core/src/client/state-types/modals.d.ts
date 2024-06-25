@@ -95,7 +95,7 @@ type FinanceModals = {
   'edit-field': {
     name: string;
     month: string;
-    onSubmit: (name: string, value: string) => void;
+    onSubmit: (name: string, value: string, mode?: string) => void;
     onClose: () => void;
   };
 

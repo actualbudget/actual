@@ -931,6 +931,10 @@ class AccountInternal extends PureComponent {
       });
     };
 
+    const pushEditField = () => {
+      this.props.pushModal('edit-field', { name, onSubmit: onChange });
+    };
+
     if (
       name === 'amount' ||
       name === 'payee' ||
@@ -946,7 +950,7 @@ class AccountInternal extends PureComponent {
             } else if (name === 'account') {
               pushAccountAutocompleteModal();
             } else {
-              this.props.pushModal('edit-field', { name, onSubmit: onChange });
+              pushEditField();
             }
           },
           confirmReason: 'batchEditWithReconciled',
@@ -966,7 +970,7 @@ class AccountInternal extends PureComponent {
     } else if (name === 'account') {
       pushAccountAutocompleteModal();
     } else {
-      this.props.pushModal('edit-field', { name, onSubmit: onChange });
+      pushEditField();
     }
   };
 

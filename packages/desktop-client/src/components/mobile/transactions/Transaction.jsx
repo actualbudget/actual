@@ -72,11 +72,16 @@ export const Transaction = memo(function Transaction({
   const account = useAccount(accountId);
   const transferAcct = useAccount(payee?.transfer_acct);
 
+  const isPreview = isPreviewId(id);
+
   const longPressEvents = useLongPress(() => {
+    if (isPreview) {
+      return;
+    }
+
     onLongPress(transaction);
   });
 
-  const isPreview = isPreviewId(id);
   let amount = originalAmount;
   if (isPreview) {
     amount = getScheduledAmount(amount);

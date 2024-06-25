@@ -25,6 +25,12 @@ export function TransactionList({
   onSelect,
   scrollProps = {},
   onLoadMore,
+  onBatchEdit,
+  onBatchDuplicate,
+  onSetTransfer,
+  onLinkSchedule,
+  onUnlinkSchedule,
+  onBatchDelete,
 }) {
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
@@ -57,7 +63,9 @@ export function TransactionList({
   const [selectedTransactions, setSelectedTransactions] = useState([]);
 
   const onTransactionPress = (transaction, isLongPress = false) => {
-    if (isLongPress || selectedTransactions.length > 0) {
+    const isPreview = isPreviewId(transaction.id);
+
+    if (!isPreview && (isLongPress || selectedTransactions.length > 0)) {
       setSelectedTransactions(prev =>
         prev.includes(transaction.id)
           ? prev.filter(id => id !== transaction.id)
@@ -142,10 +150,17 @@ export function TransactionList({
       </ListBox>
       {selectedTransactions?.length > 0 && (
         <FloatingActionBar
+          transactions={transactions}
           selectedTransactions={selectedTransactions}
           onClearSelectedTransactions={() => {
             setSelectedTransactions([]);
           }}
+          onEdit={onBatchEdit}
+          onDuplicate={onBatchDuplicate}
+          onLinkSchedule={onLinkSchedule}
+          onUnlinkSchedule={onUnlinkSchedule}
+          onSetTransfer={onSetTransfer}
+          onDelete={onBatchDelete}
         />
       )}
     </>
@@ -153,19 +168,29 @@ export function TransactionList({
 }
 
 function FloatingActionBar({
+  transactions,
   selectedTransactions,
   onClearSelectedTransactions,
+  onEdit,
+  onDuplicate,
+  onLinkSchedule,
+  onUnlinkSchedule,
+  onDelete,
   style,
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const triggerRef = useRef(null);
+  const editMenuTriggerRef = useRef(null);
+  const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
+  const moreOptionsMenuTriggerRef = useRef(null);
+  const [isMoreOptionsMenuOpen, setIsMoreOptionsMenuOpen] = useState(false);
   const getMenuItemStyle = item => ({
+    ...styles.mobileMenuItem,
     color: theme.mobileHeaderText,
     ...(item.name === 'delete' && { color: theme.errorTextMenu }),
   });
 
   const buttonProps = {
     style: {
+      ...styles.mobileMenuItem,
       color: 'currentColor',
       height: styles.mobileMinHeight,
     },
@@ -176,6 +201,12 @@ function FloatingActionBar({
       color: 'currentColor',
     },
   };
+
+  const allTransactionsAreLinked = useMemo(() => {
+    return transactions
+      .filter(t => selectedTransactions.includes(t.id))
+      .every(t => t.schedule);
+  }, [transactions, selectedTransactions]);
 
   return (
     <View
@@ -201,7 +232,13 @@ function FloatingActionBar({
           justifyContent: 'space-between',
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}
+        >
           <Button
             type="bare"
             {...buttonProps}
@@ -210,64 +247,139 @@ function FloatingActionBar({
           >
             <SvgDelete width={10} height={10} />
           </Button>
-          <Text style={{ fontWeight: 500 }}>
+          <Text style={styles.mediumText}>
             {selectedTransactions.length}{' '}
             {selectedTransactions.length > 1 ? 'transactions' : 'transaction'}{' '}
             selected
           </Text>
         </View>
         <View
-          style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 4 }}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 4,
+          }}
         >
-          <Button type="bare" {...buttonProps}>
-            Edit
-          </Button>
-          <Button type="bare" {...buttonProps}>
-            Duplicate
-          </Button>
           <Button
-            ref={triggerRef}
             type="bare"
-            aria-label="Menu"
+            ref={editMenuTriggerRef}
+            aria-label="Edit fields"
             onClick={() => {
-              setMenuOpen(true);
+              setIsEditMenuOpen(true);
             }}
             {...buttonProps}
-            style={{
-              ...buttonProps.style,
-              padding: 4,
-            }}
           >
-            <SvgDotsHorizontalTriple
-              width={15}
-              height={15}
-              style={{ color: 'currentColor' }}
-            />
+            Edit
           </Button>
 
           <Popover
-            triggerRef={triggerRef}
-            isOpen={menuOpen}
-            onOpenChange={() => setMenuOpen(false)}
+            triggerRef={editMenuTriggerRef}
+            isOpen={isEditMenuOpen}
+            onOpenChange={() => setIsEditMenuOpen(false)}
             style={{ width: 200 }}
           >
             <Menu
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
-                if (type === 'delete') {
-                }
-                setMenuOpen(false);
+                onEdit?.(type, selectedTransactions);
+                setIsEditMenuOpen(false);
               }}
               items={[
+                // Add support later on.
+                // Pikaday doesn't play well will mobile.
+                // We should consider switching to react-aria date picker.
+                // {
+                //   name: 'date',
+                //   text: 'Date',
+                // },
                 {
-                  name: 'filter-selected',
-                  text: 'Filter selected',
+                  name: 'account',
+                  text: 'Account',
                 },
                 {
-                  name: 'link-schedule',
-                  text: 'Link schedule',
+                  name: 'payee',
+                  text: 'Payee',
                 },
+                {
+                  name: 'notes',
+                  text: 'Notes',
+                },
+                {
+                  name: 'category',
+                  text: 'Category',
+                },
+                {
+                  name: 'amount',
+                  text: 'Amount',
+                },
+                {
+                  name: 'cleared',
+                  text: 'Cleared',
+                },
+              ]}
+            />
+          </Popover>
+
+          <Button
+            type="bare"
+            {...buttonProps}
+            onClick={() => {
+              onDuplicate?.(selectedTransactions);
+            }}
+          >
+            Duplicate
+          </Button>
+          <Button
+            type="bare"
+            ref={moreOptionsMenuTriggerRef}
+            aria-label="More options"
+            onClick={() => {
+              setIsMoreOptionsMenuOpen(true);
+            }}
+            {...buttonProps}
+          >
+            <SvgDotsHorizontalTriple
+              width={16}
+              height={16}
+              style={{ color: 'currentColor' }}
+            />
+          </Button>
+
+          <Popover
+            triggerRef={moreOptionsMenuTriggerRef}
+            isOpen={isMoreOptionsMenuOpen}
+            onOpenChange={() => setIsMoreOptionsMenuOpen(false)}
+            style={{ width: 200 }}
+          >
+            <Menu
+              getItemStyle={getMenuItemStyle}
+              style={{ backgroundColor: theme.floatingActionBarBackground }}
+              onMenuSelect={type => {
+                if (type === 'link-schedule') {
+                  onLinkSchedule?.(selectedTransactions);
+                } else if (type === 'unlink-schedule') {
+                  onUnlinkSchedule?.(selectedTransactions);
+                } else if (type === 'delete') {
+                  onDelete?.(selectedTransactions);
+                }
+                setIsMoreOptionsMenuOpen(false);
+              }}
+              items={[
+                ...(allTransactionsAreLinked
+                  ? [
+                      {
+                        name: 'unlink-schedule',
+                        text: 'Unlink schedule',
+                      },
+                    ]
+                  : [
+                      {
+                        name: 'link-schedule',
+                        text: 'Link schedule',
+                      },
+                    ]),
                 {
                   name: 'delete',
                   text: 'Delete',
