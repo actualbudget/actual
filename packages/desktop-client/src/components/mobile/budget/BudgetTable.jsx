@@ -337,6 +337,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const opacity = blank ? 0 : 1;
 
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const goalValue = isGoalTemplatesEnabled ? useSheetValue(goal) : null;
+  const budgetedValue = isGoalTemplatesEnabled ? useSheetValue(budgeted) : null;
 
   const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const dispatch = useDispatch();
@@ -583,8 +585,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
                       maxWidth: columnWidth,
                       ...makeBalanceAmountStyle(
                         value,
-                        isGoalTemplatesEnabled ? useSheetValue(goal) : null,
-                        isGoalTemplatesEnabled ? useSheetValue(budgeted) : null,
+                        goalValue,
+                        budgetedValue,
                       ),
                       textAlign: 'right',
                       fontSize: 12,
