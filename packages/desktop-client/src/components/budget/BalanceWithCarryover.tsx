@@ -79,7 +79,7 @@ export function BalanceWithCarryover({
             height={carryoverStyle?.height || 7}
             style={makeBalanceAmountStyle(
               balanceValue,
-              isGoalTemplatesEnabled? goalValue : null,
+              isGoalTemplatesEnabled ? goalValue : null,
               budgetedValue,
             )}
           />

@@ -8,6 +8,7 @@ import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgLogo } from '../../../icons/logo';
@@ -21,7 +22,11 @@ import { SvgViewShow } from '../../../icons/v2';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
-import { makeAmountFullStyle, makeAmountGrey,makeBalanceAmountStyle } from '../../budget/util';
+import {
+  makeAmountFullStyle,
+  makeAmountGrey,
+  makeBalanceAmountStyle,
+} from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
@@ -33,8 +38,6 @@ import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
-
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 
 import { ListItem } from './ListItem';
 
@@ -580,8 +583,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
                       maxWidth: columnWidth,
                       ...makeBalanceAmountStyle(
                         value,
-                        isGoalTemplatesEnabled? useSheetValue(goal): null,
-                        isGoalTemplatesEnabled? useSheetValue(budgeted): null,
+                        isGoalTemplatesEnabled ? useSheetValue(goal) : null,
+                        isGoalTemplatesEnabled ? useSheetValue(budgeted) : null,
                       ),
                       textAlign: 'right',
                       fontSize: 12,
