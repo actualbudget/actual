@@ -4,16 +4,26 @@ export function validForTransfer(
   fromTransaction: TransactionEntity,
   toTransaction: TransactionEntity,
 ) {
-  if (
-    // no subtransactions
-    // not already a transfer
-    [fromTransaction, toTransaction].every(tran => {
-      return tran.transfer_id == null && tran.is_child === false;
-    }) &&
-    fromTransaction.account !== toTransaction.account && // belong to different accounts
-    fromTransaction.amount + toTransaction.amount === 0 // amount must zero each other out
-  ) {
-    return true;
+  const isSubtransaction = [fromTransaction, toTransaction].every(
+    tran => tran.is_child === true,
+  );
+  if (isSubtransaction) {
+    return false;
   }
-  return false;
+
+  // Count of transactions that are transfers
+  const transferCount =
+    +(fromTransaction.transfer_id != null) +
+    +(toTransaction.transfer_id != null);
+  const differentAccount = fromTransaction.account !== toTransaction.account;
+
+  if (differentAccount) {
+    // Linking 2 normal transactions into transfer
+    const addsToZero = fromTransaction.amount + toTransaction.amount === 0;
+    return transferCount === 0 && addsToZero;
+  } else {
+    // Merging existing transaction with transfer
+    const sameAmount = fromTransaction.amount === toTransaction.amount;
+    return transferCount === 1 && sameAmount;
+  }
 }
