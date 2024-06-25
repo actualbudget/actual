@@ -22,11 +22,7 @@ import { SvgViewShow } from '../../../icons/v2';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
-import {
-  makeAmountFullStyle,
-  makeAmountGrey,
-  makeBalanceAmountStyle,
-} from '../../budget/util';
+import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
@@ -337,8 +333,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const opacity = blank ? 0 : 1;
 
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const goalValue = isGoalTemplatesEnabled ? useSheetValue(goal) : null;
-  const budgetedValue = isGoalTemplatesEnabled ? useSheetValue(budgeted) : null;
+  const goalTemp = useSheetValue(goal);
+  const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
+  const budgetedTemp = useSheetValue(budgeted);
+  const budgetedValue = isGoalTemplatesEnabled ? budgetedTemp : null;
 
   const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const dispatch = useDispatch();
