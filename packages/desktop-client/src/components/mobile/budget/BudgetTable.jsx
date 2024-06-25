@@ -21,7 +21,7 @@ import { SvgViewShow } from '../../../icons/v2';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
-import { makeAmountFullStyle, makeAmountGrey } from '../../budget/util';
+import { makeAmountFullStyle, makeAmountGrey,makeBalanceAmountStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
@@ -574,9 +574,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     mode="oneline"
                     style={{
                       maxWidth: columnWidth,
-                      ...makeAmountFullStyle(value, {
-                        zeroColor: theme.pillTextSubdued,
-                      }),
+                      ...makeBalanceAmountStyle(
+                        value,
+                        useSheetValue(goal),
+                        useSheetValue(budgeted)
+                      ),
                       textAlign: 'right',
                       fontSize: 12,
                     }}

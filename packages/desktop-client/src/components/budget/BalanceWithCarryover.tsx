@@ -18,8 +18,8 @@ type BalanceWithCarryoverProps = Omit<
 > & {
   carryover: Binding;
   balance: Binding;
-  goal?: Binding;
-  budgeted?: Binding;
+  goal: Binding;
+  budgeted: Binding;
   disabled?: boolean;
   carryoverStyle?: CSSProperties;
 };
@@ -79,7 +79,7 @@ export function BalanceWithCarryover({
             height={carryoverStyle?.height || 7}
             style={makeBalanceAmountStyle(
               balanceValue,
-              goalValue,
+              isGoalTemplatesEnabled? goalValue : null,
               budgetedValue,
             )}
           />
