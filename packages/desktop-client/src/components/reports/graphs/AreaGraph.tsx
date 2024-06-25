@@ -16,7 +16,10 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { useResponsive } from '../../../ResponsiveProvider';
@@ -33,6 +36,8 @@ type PayloadItem = {
     date: string;
     totalAssets: number | string;
     totalDebts: number | string;
+    netAssets: number | string;
+    netDebts: number | string;
     totalTotals: number | string;
   };
 };
@@ -40,7 +45,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp: 'totalAssets' | 'totalTotals' | 'totalDebts';
+  balanceTypeOp: balanceTypeOpType;
 };
 
 const CustomTooltip = ({
@@ -74,8 +79,20 @@ const CustomTooltip = ({
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Debt:"
+                left="Debts:"
                 right={amountToCurrency(payload[0].payload.totalDebts)}
+              />
+            )}
+            {['netAssets'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net Assets:"
+                right={amountToCurrency(payload[0].payload.netAssets)}
+              />
+            )}
+            {['netDebts'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net Debts:"
+                right={amountToCurrency(payload[0].payload.netDebts)}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
@@ -132,7 +149,7 @@ const customLabel = ({
 type AreaGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
-  balanceTypeOp: 'totalAssets' | 'totalTotals' | 'totalDebts';
+  balanceTypeOp: balanceTypeOpType;
   compact?: boolean;
   viewLabels: boolean;
 };

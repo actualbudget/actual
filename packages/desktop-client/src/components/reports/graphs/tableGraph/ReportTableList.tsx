@@ -38,6 +38,8 @@ export function ReportTableList({
               date: interval.date,
               totalAssets: interval.totalAssets,
               totalDebts: interval.totalDebts,
+              netAssets: interval.netAssets,
+              netDebts: interval.netDebts,
               totalTotals: interval.totalTotals,
               intervalData: [],
               categories: [],

@@ -73,14 +73,18 @@ export function recalculate({
         .reduce((a, v) => (a = a + v.amount), 0);
       totalDebts += intervalDebts;
 
+      const intervalTotals = intervalAssets + intervalDebts;
+
       const change = last
-        ? intervalAssets + intervalDebts - amountToInteger(last.totalTotals)
+        ? intervalTotals - amountToInteger(last.totalTotals)
         : 0;
 
       arr.push({
         totalAssets: integerToAmount(intervalAssets),
         totalDebts: integerToAmount(intervalDebts),
-        totalTotals: integerToAmount(intervalAssets + intervalDebts),
+        netAssets: intervalTotals > 0 ? integerToAmount(intervalTotals) : 0,
+        netDebts: intervalTotals < 0 ? integerToAmount(intervalTotals) : 0,
+        totalTotals: integerToAmount(intervalTotals),
         change,
         intervalStartDate: index === 0 ? startDate : intervalItem,
         intervalEndDate:
@@ -94,12 +98,16 @@ export function recalculate({
     [],
   );
 
+  const totalTotals = totalAssets + totalDebts;
+
   return {
     id: item.id || '',
     name: item.name,
     totalAssets: integerToAmount(totalAssets),
     totalDebts: integerToAmount(totalDebts),
-    totalTotals: integerToAmount(totalAssets + totalDebts),
+    netAssets: totalTotals > 0 ? integerToAmount(totalTotals) : 0,
+    netDebts: totalTotals < 0 ? integerToAmount(totalTotals) : 0,
+    totalTotals: integerToAmount(totalTotals),
     intervalData,
   };
 }
