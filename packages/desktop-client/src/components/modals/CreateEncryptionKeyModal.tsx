@@ -14,7 +14,7 @@ import { ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Modal, ModalButtons } from '../common/Modal';
+import { Modal, ModalButtons } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -64,7 +64,7 @@ export function CreateEncryptionKeyModal({
   return (
     <Modal
       {...modalProps}
-      title={isRecreating ? 'Generate new key' : 'Enable encryption'}
+      header={isRecreating ? 'Generate new key' : 'Enable encryption'}
       onClose={modalProps.onClose}
     >
       <View

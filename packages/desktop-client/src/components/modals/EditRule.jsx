@@ -42,7 +42,7 @@ import { SvgInformationOutline } from '../../icons/v1';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -903,7 +903,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
 
   return (
     <Modal
-      title="Rule"
+      header="Rule"
       {...modalProps}
       style={{ ...modalProps.style, flex: 'inherit' }}
     >

@@ -14,7 +14,7 @@ import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -179,7 +179,7 @@ export function CreateAccountModal({
   const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
 
   return (
-    <Modal title={title} {...modalProps}>
+    <Modal header={title} {...modalProps}>
       {() => (
         <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
           {upgradingAccountId == null && (

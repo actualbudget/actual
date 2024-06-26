@@ -8,7 +8,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { theme } from '../../style';
 import { Information } from '../alerts';
 import { Button } from '../common/Button2';
-import { Modal, ModalButtons } from '../common/Modal';
+import { Modal, ModalButtons } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -78,12 +78,7 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
   }
 
   return (
-    <Modal
-      title="Merge payee?"
-      showHeader={false}
-      {...modalProps}
-      style={modalProps.style}
-    >
+    <Modal header={null} {...modalProps} style={modalProps.style}>
       {() => (
         <View style={{ padding: 20, maxWidth: 500 }}>
           <View>

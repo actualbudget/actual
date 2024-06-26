@@ -5,7 +5,12 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { ModalCloseButton, Modal, ModalTitle } from '../common/Modal';
+import {
+  ModalCloseButton,
+  Modal,
+  ModalTitle,
+  ModalHeader,
+} from '../common/Modal2';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { type CommonModalProps } from '../Modals';
@@ -37,27 +42,30 @@ export function CategoryAutocompleteModal({
 
   return (
     <Modal
-      title={
-        <ModalTitle
-          title="Category"
-          getStyle={() => ({ color: theme.menuAutoCompleteText })}
+      header={props => (
+        <ModalHeader
+          {...props}
+          title={
+            <ModalTitle
+              title="Category"
+              getStyle={() => ({ color: theme.menuAutoCompleteText })}
+            />
+          }
+          CloseButton={props => (
+            <ModalCloseButton
+              {...props}
+              style={{ color: theme.menuAutoCompleteText }}
+            />
+          )}
         />
-      }
+      )}
       noAnimation={!isNarrowWidth}
-      showHeader={isNarrowWidth}
-      focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
       style={{
         height: isNarrowWidth ? '85vh' : 275,
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
-      CloseButton={props => (
-        <ModalCloseButton
-          {...props}
-          style={{ color: theme.menuAutoCompleteText }}
-        />
-      )}
     >
       {() => (
         <View>

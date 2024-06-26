@@ -7,7 +7,7 @@ import { styles } from '../../style';
 import { ExpenseTotal } from '../budget/report/budgetsummary/ExpenseTotal';
 import { IncomeTotal } from '../budget/report/budgetsummary/IncomeTotal';
 import { Saved } from '../budget/report/budgetsummary/Saved';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Stack } from '../common/Stack';
 import { type CommonModalProps } from '../Modals';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
@@ -23,7 +23,7 @@ export function ReportBudgetSummaryModal({
 }: ReportBudgetSummaryModalProps) {
   const currentMonth = monthUtils.currentMonth();
   return (
-    <Modal title="Budget Summary" {...modalProps}>
+    <Modal header="Budget Summary" {...modalProps}>
       <NamespaceContext.Provider value={sheetForMonth(month)}>
         <Stack
           spacing={2}

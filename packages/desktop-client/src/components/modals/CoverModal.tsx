@@ -8,7 +8,7 @@ import { useInitialMount } from '../../hooks/useInitialMount';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
@@ -72,7 +72,7 @@ export function CoverModal({
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   return (
-    <Modal title={title} showHeader focusAfterClose={false} {...modalProps}>
+    <Modal header={title} {...modalProps}>
       <View>
         <FieldLabel title="Cover from category:" />
         <TapField value={fromCategory?.name} onClick={onCategoryClick} />

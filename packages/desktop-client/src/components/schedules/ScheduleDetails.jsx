@@ -16,7 +16,7 @@ import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -449,7 +449,7 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
   const repeats = state.fields.date ? !!state.fields.date.frequency : false;
   return (
     <Modal
-      title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
+      header={payee ? `Schedule: ${payee.name}` : 'Schedule'}
       size="medium"
       {...modalProps}
     >

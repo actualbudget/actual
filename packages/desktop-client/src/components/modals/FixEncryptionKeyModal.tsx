@@ -12,7 +12,7 @@ import { Button, ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Modal, ModalButtons } from '../common/Modal';
+import { Modal, ModalButtons } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -58,7 +58,7 @@ export function FixEncryptionKeyModal({
   return (
     <Modal
       {...modalProps}
-      title={
+      header={
         hasExistingKey ? 'Unable to decrypt file' : 'This file is encrypted'
       }
       onClose={modalProps.onClose}

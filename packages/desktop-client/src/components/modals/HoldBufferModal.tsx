@@ -5,7 +5,7 @@ import { rolloverBudget } from 'loot-core/client/queries';
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
@@ -34,12 +34,7 @@ export function HoldBufferModal({
   };
 
   return (
-    <Modal
-      title="Hold Buffer"
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-    >
+    <Modal header="Hold Buffer" {...modalProps}>
       <View>
         <FieldLabel title="Hold this amount:" />
         <InitialFocus>

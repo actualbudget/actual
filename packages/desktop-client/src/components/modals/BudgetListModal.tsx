@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { BudgetList } from '../manager/BudgetList';
@@ -19,12 +19,7 @@ export function BudgetListModal({ modalProps }: BudgetListModalProps) {
   );
 
   return (
-    <Modal
-      title="Switch Budget File"
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-    >
+    <Modal header="Switch Budget File" {...modalProps}>
       <View
         style={{
           justifyContent: 'center',

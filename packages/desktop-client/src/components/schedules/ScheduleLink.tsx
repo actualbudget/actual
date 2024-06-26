@@ -11,7 +11,7 @@ import { type TransactionEntity } from 'loot-core/src/types/models';
 import { type BoundActions } from '../../hooks/useActions';
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -64,7 +64,7 @@ export function ScheduleLink({
   }
 
   return (
-    <Modal title="Link Schedule" size={{ width: 800 }} {...modalProps}>
+    <Modal header="Link Schedule" size={{ width: 800 }} {...modalProps}>
       <View
         style={{
           flexDirection: 'row',

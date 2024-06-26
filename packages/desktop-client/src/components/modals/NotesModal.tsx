@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useNotes } from '../../hooks/useNotes';
 import { SvgCheck } from '../../icons/v2';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
@@ -36,9 +36,7 @@ export function NotesModal({ modalProps, id, name, onSave }: NotesModalProps) {
 
   return (
     <Modal
-      title={`Notes: ${name}`}
-      showHeader
-      focusAfterClose={false}
+      header={`Notes: ${name}`}
       {...modalProps}
       onClose={_onClose}
       style={{

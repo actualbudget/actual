@@ -6,7 +6,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Row, Cell } from '../table';
@@ -74,7 +74,7 @@ export function LoadBackup({
   const previousBackups = backups.filter(backup => !backup.isLatest);
 
   return (
-    <Modal title="Load Backup" {...modalProps} style={{ flex: 0 }}>
+    <Modal header="Load Backup" {...modalProps} style={{ flex: 0 }}>
       {() => (
         <View style={{ marginBottom: 30 }}>
           <View

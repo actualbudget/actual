@@ -10,7 +10,7 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
@@ -215,10 +215,8 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
   return (
     <Modal
-      title={label}
+      header={isNarrowWidth && label}
       noAnimation={!isNarrowWidth}
-      showHeader={isNarrowWidth}
-      focusAfterClose={false}
       {...modalProps}
       onClose={onCloseInner}
       style={{

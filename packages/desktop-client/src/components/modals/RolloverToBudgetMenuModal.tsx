@@ -2,7 +2,7 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { type CSSProperties, theme, styles } from '../../style';
 import { ToBudgetMenu } from '../budget/rollover/budgetsummary/ToBudgetMenu';
-import { Modal } from '../common/Modal';
+import { Modal, ModalHeader } from '../common/Modal2';
 import { type CommonModalProps } from '../Modals';
 
 type RolloverToBudgetMenuModalProps = ComponentPropsWithoutRef<
@@ -26,7 +26,10 @@ export function RolloverToBudgetMenuModal({
   };
 
   return (
-    <Modal showHeader focusAfterClose={false} {...modalProps}>
+    <Modal
+      header={props => <ModalHeader {...props} showLogo />}
+      {...modalProps}
+    >
       <ToBudgetMenu
         getItemStyle={() => defaultMenuItemStyle}
         onTransfer={onTransfer}

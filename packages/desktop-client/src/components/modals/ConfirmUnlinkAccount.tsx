@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -18,7 +18,7 @@ export function ConfirmUnlinkAccount({
   onUnlink,
 }: ConfirmUnlinkAccountProps) {
   return (
-    <Modal title="Confirm Unlink" {...modalProps} style={{ flex: 0 }}>
+    <Modal header="Confirm Unlink" {...modalProps} style={{ flex: 0 }}>
       {() => (
         <View style={{ lineHeight: 1.5 }}>
           <Paragraph>

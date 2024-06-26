@@ -3,7 +3,7 @@ import React from 'react';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -25,7 +25,7 @@ export function ConfirmTransactionDelete({
     : {};
 
   return (
-    <Modal title="Confirm Delete" {...modalProps}>
+    <Modal header="Confirm Delete" {...modalProps}>
       <View style={{ lineHeight: 1.5 }}>
         <Paragraph>Are you sure you want to delete the transaction?</Paragraph>
         <View

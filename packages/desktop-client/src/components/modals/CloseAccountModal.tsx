@@ -20,7 +20,7 @@ import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
 import { Link } from '../common/Link';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -109,10 +109,10 @@ export function CloseAccountModal({
 
   return (
     <Modal
-      title="Close Account"
+      header="Close Account"
       {...modalProps}
-      style={{ flex: 0 }}
-      loading={loading}
+      style={{ maxWidth: '30vw' }}
+      isLoading={loading}
     >
       {() => (
         <View>

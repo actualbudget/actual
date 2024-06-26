@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { ManageRules } from '../ManageRules';
 import { type CommonModalProps } from '../Modals';
 
@@ -28,7 +28,7 @@ export function ManageRulesModal({
   }
 
   return (
-    <Modal title="Rules" loading={loading} {...modalProps}>
+    <Modal header="Rules" isLoading={loading} {...modalProps}>
       {() => <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />}
     </Modal>
   );

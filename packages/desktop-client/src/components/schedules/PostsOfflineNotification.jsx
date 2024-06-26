@@ -5,7 +5,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -23,7 +23,7 @@ export function PostsOfflineNotification({ modalProps, actions }) {
   }
 
   return (
-    <Modal title="Post transactions?" size="small" {...modalProps}>
+    <Modal header="Post transactions?" size="small" {...modalProps}>
       <Paragraph>
         {payees.length > 0 ? (
           <Text>

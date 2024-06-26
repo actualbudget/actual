@@ -6,14 +6,14 @@ import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { View } from '../common/View';
 import { InputField } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
 
 type SingleInputModalProps = {
   modalProps: Partial<CommonModalProps>;
-  title: ComponentProps<typeof Modal>['title'];
+  header: ComponentProps<typeof Modal>['header'];
   buttonText: string;
   onSubmit: (value: string) => void;
   onValidate?: (value: string) => string[];
@@ -22,7 +22,7 @@ type SingleInputModalProps = {
 
 export function SingleInputModal({
   modalProps,
-  title,
+  header,
   buttonText,
   onSubmit,
   onValidate,
@@ -45,7 +45,7 @@ export function SingleInputModal({
   };
 
   return (
-    <Modal title={title} {...modalProps}>
+    <Modal header={header} {...modalProps}>
       <Form onSubmit={_onSubmit}>
         <View>
           <InitialFocus>

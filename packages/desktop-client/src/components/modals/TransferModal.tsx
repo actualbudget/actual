@@ -8,7 +8,7 @@ import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
@@ -69,7 +69,7 @@ export function TransferModal({
   const toCategory = categories.find(c => c.id === toCategoryId);
 
   return (
-    <Modal title={title} showHeader focusAfterClose={false} {...modalProps}>
+    <Modal header={title} {...modalProps}>
       <View>
         <View>
           <FieldLabel title="Transfer this amount:" />

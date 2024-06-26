@@ -16,7 +16,7 @@ import { SvgDownAndRightArrow } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
 import { Input } from '../common/Input';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -1382,11 +1382,11 @@ export function ImportTransactions({ modalProps, options }) {
 
   return (
     <Modal
-      title={
+      header={
         'Import transactions' + (filetype ? ` (${filetype.toUpperCase()})` : '')
       }
       {...modalProps}
-      loading={loadingState === 'parsing'}
+      isLoading={loadingState === 'parsing'}
       style={{ width: 800 }}
     >
       {error && !error.parsed && (

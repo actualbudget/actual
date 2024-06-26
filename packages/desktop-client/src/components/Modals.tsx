@@ -60,6 +60,7 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
+import { ModalHeader } from './common/Modal2';
 
 export type CommonModalProps = {
   onClose: () => PopModalAction;
@@ -341,7 +342,12 @@ export function Modals() {
             <SingleInputModal
               key={name}
               modalProps={modalProps}
-              title={<ModalTitle title="New Category" shrinkOnOverflow />}
+              header={props => (
+                <ModalHeader
+                  {...props}
+                  title={<ModalTitle title="New Category" shrinkOnOverflow />}
+                />
+              )}
               inputPlaceholder="Category name"
               buttonText="Add"
               onValidate={options.onValidate}
@@ -354,7 +360,14 @@ export function Modals() {
             <SingleInputModal
               key={name}
               modalProps={modalProps}
-              title={<ModalTitle title="New Category Group" shrinkOnOverflow />}
+              header={props => (
+                <ModalHeader
+                  {...props}
+                  title={
+                    <ModalTitle title="New Category Group" shrinkOnOverflow />
+                  }
+                />
+              )}
               inputPlaceholder="Category group name"
               buttonText="Add"
               onValidate={options.onValidate}

@@ -9,7 +9,7 @@ import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Modal, ModalTitle } from '../common/Modal';
+import { Modal, ModalHeader, ModalTitle } from '../common/Modal2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -77,23 +77,30 @@ export function AccountMenuModal({
 
   return (
     <Modal
-      title={
-        <ModalTitle isEditable title={account.name} onTitleUpdate={onRename} />
-      }
-      showHeader
-      focusAfterClose={false}
+      header={props => (
+        <ModalHeader
+          {...props}
+          leftContent={
+            <AdditionalAccountMenu
+              account={account}
+              onClose={onCloseAccount}
+              onReopen={onReopenAccount}
+            />
+          }
+          title={
+            <ModalTitle
+              isEditable
+              title={account.name}
+              onTitleUpdate={onRename}
+            />
+          }
+        />
+      )}
       {...modalProps}
       onClose={_onClose}
       style={{
         height: '45vh',
       }}
-      leftHeaderContent={
-        <AdditionalAccountMenu
-          account={account}
-          onClose={onCloseAccount}
-          onReopen={onReopenAccount}
-        />
-      }
     >
       <View
         style={{

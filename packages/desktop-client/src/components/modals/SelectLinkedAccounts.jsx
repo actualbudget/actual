@@ -4,7 +4,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -103,7 +103,7 @@ export function SelectLinkedAccounts({
   }
 
   return (
-    <Modal title="Link Accounts" {...modalProps} style={{ width: 800 }}>
+    <Modal header="Link Accounts" {...modalProps} style={{ width: 800 }}>
       {() => (
         <>
           <Text style={{ marginBottom: 10 }}>

@@ -6,7 +6,7 @@ import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -56,7 +56,7 @@ export function ConfirmCategoryDelete({
   const isIncome = !!(category || group).is_income;
 
   return (
-    <Modal title="Confirm Delete" {...modalProps} style={{ flex: 0 }}>
+    <Modal header="Confirm Delete" {...modalProps} style={{ flex: 0 }}>
       {() => (
         <View style={{ lineHeight: 1.5 }}>
           {group ? (

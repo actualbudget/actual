@@ -6,7 +6,7 @@ import { type Query } from 'loot-core/shared/query';
 
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
-import { Modal, ModalTitle } from '../common/Modal';
+import { Modal, ModalHeader, ModalTitle } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -42,9 +42,12 @@ export function ScheduledTransactionMenuModal({
 
   return (
     <Modal
-      title={<ModalTitle title={schedule.name || ''} shrinkOnOverflow />}
-      showHeader
-      focusAfterClose={false}
+      header={props => (
+        <ModalHeader
+          {...props}
+          title={<ModalTitle title={schedule.name || ''} shrinkOnOverflow />}
+        />
+      )}
       {...modalProps}
     >
       <View

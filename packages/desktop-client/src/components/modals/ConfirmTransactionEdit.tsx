@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 
@@ -21,7 +21,7 @@ export function ConfirmTransactionEdit({
   confirmReason,
 }: ConfirmTransactionEditProps) {
   return (
-    <Modal title="Reconciled Transaction" {...modalProps} style={{ flex: 0 }}>
+    <Modal header="Reconciled Transaction" {...modalProps} style={{ flex: 0 }}>
       {() => (
         <View style={{ lineHeight: 1.5 }}>
           {confirmReason === 'batchDeleteWithReconciled' ? (

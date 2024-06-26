@@ -13,7 +13,7 @@ import { InitialFocus } from '../common/InitialFocus';
 import { InlineField } from '../common/InlineField';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Modal, ModalButtons, ModalTitle } from '../common/Modal';
+import { Modal, ModalButtons, ModalHeader, ModalTitle } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
@@ -59,7 +59,12 @@ export function CreateLocalAccountModal({
   };
   return (
     <Modal
-      title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
+      header={props => (
+        <ModalHeader
+          {...props}
+          title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
+        />
+      )}
       {...modalProps}
     >
       {() => (

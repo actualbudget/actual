@@ -10,7 +10,7 @@ import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Modal, ModalTitle } from '../common/Modal';
+import { Modal, ModalHeader, ModalTitle } from '../common/Modal2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -86,23 +86,30 @@ export function CategoryGroupMenuModal({
 
   return (
     <Modal
-      title={
-        <ModalTitle isEditable title={group.name} onTitleUpdate={onRename} />
-      }
-      showHeader
-      focusAfterClose={false}
+      header={props => (
+        <ModalHeader
+          {...props}
+          title={
+            <ModalTitle
+              isEditable
+              title={group.name}
+              onTitleUpdate={onRename}
+            />
+          }
+          leftContent={
+            <AdditionalCategoryGroupMenu
+              group={group}
+              onDelete={_onDelete}
+              onToggleVisibility={_onToggleVisibility}
+            />
+          }
+        />
+      )}
       {...modalProps}
       onClose={_onClose}
       style={{
         height: '45vh',
       }}
-      leftHeaderContent={
-        <AdditionalCategoryGroupMenu
-          group={group}
-          onDelete={_onDelete}
-          onToggleVisibility={_onToggleVisibility}
-        />
-      }
     >
       <View
         style={{

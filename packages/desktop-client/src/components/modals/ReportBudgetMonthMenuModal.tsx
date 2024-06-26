@@ -9,7 +9,7 @@ import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
-import { Modal, ModalTitle } from '../common/Modal';
+import { Modal, ModalHeader, ModalTitle } from '../common/Modal2';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
@@ -60,9 +60,12 @@ export function ReportBudgetMonthMenuModal({
 
   return (
     <Modal
-      title={<ModalTitle title={monthUtils.format(month, 'MMMM ‘yy')} />}
-      showHeader
-      focusAfterClose={false}
+      header={props => (
+        <ModalHeader
+          {...props}
+          title={<ModalTitle title={monthUtils.format(month, 'MMMM ‘yy')} />}
+        />
+      )}
       {...modalProps}
       onClose={onClose}
       style={{

@@ -16,7 +16,7 @@ import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
-import { Modal } from '../common/Modal';
+import { Modal } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
@@ -232,7 +232,7 @@ export function GoCardlessExternalMsg({
 
   return (
     <Modal
-      title="Link Your Bank"
+      header="Link Your Bank"
       {...modalProps}
       onClose={onClose}
       style={{ flex: 0 }}

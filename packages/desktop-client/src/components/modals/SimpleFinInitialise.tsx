@@ -7,8 +7,7 @@ import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Modal, ModalButtons } from '../common/Modal';
-import type { ModalProps } from '../common/Modal';
+import { Modal, ModalButtons, type ModalProps } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
@@ -45,7 +44,7 @@ export const SimpleFinInitialise = ({
   };
 
   return (
-    <Modal title="Set-up SimpleFIN" size={{ width: 300 }} {...modalProps}>
+    <Modal header="Set-up SimpleFIN" size={{ width: 300 }} {...modalProps}>
       <View style={{ display: 'flex', gap: 10 }}>
         <Text>
           In order to enable bank-sync via SimpleFIN (only for North American

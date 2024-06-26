@@ -3,7 +3,7 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
+import { Modal, ModalHeader } from '../common/Modal2';
 import { type CommonModalProps } from '../Modals';
 
 type BudgetPageMenuModalProps = ComponentPropsWithoutRef<
@@ -26,7 +26,10 @@ export function BudgetPageMenuModal({
   };
 
   return (
-    <Modal showHeader focusAfterClose={false} {...modalProps}>
+    <Modal
+      header={props => <ModalHeader {...props} showLogo />}
+      {...modalProps}
+    >
       <BudgetPageMenu
         getItemStyle={() => defaultMenuItemStyle}
         onAddCategoryGroup={onAddCategoryGroup}

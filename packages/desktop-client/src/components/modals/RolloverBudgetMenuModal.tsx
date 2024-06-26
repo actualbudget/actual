@@ -10,7 +10,7 @@ import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
 import { BudgetMenu } from '../budget/rollover/BudgetMenu';
-import { Modal, ModalTitle } from '../common/Modal';
+import { Modal, ModalHeader, ModalTitle } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
@@ -58,9 +58,12 @@ export function RolloverBudgetMenuModal({
 
   return (
     <Modal
-      title={<ModalTitle title={category.name} shrinkOnOverflow />}
-      showHeader
-      focusAfterClose={false}
+      header={props => (
+        <ModalHeader
+          {...props}
+          title={<ModalTitle title={category.name} shrinkOnOverflow />}
+        />
+      )}
       {...modalProps}
     >
       <View
