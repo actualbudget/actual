@@ -6,6 +6,8 @@ import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
 import { View } from './View';
+import { Permissions } from '../../auth/types';
+import { useAuth } from '../../auth/AuthProvider';
 
 type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
@@ -20,6 +22,7 @@ type ButtonProps = HTMLProps<HTMLButtonElement> & {
   textStyle?: CSSProperties;
   bounce?: boolean;
   as?: ElementType;
+  permission?: Permissions;
 };
 
 type ButtonType = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
@@ -133,10 +136,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       activeStyle,
       bounce = true,
       as = 'button',
+      permission,
       ...nativeProps
     },
     ref,
   ) => {
+    const { hasPermission } = useAuth();
+
     const typeWithDisabled: ButtonType | `${ButtonType}Disabled` = disabled
       ? `${type}Disabled`
       : type;
@@ -176,6 +182,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     return (
+      (!permission || hasPermission(permission)) &&
       <Component
         ref={ref}
         {...(typeof as === 'string'

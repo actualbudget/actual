@@ -30,6 +30,7 @@ import { SelectedTransactionsButton } from '../transactions/SelectedTransactions
 
 import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
+import { Permissions } from '../../auth/types';
 
 export function AccountHeader({
   filteredAmount,
@@ -286,7 +287,7 @@ export function AccountHeader({
             </Button>
           )}
           {!showEmptyMessage && (
-            <Button type="bare" onClick={onAddTransaction}>
+            <Button permission={Permissions.CAN_EDIT} type="bare" onClick={onAddTransaction}>
               <SvgAdd width={10} height={10} style={{ marginRight: 3 }} /> Add
               New
             </Button>

@@ -1492,7 +1492,7 @@ handlers['subscribe-get-user'] = async function () {
         'X-ACTUAL-TOKEN': userToken,
       },
     });
-    const { status, reason } = JSON.parse(res);
+    const { status, reason, data: { userName, permissions } } = JSON.parse(res);
 
     if (status === 'error') {
       if (reason === 'unauthorized') {
@@ -1501,7 +1501,7 @@ handlers['subscribe-get-user'] = async function () {
       return { offline: true };
     }
 
-    return { offline: false };
+    return { offline: false, userName, permissions };
   } catch (e) {
     console.log(e);
     return { offline: true };
@@ -1526,19 +1526,23 @@ handlers['subscribe-change-password'] = async function ({ password }) {
   return {};
 };
 
-handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
-  if (typeof loginMethod !== 'string' || loginMethod == null) {
-    loginMethod = 'password';
+handlers['subscribe-sign-in'] = async function (loginInfo) {
+  if (
+    typeof loginInfo.loginMethod !== 'string' ||
+    loginInfo.loginMethod == null
+  ) {
+    loginInfo.loginMethod = 'password';
   }
   let res;
 
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/login', {
-      loginMethod,
-      password,
-    });
+    res = await post(getServer().SIGNUP_SERVER + '/login', loginInfo);
   } catch (err) {
     return { error: err.reason || 'network-failure' };
+  }
+
+  if (res.redirect_url) {
+    return { redirect_url: res.redirect_url };
   }
 
   if (!res.token) {
@@ -1547,17 +1551,6 @@ handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
 
   await asyncStorage.setItem('user-token', res.token);
   return {};
-};
-
-handlers['subscribe-sign-in-openid'] = async function ({ return_url }) {
-  let res = await post(getServer().SIGNUP_SERVER + '/login-openid', {
-    return_url,
-  });
-
-  if (res.redirect_url) {
-    return { redirect_url: res.redirect_url };
-  }
-  return { error: 'internal-error' };
 };
 
 handlers['subscribe-sign-out'] = async function () {

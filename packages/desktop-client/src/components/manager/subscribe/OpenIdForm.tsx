@@ -1,17 +1,17 @@
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';
 
-import ButtonWithLoading from '../../common/Button';
-import Input from '../../common/Input';
+import { ButtonWithLoading } from '../../common/Button';
+import { Input } from '../../common/Input';
 import { useServerURL } from '../../ServerContext';
 
-export function OpenIdForm({ onSetOpenId, onError }) {
-  let [issuer, setIssuer] = useState('');
-  let [clientId, setClientId] = useState('');
-  let [clientSecret, setClientSecret] = useState('');
-  let serverUrl = useServerURL();
+export function OpenIdForm({ onSetOpenId }) {
+  const [issuer, setIssuer] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const serverUrl = useServerURL();
 
-  let [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -29,7 +29,6 @@ export function OpenIdForm({ onSetOpenId, onError }) {
     setLoading(false);
   }
 
-  console.log(onSubmit, onError);
   return (
     <form
       style={{
@@ -67,7 +66,11 @@ export function OpenIdForm({ onSetOpenId, onError }) {
         style={{ marginTop: 10 }}
       />
 
-      <ButtonWithLoading primary loading={loading} style={{ marginTop: 15 }}>
+      <ButtonWithLoading
+        loading={loading}
+        style={{ marginTop: 15 }}
+        onClick={onSubmit}
+      >
         OK
       </ButtonWithLoading>
     </form>

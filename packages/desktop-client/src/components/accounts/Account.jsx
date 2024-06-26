@@ -44,6 +44,7 @@ import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
 
 import { AccountHeader } from './Header';
+import { Permissions } from '../../auth/types';
 
 function EmptyMessage({ onAdd }) {
   return (
@@ -71,7 +72,7 @@ function EmptyMessage({ onAdd }) {
           manage it locally yourself.
         </Text>
 
-        <Button type="primary" style={{ marginTop: 20 }} onClick={onAdd}>
+        <Button permission={Permissions.CAN_EDIT} type="primary" style={{ marginTop: 20 }} onClick={onAdd}>
           Add account
         </Button>
 

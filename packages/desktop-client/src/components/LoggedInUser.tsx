@@ -13,6 +13,7 @@ import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { useServerURL } from './ServerContext';
+import { BlurredOverlay, PrivacyFilter } from './PrivacyFilter';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
@@ -94,37 +95,44 @@ export function LoggedInUser({
   }
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
-      <Button
-        ref={triggerRef}
-        type="bare"
-        onClick={() => setMenuOpen(true)}
-        style={color && { color }}
-      >
-        {serverMessage()}
-      </Button>
+    <>
+      <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
+        <Button
+          ref={triggerRef}
+          type="bare"
+          onClick={() => setMenuOpen(true)}
+          style={color && { color }}
+        >
+          {serverMessage()}
+        </Button>
 
-      <Popover
-        triggerRef={triggerRef}
-        isOpen={menuOpen}
-        onOpenChange={() => setMenuOpen(false)}
-      >
-        <Menu
-          onMenuSelect={onMenuSelect}
-          items={[
-            serverUrl &&
-              !userData?.offline && {
-                name: 'change-password',
-                text: 'Change password',
+        {(!loading && userData.userName) && (
+        <small>(logged as: <BlurredOverlay blurIntensity='0.15rem'><span>{userData.userName}</span></BlurredOverlay>)</small>
+        )}
+
+
+        <Popover
+          triggerRef={triggerRef}
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
+        >
+          <Menu
+            onMenuSelect={onMenuSelect}
+            items={[
+              serverUrl &&
+                !userData?.offline && {
+                  name: 'change-password',
+                  text: 'Change password',
+                },
+              serverUrl && { name: 'sign-out', text: 'Sign out' },
+              {
+                name: 'config-server',
+                text: serverUrl ? 'Change server URL' : 'Start using a server',
               },
-            serverUrl && { name: 'sign-out', text: 'Sign out' },
-            {
-              name: 'config-server',
-              text: serverUrl ? 'Change server URL' : 'Start using a server',
-            },
-          ]}
-        />
-      </Popover>
-    </View>
+            ]}
+          />
+        </Popover>
+      </View>
+    </>
   );
 }

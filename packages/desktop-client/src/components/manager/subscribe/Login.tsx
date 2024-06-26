@@ -17,15 +17,14 @@ import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 
-export default function Login() {
+export function Login() {
   const dispatch = useDispatch();
   const { method = 'password' } = useParams();
-  let [loginMethods, setLoginMethods] = useState(['password']);
   const [searchParams, _setSearchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { checked } = useBootstrapped(!searchParams.has('error'));
+  const { checked } = useBootstrapped(false);
 
   useEffect(() => {
     if (checked && !searchParams.has('error')) {
@@ -48,12 +47,6 @@ export default function Login() {
       })();
     }
   }, [checked, searchParams, method, dispatch]);
-
-  useEffect(() => {
-    send('subscribe-get-login-methods')
-      .then(({ methods }) => setLoginMethods(methods))
-      .catch(error => setError(error));
-  }, []);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -96,9 +89,11 @@ export default function Login() {
   async function onSubmitOpenId(e) {
     e.preventDefault();
 
-    let { error, redirect_url } = await send('subscribe-sign-in-openid', {
+    const { error, redirect_url } = await send('subscribe-sign-in', {
       return_url: window.location.origin,
+      loginMethod: 'openid',
     });
+
     if (error) {
       setError(error);
     } else {
@@ -141,7 +136,7 @@ export default function Login() {
         </Text>
       )}
 
-      {loginMethods.includes('password') && (
+      {method === 'password' && (
         <form
           style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
           onSubmit={onSubmitPassword}
@@ -165,9 +160,9 @@ export default function Login() {
         </form>
       )}
 
-      {loginMethods.includes('openid') && (
+      {method === 'openid' && (
         <form style={{ marginTop: 20 }} onSubmit={onSubmitOpenId}>
-          <Button style={{ fontSize: 15 }}>
+          <Button style={{ fontSize: 15 }} onClick={onSubmitOpenId}>
             Sign in with OpenId
           </Button>
         </form>

@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Link } from '../../common/Link';
@@ -57,12 +57,12 @@ export function Bootstrap() {
 
   async function onSetOpenId(config) {
     setError(null);
-    let { error } = await send('subscribe-bootstrap', { openid: config });
+    const { error } = await send('subscribe-bootstrap', { openid: config });
 
     if (error) {
       setError(error);
     } else {
-      navigate('/login');
+      navigate('/login/openid');
     }
   }
 
@@ -125,9 +125,7 @@ export function Bootstrap() {
           />
           <Button
             style={{ marginTop: 10 }}
-            onClick={e => {
-              setLoginMethod('openid');
-            }}
+            onClick={() => setLoginMethod('openid')}
           >
             Configure OpenID authentication instead (Advanced)
           </Button>
@@ -136,10 +134,10 @@ export function Bootstrap() {
 
       {loginMethod === 'openid' && (
         <>
-          <OpenIdForm onSetOpenId={onSetOpenId} onError={setError} />
+          <OpenIdForm onSetOpenId={onSetOpenId} />
           <Button
             style={{ marginTop: 10 }}
-            onClick={e => setLoginMethod('password')}
+            onClick={() => setLoginMethod('password')}
           >
             Configure password authentication instead
           </Button>

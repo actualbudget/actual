@@ -43,6 +43,9 @@ import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar, TitlebarProvider } from './Titlebar';
+import { AuthProvider } from '../auth/AuthProvider';
+import ProtectedRoute from '../auth/ProtectedRoute';
+import { Permissions } from '../auth/types';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -114,130 +117,136 @@ function FinancesAppWithoutContext() {
   }, []);
 
   return (
-    <BrowserRouter>
-      <RouterBehaviors />
-      <ExposeNavigate />
+    <AuthProvider>
+      <BrowserRouter>
+        <RouterBehaviors />
+        <ExposeNavigate />
 
-      <View style={{ height: '100%' }}>
-        <GlobalKeys />
-
-        <View
-          style={{
-            flexDirection: 'row',
-            backgroundColor: theme.pageBackground,
-            flex: 1,
-          }}
-        >
-          <FloatableSidebar />
+        <View style={{ height: '100%' }}>
+          <GlobalKeys />
 
           <View
             style={{
-              color: theme.pageText,
+              flexDirection: 'row',
               backgroundColor: theme.pageBackground,
               flex: 1,
-              overflow: 'hidden',
-              width: '100%',
             }}
           >
-            <div
+            <FloatableSidebar />
+
+            <View
               style={{
+                color: theme.pageText,
+                backgroundColor: theme.pageBackground,
                 flex: 1,
-                display: 'flex',
-                overflow: 'auto',
-                position: 'relative',
+                overflow: 'hidden',
+                width: '100%',
               }}
             >
-              <Titlebar
+              <div
                 style={{
-                  WebkitAppRegion: 'drag',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 1000,
+                  flex: 1,
+                  display: 'flex',
+                  overflow: 'auto',
+                  position: 'relative',
                 }}
-              />
-              <Notifications />
-              <BankSyncStatus />
+              >
+                <Titlebar
+                  style={{
+                    WebkitAppRegion: 'drag',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                  }}
+                />
+                <Notifications />
+                <BankSyncStatus />
+
+                <Routes>
+                  <Route path="/" element={<Navigate to="/budget" replace />} />
+
+                  <Route path="/reports/*" element={<Reports />} />
+
+                  <Route
+                    path="/budget"
+                    element={<NarrowAlternate name="Budget" />}
+                  />
+
+                  <Route
+                    path="/schedules"
+                    element={
+                      <NarrowNotSupported>
+                        <WideComponent name="Schedules" />
+                      </NarrowNotSupported>
+                    }
+                  />
+
+                  <Route path="/payees" element={<ManagePayeesPage />} />
+                  <Route path="/rules" element={<ManageRulesPage />} />
+                  <Route path="/settings" element=
+                  {
+                    <ProtectedRoute permission={Permissions.CAN_DELETE} element={<Settings />} />
+                  }
+                  />
+
+                  <Route
+                    path="/gocardless/link"
+                    element={
+                      <NarrowNotSupported>
+                        <WideComponent name="GoCardlessLink" />
+                      </NarrowNotSupported>
+                    }
+                  />
+
+                  <Route
+                    path="/accounts"
+                    element={<NarrowAlternate name="Accounts" />}
+                  />
+
+                  <Route
+                    path="/accounts/:id"
+                    element={<NarrowAlternate name="Account" />}
+                  />
+
+                  <Route
+                    path="/transactions/:transactionId"
+                    element={
+                      <WideNotSupported>
+                        <TransactionEdit />
+                      </WideNotSupported>
+                    }
+                  />
+
+                  <Route
+                    path="/categories/:id"
+                    element={
+                      <WideNotSupported>
+                        <Category />
+                      </WideNotSupported>
+                    }
+                  />
+
+                  {/* redirect all other traffic to the budget page */}
+                  <Route path="/*" element={<Navigate to="/budget" replace />} />
+                </Routes>
+
+                <Modals />
+              </div>
 
               <Routes>
-                <Route path="/" element={<Navigate to="/budget" replace />} />
-
-                <Route path="/reports/*" element={<Reports />} />
-
-                <Route
-                  path="/budget"
-                  element={<NarrowAlternate name="Budget" />}
-                />
-
-                <Route
-                  path="/schedules"
-                  element={
-                    <NarrowNotSupported>
-                      <WideComponent name="Schedules" />
-                    </NarrowNotSupported>
-                  }
-                />
-
-                <Route path="/payees" element={<ManagePayeesPage />} />
-                <Route path="/rules" element={<ManageRulesPage />} />
-                <Route path="/settings" element={<Settings />} />
-
-                <Route
-                  path="/gocardless/link"
-                  element={
-                    <NarrowNotSupported>
-                      <WideComponent name="GoCardlessLink" />
-                    </NarrowNotSupported>
-                  }
-                />
-
-                <Route
-                  path="/accounts"
-                  element={<NarrowAlternate name="Accounts" />}
-                />
-
-                <Route
-                  path="/accounts/:id"
-                  element={<NarrowAlternate name="Account" />}
-                />
-
-                <Route
-                  path="/transactions/:transactionId"
-                  element={
-                    <WideNotSupported>
-                      <TransactionEdit />
-                    </WideNotSupported>
-                  }
-                />
-
-                <Route
-                  path="/categories/:id"
-                  element={
-                    <WideNotSupported>
-                      <Category />
-                    </WideNotSupported>
-                  }
-                />
-
-                {/* redirect all other traffic to the budget page */}
-                <Route path="/*" element={<Navigate to="/budget" replace />} />
+                <Route path="/budget" element={<MobileNavTabs />} />
+                <Route path="/accounts" element={<MobileNavTabs />} />
+                <Route path="/settings" element={<MobileNavTabs />} />
+                <Route path="/reports" element={<MobileNavTabs />} />
+                <Route path="*" element={null} />
               </Routes>
-
-              <Modals />
-            </div>
-
-            <Routes>
-              <Route path="/budget" element={<MobileNavTabs />} />
-              <Route path="/accounts" element={<MobileNavTabs />} />
-              <Route path="/settings" element={<MobileNavTabs />} />
-              <Route path="/reports" element={<MobileNavTabs />} />
-              <Route path="*" element={null} />
-            </Routes>
+            </View>
           </View>
         </View>
-      </View>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

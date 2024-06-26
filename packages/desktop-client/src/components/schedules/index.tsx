@@ -12,6 +12,7 @@ import { View } from '../common/View';
 import { Page } from '../Page';
 
 import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
+import { Permissions } from '../../auth/types';
 
 export function Schedules() {
   const { pushModal } = useActions();
@@ -106,7 +107,7 @@ export function Schedules() {
         }}
       >
         <Button onClick={onDiscover}>Find schedules</Button>
-        <Button type="primary" onClick={onAdd}>
+        <Button permission={Permissions.CAN_EDIT} type="primary" onClick={onAdd}>
           Add new schedule
         </Button>
       </View>

@@ -265,7 +265,10 @@ export interface ServerHandlers {
     { error: string } | { bootstrapped: unknown; hasServer: boolean }
   >;
 
-  'subscribe-get-login-methods': () => Promise<{ methods: [string] }>;
+  'subscribe-get-login-methods': () => Promise<{
+    methods?: string[];
+    error?: string;
+  }>;
 
   'subscribe-bootstrap': (arg: {
     password?: string;
@@ -277,24 +280,27 @@ export interface ServerHandlers {
     };
   }) => Promise<{ error?: string }>;
 
-  'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
+  'subscribe-get-user': () => Promise<{ offline: boolean, userName?: string, permissions?: string[] } | null>;
 
   'subscribe-change-password': (arg: {
     password;
   }) => Promise<{ error?: string }>;
 
-  'subscribe-sign-in': (arg: {
-    password;
-    loginMethod?: string;
-  }) => Promise<{ error?: string }>;
-
-  'subscribe-sign-in-openid': (arg: {
-    return_url: string;
-  }) => Promise<{ error?: string; redirect_url?: string }>;
+  'subscribe-sign-in': (
+    arg:
+      | {
+          password;
+          loginMethod?: string;
+        }
+      | {
+          return_url;
+          loginMethod?: 'openid';
+        },
+  ) => Promise<{ error?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
 
-  'subscribe-set-token': (arg: { token: string }) => Promise<null>;
+  'subscribe-set-token': (arg: { token: string }) => Promise<void>;
 
   'get-server-version': () => Promise<{ error?: string } | { version: string }>;
 
