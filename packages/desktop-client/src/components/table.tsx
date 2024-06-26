@@ -325,6 +325,12 @@ function InputValue({
   ...props
 }: InputValueProps) {
   const [value, setValue] = useState(defaultValue);
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
+
+  if (prevDefaultValue !== defaultValue) {
+    setValue(defaultValue);
+    setPrevDefaultValue(defaultValue);
+  }
 
   function onBlur_(e) {
     if (onBlur) {
