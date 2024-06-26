@@ -85,6 +85,8 @@ export function ReportTableTotals({
     intervalData: data.intervalData,
     totalAssets: data.totalAssets,
     totalDebts: data.totalDebts,
+    netAssets: data.netAssets,
+    netDebts: data.netDebts,
     totalTotals: data.totalTotals,
   };
 

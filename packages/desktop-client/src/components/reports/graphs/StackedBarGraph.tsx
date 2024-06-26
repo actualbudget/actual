@@ -17,7 +17,10 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -144,7 +147,7 @@ type StackedBarGraphProps = {
   groupBy: string;
   compact?: boolean;
   viewLabels: boolean;
-  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
+  balanceTypeOp: balanceTypeOpType;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   interval?: string;
@@ -194,6 +197,7 @@ export function StackedBarGraph({
                 data={data.intervalData}
                 margin={{ top: 0, right: 0, left: leftMargin, bottom: 10 }}
                 style={{ cursor: pointer }}
+                stackOffset="sign" //stacked by sign
               >
                 {(!isNarrowWidth || !compact) && (
                   <Tooltip

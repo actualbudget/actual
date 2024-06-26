@@ -95,6 +95,10 @@ export async function asyncTransaction(
   }
 }
 
+function regexp(regex: string, text: string | null) {
+  return new RegExp(regex).test(text) ? 1 : 0;
+}
+
 export function openDatabase(pathOrBuffer: string | Buffer) {
   const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER and UPPER implementation.
@@ -107,6 +111,8 @@ export function openDatabase(pathOrBuffer: string | Buffer) {
   db.function('UNICODE_UPPER', { deterministic: true }, (arg: string | null) =>
     arg?.toUpperCase(),
   );
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
+  db.function('REGEXP', { deterministic: true }, regexp);
   return db;
 }
 

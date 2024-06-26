@@ -19,7 +19,10 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -50,6 +53,8 @@ type PayloadItem = {
     name: string;
     totalAssets: number | string;
     totalDebts: number | string;
+    netAssets: number | string;
+    netDebts: number | string;
     totalTotals: number | string;
     networth: number | string;
     totalChange: number | string;
@@ -60,7 +65,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
+  balanceTypeOp?: balanceTypeOpType;
   yAxis?: string;
 };
 
@@ -96,8 +101,20 @@ const CustomTooltip = ({
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Debt:"
+                left="Debts:"
                 right={amountToCurrency(payload[0].payload.totalDebts)}
+              />
+            )}
+            {['netAssets'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net Assets:"
+                right={amountToCurrency(payload[0].payload.netAssets)}
+              />
+            )}
+            {['netDebts'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net Debts:"
+                right={amountToCurrency(payload[0].payload.netDebts)}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
@@ -137,7 +154,7 @@ type BarGraphProps = {
   data: DataEntity;
   filters: RuleConditionEntity[];
   groupBy: string;
-  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
+  balanceTypeOp: balanceTypeOpType;
   compact?: boolean;
   viewLabels: boolean;
   showHiddenCategories?: boolean;
@@ -167,11 +184,15 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (balanceTypeOp === 'totalDebts') {
-      return -1 * obj.totalDebts;
-    } else {
+    if (balanceTypeOp === 'totalTotals' && groupBy === 'Interval') {
       return obj.totalAssets;
     }
+
+    if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+      return -1 * obj[balanceTypeOp];
+    }
+
+    return obj[balanceTypeOp];
   };
 
   const longestLabelLength = data[splitData]

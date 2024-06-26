@@ -309,12 +309,12 @@ ipcMain.handle('open-file-dialog', (event, { filters, properties }) => {
 
 ipcMain.handle(
   'save-file-dialog',
-  (event, { title, defaultPath, fileContents }) => {
-    const fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
+  async (event, { title, defaultPath, fileContents }) => {
+    const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
 
     return new Promise((resolve, reject) => {
       if (fileLocation) {
-        fs.writeFile(fileLocation, fileContents, error => {
+        fs.writeFile(fileLocation.filePath, fileContents, error => {
           return reject(error);
         });
       }
