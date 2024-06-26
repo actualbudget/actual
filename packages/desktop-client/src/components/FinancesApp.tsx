@@ -17,9 +17,6 @@ import { type State } from 'loot-core/src/client/state-types';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
-import { AuthProvider } from '../auth/AuthProvider';
-import ProtectedRoute from '../auth/ProtectedRoute';
-import { Permissions } from '../auth/types';
 import { useAccounts } from '../hooks/useAccounts';
 import { useActions } from '../hooks/useActions';
 import { useNavigate } from '../hooks/useNavigate';
@@ -46,6 +43,9 @@ import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar, TitlebarProvider } from './Titlebar';
+import { AuthProvider } from '../auth/AuthProvider';
+import ProtectedRoute from '../auth/ProtectedRoute';
+import { Permissions } from '../auth/types';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -233,10 +233,7 @@ function FinancesAppWithoutContext() {
                   />
 
                   {/* redirect all other traffic to the budget page */}
-                  <Route
-                    path="/*"
-                    element={<Navigate to="/budget" replace />}
-                  />
+                  <Route path="/*" element={<Navigate to="/budget" replace />} />
                 </Routes>
 
                 <Modals />

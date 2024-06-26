@@ -2,9 +2,6 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import { AuthProvider } from '../../auth/AuthProvider';
-import ProtectedRoute from '../../auth/ProtectedRoute';
-import { Permissions } from '../../auth/types';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -23,8 +20,10 @@ import { Bootstrap } from './subscribe/Bootstrap';
 import { ChangePassword } from './subscribe/ChangePassword';
 import { Error } from './subscribe/Error';
 import { Login } from './subscribe/Login';
-import { OpenIdCallback } from './subscribe/OpenIdCallback';
 import { WelcomeScreen } from './WelcomeScreen';
+import { AuthProvider } from '../../auth/AuthProvider';
+import ProtectedRoute from '../../auth/ProtectedRoute';
+import { Permissions } from '../../auth/types';
 
 function Version() {
   const version = useServerVersion();
@@ -198,7 +197,6 @@ export function ManagementApp({ isLoading }) {
               ) : (
                 <Routes>
                   <Route path="/login/:method?" element={<Login />} />
-                  <Route path="/openid-cb" element={<OpenIdCallback />} />
                   <Route path="/error" element={<Error />} />
                   <Route path="/config-server" element={<ConfigServer />} />
                   <Route path="/bootstrap" element={<Bootstrap />} />
@@ -222,4 +220,5 @@ export function ManagementApp({ isLoading }) {
       </BrowserRouter>
     </AuthProvider>
   );
+
 }
