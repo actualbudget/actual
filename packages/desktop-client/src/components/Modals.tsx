@@ -388,7 +388,6 @@ export function Modals() {
               key={name}
               modalProps={modalProps}
               id={options?.id || null}
-              actions={actions}
               transaction={options?.transaction || null}
             />
           );
@@ -401,7 +400,6 @@ export function Modals() {
               actions={actions}
               transactionIds={options?.transactionIds}
               getTransaction={options?.getTransaction}
-              pushModal={options?.pushModal}
             />
           );
 

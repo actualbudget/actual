@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { getPayeesById } from 'loot-core/client/reducers/queries';
-import { pushModal } from 'loot-core/src/client/actions/modals';
+import { popModal, pushModal } from 'loot-core/src/client/actions/modals';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -69,7 +69,7 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export function ScheduleDetails({ modalProps, actions, id, transaction }) {
+export function ScheduleDetails({ modalProps, id, transaction }) {
   const adding = id == null;
   const fromTrans = transaction != null;
   const payees = getPayeesById(usePayees());
@@ -400,7 +400,7 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
       if (adding) {
         await onLinkTransactions([...selectedInst.items], res.data);
       }
-      actions.popModal();
+      globalDispatch(popModal());
     }
   }
 
@@ -777,7 +777,10 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
         {state.error && (
           <Text style={{ color: theme.errorText }}>{state.error}</Text>
         )}
-        <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
+        <Button
+          style={{ marginRight: 10 }}
+          onClick={() => globalDispatch(popModal())}
+        >
           Cancel
         </Button>
         <Button type="primary" onClick={onSave}>

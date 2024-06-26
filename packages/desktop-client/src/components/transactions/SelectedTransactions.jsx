@@ -188,7 +188,6 @@ export function SelectedTransactionsButton({
             pushModal('schedule-link', {
               transactionIds: [...selectedItems],
               getTransaction,
-              pushModal,
             });
             break;
           case 'unlink-schedule':

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import { Item, Section } from '@react-stately/collections';
 
@@ -6,7 +6,12 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { theme } from '../../../style';
+import { SvgDelete } from '../../../icons/v0';
+import { SvgDotsHorizontalTriple } from '../../../icons/v1';
+import { styles, theme } from '../../../style';
+import { Button } from '../../common/Button';
+import { Menu } from '../../common/Menu';
+import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
@@ -20,6 +25,12 @@ export function TransactionList({
   onSelect,
   scrollProps = {},
   onLoadMore,
+  onBatchEdit,
+  onBatchDuplicate,
+  onSetTransfer,
+  onLinkSchedule,
+  onUnlinkSchedule,
+  onBatchDelete,
 }) {
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
@@ -48,6 +59,22 @@ export function TransactionList({
     });
     return sections;
   }, [transactions]);
+
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
+
+  const onTransactionPress = (transaction, isLongPress = false) => {
+    const isPreview = isPreviewId(transaction.id);
+
+    if (!isPreview && (isLongPress || selectedTransactions.length > 0)) {
+      setSelectedTransactions(prev =>
+        prev.includes(transaction.id)
+          ? prev.filter(id => id !== transaction.id)
+          : [...prev, transaction.id],
+      );
+    } else {
+      onSelect(transaction);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -109,8 +136,10 @@ export function TransactionList({
                   >
                     <Transaction
                       transaction={transaction}
-                      added={isNewTransaction(transaction.id)}
-                      onSelect={onSelect}
+                      isAdded={isNewTransaction(transaction.id)}
+                      isSelected={selectedTransactions.includes(transaction.id)}
+                      onPress={trans => onTransactionPress(trans)}
+                      onLongPress={trans => onTransactionPress(trans, true)}
                     />
                   </Item>
                 );
@@ -119,6 +148,247 @@ export function TransactionList({
           );
         })}
       </ListBox>
+      {selectedTransactions?.length > 0 && (
+        <FloatingActionBar
+          transactions={transactions}
+          selectedTransactions={selectedTransactions}
+          onClearSelectedTransactions={() => {
+            setSelectedTransactions([]);
+          }}
+          onEdit={onBatchEdit}
+          onDuplicate={onBatchDuplicate}
+          onLinkSchedule={onLinkSchedule}
+          onUnlinkSchedule={onUnlinkSchedule}
+          onSetTransfer={onSetTransfer}
+          onDelete={onBatchDelete}
+        />
+      )}
     </>
+  );
+}
+
+function FloatingActionBar({
+  transactions,
+  selectedTransactions,
+  onClearSelectedTransactions,
+  onEdit,
+  onDuplicate,
+  onLinkSchedule,
+  onUnlinkSchedule,
+  onDelete,
+  style,
+}) {
+  const editMenuTriggerRef = useRef(null);
+  const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
+  const moreOptionsMenuTriggerRef = useRef(null);
+  const [isMoreOptionsMenuOpen, setIsMoreOptionsMenuOpen] = useState(false);
+  const getMenuItemStyle = item => ({
+    ...styles.mobileMenuItem,
+    color: theme.mobileHeaderText,
+    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  });
+
+  const buttonProps = {
+    style: {
+      ...styles.mobileMenuItem,
+      color: 'currentColor',
+      height: styles.mobileMinHeight,
+    },
+    activeStyle: {
+      color: 'currentColor',
+    },
+    hoveredStyle: {
+      color: 'currentColor',
+    },
+  };
+
+  const allTransactionsAreLinked = useMemo(() => {
+    return transactions
+      .filter(t => selectedTransactions.includes(t.id))
+      .every(t => t.schedule);
+  }, [transactions, selectedTransactions]);
+
+  return (
+    <View
+      style={{
+        backgroundColor: theme.floatingActionBarBackground,
+        color: theme.floatingActionBarText,
+        position: 'fixed',
+        bottom: 10,
+        margin: '0 10px',
+        width: '95vw',
+        height: 60,
+        zIndex: 100,
+        borderRadius: 8,
+        ...style,
+      }}
+    >
+      <View
+        style={{
+          flex: 1,
+          padding: 8,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <Button
+            type="bare"
+            {...buttonProps}
+            style={{ ...buttonProps.style, marginRight: 4 }}
+            onClick={() => onClearSelectedTransactions?.()}
+          >
+            <SvgDelete width={10} height={10} />
+          </Button>
+          <Text style={styles.mediumText}>
+            {selectedTransactions.length}{' '}
+            {selectedTransactions.length > 1 ? 'transactions' : 'transaction'}{' '}
+            selected
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 4,
+          }}
+        >
+          <Button
+            type="bare"
+            ref={editMenuTriggerRef}
+            aria-label="Edit fields"
+            onClick={() => {
+              setIsEditMenuOpen(true);
+            }}
+            {...buttonProps}
+          >
+            Edit
+          </Button>
+
+          <Popover
+            triggerRef={editMenuTriggerRef}
+            isOpen={isEditMenuOpen}
+            onOpenChange={() => setIsEditMenuOpen(false)}
+            style={{ width: 200 }}
+          >
+            <Menu
+              getItemStyle={getMenuItemStyle}
+              style={{ backgroundColor: theme.floatingActionBarBackground }}
+              onMenuSelect={type => {
+                onEdit?.(type, selectedTransactions);
+                setIsEditMenuOpen(false);
+              }}
+              items={[
+                // Add support later on.
+                // Pikaday doesn't play well will mobile.
+                // We should consider switching to react-aria date picker.
+                // {
+                //   name: 'date',
+                //   text: 'Date',
+                // },
+                {
+                  name: 'account',
+                  text: 'Account',
+                },
+                {
+                  name: 'payee',
+                  text: 'Payee',
+                },
+                {
+                  name: 'notes',
+                  text: 'Notes',
+                },
+                {
+                  name: 'category',
+                  text: 'Category',
+                },
+                {
+                  name: 'amount',
+                  text: 'Amount',
+                },
+                {
+                  name: 'cleared',
+                  text: 'Cleared',
+                },
+              ]}
+            />
+          </Popover>
+
+          <Button
+            type="bare"
+            {...buttonProps}
+            onClick={() => {
+              onDuplicate?.(selectedTransactions);
+            }}
+          >
+            Duplicate
+          </Button>
+          <Button
+            type="bare"
+            ref={moreOptionsMenuTriggerRef}
+            aria-label="More options"
+            onClick={() => {
+              setIsMoreOptionsMenuOpen(true);
+            }}
+            {...buttonProps}
+          >
+            <SvgDotsHorizontalTriple
+              width={16}
+              height={16}
+              style={{ color: 'currentColor' }}
+            />
+          </Button>
+
+          <Popover
+            triggerRef={moreOptionsMenuTriggerRef}
+            isOpen={isMoreOptionsMenuOpen}
+            onOpenChange={() => setIsMoreOptionsMenuOpen(false)}
+            style={{ width: 200 }}
+          >
+            <Menu
+              getItemStyle={getMenuItemStyle}
+              style={{ backgroundColor: theme.floatingActionBarBackground }}
+              onMenuSelect={type => {
+                if (type === 'link-schedule') {
+                  onLinkSchedule?.(selectedTransactions);
+                } else if (type === 'unlink-schedule') {
+                  onUnlinkSchedule?.(selectedTransactions);
+                } else if (type === 'delete') {
+                  onDelete?.(selectedTransactions);
+                }
+                setIsMoreOptionsMenuOpen(false);
+              }}
+              items={[
+                ...(allTransactionsAreLinked
+                  ? [
+                      {
+                        name: 'unlink-schedule',
+                        text: 'Unlink schedule',
+                      },
+                    ]
+                  : [
+                      {
+                        name: 'link-schedule',
+                        text: 'Link schedule',
+                      },
+                    ]),
+                {
+                  name: 'delete',
+                  text: 'Delete',
+                },
+              ]}
+            />
+          </Popover>
+        </View>
+      </View>
+    </View>
   );
 }

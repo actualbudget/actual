@@ -198,3 +198,6 @@ export const reportsInnerLabel = colorPalette.navy800;
 export const noteTagBackground = colorPalette.purple800;
 export const noteTagBackgroundHover = colorPalette.purple600;
 export const noteTagText = colorPalette.purple100;
+
+export const floatingActionBarBackground = colorPalette.gray900;
+export const floatingActionBarText = colorPalette.purple200;
