@@ -33,7 +33,6 @@ import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 
 export function AccountHeader({
-  filteredAmount,
   tableRef,
   editingName,
   isNameEditable,
@@ -41,7 +40,7 @@ export function AccountHeader({
   accountName,
   account,
   filterId,
-  filtersList,
+  savedFilters,
   accountsSyncing,
   failedAccounts,
   accounts,
@@ -54,10 +53,12 @@ export function AccountHeader({
   balanceQuery,
   reconcileAmount,
   canCalculateBalance,
+  isFiltered,
+  filteredAmount,
   isSorted,
   search,
-  filters,
-  conditionsOp,
+  filterConditions,
+  filterConditionsOp,
   pushModal,
   onSearch,
   onAddTransaction,
@@ -80,7 +81,7 @@ export function AccountHeader({
   onUpdateFilter,
   onClearFilters,
   onReloadSavedFilter,
-  onCondOpChange,
+  onConditionsOpChange,
   onDeleteFilter,
   onScheduleAction,
   onSetTransfer,
@@ -244,7 +245,7 @@ export function AccountHeader({
           showExtraBalances={showExtraBalances}
           onToggleExtraBalances={onToggleExtraBalances}
           account={account}
-          filteredItems={filters}
+          isFiltered={isFiltered}
           filteredAmount={filteredAmount}
         />
 
@@ -327,7 +328,7 @@ export function AccountHeader({
           )}
           <Button
             type="bare"
-            disabled={search !== '' || filters.length > 0}
+            disabled={search !== '' || filterConditions.length > 0}
             style={{ padding: 6, marginLeft: 10 }}
             onClick={onToggleSplits}
             title={
@@ -396,17 +397,17 @@ export function AccountHeader({
           )}
         </Stack>
 
-        {filters && filters.length > 0 && (
+        {filterConditions?.length > 0 && (
           <FiltersStack
-            filters={filters}
-            conditionsOp={conditionsOp}
+            conditions={filterConditions}
+            conditionsOp={filterConditionsOp}
             onUpdateFilter={onUpdateFilter}
             onDeleteFilter={onDeleteFilter}
             onClearFilters={onClearFilters}
             onReloadSavedFilter={onReloadSavedFilter}
             filterId={filterId}
-            filtersList={filtersList}
-            onCondOpChange={onCondOpChange}
+            savedFilters={savedFilters}
+            onConditionsOpChange={onConditionsOpChange}
           />
         )}
       </View>
