@@ -63,7 +63,12 @@ export function ReportBalanceMenuModal({
             textAlign: 'center',
             ...styles.veryLargeText,
           }}
-          carryoverStyle={{ right: -20, width: 15, height: 15 }}
+          carryoverStyle={{
+            width: 15,
+            height: 15,
+            display: 'inline-flex',
+            position: 'relative',
+          }}
           carryover={reportBudget.catCarryover(categoryId)}
           balance={reportBudget.catBalance(categoryId)}
           goal={reportBudget.catGoal(categoryId)}

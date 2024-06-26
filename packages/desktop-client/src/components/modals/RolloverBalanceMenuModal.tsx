@@ -65,7 +65,12 @@ export function RolloverBalanceMenuModal({
             textAlign: 'center',
             ...styles.veryLargeText,
           }}
-          carryoverStyle={{ right: -20, width: 15, height: 15 }}
+          carryoverStyle={{
+            width: 15,
+            height: 15,
+            display: 'inline-flex',
+            position: 'relative',
+          }}
           carryover={rolloverBudget.catCarryover(categoryId)}
           balance={rolloverBudget.catBalance(categoryId)}
           goal={rolloverBudget.catGoal(categoryId)}

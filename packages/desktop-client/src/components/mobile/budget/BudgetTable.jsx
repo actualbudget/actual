@@ -16,6 +16,7 @@ import { SvgExpandArrow } from '../../../icons/v0';
 import {
   SvgArrowThinLeft,
   SvgArrowThinRight,
+  SvgArrowThickRight,
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
@@ -593,6 +594,23 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     {format(value, 'financial')}
                   </AutoTextSize>
                 </Button>
+              )}
+              carryoverView={valueColor => (
+                <View
+                  style={{
+                    position: 'absolute',
+                    right: '-3px',
+                    top: '-5px',
+                    borderRadius: '50%',
+                    backgroundColor: valueColor,
+                  }}
+                >
+                  <SvgArrowThickRight
+                    width={11}
+                    height={11}
+                    style={{ color: theme.pillBackgroundLight }}
+                  />
+                </View>
               )}
             />
           </span>

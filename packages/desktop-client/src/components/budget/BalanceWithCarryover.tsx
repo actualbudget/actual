@@ -1,9 +1,10 @@
 // @ts-strict-ignore
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React, { type ReactNode, type ComponentPropsWithoutRef } from 'react';
+
+import { type Property as CSSProperty } from 'csstype';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
-import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { type Binding } from '../spreadsheet';
@@ -22,6 +23,7 @@ type BalanceWithCarryoverProps = Omit<
   budgeted: Binding;
   disabled?: boolean;
   carryoverStyle?: CSSProperties;
+  carryoverView?: (valueColor: CSSProperty.Color | undefined) => ReactNode;
 };
 export function BalanceWithCarryover({
   carryover,
@@ -30,6 +32,7 @@ export function BalanceWithCarryover({
   budgeted,
   disabled,
   carryoverStyle,
+  carryoverView,
   ...props
 }: BalanceWithCarryoverProps) {
   const carryoverValue = useSheetValue(carryover);
@@ -37,11 +40,21 @@ export function BalanceWithCarryover({
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-
-  const { isNarrowWidth } = useResponsive();
+  const valueStyle = makeBalanceAmountStyle(
+    balanceValue,
+    isGoalTemplatesEnabled ? goalValue : null,
+    budgetedValue,
+  );
 
   return (
-    <>
+    <span
+      style={{
+        alignItems: 'center',
+        display: 'inline-flex',
+        justifyContent: 'right',
+        maxWidth: '100%',
+      }}
+    >
       <CellValue
         {...props}
         binding={balance}
@@ -54,6 +67,8 @@ export function BalanceWithCarryover({
           )
         }
         style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
           textAlign: 'right',
           ...(!disabled && {
             cursor: 'pointer',
@@ -61,30 +76,28 @@ export function BalanceWithCarryover({
           ...props.style,
         }}
       />
-      {carryoverValue && (
-        <View
-          style={{
-            alignSelf: 'center',
-            marginLeft: 2,
-            position: 'absolute',
-            right: isNarrowWidth ? '-8px' : '-4px',
-            top: 0,
-            bottom: 0,
-            justifyContent: 'center',
-            ...carryoverStyle,
-          }}
-        >
-          <SvgArrowThinRight
-            width={carryoverStyle?.width || 7}
-            height={carryoverStyle?.height || 7}
-            style={makeBalanceAmountStyle(
-              balanceValue,
-              isGoalTemplatesEnabled ? goalValue : null,
-              budgetedValue,
-            )}
-          />
-        </View>
-      )}
-    </>
+      {carryoverValue &&
+        (carryoverView ? (
+          carryoverView(valueStyle?.color)
+        ) : (
+          <View
+            style={{
+              marginLeft: 2,
+              position: 'absolute',
+              right: '-4px',
+              alignSelf: 'center',
+              top: 0,
+              bottom: 0,
+              ...carryoverStyle,
+            }}
+          >
+            <SvgArrowThinRight
+              width={carryoverStyle?.width || 7}
+              height={carryoverStyle?.height || 7}
+              style={valueStyle}
+            />
+          </View>
+        ))}
+    </span>
   );
 }
