@@ -9,6 +9,7 @@ import React, {
 import {
   type GroupedEntity,
   type DataEntity,
+  type balanceTypeOpType,
 } from 'loot-core/src/types/models/reports';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
@@ -28,7 +29,7 @@ type ReportTableProps = {
   totalScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   groupBy: string;
-  balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
+  balanceTypeOp: balanceTypeOpType;
   data: DataEntity;
   filters?: RuleConditionEntity[];
   mode: string;

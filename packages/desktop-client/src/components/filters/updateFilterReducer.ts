@@ -12,6 +12,7 @@ export function updateFilterReducer(
       if (
         (type === 'id' || type === 'string') &&
         (action.op === 'contains' ||
+          action.op === 'matches' ||
           action.op === 'is' ||
           action.op === 'doesNotContain' ||
           action.op === 'isNot')
