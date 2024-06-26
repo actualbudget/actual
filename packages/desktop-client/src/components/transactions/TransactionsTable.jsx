@@ -181,6 +181,10 @@ const TransactionHeader = memo(
           zIndex: 200,
           color: theme.tableHeaderText,
           backgroundColor: theme.tableBackground,
+          paddingRight: `${5 + (scrollWidth ?? 0)}px`,
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor: theme.tableBorder,
         }}
       >
         <SelectCell
@@ -188,6 +192,10 @@ const TransactionHeader = memo(
           focused={false}
           selected={hasSelected}
           width={20}
+          style={{
+            borderTopWidth: 0,
+            borderBottomWidth: 0,
+          }}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
         <HeaderCell
@@ -291,8 +299,6 @@ const TransactionHeader = memo(
             }}
           />
         )}
-
-        <Cell value="" width={5 + (scrollWidth ?? 0)} />
       </Row>
     );
   },
@@ -416,6 +422,10 @@ function HeaderCell({
       name={id}
       alignItems={alignItems}
       value={value}
+      style={{
+        borderTopWidth: 0,
+        borderBottomWidth: 0,
+      }}
       unexposedContent={({ value: cellValue }) => (
         <Button
           type="bare"
