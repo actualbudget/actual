@@ -4,6 +4,7 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   GoCardlessToken,
+  TransactionEntity,
 } from '../../types/models';
 import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
@@ -121,7 +122,7 @@ type FinanceModals = {
     month: string;
   };
 
-  'schedule-edit': { id: string } | null;
+  'schedule-edit': { id: string; transaction?: TransactionEntity } | null;
 
   'schedule-link': { transactionIds: string[] } | null;
 
