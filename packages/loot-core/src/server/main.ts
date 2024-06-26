@@ -1131,9 +1131,6 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 handlers['transactions-import'] = mutator(function ({
   accountId,
   transactions,
-  detectInstallments,
-  updateDetectInstallmentDate,
-  ignoreAlreadyDetectedInstallments,
 }) {
   return withUndo(async () => {
     if (typeof accountId !== 'string') {
@@ -1150,9 +1147,6 @@ handlers['transactions-import'] = mutator(function ({
         result.added?.map(async transaction => {
           await bankSync.createScheduleForTransaction(
             transaction,
-            detectInstallments,
-            updateDetectInstallmentDate,
-            ignoreAlreadyDetectedInstallments,
           );
         }),
       );

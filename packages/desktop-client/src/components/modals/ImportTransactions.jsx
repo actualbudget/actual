@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import * as d from 'date-fns';
 
-import * as monthUtils from 'loot-core/src/shared/months';
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
@@ -134,24 +133,13 @@ function getFileType(filepath) {
   return rawType;
 }
 
-function ParsedDate({ parseDateFormat, dateFormat, date, installmentParcel }) {
+function ParsedDate({ parseDateFormat, dateFormat, date }) {
   const parsed =
     date &&
     formatDate(
       parseDateFormat ? parseDate(date, parseDateFormat) : date,
       dateFormat,
     );
-  const overrideDate =
-    parsed != null
-      ? d.format(
-          d.addMonths(
-            monthUtils._parse(parseDate(parsed)),
-            installmentParcel - 1,
-          ),
-          dateFormat,
-        )
-      : null;
-
   return (
     <Text>
       <Text>
@@ -165,18 +153,6 @@ function ParsedDate({ parseDateFormat, dateFormat, date, installmentParcel }) {
       <Text style={{ color: parsed ? theme.noticeTextLight : theme.errorText }}>
         {parsed || 'Invalid'}
       </Text>
-      {installmentParcel && (
-        <Text>
-          &rarr;{' '}
-          <Text
-            style={{
-              color: overrideDate ? theme.noticeTextLight : theme.errorText,
-            }}
-          >
-            {overrideDate || 'Invalid'}
-          </Text>
-        </Text>
-      )}
     </Text>
   );
 }
@@ -347,17 +323,6 @@ function parseCategoryFields(trans, categories) {
   return match;
 }
 
-function markInstallment(transaction, mapping) {
-  return (
-    <Checkbox
-      checked={
-        transaction[mapping['notes']]?.match(/\((\d{2})\/(\d{2})\)/) ?? false
-      }
-      readOnly={true}
-    />
-  );
-}
-
 function Transaction({
   transaction: rawTransaction,
   fieldMappings,
@@ -370,8 +335,6 @@ function Transaction({
   flipAmount,
   multiplierAmount,
   categories,
-  detectInstallments,
-  updateDetectedInstallmentDate,
 }) {
   const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
@@ -391,33 +354,18 @@ function Transaction({
     multiplierAmount,
   );
 
-  let installmentParcel = null;
-  if (
-    detectInstallments &&
-    updateDetectedInstallmentDate &&
-    transaction.date !== null &&
-    transaction.date !== undefined
-  ) {
-    const matches =
-      rawTransaction[fieldMappings['notes']]?.match(/\((\d{2})\/(\d{2})\)/);
-    if (matches) {
-      installmentParcel = parseInt(matches[1]);
-    }
-  }
-
   return (
     <Row
       style={{
         backgroundColor: theme.tableBackground,
       }}
     >
-      <Field width={updateDetectedInstallmentDate ? 300 : 200}>
+      <Field width={200}>
         {showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
             dateFormat={dateFormat}
             date={transaction.date}
-            installmentParcel={installmentParcel}
           />
         ) : (
           formatDate(transaction.date, dateFormat)
@@ -506,18 +454,6 @@ function Transaction({
             {amountToCurrency(amount)}
           </Field>
         </>
-      )}
-      {detectInstallments && (
-        <Field
-          width={90}
-          title="Installment"
-          style={{ display: 'flex', alignItems: 'flex-end' }}
-          contentStyle={{
-            textAlign: 'right',
-          }}
-        >
-          {markInstallment(rawTransaction, fieldMappings)}
-        </Field>
       )}
     </Row>
   );
@@ -821,13 +757,6 @@ export function ImportTransactions({ modalProps, options }) {
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
   const { accountId, categories, onImported } = options;
-  const [detectInstallments, setDetectInstallments] = useState(false);
-  const [updateDetectedInstallmentDate, setUpdateDetectedInstallmentDate] =
-    useState(false);
-  const [
-    ignoreAlreadyDetectedInstallments,
-    setIgnoreAlreadyDetectedInstallments,
-  ] = useState(false);
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -987,32 +916,10 @@ export function ImportTransactions({ modalProps, options }) {
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      let date =
+      const date =
         isOfxFile(filetype) || isCamtFile(filetype)
           ? trans.date
           : parseDate(trans.date, parseDateFormat);
-
-      if (updateDetectedInstallmentDate) {
-        if (
-          detectInstallments &&
-          updateDetectedInstallmentDate &&
-          trans.date !== null &&
-          trans.date !== undefined
-        ) {
-          const matches = trans.notes?.match(/\((\d{2})\/(\d{2})\)/);
-          if (matches) {
-            const installmentParcel = parseInt(matches[1]);
-            date =
-              date != null
-                ? d.format(
-                    d.addMonths(monthUtils._parse(date), installmentParcel - 1),
-                    'yyyy-MM-dd',
-                  )
-                : null;
-          }
-        }
-      }
-
       if (date == null) {
         errorMessage = `Unable to parse date ${
           trans.date || '(empty)'
@@ -1077,9 +984,6 @@ export function ImportTransactions({ modalProps, options }) {
       accountId,
       finalTransactions,
       reconcile,
-      detectInstallments,
-      updateDetectedInstallmentDate,
-      ignoreAlreadyDetectedInstallments,
     );
     if (didChange) {
       await getPayees();
@@ -1093,7 +997,7 @@ export function ImportTransactions({ modalProps, options }) {
   }
 
   const headers = [
-    { name: 'Date', width: updateDetectedInstallmentDate ? 300 : 200 },
+    { name: 'Date', width: 200 },
     { name: 'Payee', width: 'flex' },
     { name: 'Notes', width: 'flex' },
     { name: 'Category', width: 'flex' },
@@ -1109,14 +1013,6 @@ export function ImportTransactions({ modalProps, options }) {
     headers.push({ name: 'Amount', width: 90, style: { textAlign: 'right' } });
   }
 
-  if (detectInstallments) {
-    headers.push({
-      name: 'Installment',
-      width: 90,
-      style: { textAlign: 'right' },
-    });
-  }
-
   return (
     <Modal
       title={
@@ -1124,7 +1020,7 @@ export function ImportTransactions({ modalProps, options }) {
       }
       {...modalProps}
       loading={loadingState === 'parsing'}
-      style={{ width: 900 }}
+      style={{ width: 800 }}
     >
       {error && !error.parsed && (
         <View style={{ alignItems: 'center', marginBottom: 15 }}>
@@ -1176,8 +1072,6 @@ export function ImportTransactions({ modalProps, options }) {
                   flipAmount={flipAmount}
                   multiplierAmount={multiplierAmount}
                   categories={categories.list}
-                  detectInstallments={detectInstallments}
-                  updateDetectedInstallmentDate={updateDetectedInstallmentDate}
                 />
               </View>
             )}
@@ -1328,9 +1222,6 @@ export function ImportTransactions({ modalProps, options }) {
                   checked={reconcile}
                   onChange={() => {
                     setReconcile(state => !state);
-                    setDetectInstallments(false);
-                    setUpdateDetectedInstallmentDate(false);
-                    setIgnoreAlreadyDetectedInstallments(false);
                   }}
                 >
                   Reconcile transactions
@@ -1378,45 +1269,6 @@ export function ImportTransactions({ modalProps, options }) {
                 }}
                 onChangeAmount={onMultiplierChange}
               />
-            </View>
-            <View style={{ marginRight: 25, gap: 5 }}>
-              <SectionLabel title="MISC" />
-              <CheckboxOption
-                id="form_detect_installments"
-                checked={detectInstallments}
-                disabled={!reconcile}
-                onChange={() => {
-                  setDetectInstallments(!detectInstallments);
-                  setUpdateDetectedInstallmentDate(false);
-                  setIgnoreAlreadyDetectedInstallments(false);
-                }}
-              >
-                Detect Installments
-              </CheckboxOption>
-              <CheckboxOption
-                id="form_detect_installments_update_installment_date"
-                checked={updateDetectedInstallmentDate}
-                disabled={!detectInstallments}
-                onChange={() =>
-                  setUpdateDetectedInstallmentDate(
-                    !updateDetectedInstallmentDate,
-                  )
-                }
-              >
-                Update installment parcel to right month date
-              </CheckboxOption>
-              <CheckboxOption
-                id="form_detect_installments_already_detected"
-                checked={ignoreAlreadyDetectedInstallments}
-                disabled={!detectInstallments}
-                onChange={() =>
-                  setIgnoreAlreadyDetectedInstallments(
-                    !ignoreAlreadyDetectedInstallments,
-                  )
-                }
-              >
-                Don&apos;t create installment if already exists
-              </CheckboxOption>
             </View>
           </Stack>
         </View>

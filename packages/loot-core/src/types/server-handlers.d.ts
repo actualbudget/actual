@@ -225,9 +225,6 @@ export interface ServerHandlers {
   'transactions-import': (arg: {
     accountId;
     transactions;
-    detectInstallments;
-    updateDetectInstallmentDate;
-    ignoreAlreadyDetectedInstallments;
   }) => Promise<{
     errors?: { message: string }[];
     added;

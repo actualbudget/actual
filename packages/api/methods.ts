@@ -84,10 +84,7 @@ export function addTransactions(
 export function importTransactions(accountId, transactions) {
   return send('api/transactions-import', {
     accountId,
-    transactions,
-    detectInstallments: false,
-    updateDetectInstallmentDate: false,
-    ignoreAlreadyDetectedInstallments: false,
+    transactions
   });
 }
 
