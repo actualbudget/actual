@@ -2,12 +2,12 @@ import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
 import { css } from 'glamor';
 
+import { useAuth } from '../../auth/AuthProvider';
+import { type Permissions } from '../../auth/types';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
 import { View } from './View';
-import { Permissions } from '../../auth/types';
-import { useAuth } from '../../auth/AuthProvider';
 
 type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
@@ -182,19 +182,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     return (
-      (!permission || hasPermission(permission)) &&
-      <Component
-        ref={ref}
-        {...(typeof as === 'string'
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (css(buttonStyle) as any)
-          : { style: buttonStyle })}
-        disabled={disabled}
-        type={isSubmit ? 'submit' : 'button'}
-        {...nativeProps}
-      >
-        {children}
-      </Component>
+      (!permission || hasPermission(permission)) && (
+        <Component
+          ref={ref}
+          {...(typeof as === 'string'
+            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (css(buttonStyle) as any)
+            : { style: buttonStyle })}
+          disabled={disabled}
+          type={isSubmit ? 'submit' : 'button'}
+          {...nativeProps}
+        >
+          {children}
+        </Component>
+      )
     );
   },
 );

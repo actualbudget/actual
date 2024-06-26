@@ -280,7 +280,11 @@ export interface ServerHandlers {
     };
   }) => Promise<{ error?: string }>;
 
-  'subscribe-get-user': () => Promise<{ offline: boolean, userName?: string, permissions?: string[] } | null>;
+  'subscribe-get-user': () => Promise<{
+    offline: boolean;
+    userName?: string;
+    permissions?: string[];
+  } | null>;
 
   'subscribe-change-password': (arg: {
     password;

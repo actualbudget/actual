@@ -1492,7 +1492,11 @@ handlers['subscribe-get-user'] = async function () {
         'X-ACTUAL-TOKEN': userToken,
       },
     });
-    const { status, reason, data: { userName, permissions } } = JSON.parse(res);
+    const {
+      status,
+      reason,
+      data: { userName, permissions },
+    } = JSON.parse(res);
 
     if (status === 'error') {
       if (reason === 'unauthorized') {

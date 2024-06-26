@@ -1,10 +1,11 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, type ReactNode } from 'react';
 import { useSelector } from 'react-redux';
-import { State } from 'loot-core/client/state-types';
 
-interface AuthContextType {
+import { type State } from 'loot-core/client/state-types';
+
+type AuthContextType = {
   hasPermission: (permission: string) => boolean;
-}
+};
 
 const AuthContext = createContext<AuthContextType>(undefined);
 
@@ -16,7 +17,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const userData = useSelector((state: State) => state.user.data);
 
   const hasPermission = (permission: string) => {
-    return userData.offline || (userData.permissions?.includes(permission?.toUpperCase()) ?? false);
+    return (
+      userData.offline ||
+      (userData.permissions?.includes(permission?.toUpperCase()) ?? false)
+    );
   };
 
   return (

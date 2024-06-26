@@ -1,14 +1,15 @@
-import React from 'react';
+import { type FC, type ReactElement } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import { Permissions } from './types';
+
 import { useAuth } from './AuthProvider';
+import { type Permissions } from './types';
 
-interface ProtectedRouteProps {
+type ProtectedRouteProps = {
   permission: Permissions;
-  element: React.ReactElement;
-}
+  element: ReactElement;
+};
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element, permission }) => {
+const ProtectedRoute = ({ element, permission }: ProtectedRouteProps) => {
   const { hasPermission } = useAuth();
   const location = useLocation();
 

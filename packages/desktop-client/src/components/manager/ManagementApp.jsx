@@ -2,6 +2,9 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import { AuthProvider } from '../../auth/AuthProvider';
+import ProtectedRoute from '../../auth/ProtectedRoute';
+import { Permissions } from '../../auth/types';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -20,11 +23,8 @@ import { Bootstrap } from './subscribe/Bootstrap';
 import { ChangePassword } from './subscribe/ChangePassword';
 import { Error } from './subscribe/Error';
 import { Login } from './subscribe/Login';
-import { WelcomeScreen } from './WelcomeScreen';
 import { OpenIdCallback } from './subscribe/OpenIdCallback';
-import ProtectedRoute from '../../auth/ProtectedRoute';
-import { AuthProvider } from '../../auth/AuthProvider';
-import { Permissions } from '../../auth/types';
+import { WelcomeScreen } from './WelcomeScreen';
 
 function Version() {
   const version = useServerVersion();
@@ -154,10 +154,15 @@ export function ManagementApp({ isLoading }) {
                   <Routes>
                     <Route path="/config-server" element={<ConfigServer />} />
 
-                    <Route path="/change-password" element={
-                      <ProtectedRoute permission={Permissions.CAN_EDIT} element={<ChangePassword />} />
-                      }>
-                    </Route>
+                    <Route
+                      path="/change-password"
+                      element={
+                        <ProtectedRoute
+                          permission={Permissions.CAN_EDIT}
+                          element={<ChangePassword />}
+                        />
+                      }
+                    />
                     {files && files.length > 0 ? (
                       <Route path="/" element={<BudgetList />} />
                     ) : (

@@ -1,1 +1,0 @@
-export function validateNodeVersion(): void;

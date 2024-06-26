@@ -4,6 +4,7 @@ import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
+import { Permissions } from '../../auth/types';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
@@ -12,7 +13,6 @@ import { View } from '../common/View';
 import { Page } from '../Page';
 
 import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
-import { Permissions } from '../../auth/types';
 
 export function Schedules() {
   const { pushModal } = useActions();
@@ -107,7 +107,11 @@ export function Schedules() {
         }}
       >
         <Button onClick={onDiscover}>Find schedules</Button>
-        <Button permission={Permissions.CAN_EDIT} type="primary" onClick={onAdd}>
+        <Button
+          permission={Permissions.CAN_EDIT}
+          type="primary"
+          onClick={onAdd}
+        >
           Add new schedule
         </Button>
       </View>
