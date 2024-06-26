@@ -1138,20 +1138,7 @@ handlers['transactions-import'] = mutator(function ({
     }
 
     try {
-      const result = await bankSync.reconcileTransactions(
-        accountId,
-        transactions,
-      );
-
-      await Promise.all(
-        result.added?.map(async transaction => {
-          await bankSync.createScheduleForTransaction(
-            transaction,
-          );
-        }),
-      );
-
-      return result;
+      return await bankSync.reconcileTransactions(accountId, transactions);
     } catch (err) {
       if (err instanceof TransactionError) {
         return { errors: [{ message: err.message }], added: [], updated: [] };

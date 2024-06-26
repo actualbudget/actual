@@ -84,7 +84,7 @@ export function addTransactions(
 export function importTransactions(accountId, transactions) {
   return send('api/transactions-import', {
     accountId,
-    transactions
+    transactions,
   });
 }
 

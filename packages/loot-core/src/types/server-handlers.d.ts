@@ -222,10 +222,7 @@ export interface ServerHandlers {
     updatedAccounts;
   }>;
 
-  'transactions-import': (arg: {
-    accountId;
-    transactions;
-  }) => Promise<{
+  'transactions-import': (arg: { accountId; transactions }) => Promise<{
     errors?: { message: string }[];
     added;
     updated;

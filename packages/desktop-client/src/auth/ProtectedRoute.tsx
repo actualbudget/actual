@@ -1,4 +1,4 @@
-import { type FC, type ReactElement } from 'react';
+import { type ReactElement } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
 
 import { useAuth } from './AuthProvider';
@@ -9,7 +9,10 @@ type ProtectedRouteProps = {
   element: ReactElement;
 };
 
-const ProtectedRoute = ({ element, permission }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+  element,
+  permission,
+}: ProtectedRouteProps) => {
   const { hasPermission } = useAuth();
   const location = useLocation();
 
@@ -19,5 +22,3 @@ const ProtectedRoute = ({ element, permission }: ProtectedRouteProps) => {
     <Navigate to="/login" state={{ from: location }} replace />
   );
 };
-
-export default ProtectedRoute;
