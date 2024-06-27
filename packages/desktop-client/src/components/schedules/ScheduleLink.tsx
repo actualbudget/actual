@@ -11,7 +11,7 @@ import { type TransactionEntity } from 'loot-core/src/types/models';
 import { type BoundActions } from '../../hooks/useActions';
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -64,62 +64,70 @@ export function ScheduleLink({
   }
 
   return (
-    <Modal header="Link Schedule" size={{ width: 800 }} {...modalProps}>
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: 4,
-          marginBottom: 20,
-          alignItems: 'center',
-        }}
-      >
-        <Text>
-          Choose the schedule{' '}
-          {ids?.length > 1
-            ? `these ${ids.length} transactions belong`
-            : `this transaction belongs`}{' '}
-          to:
-        </Text>
-        <Search
-          inputRef={searchInput}
-          isInModal
-          width={300}
-          placeholder="Filter schedules…"
-          value={filter}
-          onChange={setFilter}
-        />
-        {ids.length === 1 && (
-          <Button
-            variant="primary"
-            style={{ marginLeft: 15, padding: '4px 10px' }}
-            onPress={onCreate}
+    <Modal size={{ width: 800 }} {...modalProps}>
+      {({ close }) => (
+        <>
+          <ModalHeader
+            title="Link Schedule"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 4,
+              marginBottom: 20,
+              alignItems: 'center',
+            }}
           >
-            <SvgAdd style={{ width: '20', padding: '3' }} />
-            Create New
-          </Button>
-        )}
-      </View>
+            <Text>
+              Choose the schedule{' '}
+              {ids?.length > 1
+                ? `these ${ids.length} transactions belong`
+                : `this transaction belongs`}{' '}
+              to:
+            </Text>
+            <Search
+              inputRef={searchInput}
+              isInModal
+              width={300}
+              placeholder="Filter schedules…"
+              value={filter}
+              onChange={setFilter}
+            />
+            {ids.length === 1 && (
+              <Button
+                variant="primary"
+                style={{ marginLeft: 15, padding: '4px 10px' }}
+                onPress={onCreate}
+              >
+                <SvgAdd style={{ width: '20', padding: '3' }} />
+                Create New
+              </Button>
+            )}
+          </View>
 
-      <View
-        style={{
-          flex: `1 1 ${
-            (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1)
-          }px`,
-          marginTop: 15,
-          maxHeight: '50vh',
-        }}
-      >
-        <SchedulesTable
-          allowCompleted={false}
-          filter={filter}
-          minimal={true}
-          onAction={() => {}}
-          onSelect={onSelect}
-          schedules={schedules}
-          statuses={statuses}
-          style={null}
-        />
-      </View>
+          <View
+            style={{
+              flex: `1 1 ${
+                (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1)
+              }px`,
+              marginTop: 15,
+              maxHeight: '50vh',
+            }}
+          >
+            <SchedulesTable
+              allowCompleted={false}
+              filter={filter}
+              minimal={true}
+              onAction={() => {}}
+              onSelect={onSelect}
+              schedules={schedules}
+              statuses={statuses}
+              style={null}
+            />
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

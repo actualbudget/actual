@@ -43,26 +43,6 @@ export function PayeeAutocompleteModal({
 
   return (
     <Modal
-      header={
-        isNarrowWidth &&
-        (props => (
-          <ModalHeader
-            {...props}
-            title={
-              <ModalTitle
-                title="Payee"
-                getStyle={() => ({ color: theme.menuAutoCompleteText })}
-              />
-            }
-            rightContent={props => (
-              <ModalCloseButton
-                {...props}
-                style={{ color: theme.menuAutoCompleteText }}
-              />
-            )}
-          />
-        ))
-      }
       noAnimation={!isNarrowWidth}
       {...modalProps}
       onClose={_onClose}
