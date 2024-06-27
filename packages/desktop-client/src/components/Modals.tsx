@@ -11,7 +11,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useActions } from '../hooks/useActions';
 import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 
-import { ModalTitle } from './common/Modal';
+import { ModalTitle, ModalHeader } from './common/Modal2';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetListModal } from './modals/BudgetListModal';
@@ -60,7 +60,6 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
-import { ModalHeader } from './common/Modal2';
 
 export type CommonModalProps = {
   onClose: () => PopModalAction;
