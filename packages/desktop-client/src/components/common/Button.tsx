@@ -138,7 +138,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       as = 'button',
       permission,
       ...nativeProps
-    },
+    } : ButtonProps,
     ref,
   ) => {
     const { hasPermission } = useAuth();

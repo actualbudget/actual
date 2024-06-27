@@ -33,10 +33,10 @@ export function OpenIdForm({ onSetOpenId }: OpenIdFormProps) {
 
     setLoading(true);
     await onSetOpenId({
-      issuer,
-      client_id: clientId,
-      client_secret: clientSecret,
-      server_hostname: serverUrl,
+      issuer: issuer ?? "",
+      client_id: clientId ?? "",
+      client_secret: clientSecret ?? "",
+      server_hostname: serverUrl ?? "",
     });
     setLoading(false);
   }
