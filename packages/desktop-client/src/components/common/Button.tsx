@@ -1,4 +1,4 @@
-import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
+import React, { forwardRef, type ElementType, type HTMLProps, type ForwardRefRenderFunction } from 'react';
 
 import { css } from 'glamor';
 
@@ -121,89 +121,81 @@ const _getActiveStyles = (type: ButtonType, bounce: boolean): CSSProperties => {
   }
 };
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      children,
-      pressed,
-      hover,
-      type = 'normal',
-      isSubmit = type === 'primary',
-      color,
-      style,
-      disabled,
-      hoveredStyle,
-      activeStyle,
-      bounce = true,
-      as = 'button',
-      permission,
-      ...nativeProps
-    },
-    ref,
-  ) => {
-    const { hasPermission } = useAuth();
-
-    const typeWithDisabled: ButtonType | `${ButtonType}Disabled` = disabled
-      ? `${type}Disabled`
-      : type;
-
-    hoveredStyle = {
-      ...(type !== 'bare' && styles.shadow),
-      backgroundColor: backgroundColorHover[type],
-      color: color || textColorHover[type],
-      ...hoveredStyle,
-    };
-    activeStyle = {
-      ..._getActiveStyles(type, bounce),
-      ...activeStyle,
-    };
-
-    const Component = as;
-    const buttonStyle = {
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      padding: _getPadding(type),
-      margin: 0,
-      overflow: 'hidden',
-      display: 'flex',
-      borderRadius: 4,
-      backgroundColor: backgroundColor[typeWithDisabled],
-      border: _getBorder(type, typeWithDisabled),
-      color: color || textColor[typeWithDisabled],
-      transition: 'box-shadow .25s',
-      WebkitAppRegion: 'no-drag',
-      ...styles.smallText,
-      ':hover': !disabled && hoveredStyle,
-      ':active': !disabled && activeStyle,
-      ...(hover && hoveredStyle),
-      ...(pressed && activeStyle),
-      ...style,
-    };
-
-    return (
-      (!permission || hasPermission(permission)) && (
-        <Component
-          ref={ref}
-          {...(typeof as === 'string'
-            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (css(buttonStyle) as any)
-            : { style: buttonStyle })}
-          disabled={disabled}
-          type={isSubmit ? 'submit' : 'button'}
-          {...nativeProps}
-        >
-          {children}
-        </Component>
-      )
-    );
+const Button: ForwardRefRenderFunction<HTMLButtonElement, ButtonProps> = (
+  {
+    children,
+    pressed,
+    hover,
+    type = 'normal',
+    isSubmit = type === 'primary',
+    color,
+    style,
+    disabled,
+    hoveredStyle,
+    activeStyle,
+    bounce = true,
+    as = 'button',
+    permission,
+    ...nativeProps
   },
-);
+  ref,
+) => {
+  const { hasPermission } = useAuth();
 
-Button.displayName = 'Button';
+  const typeWithDisabled: ButtonType | `${ButtonType}Disabled` = disabled
+    ? `${type}Disabled`
+    : type;
 
-type ButtonWithLoadingProps = ButtonProps & {
-  loading?: boolean;
+  hoveredStyle = {
+    ...(type !== 'bare' && styles.shadow),
+    backgroundColor: backgroundColorHover[type],
+    color: color || textColorHover[type],
+    ...hoveredStyle,
+  };
+  activeStyle = {
+    ..._getActiveStyles(type, bounce),
+    ...activeStyle,
+  };
+
+  const Component = as;
+  const buttonStyle = {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    padding: _getPadding(type),
+    margin: 0,
+    overflow: 'hidden',
+    display: 'flex',
+    borderRadius: 4,
+    backgroundColor: backgroundColor[typeWithDisabled],
+    border: _getBorder(type, typeWithDisabled),
+    color: color || textColor[typeWithDisabled],
+    transition: 'box-shadow .25s',
+    WebkitAppRegion: 'no-drag',
+    ...styles.smallText,
+    ':hover': !disabled && hoveredStyle,
+    ':active': !disabled && activeStyle,
+    ...(hover && hoveredStyle),
+    ...(pressed && activeStyle),
+    ...style,
+  };
+
+  return (
+    (!permission || hasPermission(permission)) && (
+      <Component
+        ref={ref}
+        {...(typeof as === 'string'
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (css(buttonStyle) as any)
+          : { style: buttonStyle })}
+        disabled={disabled}
+        type={isSubmit ? 'submit' : 'button'}
+        {...nativeProps}
+      >
+        {children}
+      </Component>
+    )
+  );
 };
 
 export const ButtonWithLoading = forwardRef<
@@ -245,4 +237,7 @@ export const ButtonWithLoading = forwardRef<
   );
 });
 
+Button.displayName = 'Button';
 ButtonWithLoading.displayName = 'ButtonWithLoading';
+
+export default forwardRef(Button);

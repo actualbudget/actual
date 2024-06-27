@@ -7,7 +7,7 @@ type AuthContextType = {
   hasPermission: (permission: string) => boolean;
 };
 
-const AuthContext = createContext<AuthContextType>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 type AuthProviderProps = {
   children?: ReactNode;
@@ -18,8 +18,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const hasPermission = (permission: string) => {
     return (
-      userData.offline ||
-      (userData.permissions?.includes(permission?.toUpperCase()) ?? false)
+      (userData?.offline ?? false) ||
+      (userData?.permissions?.includes(permission?.toUpperCase()) ?? false)
     );
   };
 

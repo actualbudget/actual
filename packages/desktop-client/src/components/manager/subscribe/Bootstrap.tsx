@@ -15,7 +15,7 @@ import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-import { OpenIdForm } from './OpenIdForm';
+import { OpenIdConfig, OpenIdForm } from './OpenIdForm';
 
 export function Bootstrap() {
   const dispatch = useDispatch();
@@ -55,7 +55,7 @@ export function Bootstrap() {
     }
   }
 
-  async function onSetOpenId(config) {
+  async function onSetOpenId(config: OpenIdConfig) {
     setError(null);
     const { error } = await send('subscribe-bootstrap', { openid: config });
 
@@ -144,5 +144,5 @@ export function Bootstrap() {
         </>
       )}
     </View>
-  );
+);
 }

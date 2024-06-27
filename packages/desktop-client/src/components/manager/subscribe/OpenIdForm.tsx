@@ -5,7 +5,20 @@ import { ButtonWithLoading } from '../../common/Button';
 import { Input } from '../../common/Input';
 import { useServerURL } from '../../ServerContext';
 
-export function OpenIdForm({ onSetOpenId }) {
+export type OpenIdConfig = {
+  issuer: string;
+  client_id: string;
+  client_secret: string;
+  server_hostname: string;
+};
+
+export type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
+
+type OpenIdFormProps = {
+  onSetOpenId: OpenIdCallback;
+};
+
+export function OpenIdForm({ onSetOpenId }: OpenIdFormProps) {
   const [issuer, setIssuer] = useState('');
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -13,8 +26,7 @@ export function OpenIdForm({ onSetOpenId }) {
 
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e) {
-    e.preventDefault();
+  async function onSubmit() {
     if (loading) {
       return;
     }
@@ -30,14 +42,13 @@ export function OpenIdForm({ onSetOpenId }) {
   }
 
   return (
-    <form
+    <div
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'stretch',
         marginTop: 30,
       }}
-      onSubmit={onSubmit}
     >
       <Input
         placeholder="OpenID provider"
@@ -73,6 +84,6 @@ export function OpenIdForm({ onSetOpenId }) {
       >
         OK
       </ButtonWithLoading>
-    </form>
+    </div>
   );
 }
