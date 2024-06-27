@@ -158,16 +158,20 @@ const ModalContent = ({
   stackIndex,
   children,
 }: ModalContentProps) => {
-  const contentRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
   const rotateFactor = useRef(Math.random() * 10 - 5);
 
   useLayoutEffect(() => {
-    if (contentRef.current == null) {
+    if (!contentRef.current) {
       return;
     }
 
     function setProps() {
+      if (!contentRef.current) {
+        return;
+      }
+
       if (isCurrent) {
         contentRef.current.style.transform = 'translateY(0px) scale(1)';
         contentRef.current.style.pointerEvents = 'auto';
@@ -179,7 +183,7 @@ const ModalContent = ({
 
     if (!mounted.current) {
       if (noAnimation) {
-        contentRef.current.style.opacity = 1;
+        contentRef.current.style.opacity = '1';
         contentRef.current.style.transform = 'translateY(0px) scale(1)';
 
         setTimeout(() => {
@@ -189,7 +193,7 @@ const ModalContent = ({
           }
         }, 0);
       } else {
-        contentRef.current.style.opacity = 0;
+        contentRef.current.style.opacity = '0';
         contentRef.current.style.transform = 'translateY(10px) scale(1)';
 
         setTimeout(() => {
@@ -197,7 +201,7 @@ const ModalContent = ({
             mounted.current = true;
             contentRef.current.style.transition =
               'opacity .1s, transform .1s cubic-bezier(.42, 0, .58, 1)';
-            contentRef.current.style.opacity = 1;
+            contentRef.current.style.opacity = '1';
             setProps();
           }
         }, 0);
@@ -234,11 +238,11 @@ export const ModalButtons = ({
   focusButton = false,
   children,
 }: ModalButtonsProps) => {
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (focusButton && containerRef.current) {
-      const button = containerRef.current.querySelector(
+      const button = containerRef.current.querySelector<HTMLButtonElement>(
         'button:not([data-hidden])',
       );
 
@@ -359,14 +363,14 @@ export function ModalTitle({
     }
   };
 
-  const _onTitleUpdate = newTitle => {
+  const _onTitleUpdate = (newTitle: string) => {
     if (newTitle !== title) {
       onTitleUpdate?.(newTitle);
     }
     setIsEditing(false);
   };
 
-  const inputRef = useRef<HTMLInputElement>();
+  const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (isEditing) {
       if (inputRef.current) {
