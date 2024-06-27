@@ -26,6 +26,7 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
+import { Permissions } from '../../auth/types';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
@@ -73,7 +74,12 @@ function EmptyMessage({ onAdd }) {
           manage it locally yourself.
         </Text>
 
-        <Button type="primary" style={{ marginTop: 20 }} onClick={onAdd}>
+        <Button
+          permission={Permissions.CAN_EDIT}
+          type="primary"
+          style={{ marginTop: 20 }}
+          onClick={onAdd}
+        >
           Add account
         </Button>
 

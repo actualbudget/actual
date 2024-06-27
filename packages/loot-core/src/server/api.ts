@@ -413,7 +413,10 @@ handlers['api/transactions-import'] = withMutation(async function ({
   transactions,
 }) {
   checkFileOpen();
-  return handlers['transactions-import']({ accountId, transactions });
+  return handlers['transactions-import']({
+    accountId,
+    transactions,
+  });
 });
 
 handlers['api/transactions-add'] = withMutation(async function ({

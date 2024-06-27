@@ -1427,17 +1427,27 @@ handlers['subscribe-needs-bootstrap'] = async function ({
   };
 };
 
-handlers['subscribe-bootstrap'] = async function ({ password }) {
+handlers['subscribe-bootstrap'] = async function (loginConfig) {
+  try {
+    await post(getServer().SIGNUP_SERVER + '/bootstrap', loginConfig);
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
+};
+
+handlers['subscribe-get-login-methods'] = async function () {
   let res;
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/bootstrap', { password });
+    res = await fetch(getServer().SIGNUP_SERVER + '/login-methods').then(res =>
+      res.json(),
+    );
   } catch (err) {
     return { error: err.reason || 'network-failure' };
   }
 
-  if (res.token) {
-    await asyncStorage.setItem('user-token', res.token);
-    return {};
+  if (res.methods) {
+    return { methods: res.methods };
   }
   return { error: 'internal' };
 };
@@ -1462,7 +1472,11 @@ handlers['subscribe-get-user'] = async function () {
         'X-ACTUAL-TOKEN': userToken,
       },
     });
-    const { status, reason } = JSON.parse(res);
+    const {
+      status,
+      reason,
+      data: { userName, permissions },
+    } = JSON.parse(res);
 
     if (status === 'error') {
       if (reason === 'unauthorized') {
@@ -1471,7 +1485,7 @@ handlers['subscribe-get-user'] = async function () {
       return { offline: true };
     }
 
-    return { offline: false };
+    return { offline: false, userName, permissions };
   } catch (e) {
     console.log(e);
     return { offline: true };
@@ -1496,19 +1510,23 @@ handlers['subscribe-change-password'] = async function ({ password }) {
   return {};
 };
 
-handlers['subscribe-sign-in'] = async function ({ password, loginMethod }) {
-  if (typeof loginMethod !== 'string' || loginMethod == null) {
-    loginMethod = 'password';
+handlers['subscribe-sign-in'] = async function (loginInfo) {
+  if (
+    typeof loginInfo.loginMethod !== 'string' ||
+    loginInfo.loginMethod == null
+  ) {
+    loginInfo.loginMethod = 'password';
   }
   let res;
 
   try {
-    res = await post(getServer().SIGNUP_SERVER + '/login', {
-      loginMethod,
-      password,
-    });
+    res = await post(getServer().SIGNUP_SERVER + '/login', loginInfo);
   } catch (err) {
     return { error: err.reason || 'network-failure' };
+  }
+
+  if (res.redirect_url) {
+    return { redirect_url: res.redirect_url };
   }
 
   if (!res.token) {
@@ -1528,6 +1546,10 @@ handlers['subscribe-sign-out'] = async function () {
     'readOnly',
   ]);
   return 'ok';
+};
+
+handlers['subscribe-set-token'] = async function ({ token }) {
+  await asyncStorage.setItem('user-token', token);
 };
 
 handlers['get-server-version'] = async function () {

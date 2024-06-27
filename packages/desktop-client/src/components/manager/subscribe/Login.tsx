@@ -23,8 +23,8 @@ export function Login() {
   const [searchParams, _setSearchParams] = useSearchParams();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(searchParams.get('error'));
-  const { checked } = useBootstrapped(!searchParams.has('error'));
+  const [error, setError] = useState(null);
+  const { checked } = useBootstrapped(false);
 
   useEffect(() => {
     if (checked && !searchParams.has('error')) {
@@ -58,12 +58,14 @@ export function Login() {
         return 'Invalid password';
       case 'network-failure':
         return 'Unable to contact the server';
+      case 'internal-error':
+        return 'Internal error';
       default:
         return `An unknown error occurred: ${error}`;
     }
   }
 
-  async function onSubmit(e) {
+  async function onSubmitPassword(e) {
     e.preventDefault();
     if (password === '' || loading) {
       return;
@@ -81,6 +83,21 @@ export function Login() {
       setError(error);
     } else {
       dispatch(loggedIn());
+    }
+  }
+
+  async function onSubmitOpenId(e) {
+    e.preventDefault();
+
+    const { error, redirect_url } = await send('subscribe-sign-in', {
+      return_url: window.location.origin,
+      loginMethod: 'openid',
+    });
+
+    if (error) {
+      setError(error);
+    } else {
+      window.location.href = redirect_url;
     }
   }
 
@@ -122,7 +139,7 @@ export function Login() {
       {method === 'password' && (
         <form
           style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-          onSubmit={onSubmit}
+          onSubmit={onSubmitPassword}
         >
           <BigInput
             autoFocus={true}
@@ -142,6 +159,15 @@ export function Login() {
           </ButtonWithLoading>
         </form>
       )}
+
+      {method === 'openid' && (
+        <form style={{ marginTop: 20 }} onSubmit={onSubmitOpenId}>
+          <Button style={{ fontSize: 15 }} onClick={onSubmitOpenId}>
+            Sign in with OpenId
+          </Button>
+        </form>
+      )}
+
       {method === 'header' && (
         <View
           style={{

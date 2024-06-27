@@ -74,7 +74,7 @@ export function PrivacyFilter({
   );
 }
 
-function BlurredOverlay({ blurIntensity, children, ...props }) {
+export function BlurredOverlay({ blurIntensity, children, ...props }) {
   const [hovered, setHovered] = useState(false);
   const onHover = useCallback(() => setHovered(true), [setHovered]);
   const onHoverEnd = useCallback(() => setHovered(false), [setHovered]);

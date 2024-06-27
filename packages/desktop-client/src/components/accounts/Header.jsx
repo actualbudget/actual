@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+import { Permissions } from '../../auth/types';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
@@ -289,7 +290,11 @@ export function AccountHeader({
             </Button>
           )}
           {!showEmptyMessage && (
-            <Button type="bare" onClick={onAddTransaction}>
+            <Button
+              permission={Permissions.CAN_EDIT}
+              type="bare"
+              onClick={onAddTransaction}
+            >
               <SvgAdd width={10} height={10} style={{ marginRight: 3 }} /> Add
               New
             </Button>

@@ -12,6 +12,7 @@ import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
+import { BlurredOverlay } from './PrivacyFilter';
 import { useServerURL } from './ServerContext';
 
 type LoggedInUserProps = {
@@ -103,6 +104,16 @@ export function LoggedInUser({
       >
         {serverMessage()}
       </Button>
+
+      {!loading && userData.userName && (
+        <small>
+          (logged as:{' '}
+          <BlurredOverlay blurIntensity="0.15rem">
+            <span>{userData.userName}</span>
+          </BlurredOverlay>
+          )
+        </small>
+      )}
 
       <Popover
         triggerRef={triggerRef}

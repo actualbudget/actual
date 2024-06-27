@@ -2,6 +2,9 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import { AuthProvider } from '../../auth/AuthProvider';
+import { ProtectedRoute } from '../../auth/ProtectedRoute';
+import { Permissions } from '../../auth/types';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -20,6 +23,7 @@ import { Bootstrap } from './subscribe/Bootstrap';
 import { ChangePassword } from './subscribe/ChangePassword';
 import { Error } from './subscribe/Error';
 import { Login } from './subscribe/Login';
+import { OpenIdCallback } from './subscribe/OpenIdCallback';
 import { WelcomeScreen } from './WelcomeScreen';
 
 function Version() {
@@ -102,109 +106,120 @@ export function ManagementApp({ isLoading }) {
   }
 
   return (
-    <BrowserRouter>
-      <ExposeNavigate />
-      <View style={{ height: '100%', color: theme.pageText }}>
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 40,
-            WebkitAppRegion: 'drag',
-          }}
-        />
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 40,
-            right: 15,
-          }}
-        >
-          <Notifications
-            style={{
-              position: 'relative',
-              left: 'initial',
-              right: 'initial',
-            }}
-          />
-        </View>
-
-        {managerHasInitialized && (
+    <AuthProvider>
+      <BrowserRouter>
+        <ExposeNavigate />
+        <View style={{ height: '100%', color: theme.pageText }}>
           <View
             style={{
-              alignItems: 'center',
-              bottom: 0,
-              justifyContent: 'center',
-              left: 0,
-              padding: 20,
               position: 'absolute',
-              right: 0,
               top: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              WebkitAppRegion: 'drag',
+            }}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 40,
+              right: 15,
             }}
           >
-            {userData && files ? (
-              <>
-                <Routes>
-                  <Route path="/config-server" element={<ConfigServer />} />
+            <Notifications
+              style={{
+                position: 'relative',
+                left: 'initial',
+                right: 'initial',
+              }}
+            />
+          </View>
 
-                  <Route path="/change-password" element={<ChangePassword />} />
-                  {files && files.length > 0 ? (
-                    <Route path="/" element={<BudgetList />} />
-                  ) : (
-                    <Route path="/" element={<WelcomeScreen />} />
-                  )}
-                  {/* Redirect all other pages to this route */}
-                  <Route path="/*" element={<Navigate to="/" />} />
-                </Routes>
-
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    padding: '6px 10px',
-                    zIndex: 4000,
-                  }}
-                >
+          {managerHasInitialized && (
+            <View
+              style={{
+                alignItems: 'center',
+                bottom: 0,
+                justifyContent: 'center',
+                left: 0,
+                padding: 20,
+                position: 'absolute',
+                right: 0,
+                top: 0,
+              }}
+            >
+              {userData && files ? (
+                <>
                   <Routes>
-                    <Route path="/config-server" element={null} />
+                    <Route path="/config-server" element={<ConfigServer />} />
+
                     <Route
-                      path="/*"
+                      path="/change-password"
                       element={
-                        <LoggedInUser
-                          hideIfNoServer
-                          style={{ padding: '4px 7px' }}
+                        <ProtectedRoute
+                          permission={Permissions.CAN_EDIT}
+                          element={<ChangePassword />}
                         />
                       }
                     />
+                    {files && files.length > 0 ? (
+                      <Route path="/" element={<BudgetList />} />
+                    ) : (
+                      <Route path="/" element={<WelcomeScreen />} />
+                    )}
+                    {/* Redirect all other pages to this route */}
+                    <Route path="/*" element={<Navigate to="/" />} />
                   </Routes>
-                </View>
-              </>
-            ) : (
-              <Routes>
-                <Route path="/login/:method?" element={<Login />} />
-                <Route path="/error" element={<Error />} />
-                <Route path="/config-server" element={<ConfigServer />} />
-                <Route path="/bootstrap" element={<Bootstrap />} />
-                {/* Redirect all other pages to this route */}
-                <Route
-                  path="/*"
-                  element={<Navigate to="/bootstrap" replace />}
-                />
-              </Routes>
-            )}
-          </View>
-        )}
 
-        <Routes>
-          <Route path="/config-server" element={null} />
-          <Route path="/*" element={<ServerURL />} />
-        </Routes>
-        <Version />
-      </View>
-      <Modals />
-    </BrowserRouter>
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      padding: '6px 10px',
+                      zIndex: 4000,
+                    }}
+                  >
+                    <Routes>
+                      <Route path="/config-server" element={null} />
+                      <Route
+                        path="/*"
+                        element={
+                          <LoggedInUser
+                            hideIfNoServer
+                            style={{ padding: '4px 7px' }}
+                          />
+                        }
+                      />
+                    </Routes>
+                  </View>
+                </>
+              ) : (
+                <Routes>
+                  <Route path="/login/:method?" element={<Login />} />
+                  <Route path="/openid-cb" element={<OpenIdCallback />} />
+                  <Route path="/error" element={<Error />} />
+                  <Route path="/config-server" element={<ConfigServer />} />
+                  <Route path="/bootstrap" element={<Bootstrap />} />
+                  {/* Redirect all other pages to this route */}
+                  <Route
+                    path="/*"
+                    element={<Navigate to="/bootstrap" replace />}
+                  />
+                </Routes>
+              )}
+            </View>
+          )}
+
+          <Routes>
+            <Route path="/config-server" element={null} />
+            <Route path="/*" element={<ServerURL />} />
+          </Routes>
+          <Version />
+        </View>
+        <Modals />
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

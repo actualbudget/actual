@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Link } from '../../common/Link';
@@ -15,12 +15,15 @@ import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
+import { type OpenIdConfig, OpenIdForm } from './OpenIdForm';
 
 export function Bootstrap() {
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
+  const [loginMethod, setLoginMethod] = useState('password');
 
   const { checked } = useBootstrapped();
+  const navigate = useNavigate();
 
   function getErrorMessage(error) {
     switch (error) {
@@ -30,6 +33,12 @@ export function Bootstrap() {
         return 'Passwords do not match';
       case 'network-failure':
         return 'Unable to contact the server';
+      case 'missing-issuer':
+        return 'OpenID server cannot be empty';
+      case 'missing-client-id':
+        return 'Client ID cannot be empty';
+      case 'missing-client-secret':
+        return 'Client secret cannot be empty';
       default:
         return `An unknown error occurred: ${error}`;
     }
@@ -42,7 +51,18 @@ export function Bootstrap() {
     if (error) {
       setError(error);
     } else {
-      dispatch(loggedIn());
+      navigate('/login');
+    }
+  }
+
+  async function onSetOpenId(config: OpenIdConfig) {
+    setError(null);
+    const { error } = await send('subscribe-bootstrap', { openid: config });
+
+    if (error) {
+      setError(error);
+    } else {
+      navigate('/login/openid');
     }
   }
 
@@ -84,19 +104,45 @@ export function Bootstrap() {
         </Text>
       )}
 
-      <ConfirmPasswordForm
-        buttons={
+      {loginMethod === 'password' && (
+        <>
+          <ConfirmPasswordForm
+            buttons={
+              <Button
+                type="bare"
+                style={{
+                  fontSize: 15,
+                  color: theme.pageTextLink,
+                  marginRight: 15,
+                }}
+                onClick={onDemo}
+              >
+                Try Demo
+              </Button>
+            }
+            onSetPassword={onSetPassword}
+            onError={setError}
+          />
           <Button
-            type="bare"
-            style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
-            onClick={onDemo}
+            style={{ marginTop: 10 }}
+            onClick={() => setLoginMethod('openid')}
           >
-            Try Demo
+            Configure OpenID authentication instead (Advanced)
           </Button>
-        }
-        onSetPassword={onSetPassword}
-        onError={setError}
-      />
+        </>
+      )}
+
+      {loginMethod === 'openid' && (
+        <>
+          <OpenIdForm onSetOpenId={onSetOpenId} />
+          <Button
+            style={{ marginTop: 10 }}
+            onClick={() => setLoginMethod('password')}
+          >
+            Configure password authentication instead
+          </Button>
+        </>
+      )}
     </View>
   );
 }
