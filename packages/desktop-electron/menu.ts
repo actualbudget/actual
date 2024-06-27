@@ -18,7 +18,7 @@ export function getMenu(
         {
           label: 'Load Backup...',
           enabled: false,
-          click(item, focusedWindow) {
+          click(_item, focusedWindow) {
             if (focusedWindow && budgetId) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
@@ -34,7 +34,7 @@ export function getMenu(
         {
           label: 'Manage files...',
           accelerator: 'CmdOrCtrl+O',
-          click(item, focusedWindow) {
+          click(_item, focusedWindow) {
             if (focusedWindow) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
@@ -58,18 +58,26 @@ export function getMenu(
           label: 'Undo',
           enabled: false,
           accelerator: 'CmdOrCtrl+Z',
-          click: function (menuItem, focusedWin) {
+          click: function (_menuItem, focusedWin) {
             // Undo
-            focusedWin.webContents.executeJavaScript('__actionsForMenu.undo()');
+            if (focusedWin) {
+              focusedWin.webContents.executeJavaScript(
+                '__actionsForMenu.undo()',
+              );
+            }
           },
         },
         {
           label: 'Redo',
           enabled: false,
           accelerator: 'Shift+CmdOrCtrl+Z',
-          click: function (menuItem, focusedWin) {
+          click: function (_menuItem, focusedWin) {
             // Redo
-            focusedWin.webContents.executeJavaScript('__actionsForMenu.redo()');
+            if (focusedWin) {
+              focusedWin.webContents.executeJavaScript(
+                '__actionsForMenu.redo()',
+              );
+            }
           },
         },
         {
@@ -98,24 +106,28 @@ export function getMenu(
     {
       label: 'View',
       submenu: [
-        isDev && {
-          label: 'Reload',
-          accelerator: 'CmdOrCtrl+R',
-          click(item, focusedWindow) {
-            if (focusedWindow) focusedWindow.reload();
-          },
-        },
+        isDev
+          ? {
+              label: 'Reload',
+              accelerator: 'CmdOrCtrl+R',
+              click(_item, focusedWindow) {
+                if (focusedWindow) focusedWindow.reload();
+              },
+            }
+          : { label: 'hidden', visible: false },
         {
           label: 'Toggle Developer Tools',
           accelerator:
             process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-          click(item, focusedWindow) {
+          click(_item, focusedWindow) {
             if (focusedWindow) focusedWindow.webContents.toggleDevTools();
           },
         },
-        isDev && {
-          type: 'separator',
-        },
+        isDev
+          ? {
+              type: 'separator',
+            }
+          : { label: 'hidden', visible: false },
         {
           role: 'resetZoom',
         },
@@ -139,10 +151,12 @@ export function getMenu(
         {
           label: 'Find schedules',
           enabled: false,
-          click: function (menuItem, focusedWin) {
-            focusedWin.webContents.executeJavaScript(
-              'window.__actionsForMenu && window.__actionsForMenu.pushModal("schedules-discover")',
-            );
+          click: function (_menuItem, focusedWin) {
+            if (focusedWin) {
+              focusedWin.webContents.executeJavaScript(
+                'window.__actionsForMenu && window.__actionsForMenu.pushModal("schedules-discover")',
+              );
+            }
           },
         },
       ],
@@ -189,12 +203,14 @@ export function getMenu(
             ipcMain.emit('show-about');
           },
         },
-        isDev && {
-          label: 'Screenshot',
-          click() {
-            ipcMain.emit('screenshot');
-          },
-        },
+        isDev
+          ? {
+              label: 'Screenshot',
+              click() {
+                ipcMain.emit('screenshot');
+              },
+            }
+          : { label: 'hidden', visible: false },
         {
           type: 'separator',
         },
