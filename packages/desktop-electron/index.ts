@@ -194,15 +194,13 @@ function isExternalUrl(url: string) {
 
 function updateMenu(budgetId?: string) {
   const isBudgetOpen = !!budgetId;
-  const menu = getMenu(isDev, createWindow);
+  const menu = getMenu(isDev, createWindow, budgetId);
   const file = menu.items.filter(item => item.label === 'File')[0];
   const fileItems = file.submenu?.items || [];
   fileItems
     .filter(item => item.label === 'Load Backup...')
     .forEach(item => {
       item.enabled = isBudgetOpen;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (item as any).budgetId = budgetId;
     });
 
   const tools = menu.items.filter(item => item.label === 'Tools')[0];
@@ -373,7 +371,7 @@ ipcMain.on('apply-update', () => {
   updater.apply();
 });
 
-ipcMain.on('update-menu', (event, budgetId) => {
+ipcMain.on('update-menu', (event, budgetId?: string) => {
   updateMenu(budgetId);
 });
 

@@ -1,6 +1,6 @@
 const { Menu, ipcMain, app, shell } = require('electron');
 
-function getMenu(isDev, createWindow) {
+function getMenu(isDev, createWindow, budgetId = undefined) {
   const template = [
     {
       label: 'File',
@@ -12,7 +12,7 @@ function getMenu(isDev, createWindow) {
             if (focusedWindow) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
-                  `__actionsForMenu.replaceModal('load-backup', { budgetId: '${item.budgetId}' })`,
+                  `__actionsForMenu.replaceModal('load-backup', { budgetId: '${budgetId}' })`,
                 );
               }
             }
