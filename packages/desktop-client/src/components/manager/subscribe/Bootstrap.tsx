@@ -15,7 +15,7 @@ import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-import { OpenIdConfig, OpenIdForm } from './OpenIdForm';
+import { type OpenIdConfig, OpenIdForm } from './OpenIdForm';
 
 export function Bootstrap() {
   const dispatch = useDispatch();
@@ -144,5 +144,5 @@ export function Bootstrap() {
         </>
       )}
     </View>
-);
+  );
 }
