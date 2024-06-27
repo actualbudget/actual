@@ -1,6 +1,6 @@
 const { Menu, ipcMain, app, shell } = require('electron');
 
-function getMenu(isDev, createWindow, budgetId = undefined) {
+function getMenu(isDev, createWindow, budgetId) {
   const template = [
     {
       label: 'File',
