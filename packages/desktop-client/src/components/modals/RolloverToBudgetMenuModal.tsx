@@ -2,7 +2,7 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { type CSSProperties, theme, styles } from '../../style';
 import { ToBudgetMenu } from '../budget/rollover/budgetsummary/ToBudgetMenu';
-import { Modal, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { type CommonModalProps } from '../Modals';
 
 type RolloverToBudgetMenuModalProps = ComponentPropsWithoutRef<
@@ -26,17 +26,22 @@ export function RolloverToBudgetMenuModal({
   };
 
   return (
-    <Modal
-      header={props => <ModalHeader {...props} showLogo />}
-      {...modalProps}
-    >
-      <ToBudgetMenu
-        getItemStyle={() => defaultMenuItemStyle}
-        onTransfer={onTransfer}
-        onCover={onCover}
-        onHoldBuffer={onHoldBuffer}
-        onResetHoldBuffer={onResetHoldBuffer}
-      />
+    <Modal {...modalProps}>
+      {({ close }) => (
+        <>
+          <ModalHeader
+            showLogo
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <ToBudgetMenu
+            getItemStyle={() => defaultMenuItemStyle}
+            onTransfer={onTransfer}
+            onCover={onCover}
+            onHoldBuffer={onHoldBuffer}
+            onResetHoldBuffer={onResetHoldBuffer}
+          />
+        </>
+      )}
     </Modal>
   );
 }

@@ -13,7 +13,13 @@ import { InitialFocus } from '../common/InitialFocus';
 import { InlineField } from '../common/InlineField';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Modal, ModalButtons, ModalHeader, ModalTitle } from '../common/Modal2';
+import {
+  Modal,
+  ModalButtons,
+  ModalCloseButton,
+  ModalHeader,
+  ModalTitle,
+} from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
@@ -58,127 +64,127 @@ export function CreateLocalAccountModal({
     }
   };
   return (
-    <Modal
-      header={props => (
-        <ModalHeader
-          {...props}
-          title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
-        />
-      )}
-      {...modalProps}
-    >
-      {() => (
-        <View>
-          <Form onSubmit={onSubmit}>
-            <InlineField label="Name" width="100%">
-              <InitialFocus>
+    <Modal {...modalProps}>
+      {({ close }) => (
+        <>
+          <ModalHeader
+            title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View>
+            <Form onSubmit={onSubmit}>
+              <InlineField label="Name" width="100%">
+                <InitialFocus>
+                  <Input
+                    name="name"
+                    value={name}
+                    onChange={event => setName(event.target.value)}
+                    onBlur={event => {
+                      const name = event.target.value.trim();
+                      setName(name);
+                      if (name && nameError) {
+                        setNameError(false);
+                      }
+                    }}
+                    style={{ flex: 1 }}
+                  />
+                </InitialFocus>
+              </InlineField>
+              {nameError && (
+                <FormError style={{ marginLeft: 75 }}>
+                  Name is required
+                </FormError>
+              )}
+
+              <View
+                style={{
+                  width: '100%',
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                }}
+              >
+                <View style={{ flexDirection: 'column' }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'flex-end',
+                    }}
+                  >
+                    <Checkbox
+                      id="offbudget"
+                      name="offbudget"
+                      checked={offbudget}
+                      onChange={() => setOffbudget(!offbudget)}
+                    />
+                    <label
+                      htmlFor="offbudget"
+                      style={{
+                        userSelect: 'none',
+                        verticalAlign: 'center',
+                      }}
+                    >
+                      Off-budget
+                    </label>
+                  </View>
+                  <div
+                    style={{
+                      textAlign: 'right',
+                      fontSize: '0.7em',
+                      color: theme.pageTextLight,
+                      marginTop: 3,
+                    }}
+                  >
+                    <Text>
+                      This cannot be changed later. <br /> {'\n'}
+                      See{' '}
+                      <Link
+                        variant="external"
+                        linkColor="muted"
+                        to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
+                      >
+                        Accounts Overview
+                      </Link>{' '}
+                      for more information.
+                    </Text>
+                  </div>
+                </View>
+              </View>
+
+              <InlineField label="Balance" width="100%">
                 <Input
-                  name="name"
-                  value={name}
-                  onChange={event => setName(event.target.value)}
+                  name="balance"
+                  inputMode="decimal"
+                  value={balance}
+                  onChange={event => setBalance(event.target.value)}
                   onBlur={event => {
-                    const name = event.target.value.trim();
-                    setName(name);
-                    if (name && nameError) {
-                      setNameError(false);
+                    const balance = event.target.value.trim();
+                    setBalance(balance);
+                    if (validateBalance(balance) && balanceError) {
+                      setBalanceError(false);
                     }
                   }}
                   style={{ flex: 1 }}
                 />
-              </InitialFocus>
-            </InlineField>
-            {nameError && (
-              <FormError style={{ marginLeft: 75 }}>Name is required</FormError>
-            )}
+              </InlineField>
+              {balanceError && (
+                <FormError style={{ marginLeft: 75 }}>
+                  Balance must be a number
+                </FormError>
+              )}
 
-            <View
-              style={{
-                width: '100%',
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <View style={{ flexDirection: 'column' }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'flex-end',
-                  }}
+              <ModalButtons>
+                <Button onPress={() => modalProps.onBack()}>Back</Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  style={{ marginLeft: 10 }}
                 >
-                  <Checkbox
-                    id="offbudget"
-                    name="offbudget"
-                    checked={offbudget}
-                    onChange={() => setOffbudget(!offbudget)}
-                  />
-                  <label
-                    htmlFor="offbudget"
-                    style={{
-                      userSelect: 'none',
-                      verticalAlign: 'center',
-                    }}
-                  >
-                    Off-budget
-                  </label>
-                </View>
-                <div
-                  style={{
-                    textAlign: 'right',
-                    fontSize: '0.7em',
-                    color: theme.pageTextLight,
-                    marginTop: 3,
-                  }}
-                >
-                  <Text>
-                    This cannot be changed later. <br /> {'\n'}
-                    See{' '}
-                    <Link
-                      variant="external"
-                      linkColor="muted"
-                      to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
-                    >
-                      Accounts Overview
-                    </Link>{' '}
-                    for more information.
-                  </Text>
-                </div>
-              </View>
-            </View>
-
-            <InlineField label="Balance" width="100%">
-              <Input
-                name="balance"
-                inputMode="decimal"
-                value={balance}
-                onChange={event => setBalance(event.target.value)}
-                onBlur={event => {
-                  const balance = event.target.value.trim();
-                  setBalance(balance);
-                  if (validateBalance(balance) && balanceError) {
-                    setBalanceError(false);
-                  }
-                }}
-                style={{ flex: 1 }}
-              />
-            </InlineField>
-            {balanceError && (
-              <FormError style={{ marginLeft: 75 }}>
-                Balance must be a number
-              </FormError>
-            )}
-
-            <ModalButtons>
-              <Button onPress={() => modalProps.onBack()}>Back</Button>
-              <Button
-                type="submit"
-                variant="primary"
-                style={{ marginLeft: 10 }}
-              >
-                Create
-              </Button>
-            </ModalButtons>
-          </Form>
-        </View>
+                  Create
+                </Button>
+              </ModalButtons>
+            </Form>
+          </View>
+        </>
       )}
     </Modal>
   );

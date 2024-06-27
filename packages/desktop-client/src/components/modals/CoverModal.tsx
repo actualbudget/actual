@@ -72,7 +72,8 @@ export function CoverModal({
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   return (
-    <Modal header={title} {...modalProps}>
+    <Modal {...modalProps}>
+      {title}
       <View>
         <FieldLabel title="Cover from category:" />
         <TapField value={fromCategory?.name} onClick={onCategoryClick} />

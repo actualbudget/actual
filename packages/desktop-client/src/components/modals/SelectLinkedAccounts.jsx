@@ -4,7 +4,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -103,9 +103,13 @@ export function SelectLinkedAccounts({
   }
 
   return (
-    <Modal header="Link Accounts" {...modalProps} style={{ width: 800 }}>
-      {() => (
+    <Modal {...modalProps} style={{ width: 800 }}>
+      {({ close }) => (
         <>
+          <ModalHeader
+            title="Link Accounts"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
           <Text style={{ marginBottom: 10 }}>
             We found the following accounts. Select which ones you want to add:
           </Text>

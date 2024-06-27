@@ -10,7 +10,12 @@ import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Modal, ModalHeader, ModalTitle } from '../common/Modal2';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+  ModalTitle,
+} from '../common/Modal2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -86,77 +91,83 @@ export function CategoryGroupMenuModal({
 
   return (
     <Modal
-      header={props => (
-        <ModalHeader
-          {...props}
-          title={
-            <ModalTitle
-              isEditable
-              title={group.name}
-              onTitleUpdate={onRename}
-            />
-          }
-          leftContent={
-            <AdditionalCategoryGroupMenu
-              group={group}
-              onDelete={_onDelete}
-              onToggleVisibility={_onToggleVisibility}
-            />
-          }
-        />
-      )}
       {...modalProps}
       onClose={_onClose}
       style={{
         height: '45vh',
       }}
     >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-        }}
-      >
-        <View
-          style={{
-            overflowY: 'auto',
-            flex: 1,
-          }}
-        >
-          <Notes
-            notes={notes?.length > 0 ? notes : 'No notes'}
-            editable={false}
-            focused={false}
-            getStyle={() => ({
-              ...styles.mediumText,
-              borderRadius: 6,
-              ...((!notes || notes.length === 0) && {
-                justifySelf: 'center',
-                alignSelf: 'center',
-                color: theme.pageTextSubdued,
-              }),
-            })}
+      {({ close }) => (
+        <>
+          <ModalHeader
+            leftContent={
+              <AdditionalCategoryGroupMenu
+                group={group}
+                onDelete={_onDelete}
+                onToggleVisibility={_onToggleVisibility}
+              />
+            }
+            title={
+              <ModalTitle
+                isEditable
+                title={group.name}
+                onTitleUpdate={onRename}
+              />
+            }
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignContent: 'space-between',
-            paddingTop: 10,
-          }}
-        >
-          <Button style={buttonStyle} onPress={_onAddCategory}>
-            <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
-            Add category
-          </Button>
-          <Button style={buttonStyle} onPress={_onEditNotes}>
-            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
-            Edit notes
-          </Button>
-        </View>
-      </View>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'column',
+            }}
+          >
+            <View
+              style={{
+                overflowY: 'auto',
+                flex: 1,
+              }}
+            >
+              <Notes
+                notes={notes?.length > 0 ? notes : 'No notes'}
+                editable={false}
+                focused={false}
+                getStyle={() => ({
+                  ...styles.mediumText,
+                  borderRadius: 6,
+                  ...((!notes || notes.length === 0) && {
+                    justifySelf: 'center',
+                    alignSelf: 'center',
+                    color: theme.pageTextSubdued,
+                  }),
+                })}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                alignContent: 'space-between',
+                paddingTop: 10,
+              }}
+            >
+              <Button style={buttonStyle} onPress={_onAddCategory}>
+                <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
+                Add category
+              </Button>
+              <Button style={buttonStyle} onPress={_onEditNotes}>
+                <SvgNotesPaper
+                  width={20}
+                  height={20}
+                  style={{ paddingRight: 5 }}
+                />
+                Edit notes
+              </Button>
+            </View>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

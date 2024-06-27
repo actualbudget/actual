@@ -8,7 +8,7 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/rollover/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
-import { Modal } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { type CommonModalProps } from '../Modals';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
@@ -95,26 +95,34 @@ export function RolloverBudgetSummaryModal({
   };
 
   return (
-    <Modal header="Budget Summary" {...modalProps}>
-      <NamespaceContext.Provider value={sheetForMonth(month)}>
-        <TotalsList
-          prevMonthName={prevMonthName}
-          style={{
-            ...styles.mediumText,
-          }}
-        />
-        <ToBudgetAmount
-          prevMonthName={prevMonthName}
-          style={{
-            ...styles.mediumText,
-            marginTop: 15,
-          }}
-          amountStyle={{
-            ...styles.underlinedText,
-          }}
-          onClick={onClick}
-        />
-      </NamespaceContext.Provider>
+    <Modal {...modalProps}>
+      {({ close }) => (
+        <>
+          <ModalHeader
+            title="Budget Summary"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <NamespaceContext.Provider value={sheetForMonth(month)}>
+            <TotalsList
+              prevMonthName={prevMonthName}
+              style={{
+                ...styles.mediumText,
+              }}
+            />
+            <ToBudgetAmount
+              prevMonthName={prevMonthName}
+              style={{
+                ...styles.mediumText,
+                marginTop: 15,
+              }}
+              amountStyle={{
+                ...styles.underlinedText,
+              }}
+              onClick={onClick}
+            />
+          </NamespaceContext.Provider>
+        </>
+      )}
     </Modal>
   );
 }

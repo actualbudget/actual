@@ -9,7 +9,12 @@ import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Modal, ModalHeader, ModalTitle } from '../common/Modal2';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+  ModalTitle,
+} from '../common/Modal2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -77,76 +82,82 @@ export function AccountMenuModal({
 
   return (
     <Modal
-      header={props => (
-        <ModalHeader
-          {...props}
-          leftContent={
-            <AdditionalAccountMenu
-              account={account}
-              onClose={onCloseAccount}
-              onReopen={onReopenAccount}
-            />
-          }
-          title={
-            <ModalTitle
-              isEditable
-              title={account.name}
-              onTitleUpdate={onRename}
-            />
-          }
-        />
-      )}
       {...modalProps}
       onClose={_onClose}
       style={{
         height: '45vh',
       }}
     >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-        }}
-      >
-        <View
-          style={{
-            overflowY: 'auto',
-            flex: 1,
-          }}
-        >
-          <Notes
-            notes={
-              originalNotes && originalNotes.length > 0
-                ? originalNotes
-                : 'No notes'
+      {({ close }) => (
+        <>
+          <ModalHeader
+            leftContent={
+              <AdditionalAccountMenu
+                account={account}
+                onClose={onCloseAccount}
+                onReopen={onReopenAccount}
+              />
             }
-            editable={false}
-            focused={false}
-            getStyle={() => ({
-              borderRadius: 6,
-              ...((!originalNotes || originalNotes.length === 0) && {
-                justifySelf: 'center',
-                alignSelf: 'center',
-                color: theme.pageTextSubdued,
-              }),
-            })}
+            title={
+              <ModalTitle
+                isEditable
+                title={account.name}
+                onTitleUpdate={onRename}
+              />
+            }
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignContent: 'space-between',
-            paddingTop: 10,
-          }}
-        >
-          <Button style={buttonStyle} onPress={_onEditNotes}>
-            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
-            Edit notes
-          </Button>
-        </View>
-      </View>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'column',
+            }}
+          >
+            <View
+              style={{
+                overflowY: 'auto',
+                flex: 1,
+              }}
+            >
+              <Notes
+                notes={
+                  originalNotes && originalNotes.length > 0
+                    ? originalNotes
+                    : 'No notes'
+                }
+                editable={false}
+                focused={false}
+                getStyle={() => ({
+                  borderRadius: 6,
+                  ...((!originalNotes || originalNotes.length === 0) && {
+                    justifySelf: 'center',
+                    alignSelf: 'center',
+                    color: theme.pageTextSubdued,
+                  }),
+                })}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                alignContent: 'space-between',
+                paddingTop: 10,
+              }}
+            >
+              <Button style={buttonStyle} onPress={_onEditNotes}>
+                <SvgNotesPaper
+                  width={20}
+                  height={20}
+                  style={{ paddingRight: 5 }}
+                />
+                Edit notes
+              </Button>
+            </View>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

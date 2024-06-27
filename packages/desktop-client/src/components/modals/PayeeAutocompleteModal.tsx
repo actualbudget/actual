@@ -54,7 +54,7 @@ export function PayeeAutocompleteModal({
                 getStyle={() => ({ color: theme.menuAutoCompleteText })}
               />
             }
-            CloseButton={props => (
+            rightContent={props => (
               <ModalCloseButton
                 {...props}
                 style={{ color: theme.menuAutoCompleteText }}
@@ -71,19 +71,39 @@ export function PayeeAutocompleteModal({
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
     >
-      <PayeeAutocomplete
-        payees={payees}
-        accounts={accounts}
-        focused={true}
-        embedded={true}
-        closeOnBlur={false}
-        onClose={_onClose}
-        onManagePayees={onManagePayees}
-        showManagePayees={!isNarrowWidth}
-        showMakeTransfer={!isNarrowWidth}
-        {...defaultAutocompleteProps}
-        {...autocompleteProps}
-      />
+      {({ close }) => (
+        <>
+          {isNarrowWidth && (
+            <ModalHeader
+              title={
+                <ModalTitle
+                  title="Payee"
+                  getStyle={() => ({ color: theme.menuAutoCompleteText })}
+                />
+              }
+              rightContent={
+                <ModalCloseButton
+                  onClick={close}
+                  style={{ color: theme.menuAutoCompleteText }}
+                />
+              }
+            />
+          )}
+          <PayeeAutocomplete
+            payees={payees}
+            accounts={accounts}
+            focused={true}
+            embedded={true}
+            closeOnBlur={false}
+            onClose={close}
+            onManagePayees={onManagePayees}
+            showManagePayees={!isNarrowWidth}
+            showMakeTransfer={!isNarrowWidth}
+            {...defaultAutocompleteProps}
+            {...autocompleteProps}
+          />
+        </>
+      )}
     </Modal>
   );
 }

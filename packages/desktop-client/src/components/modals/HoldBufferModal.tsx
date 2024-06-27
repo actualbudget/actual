@@ -5,7 +5,7 @@ import { rolloverBudget } from 'loot-core/client/queries';
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
@@ -34,44 +34,52 @@ export function HoldBufferModal({
   };
 
   return (
-    <Modal header="Hold Buffer" {...modalProps}>
-      <View>
-        <FieldLabel title="Hold this amount:" />
-        <InitialFocus>
-          <AmountInput
-            value={available}
-            autoDecimals={true}
-            style={{
-              marginLeft: styles.mobileEditingPadding,
-              marginRight: styles.mobileEditingPadding,
-            }}
-            inputStyle={{
-              height: styles.mobileMinHeight,
-            }}
-            onUpdate={setAmount}
-            onEnter={() => _onSubmit(amount)}
+    <Modal {...modalProps}>
+      {({ close }) => (
+        <>
+          <ModalHeader
+            title="Hold Buffer"
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-        </InitialFocus>
-      </View>
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingTop: 10,
-        }}
-      >
-        <Button
-          variant="primary"
-          style={{
-            height: styles.mobileMinHeight,
-            marginLeft: styles.mobileEditingPadding,
-            marginRight: styles.mobileEditingPadding,
-          }}
-          onPress={() => _onSubmit(amount)}
-        >
-          Hold
-        </Button>
-      </View>
+          <View>
+            <FieldLabel title="Hold this amount:" />
+            <InitialFocus>
+              <AmountInput
+                value={available}
+                autoDecimals={true}
+                style={{
+                  marginLeft: styles.mobileEditingPadding,
+                  marginRight: styles.mobileEditingPadding,
+                }}
+                inputStyle={{
+                  height: styles.mobileMinHeight,
+                }}
+                onUpdate={setAmount}
+                onEnter={() => _onSubmit(amount)}
+              />
+            </InitialFocus>
+          </View>
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingTop: 10,
+            }}
+          >
+            <Button
+              variant="primary"
+              style={{
+                height: styles.mobileMinHeight,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+              }}
+              onPress={() => _onSubmit(amount)}
+            >
+              Hold
+            </Button>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

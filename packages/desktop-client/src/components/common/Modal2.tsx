@@ -4,9 +4,6 @@ import React, {
   useLayoutEffect,
   type ReactNode,
   useState,
-  type ComponentPropsWithRef,
-  type ComponentPropsWithoutRef,
-  type ComponentType,
 } from 'react';
 import {
   ModalOverlay as ReactAriaModalOverlay,
@@ -31,10 +28,9 @@ import { TextOneLine } from './TextOneLine';
 import { View } from './View';
 
 export type ModalProps = {
-  header: string | ComponentType<ComponentPropsWithoutRef<typeof ModalHeader>>;
   isCurrent?: boolean;
   isHidden?: boolean;
-  children: ReactNode | (() => ReactNode);
+  children: ReactNode | (({ close }: { close: () => void }) => ReactNode);
   size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
   padding?: CSSProperties['padding'];
   isLoading?: boolean;
@@ -46,7 +42,6 @@ export type ModalProps = {
 };
 
 export const Modal = ({
-  header,
   isCurrent,
   isHidden,
   size,
@@ -62,7 +57,7 @@ export const Modal = ({
   const { enableScope, disableScope } = useHotkeysContext();
 
   // This deactivates any key handlers in the "app" scope
-  const scopeId = `modal-${stackIndex}-${header}`;
+  const scopeId = `modal-${stackIndex}`;
   useEffect(() => {
     enableScope(scopeId);
     return () => disableScope(scopeId);
@@ -112,17 +107,10 @@ export const Modal = ({
                 ...style,
               }}
             >
-              {header &&
-                (typeof header === 'string' ? (
-                  <ModalHeader title={header} onClose={close} />
-                ) : (
-                  header({
-                    CloseButton: ModalCloseButton,
-                    onClose: close,
-                  })
-                ))}
               <View style={{ paddingTop: 0, flex: 1 }}>
-                {typeof children === 'function' ? children() : children}
+                {typeof children === 'function'
+                  ? children({ close })
+                  : children}
               </View>
               {isLoading && (
                 <View
@@ -279,16 +267,14 @@ type ModalHeaderProps = {
   leftContent?: ReactNode;
   showLogo?: boolean;
   title?: ReactNode;
-  CloseButton?: ComponentType<ComponentPropsWithRef<typeof ModalCloseButton>>;
-  onClose?: () => void;
+  rightContent?: ReactNode;
 };
 
 export function ModalHeader({
   leftContent,
   showLogo,
   title,
-  CloseButton = ModalCloseButton,
-  onClose,
+  rightContent = ModalCloseButton,
 }: ModalHeaderProps) {
   return (
     <View
@@ -334,14 +320,14 @@ export function ModalHeader({
         </View>
       )}
 
-      {CloseButton && (
+      {rightContent && (
         <View
           style={{
             position: 'absolute',
             right: 0,
           }}
         >
-          <CloseButton onClick={onClose} />
+          {rightContent}
         </View>
       )}
     </View>

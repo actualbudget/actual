@@ -78,7 +78,7 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
   }
 
   return (
-    <Modal header={null} {...modalProps} style={modalProps.style}>
+    <Modal {...modalProps} style={modalProps.style}>
       {() => (
         <View style={{ padding: 20, maxWidth: 500 }}>
           <View>

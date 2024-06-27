@@ -10,7 +10,7 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
-import { Modal } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
@@ -227,20 +227,26 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
     >
-      {() => (
-        <View>
-          {!isNarrowWidth && (
-            <SectionLabel
-              title={label}
-              style={{
-                alignSelf: 'center',
-                color: theme.menuAutoCompleteText,
-                marginBottom: 10,
-              }}
-            />
-          )}
-          <View style={{ flex: 1 }}>{editor}</View>
-        </View>
+      {({ close }) => (
+        <>
+          <ModalHeader
+            title={label}
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View>
+            {!isNarrowWidth && (
+              <SectionLabel
+                title={label}
+                style={{
+                  alignSelf: 'center',
+                  color: theme.menuAutoCompleteText,
+                  marginBottom: 10,
+                }}
+              />
+            )}
+            <View style={{ flex: 1 }}>{editor}</View>
+          </View>
+        </>
       )}
     </Modal>
   );

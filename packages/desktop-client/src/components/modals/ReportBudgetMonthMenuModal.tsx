@@ -9,7 +9,7 @@ import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
-import { Modal, ModalHeader, ModalTitle } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
@@ -60,123 +60,128 @@ export function ReportBudgetMonthMenuModal({
 
   return (
     <Modal
-      header={props => (
-        <ModalHeader
-          {...props}
-          title={<ModalTitle title={monthUtils.format(month, 'MMMM ‘yy')} />}
-        />
-      )}
       {...modalProps}
       onClose={onClose}
       style={{
         height: '50vh',
       }}
     >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-        }}
-      >
-        <View
-          style={{
-            display: showMore ? 'none' : undefined,
-            overflowY: 'auto',
-            flex: 1,
-          }}
-        >
-          <Notes
-            notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
-            editable={false}
-            focused={false}
-            getStyle={() => ({
-              borderRadius: 6,
-              ...((!originalNotes || originalNotes.length === 0) && {
-                justifySelf: 'center',
-                alignSelf: 'center',
-                color: theme.pageTextSubdued,
-              }),
-            })}
+      {({ close }) => (
+        <>
+          <ModalHeader
+            title={monthUtils.format(month, 'MMMM ‘yy')}
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-        </View>
-        <View style={{ paddingTop: 10, gap: 5 }}>
           <View
             style={{
-              display: showMore ? 'none' : undefined,
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignContent: 'space-between',
+              flex: 1,
+              flexDirection: 'column',
             }}
           >
-            <Button style={buttonStyle} onPress={_onEditNotes}>
-              <SvgNotesPaper
-                width={20}
-                height={20}
-                style={{ paddingRight: 5 }}
-              />
-              Edit notes
-            </Button>
-          </View>
-          <View>
-            <Button
-              variant="bare"
-              style={({ isPressed, isHovered }) => ({
-                ...buttonStyle,
-                ...(isPressed || isHovered
-                  ? { backgroundColor: 'transparent', color: buttonStyle.color }
-                  : {}),
-              })}
-              onPress={onShowMore}
+            <View
+              style={{
+                display: showMore ? 'none' : undefined,
+                overflowY: 'auto',
+                flex: 1,
+              }}
             >
-              {!showMore ? (
-                <SvgCheveronUp
-                  width={30}
-                  height={30}
-                  style={{ paddingRight: 5 }}
-                />
-              ) : (
-                <SvgCheveronDown
-                  width={30}
-                  height={30}
-                  style={{ paddingRight: 5 }}
-                />
-              )}
-              Actions
-            </Button>
+              <Notes
+                notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
+                editable={false}
+                focused={false}
+                getStyle={() => ({
+                  borderRadius: 6,
+                  ...((!originalNotes || originalNotes.length === 0) && {
+                    justifySelf: 'center',
+                    alignSelf: 'center',
+                    color: theme.pageTextSubdued,
+                  }),
+                })}
+              />
+            </View>
+            <View style={{ paddingTop: 10, gap: 5 }}>
+              <View
+                style={{
+                  display: showMore ? 'none' : undefined,
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                  alignContent: 'space-between',
+                }}
+              >
+                <Button style={buttonStyle} onPress={_onEditNotes}>
+                  <SvgNotesPaper
+                    width={20}
+                    height={20}
+                    style={{ paddingRight: 5 }}
+                  />
+                  Edit notes
+                </Button>
+              </View>
+              <View>
+                <Button
+                  variant="bare"
+                  style={({ isPressed, isHovered }) => ({
+                    ...buttonStyle,
+                    ...(isPressed || isHovered
+                      ? {
+                          backgroundColor: 'transparent',
+                          color: buttonStyle.color,
+                        }
+                      : {}),
+                  })}
+                  onPress={onShowMore}
+                >
+                  {!showMore ? (
+                    <SvgCheveronUp
+                      width={30}
+                      height={30}
+                      style={{ paddingRight: 5 }}
+                    />
+                  ) : (
+                    <SvgCheveronDown
+                      width={30}
+                      height={30}
+                      style={{ paddingRight: 5 }}
+                    />
+                  )}
+                  Actions
+                </Button>
+              </View>
+            </View>
+            {showMore && (
+              <BudgetMonthMenu
+                style={{ overflowY: 'auto', paddingTop: 10 }}
+                getItemStyle={() => defaultMenuItemStyle}
+                onCopyLastMonthBudget={() => {
+                  onBudgetAction(month, 'copy-last');
+                  close();
+                }}
+                onSetBudgetsToZero={() => {
+                  onBudgetAction(month, 'set-zero');
+                  close();
+                }}
+                onSetMonthsAverage={numberOfMonths => {
+                  onBudgetAction(month, `set-${numberOfMonths}-avg`);
+                  close();
+                }}
+                onCheckTemplates={() => {
+                  onBudgetAction(month, 'check-templates');
+                  close();
+                }}
+                onApplyBudgetTemplates={() => {
+                  onBudgetAction(month, 'apply-goal-template');
+                  close();
+                }}
+                onOverwriteWithBudgetTemplates={() => {
+                  onBudgetAction(month, 'overwrite-goal-template');
+                  close();
+                }}
+              />
+            )}
           </View>
-        </View>
-        {showMore && (
-          <BudgetMonthMenu
-            style={{ overflowY: 'auto', paddingTop: 10 }}
-            getItemStyle={() => defaultMenuItemStyle}
-            onCopyLastMonthBudget={() => {
-              onBudgetAction(month, 'copy-last');
-              onClose();
-            }}
-            onSetBudgetsToZero={() => {
-              onBudgetAction(month, 'set-zero');
-              onClose();
-            }}
-            onSetMonthsAverage={numberOfMonths => {
-              onBudgetAction(month, `set-${numberOfMonths}-avg`);
-              onClose();
-            }}
-            onCheckTemplates={() => {
-              onBudgetAction(month, 'check-templates');
-              onClose();
-            }}
-            onApplyBudgetTemplates={() => {
-              onBudgetAction(month, 'apply-goal-template');
-              onClose();
-            }}
-            onOverwriteWithBudgetTemplates={() => {
-              onBudgetAction(month, 'overwrite-goal-template');
-              onClose();
-            }}
-          />
-        )}
-      </View>
+        </>
+      )}
     </Modal>
   );
 }

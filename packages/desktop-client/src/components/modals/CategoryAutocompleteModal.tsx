@@ -42,23 +42,6 @@ export function CategoryAutocompleteModal({
 
   return (
     <Modal
-      header={props => (
-        <ModalHeader
-          {...props}
-          title={
-            <ModalTitle
-              title="Category"
-              getStyle={() => ({ color: theme.menuAutoCompleteText })}
-            />
-          }
-          CloseButton={props => (
-            <ModalCloseButton
-              {...props}
-              style={{ color: theme.menuAutoCompleteText }}
-            />
-          )}
-        />
-      )}
       noAnimation={!isNarrowWidth}
       {...modalProps}
       onClose={_onClose}
@@ -67,34 +50,50 @@ export function CategoryAutocompleteModal({
         backgroundColor: theme.menuAutoCompleteBackground,
       }}
     >
-      {() => (
-        <View>
-          {!isNarrowWidth && (
-            <SectionLabel
-              title="Category"
-              style={{
-                alignSelf: 'center',
-                color: theme.menuAutoCompleteText,
-                marginBottom: 10,
-              }}
-            />
-          )}
-          <View style={{ flex: 1 }}>
-            <NamespaceContext.Provider
-              value={month ? monthUtils.sheetForMonth(month) : ''}
-            >
-              <CategoryAutocomplete
-                focused={true}
-                embedded={true}
-                closeOnBlur={false}
-                showSplitOption={false}
-                onClose={_onClose}
-                {...defaultAutocompleteProps}
-                {...autocompleteProps}
+      {({ close }) => (
+        <>
+          <ModalHeader
+            title={
+              <ModalTitle
+                title="Category"
+                getStyle={() => ({ color: theme.menuAutoCompleteText })}
               />
-            </NamespaceContext.Provider>
+            }
+            rightContent={
+              <ModalCloseButton
+                onClick={close}
+                style={{ color: theme.menuAutoCompleteText }}
+              />
+            }
+          />
+          <View>
+            {!isNarrowWidth && (
+              <SectionLabel
+                title="Category"
+                style={{
+                  alignSelf: 'center',
+                  color: theme.menuAutoCompleteText,
+                  marginBottom: 10,
+                }}
+              />
+            )}
+            <View style={{ flex: 1 }}>
+              <NamespaceContext.Provider
+                value={month ? monthUtils.sheetForMonth(month) : ''}
+              >
+                <CategoryAutocomplete
+                  focused={true}
+                  embedded={true}
+                  closeOnBlur={false}
+                  showSplitOption={false}
+                  onClose={close}
+                  {...defaultAutocompleteProps}
+                  {...autocompleteProps}
+                />
+              </NamespaceContext.Provider>
+            </View>
           </View>
-        </View>
+        </>
       )}
     </Modal>
   );
