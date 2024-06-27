@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, type ComponentProps } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
@@ -130,6 +130,19 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
   };
+
+  const rangeOptions = useMemo(() => {
+    const options: ComponentProps<typeof Select>['options'] =
+      ReportOptions.dateRange
+        .filter(f => f[customReportItems.interval as keyof dateRangeProps])
+        .map(option => [option.description, option.description]);
+
+    // Append separator if necessary
+    if (dateRangeLine > 0) {
+      options.splice(dateRangeLine, 0, Menu.line);
+    }
+    return options;
+  }, [customReportItems, dateRangeLine]);
 
   return (
     <View
@@ -419,15 +432,8 @@ export function ReportSidebar({
             </Text>
             <Select
               value={customReportItems.dateRange}
-              onChange={e => {
-                onSelectRange(e);
-              }}
-              options={ReportOptions.dateRange
-                .filter(
-                  f => f[customReportItems.interval as keyof dateRangeProps],
-                )
-                .map(option => [option.description, option.description])}
-              line={dateRangeLine > 0 ? dateRangeLine : undefined}
+              onChange={onSelectRange}
+              options={rangeOptions}
             />
           </View>
         ) : (

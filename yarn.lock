@@ -61,7 +61,6 @@ __metadata:
   dependencies:
     "@juggle/resize-observer": "npm:^3.4.0"
     "@playwright/test": "npm:1.41.1"
-    "@reach/listbox": "npm:^0.18.0"
     "@react-aria/focus": "npm:^3.16.0"
     "@react-aria/listbox": "npm:^3.11.3"
     "@react-aria/utils": "npm:^3.23.0"
@@ -2764,128 +2763,6 @@ __metadata:
   version: 1.0.0-next.21
   resolution: "@polka/url@npm:1.0.0-next.21"
   checksum: c7654046d38984257dd639eab3dc770d1b0340916097b2fac03ce5d23506ada684e05574a69b255c32ea6a144a957c8cd84264159b545fca031c772289d88788
-  languageName: node
-  linkType: hard
-
-"@reach/auto-id@npm:0.18.0":
-  version: 0.18.0
-  resolution: "@reach/auto-id@npm:0.18.0"
-  dependencies:
-    "@reach/utils": "npm:0.18.0"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: 545ff94eb4898ad0e1359e604deeebbabc753e004ca3ed5a817272e61422413faf4f68268ba41b61432c157999f3be0d18cf2c52c7d57ae2b988a88a602e4a0c
-  languageName: node
-  linkType: hard
-
-"@reach/descendants@npm:0.18.0":
-  version: 0.18.0
-  resolution: "@reach/descendants@npm:0.18.0"
-  dependencies:
-    "@reach/utils": "npm:0.18.0"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: dbf784cebe0e8cf003d9ce3c8a5fb88d6cb089819ee6149ccb46e6655ce2505e5524d5e95e25e22df974351315d037c08d73149b8748cb8c040dd7d5b6545750
-  languageName: node
-  linkType: hard
-
-"@reach/listbox@npm:^0.18.0":
-  version: 0.18.0
-  resolution: "@reach/listbox@npm:0.18.0"
-  dependencies:
-    "@reach/auto-id": "npm:0.18.0"
-    "@reach/descendants": "npm:0.18.0"
-    "@reach/machine": "npm:0.18.0"
-    "@reach/polymorphic": "npm:0.18.0"
-    "@reach/popover": "npm:0.18.0"
-    "@reach/utils": "npm:0.18.0"
-    tiny-invariant: "npm:^1.2.0"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: 3de1bd2288840a8153bf93f05047f3ae5daccadc661cf9e29fd912dfe4d248a2733942fd7d9ec807b8b70f7367ce51f55cc4e5cfb2db1683e7f1ed1c1e740790
-  languageName: node
-  linkType: hard
-
-"@reach/machine@npm:0.18.0":
-  version: 0.18.0
-  resolution: "@reach/machine@npm:0.18.0"
-  dependencies:
-    "@reach/utils": "npm:0.18.0"
-    "@xstate/fsm": "npm:1.4.0"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: bb81de49b4a98515ac05b55809394ddd548c3c680f7ad83b1f82ca9dc38bce0433e3b2702d5e7b721e26e29cac2b17203a44c7335339c09d03fce5c7d942b3e8
-  languageName: node
-  linkType: hard
-
-"@reach/observe-rect@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@reach/observe-rect@npm:1.2.0"
-  checksum: 7dd903eeaad0e22c6d973bd26265d91eadba56ab5134701ceb3e85214db75339fae94aa7e8b88a65e8daa64bc7cf1b915d4ffcdfd324466b561dc6adc3c6e070
-  languageName: node
-  linkType: hard
-
-"@reach/polymorphic@npm:0.18.0":
-  version: 0.18.0
-  resolution: "@reach/polymorphic@npm:0.18.0"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-  checksum: 68b432dd9c3750213f0b0748eb81c3cf78b4cbc18274aa0ff9b77519f9fdf62f1c598bcd5c3893a0283be1cc7fb610e6b44edf3aff3f4fe0232c49653334246a
-  languageName: node
-  linkType: hard
-
-"@reach/popover@npm:0.18.0":
-  version: 0.18.0
-  resolution: "@reach/popover@npm:0.18.0"
-  dependencies:
-    "@reach/polymorphic": "npm:0.18.0"
-    "@reach/portal": "npm:0.18.0"
-    "@reach/rect": "npm:0.18.0"
-    "@reach/utils": "npm:0.18.0"
-    tabbable: "npm:^5.3.3"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: 44cbf56a8dc14a9e8d260915afb8f74cd1bf176a9659d78c91f63df99a914920ad886d9e568794785ad5b3257dfd7058b1b35d13f02f6937f872ff1c6aaaed98
-  languageName: node
-  linkType: hard
-
-"@reach/portal@npm:0.18.0":
-  version: 0.18.0
-  resolution: "@reach/portal@npm:0.18.0"
-  dependencies:
-    "@reach/utils": "npm:0.18.0"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: ec4714fae246141f76532beebe68945cdea83c4f425e9dff0db336b820f6e2c67447aaed9f85848f999712d83d6063dcc867a4e2ca12f7a0a8f4faef04ca71a2
-  languageName: node
-  linkType: hard
-
-"@reach/rect@npm:0.18.0":
-  version: 0.18.0
-  resolution: "@reach/rect@npm:0.18.0"
-  dependencies:
-    "@reach/observe-rect": "npm:1.2.0"
-    "@reach/utils": "npm:0.18.0"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: 4d5c0f277cf8a11eed82cf299d9e30b58b85172f8928d92b7f20a249d702ee5b4ee73b1ada78fb328fc0806a55d01129b40a2cc73085584fe1ec1fdbeeb8776f
-  languageName: node
-  linkType: hard
-
-"@reach/utils@npm:0.18.0":
-  version: 0.18.0
-  resolution: "@reach/utils@npm:0.18.0"
-  peerDependencies:
-    react: ^16.8.0 || 17.x
-    react-dom: ^16.8.0 || 17.x
-  checksum: 7686b0cba3653fcddfc49b7887a77c438c1f3d4da35fda0694f771f64669a615129edebf7c62fb2e960c39cb23ab1518a10bb3e818330d57df976de77ada4e5b
   languageName: node
   linkType: hard
 
@@ -6173,13 +6050,6 @@ __metadata:
   version: 0.8.10
   resolution: "@xmldom/xmldom@npm:0.8.10"
   checksum: 62400bc5e0e75b90650e33a5ceeb8d94829dd11f9b260962b71a784cd014ddccec3e603fe788af9c1e839fa4648d8c521ebd80d8b752878d3a40edabc9ce7ccf
-  languageName: node
-  linkType: hard
-
-"@xstate/fsm@npm:1.4.0":
-  version: 1.4.0
-  resolution: "@xstate/fsm@npm:1.4.0"
-  checksum: 56472c06cc52f9ad23d857e6288d96b9d8269d7a66a07544acd3a3d335e13c053401d356636e562a65745b54fd5d12ba115b42a0f55c96063849b80f08917bf0
   languageName: node
   linkType: hard
 
@@ -17243,13 +17113,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tabbable@npm:^5.3.3":
-  version: 5.3.3
-  resolution: "tabbable@npm:5.3.3"
-  checksum: 5da150c9ac7aaed95f901623214794ffac9472a86009a1762c7b436249d33b157b7d86d93610986090d0fb1ef152f5dec2c201552e0b67ca895ba00c145a51c5
-  languageName: node
-  linkType: hard
-
 "tapable@npm:^2.1.1, tapable@npm:^2.2.0":
   version: 2.2.1
   resolution: "tapable@npm:2.2.1"
@@ -17459,7 +17322,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-invariant@npm:^1.2.0, tiny-invariant@npm:^1.3.1":
+"tiny-invariant@npm:^1.3.1":
   version: 1.3.1
   resolution: "tiny-invariant@npm:1.3.1"
   checksum: 872dbd1ff20a21303a2fd20ce3a15602cfa7fcf9b228bd694a52e2938224313b5385a1078cb667ed7375d1612194feaca81c4ecbe93121ca1baebe344de4f84c

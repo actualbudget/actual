@@ -23,14 +23,6 @@ export const Popover = ({
         ...style,
       })}`}
       shouldCloseOnInteractOutside={element => {
-        // Disable closing the popover when a reach listbox is clicked (Select component)
-        if (
-          element.getAttribute('data-reach-listbox-list') !== null ||
-          element.getAttribute('data-reach-listbox-option') !== null
-        ) {
-          return false;
-        }
-
         if (shouldCloseOnInteractOutside) {
           return shouldCloseOnInteractOutside(element);
         }
