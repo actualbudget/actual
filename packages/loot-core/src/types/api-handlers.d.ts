@@ -114,6 +114,8 @@ export interface ApiHandlers {
 
   'api/account-delete': (arg: { id }) => Promise<unknown>;
 
+  'api/account-balance': (arg: { id; cutoff? }) => Promise<number>;
+
   'api/categories-get': (arg: {
     grouped;
   }) => Promise<Array<APICategoryGroupEntity | APICategoryEntity>>;

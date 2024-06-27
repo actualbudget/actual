@@ -125,6 +125,10 @@ export function deleteAccount(id) {
   return send('api/account-delete', { id });
 }
 
+export function getAccountBalance(id, cutoff?) {
+  return send('api/account-balance', { id, cutoff });
+}
+
 export function getCategoryGroups() {
   return send('api/category-groups-get');
 }
