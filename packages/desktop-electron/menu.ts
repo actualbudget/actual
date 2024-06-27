@@ -1,7 +1,17 @@
-const { Menu, ipcMain, app, shell } = require('electron');
+import {
+  MenuItemConstructorOptions,
+  Menu,
+  ipcMain,
+  app,
+  shell,
+} from 'electron';
 
-function getMenu(isDev, createWindow, budgetId = undefined) {
-  const template = [
+export function getMenu(
+  isDev: boolean,
+  createWindow: () => Promise<void>,
+  budgetId: string | undefined = undefined,
+) {
+  const template: MenuItemConstructorOptions[] = [
     {
       label: 'File',
       submenu: [
@@ -75,13 +85,13 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
           role: 'paste',
         },
         {
-          role: 'pasteandmatchstyle',
+          role: 'pasteAndMatchStyle',
         },
         {
           role: 'delete',
         },
         {
-          role: 'selectall',
+          role: 'selectAll',
         },
       ],
     },
@@ -107,13 +117,13 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
           type: 'separator',
         },
         {
-          role: 'resetzoom',
+          role: 'resetZoom',
         },
         {
-          role: 'zoomin',
+          role: 'zoomIn',
         },
         {
-          role: 'zoomout',
+          role: 'zoomOut',
         },
         {
           type: 'separator',
@@ -121,7 +131,7 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
         {
           role: 'togglefullscreen',
         },
-      ].filter(x => x),
+      ],
     },
     {
       label: 'Tools',
@@ -160,7 +170,9 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
 
   if (process.platform === 'win32') {
     // Add about to help menu on Windows
-    template[template.length - 1].submenu.unshift({
+    (
+      template[template.length - 1].submenu as MenuItemConstructorOptions[]
+    ).unshift({
       label: 'About Actual',
       click() {
         ipcMain.emit('show-about');
@@ -197,7 +209,7 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
           role: 'hide',
         },
         {
-          role: 'hideothers',
+          role: 'hideOthers',
         },
         {
           role: 'unhide',
@@ -208,11 +220,11 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
         {
           role: 'quit',
         },
-      ].filter(x => x),
+      ],
     });
     // Edit menu.
     const editIdx = template.findIndex(t => t.label === 'Edit');
-    template[editIdx].submenu.push(
+    (template[editIdx].submenu as MenuItemConstructorOptions[]).push(
       {
         type: 'separator',
       },
@@ -220,10 +232,10 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
         label: 'Speech',
         submenu: [
           {
-            role: 'startspeaking',
+            role: 'startSpeaking',
           },
           {
-            role: 'stopspeaking',
+            role: 'stopSpeaking',
           },
         ],
       },
@@ -257,5 +269,3 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
 
   return Menu.buildFromTemplate(template);
 }
-
-module.exports = getMenu;
