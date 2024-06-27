@@ -16,7 +16,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -98,10 +98,9 @@ function OverflowMenu({
     <View>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         aria-label="Menu"
-        onClick={e => {
-          e.stopPropagation();
+        onPress={() => {
           setOpen(true);
         }}
       >

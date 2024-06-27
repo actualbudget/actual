@@ -17,7 +17,7 @@ import {
 } from '../../hooks/useSelected';
 import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
 import { theme } from '../../style';
-import { ButtonWithLoading } from '../common/Button';
+import { ButtonWithLoading } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
@@ -206,10 +206,10 @@ export function DiscoverSchedules({
         }}
       >
         <ButtonWithLoading
-          type="primary"
-          loading={creating}
-          disabled={selectedInst.items.size === 0}
-          onClick={onCreate}
+          variant="primary"
+          isLoading={creating}
+          isDisabled={selectedInst.items.size === 0}
+          onPress={onCreate}
         >
           Create schedules
         </ButtonWithLoading>
