@@ -9,7 +9,7 @@ function getMenu(isDev, createWindow, budgetId = undefined) {
           label: 'Load Backup...',
           enabled: false,
           click(item, focusedWindow) {
-            if (focusedWindow) {
+            if (focusedWindow && budgetId) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
                   `__actionsForMenu.replaceModal('load-backup', { budgetId: '${budgetId}' })`,
