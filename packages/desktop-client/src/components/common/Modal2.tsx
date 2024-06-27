@@ -2,8 +2,9 @@ import React, {
   useEffect,
   useRef,
   useLayoutEffect,
-  type ReactNode,
   useState,
+  type ReactNode,
+  type ComponentPropsWithoutRef,
 } from 'react';
 import {
   ModalOverlay as ReactAriaModalOverlay,
@@ -274,7 +275,7 @@ export function ModalHeader({
   leftContent,
   showLogo,
   title,
-  rightContent = ModalCloseButton,
+  rightContent,
 }: ModalHeaderProps) {
   return (
     <View
@@ -438,7 +439,7 @@ export function ModalTitle({
 }
 
 type ModalCloseButtonProps = {
-  onClick: ComponentProps<typeof Button>['onClick'];
+  onClick: ComponentPropsWithoutRef<typeof Button>['onClick'];
   style?: CSSProperties;
 };
 
