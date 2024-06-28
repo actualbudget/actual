@@ -192,3 +192,27 @@ export function updateRule(rule) {
 export function deleteRule(id) {
   return send('api/rule-delete', { id });
 }
+
+export function getSchedules() {
+  return send('api/schedules-get');
+}
+
+export function createSchedule(schedule, conditions) {
+  return send('api/schedule-create', { schedule, conditions });
+}
+
+export function updateSchedule(schedule, conditions, resetNextDate) {
+  return send('api/schedule-update', { schedule, conditions, resetNextDate });
+}
+
+export function deleteSchedule(id) {
+  return send('api/schedule-delete', { id });
+}
+
+export function scheduleSkipNextDate(id) {
+  return send('api/schedule-skip-next-date', { id });
+}
+
+export function scheduleGetUpcomingDates(config, count) {
+  return send('api/schedule-get-upcoming-dates', { config, count });
+}
