@@ -246,6 +246,17 @@ export function getPayees() {
   };
 }
 
+export function getCommonPayees() {
+  return async (dispatch: Dispatch) => {
+    const payees = await send('common-payees-get');
+    dispatch({
+      type: constants.LOAD_COMMON_PAYEES,
+      payees,
+    });
+    return payees;
+  };
+}
+
 export function initiallyLoadPayees() {
   return async (dispatch: Dispatch, getState: GetState) => {
     if (getState().queries.payees.length === 0) {

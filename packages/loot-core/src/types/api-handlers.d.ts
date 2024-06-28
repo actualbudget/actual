@@ -140,6 +140,8 @@ export interface ApiHandlers {
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
 
+  'api/common-payees-get': () => Promise<APIPayeeEntity[]>;
+
   'api/payee-create': (arg: { payee }) => Promise<string>;
 
   'api/payee-update': (arg: { id; fields }) => Promise<unknown>;

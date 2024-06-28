@@ -1,6 +1,7 @@
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { SvgDelete, SvgMerge } from '../../icons/v0';
+import { SvgBookmark } from '../../icons/v1';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { View } from '../common/View';
@@ -10,6 +11,7 @@ type PayeeMenuProps = {
   selectedPayees: Set<PayeeEntity['id']>;
   onDelete: () => void;
   onMerge: () => Promise<void>;
+  onFavorite: () => Promise<void>;
   onClose: () => void;
 };
 
@@ -18,6 +20,7 @@ export function PayeeMenu({
   selectedPayees,
   onDelete,
   onMerge,
+  onFavorite,
   onClose,
 }: PayeeMenuProps) {
   // Transfer accounts are never editable
@@ -35,6 +38,9 @@ export function PayeeMenu({
             break;
           case 'merge':
             onMerge();
+            break;
+          case 'favorite':
+            onFavorite();
             break;
           default:
         }
@@ -59,6 +65,13 @@ export function PayeeMenu({
           icon: SvgDelete,
           name: 'delete',
           text: 'Delete',
+          disabled: isDisabled,
+        },
+        {
+          icon: SvgBookmark,
+          iconSize: 9,
+          name: 'favorite',
+          text: 'Favorite',
           disabled: isDisabled,
         },
         {
