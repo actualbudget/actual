@@ -5,6 +5,7 @@ import React, {
   useState,
   type ReactNode,
   type ComponentPropsWithoutRef,
+  type ComponentPropsWithRef,
 } from 'react';
 import {
   ModalOverlay as ReactAriaModalOverlay,
@@ -12,7 +13,6 @@ import {
   Dialog,
 } from 'react-aria-components';
 import { useHotkeysContext } from 'react-hotkeys-hook';
-import ReactModal from 'react-modal';
 
 import { AutoTextSize } from 'auto-text-size';
 
@@ -28,32 +28,31 @@ import { Text } from './Text';
 import { TextOneLine } from './TextOneLine';
 import { View } from './View';
 
-export type ModalProps = {
+export type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
+  children: ReactNode | (({ close }: { close: () => void }) => ReactNode);
   isCurrent?: boolean;
   isHidden?: boolean;
-  children: ReactNode | (({ close }: { close: () => void }) => ReactNode);
+  isLoading?: boolean;
+  stackIndex?: number;
   size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
   padding?: CSSProperties['padding'];
-  isLoading?: boolean;
   noAnimation?: boolean;
-  stackIndex?: number;
   style?: CSSProperties;
-  overlayStyle?: CSSProperties;
   onClose?: () => void;
 };
 
 export const Modal = ({
   isCurrent,
   isHidden,
+  isLoading = false,
+  stackIndex,
   size,
   padding = 10,
-  isLoading = false,
   noAnimation = false,
-  stackIndex,
   style,
-  overlayStyle,
   children,
   onClose,
+  ...props
 }: ModalProps) => {
   const { enableScope, disableScope } = useHotkeysContext();
 
@@ -77,8 +76,9 @@ export const Modal = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        ...overlayStyle,
+        ...style,
       }}
+      {...props}
     >
       <ReactAriaModal>
         <Dialog aria-label="Modal Dialog">
