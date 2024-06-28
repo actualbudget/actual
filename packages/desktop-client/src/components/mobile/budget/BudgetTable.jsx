@@ -69,7 +69,10 @@ function ToBudget({ toBudget, onClick, show3Cols }) {
       <Button
         type="bare"
         style={{ maxWidth: sidebarColumnWidth }}
-        onClick={onClick}
+        onPointerUp={e => {
+          e.stopPropagation();
+          onClick?.();
+        }}
       >
         <View>
           <Label
@@ -139,7 +142,10 @@ function Saved({ projected, onClick, show3Cols }) {
       <Button
         type="bare"
         style={{ maxWidth: sidebarColumnWidth }}
-        onClick={onClick}
+        onPointerUp={e => {
+          e.stopPropagation();
+          onClick?.();
+        }}
       >
         <View>
           <View>
@@ -266,7 +272,10 @@ function BudgetCell({
       type="financial"
       getStyle={makeAmountGrey}
       data-testid={name}
-      onClick={onOpenCategoryBudgetMenu}
+      onPointerUp={e => {
+        e.stopPropagation();
+        onOpenCategoryBudgetMenu();
+      }}
       {...props}
     />
   );
@@ -377,7 +386,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const onCover = () => {
     dispatch(
       pushModal('cover', {
-        categoryId: category.id,
+        title: category.name,
         month,
         onSubmit: fromCategoryId => {
           onBudgetAction(month, 'cover-overspending', {
@@ -435,7 +444,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
           style={{
             maxWidth: sidebarColumnWidth,
           }}
-          onClick={() => onEdit?.(category.id)}
+          onPointerUp={e => {
+            e.stopPropagation();
+            onEdit?.(category.id);
+          }}
         >
           <View
             style={{
@@ -524,7 +536,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
             binding={spent}
             getStyle={makeAmountGrey}
             type="financial"
-            onClick={onShowActivity}
+            onPointerUp={e => {
+              e.stopPropagation();
+              onShowActivity();
+            }}
             formatter={value => (
               <Button
                 type="bare"
@@ -559,7 +574,13 @@ const ExpenseCategory = memo(function ExpenseCategory({
             width: columnWidth,
           }}
         >
-          <span role="button" onClick={() => onOpenBalanceMenu?.()}>
+          <span
+            role="button"
+            onPointerUp={e => {
+              e.stopPropagation();
+              onOpenBalanceMenu();
+            }}
+          >
             <BalanceWithCarryover
               carryover={carryover}
               balance={balance}
@@ -692,7 +713,10 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
           hoveredStyle={{
             backgroundColor: 'transparent',
           }}
-          onClick={() => onToggleCollapse?.(group.id)}
+          onPointerUp={e => {
+            e.stopPropagation();
+            onToggleCollapse?.(group.id);
+          }}
         >
           <SvgExpandArrow
             width={8}
@@ -709,7 +733,10 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
           style={{
             maxWidth: sidebarColumnWidth,
           }}
-          onClick={() => onEdit?.(group.id)}
+          onPointerUp={e => {
+            e.stopPropagation();
+            onEdit?.(group.id);
+          }}
         >
           <View
             style={{
@@ -843,7 +870,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       {/* {editMode && (
         <View>
           <Button
-            onClick={() => onAddCategory(group.id, group.is_income)}
+            onPointerUp={() => onAddCategory(group.id, group.is_income)}
             style={{ padding: 10 }}
           >
             <Add width={15} height={15} />
@@ -918,7 +945,10 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           hoveredStyle={{
             backgroundColor: 'transparent',
           }}
-          onClick={() => onToggleCollapse?.(group.id)}
+          onPointerUp={e => {
+            e.stopPropagation();
+            onToggleCollapse?.(group.id);
+          }}
         >
           <SvgExpandArrow
             width={8}
@@ -935,7 +965,10 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           style={{
             maxWidth: sidebarColumnWidth,
           }}
-          onClick={() => onEdit?.(group.id)}
+          onPointerUp={e => {
+            e.stopPropagation();
+            onEdit?.(group.id);
+          }}
         >
           <View
             style={{
@@ -1081,7 +1114,10 @@ const IncomeCategory = memo(function IncomeCategory({
           style={{
             maxWidth: sidebarColumnWidth,
           }}
-          onClick={() => onEdit?.(category.id)}
+          onPointerUp={e => {
+            e.stopPropagation();
+            onEdit?.(category.id);
+          }}
         >
           <View
             style={{
@@ -1206,20 +1242,20 @@ const IncomeCategory = memo(function IncomeCategory({
 //         <MathOperations emitter={emitter} />
 //         <View style={{ flex: 1 }} />
 //         <Button
-//           onClick={() => emitter.emit('moveUp')}
+//           onPointerUp={() => emitter.emit('moveUp')}
 //           style={{ marginRight: 5 }}
 //           data-testid="up"
 //         >
 //           <ArrowThinUp width={13} height={13} />
 //         </Button>
 //         <Button
-//           onClick={() => emitter.emit('moveDown')}
+//           onPointerUp={() => emitter.emit('moveDown')}
 //           style={{ marginRight: 5 }}
 //           data-testid="down"
 //         >
 //           <ArrowThinDown width={13} height={13} />
 //         </Button>
-//         <Button onClick={() => emitter.emit('done')} data-testid="done">
+//         <Button onPointerUp={() => emitter.emit('done')} data-testid="done">
 //           Done
 //         </Button>
 //       </View>
@@ -1608,7 +1644,10 @@ export function BudgetTable({
               }}
               hoveredStyle={noBackgroundColorStyle}
               activeStyle={noBackgroundColorStyle}
-              onClick={() => onOpenBudgetPageMenu?.()}
+              onPointerUp={e => {
+                e.stopPropagation();
+                onOpenBudgetPageMenu?.();
+              }}
             >
               <SvgLogo width="20" height="20" />
               <SvgCheveronRight
@@ -1732,7 +1771,10 @@ function BudgetTableHeader({
             <Button
               type="bare"
               disabled={show3Cols}
-              onClick={toggleSpentColumn}
+              onPointerUp={e => {
+                e.stopPropagation();
+                toggleSpentColumn();
+              }}
               style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
@@ -1793,7 +1835,10 @@ function BudgetTableHeader({
             <Button
               type="bare"
               disabled={show3Cols}
-              onClick={toggleSpentColumn}
+              onPointerUp={e => {
+                e.stopPropagation();
+                toggleSpentColumn();
+              }}
               style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
@@ -1907,7 +1952,12 @@ function MonthSelector({
     >
       <Button
         type="bare"
-        onClick={prevEnabled && onPrevMonth}
+        onPointerUp={e => {
+          e.stopPropagation();
+          if (prevEnabled) {
+            onPrevMonth();
+          }
+        }}
         style={{
           ...styles.noTapHighlight,
           ...arrowButtonStyle,
@@ -1930,13 +1980,21 @@ function MonthSelector({
           margin: '0 5px',
           ...styles.underlinedText,
         }}
-        onClick={() => onOpenMonthMenu?.(month)}
+        onPointerUp={e => {
+          e.stopPropagation();
+          onOpenMonthMenu?.(month);
+        }}
       >
         {monthUtils.format(month, 'MMMM ‘yy')}
       </Text>
       <Button
         type="bare"
-        onClick={nextEnabled && onNextMonth}
+        onPointerUp={e => {
+          e.stopPropagation();
+          if (nextEnabled) {
+            onNextMonth();
+          }
+        }}
         style={{
           ...styles.noTapHighlight,
           ...arrowButtonStyle,

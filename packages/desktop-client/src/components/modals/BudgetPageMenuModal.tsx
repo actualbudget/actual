@@ -4,17 +4,11 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
-import { type CommonModalProps } from '../Modals';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 
-type BudgetPageMenuModalProps = ComponentPropsWithoutRef<
-  typeof BudgetPageMenu
-> & {
-  modalProps: CommonModalProps;
-};
+type BudgetPageMenuModalProps = ComponentPropsWithoutRef<typeof BudgetPageMenu>;
 
 export function BudgetPageMenuModal({
-  modalProps,
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
@@ -28,14 +22,22 @@ export function BudgetPageMenuModal({
   };
 
   return (
-    <Modal showHeader focusAfterClose={false} {...modalProps}>
-      <BudgetPageMenu
-        getItemStyle={() => defaultMenuItemStyle}
-        onAddCategoryGroup={onAddCategoryGroup}
-        onToggleHiddenCategories={onToggleHiddenCategories}
-        onSwitchBudgetFile={onSwitchBudgetFile}
-        onSwitchBudgetType={onSwitchBudgetType}
-      />
+    <Modal name="budget-page-menu">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            showLogo
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <BudgetPageMenu
+            getItemStyle={() => defaultMenuItemStyle}
+            onAddCategoryGroup={onAddCategoryGroup}
+            onToggleHiddenCategories={onToggleHiddenCategories}
+            onSwitchBudgetFile={onSwitchBudgetFile}
+            onSwitchBudgetType={onSwitchBudgetType}
+          />
+        </>
+      )}
     </Modal>
   );
 }
