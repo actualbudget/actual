@@ -2,12 +2,13 @@
 
 ROOT=`dirname $0`/..
 
-rm -rf ${ROOT}/client-build
-cp -r ${ROOT}/../desktop-client/build ${ROOT}/client-build
+rm -rf ${ROOT}/build
+mkdir -p ${ROOT}/build
+cp -r ${ROOT}/../desktop-client/build ${ROOT}/build/client-build
 
 # Remove the embedded backend for the browser version. Will improve
 # this process
-rm -rf ${ROOT}/client-build/data
-rm -rf ${ROOT}/client-build/*kcab.*
-rm -rf ${ROOT}/client-build/*.wasm
-rm -rf ${ROOT}/client-build/*.map
+rm -rf ${ROOT}/build/client-build/data
+rm -rf ${ROOT}/build/client-build/*kcab.*
+rm -rf ${ROOT}/build/client-build/*.wasm
+rm -rf ${ROOT}/build/client-build/*.map

@@ -1,11 +1,8 @@
-/* eslint-disable import/order */
-// (I have no idea why the imports are like this. Not touching them.)
-const isDev = require('electron-is-dev');
-const fs = require('fs');
+import fs from 'fs';
+import NodeModule from 'module';
+import path from 'path';
 
-require('module').globalPaths.push(__dirname + '/..');
-
-const {
+import {
   app,
   ipcMain,
   BrowserWindow,
@@ -14,8 +11,28 @@ const {
   shell,
   protocol,
   utilityProcess,
-} = require('electron');
-const promiseRetry = require('promise-retry');
+  UtilityProcess,
+} from 'electron';
+import isDev from 'electron-is-dev';
+import promiseRetry from 'promise-retry';
+
+import about from './about';
+import getMenu from './menu';
+import updater from './updater';
+import {
+  get as getWindowState,
+  listen as listenToWindowState,
+} from './window-state';
+
+import './setRequireHook';
+
+import './security';
+
+const Module: typeof NodeModule & { globalPaths: string[] } =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  NodeModule as unknown as any;
+
+Module.globalPaths.push(__dirname + '/..');
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -25,16 +42,6 @@ protocol.registerSchemesAsPrivileged([
 
 global.fetch = require('node-fetch');
 
-const about = require('./about');
-const getMenu = require('./menu');
-const updater = require('./updater');
-
-require('./security');
-
-const path = require('path');
-
-require('./setRequireHook');
-
 if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
   process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
 }
@@ -43,15 +50,12 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
   process.env.ACTUAL_DATA_DIR = app.getPath('userData');
 }
 
-// eslint-disable-next-line import/extensions
-const WindowState = require('./window-state.js');
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let clientWin;
-let serverProcess;
+let clientWin: BrowserWindow | null;
+let serverProcess: UtilityProcess | null;
 
-updater.onEvent((type, data) => {
+updater.onEvent((type: string, data: Record<string, string> | string) => {
   // Notify both the app and the about window
   if (clientWin) {
     clientWin.webContents.send(type, data);
@@ -99,7 +103,7 @@ function createBackgroundProcess() {
 }
 
 async function createWindow() {
-  const windowState = await WindowState.get();
+  const windowState = await getWindowState();
 
   // Create the browser window.
   const win = new BrowserWindow({
@@ -113,7 +117,6 @@ async function createWindow() {
       nodeIntegrationInWorker: false,
       nodeIntegrationInSubFrames: false,
       contextIsolation: true,
-      enableRemoteModule: false,
       preload: __dirname + '/preload.js',
     },
   });
@@ -123,7 +126,7 @@ async function createWindow() {
     win.webContents.openDevTools();
   }
 
-  const unlistenToState = WindowState.listen(win, windowState);
+  const unlistenToState = listenToWindowState(win, windowState);
 
   if (isDev) {
     win.loadURL(`file://${__dirname}/loading.html`);
@@ -148,9 +151,11 @@ async function createWindow() {
   });
 
   win.on('focus', async () => {
-    const url = clientWin.webContents.getURL();
-    if (url.includes('app://') || url.includes('localhost:')) {
-      clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
+    if (clientWin) {
+      const url = clientWin.webContents.getURL();
+      if (url.includes('app://') || url.includes('localhost:')) {
+        clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
+      }
     }
   });
 
@@ -183,29 +188,28 @@ async function createWindow() {
   clientWin = win;
 }
 
-function isExternalUrl(url) {
+function isExternalUrl(url: string) {
   return !url.includes('localhost:') && !url.includes('app://');
 }
 
-function updateMenu(budgetId) {
+function updateMenu(budgetId?: string) {
   const isBudgetOpen = !!budgetId;
-  const menu = getMenu(isDev, createWindow);
+  const menu = getMenu(isDev, createWindow, budgetId);
   const file = menu.items.filter(item => item.label === 'File')[0];
-  const fileItems = file.submenu.items;
+  const fileItems = file.submenu?.items || [];
   fileItems
     .filter(item => item.label === 'Load Backup...')
     .forEach(item => {
       item.enabled = isBudgetOpen;
-      item.budgetId = budgetId;
     });
 
   const tools = menu.items.filter(item => item.label === 'Tools')[0];
-  tools.submenu.items.forEach(item => {
+  tools.submenu?.items.forEach(item => {
     item.enabled = isBudgetOpen;
   });
 
   const edit = menu.items.filter(item => item.label === 'Edit')[0];
-  const editItems = edit.submenu.items;
+  const editItems = edit.submenu?.items || [];
   editItems
     .filter(item => item.label === 'Undo' || item.label === 'Redo')
     .map(item => (item.enabled = isBudgetOpen));
@@ -312,7 +316,7 @@ ipcMain.handle(
   async (event, { title, defaultPath, fileContents }) => {
     const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       if (fileLocation) {
         fs.writeFile(fileLocation.filePath, fileContents, error => {
           return reject(error);
@@ -344,8 +348,9 @@ ipcMain.on('screenshot', () => {
     const width = 1100;
 
     // This is for the main screenshot inside the frame
-    clientWin.setSize(width, Math.floor(width * (427 / 623)));
-    // clientWin.setSize(width, Math.floor(width * (495 / 700)));
+    if (clientWin) {
+      clientWin.setSize(width, Math.floor(width * (427 / 623)));
+    }
   }
 });
 
@@ -366,14 +371,15 @@ ipcMain.on('apply-update', () => {
   updater.apply();
 });
 
-ipcMain.on('update-menu', (event, budgetId) => {
+ipcMain.on('update-menu', (event, budgetId?: string) => {
   updateMenu(budgetId);
 });
 
 ipcMain.on('set-theme', theme => {
   const obj = { theme };
-
-  clientWin.webContents.executeJavaScript(
-    `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${obj})`,
-  );
+  if (clientWin) {
+    clientWin.webContents.executeJavaScript(
+      `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${obj})`,
+    );
+  }
 });
