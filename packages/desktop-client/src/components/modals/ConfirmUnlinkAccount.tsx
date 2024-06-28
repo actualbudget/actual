@@ -4,21 +4,21 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
 type ConfirmUnlinkAccountProps = {
-  modalProps: CommonModalProps;
   accountName: string;
   onUnlink: () => void;
 };
 
 export function ConfirmUnlinkAccount({
-  modalProps,
   accountName,
   onUnlink,
 }: ConfirmUnlinkAccountProps) {
   return (
-    <Modal {...modalProps} contentProps={{ style: { flex: 0 } }}>
+    <Modal
+      name="confirm-unlink-account"
+      containerProps={{ style: { width: '30vw' } }}
+    >
       {({ state: { close } }) => (
         <>
           <ModalHeader

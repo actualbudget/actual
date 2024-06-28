@@ -11,10 +11,8 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
-import { type CommonModalProps } from '../Modals';
 
 type CoverModalProps = {
-  modalProps: CommonModalProps;
   title: string;
   month: string;
   showToBeBudgeted?: boolean;
@@ -22,7 +20,6 @@ type CoverModalProps = {
 };
 
 export function CoverModal({
-  modalProps,
   title,
   month,
   showToBeBudgeted = true,
@@ -57,8 +54,6 @@ export function CoverModal({
     if (categoryId) {
       onSubmit?.(categoryId);
     }
-
-    modalProps.onClose();
   };
 
   const initialMount = useInitialMount();
@@ -72,7 +67,7 @@ export function CoverModal({
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="cover">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -98,7 +93,10 @@ export function CoverModal({
                 marginLeft: styles.mobileEditingPadding,
                 marginRight: styles.mobileEditingPadding,
               }}
-              onPress={() => _onSubmit(fromCategoryId)}
+              onPress={() => {
+                _onSubmit(fromCategoryId);
+                close();
+              }}
             >
               Transfer
             </Button>

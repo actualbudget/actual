@@ -11,24 +11,16 @@ import {
 } from '../common/Modal2';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
-import { type CommonModalProps } from '../Modals';
 
 type AccountAutocompleteModalProps = {
-  modalProps: CommonModalProps;
   autocompleteProps: ComponentPropsWithoutRef<typeof AccountAutocomplete>;
   onClose: () => void;
 };
 
 export function AccountAutocompleteModal({
-  modalProps,
   autocompleteProps,
   onClose,
 }: AccountAutocompleteModalProps) {
-  const _onClose = () => {
-    modalProps.onClose();
-    onClose?.();
-  };
-
   const { isNarrowWidth } = useResponsive();
   const defaultAutocompleteProps = {
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
@@ -36,10 +28,10 @@ export function AccountAutocompleteModal({
 
   return (
     <Modal
+      name="account-autocomplete"
       noAnimation={!isNarrowWidth}
-      {...modalProps}
-      onClose={_onClose}
-      contentProps={{
+      onClose={onClose}
+      containerProps={{
         style: {
           height: isNarrowWidth ? '85vh' : 275,
           backgroundColor: theme.menuAutoCompleteBackground,

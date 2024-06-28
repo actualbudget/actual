@@ -11,27 +11,20 @@ import { BudgetMonthMenu } from '../budget/report/budgetsummary/BudgetMonthMenu'
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 
 type ReportBudgetMonthMenuModalProps = {
-  modalProps: CommonModalProps;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onEditNotes: (month: string) => void;
 };
 
 export function ReportBudgetMonthMenuModal({
-  modalProps,
   month,
   onBudgetAction,
   onEditNotes,
 }: ReportBudgetMonthMenuModalProps) {
   const originalNotes = useNotes(`budget-${month}`);
-
-  const onClose = () => {
-    modalProps.onClose();
-  };
 
   const _onEditNotes = () => {
     onEditNotes?.(month);
@@ -60,9 +53,8 @@ export function ReportBudgetMonthMenuModal({
 
   return (
     <Modal
-      {...modalProps}
-      onClose={onClose}
-      contentProps={{
+      name="report-budget-month-menu"
+      containerProps={{
         style: { height: '50vh' },
       }}
     >

@@ -5,23 +5,23 @@ import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
 type ConfirmTransactionEditProps = {
-  modalProps: Partial<CommonModalProps>;
   onCancel?: () => void;
   onConfirm: () => void;
   confirmReason: string;
 };
 
 export function ConfirmTransactionEdit({
-  modalProps,
   onCancel,
   onConfirm,
   confirmReason,
 }: ConfirmTransactionEditProps) {
   return (
-    <Modal {...modalProps} contentProps={{ style: { flex: 0 } }}>
+    <Modal
+      name="confirm-transaction-edit"
+      containerProps={{ style: { width: '30vw' } }}
+    >
       {({ state: { close } }) => (
         <>
           <ModalHeader

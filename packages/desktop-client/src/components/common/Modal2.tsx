@@ -16,6 +16,7 @@ import { useHotkeysContext } from 'react-hotkeys-hook';
 
 import { AutoTextSize } from 'auto-text-size';
 
+import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
@@ -28,45 +29,47 @@ import { Text } from './Text';
 import { TextOneLine } from './TextOneLine';
 import { View } from './View';
 
-export type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
-  isCurrent?: boolean;
-  isHidden?: boolean;
+type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
+  name: string;
   isLoading?: boolean;
-  stackIndex?: number;
   noAnimation?: boolean;
   style?: CSSProperties;
   onClose?: () => void;
-  contentProps?: {
+  containerProps?: {
     style?: CSSProperties;
   };
 };
 
 export const Modal = ({
-  isCurrent,
-  isHidden,
+  name,
   isLoading = false,
-  stackIndex,
   noAnimation = false,
   style,
   children,
   onClose,
-  contentProps,
+  containerProps,
   ...props
 }: ModalProps) => {
   const { enableScope, disableScope } = useHotkeysContext();
 
   // This deactivates any key handlers in the "app" scope
-  const scopeId = `modal-${stackIndex}`;
   useEffect(() => {
-    enableScope(scopeId);
-    return () => disableScope(scopeId);
-  }, [enableScope, disableScope, scopeId]);
+    enableScope(name);
+    return () => disableScope(name);
+  }, [enableScope, disableScope, name]);
+
+  const { isHidden, isActive, onClose: closeModal } = useModalState();
+
+  const handleOnClose = () => {
+    closeModal();
+    onClose?.();
+  };
 
   return (
     <ReactAriaModalOverlay
       isDismissable
       defaultOpen={true}
-      onOpenChange={isOpen => !isOpen && onClose?.()}
+      onOpenChange={isOpen => !isOpen && handleOnClose?.()}
       style={{
         position: 'fixed',
         inset: 0,
@@ -75,6 +78,7 @@ export const Modal = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        fontSize: 14,
         ...style,
       }}
       {...props}
@@ -82,10 +86,10 @@ export const Modal = ({
       <ReactAriaModal>
         {modalProps => (
           <Dialog aria-label="Modal Dialog">
-            <ModalContent
+            <ModalContentContainer
               noAnimation={noAnimation}
-              isCurrent={isCurrent}
-              {...contentProps}
+              isActive={isActive(name)}
+              {...containerProps}
               style={{
                 flex: 1,
                 padding: 10,
@@ -104,7 +108,7 @@ export const Modal = ({
                 },
                 ...styles.shadowLarge,
                 ...styles.lightScrollbar,
-                ...contentProps?.style,
+                ...containerProps?.style,
               }}
             >
               <View style={{ paddingTop: 0, flex: 1 }}>
@@ -132,7 +136,7 @@ export const Modal = ({
                   />
                 </View>
               )}
-            </ModalContent>
+            </ModalContentContainer>
           </Dialog>
         )}
       </ReactAriaModal>
@@ -140,21 +144,19 @@ export const Modal = ({
   );
 };
 
-type ModalContentProps = {
+type ModalContentContainerProps = {
   style?: CSSProperties;
   noAnimation?: boolean;
-  isCurrent?: boolean;
-  stackIndex?: number;
+  isActive?: boolean;
   children: ReactNode;
 };
 
-const ModalContent = ({
+const ModalContentContainer = ({
   style,
   noAnimation,
-  isCurrent,
-  stackIndex,
+  isActive,
   children,
-}: ModalContentProps) => {
+}: ModalContentContainerProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
   const rotateFactor = useRef(Math.random() * 10 - 5);
@@ -169,7 +171,7 @@ const ModalContent = ({
         return;
       }
 
-      if (isCurrent) {
+      if (isActive) {
         contentRef.current.style.transform = 'translateY(0px) scale(1)';
         contentRef.current.style.pointerEvents = 'auto';
       } else {
@@ -206,14 +208,14 @@ const ModalContent = ({
     } else {
       setProps();
     }
-  }, [noAnimation, isCurrent, stackIndex]);
+  }, [noAnimation, isActive]);
 
   return (
     <View
       innerRef={contentRef}
       style={{
         ...style,
-        ...(noAnimation && !isCurrent && { display: 'none' }),
+        ...(noAnimation && !isActive && { display: 'none' }),
       }}
     >
       {children}

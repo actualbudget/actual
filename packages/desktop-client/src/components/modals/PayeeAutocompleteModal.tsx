@@ -12,27 +12,19 @@ import {
   ModalTitle,
   ModalHeader,
 } from '../common/Modal2';
-import { type CommonModalProps } from '../Modals';
 
 type PayeeAutocompleteModalProps = {
-  modalProps: CommonModalProps;
   autocompleteProps: ComponentPropsWithoutRef<typeof PayeeAutocomplete>;
   onClose: () => void;
 };
 
 export function PayeeAutocompleteModal({
-  modalProps,
   autocompleteProps,
   onClose,
 }: PayeeAutocompleteModalProps) {
   const payees = usePayees() || [];
   const accounts = useAccounts() || [];
   const navigate = useNavigate();
-
-  const _onClose = () => {
-    modalProps.onClose();
-    onClose?.();
-  };
 
   const { isNarrowWidth } = useResponsive();
   const defaultAutocompleteProps = {
@@ -43,10 +35,10 @@ export function PayeeAutocompleteModal({
 
   return (
     <Modal
+      name="payee-autocomplete"
       noAnimation={!isNarrowWidth}
-      {...modalProps}
-      onClose={_onClose}
-      contentProps={{
+      onClose={onClose}
+      containerProps={{
         style: {
           height: isNarrowWidth ? '85vh' : 275,
           backgroundColor: theme.menuAutoCompleteBackground,

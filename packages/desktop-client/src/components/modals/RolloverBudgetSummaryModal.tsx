@@ -9,12 +9,10 @@ import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/rollover/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
-import { type CommonModalProps } from '../Modals';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type RolloverBudgetSummaryModalProps = {
-  modalProps: CommonModalProps;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   month: string;
 };
@@ -22,7 +20,6 @@ type RolloverBudgetSummaryModalProps = {
 export function RolloverBudgetSummaryModal({
   month,
   onBudgetAction,
-  modalProps,
 }: RolloverBudgetSummaryModalProps) {
   const dispatch = useDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM');
@@ -79,23 +76,25 @@ export function RolloverBudgetSummaryModal({
 
   const onResetHoldBuffer = () => {
     onBudgetAction(month, 'reset-hold');
-    modalProps.onClose();
   };
 
-  const onClick = () => {
+  const onClick = ({ close }) => {
     dispatch(
       pushModal('rollover-summary-to-budget-menu', {
         month,
         onTransfer: openTransferAvailableModal,
         onCover: openCoverOverbudgetedModal,
-        onResetHoldBuffer,
+        onResetHoldBuffer: () => {
+          onResetHoldBuffer();
+          close();
+        },
         onHoldBuffer,
       }),
     );
   };
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="rollover-budget-summary">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -118,7 +117,7 @@ export function RolloverBudgetSummaryModal({
               amountStyle={{
                 ...styles.underlinedText,
               }}
-              onClick={onClick}
+              onClick={() => onClick({ close })}
             />
           </NamespaceContext.Provider>
         </>

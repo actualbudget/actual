@@ -6,15 +6,12 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
 type ConfirmTransactionDeleteProps = {
-  modalProps: CommonModalProps;
   onConfirm: () => void;
 };
 
 export function ConfirmTransactionDelete({
-  modalProps,
   onConfirm,
 }: ConfirmTransactionDeleteProps) {
   const { isNarrowWidth } = useResponsive();
@@ -25,7 +22,7 @@ export function ConfirmTransactionDelete({
     : {};
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="confirm-transaction-delete">
       {({ state: { close } }) => (
         <>
           <ModalHeader

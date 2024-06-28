@@ -6,17 +6,12 @@ import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { ManageRules } from '../ManageRules';
-import { type CommonModalProps } from '../Modals';
 
 type ManageRulesModalProps = {
-  modalProps: CommonModalProps;
   payeeId?: string;
 };
 
-export function ManageRulesModal({
-  modalProps,
-  payeeId,
-}: ManageRulesModalProps) {
+export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   if (isNonProductionEnvironment()) {
@@ -28,7 +23,7 @@ export function ManageRulesModal({
   }
 
   return (
-    <Modal isLoading={loading} {...modalProps}>
+    <Modal name="manage-rules" isLoading={loading}>
       {({ state: { close } }) => (
         <>
           <ModalHeader

@@ -18,37 +18,31 @@ import {
 } from '../common/Modal2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 
 type CategoryGroupMenuModalProps = {
-  modalProps: CommonModalProps;
   groupId: string;
   onSave: (group: CategoryGroupEntity) => void;
   onAddCategory: (groupId: string, isIncome: boolean) => void;
   onEditNotes: (id: string) => void;
   onSaveNotes: (id: string, notes: string) => void;
   onDelete: (groupId: string) => void;
+  onToggleVisibility: (groupId: string) => void;
   onClose?: () => void;
 };
 
 export function CategoryGroupMenuModal({
-  modalProps,
   groupId,
   onSave,
   onAddCategory,
   onEditNotes,
   onDelete,
+  onToggleVisibility,
   onClose,
 }: CategoryGroupMenuModalProps) {
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
   const notes = useNotes(group.id);
-
-  const _onClose = () => {
-    modalProps?.onClose();
-    onClose?.();
-  };
 
   const onRename = newName => {
     if (newName !== group.name) {
@@ -67,16 +61,12 @@ export function CategoryGroupMenuModal({
     onEditNotes?.(group.id);
   };
 
-  const _onToggleVisibility = () => {
-    onSave?.({
-      ...group,
-      hidden: !!!group.hidden,
-    });
-    _onClose();
-  };
-
   const _onDelete = () => {
     onDelete?.(group.id);
+  };
+
+  const _onToggleVisibility = () => {
+    onToggleVisibility?.(group.id);
   };
 
   const buttonStyle: CSSProperties = {
@@ -91,9 +81,9 @@ export function CategoryGroupMenuModal({
 
   return (
     <Modal
-      {...modalProps}
-      onClose={_onClose}
-      contentProps={{
+      name="category-group-menu"
+      onClose={onClose}
+      containerProps={{
         style: {
           height: '45vh',
         },

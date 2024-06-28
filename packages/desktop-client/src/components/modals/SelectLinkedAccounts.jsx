@@ -1,4 +1,11 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+
+import {
+  linkAccount,
+  linkAccountSimpleFin,
+  unlinkAccount,
+} from 'loot-core/client/actions';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { theme } from '../../style';
@@ -17,13 +24,12 @@ const addOffBudgetAccountOption = {
 };
 
 export function SelectLinkedAccounts({
-  modalProps,
   requisitionId,
   externalAccounts,
-  actions,
   syncSource,
 }) {
   externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
+  const dispatch = useDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
   const [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(
@@ -41,7 +47,7 @@ export function SelectLinkedAccounts({
     localAccounts
       .filter(acc => acc.account_id)
       .filter(acc => !chosenLocalAccountIds.includes(acc.id))
-      .forEach(acc => actions.unlinkAccount(acc.id));
+      .forEach(acc => dispatch(unlinkAccount(acc.id)));
 
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
@@ -59,29 +65,31 @@ export function SelectLinkedAccounts({
 
         // Finally link the matched account
         if (syncSource === 'simpleFin') {
-          actions.linkAccountSimpleFin(
-            externalAccount,
-            chosenLocalAccountId !== addOnBudgetAccountOption.id &&
-              chosenLocalAccountId !== addOffBudgetAccountOption.id
-              ? chosenLocalAccountId
-              : undefined,
-            offBudget,
+          dispatch(
+            linkAccountSimpleFin(
+              externalAccount,
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+              offBudget,
+            ),
           );
         } else {
-          actions.linkAccount(
-            requisitionId,
-            externalAccount,
-            chosenLocalAccountId !== addOnBudgetAccountOption.id &&
-              chosenLocalAccountId !== addOffBudgetAccountOption.id
-              ? chosenLocalAccountId
-              : undefined,
-            offBudget,
+          dispatch(
+            linkAccount(
+              requisitionId,
+              externalAccount,
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+              offBudget,
+            ),
           );
         }
       },
     );
-
-    actions.closeModal();
   }
 
   const unlinkedAccounts = localAccounts.filter(
@@ -103,7 +111,10 @@ export function SelectLinkedAccounts({
   }
 
   return (
-    <Modal {...modalProps} contentProps={{ style: { width: 800 } }}>
+    <Modal
+      name="select-linked-accounts"
+      containerProps={{ style: { width: 800 } }}
+    >
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -165,7 +176,10 @@ export function SelectLinkedAccounts({
           >
             <Button
               variant="primary"
-              onPress={onNext}
+              onPress={() => {
+                onNext();
+                close();
+              }}
               isDisabled={!Object.keys(chosenAccounts).length}
             >
               Link accounts

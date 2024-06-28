@@ -13,27 +13,19 @@ import {
 } from '../common/Modal2';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
-import { type CommonModalProps } from '../Modals';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type CategoryAutocompleteModalProps = {
-  modalProps: CommonModalProps;
   autocompleteProps: ComponentPropsWithoutRef<typeof CategoryAutocomplete>;
   onClose: () => void;
   month?: string;
 };
 
 export function CategoryAutocompleteModal({
-  modalProps,
   autocompleteProps,
   month,
   onClose,
 }: CategoryAutocompleteModalProps) {
-  const _onClose = () => {
-    modalProps.onClose();
-    onClose?.();
-  };
-
   const { isNarrowWidth } = useResponsive();
 
   const defaultAutocompleteProps = {
@@ -42,10 +34,10 @@ export function CategoryAutocompleteModal({
 
   return (
     <Modal
+      name="category-autocomplete"
       noAnimation={!isNarrowWidth}
-      {...modalProps}
-      onClose={_onClose}
-      contentProps={{
+      onClose={onClose}
+      containerProps={{
         style: {
           height: isNarrowWidth ? '85vh' : 275,
           backgroundColor: theme.menuAutoCompleteBackground,
@@ -54,20 +46,22 @@ export function CategoryAutocompleteModal({
     >
       {({ state: { close } }) => (
         <>
-          <ModalHeader
-            title={
-              <ModalTitle
-                title="Category"
-                getStyle={() => ({ color: theme.menuAutoCompleteText })}
-              />
-            }
-            rightContent={
-              <ModalCloseButton
-                onClick={close}
-                style={{ color: theme.menuAutoCompleteText }}
-              />
-            }
-          />
+          {isNarrowWidth && (
+            <ModalHeader
+              title={
+                <ModalTitle
+                  title="Category"
+                  getStyle={() => ({ color: theme.menuAutoCompleteText })}
+                />
+              }
+              rightContent={
+                <ModalCloseButton
+                  onClick={close}
+                  style={{ color: theme.menuAutoCompleteText }}
+                />
+              }
+            />
+          )}
           <View>
             {!isNarrowWidth && (
               <SectionLabel

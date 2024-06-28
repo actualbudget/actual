@@ -19,19 +19,16 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
-import { type CommonModalProps } from '../Modals';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type ReportBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof BudgetMenu
 > & {
-  modalProps: CommonModalProps;
   categoryId: string;
   onUpdateBudget: (amount: number) => void;
 };
 
 export function ReportBudgetMenuModal({
-  modalProps,
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
@@ -62,7 +59,7 @@ export function ReportBudgetMenuModal({
   }
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="report-budget-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -89,7 +86,7 @@ export function ReportBudgetMenuModal({
               focused={amountFocused}
               onFocus={() => setAmountFocused(true)}
               onBlur={() => setAmountFocused(false)}
-              onEnter={() => modalProps.onClose()}
+              onEnter={close}
               zeroSign="+"
               focusedStyle={{
                 width: 'auto',

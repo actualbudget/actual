@@ -69,7 +69,7 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export function ScheduleDetails({ modalProps, actions, id, transaction }) {
+export function ScheduleDetails({ id, transaction }) {
   const adding = id == null;
   const fromTrans = transaction != null;
   const payees = getPayeesById(usePayees());
@@ -400,7 +400,6 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
       if (adding) {
         await onLinkTransactions([...selectedInst.items], res.data);
       }
-      actions.popModal();
     }
   }
 
@@ -448,8 +447,8 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
   // This is derived from the date
   const repeats = state.fields.date ? !!state.fields.date.frequency : false;
   return (
-    <Modal {...modalProps}>
-      {({ close }) => (
+    <Modal name="schedule-edit">
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
@@ -783,10 +782,16 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
             {state.error && (
               <Text style={{ color: theme.errorText }}>{state.error}</Text>
             )}
-            <Button style={{ marginRight: 10 }} onPress={actions.popModal}>
+            <Button style={{ marginRight: 10 }} onPress={close}>
               Cancel
             </Button>
-            <Button variant="primary" onPress={onSave}>
+            <Button
+              variant="primary"
+              onPress={() => {
+                onSave();
+                close();
+              }}
+            >
               {adding ? 'Add' : 'Save'}
             </Button>
           </Stack>

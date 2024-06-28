@@ -9,21 +9,18 @@ import { IncomeTotal } from '../budget/report/budgetsummary/IncomeTotal';
 import { Saved } from '../budget/report/budgetsummary/Saved';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Stack } from '../common/Stack';
-import { type CommonModalProps } from '../Modals';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type ReportBudgetSummaryModalProps = {
-  modalProps: CommonModalProps;
   month: string;
 };
 
 export function ReportBudgetSummaryModal({
   month,
-  modalProps,
 }: ReportBudgetSummaryModalProps) {
   const currentMonth = monthUtils.currentMonth();
   return (
-    <Modal {...modalProps}>
+    <Modal name="report-budget-summary">
       {({ state: { close } }) => (
         <>
           <ModalHeader

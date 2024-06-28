@@ -8,25 +8,19 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type Query } from 'loot-core/src/shared/query';
 import { type TransactionEntity } from 'loot-core/src/types/models';
 
-import { type BoundActions } from '../../hooks/useActions';
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
 export function ScheduleLink({
-  modalProps,
-  actions,
   transactionIds: ids,
   getTransaction,
 }: {
-  actions: BoundActions;
-  modalProps?: CommonModalProps;
   transactionIds: string[];
   getTransaction: (transactionId: string) => TransactionEntity;
 }) {
@@ -50,11 +44,9 @@ export function ScheduleLink({
         updated: ids.map(id => ({ id, schedule: scheduleId })),
       });
     }
-    actions.popModal();
   }
 
   async function onCreate() {
-    actions.popModal();
     dispatch(
       pushModal('schedule-edit', {
         id: null,
@@ -64,8 +56,15 @@ export function ScheduleLink({
   }
 
   return (
-    <Modal size={{ width: 800 }} {...modalProps}>
-      {({ close }) => (
+    <Modal
+      name="schedule-link"
+      containerProps={{
+        style: {
+          width: 800,
+        },
+      }}
+    >
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Link Schedule"
@@ -98,7 +97,10 @@ export function ScheduleLink({
               <Button
                 variant="primary"
                 style={{ marginLeft: 15, padding: '4px 10px' }}
-                onPress={onCreate}
+                onPress={() => {
+                  close();
+                  onCreate();
+                }}
               >
                 <SvgAdd style={{ width: '20', padding: '3' }} />
                 Create New
@@ -120,7 +122,10 @@ export function ScheduleLink({
               filter={filter}
               minimal={true}
               onAction={() => {}}
-              onSelect={onSelect}
+              onSelect={id => {
+                onSelect(id);
+                close();
+              }}
               schedules={schedules}
               statuses={statuses}
               style={null}

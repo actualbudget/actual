@@ -6,20 +6,15 @@ import { Modal, ModalHeader, ModalCloseButton } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { BudgetList } from '../manager/BudgetList';
-import { type CommonModalProps } from '../Modals';
 
-type BudgetListModalProps = {
-  modalProps: CommonModalProps;
-};
-
-export function BudgetListModal({ modalProps }: BudgetListModalProps) {
+export function BudgetListModal() {
   const [id] = useLocalPref('id');
   const currentFile = useSelector(state =>
     state.budgets.allFiles?.find(f => 'id' in f && f.id === id),
   );
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="budget-list">
       {({ state: { close } }) => (
         <>
           <ModalHeader

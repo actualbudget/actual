@@ -19,33 +19,28 @@ import {
 } from '../common/Modal2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 
 type CategoryMenuModalProps = {
-  modalProps: CommonModalProps;
   categoryId: string;
   onSave: (category: CategoryEntity) => void;
-  onEditNotes: (id: string) => void;
+  onEditNotes: (categoryId: string) => void;
   onDelete: (categoryId: string) => void;
+  onToggleVisibility: (categoryId: string) => void;
   onClose?: () => void;
 };
 
 export function CategoryMenuModal({
-  modalProps,
   categoryId,
   onSave,
   onEditNotes,
   onDelete,
+  onToggleVisibility,
   onClose,
 }: CategoryMenuModalProps) {
   const category = useCategory(categoryId);
   const categoryGroup = useCategoryGroup(category?.cat_group);
   const originalNotes = useNotes(category.id);
-  const _onClose = () => {
-    modalProps?.onClose();
-    onClose?.();
-  };
 
   const onRename = newName => {
     if (newName !== category.name) {
@@ -57,11 +52,7 @@ export function CategoryMenuModal({
   };
 
   const _onToggleVisibility = () => {
-    onSave?.({
-      ...category,
-      hidden: !category.hidden,
-    });
-    _onClose();
+    onToggleVisibility?.(category.id);
   };
 
   const _onEditNotes = () => {
@@ -82,9 +73,9 @@ export function CategoryMenuModal({
 
   return (
     <Modal
-      {...modalProps}
-      onClose={_onClose}
-      contentProps={{
+      name="category-menu"
+      onClose={onClose}
+      containerProps={{
         style: { height: '45vh' },
       }}
     >

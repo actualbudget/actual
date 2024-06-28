@@ -4,16 +4,10 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
-import { type CommonModalProps } from '../Modals';
 
-type BudgetPageMenuModalProps = ComponentPropsWithoutRef<
-  typeof BudgetPageMenu
-> & {
-  modalProps: CommonModalProps;
-};
+type BudgetPageMenuModalProps = ComponentPropsWithoutRef<typeof BudgetPageMenu>;
 
 export function BudgetPageMenuModal({
-  modalProps,
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
@@ -26,7 +20,7 @@ export function BudgetPageMenuModal({
   };
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="budget-page-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader

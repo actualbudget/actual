@@ -9,17 +9,14 @@ import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
 type ConfirmCategoryDeleteProps = {
-  modalProps: CommonModalProps;
   category: string;
   group: string;
   onDelete: (categoryId: string) => void;
 };
 
 export function ConfirmCategoryDelete({
-  modalProps,
   group: groupId,
   category: categoryId,
   onDelete,
@@ -56,7 +53,10 @@ export function ConfirmCategoryDelete({
   const isIncome = !!(category || group).is_income;
 
   return (
-    <Modal {...modalProps} contentProps={{ style: { flex: 0 } }}>
+    <Modal
+      name="confirm-category-delete"
+      containerProps={{ style: { width: '30vw' } }}
+    >
       {({ state: { close } }) => (
         <>
           <ModalHeader

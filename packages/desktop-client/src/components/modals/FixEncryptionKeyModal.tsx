@@ -21,15 +21,12 @@ import {
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
 type FixEncryptionKeyModalProps = {
-  modalProps: CommonModalProps;
   options: FinanceModals['fix-encryption-key'];
 };
 
 export function FixEncryptionKeyModal({
-  modalProps,
   options = {},
 }: FixEncryptionKeyModalProps) {
   const { hasExistingKey, cloudFileId, onSuccess } = options;
@@ -55,13 +52,12 @@ export function FixEncryptionKeyModal({
         return;
       }
 
-      modalProps.onClose();
       onSuccess?.();
     }
   }
 
   return (
-    <Modal {...modalProps} onClose={modalProps.onClose}>
+    <Modal name="fix-encryption-key">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -109,6 +105,7 @@ export function FixEncryptionKeyModal({
             onSubmit={e => {
               e.preventDefault();
               onUpdateKey();
+              close();
             }}
           >
             <View
@@ -159,7 +156,7 @@ export function FixEncryptionKeyModal({
                   height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   marginRight: 10,
                 }}
-                onPress={() => modalProps.onBack()}
+                onPress={close}
               >
                 Back
               </Button>

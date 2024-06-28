@@ -7,7 +7,6 @@ import { q } from 'loot-core/src/shared/query';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/src/types/models';
 
-import type { BoundActions } from '../../hooks/useActions';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import {
   useSelected,
@@ -22,7 +21,6 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
@@ -124,13 +122,7 @@ function DiscoverSchedulesTable({
   );
 }
 
-export function DiscoverSchedules({
-  modalProps,
-  actions,
-}: {
-  modalProps: CommonModalProps;
-  actions: BoundActions;
-}) {
+export function DiscoverSchedules() {
   const { data, isLoading } = useSendPlatformRequest('schedule/discover');
 
   const schedules = data || [];
@@ -173,12 +165,14 @@ export function DiscoverSchedules({
     }
 
     setCreating(false);
-    actions.popModal();
   }
 
   return (
-    <Modal size={{ width: 850, height: 650 }} {...modalProps}>
-      {({ close }) => (
+    <Modal
+      name="schedules-discover"
+      containerProps={{ style: { width: 850, height: 650 } }}
+    >
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Found Schedules"
@@ -212,7 +206,10 @@ export function DiscoverSchedules({
               variant="primary"
               isLoading={creating}
               isDisabled={selectedInst.items.size === 0}
-              onPress={onCreate}
+              onPress={() => {
+                onCreate();
+                close();
+              }}
             >
               Create schedules
             </ButtonWithLoading>

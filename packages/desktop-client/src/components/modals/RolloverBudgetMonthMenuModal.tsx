@@ -11,27 +11,20 @@ import { BudgetMonthMenu } from '../budget/rollover/budgetsummary/BudgetMonthMen
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 
 type RolloverBudgetMonthMenuModalProps = {
-  modalProps: CommonModalProps;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onEditNotes: (month: string) => void;
 };
 
 export function RolloverBudgetMonthMenuModal({
-  modalProps,
   month,
   onBudgetAction,
   onEditNotes,
 }: RolloverBudgetMonthMenuModalProps) {
   const originalNotes = useNotes(`budget-${month}`);
-
-  const onClose = () => {
-    modalProps.onClose();
-  };
 
   const _onEditNotes = () => {
     onEditNotes?.(month);
@@ -60,9 +53,8 @@ export function RolloverBudgetMonthMenuModal({
 
   return (
     <Modal
-      {...modalProps}
-      onClose={onClose}
-      contentProps={{
+      name="rollover-budget-month-menu"
+      containerProps={{
         style: { height: '50vh' },
       }}
     >
@@ -175,11 +167,11 @@ export function RolloverBudgetMonthMenuModal({
                 }}
                 onOverwriteWithBudgetTemplates={() => {
                   onBudgetAction(month, 'overwrite-goal-template');
-                  onClose();
+                  close();
                 }}
                 onEndOfMonthCleanup={() => {
                   onBudgetAction(month, 'cleanup-goal-template');
-                  onClose();
+                  close();
                 }}
               />
             )}

@@ -12,19 +12,16 @@ import {
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-  type ModalProps,
 } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type GoCardlessInitialiseProps = {
-  modalProps?: Partial<ModalProps>;
   onSuccess: () => void;
 };
 
 export const GoCardlessInitialise = ({
-  modalProps,
   onSuccess,
 }: GoCardlessInitialiseProps) => {
   const [secretId, setSecretId] = useState('');
@@ -52,12 +49,11 @@ export const GoCardlessInitialise = ({
     ]);
 
     onSuccess();
-    modalProps.onClose();
     setIsLoading(false);
   };
 
   return (
-    <Modal {...modalProps} contentProps={{ style: { width: 300 } }}>
+    <Modal name="gocardless-init" containerProps={{ style: { width: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -116,7 +112,10 @@ export const GoCardlessInitialise = ({
             <ButtonWithLoading
               variant="primary"
               isLoading={isLoading}
-              onPress={onSubmit}
+              onPress={() => {
+                onSubmit();
+                close();
+              }}
             >
               Save and continue
             </ButtonWithLoading>

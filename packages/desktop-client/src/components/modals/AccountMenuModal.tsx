@@ -17,11 +17,9 @@ import {
 } from '../common/Modal2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 
 type AccountMenuModalProps = {
-  modalProps: CommonModalProps;
   accountId: string;
   onSave: (account: AccountEntity) => void;
   onCloseAccount: (accountId: string) => void;
@@ -31,7 +29,6 @@ type AccountMenuModalProps = {
 };
 
 export function AccountMenuModal({
-  modalProps,
   accountId,
   onSave,
   onCloseAccount,
@@ -41,11 +38,6 @@ export function AccountMenuModal({
 }: AccountMenuModalProps) {
   const account = useAccount(accountId);
   const originalNotes = useNotes(`account-${accountId}`);
-
-  const _onClose = () => {
-    modalProps?.onClose();
-    onClose?.();
-  };
 
   const onRename = (newName: string) => {
     if (!account) {
@@ -82,9 +74,9 @@ export function AccountMenuModal({
 
   return (
     <Modal
-      {...modalProps}
-      onClose={_onClose}
-      contentProps={{
+      name="account-menu"
+      onClose={onClose}
+      containerProps={{
         style: {
           height: '45vh',
         },

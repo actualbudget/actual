@@ -11,11 +11,9 @@ import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
-import { type CommonModalProps } from '../Modals';
 import { AmountInput } from '../util/AmountInput';
 
 type TransferModalProps = {
-  modalProps: CommonModalProps;
   title: string;
   month: string;
   amount: number;
@@ -24,7 +22,6 @@ type TransferModalProps = {
 };
 
 export function TransferModal({
-  modalProps,
   title,
   month,
   amount: initialAmount,
@@ -62,14 +59,12 @@ export function TransferModal({
     if (newAmount && categoryId) {
       onSubmit?.(newAmount, categoryId);
     }
-
-    modalProps.onClose();
   };
 
   const toCategory = categories.find(c => c.id === toCategoryId);
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="transfer">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -121,7 +116,10 @@ export function TransferModal({
                   marginLeft: styles.mobileEditingPadding,
                   marginRight: styles.mobileEditingPadding,
                 }}
-                onPress={() => _onSubmit(amount, toCategoryId)}
+                onPress={() => {
+                  _onSubmit(amount, toCategoryId);
+                  close();
+                }}
               >
                 Transfer
               </Button>

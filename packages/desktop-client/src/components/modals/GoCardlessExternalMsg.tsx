@@ -20,7 +20,6 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-import { type CommonModalProps } from '../Modals';
 
 import { COUNTRY_OPTIONS } from './countries';
 
@@ -74,7 +73,6 @@ function renderError(error: 'unknown' | 'timeout') {
 }
 
 type GoCardlessExternalMsgProps = {
-  modalProps: CommonModalProps;
   onMoveExternal: (arg: {
     institutionId: string;
   }) => Promise<{ error?: 'unknown' | 'timeout'; data?: GoCardlessToken }>;
@@ -83,10 +81,9 @@ type GoCardlessExternalMsgProps = {
 };
 
 export function GoCardlessExternalMsg({
-  modalProps,
   onMoveExternal,
   onSuccess,
-  onClose: originalOnClose,
+  onClose,
 }: GoCardlessExternalMsgProps) {
   const dispatch = useDispatch();
 
@@ -124,11 +121,6 @@ export function GoCardlessExternalMsg({
     data.current = res.data;
     setWaiting(null);
     setSuccess(true);
-  }
-
-  function onClose() {
-    originalOnClose?.();
-    modalProps.onClose();
   }
 
   async function onContinue() {
@@ -232,9 +224,9 @@ export function GoCardlessExternalMsg({
 
   return (
     <Modal
-      {...modalProps}
+      name="gocardless-external-msg"
       onClose={onClose}
-      contentProps={{ style: { flex: 0 } }}
+      containerProps={{ style: { width: '30vw' } }}
     >
       {({ state: { close } }) => (
         <>

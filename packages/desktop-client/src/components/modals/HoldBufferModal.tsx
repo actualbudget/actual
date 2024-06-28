@@ -8,20 +8,15 @@ import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
-import { type CommonModalProps } from '../Modals';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { AmountInput } from '../util/AmountInput';
 
 type HoldBufferModalProps = {
-  modalProps: CommonModalProps;
   month: string;
   onSubmit: (amount: number) => void;
 };
 
-export function HoldBufferModal({
-  modalProps,
-  onSubmit,
-}: HoldBufferModalProps) {
+export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
   const available = useSheetValue(rolloverBudget.toBudget);
   const [amount, setAmount] = useState<number>(0);
 
@@ -29,12 +24,10 @@ export function HoldBufferModal({
     if (newAmount) {
       onSubmit?.(newAmount);
     }
-
-    modalProps.onClose();
   };
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="hold-buffer">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -55,7 +48,10 @@ export function HoldBufferModal({
                   height: styles.mobileMinHeight,
                 }}
                 onUpdate={setAmount}
-                onEnter={() => _onSubmit(amount)}
+                onEnter={() => {
+                  _onSubmit(amount);
+                  close();
+                }}
               />
             </InitialFocus>
           </View>

@@ -1,5 +1,7 @@
 import React, { Component, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { loadBackup, makeBackup } from 'loot-core/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -48,13 +50,8 @@ class BackupTable extends Component {
   }
 }
 
-export function LoadBackup({
-  budgetId,
-  watchUpdates,
-  backupDisabled,
-  actions,
-  modalProps,
-}) {
+export function LoadBackup({ budgetId, watchUpdates, backupDisabled }) {
+  const dispatch = useDispatch();
   const [backups, setBackups] = useState([]);
   const [prefsBudgetId] = useLocalPref('id');
   const budgetIdToLoad = budgetId || prefsBudgetId;
@@ -74,7 +71,7 @@ export function LoadBackup({
   const previousBackups = backups.filter(backup => !backup.isLatest);
 
   return (
-    <Modal {...modalProps} contentProps={{ style: { flex: 0 } }}>
+    <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -102,7 +99,7 @@ export function LoadBackup({
                   <Button
                     variant="primary"
                     onPress={() =>
-                      actions.loadBackup(budgetIdToLoad, latestBackup.id)
+                      dispatch(loadBackup(budgetIdToLoad, latestBackup.id))
                     }
                   >
                     Revert to original version
@@ -122,7 +119,7 @@ export function LoadBackup({
                   <Button
                     variant="primary"
                     isDisabled={backupDisabled}
-                    onPress={() => actions.makeBackup()}
+                    onPress={() => dispatch(makeBackup())}
                   >
                     Backup now
                   </Button>
@@ -136,7 +133,7 @@ export function LoadBackup({
             ) : (
               <BackupTable
                 backups={previousBackups}
-                onSelect={id => actions.loadBackup(budgetIdToLoad, id)}
+                onSelect={id => dispatch(loadBackup(budgetIdToLoad, id))}
               />
             )}
           </View>

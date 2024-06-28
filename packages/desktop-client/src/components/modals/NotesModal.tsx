@@ -6,39 +6,30 @@ import { SvgCheck } from '../../icons/v2';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 
 type NotesModalProps = {
-  modalProps: CommonModalProps;
   id: string;
   name: string;
   onSave: (id: string, notes: string) => void;
 };
 
-export function NotesModal({ modalProps, id, name, onSave }: NotesModalProps) {
+export function NotesModal({ id, name, onSave }: NotesModalProps) {
   const originalNotes = useNotes(id);
 
   const [notes, setNotes] = useState(originalNotes);
   useEffect(() => setNotes(originalNotes), [originalNotes]);
 
-  function _onClose() {
-    modalProps?.onClose();
-  }
-
   function _onSave() {
     if (notes !== originalNotes) {
       onSave?.(id, notes);
     }
-
-    _onClose();
   }
 
   return (
     <Modal
-      {...modalProps}
-      onClose={_onClose}
-      contentProps={{
+      name="notes"
+      containerProps={{
         style: { height: '50vh' },
       }}
     >
@@ -81,7 +72,10 @@ export function NotesModal({ modalProps, id, name, onSave }: NotesModalProps) {
                   fontWeight: 400,
                   width: '100%',
                 }}
-                onPress={_onSave}
+                onPress={() => {
+                  _onSave();
+                  close();
+                }}
               >
                 <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />
                 Save notes

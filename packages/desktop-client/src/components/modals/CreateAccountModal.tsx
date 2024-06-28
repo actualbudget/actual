@@ -19,16 +19,13 @@ import { Paragraph } from '../common/Paragraph';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
 type CreateAccountProps = {
-  modalProps: CommonModalProps;
   syncServerStatus: SyncServerStatus;
   upgradingAccountId?: string;
 };
 
 export function CreateAccountModal({
-  modalProps,
   syncServerStatus,
   upgradingAccountId,
 }: CreateAccountProps) {
@@ -179,7 +176,7 @@ export function CreateAccountModal({
   const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="add-account">
       {({ state: { close } }) => (
         <>
           <ModalHeader

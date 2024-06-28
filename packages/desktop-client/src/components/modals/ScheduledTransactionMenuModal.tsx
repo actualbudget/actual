@@ -14,14 +14,10 @@ import {
 } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
-type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps & {
-  modalProps: CommonModalProps;
-};
+type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
 
 export function ScheduledTransactionMenuModal({
-  modalProps,
   transactionId,
   onSkip,
   onPost,
@@ -46,7 +42,7 @@ export function ScheduledTransactionMenuModal({
   }
 
   return (
-    <Modal {...modalProps}>
+    <Modal name="scheduled-transaction-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
