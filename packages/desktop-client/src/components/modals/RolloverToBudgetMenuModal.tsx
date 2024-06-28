@@ -27,7 +27,7 @@ export function RolloverToBudgetMenuModal({
 
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             showLogo

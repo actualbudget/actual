@@ -219,15 +219,17 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
       noAnimation={!isNarrowWidth}
       {...modalProps}
       onClose={onCloseInner}
-      style={{
-        flex: 0,
-        height: isNarrowWidth ? '85vh' : 275,
-        padding: '15px 10px',
-        ...(minWidth && { minWidth }),
-        backgroundColor: theme.menuAutoCompleteBackground,
+      contentProps={{
+        style: {
+          flex: 0,
+          height: isNarrowWidth ? '85vh' : 275,
+          padding: '15px 10px',
+          ...(minWidth && { minWidth }),
+          backgroundColor: theme.menuAutoCompleteBackground,
+        },
       }}
     >
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title={label}

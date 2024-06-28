@@ -46,12 +46,14 @@ export function PayeeAutocompleteModal({
       noAnimation={!isNarrowWidth}
       {...modalProps}
       onClose={_onClose}
-      style={{
-        height: isNarrowWidth ? '85vh' : 275,
-        backgroundColor: theme.menuAutoCompleteBackground,
+      contentProps={{
+        style: {
+          height: isNarrowWidth ? '85vh' : 275,
+          backgroundColor: theme.menuAutoCompleteBackground,
+        },
       }}
     >
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           {isNarrowWidth && (
             <ModalHeader

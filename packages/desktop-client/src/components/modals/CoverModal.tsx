@@ -8,7 +8,7 @@ import { useInitialMount } from '../../hooks/useInitialMount';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { type CommonModalProps } from '../Modals';
@@ -73,31 +73,38 @@ export function CoverModal({
 
   return (
     <Modal {...modalProps}>
-      {title}
-      <View>
-        <FieldLabel title="Cover from category:" />
-        <TapField value={fromCategory?.name} onClick={onCategoryClick} />
-      </View>
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title={title}
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View>
+            <FieldLabel title="Cover from category:" />
+            <TapField value={fromCategory?.name} onClick={onCategoryClick} />
+          </View>
 
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingTop: 10,
-        }}
-      >
-        <Button
-          variant="primary"
-          style={{
-            height: styles.mobileMinHeight,
-            marginLeft: styles.mobileEditingPadding,
-            marginRight: styles.mobileEditingPadding,
-          }}
-          onPress={() => _onSubmit(fromCategoryId)}
-        >
-          Transfer
-        </Button>
-      </View>
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingTop: 10,
+            }}
+          >
+            <Button
+              variant="primary"
+              style={{
+                height: styles.mobileMinHeight,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+              }}
+              onPress={() => _onSubmit(fromCategoryId)}
+            >
+              Transfer
+            </Button>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

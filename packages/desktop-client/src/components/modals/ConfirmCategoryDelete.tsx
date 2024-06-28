@@ -56,8 +56,8 @@ export function ConfirmCategoryDelete({
   const isIncome = !!(category || group).is_income;
 
   return (
-    <Modal {...modalProps} style={{ flex: 0 }}>
-      {({ close }) => (
+    <Modal {...modalProps} contentProps={{ style: { flex: 0 } }}>
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Confirm Delete"

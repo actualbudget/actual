@@ -35,7 +35,7 @@ export function HoldBufferModal({
 
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Hold Buffer"

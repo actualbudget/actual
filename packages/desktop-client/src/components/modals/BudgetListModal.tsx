@@ -20,7 +20,7 @@ export function BudgetListModal({ modalProps }: BudgetListModalProps) {
 
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Switch Budget File"

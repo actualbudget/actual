@@ -26,7 +26,7 @@ export function ConfirmTransactionDelete({
 
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Confirm Delete"

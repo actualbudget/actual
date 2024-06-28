@@ -38,11 +38,11 @@ export function NotesModal({ modalProps, id, name, onSave }: NotesModalProps) {
     <Modal
       {...modalProps}
       onClose={_onClose}
-      style={{
-        height: '50vh',
+      contentProps={{
+        style: { height: '50vh' },
       }}
     >
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title={`Notes: ${name}`}

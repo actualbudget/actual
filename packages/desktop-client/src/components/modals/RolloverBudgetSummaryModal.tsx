@@ -96,7 +96,7 @@ export function RolloverBudgetSummaryModal({
 
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Budget Summary"

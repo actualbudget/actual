@@ -18,8 +18,8 @@ export function ConfirmUnlinkAccount({
   onUnlink,
 }: ConfirmUnlinkAccountProps) {
   return (
-    <Modal {...modalProps} style={{ flex: 0 }}>
-      {({ close }) => (
+    <Modal {...modalProps} contentProps={{ style: { flex: 0 } }}>
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Confirm Unlink"

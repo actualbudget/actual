@@ -62,11 +62,11 @@ export function RolloverBudgetMonthMenuModal({
     <Modal
       {...modalProps}
       onClose={onClose}
-      style={{
-        height: '50vh',
+      contentProps={{
+        style: { height: '50vh' },
       }}
     >
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title={monthUtils.format(month, 'MMMM ‘yy')}

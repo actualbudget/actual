@@ -21,8 +21,8 @@ export function ConfirmTransactionEdit({
   confirmReason,
 }: ConfirmTransactionEditProps) {
   return (
-    <Modal {...modalProps} style={{ flex: 0 }}>
-      {({ close }) => (
+    <Modal {...modalProps} contentProps={{ style: { flex: 0 } }}>
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Reconciled Transaction"

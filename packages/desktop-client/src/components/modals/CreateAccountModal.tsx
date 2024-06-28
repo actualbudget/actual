@@ -180,7 +180,7 @@ export function CreateAccountModal({
 
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title={title}

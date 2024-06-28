@@ -902,8 +902,8 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   const showSplitButton = actionSplits.length > 0;
 
   return (
-    <Modal {...modalProps} style={{ ...modalProps.style, flex: 'inherit' }}>
-      {({ close }) => (
+    <Modal {...modalProps} contentProps={{ style: { flex: 'inherit' } }}>
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Rule"

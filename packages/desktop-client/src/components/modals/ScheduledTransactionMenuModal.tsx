@@ -47,7 +47,7 @@ export function ScheduledTransactionMenuModal({
 
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title={<ModalTitle title={schedule.name || ''} shrinkOnOverflow />}

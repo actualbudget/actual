@@ -29,7 +29,7 @@ export function ManageRulesModal({
 
   return (
     <Modal isLoading={loading} {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Rules"

@@ -57,8 +57,8 @@ export const GoCardlessInitialise = ({
   };
 
   return (
-    <Modal size={{ width: 300 }} {...modalProps}>
-      {({ close }) => (
+    <Modal {...modalProps} contentProps={{ style: { width: 300 } }}>
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Set-up GoCardless"

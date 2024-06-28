@@ -74,8 +74,8 @@ export function LoadBackup({
   const previousBackups = backups.filter(backup => !backup.isLatest);
 
   return (
-    <Modal {...modalProps} style={{ flex: 0 }}>
-      {({ close }) => (
+    <Modal {...modalProps} contentProps={{ style: { flex: 0 } }}>
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Load Backup"

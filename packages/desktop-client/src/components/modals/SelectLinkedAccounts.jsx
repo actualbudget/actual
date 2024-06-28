@@ -103,8 +103,8 @@ export function SelectLinkedAccounts({
   }
 
   return (
-    <Modal {...modalProps} style={{ width: 800 }}>
-      {({ close }) => (
+    <Modal {...modalProps} contentProps={{ style: { width: 800 } }}>
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Link Accounts"

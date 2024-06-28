@@ -29,16 +29,16 @@ import { TextOneLine } from './TextOneLine';
 import { View } from './View';
 
 export type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
-  children: ReactNode | (({ close }: { close: () => void }) => ReactNode);
   isCurrent?: boolean;
   isHidden?: boolean;
   isLoading?: boolean;
   stackIndex?: number;
-  size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
-  padding?: CSSProperties['padding'];
   noAnimation?: boolean;
   style?: CSSProperties;
   onClose?: () => void;
+  contentProps?: {
+    style?: CSSProperties;
+  };
 };
 
 export const Modal = ({
@@ -46,12 +46,11 @@ export const Modal = ({
   isHidden,
   isLoading = false,
   stackIndex,
-  size,
-  padding = 10,
   noAnimation = false,
   style,
   children,
   onClose,
+  contentProps,
   ...props
 }: ModalProps) => {
   const { enableScope, disableScope } = useHotkeysContext();
@@ -81,15 +80,15 @@ export const Modal = ({
       {...props}
     >
       <ReactAriaModal>
-        <Dialog aria-label="Modal Dialog">
-          {({ close }) => (
+        {modalProps => (
+          <Dialog aria-label="Modal Dialog">
             <ModalContent
               noAnimation={noAnimation}
               isCurrent={isCurrent}
-              size={size}
+              {...contentProps}
               style={{
                 flex: 1,
-                padding,
+                padding: 10,
                 willChange: 'opacity, transform',
                 maxWidth: '90vw',
                 minWidth: '90vw',
@@ -105,12 +104,12 @@ export const Modal = ({
                 },
                 ...styles.shadowLarge,
                 ...styles.lightScrollbar,
-                ...style,
+                ...contentProps?.style,
               }}
             >
               <View style={{ paddingTop: 0, flex: 1 }}>
                 {typeof children === 'function'
-                  ? children({ close })
+                  ? children(modalProps)
                   : children}
               </View>
               {isLoading && (
@@ -134,8 +133,8 @@ export const Modal = ({
                 </View>
               )}
             </ModalContent>
-          )}
-        </Dialog>
+          </Dialog>
+        )}
       </ReactAriaModal>
     </ReactAriaModalOverlay>
   );
@@ -143,7 +142,6 @@ export const Modal = ({
 
 type ModalContentProps = {
   style?: CSSProperties;
-  size?: ModalProps['size'];
   noAnimation?: boolean;
   isCurrent?: boolean;
   stackIndex?: number;
@@ -152,7 +150,6 @@ type ModalContentProps = {
 
 const ModalContent = ({
   style,
-  size,
   noAnimation,
   isCurrent,
   stackIndex,
@@ -216,7 +213,6 @@ const ModalContent = ({
       innerRef={contentRef}
       style={{
         ...style,
-        ...(size && { width: size.width, height: size.height }),
         ...(noAnimation && !isCurrent && { display: 'none' }),
       }}
     >

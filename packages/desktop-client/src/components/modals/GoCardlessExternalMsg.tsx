@@ -231,8 +231,12 @@ export function GoCardlessExternalMsg({
   };
 
   return (
-    <Modal {...modalProps} onClose={onClose} style={{ flex: 0 }}>
-      {({ close }) => (
+    <Modal
+      {...modalProps}
+      onClose={onClose}
+      contentProps={{ style: { flex: 0 } }}
+    >
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Link Your Bank"

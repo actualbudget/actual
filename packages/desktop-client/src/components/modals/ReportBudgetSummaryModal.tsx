@@ -24,7 +24,7 @@ export function ReportBudgetSummaryModal({
   const currentMonth = monthUtils.currentMonth();
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Budget Summary"

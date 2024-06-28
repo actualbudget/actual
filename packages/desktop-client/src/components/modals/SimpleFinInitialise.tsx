@@ -50,8 +50,8 @@ export const SimpleFinInitialise = ({
   };
 
   return (
-    <Modal size={{ width: 300 }} {...modalProps}>
-      {({ close }) => (
+    <Modal contentProps={{ style: { width: 300 } }} {...modalProps}>
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Set-up SimpleFIN"

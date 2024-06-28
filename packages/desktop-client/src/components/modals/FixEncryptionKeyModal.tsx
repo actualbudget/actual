@@ -62,7 +62,7 @@ export function FixEncryptionKeyModal({
 
   return (
     <Modal {...modalProps} onClose={modalProps.onClose}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title={

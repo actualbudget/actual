@@ -51,7 +51,7 @@ export function SingleInputModal({
 
   return (
     <Modal {...modalProps}>
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <Header rightContent={<ModalCloseButton onClick={close} />} />
           <Form onSubmit={_onSubmit}>

@@ -84,11 +84,11 @@ export function CategoryMenuModal({
     <Modal
       {...modalProps}
       onClose={_onClose}
-      style={{
-        height: '45vh',
+      contentProps={{
+        style: { height: '45vh' },
       }}
     >
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             leftContent={
