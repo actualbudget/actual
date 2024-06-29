@@ -129,7 +129,10 @@ export const remoteFileModel = {
     return {
       cloudFileId: file.fileId,
       state: 'remote',
-      ...file,
+      groupId: file.groupId,
+      name: file.name,
+      encryptKeyId: file.encryptKeyId,
+      hasKey: file.hasKey,
     };
   },
 
