@@ -236,7 +236,9 @@ handlers['api/get-remote-budgets'] = async function () {
   if (!files) {
     return [];
   }
-  return files.map(file => remoteFileModel.toExternal(file));
+  return files
+    .map(file => remoteFileModel.toExternal(file))
+    .filter(file => file);
 };
 
 handlers['api/sync'] = async function () {
