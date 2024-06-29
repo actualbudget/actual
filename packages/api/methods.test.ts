@@ -58,9 +58,9 @@ describe('API CRUD operations', () => {
     await api.loadBudget(budgetName);
   });
 
-  // api: getBudgets
-  test('getBudgets', async () => {
-    const budgets = await api.getBudgets();
+  // api: getLocalBudgets
+  test('getLocalBudgets', async () => {
+    const budgets = await api.getLocalBudgets();
     expect(budgets).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -69,6 +69,12 @@ describe('API CRUD operations', () => {
         }),
       ]),
     );
+  });
+
+  // api: getRemoteBudgets
+  test('getRemoteBudgets', async () => {
+    const budgets = await api.getRemoteBudgets();
+    expect(budgets).toEqual([]);
   });
 
   // apis: getCategoryGroups, createCategoryGroup, updateCategoryGroup, deleteCategoryGroup

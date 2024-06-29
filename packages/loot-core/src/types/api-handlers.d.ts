@@ -4,6 +4,7 @@ import type {
   APICategoryEntity,
   APICategoryGroupEntity,
   APIPayeeEntity,
+  APIRemoteFileEntity,
 } from '../server/api-models';
 
 import type { Budget } from './budget';
@@ -24,7 +25,9 @@ export interface ApiHandlers {
     password?: string;
   }) => Promise<void>;
 
-  'api/get-budgets': () => Promise<Budget[]>;
+  'api/get-local-budgets': () => Promise<Budget[]>;
+
+  'api/get-remote-budgets': () => Promise<APIRemoteFileEntity[]>;
 
   'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 
