@@ -858,13 +858,13 @@ const Transaction = memo(function Transaction(props) {
     >
       {splitError && listContainerRef.current && (
         <Popover
+          key={updateId}
           triggerRef={triggerRef}
           isOpen
           isNonModal
           style={{ width: 375, padding: 5, maxHeight: '38px !important' }}
           shouldFlip={false}
           placement="bottom end"
-          arrowSize={updateId}
           UNSTABLE_portalContainer={listContainerRef.current}
         >
           {splitError}
