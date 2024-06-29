@@ -1,4 +1,7 @@
-/* globals importScripts, backend */
+interface ImportScriptsOptions {
+  maxRetries?: number;
+}
+
 let hasInitialized = false;
 
 /**
@@ -9,34 +12,31 @@ let hasInitialized = false;
  * The goal of this function is to retry X amount of times
  * to retrieve the backend script with a small delay.
  */
-const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
+const importScriptsWithRetry = async (script: string, options: ImportScriptsOptions = {}): Promise<void> => {
+  const { maxRetries = 5 } = options;
   try {
+    // @ts-ignore
     importScripts(script);
   } catch (error) {
     // Break if maxRetries has exceeded
     if (maxRetries <= 0) {
       throw error;
     } else {
-      console.groupCollapsed(
-        `Failed to load backend, will retry ${maxRetries} more time(s)`,
-      );
+      console.groupCollapsed(`Failed to load backend, will retry ${maxRetries} more time(s)`);
       console.log(error);
       console.groupEnd();
     }
 
     // Attempt to retry after a small delay
-    await new Promise(resolve =>
-      setTimeout(async () => {
-        await importScriptsWithRetry(script, {
-          maxRetries: maxRetries - 1,
-        });
-        resolve();
-      }, 5000),
-    );
+    await new Promise<void>(resolve => setTimeout(async () => {
+      await importScriptsWithRetry(script, { maxRetries: maxRetries - 1 });
+      resolve();
+    }, 5000));
   }
 };
 
-self.addEventListener('message', async event => {
+// Event listener for 'message'
+self.addEventListener('message', async (event: MessageEvent) => {
   try {
     if (!hasInitialized) {
       const msg = event.data;
@@ -44,13 +44,9 @@ self.addEventListener('message', async event => {
       if (msg.type === 'init') {
         hasInitialized = true;
         const isDev = !!msg.isDev;
-        // let version = msg.version;
         const hash = msg.hash;
 
-        if (
-          !self.SharedArrayBuffer &&
-          !msg.isSharedArrayBufferOverrideEnabled
-        ) {
+        if (!self.SharedArrayBuffer && !msg.isSharedArrayBufferOverrideEnabled) {
           self.postMessage({
             type: 'app-init-failure',
             SharedArrayBufferMissing: true,
@@ -58,18 +54,16 @@ self.addEventListener('message', async event => {
           return;
         }
 
-        await importScriptsWithRetry(
-          `${msg.publicUrl}/kcab/kcab.worker.${hash}.js`,
-          { maxRetries: isDev ? 5 : 0 },
-        );
+        await importScriptsWithRetry(`${msg.publicUrl}/kcab/kcab.worker.${hash}.js`, { maxRetries: isDev ? 5 : 0 });
 
+        // @ts-ignore
         backend.initApp(isDev, self).catch(err => {
           console.log(err);
-          const msg = {
+          const failureMsg = {
             type: 'app-init-failure',
             IDBFailure: err.message.includes('indexeddb-failure'),
           };
-          self.postMessage(msg);
+          self.postMessage(failureMsg);
 
           throw err;
         });

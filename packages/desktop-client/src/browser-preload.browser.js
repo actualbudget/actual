@@ -4,7 +4,7 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import packageJson from '../package.json';
 
-const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
+const backendWorkerUrl = new URL('./browser-server.ts', import.meta.url);
 
 // This file installs global variables that the app expects.
 // Normally these are already provided by electron, but in a real
