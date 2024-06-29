@@ -122,7 +122,7 @@ export type APIRemoteFileEntity = Omit<RemoteFile, 'deleted' | 'fileId'> & {
 };
 
 export const remoteFileModel = {
-  toExternal(file: RemoteFile): APIRemoteFileEntity {
+  toExternal(file: RemoteFile): APIRemoteFileEntity | null {
     if (file.deleted) {
       return null;
     }
