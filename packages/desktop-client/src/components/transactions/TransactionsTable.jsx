@@ -924,7 +924,7 @@ const Transaction = memo(function Transaction({
     >
       {splitError && listContainerRef.current && (
         <Popover
-          key={updateId}
+          arrowSize={updateId}
           triggerRef={triggerRef}
           isOpen
           isNonModal
