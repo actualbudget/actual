@@ -15,6 +15,7 @@ export interface CustomReportEntity {
   showEmpty: boolean;
   showOffBudget: boolean;
   showHiddenCategories: boolean;
+  includeCurrentInterval: boolean;
   showUncategorized: boolean;
   selectedCategories?: CategoryEntity[];
   graphType: string;
@@ -23,6 +24,13 @@ export interface CustomReportEntity {
   data?: GroupedEntity;
   tombstone?: boolean;
 }
+
+export type balanceTypeOpType =
+  | 'totalAssets'
+  | 'totalDebts'
+  | 'totalTotals'
+  | 'netAssets'
+  | 'netDebts';
 
 export type SpendingMonthEntity = Record<
   string | number,
@@ -67,6 +75,8 @@ export interface DataEntity {
   endDate?: string;
   totalDebts: number;
   totalAssets: number;
+  netAssets: number;
+  netDebts: number;
   totalTotals: number;
 }
 
@@ -83,6 +93,8 @@ export type IntervalEntity = {
   intervalEndDate?: string;
   totalAssets: number;
   totalDebts: number;
+  netAssets: number;
+  netDebts: number;
   totalTotals: number;
 };
 
@@ -94,6 +106,8 @@ export interface GroupedEntity {
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
+  netAssets: number;
+  netDebts: number;
   categories?: GroupedEntity[];
 }
 
@@ -114,6 +128,7 @@ export interface CustomReportData {
   show_empty: number;
   show_offbudget: number;
   show_hidden: number;
+  include_current: number;
   show_uncategorized: number;
   selected_categories?: CategoryEntity[];
   graph_type: string;

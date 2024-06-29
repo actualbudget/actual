@@ -26,13 +26,12 @@ import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';
 import { NotesButton } from '../NotesButton';
-import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
+import { SelectedTransactionsButton } from '../transactions/SelectedTransactionsButton';
 
 import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 
 export function AccountHeader({
-  filteredAmount,
   tableRef,
   editingName,
   isNameEditable,
@@ -40,7 +39,7 @@ export function AccountHeader({
   accountName,
   account,
   filterId,
-  filtersList,
+  savedFilters,
   accountsSyncing,
   failedAccounts,
   accounts,
@@ -53,10 +52,12 @@ export function AccountHeader({
   balanceQuery,
   reconcileAmount,
   canCalculateBalance,
+  isFiltered,
+  filteredAmount,
   isSorted,
   search,
-  filters,
-  conditionsOp,
+  filterConditions,
+  filterConditionsOp,
   pushModal,
   onSearch,
   onAddTransaction,
@@ -79,10 +80,12 @@ export function AccountHeader({
   onUpdateFilter,
   onClearFilters,
   onReloadSavedFilter,
-  onCondOpChange,
+  onConditionsOpChange,
   onDeleteFilter,
   onScheduleAction,
   onSetTransfer,
+  onMakeAsSplitTransaction,
+  onMakeAsNonSplitTransactions,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
@@ -243,7 +246,7 @@ export function AccountHeader({
           showExtraBalances={showExtraBalances}
           onToggleExtraBalances={onToggleExtraBalances}
           account={account}
-          filteredItems={filters}
+          isFiltered={isFiltered}
           filteredAmount={filteredAmount}
         />
 
@@ -271,7 +274,7 @@ export function AccountHeader({
                     }
                     style={{ marginRight: 4 }}
                   />{' '}
-                  {isServerOffline ? 'Sync offline' : 'Sync'}
+                  {isServerOffline ? 'Bank Sync Offline' : 'Bank Sync'}
                 </>
               ) : (
                 <>
@@ -318,11 +321,13 @@ export function AccountHeader({
               onScheduleAction={onScheduleAction}
               pushModal={pushModal}
               showMakeTransfer={showMakeTransfer}
+              onMakeAsSplitTransaction={onMakeAsSplitTransaction}
+              onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
             />
           )}
           <Button
             type="bare"
-            disabled={search !== '' || filters.length > 0}
+            disabled={search !== '' || filterConditions.length > 0}
             style={{ padding: 6, marginLeft: 10 }}
             onClick={onToggleSplits}
             title={
@@ -391,17 +396,17 @@ export function AccountHeader({
           )}
         </Stack>
 
-        {filters && filters.length > 0 && (
+        {filterConditions?.length > 0 && (
           <FiltersStack
-            filters={filters}
-            conditionsOp={conditionsOp}
+            conditions={filterConditions}
+            conditionsOp={filterConditionsOp}
             onUpdateFilter={onUpdateFilter}
             onDeleteFilter={onDeleteFilter}
             onClearFilters={onClearFilters}
             onReloadSavedFilter={onReloadSavedFilter}
             filterId={filterId}
-            filtersList={filtersList}
-            onCondOpChange={onCondOpChange}
+            savedFilters={savedFilters}
+            onConditionsOpChange={onConditionsOpChange}
           />
         )}
       </View>

@@ -4,26 +4,29 @@ import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
 import { View } from '../common/View';
 
-import { CondOpMenu } from './CondOpMenu';
+import { ConditionsOpMenu } from './ConditionsOpMenu';
 import { FilterExpression } from './FilterExpression';
 
 type AppliedFiltersProps = {
-  filters: RuleConditionEntity[];
+  conditions: RuleConditionEntity[];
   onUpdate: (
     filter: RuleConditionEntity,
     newFilter: RuleConditionEntity,
   ) => void;
   onDelete: (filter: RuleConditionEntity) => void;
   conditionsOp: string;
-  onCondOpChange: (value: string, filters: RuleConditionEntity[]) => void;
+  onConditionsOpChange: (
+    value: string,
+    conditions: RuleConditionEntity[],
+  ) => void;
 };
 
 export function AppliedFilters({
-  filters,
+  conditions,
   onUpdate,
   onDelete,
   conditionsOp,
-  onCondOpChange,
+  onConditionsOpChange,
 }: AppliedFiltersProps) {
   return (
     <View
@@ -33,12 +36,12 @@ export function AppliedFilters({
         flexWrap: 'wrap',
       }}
     >
-      <CondOpMenu
+      <ConditionsOpMenu
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
-        filters={filters}
+        onChange={onConditionsOpChange}
+        conditions={conditions}
       />
-      {filters.map((filter: RuleConditionEntity, i: number) => (
+      {conditions.map((filter: RuleConditionEntity, i: number) => (
         <FilterExpression
           key={i}
           customName={filter.customName}
