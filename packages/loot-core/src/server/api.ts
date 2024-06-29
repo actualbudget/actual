@@ -25,6 +25,7 @@ import {
   categoryModel,
   categoryGroupModel,
   payeeModel,
+  remoteFileModel,
 } from './api-models';
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -224,6 +225,20 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     throw new Error(getDownloadError(result.error));
   }
   await handlers['load-budget']({ id: result.id });
+};
+
+handlers['api/get-local-budgets'] = async function () {
+  return await handlers['get-budgets']();
+};
+
+handlers['api/get-remote-budgets'] = async function () {
+  const files = await handlers['get-remote-files']();
+  if (!files) {
+    return [];
+  }
+  return files
+    .map(file => remoteFileModel.toExternal(file))
+    .filter(file => file);
 };
 
 handlers['api/sync'] = async function () {

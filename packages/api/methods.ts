@@ -31,6 +31,14 @@ export async function downloadBudget(syncId, { password }: { password? } = {}) {
   return send('api/download-budget', { syncId, password });
 }
 
+export async function getLocalBudgets() {
+  return send('api/get-local-budgets');
+}
+
+export async function getRemoteBudgets() {
+  return send('api/get-remote-budgets');
+}
+
 export async function sync() {
   return send('api/sync');
 }

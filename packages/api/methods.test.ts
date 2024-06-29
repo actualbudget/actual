@@ -58,6 +58,25 @@ describe('API CRUD operations', () => {
     await api.loadBudget(budgetName);
   });
 
+  // api: getLocalBudgets
+  test('getLocalBudgets', async () => {
+    const budgets = await api.getLocalBudgets();
+    expect(budgets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'test-budget',
+          name: 'Default Test Db',
+        }),
+      ]),
+    );
+  });
+
+  // api: getRemoteBudgets
+  test('getRemoteBudgets', async () => {
+    const budgets = await api.getRemoteBudgets();
+    expect(budgets).toEqual([]);
+  });
+
   // apis: getCategoryGroups, createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
   test('CategoryGroups: successfully update category groups', async () => {
     const month = '2023-10';
