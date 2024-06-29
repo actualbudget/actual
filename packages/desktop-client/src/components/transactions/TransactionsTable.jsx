@@ -673,6 +673,7 @@ function PayeeIcons({
 }
 
 const Transaction = memo(function Transaction({
+  allTransactions,
   transaction: originalTransaction,
   subtransactions,
   editing,
@@ -1716,9 +1717,6 @@ function TransactionTableInner({
         accounts={accounts}
         categoryGroups={categoryGroups}
         payees={payees}
-        inheritedFields={
-          parent?.payee === trans.payee ? new Set(['payee']) : new Set()
-        }
         dateFormat={dateFormat}
         hideFraction={hideFraction}
         onEdit={tableNavigator.onEdit}
@@ -1731,7 +1729,6 @@ function TransactionTableInner({
         onNavigateToTransferAccount={onNavigateToTransferAccount}
         onNavigateToSchedule={onNavigateToSchedule}
         onNotesTagClick={onNotesTagClick}
-        pushModal={props.pushModal}
         splitError={
           hasSplitError && (
             <TransactionError

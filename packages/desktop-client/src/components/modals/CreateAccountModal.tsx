@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -16,10 +16,10 @@ import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
-import { Tooltip } from '../tooltips';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -38,6 +38,7 @@ export function CreateAccountModal({
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] =
     useState(null);
   const [menuGoCardlessOpen, setGoCardlessMenuOpen] = useState<boolean>(false);
+  const triggerRef = useRef(null);
   const [menuSimplefinOpen, setSimplefinMenuOpen] = useState<boolean>(false);
 
   const onConnectGoCardless = () => {
@@ -235,39 +236,40 @@ export function CreateAccountModal({
                       : 'Set up GoCardless for bank sync'}
                   </ButtonWithLoading>
                   {isGoCardlessSetupComplete && (
-                    <Button
-                      type="bare"
-                      onClick={() => setGoCardlessMenuOpen(true)}
-                      aria-label="Menu"
-                    >
-                      <SvgDotsHorizontalTriple
-                        width={15}
-                        height={15}
-                        style={{ transform: 'rotateZ(90deg)' }}
-                      />
-                      {menuGoCardlessOpen && (
-                        <Tooltip
-                          position="bottom-right"
-                          width={200}
-                          style={{ padding: 0 }}
-                          onClose={() => setGoCardlessMenuOpen(false)}
-                        >
-                          <Menu
-                            onMenuSelect={item => {
-                              if (item === 'reconfigure') {
-                                onGoCardlessReset();
-                              }
-                            }}
-                            items={[
-                              {
-                                name: 'reconfigure',
-                                text: 'Reset GoCardless credentials',
-                              },
-                            ]}
-                          />
-                        </Tooltip>
-                      )}
-                    </Button>
+                    <>
+                      <Button
+                        ref={triggerRef}
+                        type="bare"
+                        onClick={() => setGoCardlessMenuOpen(true)}
+                        aria-label="Menu"
+                      >
+                        <SvgDotsHorizontalTriple
+                          width={15}
+                          height={15}
+                          style={{ transform: 'rotateZ(90deg)' }}
+                        />
+                      </Button>
+
+                      <Popover
+                        triggerRef={triggerRef}
+                        isOpen={menuGoCardlessOpen}
+                        onOpenChange={() => setGoCardlessMenuOpen(false)}
+                      >
+                        <Menu
+                          onMenuSelect={item => {
+                            if (item === 'reconfigure') {
+                              onGoCardlessReset();
+                            }
+                          }}
+                          items={[
+                            {
+                              name: 'reconfigure',
+                              text: 'Reset GoCardless credentials',
+                            },
+                          ]}
+                        />
+                      </Popover>
+                    </>
                   )}
                 </View>
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
@@ -303,39 +305,39 @@ export function CreateAccountModal({
                           : 'Set up SimpleFIN for bank sync'}
                       </ButtonWithLoading>
                       {isSimpleFinSetupComplete && (
-                        <Button
-                          type="bare"
-                          onClick={() => setSimplefinMenuOpen(true)}
-                          aria-label="Menu"
-                        >
-                          <SvgDotsHorizontalTriple
-                            width={15}
-                            height={15}
-                            style={{ transform: 'rotateZ(90deg)' }}
-                          />
-                          {menuSimplefinOpen && (
-                            <Tooltip
-                              position="bottom-right"
-                              width={200}
-                              style={{ padding: 0 }}
-                              onClose={() => setSimplefinMenuOpen(false)}
-                            >
-                              <Menu
-                                onMenuSelect={item => {
-                                  if (item === 'reconfigure') {
-                                    onSimpleFinReset();
-                                  }
-                                }}
-                                items={[
-                                  {
-                                    name: 'reconfigure',
-                                    text: 'Reset SimpleFIN credentials',
-                                  },
-                                ]}
-                              />
-                            </Tooltip>
-                          )}
-                        </Button>
+                        <>
+                          <Button
+                            ref={triggerRef}
+                            type="bare"
+                            onClick={() => setSimplefinMenuOpen(true)}
+                            aria-label="Menu"
+                          >
+                            <SvgDotsHorizontalTriple
+                              width={15}
+                              height={15}
+                              style={{ transform: 'rotateZ(90deg)' }}
+                            />
+                          </Button>
+                          <Popover
+                            triggerRef={triggerRef}
+                            isOpen={menuSimplefinOpen}
+                            onOpenChange={() => setSimplefinMenuOpen(false)}
+                          >
+                            <Menu
+                              onMenuSelect={item => {
+                                if (item === 'reconfigure') {
+                                  onSimpleFinReset();
+                                }
+                              }}
+                              items={[
+                                {
+                                  name: 'reconfigure',
+                                  text: 'Reset SimpleFIN credentials',
+                                },
+                              ]}
+                            />
+                          </Popover>
+                        </>
                       )}
                     </View>
                     <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
