@@ -89,7 +89,7 @@ test.describe('Rules', () => {
         splitActions: [
           [
             {
-              field: 'a fixed percent',
+              field: 'a fixed percent of the remainder',
               value: '90',
             },
             {
@@ -120,7 +120,7 @@ test.describe('Rules', () => {
     });
 
     const transaction = accountPage.getNthTransaction(0);
-    await expect(transaction.payee).toHaveText('Ikea');
+    await expect(transaction.payee).toHaveText('Split');
     await expect(transaction.notes).toHaveText('food / entertainment');
     await expect(transaction.category).toHaveText('Split');
     await expect(transaction.debit).toHaveText('100.00');

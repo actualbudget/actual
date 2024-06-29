@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useDispatch } from 'react-redux';
 
+import { pushModal } from 'loot-core/client/actions';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/src/client/transfer';
 
@@ -18,43 +20,45 @@ export function SelectedTransactionsButton({
   onCreateRule,
   onSetTransfer,
   onScheduleAction,
-  pushModal,
   showMakeTransfer,
+  onMakeAsSplitTransaction,
+  onMakeAsNonSplitTransactions,
 }) {
+  const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
+  const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
 
   const types = useMemo(() => {
-    const items = [...selectedItems];
+    const items = selectedIds;
     return {
       preview: !!items.find(id => isPreviewId(id)),
       trans: !!items.find(id => !isPreviewId(id)),
     };
-  }, [selectedItems]);
+  }, [selectedIds]);
 
   const ambiguousDuplication = useMemo(() => {
-    const transactions = [...selectedItems].map(id => getTransaction(id));
+    const transactions = selectedIds.map(id => getTransaction(id));
 
     return transactions.some(t => t && t.is_child);
-  }, [selectedItems]);
+  }, [selectedIds, getTransaction]);
 
   const linked = useMemo(() => {
     return (
       !types.preview &&
-      [...selectedItems].every(id => {
+      selectedIds.every(id => {
         const t = getTransaction(id);
         return t && t.schedule;
       })
     );
-  }, [types.preview, selectedItems, getTransaction]);
+  }, [types.preview, selectedIds, getTransaction]);
 
   const canBeTransfer = useMemo(() => {
     // only two selected
-    if (selectedItems.size !== 2) {
+    if (selectedIds.length !== 2) {
       return false;
     }
-    const transactions = [...selectedItems];
-    const fromTrans = getTransaction(transactions[0]);
-    const toTrans = getTransaction(transactions[1]);
+    const fromTrans = getTransaction(selectedIds[0]);
+    const toTrans = getTransaction(selectedIds[1]);
 
     // previously selected transactions aren't always present in current transaction list
     if (!fromTrans || !toTrans) {
@@ -62,39 +66,83 @@ export function SelectedTransactionsButton({
     }
 
     return validForTransfer(fromTrans, toTrans);
-  }, [selectedItems, getTransaction]);
+  }, [selectedIds, getTransaction]);
+
+  const canMakeAsSplitTransaction = useMemo(() => {
+    if (selectedIds.length <= 1 || types.preview) {
+      return false;
+    }
+
+    const transactions = selectedIds.map(id => getTransaction(id));
+    const [firstTransaction] = transactions;
+
+    const areAllSameDateAndAccount = transactions.every(
+      t =>
+        t &&
+        t.date === firstTransaction.date &&
+        t.account === firstTransaction.account,
+    );
+    const areNoSplitTransactions = transactions.every(
+      t => t && !t.is_parent && !t.is_child,
+    );
+    const areNoReconciledTransactions = transactions.every(
+      t => t && !t.reconciled,
+    );
+
+    return (
+      areAllSameDateAndAccount &&
+      areNoSplitTransactions &&
+      areNoReconciledTransactions
+    );
+  }, [selectedIds, types, getTransaction]);
+
+  const canUnsplitTransactions = useMemo(() => {
+    if (selectedIds.length === 0 || types.preview) {
+      return false;
+    }
+
+    const transactions = selectedIds.map(id => getTransaction(id));
+
+    const areNoReconciledTransactions = transactions.every(
+      t => t && !t.reconciled,
+    );
+    const areAllSplitTransactions = transactions.every(
+      t => t && (t.is_parent || t.is_child),
+    );
+    return areNoReconciledTransactions && areAllSplitTransactions;
+  }, [selectedIds, types, getTransaction]);
 
   const hotKeyOptions = {
     enabled: types.trans,
     scopes: ['app'],
   };
-  useHotkeys('f', () => onShow([...selectedItems]), hotKeyOptions, [
+  useHotkeys('f', () => onShow(selectedIds), hotKeyOptions, [
     onShow,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('d', () => onDelete([...selectedItems]), hotKeyOptions, [
+  useHotkeys('d', () => onDelete(selectedIds), hotKeyOptions, [
     onDelete,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('a', () => onEdit('account', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('a', () => onEdit('account', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('p', () => onEdit('payee', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('p', () => onEdit('payee', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('n', () => onEdit('notes', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('n', () => onEdit('notes', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('c', () => onEdit('category', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('c', () => onEdit('category', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
-  useHotkeys('l', () => onEdit('cleared', [...selectedItems]), hotKeyOptions, [
+  useHotkeys('l', () => onEdit('cleared', selectedIds), hotKeyOptions, [
     onEdit,
-    selectedItems,
+    selectedIds,
   ]);
 
   return (
@@ -120,7 +168,7 @@ export function SelectedTransactionsButton({
                     {
                       name: 'view-schedule',
                       text: 'View schedule',
-                      disabled: selectedItems.size > 1,
+                      disabled: selectedIds.length > 1,
                     },
                     { name: 'unlink-schedule', text: 'Unlink schedule' },
                   ]
@@ -143,6 +191,24 @@ export function SelectedTransactionsButton({
                     },
                   ]
                 : []),
+              ...(canMakeAsSplitTransaction
+                ? [
+                    {
+                      name: 'make-as-split-transaction',
+                      text: 'Make as split transaction',
+                    },
+                  ]
+                : []),
+              ...(canUnsplitTransactions
+                ? [
+                    {
+                      name: 'unsplit-transactions',
+                      text:
+                        'Unsplit transaction' +
+                        (selectedIds.length > 1 ? 's' : ''),
+                    },
+                  ]
+                : []),
               Menu.line,
               { type: Menu.label, name: 'Edit field' },
               { name: 'date', text: 'Date' },
@@ -157,20 +223,26 @@ export function SelectedTransactionsButton({
       onSelect={name => {
         switch (name) {
           case 'show':
-            onShow([...selectedItems]);
+            onShow(selectedIds);
             break;
           case 'duplicate':
-            onDuplicate([...selectedItems]);
+            onDuplicate(selectedIds);
             break;
           case 'delete':
-            onDelete([...selectedItems]);
+            onDelete(selectedIds);
+            break;
+          case 'make-as-split-transaction':
+            onMakeAsSplitTransaction(selectedIds);
+            break;
+          case 'unsplit-transactions':
+            onMakeAsNonSplitTransactions(selectedIds);
             break;
           case 'post-transaction':
           case 'skip':
-            onScheduleAction(name, selectedItems);
+            onScheduleAction(name, selectedIds);
             break;
           case 'view-schedule':
-            const firstId = [...selectedItems][0];
+            const firstId = selectedIds[0];
             let scheduleId;
             if (isPreviewId(firstId)) {
               const parts = firstId.split('/');
@@ -181,27 +253,28 @@ export function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              pushModal('schedule-edit', { id: scheduleId });
+              dispatch(pushModal('schedule-edit', { id: scheduleId }));
             }
             break;
           case 'link-schedule':
-            pushModal('schedule-link', {
-              transactionIds: [...selectedItems],
-              getTransaction,
-              pushModal,
-            });
+            dispatch(
+              pushModal('schedule-link', {
+                transactionIds: selectedIds,
+                getTransaction,
+              }),
+            );
             break;
           case 'unlink-schedule':
-            onUnlink([...selectedItems]);
+            onUnlink(selectedIds);
             break;
           case 'create-rule':
-            onCreateRule([...selectedItems]);
+            onCreateRule(selectedIds);
             break;
           case 'set-transfer':
-            onSetTransfer([...selectedItems]);
+            onSetTransfer(selectedIds);
             break;
           default:
-            onEdit(name, [...selectedItems]);
+            onEdit(name, selectedIds);
         }
       }}
     />
