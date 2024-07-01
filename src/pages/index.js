@@ -139,9 +139,9 @@ export default function Hello() {
           srcDark="/img/homepage/actual-report-cash-flow-dark.png"
         >
           Intuitive reports give you a quick way to learn about your finances.
-          By default, we include net worth and cash flow reports, but soon
-          you’ll be able to create any report that you like. You’ll even be able
-          to download custom reports from others.
+          By default, we include net worth and cash flow reports.  Actual also
+          includes a powerful custom report engine to design your own reports 
+          to fit your needs.
         </BigFeature>
       </div>
 
@@ -153,7 +153,7 @@ export default function Hello() {
         />
 
         <h2 class={`${classes.featuresSectionHeader} serif-header`}>
-          So many features
+          So many features!
         </h2>
         <div class={`${classes.smallFeaturesGrid} ${classes.container}`}>
           <SmallFeature
@@ -179,7 +179,7 @@ export default function Hello() {
             learnMore="/docs/advanced/bank-sync"
           >
             Actual has built in support for bank syncing using goCardless 
-            (EU/UK) and SimpleFIN (US/Canada).  Community importers are also available for Plaid.
+            (EU/UK) and SimpleFIN (US/Canada).
           </SmallFeature>
           <SmallFeature
             title="Envelope Style Budgeting"
@@ -204,7 +204,7 @@ export default function Hello() {
             learnMore="/docs/transactions/importing"
           >
             Import transactions from the most popular financial files: QIF, OFX,
-            QFX, and CSV.
+            QFX, CAMT.053 and CSV.
           </SmallFeature>
           <SmallFeature
             title="Undo & redo"

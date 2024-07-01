@@ -1,10 +1,8 @@
 # Reports
 
-Currently Actual comes with two reports: **net worth** and **cash flow**. These are valuable reports, but in the future many more report types will be available.
+Currently Actual comes with two built in reports: **net worth** and **cash flow**.
 
 ![](/static/img/reports/reports-dashboard.png)
-
-There will also be a way to create custom reports. Subscribe to [the feature request for custom reports](https://github.com/actualbudget/actual/issues/730) to receive updates.
 
 ## Net worth
 

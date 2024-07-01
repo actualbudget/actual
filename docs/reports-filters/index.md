@@ -4,8 +4,8 @@ Actual Budget gives you powerful tools to see not only your current financial as
 
 ## Reports
 
-The reports dashboard gives you a graphical representation of your net worth and cash flow on a monthly, yearly, and daily basis. We plan to add more features to the reports page as time goes on, so be sure to check in with each update to see what is new.
+The reports dashboard gives you a graphical representation of your net worth and cash flow on a monthly, yearly, and daily basis. There is also the option to create your own custom reports using Actual's powerful report engine to view your data in the ways that are most useful to you.
 
 ## Filters
 
-Filtering gives you the ability to pull transactions based on a variety of criteria that you set. These can be one-off queries or you can save these filters for future use. You are also able to download the transactions as a CSV file to import into other analysis software.
+Filtering gives you the ability to pull transactions based on a variety of criteria that you set. These can be one-off queries or you can save these filters for future use.  These filters can also be used to fine tune the data used in reports.

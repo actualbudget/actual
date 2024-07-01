@@ -172,7 +172,11 @@ const sidebars = {
             type: 'doc',
             id: 'reports-filters/index',
           },
-          items: ['reports-filters/reports', 'reports-filters/filters'],
+          items: [
+            'reports-filters/filters',
+            'reports-filters/reports', 
+            'reports-filters/custom-reports'
+          ],
         },
         {
           type: 'category',
@@ -226,7 +230,6 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/report-budget',
             'experimental/simplefin-sync',
-            'experimental/custom-reports',
           ],
         },
       ],

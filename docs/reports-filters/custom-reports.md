@@ -1,19 +1,12 @@
 # Custom Reports
 
-:::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
-:::
-
-:::warning
-All functionality described here may not be available in the latest stable release. Use the `edge` images for the latest implementation.
-:::
-
-Custom reports allow analyzing transaction data by using charts or a data table with summary statistics. There are four types of reports available: 
+Custom reports allow analyzing transaction data by using charts or a data table with summary statistics. The following types of reports available: 
 
 1. Table View
 2. Bar Graph
-3. Area Graph
-4. Donut Graph
+3. Line Graph
+4. Area Graph
+5. Donut Graph
 
 ## Left Menu
 
@@ -48,7 +41,7 @@ Greyed out options in dropdown menus are not yet available for the chosen report
 
 ## Center Menu
 
-Icons in the first group of the center menu are used to select the displayed report, the second group is used to show graph legends, summary and labels. The funnel icon can be used to [filter transactions](../reports-filters/filters.md). Finally, the menu on the right-hand side is used to Save a Custom Report to the Reports page. 
+Icons in the first group of the center menu are used to select the displayed report, the second group is used to show graph legends, summary and labels. The funnel icon can be used to [filter transactions](./filters.md). Finally, the menu on the right-hand side is used to Save a Custom Report to the Reports page. 
 
 ![](/img/reports/cr-center-menu.png)
 
