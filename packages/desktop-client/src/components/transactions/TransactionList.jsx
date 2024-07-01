@@ -90,9 +90,9 @@ export function TransactionList({
   onCreatePayee,
   onApplyFilter,
 }) {
+  const dispatch = useDispatch();
   const transactionsLatest = useRef();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -158,7 +158,7 @@ export function TransactionList({
   }, []);
 
   const onManagePayees = useCallback(id => {
-    navigate('/payees', { selectedPayee: id });
+    navigate('/payees', { state: { selectedPayee: id } });
   });
 
   const onNavigateToTransferAccount = useCallback(accountId => {
