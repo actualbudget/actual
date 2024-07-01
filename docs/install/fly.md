@@ -8,16 +8,7 @@ In order to deploy Actual to Fly.io, you’ll need to use their command line int
 
 ### Creating a Fly.io Account
 
-:::note
-Fly's pricing structure has changed as of Jan 25, 2024.
-New accounts are now gifted $5 credit. That $5 credit is only spent when exceeding the [free allowances](https://fly.io/docs/about/pricing/#free-allowances) for apps.
-This is called the 'Hobby Trial' plan.
-
-If you create an *additional* organisation from an existing account on a 'Hobby Trial' plan, that organisation will directly start on the 'Hobby' plan, which costs $5 per month as a base rate + usage outside of the free allowance limits.
-This has been confirmed by [Fly staff via their forum](https://community.fly.io/t/i-got-charged-today-for-the-hobby-plan-and-im-confused-as-to-why-cause-fly-io-didnt-send-any-emails/17969/8?u=tjex).
-
-You can therefore still sign up and host your Actual Budget instance with Fly for free, as the usage will not exceed the free allowances.
-:::
+Fly.io has a "pay as you go" plan for new users with no monthly fee, with actual usage billed monthly. Paid plans start at $5/month and include a limited amount of free compute. See [Pricing Details](https://fly.io/docs/about/pricing/) for more information.
 
 To begin, you’ll need to sign up for an account. Go to [fly.io](https://fly.io) and click “Get Started,” then fill in
 the form. Note that Fly requires that credit card details for sign up. See [their docs on how they use credit cards](https://fly.io/docs/about/credit-cards/) for more information.
@@ -201,9 +192,7 @@ fly deploy
 
 - **Q.** _I have deployed actual to Fly.io but I am being charged, why is this?_
 
-  **A.** While we wouldn’t know for certain without seeing your configuration, it is likely that during
-  deployment you created a Postgres database. Actual doesn’t need this so you can just delete it and
-  charges should then stop. If you're unsure, please [reach out to us](/contact).
+  **A.** Pay as you go plans are billed for all usage monthly.
 
 - **Q.** _How can I try out a beta/unstable version of Actual?_
 
