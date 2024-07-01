@@ -7,12 +7,18 @@ import APIList from './APIList';
 
 This is the documentation of all available API methods. The API has not been released yet, but it will be available in the next update. This section is a work in progress.
 
+<APIList title="Budgets" sections={[
+"getBudgetMonths",
+"getBudgetMonth",
+"setBudgetAmount",
+"setBudgetCarryover"
+]} />
+
 <APIList title="Transactions" sections={[
 "Transaction",
 "addTransactions",
 "importTransactions",
 "getTransactions",
-"filterTransactions",
 "updateTransaction",
 "deleteTransaction"
 ]} />
@@ -63,7 +69,16 @@ This is the documentation of all available API methods. The API has not been rel
 ]} />
 
 <APIList title="Misc" sections={[
-"runBankSync"
+"initConfig",
+"init",
+"shutdown",
+"sync",
+"runBankSync",
+"runImport",
+"loadBudget",
+"downloadBudget",
+"batchBudgetUpdates",
+"runQuery"
 ]} />
 
 ## Types of methods
@@ -208,12 +223,6 @@ await importTransactions(accountId, [
 // (it doesn't matter that August 31st doesn't exist).
 
 await getTransactions(accountId, '2019-08-01', '2019-08-31');
-```
-
-```js
-// Find transactions with the amount of 3.91. Currently this
-// assumes you are using a currency with two decimal places.
-await filterTransactions(accountId, '3.91');
 ```
 
 ```js
@@ -513,10 +522,62 @@ Delete a rule.
 
 ## Misc
 
+#### InitConfig
+
+<StructType fields={objects.initConfig} />
+
 #### Methods
+
+#### `init`
+
+<Method name="init" args={[{ properties: [{ name: 'config', type: 'InitConfig' }] }]} returns="Promise<void>" />
+
+Initializes the API by connecting to an Actual Budget server.
+
+#### `shutdown`
+
+<Method name="shutdown" args={[]} returns="Promise<void>" />
+
+Shuts down the API. This will close any open budget and clean up any resources.
+
+#### `sync`
+
+<Method name="sync" args={[]} returns="Promise<void>" />
+
+Synchronizes the locally cached budget files with the server's copy.
 
 #### `runBankSync`
 
 <Method name="runBankSync" args={[{ properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<void>" />
 
 Run the 3rd party (gocardless, simplefin) bank sync operation. This will download the transactions and insert them into the ledger.
+
+#### `runImport`
+
+<Method name="runImport" args={[{ properties: [{ name: 'budgetName', type: 'string' }, { name: 'func', type: 'func' }] }]} returns="Promise<void>" />
+
+Creates a new budget file with the given name, and then runs the custom importer function to populate it with data.
+
+#### `loadBudget`
+
+<Method name="loadBudget" args={[{ properties: [{ name: 'syncId', type: 'string' }] }]} returns="Promise<void>" />
+
+Load a locally cached budget file.
+
+#### `downloadBudget`
+
+<Method name="downloadBudget" args={[{ properties: [{ name: 'syncId', type: 'string' }, { name: 'password', type: 'string?' }] }]} returns="Promise<void>" />
+
+Load a budget file. If the file exists locally, it will load from there. Otherwise, it will download the file from the server.
+
+#### `batchBudgetUpdates`
+
+<Method name="batchBudgetUpdates" args={[{ properties: [{ name: 'func', type: 'func' }] }]} returns="Promise<void>" />
+
+Performs a batch of budget updates. This is useful for making multiple changes to the budget in a single call to the server.
+
+#### `runQuery`
+
+<Method name="runQuery" args={[{ properties: [{ name: 'query', type: 'ActualQL' }] }]} returns="Promise<unknown>" />
+
+Allows running any arbitrary ActualQL query on the open budget.

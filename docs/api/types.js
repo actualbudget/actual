@@ -37,6 +37,36 @@ export let types = {
 };
 
 export let objects = {
+  initConfig: [
+    {
+      name: 'serverURL',
+      type: 'string',
+      description: (
+        <span>
+          The URL of your Actual Budget server.
+        </span>
+      ),
+    },
+    {
+      name: 'password',
+      type: 'string',
+      description: (
+        <span>
+          The password of your Actual Budget server.
+        </span>
+      ),
+    },
+    {
+      name: 'dataDir',
+      type: 'string',
+      description: (
+        <span>
+          The directory to store locally cached budget files.
+        </span>
+      ),
+    },
+  ],
+
   transaction: [
     {
       name: 'id',

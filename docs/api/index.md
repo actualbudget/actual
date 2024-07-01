@@ -72,7 +72,7 @@ Note that this is not about importing transactions. If all you want to do is add
 
 The API has a special mode for bulk importing data. In this mode, a new file is always created (you can't bulk import into an existing file), and it will run much faster than if you did it normally.
 
-To write a custom importer, use `runImport` instead of `runWithBudget`. `runImport` takes the _name_ of the file you want to create and runs a function. Here is an example importer:
+To write a custom importer, use `runImport`. It takes the _name_ of the file you want to create and runs a function. Here is an example importer:
 
 ```js
 let api = require('@actual-app/api');
