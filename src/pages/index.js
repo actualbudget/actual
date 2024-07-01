@@ -174,22 +174,6 @@ export default function Hello() {
             any number of devices.
           </SmallFeature>
           <SmallFeature
-            title="Payees"
-            icon={icons.shopCashierWoman}
-            learnMore="/docs/transactions/payees"
-          >
-            Manage payees quickly. Merge them, set up custom rules for how they
-            are matched, and use default categories to automatically categorize
-            transactions.
-          </SmallFeature>
-          <SmallFeature
-            title="Split transactions"
-            icon={icons.diagramSplitVertical}
-          >
-            Use split transactions to separate a single expense into multiple
-            categories. An inline editor makes this seamless.
-          </SmallFeature>
-          <SmallFeature
             title="Bank Sync"
             icon={icons.bank}
             learnMore="/docs/advanced/bank-sync"
@@ -198,13 +182,13 @@ export default function Hello() {
             (EU/UK) and SimpleFIN (US/Canada).  Community importers are also available for Plaid.
           </SmallFeature>
           <SmallFeature
-            title="Budgeting"
+            title="Envelope Style Budgeting"
             icon={icons.wallet}
             learnMore="/docs/budgeting/"
           >
-            Track your spending with budgets. You can only budget cash you have
-            on hand, which means your budget stays realistic and you don't make
-            numbers up.
+            Use the power of envelope budgeting to get on top of your finances.
+            You can only budget cash you have on hand, which means your budget
+            stays realistic and you don't make numbers up.
           </SmallFeature>
           <SmallFeature
             title="Transfers"
@@ -220,8 +204,7 @@ export default function Hello() {
             learnMore="/docs/transactions/importing"
           >
             Import transactions from the most popular financial files: QIF, OFX,
-            QFX, and CSV. Soon we will launch bank syncing to automatically
-            download transactions.
+            QFX, and CSV.
           </SmallFeature>
           <SmallFeature
             title="Undo & redo"
