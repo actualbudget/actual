@@ -5,8 +5,8 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
 import { Input } from '../common/Input';
+import { Link } from '../common/Link';
 import { Modal, ModalButtons } from '../common/Modal';
 import type { ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
@@ -51,12 +51,13 @@ export const SimpleFinInitialise = ({
           In order to enable bank-sync via SimpleFIN (only for North American
           banks) you will need to create a token. This can be done by creating
           an account with{' '}
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://beta-bridge.simplefin.org/"
             linkColor="purple"
           >
             SimpleFIN
-          </ExternalLink>
+          </Link>
           .
         </Text>
 
@@ -66,8 +67,10 @@ export const SimpleFinInitialise = ({
             id="token-field"
             type="password"
             value={token}
-            onUpdate={setToken}
-            onChange={() => setIsValid(true)}
+            onChangeValue={value => {
+              setToken(value);
+              setIsValid(true);
+            }}
           />
         </FormField>
 

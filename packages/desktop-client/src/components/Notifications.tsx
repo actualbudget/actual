@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/src/client/state-types';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
@@ -15,8 +16,7 @@ import { SvgDelete } from '../icons/v0';
 import { styles, theme, type CSSProperties } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button';
-import { ExternalLink } from './common/ExternalLink';
-import { LinkButton } from './common/LinkButton';
+import { Link } from './common/Link';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
 import { View } from './common/View';
@@ -42,7 +42,8 @@ function compileMessage(
                 if (href[0] === '#') {
                   const actionName = href.slice(1);
                   return (
-                    <LinkButton
+                    <Link
+                      variant="text"
                       key={idx}
                       onClick={async e => {
                         e.preventDefault();
@@ -54,14 +55,19 @@ function compileMessage(
                       }}
                     >
                       {text}
-                    </LinkButton>
+                    </Link>
                   );
                 }
 
                 return (
-                  <ExternalLink linkColor="purple" key={idx} to={match[2]}>
+                  <Link
+                    variant="external"
+                    linkColor="purple"
+                    key={idx}
+                    to={match[2]}
+                  >
                     {match[1]}
-                  </ExternalLink>
+                  </Link>
                 );
               }
               return <Text key={idx}>{part}</Text>;
@@ -89,6 +95,7 @@ function Notification({
     sticky,
     internal,
     button,
+    timeout,
   } = notification;
 
   const [loading, setLoading] = useState(false);
@@ -100,7 +107,7 @@ function Notification({
     }
 
     if (!sticky) {
-      setTimeout(onRemove, 6500);
+      setTimeout(onRemove, timeout || 6500);
     }
   }, []);
 
@@ -238,7 +245,9 @@ function Notification({
 
 export function Notifications({ style }: { style?: CSSProperties }) {
   const { removeNotification } = useActions();
-  const notifications = useSelector(state => state.notifications.notifications);
+  const notifications = useSelector(
+    (state: State) => state.notifications.notifications,
+  );
   return (
     <View
       style={{

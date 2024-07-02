@@ -5,7 +5,7 @@ export class MobileAccountPage {
     this.page = page;
 
     this.heading = page.getByRole('heading');
-    this.balance = page.getByTestId('account-balance');
+    this.balance = page.getByTestId('transactions-balance');
     this.noTransactionsFoundError = page.getByText('No transactions');
     this.searchBox = page.getByPlaceholder(/^Search/);
     this.transactionList = page.getByLabel('transaction list');

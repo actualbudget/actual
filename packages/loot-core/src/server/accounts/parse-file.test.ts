@@ -84,6 +84,18 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   }, 45000);
 
+  test('ofx import works with multiple decimals in amount', async () => {
+    const ofxFile = __dirname + '/../../mocks/files/data-multi-decimal.ofx';
+
+    const { transactions } = (await parseFile(ofxFile)) as {
+      transactions: { amount: number }[];
+    };
+
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0].amount).toBe(-30.0);
+    expect(transactions[1].amount).toBe(-3.77);
+  }, 45000);
+
   test('ofx import works (credit card)', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
@@ -138,6 +150,31 @@ describe('File import', () => {
       'one',
       __dirname + '/../../mocks/files/8859-1.qfx',
       'yyyy-MM-dd',
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
+
+  test('handles html escaped plaintext', async () => {
+    prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../mocks/files/html-vals.qfx',
+      'yyyy-MM-dd',
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
+
+  test('CAMT.053 import works', async () => {
+    prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../mocks/files/camt/camt.053.xml',
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();

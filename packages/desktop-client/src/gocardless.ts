@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { pushModal as pushModalAction } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type GoCardlessToken } from 'loot-core/src/types/models';
@@ -19,12 +18,12 @@ function _authorize(
       const resp = await send('gocardless-create-web-token', {
         upgradingAccountId,
         institutionId,
-        accessValidForDays: 30,
+        accessValidForDays: 90,
       });
 
       if ('error' in resp) return resp;
       const { link, requisitionId } = resp;
-      window.Actual.openURLInBrowser(link);
+      window.Actual?.openURLInBrowser(link);
 
       return send('gocardless-poll-web-token', {
         upgradingAccountId,

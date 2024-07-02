@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
@@ -11,6 +10,8 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocalPrefs } from '../../hooks/useLocalPrefs';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
 import { Input } from '../common/Input';
@@ -247,14 +248,19 @@ function applyFieldMappings(transaction, mappings) {
   return result;
 }
 
-function parseAmount(amount, mapper) {
+function parseAmount(amount, mapper, multiplier) {
   if (amount == null) {
     return null;
   }
+
   const parsed =
     typeof amount === 'string' ? looselyParseAmount(amount) : amount;
-  const value = mapper(parsed);
-  return value;
+
+  if (parsed === null) {
+    return null;
+  }
+
+  return mapper(parsed) * multiplier;
 }
 
 function parseAmountFields(
@@ -271,10 +277,10 @@ function parseAmountFields(
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    const outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * multiplier;
+    const outflow = parseAmount(trans.outflow, n => -Math.abs(n), multiplier);
     const inflow = outflow
       ? 0
-      : parseAmount(trans.inflow, n => Math.abs(n)) * multiplier;
+      : parseAmount(trans.inflow, n => Math.abs(n), multiplier);
 
     return {
       amount: outflow || inflow,
@@ -284,17 +290,21 @@ function parseAmountFields(
   }
   if (inOutMode) {
     return {
-      amount:
-        parseAmount(trans.amount, n =>
-          trans.inOut === outValue ? Math.abs(n) * -1 : Math.abs(n),
-        ) * multiplier,
+      amount: parseAmount(
+        trans.amount,
+        n => (trans.inOut === outValue ? Math.abs(n) * -1 : Math.abs(n)),
+        multiplier,
+      ),
       outflow: null,
       inflow: null,
     };
   }
   return {
-    amount:
-      parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * multiplier,
+    amount: parseAmount(
+      trans.amount,
+      n => (flipAmount ? n * -1 : n),
+      multiplier,
+    ),
     outflow: null,
     inflow: null,
   };
@@ -335,7 +345,7 @@ function Transaction({
     [rawTransaction, fieldMappings],
   );
 
-  let { amount, outflow, inflow } = parseAmountFields(
+  const { amount, outflow, inflow } = parseAmountFields(
     transaction,
     splitMode,
     inOutMode,
@@ -343,9 +353,6 @@ function Transaction({
     flipAmount,
     multiplierAmount,
   );
-  amount = amountToCurrency(amount);
-  outflow = amountToCurrency(outflow);
-  inflow = amountToCurrency(inflow);
 
   return (
     <Row
@@ -387,17 +394,37 @@ function Transaction({
         <>
           <Field
             width={90}
-            contentStyle={{ textAlign: 'right', ...styles.tnum }}
-            title={outflow}
+            contentStyle={{
+              textAlign: 'right',
+              ...styles.tnum,
+              ...(inflow === null && outflow === null
+                ? { color: theme.errorText }
+                : {}),
+            }}
+            title={
+              inflow === null && outflow === null
+                ? 'Invalid: unable to parse the value'
+                : amountToCurrency(outflow)
+            }
           >
-            {outflow}
+            {amountToCurrency(outflow)}
           </Field>
           <Field
             width={90}
-            contentStyle={{ textAlign: 'right', ...styles.tnum }}
-            title={inflow}
+            contentStyle={{
+              textAlign: 'right',
+              ...styles.tnum,
+              ...(inflow === null && outflow === null
+                ? { color: theme.errorText }
+                : {}),
+            }}
+            title={
+              inflow === null && outflow === null
+                ? 'Invalid: unable to parse the value'
+                : amountToCurrency(inflow)
+            }
           >
-            {inflow}
+            {amountToCurrency(inflow)}
           </Field>
         </>
       ) : (
@@ -413,10 +440,18 @@ function Transaction({
           )}
           <Field
             width={90}
-            contentStyle={{ textAlign: 'right', ...styles.tnum }}
-            title={amount}
+            contentStyle={{
+              textAlign: 'right',
+              ...styles.tnum,
+              ...(amount === null ? { color: theme.errorText } : {}),
+            }}
+            title={
+              amount === null
+                ? `Invalid: unable to parse the value (${transaction.amount})`
+                : amountToCurrency(amount)
+            }
           >
-            {amount}
+            {amountToCurrency(amount)}
           </Field>
         </>
       )}
@@ -543,7 +578,7 @@ function MultiplierOption({
         style={{ display: multiplierEnabled ? 'inherit' : 'none' }}
         value={multiplierAmount}
         placeholder="Multiplier"
-        onUpdate={onChangeAmount}
+        onChangeValue={onChangeAmount}
       />
     </View>
   );
@@ -572,7 +607,7 @@ function InOutOption({
         <Input
           type="text"
           value={outValue}
-          onUpdate={onChangeText}
+          onChangeValue={onChangeText}
           placeholder="Value for out rows, i.e. Credit"
         />
       )}
@@ -703,10 +738,8 @@ function FieldMappings({
 }
 
 export function ImportTransactions({ modalProps, options }) {
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
-  const prefs = useSelector(state => state.prefs.local);
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const prefs = useLocalPrefs();
   const { parseTransactions, importTransactions, getPayees, savePrefs } =
     useActions();
 
@@ -722,6 +755,7 @@ export function ImportTransactions({ modalProps, options }) {
   const [outValue, setOutValue] = useState('');
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
+  const [reconcile, setReconcile] = useState(true);
   const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -850,11 +884,11 @@ export function ImportTransactions({ modalProps, options }) {
   }
 
   async function onNewFile() {
-    const res = await window.Actual.openFileDialog({
+    const res = await window.Actual?.openFileDialog({
       filters: [
         {
           name: 'Financial Files',
-          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
         },
       ],
     });
@@ -882,9 +916,10 @@ export function ImportTransactions({ modalProps, options }) {
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      const date = isOfxFile(filetype)
-        ? trans.date
-        : parseDate(trans.date, parseDateFormat);
+      const date =
+        isOfxFile(filetype) || isCamtFile(filetype)
+          ? trans.date
+          : parseDate(trans.date, parseDateFormat);
       if (date == null) {
         errorMessage = `Unable to parse date ${
           trans.date || '(empty)'
@@ -906,9 +941,7 @@ export function ImportTransactions({ modalProps, options }) {
       }
 
       const category_id = parseCategoryFields(trans, categories.list);
-      if (category_id != null) {
-        trans.category = category_id;
-      }
+      trans.category = category_id;
 
       const { inflow, outflow, inOut, ...finalTransaction } = trans;
       finalTransactions.push({
@@ -925,7 +958,7 @@ export function ImportTransactions({ modalProps, options }) {
       return;
     }
 
-    if (!isOfxFile(filetype)) {
+    if (!isOfxFile(filetype) && !isCamtFile(filetype)) {
       const key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
     }
@@ -947,7 +980,11 @@ export function ImportTransactions({ modalProps, options }) {
       savePrefs({ [`flip-amount-${accountId}-${filetype}`]: flipAmount });
     }
 
-    const didChange = await importTransactions(accountId, finalTransactions);
+    const didChange = await importTransactions(
+      accountId,
+      finalTransactions,
+      reconcile,
+    );
     if (didChange) {
       await getPayees();
     }
@@ -1088,6 +1125,17 @@ export function ImportTransactions({ modalProps, options }) {
           Use Memo as a fallback for empty Payees
         </CheckboxOption>
       )}
+      {(isOfxFile(filetype) || isCamtFile(filetype)) && (
+        <CheckboxOption
+          id="form_dont_reconcile"
+          checked={reconcile}
+          onChange={() => {
+            setReconcile(state => !state);
+          }}
+        >
+          Reconcile transactions
+        </CheckboxOption>
+      )}
 
       {/*Import Options */}
       {(filetype === 'qif' || filetype === 'csv') && (
@@ -1168,6 +1216,15 @@ export function ImportTransactions({ modalProps, options }) {
                   }}
                 >
                   Clear transactions on import
+                </CheckboxOption>
+                <CheckboxOption
+                  id="form_dont_reconcile"
+                  checked={reconcile}
+                  onChange={() => {
+                    setReconcile(state => !state);
+                  }}
+                >
+                  Reconcile transactions
                 </CheckboxOption>
               </View>
             )}
@@ -1253,4 +1310,8 @@ function getParseOptions(fileType, options = {}) {
 
 function isOfxFile(fileType) {
   return fileType === 'ofx' || fileType === 'qfx';
+}
+
+function isCamtFile(fileType) {
+  return fileType === 'xml';
 }

@@ -1,47 +1,51 @@
 // @ts-strict-ignore
 import { useCallback, useMemo, useState } from 'react';
 
-export function useFilters<T>(initialFilters: T[] = []) {
-  const [filters, setFilters] = useState<T[]>(initialFilters);
-  const [conditionsOp, setConditionsOp] = useState('and');
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+
+export function useFilters<T extends RuleConditionEntity>(
+  initialConditions: T[] = [],
+) {
+  const [conditions, setConditions] = useState<T[]>(initialConditions);
+  const [conditionsOp, setConditionsOp] = useState<'and' | 'or'>('and');
   const [saved, setSaved] = useState<T[]>(null);
 
   const onApply = useCallback(
-    newFilter => {
-      if (newFilter === null) {
-        setFilters([]);
+    conditionsOrSavedFilter => {
+      if (conditionsOrSavedFilter === null) {
+        setConditions([]);
         setSaved(null);
-      } else if (newFilter.conditions) {
-        setFilters([...newFilter.conditions]);
-        setConditionsOp(newFilter.conditionsOp);
-        setSaved(newFilter.id);
+      } else if (conditionsOrSavedFilter.conditions) {
+        setConditions([...conditionsOrSavedFilter.conditions]);
+        setConditionsOp(conditionsOrSavedFilter.conditionsOp);
+        setSaved(conditionsOrSavedFilter.id);
       } else {
-        setFilters(state => [...state, newFilter]);
+        setConditions(state => [...state, conditionsOrSavedFilter]);
         setSaved(null);
       }
     },
-    [setFilters],
+    [setConditions],
   );
 
   const onUpdate = useCallback(
     (oldFilter: T, updatedFilter: T) => {
-      setFilters(state =>
+      setConditions(state =>
         state.map(f => (f === oldFilter ? updatedFilter : f)),
       );
       setSaved(null);
     },
-    [setFilters],
+    [setConditions],
   );
 
   const onDelete = useCallback(
     (deletedFilter: T) => {
-      setFilters(state => state.filter(f => f !== deletedFilter));
+      setConditions(state => state.filter(f => f !== deletedFilter));
       setSaved(null);
     },
-    [setFilters],
+    [setConditions],
   );
 
-  const onCondOpChange = useCallback(
+  const onConditionsOpChange = useCallback(
     condOp => {
       setConditionsOp(condOp);
     },
@@ -50,14 +54,22 @@ export function useFilters<T>(initialFilters: T[] = []) {
 
   return useMemo(
     () => ({
-      filters,
+      conditions,
       saved,
       conditionsOp,
       onApply,
       onUpdate,
       onDelete,
-      onCondOpChange,
+      onConditionsOpChange,
     }),
-    [filters, saved, onApply, onUpdate, onDelete, onCondOpChange, conditionsOp],
+    [
+      conditions,
+      saved,
+      onApply,
+      onUpdate,
+      onDelete,
+      onConditionsOpChange,
+      conditionsOp,
+    ],
   );
 }

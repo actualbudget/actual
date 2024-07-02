@@ -1,160 +1,105 @@
-// @ts-strict-ignore
-import React, { useState, type ComponentPropsWithoutRef } from 'react';
-
-import { css } from 'glamor';
+import React, { useRef, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
-import { theme, styles, type CSSProperties } from '../../../../style';
-import { Block } from '../../../common/Block';
-import { HoverTarget } from '../../../common/HoverTarget';
-import { Menu } from '../../../common/Menu';
+import { type CSSProperties } from '../../../../style';
+import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
-import { PrivacyFilter } from '../../../PrivacyFilter';
-import { useFormat } from '../../../spreadsheet/useFormat';
-import { useSheetName } from '../../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../../spreadsheet/useSheetValue';
-import { Tooltip } from '../../../tooltips';
-import { HoldTooltip } from '../HoldTooltip';
-import { TransferTooltip } from '../TransferTooltip';
+import { CoverMenu } from '../CoverMenu';
+import { HoldMenu } from '../HoldMenu';
+import { TransferMenu } from '../TransferMenu';
 
-import { TotalsList } from './TotalsList';
+import { ToBudgetAmount } from './ToBudgetAmount';
+import { ToBudgetMenu } from './ToBudgetMenu';
 
 type ToBudgetProps = {
-  month: string | number;
-  onBudgetAction: (idx: string | number, action: string, arg?: unknown) => void;
-  prevMonthName?: string;
-  showTotalsTooltipOnHover?: boolean;
+  month: string;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
+  prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
-  menuTooltipProps?: ComponentPropsWithoutRef<typeof Tooltip>;
-  totalsTooltipProps?: ComponentPropsWithoutRef<typeof Tooltip>;
-  holdTooltipProps?: ComponentPropsWithoutRef<typeof HoldTooltip>;
-  transferTooltipProps?: ComponentPropsWithoutRef<typeof TransferTooltip>;
+  isCollapsed?: boolean;
 };
 export function ToBudget({
   month,
   prevMonthName,
-  showTotalsTooltipOnHover,
   onBudgetAction,
   style,
   amountStyle,
-  menuTooltipProps,
-  totalsTooltipProps,
-  holdTooltipProps,
-  transferTooltipProps,
+  isCollapsed = false,
 }: ToBudgetProps) {
-  const [menuOpen, setMenuOpen] = useState(null);
-  const sheetName = useSheetName(rolloverBudget.toBudget);
+  const [menuOpen, setMenuOpen] = useState<string | null>(null);
+  const triggerRef = useRef(null);
   const sheetValue = useSheetValue({
     name: rolloverBudget.toBudget,
     value: 0,
   });
-  const format = useFormat();
   const availableValue = parseInt(sheetValue);
-  const num = isNaN(availableValue) ? 0 : availableValue;
-  const isNegative = num < 0;
+  const isMenuOpen = Boolean(menuOpen);
 
   return (
-    <View style={{ alignItems: 'center', ...style }}>
-      <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
-      <View>
-        <HoverTarget
-          disabled={!showTotalsTooltipOnHover || menuOpen}
-          renderContent={() => (
-            <Tooltip position="bottom-center" {...totalsTooltipProps}>
-              <TotalsList
-                prevMonthName={prevMonthName}
-                style={{
-                  padding: 7,
-                }}
-              />
-            </Tooltip>
-          )}
-        >
-          <PrivacyFilter blurIntensity={7}>
-            <Block
-              onClick={() => setMenuOpen('actions')}
-              data-cellname={sheetName}
-              className={`${css([
-                styles.veryLargeText,
-                {
-                  fontWeight: 400,
-                  userSelect: 'none',
-                  cursor: 'pointer',
-                  color: isNegative ? theme.errorText : theme.pageTextPositive,
-                  marginBottom: -1,
-                  borderBottom: '1px solid transparent',
-                  ':hover': {
-                    borderColor: isNegative
-                      ? theme.errorBorder
-                      : theme.pageTextPositive,
-                  },
-                },
-                amountStyle,
-              ])}`}
-            >
-              {format(num, 'financial')}
-            </Block>
-          </PrivacyFilter>
-        </HoverTarget>
+    <>
+      <View ref={triggerRef}>
+        <ToBudgetAmount
+          onClick={() => setMenuOpen('actions')}
+          prevMonthName={prevMonthName}
+          style={style}
+          amountStyle={amountStyle}
+          isTotalsListTooltipDisabled={!isCollapsed || isMenuOpen}
+        />
+      </View>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom"
+        isOpen={isMenuOpen}
+        onOpenChange={() => setMenuOpen(null)}
+        style={{ width: 200 }}
+      >
         {menuOpen === 'actions' && (
-          <Tooltip
-            position="bottom-center"
-            width={200}
-            style={{ padding: 0 }}
-            onClose={() => setMenuOpen(null)}
-            {...menuTooltipProps}
-          >
-            <Menu
-              onMenuSelect={type => {
-                if (type === 'reset-buffer') {
-                  onBudgetAction(month, 'reset-hold');
-                  setMenuOpen(null);
-                } else {
-                  setMenuOpen(type);
-                }
-              }}
-              items={[
-                {
-                  name: 'transfer',
-                  text: 'Move to a category',
-                },
-                {
-                  name: 'buffer',
-                  text: 'Hold for next month',
-                },
-                {
-                  name: 'reset-buffer',
-                  text: 'Reset next month’s buffer',
-                },
-              ]}
-            />
-          </Tooltip>
+          <ToBudgetMenu
+            onTransfer={() => setMenuOpen('transfer')}
+            onCover={() => setMenuOpen('cover')}
+            onHoldBuffer={() => setMenuOpen('buffer')}
+            onResetHoldBuffer={() => {
+              onBudgetAction(month, 'reset-hold');
+              setMenuOpen(null);
+            }}
+          />
         )}
         {menuOpen === 'buffer' && (
-          <HoldTooltip
+          <HoldMenu
             onClose={() => setMenuOpen(null)}
             onSubmit={amount => {
               onBudgetAction(month, 'hold', { amount });
             }}
-            {...holdTooltipProps}
           />
         )}
         {menuOpen === 'transfer' && (
-          <TransferTooltip
+          <TransferMenu
             initialAmount={availableValue}
             onClose={() => setMenuOpen(null)}
-            onSubmit={(amount, category) => {
+            onSubmit={(amount, categoryId) => {
               onBudgetAction(month, 'transfer-available', {
                 amount,
-                category,
+                category: categoryId,
               });
             }}
-            {...transferTooltipProps}
           />
         )}
-      </View>
-    </View>
+        {menuOpen === 'cover' && (
+          <CoverMenu
+            showToBeBudgeted={false}
+            onClose={() => setMenuOpen(null)}
+            onSubmit={categoryId => {
+              onBudgetAction(month, 'cover-overbudgeted', {
+                category: categoryId,
+              });
+            }}
+          />
+        )}
+      </Popover>
+    </>
   );
 }

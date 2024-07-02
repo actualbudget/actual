@@ -4,7 +4,6 @@ import {
   type CustomReportData,
   type CustomReportEntity,
 } from '../../types/models';
-import { parseConditionsOrActions } from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import * as db from '../db';
 import { requiredFields } from '../models';
@@ -15,7 +14,7 @@ import { ReportsHandlers } from './types/handlers';
 
 const reportModel = {
   validate(report: CustomReportEntity, { update }: { update?: boolean } = {}) {
-    requiredFields('reports', report, ['conditionsOp'], update);
+    requiredFields('Report', report, ['conditionsOp'], update);
 
     if (!update || 'conditionsOp' in report) {
       if (!['and', 'or'].includes(report.conditionsOp)) {
@@ -28,68 +27,125 @@ const reportModel = {
 
   toJS(row: CustomReportData) {
     return {
-      ...row,
+      id: row.id,
+      name: row.name,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      isDateStatic: row.date_static === 1,
+      dateRange: row.date_range,
+      mode: row.mode,
+      groupBy: row.group_by,
+      interval: row.interval,
+      balanceType: row.balance_type,
+      showEmpty: row.show_empty === 1,
+      showOffBudget: row.show_offbudget === 1,
+      showHiddenCategories: row.show_hidden === 1,
+      showUncategorized: row.show_uncategorized === 1,
+      includeCurrentInterval: row.include_current === 1,
+      selectedCategories: row.selected_categories,
+      graphType: row.graph_type,
+      conditions: row.conditions,
       conditionsOp: row.conditions_op,
-      filters: parseConditionsOrActions(row.conditions),
+      data: row.metadata,
     };
   },
 
   fromJS(report: CustomReportEntity) {
-    const { filters, conditionsOp, ...row }: CustomReportData = report;
-    if (conditionsOp) {
-      row.conditions_op = conditionsOp;
-      row.conditions = filters;
-    }
-    return row;
+    return {
+      id: report.id,
+      name: report.name,
+      start_date: report.startDate,
+      end_date: report.endDate,
+      date_static: report.isDateStatic ? 1 : 0,
+      date_range: report.dateRange,
+      mode: report.mode,
+      group_by: report.groupBy,
+      interval: report.interval,
+      balance_type: report.balanceType,
+      show_empty: report.showEmpty ? 1 : 0,
+      show_offbudget: report.showOffBudget ? 1 : 0,
+      show_hidden: report.showHiddenCategories ? 1 : 0,
+      show_uncategorized: report.showUncategorized ? 1 : 0,
+      include_current: report.includeCurrentInterval ? 1 : 0,
+      selected_categories: report.selectedCategories,
+      graph_type: report.graphType,
+      conditions: report.conditions,
+      conditions_op: report.conditionsOp,
+      metadata: report.data,
+    };
   },
 };
 
 async function reportNameExists(
   name: string,
-  reportId: string | undefined,
+  reportId: string,
   newItem: boolean,
 ) {
-  if (!name) {
-    throw new Error('Report name is required');
-  }
-
-  if (!reportId) {
-    throw new Error('Report recall error');
-  }
-
   const idForName: { id: string } = await db.first(
-    'SELECT id from reports WHERE tombstone = 0 AND name = ?',
+    'SELECT id from custom_reports WHERE tombstone = 0 AND name = ?',
     [name],
   );
 
-  if (!newItem && idForName.id !== reportId) {
-    throw new Error('There is already a report named ' + name);
+  //no existing name found
+  if (idForName === null) {
+    return false;
   }
+
+  //for update/rename
+  if (!newItem) {
+    /*
+    -if the found item is the same as the existing item 
+    then no name change was made.
+    -if they are not the same then there is another
+    item with that name already.
+    */
+    return idForName.id !== reportId;
+  }
+
+  //default return: item was found but does not match current name
+  return true;
 }
 
 async function createReport(report: CustomReportEntity) {
   const reportId = uuidv4();
-  const item: CustomReportData = {
+  const item: CustomReportEntity = {
     ...report,
     id: reportId,
   };
+  if (!item.name) {
+    throw new Error('Report name is required');
+  }
 
-  reportNameExists(item.name, item.id, true);
+  const nameExists = await reportNameExists(item.name, item.id ?? '', true);
+  if (nameExists) {
+    throw new Error('There is already a filter named ' + item.name);
+  }
 
   // Create the report here based on the info
-  await db.insertWithSchema('reports', reportModel.fromJS(item));
+  await db.insertWithSchema('custom_reports', reportModel.fromJS(item));
 
   return reportId;
 }
 
 async function updateReport(item: CustomReportEntity) {
-  reportNameExists(item.name, item.id, false);
+  if (!item.name) {
+    throw new Error('Report name is required');
+  }
 
-  await db.insertWithSchema('reports', reportModel.fromJS(item));
+  if (!item.id) {
+    throw new Error('Report recall error');
+  }
+
+  const nameExists = await reportNameExists(item.name, item.id, false);
+  if (nameExists) {
+    throw new Error('There is already a filter named ' + item.name);
+  }
+
+  await db.insertWithSchema('custom_reports', reportModel.fromJS(item));
 }
 
 async function deleteReport(id: string) {
-  await db.delete_('reports', id);
+  await db.delete_('custom_reports', id);
 }
 
 // Expose functions to the client

@@ -7,6 +7,7 @@ import {
   makeClientId,
   Timestamp,
 } from '@actual-app/crdt';
+import { Database } from '@jlongster/sql.js';
 import LRU from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -37,8 +38,8 @@ import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
-let dbPath;
-let db;
+let dbPath: string | null = null;
+let db: Database | null = null;
 
 // Util
 
@@ -46,7 +47,7 @@ export function getDatabasePath() {
   return dbPath;
 }
 
-export async function openDatabase(id?) {
+export async function openDatabase(id?: string) {
   if (db) {
     await sqlite.closeDatabase(db);
   }
@@ -57,11 +58,6 @@ export async function openDatabase(id?) {
   // await execQuery('PRAGMA journal_mode = WAL');
 }
 
-export async function reopenDatabase() {
-  await sqlite.closeDatabase(db);
-  setDatabase(await sqlite.openDatabase(dbPath));
-}
-
 export async function closeDatabase() {
   if (db) {
     await sqlite.closeDatabase(db);
@@ -69,7 +65,7 @@ export async function closeDatabase() {
   }
 }
 
-export function setDatabase(db_) {
+export function setDatabase(db_: Database) {
   db = db_;
   resetQueryCache();
 }
@@ -115,14 +111,14 @@ export function runQuery(sql, params, fetchAll) {
   return result;
 }
 
-export function execQuery(sql) {
+export function execQuery(sql: string) {
   sqlite.execQuery(db, sql);
 }
 
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
 let _queryCache = new LRU({ max: 100 });
-export function cache(sql) {
+export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
     return cached;
@@ -304,6 +300,17 @@ export async function getCategoriesGrouped(): Promise<
 }
 
 export async function insertCategoryGroup(group) {
+  // Don't allow duplicate group
+  const existingGroup = await first(
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase()],
+  );
+  if (existingGroup) {
+    throw new Error(
+      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
+    );
+  }
+
   const lastGroup = await first(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
@@ -525,7 +532,7 @@ export function getPayees() {
     SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
     WHERE p.tombstone = 0 AND (p.transfer_acct IS NULL OR a.id IS NOT NULL)
-    ORDER BY p.transfer_acct IS NULL DESC, p.name COLLATE NOCASE
+    ORDER BY p.transfer_acct IS NULL DESC, p.name COLLATE NOCASE, a.offbudget, a.sort_order
   `);
 }
 

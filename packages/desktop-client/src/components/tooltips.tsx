@@ -3,11 +3,8 @@ import {
   Component,
   createContext,
   createRef,
-  useState,
   type RefObject,
   type ReactNode,
-  type MouseEventHandler,
-  type MouseEvent,
   type ContextType,
 } from 'react';
 import ReactDOM from 'react-dom';
@@ -18,24 +15,7 @@ import { type CSSProperties, styles, theme } from '../style';
 
 export const IntersectionBoundary = createContext<RefObject<HTMLElement>>(null);
 
-export function useTooltip() {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  return {
-    getOpenEvents: (events: { onClick?: MouseEventHandler } = {}) => ({
-      onClick: (e: MouseEvent) => {
-        e.stopPropagation();
-        events.onClick?.(e);
-        setIsOpen(true);
-      },
-    }),
-    isOpen,
-    open: () => setIsOpen(true),
-    close: () => setIsOpen(false),
-  };
-}
-
-export type TooltipPosition =
+type TooltipPosition =
   | 'top'
   | 'top-left'
   | 'top-right'
@@ -69,6 +49,7 @@ type MutableDomRect = {
   height: number;
 };
 
+// @deprecated: please use `Tooltip` component in `common` folder
 export class Tooltip extends Component<TooltipProps> {
   static contextType = IntersectionBoundary;
   position: TooltipPosition;

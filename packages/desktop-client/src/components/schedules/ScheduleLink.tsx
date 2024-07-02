@@ -1,16 +1,21 @@
 // @ts-strict-ignore
 import React, { useCallback, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { pushModal } from 'loot-core/client/actions';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Query } from 'loot-core/src/shared/query';
+import { type TransactionEntity } from 'loot-core/src/types/models';
 
 import { type BoundActions } from '../../hooks/useActions';
-import { type CommonModalProps } from '../../types/modals';
+import { SvgAdd } from '../../icons/v0';
+import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
@@ -18,11 +23,14 @@ export function ScheduleLink({
   modalProps,
   actions,
   transactionIds: ids,
+  getTransaction,
 }: {
   actions: BoundActions;
   modalProps?: CommonModalProps;
   transactionIds: string[];
+  getTransaction: (transactionId: string) => TransactionEntity;
 }) {
+  const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
 
   const scheduleData = useSchedules({
@@ -45,8 +53,18 @@ export function ScheduleLink({
     actions.popModal();
   }
 
+  async function onCreate() {
+    actions.popModal();
+    dispatch(
+      pushModal('schedule-edit', {
+        id: null,
+        transaction: getTransaction(ids[0]),
+      }),
+    );
+  }
+
   return (
-    <Modal title="Link Schedule" size={{ width: 600 }} {...modalProps}>
+    <Modal title="Link Schedule" size={{ width: 800 }} {...modalProps}>
       <View
         style={{
           flexDirection: 'row',
@@ -70,6 +88,16 @@ export function ScheduleLink({
           value={filter}
           onChange={setFilter}
         />
+        {ids.length === 1 && (
+          <Button
+            type="primary"
+            style={{ marginLeft: 15, padding: '4px 10px' }}
+            onClick={onCreate}
+          >
+            <SvgAdd style={{ width: '20', padding: '3' }} />
+            Create New
+          </Button>
+        )}
       </View>
 
       <View
@@ -90,7 +118,6 @@ export function ScheduleLink({
           schedules={schedules}
           statuses={statuses}
           style={null}
-          tableStyle={{ marginInline: -20 }}
         />
       </View>
     </Modal>

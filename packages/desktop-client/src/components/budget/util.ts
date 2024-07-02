@@ -6,7 +6,7 @@ import { type Handlers } from 'loot-core/src/types/handlers';
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
-import { styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 import { type DropPosition } from '../sort';
 
 import { getValidMonthBounds } from './MonthsContext';
@@ -39,13 +39,13 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
   ];
 }
 
-export function makeAmountGrey(value: number | string) {
+export function makeAmountGrey(value: number | string): CSSProperties {
   return value === 0 || value === '0' || value === '' || value == null
     ? { color: theme.tableTextSubdued }
     : null;
 }
 
-export function makeAmountStyle(
+export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number,
   budgetedValue?: number,
@@ -67,14 +67,24 @@ export function makeAmountStyle(
   }
 }
 
-export function makeAmountFullStyle(value: number) {
+export function makeAmountFullStyle(
+  value: number,
+  colors?: {
+    positiveColor?: string;
+    negativeColor?: string;
+    zeroColor?: string;
+  },
+) {
+  const positiveColorToUse = colors?.positiveColor || theme.noticeText;
+  const negativeColorToUse = colors?.negativeColor || theme.errorText;
+  const zeroColorToUse = colors?.zeroColor || theme.tableTextSubdued;
   return {
     color:
       value < 0
-        ? theme.errorText
+        ? negativeColorToUse
         : value === 0
-          ? theme.tableTextSubdued
-          : theme.noticeText,
+          ? zeroColorToUse
+          : positiveColorToUse,
   };
 }
 

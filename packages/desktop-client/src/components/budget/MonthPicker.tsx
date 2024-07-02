@@ -124,9 +124,14 @@ export const MonthPicker = ({
                   borderRadius: 0,
                   cursor: 'pointer',
                 }),
+                ...(hoverId !== null &&
+                  !hovered &&
+                  selected && {
+                    filter: 'brightness(65%)',
+                  }),
                 ...(hovered &&
                   !selected && {
-                    backgroundColor: 'rgba(100, 100, 100, .15)',
+                    backgroundColor: theme.buttonBareBackgroundHover,
                   }),
                 ...(hovered &&
                   selected && {

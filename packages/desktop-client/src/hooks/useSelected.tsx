@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type UndoState } from 'loot-core/src/server/undo';
@@ -29,7 +30,7 @@ function iterateRange(range: Range<number>, func: (i: number) => void): void {
   }
 }
 
-type State = {
+type SelectedState = {
   selectedRange: Range<string> | null;
   selectedItems: Set<string>;
 };
@@ -58,7 +59,7 @@ export function useSelected<T extends Item>(
   selectAllFilter?: (item: T) => boolean,
 ) {
   const [state, dispatch] = useReducer(
-    (state: State, action: Actions) => {
+    (state: SelectedState, action: Actions) => {
       switch (action.type) {
         case 'select': {
           const { selectedRange } = state;
@@ -208,7 +209,7 @@ export function useSelected<T extends Item>(
     return () => undo.setUndoState('selectedItems', prevState);
   }, [state.selectedItems]);
 
-  const lastUndoState = useSelector(state => state.app.lastUndoState);
+  const lastUndoState = useSelector((state: State) => state.app.lastUndoState);
 
   useEffect(() => {
     function onUndo({ messages, undoTag }: UndoState) {

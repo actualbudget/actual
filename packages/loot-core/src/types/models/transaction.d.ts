@@ -4,6 +4,7 @@ import type { PayeeEntity } from './payee';
 import type { ScheduleEntity } from './schedule';
 
 export interface NewTransactionEntity {
+  id?: string;
   is_parent?: boolean;
   is_child?: boolean;
   parent_id?: string;
@@ -25,7 +26,11 @@ export interface NewTransactionEntity {
   subtransactions?: Omit<NewTransactionEntity, 'account' | 'date'>[];
 }
 
-export interface TransactionEntity extends NewTransactionEntity {
+export interface TransactionEntity
+  extends Omit<
+    NewTransactionEntity,
+    'account' | 'category' | 'payee' | 'schedule' | 'subtransactions'
+  > {
   id: string;
   account: AccountEntity;
   category?: CategoryEntity;

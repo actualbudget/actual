@@ -1,12 +1,11 @@
 import { type numberFormats } from '../shared/util';
 
 export type FeatureFlag =
-  | 'categorySpendingReport'
-  | 'sankeyReport'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'customReports'
-  | 'simpleFinSync';
+  | 'spendingReport'
+  | 'simpleFinSync'
+  | 'iterableTopologicalSort';
 
 export type LocalPrefs = Partial<
   {
@@ -27,6 +26,7 @@ export type LocalPrefs = Partial<
     'expand-splits': boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
+    [key: `hide-reconciled-${string}`]: boolean;
     'budget.collapsed': string[];
     'budget.summaryCollapsed': boolean;
     'budget.showHiddenCategories': boolean;
@@ -53,13 +53,16 @@ export type LocalPrefs = Partial<
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
+    'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
-export type Theme = 'light' | 'dark' | 'auto';
+export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
+  autoUpdate: boolean;
+  keyId?: string;
   theme: Theme;
   documentDir: string; // Electron only
 }>;

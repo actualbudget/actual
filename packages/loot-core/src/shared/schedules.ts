@@ -43,9 +43,9 @@ export function getHasTransactionsQuery(schedules) {
   });
 
   return q('transactions')
+    .options({ splits: 'all' })
     .filter({ $or: filters })
     .orderBy({ date: 'desc' })
-    .groupBy('schedule')
     .select(['schedule', 'date']);
 }
 

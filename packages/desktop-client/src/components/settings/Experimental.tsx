@@ -1,12 +1,11 @@
 import { type ReactNode, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
-import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
-import { LinkButton } from '../common/LinkButton';
+import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
@@ -21,23 +20,20 @@ type FeatureToggleProps = {
 };
 
 function FeatureToggle({
-  flag,
+  flag: flagName,
   disableToggle = false,
   error,
   children,
 }: FeatureToggleProps) {
-  const { savePrefs } = useActions();
-  const enabled = useFeatureFlag(flag);
+  const enabled = useFeatureFlag(flagName);
+  const [_, setFlagPref] = useLocalPref(`flags.${flagName}`);
 
   return (
     <label style={{ display: 'flex' }}>
       <Checkbox
         checked={enabled}
         onChange={() => {
-          // @ts-expect-error key type is not correctly inferred
-          savePrefs({
-            [`flags.${flag}`]: !enabled,
-          });
+          setFlagPref(!enabled);
         }}
         disabled={disableToggle}
       />
@@ -61,7 +57,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  const budgetType = useSelector(state => state.prefs.local?.budgetType);
+  const [budgetType] = useLocalPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (
@@ -83,11 +79,9 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <FeatureToggle flag="categorySpendingReport">
-              Category spending report
+            <FeatureToggle flag="spendingReport">
+              Monthly spending
             </FeatureToggle>
-            <FeatureToggle flag="customReports">Custom reports</FeatureToggle>
-            <FeatureToggle flag="sankeyReport">Sankey report</FeatureToggle>
 
             <ReportBudgetFeature />
 
@@ -95,10 +89,15 @@ export function ExperimentalFeatures() {
               Goal templates
             </FeatureToggle>
             <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
+            <FeatureToggle flag="iterableTopologicalSort">
+              Iterable topological sort budget
+            </FeatureToggle>
           </View>
         ) : (
-          <LinkButton
+          <Link
+            variant="text"
             onClick={() => setExpanded(true)}
+            data-testid="experimental-settings"
             style={{
               flexShrink: 0,
               alignSelf: 'flex-start',
@@ -106,7 +105,7 @@ export function ExperimentalFeatures() {
             }}
           >
             I understand the risks, show experimental features
-          </LinkButton>
+          </Link>
         )
       }
     >

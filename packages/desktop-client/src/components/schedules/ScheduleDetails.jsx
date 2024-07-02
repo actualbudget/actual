@@ -1,14 +1,16 @@
 import React, { useEffect, useReducer } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
+import { getPayeesById } from 'loot-core/client/reducers/queries';
 import { pushModal } from 'loot-core/src/client/actions/modals';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
@@ -67,13 +69,12 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export function ScheduleDetails({ modalProps, actions, id }) {
+export function ScheduleDetails({ modalProps, actions, id, transaction }) {
   const adding = id == null;
-  const payees = useCachedPayees({ idKey: true });
+  const fromTrans = transaction != null;
+  const payees = getPayeesById(usePayees());
   const globalDispatch = useDispatch();
-  const dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const [state, dispatch] = useReducer(
     (state, action) => {
@@ -95,7 +96,8 @@ export function ScheduleDetails({ modalProps, actions, id }) {
             fields: {
               payee: schedule._payee,
               account: schedule._account,
-              amount: schedule._amount || 0,
+              // defalut to a non-zero value so the sign can be changed before the value
+              amount: schedule._amount || -1000,
               amountOp: schedule._amountOp || 'isapprox',
               date: schedule._date,
               posts_transaction: action.schedule.posts_transaction,
@@ -143,6 +145,11 @@ export function ScheduleDetails({ modalProps, actions, id }) {
             fields: { ...state.fields, ...fields },
           };
         case 'set-transactions':
+          if (fromTrans && action.transactions) {
+            action.transactions.sort(a => {
+              return transaction.id === a.id ? -1 : 1;
+            });
+          }
           return { ...state, transactions: action.transactions };
         case 'set-repeats':
           return {
@@ -210,12 +217,30 @@ export function ScheduleDetails({ modalProps, actions, id }) {
           endOccurrences: '1',
           endDate: monthUtils.currentDay(),
         };
-        const schedule = {
-          posts_transaction: false,
-          _date: date,
-          _conditions: [{ op: 'isapprox', field: 'date', value: date }],
-          _actions: [],
-        };
+
+        const schedule = fromTrans
+          ? {
+              posts_transaction: false,
+              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
+              _actions: [],
+              _account: transaction.account,
+              _amount: transaction.amount,
+              _amountOp: 'is',
+              name: transaction.payee ? payees[transaction.payee].name : '',
+              _payee: transaction.payee ? transaction.payee : '',
+              _date: {
+                ...date,
+                frequency: 'monthly',
+                start: transaction.date,
+                patterns: [],
+              },
+            }
+          : {
+              posts_transaction: false,
+              _date: date,
+              _conditions: [{ op: 'isapprox', field: 'date', value: date }],
+              _actions: [],
+            };
 
         dispatch({ type: 'set-schedule', schedule });
       } else {
@@ -226,6 +251,7 @@ export function ScheduleDetails({ modalProps, actions, id }) {
         }
       }
     }
+
     run();
   }, []);
 
@@ -321,7 +347,11 @@ export function ScheduleDetails({ modalProps, actions, id }) {
     };
   }, [state.schedule, state.transactionsMode, state.fields]);
 
-  const selectedInst = useSelected('transactions', state.transactions, []);
+  const selectedInst = useSelected(
+    'transactions',
+    state.transactions,
+    transaction ? [transaction.id] : [],
+  );
 
   async function onSave() {
     dispatch({ type: 'form-error', error: null });
@@ -415,7 +445,6 @@ export function ScheduleDetails({ modalProps, actions, id }) {
   }
 
   const payee = payees ? payees[state.fields.payee] : null;
-
   // This is derived from the date
   const repeats = state.fields.date ? !!state.fields.date.frequency : false;
   return (
@@ -448,7 +477,6 @@ export function ScheduleDetails({ modalProps, actions, id }) {
             onSelect={id =>
               dispatch({ type: 'set-field', field: 'payee', value: id })
             }
-            isCreatable
           />
         </FormField>
 

@@ -4,9 +4,16 @@ import { useSelector } from 'react-redux';
 import { selectNumberFormat } from 'loot-core/src/client/selectors';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+export type FormatType =
+  | 'string'
+  | 'number'
+  | 'percentage'
+  | 'financial'
+  | 'financial-with-sign';
+
 function format(
   value: unknown,
-  type = 'string',
+  type: FormatType = 'string',
   formatter?: Intl.NumberFormat,
 ): string {
   switch (type) {
@@ -19,6 +26,8 @@ function format(
       return val;
     case 'number':
       return '' + value;
+    case 'percentage':
+      return value + '%';
     case 'financial-with-sign':
       const formatted = format(value, 'financial', formatter);
       if (typeof value === 'number' && value >= 0) {
@@ -49,7 +58,7 @@ export function useFormat() {
   const numberFormat = useSelector(selectNumberFormat);
 
   return useCallback(
-    (value: unknown, type = 'string') =>
+    (value: unknown, type: FormatType = 'string') =>
       format(value, type, numberFormat.formatter),
     [numberFormat],
   );

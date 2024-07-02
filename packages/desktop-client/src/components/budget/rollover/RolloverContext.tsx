@@ -1,41 +1,52 @@
-// @ts-strict-ignore
 import React, { type ReactNode, createContext, useContext } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-const Context = createContext(null);
-
-type RolloverContextProps = {
-  categoryGroups: unknown[];
+type RolloverContextDefinition = {
   summaryCollapsed: boolean;
-  onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onToggleSummaryCollapse: () => void;
+  currentMonth: string;
+};
+
+const RolloverContext = createContext<RolloverContextDefinition>({
+  summaryCollapsed: false,
+  onBudgetAction: () => {
+    throw new Error('Unitialised context method called: onBudgetAction');
+  },
+  onToggleSummaryCollapse: () => {
+    throw new Error(
+      'Unitialised context method called: onToggleSummaryCollapse',
+    );
+  },
+  currentMonth: 'unknown',
+});
+
+type RolloverProviderProps = Omit<RolloverContextDefinition, 'currentMonth'> & {
   children: ReactNode;
 };
-export function RolloverContext({
-  categoryGroups,
+export function RolloverProvider({
   summaryCollapsed,
   onBudgetAction,
   onToggleSummaryCollapse,
   children,
-}: RolloverContextProps) {
+}: RolloverProviderProps) {
   const currentMonth = monthUtils.currentMonth();
 
   return (
-    <Context.Provider
+    <RolloverContext.Provider
       value={{
         currentMonth,
-        categoryGroups,
         summaryCollapsed,
         onBudgetAction,
         onToggleSummaryCollapse,
       }}
     >
       {children}
-    </Context.Provider>
+    </RolloverContext.Provider>
   );
 }
 
 export function useRollover() {
-  return useContext(Context);
+  return useContext(RolloverContext);
 }

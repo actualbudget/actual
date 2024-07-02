@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react-swc';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
 import { defineConfig, loadEnv, Plugin } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 
 const addWatchers = (): Plugin => ({
@@ -147,6 +148,18 @@ export default defineConfig(async ({ mode }) => {
       extensions: resolveExtensions,
     },
     plugins: [
+      // Macos electron (desktop) builds do not support PWA
+      mode === 'desktop'
+        ? undefined
+        : VitePWA({
+            registerType: 'autoUpdate',
+            workbox: {
+              globPatterns: [
+                '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
+              ],
+              ignoreURLParametersMatching: [/^v$/],
+            },
+          }),
       injectShims(),
       addWatchers(),
       react({

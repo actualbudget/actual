@@ -4,11 +4,11 @@ import { type File } from 'loot-core/src/types/file';
 
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 
 type DeleteFileProps = {
   modalProps: CommonModalProps;
@@ -30,7 +30,6 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
     <Modal
       {...modalProps}
       title={'Delete ' + file.name}
-      padding={0}
       showOverlay={false}
       onClose={modalProps.onBack}
     >

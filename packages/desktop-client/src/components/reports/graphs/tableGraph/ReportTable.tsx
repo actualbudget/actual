@@ -1,45 +1,79 @@
-// @ts-strict-ignore
 import React, {
+  type RefObject,
   useCallback,
   useLayoutEffect,
   useRef,
   type UIEventHandler,
 } from 'react';
-import { type RefProp } from 'react-spring';
 
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type GroupedEntity,
+  type DataEntity,
+  type balanceTypeOpType,
+} from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { View } from '../../../common/View';
 
+import { ReportTableHeader } from './ReportTableHeader';
 import { ReportTableList } from './ReportTableList';
 import { ReportTableRow } from './ReportTableRow';
+import { ReportTableTotals } from './ReportTableTotals';
 
 type ReportTableProps = {
   saveScrollWidth: (value: number) => void;
-  listScrollRef: RefProp<HTMLDivElement>;
+  headerScrollRef: RefObject<HTMLDivElement>;
+  listScrollRef: RefObject<HTMLDivElement>;
+  totalScrollRef: RefObject<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
-  style?: CSSProperties;
   groupBy: string;
-  balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
-  data: DataEntity[];
+  balanceTypeOp: balanceTypeOpType;
+  data: DataEntity;
+  filters?: RuleConditionEntity[];
   mode: string;
-  monthsCount: number;
+  intervalsCount: number;
+  interval: string;
   compact: boolean;
+  style?: CSSProperties;
+  compactStyle?: CSSProperties;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
+};
+
+export type renderTotalsProps = {
+  metadata: GroupedEntity;
+  mode: string;
+  totalsStyle: CSSProperties;
+  testStyle: CSSProperties;
+  scrollWidthTotals: number;
+};
+
+export type renderRowProps = {
+  item: GroupedEntity;
+  mode: string;
+  style?: CSSProperties;
 };
 
 export function ReportTable({
   saveScrollWidth,
+  headerScrollRef,
   listScrollRef,
+  totalScrollRef,
   handleScroll,
-  style,
   groupBy,
   balanceTypeOp,
   data,
+  filters,
   mode,
-  monthsCount,
+  intervalsCount,
+  interval,
   compact,
+  style,
+  compactStyle,
+  showHiddenCategories,
+  showOffBudget,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -49,17 +83,55 @@ export function ReportTable({
     }
   });
 
-  const renderItem = useCallback(
-    ({ item, groupByItem, mode, style, monthsCount, compact }) => {
+  const renderRow = useCallback(({ item, mode, style }: renderRowProps) => {
+    return (
+      <ReportTableRow
+        item={item}
+        balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        mode={mode}
+        filters={filters}
+        startDate={data.startDate}
+        endDate={data.endDate}
+        intervalsCount={intervalsCount}
+        compact={compact}
+        style={style}
+        compactStyle={compactStyle}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
+        interval={interval}
+      />
+    );
+  }, []);
+
+  const renderTotals = useCallback(
+    ({
+      metadata,
+      mode,
+      totalsStyle,
+      testStyle,
+      scrollWidthTotals,
+    }: renderTotalsProps) => {
       return (
         <ReportTableRow
-          item={item}
+          item={metadata}
           balanceTypeOp={balanceTypeOp}
-          groupByItem={groupByItem}
+          groupBy={groupBy}
           mode={mode}
-          style={style}
-          monthsCount={monthsCount}
+          filters={filters}
+          startDate={data.startDate}
+          endDate={data.endDate}
+          intervalsCount={intervalsCount}
           compact={compact}
+          style={totalsStyle}
+          compactStyle={compactStyle}
+          showHiddenCategories={showHiddenCategories}
+          showOffBudget={showOffBudget}
+          totalStyle={testStyle}
+          totalScrollRef={totalScrollRef}
+          handleScroll={handleScroll}
+          height={32 + scrollWidthTotals}
+          interval={interval}
         />
       );
     },
@@ -67,39 +139,58 @@ export function ReportTable({
   );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        outline: 'none',
-        '& .animated .animated-row': { transition: '.25s transform' },
-        ...style,
-      }}
-      tabIndex={1}
-    >
-      <Block
-        innerRef={listScrollRef}
-        onScroll={handleScroll}
-        id="list"
+    <View>
+      <ReportTableHeader
+        headerScrollRef={headerScrollRef}
+        handleScroll={handleScroll}
+        data={data.intervalData}
+        groupBy={groupBy}
+        interval={interval}
+        balanceTypeOp={balanceTypeOp}
+        compact={compact}
+        style={style}
+        compactStyle={compactStyle}
+        mode={mode}
+      />
+      <View
         style={{
-          overflowY: 'auto',
-          scrollbarWidth: 'none',
-          '::-webkit-scrollbar': { display: 'none' },
           flex: 1,
+          flexDirection: 'row',
           outline: 'none',
           '& .animated .animated-row': { transition: '.25s transform' },
-          ...style,
         }}
+        tabIndex={1}
       >
-        <ReportTableList
-          data={data}
-          monthsCount={monthsCount}
-          mode={mode}
-          groupBy={groupBy}
-          renderItem={renderItem}
-          compact={compact}
-        />
-      </Block>
+        <Block
+          innerRef={listScrollRef}
+          onScroll={handleScroll}
+          id="list"
+          style={{
+            overflowY: 'auto',
+            scrollbarWidth: 'none',
+            '::-webkit-scrollbar': { display: 'none' },
+            flex: 1,
+            outline: 'none',
+            '& .animated .animated-row': { transition: '.25s transform' },
+          }}
+        >
+          <ReportTableList
+            data={data}
+            mode={mode}
+            groupBy={groupBy}
+            renderRow={renderRow}
+            style={style}
+          />
+        </Block>
+      </View>
+      <ReportTableTotals
+        data={data}
+        mode={mode}
+        totalScrollRef={totalScrollRef}
+        compact={compact}
+        style={style}
+        renderTotals={renderTotals}
+      />
     </View>
   );
 }

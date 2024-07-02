@@ -7,7 +7,7 @@ const Context = createContext(null);
 
 type ReportProviderProps = {
   summaryCollapsed: boolean;
-  onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+  onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onToggleSummaryCollapse: () => void;
   children: ReactNode;
 };

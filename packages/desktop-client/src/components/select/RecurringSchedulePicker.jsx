@@ -1,20 +1,20 @@
-import React, { useEffect, useReducer, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
+import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
-import { useTooltip, Tooltip } from '../tooltips';
 
 import { DateSelect } from './DateSelect';
 
@@ -48,19 +48,18 @@ function parsePatternValue(value) {
 }
 
 function parseConfig(config) {
-  return (
-    config || {
-      start: monthUtils.currentDay(),
-      interval: 1,
-      frequency: 'monthly',
-      patterns: [createMonthlyRecurrence(monthUtils.currentDay())],
-      skipWeekend: false,
-      weekendSolveMode: 'before',
-      endMode: 'never',
-      endOccurrences: '1',
-      endDate: monthUtils.currentDay(),
-    }
-  );
+  return {
+    start: monthUtils.currentDay(),
+    interval: 1,
+    frequency: 'monthly',
+    patterns: [createMonthlyRecurrence(monthUtils.currentDay())],
+    skipWeekend: false,
+    weekendSolveMode: 'before',
+    endMode: 'never',
+    endOccurrences: '1',
+    endDate: monthUtils.currentDay(),
+    ...config,
+  };
 }
 
 function unparseConfig(parsed) {
@@ -159,11 +158,9 @@ function reducer(state, action) {
 }
 
 function SchedulePreview({ previewDates }) {
-  const dateFormat = useSelector(state =>
-    (state.prefs.local.dateFormat || 'MM/dd/yyyy')
-      .replace('MM', 'M')
-      .replace('dd', 'd'),
-  );
+  const dateFormat = (useDateFormat() || 'MM/dd/yyyy')
+    .replace('MM', 'M')
+    .replace('dd', 'd');
 
   if (!previewDates) {
     return null;
@@ -281,9 +278,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   const skipWeekend = state.config.hasOwnProperty('skipWeekend')
     ? state.config.skipWeekend
     : false;
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   useEffect(() => {
     dispatch({
@@ -313,12 +308,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   }
 
   return (
-    <Tooltip
-      style={{ padding: 10, width: 380 }}
-      offset={1}
-      position="bottom-left"
-      onClose={onClose}
-    >
+    <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
         <label htmlFor="start">From</label>
         <DateSelect
@@ -475,38 +465,45 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           Apply
         </Button>
       </div>
-    </Tooltip>
+    </>
   );
 }
 
 export function RecurringSchedulePicker({ value, buttonStyle, onChange }) {
-  const { isOpen, close, getOpenEvents } = useTooltip();
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
+  const triggerRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   function onSave(config) {
     onChange(config);
-    close();
+    setIsOpen(false);
   }
 
   return (
     <View>
       <Button
-        {...getOpenEvents()}
+        ref={triggerRef}
         style={{ textAlign: 'left', ...buttonStyle }}
+        onClick={() => setIsOpen(true)}
       >
         {value
           ? getRecurringDescription(value, dateFormat)
           : 'No recurring date'}
       </Button>
-      {isOpen && (
+
+      <Popover
+        triggerRef={triggerRef}
+        style={{ padding: 10, width: 380 }}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
         <RecurringScheduleTooltip
           config={value}
-          onClose={close}
+          onClose={() => setIsOpen(false)}
           onSave={onSave}
         />
-      )}
+      </Popover>
     </View>
   );
 }

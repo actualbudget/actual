@@ -1,9 +1,6 @@
 // @ts-strict-ignore
-import React, { useState, useMemo, type CSSProperties } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useRef, useState, useMemo, type CSSProperties } from 'react';
 
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import {
   type ScheduleStatusType,
   type ScheduleStatuses,
@@ -13,16 +10,19 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
+import { useAccounts } from '../../hooks/useAccounts';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePayees } from '../../hooks/usePayees';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
-import { Tooltip } from '../tooltips';
 import { DisplayId } from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
@@ -60,17 +60,16 @@ function OverflowMenu({
   status: ScheduleStatusType;
   onAction: SchedulesTableProps['onAction'];
 }) {
+  const triggerRef = useRef(null);
   const [open, setOpen] = useState(false);
 
   const getMenuItems = () => {
     const menuItems: { name: ScheduleItemAction; text: string }[] = [];
 
-    if (status === 'due') {
-      menuItems.push({
-        name: 'post-transaction',
-        text: 'Post transaction',
-      });
-    }
+    menuItems.push({
+      name: 'post-transaction',
+      text: 'Post transaction',
+    });
 
     if (status === 'completed') {
       menuItems.push({
@@ -98,6 +97,7 @@ function OverflowMenu({
   return (
     <View>
       <Button
+        ref={triggerRef}
         type="bare"
         aria-label="Menu"
         onClick={e => {
@@ -111,22 +111,20 @@ function OverflowMenu({
           style={{ transform: 'rotateZ(90deg)' }}
         />
       </Button>
-      {open && (
-        <Tooltip
-          position="bottom-right"
-          width={150}
-          style={{ padding: 0 }}
-          onClose={() => setOpen(false)}
-        >
-          <Menu
-            onMenuSelect={name => {
-              onAction(name, schedule.id);
-              setOpen(false);
-            }}
-            items={getMenuItems()}
-          />
-        </Tooltip>
-      )}
+
+      <Popover
+        triggerRef={triggerRef}
+        isOpen={open}
+        onOpenChange={() => setOpen(false)}
+      >
+        <Menu
+          onMenuSelect={name => {
+            onAction(name, schedule.id);
+            setOpen(false);
+          }}
+          items={getMenuItems()}
+        />
+      </Popover>
     </View>
   );
 }
@@ -194,14 +192,11 @@ export function SchedulesTable({
   onAction,
   tableStyle,
 }: SchedulesTableProps) {
-  const dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
-
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const payees = useCachedPayees();
-  const accounts = useCachedAccounts();
+  const payees = usePayees();
+  const accounts = useAccounts();
 
   const filteredSchedules = useMemo(() => {
     if (!filter) {
@@ -236,7 +231,7 @@ export function SchedulesTable({
         filterIncludes(dateStr)
       );
     });
-  }, [schedules, filter, statuses]);
+  }, [payees, accounts, schedules, filter, statuses]);
 
   const items: SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useState } from 'react';
 
 import { css } from 'glamor';
 import {
@@ -15,23 +15,31 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import { usePrivacyMode } from 'loot-core/src/client/privacy';
 import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
-import { theme } from '../../../style';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { type CSSProperties } from '../../../style';
+import { theme } from '../../../style/index';
 import { AlignedText } from '../../common/AlignedText';
-import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
+import { showActivity } from './showActivity';
 
 type PayloadChild = {
   props: {
@@ -45,6 +53,8 @@ type PayloadItem = {
     name: string;
     totalAssets: number | string;
     totalDebts: number | string;
+    netAssets: number | string;
+    netDebts: number | string;
     totalTotals: number | string;
     networth: number | string;
     totalChange: number | string;
@@ -55,7 +65,7 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp?: string;
+  balanceTypeOp?: balanceTypeOpType;
   yAxis?: string;
 };
 
@@ -83,30 +93,40 @@ const CustomTooltip = ({
             <strong>{payload[0].payload[yAxis]}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            <PrivacyFilter>
-              {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Assets:"
-                  right={amountToCurrency(payload[0].payload.totalAssets)}
-                />
-              )}
-              {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Debt:"
-                  right={amountToCurrency(payload[0].payload.totalDebts)}
-                />
-              )}
-              {['totalTotals'].includes(balanceTypeOp) && (
-                <AlignedText
-                  left="Net:"
-                  right={
-                    <strong>
-                      {amountToCurrency(payload[0].payload.totalTotals)}
-                    </strong>
-                  }
-                />
-              )}
-            </PrivacyFilter>
+            {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Assets:"
+                right={amountToCurrency(payload[0].payload.totalAssets)}
+              />
+            )}
+            {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Debts:"
+                right={amountToCurrency(payload[0].payload.totalDebts)}
+              />
+            )}
+            {['netAssets'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net Assets:"
+                right={amountToCurrency(payload[0].payload.netAssets)}
+              />
+            )}
+            {['netDebts'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net Debts:"
+                right={amountToCurrency(payload[0].payload.netDebts)}
+              />
+            )}
+            {['totalTotals'].includes(balanceTypeOp) && (
+              <AlignedText
+                left="Net:"
+                right={
+                  <strong>
+                    {amountToCurrency(payload[0].payload.totalTotals)}
+                  </strong>
+                }
+              />
+            )}
           </div>
         </div>
       </div>
@@ -114,51 +134,76 @@ const CustomTooltip = ({
   }
 };
 
-const customLabel = props => {
+const customLabel = (props, typeOp) => {
   const calcX = props.x + props.width / 2;
   const calcY = props.y - (props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
   const display =
     props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
-  const textSize = adjustTextSize(props.width, 'variable', props.value);
+  const textSize = adjustTextSize({
+    sized: props.width,
+    type: typeOp === 'totalTotals' ? 'default' : 'variable',
+    values: props.value,
+  });
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
 type BarGraphProps = {
   style?: CSSProperties;
-  data: GroupedEntity;
+  data: DataEntity;
+  filters: RuleConditionEntity[];
   groupBy: string;
-  balanceTypeOp: string;
+  balanceTypeOp: balanceTypeOpType;
   compact?: boolean;
   viewLabels: boolean;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
 };
 
 export function BarGraph({
   style,
   data,
+  filters,
   groupBy,
   balanceTypeOp,
   compact,
   viewLabels,
+  showHiddenCategories,
+  showOffBudget,
 }: BarGraphProps) {
+  const navigate = useNavigate();
+  const categories = useCategories();
+  const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const { isNarrowWidth } = useResponsive();
+  const [pointer, setPointer] = useState('');
 
-  const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
-  const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
+  const yAxis = groupBy === 'Interval' ? 'date' : 'name';
+  const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (balanceTypeOp === 'totalDebts') {
-      return -1 * obj.totalDebts;
-    } else {
+    if (balanceTypeOp === 'totalTotals' && groupBy === 'Interval') {
       return obj.totalAssets;
     }
+
+    if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+      return -1 * obj[balanceTypeOp];
+    }
+
+    return obj[balanceTypeOp];
   };
 
   const longestLabelLength = data[splitData]
     .map(c => c[yAxis])
     .reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
+
+  const largestValue = data[splitData]
+    .map(c => c[balanceTypeOp])
+    .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
+
+  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
 
   return (
     <Container
@@ -177,19 +222,27 @@ export function BarGraph({
                 height={height}
                 stackOffset="sign"
                 data={data[splitData]}
-                margin={{ top: labelsMargin, right: 0, left: 0, bottom: 0 }}
+                style={{ cursor: pointer }}
+                margin={{
+                  top: labelsMargin,
+                  right: 0,
+                  left: leftMargin,
+                  bottom: 0,
+                }}
               >
-                <Tooltip
-                  cursor={{ fill: 'transparent' }}
-                  content={
-                    <CustomTooltip
-                      balanceTypeOp={balanceTypeOp}
-                      yAxis={yAxis}
-                    />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    cursor={{ fill: 'transparent' }}
+                    content={
+                      <CustomTooltip
+                        balanceTypeOp={balanceTypeOp}
+                        yAxis={yAxis}
+                      />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                  />
+                )}
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -202,18 +255,50 @@ export function BarGraph({
                       tickLine={{ stroke: theme.pageText }}
                     />
                     <YAxis
-                      tickFormatter={value => getCustomTick(value, privacyMode)}
+                      tickFormatter={value =>
+                        getCustomTick(
+                          amountToCurrencyNoDecimal(value),
+                          privacyMode,
+                        )
+                      }
                       tick={{ fill: theme.pageText }}
                       tickLine={{ stroke: theme.pageText }}
+                      tickSize={0}
                     />
                     <ReferenceLine y={0} stroke={theme.pageTextLight} />
                   </>
                 )}
-                <Bar dataKey={val => getVal(val)} stackId="a">
+                <Bar
+                  dataKey={val => getVal(val)}
+                  stackId="a"
+                  onMouseLeave={() => setPointer('')}
+                  onMouseEnter={() =>
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    setPointer('pointer')
+                  }
+                  onClick={item =>
+                    !isNarrowWidth &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'totals',
+                      startDate: data.startDate,
+                      endDate: data.endDate,
+                      field: groupBy.toLowerCase(),
+                      id: item.id,
+                    })
+                  }
+                >
                   {viewLabels && !compact && (
                     <LabelList
                       dataKey={val => getVal(val)}
-                      content={customLabel}
+                      content={e => customLabel(e, balanceTypeOp)}
                     />
                   )}
                   {data.legend.map((entry, index) => (
@@ -227,7 +312,10 @@ export function BarGraph({
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey="totalDebts" stackId="a">
                     {viewLabels && !compact && (
-                      <LabelList dataKey="totalDebts" content={customLabel} />
+                      <LabelList
+                        dataKey="totalDebts"
+                        content={e => customLabel(e, balanceTypeOp)}
+                      />
                     )}
                     {data[splitData].map((entry, index) => (
                       <Cell

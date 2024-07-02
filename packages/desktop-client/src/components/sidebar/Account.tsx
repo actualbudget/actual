@@ -3,12 +3,17 @@ import React from 'react';
 
 import { css } from 'glamor';
 
+import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useNotes } from '../../hooks/useNotes';
 import { styles, theme, type CSSProperties } from '../../style';
 import { AlignedText } from '../common/AlignedText';
-import { AnchorLink } from '../common/AnchorLink';
+import { Link } from '../common/Link';
+import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
+import { Notes } from '../Notes';
 import {
   useDraggable,
   useDroppable,
@@ -38,6 +43,7 @@ type AccountProps = {
   query: Binding;
   account?: AccountEntity;
   connected?: boolean;
+  pending?: boolean;
   failed?: boolean;
   updated?: boolean;
   style?: CSSProperties;
@@ -50,6 +56,7 @@ export function Account({
   name,
   account,
   connected,
+  pending = false,
   failed,
   updated,
   to,
@@ -80,12 +87,15 @@ export function Account({
     onDrop,
   });
 
-  return (
+  const accountNote = useNotes(`account-${account?.id}`);
+  const needsTooltip = !!account?.id;
+
+  const accountRow = (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
-          <AnchorLink
+          <Link
             to={to}
             style={{
               ...accountNameStyle,
@@ -125,9 +135,11 @@ export function Account({
                   width: 5,
                   height: 5,
                   borderRadius: 5,
-                  backgroundColor: failed
-                    ? theme.sidebarItemBackgroundFailed
-                    : theme.sidebarItemBackgroundPositive,
+                  backgroundColor: pending
+                    ? theme.sidebarItemBackgroundPending
+                    : failed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
                   marginLeft: 2,
                   transition: 'transform .3s',
                   opacity: connected ? 1 : 0,
@@ -136,12 +148,59 @@ export function Account({
             </View>
 
             <AlignedText
+              style={
+                (name === 'Off budget' || name === 'For budget') && {
+                  borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
+                  paddingBottom: '3px',
+                }
+              }
               left={name}
               right={<CellValue binding={query} type="financial" />}
             />
-          </AnchorLink>
+          </Link>
         </View>
       </View>
     </View>
+  );
+
+  if (!needsTooltip || Platform.isPlaywright) {
+    return accountRow;
+  }
+
+  return (
+    <Tooltip
+      content={
+        <View
+          style={{
+            padding: 10,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              borderBottom: accountNote ? `1px solid ${theme.tableBorder}` : 0,
+              marginBottom: accountNote ? '0.5rem' : 0,
+            }}
+          >
+            {name}
+          </Text>
+          {accountNote && (
+            <Notes
+              getStyle={() => ({
+                padding: 0,
+              })}
+              notes={accountNote}
+            />
+          )}
+        </View>
+      }
+      style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+      placement="right top"
+      triggerProps={{
+        delay: 1000,
+      }}
+    >
+      {accountRow}
+    </Tooltip>
   );
 }

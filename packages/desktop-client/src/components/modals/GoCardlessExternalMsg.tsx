@@ -11,20 +11,16 @@ import {
 
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
-import { LinkButton } from '../common/LinkButton';
-import { Menu } from '../common/Menu';
+import { Link } from '../common/Link';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-import { Tooltip } from '../tooltips';
+import { type CommonModalProps } from '../Modals';
 
 import { COUNTRY_OPTIONS } from './countries';
 
@@ -102,7 +98,6 @@ export function GoCardlessExternalMsg({
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
   >(null);
-  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const data = useRef<GoCardlessToken | null>(null);
 
   const {
@@ -169,12 +164,13 @@ export function GoCardlessExternalMsg({
           <Error>
             Failed loading available banks: GoCardless access credentials might
             be misconfigured. Please{' '}
-            <LinkButton
+            <Link
+              variant="text"
               onClick={onGoCardlessInit}
               style={{ color: theme.formLabelText, display: 'inline' }}
             >
               set them up
-            </LinkButton>{' '}
+            </Link>{' '}
             again.
           </Error>
         ) : (
@@ -205,9 +201,13 @@ export function GoCardlessExternalMsg({
           service) read-only access to your entire account’s transaction
           history. This service is not affiliated with Actual in any way. Make
           sure you’ve read and understand GoCardless’s{' '}
-          <ExternalLink to="https://gocardless.com/privacy/" linkColor="purple">
+          <Link
+            variant="external"
+            to="https://gocardless.com/privacy/"
+            linkColor="purple"
+          >
             Privacy Policy
-          </ExternalLink>{' '}
+          </Link>{' '}
           before proceeding.
         </Warning>
 
@@ -224,39 +224,6 @@ export function GoCardlessExternalMsg({
             disabled={!institutionId || !country}
           >
             Link bank in browser &rarr;
-          </Button>
-          <Button
-            type="bare"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Menu"
-          >
-            <SvgDotsHorizontalTriple
-              width={15}
-              height={15}
-              style={{ transform: 'rotateZ(90deg)' }}
-            />
-            {menuOpen && (
-              <Tooltip
-                position="bottom-right"
-                width={200}
-                style={{ padding: 0 }}
-                onClose={() => setMenuOpen(false)}
-              >
-                <Menu
-                  onMenuSelect={item => {
-                    if (item === 'reconfigure') {
-                      onGoCardlessInit();
-                    }
-                  }}
-                  items={[
-                    {
-                      name: 'reconfigure',
-                      text: 'Set new API secrets',
-                    },
-                  ]}
-                />
-              </Tooltip>
-            )}
           </Button>
         </View>
       </View>
@@ -297,9 +264,9 @@ export function GoCardlessExternalMsg({
               </View>
 
               {waiting === 'browser' && (
-                <LinkButton onClick={onJump} style={{ marginTop: 10 }}>
+                <Link variant="text" onClick={onJump} style={{ marginTop: 10 }}>
                   (Account linking not opening in a new tab? Click here)
-                </LinkButton>
+                </Link>
               )}
             </View>
           ) : success ? (

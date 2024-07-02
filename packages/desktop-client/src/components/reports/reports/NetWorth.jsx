@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
@@ -7,10 +6,15 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import { useAccounts } from '../../../hooks/useAccounts';
 import { useFilters } from '../../../hooks/useFilters';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
+import { MobileBackButton } from '../../mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
@@ -20,15 +24,15 @@ import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
 export function NetWorth() {
-  const accounts = useSelector(state => state.queries.accounts);
+  const accounts = useAccounts();
   const {
-    filters,
+    conditions,
     saved,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
@@ -38,8 +42,8 @@ export function NetWorth() {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, filters, conditionsOp),
-    [start, end, accounts, filters, conditionsOp],
+    () => netWorthSpreadsheet(start, end, accounts, conditions, conditionsOp),
+    [start, end, accounts, conditions, conditionsOp],
   );
   const data = useReport('net_worth', params);
   useEffect(() => {
@@ -76,42 +80,56 @@ export function NetWorth() {
     setEnd(end);
   }
 
+  const navigate = useNavigate();
+  const { isNarrowWidth } = useResponsive();
+
   if (!allMonths || !data) {
     return null;
   }
 
   return (
-    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
+    <Page
+      header={
+        isNarrowWidth ? (
+          <MobilePageHeader
+            title="Net Worth"
+            leftContent={
+              <MobileBackButton onClick={() => navigate('/reports')} />
+            }
+          />
+        ) : (
+          <PageHeader title="Net Worth" />
+        )
+      }
+      padding={0}
+    >
       <Header
-        title="Net Worth"
         allMonths={allMonths}
         start={start}
         end={end}
         onChangeDates={onChangeDates}
-        filters={filters}
+        filters={conditions}
         saved={saved}
         onApply={onApplyFilter}
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
+        onConditionsOpChange={onConditionsOpChange}
       />
 
       <View
         style={{
           backgroundColor: theme.tableBackground,
-          padding: 30,
+          padding: 20,
           paddingTop: 0,
-          overflow: 'auto',
-          flexGrow: 1,
+          flex: '1 0 auto',
+          overflowY: 'auto',
         }}
       >
         <View
           style={{
             textAlign: 'right',
             paddingTop: 20,
-            paddingRight: 20,
-            flexShrink: 0,
           }}
         >
           <View
@@ -127,7 +145,6 @@ export function NetWorth() {
         </View>
 
         <NetWorthGraph
-          style={{ flexGrow: 1 }}
           start={start}
           end={end}
           graphData={data.graphData}
@@ -136,7 +153,7 @@ export function NetWorth() {
           }}
         />
 
-        <View style={{ marginTop: 30 }}>
+        <View style={{ marginTop: 30, userSelect: 'none' }}>
           <Paragraph>
             <strong>How is net worth calculated?</strong>
           </Paragraph>
@@ -149,6 +166,6 @@ export function NetWorth() {
           </Paragraph>
         </View>
       </View>
-    </View>
+    </Page>
   );
 }

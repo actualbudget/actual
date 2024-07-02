@@ -58,10 +58,41 @@ describe('API CRUD operations', () => {
     await api.loadBudget(budgetName);
   });
 
-  // apis: createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
+  // apis: getCategoryGroups, createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
   test('CategoryGroups: successfully update category groups', async () => {
     const month = '2023-10';
     global.currentMonth = month;
+
+    // get existing category groups
+    const groups = await api.getCategoryGroups();
+    expect(groups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          hidden: 0,
+          id: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+          is_income: 0,
+          name: 'Usual Expenses',
+          sort_order: 16384,
+          tombstone: 0,
+        }),
+        expect.objectContaining({
+          hidden: 0,
+          id: 'a137772f-cf2f-4089-9432-822d2ddc1466',
+          is_income: 0,
+          name: 'Investments and Savings',
+          sort_order: 32768,
+          tombstone: 0,
+        }),
+        expect.objectContaining({
+          hidden: 0,
+          id: '2E1F5BDB-209B-43F9-AF2C-3CE28E380C00',
+          is_income: 1,
+          name: 'Income',
+          sort_order: 32768,
+          tombstone: 0,
+        }),
+      ]),
+    );
 
     // create our test category group
     const mainGroupId = await api.createCategoryGroup({
@@ -315,13 +346,221 @@ describe('API CRUD operations', () => {
     );
   });
 
+  // apis: getRules, getPayeeRules, createRule, updateRule, deleteRule
+  test('Rules: successfully update rules', async () => {
+    await api.createPayee({ name: 'test-payee' });
+    await api.createPayee({ name: 'test-payee2' });
+
+    // create our test rules
+    const rule = await api.createRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: 'test-payee',
+        },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+        },
+      ],
+    });
+    const rule2 = await api.createRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: 'test-payee2',
+        },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+        },
+      ],
+    });
+
+    // get existing rules
+    const rules = await api.getRules();
+    expect(rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule2.id,
+          stage: 'pre',
+        }),
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule.id,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    // get by payee
+    expect(await api.getPayeeRules('test-payee')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule.id,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    expect(await api.getPayeeRules('test-payee2')).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule2.id,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    // update one rule
+    const updatedRule = {
+      ...rule,
+      stage: 'post',
+      conditionsOp: 'or',
+    };
+    expect(await api.updateRule(updatedRule)).toEqual(updatedRule);
+
+    expect(await api.getRules()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee',
+            }),
+          ]),
+          conditionsOp: 'or',
+          id: rule.id,
+          stage: 'post',
+        }),
+        expect.objectContaining({
+          actions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'category',
+              op: 'set',
+              type: 'id',
+              value: 'fc3825fd-b982-4b72-b768-5b30844cf832',
+            }),
+          ]),
+          conditions: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'payee',
+              op: 'is',
+              type: 'id',
+              value: 'test-payee2',
+            }),
+          ]),
+          conditionsOp: 'and',
+          id: rule2.id,
+          stage: 'pre',
+        }),
+      ]),
+    );
+
+    // delete rules
+    await api.deleteRule(rules[1]);
+    expect(await api.getRules()).toHaveLength(1);
+
+    await api.deleteRule(rules[0]);
+    expect(await api.getRules()).toHaveLength(0);
+  });
+
   // apis: addTransactions, getTransactions, importTransactions, updateTransaction, deleteTransaction
   test('Transactions: successfully update transactions', async () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);
 
     let newTransaction = [
-      { date: '2023-11-03', imported_id: '11', amount: 100 },
-      { date: '2023-11-03', imported_id: '11', amount: 100 },
+      { date: '2023-11-03', imported_id: '11', amount: 100, notes: 'notes' },
+      { date: '2023-11-03', imported_id: '12', amount: 100, notes: '' },
     ];
 
     const addResult = await api.addTransactions(accountId, newTransaction, {
@@ -344,8 +583,9 @@ describe('API CRUD operations', () => {
     expect(transactions).toHaveLength(2);
 
     newTransaction = [
-      { date: '2023-12-03', imported_id: '11', amount: 100 },
-      { date: '2023-12-03', imported_id: '22', amount: 200 },
+      { date: '2023-12-03', imported_id: '11', amount: 100, notes: 'notes' },
+      { date: '2023-12-03', imported_id: '12', amount: 100, notes: 'notes' },
+      { date: '2023-12-03', imported_id: '22', amount: 200, notes: '' },
     ];
 
     const reconciled = await api.importTransactions(accountId, newTransaction);
@@ -361,9 +601,22 @@ describe('API CRUD operations', () => {
       '2023-12-31',
     );
     expect(transactions).toEqual(
-      expect.arrayContaining(
-        newTransaction.map(trans => expect.objectContaining(trans)),
-      ),
+      expect.arrayContaining([
+        expect.objectContaining({ imported_id: '22', amount: 200 }),
+      ]),
+    );
+    expect(transactions).toHaveLength(1);
+
+    // confirm imported transactions update perfomed
+    transactions = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    expect(transactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ notes: 'notes', amount: 100 }),
+      ]),
     );
     expect(transactions).toHaveLength(2);
 

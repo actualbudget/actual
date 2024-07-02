@@ -4,9 +4,9 @@ import { useLocation } from 'react-router-dom';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
-import { type CommonModalProps } from '../../types/modals';
 import { Modal } from '../common/Modal';
 import { ManageRules } from '../ManageRules';
+import { type CommonModalProps } from '../Modals';
 
 type ManageRulesModalProps = {
   modalProps: CommonModalProps;
@@ -28,15 +28,7 @@ export function ManageRulesModal({
   }
 
   return (
-    <Modal
-      title="Rules"
-      padding={0}
-      loading={loading}
-      {...modalProps}
-      style={{
-        flex: 1,
-      }}
-    >
+    <Modal title="Rules" loading={loading} {...modalProps}>
       {() => <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />}
     </Modal>
   );

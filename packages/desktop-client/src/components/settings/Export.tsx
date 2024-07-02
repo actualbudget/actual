@@ -1,11 +1,10 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { format } from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
@@ -16,8 +15,8 @@ import { Setting } from './UI';
 export function ExportBudget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const budgetId = useSelector(state => state.prefs.local.id);
-  const encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);
+  const [budgetName] = useLocalPref('budgetName');
+  const [encryptKeyId] = useLocalPref('encryptKeyId');
 
   async function onExport() {
     setIsLoading(true);
@@ -32,9 +31,9 @@ export function ExportBudget() {
       return;
     }
 
-    window.Actual.saveFile(
+    window.Actual?.saveFile(
       response.data,
-      `${format(new Date(), 'yyyy-MM-dd')}-${budgetId}.zip`,
+      `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
       'Export budget',
     );
     setIsLoading(false);

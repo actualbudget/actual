@@ -5,11 +5,13 @@ import React, {
   useState,
   useEffect,
   type FocusEventHandler,
+  type KeyboardEventHandler,
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
-import { amountToInteger } from 'loot-core/src/shared/util';
+import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
@@ -23,14 +25,16 @@ type AmountInputProps = {
   inputRef?: Ref<HTMLInputElement>;
   value: number;
   zeroSign?: '-' | '+';
-  onChange?: (value: string) => void;
+  onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
+  onEnter?: KeyboardEventHandler<HTMLInputElement>;
   onUpdate?: (amount: number) => void;
   style?: CSSProperties;
-  textStyle?: CSSProperties;
+  inputStyle?: CSSProperties;
   focused?: boolean;
   disabled?: boolean;
+  autoDecimals?: boolean;
 };
 
 export function AmountInput({
@@ -40,12 +44,14 @@ export function AmountInput({
   zeroSign = '-', // + or -
   onFocus,
   onBlur,
-  onChange,
+  onChangeValue,
   onUpdate,
+  onEnter,
   style,
-  textStyle,
+  inputStyle,
   focused,
   disabled = false,
+  autoDecimals = false,
 }: AmountInputProps) {
   const format = useFormat();
   const negative = (initialValue === 0 && zeroSign === '-') || initialValue < 0;
@@ -55,8 +61,9 @@ export function AmountInput({
   useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
 
   const buttonRef = useRef();
-  const ref = useRef<HTMLInputElement>();
+  const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
+  const [hideFraction = false] = useLocalPref('hideFraction');
 
   useEffect(() => {
     if (focused) {
@@ -69,15 +76,14 @@ export function AmountInput({
   }
 
   function getAmount(negate) {
-    const valueOrInitial = Math.abs(
-      amountToInteger(evalArithmetic(value, initialValueAbsolute)),
-    );
+    const valueOrInitial = Math.abs(amountToInteger(evalArithmetic(value)));
     return negate ? valueOrInitial * -1 : valueOrInitial;
   }
 
   function onInputTextChange(val) {
+    val = autoDecimals ? appendDecimals(val, hideFraction) : val;
     setValue(val ? val : '');
-    onChange?.(val);
+    onChangeValue?.(val);
   }
 
   function fireUpdate(negate) {
@@ -117,15 +123,16 @@ export function AmountInput({
       disabled={disabled}
       focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
-      inputStyle={{ paddingLeft: 0, ...textStyle }}
+      inputStyle={inputStyle}
       onKeyUp={e => {
         if (e.key === 'Enter') {
           fireUpdate(negative);
         }
       }}
-      onUpdate={onInputTextChange}
+      onChangeValue={onInputTextChange}
       onBlur={onInputAmountBlur}
       onFocus={onFocus}
+      onEnter={onEnter}
     />
   );
 }

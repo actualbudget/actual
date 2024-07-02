@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useState } from 'react';
 
 import { css } from 'glamor';
 import {
@@ -12,30 +12,55 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core/src/shared/util';
+import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core/types/models/reports';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
-import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
+import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
 
+import { showActivity } from './showActivity';
+
 type PayloadItem = {
+  dataKey: string;
+  value: number;
+  date: string;
+  color: string;
   payload: {
     date: string;
-    assets: number | string;
-    debt: number | string;
-    networth: number | string;
-    change: number | string;
   };
 };
 
 type CustomTooltipProps = {
+  compact: boolean;
+  tooltip: string;
   active?: boolean;
   payload?: PayloadItem[];
 };
 
-const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+const CustomTooltip = ({
+  compact,
+  tooltip,
+  active,
+  payload,
+}: CustomTooltipProps) => {
   if (active && payload && payload.length) {
+    let sumTotals = 0;
     return (
       <div
         className={`${css({
@@ -53,14 +78,33 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            <PrivacyFilter>
-              <AlignedText left="Assets:" right={payload[0].payload.assets} />
-              <AlignedText left="Debt:" right={payload[0].payload.debt} />
-              <AlignedText
-                left="Change:"
-                right={<strong>{payload[0].payload.change}</strong>}
-              />
-            </PrivacyFilter>
+            {payload
+              .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
+              .map((p: PayloadItem, index: number) => {
+                sumTotals += p.value;
+                return (
+                  (compact ? index < 4 : true) && (
+                    <AlignedText
+                      key={index}
+                      left={p.dataKey}
+                      right={amountToCurrency(p.value)}
+                      style={{
+                        color: p.color,
+                        textDecoration:
+                          tooltip === p.dataKey ? 'underline' : 'inherit',
+                      }}
+                    />
+                  )
+                );
+              })}
+            {payload.length > 5 && compact && '...'}
+            <AlignedText
+              left="Total"
+              right={amountToCurrency(sumTotals)}
+              style={{
+                fontWeight: 600,
+              }}
+            />
           </div>
         </div>
       </div>
@@ -70,13 +114,57 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
 
 type LineGraphProps = {
   style?: CSSProperties;
-  graphData;
+  data: DataEntity;
+  filters: RuleConditionEntity[];
+  groupBy: string;
   compact?: boolean;
+  balanceTypeOp: balanceTypeOpType;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
+  interval?: string;
 };
 
-export function LineGraph({ style, graphData, compact }: LineGraphProps) {
-  const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+export function LineGraph({
+  style,
+  data,
+  filters,
+  groupBy,
+  compact,
+  balanceTypeOp,
+  showHiddenCategories,
+  showOffBudget,
+  interval,
+}: LineGraphProps) {
+  const navigate = useNavigate();
+  const categories = useCategories();
+  const accounts = useAccounts();
+  const privacyMode = usePrivacyMode();
+  const [pointer, setPointer] = useState('');
+  const [tooltip, setTooltip] = useState('');
+  const { isNarrowWidth } = useResponsive();
+
+  const largestValue = data.intervalData
+    .map(c => c[balanceTypeOp])
+    .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
+
+  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 5;
+
+  const onShowActivity = (item, id, payload) => {
+    showActivity({
+      navigate,
+      categories,
+      accounts,
+      balanceTypeOp,
+      filters,
+      showHiddenCategories,
+      showOffBudget,
+      type: 'time',
+      startDate: payload.payload.intervalStartDate,
+      endDate: payload.payload.intervalEndDate,
+      field: groupBy.toLowerCase(),
+      id,
+      interval,
+    });
   };
 
   return (
@@ -87,29 +175,75 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
       }}
     >
       {(width, height) =>
-        graphData && (
+        data && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <LineChart
                 width={width}
                 height={height}
-                data={graphData.data}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                data={data.intervalData}
+                margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
+                style={{ cursor: pointer }}
               >
-                <Tooltip
-                  content={<CustomTooltip />}
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
+                {(!isNarrowWidth || !compact) && (
+                  <Tooltip
+                    content={
+                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                  />
+                )}
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="x" />
-                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                    <YAxis
+                      tickFormatter={value =>
+                        getCustomTick(
+                          amountToCurrencyNoDecimal(value),
+                          privacyMode,
+                        )
+                      }
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                      tickSize={0}
+                    />
                   </>
                 )}
-                <Line type="monotone" dataKey="y" stroke="#8884d8" />
+                {data.legend.map((entry, index) => {
+                  return (
+                    <Line
+                      key={index}
+                      strokeWidth={2}
+                      type="monotone"
+                      dataKey={entry.name}
+                      stroke={entry.color}
+                      activeDot={{
+                        r: entry.name === tooltip && !compact ? 8 : 3,
+                        onMouseEnter: () => {
+                          setTooltip(entry.name);
+                          if (!['Group', 'Interval'].includes(groupBy)) {
+                            setPointer('pointer');
+                          }
+                        },
+                        onMouseLeave: () => {
+                          setPointer('');
+                          setTooltip('');
+                        },
+                        onClick: (e, payload) =>
+                          !isNarrowWidth &&
+                          !['Group', 'Interval'].includes(groupBy) &&
+                          onShowActivity(e, entry.id, payload),
+                      }}
+                    />
+                  );
+                })}
               </LineChart>
             </div>
           </ResponsiveContainer>

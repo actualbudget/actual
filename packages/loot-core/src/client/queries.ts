@@ -151,6 +151,47 @@ export function offbudgetAccountBalance() {
   };
 }
 
+export function categoryBalance(category, month) {
+  return {
+    name: `balance-${category.id}`,
+    query: q('transactions')
+      .filter({
+        category: category.id,
+        date: { $transform: '$month', $eq: month },
+      })
+      .options({ splits: 'inline' })
+      .calculate({ $sum: '$amount' }),
+  };
+}
+
+export function categoryBalanceCleared(category, month) {
+  return {
+    name: `balanceCleared-${category.id}`,
+    query: q('transactions')
+      .filter({
+        category: category.id,
+        date: { $transform: '$month', $eq: month },
+        cleared: true,
+      })
+      .options({ splits: 'inline' })
+      .calculate({ $sum: '$amount' }),
+  };
+}
+
+export function categoryBalanceUncleared(category, month) {
+  return {
+    name: `balanceUncleared-${category.id}`,
+    query: q('transactions')
+      .filter({
+        category: category.id,
+        date: { $transform: '$month', $eq: month },
+        cleared: false,
+      })
+      .options({ splits: 'inline' })
+      .calculate({ $sum: '$amount' }),
+  };
+}
+
 const uncategorizedQuery = q('transactions').filter({
   'account.offbudget': false,
   category: null,

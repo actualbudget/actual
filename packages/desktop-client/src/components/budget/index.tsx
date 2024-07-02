@@ -1,42 +1,33 @@
 // @ts-strict-ignore
-import React, {
-  memo,
-  useContext,
-  useMemo,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
-import { useSelector } from 'react-redux';
-import {
-  type NavigateFunction,
-  type PathMatch,
-  useLocation,
-  useMatch,
-} from 'react-router-dom';
+import React, { memo, useContext, useMemo, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { type QueriesState } from 'loot-core/src/client/state-types/queries';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
-  addCategory,
+  addNotification,
+  applyBudgetAction,
+  createCategory,
+  createGroup,
+  deleteCategory,
+  deleteGroup,
+  getCategories,
+  loadPrefs,
   moveCategory,
   moveCategoryGroup,
+  pushModal,
   updateCategory,
-  deleteCategory,
-  addGroup,
   updateGroup,
-  deleteGroup,
-} from 'loot-core/src/shared/categories';
+} from 'loot-core/src/client/actions';
+import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
+import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { type GlobalPrefs, type LocalPrefs } from 'loot-core/src/types/prefs';
 
-import { type BoundActions, useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import { View } from '../common/View';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import {
   SWITCH_BUDGET_MESSAGE_TYPE,
   TitlebarContext,
@@ -48,7 +39,7 @@ import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as report from './report/ReportComponents';
 import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/RolloverComponents';
-import { RolloverContext } from './rollover/RolloverContext';
+import { RolloverProvider } from './rollover/RolloverContext';
 import { prewarmAllMonths, prewarmMonth, switchBudgetType } from './util';
 
 type ReportComponents = {
@@ -71,64 +62,40 @@ type RolloverComponents = {
   IncomeHeaderComponent: typeof rollover.IncomeHeaderMonth;
 };
 
-type BudgetProps = {
+type BudgetInnerProps = {
   accountId?: string;
-  startMonth: LocalPrefs['budget.startMonth'];
-  collapsedPrefs: LocalPrefs['budget.collapsed'];
-  summaryCollapsed: LocalPrefs['budget.summaryCollapsed'];
-  budgetType: LocalPrefs['budgetType'];
-  maxMonths: GlobalPrefs['maxMonths'];
-  categoryGroups: QueriesState['categories']['grouped'];
   reportComponents: ReportComponents;
   rolloverComponents: RolloverComponents;
   titlebar: TitlebarContextValue;
-  match: PathMatch<string>;
-  spreadsheet: ReturnType<typeof useSpreadsheet>;
-  navigate: NavigateFunction;
-  getCategories: BoundActions['getCategories'];
-  savePrefs: BoundActions['savePrefs'];
-  createCategory: BoundActions['createCategory'];
-  updateCategory: BoundActions['updateCategory'];
-  pushModal: BoundActions['pushModal'];
-  deleteCategory: BoundActions['deleteCategory'];
-  createGroup: BoundActions['createGroup'];
-  updateGroup: BoundActions['updateGroup'];
-  deleteGroup: BoundActions['deleteGroup'];
-  applyBudgetAction: BoundActions['applyBudgetAction'];
-  moveCategory: BoundActions['moveCategory'];
-  moveCategoryGroup: BoundActions['moveCategoryGroup'];
-  loadPrefs: BoundActions['loadPrefs'];
-  addNotification: BoundActions['addNotification'];
 };
 
-function BudgetInner(props: BudgetProps) {
+function BudgetInner(props: BudgetInnerProps) {
   const currentMonth = monthUtils.currentMonth();
-  const tableRef = useRef(null);
-
-  const [initialized, setInitialized] = useState(false);
-  const [prewarmStartMonth, setPrewarmStartMonth] = useState(
-    props.startMonth || currentMonth,
+  const spreadsheet = useSpreadsheet();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
+    'budget.summaryCollapsed',
   );
-
-  const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
-  const [isAddingGroup, setIsAddingGroup] = useState(false);
-  const [collapsed, setCollapsed] = useState(props.collapsedPrefs || []);
+  const [startMonthPref, setStartMonthPref] = useLocalPref('budget.startMonth');
+  const startMonth = startMonthPref || currentMonth;
   const [bounds, setBounds] = useState({
-    start: currentMonth,
-    end: currentMonth,
+    start: startMonth,
+    end: startMonth,
   });
-  const [categoryGroups, setCategoryGroups] = useState(null);
-  const [summaryCollapsed, setSummaryCollapsed] = useState(
-    props.summaryCollapsed,
-  );
+  const [budgetTypePref] = useLocalPref('budgetType');
+  const budgetType = budgetTypePref || 'rollover';
+  const [maxMonthsPref] = useGlobalPref('maxMonths');
+  const maxMonths = maxMonthsPref || 1;
+  const [initialized, setInitialized] = useState(false);
+  const { grouped: categoryGroups } = useCategories();
 
-  async function loadCategories() {
-    const result = await props.getCategories();
-    setCategoryGroups(result.grouped);
+  function loadCategories() {
+    dispatch(getCategories());
   }
 
   useEffect(() => {
-    const { titlebar, budgetType } = props;
+    const { titlebar } = props;
 
     async function run() {
       loadCategories();
@@ -138,9 +105,9 @@ function BudgetInner(props: BudgetProps) {
 
       await prewarmAllMonths(
         budgetType,
-        props.spreadsheet,
+        spreadsheet,
         { start, end },
-        prewarmStartMonth,
+        startMonth,
       );
 
       setInitialized(true);
@@ -161,17 +128,6 @@ function BudgetInner(props: BudgetProps) {
       }),
 
       listen('undo-event', ({ tables }) => {
-        if (tableRef.current) {
-          // g dammit
-          // We need to clear the editing cell, otherwise when
-          // the user navigates away from the page they will
-          // accidentally clear the undo stack if they have pressed
-          // undo, since the cell will save itself on blur (worst case:
-          // undo takes you to another screen and then you can't redo
-          // any of the budget changes)
-          tableRef.current.clearEditing();
-        }
-
         if (tables.includes('categories')) {
           loadCategories();
         }
@@ -186,10 +142,6 @@ function BudgetInner(props: BudgetProps) {
   }, []);
 
   useEffect(() => {
-    props.savePrefs({ 'budget.collapsed': collapsed });
-  }, [collapsed]);
-
-  useEffect(() => {
     send('get-budget-bounds').then(({ start, end }) => {
       if (bounds.start !== start || bounds.end !== end) {
         setBounds({ start, end });
@@ -198,11 +150,9 @@ function BudgetInner(props: BudgetProps) {
   }, [props.accountId]);
 
   const onMonthSelect = async (month, numDisplayed) => {
-    setPrewarmStartMonth(month);
+    setStartMonthPref(month);
 
     const warmingMonth = month;
-
-    const startMonth = props.startMonth || currentMonth;
 
     // We could be smarter about this, but this is a good start. We
     // optimize for the case where users press the left/right button
@@ -213,51 +163,37 @@ function BudgetInner(props: BudgetProps) {
     if (month < startMonth) {
       // pre-warm prev month
       await prewarmMonth(
-        props.budgetType,
-        props.spreadsheet,
+        budgetType,
+        spreadsheet,
         monthUtils.subMonths(month, 1),
       );
     } else if (month > startMonth) {
       // pre-warm next month
       await prewarmMonth(
-        props.budgetType,
-        props.spreadsheet,
+        budgetType,
+        spreadsheet,
         monthUtils.addMonths(month, numDisplayed),
       );
     }
 
     if (warmingMonth === month) {
-      props.savePrefs({ 'budget.startMonth': month });
+      setStartMonthPref(month);
     }
   };
 
-  const onShowNewCategory = groupId => {
-    setNewCategoryForGroup(groupId);
-    setCollapsed(state => state.filter(c => c !== groupId));
-  };
-
-  const onHideNewCategory = () => {
-    setNewCategoryForGroup(null);
-  };
-
-  const onShowNewGroup = () => {
-    setIsAddingGroup(true);
-  };
-
-  const onHideNewGroup = () => {
-    setIsAddingGroup(false);
-  };
-
   const categoryNameAlreadyExistsNotification = name => {
-    props.addNotification({
-      type: 'error',
-      message: `Category ‘${name}’ already exists in group (May be Hidden)`,
-    });
+    dispatch(
+      addNotification({
+        type: 'error',
+        message: `Category ‘${name}’ already exists in group (May be Hidden)`,
+      }),
+    );
   };
 
   const onSaveCategory = async category => {
+    const cats = await send('get-categories');
     const exists =
-      (await props.getCategories()).grouped
+      cats.grouped
         .filter(g => g.id === category.cat_group)[0]
         .categories.filter(
           c => c.name.toUpperCase() === category.name.toUpperCase(),
@@ -271,24 +207,16 @@ function BudgetInner(props: BudgetProps) {
     }
 
     if (category.id === 'new') {
-      const id = await props.createCategory(
-        category.name,
-        category.cat_group,
-        category.is_income,
-        category.hidden,
-      );
-
-      setNewCategoryForGroup(null);
-      setCategoryGroups(state =>
-        addCategory(state, {
-          ...category,
-          is_income: category.is_income ? 1 : 0,
-          id,
-        }),
+      dispatch(
+        createCategory(
+          category.name,
+          category.cat_group,
+          category.is_income,
+          category.hidden,
+        ),
       );
     } else {
-      props.updateCategory(category);
-      setCategoryGroups(state => updateCategory(state, category));
+      dispatch(updateCategory(category));
     }
   };
 
@@ -296,38 +224,26 @@ function BudgetInner(props: BudgetProps) {
     const mustTransfer = await send('must-category-transfer', { id });
 
     if (mustTransfer) {
-      props.pushModal('confirm-category-delete', {
-        category: id,
-        onDelete: transferCategory => {
-          if (id !== transferCategory) {
-            props.deleteCategory(id, transferCategory);
-
-            setCategoryGroups(state => deleteCategory(state, id));
-          }
-        },
-      });
-    } else {
-      props.deleteCategory(id);
-
-      setCategoryGroups(state => deleteCategory(state, id));
-    }
-  };
-
-  const onSaveGroup = async group => {
-    if (group.id === 'new') {
-      const id = await props.createGroup(group.name);
-      setIsAddingGroup(false);
-      setCategoryGroups(state =>
-        addGroup(state, {
-          ...group,
-          is_income: 0,
-          categories: group.categories || [],
-          id,
+      dispatch(
+        pushModal('confirm-category-delete', {
+          category: id,
+          onDelete: transferCategory => {
+            if (id !== transferCategory) {
+              dispatch(deleteCategory(id, transferCategory));
+            }
+          },
         }),
       );
     } else {
-      props.updateGroup(group);
-      setCategoryGroups(state => updateGroup(state, group));
+      dispatch(deleteCategory(id));
+    }
+  };
+
+  const onSaveGroup = group => {
+    if (group.id === 'new') {
+      dispatch(createGroup(group.name));
+    } else {
+      dispatch(updateGroup(group));
     }
   };
 
@@ -343,43 +259,45 @@ function BudgetInner(props: BudgetProps) {
     }
 
     if (mustTransfer) {
-      props.pushModal('confirm-category-delete', {
-        group: id,
-        onDelete: transferCategory => {
-          props.deleteGroup(id, transferCategory);
-
-          setCategoryGroups(state => deleteGroup(state, id));
-        },
-      });
+      dispatch(
+        pushModal('confirm-category-delete', {
+          group: id,
+          onDelete: transferCategory => {
+            dispatch(deleteGroup(id, transferCategory));
+          },
+        }),
+      );
     } else {
-      props.deleteGroup(id);
-
-      setCategoryGroups(state => deleteGroup(state, id));
+      dispatch(deleteGroup(id));
     }
   };
 
   const onBudgetAction = (month, type, args) => {
-    props.applyBudgetAction(month, type, args);
+    dispatch(applyBudgetAction(month, type, args));
   };
 
-  const onShowActivity = (categoryName, categoryId, month) => {
-    props.navigate('/accounts', {
+  const onShowActivity = (categoryId, month) => {
+    const filterConditions = [
+      { field: 'category', op: 'is', value: categoryId, type: 'id' },
+      {
+        field: 'date',
+        op: 'is',
+        value: month,
+        options: { month: true },
+        type: 'date',
+      },
+    ];
+    navigate('/accounts', {
       state: {
         goBack: true,
-        filterName: `${categoryName} (${monthUtils.format(
-          month,
-          'MMMM yyyy',
-        )})`,
-        filter: {
-          category: categoryId,
-          date: { $transform: '$month', $eq: month },
-        },
+        filterConditions,
+        categoryId,
       },
     });
   };
 
   const onReorderCategory = async sortInfo => {
-    const cats = await props.getCategories();
+    const cats = await send('get-categories');
     const moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
     const exists =
       cats.grouped
@@ -394,23 +312,15 @@ function BudgetInner(props: BudgetProps) {
       return;
     }
 
-    props.moveCategory(sortInfo.id, sortInfo.groupId, sortInfo.targetId);
-    setCategoryGroups(state =>
-      moveCategory(state, sortInfo.id, sortInfo.groupId, sortInfo.targetId),
-    );
+    dispatch(moveCategory(sortInfo.id, sortInfo.groupId, sortInfo.targetId));
   };
 
   const onReorderGroup = async sortInfo => {
-    props.moveCategoryGroup(sortInfo.id, sortInfo.targetId);
-    setCategoryGroups(state =>
-      moveCategoryGroup(state, sortInfo.id, sortInfo.targetId),
-    );
+    dispatch(moveCategoryGroup(sortInfo.id, sortInfo.targetId));
   };
 
   const onToggleCollapse = () => {
-    const collapsed = !summaryCollapsed;
-    setSummaryCollapsed(collapsed);
-    props.savePrefs({ 'budget.summaryCollapsed': collapsed });
+    setSummaryCollapsedPref(!summaryCollapsed);
   };
 
   const onTitlebarEvent = async ({ type, payload }: TitlebarMessage) => {
@@ -418,10 +328,12 @@ function BudgetInner(props: BudgetProps) {
       case SWITCH_BUDGET_MESSAGE_TYPE: {
         await switchBudgetType(
           payload.newBudgetType,
-          props.spreadsheet,
+          spreadsheet,
           bounds,
-          prewarmStartMonth,
-          () => props.loadPrefs(),
+          startMonth,
+          async () => {
+            dispatch(loadPrefs());
+          },
         );
         break;
       }
@@ -429,23 +341,14 @@ function BudgetInner(props: BudgetProps) {
     }
   };
 
-  const {
-    maxMonths: originalMaxMonths,
-    budgetType: type,
-    reportComponents,
-    rolloverComponents,
-  } = props;
-
-  const maxMonths = originalMaxMonths || 1;
+  const { reportComponents, rolloverComponents } = props;
 
   if (!initialized || !categoryGroups) {
     return null;
   }
 
-  const startMonth = props.startMonth || currentMonth;
-
   let table;
-  if (type === 'report') {
+  if (budgetType === 'report') {
     table = (
       <ReportProvider
         summaryCollapsed={summaryCollapsed}
@@ -453,23 +356,13 @@ function BudgetInner(props: BudgetProps) {
         onToggleSummaryCollapse={onToggleCollapse}
       >
         <DynamicBudgetTable
-          ref={tableRef}
-          type={type}
-          categoryGroups={categoryGroups}
-          prewarmStartMonth={prewarmStartMonth}
+          type={budgetType}
+          prewarmStartMonth={startMonth}
           startMonth={startMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-          newCategoryForGroup={newCategoryForGroup}
-          isAddingGroup={isAddingGroup}
           dataComponents={reportComponents}
           onMonthSelect={onMonthSelect}
-          onShowNewCategory={onShowNewCategory}
-          onHideNewCategory={onHideNewCategory}
-          onShowNewGroup={onShowNewGroup}
-          onHideNewGroup={onHideNewGroup}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
           onSaveCategory={onSaveCategory}
@@ -483,30 +376,19 @@ function BudgetInner(props: BudgetProps) {
     );
   } else {
     table = (
-      <RolloverContext
-        categoryGroups={categoryGroups}
+      <RolloverProvider
         summaryCollapsed={summaryCollapsed}
         onBudgetAction={onBudgetAction}
         onToggleSummaryCollapse={onToggleCollapse}
       >
         <DynamicBudgetTable
-          ref={tableRef}
-          type={type}
-          categoryGroups={categoryGroups}
-          prewarmStartMonth={prewarmStartMonth}
+          type={budgetType}
+          prewarmStartMonth={startMonth}
           startMonth={startMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-          newCategoryForGroup={newCategoryForGroup}
-          isAddingGroup={isAddingGroup}
           dataComponents={rolloverComponents}
           onMonthSelect={onMonthSelect}
-          onShowNewCategory={onShowNewCategory}
-          onHideNewCategory={onHideNewCategory}
-          onShowNewGroup={onShowNewGroup}
-          onHideNewGroup={onHideNewGroup}
           onDeleteCategory={onDeleteCategory}
           onDeleteGroup={onDeleteGroup}
           onSaveCategory={onSaveCategory}
@@ -516,45 +398,25 @@ function BudgetInner(props: BudgetProps) {
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
         />
-      </RolloverContext>
+      </RolloverProvider>
     );
   }
 
-  return <View style={{ flex: 1 }}>{table}</View>;
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
+      <View style={{ flex: 1 }}>{table}</View>
+    </NamespaceContext.Provider>
+  );
 }
 
 const RolloverBudgetSummary = memo<{ month: string }>(props => {
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  return (
-    <rollover.BudgetSummary
-      {...props}
-      isGoalTemplatesEnabled={isGoalTemplatesEnabled}
-    />
-  );
+  return <rollover.BudgetSummary {...props} />;
 });
 
-export function Budget() {
-  const startMonth = useSelector(
-    state => state.prefs.local['budget.startMonth'],
-  );
-  const collapsedPrefs = useSelector(
-    state => state.prefs.local['budget.collapsed'],
-  );
-  const summaryCollapsed = useSelector(
-    state => state.prefs.local['budget.summaryCollapsed'],
-  );
-  const budgetType = useSelector(
-    state => state.prefs.local.budgetType || 'rollover',
-  );
-  const maxMonths = useSelector(state => state.prefs.global.maxMonths);
-  const { grouped: categoryGroups } = useCategories();
+RolloverBudgetSummary.displayName = 'RolloverBudgetSummary';
 
-  const actions = useActions();
-  const spreadsheet = useSpreadsheet();
+export function Budget() {
   const titlebar = useContext(TitlebarContext);
-  const location = useLocation();
-  const match = useMatch(location.pathname);
-  const navigate = useNavigate();
 
   const reportComponents = useMemo<ReportComponents>(
     () => ({
@@ -596,19 +458,9 @@ export function Budget() {
       }}
     >
       <BudgetInner
-        startMonth={startMonth}
-        collapsedPrefs={collapsedPrefs}
-        summaryCollapsed={summaryCollapsed}
-        budgetType={budgetType}
-        maxMonths={maxMonths}
-        categoryGroups={categoryGroups}
-        {...actions}
         reportComponents={reportComponents}
         rolloverComponents={rolloverComponents}
-        spreadsheet={spreadsheet}
         titlebar={titlebar}
-        navigate={navigate}
-        match={match}
       />
     </View>
   );

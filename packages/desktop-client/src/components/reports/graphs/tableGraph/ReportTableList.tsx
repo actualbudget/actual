@@ -1,95 +1,102 @@
-// @ts-strict-ignore
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type GroupedEntity,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
-import { Cell, Row } from '../../../table';
+import { Row } from '../../../table';
+
+import { RenderTableRow } from './RenderTableRow';
+import { type renderRowProps } from './ReportTable';
 
 type ReportTableListProps = {
-  data: DataEntity[];
-  mode?: string;
-  monthsCount?: number;
+  data: DataEntity;
+  mode: string;
   groupBy: string;
-  renderItem;
-  compact: boolean;
+  renderRow: (arg: renderRowProps) => ReactNode;
+  style?: CSSProperties;
 };
 
 export function ReportTableList({
   data,
-  monthsCount,
   mode,
   groupBy,
-  renderItem,
-  compact,
+  renderRow,
+  style,
 }: ReportTableListProps) {
-  const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
-
-  type RenderRowProps = {
-    index: number;
-    parent_index?: number;
-    style?: CSSProperties;
-    compact: boolean;
-  };
-  function RenderRow({ index, parent_index, style, compact }: RenderRowProps) {
-    const item =
-      parent_index === undefined
-        ? data[index]
-        : data[parent_index].categories[index];
-
-    return renderItem({
-      item,
-      groupByItem,
-      mode,
-      style,
-      monthsCount,
-      compact,
-    });
-  }
+  const metadata: GroupedEntity[] | undefined =
+    groupBy === 'Category'
+      ? data.groupedData || []
+      : groupBy === 'Interval'
+        ? data.intervalData.map(interval => {
+            return {
+              id: '',
+              name: '',
+              date: interval.date,
+              totalAssets: interval.totalAssets,
+              totalDebts: interval.totalDebts,
+              netAssets: interval.netAssets,
+              netDebts: interval.netDebts,
+              totalTotals: interval.totalTotals,
+              intervalData: [],
+              categories: [],
+            };
+          })
+        : data.data;
 
   return (
     <View>
-      {data.map((item, index) => {
-        return (
-          <View key={item.id}>
-            {data ? (
-              <>
-                <RenderRow
+      {metadata ? (
+        <View>
+          {metadata.map((item, index) => {
+            return (
+              <View key={index}>
+                <RenderTableRow
                   index={index}
-                  compact={compact}
-                  style={
-                    item.categories && {
+                  renderRow={renderRow}
+                  mode={mode}
+                  metadata={metadata}
+                  style={{
+                    ...(item.categories && {
                       color: theme.tableRowHeaderText,
                       backgroundColor: theme.tableRowHeaderBackground,
                       fontWeight: 600,
-                    }
-                  }
+                    }),
+                    ...style,
+                  }}
                 />
                 {item.categories && (
                   <>
                     <View>
-                      {item.categories.map((category, i) => {
-                        return (
-                          <RenderRow
-                            key={category.id}
-                            index={i}
-                            compact={compact}
-                            parent_index={index}
-                          />
-                        );
-                      })}
+                      {item.categories.map(
+                        (category: GroupedEntity, i: number) => {
+                          return (
+                            <RenderTableRow
+                              key={category.id}
+                              index={i}
+                              renderRow={renderRow}
+                              mode={mode}
+                              metadata={metadata}
+                              parent_index={index}
+                              style={style}
+                            />
+                          );
+                        },
+                      )}
                     </View>
                     <Row height={20} />
                   </>
                 )}
-              </>
-            ) : (
-              <Cell width="flex" />
-            )}
-          </View>
-        );
-      })}
+              </View>
+            );
+          })}
+        </View>
+      ) : (
+        <View width="flex" />
+      )}
     </View>
   );
 }

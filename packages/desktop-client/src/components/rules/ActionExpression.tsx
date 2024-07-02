@@ -1,7 +1,12 @@
 import React from 'react';
 
-import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import {
+  mapField,
+  friendlyOp,
+  ALLOCATION_METHODS,
+} from 'loot-core/src/shared/rules';
+import {
+  type SetSplitAmountRuleActionEntity,
   type LinkScheduleRuleActionEntity,
   type RuleActionEntity,
   type SetRuleActionEntity,
@@ -40,6 +45,8 @@ export function ActionExpression({ style, ...props }: ActionExpressionProps) {
     >
       {props.op === 'set' ? (
         <SetActionExpression {...props} />
+      ) : props.op === 'set-split-amount' ? (
+        <SetSplitAmountActionExpression {...props} />
       ) : props.op === 'link-schedule' ? (
         <LinkScheduleActionExpression {...props} />
       ) : null}
@@ -59,6 +66,29 @@ function SetActionExpression({
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>to </Text>
       <Value style={valueStyle} value={value} field={field} />
+    </>
+  );
+}
+
+function SetSplitAmountActionExpression({
+  op,
+  value,
+  options,
+}: SetSplitAmountRuleActionEntity) {
+  const method = options?.method;
+  if (!method) {
+    return null;
+  }
+
+  return (
+    <>
+      <Text>{friendlyOp(op)}</Text>{' '}
+      <Text style={valueStyle}>{ALLOCATION_METHODS[method]}</Text>
+      {method !== 'remainder' && ': '}
+      {method === 'fixed-amount' && (
+        <Value style={valueStyle} value={value} field="amount" />
+      )}
+      {method === 'fixed-percent' && <Text style={valueStyle}>{value}%</Text>}
     </>
   );
 }

@@ -1,74 +1,140 @@
+import { CategoryEntity } from './category';
 import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
-  id: string | undefined;
-  mode: string;
-  groupBy: string;
-  balanceType: string;
-  showEmpty: boolean;
-  showOffBudgetHidden: boolean;
-  showUncategorized: boolean;
-  graphType: string;
-  selectedCategories;
-  filters?: RuleConditionEntity[];
-  conditionsOp: string;
+  id: string;
   name: string;
   startDate: string;
   endDate: string;
   isDateStatic: boolean;
+  dateRange: string;
+  mode: string;
+  groupBy: string;
+  interval: string;
+  balanceType: string;
+  showEmpty: boolean;
+  showOffBudget: boolean;
+  showHiddenCategories: boolean;
+  includeCurrentInterval: boolean;
+  showUncategorized: boolean;
+  selectedCategories?: CategoryEntity[];
+  graphType: string;
+  conditions?: RuleConditionEntity[];
+  conditionsOp: string;
   data?: GroupedEntity;
   tombstone?: boolean;
 }
 
-export interface GroupedEntity {
-  data: DataEntity[];
-  monthData: DataEntity[];
-  groupedData: DataEntity[];
-  legend: LegendEntity[];
-  startDate: string;
-  endDate: string;
+export type balanceTypeOpType =
+  | 'totalAssets'
+  | 'totalDebts'
+  | 'totalTotals'
+  | 'netAssets'
+  | 'netDebts';
+
+export type SpendingMonthEntity = Record<
+  string | number,
+  {
+    cumulative: number;
+    daily: number;
+    date: string;
+    month: string;
+  }
+>;
+
+export interface SpendingDataEntity {
+  date: string;
+  totalAssets: number;
+  totalDebts: number;
+  totalTotals: number;
+  cumulative: number;
+}
+
+export interface SpendingEntity {
+  intervalData: {
+    months: SpendingMonthEntity;
+    day: string;
+    average: number;
+    thisMonth: number;
+    lastMonth: number;
+    lastYear: number;
+  }[];
+  startDate?: string;
+  endDate?: string;
   totalDebts: number;
   totalAssets: number;
+  totalTotals: number;
+}
+
+export interface DataEntity {
+  data?: GroupedEntity[];
+  intervalData: IntervalEntity[];
+  groupedData?: GroupedEntity[] | null;
+  legend?: LegendEntity[];
+  startDate?: string;
+  endDate?: string;
+  totalDebts: number;
+  totalAssets: number;
+  netAssets: number;
+  netDebts: number;
   totalTotals: number;
 }
 
 type LegendEntity = {
   name: string;
+  id: string | null;
   color: string;
 };
 
-export type ItemEntity = {
-  id: string;
-  name: string;
-  monthData: MonthData[];
+export type IntervalEntity = {
+  date?: string;
+  change?: number;
+  intervalStartDate?: string;
+  intervalEndDate?: string;
   totalAssets: number;
   totalDebts: number;
+  netAssets: number;
+  netDebts: number;
   totalTotals: number;
 };
 
-export type MonthData = {
-  date: string;
-  totalAssets: number;
-  totalDebts: number;
-  totalTotals: number;
-};
-
-export interface DataEntity {
+export interface GroupedEntity {
   id: string;
   name: string;
   date?: string;
-  monthData: MonthData[];
-  categories?: ItemEntity[];
+  intervalData: IntervalEntity[];
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
+  netAssets: number;
+  netDebts: number;
+  categories?: GroupedEntity[];
 }
 
-export type Month = {
-  month: string;
+export type Interval = {
+  interval: string;
 };
 
-export interface CustomReportData extends CustomReportEntity {
-  conditions_op?: string;
+export interface CustomReportData {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  date_static: number;
+  date_range: string;
+  mode: string;
+  group_by: string;
+  balance_type: string;
+  show_empty: number;
+  show_offbudget: number;
+  show_hidden: number;
+  include_current: number;
+  show_uncategorized: number;
+  selected_categories?: CategoryEntity[];
+  graph_type: string;
   conditions?: RuleConditionEntity[];
+  conditions_op: string;
+  metadata?: GroupedEntity;
+  interval: string;
+  color_scheme?: string;
 }

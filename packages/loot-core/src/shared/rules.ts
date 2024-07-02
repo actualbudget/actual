@@ -9,7 +9,15 @@ export const TYPE_INFO = {
     nullable: false,
   },
   id: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
     nullable: true,
   },
   saved: {
@@ -17,7 +25,15 @@ export const TYPE_INFO = {
     nullable: false,
   },
   string: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
     nullable: true,
   },
   number: {
@@ -46,6 +62,12 @@ export const FIELD_TYPES = new Map(
     saved: 'saved',
   }),
 );
+
+export const ALLOCATION_METHODS = {
+  'fixed-amount': 'a fixed amount',
+  'fixed-percent': 'a fixed percent of the remainder',
+  remainder: 'an equal portion of the remainder',
+};
 
 export function mapField(field, opts?) {
   opts = opts || {};
@@ -85,6 +107,8 @@ export function friendlyOp(op, type?) {
       return 'is between';
     case 'contains':
       return 'contains';
+    case 'matches':
+      return 'matches';
     case 'doesNotContain':
       return 'does not contain';
     case 'gt':
@@ -113,6 +137,8 @@ export function friendlyOp(op, type?) {
       return 'is false';
     case 'set':
       return 'set';
+    case 'set-split-amount':
+      return 'allocate';
     case 'link-schedule':
       return 'link schedule';
     case 'and':
@@ -159,6 +185,13 @@ export function sortNumbers(num1, num2) {
 }
 
 export function parse(item) {
+  if (item.op === 'set-split-amount') {
+    if (item.options.method === 'fixed-amount') {
+      return { ...item, value: item.value && integerToAmount(item.value) };
+    }
+    return item;
+  }
+
   switch (item.type) {
     case 'number': {
       let parsed = item.value;
@@ -186,6 +219,22 @@ export function parse(item) {
 }
 
 export function unparse({ error, inputKey, ...item }) {
+  if (item.op === 'set-split-amount') {
+    if (item.options.method === 'fixed-amount') {
+      return {
+        ...item,
+        value: item.value && amountToInteger(item.value),
+      };
+    }
+    if (item.options.method === 'fixed-percent') {
+      return {
+        ...item,
+        value: item.value && parseFloat(item.value),
+      };
+    }
+    return item;
+  }
+
   switch (item.type) {
     case 'number': {
       let unparsed = item.value;

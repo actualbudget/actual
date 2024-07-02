@@ -1,7 +1,7 @@
 import React, { type MouseEventHandler, type ReactNode } from 'react';
 
 import { type CSSProperties } from '../../style';
-import { AnchorLink } from '../common/AnchorLink';
+import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 type ItemContentProps = {
@@ -38,8 +38,8 @@ export function ItemContent({
       {children}
     </View>
   ) : (
-    <AnchorLink to={to} style={style} activeStyle={activeStyle}>
+    <Link to={to} style={style} activeStyle={activeStyle}>
       {children}
-    </AnchorLink>
+    </Link>
   );
 }

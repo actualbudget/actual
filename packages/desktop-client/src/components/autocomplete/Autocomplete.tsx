@@ -15,11 +15,42 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 import { css } from 'glamor';
 
 import { SvgRemove } from '../../icons/v2';
-import { theme, type CSSProperties } from '../../style';
+import { useResponsive } from '../../ResponsiveProvider';
+import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
+
+type CommonAutocompleteProps<T extends Item> = {
+  focused?: boolean;
+  embedded?: boolean;
+  containerProps?: HTMLProps<HTMLDivElement>;
+  labelProps?: { id?: string };
+  inputProps?: Omit<ComponentProps<typeof Input>, 'onChange'> & {
+    onChange?: (value: string) => void;
+  };
+  suggestions?: T[];
+  renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
+  renderItems?: (
+    items: T[],
+    getItemProps: (arg: { item: T }) => ComponentProps<typeof View>,
+    idx: number,
+    value?: string,
+  ) => ReactNode;
+  itemToString?: (item: T) => string;
+  shouldSaveFromKey?: (e: KeyboardEvent) => boolean;
+  filterSuggestions?: (suggestions: T[], value: string) => T[];
+  openOnFocus?: boolean;
+  getHighlightedIndex?: (suggestions: T[]) => number | null;
+  highlightFirst?: boolean;
+  onUpdate?: (id: T['id'], value: string) => void;
+  strict?: boolean;
+  clearOnBlur?: boolean;
+  clearOnSelect?: boolean;
+  closeOnBlur?: boolean;
+  onClose?: () => void;
+};
 
 type Item = {
   id?: string;
@@ -41,7 +72,7 @@ function findItem<T extends Item>(
   return value;
 }
 
-function getItemName(item: null | string | Item): string {
+function getItemName<T extends Item>(item: T | T['name'] | null): string {
   if (item == null) {
     return '';
   } else if (typeof item === 'string') {
@@ -50,7 +81,7 @@ function getItemName(item: null | string | Item): string {
   return item.name || '';
 }
 
-function getItemId(item: Item | Item['id']) {
+function getItemId<T extends Item>(item: T | T['id']) {
   if (typeof item === 'string') {
     return item;
   }
@@ -61,7 +92,16 @@ export function defaultFilterSuggestion<T extends Item>(
   suggestion: T,
   value: string,
 ) {
-  return getItemName(suggestion).toLowerCase().includes(value.toLowerCase());
+  return getItemName(suggestion)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .includes(
+      value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, ''),
+    );
 }
 
 function defaultFilterSuggestions<T extends Item>(
@@ -168,38 +208,12 @@ function defaultItemToString<T extends Item>(item?: T) {
   return item ? getItemName(item) : '';
 }
 
-type SingleAutocompleteProps<T extends Item> = {
-  focused?: boolean;
-  embedded?: boolean;
-  containerProps?: HTMLProps<HTMLDivElement>;
-  labelProps?: { id?: string };
-  inputProps?: Omit<ComponentProps<typeof Input>, 'onChange'> & {
-    onChange?: (value: string) => void;
-  };
-  suggestions?: T[];
-  tooltipStyle?: CSSProperties;
-  tooltipProps?: ComponentProps<typeof Tooltip>;
-  renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
-  renderItems?: (
-    items: T[],
-    getItemProps: (arg: { item: T }) => ComponentProps<typeof View>,
-    idx: number,
-    value?: string,
-  ) => ReactNode;
-  itemToString?: (item: T) => string;
-  shouldSaveFromKey?: (e: KeyboardEvent) => boolean;
-  filterSuggestions?: (suggestions: T[], value: string) => T[];
-  openOnFocus?: boolean;
-  getHighlightedIndex?: (suggestions: T[]) => number | null;
-  highlightFirst?: boolean;
-  onUpdate?: (id: T['id'], value: string) => void;
-  strict?: boolean;
+type SingleAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
+  type?: 'single' | never;
   onSelect: (id: T['id'], value: string) => void;
-  tableBehavior?: boolean;
-  closeOnBlur?: boolean;
-  value: T | T['id'];
-  isMulti?: boolean;
+  value: null | T | T['id'];
 };
+
 function SingleAutocomplete<T extends Item>({
   focused,
   embedded = false,
@@ -207,8 +221,6 @@ function SingleAutocomplete<T extends Item>({
   labelProps = {},
   inputProps = {},
   suggestions,
-  tooltipStyle,
-  tooltipProps,
   renderInput = defaultRenderInput,
   renderItems = defaultRenderItems,
   itemToString = defaultItemToString,
@@ -220,10 +232,11 @@ function SingleAutocomplete<T extends Item>({
   onUpdate,
   strict,
   onSelect,
-  tableBehavior,
+  clearOnBlur = true,
+  clearOnSelect = false,
   closeOnBlur = true,
+  onClose,
   value: initialValue,
-  isMulti = false,
 }: SingleAutocompleteProps<T>) {
   const [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
@@ -239,6 +252,28 @@ function SingleAutocomplete<T extends Item>({
   );
   const [highlightedIndex, setHighlightedIndex] = useState(null);
   const [isOpen, setIsOpen] = useState(embedded);
+  const open = () => setIsOpen(true);
+  const close = () => {
+    setIsOpen(false);
+    onClose?.();
+  };
+
+  const triggerRef = useRef(null);
+
+  const { isNarrowWidth } = useResponsive();
+  const narrowInputStyle = isNarrowWidth
+    ? {
+        ...styles.mobileMenuItem,
+      }
+    : {};
+
+  inputProps = {
+    ...inputProps,
+    style: {
+      ...narrowInputStyle,
+      ...inputProps.style,
+    },
+  };
 
   // Update the selected item if the suggestion list or initial
   // input value has changed
@@ -273,10 +308,10 @@ function SingleAutocomplete<T extends Item>({
         setSelectedItem(item);
         setHighlightedIndex(null);
 
-        if (isMulti) {
+        if (clearOnSelect) {
           setValue('');
         } else {
-          setIsOpen(false);
+          close();
         }
 
         if (onSelect) {
@@ -359,10 +394,11 @@ function SingleAutocomplete<T extends Item>({
 
         setValue(value);
         setIsChanged(true);
+        open();
       }}
       onStateChange={changes => {
         if (
-          tableBehavior &&
+          !clearOnBlur &&
           changes.type === Downshift.stateChangeTypes.mouseUp
         ) {
           return;
@@ -413,130 +449,120 @@ function SingleAutocomplete<T extends Item>({
         // can't use a View here, but we can fake it be using the
         // className
         <div className={`view ${css({ display: 'flex' })}`} {...containerProps}>
-          {renderInput(
-            getInputProps({
-              focused,
-              ...inputProps,
-              onFocus: e => {
-                inputProps.onFocus?.(e);
+          <View ref={triggerRef} style={{ flexShrink: 0 }}>
+            {renderInput(
+              getInputProps({
+                focused,
+                ...inputProps,
+                onFocus: e => {
+                  inputProps.onFocus?.(e);
 
-                if (openOnFocus) {
-                  setIsOpen(true);
-                }
-              },
-              onBlur: e => {
-                // Should this be e.nativeEvent
-                e['preventDownshiftDefault'] = true;
-                inputProps.onBlur?.(e);
-
-                if (!closeOnBlur) return;
-
-                if (!tableBehavior) {
-                  if (e.target.value === '') {
-                    onSelect?.(null, e.target.value);
-                    setSelectedItem(null);
-                    setIsOpen(false);
-                    return;
+                  if (openOnFocus) {
+                    open();
                   }
+                },
+                onBlur: e => {
+                  // Should this be e.nativeEvent
+                  e['preventDownshiftDefault'] = true;
+                  inputProps.onBlur?.(e);
 
-                  // If not using table behavior, reset the input on blur. Tables
-                  // handle saving the value on blur.
-                  const value = selectedItem ? getItemId(selectedItem) : null;
+                  if (!closeOnBlur) return;
 
-                  resetState(value);
-                } else {
-                  setIsOpen(false);
-                }
-              },
-              onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
-                const { onKeyDown } = inputProps || {};
+                  if (clearOnBlur) {
+                    if (e.target.value === '') {
+                      onSelect?.(null, e.target.value);
+                      setSelectedItem(null);
+                      close();
+                      return;
+                    }
 
-                // If the dropdown is open, an item is highlighted, and the user
-                // pressed enter, always capture that and handle it ourselves
-                if (isOpen) {
-                  if (e.key === 'Enter') {
-                    if (highlightedIndex != null) {
-                      if (
-                        inst.lastChangeType ===
-                        Downshift.stateChangeTypes.itemMouseEnter
-                      ) {
-                        // If the last thing the user did was hover an item, intentionally
-                        // ignore the default behavior of selecting the item. It's too
-                        // common to accidentally hover an item and then save it
-                        e.preventDefault();
-                      } else {
-                        // Otherwise, stop propagation so that the table navigator
-                        // doesn't handle it
+                    // If not using table behavior, reset the input on blur. Tables
+                    // handle saving the value on blur.
+                    const value = selectedItem ? getItemId(selectedItem) : null;
+
+                    resetState(value);
+                  } else {
+                    close();
+                  }
+                },
+                onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
+                  const { onKeyDown } = inputProps || {};
+
+                  // If the dropdown is open, an item is highlighted, and the user
+                  // pressed enter, always capture that and handle it ourselves
+                  if (isOpen) {
+                    if (e.key === 'Enter') {
+                      if (highlightedIndex != null) {
+                        if (
+                          inst.lastChangeType ===
+                          Downshift.stateChangeTypes.itemMouseEnter
+                        ) {
+                          // If the last thing the user did was hover an item, intentionally
+                          // ignore the default behavior of selecting the item. It's too
+                          // common to accidentally hover an item and then save it
+                          e.preventDefault();
+                        } else {
+                          // Otherwise, stop propagation so that the table navigator
+                          // doesn't handle it
+                          e.stopPropagation();
+                        }
+                      } else if (!strict) {
+                        // Handle it ourselves
                         e.stopPropagation();
+                        onSelect(value, (e.target as HTMLInputElement).value);
+                        return onSelectAfter();
+                      } else {
+                        // No highlighted item, still allow the table to save the item
+                        // as `null`, even though we're allowing the table to move
+                        e.preventDefault();
+                        onKeyDown?.(e);
                       }
-                    } else if (!strict) {
-                      // Handle it ourselves
-                      e.stopPropagation();
-                      onSelect(value, (e.target as HTMLInputElement).value);
-                      return onSelectAfter();
-                    } else {
-                      // No highlighted item, still allow the table to save the item
-                      // as `null`, even though we're allowing the table to move
+                    } else if (shouldSaveFromKey(e)) {
                       e.preventDefault();
                       onKeyDown?.(e);
                     }
-                  } else if (shouldSaveFromKey(e)) {
-                    e.preventDefault();
-                    onKeyDown?.(e);
-                  }
-                }
-
-                // Handle escape ourselves
-                if (e.key === 'Escape') {
-                  e.nativeEvent['preventDownshiftDefault'] = true;
-
-                  if (!embedded) {
-                    e.stopPropagation();
                   }
 
-                  fireUpdate(
-                    onUpdate,
-                    strict,
-                    suggestions,
-                    null,
-                    getItemId(originalItem),
-                  );
+                  // Handle escape ourselves
+                  if (e.key === 'Escape') {
+                    e.nativeEvent['preventDownshiftDefault'] = true;
 
-                  setValue(getItemName(originalItem));
-                  setSelectedItem(findItem(strict, suggestions, originalItem));
-                  setHighlightedIndex(null);
-                  setIsOpen(embedded ? true : false);
-                }
-              },
-              onChange: (e: ChangeEvent<HTMLInputElement>) => {
-                const { onChange } = inputProps || {};
-                onChange?.(e.target.value);
-              },
-            }),
-          )}
+                    if (!embedded) {
+                      e.stopPropagation();
+                    }
+
+                    fireUpdate(
+                      onUpdate,
+                      strict,
+                      suggestions,
+                      null,
+                      getItemId(originalItem),
+                    );
+
+                    setValue(getItemName(originalItem));
+                    setSelectedItem(
+                      findItem(strict, suggestions, originalItem),
+                    );
+                    setHighlightedIndex(null);
+                    if (embedded) {
+                      open();
+                    } else {
+                      close();
+                    }
+                  }
+                },
+                onChange: (e: ChangeEvent<HTMLInputElement>) => {
+                  const { onChange } = inputProps || {};
+                  onChange?.(e.target.value);
+                },
+              }),
+            )}
+          </View>
           {isOpen &&
             filtered.length > 0 &&
             (embedded ? (
-              <View style={{ marginTop: 5 }} data-testid="autocomplete">
-                {renderItems(
-                  filtered,
-                  getItemProps,
-                  highlightedIndex,
-                  inputValue,
-                )}
-              </View>
-            ) : (
-              <Tooltip
-                position="bottom-stretch"
-                offset={2}
-                style={{
-                  padding: 0,
-                  backgroundColor: theme.menuAutoCompleteBackground,
-                  color: theme.menuAutoCompleteText,
-                  minWidth: 200,
-                  ...tooltipStyle,
-                }}
-                {...tooltipProps}
+              <View
+                style={{ ...styles.darkScrollbar, marginTop: 5 }}
                 data-testid="autocomplete"
               >
                 {renderItems(
@@ -545,7 +571,31 @@ function SingleAutocomplete<T extends Item>({
                   highlightedIndex,
                   inputValue,
                 )}
-              </Tooltip>
+              </View>
+            ) : (
+              <Popover
+                triggerRef={triggerRef}
+                placement="bottom start"
+                offset={2}
+                isOpen={isOpen}
+                onOpenChange={close}
+                isNonModal
+                style={{
+                  ...styles.darkScrollbar,
+                  backgroundColor: theme.menuAutoCompleteBackground,
+                  color: theme.menuAutoCompleteText,
+                  minWidth: 200,
+                  width: triggerRef.current?.clientWidth,
+                }}
+                data-testid="autocomplete"
+              >
+                {renderItems(
+                  filtered,
+                  getItemProps,
+                  highlightedIndex,
+                  inputValue,
+                )}
+              </Popover>
             ))}
         </div>
       )}
@@ -578,36 +628,32 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
   );
 }
 
-type MultiAutocompleteProps<
-  T extends Item,
-  Value = SingleAutocompleteProps<T>['value'],
-> = Omit<SingleAutocompleteProps<T>, 'value' | 'onSelect'> & {
-  value: Value[];
-  onSelect: (ids: Value[], id?: string) => void;
+type MultiAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
+  type: 'multi';
+  onSelect: (ids: T['id'][], id?: T['id']) => void;
+  value: null | T[] | T['id'][];
 };
+
 function MultiAutocomplete<T extends Item>({
-  value: selectedItems,
+  value: selectedItems = [],
   onSelect,
   suggestions,
   strict,
+  clearOnBlur = true,
   ...props
 }: MultiAutocompleteProps<T>) {
   const [focused, setFocused] = useState(false);
-  const lastSelectedItems = useRef<typeof selectedItems>();
+  const selectedItemIds = selectedItems.map(getItemId);
 
-  useEffect(() => {
-    lastSelectedItems.current = selectedItems;
-  });
-
-  function onRemoveItem(id: (typeof selectedItems)[0]) {
-    const items = selectedItems.filter(i => i !== id);
+  function onRemoveItem(id: T['id']) {
+    const items = selectedItemIds.filter(i => i !== id);
     onSelect(items);
   }
 
-  function onAddItem(id: string) {
+  function onAddItem(id: T['id']) {
     if (id) {
       id = id.trim();
-      onSelect([...selectedItems, id], id);
+      onSelect([...selectedItemIds, id], id);
     }
   }
 
@@ -616,7 +662,7 @@ function MultiAutocomplete<T extends Item>({
     prevOnKeyDown?: ComponentProps<typeof Input>['onKeyDown'],
   ) {
     if (e.key === 'Backspace' && e.currentTarget.value === '') {
-      onRemoveItem(selectedItems[selectedItems.length - 1]);
+      onRemoveItem(selectedItemIds[selectedItems.length - 1]);
     }
 
     prevOnKeyDown?.(e);
@@ -625,17 +671,16 @@ function MultiAutocomplete<T extends Item>({
   return (
     <Autocomplete
       {...props}
-      isMulti
+      type="single"
       value={null}
+      clearOnBlur={clearOnBlur}
+      clearOnSelect={true}
       suggestions={suggestions.filter(
-        item => !selectedItems.includes(getItemId(item)),
+        item => !selectedItemIds.includes(getItemId(item)),
       )}
       onSelect={onAddItem}
       highlightFirst
       strict={strict}
-      tooltipProps={{
-        forceLayout: lastSelectedItems.current !== selectedItems,
-      }}
       renderInput={inputProps => (
         <View
           style={{
@@ -720,18 +765,10 @@ type AutocompleteProps<T extends Item> =
   | ComponentProps<typeof SingleAutocomplete<T>>
   | ComponentProps<typeof MultiAutocomplete<T>>;
 
-function isMultiAutocomplete<T extends Item>(
-  _props: AutocompleteProps<T>,
-  multi?: boolean,
-): _props is ComponentProps<typeof MultiAutocomplete<T>> {
-  return multi;
-}
-
 export function Autocomplete<T extends Item>({
-  multi,
   ...props
-}: AutocompleteProps<T> & { multi?: boolean }) {
-  if (isMultiAutocomplete(props, multi)) {
+}: AutocompleteProps<T>) {
+  if (props.type === 'multi') {
     return <MultiAutocomplete {...props} />;
   }
 

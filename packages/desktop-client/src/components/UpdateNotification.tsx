@@ -1,19 +1,21 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/src/client/state-types';
+
 import { useActions } from '../hooks/useActions';
 import { SvgClose } from '../icons/v1';
 import { theme } from '../style';
 
 import { Button } from './common/Button';
-import { LinkButton } from './common/LinkButton';
+import { Link } from './common/Link';
 import { Text } from './common/Text';
 import { View } from './common/View';
 
 export function UpdateNotification() {
-  const updateInfo = useSelector(state => state.app.updateInfo);
+  const updateInfo = useSelector((state: State) => state.app.updateInfo);
   const showUpdateNotification = useSelector(
-    state => state.app.showUpdateNotification,
+    (state: State) => state.app.showUpdateNotification,
   );
 
   const { updateApp, setAppState } = useActions();
@@ -43,7 +45,8 @@ export function UpdateNotification() {
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
-              <LinkButton
+              <Link
+                variant="text"
                 onClick={updateApp}
                 style={{
                   color: theme.buttonPrimaryText,
@@ -51,9 +54,10 @@ export function UpdateNotification() {
                 }}
               >
                 Restart
-              </LinkButton>{' '}
+              </Link>{' '}
               (
-              <LinkButton
+              <Link
+                variant="text"
                 style={{
                   color: theme.buttonPrimaryText,
                   textDecoration: 'underline',
@@ -65,7 +69,7 @@ export function UpdateNotification() {
                 }
               >
                 notes
-              </LinkButton>
+              </Link>
               )
               <Button
                 type="bare"

@@ -25,14 +25,14 @@ function loadStatuses(schedules: ScheduleEntity[], onData) {
 }
 
 type UseSchedulesArgs = { transform?: (q: Query) => Query };
-type UseSchedulesReturnType = {
+type UseSchedulesResult = {
   schedules: ScheduleEntity[];
   statuses: ScheduleStatuses;
 } | null;
 export function useSchedules({
   transform,
-}: UseSchedulesArgs = {}): UseSchedulesReturnType {
-  const [data, setData] = useState<UseSchedulesReturnType>(null);
+}: UseSchedulesArgs = {}): UseSchedulesResult {
+  const [data, setData] = useState<UseSchedulesResult>(null);
 
   useEffect(() => {
     const query = q('schedules').select('*');
@@ -66,7 +66,11 @@ export function useSchedules({
   return data;
 }
 
-const SchedulesContext = createContext(null);
+type SchedulesContextValue = UseSchedulesResult;
+
+const SchedulesContext = createContext<SchedulesContextValue | undefined>(
+  undefined,
+);
 
 export function SchedulesProvider({ transform, children }) {
   const data = useSchedules({ transform });

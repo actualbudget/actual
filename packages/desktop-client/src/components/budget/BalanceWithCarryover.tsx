@@ -1,23 +1,26 @@
 // @ts-strict-ignore
-import React, { type ComponentProps } from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
+import { type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
-import { makeAmountStyle } from './util';
+import { makeBalanceAmountStyle } from './util';
 
-type BalanceWithCarryoverProps = {
-  carryover: ComponentProps<typeof CellValue>['binding'];
-  balance: ComponentProps<typeof CellValue>['binding'];
-  goal?: ComponentProps<typeof CellValue>['binding'];
-  budgeted?: ComponentProps<typeof CellValue>['binding'];
+type BalanceWithCarryoverProps = Omit<
+  ComponentPropsWithoutRef<typeof CellValue>,
+  'binding'
+> & {
+  carryover: Binding;
+  balance: Binding;
+  goal: Binding;
+  budgeted: Binding;
   disabled?: boolean;
-  style?: CSSProperties;
-  balanceStyle?: CSSProperties;
   carryoverStyle?: CSSProperties;
 };
 export function BalanceWithCarryover({
@@ -26,22 +29,25 @@ export function BalanceWithCarryover({
   goal,
   budgeted,
   disabled,
-  style,
-  balanceStyle,
   carryoverStyle,
+  ...props
 }: BalanceWithCarryoverProps) {
   const carryoverValue = useSheetValue(carryover);
   const balanceValue = useSheetValue(balance);
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
+  const { isNarrowWidth } = useResponsive();
+
   return (
-    <View style={style}>
+    <>
       <CellValue
+        {...props}
         binding={balance}
         type="financial"
         getStyle={value =>
-          makeAmountStyle(
+          makeBalanceAmountStyle(
             value,
             isGoalTemplatesEnabled ? goalValue : null,
             budgetedValue,
@@ -51,9 +57,8 @@ export function BalanceWithCarryover({
           textAlign: 'right',
           ...(!disabled && {
             cursor: 'pointer',
-            ':hover': { textDecoration: 'underline' },
           }),
-          ...balanceStyle,
+          ...props.style,
         }}
       />
       {carryoverValue && (
@@ -62,7 +67,7 @@ export function BalanceWithCarryover({
             alignSelf: 'center',
             marginLeft: 2,
             position: 'absolute',
-            right: -8,
+            right: isNarrowWidth ? '-8px' : '-4px',
             top: 0,
             bottom: 0,
             justifyContent: 'center',
@@ -70,12 +75,16 @@ export function BalanceWithCarryover({
           }}
         >
           <SvgArrowThinRight
-            width={7}
-            height={7}
-            style={makeAmountStyle(balanceValue, goalValue, budgetedValue)}
+            width={carryoverStyle?.width || 7}
+            height={carryoverStyle?.height || 7}
+            style={makeBalanceAmountStyle(
+              balanceValue,
+              isGoalTemplatesEnabled ? goalValue : null,
+              budgetedValue,
+            )}
           />
         </View>
       )}
-    </View>
+    </>
   );
 }

@@ -5,8 +5,8 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button';
-import { ExternalLink } from '../common/ExternalLink';
 import { Input } from '../common/Input';
+import { Link } from '../common/Link';
 import { Modal, ModalButtons } from '../common/Modal';
 import type { ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
@@ -58,12 +58,13 @@ export const GoCardlessInitialise = ({
           In order to enable bank-sync via GoCardless (only for EU banks) you
           will need to create access credentials. This can be done by creating
           an account with{' '}
-          <ExternalLink
+          <Link
+            variant="external"
             to="https://actualbudget.org/docs/advanced/bank-sync/"
             linkColor="purple"
           >
             GoCardless
-          </ExternalLink>
+          </Link>
           .
         </Text>
 
@@ -73,8 +74,10 @@ export const GoCardlessInitialise = ({
             id="secret-id-field"
             type="password"
             value={secretId}
-            onUpdate={setSecretId}
-            onChange={() => setIsValid(true)}
+            onChangeValue={value => {
+              setSecretId(value);
+              setIsValid(true);
+            }}
           />
         </FormField>
 
@@ -84,8 +87,10 @@ export const GoCardlessInitialise = ({
             id="secret-key-field"
             type="password"
             value={secretKey}
-            onUpdate={setSecretKey}
-            onChange={() => setIsValid(true)}
+            onChangeValue={value => {
+              setSecretKey(value);
+              setIsValid(true);
+            }}
           />
         </FormField>
 

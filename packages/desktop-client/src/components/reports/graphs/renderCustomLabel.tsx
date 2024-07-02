@@ -2,6 +2,7 @@
 import React from 'react';
 
 import { theme } from '../../../style';
+import { PrivacyFilter } from '../../PrivacyFilter';
 
 export const renderCustomLabel = (
   calcX: number,
@@ -15,6 +16,7 @@ export const renderCustomLabel = (
 ) => {
   return !showLabel || Math.abs(showLabel) > showLabelThreshold ? (
     <text
+      key={fill + display}
       x={calcX}
       y={calcY}
       fill={fill}
@@ -22,7 +24,7 @@ export const renderCustomLabel = (
       dominantBaseline="middle"
       fontSize={textSize}
     >
-      {display}
+      <PrivacyFilter>{display}</PrivacyFilter>
     </text>
   ) : (
     <text />

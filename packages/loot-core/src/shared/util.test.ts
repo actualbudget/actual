@@ -2,18 +2,28 @@ import { looselyParseAmount, getNumberFormat, setNumberFormat } from './util';
 
 describe('utility functions', () => {
   test('looseParseAmount works with basic numbers', () => {
+    // Parsing is currently limited to 1,2 decimal places or 5-9.
+    // Ignoring 3 places removes the possibility of improper parse
+    //  of amounts without decimal amounts included.
     expect(looselyParseAmount('3')).toBe(3);
+    expect(looselyParseAmount('3.4')).toBe(3.4);
     expect(looselyParseAmount('3.45')).toBe(3.45);
-
-    // Right now it doesn't actually parse an "amount", it just parses
-    // a number. An "amount" is a valid transaction amount, usually a
-    // number with 2 decimal places.
-    expect(looselyParseAmount('3.456')).toBe(3.456);
+    expect(looselyParseAmount('3.456')).toBe(3456);
+    expect(looselyParseAmount('3.45000')).toBe(3.45);
+    expect(looselyParseAmount('3.450000')).toBe(3.45);
+    expect(looselyParseAmount('3.4500000')).toBe(3.45);
+    expect(looselyParseAmount('3.45000000')).toBe(3.45);
+    expect(looselyParseAmount('3.450000000')).toBe(3.45);
   });
 
   test('looseParseAmount works with alternate formats', () => {
     expect(looselyParseAmount('3,45')).toBe(3.45);
-    expect(looselyParseAmount('3,456')).toBe(3.456);
+    expect(looselyParseAmount('3,456')).toBe(3456);
+    expect(looselyParseAmount('3,45000')).toBe(3.45);
+    expect(looselyParseAmount('3,450000')).toBe(3.45);
+    expect(looselyParseAmount('3,4500000')).toBe(3.45);
+    expect(looselyParseAmount('3,45000000')).toBe(3.45);
+    expect(looselyParseAmount('3,450000000')).toBe(3.45);
   });
 
   test('looseParseAmount works with negative numbers', () => {

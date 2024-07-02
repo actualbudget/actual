@@ -129,7 +129,10 @@ export const PayeeTableRow = memo(
         <InputCell
           value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
           valueStyle={
-            !selected && payee.transfer_acct && { color: theme.pageTextSubdued }
+            (!selected &&
+              payee.transfer_acct && { color: theme.pageTextSubdued }) ||
+            (!selected && !payee.transfer_acct && { color: theme.tableText }) ||
+            (selected && { color: theme.tableTextSelected })
           }
           exposed={focusedField === 'name'}
           width="flex"
@@ -151,3 +154,5 @@ export const PayeeTableRow = memo(
     );
   },
 );
+
+PayeeTableRow.displayName = 'PayeeTableRow';

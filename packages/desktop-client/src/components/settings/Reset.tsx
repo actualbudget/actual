@@ -1,10 +1,9 @@
-// @ts-strict-ignore
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { ButtonWithLoading } from '../common/Button';
 import { Text } from '../common/Text';
 
@@ -39,7 +38,8 @@ export function ResetCache() {
 }
 
 export function ResetSync() {
-  const isEnabled = useSelector(state => !!state.prefs.local.groupId);
+  const [groupId] = useLocalPref('groupId');
+  const isEnabled = !!groupId;
   const { resetSync } = useActions();
 
   const [resetting, setResetting] = useState(false);

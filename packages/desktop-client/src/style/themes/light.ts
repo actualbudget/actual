@@ -39,6 +39,7 @@ export const tableRowHeaderBackground = colorPalette.navy50;
 export const tableRowHeaderText = colorPalette.navy800;
 
 export const sidebarBackground = colorPalette.navy900;
+export const sidebarItemBackgroundPending = colorPalette.orange200;
 export const sidebarItemBackgroundPositive = colorPalette.green500;
 export const sidebarItemBackgroundFailed = colorPalette.red300;
 export const sidebarItemBackgroundHover = colorPalette.navy800;
@@ -59,7 +60,10 @@ export const menuKeybindingText = colorPalette.navy400;
 export const menuAutoCompleteBackground = colorPalette.navy900;
 export const menuAutoCompleteBackgroundHover = colorPalette.navy600;
 export const menuAutoCompleteText = colorPalette.white;
+export const menuAutoCompleteTextHover = colorPalette.green150;
 export const menuAutoCompleteTextHeader = colorPalette.orange150;
+export const menuAutoCompleteItemTextHover = menuAutoCompleteText;
+export const menuAutoCompleteItemText = menuAutoCompleteText;
 
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
@@ -73,8 +77,6 @@ export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
-export const mobileModalBackground = colorPalette.navy900;
-export const mobileModalText = colorPalette.white;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = mobileHeaderBackground;
@@ -99,7 +101,7 @@ export const buttonMenuSelectedBorder = buttonMenuSelectedBackground;
 export const buttonPrimaryText = colorPalette.white;
 export const buttonPrimaryTextHover = buttonPrimaryText;
 export const buttonPrimaryBackground = colorPalette.purple500;
-export const buttonPrimaryBackgroundHover = buttonPrimaryBackground;
+export const buttonPrimaryBackgroundHover = colorPalette.purple300;
 export const buttonPrimaryBorder = buttonPrimaryBackground;
 export const buttonPrimaryShadow = 'rgba(0, 0, 0, 0.3)';
 export const buttonPrimaryDisabledText = colorPalette.white;
@@ -177,7 +179,7 @@ export const checkboxShadowSelected = colorPalette.blue300;
 export const checkboxToggleBackground = colorPalette.gray400;
 
 export const pillBackground = colorPalette.navy150;
-export const pillBackgroundLight = colorPalette.navy100;
+export const pillBackgroundLight = colorPalette.navy50;
 export const pillText = colorPalette.navy800;
 export const pillTextHighlighted = colorPalette.purple600;
 export const pillBorder = colorPalette.navy150;
@@ -185,8 +187,14 @@ export const pillBorderDark = colorPalette.navy300;
 export const pillBackgroundSelected = colorPalette.blue150;
 export const pillTextSelected = colorPalette.blue900;
 export const pillBorderSelected = colorPalette.purple500;
+export const pillTextSubdued = colorPalette.navy200;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
+export const reportsGreen = colorPalette.green400;
 export const reportsLabel = colorPalette.navy900;
 export const reportsInnerLabel = colorPalette.navy800;
+
+export const noteTagBackground = colorPalette.purple100;
+export const noteTagBackgroundHover = colorPalette.purple150;
+export const noteTagText = colorPalette.purple700;

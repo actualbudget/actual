@@ -38,6 +38,7 @@ module.exports = {
   extends: [
     'react-app',
     'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
     'plugin:prettier/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:import/typescript',
@@ -57,7 +58,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': [
       'warn',
       {
-        varsIgnorePattern: '^_',
+        varsIgnorePattern: '^(_|React)',
         ignoreRestSiblings: true,
       },
     ],
@@ -90,15 +91,7 @@ module.exports = {
     'react/prop-types': 'off',
 
     // TODO: re-enable these rules
-    'react-hooks/exhaustive-deps': 'off',
-    'react/display-name': 'off',
     'react/react-in-jsx-scope': 'off',
-    // 'react-hooks/exhaustive-deps': [
-    //   'warn',
-    //   {
-    //     additionalHooks: 'useLiveQuery',
-    //   },
-    // ],
 
     'no-var': 'warn',
     'react/jsx-curly-brace-presence': 'warn',
@@ -153,10 +146,9 @@ module.exports = {
           'Using default React import is discouraged, please use named exports directly instead.',
       },
       {
-        // forbid <a> in favor of <LinkButton> or <ExternalLink>
+        // forbid <a> in favor of <Link>
         selector: 'JSXOpeningElement[name.name="a"]',
-        message:
-          'Using <a> is discouraged, please use <LinkButton> or <ExternalLink> instead.',
+        message: 'Using <a> is discouraged, please use <Link> instead.',
       },
     ],
     'no-restricted-imports': [
@@ -275,6 +267,69 @@ module.exports = {
       ],
       rules: {
         'import/no-default-export': 'off',
+      },
+    },
+    {
+      // TODO: fix the issues in these files
+      files: [
+        './packages/desktop-client/src/components/accounts/Account.jsx',
+        './packages/desktop-client/src/components/accounts/MobileAccount.jsx',
+        './packages/desktop-client/src/components/accounts/MobileAccounts.jsx',
+        './packages/desktop-client/src/components/App.tsx',
+        './packages/desktop-client/src/components/budget/BudgetCategories.jsx',
+        './packages/desktop-client/src/components/budget/BudgetSummaries.tsx',
+        './packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx',
+        './packages/desktop-client/src/components/budget/index.tsx',
+        './packages/desktop-client/src/components/budget/MobileBudget.tsx',
+        './packages/desktop-client/src/components/budget/rollover/HoldMenu.tsx',
+        './packages/desktop-client/src/components/budget/rollover/TransferMenu.tsx',
+        './packages/desktop-client/src/components/common/Menu.tsx',
+        './packages/desktop-client/src/components/FinancesApp.tsx',
+        './packages/desktop-client/src/components/GlobalKeys.ts',
+        './packages/desktop-client/src/components/LoggedInUser.tsx',
+        './packages/desktop-client/src/components/manager/ManagementApp.jsx',
+        './packages/desktop-client/src/components/manager/subscribe/common.tsx',
+        './packages/desktop-client/src/components/ManageRules.tsx',
+        './packages/desktop-client/src/components/mobile/MobileAmountInput.jsx',
+        './packages/desktop-client/src/components/mobile/MobileNavTabs.tsx',
+        './packages/desktop-client/src/components/Modals.tsx',
+        './packages/desktop-client/src/components/modals/EditRule.jsx',
+        './packages/desktop-client/src/components/modals/ImportTransactions.jsx',
+        './packages/desktop-client/src/components/modals/MergeUnusedPayees.jsx',
+        './packages/desktop-client/src/components/Notifications.tsx',
+        './packages/desktop-client/src/components/payees/ManagePayees.jsx',
+        './packages/desktop-client/src/components/payees/ManagePayeesWithData.jsx',
+        './packages/desktop-client/src/components/payees/PayeeTable.tsx',
+        './packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTable.tsx',
+        './packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableTotals.tsx',
+        './packages/desktop-client/src/components/reports/reports/CashFlowCard.jsx',
+        './packages/desktop-client/src/components/reports/reports/CustomReport.jsx',
+        './packages/desktop-client/src/components/reports/reports/NetWorthCard.jsx',
+        './packages/desktop-client/src/components/reports/SaveReportName.tsx',
+        './packages/desktop-client/src/components/reports/useReport.ts',
+        './packages/desktop-client/src/components/schedules/ScheduleDetails.jsx',
+        './packages/desktop-client/src/components/schedules/SchedulesTable.tsx',
+        './packages/desktop-client/src/components/select/DateSelect.tsx',
+        './packages/desktop-client/src/components/sidebar/Tools.tsx',
+        './packages/desktop-client/src/components/sort.tsx',
+        './packages/desktop-client/src/components/spreadsheet/useSheetValue.ts',
+        './packages/desktop-client/src/components/table.tsx',
+        './packages/desktop-client/src/components/Titlebar.tsx',
+        './packages/desktop-client/src/components/transactions/MobileTransaction.jsx',
+        './packages/desktop-client/src/components/transactions/SelectedTransactions.jsx',
+        './packages/desktop-client/src/components/transactions/SimpleTransactionsTable.jsx',
+        './packages/desktop-client/src/components/transactions/TransactionList.jsx',
+        './packages/desktop-client/src/components/transactions/TransactionsTable.jsx',
+        './packages/desktop-client/src/components/transactions/TransactionsTable.test.jsx',
+        './packages/desktop-client/src/hooks/useAccounts.ts',
+        './packages/desktop-client/src/hooks/useCategories.ts',
+        './packages/desktop-client/src/hooks/usePayees.ts',
+        './packages/desktop-client/src/hooks/useProperFocus.tsx',
+        './packages/desktop-client/src/hooks/useSelected.tsx',
+        './packages/loot-core/src/client/query-hooks.tsx',
+      ],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
       },
     },
   ],

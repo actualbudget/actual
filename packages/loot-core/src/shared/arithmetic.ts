@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { getNumberFormat } from './util';
+import { currencyToAmount } from './util';
 
 function fail(state, msg) {
   throw new Error(
@@ -37,31 +37,16 @@ function parsePrimary(state) {
     next(state);
   }
 
-  if (/\p{Sc}/u.test(char(state))) {
-    next(state);
-  }
-
-  // TODO: The regex should probably respect the number format better,
-  // and we should do more strict parsing
   let numberStr = '';
-  while (char(state) && char(state).match(/[0-9,.]/)) {
-    const thousandsSep = getNumberFormat().separator === ',' ? '.' : ',';
-
-    // Don't include the thousands separator
-    if (char(state) === thousandsSep) {
-      next(state);
-    } else {
-      numberStr += next(state);
-    }
+  while (char(state) && char(state).match(/[0-9,. ]|\p{Sc}/u)) {
+    numberStr += next(state);
   }
 
   if (numberStr === '') {
     fail(state, 'Unexpected character');
   }
 
-  const number = parseFloat(
-    numberStr.replace(getNumberFormat().separator, '.'),
-  );
+  const number = currencyToAmount(numberStr);
   return isNegative ? -number : number;
 }
 
@@ -96,12 +81,12 @@ function makeOperatorParser(...ops) {
 // These operators go from high to low order of precedence
 const parseOperator = makeOperatorParser('^', '/', '*', '-', '+');
 
-function parse(expression) {
+function parse(expression: string) {
   const state = { str: expression.replace(/\s/g, ''), index: 0 };
   return parseOperator(state);
 }
 
-function evaluate(ast) {
+function evaluate(ast): number {
   if (typeof ast === 'number') {
     return ast;
   }
@@ -124,13 +109,16 @@ function evaluate(ast) {
   }
 }
 
-export function evalArithmetic(expression, defaultValue = null) {
+export function evalArithmetic(
+  expression: string,
+  defaultValue: number = null,
+) {
   // An empty expression always evals to the default
   if (expression === '') {
     return defaultValue;
   }
 
-  let result;
+  let result: number;
   try {
     result = evaluate(parse(expression));
   } catch (e) {

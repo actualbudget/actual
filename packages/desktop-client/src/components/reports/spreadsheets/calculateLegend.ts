@@ -1,34 +1,43 @@
-// @ts-strict-ignore
 import {
-  type ItemEntity,
-  type MonthData,
+  type LegendEntity,
+  type IntervalEntity,
+  type GroupedEntity,
+  type balanceTypeOpType,
 } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';
 import { getColorScale } from '../chart-theme';
 
 export function calculateLegend(
-  monthData: MonthData[],
-  calcDataFiltered: ItemEntity[],
+  intervalData: IntervalEntity[],
+  calcDataFiltered: GroupedEntity[],
   groupBy: string,
-  graphType: string,
-  balanceTypeOp: string,
-) {
+  graphType?: string,
+  balanceTypeOp?: balanceTypeOpType,
+): LegendEntity[] {
   const colorScale = getColorScale('qualitative');
-  const chooseData = ['Month', 'Year'].includes(groupBy)
-    ? monthData
-    : calcDataFiltered;
-  return chooseData.map((c, index) => {
+  const chooseData =
+    groupBy === 'Interval'
+      ? intervalData.map(c => {
+          return { name: c.date, id: null };
+        })
+      : calcDataFiltered.map(c => {
+          return { name: c.name, id: c.id };
+        });
+
+  const legend: LegendEntity[] = chooseData.map((item, index) => {
     return {
-      name: ['Month', 'Year'].includes(groupBy) ? c.date : c.name,
+      id: item.id || '',
+      name: item.name || '',
       color:
         graphType === 'DonutGraph'
           ? colorScale[index % colorScale.length]
-          : ['Month', 'Year'].includes(groupBy)
+          : groupBy === 'Interval'
             ? balanceTypeOp === 'totalDebts'
               ? theme.reportsRed
               : theme.reportsBlue
             : colorScale[index % colorScale.length],
     };
   });
+  return legend;
 }
