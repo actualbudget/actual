@@ -94,12 +94,12 @@ If you wish to only sync one account, view the desired account and click the syn
 
 ### Resetting the Setup Token
 
-At the moment there is no UI to reset the setup token.  If you need to reset it, you must manually edit the SQLite database.
+To reset your SimpleFIN setup token:
 
-1. Shut down the server.
-2. On the server, find your data directory and open the database.  Typically this is in a file such as `actual-data/server-files/account.sqlite`.
-3. In the `secrets` table, there are two rows named `simplefin_token` and `simplefin_accessKey`.  Delete both rows.
-4. Save the database.
-5. Restart the server.
+1. Click "Add Account" in the sidebar.
 
-You should now be able to go back in and provide a new setup token.
+2. Next to "Link bank account with SimpleFIN", click the three-dot menu button.
+
+3. Click "Reset SimpleFIN credentials".
+
+You will then need to obtain a new setup token from SimpleFIN and enter it into Actual.
