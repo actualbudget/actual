@@ -73,7 +73,7 @@ export async function getAvailableBackups(id: string): Promise<Backup[]> {
 
   return backups.map(backup => ({
     ...backup,
-    date: backup.date ? dateFns.format(backup.date, 'yyyy-MM-dd h:mm') : null,
+    date: backup.date ? dateFns.format(backup.date, 'yyyy-MM-dd H:mm') : null,
   }));
 }
 
