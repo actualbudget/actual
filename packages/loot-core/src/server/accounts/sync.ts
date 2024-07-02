@@ -63,15 +63,15 @@ async function updateAccountNotesWithBalance(id, balance) {
   const balanceDate = new Date(acctRow['balance-date'] * 1000);
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
-	currency: 'USD',
+    currency: 'USD',
   });
 
-  const accountNote = 
-      "Transactions synced at " + 
-	  balanceDate.toLocaleString() + 
-	  " with balance " + 
-	  formatter.format(balance);
-  
+  const accountNote =
+    "Transactions synced at " + 
+    balanceDate.toLocaleString() + 
+    " with balance " + 
+    formatter.format(balance);
+
   await send('notes-save', { id, note: accountNote });
 }
 
@@ -689,7 +689,7 @@ export async function syncAccount(
     return runMutator(async () => {
       const result = await reconcileTransactions(id, transactions, true);
       await updateAccountBalance(id, accountBalance);
-	  await updateAccountNotesWithBalance(id, accountBalance);
+      await updateAccountNotesWithBalance(id, accountBalance);
       return result;
     });
   } else {
