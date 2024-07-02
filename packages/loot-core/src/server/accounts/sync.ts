@@ -684,15 +684,12 @@ export async function syncAccount(
       account: id,
     }));
 	
-	const currentBalance;
-	const balanceDate;
-	
 	if (acctRow.account_sync_source === 'simpleFin') {
-      currentBalance = accountBalance[0].balanceAmount.amount;
-	  balanceDate = accountBalance[0].referenceDate;
+      const currentBalance = accountBalance[0].balanceAmount.amount;
+	  const balanceDate = accountBalance[0].referenceDate;
     } else if (acctRow.account_sync_source === 'goCardless') {
-	  currentBalance = accountBalance;
-	  balanceDate = new Date();
+	  const currentBalance = accountBalance;
+	  const balanceDate = new Date();
 	}
 
     return runMutator(async () => {
