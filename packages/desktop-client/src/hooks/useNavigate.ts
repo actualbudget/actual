@@ -17,29 +17,11 @@ export function useNavigate(): NavigateFunction {
         navigate(to);
       } else {
         const optionsWithPrevLocation: NavigateOptions = {
-          replace:
-            options.replace || isSamePath(to, location) ? true : undefined,
+          replace: isSamePath(to, location) ? true : undefined,
           ...options,
-          state: {
-            ...options?.state,
-            previousLocation: location,
-          },
         };
 
-        const { previousLocation, ...previousOriginalState } =
-          location.state || {};
-
-        if (
-          previousLocation == null ||
-          !isSamePath(to, previousLocation) ||
-          JSON.stringify(options?.state || {}) !==
-            JSON.stringify(previousOriginalState)
-        ) {
-          navigate(to, optionsWithPrevLocation);
-        } else if (to === previousLocation.pathname) {
-          // `to` is the same as the previous location. Just go back.
-          navigate(-1);
-        }
+        navigate(to, optionsWithPrevLocation);
       }
     },
     [navigate, location],
