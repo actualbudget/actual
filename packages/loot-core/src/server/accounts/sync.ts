@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { send } from '@actual-app/api/injected';
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -55,6 +56,23 @@ async function updateAccountBalance(id, balance) {
     amountToInteger(balance),
     id,
   ]);
+}
+
+async function updateAccountNotesWithBalance(id, balance) {
+  const acctRow = await db.select('accounts', id);
+  const balanceDate = new Date(acctRow['balance-date'] * 1000);
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
+  const accountNote =
+    'Transactions synced at ' +
+    balanceDate.toLocaleString() +
+    ' with balance ' +
+    formatter.format(balance);
+
+  await send('notes-save', { id, note: accountNote });
 }
 
 export async function getGoCardlessAccounts(userId, userKey, id) {
@@ -671,6 +689,7 @@ export async function syncAccount(
     return runMutator(async () => {
       const result = await reconcileTransactions(id, transactions, true);
       await updateAccountBalance(id, accountBalance);
+      await updateAccountNotesWithBalance(id, accountBalance);
       return result;
     });
   } else {
