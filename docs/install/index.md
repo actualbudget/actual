@@ -54,4 +54,4 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
 
 [^1]: You technically don't need a server instance for this. You need to run either a web-based client or a server, but a server is the same effort.
-[^2]: A portion of the cost to host on PikaPods is donated to the Actual Budget Project.  With that said, PikaPods is a very simple, and cost-effective way, to host your server.
+[^2]: A portion of the cost to host on PikaPods is donated to the Actual Budget Project.  With that said, PikaPods is a very simple, and cost-effective way to host your server.
