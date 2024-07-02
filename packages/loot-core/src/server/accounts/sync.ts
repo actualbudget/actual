@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { send } from '@actual-app/api/injected';
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -19,7 +20,6 @@ import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
-import { send } from '@actual-app/api/injected';
 
 function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
@@ -62,12 +62,15 @@ async function updateAccountNotesWithBalance(id, balance) {
   const acctRow = await db.select('accounts', id);
   const balanceDate = new Date(acctRow['balance-date'] * 1000);
   const formatter = new Intl.NumberFormat('en-US', {
-	  style: 'currency',
-	  currency: 'USD',
+    style: 'currency',
+	currency: 'USD',
   });
 
-  const accountNote = "Transactions synced at " + balanceDate.toLocaleString() + " with balance " + formatter.format(balance);
-  const noteId = 'account-' + id;
+  const accountNote = 
+      "Transactions synced at " + 
+	  balanceDate.toLocaleString() + 
+	  " with balance " + 
+	  formatter.format(balance);
   
   await send('notes-save', { id, note: accountNote });
 }
