@@ -57,6 +57,21 @@ async function updateAccountBalance(id, balance) {
   ]);
 }
 
+async function updateAccountNotesWithBalance(id, balance) {
+  const acctRow = await db.select('accounts', id);
+  const balanceDate = new Date(acctRow['balance-date'] * 1000);
+  const formatter = new Intl.NumberFormat('en-US', {
+	  style: 'currency',
+	  currency: 'USD',
+  });
+
+  const accountNote = "Transactions synced at " + balanceDate.toLocaleString() + " with balance " + formatter.format(balance);
+  const noteId = 'account-' + id;
+  
+  await actualInjected.send('notes-save', { id: noteId, note: accountNote });
+  ]);
+}
+
 export async function getGoCardlessAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -671,6 +686,7 @@ export async function syncAccount(
     return runMutator(async () => {
       const result = await reconcileTransactions(id, transactions, true);
       await updateAccountBalance(id, accountBalance);
+	  await updateAccountBalanceWithNotes(id, accountBalance);
       return result;
     });
   } else {
