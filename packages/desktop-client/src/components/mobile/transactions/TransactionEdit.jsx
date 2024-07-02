@@ -532,7 +532,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       }
 
       props.onSave(transactionsToSave);
-      navigate(`/accounts/${account.id}`, { replace: true });
+      navigate(`/accounts/${account.id}`);
     };
 
     if (unserializedTransaction.reconciled) {
