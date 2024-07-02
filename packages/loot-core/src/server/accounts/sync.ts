@@ -64,6 +64,7 @@ async function updateAccountNotesWithBalance(id, balance, balanceDate) {
     currency: 'USD',
   });
 
+  const accountId = 'account-' + id;
   const accountNote =
     'Transactions synced at ' +
     balanceDate.toLocaleString() +
