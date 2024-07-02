@@ -3,7 +3,7 @@ import LRU from 'lru-cache';
 
 const likePatternCache = new LRU({ max: 500 });
 
-export function UnicodeLike(
+export function unicodeLike(
   pattern: string | null,
   value: string | null,
 ): number {

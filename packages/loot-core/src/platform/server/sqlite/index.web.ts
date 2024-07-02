@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import initSqlJS, { type SqlJsStatic, type Database } from '@jlongster/sql.js';
 
-import { UnicodeLike } from './unicodeLike';
+import { unicodeLike } from './unicodeLike';
 
 let SQL: SqlJsStatic | null = null;
 
@@ -203,7 +203,7 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
   // but SQL.js does not support this: https://github.com/sql-js/sql.js/issues/551
   db.create_function('UNICODE_LOWER', arg => arg?.toLowerCase());
   db.create_function('UNICODE_UPPER', arg => arg?.toUpperCase());
-  db.create_function('UNICODE_LIKE', UnicodeLike);
+  db.create_function('UNICODE_LIKE', unicodeLike);
   db.create_function('REGEXP', regexp);
   return db;
 }
