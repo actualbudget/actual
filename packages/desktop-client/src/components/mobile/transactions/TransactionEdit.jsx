@@ -523,9 +523,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
     const [unserializedTransaction] = unserializedTransactions;
 
     const onConfirmSave = async () => {
-      const { account: accountId } = unserializedTransaction;
-      const account = accountsById[accountId];
-
       let transactionsToSave = unserializedTransactions;
       if (adding) {
         transactionsToSave = realizeTempTransactions(unserializedTransactions);
