@@ -595,14 +595,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   </AutoTextSize>
                 </Button>
               )}
-              carryoverView={valueColor => (
+              carryoverIndicator={({ style }) => (
                 <View
                   style={{
                     position: 'absolute',
                     right: '-3px',
                     top: '-5px',
                     borderRadius: '50%',
-                    backgroundColor: valueColor,
+                    backgroundColor: style?.color,
                   }}
                 >
                   <SvgArrowThickRight

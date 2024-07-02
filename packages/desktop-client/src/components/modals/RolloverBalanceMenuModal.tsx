@@ -4,7 +4,10 @@ import { rolloverBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
-import { BalanceWithCarryover } from '../budget/BalanceWithCarryover';
+import {
+  BalanceWithCarryover,
+  DefaultCarryoverIndicator,
+} from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/rollover/BalanceMenu';
 import { Modal, ModalTitle } from '../common/Modal';
 import { Text } from '../common/Text';
@@ -65,16 +68,21 @@ export function RolloverBalanceMenuModal({
             textAlign: 'center',
             ...styles.veryLargeText,
           }}
-          carryoverStyle={{
-            width: 15,
-            height: 15,
-            display: 'inline-flex',
-            position: 'relative',
-          }}
           carryover={rolloverBudget.catCarryover(categoryId)}
           balance={rolloverBudget.catBalance(categoryId)}
           goal={rolloverBudget.catGoal(categoryId)}
           budgeted={rolloverBudget.catBudgeted(categoryId)}
+          carryoverIndicator={({ style }) =>
+            DefaultCarryoverIndicator({
+              style: {
+                width: 15,
+                height: 15,
+                display: 'inline-flex',
+                position: 'relative',
+                ...style,
+              },
+            })
+          }
         />
       </View>
       <BalanceMenu
