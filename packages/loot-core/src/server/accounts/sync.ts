@@ -701,7 +701,7 @@ export async function syncAccount(
       await updateAccountNotesWithBalance(
         id,
         accountCurrentBalance,
-        balanceDate
+        balanceDate,
       );
       return result;
     });
