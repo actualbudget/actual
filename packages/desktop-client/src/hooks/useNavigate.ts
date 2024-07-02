@@ -36,6 +36,9 @@ export function useNavigate(): NavigateFunction {
             JSON.stringify(previousOriginalState)
         ) {
           navigate(to, optionsWithPrevLocation);
+        } else {
+          // `to` is the same as the previous location. Just go back.
+          navigate(-1);
         }
       }
     },
