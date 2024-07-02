@@ -602,7 +602,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     right: '-3px',
                     top: '-5px',
                     borderRadius: '50%',
-                    backgroundColor: style?.color,
+                    backgroundColor: style?.color ?? theme.pillText,
                   }}
                 >
                   <SvgArrowThickRight
