@@ -686,7 +686,7 @@ export async function syncAccount(
     return runMutator(async () => {
       const result = await reconcileTransactions(id, transactions, true);
       await updateAccountBalance(id, accountBalance);
-	  await updateAccountBalanceWithNotes(id, accountBalance);
+	  await updateAccountNotesWithBalance(id, accountBalance);
       return result;
     });
   } else {
