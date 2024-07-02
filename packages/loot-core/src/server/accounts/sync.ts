@@ -683,22 +683,26 @@ export async function syncAccount(
       ...trans,
       account: id,
     }));
-	
-	let accountCurrentBalance;
-	let balanceDate;
-	
-	if (acctRow.account_sync_source === 'simpleFin') {
+
+    let accountCurrentBalance;
+    let balanceDate;
+
+    if (acctRow.account_sync_source === 'simpleFin') {
       accountCurrentBalance = accountBalance[0].balanceAmount.amount;
-	  balanceDate = accountBalance[0].referenceDate;
+      balanceDate = accountBalance[0].referenceDate;
     } else if (acctRow.account_sync_source === 'goCardless') {
-	  accountCurrentBalance = accountBalance;
-	  balanceDate = new Date();
-	}
+      accountCurrentBalance = accountBalance;
+      balanceDate = new Date();
+    }
 
     return runMutator(async () => {
       const result = await reconcileTransactions(id, transactions, true);
       await updateAccountBalance(id, accountCurrentBalance);
-      await updateAccountNotesWithBalance(id, accountCurrentBalance, balanceDate);
+      await updateAccountNotesWithBalance(
+        id,
+        accountCurrentBalance,
+        balanceDate
+      );
       return result;
     });
   } else {
