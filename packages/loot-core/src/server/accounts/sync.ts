@@ -19,7 +19,7 @@ import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
-import { listen, send } from '../../platform/client/fetch';
+import { send } from '@actual-app/api/injected';
 
 function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
