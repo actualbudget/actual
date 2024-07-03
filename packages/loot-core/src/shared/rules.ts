@@ -65,7 +65,7 @@ export const FIELD_TYPES = new Map(
 
 export const ALLOCATION_METHODS = {
   'fixed-amount': 'a fixed amount',
-  'fixed-percent': 'a fixed percent',
+  'fixed-percent': 'a fixed percent of the remainder',
   remainder: 'an equal portion of the remainder',
 };
 
