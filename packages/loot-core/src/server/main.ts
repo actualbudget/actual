@@ -1075,7 +1075,6 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
           acct.account_id,
           acct.bankId,
         );
-        console.groupEnd();
 
         const { added, updated } = res;
 
@@ -1113,6 +1112,8 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 
           captureException(err);
         }
+      } finally {
+        console.groupEnd();
       }
     }
   }
