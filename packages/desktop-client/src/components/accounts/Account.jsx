@@ -73,7 +73,12 @@ function EmptyMessage({ onAdd }) {
           manage it locally yourself.
         </Text>
 
-        <Button type="primary" autoFocus style={{ marginTop: 20 }} onClick={onAdd}>
+        <Button
+          type="primary"
+          autoFocus
+          style={{ marginTop: 20 }}
+          onClick={onAdd}
+        >
           Add account
         </Button>
 

@@ -130,7 +130,12 @@ export function AccountSyncCheck() {
           {showAuth ? (
             <>
               <Button onClick={unlink}>Unlink</Button>
-              <Button type="primary" autoFocus onClick={reauth} style={{ marginLeft: 5 }}>
+              <Button
+                type="primary"
+                autoFocus
+                onClick={reauth}
+                style={{ marginLeft: 5 }}
+              >
                 Reauthorize
               </Button>
             </>

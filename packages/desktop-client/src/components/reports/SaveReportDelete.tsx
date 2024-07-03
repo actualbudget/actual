@@ -36,9 +36,7 @@ export function SaveReportDelete({
         <Button type="primary" autoFocus onClick={onDelete}>
           Yes
         </Button>
-        <Button onClick={onClose}>
-          No
-        </Button>
+        <Button onClick={onClose}>No</Button>
       </Stack>
     </>
   );

@@ -5,6 +5,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import { Modal, ModalButtons } from '../common/Modal';
@@ -12,7 +13,6 @@ import type { ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-import { InitialFocus } from '../common/InitialFocus';
 
 type GoCardlessInitialiseProps = {
   modalProps?: Partial<ModalProps>;

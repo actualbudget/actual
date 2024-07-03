@@ -1,11 +1,11 @@
 import React from 'react';
 
 import { Button } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
-import { InitialFocus } from '../common/InitialFocus';
 
 type ConfirmUnlinkAccountProps = {
   modalProps: CommonModalProps;

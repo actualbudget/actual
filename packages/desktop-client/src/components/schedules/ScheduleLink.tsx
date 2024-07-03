@@ -11,6 +11,7 @@ import { type TransactionEntity } from 'loot-core/src/types/models';
 import { type BoundActions } from '../../hooks/useActions';
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
@@ -18,7 +19,6 @@ import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
-import { InitialFocus } from '../common/InitialFocus';
 
 export function ScheduleLink({
   modalProps,

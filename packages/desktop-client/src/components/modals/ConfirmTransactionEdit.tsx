@@ -3,10 +3,10 @@ import React from 'react';
 
 import { Block } from '../common/Block';
 import { Button } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
-import { InitialFocus } from '../common/InitialFocus';
 
 type ConfirmTransactionEditProps = {
   modalProps: Partial<CommonModalProps>;

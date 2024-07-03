@@ -12,6 +12,7 @@ import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
@@ -20,7 +21,6 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Tooltip } from '../tooltips';
-import { InitialFocus } from '../common/InitialFocus';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
