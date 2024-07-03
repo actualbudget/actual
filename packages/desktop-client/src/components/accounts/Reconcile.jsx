@@ -106,13 +106,16 @@ export function ReconcileMenu({ account, onReconcile, onClose }) {
   const [inputFocused, setInputFocused] = useState(false);
 
   function onSubmit() {
-    if (!!inputValue) {
-      const amount = currencyToInteger(inputValue);
-      onReconcile(amount == null ? clearedBalance : amount);
-      onClose();
-    } else {
+    if (inputValue === '') {
       setInputFocused(true);
+      return;
     }
+
+    const amount =
+      inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
+
+    onReconcile(amount);
+    onClose();
   }
 
   return (
