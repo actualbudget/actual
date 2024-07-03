@@ -214,6 +214,7 @@ export function GoCardlessExternalMsg({
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Button
             type="primary"
+            autoFocus
             style={{
               padding: '10px 0',
               fontSize: 15,
@@ -272,6 +273,7 @@ export function GoCardlessExternalMsg({
           ) : success ? (
             <Button
               type="primary"
+              autoFocus
               style={{
                 padding: '10px 0',
                 fontSize: 15,
@@ -289,7 +291,7 @@ export function GoCardlessExternalMsg({
               <Paragraph style={{ color: theme.errorText }}>
                 GoCardless integration has not yet been configured.
               </Paragraph>
-              <Button type="primary" onClick={onGoCardlessInit}>
+              <Button type="primary" autoFocus onClick={onGoCardlessInit}>
                 Configure GoCardless integration
               </Button>
             </>
