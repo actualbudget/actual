@@ -20,6 +20,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Tooltip } from '../tooltips';
+import { InitialFocus } from '../common/InitialFocus';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -183,17 +184,19 @@ export function CreateAccountModal({
         <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
           {upgradingAccountId == null && (
             <View style={{ gap: 10 }}>
-              <Button
-                type="primary"
-                style={{
-                  padding: '10px 0',
-                  fontSize: 15,
-                  fontWeight: 600,
-                }}
-                onClick={onCreateLocalAccount}
-              >
-                Create local account
-              </Button>
+              <InitialFocus>
+                <Button
+                  type="primary"
+                  style={{
+                    padding: '10px 0',
+                    fontSize: 15,
+                    fontWeight: 600,
+                  }}
+                  onClick={onCreateLocalAccount}
+                >
+                  Create local account
+                </Button>
+              </InitialFocus>
               <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
                 <Text>
                   <strong>Create a local account</strong> if you want to add

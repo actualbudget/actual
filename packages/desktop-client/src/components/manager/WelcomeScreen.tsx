@@ -75,7 +75,7 @@ export function WelcomeScreen() {
           <Button onClick={() => createBudget({ testMode: true })}>
             View demo
           </Button>
-          <Button type="primary" onClick={() => createBudget()}>
+          <Button type="primary" autoFocus onClick={() => createBudget()}>
             Start fresh
           </Button>
         </View>

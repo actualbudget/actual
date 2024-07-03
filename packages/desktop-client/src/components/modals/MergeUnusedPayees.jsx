@@ -158,6 +158,7 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
             <ModalButtons style={{ marginTop: 20 }} focusButton>
               <Button
                 type="primary"
+                autoFocus
                 isSubmit={false}
                 style={{ marginRight: 10 }}
                 onClick={onMerge}

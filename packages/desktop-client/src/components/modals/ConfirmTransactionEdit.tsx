@@ -6,6 +6,7 @@ import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
+import { InitialFocus } from '../common/InitialFocus';
 
 type ConfirmTransactionEditProps = {
   modalProps: Partial<CommonModalProps>;
@@ -74,15 +75,17 @@ export function ConfirmTransactionEdit({
               <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
                 Cancel
               </Button>
-              <Button
-                type="primary"
-                onClick={() => {
-                  modalProps.onClose();
-                  onConfirm();
-                }}
-              >
-                Confirm
-              </Button>
+              <InitialFocus>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    modalProps.onClose();
+                    onConfirm();
+                  }}
+                >
+                  Confirm
+                </Button>
+              </InitialFocus>
             </View>
           </View>
         </View>

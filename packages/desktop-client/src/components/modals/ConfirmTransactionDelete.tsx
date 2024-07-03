@@ -7,6 +7,7 @@ import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
+import { InitialFocus } from '../common/InitialFocus';
 
 type ConfirmTransactionDeleteProps = {
   modalProps: CommonModalProps;
@@ -43,16 +44,18 @@ export function ConfirmTransactionDelete({
           >
             Cancel
           </Button>
-          <Button
-            type="primary"
-            style={narrowButtonStyle}
-            onClick={() => {
-              onConfirm();
-              modalProps.onClose();
-            }}
-          >
-            Delete
-          </Button>
+          <InitialFocus>
+            <Button
+              type="primary"
+              style={narrowButtonStyle}
+              onClick={() => {
+                onConfirm();
+                modalProps.onClose();
+              }}
+            >
+              Delete
+            </Button>
+          </InitialFocus>
         </View>
       </View>
     </Modal>

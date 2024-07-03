@@ -1285,6 +1285,7 @@ export function ImportTransactions({ modalProps, options }) {
         >
           <ButtonWithLoading
             type="primary"
+            autoFocus
             disabled={transactions.length === 0}
             loading={loadingState === 'importing'}
             onClick={onImport}

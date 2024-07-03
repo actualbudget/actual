@@ -78,7 +78,7 @@ export function ReconcilingMessage({
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
-          <Button type="primary" onClick={onDone}>
+          <Button type="primary" autoFocus onClick={onDone}>
             Done Reconciling
           </Button>
         </View>

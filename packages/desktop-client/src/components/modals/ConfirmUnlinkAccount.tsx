@@ -5,6 +5,7 @@ import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
+import { InitialFocus } from '../common/InitialFocus';
 
 type ConfirmUnlinkAccountProps = {
   modalProps: CommonModalProps;
@@ -39,15 +40,17 @@ export function ConfirmUnlinkAccount({
             <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
               Cancel
             </Button>
-            <Button
-              type="primary"
-              onClick={() => {
-                onUnlink();
-                modalProps.onClose();
-              }}
-            >
-              Unlink
-            </Button>
+            <InitialFocus>
+              <Button
+                type="primary"
+                onClick={() => {
+                  onUnlink();
+                  modalProps.onClose();
+                }}
+              >
+                Unlink
+              </Button>
+            </InitialFocus>
           </View>
         </View>
       )}

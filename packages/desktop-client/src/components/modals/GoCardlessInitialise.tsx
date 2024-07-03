@@ -12,6 +12,7 @@ import type { ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { InitialFocus } from '../common/InitialFocus';
 
 type GoCardlessInitialiseProps = {
   modalProps?: Partial<ModalProps>;
@@ -70,15 +71,17 @@ export const GoCardlessInitialise = ({
 
         <FormField>
           <FormLabel title="Secret ID:" htmlFor="secret-id-field" />
-          <Input
-            id="secret-id-field"
-            type="password"
-            value={secretId}
-            onChangeValue={value => {
-              setSecretId(value);
-              setIsValid(true);
-            }}
-          />
+          <InitialFocus>
+            <Input
+              id="secret-id-field"
+              type="password"
+              value={secretId}
+              onChangeValue={value => {
+                setSecretId(value);
+                setIsValid(true);
+              }}
+            />
+          </InitialFocus>
         </FormField>
 
         <FormField>

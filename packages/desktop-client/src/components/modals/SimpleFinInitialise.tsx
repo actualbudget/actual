@@ -80,6 +80,7 @@ export const SimpleFinInitialise = ({
       <ModalButtons>
         <ButtonWithLoading
           type="primary"
+          autoFocus
           loading={isLoading}
           onClick={onSubmit}
         >

@@ -8,6 +8,7 @@ import { useDateFormat } from '../../hooks/useDateFormat';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
@@ -311,14 +312,16 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
         <label htmlFor="start">From</label>
-        <DateSelect
-          id="start"
-          inputProps={{ placeholder: 'Start Date' }}
-          value={config.start}
-          onSelect={value => updateField('start', value)}
-          containerProps={{ style: { width: 100 } }}
-          dateFormat={dateFormat}
-        />
+        <InitialFocus>
+          <DateSelect
+            id="start"
+            inputProps={{ placeholder: 'Start Date' }}
+            value={config.start}
+            onSelect={value => updateField('start', value)}
+            containerProps={{ style: { width: 100 } }}
+            dateFormat={dateFormat}
+          />
+        </InitialFocus>
         <Select
           id="repeat_end_dropdown"
           bare
