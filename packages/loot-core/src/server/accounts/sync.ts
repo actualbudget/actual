@@ -71,7 +71,7 @@ async function updateAccountNotesWithBalance(id, balance, balanceDate) {
     ' with balance ' +
     formatter.format(balance);
 
-  await send('notes-save', { accountId, note: accountNote });
+  await send('notes-save', { id: accountId, note: accountNote });
 }
 
 export async function getGoCardlessAccounts(userId, userKey, id) {
