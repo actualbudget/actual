@@ -68,8 +68,7 @@ function conditionExists(item, filters, newItem) {
     ) {
       let allConditionsMatch = true;
 
-      for (let i = 0; i < conditions.length; i++) {
-        const cond = conditions[i];
+      conditions.some(cond => {
         const matchingCondition = filter.conditions.find(
           fcond =>
             cond.value === fcond.value &&
@@ -79,9 +78,10 @@ function conditionExists(item, filters, newItem) {
         );
         if (!matchingCondition) {
           allConditionsMatch = false;
-          break;
+          return true;
         }
-      }
+        return false;
+      });
 
       if (allConditionsMatch) {
         fConditionFound = filter;
