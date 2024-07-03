@@ -24,7 +24,7 @@ export function useModalState(): ModalState {
 
   const lastModal = modalStack[modalStack.length - 1];
   const isActive = useCallback(
-    name => {
+    (name: string) => {
       if (name === lastModal?.name) {
         return true;
       }

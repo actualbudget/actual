@@ -78,7 +78,7 @@ export function RolloverBudgetSummaryModal({
     onBudgetAction(month, 'reset-hold');
   };
 
-  const onClick = ({ close }) => {
+  const onClick = ({ close }: { close: () => void }) => {
     dispatch(
       pushModal('rollover-summary-to-budget-menu', {
         month,
