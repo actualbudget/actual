@@ -112,8 +112,7 @@ handlers['transactions-batch-update'] = mutator(async function ({
       learnCategories,
     });
 
-    // Return all data updates to the frontend
-    return result.updated;
+    return result;
   });
 });
 
@@ -1076,7 +1075,6 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
           acct.account_id,
           acct.bankId,
         );
-        console.groupEnd();
 
         const { added, updated } = res;
 
@@ -1114,6 +1112,8 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 
           captureException(err);
         }
+      } finally {
+        console.groupEnd();
       }
     }
   }

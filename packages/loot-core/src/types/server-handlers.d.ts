@@ -32,7 +32,7 @@ export interface ServerHandlers {
       Parameters<typeof batchUpdateTransactions>[0],
       'detectOrphanPayees'
     >,
-  ) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
+  ) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>>;
 
   'transaction-add': (transaction) => Promise<EmptyObject>;
 

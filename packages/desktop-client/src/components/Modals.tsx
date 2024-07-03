@@ -401,7 +401,6 @@ export function Modals() {
               actions={actions}
               transactionIds={options?.transactionIds}
               getTransaction={options?.getTransaction}
-              pushModal={options?.pushModal}
             />
           );
 
