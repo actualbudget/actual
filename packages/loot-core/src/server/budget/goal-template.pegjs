@@ -21,10 +21,10 @@ expr
   / template: template _ schedule _ full:full? name: name
     { return { type: 'schedule', name, priority: template.priority, directive: template.directive, full } }
   / template: template _ remainder: remainder limit: limit?
-    { return { type: 'remainder', priority: null, weight: remainder, limit } }
+    { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit } }
   / template: template _ 'average'i _ amount: positive _ 'months'i?
     { return { type: 'average', amount: +amount, priority: template.priority, directive: template.directive }}
-  / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: 0, directive: 'goal' }}
+  / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: null, directive: 'goal' }}
 
 
 repeat 'repeat interval'
