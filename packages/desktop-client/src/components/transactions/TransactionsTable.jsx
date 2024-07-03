@@ -1264,7 +1264,7 @@ const Transaction = memo(function Transaction({
         }}
       />
 
-      {isParent ? (
+      {(isPreview && !isChild) || isParent ? (
         <Cell
           /* Category field (Split button) for parent transactions */
           name="category"
