@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import * as connection from '../../platform/server/connection';
-import { TransactionEntity } from '../../types/models';
+import { NewTransactionEntity, TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import { batchMessages } from '../sync';
@@ -43,14 +43,9 @@ export async function batchUpdateTransactions({
   detectOrphanPayees = true,
   runTransfers = true,
 }: {
-  added?: Array<{ id: string; payee: unknown; category: unknown }>;
-  deleted?: Array<{ id: string; payee: unknown }>;
-  updated?: Array<{
-    id: string;
-    payee?: unknown;
-    account?: unknown;
-    category?: unknown;
-  }>;
+  added?: Array<Partial<NewTransactionEntity | TransactionEntity>>;
+  deleted?: Array<Partial<NewTransactionEntity | TransactionEntity>>;
+  updated?: Array<Partial<NewTransactionEntity | TransactionEntity>>;
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
   runTransfers?: boolean;

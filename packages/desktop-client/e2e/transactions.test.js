@@ -120,7 +120,7 @@ test.describe('Transactions', () => {
     ]);
 
     const firstTransaction = accountPage.getNthTransaction(0);
-    await expect(firstTransaction.payee).toHaveText('Krogger');
+    await expect(firstTransaction.payee).toHaveText('Split');
     await expect(firstTransaction.notes).toHaveText('Notes');
     await expect(firstTransaction.category).toHaveText('Split');
     await expect(firstTransaction.debit).toHaveText('333.33');

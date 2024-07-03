@@ -8,6 +8,7 @@ import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgLogo } from '../../../icons/logo';
@@ -21,7 +22,7 @@ import { SvgViewShow } from '../../../icons/v2';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
-import { makeAmountFullStyle, makeAmountGrey } from '../../budget/util';
+import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { Button } from '../../common/Button';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
@@ -331,6 +332,12 @@ const ExpenseCategory = memo(function ExpenseCategory({
 }) {
   const opacity = blank ? 0 : 1;
 
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const goalTemp = useSheetValue(goal);
+  const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
+  const budgetedTemp = useSheetValue(budgeted);
+  const budgetedValue = isGoalTemplatesEnabled ? budgetedTemp : null;
+
   const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const dispatch = useDispatch();
 
@@ -574,9 +581,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     mode="oneline"
                     style={{
                       maxWidth: columnWidth,
-                      ...makeAmountFullStyle(value, {
-                        zeroColor: theme.pillTextSubdued,
-                      }),
+                      ...makeBalanceAmountStyle(
+                        value,
+                        goalValue,
+                        budgetedValue,
+                      ),
                       textAlign: 'right',
                       fontSize: 12,
                     }}
