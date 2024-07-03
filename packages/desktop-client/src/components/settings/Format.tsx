@@ -88,12 +88,11 @@ export function FormatSettings() {
                 bare
                 key={String(hideFraction)} // needed because label does not update
                 value={numberFormat}
-                onChange={format => setNumberFormatPref(format)}
+                onChange={setNumberFormatPref}
                 options={numberFormats.map(f => [
                   f.value,
                   hideFraction ? f.labelNoFraction : f.label,
                 ])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
               />
             </Button>
 
@@ -112,9 +111,8 @@ export function FormatSettings() {
               <Select
                 bare
                 value={dateFormat}
-                onChange={format => setDateFormatPref(format)}
+                onChange={setDateFormatPref}
                 options={dateFormats.map(f => [f.value, f.label])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
               />
             </Button>
           </Column>
@@ -124,9 +122,8 @@ export function FormatSettings() {
               <Select
                 bare
                 value={firstDayOfWeekIdx}
-                onChange={idx => setFirstDayOfWeekIdxPref(idx)}
+                onChange={setFirstDayOfWeekIdxPref}
                 options={daysOfWeek.map(f => [f.value, f.label])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
               />
             </Button>
           </Column>
