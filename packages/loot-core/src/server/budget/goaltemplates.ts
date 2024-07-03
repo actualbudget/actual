@@ -16,6 +16,9 @@ import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
 
+const TEMPLATE_PREFIX = '#template';
+const GOAL_PREFIX = '#goal';
+
 export async function applyTemplate({ month }) {
   await storeTemplates();
   const category_templates = await getTemplates(null);
@@ -382,12 +385,12 @@ async function processTemplate(
   }
 }
 
-const TEMPLATE_PREFIX = '#template';
 async function getCategoryTemplates(category) {
   const templates = {};
 
   let notes = await db.all(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
+    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%' OR 
+    'lower(note) like %${GOAL_PREFIX}%'`,
   );
   if (category) notes = notes.filter(n => n.id === category.id);
 
@@ -396,10 +399,10 @@ async function getCategoryTemplates(category) {
     const template_lines = [];
     for (let l = 0; l < lines.length; l++) {
       const line = lines[l].trim();
-      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
-      const expression = line.slice(TEMPLATE_PREFIX.length);
+      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)
+          && !line.toLowerCase().startsWith(GOAL_PREFIX)) continue;
       try {
-        const parsed = parse(expression);
+        const parsed = parse(line);
         template_lines.push(parsed);
       } catch (e) {
         template_lines.push({ type: 'error', line, error: e });
