@@ -67,6 +67,7 @@ function conditionExists(item, filters, newItem) {
       filter.conditions.length === conditions.length
     ) {
       let allConditionsMatch = true;
+
       for (let i = 0; i < conditions.length; i++) {
         const cond = conditions[i];
         const matchingCondition = filter.conditions.find(
@@ -74,7 +75,7 @@ function conditionExists(item, filters, newItem) {
             cond.value === fcond.value &&
             cond.op === fcond.op &&
             cond.field === fcond.field &&
-            compareFilterOptions(cond.options, fcond.options),
+            filterOptionsMatch(cond.options, fcond.options),
         );
         if (!matchingCondition) {
           allConditionsMatch = false;
@@ -89,6 +90,7 @@ function conditionExists(item, filters, newItem) {
     }
     return false;
   });
+
   if (!newItem) {
     return fConditionFound
       ? fConditionFound.id !== item.id
@@ -96,10 +98,11 @@ function conditionExists(item, filters, newItem) {
         : false
       : false;
   }
+
   return fConditionFound ? fConditionFound.name : false;
 }
 
-function compareFilterOptions(options1, options2) {
+function filterOptionsMatch(options1, options2) {
   const opt1 = options1 ?? {};
   const opt2 = options2 ?? {};
 
