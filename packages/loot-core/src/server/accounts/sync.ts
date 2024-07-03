@@ -68,7 +68,7 @@ async function updateAccountNotesWithBalance(id, balance, balanceDate) {
   const accountNote =
     'Transactions synced on ' +
     balanceDate.toLocaleString() +
-    ' with a balance of' +
+    ' with a balance of ' +
     formatter.format(balance);
 
   await send('notes-save', { id: accountId, note: accountNote });
