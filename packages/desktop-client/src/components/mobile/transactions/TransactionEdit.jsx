@@ -529,7 +529,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
       }
 
       props.onSave(transactionsToSave);
-      navigate(-1);
+
+      if (adding) {
+        const { account: accountId } = unserializedTransaction;
+        const account = accountsById[accountId];
+        navigate(`/accounts/${account.id}`, { replace: true });
+      } else {
+        navigate(-1);
+      }
     };
 
     if (unserializedTransaction.reconciled) {
@@ -636,12 +643,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               return;
             }
 
-            const { account: accountId } = unserializedTransaction;
-            if (accountId) {
-              navigate(-1);
-            } else {
-              navigate(-1);
-            }
+            navigate(-1);
           },
         }),
       );
