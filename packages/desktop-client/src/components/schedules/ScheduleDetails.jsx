@@ -15,7 +15,7 @@ import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { Stack } from '../common/Stack';
@@ -679,7 +679,7 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
                   This schedule has custom conditions and actions
                 </Text>
               )}
-              <Button onClick={() => onEditRule()} disabled={adding}>
+              <Button onPress={() => onEditRule()} isDisabled={adding}>
                 Edit as rule
               </Button>
             </Stack>
@@ -702,7 +702,7 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Button
-                type="bare"
+                variant="bare"
                 style={{
                   color:
                     state.transactionsMode === 'linked'
@@ -711,12 +711,12 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
                   marginRight: 10,
                   fontSize: 14,
                 }}
-                onClick={() => onSwitchTransactions('linked')}
+                onPress={() => onSwitchTransactions('linked')}
               >
                 Linked transactions
               </Button>{' '}
               <Button
-                type="bare"
+                variant="bare"
                 style={{
                   color:
                     state.transactionsMode === 'matched'
@@ -724,7 +724,7 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
                       : theme.pageTextSubdued,
                   fontSize: 14,
                 }}
-                onClick={() => onSwitchTransactions('matched')}
+                onPress={() => onSwitchTransactions('matched')}
               >
                 Find matching transactions
               </Button>
@@ -780,10 +780,10 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
         {state.error && (
           <Text style={{ color: theme.errorText }}>{state.error}</Text>
         )}
-        <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
+        <Button style={{ marginRight: 10 }} onPress={actions.popModal}>
           Cancel
         </Button>
-        <Button type="primary" onClick={onSave}>
+        <Button variant="primary" onPress={onSave}>
           {adding ? 'Add' : 'Save'}
         </Button>
       </Stack>

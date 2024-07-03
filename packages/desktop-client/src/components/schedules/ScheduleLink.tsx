@@ -10,7 +10,7 @@ import { type TransactionEntity } from 'loot-core/src/types/models';
 
 import { type BoundActions } from '../../hooks/useActions';
 import { SvgAdd } from '../../icons/v0';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { Search } from '../common/Search';
@@ -93,9 +93,9 @@ export function ScheduleLink({
         </InitialFocus>
         {ids.length === 1 && (
           <Button
-            type="primary"
+            variant="primary"
             style={{ marginLeft: 15, padding: '4px 10px' }}
-            onClick={onCreate}
+            onPress={onCreate}
           >
             <SvgAdd style={{ width: '20', padding: '3' }} />
             Create New
