@@ -217,7 +217,12 @@ export function appendDecimals(
   return amountToCurrency(currencyToAmount(result));
 }
 
-type NumberFormats = 'comma-dot' | 'dot-comma' | 'space-comma' | 'comma-dot-in';
+type NumberFormats =
+  | 'comma-dot'
+  | 'dot-comma'
+  | 'space-comma'
+  | 'apostrophe-dot'
+  | 'comma-dot-in';
 
 export const numberFormats: Array<{
   value: NumberFormats;
@@ -227,6 +232,7 @@ export const numberFormats: Array<{
   { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
   { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
   { value: 'space-comma', label: '1\xa0000,33', labelNoFraction: '1\xa0000' },
+  { value: 'apostrophe-dot', label: '1’000.33', labelNoFraction: '1’000' },
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
 
@@ -262,6 +268,12 @@ export function getNumberFormat({
       locale = 'de-DE';
       regex = /[^-0-9,]/g;
       separator = ',';
+      break;
+    case 'apostrophe-dot':
+      locale = 'de-CH';
+      regex = /[^-0-9,.]/g;
+      separator = '.';
+      separatorRegex = /[,.]/g;
       break;
     case 'comma-dot-in':
       locale = 'en-IN';
