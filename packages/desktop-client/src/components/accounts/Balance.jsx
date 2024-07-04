@@ -189,7 +189,8 @@ export function Balances({
             marginLeft: 10,
             color: theme.pillText,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
-            opacity: isButtonHovered || selectedItems.size > 0 || showExtraBalances
+            opacity:
+              isButtonHovered || selectedItems.size > 0 || showExtraBalances
                 ? 1
                 : 0,
           }}
