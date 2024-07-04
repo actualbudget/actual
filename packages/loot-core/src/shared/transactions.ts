@@ -241,7 +241,9 @@ export function updateTransaction(
   return replaceTransactions(transactions, transaction.id, trans => {
     if (trans.is_parent) {
       const parent = trans.id === transaction.id ? transaction : trans;
-      const sub = trans.subtransactions?.map(t => {
+      const originalSubtransactions =
+        parent.subtransactions ?? trans.subtransactions;
+      const sub = originalSubtransactions?.map(t => {
         // Make sure to update the children to reflect the updated
         // properties (if the parent updated)
 
