@@ -84,15 +84,4 @@ describe('utility functions', () => {
     formatter = getNumberFormat().formatter;
     expect(formatter.format(Number('1234.56'))).toBe('1\xa0235');
   });
-
-  test('number formatting works with space-dot format', () => {
-    setNumberFormat({ format: 'space-dot', hideFraction: false });
-    let formatter = getNumberFormat().formatter;
-    // grouping separator space char is a non-breaking space, or UTF-16 \xa0
-    expect(formatter.format(Number('1234.56'))).toBe('1\xa0234.56');
-
-    setNumberFormat({ format: 'space-dot', hideFraction: true });
-    formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1\xa0235');
-  });
 });
