@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
+
+import { useHover } from 'usehooks-ts';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
@@ -141,6 +143,8 @@ export function Balances({
   filteredAmount,
 }) {
   const selectedItems = useSelectedItems();
+  const buttonRef = useRef(null);
+  const isButtonHovered = useHover(buttonRef);
 
   return (
     <View
@@ -152,14 +156,11 @@ export function Balances({
       }}
     >
       <Button
+        ref={buttonRef}
         data-testid="account-balance"
         variant="bare"
         onPress={onToggleExtraBalances}
         style={{
-          '& svg': {
-            opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0,
-          },
-          '&:hover svg': { opacity: 1 },
           paddingTop: 1,
           paddingBottom: 1,
         }}
@@ -188,6 +189,11 @@ export function Balances({
             marginLeft: 10,
             color: theme.pillText,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
+            opacity: isButtonHovered
+              ? 1
+              : selectedItems.size > 0 || showExtraBalances
+                ? 1
+                : 0,
           }}
         />
       </Button>
