@@ -1,14 +1,24 @@
-const { Menu, ipcMain, app, shell } = require('electron');
+import {
+  MenuItemConstructorOptions,
+  Menu,
+  ipcMain,
+  app,
+  shell,
+} from 'electron';
 
-function getMenu(isDev, createWindow, budgetId) {
-  const template = [
+export function getMenu(
+  isDev: boolean,
+  createWindow: () => Promise<void>,
+  budgetId: string | undefined = undefined,
+) {
+  const template: MenuItemConstructorOptions[] = [
     {
       label: 'File',
       submenu: [
         {
           label: 'Load Backup...',
           enabled: false,
-          click(item, focusedWindow) {
+          click(_item, focusedWindow) {
             if (focusedWindow && budgetId) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
@@ -24,7 +34,7 @@ function getMenu(isDev, createWindow, budgetId) {
         {
           label: 'Manage files...',
           accelerator: 'CmdOrCtrl+O',
-          click(item, focusedWindow) {
+          click(_item, focusedWindow) {
             if (focusedWindow) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
@@ -48,18 +58,26 @@ function getMenu(isDev, createWindow, budgetId) {
           label: 'Undo',
           enabled: false,
           accelerator: 'CmdOrCtrl+Z',
-          click: function (menuItem, focusedWin) {
+          click: function (_menuItem, focusedWin) {
             // Undo
-            focusedWin.webContents.executeJavaScript('__actionsForMenu.undo()');
+            if (focusedWin) {
+              focusedWin.webContents.executeJavaScript(
+                '__actionsForMenu.undo()',
+              );
+            }
           },
         },
         {
           label: 'Redo',
           enabled: false,
           accelerator: 'Shift+CmdOrCtrl+Z',
-          click: function (menuItem, focusedWin) {
+          click: function (_menuItem, focusedWin) {
             // Redo
-            focusedWin.webContents.executeJavaScript('__actionsForMenu.redo()');
+            if (focusedWin) {
+              focusedWin.webContents.executeJavaScript(
+                '__actionsForMenu.redo()',
+              );
+            }
           },
         },
         {
@@ -75,45 +93,49 @@ function getMenu(isDev, createWindow, budgetId) {
           role: 'paste',
         },
         {
-          role: 'pasteandmatchstyle',
+          role: 'pasteAndMatchStyle',
         },
         {
           role: 'delete',
         },
         {
-          role: 'selectall',
+          role: 'selectAll',
         },
       ],
     },
     {
       label: 'View',
       submenu: [
-        isDev && {
-          label: 'Reload',
-          accelerator: 'CmdOrCtrl+R',
-          click(item, focusedWindow) {
-            if (focusedWindow) focusedWindow.reload();
-          },
-        },
+        isDev
+          ? {
+              label: 'Reload',
+              accelerator: 'CmdOrCtrl+R',
+              click(_item, focusedWindow) {
+                if (focusedWindow) focusedWindow.reload();
+              },
+            }
+          : { label: 'hidden', visible: false },
         {
           label: 'Toggle Developer Tools',
           accelerator:
             process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-          click(item, focusedWindow) {
+          click(_item, focusedWindow) {
             if (focusedWindow) focusedWindow.webContents.toggleDevTools();
           },
         },
-        isDev && {
-          type: 'separator',
+        isDev
+          ? {
+              type: 'separator',
+            }
+          : { label: 'hidden', visible: false },
+        {
+          role: 'resetZoom',
         },
         {
-          role: 'resetzoom',
+          role: 'zoomIn',
         },
         {
-          role: 'zoomin',
-        },
-        {
-          role: 'zoomout',
+          role: 'zoomOut',
         },
         {
           type: 'separator',
@@ -121,7 +143,7 @@ function getMenu(isDev, createWindow, budgetId) {
         {
           role: 'togglefullscreen',
         },
-      ].filter(x => x),
+      ],
     },
     {
       label: 'Tools',
@@ -129,10 +151,12 @@ function getMenu(isDev, createWindow, budgetId) {
         {
           label: 'Find schedules',
           enabled: false,
-          click: function (menuItem, focusedWin) {
-            focusedWin.webContents.executeJavaScript(
-              'window.__actionsForMenu && window.__actionsForMenu.pushModal("schedules-discover")',
-            );
+          click: function (_menuItem, focusedWin) {
+            if (focusedWin) {
+              focusedWin.webContents.executeJavaScript(
+                'window.__actionsForMenu && window.__actionsForMenu.pushModal("schedules-discover")',
+              );
+            }
           },
         },
       ],
@@ -160,7 +184,9 @@ function getMenu(isDev, createWindow, budgetId) {
 
   if (process.platform === 'win32') {
     // Add about to help menu on Windows
-    template[template.length - 1].submenu.unshift({
+    (
+      template[template.length - 1].submenu as MenuItemConstructorOptions[]
+    ).unshift({
       label: 'About Actual',
       click() {
         ipcMain.emit('show-about');
@@ -177,12 +203,14 @@ function getMenu(isDev, createWindow, budgetId) {
             ipcMain.emit('show-about');
           },
         },
-        isDev && {
-          label: 'Screenshot',
-          click() {
-            ipcMain.emit('screenshot');
-          },
-        },
+        isDev
+          ? {
+              label: 'Screenshot',
+              click() {
+                ipcMain.emit('screenshot');
+              },
+            }
+          : { label: 'hidden', visible: false },
         {
           type: 'separator',
         },
@@ -197,7 +225,7 @@ function getMenu(isDev, createWindow, budgetId) {
           role: 'hide',
         },
         {
-          role: 'hideothers',
+          role: 'hideOthers',
         },
         {
           role: 'unhide',
@@ -208,11 +236,11 @@ function getMenu(isDev, createWindow, budgetId) {
         {
           role: 'quit',
         },
-      ].filter(x => x),
+      ],
     });
     // Edit menu.
     const editIdx = template.findIndex(t => t.label === 'Edit');
-    template[editIdx].submenu.push(
+    (template[editIdx].submenu as MenuItemConstructorOptions[]).push(
       {
         type: 'separator',
       },
@@ -220,10 +248,10 @@ function getMenu(isDev, createWindow, budgetId) {
         label: 'Speech',
         submenu: [
           {
-            role: 'startspeaking',
+            role: 'startSpeaking',
           },
           {
-            role: 'stopspeaking',
+            role: 'stopSpeaking',
           },
         ],
       },
@@ -257,5 +285,3 @@ function getMenu(isDev, createWindow, budgetId) {
 
   return Menu.buildFromTemplate(template);
 }
-
-module.exports = getMenu;

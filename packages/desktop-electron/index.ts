@@ -17,7 +17,7 @@ import isDev from 'electron-is-dev';
 import promiseRetry from 'promise-retry';
 
 import about from './about';
-import getMenu from './menu';
+import { getMenu } from './menu';
 import updater from './updater';
 import {
   get as getWindowState,
