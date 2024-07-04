@@ -25,7 +25,7 @@ export default {
   /**
    * Following the GoCardless documentation[0] we should prefer `bookingDate`
    * here, though some of their bank integrations uses the date field
-   * differently from what's describen in their documentation and so it's
+   * differently from what's described in their documentation and so it's
    * sometimes necessary to use `valueDate` instead.
    *
    *   [0]: https://nordigen.zendesk.com/hc/en-gb/articles/7899367372829-valueDate-and-bookingDate-for-transactions
