@@ -179,6 +179,9 @@ Actual is now up and running. Congratulations! Consider checking out [our tour](
 ## Updating Actual
 
 When updates to Actual are released, you’ll need to re-deploy your app to get the latest version.
+```
+fly deploy --image actualbudget/actual-server:latest --app your-app-name
+```
 
 ### Local terminal
 
