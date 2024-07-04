@@ -6,7 +6,9 @@
 
 - **Q.** _Can I sync my bank to Actual automatically?_
 
-  **A.** Yes, certain banks are now supported, you can find the documentation [here](./advanced/bank-sync.md)
+  **A.** Yes, certain banks are now supported, you can find the documentation [here](./advanced/bank-sync.md). If you are setting up Actual for the first time,
+  it is much easier to not pull in historical data. First, set up your account(s) with a correct opening balance on a recent date, then set up bank sync. Only
+  transactions after the opening balance date will be synced, making reconciliation easy.
 
 - **Q.** _Can I import my Actual Budget from the hosted instance of Actual to my Self Hosted version_
 
