@@ -40,7 +40,7 @@ import {
   useSplitsExpanded,
 } from '../../hooks/useSplitsExpanded';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
@@ -73,7 +73,7 @@ function EmptyMessage({ onAdd }) {
           manage it locally yourself.
         </Text>
 
-        <Button type="primary" style={{ marginTop: 20 }} onClick={onAdd}>
+        <Button variant="primary" style={{ marginTop: 20 }} onPress={onAdd}>
           Add account
         </Button>
 
