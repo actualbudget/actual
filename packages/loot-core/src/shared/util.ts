@@ -231,8 +231,8 @@ export const numberFormats: Array<{
 }> = [
   { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
   { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
-  { value: 'space-comma', label: '1 000,33', labelNoFraction: '1 000' },
-  { value: 'space-dot', label: '1 000.33', labelNoFraction: '1 000' },
+  { value: 'space-comma', label: '1\xa0000,33', labelNoFraction: '1\xa0000' },
+  { value: 'space-dot', label: '1\xa0000.33', labelNoFraction: '1\xa0000' },
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
 
