@@ -20,15 +20,16 @@ export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
         backgroundColor: theme.pillBackground,
         marginBottom: 5,
         ...style,
-        ...(selected && {
-          color: theme.buttonNormalSelectedText,
-          ...(isHovered || isPressed
+        ...(selected
+          ? {
+              color: theme.pillTextSelected,
+              backgroundColor: theme.pillBackgroundSelected,
+            }
+          : isHovered || isPressed
             ? {
-                backgroundColor: theme.buttonNormalSelectedBackground,
-                color: theme.buttonNormalSelectedText,
+                backgroundColor: theme.pillBackgroundHover,
               }
             : {}),
-        }),
       })}
       onPress={onClick}
     >

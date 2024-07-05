@@ -185,6 +185,7 @@ export const pillTextHighlighted = colorPalette.purple600;
 export const pillBorder = colorPalette.navy150;
 export const pillBorderDark = colorPalette.navy300;
 export const pillBackgroundSelected = colorPalette.blue150;
+export const pillBackgroundHover = 'rgba(100, 100, 100, .15)';
 export const pillTextSelected = colorPalette.blue900;
 export const pillBorderSelected = colorPalette.purple500;
 export const pillTextSubdued = colorPalette.navy200;
