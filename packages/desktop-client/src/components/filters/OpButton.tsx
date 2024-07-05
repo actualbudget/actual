@@ -17,7 +17,6 @@ export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
     <Button
       variant="bare"
       style={({ isHovered, isPressed }) => ({
-        backgroundColor: theme.pillBackground,
         marginBottom: 5,
         ...style,
         ...(selected
@@ -29,7 +28,9 @@ export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
             ? {
                 backgroundColor: theme.pillBackgroundHover,
               }
-            : {}),
+            : {
+                backgroundColor: theme.pillBackground,
+              }),
       })}
       onPress={onClick}
     >
