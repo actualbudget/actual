@@ -118,14 +118,19 @@ export const Transaction = memo(function Transaction({
         }}
       >
         <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              color: textStyle.color || theme.tableText,
+            }}
+          >
             {schedule && (
               <SvgArrowsSynchronize
                 style={{
                   width: 12,
                   height: 12,
                   marginRight: 5,
-                  color: textStyle.color || theme.menuItemText,
                 }}
               />
             )}
@@ -135,13 +140,18 @@ export const Transaction = memo(function Transaction({
                 ...textStyle,
                 fontSize: 14,
                 fontWeight: added ? '600' : '400',
-                ...(prettyDescription === '' && {
-                  color: theme.tableTextLight,
-                  fontStyle: 'italic',
-                }),
+                ...(!isPreview &&
+                  prettyDescription === '' && {
+                    color: theme.tableTextSubdued,
+                  }),
+                ...(!isPreview &&
+                  (prettyDescription === '' ||
+                    prettyDescription === 'Split') && {
+                    fontStyle: 'italic',
+                  }),
               }}
             >
-              {prettyDescription || 'Empty'}
+              {prettyDescription || 'No payee'}
             </TextOneLine>
           </View>
           {isPreview ? (
@@ -170,7 +180,7 @@ export const Transaction = memo(function Transaction({
                     height: 11,
                     color: cleared
                       ? theme.noticeTextLight
-                      : theme.pageTextSubdued,
+                      : theme.tableTextSubdued,
                     marginRight: 5,
                   }}
                 />

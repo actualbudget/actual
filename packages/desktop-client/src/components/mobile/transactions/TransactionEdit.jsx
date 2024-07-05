@@ -69,9 +69,11 @@ function getFieldName(transactionId, field) {
 }
 
 export function getDescriptionPretty(transaction, payee, transferAcct) {
-  const { amount } = transaction;
+  const { amount, is_parent: isParent } = transaction;
 
-  if (transferAcct) {
+  if (isParent) {
+    return 'Split';
+  } else if (transferAcct) {
     return `Transfer ${amount > 0 ? 'from' : 'to'} ${transferAcct.name}`;
   } else if (payee) {
     return payee.name;
