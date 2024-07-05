@@ -367,6 +367,7 @@ export function PayeeAutocomplete({
               {showMakeTransfer && (
                 <Button
                   variant={focusTransferPayees ? 'menuSelected' : 'menu'}
+                  aria-label="Make transfer"
                   style={showManagePayees && { marginBottom: 5 }}
                   onPress={() => {
                     onUpdate?.(null, null);
@@ -377,7 +378,11 @@ export function PayeeAutocomplete({
                 </Button>
               )}
               {showManagePayees && (
-                <Button variant="menu" onPress={() => onManagePayees()}>
+                <Button
+                  variant="menu"
+                  aria-label="Manage payees"
+                  onPress={() => onManagePayees()}
+                >
                   Manage Payees
                 </Button>
               )}

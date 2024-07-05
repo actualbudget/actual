@@ -621,7 +621,12 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
       }}
     >
       {name}
-      <Button variant="bare" style={{ marginLeft: 1 }} onPress={onRemove}>
+      <Button
+        variant="bare"
+        aria-label="Remove autocomplete item"
+        style={{ marginLeft: 1 }}
+        onPress={onRemove}
+      >
         <SvgRemove style={{ width: 8, height: 8 }} />
       </Button>
     </View>

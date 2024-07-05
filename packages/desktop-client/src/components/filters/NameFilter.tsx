@@ -55,6 +55,7 @@ export function NameFilter({
             </FormField>
             <Button
               variant="primary"
+              aria-label={adding ? 'Add' : 'Update'}
               style={{ marginTop: 18 }}
               onPress={onAddUpdate}
             >

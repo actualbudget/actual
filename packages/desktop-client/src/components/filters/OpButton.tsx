@@ -13,9 +13,11 @@ type OpButtonProps = {
 };
 
 export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
+  const displayOp = friendlyOp(op);
   return (
     <Button
       variant="bare"
+      aria-label={`${displayOp} op`}
       style={({ isHovered, isPressed }) => ({
         marginBottom: 5,
         ...style,
@@ -34,7 +36,7 @@ export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
       })}
       onPress={onClick}
     >
-      {friendlyOp(op)}
+      {displayOp}
     </Button>
   );
 }

@@ -162,6 +162,7 @@ export function SavedFilterMenuButton({
         <Button
           ref={triggerRef}
           variant="bare"
+          aria-label="Saved filter menu"
           style={{ marginTop: 10 }}
           onPress={() => {
             setMenuOpen(true);

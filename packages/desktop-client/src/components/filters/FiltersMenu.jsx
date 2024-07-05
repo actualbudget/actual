@@ -220,6 +220,7 @@ function ConfigureField({
           <View style={{ flex: 1 }} />
           <Button
             variant="primary"
+            aria-label="Apply"
             onPress={() => {
               onApply({
                 field,

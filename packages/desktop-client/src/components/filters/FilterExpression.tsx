@@ -45,6 +45,8 @@ export function FilterExpression({
   const triggerRef = useRef(null);
 
   const field = subfieldFromFilter({ field: originalField, value });
+  const displayField = mapField(field, options);
+  const displayOp = friendlyOp(op, null);
 
   return (
     <View
@@ -61,6 +63,7 @@ export function FilterExpression({
       <Button
         ref={triggerRef}
         variant="bare"
+        aria-label={`${displayField} ${displayOp} ${value} filter`}
         isDisabled={customName != null}
         onPress={() => setEditing(true)}
       >
@@ -70,9 +73,9 @@ export function FilterExpression({
           ) : (
             <>
               <Text style={{ color: theme.pageTextPositive }}>
-                {mapField(field, options)}
+                {displayField}
               </Text>{' '}
-              <Text>{friendlyOp(op, null)}</Text>{' '}
+              <Text>{displayOp}</Text>{' '}
               <Value
                 value={value}
                 field={field}
