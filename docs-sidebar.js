@@ -84,7 +84,7 @@ const sidebars = {
         'getting-started/tips-tricks',
         'getting-started/sync',
         'getting-started/manage-files',
-        'getting-started/starting-clean',
+        'getting-started/starting-fresh',
         'getting-started/envelope-budgeting',
         {
           type: 'category',

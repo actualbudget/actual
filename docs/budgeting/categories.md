@@ -2,6 +2,9 @@
 
 You can manage your categories in the budget page. Actual supports both expense and income categories.
 
+Get some background information and recommendations on budget categories in our 
+[starting fresh](/docs/getting-started/starting-fresh#2-setting-up-your-budget-categories) guide.
+
 ## Add a category
 
 1. Hover over the category group and press the down arrow
