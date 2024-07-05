@@ -16,9 +16,7 @@ import {
 import isDev from 'electron-is-dev';
 import promiseRetry from 'promise-retry';
 
-import about from './about';
 import { getMenu } from './menu';
-import updater from './updater';
 import {
   get as getWindowState,
   listen as listenToWindowState,
@@ -55,17 +53,6 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 
-updater.onEvent((type: string, data: Record<string, string> | string) => {
-  // Notify both the app and the about window
-  if (clientWin) {
-    clientWin.webContents.send(type, data);
-  }
-
-  if (about.getWindow()) {
-    about.getWindow().webContents.send(type, data);
-  }
-});
-
 if (isDev) {
   process.traceProcessWarnings = true;
 }
@@ -81,13 +68,6 @@ function createBackgroundProcess() {
     switch (msg.type) {
       case 'captureEvent':
       case 'captureBreadcrumb':
-        break;
-      case 'shouldAutoUpdate':
-        if (msg.flag) {
-          updater.start();
-        } else {
-          updater.stop();
-        }
         break;
       case 'reply':
       case 'error':
@@ -331,10 +311,6 @@ ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
 
-ipcMain.on('show-about', () => {
-  about.openAboutWindow();
-});
-
 ipcMain.on('message', (_event, msg) => {
   if (!serverProcess) {
     return;
@@ -352,23 +328,6 @@ ipcMain.on('screenshot', () => {
       clientWin.setSize(width, Math.floor(width * (427 / 623)));
     }
   }
-});
-
-ipcMain.on('check-for-update', () => {
-  // If the updater is in the middle of an update already, send the
-  // about window the current status
-  if (updater.isChecking()) {
-    // This should always come from the about window so we can
-    // guarantee that it exists. If we ever see an error here
-    // something is wrong
-    about.getWindow().webContents.send(updater.getLastEvent());
-  } else {
-    updater.check();
-  }
-});
-
-ipcMain.on('apply-update', () => {
-  updater.apply();
 });
 
 ipcMain.on('update-menu', (event, budgetId?: string) => {

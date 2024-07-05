@@ -182,27 +182,11 @@ export function getMenu(
     },
   ];
 
-  if (process.platform === 'win32') {
-    // Add about to help menu on Windows
-    (
-      template[template.length - 1].submenu as MenuItemConstructorOptions[]
-    ).unshift({
-      label: 'About Actual',
-      click() {
-        ipcMain.emit('show-about');
-      },
-    });
-  } else if (process.platform === 'darwin') {
+  if (process.platform === 'darwin') {
     const name = app.getName();
     template.unshift({
       label: name,
       submenu: [
-        {
-          label: 'About Actual',
-          click() {
-            ipcMain.emit('show-about');
-          },
-        },
         isDev
           ? {
               label: 'Screenshot',
