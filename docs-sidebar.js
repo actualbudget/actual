@@ -85,6 +85,7 @@ const sidebars = {
         'getting-started/sync',
         'getting-started/manage-files',
         'getting-started/starting-clean',
+        'getting-started/envelope-budgeting',
         {
           type: 'category',
           label: 'Migration',

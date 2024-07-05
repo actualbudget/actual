@@ -4,7 +4,7 @@ The purpose of a budget is to answer simple questions: how much money did I save
 
 There are many approaches to budgeting. Some of the approaches that seem simple at first end up causing more work to keep an accurate budget, or make it easy for hidden expenses to drain your savings.
 
-We find the best way to track your money is rooted in something called **envelope budgeting**. Instead of predicting how much you'll make and spend and trying to reconcile that with what actually happened, envelope budgeting embraces real income as the source of your budget instead. This means you can only budget money that you already have.
+We find the best way to track your money is rooted in something called **[envelope budgeting](docs/getting-started/envelope-budgeting.md)**. Instead of predicting how much you'll make and spend and trying to reconcile that with what actually happened, envelope budgeting embraces real income as the source of your budget instead. This means you can only budget money that you already have.
 
 You can think of categories as little funds that you deposit money into. Combined with our rollover system, it provides an intuitive way to handle a lot of things that come up in life. And you know it's always accurately depicting your finances — there's no made up numbers.
 
