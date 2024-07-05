@@ -586,9 +586,8 @@ function SelectField({
         ]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ width: '100%' }}
-      wrapperStyle={style}
-      onChange={value => onChange(value)}
+      onChange={onChange}
+      buttonStyle={style}
     />
   );
 }
@@ -619,8 +618,7 @@ function DateFormatSelect({
           f.label.replace(/ /g, delimiter),
         ])}
         value={parseDateFormat || ''}
-        onChange={value => onChange(value)}
-        style={{ width: '100%' }}
+        onChange={onChange}
       />
     </View>
   );

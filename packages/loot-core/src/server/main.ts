@@ -1075,7 +1075,6 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
           acct.account_id,
           acct.bankId,
         );
-        console.groupEnd();
 
         const { added, updated } = res;
 
@@ -1113,6 +1112,8 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 
           captureException(err);
         }
+      } finally {
+        console.groupEnd();
       }
     }
   }
@@ -1226,13 +1227,6 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if ('autoUpdate' in prefs) {
-    await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
-    process.parentPort.postMessage({
-      type: 'shouldAutoUpdate',
-      flag: prefs.autoUpdate,
-    });
-  }
   if ('documentDir' in prefs) {
     if (await fs.exists(prefs.documentDir)) {
       await asyncStorage.setItem('document-dir', prefs.documentDir);
@@ -1251,14 +1245,12 @@ handlers['load-global-prefs'] = async function () {
   const [
     [, floatingSidebar],
     [, maxMonths],
-    [, autoUpdate],
     [, documentDir],
     [, encryptKey],
     [, theme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
-    'auto-update',
     'document-dir',
     'encrypt-key',
     'theme',
@@ -1266,7 +1258,6 @@ handlers['load-global-prefs'] = async function () {
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
-    autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
     theme:
@@ -2127,14 +2118,6 @@ export async function initApp(isDev, socketName) {
   setServer(url);
 
   connection.init(socketName, app.handlers);
-
-  if (!isDev && !Platform.isMobile && !Platform.isWeb) {
-    const autoUpdate = await asyncStorage.getItem('auto-update');
-    process.parentPort.postMessage({
-      type: 'shouldAutoUpdate',
-      flag: autoUpdate == null || autoUpdate === 'true',
-    });
-  }
 
   // Allow running DB queries locally
   global.$query = aqlQuery;
