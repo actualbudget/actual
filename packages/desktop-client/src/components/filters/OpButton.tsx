@@ -16,18 +16,20 @@ export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
   return (
     <Button
       variant="bare"
-      style={{
+      style={({ isHovered, isPressed }) => ({
         backgroundColor: theme.pillBackground,
         marginBottom: 5,
         ...style,
         ...(selected && {
           color: theme.buttonNormalSelectedText,
-          '&,:hover,:active': {
-            backgroundColor: theme.buttonNormalSelectedBackground,
-            color: theme.buttonNormalSelectedText,
-          },
+          ...(isHovered || isPressed
+            ? {
+                backgroundColor: theme.buttonNormalSelectedBackground,
+                color: theme.buttonNormalSelectedText,
+              }
+            : {}),
         }),
-      }}
+      })}
       onPress={onClick}
     >
       {friendlyOp(op)}
