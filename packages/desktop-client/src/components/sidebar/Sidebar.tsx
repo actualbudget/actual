@@ -12,6 +12,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
@@ -29,7 +30,6 @@ import { Item } from './Item';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
 import { Tools } from './Tools';
-import { useResizeObserver } from '../../hooks/useResizeObserver';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -43,7 +43,7 @@ export function Sidebar() {
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
   const [_sidebarWidth, setSidebarWidth] = useLocalPref('sidebarWidth');
-  const sidebarWidth = Math.max(100, (_sidebarWidth || 240));
+  const sidebarWidth = Math.max(100, _sidebarWidth || 240);
 
   async function onReorder(
     id: string,

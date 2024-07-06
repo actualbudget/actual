@@ -42,9 +42,7 @@ export function FloatableSidebar() {
             : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
         transform: `translateY(${!sidebarShouldFloat ? -12 : 0}px)
                       translateX(${
-                        sidebarShouldFloat && sidebar.hidden
-                          ? '-100%'
-                          : '0px'
+                        sidebarShouldFloat && sidebar.hidden ? '-100%' : '0px'
                       })`,
         transition:
           'transform .5s, box-shadow .5s, border-radius .5s, bottom .5s',
