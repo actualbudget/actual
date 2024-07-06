@@ -29,8 +29,7 @@ import { Item } from './Item';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
 import { Tools } from './Tools';
-
-export const SIDEBAR_WIDTH = 240;
+import { useResizeObserver } from '../../hooks/useResizeObserver';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -43,6 +42,8 @@ export function Sidebar() {
   );
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
+  const [_sidebarWidth, setSidebarWidth] = useLocalPref('sidebarWidth');
+  const sidebarWidth = Math.max(100, (_sidebarWidth || 240));
 
   async function onReorder(
     id: string,
@@ -70,11 +71,18 @@ export function Sidebar() {
     setShowClosedAccountsPref(!showClosedAccounts);
   };
 
+  const containerRef = useResizeObserver(rect => {
+    setSidebarWidth(rect.width);
+  });
+
   return (
     <View
+      innerRef={containerRef}
       style={{
-        width: SIDEBAR_WIDTH,
+        width: sidebarWidth,
         color: theme.sidebarItemText,
+        resize: 'horizontal',
+        overflowX: 'hidden',
         backgroundColor: theme.sidebarBackground,
         '& .float': {
           opacity: isFloating ? 1 : 0,

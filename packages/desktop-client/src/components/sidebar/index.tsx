@@ -4,7 +4,7 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
 
-import { SIDEBAR_WIDTH, Sidebar } from './Sidebar';
+import { Sidebar } from './Sidebar';
 import { useSidebar } from './SidebarProvider';
 
 export function FloatableSidebar() {
@@ -43,9 +43,9 @@ export function FloatableSidebar() {
         transform: `translateY(${!sidebarShouldFloat ? -12 : 0}px)
                       translateX(${
                         sidebarShouldFloat && sidebar.hidden
-                          ? -SIDEBAR_WIDTH
-                          : 0
-                      }px)`,
+                          ? '-100%'
+                          : '0px'
+                      })`,
         transition:
           'transform .5s, box-shadow .5s, border-radius .5s, bottom .5s',
       }}
