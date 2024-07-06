@@ -2,8 +2,7 @@ import React from 'react';
 
 import { type Theme } from 'loot-core/types/prefs';
 
-import { themeOptions, useTheme } from '../../style';
-import { Button } from '../common/Button';
+import { themeOptions, useTheme, theme as themeStyle } from '../../style';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 
@@ -15,17 +14,18 @@ export function ThemeSettings() {
   return (
     <Setting
       primaryAction={
-        <Button bounce={false} style={{ padding: 0 }}>
-          <Select<Theme>
-            bare
-            onChange={value => {
-              switchTheme(value);
-            }}
-            value={theme}
-            options={themeOptions}
-            style={{ padding: '2px 10px', fontSize: 15 }}
-          />
-        </Button>
+        <Select<Theme>
+          onChange={value => {
+            switchTheme(value);
+          }}
+          value={theme}
+          options={themeOptions}
+          buttonStyle={{
+            ':hover': {
+              backgroundColor: themeStyle.buttonNormalBackgroundHover,
+            },
+          }}
+        />
       }
     >
       <Text>

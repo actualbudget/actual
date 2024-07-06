@@ -15,7 +15,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InputWithContent } from '../common/InputWithContent';
 import { View } from '../common/View';
 import { useFormat } from '../spreadsheet/useFormat';
@@ -104,12 +104,11 @@ export function AmountInput({
       inputMode="decimal"
       leftContent={
         <Button
-          type="bare"
-          disabled={disabled}
+          variant="bare"
+          isDisabled={disabled}
           aria-label={`Make ${negative ? 'positive' : 'negative'}`}
           style={{ padding: '0 7px' }}
-          onPointerUp={onSwitch}
-          onPointerDown={e => e.preventDefault()}
+          onPress={onSwitch}
           ref={buttonRef}
         >
           {negative ? (

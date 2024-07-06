@@ -252,6 +252,7 @@ type FinanceModals = {
   'budget-list';
   'confirm-transaction-edit': {
     onConfirm: () => void;
+    onCancel?: () => void;
     confirmReason: string;
   };
   'confirm-transaction-delete': {

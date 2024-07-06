@@ -123,6 +123,28 @@ describe('sheet language', () => {
     );
   });
 
+  it('`like` should use unicode function', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select('payee')
+        .filter({ 'payee.name': { $like: `%TEST%` } })
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch(`UNICODE_LIKE('%TEST%', payees1.name)`);
+  });
+
+  it('`notlike` should use unicode function', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select('payee')
+        .filter({ 'payee.name': { $notlike: `%TEST%` } })
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch(`NOT UNICODE_LIKE('%TEST%', payees1.name)`);
+  });
+
   it('`select` allows nested functions', () => {
     const result = generateSQLWithState(
       q('transactions')

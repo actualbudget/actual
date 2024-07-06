@@ -9,6 +9,7 @@ import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
+import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
@@ -218,7 +219,7 @@ function MonthlyPatterns({ config, dispatch }) {
           <Select
             options={[
               [-1, 'Last'],
-              ['-', '---'],
+              Menu.line,
               ...DAY_OF_MONTH_OPTIONS.map(opt => [opt, opt]),
             ]}
             value={recurrence.value}
@@ -226,20 +227,18 @@ function MonthlyPatterns({ config, dispatch }) {
               updateRecurrence(recurrence, 'value', parsePatternValue(value))
             }
             disabledKeys={['-']}
-            wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{ minHeight: '1px', width: '100%' }}
+            buttonStyle={{ flex: 1, marginRight: 10 }}
           />
           <Select
             options={[
               ['day', 'Day'],
-              ['-', '---'],
+              Menu.line,
               ...DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name]),
             ]}
             value={recurrence.type}
             onChange={value => updateRecurrence(recurrence, 'type', value)}
             disabledKeys={['-']}
-            wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{ minHeight: '1px', width: '100%' }}
+            buttonStyle={{ flex: 1, marginRight: 10 }}
           />
           <Button
             type="bare"
@@ -321,7 +320,6 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
         />
         <Select
           id="repeat_end_dropdown"
-          bare
           options={[
             ['never', 'indefinitely'],
             ['after_n_occurrences', 'for'],
@@ -329,10 +327,6 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           ]}
           value={config.endMode}
           onChange={value => updateField('endMode', value)}
-          style={{
-            border: '1px solid ' + theme.formInputBorder,
-            height: 27.5,
-          }}
         />
         {config.endMode === 'after_n_occurrences' && (
           <>
@@ -375,11 +369,10 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           defaultValue={config.interval || 1}
         />
         <Select
-          bare
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ border: '1px solid ' + theme.formInputBorder, height: 27.5 }}
+          buttonStyle={{ marginRight: 5 }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
@@ -437,11 +430,6 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
             value={state.config.weekendSolveMode}
             onChange={value => dispatch({ type: 'set-weekend-solve', value })}
             disabled={!skipWeekend}
-            style={{
-              backgroundColor: theme.tableBackground,
-              minHeight: '1px',
-              width: '5rem',
-            }}
           />
           <label
             htmlFor="solve_dropdown"

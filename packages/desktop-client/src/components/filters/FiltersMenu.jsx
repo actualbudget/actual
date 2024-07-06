@@ -87,7 +87,6 @@ function ConfigureField({
         <Stack direction="row" align="flex-start">
           {field === 'amount' || field === 'date' ? (
             <Select
-              bare
               options={
                 field === 'amount'
                   ? [
@@ -111,7 +110,6 @@ function ConfigureField({
                   dispatch({ type: 'set-op', op: 'is' });
                 }
               }}
-              style={{ borderWidth: 1 }}
             />
           ) : (
             titleFirst(mapField(field))

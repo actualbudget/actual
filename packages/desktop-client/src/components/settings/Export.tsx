@@ -7,7 +7,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
-import { ButtonWithLoading } from '../common/Button';
+import { ButtonWithLoading } from '../common/Button2';
 import { Text } from '../common/Text';
 
 import { Setting } from './UI';
@@ -43,7 +43,7 @@ export function ExportBudget() {
     <Setting
       primaryAction={
         <>
-          <ButtonWithLoading onClick={onExport} loading={isLoading}>
+          <ButtonWithLoading onPress={onExport} isLoading={isLoading}>
             Export data
           </ButtonWithLoading>
           {error && (

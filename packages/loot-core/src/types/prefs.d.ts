@@ -61,7 +61,6 @@ export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
-  autoUpdate: boolean;
   keyId?: string;
   theme: Theme;
   documentDir: string; // Electron only

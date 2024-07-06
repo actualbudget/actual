@@ -14,7 +14,7 @@ import {
 } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { AnimatedRefresh } from '../AnimatedRefresh';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
@@ -214,10 +214,10 @@ export function AccountHeader({
                   />
                 )}
                 <Button
-                  type="bare"
+                  variant="bare"
                   aria-label="Edit account name"
                   className="hover-visible"
-                  onClick={() => onExposeName(true)}
+                  onPress={() => onExposeName(true)}
                 >
                   <SvgPencil1
                     style={{
@@ -258,9 +258,9 @@ export function AccountHeader({
         >
           {((account && !account.closed) || canSync) && (
             <Button
-              type="bare"
-              onClick={canSync ? onSync : onImport}
-              disabled={canSync && isServerOffline}
+              variant="bare"
+              onPress={canSync ? onSync : onImport}
+              isDisabled={canSync && isServerOffline}
             >
               {canSync ? (
                 <>
@@ -289,7 +289,7 @@ export function AccountHeader({
             </Button>
           )}
           {!showEmptyMessage && (
-            <Button type="bare" onClick={onAddTransaction}>
+            <Button variant="bare" onPress={onAddTransaction}>
               <SvgAdd width={10} height={10} style={{ marginRight: 3 }} /> Add
               New
             </Button>
@@ -326,21 +326,29 @@ export function AccountHeader({
             />
           )}
           <Button
-            type="bare"
-            disabled={search !== '' || filterConditions.length > 0}
-            style={{ padding: 6, marginLeft: 10 }}
-            onClick={onToggleSplits}
-            title={
+            variant="bare"
+            aria-label={
               splitsExpanded.state.mode === 'collapse'
                 ? 'Collapse split transactions'
                 : 'Expand split transactions'
             }
+            isDisabled={search !== '' || filterConditions.length > 0}
+            style={{ padding: 6, marginLeft: 10 }}
+            onPress={onToggleSplits}
           >
-            {splitsExpanded.state.mode === 'collapse' ? (
-              <SvgArrowsShrink3 style={{ width: 14, height: 14 }} />
-            ) : (
-              <SvgArrowsExpand3 style={{ width: 14, height: 14 }} />
-            )}
+            <View
+              title={
+                splitsExpanded.state.mode === 'collapse'
+                  ? 'Collapse split transactions'
+                  : 'Expand split transactions'
+              }
+            >
+              {splitsExpanded.state.mode === 'collapse' ? (
+                <SvgArrowsShrink3 style={{ width: 14, height: 14 }} />
+              ) : (
+                <SvgArrowsExpand3 style={{ width: 14, height: 14 }} />
+              )}
+            </View>
           </Button>
           {account ? (
             <View>
