@@ -16,6 +16,7 @@ import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
+import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
@@ -37,13 +38,21 @@ export function Sidebar() {
   const dispatch = useDispatch();
   const sidebar = useSidebar();
   const accounts = useAccounts();
+  const { width } = useResponsive();
   const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
     'ui.showClosedAccounts',
   );
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
+
   const [_sidebarWidth, setSidebarWidth] = useLocalPref('sidebarWidth');
-  const sidebarWidth = Math.max(100, _sidebarWidth || 240);
+  const DEFAULT_SIDEBAR_WIDTH = 240;
+  const MAX_SIDEBAR_WIDTH = width - 100;
+  const MIN_SIDEBAR_WIDTH = Math.max(
+    100,
+    _sidebarWidth || DEFAULT_SIDEBAR_WIDTH,
+  );
+  const sidebarWidth = Math.min(MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH);
 
   async function onReorder(
     id: string,
