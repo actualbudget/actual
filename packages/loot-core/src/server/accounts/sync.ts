@@ -349,6 +349,7 @@ export async function reconcileTransactions(
   acctId,
   transactions,
   isBankSyncAccount = false,
+  useFuzzyMatchV2 = true,
 ) {
   console.log('Performing transaction reconciliation');
 
@@ -394,27 +395,40 @@ export async function reconcileTransactions(
 
     // If it didn't match, query data needed for fuzzy matching
     if (!match) {
-      // Look 7 days ahead and 7 days back when fuzzy matching. This
+      // Fuzzy matching looks 7 days ahead and 7 days back. This
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
       // fields.
-      fuzzyDataset = await db.all(
-        `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
-           WHERE
-             -- If both ids are set, and we didn't match earlier then skip dedup
-             ( imported_id IS NULL OR ? IS NULL )
-             -- Look 7 days ahead, 7 days behind
-             AND date >= ? AND date <= ? AND amount = ?
-             AND account = ?
-        `,
-        [
-          trans.imported_id || null,
-          db.toDateRepr(monthUtils.subDays(trans.date, 7)),
-          db.toDateRepr(monthUtils.addDays(trans.date, 7)),
-          trans.amount || 0,
-          acctId,
-        ],
-      );
+
+      const sevenDaysBefore = db.toDateRepr(monthUtils.subDays(trans.date, 7));
+      const sevenDaysAfter = db.toDateRepr(monthUtils.addDays(trans.date, 7));
+      // useFuzzyMatchV2 has the added behaviour of only matching on transactions with no import ID
+      // if the transaction being imported has an import ID.
+      if (useFuzzyMatchV2) {
+        fuzzyDataset = await db.all(
+          `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled
+          FROM v_transactions
+          WHERE
+            -- If both ids are set, and we didn't match earlier then skip dedup
+            (imported_id IS NULL OR ? IS NULL)
+            AND date >= ? AND date <= ? AND amount = ?
+            AND account = ?`,
+          [
+            trans.imported_id || null,
+            sevenDaysBefore,
+            sevenDaysAfter,
+            trans.amount || 0,
+            acctId,
+          ],
+        );
+      } else {
+        fuzzyDataset = await db.all(
+          `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled
+          FROM v_transactions
+          WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
+          [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],
+        );
+      }
 
       // Sort the matched transactions according to the distance from the original
       // transactions date. i.e. if the original transaction is in 21-02-2024 and
@@ -626,6 +640,10 @@ export async function syncAccount(
   );
 
   const acctRow = await db.select('accounts', id);
+  // If syncing an account from Go Cardless it must not use FuzzySearchV2. This allows
+  // the fuzzy search to match transactions where the import IDs are different. It is a known quirk
+  // that Go Cardless can give two different transaction IDs even though it's the same transaction.
+  const useFuzzySearchV2 = acctRow.account_sync_source !== 'goCardless';
 
   if (latestTransaction) {
     const startingTransaction = await db.first(
@@ -676,7 +694,12 @@ export async function syncAccount(
     }));
 
     return runMutator(async () => {
-      const result = await reconcileTransactions(id, transactions, true);
+      const result = await reconcileTransactions(
+        id,
+        transactions,
+        true,
+        useFuzzySearchV2,
+      );
       await updateAccountBalance(id, accountBalance);
       return result;
     });
@@ -731,7 +754,12 @@ export async function syncAccount(
         starting_balance_flag: true,
       });
 
-      const result = await reconcileTransactions(id, transactions, true);
+      const result = await reconcileTransactions(
+        id,
+        transactions,
+        true,
+        useFuzzySearchV2,
+      );
       return {
         ...result,
         added: [initialId, ...result.added],
