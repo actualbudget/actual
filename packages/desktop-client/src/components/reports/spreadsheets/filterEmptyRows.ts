@@ -1,4 +1,7 @@
-import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type GroupedEntity,
+} from 'loot-core/src/types/models/reports';
 
 export function filterEmptyRows({
   showEmpty,
@@ -7,7 +10,7 @@ export function filterEmptyRows({
 }: {
   showEmpty: boolean;
   data: GroupedEntity;
-  balanceTypeOp?: 'totalAssets' | 'totalDebts' | 'totalTotals';
+  balanceTypeOp?: balanceTypeOpType;
 }): boolean {
   let showHide: boolean;
   if (balanceTypeOp === 'totalTotals') {

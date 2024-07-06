@@ -29,9 +29,15 @@ export function update(state = initialState, action: Action): QueriesState {
     case constants.SET_NEW_TRANSACTIONS:
       return {
         ...state,
-        newTransactions: action.newTransactions || [],
-        matchedTransactions: action.matchedTransactions || [],
-        updatedAccounts: action.updatedAccounts || [],
+        newTransactions: action.newTransactions
+          ? [...state.newTransactions, ...action.newTransactions]
+          : state.newTransactions,
+        matchedTransactions: action.matchedTransactions
+          ? [...state.matchedTransactions, ...action.matchedTransactions]
+          : state.matchedTransactions,
+        updatedAccounts: action.updatedAccounts
+          ? [...state.updatedAccounts, ...action.updatedAccounts]
+          : state.updatedAccounts,
       };
     case constants.UPDATE_NEW_TRANSACTIONS:
       return {

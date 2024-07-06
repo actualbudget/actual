@@ -3,14 +3,16 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.6.0",
+  "version": "24.7.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
-    "build": "electron-builder",
-    "watch": "cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
+    "build": "yarn build:dist && electron-builder",
+    "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-html",
+    "copy-static-html": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build",
+    "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
-  "main": "index.js",
+  "main": "build/index.js",
   "build": {
     "appId": "com.actualbudget.actual",
     "files": [
@@ -19,7 +21,8 @@
       "!**/*.js.map",
       "!node_modules/@jlongster/sql.js",
       "!node_modules/absurd-sql",
-      "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}"
+      "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
+      "build"
     ],
     "publish": {
       "provider": "github",
@@ -55,7 +58,6 @@
   "dependencies": {
     "electron-is-dev": "2.0.0",
     "electron-log": "4.4.8",
-    "electron-updater": "6.1.7",
     "loot-core": "*",
     "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
@@ -63,8 +65,11 @@
   "devDependencies": {
     "@electron/notarize": "2.2.0",
     "@electron/rebuild": "3.6.0",
+    "@types/copyfiles": "^2",
+    "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "electron": "30.0.6",
-    "electron-builder": "24.13.3"
+    "electron-builder": "24.13.3",
+    "typescript": "^5.0.2"
   }
 }

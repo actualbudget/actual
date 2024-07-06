@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
@@ -68,8 +68,8 @@ export function PostsOfflineNotification({ modalProps, actions }) {
         style={{ marginTop: 20 }}
         spacing={2}
       >
-        <Button onClick={actions.popModal}>Decide later</Button>
-        <Button type="primary" onClick={onPost}>
+        <Button onPress={actions.popModal}>Decide later</Button>
+        <Button variant="primary" onPress={onPost}>
           Post transactions
         </Button>
       </Stack>

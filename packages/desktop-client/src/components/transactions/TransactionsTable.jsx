@@ -49,7 +49,7 @@ import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
-import { SvgLeftArrow2, SvgRightArrow2 } from '../../icons/v0';
+import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../icons/v0';
 import { SvgArrowDown, SvgArrowUp, SvgCheveronDown } from '../../icons/v1';
 import {
   SvgArrowsSynchronize,
@@ -181,6 +181,10 @@ const TransactionHeader = memo(
           zIndex: 200,
           color: theme.tableHeaderText,
           backgroundColor: theme.tableBackground,
+          paddingRight: `${5 + (scrollWidth ?? 0)}px`,
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor: theme.tableBorder,
         }}
       >
         <SelectCell
@@ -188,6 +192,10 @@ const TransactionHeader = memo(
           focused={false}
           selected={hasSelected}
           width={20}
+          style={{
+            borderTopWidth: 0,
+            borderBottomWidth: 0,
+          }}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
         <HeaderCell
@@ -291,8 +299,6 @@ const TransactionHeader = memo(
             }}
           />
         )}
-
-        <Cell value="" width={5 + (scrollWidth ?? 0)} />
       </Row>
     );
   },
@@ -416,6 +422,10 @@ function HeaderCell({
       name={id}
       alignItems={alignItems}
       value={value}
+      style={{
+        borderTopWidth: 0,
+        borderBottomWidth: 0,
+      }}
       unexposedContent={({ value: cellValue }) => (
         <Button
           type="bare"
@@ -447,7 +457,6 @@ function PayeeCell({
   id,
   payee,
   focused,
-  inherited,
   payees,
   accounts,
   valueStyle,
@@ -463,16 +472,75 @@ function PayeeCell({
 }) {
   const isCreatingPayee = useRef(false);
 
-  return (
+  const dispatch = useDispatch();
+
+  return transaction.is_parent ? (
+    <Cell
+      name="payee"
+      width="flex"
+      focused={focused}
+      style={{ padding: 0 }}
+      plain
+    >
+      <CellButton
+        bare
+        style={{
+          alignSelf: 'flex-start',
+          borderRadius: 4,
+          border: '1px solid transparent', // so it doesn't shift on hover
+          ':hover': {
+            border: '1px solid ' + theme.buttonNormalBorder,
+          },
+        }}
+        disabled={isPreview}
+        onSelect={() =>
+          dispatch(
+            pushModal('payee-autocomplete', {
+              onSelect: payeeId => {
+                onUpdate('payee', payeeId);
+              },
+            }),
+          )
+        }
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            alignSelf: 'stretch',
+            borderRadius: 4,
+            flex: 1,
+            padding: 4,
+            color: theme.pageTextSubdued,
+          }}
+        >
+          <SvgSplit
+            style={{
+              color: 'inherit',
+              width: 14,
+              height: 14,
+              marginRight: 2,
+            }}
+          />
+          <Text
+            style={{
+              fontStyle: 'italic',
+              fontWeight: 300,
+              userSelect: 'none',
+            }}
+          >
+            Split
+          </Text>
+        </View>
+      </CellButton>
+    </Cell>
+  ) : (
     <CustomCell
       width="flex"
       name="payee"
       textAlign="flex"
       value={payee?.id}
-      valueStyle={{
-        ...valueStyle,
-        ...(inherited && { color: theme.tableTextInactive }),
-      }}
+      valueStyle={valueStyle}
       exposed={focused}
       onExpose={name => !isPreview && onEdit(id, name)}
       onUpdate={async value => {
@@ -604,41 +672,38 @@ function PayeeIcons({
   );
 }
 
-const Transaction = memo(function Transaction(props) {
-  const {
-    transaction: originalTransaction,
-    subtransactions,
-    editing,
-    showAccount,
-    showBalance,
-    showCleared,
-    showZeroInDeposit,
-    style,
-    selected,
-    highlighted,
-    added,
-    matched,
-    expanded,
-    inheritedFields,
-    focusedField,
-    categoryGroups,
-    payees,
-    accounts,
-    balance,
-    dateFormat = 'MM/dd/yyyy',
-    hideFraction,
-    onSave,
-    onEdit,
-    onDelete,
-    onSplit,
-    onManagePayees,
-    onCreatePayee,
-    onToggleSplit,
-    onNavigateToTransferAccount,
-    onNavigateToSchedule,
-    onNotesTagClick,
-  } = props;
-
+const Transaction = memo(function Transaction({
+  transaction: originalTransaction,
+  subtransactions,
+  editing,
+  showAccount,
+  showBalance,
+  showCleared,
+  showZeroInDeposit,
+  style,
+  selected,
+  highlighted,
+  added,
+  matched,
+  expanded,
+  focusedField,
+  categoryGroups,
+  payees,
+  accounts,
+  balance,
+  dateFormat = 'MM/dd/yyyy',
+  hideFraction,
+  onSave,
+  onEdit,
+  onDelete,
+  onSplit,
+  onManagePayees,
+  onCreatePayee,
+  onToggleSplit,
+  onNavigateToTransferAccount,
+  onNavigateToSchedule,
+  onNotesTagClick,
+}) {
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
 
@@ -665,7 +730,7 @@ const Transaction = memo(function Transaction(props) {
 
   function onUpdate(name, value) {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
-    // modal is the transaction is locked. I added a boolean to guard against showing the modal twice.
+    // modal if the transaction is locked. I added a boolean to guard against showing the modal twice.
     // I'm still not completely happy with how the cells update pre/post modal. Sometimes you have to
     // click off of the cell manually after confirming your change post modal for example. The last
     // row seems to have more issues than others but the combination of tab, return, and clicking out
@@ -684,6 +749,9 @@ const Transaction = memo(function Transaction(props) {
           setShowReconciliationWarning(true);
           dispatch(
             pushModal('confirm-transaction-edit', {
+              onCancel: () => {
+                setShowReconciliationWarning(false);
+              },
               onConfirm: () => {
                 setShowReconciliationWarning(false);
                 onUpdateAfterConfirm(name, value);
@@ -753,7 +821,10 @@ const Transaction = memo(function Transaction(props) {
       // it's always showing the formatted result
       setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
 
-      onSave(deserialized, subtransactions);
+      const deserializedName = ['credit', 'debit'].includes(name)
+        ? 'amount'
+        : name;
+      onSave(deserialized, subtransactions, deserializedName);
     }
   }
 
@@ -979,7 +1050,6 @@ const Transaction = memo(function Transaction(props) {
           id={id}
           payee={payee}
           focused={focusedField === 'payee'}
-          inherited={inheritedFields && inheritedFields.has('payee')}
           /* Filter out the account we're currently in as it is not a valid transfer */
           accounts={accounts.filter(account => account.id !== accountId)}
           payees={payees.filter(payee => payee.transfer_acct !== accountId)}
@@ -1080,6 +1150,7 @@ const Transaction = memo(function Transaction(props) {
                 borderRadius: 4,
                 flex: 1,
                 padding: 4,
+                color: theme.pageTextSubdued,
               }}
             >
               {isParent && (
@@ -1093,7 +1164,13 @@ const Transaction = memo(function Transaction(props) {
                   }}
                 />
               )}
-              <Text style={{ fontStyle: 'italic', userSelect: 'none' }}>
+              <Text
+                style={{
+                  fontStyle: 'italic',
+                  fontWeight: 300,
+                  userSelect: 'none',
+                }}
+              >
                 Split
               </Text>
             </View>
@@ -1622,9 +1699,6 @@ function TransactionTableInner({
           accounts={accounts}
           categoryGroups={categoryGroups}
           payees={payees}
-          inheritedFields={
-            parent?.payee === trans.payee ? new Set(['payee']) : new Set()
-          }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
           onEdit={tableNavigator.onEdit}
@@ -1985,7 +2059,7 @@ export const TransactionTable = forwardRef((props, ref) => {
   }, [props.onAdd, newNavigator.onEdit]);
 
   const onSave = useCallback(
-    async (transaction, subtransactions = null) => {
+    async (transaction, subtransactions = null, updatedFieldName = null) => {
       savePending.current = true;
 
       let groupedTransaction = subtransactions
@@ -1994,7 +2068,10 @@ export const TransactionTable = forwardRef((props, ref) => {
 
       if (isTemporaryId(transaction.id)) {
         if (props.onApplyRules) {
-          groupedTransaction = await props.onApplyRules(groupedTransaction);
+          groupedTransaction = await props.onApplyRules(
+            groupedTransaction,
+            updatedFieldName,
+          );
         }
 
         const newTrans = latestState.current.newTransactions;

@@ -6,8 +6,8 @@ import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { type CSSProperties, theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -65,6 +65,12 @@ export function FormatSettings() {
   const [hideFraction = false, setHideFractionPref] =
     useLocalPref('hideFraction');
 
+  const selectButtonStyle: CSSProperties = {
+    ':hover': {
+      backgroundColor: theme.buttonNormalBackgroundHover,
+    },
+  };
+
   return (
     <Setting
       primaryAction={
@@ -83,19 +89,16 @@ export function FormatSettings() {
           }}
         >
           <Column title="Numbers">
-            <Button bounce={false} style={{ padding: 0 }}>
-              <Select
-                bare
-                key={String(hideFraction)} // needed because label does not update
-                value={numberFormat}
-                onChange={format => setNumberFormatPref(format)}
-                options={numberFormats.map(f => [
-                  f.value,
-                  hideFraction ? f.labelNoFraction : f.label,
-                ])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
-              />
-            </Button>
+            <Select
+              key={String(hideFraction)} // needed because label does not update
+              value={numberFormat}
+              onChange={format => setNumberFormatPref(format)}
+              options={numberFormats.map(f => [
+                f.value,
+                hideFraction ? f.labelNoFraction : f.label,
+              ])}
+              buttonStyle={selectButtonStyle}
+            />
 
             <Text style={{ display: 'flex' }}>
               <Checkbox
@@ -108,27 +111,21 @@ export function FormatSettings() {
           </Column>
 
           <Column title="Dates">
-            <Button bounce={false} style={{ padding: 0 }}>
-              <Select
-                bare
-                value={dateFormat}
-                onChange={format => setDateFormatPref(format)}
-                options={dateFormats.map(f => [f.value, f.label])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
-              />
-            </Button>
+            <Select
+              value={dateFormat}
+              onChange={format => setDateFormatPref(format)}
+              options={dateFormats.map(f => [f.value, f.label])}
+              buttonStyle={selectButtonStyle}
+            />
           </Column>
 
           <Column title="First day of the week">
-            <Button bounce={false} style={{ padding: 0 }}>
-              <Select
-                bare
-                value={firstDayOfWeekIdx}
-                onChange={idx => setFirstDayOfWeekIdxPref(idx)}
-                options={daysOfWeek.map(f => [f.value, f.label])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
-              />
-            </Button>
+            <Select
+              value={firstDayOfWeekIdx}
+              onChange={idx => setFirstDayOfWeekIdxPref(idx)}
+              options={daysOfWeek.map(f => [f.value, f.label])}
+              buttonStyle={selectButtonStyle}
+            />
           </Column>
         </View>
       }
