@@ -87,7 +87,6 @@ function ConfigureField({
         <Stack direction="row" align="flex-start">
           {field === 'amount' || field === 'date' ? (
             <Select
-              bare
               options={
                 field === 'amount'
                   ? [
@@ -111,7 +110,6 @@ function ConfigureField({
                   dispatch({ type: 'set-op', op: 'is' });
                 }
               }}
-              style={{ borderWidth: 1 }}
             />
           ) : (
             titleFirst(mapField(field))
@@ -199,7 +197,8 @@ function ConfigureField({
             field={field}
             subfield={subfield}
             type={
-              type === 'id' && (op === 'contains' || op === 'doesNotContain')
+              type === 'id' &&
+              (op === 'contains' || op === 'matches' || op === 'doesNotContain')
                 ? 'string'
                 : type
             }

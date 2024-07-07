@@ -9,7 +9,15 @@ export const TYPE_INFO = {
     nullable: false,
   },
   id: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
     nullable: true,
   },
   saved: {
@@ -17,7 +25,15 @@ export const TYPE_INFO = {
     nullable: false,
   },
   string: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
     nullable: true,
   },
   number: {
@@ -49,7 +65,7 @@ export const FIELD_TYPES = new Map(
 
 export const ALLOCATION_METHODS = {
   'fixed-amount': 'a fixed amount',
-  'fixed-percent': 'a fixed percent',
+  'fixed-percent': 'a fixed percent of the remainder',
   remainder: 'an equal portion of the remainder',
 };
 
@@ -91,6 +107,8 @@ export function friendlyOp(op, type?) {
       return 'is between';
     case 'contains':
       return 'contains';
+    case 'matches':
+      return 'matches';
     case 'doesNotContain':
       return 'does not contain';
     case 'gt':

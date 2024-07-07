@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useCallback, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { pushModal } from 'loot-core/client/actions';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Query } from 'loot-core/src/shared/query';
@@ -8,7 +10,7 @@ import { type TransactionEntity } from 'loot-core/src/types/models';
 
 import { type BoundActions } from '../../hooks/useActions';
 import { SvgAdd } from '../../icons/v0';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
@@ -17,24 +19,18 @@ import { type CommonModalProps } from '../Modals';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
-type ModalParams = {
-  id: string;
-  transaction: TransactionEntity;
-};
-
 export function ScheduleLink({
   modalProps,
   actions,
   transactionIds: ids,
   getTransaction,
-  pushModal,
 }: {
   actions: BoundActions;
   modalProps?: CommonModalProps;
   transactionIds: string[];
   getTransaction: (transactionId: string) => TransactionEntity;
-  pushModal: (name: string, params: ModalParams) => void;
 }) {
+  const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
 
   const scheduleData = useSchedules({
@@ -59,10 +55,12 @@ export function ScheduleLink({
 
   async function onCreate() {
     actions.popModal();
-    pushModal('schedule-edit', {
-      id: null,
-      transaction: getTransaction(ids[0]),
-    });
+    dispatch(
+      pushModal('schedule-edit', {
+        id: null,
+        transaction: getTransaction(ids[0]),
+      }),
+    );
   }
 
   return (
@@ -92,9 +90,9 @@ export function ScheduleLink({
         />
         {ids.length === 1 && (
           <Button
-            type="primary"
+            variant="primary"
             style={{ marginLeft: 15, padding: '4px 10px' }}
-            onClick={onCreate}
+            onPress={onCreate}
           >
             <SvgAdd style={{ width: '20', padding: '3' }} />
             Create New

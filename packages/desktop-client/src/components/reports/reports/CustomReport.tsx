@@ -8,6 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import {
+  type balanceTypeOpType,
   type CustomReportEntity,
   type DataEntity,
 } from 'loot-core/types/models/reports';
@@ -68,12 +69,12 @@ export function CustomReport() {
     useLocalPref('reportsViewLabel');
 
   const {
-    filters,
+    conditions,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters();
 
   const location = useLocation();
@@ -248,7 +249,7 @@ export function CustomReport() {
     }
   }, [interval, startDate, endDate, firstDayOfWeekIdx]);
 
-  const balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals' =
+  const balanceTypeOp: balanceTypeOpType =
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
   const payees = usePayees();
   const accounts = useAccounts();
@@ -260,7 +261,7 @@ export function CustomReport() {
       interval,
       categories,
       selectedCategories,
-      conditions: filters,
+      conditions,
       conditionsOp,
       showEmpty,
       showOffBudget,
@@ -276,7 +277,7 @@ export function CustomReport() {
     balanceTypeOp,
     categories,
     selectedCategories,
-    filters,
+    conditions,
     conditionsOp,
     showEmpty,
     showOffBudget,
@@ -293,7 +294,7 @@ export function CustomReport() {
       interval,
       categories,
       selectedCategories,
-      conditions: filters,
+      conditions,
       conditionsOp,
       showEmpty,
       showOffBudget,
@@ -317,7 +318,7 @@ export function CustomReport() {
     selectedCategories,
     payees,
     accounts,
-    filters,
+    conditions,
     conditionsOp,
     showEmpty,
     showOffBudget,
@@ -349,7 +350,7 @@ export function CustomReport() {
     showUncategorized,
     selectedCategories,
     graphType,
-    conditions: filters,
+    conditions,
     conditionsOp,
   };
 
@@ -494,7 +495,7 @@ export function CustomReport() {
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => onApplyFilter(condition));
-    onCondOpChange(input.conditionsOp);
+    onConditionsOpChange(input.conditionsOp);
   };
 
   const onReportChange = ({
@@ -623,7 +624,7 @@ export function CustomReport() {
               defaultItems={defaultItems}
             />
           )}
-          {filters && filters.length > 0 && (
+          {conditions && conditions.length > 0 && (
             <View
               style={{
                 marginBottom: 10,
@@ -635,11 +636,11 @@ export function CustomReport() {
               }}
             >
               <AppliedFilters
-                filters={filters}
+                conditions={conditions}
                 onUpdate={(oldFilter, newFilter) => {
                   setSessionReport(
                     'conditions',
-                    filters.map(f => (f === oldFilter ? newFilter : f)),
+                    conditions.map(f => (f === oldFilter ? newFilter : f)),
                   );
                   onReportChange({ type: 'modify' });
                   onUpdateFilter(oldFilter, newFilter);
@@ -647,14 +648,14 @@ export function CustomReport() {
                 onDelete={deletedFilter => {
                   setSessionReport(
                     'conditions',
-                    filters.filter(f => f !== deletedFilter),
+                    conditions.filter(f => f !== deletedFilter),
                   );
                   onDeleteFilter(deletedFilter);
                   onReportChange({ type: 'modify' });
                 }}
                 conditionsOp={conditionsOp}
-                onCondOpChange={co => {
-                  onCondOpChange(co);
+                onConditionsOpChange={co => {
+                  onConditionsOpChange(co);
                   onReportChange({ type: 'modify' });
                 }}
               />
@@ -692,7 +693,7 @@ export function CustomReport() {
                       right={
                         <Text>
                           <PrivacyFilter blurIntensity={5}>
-                            {amountToCurrency(Math.abs(data[balanceTypeOp]))}
+                            {amountToCurrency(data[balanceTypeOp])}
                           </PrivacyFilter>
                         </Text>
                       }
@@ -704,7 +705,7 @@ export function CustomReport() {
                 {dataCheck ? (
                   <ChooseGraph
                     data={data}
-                    filters={filters}
+                    filters={conditions}
                     mode={mode}
                     graphType={graphType}
                     balanceType={balanceType}

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
+
+import { useHover } from 'usehooks-ts';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
@@ -8,7 +10,7 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -137,10 +139,12 @@ export function Balances({
   showExtraBalances,
   onToggleExtraBalances,
   account,
-  filteredItems,
+  isFiltered,
   filteredAmount,
 }) {
   const selectedItems = useSelectedItems();
+  const buttonRef = useRef(null);
+  const isButtonHovered = useHover(buttonRef);
 
   return (
     <View
@@ -152,14 +156,11 @@ export function Balances({
       }}
     >
       <Button
+        ref={buttonRef}
         data-testid="account-balance"
-        type="bare"
-        onClick={onToggleExtraBalances}
+        variant="bare"
+        onPress={onToggleExtraBalances}
         style={{
-          '& svg': {
-            opacity: selectedItems.size > 0 || showExtraBalances ? 1 : 0,
-          },
-          '&:hover svg': { opacity: 1 },
           paddingTop: 1,
           paddingBottom: 1,
         }}
@@ -188,6 +189,10 @@ export function Balances({
             marginLeft: 10,
             color: theme.pillText,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
+            opacity:
+              isButtonHovered || selectedItems.size > 0 || showExtraBalances
+                ? 1
+                : 0,
           }}
         />
       </Button>
@@ -196,9 +201,7 @@ export function Balances({
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
       )}
-      {filteredItems.length > 0 && (
-        <FilteredBalance filteredAmount={filteredAmount} />
-      )}
+      {isFiltered && <FilteredBalance filteredAmount={filteredAmount} />}
     </View>
   );
 }

@@ -28,6 +28,44 @@
             "purpose": "maskable"
         }
     ],
+    "shortcuts": [
+        {
+            "name": "Add Transaction",
+            "short_name": "Add Transaction",
+            "description": "Add a new transaction",
+            "url": "/transactions/new",
+            "icons": [
+                {
+                    "src": "/shortcut-transaction.svg",
+                    "sizes": "150x150"
+                }
+            ]
+        },
+        {
+            "name": "Accounts",
+            "short_name": "Accounts",
+            "description": "View all accounts",
+            "url": "/accounts",
+            "icons": [
+                {
+                    "src": "/shortcut-accounts.svg",
+                    "sizes": "150x150"
+                }
+            ]
+        },
+        {
+            "name": "Reports",
+            "short_name": "Reports",
+            "description": "View reports",
+            "url": "/reports",
+            "icons": [
+                {
+                    "src": "/shortcut-reports.svg",
+                    "sizes": "150x150"
+                }
+            ]
+        }
+    ],
     "screenshots": [
         {
             "src": "/screenshot_wide.png",
@@ -43,7 +81,7 @@
             "type": "image/png",
             "sizes": "350x600"
         }
-    ], 
+    ],
     "theme_color": "#8812E1",
     "background_color": "#ffffff",
     "display": "standalone",
