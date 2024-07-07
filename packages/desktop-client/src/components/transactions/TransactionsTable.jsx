@@ -734,7 +734,7 @@ const Transaction = memo(function Transaction({
 
   function onUpdate(name, value) {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
-    // modal is the transaction is locked. I added a boolean to guard against showing the modal twice.
+    // modal if the transaction is locked. I added a boolean to guard against showing the modal twice.
     // I'm still not completely happy with how the cells update pre/post modal. Sometimes you have to
     // click off of the cell manually after confirming your change post modal for example. The last
     // row seems to have more issues than others but the combination of tab, return, and clicking out
@@ -753,6 +753,9 @@ const Transaction = memo(function Transaction({
           setShowReconciliationWarning(true);
           dispatch(
             pushModal('confirm-transaction-edit', {
+              onCancel: () => {
+                setShowReconciliationWarning(false);
+              },
               onConfirm: () => {
                 setShowReconciliationWarning(false);
                 onUpdateAfterConfirm(name, value);
