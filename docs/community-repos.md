@@ -21,3 +21,5 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
    - *Categorise transactions using AI*
 * **Actual Helpers** - https://github.com/psybers/actual-helpers
    - *Collection of helper scripts to do things like track home prices, car values, add loan interest transactions, track investment accounts, etc.*
+* **Actual Python API** - https://github.com/bvanelli/actualpy
+   - *API to interact with the Actual server, written in Python.*
