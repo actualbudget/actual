@@ -8,9 +8,6 @@
     "noEmit": false,
     "declaration": true,
     "outDir": "build",
-    "paths": {
-      "loot-core/*": ["../packages/loot-core"]
-    }
   },
   "include": ["."],
   "exclude": ["**/node_modules/*", "build/**/*"]
