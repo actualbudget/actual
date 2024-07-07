@@ -89,7 +89,7 @@ app.post(
             error_code: 'ACCOUNT_NEEDS_ATTENTION',
             status: 'rejected',
             reason:
-              'The account needs your attention at <a href="https://beta-bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+              'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
           },
         });
       }
