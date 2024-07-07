@@ -1,6 +1,7 @@
+import Module from 'module';
+
 import fetch from 'node-fetch';
 
-import { Module } from './nodeModule';
 import './setRequireHook';
 
 Module.globalPaths.push(__dirname + '/..');

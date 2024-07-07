@@ -1,4 +1,5 @@
 import fs from 'fs';
+import Module from 'module';
 import path from 'path';
 
 import {
@@ -17,7 +18,6 @@ import fetch from 'node-fetch';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
-import { Module } from './nodeModule';
 import {
   get as getWindowState,
   listen as listenToWindowState,
