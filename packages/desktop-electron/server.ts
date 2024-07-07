@@ -1,4 +1,4 @@
-// import fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 import { Module } from './nodeModule';
 import './setRequireHook';
