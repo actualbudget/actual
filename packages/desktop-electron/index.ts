@@ -14,6 +14,7 @@ import {
   UtilityProcess,
 } from 'electron';
 import isDev from 'electron-is-dev';
+// @ts-strict-ignore
 import fetch from 'node-fetch';
 import promiseRetry from 'promise-retry';
 
