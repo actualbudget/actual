@@ -47,12 +47,12 @@ export function Sidebar() {
 
   const [_sidebarWidth, setSidebarWidth] = useLocalPref('sidebarWidth');
   const DEFAULT_SIDEBAR_WIDTH = 240;
-  const MAX_SIDEBAR_WIDTH = width - 100;
-  const MIN_SIDEBAR_WIDTH = Math.max(
-    100,
-    _sidebarWidth || DEFAULT_SIDEBAR_WIDTH,
+  const MAX_SIDEBAR_WIDTH = width / 2;
+  const MIN_SIDEBAR_WIDTH = 100;
+  const sidebarWidth = Math.min(
+    MAX_SIDEBAR_WIDTH,
+    Math.max(MIN_SIDEBAR_WIDTH, _sidebarWidth || DEFAULT_SIDEBAR_WIDTH),
   );
-  const sidebarWidth = Math.min(MAX_SIDEBAR_WIDTH, MIN_SIDEBAR_WIDTH);
 
   async function onReorder(
     id: string,
@@ -89,6 +89,8 @@ export function Sidebar() {
       innerRef={containerRef}
       style={{
         width: sidebarWidth,
+        minWidth: MIN_SIDEBAR_WIDTH,
+        maxWidth: MAX_SIDEBAR_WIDTH,
         color: theme.sidebarItemText,
         resize: 'horizontal',
         overflowX: 'hidden',
