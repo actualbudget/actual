@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { Resizable } from 're-resizable';
+
 import {
   closeBudget,
   moveAccount,
@@ -47,7 +49,7 @@ export function Sidebar() {
 
   const [_sidebarWidth, setSidebarWidth] = useLocalPref('sidebarWidth');
   const DEFAULT_SIDEBAR_WIDTH = 240;
-  const MAX_SIDEBAR_WIDTH = width / 2;
+  const MAX_SIDEBAR_WIDTH = width / 3;
   const MIN_SIDEBAR_WIDTH = 200;
   const sidebarWidth = Math.min(
     MAX_SIDEBAR_WIDTH,
@@ -85,76 +87,91 @@ export function Sidebar() {
   });
 
   return (
-    <View
-      innerRef={containerRef}
-      style={{
+    <Resizable
+      defaultSize={{
         width: sidebarWidth,
-        minWidth: MIN_SIDEBAR_WIDTH,
-        maxWidth: MAX_SIDEBAR_WIDTH,
-        color: theme.sidebarItemText,
-        resize: 'horizontal',
-        overflowX: 'hidden',
-        backgroundColor: theme.sidebarBackground,
-        '& .float': {
-          opacity: isFloating ? 1 : 0,
-          transition: 'opacity .25s, width .25s',
-          width: hasWindowButtons || isFloating ? null : 0,
-        },
-        '&:hover .float': {
-          opacity: 1,
-          width: hasWindowButtons ? null : 'auto',
-        },
-        flex: 1,
-        ...styles.darkScrollbar,
+        height: '100%',
+      }}
+      maxWidth={MAX_SIDEBAR_WIDTH}
+      minWidth={MIN_SIDEBAR_WIDTH}
+      enable={{
+        top: false,
+        right: true,
+        bottom: false,
+        left: false,
+        topRight: false,
+        bottomRight: false,
+        bottomLeft: false,
+        topLeft: false,
       }}
     >
       <View
+        innerRef={containerRef}
         style={{
-          paddingTop: 35,
-          height: 30,
-          flexDirection: 'row',
-          alignItems: 'center',
-          margin: '0 8px 23px 20px',
-          transition: 'padding .4s',
-          ...(hasWindowButtons && {
-            paddingTop: 20,
-            justifyContent: 'flex-start',
-          }),
+          color: theme.sidebarItemText,
+          height: '100%',
+          backgroundColor: theme.sidebarBackground,
+          '& .float': {
+            opacity: isFloating ? 1 : 0,
+            transition: 'opacity .25s, width .25s',
+            width: hasWindowButtons || isFloating ? null : 0,
+          },
+          '&:hover .float': {
+            opacity: 1,
+            width: hasWindowButtons ? null : 'auto',
+          },
+          flex: 1,
+          ...styles.darkScrollbar,
         }}
       >
-        <EditableBudgetName />
-
-        <View style={{ flex: 1, flexDirection: 'row' }} />
-
-        {!sidebar.alwaysFloats && (
-          <ToggleButton isFloating={isFloating} onFloat={onFloat} />
-        )}
-      </View>
-
-      <View style={{ overflow: 'auto' }}>
-        <Item title="Budget" Icon={SvgWallet} to="/budget" />
-        <Item title="Reports" Icon={SvgReports} to="/reports" />
-
-        <Item title="Schedules" Icon={SvgCalendar} to="/schedules" />
-
-        <Tools />
-
         <View
           style={{
-            height: 1,
-            backgroundColor: theme.sidebarItemBackgroundHover,
-            marginTop: 15,
-            flexShrink: 0,
+            paddingTop: 35,
+            height: 30,
+            flexDirection: 'row',
+            alignItems: 'center',
+            margin: '0 8px 23px 20px',
+            transition: 'padding .4s',
+            ...(hasWindowButtons && {
+              paddingTop: 20,
+              justifyContent: 'flex-start',
+            }),
           }}
-        />
+        >
+          <EditableBudgetName />
 
-        <Accounts
-          onAddAccount={onAddAccount}
-          onToggleClosedAccounts={onToggleClosedAccounts}
-          onReorder={onReorder}
-        />
+          <View style={{ flex: 1, flexDirection: 'row' }} />
+
+          {!sidebar.alwaysFloats && (
+            <ToggleButton isFloating={isFloating} onFloat={onFloat} />
+          )}
+        </View>
+
+        <View style={{ overflow: 'auto' }}>
+          <Item title="Budget" Icon={SvgWallet} to="/budget" />
+          <Item title="Reports" Icon={SvgReports} to="/reports" />
+
+          <Item title="Schedules" Icon={SvgCalendar} to="/schedules" />
+
+          <Tools />
+
+          <View
+            style={{
+              height: 1,
+              backgroundColor: theme.sidebarItemBackgroundHover,
+              marginTop: 15,
+              flexShrink: 0,
+            }}
+          />
+
+          <Accounts
+            onAddAccount={onAddAccount}
+            onToggleClosedAccounts={onToggleClosedAccounts}
+            onReorder={onReorder}
+          />
+        </View>
       </View>
-    </View>
+    </Resizable>
   );
 }
 
