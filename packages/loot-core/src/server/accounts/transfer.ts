@@ -80,6 +80,7 @@ export async function addTransfer(transaction, transferredAccount) {
     date: transaction.date,
     transfer_id: transaction.id,
     notes: transaction.notes || null,
+    schedule: transaction.schedule,
     cleared: false,
   });
 
@@ -130,6 +131,7 @@ export async function updateTransfer(transaction, transferredAccount) {
     date: transaction.date,
     notes: transaction.notes,
     amount: -transaction.amount,
+    schedule: transaction.schedule,
   });
 
   const categoryCleared = await clearCategory(transaction, transferredAccount);
