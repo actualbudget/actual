@@ -18,7 +18,8 @@ export function FloatableSidebar() {
   const sidebarShouldFloat = floatingSidebar || sidebar.alwaysFloats;
   const debouncedHideSidebar = useDebounceCallback(
   () => sidebar.setHidden(true),
-    350);
+    350
+  );
 
   return isNarrowWidth ? null : (
     <View
