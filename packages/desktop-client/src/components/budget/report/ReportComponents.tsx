@@ -323,7 +323,6 @@ export const CategoryMonth = memo(function CategoryMonth({
       {!category.is_income && (
         <Field
           name="balance"
-          truncate={false}
           width="flex"
           style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
