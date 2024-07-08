@@ -171,7 +171,7 @@ async function processTemplate(
   month,
   force,
   category_templates,
-  category_goals
+  category_goals,
 ): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
@@ -376,8 +376,10 @@ async function processTemplate(
   for (let c = 0; c < categories.length; c++) {
     const cat_id = categories[c].id;
     let goal_lines = category_goals[cat_id];
-    if (goal_lines.length>0) {
-      await setGoal({month, category: cat_id, goal: amountToInteger(goal_lines[0].amount)});
+    if(goal_lines){
+      if (goal_lines.length>0) {
+        await setGoal({month, category: cat_id, goal: amountToInteger(goal_lines[0].amount)});
+      }
     }
   }
 
