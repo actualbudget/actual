@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { debounce } from 'debounce';
+import debounce from 'debounce';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useResponsive } from '../../ResponsiveProvider';
