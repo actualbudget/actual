@@ -19,6 +19,7 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 const headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -162,6 +163,7 @@ export const CategoryMonth = memo(function CategoryMonth({
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
+  const longGoal = useSheetValue(reportBudget.catLongGoal(category.id));
 
   return (
     <View
@@ -336,7 +338,11 @@ export const CategoryMonth = memo(function CategoryMonth({
               carryover={reportBudget.catCarryover(category.id)}
               balance={reportBudget.catBalance(category.id)}
               goal={reportBudget.catGoal(category.id)}
-              budgeted={reportBudget.catBudgeted(category.id)}
+              budgeted={
+                longGoal==1
+                  ? reportBudget.catBalance(category.id)
+                  : reportBudget.catBudgeted(category.id)
+                }
               style={{
                 ':hover': { textDecoration: 'underline' },
               }}

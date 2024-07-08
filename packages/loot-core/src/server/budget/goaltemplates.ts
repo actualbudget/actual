@@ -92,6 +92,7 @@ async function setCategoryTargets({ month, idealTemplate }) {
         category: element.category,
         goal: element.amount,
         month,
+        long_goal: 0,
       });
     });
   });
@@ -110,6 +111,7 @@ async function resetCategoryTargets({ month, category }) {
         category: element.id,
         goal: null,
         month,
+        long_goal: 0,
       });
     });
   });
@@ -378,7 +380,12 @@ async function processTemplate(
     let goal_lines = category_goals[cat_id];
     if(goal_lines){
       if (goal_lines.length>0) {
-        await setGoal({month, category: cat_id, goal: amountToInteger(goal_lines[0].amount)});
+        await setGoal({
+                month, 
+                category: cat_id, 
+                goal: amountToInteger(goal_lines[0].amount),
+                long_goal: 1,
+              });
       }
     }
   }

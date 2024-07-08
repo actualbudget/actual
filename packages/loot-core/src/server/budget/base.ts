@@ -320,6 +320,7 @@ function handleBudgetChange(budget) {
         budget.carryover === 1 ? true : false,
       );
     sheet.get().set(`${sheetName}!goal-${budget.category}`, budget.goal);
+    sheet.get().set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
   }
 }
 

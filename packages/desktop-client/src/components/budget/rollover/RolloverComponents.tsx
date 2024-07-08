@@ -16,6 +16,7 @@ import { useFormat } from '../../spreadsheet/useFormat';
 import { Row, Field, SheetCell } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -157,6 +158,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
+
+  const longGoal = useSheetValue(rolloverBudget.catLongGoal(category.id));
 
   return (
     <View
@@ -322,7 +325,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             carryover={rolloverBudget.catCarryover(category.id)}
             balance={rolloverBudget.catBalance(category.id)}
             goal={rolloverBudget.catGoal(category.id)}
-            budgeted={rolloverBudget.catBudgeted(category.id)}
+            budgeted={
+              longGoal==1
+              ? rolloverBudget.catBalance(category.id)
+              : rolloverBudget.catBudgeted(category.id)
+            }
             style={{
               ':hover': { textDecoration: 'underline' },
             }}
