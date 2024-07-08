@@ -604,17 +604,17 @@ function PayeeIcons({
   transferAccount,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
-  children,
 }) {
   const scheduleId = transaction.schedule;
   const scheduleData = useCachedSchedules();
-  const schedule = scheduleData
-    ? scheduleData.schedules.find(s => s.id === scheduleId)
-    : null;
+  const schedule =
+    scheduleId && scheduleData
+      ? scheduleData.schedules.find(s => s.id === scheduleId)
+      : null;
 
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
-    return children;
+    return null;
   }
 
   const buttonStyle = {
