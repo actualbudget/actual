@@ -169,7 +169,7 @@ async function processTemplate(
   }
 
   //clears templated categories
-  for (let c = 0; c <= categories.length-1; c++) {
+  for (let c = 0; c < categories.length; c++) {
     const category = categories[c];
     const budgeted = await getSheetValue(
       monthUtils.sheetForMonth(month),
