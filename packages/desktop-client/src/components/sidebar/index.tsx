@@ -23,7 +23,7 @@ export function FloatableSidebar() {
       onMouseOver={
         sidebarShouldFloat
           ? e => {
-              debouncedHideSidebar.cancel());
+              debouncedHideSidebar.cancel();
               e.stopPropagation();
               sidebar.setHidden(false);
             }
