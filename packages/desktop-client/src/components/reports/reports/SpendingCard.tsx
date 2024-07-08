@@ -39,7 +39,7 @@ export function SpendingCard() {
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
   return (
-    <ReportCard flex="1" to="/reports/spending">
+    <ReportCard to="/reports/spending">
       <View
         style={{ flex: 1 }}
         onPointerEnter={() => setIsCardHovered(true)}
