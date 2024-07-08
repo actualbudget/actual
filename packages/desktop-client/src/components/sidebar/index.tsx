@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { debounce } from 'lodash';
+
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
@@ -14,19 +16,21 @@ export function FloatableSidebar() {
   const { isNarrowWidth } = useResponsive();
 
   const sidebarShouldFloat = floatingSidebar || sidebar.alwaysFloats;
+  const debouncedHideSidebar = debounce(() => sidebar.setHidden(true), 250);
 
   return isNarrowWidth ? null : (
     <View
       onMouseOver={
         sidebarShouldFloat
           ? e => {
+              debouncedHideSidebar.cancel();
               e.stopPropagation();
               sidebar.setHidden(false);
             }
           : undefined
       }
       onMouseLeave={
-        sidebarShouldFloat ? () => sidebar.setHidden(true) : undefined
+        sidebarShouldFloat ? () => debouncedHideSidebar() : undefined
       }
       style={{
         position: sidebarShouldFloat ? 'absolute' : undefined,
