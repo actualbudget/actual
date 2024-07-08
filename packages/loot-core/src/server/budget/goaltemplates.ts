@@ -93,10 +93,10 @@ async function resetCategoryTargets(month, category) {
   if (category === null) {
     categories = await getCategories();
   } else {
-    categories= category;
+    categories = category;
   }
   await batchMessages(async () => {
-    for(let i = 0; i<categories.length; i++){
+    for (let i = 0; i < categories.length; i++) {
       setGoal({
         category: categories[i].id,
         goal: null,
@@ -152,7 +152,7 @@ async function processTemplate(
   month,
   force,
   category_templates,
-  category?
+  category?,
 ): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
@@ -162,7 +162,7 @@ async function processTemplate(
 
   let categories = [];
   const categories_remove = [];
-  if(category) {
+  if (category) {
     categories[0] = category;
   } else {
     categories = await getCategories();
