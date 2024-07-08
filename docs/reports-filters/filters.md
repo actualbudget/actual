@@ -27,13 +27,13 @@ Now select **Filter**. You will see from this drop-down that there are a number 
 
 The great thing is that you are not limited to just one Filter. You can select multiple filters. In effect stacking one upon another. An example will help illustrate this.
 
-There are further options to choose within each area, in order to narrow the Filter still further. Here are three just to illustrate the choices – Dates, Categories and Notes:
+There are further options within each area to narrow the filter further. Here are a couple to illustrate the choices – Dates and Categories:
+
+`Matches` is *[regular expressions](https://regextutorial.org/)*, the other condition types are further explained at [Rules Page](../budgeting/rules/#condition-types).
 
 ![](/img/filtering/conditions-1.png)
 
 ![](/img/filtering/conditions-2.png)
-
-![](/img/filtering/conditions-3.png)
 
 **Note**: There are further options available by clicking the down arrow under **Date** and **Amount**. The **Date** options are *Year* and *Month*. The **Amount** options are to choose between  *Inflow* and *Outflow*.
 

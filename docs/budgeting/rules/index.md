@@ -22,6 +22,13 @@ Rules are **automatically ranked** from least to most specific. If the condition
 
 While ranking works for the most part, you might want to say "this rule _always_ should run last no matter what". Actual allows this with **stages**. Rules are actually run in 3 stages: `pre`, normal, and `post`. By tagging a rule as `pre` or `post`, you force it to always run before or after rules in the other stages. Within a stage, rules are still automatically ranked.
 
+### Condition Types
+
+- `is`/`is not` matches exactly
+- `contains`/`does not contain` matches a substring
+- `matches` is regex
+- `one of`/`not one of` is a multi-select
+
 ### Fields
 
 Conditions can use the following fields:
