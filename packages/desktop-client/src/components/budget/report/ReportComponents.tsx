@@ -13,13 +13,13 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 const headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -338,10 +338,10 @@ export const CategoryMonth = memo(function CategoryMonth({
               balance={reportBudget.catBalance(category.id)}
               goal={reportBudget.catGoal(category.id)}
               budgeted={
-                longGoal==1
+                longGoal == 1
                   ? reportBudget.catBalance(category.id)
                   : reportBudget.catBudgeted(category.id)
-                }
+              }
               style={{
                 ':hover': { textDecoration: 'underline' },
               }}

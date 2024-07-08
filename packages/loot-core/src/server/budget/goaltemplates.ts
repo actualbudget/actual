@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
-import { integerToAmount,amountToInteger } from '../../shared/util';
+import { integerToAmount, amountToInteger } from '../../shared/util';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
@@ -21,16 +21,16 @@ const GOAL_PREFIX = '#goal';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
-  const category_templates = await getTemplates(null,'template');
-  const category_goals = await getTemplates(null,'goal');
+  const category_templates = await getTemplates(null, 'template');
+  const category_goals = await getTemplates(null, 'goal');
   await resetCategoryTargets({ month, category: null });
   return processTemplate(month, false, category_templates, category_goals);
 }
 
 export async function overwriteTemplate({ month }) {
   await storeTemplates();
-  const category_templates = await getTemplates(null,'template');
-  const category_goals = await getTemplates(null,'goal');
+  const category_templates = await getTemplates(null, 'template');
+  const category_goals = await getTemplates(null, 'goal');
   await resetCategoryTargets({ month, category: null });
   return processTemplate(month, true, category_templates, category_goals);
 }
@@ -40,10 +40,10 @@ export async function applySingleCategoryTemplate({ month, category }) {
     category,
   ]);
   await storeTemplates();
-  const category_templates = await getTemplates(categories[0],'template');
-  const category_goals = await getTemplates(categories[0],'goal');
+  const category_templates = await getTemplates(categories[0], 'template');
+  const category_goals = await getTemplates(categories[0], 'goal');
   await resetCategoryTargets({ month, category: categories });
-  return processTemplate(month, true, category_templates,category_goals);
+  return processTemplate(month, true, category_templates, category_goals);
 }
 
 export function runCheckTemplates() {
@@ -154,15 +154,17 @@ async function getTemplates(category, directive: string) {
     if (templates[category.id] !== undefined) {
       singleCategoryTemplate[category.id] = templates[category.id];
     }
-    return singleCategoryTemplate[category.id].filter(t=>t.directive===directive)
+    return singleCategoryTemplate[category.id].filter(
+      t => t.directive === directive,
+    );
   } else {
     const categories = await getCategories();
-    let ret = [];
-    for(let cc=0; cc<categories.length; cc++){
+    const ret = [];
+    for (let cc = 0; cc < categories.length; cc++) {
       const id = categories[cc].id;
-      if(templates[id]){
+      if (templates[id]) {
         ret[id] = templates[id];
-        ret[id] = ret[id].filter(t=>t.directive===directive);
+        ret[id] = ret[id].filter(t => t.directive === directive);
       }
     }
     return ret;
@@ -191,7 +193,7 @@ async function processTemplate(
       monthUtils.sheetForMonth(month),
       `budget-${category.id}`,
     );
-    let template = category_templates[category.id];
+    const template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
         //add each priority we need to a list.  Will sort later
@@ -377,15 +379,15 @@ async function processTemplate(
   //apply goals
   for (let c = 0; c < categories.length; c++) {
     const cat_id = categories[c].id;
-    let goal_lines = category_goals[cat_id];
-    if(goal_lines){
-      if (goal_lines.length>0) {
+    const goal_lines = category_goals[cat_id];
+    if (goal_lines) {
+      if (goal_lines.length > 0) {
         await setGoal({
-                month, 
-                category: cat_id, 
-                goal: amountToInteger(goal_lines[0].amount),
-                long_goal: 1,
-              });
+          month,
+          category: cat_id,
+          goal: amountToInteger(goal_lines[0].amount),
+          long_goal: 1,
+        });
       }
     }
   }
@@ -435,8 +437,12 @@ async function getCategoryTemplates(category) {
     const template_lines = [];
     for (let l = 0; l < lines.length; l++) {
       const line = lines[l].trim();
-      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)
-          && !line.toLowerCase().startsWith(GOAL_PREFIX)) continue;
+      if (
+        !line.toLowerCase().startsWith(TEMPLATE_PREFIX) &&
+        !line.toLowerCase().startsWith(GOAL_PREFIX)
+      ) {
+        continue;
+      }
       try {
         const parsed = parse(line);
         template_lines.push(parsed);

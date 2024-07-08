@@ -13,10 +13,10 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -325,9 +325,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             balance={rolloverBudget.catBalance(category.id)}
             goal={rolloverBudget.catGoal(category.id)}
             budgeted={
-              longGoal==1
-              ? rolloverBudget.catBalance(category.id)
-              : rolloverBudget.catBudgeted(category.id)
+              longGoal == 1
+                ? rolloverBudget.catBalance(category.id)
+                : rolloverBudget.catBudgeted(category.id)
             }
             style={{
               ':hover': { textDecoration: 'underline' },
