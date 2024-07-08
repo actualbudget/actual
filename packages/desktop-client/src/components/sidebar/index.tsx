@@ -1,7 +1,6 @@
-// @ts-strict-ignore
 import React from 'react';
 
-import debounce from 'debounce';
+import { useDebounceCallback } from 'usehooks-ts'
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useResponsive } from '../../ResponsiveProvider';
@@ -17,14 +16,14 @@ export function FloatableSidebar() {
   const { isNarrowWidth } = useResponsive();
 
   const sidebarShouldFloat = floatingSidebar || sidebar.alwaysFloats;
-  const debouncedHideSidebar = debounce(() => sidebar.setHidden(true), 350);
+  const debouncedHideSidebar = useDebounceCallback(() => sidebar.setHidden(true), 350);
 
   return isNarrowWidth ? null : (
     <View
       onMouseOver={
         sidebarShouldFloat
           ? e => {
-              debouncedHideSidebar.clear();
+              debouncedHideSidebar.cancel());
               e.stopPropagation();
               sidebar.setHidden(false);
             }
