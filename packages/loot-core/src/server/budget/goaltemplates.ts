@@ -23,7 +23,6 @@ export async function applyTemplate({ month }) {
   await storeTemplates();
   const category_templates = await getTemplates(null, 'template');
   const category_goals = await getTemplates(null, 'goal');
-  await resetCategoryTargets({ month, category: null });
   return processTemplate(month, false, category_templates, category_goals);
 }
 
@@ -31,7 +30,6 @@ export async function overwriteTemplate({ month }) {
   await storeTemplates();
   const category_templates = await getTemplates(null, 'template');
   const category_goals = await getTemplates(null, 'goal');
-  await resetCategoryTargets({ month, category: null });
   return processTemplate(month, true, category_templates, category_goals);
 }
 
@@ -42,8 +40,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
   await storeTemplates();
   const category_templates = await getTemplates(categories[0], 'template');
   const category_goals = await getTemplates(categories[0], 'goal');
-  await resetCategoryTargets({ month, category: categories });
-  return processTemplate(month, true, category_templates, category_goals);
+  return processTemplate(month, true, category_templates, category_goals, categories[0]);
 }
 
 export function runCheckTemplates() {
@@ -98,22 +95,22 @@ async function setCategoryTargets({ month, idealTemplate }) {
   });
 }
 
-async function resetCategoryTargets({ month, category }) {
-  let categories;
+async function resetCategoryTargets(month, category) {
+  let categories = [];
   if (category === null) {
     categories = await getCategories();
   } else {
     categories = category;
   }
   await batchMessages(async () => {
-    categories.forEach(element => {
+    for (let i = 0; i < categories.length; i++) {
       setGoal({
-        category: element.id,
+        category: categories[i].id,
         goal: null,
         month,
         long_goal: null,
       });
-    });
+    }
   });
 }
 
@@ -176,6 +173,7 @@ async function processTemplate(
   force,
   category_templates,
   category_goals,
+  category?,
 ): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
@@ -183,8 +181,13 @@ async function processTemplate(
   const setToZero = [];
   let priority_list = [];
 
-  const categories = await getCategories();
+  let categories = [];
   const categories_remove = [];
+  if (category) {
+    categories[0] = category;
+  } else {
+    categories = await getCategories();
+  }
 
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
@@ -226,11 +229,12 @@ async function processTemplate(
     categories.splice(categories_remove[i], 1);
   }
 
-  // zero out the categories that need it
+  // zero out budget and goal from categories that need it
   await setGoalBudget({
     month,
     templateBudget: setToZero.filter(f => f.isTemplate === true),
   });
+  await resetCategoryTargets(month, categories);
 
   // sort and filter down to just the requested priorities
   priority_list = priority_list
