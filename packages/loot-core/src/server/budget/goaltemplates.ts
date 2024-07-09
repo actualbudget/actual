@@ -40,7 +40,13 @@ export async function applySingleCategoryTemplate({ month, category }) {
   await storeTemplates();
   const category_templates = await getTemplates(categories[0], 'template');
   const category_goals = await getTemplates(categories[0], 'goal');
-  return processTemplate(month, true, category_templates, category_goals, categories[0]);
+  return processTemplate(
+    month,
+    true,
+    category_templates,
+    category_goals,
+    categories[0],
+  );
 }
 
 export function runCheckTemplates() {
