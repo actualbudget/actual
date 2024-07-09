@@ -13,7 +13,6 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
@@ -163,7 +162,6 @@ export const CategoryMonth = memo(function CategoryMonth({
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
-  const longGoal = useSheetValue(reportBudget.catLongGoal(category.id));
 
   return (
     <View

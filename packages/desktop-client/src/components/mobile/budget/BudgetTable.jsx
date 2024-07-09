@@ -356,8 +356,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
   );
   const budgetedtmp = useSheetValue(budgeted);
   const balancetmp = useSheetValue(balance);
+  const isLongGoal = useSheetValue(longGoal) === 1;
   const budgetedValue = isGoalTemplatesEnabled
-    ? useSheetValue(longGoal) === 1
+    ? isLongGoal
       ? balancetmp
       : budgetedtmp
     : null;
