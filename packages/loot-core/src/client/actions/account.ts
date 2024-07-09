@@ -185,6 +185,27 @@ export function parseTransactions(filepath, options) {
   };
 }
 
+export function importPreviewTransactions(id: string, transactions) {
+  return async (dispatch: Dispatch): Promise<boolean> => {
+    const { errors = [], updatedPreview } = await send('transactions-import', {
+      accountId: id,
+      transactions,
+      isPreview: true,
+    });
+
+    errors.forEach(error => {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: error.message,
+        }),
+      );
+    });
+
+    return updatedPreview;
+  };
+}
+
 export function importTransactions(id: string, transactions, reconcile = true) {
   return async (dispatch: Dispatch): Promise<boolean> => {
     if (!reconcile) {
@@ -203,6 +224,7 @@ export function importTransactions(id: string, transactions, reconcile = true) {
     } = await send('transactions-import', {
       accountId: id,
       transactions,
+      isPreview: false,
     });
 
     errors.forEach(error => {
