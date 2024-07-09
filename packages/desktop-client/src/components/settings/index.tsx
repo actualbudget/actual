@@ -6,6 +6,7 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -23,6 +24,7 @@ import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
+import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
@@ -177,6 +179,7 @@ export function Settings() {
 
         <ThemeSettings />
         <FormatSettings />
+        {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
         <EncryptionSettings />
         <ExportBudget />
 
