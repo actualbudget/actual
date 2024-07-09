@@ -336,8 +336,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemp = useSheetValue(goal);
   const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
-  const budgetedTemp = useSheetValue(budgeted);
-  const budgetedValue = isGoalTemplatesEnabled ? budgetedTemp : null;
 
   const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const dispatch = useDispatch();
@@ -355,6 +353,16 @@ const ExpenseCategory = memo(function ExpenseCategory({
       ? rolloverBudget.catBalance(category.id)
       : reportBudget.catBalance(category.id),
   );
+  const longGoal = useSheetValue(
+    type === 'rollover'
+      ? rolloverBudget.catLongGoal(category.id)
+      : reportBudget.catLongGoal(category.id),
+  );
+  const budgetedValue = isGoalTemplatesEnabled
+    ? longGoal === 1
+      ? useSheetValue(balance)
+      : useSheetValue(budgeted)
+    : null;
 
   const onTransfer = () => {
     dispatch(

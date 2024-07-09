@@ -325,7 +325,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             balance={rolloverBudget.catBalance(category.id)}
             goal={rolloverBudget.catGoal(category.id)}
             budgeted={
-              longGoal == 1
+              longGoal === 1
                 ? rolloverBudget.catBalance(category.id)
                 : rolloverBudget.catBudgeted(category.id)
             }
