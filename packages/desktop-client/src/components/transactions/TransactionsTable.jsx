@@ -632,7 +632,19 @@ function PayeeCell({
       formatter={() => getPayeePretty(transaction, payee, transferAccount)}
       unexposedContent={props =>
         importedPayee ? (
-          <Tooltip content={importedPayee}>
+          <Tooltip
+            content={
+              <View style={{ padding: 10 }}>
+                <Text style={{ fontWeight: 'bold' }}>
+                  {'Imported Payee: '}
+                  <Text style={{ fontWeight: 'normal' }}>{importedPayee}</Text>
+                </Text>
+              </View>
+            }
+            style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+            placement="right top"
+            triggerProps={{ delay: 750 }}
+          >
             <div
               style={{ display: 'flex', alignItems: 'center', width: '100%' }}
             >
