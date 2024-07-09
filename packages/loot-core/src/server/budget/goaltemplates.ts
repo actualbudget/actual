@@ -111,7 +111,7 @@ async function resetCategoryTargets({ month, category }) {
         category: element.id,
         goal: null,
         month,
-        long_goal: 0,
+        long_goal: null,
       });
     });
   });
