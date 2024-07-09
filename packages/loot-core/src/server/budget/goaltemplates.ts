@@ -218,7 +218,7 @@ async function processTemplate(
         categories_remove.push(c);
       } else {
         // add all categories with a template to the list to unset budget
-        if (template.length>0) {
+        if (template.length > 0) {
           setToZero.push({
             category: category.id,
           });
