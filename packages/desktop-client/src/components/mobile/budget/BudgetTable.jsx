@@ -358,10 +358,12 @@ const ExpenseCategory = memo(function ExpenseCategory({
       ? rolloverBudget.catLongGoal(category.id)
       : reportBudget.catLongGoal(category.id),
   );
+  const budgetedtmp = useSheetValue(budgeted);
+  const balancetmp = useSheetValue(balance);
   const budgetedValue = isGoalTemplatesEnabled
     ? longGoal === 1
-      ? useSheetValue(balance)
-      : useSheetValue(budgeted)
+      ? balancetmp
+      : budgetedtmp
     : null;
 
   const onTransfer = () => {
