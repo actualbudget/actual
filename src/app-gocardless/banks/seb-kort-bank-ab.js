@@ -6,7 +6,11 @@ import { printIban, amountToInteger } from '../utils.js';
 export default {
   ...Fallback,
 
-  institutionIds: ['SEB_KORT_AB_NO_SKHSFI21', 'SEB_KORT_AB_SE_SKHSFI21'],
+  institutionIds: [
+    'SEB_KORT_AB_NO_SKHSFI21',
+    'SEB_KORT_AB_SE_SKHSFI21',
+    'SEB_CARD_ESSESESS',
+  ],
 
   accessValidForDays: 180,
 
