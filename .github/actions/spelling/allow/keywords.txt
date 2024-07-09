@@ -49,8 +49,10 @@ ldaplogin
 letsencrypt
 libofx
 linting
+linuxsvg
 lleskassen
 lte
+macsvg
 Mariushosting
 minimalistic
 monkeypatch
@@ -94,6 +96,7 @@ useb
 usernames
 valign
 Venmo
+winsvg
 WSL
 Xxxxx
 ynab

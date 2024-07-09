@@ -82,6 +82,11 @@ module.exports = {
             position: 'left',
           },
           {
+            to: '/download',
+            label: 'Download',
+            position: 'left',
+          },
+          {
             href: 'https://opencollective.com/actual',
             label: 'Donate',
             position: 'left',
