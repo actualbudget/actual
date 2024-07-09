@@ -64,6 +64,7 @@ import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
@@ -528,6 +529,7 @@ function PayeeCell({
   valueStyle,
   transaction,
   subtransactions,
+  importedPayee,
   isPreview,
   onEdit,
   onUpdate,
@@ -628,17 +630,33 @@ function PayeeCell({
         }
       }}
       formatter={() => getPayeePretty(transaction, payee, transferAccount)}
-      unexposedContent={props => (
-        <>
-          <PayeeIcons
-            transaction={transaction}
-            transferAccount={transferAccount}
-            onNavigateToTransferAccount={onNavigateToTransferAccount}
-            onNavigateToSchedule={onNavigateToSchedule}
-          />
-          <UnexposedCellContent {...props} />
-        </>
-      )}
+      unexposedContent={props =>
+        importedPayee ? (
+          <Tooltip content={importedPayee}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', width: '100%' }}
+            >
+              <PayeeIcons
+                transaction={transaction}
+                transferAccount={transferAccount}
+                onNavigateToTransferAccount={onNavigateToTransferAccount}
+                onNavigateToSchedule={onNavigateToSchedule}
+              />
+              <UnexposedCellContent {...props} />
+            </div>
+          </Tooltip>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            <PayeeIcons
+              transaction={transaction}
+              transferAccount={transferAccount}
+              onNavigateToTransferAccount={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToSchedule}
+            />
+            <UnexposedCellContent {...props} />
+          </div>
+        )
+      }
     >
       {({
         onBlur,
@@ -647,28 +665,26 @@ function PayeeCell({
         onSave,
         shouldSaveFromKey,
         inputStyle,
-      }) => {
-        return (
-          <PayeeAutocomplete
-            payees={payees}
-            accounts={accounts}
-            value={payee?.id}
-            shouldSaveFromKey={shouldSaveFromKey}
-            inputProps={{
-              onBlur,
-              onKeyDown,
-              style: inputStyle,
-            }}
-            showManagePayees={true}
-            clearOnBlur={false}
-            focused={true}
-            onUpdate={(id, value) => onUpdate?.(value)}
-            onSelect={onSave}
-            onManagePayees={() => onManagePayees(payee?.id)}
-            menuPortalTarget={undefined}
-          />
-        );
-      }}
+      }) => (
+        <PayeeAutocomplete
+          payees={payees}
+          accounts={accounts}
+          value={payee?.id}
+          shouldSaveFromKey={shouldSaveFromKey}
+          inputProps={{
+            onBlur,
+            onKeyDown,
+            style: inputStyle,
+          }}
+          showManagePayees={true}
+          clearOnBlur={false}
+          focused={true}
+          onUpdate={(id, value) => onUpdate?.(value)}
+          onSelect={onSave}
+          onManagePayees={() => onManagePayees(payee?.id)}
+          menuPortalTarget={undefined}
+        />
+      )}
     </CustomCell>
   );
 }
