@@ -9,11 +9,11 @@ import { type RuleEntity } from 'loot-core/src/types/models';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgRightArrow2 } from '../../icons/v0';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { SelectCell, Row, Field, Cell, CellButton } from '../table';
+import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
@@ -134,7 +134,7 @@ export const RuleRow = memo(
                     >
                       <Text
                         style={{
-                          ...styles.verySmallText,
+                          ...styles.smallText,
                           color: theme.pageTextLight,
                           marginBottom: 6,
                         }}
@@ -162,10 +162,7 @@ export const RuleRow = memo(
         </Field>
 
         <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
-          {/* @ts-expect-error fix this later */}
-          <Button as={CellButton} onSelect={() => onEditRule(rule)}>
-            Edit
-          </Button>
+          <Button onPress={() => onEditRule(rule)}>Edit</Button>
         </Cell>
       </Row>
     );

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useState } from 'react';
+import React, { memo, useRef, useState } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -8,16 +8,16 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
 import { Button } from '../../common/Button';
+import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { Field, SheetCell } from '../../table';
-import { Tooltip, useTooltip } from '../../tooltips';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
-import { BalanceTooltip } from './BalanceTooltip';
+import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
 const headerLabelStyle: CSSProperties = {
@@ -156,9 +156,12 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
-  const balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
+  const triggerRef = useRef(null);
+
+  const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
+  const triggerBalanceMenuRef = useRef(null);
 
   return (
     <View
@@ -196,6 +199,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             }}
           >
             <Button
+              ref={triggerRef}
               type="bare"
               onClick={e => {
                 e.stopPropagation();
@@ -212,44 +216,42 @@ export const CategoryMonth = memo(function CategoryMonth({
                 style={menuOpen && { opacity: 1 }}
               />
             </Button>
-            {menuOpen && (
-              <Tooltip
-                position="bottom-left"
-                width={200}
-                style={{ padding: 0 }}
-                onClose={() => setMenuOpen(false)}
-              >
-                <BudgetMenu
-                  onCopyLastMonthAverage={() => {
-                    onBudgetAction?.(month, 'copy-single-last', {
-                      category: category.id,
-                    });
-                  }}
-                  onSetMonthsAverage={numberOfMonths => {
-                    if (
-                      numberOfMonths !== 3 &&
-                      numberOfMonths !== 6 &&
-                      numberOfMonths !== 12
-                    ) {
-                      return;
-                    }
 
-                    onBudgetAction?.(
-                      month,
-                      `set-single-${numberOfMonths}-avg`,
-                      {
-                        category: category.id,
-                      },
-                    );
-                  }}
-                  onApplyBudgetTemplate={() => {
-                    onBudgetAction?.(month, 'apply-single-category-template', {
-                      category: category.id,
-                    });
-                  }}
-                />
-              </Tooltip>
-            )}
+            <Popover
+              triggerRef={triggerRef}
+              isOpen={menuOpen}
+              onOpenChange={() => setMenuOpen(false)}
+              placement="bottom start"
+            >
+              <BudgetMenu
+                onCopyLastMonthAverage={() => {
+                  onBudgetAction?.(month, 'copy-single-last', {
+                    category: category.id,
+                  });
+                  setMenuOpen(false);
+                }}
+                onSetMonthsAverage={numberOfMonths => {
+                  if (
+                    numberOfMonths !== 3 &&
+                    numberOfMonths !== 6 &&
+                    numberOfMonths !== 12
+                  ) {
+                    return;
+                  }
+
+                  onBudgetAction?.(month, `set-single-${numberOfMonths}-avg`, {
+                    category: category.id,
+                  });
+                  setMenuOpen(false);
+                }}
+                onApplyBudgetTemplate={() => {
+                  onBudgetAction?.(month, 'apply-single-category-template', {
+                    category: category.id,
+                  });
+                  setMenuOpen(false);
+                }}
+              />
+            </Popover>
           </View>
         )}
         <SheetCell
@@ -319,27 +321,44 @@ export const CategoryMonth = memo(function CategoryMonth({
       {!category.is_income && (
         <Field
           name="balance"
-          truncate={false}
           width="flex"
           style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
-          <span {...(category.is_income ? {} : balanceTooltip.getOpenEvents())}>
+          <span
+            ref={triggerBalanceMenuRef}
+            {...(category.is_income
+              ? {}
+              : { onClick: () => setBalanceMenuOpen(true) })}
+          >
             <BalanceWithCarryover
               disabled={category.is_income}
               carryover={reportBudget.catCarryover(category.id)}
               balance={reportBudget.catBalance(category.id)}
               goal={reportBudget.catGoal(category.id)}
               budgeted={reportBudget.catBudgeted(category.id)}
+              style={{
+                ':hover': { textDecoration: 'underline' },
+              }}
             />
           </span>
-          {balanceTooltip.isOpen && (
-            <BalanceTooltip
+
+          <Popover
+            triggerRef={triggerBalanceMenuRef}
+            isOpen={balanceMenuOpen}
+            onOpenChange={() => setBalanceMenuOpen(false)}
+            placement="bottom end"
+          >
+            <BalanceMenu
               categoryId={category.id}
-              tooltip={balanceTooltip}
-              month={month}
-              onBudgetAction={onBudgetAction}
+              onCarryover={carryover => {
+                onBudgetAction?.(month, 'carryover', {
+                  category: category.id,
+                  flag: carryover,
+                });
+                setBalanceMenuOpen(false);
+              }}
             />
-          )}
+          </Popover>
         </Field>
       )}
     </View>

@@ -29,26 +29,26 @@ export function Spending() {
   const categories = useCategories();
 
   const {
-    filters,
+    conditions,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
   const [dataCheck, setDataCheck] = useState(false);
-  const [mode, setMode] = useState('Last month');
+  const [mode, setMode] = useState('lastMonth');
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
     return createSpendingSpreadsheet({
       categories,
-      conditions: filters,
+      conditions,
       conditionsOp,
       setDataCheck,
     });
-  }, [categories, filters, conditionsOp]);
+  }, [categories, conditions, conditionsOp]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
@@ -57,15 +57,21 @@ export function Spending() {
   if (!data) {
     return null;
   }
+
   const showAverage =
-    data.intervalData[27].months[
-      monthUtils.subMonths(monthUtils.currentDay(), 3)
-    ].daily !== 0;
+    Math.abs(
+      data.intervalData[27].months[
+        monthUtils.subMonths(monthUtils.currentDay(), 3)
+      ].cumulative,
+    ) > 0;
+
   const todayDay =
     monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
+  const showLastYear = Math.abs(data.intervalData[27].lastYear) > 0;
+  const showLastMonth = Math.abs(data.intervalData[27].lastMonth) > 0;
   return (
     <Page
       header={
@@ -94,7 +100,7 @@ export function Spending() {
             flexShrink: 0,
           }}
         >
-          {filters && (
+          {conditions && (
             <View style={{ flexDirection: 'row' }}>
               <FilterButton
                 onApply={onApplyFilter}
@@ -120,7 +126,7 @@ export function Spending() {
             flexGrow: 1,
           }}
         >
-          {filters && filters.length > 0 && (
+          {conditions && conditions.length > 0 && (
             <View
               style={{
                 marginBottom: 10,
@@ -133,11 +139,11 @@ export function Spending() {
               }}
             >
               <AppliedFilters
-                filters={filters}
+                conditions={conditions}
                 onUpdate={onUpdateFilter}
                 onDelete={onDeleteFilter}
                 conditionsOp={conditionsOp}
-                onCondOpChange={onCondOpChange}
+                onConditionsOpChange={onConditionsOpChange}
               />
             </View>
           )}
@@ -171,30 +177,40 @@ export function Spending() {
                     marginBottom: 5,
                   }}
                 >
-                  <AlignedText
-                    left={<Block>Spent MTD:</Block>}
-                    right={
-                      <Text>
-                        <PrivacyFilter blurIntensity={5}>
-                          {amountToCurrency(
-                            Math.abs(data.intervalData[todayDay].thisMonth),
-                          )}
-                        </PrivacyFilter>
-                      </Text>
-                    }
-                  />
-                  <AlignedText
-                    left={<Block>Spent Last MTD:</Block>}
-                    right={
-                      <Text>
-                        <PrivacyFilter blurIntensity={5}>
-                          {amountToCurrency(
-                            Math.abs(data.intervalData[todayDay].lastMonth),
-                          )}
-                        </PrivacyFilter>
-                      </Text>
-                    }
-                  />
+                  {showLastMonth && (
+                    <View
+                      style={{
+                        ...styles.mediumText,
+                        fontWeight: 500,
+                        marginBottom: 5,
+                      }}
+                    >
+                      <AlignedText
+                        left={<Block>Spent MTD:</Block>}
+                        right={
+                          <Text>
+                            <PrivacyFilter blurIntensity={5}>
+                              {amountToCurrency(
+                                Math.abs(data.intervalData[todayDay].thisMonth),
+                              )}
+                            </PrivacyFilter>
+                          </Text>
+                        }
+                      />
+                      <AlignedText
+                        left={<Block>Spent Last MTD:</Block>}
+                        right={
+                          <Text>
+                            <PrivacyFilter blurIntensity={5}>
+                              {amountToCurrency(
+                                Math.abs(data.intervalData[todayDay].lastMonth),
+                              )}
+                            </PrivacyFilter>
+                          </Text>
+                        }
+                      />
+                    </View>
+                  )}
                   {showAverage && (
                     <AlignedText
                       left={<Block>Spent Average MTD:</Block>}
@@ -211,46 +227,66 @@ export function Spending() {
                   )}
                 </View>
               </View>
-              <View
-                style={{
-                  alignItems: 'center',
-                  flexDirection: 'row',
-                }}
-              >
-                <Text
-                  style={{
-                    paddingRight: 10,
-                  }}
-                >
-                  Compare this month to:
-                </Text>
-                <ModeButton
-                  selected={mode === 'Last month'}
-                  onSelect={() => setMode('Last month')}
-                >
-                  Last month
-                </ModeButton>
-                {showAverage && (
-                  <ModeButton
-                    selected={mode === 'Average'}
-                    onSelect={() => setMode('Average')}
-                  >
-                    Average
-                  </ModeButton>
-                )}
-              </View>
-
-              {dataCheck ? (
-                <SpendingGraph
-                  style={{ flexGrow: 1 }}
-                  compact={false}
-                  data={data}
-                  mode={mode}
-                />
+              {!showLastMonth ? (
+                <View style={{ marginTop: 30 }}>
+                  <h1>Additional data required to generate graph</h1>
+                  <Paragraph>
+                    Currently, there is insufficient data to display any
+                    information regarding your spending. Please input
+                    transactions from last month to enable graph visualization.
+                  </Paragraph>
+                </View>
               ) : (
-                <LoadingIndicator message="Loading report..." />
-              )}
+                <>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        paddingRight: 10,
+                      }}
+                    >
+                      Compare this month to:
+                    </Text>
+                    <ModeButton
+                      selected={mode === 'lastMonth'}
+                      onSelect={() => setMode('lastMonth')}
+                    >
+                      Last month
+                    </ModeButton>
+                    {showLastYear && (
+                      <ModeButton
+                        selected={mode === 'lastYear'}
+                        onSelect={() => setMode('lastYear')}
+                      >
+                        Last year
+                      </ModeButton>
+                    )}
+                    {showAverage && (
+                      <ModeButton
+                        selected={mode === 'Average'}
+                        onSelect={() => setMode('Average')}
+                      >
+                        Average
+                      </ModeButton>
+                    )}
+                  </View>
 
+                  {dataCheck ? (
+                    <SpendingGraph
+                      style={{ flexGrow: 1 }}
+                      compact={false}
+                      data={data}
+                      mode={mode}
+                    />
+                  ) : (
+                    <LoadingIndicator message="Loading report..." />
+                  )}
+                </>
+              )}
               {showAverage && (
                 <View style={{ marginTop: 30 }}>
                   <Paragraph>

@@ -173,6 +173,7 @@ export function Modals() {
             <ConfirmTransactionEdit
               key={name}
               modalProps={modalProps}
+              onCancel={options.onCancel}
               onConfirm={options.onConfirm}
               confirmReason={options.confirmReason}
             />
@@ -401,7 +402,6 @@ export function Modals() {
               actions={actions}
               transactionIds={options?.transactionIds}
               getTransaction={options?.getTransaction}
-              pushModal={options?.pushModal}
             />
           );
 
@@ -544,6 +544,7 @@ export function Modals() {
               <RolloverToBudgetMenuModal
                 modalProps={modalProps}
                 onTransfer={options.onTransfer}
+                onCover={options.onCover}
                 onHoldBuffer={options.onHoldBuffer}
                 onResetHoldBuffer={options.onResetHoldBuffer}
               />
@@ -596,8 +597,9 @@ export function Modals() {
             <CoverModal
               key={name}
               modalProps={modalProps}
-              categoryId={options.categoryId}
+              title={options.title}
               month={options.month}
+              showToBeBudgeted={options.showToBeBudgeted}
               onSubmit={options.onSubmit}
             />
           );

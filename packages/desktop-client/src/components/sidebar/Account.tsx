@@ -3,6 +3,7 @@ import React from 'react';
 
 import { css } from 'glamor';
 
+import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useNotes } from '../../hooks/useNotes';
@@ -147,6 +148,12 @@ export function Account({
             </View>
 
             <AlignedText
+              style={
+                (name === 'Off budget' || name === 'For budget') && {
+                  borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
+                  paddingBottom: '3px',
+                }
+              }
               left={name}
               right={<CellValue binding={query} type="financial" />}
             />
@@ -156,7 +163,7 @@ export function Account({
     </View>
   );
 
-  if (!needsTooltip) {
+  if (!needsTooltip || Platform.isPlaywright) {
     return accountRow;
   }
 

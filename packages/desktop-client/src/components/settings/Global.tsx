@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { theme } from '../../style';
 import { Information } from '../alerts';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -35,7 +35,7 @@ export function GlobalSettings() {
     <Setting
       primaryAction={
         <View style={{ flexDirection: 'row' }}>
-          <Button onClick={onChooseDocumentDir}>Change location</Button>
+          <Button onPress={onChooseDocumentDir}>Change location</Button>
           {documentDirChanged && (
             <Information>
               A restart is required for this change to take effect

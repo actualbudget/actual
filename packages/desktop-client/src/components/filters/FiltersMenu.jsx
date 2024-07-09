@@ -21,16 +21,15 @@ import {
 import { titleFirst } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
-import { HoverTarget } from '../common/HoverTarget';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
-import { Tooltip } from '../tooltips';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
@@ -88,7 +87,6 @@ function ConfigureField({
         <Stack direction="row" align="flex-start">
           {field === 'amount' || field === 'date' ? (
             <Select
-              bare
               options={
                 field === 'amount'
                   ? [
@@ -112,7 +110,6 @@ function ConfigureField({
                   dispatch({ type: 'set-op', op: 'is' });
                 }
               }}
-              style={{ borderWidth: 1 }}
             />
           ) : (
             titleFirst(mapField(field))
@@ -200,7 +197,8 @@ function ConfigureField({
             field={field}
             subfield={subfield}
             type={
-              type === 'id' && (op === 'contains' || op === 'doesNotContain')
+              type === 'id' &&
+              (op === 'contains' || op === 'matches' || op === 'doesNotContain')
                 ? 'string'
                 : type
             }
@@ -321,23 +319,17 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
   return (
     <View>
       <View ref={triggerRef}>
-        <HoverTarget
-          style={{ flexShrink: 0 }}
-          renderContent={() =>
-            hover && (
-              <Tooltip
-                position="bottom-left"
-                style={{
-                  lineHeight: 1.5,
-                  padding: '6px 10px',
-                  backgroundColor: theme.menuBackground,
-                  color: theme.menuItemText,
-                }}
-              >
-                <Text>Filters</Text>
-              </Tooltip>
-            )
-          }
+        <Tooltip
+          style={{
+            ...styles.tooltip,
+            lineHeight: 1.5,
+            padding: '6px 10px',
+          }}
+          content={<Text>Filters</Text>}
+          placement="bottom start"
+          triggerProps={{
+            isDisabled: !hover,
+          }}
         >
           {compact ? (
             <CompactFiltersButton
@@ -346,7 +338,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
           ) : (
             <FiltersButton onClick={() => dispatch({ type: 'select-field' })} />
           )}
-        </HoverTarget>
+        </Tooltip>
       </View>
 
       <Popover

@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { integerToCurrency } from 'loot-core/shared/util';
+
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
@@ -19,7 +21,6 @@ import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
-import { integerToCurrency } from 'loot-core/shared/util';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -125,7 +126,7 @@ export function NetWorthGraph({
                 margin={{
                   top: 0,
                   right: 0,
-                  left: computePadding(graphData.data),
+                  left: compact ? 0 : computePadding(graphData.data),
                   bottom: 0,
                 }}
               >
@@ -198,14 +199,10 @@ function computePadding(netWorthData: Array<{ y: number }>) {
    */
   const maxLength = Math.max(
     ...netWorthData.map(({ y }) => {
-      return integerToCurrency(Math.round(y)).length;
+      return Math.round(y).toLocaleString().length;
     }),
   );
 
-  if (maxLength <= 5) {
-    // No additional left padding is required for upto 5 characters
-    return 0;
-  }
-
-  return (maxLength - 5) * 5;
+  // No additional left padding is required for upto 5 characters
+  return Math.max(0, (maxLength - 5) * 5);
 }

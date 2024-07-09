@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useDispatch } from 'react-redux';
 
 import { v4 as uuid } from 'uuid';
@@ -35,6 +41,7 @@ import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgInformationOutline } from '../../icons/v1';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
@@ -82,12 +89,13 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={{ color: theme.pageTextPositive, ...style }}>
+    <View style={style}>
       <Select
         bare
         options={fields}
         value={value}
         onChange={value => onChange('field', value)}
+        buttonStyle={{ color: theme.pageTextPositive }}
       />
     </View>
   );
@@ -97,31 +105,36 @@ export function OpSelect({
   ops,
   type,
   style,
-  wrapperStyle,
   value,
   formatOp = friendlyOp,
   onChange,
 }) {
-  let line;
-  // We don't support the `contains` operator for the id type for
-  // rules yet
-  if (type === 'id') {
-    ops = ops.filter(op => op !== 'contains' && op !== 'doesNotContain');
-    line = ops.length / 2;
-  }
-  if (type === 'string') {
-    line = ops.length / 2;
-  }
+  const opOptions = useMemo(() => {
+    const options = ops
+      // We don't support the `contains`, `doesNotContain`, `matches` operators
+      // for the id type rules yet
+      // TODO: Add matches op support for payees, accounts, categories.
+      .filter(op =>
+        type === 'id'
+          ? !['contains', 'matches', 'doesNotContain'].includes(op)
+          : true,
+      )
+      .map(op => [op, formatOp(op, type)]);
+
+    if (type === 'string' || type === 'id') {
+      options.splice(options.length / 2, 0, Menu.line);
+    }
+
+    return options;
+  }, [ops, type]);
 
   return (
     <Select
       bare
-      options={ops.map(op => [op, formatOp(op, type)])}
+      options={opOptions}
       value={value}
       onChange={value => onChange('op', value)}
-      line={line}
-      style={{ minHeight: '1px', ...style }}
-      wrapperStyle={wrapperStyle}
+      buttonStyle={style}
     />
   );
 }
@@ -235,6 +248,7 @@ function ConditionEditor({
         value={value}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
+        numberFormatType="currency"
       />
     );
   }
@@ -365,6 +379,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               op={op}
               value={value}
               onChange={v => onChange('value', v)}
+              numberFormatType="currency"
             />
           </View>
         </>
@@ -386,6 +401,9 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
                 key={inputKey}
                 field={field}
                 type="number"
+                numberFormatType={
+                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                }
                 value={value}
                 onChange={v => onChange('value', v)}
               />
@@ -1006,7 +1024,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                         >
                           <Text
                             style={{
-                              ...styles.verySmallText,
+                              ...styles.smallText,
                               marginBottom: '10px',
                             }}
                           >

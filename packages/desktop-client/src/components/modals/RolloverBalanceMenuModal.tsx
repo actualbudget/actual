@@ -4,9 +4,12 @@ import { rolloverBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
-import { BalanceWithCarryover } from '../budget/BalanceWithCarryover';
+import {
+  BalanceWithCarryover,
+  DefaultCarryoverIndicator,
+} from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/rollover/BalanceMenu';
-import { Modal } from '../common/Modal';
+import { Modal, ModalTitle } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -39,7 +42,7 @@ export function RolloverBalanceMenuModal({
 
   return (
     <Modal
-      title={category.name}
+      title={<ModalTitle title={category.name} shrinkOnOverflow />}
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -61,15 +64,25 @@ export function RolloverBalanceMenuModal({
         </Text>
         <BalanceWithCarryover
           disabled
-          balanceStyle={{
+          style={{
             textAlign: 'center',
             ...styles.veryLargeText,
           }}
-          carryoverStyle={{ right: -20, width: 15, height: 15 }}
           carryover={rolloverBudget.catCarryover(categoryId)}
           balance={rolloverBudget.catBalance(categoryId)}
           goal={rolloverBudget.catGoal(categoryId)}
           budgeted={rolloverBudget.catBudgeted(categoryId)}
+          carryoverIndicator={({ style }) =>
+            DefaultCarryoverIndicator({
+              style: {
+                width: 15,
+                height: 15,
+                display: 'inline-flex',
+                position: 'relative',
+                ...style,
+              },
+            })
+          }
         />
       </View>
       <BalanceMenu

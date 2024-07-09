@@ -3,9 +3,9 @@ import { type numberFormats } from '../shared/util';
 export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'customReports'
   | 'spendingReport'
-  | 'simpleFinSync';
+  | 'simpleFinSync'
+  | 'iterableTopologicalSort';
 
 export type LocalPrefs = Partial<
   {
@@ -53,6 +53,7 @@ export type LocalPrefs = Partial<
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
+    sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
@@ -61,7 +62,6 @@ export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
-  autoUpdate: boolean;
   keyId?: string;
   theme: Theme;
   documentDir: string; // Electron only

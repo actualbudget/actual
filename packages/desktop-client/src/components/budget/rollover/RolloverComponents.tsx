@@ -310,7 +310,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       </Field>
       <Field
         name="balance"
-        truncate={false}
         width="flex"
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
@@ -323,6 +322,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             balance={rolloverBudget.catBalance(category.id)}
             goal={rolloverBudget.catGoal(category.id)}
             budgeted={rolloverBudget.catBudgeted(category.id)}
+            style={{
+              ':hover': { textDecoration: 'underline' },
+            }}
           />
         </span>
 
