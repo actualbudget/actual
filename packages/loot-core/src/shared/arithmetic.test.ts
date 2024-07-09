@@ -1,4 +1,5 @@
 import { evalArithmetic } from './arithmetic';
+import { setNumberFormat } from './util';
 
 describe('arithmetic', () => {
   test('handles negative numbers', () => {
@@ -40,5 +41,8 @@ describe('arithmetic', () => {
 
   test('respects current number format', () => {
     expect(evalArithmetic('1,222.45')).toEqual(1222.45);
+
+    setNumberFormat({ format: 'space-comma', hideFraction: false });
+    expect(evalArithmetic('1\xa0222,45')).toEqual(1222.45);
   });
 });
