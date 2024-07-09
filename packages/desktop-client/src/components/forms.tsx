@@ -105,6 +105,17 @@ export const Checkbox = (props: CheckboxProps) => {
                 content: ' ',
               },
             },
+            ':disabled': {
+              border: '1px solid ' + theme.buttonNormalDisabledBorder,
+              backgroundColor: theme.buttonNormalDisabledBorder,
+            },
+            ':checked:disabled': {
+              border: '1px solid ' + theme.buttonNormalDisabledBorder,
+              backgroundColor: theme.buttonNormalDisabledBorder,
+              '::after': {
+                backgroundColor: theme.buttonNormalDisabledBorder,
+              },
+            },
             '&.focus-visible:focus': {
               '::before': {
                 position: 'absolute',
