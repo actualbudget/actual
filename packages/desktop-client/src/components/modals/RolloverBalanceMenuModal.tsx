@@ -72,6 +72,7 @@ export function RolloverBalanceMenuModal({
           balance={rolloverBudget.catBalance(categoryId)}
           goal={rolloverBudget.catGoal(categoryId)}
           budgeted={rolloverBudget.catBudgeted(categoryId)}
+          longGoal={rolloverBudget.catLongGoal(categoryId)}
           carryoverIndicator={({ style }) =>
             DefaultCarryoverIndicator({
               style: {
