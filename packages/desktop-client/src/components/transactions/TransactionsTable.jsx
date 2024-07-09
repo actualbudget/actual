@@ -635,10 +635,8 @@ function PayeeCell({
           <Tooltip
             content={
               <View style={{ padding: 10 }}>
-                <Text style={{ fontWeight: 'bold' }}>
-                  {'Imported Payee: '}
-                  <Text style={{ fontWeight: 'normal' }}>{importedPayee}</Text>
-                </Text>
+                <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
+                <Text style={{ fontWeight: 'normal' }}>{importedPayee}</Text>
               </View>
             }
             style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
