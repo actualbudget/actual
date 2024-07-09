@@ -203,7 +203,6 @@ async function processTemplate(
       `budget-${category.id}`,
     );
     const template = category_templates[category.id];
-    const goal = category_goals[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
         //add each priority we need to a list.  Will sort later
