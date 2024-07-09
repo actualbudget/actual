@@ -317,6 +317,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   category,
   isHidden,
   goal,
+  longGoal,
   budgeted,
   spent,
   balance,
@@ -353,15 +354,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
       ? rolloverBudget.catBalance(category.id)
       : reportBudget.catBalance(category.id),
   );
-  const longGoal = useSheetValue(
-    type === 'rollover'
-      ? rolloverBudget.catLongGoal(category.id)
-      : reportBudget.catLongGoal(category.id),
-  );
   const budgetedtmp = useSheetValue(budgeted);
   const balancetmp = useSheetValue(balance);
   const budgetedValue = isGoalTemplatesEnabled
-    ? longGoal === 1
+    ? useSheetValue(longGoal) === 1
       ? balancetmp
       : budgetedtmp
     : null;
@@ -576,6 +572,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
               balance={balance}
               goal={goal}
               budgeted={budgeted}
+              longGoal={longGoal}
               formatter={value => (
                 <Button
                   type="bare"
@@ -1353,6 +1350,11 @@ const ExpenseGroup = memo(function ExpenseGroup({
                 type === 'report'
                   ? reportBudget.catGoal(category.id)
                   : rolloverBudget.catGoal(category.id)
+              }
+              longGoal={
+                type === 'report'
+                  ? reportBudget.catLongGoal(category.id)
+                  : rolloverBudget.catLongGoal(category.id)
               }
               budgeted={
                 type === 'report'

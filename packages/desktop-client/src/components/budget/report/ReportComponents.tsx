@@ -337,11 +337,8 @@ export const CategoryMonth = memo(function CategoryMonth({
               carryover={reportBudget.catCarryover(category.id)}
               balance={reportBudget.catBalance(category.id)}
               goal={reportBudget.catGoal(category.id)}
-              budgeted={
-                longGoal === 1
-                  ? reportBudget.catBalance(category.id)
-                  : reportBudget.catBudgeted(category.id)
-              }
+              budgeted={reportBudget.catBudgeted(category.id)}
+              longGoal={reportBudget.catLongGoal(category.id)}
               style={{
                 ':hover': { textDecoration: 'underline' },
               }}

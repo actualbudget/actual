@@ -23,6 +23,7 @@ type BalanceWithCarryoverProps = Omit<
   balance: Binding;
   goal: Binding;
   budgeted: Binding;
+  longGoal: Binding;
   disabled?: boolean;
   carryoverIndicator?: ({ style }: CarryoverIndicatorProps) => JSX.Element;
 };
@@ -54,6 +55,7 @@ export function BalanceWithCarryover({
   balance,
   goal,
   budgeted,
+  longGoal,
   disabled,
   carryoverIndicator = DefaultCarryoverIndicator,
   ...props
@@ -62,11 +64,12 @@ export function BalanceWithCarryover({
   const balanceValue = useSheetValue(balance);
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
+  const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const valueStyle = makeBalanceAmountStyle(
     balanceValue,
     isGoalTemplatesEnabled ? goalValue : null,
-    budgetedValue,
+    longGoalValue === 1 ? balanceValue : budgetedValue,
   );
 
   return (
@@ -86,7 +89,7 @@ export function BalanceWithCarryover({
           makeBalanceAmountStyle(
             value,
             isGoalTemplatesEnabled ? goalValue : null,
-            budgetedValue,
+            longGoalValue === 1 ? balanceValue : budgetedValue,
           )
         }
         style={{

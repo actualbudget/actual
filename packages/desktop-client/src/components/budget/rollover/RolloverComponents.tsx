@@ -159,8 +159,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
 
-  const longGoal = useSheetValue(rolloverBudget.catLongGoal(category.id));
-
   return (
     <View
       style={{
@@ -324,11 +322,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             carryover={rolloverBudget.catCarryover(category.id)}
             balance={rolloverBudget.catBalance(category.id)}
             goal={rolloverBudget.catGoal(category.id)}
-            budgeted={
-              longGoal === 1
-                ? rolloverBudget.catBalance(category.id)
-                : rolloverBudget.catBudgeted(category.id)
-            }
+            budgeted={rolloverBudget.catBudgeted(category.id)}
+            longGoal={rolloverBudget.catLongGoal(category.id)}
             style={{
               ':hover': { textDecoration: 'underline' },
             }}
