@@ -51,6 +51,7 @@ libofx
 linting
 lleskassen
 lte
+Mariushosting
 minimalistic
 monkeypatch
 Morrisons
@@ -65,6 +66,7 @@ ofx
 OFX
 payeerule
 pikaday
+pikapods
 playsinline
 portalization
 Postgresql
@@ -73,11 +75,13 @@ publix
 QFX
 QIF
 returnsandreimbursements
+roadmap
 Rezip
 RUpdate
 sankey
 screenshots
 SEB
+Sztup
 subfolders
 subreaper
 subtransaction
@@ -95,3 +99,4 @@ Xxxxx
 ynab
 Ynab
 YNAB
+Zsolt

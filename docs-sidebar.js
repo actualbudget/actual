@@ -33,6 +33,7 @@ const sidebars = {
       label: 'Getting Started',
       collapsible: false,
       items: [
+        'getting-started/roadmap-for-new-users',
         {
           type: 'category',
           label: 'Installing Actual',
@@ -81,10 +82,10 @@ const sidebars = {
             'tour/settings',
           ],
         },
+        'getting-started/starting-fresh',
         'getting-started/tips-tricks',
         'getting-started/sync',
         'getting-started/manage-files',
-        'getting-started/starting-fresh',
         'getting-started/envelope-budgeting',
         {
           type: 'category',
