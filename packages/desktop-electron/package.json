@@ -41,6 +41,7 @@
       },
       "target": [
         {
+          "target": "default",
           "arch": ["universal"]
         }
       ]
