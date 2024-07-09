@@ -1131,6 +1131,7 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 handlers['transactions-import'] = mutator(function ({
   accountId,
   transactions,
+  isPreview,
 }) {
   return withUndo(async () => {
     if (typeof accountId !== 'string') {
@@ -1138,10 +1139,20 @@ handlers['transactions-import'] = mutator(function ({
     }
 
     try {
-      return await bankSync.reconcileTransactions(accountId, transactions);
+      return await bankSync.reconcileTransactions(
+        accountId,
+        transactions,
+        false,
+        isPreview,
+      );
     } catch (err) {
       if (err instanceof TransactionError) {
-        return { errors: [{ message: err.message }], added: [], updated: [] };
+        return {
+          errors: [{ message: err.message }],
+          added: [],
+          updated: [],
+          updatedPreview: [],
+        };
       }
 
       throw err;

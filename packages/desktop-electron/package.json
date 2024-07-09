@@ -35,6 +35,7 @@
       "icon": "icons/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
+      "artifactName": "${productName}-mac.${ext}",
       "notarize": {
         "teamId": "79ANZ983YF"
       }
@@ -44,7 +45,7 @@
         "flatpak",
         "AppImage"
       ],
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-linux.${ext}"
     },
     "flatpak": {
       "runtimeVersion": "23.08",
@@ -52,7 +53,8 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "icons/icon.ico"
+      "icon": "icons/icon.ico",
+      "artifactName": "${productName}-windows.${ext}"
     }
   },
   "dependencies": {

@@ -24,8 +24,6 @@ import {
   listen as listenToWindowState,
 } from './window-state';
 
-import './setRequireHook';
-
 import './security';
 
 Module.globalPaths.push(__dirname + '/..');
