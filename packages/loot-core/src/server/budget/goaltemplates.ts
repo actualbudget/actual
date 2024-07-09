@@ -190,7 +190,7 @@ async function processTemplate(
   let categories = [];
   const categories_remove = [];
   if (category) {
-    categories[0] = category;
+    categories[category.id] = category;
   } else {
     categories = await getCategories();
   }
