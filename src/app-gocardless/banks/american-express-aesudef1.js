@@ -1,6 +1,7 @@
 import Fallback from './integration-bank.js';
 
 import { amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -29,6 +30,7 @@ export default {
   normalizeTransaction(transaction, _booked) {
     return {
       ...transaction,
+      payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate,
     };
   },

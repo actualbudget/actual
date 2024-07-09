@@ -1,6 +1,7 @@
 import Fallback from './integration-bank.js';
 
 import { printIban, amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -33,6 +34,7 @@ export default {
     if (booked) {
       return {
         ...transaction,
+        payeeName: formatPayeeName(transaction),
         date: transaction.bookingDate,
       };
     }
@@ -52,6 +54,7 @@ export default {
     if (transaction.valueDate !== undefined) {
       return {
         ...transaction,
+        payeeName: formatPayeeName(transaction),
         date: transaction.valueDate,
       };
     }
@@ -64,6 +67,7 @@ export default {
         transaction.valueDate = matches[1];
         return {
           ...transaction,
+          payeeName: formatPayeeName(transaction),
           date: matches[1],
         };
       }

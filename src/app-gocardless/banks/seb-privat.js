@@ -2,6 +2,7 @@ import Fallback from './integration-bank.js';
 
 import * as d from 'date-fns';
 import { amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -23,10 +24,13 @@ export default {
     if (!date) {
       return null;
     }
+
+    // Creditor name is stored in additionInformation for SEB
+    transaction.creditorName = transaction.additionalInformation;
+
     return {
       ...transaction,
-      // Creditor name is stored in additionInformation for SEB
-      creditorName: transaction.additionalInformation,
+      payeeName: formatPayeeName(transaction),
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
     };
   },

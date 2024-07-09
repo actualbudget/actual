@@ -1,6 +1,7 @@
 import Fallback from './integration-bank.js';
 
 import { printIban, amountToInteger } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -26,13 +27,14 @@ export default {
     const remittanceInformationMatch = /remittanceinformation:(.*)$/.exec(
       transaction.remittanceInformationUnstructured,
     );
-    const remittanceInformation = remittanceInformationMatch
+
+    transaction.remittanceInformationUnstructured = remittanceInformationMatch
       ? remittanceInformationMatch[1]
       : transaction.remittanceInformationUnstructured;
 
     return {
       ...transaction,
-      remittanceInformationUnstructured: remittanceInformation,
+      payeeName: formatPayeeName(transaction),
       date: transaction.bookingDate || transaction.valueDate,
     };
   },

@@ -23,8 +23,6 @@ export default {
       transaction.bookingDate = useDate.toISOString().slice(0, 10);
     }
 
-    console.log(transaction);
-
     // Nationwide also occasionally returns erroneous transaction_ids
     // that are malformed and can even change after import. This will ignore
     // these ids and unset them. When a correct ID is returned then it will

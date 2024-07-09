@@ -1,7 +1,8 @@
 import Fallback from './integration-bank.js';
 
-import { printIban } from '../utils.js';
 import d from 'date-fns';
+import { printIban } from '../utils.js';
+import { formatPayeeName } from '../../util/payee-name.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -52,10 +53,13 @@ export default {
         transaction.remittanceInformationStructuredArray?.join(' ');
     }
 
+    transaction.remittanceInformationUnstructured =
+      remittanceInformationUnstructured;
+
     return {
       ...transaction,
+      payeeName: formatPayeeName(transaction),
       date: d.format(d.parseISO(date), 'yyyy-MM-dd'),
-      remittanceInformationUnstructured: remittanceInformationUnstructured,
     };
   },
 };
