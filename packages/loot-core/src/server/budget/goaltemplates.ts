@@ -203,6 +203,7 @@ async function processTemplate(
       `budget-${category.id}`,
     );
     const template = category_templates[category.id];
+    const goal = category_goals[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
         //add each priority we need to a list.  Will sort later
@@ -217,13 +218,12 @@ async function processTemplate(
         // save index of category to remove
         categories_remove.push(c);
       } else {
-        // if we are overwritting add this category to list to zero
-        setToZero.push({
-          category: category.id,
-          amount: 0,
-          isIncome: category.is_income,
-          isTemplate: template ? true : false,
-        });
+        // add all categories with a template to the list to unset budget
+        if (template.length>0) {
+          setToZero.push({
+            category: category.id,
+          });
+        }
       }
     }
   }
@@ -238,7 +238,7 @@ async function processTemplate(
   // zero out budget and goal from categories that need it
   await setGoalBudget({
     month,
-    templateBudget: setToZero.filter(f => f.isTemplate === true),
+    templateBudget: setToZero,
   });
   await resetCategoryTargets(month, categories);
 
