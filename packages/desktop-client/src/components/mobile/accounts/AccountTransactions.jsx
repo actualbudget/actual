@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import memoizeOne from 'memoize-one';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import {
@@ -20,7 +19,10 @@ import {
   syncAndDownload,
   updateAccount,
 } from 'loot-core/client/actions';
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
+import {
+  SchedulesProvider,
+  useDefaultSchedulesQueryTransform,
+} from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
 import { pagedQuery } from 'loot-core/client/query-helpers';
 import { listen, send } from 'loot-core/platform/client/fetch';
@@ -39,6 +41,7 @@ import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
 
 export function AccountTransactions({ account, pending, failed }) {
+  const schedulesTransform = useDefaultSchedulesQueryTransform(account.id);
   return (
     <Page
       header={
@@ -52,7 +55,7 @@ export function AccountTransactions({ account, pending, failed }) {
       }
       padding={0}
     >
-      <SchedulesProvider transform={getSchedulesTransform(account.id)}>
+      <SchedulesProvider transform={schedulesTransform}>
         <TransactionListWithPreviews account={account} />
       </SchedulesProvider>
     </Page>
@@ -131,15 +134,6 @@ function AccountName({ account, pending, failed }) {
     </View>
   );
 }
-
-const getSchedulesTransform = memoizeOne(id => {
-  const filter = queries.getAccountFilter(id, '_account');
-
-  return q => {
-    q = q.filter({ $and: [filter, { '_account.closed': false }] });
-    return q.orderBy({ next_date: 'desc' });
-  };
-});
 
 function TransactionListWithPreviews({ account }) {
   const [currentQuery, setCurrentQuery] = useState();

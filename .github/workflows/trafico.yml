@@ -21,8 +21,6 @@ on:
      - edited
      - review_requested
      - review_request_removed
-  pull_request_review:
-    types: [submitted, edited, dismissed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

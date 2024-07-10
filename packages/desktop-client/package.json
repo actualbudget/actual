@@ -47,6 +47,7 @@
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.2",
     "promise-retry": "^2.0.1",
+    "re-resizable": "^6.9.17",
     "react": "18.2.0",
     "react-aria-components": "^1.2.1",
     "react-dnd": "^16.0.1",

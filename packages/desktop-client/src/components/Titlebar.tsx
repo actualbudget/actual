@@ -416,11 +416,6 @@ export function Titlebar({ style }: TitlebarProps) {
               sidebar.setHidden(false);
             }
           }}
-          onPointerLeave={e => {
-            if (e.pointerType === 'mouse') {
-              sidebar.setHidden(true);
-            }
-          }}
           onPointerUp={e => {
             if (e.pointerType !== 'mouse') {
               sidebar.setHidden(!sidebar.hidden);
