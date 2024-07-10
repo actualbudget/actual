@@ -1,8 +1,6 @@
 // @ts-strict-ignore
 import { getClock } from '@actual-app/crdt';
 
-import { Budget } from 'loot-core/types/budget';
-
 import * as connection from '../platform/server/connection';
 import {
   getBankSyncError,
@@ -18,6 +16,7 @@ import {
   deleteTransaction,
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
+import { Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 import { ServerHandlers } from '../types/server-handlers';
 
