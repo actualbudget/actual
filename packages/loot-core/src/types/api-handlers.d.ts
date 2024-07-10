@@ -114,7 +114,10 @@ export interface ApiHandlers {
 
   'api/account-delete': (arg: { id }) => Promise<unknown>;
 
-  'api/account-balance': (arg: { id: string; cutoff?: Date }) => Promise<number>;
+  'api/account-balance': (arg: {
+    id: string;
+    cutoff?: Date;
+  }) => Promise<number>;
 
   'api/categories-get': (arg: {
     grouped;
