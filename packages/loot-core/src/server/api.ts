@@ -642,6 +642,14 @@ handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-batch-change']({ deleted: [{ id }] });
 });
 
+handlers['api/payees-merge'] = withMutation(async function ({
+  targetId,
+  mergeIds,
+}) {
+  checkFileOpen();
+  return handlers['payees-merge']({ targetId, mergeIds });
+});
+
 handlers['api/rules-get'] = async function () {
   checkFileOpen();
   return handlers['rules-get']();
