@@ -141,7 +141,7 @@ export async function get() {
       width: Math.min(1000, displayBounds.width - 100),
       height: Math.min(700, displayBounds.width - 50),
     },
-    loadState(),
+    await loadState(),
   );
 
   return state;
