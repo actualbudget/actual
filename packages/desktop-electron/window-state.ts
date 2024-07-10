@@ -15,7 +15,7 @@ type WindowState = Electron.Rectangle & {
 };
 
 async function loadState() {
-  let state: WindowState = undefined;
+  let state: WindowState | undefined = undefined;
   const backend = await getBackend();
   try {
     state = JSON.parse(
