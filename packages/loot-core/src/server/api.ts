@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import { getClock } from '@actual-app/crdt';
 
+import { Budget } from 'loot-core/types/budget';
+
 import * as connection from '../platform/server/connection';
 import {
   getBankSyncError,
@@ -37,7 +39,6 @@ import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
-import { Budget } from 'loot-core/types/budget';
 
 let IMPORT_MODE = false;
 
@@ -230,14 +231,15 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 };
 
 handlers['api/get-budgets'] = async function () {
-  const budgets: (Budget | APIRemoteFileEntity)[] = await handlers['get-budgets']();
+  const budgets: (Budget | APIRemoteFileEntity)[] =
+    await handlers['get-budgets']();
   const files = await handlers['get-remote-files']();
   if (!files) {
     return budgets;
   }
-  return budgets.concat(files
-    .map(file => remoteFileModel.toExternal(file))
-    .filter(file => file));
+  return budgets.concat(
+    files.map(file => remoteFileModel.toExternal(file)).filter(file => file),
+  );
 };
 
 handlers['api/sync'] = async function () {
