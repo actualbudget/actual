@@ -1,3 +1,4 @@
+import { Budget } from '../types/budget';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -116,13 +117,14 @@ export const payeeModel = {
   },
 };
 
-export type APIRemoteFileEntity = Omit<RemoteFile, 'deleted' | 'fileId'> & {
+export type APIFileEntity = Omit<RemoteFile, 'deleted' | 'fileId'> & {
+  id?: string;
   cloudFileId: string;
-  state: 'remote';
+  state?: 'remote';
 };
 
 export const remoteFileModel = {
-  toExternal(file: RemoteFile): APIRemoteFileEntity | null {
+  toExternal(file: RemoteFile): APIFileEntity | null {
     if (file.deleted) {
       return null;
     }
@@ -136,7 +138,17 @@ export const remoteFileModel = {
     };
   },
 
-  fromExternal(file: APIRemoteFileEntity) {
+  fromExternal(file: APIFileEntity) {
     return { deleted: false, fileId: file.cloudFileId, ...file } as RemoteFile;
+  },
+};
+
+export const budgetModel = {
+  toExternal(file: Budget): APIFileEntity {
+    return file as APIFileEntity;
+  },
+
+  fromExternal(file: APIFileEntity) {
+    return file as Budget;
   },
 };

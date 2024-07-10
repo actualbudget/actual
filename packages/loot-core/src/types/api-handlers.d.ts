@@ -3,11 +3,10 @@ import type {
   APIAccountEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIFileEntity,
   APIPayeeEntity,
-  APIRemoteFileEntity,
 } from '../server/api-models';
 
-import type { Budget } from './budget';
 import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
 import { type ServerHandlers } from './server-handlers';
 
@@ -25,7 +24,7 @@ export interface ApiHandlers {
     password?: string;
   }) => Promise<void>;
 
-  'api/get-budgets': () => Promise<(Budget | APIRemoteFileEntity)[]>;
+  'api/get-budgets': () => Promise<APIFileEntity[]>;
 
   'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 

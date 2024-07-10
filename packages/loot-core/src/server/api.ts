@@ -22,6 +22,7 @@ import { ServerHandlers } from '../types/server-handlers';
 import { addTransactions } from './accounts/sync';
 import {
   accountModel,
+  budgetModel,
   categoryModel,
   categoryGroupModel,
   payeeModel,
@@ -229,12 +230,9 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 
 handlers['api/get-budgets'] = async function () {
   const budgets = await handlers['get-budgets']();
-  const files = await handlers['get-remote-files']();
-  if (!files) {
-    return budgets;
-  }
+  const files = (await handlers['get-remote-files']()) || [];
   return [
-    ...budgets,
+    ...budgets.map(file => budgetModel.toExternal(file)),
     ...files.map(file => remoteFileModel.toExternal(file)).filter(file => file),
   ];
 };
