@@ -10,12 +10,14 @@ import { type CommonModalProps } from '../Modals';
 
 type ConfirmTransactionEditProps = {
   modalProps: Partial<CommonModalProps>;
+  onCancel?: () => void;
   onConfirm: () => void;
   confirmReason: string;
 };
 
 export function ConfirmTransactionEdit({
   modalProps,
+  onCancel,
   onConfirm,
   confirmReason,
 }: ConfirmTransactionEditProps) {
@@ -72,7 +74,13 @@ export function ConfirmTransactionEdit({
                 justifyContent: 'flex-end',
               }}
             >
-              <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
+              <Button
+                style={{ marginRight: 10 }}
+                onClick={() => {
+                  modalProps.onClose();
+                  onCancel();
+                }}
+              >
                 Cancel
               </Button>
               <InitialFocus>

@@ -173,6 +173,7 @@ export function Modals() {
             <ConfirmTransactionEdit
               key={name}
               modalProps={modalProps}
+              onCancel={options.onCancel}
               onConfirm={options.onConfirm}
               confirmReason={options.confirmReason}
             />

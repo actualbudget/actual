@@ -7,7 +7,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { validForTransfer } from 'loot-core/client/transfer';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
-import { SchedulesProvider } from 'loot-core/src/client/data-hooks/schedules';
+import {
+  SchedulesProvider,
+  useDefaultSchedulesQueryTransform,
+} from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -40,7 +43,7 @@ import {
   useSplitsExpanded,
 } from '../../hooks/useSplitsExpanded';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
@@ -73,12 +76,7 @@ function EmptyMessage({ onAdd }) {
           manage it locally yourself.
         </Text>
 
-        <Button
-          type="primary"
-          autoFocus
-          style={{ marginTop: 20 }}
-          onClick={onAdd}
-        >
+        <Button variant="primary" style={{ marginTop: 20 }} autoFocus onPress={onAdd}>
           Add account
         </Button>
 
@@ -1842,29 +1840,7 @@ export function Account() {
   const savedFiters = useFilters();
   const actionCreators = useActions();
 
-  const transform = useMemo(() => {
-    const filterByAccount = queries.getAccountFilter(params.id, '_account');
-    const filterByPayee = queries.getAccountFilter(
-      params.id,
-      '_payee.transfer_acct',
-    );
-
-    return q => {
-      q = q.filter({
-        $and: [{ '_account.closed': false }],
-      });
-      if (params.id) {
-        if (params.id === 'uncategorized') {
-          q = q.filter({ next_date: null });
-        } else {
-          q = q.filter({
-            $or: [filterByAccount, filterByPayee],
-          });
-        }
-      }
-      return q.orderBy({ next_date: 'desc' });
-    };
-  }, [params.id]);
+  const transform = useDefaultSchedulesQueryTransform(params.id);
 
   return (
     <SchedulesProvider transform={transform}>
