@@ -44,7 +44,7 @@ export class RulesPage {
         .first()
         .click();
       await this.page
-        .getByRole('option', { exact: true, name: data.conditionsOp })
+        .getByRole('button', { exact: true, name: data.conditionsOp })
         .click();
     }
 
@@ -97,13 +97,13 @@ export class RulesPage {
       if (field) {
         await row.getByRole('button').first().click();
         await this.page
-          .getByRole('option', { exact: true, name: field })
+          .getByRole('button', { exact: true, name: field })
           .click();
       }
 
       if (op) {
         await row.getByRole('button', { name: 'is' }).click();
-        await this.page.getByRole('option', { name: op, exact: true }).click();
+        await this.page.getByRole('button', { name: op, exact: true }).click();
       }
 
       if (value) {

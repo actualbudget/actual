@@ -3,7 +3,6 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
-import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { type Binding } from '../spreadsheet';
@@ -12,24 +11,51 @@ import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { makeBalanceAmountStyle } from './util';
 
+type CarryoverIndicatorProps = {
+  style?: CSSProperties;
+};
+
 type BalanceWithCarryoverProps = Omit<
   ComponentPropsWithoutRef<typeof CellValue>,
   'binding'
 > & {
   carryover: Binding;
   balance: Binding;
-  goal?: Binding;
-  budgeted?: Binding;
+  goal: Binding;
+  budgeted: Binding;
   disabled?: boolean;
-  carryoverStyle?: CSSProperties;
+  carryoverIndicator?: ({ style }: CarryoverIndicatorProps) => JSX.Element;
 };
+
+export function DefaultCarryoverIndicator({ style }: CarryoverIndicatorProps) {
+  return (
+    <View
+      style={{
+        marginLeft: 2,
+        position: 'absolute',
+        right: '-4px',
+        alignSelf: 'center',
+        top: 0,
+        bottom: 0,
+        ...style,
+      }}
+    >
+      <SvgArrowThinRight
+        width={style?.width || 7}
+        height={style?.height || 7}
+        style={style}
+      />
+    </View>
+  );
+}
+
 export function BalanceWithCarryover({
   carryover,
   balance,
   goal,
   budgeted,
   disabled,
-  carryoverStyle,
+  carryoverIndicator = DefaultCarryoverIndicator,
   ...props
 }: BalanceWithCarryoverProps) {
   const carryoverValue = useSheetValue(carryover);
@@ -37,11 +63,21 @@ export function BalanceWithCarryover({
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-
-  const { isNarrowWidth } = useResponsive();
+  const valueStyle = makeBalanceAmountStyle(
+    balanceValue,
+    isGoalTemplatesEnabled ? goalValue : null,
+    budgetedValue,
+  );
 
   return (
-    <>
+    <span
+      style={{
+        alignItems: 'center',
+        display: 'inline-flex',
+        justifyContent: 'right',
+        maxWidth: '100%',
+      }}
+    >
       <CellValue
         {...props}
         binding={balance}
@@ -54,6 +90,8 @@ export function BalanceWithCarryover({
           )
         }
         style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
           textAlign: 'right',
           ...(!disabled && {
             cursor: 'pointer',
@@ -61,30 +99,7 @@ export function BalanceWithCarryover({
           ...props.style,
         }}
       />
-      {carryoverValue && (
-        <View
-          style={{
-            alignSelf: 'center',
-            marginLeft: 2,
-            position: 'absolute',
-            right: isNarrowWidth ? '-8px' : '-4px',
-            top: 0,
-            bottom: 0,
-            justifyContent: 'center',
-            ...carryoverStyle,
-          }}
-        >
-          <SvgArrowThinRight
-            width={carryoverStyle?.width || 7}
-            height={carryoverStyle?.height || 7}
-            style={makeBalanceAmountStyle(
-              balanceValue,
-              goalValue,
-              budgetedValue,
-            )}
-          />
-        </View>
-      )}
-    </>
+      {carryoverValue && carryoverIndicator({ style: valueStyle })}
+    </span>
   );
 }

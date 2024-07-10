@@ -66,6 +66,22 @@ export function makeChild<T extends GenericTransactionEntity>(
   } as unknown as T;
 }
 
+function makeNonChild<T extends GenericTransactionEntity>(
+  parent: T,
+  data: object,
+) {
+  return {
+    amount: 0,
+    ...data,
+    cleared: parent.cleared != null ? parent.cleared : null,
+    reconciled: parent.reconciled != null ? parent.reconciled : null,
+    sort_order: parent.sort_order || null,
+    starting_balance_flag: null,
+    is_child: false,
+    parent_id: null,
+  } as unknown as T;
+}
+
 export function recalculateSplit(trans: TransactionEntity) {
   // Calculate the new total of split transactions and make sure
   // that it equals the parent amount
@@ -225,7 +241,9 @@ export function updateTransaction(
   return replaceTransactions(transactions, transaction.id, trans => {
     if (trans.is_parent) {
       const parent = trans.id === transaction.id ? transaction : trans;
-      const sub = trans.subtransactions?.map(t => {
+      const originalSubtransactions =
+        parent.subtransactions ?? trans.subtransactions;
+      const sub = originalSubtransactions?.map(t => {
         // Make sure to update the children to reflect the updated
         // properties (if the parent updated)
 
@@ -313,4 +331,48 @@ export function realizeTempTransactions(transactions: TransactionEntity[]) {
       parent_id: parent.id,
     })),
   ];
+}
+
+export function makeAsNonChildTransactions(
+  childTransactionsToUpdate: TransactionEntity[],
+  transactions: TransactionEntity[],
+) {
+  const [parentTransaction, ...childTransactions] = transactions;
+  const newNonChildTransactions = childTransactionsToUpdate.map(t =>
+    makeNonChild(parentTransaction, t),
+  );
+
+  const remainingChildTransactions = childTransactions.filter(
+    t =>
+      !newNonChildTransactions.some(updatedTrans => updatedTrans.id === t.id),
+  );
+
+  const nonChildTransactionsToUpdate =
+    remainingChildTransactions.length === 1
+      ? [
+          ...newNonChildTransactions,
+          makeNonChild(parentTransaction, remainingChildTransactions[0]),
+        ]
+      : newNonChildTransactions;
+
+  const deleteParentTransaction = remainingChildTransactions.length <= 1;
+
+  const updatedParentTransaction = {
+    ...parentTransaction,
+    ...(!deleteParentTransaction
+      ? {
+          amount: remainingChildTransactions
+            .map(t => t.amount)
+            .reduce((total, amount) => total + amount, 0),
+        }
+      : {}),
+  };
+
+  return {
+    updated: [
+      ...(!deleteParentTransaction ? [updatedParentTransaction] : []),
+      ...nonChildTransactionsToUpdate,
+    ],
+    deleted: [...(deleteParentTransaction ? [updatedParentTransaction] : [])],
+  };
 }

@@ -1,12 +1,16 @@
 import React, { PureComponent, createRef, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, useParams, useLocation, useMatch } from 'react-router-dom';
+import { Navigate, useParams, useLocation } from 'react-router-dom';
 
 import { debounce } from 'debounce';
+import { v4 as uuidv4 } from 'uuid';
 
 import { validForTransfer } from 'loot-core/client/transfer';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
-import { SchedulesProvider } from 'loot-core/src/client/data-hooks/schedules';
+import {
+  SchedulesProvider,
+  useDefaultSchedulesQueryTransform,
+} from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -20,6 +24,8 @@ import {
   realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
+  makeChild,
+  makeAsNonChildTransactions,
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
@@ -37,7 +43,7 @@ import {
   useSplitsExpanded,
 } from '../../hooks/useSplitsExpanded';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { TransactionList } from '../transactions/TransactionList';
@@ -70,7 +76,7 @@ function EmptyMessage({ onAdd }) {
           manage it locally yourself.
         </Text>
 
-        <Button type="primary" style={{ marginTop: 20 }} onClick={onAdd}>
+        <Button variant="primary" style={{ marginTop: 20 }} onPress={onAdd}>
           Add account
         </Button>
 
@@ -1049,6 +1055,114 @@ class AccountInternal extends PureComponent {
     );
   };
 
+  onMakeAsSplitTransaction = async ids => {
+    this.setState({ workingHard: true });
+
+    const { data: transactions } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'none' }),
+    );
+
+    if (!transactions || transactions.length === 0) {
+      return;
+    }
+
+    const [firstTransaction] = transactions;
+    const parentTransaction = {
+      id: uuidv4(),
+      is_parent: true,
+      cleared: transactions.every(t => !!t.cleared),
+      date: firstTransaction.date,
+      account: firstTransaction.account,
+      amount: transactions
+        .map(t => t.amount)
+        .reduce((total, amount) => total + amount, 0),
+    };
+    const childTransactions = transactions.map(t =>
+      makeChild(parentTransaction, t),
+    );
+
+    await send('transactions-batch-update', {
+      added: [parentTransaction],
+      updated: childTransactions,
+    });
+
+    this.refetchTransactions();
+  };
+
+  onMakeAsNonSplitTransactions = async ids => {
+    this.setState({ workingHard: true });
+
+    const { data: groupedTransactions } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+
+    let changes = {
+      updated: [],
+      deleted: [],
+    };
+
+    const groupedTransactionsToUpdate = groupedTransactions.filter(
+      t => t.is_parent,
+    );
+
+    for (const groupedTransaction of groupedTransactionsToUpdate) {
+      const transactions = ungroupTransaction(groupedTransaction);
+      const [parentTransaction, ...childTransactions] = transactions;
+
+      if (ids.includes(parentTransaction.id)) {
+        // Unsplit all child transactions.
+        const diff = makeAsNonChildTransactions(
+          childTransactions,
+          transactions,
+        );
+
+        changes = {
+          updated: [...changes.updated, ...diff.updated],
+          deleted: [...changes.deleted, ...diff.deleted],
+        };
+
+        // Already processed the child transactions above, no need to process them below.
+        continue;
+      }
+
+      // Unsplit selected child transactions.
+
+      const selectedChildTransactions = childTransactions.filter(t =>
+        ids.includes(t.id),
+      );
+
+      if (selectedChildTransactions.length === 0) {
+        continue;
+      }
+
+      const diff = makeAsNonChildTransactions(
+        selectedChildTransactions,
+        transactions,
+      );
+
+      changes = {
+        updated: [...changes.updated, ...diff.updated],
+        deleted: [...changes.deleted, ...diff.deleted],
+      };
+    }
+
+    await send('transactions-batch-update', changes);
+
+    this.refetchTransactions();
+
+    const transactionsToSelect = changes.updated.map(t => t.id);
+    this.dispatchSelected({
+      type: 'select-all',
+      ids: transactionsToSelect,
+    });
+  };
+
   checkForReconciledTransactions = async (ids, confirmReason, onConfirm) => {
     const { data } = await runQuery(
       q('transactions')
@@ -1610,6 +1724,8 @@ class AccountInternal extends PureComponent {
                 onApplyFilter={this.onApplyFilter}
                 onScheduleAction={this.onScheduleAction}
                 onSetTransfer={this.onSetTransfer}
+                onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
+                onMakeAsNonSplitTransactions={this.onMakeAsNonSplitTransactions}
               />
 
               <View style={{ flex: 1 }}>
@@ -1686,13 +1802,11 @@ class AccountInternal extends PureComponent {
 
 function AccountHack(props) {
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
-  const match = useMatch(props.location.pathname);
 
   return (
     <AccountInternal
-      {...props}
-      match={match}
       splitsExpandedDispatch={splitsExpandedDispatch}
+      {...props}
     />
   );
 }
@@ -1726,29 +1840,7 @@ export function Account() {
   const savedFiters = useFilters();
   const actionCreators = useActions();
 
-  const transform = useMemo(() => {
-    const filterByAccount = queries.getAccountFilter(params.id, '_account');
-    const filterByPayee = queries.getAccountFilter(
-      params.id,
-      '_payee.transfer_acct',
-    );
-
-    return q => {
-      q = q.filter({
-        $and: [{ '_account.closed': false }],
-      });
-      if (params.id) {
-        if (params.id === 'uncategorized') {
-          q = q.filter({ next_date: null });
-        } else {
-          q = q.filter({
-            $or: [filterByAccount, filterByPayee],
-          });
-        }
-      }
-      return q.orderBy({ next_date: 'desc' });
-    };
-  }, [params.id]);
+  const transform = useDefaultSchedulesQueryTransform(params.id);
 
   return (
     <SchedulesProvider transform={transform}>
