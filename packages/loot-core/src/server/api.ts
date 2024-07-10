@@ -16,7 +16,6 @@ import {
   deleteTransaction,
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
-import { Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
 import { ServerHandlers } from '../types/server-handlers';
 
@@ -27,7 +26,6 @@ import {
   categoryGroupModel,
   payeeModel,
   remoteFileModel,
-  APIRemoteFileEntity,
 } from './api-models';
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -230,15 +228,15 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 };
 
 handlers['api/get-budgets'] = async function () {
-  const budgets: (Budget | APIRemoteFileEntity)[] =
-    await handlers['get-budgets']();
+  const budgets = await handlers['get-budgets']();
   const files = await handlers['get-remote-files']();
   if (!files) {
     return budgets;
   }
-  return budgets.concat(
-    files.map(file => remoteFileModel.toExternal(file)).filter(file => file),
-  );
+  return [
+    ...budgets,
+    ...files.map(file => remoteFileModel.toExternal(file)).filter(file => file),
+  ];
 };
 
 handlers['api/sync'] = async function () {
