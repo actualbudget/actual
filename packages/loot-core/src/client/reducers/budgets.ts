@@ -47,7 +47,7 @@ function reconcileFiles(
           groupId,
           deleted: false,
           state: 'unknown',
-          hasKey: true
+          hasKey: true,
         };
       }
 
@@ -86,7 +86,7 @@ function reconcileFiles(
           groupId,
           deleted: false,
           state: 'broken',
-          hasKey: true
+          hasKey: true,
         };
       }
     } else {
