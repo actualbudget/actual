@@ -1,13 +1,22 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const electron = require('electron');
+import electron, { BrowserWindow } from 'electron';
 
-// eslint-disable-next-line import/extensions
-const backend = require('loot-core/lib-dist/bundle.desktop.js');
+const backend = undefined;
+const getBackend = async () =>
+  // eslint-disable-next-line import/extensions
+  backend || (await import('loot-core/lib-dist/bundle.desktop.js'));
 
-function loadState() {
-  let state = {};
+type WindowState = Electron.Rectangle & {
+  isMaximized?: boolean;
+  isFullScreen?: boolean;
+  displayBounds?: Electron.Rectangle;
+};
+
+async function loadState() {
+  let state: WindowState;
+  const backend = await getBackend();
   try {
     state = JSON.parse(
       fs.readFileSync(
@@ -18,11 +27,12 @@ function loadState() {
   } catch (e) {
     console.log('Could not load window state');
   }
+
   return validateState(state);
 }
 
-function updateState(win, state) {
-  const screen = electron.screen || electron.remote.screen;
+function updateState(win: BrowserWindow, state: WindowState) {
+  const screen = electron.screen;
   const bounds = win.getBounds();
   if (!win.isMaximized() && !win.isMinimized() && !win.isFullScreen()) {
     state.x = bounds.x;
@@ -35,7 +45,8 @@ function updateState(win, state) {
   state.displayBounds = screen.getDisplayMatching(bounds).bounds;
 }
 
-function saveState(win, state) {
+async function saveState(win: BrowserWindow, state: WindowState) {
+  const backend = await getBackend();
   updateState(win, state);
   fs.writeFileSync(
     path.join(backend.lib.getDataDir(), 'window.json'),
@@ -44,7 +55,7 @@ function saveState(win, state) {
   );
 }
 
-function listen(win, state) {
+export function listen(win: BrowserWindow, state: WindowState) {
   if (state.isMaximized) {
     win.maximize();
   }
@@ -61,7 +72,7 @@ function listen(win, state) {
   };
 }
 
-function hasBounds(state) {
+function hasBounds(state: WindowState) {
   return (
     Number.isInteger(state.x) &&
     Number.isInteger(state.y) &&
@@ -72,15 +83,18 @@ function hasBounds(state) {
   );
 }
 
-function validateState(state) {
-  if (!(hasBounds(state) || state.isMaximized || state.isFullScreen)) {
+function validateState(state?: WindowState): Partial<WindowState> {
+  if (
+    !state ||
+    !(hasBounds(state) || state.isMaximized || state.isFullScreen)
+  ) {
     return {};
   }
 
   const newState = Object.assign({}, state);
 
   if (hasBounds(state) && state.displayBounds) {
-    const screen = electron.screen || electron.remote.screen;
+    const screen = electron.screen;
 
     // Check if the display where the window was last open is still available
     const displayBounds = screen.getDisplayMatching(state).bounds;
@@ -116,22 +130,19 @@ function validateState(state) {
   return newState;
 }
 
-async function get() {
-  const screen = electron.screen || electron.remote.screen;
+export async function get() {
+  const screen = electron.screen;
   const displayBounds = screen.getPrimaryDisplay().bounds;
 
-  let state = loadState();
-  state = Object.assign(
+  const state: WindowState = Object.assign(
     {
       x: 100,
       y: 50,
       width: Math.min(1000, displayBounds.width - 100),
       height: Math.min(700, displayBounds.width - 50),
     },
-    state,
+    loadState(),
   );
 
   return state;
 }
-
-module.exports = { get, listen };
