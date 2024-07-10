@@ -1062,7 +1062,8 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}`,
+         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}
+         ORDER BY a.offbudget, a.sort_order`,
     id ? [id] : [],
     true,
   );
