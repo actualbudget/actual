@@ -47,7 +47,7 @@ function Version() {
   );
 }
 
-export function ManagementApp({ isLoading }) {
+export function ManagementApp({ isLoading }: { isLoading: boolean }) {
   const files = useSelector(state => state.budgets.allFiles);
   const userData = useSelector(state => state.user.data);
   const managerHasInitialized = useSelector(
@@ -91,7 +91,7 @@ export function ManagementApp({ isLoading }) {
     }
 
     fetchData();
-  }, []);
+  });
 
   if (!managerHasInitialized) {
     return null;

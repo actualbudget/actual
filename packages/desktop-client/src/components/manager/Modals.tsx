@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
 import { View } from '../common/View';
+import { type CommonModalProps } from '../Modals';
 import { CreateEncryptionKeyModal } from '../modals/CreateEncryptionKeyModal';
 import { FixEncryptionKeyModal } from '../modals/FixEncryptionKeyModal';
 import { LoadBackup } from '../modals/LoadBackup';
@@ -19,10 +20,10 @@ export function Modals() {
   const actions = useActions();
 
   const stack = modalStack.map(({ name, options = {} }, idx) => {
-    const modalProps = {
+    const modalProps: CommonModalProps = {
       onClose: actions.popModal,
-      onPush: actions.pushModal,
       onBack: actions.popModal,
+      showBack: false,
       isCurrent: idx === modalStack.length - 1,
       isHidden,
       stackIndex: idx,
@@ -41,25 +42,17 @@ export function Modals() {
       case 'import':
         return <Import key={name} modalProps={modalProps} actions={actions} />;
       case 'import-ynab4':
-        return (
-          <ImportYNAB4 key={name} modalProps={modalProps} actions={actions} />
-        );
+        return <ImportYNAB4 key={name} modalProps={modalProps} />;
       case 'import-ynab5':
-        return (
-          <ImportYNAB5 key={name} modalProps={modalProps} actions={actions} />
-        );
+        return <ImportYNAB5 key={name} modalProps={modalProps} />;
       case 'import-actual':
-        return (
-          <ImportActual key={name} modalProps={modalProps} actions={actions} />
-        );
+        return <ImportActual key={name} modalProps={modalProps} />;
       case 'load-backup': {
         return (
           <LoadBackup
             budgetId={options.budgetId}
-            modalProps={{
-              ...modalProps,
-              onClose: actions.popModal,
-            }}
+            watchUpdates={false}
+            modalProps={modalProps}
             backupDisabled={true}
             actions={actions}
           />

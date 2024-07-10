@@ -30,7 +30,7 @@ export type ModalProps = {
   title?: ReactNode;
   isCurrent?: boolean;
   isHidden?: boolean;
-  children: ReactNode | (() => ReactNode);
+  children?: ReactNode | (() => ReactNode);
   size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
   padding?: CSSProperties['padding'];
   showHeader?: boolean;
