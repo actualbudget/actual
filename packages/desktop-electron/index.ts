@@ -1,5 +1,5 @@
 import fs from 'fs';
-import NodeModule from 'module';
+import Module from 'module';
 import path from 'path';
 
 import {
@@ -14,23 +14,17 @@ import {
   UtilityProcess,
 } from 'electron';
 import isDev from 'electron-is-dev';
+// @ts-strict-ignore
+import fetch from 'node-fetch';
 import promiseRetry from 'promise-retry';
 
-import about from './about';
-import getMenu from './menu';
-import updater from './updater';
+import { getMenu } from './menu';
 import {
   get as getWindowState,
   listen as listenToWindowState,
 } from './window-state';
 
-import './setRequireHook';
-
 import './security';
-
-const Module: typeof NodeModule & { globalPaths: string[] } =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  NodeModule as unknown as any;
 
 Module.globalPaths.push(__dirname + '/..');
 
@@ -40,7 +34,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true } },
 ]);
 
-global.fetch = require('node-fetch');
+global.fetch = fetch;
 
 if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
   process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
@@ -54,17 +48,6 @@ if (!isDev || !process.env.ACTUAL_DATA_DIR) {
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
-
-updater.onEvent((type: string, data: Record<string, string> | string) => {
-  // Notify both the app and the about window
-  if (clientWin) {
-    clientWin.webContents.send(type, data);
-  }
-
-  if (about.getWindow()) {
-    about.getWindow().webContents.send(type, data);
-  }
-});
 
 if (isDev) {
   process.traceProcessWarnings = true;
@@ -81,13 +64,6 @@ function createBackgroundProcess() {
     switch (msg.type) {
       case 'captureEvent':
       case 'captureBreadcrumb':
-        break;
-      case 'shouldAutoUpdate':
-        if (msg.flag) {
-          updater.start();
-        } else {
-          updater.stop();
-        }
         break;
       case 'reply':
       case 'error':
@@ -331,10 +307,6 @@ ipcMain.handle('open-external-url', (event, url) => {
   shell.openExternal(url);
 });
 
-ipcMain.on('show-about', () => {
-  about.openAboutWindow();
-});
-
 ipcMain.on('message', (_event, msg) => {
   if (!serverProcess) {
     return;
@@ -352,23 +324,6 @@ ipcMain.on('screenshot', () => {
       clientWin.setSize(width, Math.floor(width * (427 / 623)));
     }
   }
-});
-
-ipcMain.on('check-for-update', () => {
-  // If the updater is in the middle of an update already, send the
-  // about window the current status
-  if (updater.isChecking()) {
-    // This should always come from the about window so we can
-    // guarantee that it exists. If we ever see an error here
-    // something is wrong
-    about.getWindow().webContents.send(updater.getLastEvent());
-  } else {
-    updater.check();
-  }
-});
-
-ipcMain.on('apply-update', () => {
-  updater.apply();
 });
 
 ipcMain.on('update-menu', (event, budgetId?: string) => {
