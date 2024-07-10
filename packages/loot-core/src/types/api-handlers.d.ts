@@ -25,9 +25,7 @@ export interface ApiHandlers {
     password?: string;
   }) => Promise<void>;
 
-  'api/get-local-budgets': () => Promise<Budget[]>;
-
-  'api/get-remote-budgets': () => Promise<APIRemoteFileEntity[]>;
+  'api/get-budgets': () => Promise<(Budget | APIRemoteFileEntity)[]>;
 
   'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 
