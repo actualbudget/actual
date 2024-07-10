@@ -342,6 +342,7 @@ function StatusCell({
   selected,
   status,
   isChild,
+  isPreview,
   onEdit,
   onUpdate,
 }) {
@@ -384,12 +385,19 @@ function StatusCell({
           border: '1px solid transparent',
           borderRadius: 50,
           ':focus': {
-            border: '1px solid ' + theme.formInputBorderSelected,
-            boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+            ...(isPreview
+              ? {
+                  boxShadow: 'none',
+                }
+              : {
+                  border: '1px solid ' + theme.formInputBorderSelected,
+                  boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+                }),
           },
           cursor: isClearedField ? 'pointer' : 'default',
           ...(isChild && { visibility: 'hidden' }),
         }}
+        disabled={isPreview || isChild}
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
       >
@@ -604,17 +612,17 @@ function PayeeIcons({
   transferAccount,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
-  children,
 }) {
   const scheduleId = transaction.schedule;
   const scheduleData = useCachedSchedules();
-  const schedule = scheduleData
-    ? scheduleData.schedules.find(s => s.id === scheduleId)
-    : null;
+  const schedule =
+    scheduleId && scheduleData
+      ? scheduleData.schedules.find(s => s.id === scheduleId)
+      : null;
 
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
-    return children;
+    return null;
   }
 
   const buttonStyle = {
@@ -730,7 +738,7 @@ const Transaction = memo(function Transaction({
 
   function onUpdate(name, value) {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
-    // modal is the transaction is locked. I added a boolean to guard against showing the modal twice.
+    // modal if the transaction is locked. I added a boolean to guard against showing the modal twice.
     // I'm still not completely happy with how the cells update pre/post modal. Sometimes you have to
     // click off of the cell manually after confirming your change post modal for example. The last
     // row seems to have more issues than others but the combination of tab, return, and clicking out
@@ -749,6 +757,9 @@ const Transaction = memo(function Transaction({
           setShowReconciliationWarning(true);
           dispatch(
             pushModal('confirm-transaction-edit', {
+              onCancel: () => {
+                setShowReconciliationWarning(false);
+              },
               onConfirm: () => {
                 setShowReconciliationWarning(false);
                 onUpdateAfterConfirm(name, value);
@@ -818,7 +829,10 @@ const Transaction = memo(function Transaction({
       // it's always showing the formatted result
       setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
 
-      onSave(deserialized, subtransactions);
+      const deserializedName = ['credit', 'debit'].includes(name)
+        ? 'amount'
+        : name;
+      onSave(deserialized, subtransactions, deserializedName);
     }
   }
 
@@ -1959,7 +1973,7 @@ export const TransactionTable = forwardRef((props, ref) => {
         );
 
     if (isPreviewId(item.id)) {
-      fields = ['select', 'cleared'];
+      fields = ['select'];
     }
     if (isTemporaryId(item.id)) {
       // You can't focus the select/delete button of temporary
@@ -2053,7 +2067,7 @@ export const TransactionTable = forwardRef((props, ref) => {
   }, [props.onAdd, newNavigator.onEdit]);
 
   const onSave = useCallback(
-    async (transaction, subtransactions = null) => {
+    async (transaction, subtransactions = null, updatedFieldName = null) => {
       savePending.current = true;
 
       let groupedTransaction = subtransactions
@@ -2062,7 +2076,10 @@ export const TransactionTable = forwardRef((props, ref) => {
 
       if (isTemporaryId(transaction.id)) {
         if (props.onApplyRules) {
-          groupedTransaction = await props.onApplyRules(groupedTransaction);
+          groupedTransaction = await props.onApplyRules(
+            groupedTransaction,
+            updatedFieldName,
+          );
         }
 
         const newTrans = latestState.current.newTransactions;

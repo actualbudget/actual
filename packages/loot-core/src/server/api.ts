@@ -426,9 +426,14 @@ handlers['api/transactions-export'] = async function ({
 handlers['api/transactions-import'] = withMutation(async function ({
   accountId,
   transactions,
+  isPreview = false,
 }) {
   checkFileOpen();
-  return handlers['transactions-import']({ accountId, transactions });
+  return handlers['transactions-import']({
+    accountId,
+    transactions,
+    isPreview,
+  });
 });
 
 handlers['api/transactions-add'] = withMutation(async function ({
