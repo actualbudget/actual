@@ -179,8 +179,8 @@ export function Settings() {
 
         <ThemeSettings />
         <FormatSettings />
-        {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
         <EncryptionSettings />
+        {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
         <ExportBudget />
 
         <AdvancedToggle>
