@@ -96,7 +96,7 @@ export function syncAccounts(id?: string) {
             ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
           )
           .sort((a, b) =>
-            a.offbudget == b.offbudget
+            a.offbudget === b.offbudget
               ? a.sort_order - b.sort_order
               : a.offbudget - b.offbudget,
           )
