@@ -640,7 +640,7 @@ function PayeeCell({
               </View>
             }
             style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
-            placement="right top"
+            placement="bottom"
             triggerProps={{ delay: 750 }}
           >
             <div
@@ -652,7 +652,10 @@ function PayeeCell({
                 onNavigateToTransferAccount={onNavigateToTransferAccount}
                 onNavigateToSchedule={onNavigateToSchedule}
               />
-              <UnexposedCellContent {...props} />
+              <UnexposedCellContent
+                {...props}
+                style={{ borderBottom: `1px dashed ${theme.pageTextSubdued}` }}
+              />
             </div>
           </Tooltip>
         ) : (
