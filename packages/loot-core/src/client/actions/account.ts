@@ -95,6 +95,11 @@ export function syncAccounts(id?: string) {
           .queries.accounts.filter(
             ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
           )
+          .sort((a, b) =>
+            a.offbudget == b.offbudget
+              ? a.sort_order - b.sort_order
+              : a.offbudget - b.offbudget,
+          )
           .map(({ id }) => id);
 
     dispatch(setAccountsSyncing(accountIdsToSync));
