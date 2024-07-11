@@ -1,8 +1,12 @@
-import { Modal } from '../common/Modal';
+import { Modal, ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-function KeyIcon(key) {
+type KeyboardShortcutsModalProps = {
+  modalProps?: Partial<ModalProps>;
+};
+
+function KeyIcon(key: string) {
   return (
     <div
       style={{
@@ -25,7 +29,7 @@ function KeyIcon(key) {
   );
 }
 
-function GroupHeading(group) {
+function GroupHeading(group: string) {
   return (
     <Text
       style={{
@@ -40,7 +44,7 @@ function GroupHeading(group) {
   );
 }
 
-function Shortcut(key, description, meta?) {
+function Shortcut(key: string, description: string, meta?: string) {
   return (
     <div
       style={{
@@ -102,7 +106,7 @@ function Shortcut(key, description, meta?) {
   );
 }
 
-export function KeyboardShortcuts({ modalProps }) {
+export function KeyboardShortcuts({ modalProps }: KeyboardShortcutsModalProps) {
   return (
     <Modal title="Keyboard Shortcuts" {...modalProps}>
       <View
