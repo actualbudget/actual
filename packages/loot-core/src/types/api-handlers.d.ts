@@ -154,7 +154,7 @@ export interface ApiHandlers {
   'api/payees-merge': (arg: {
     targetId: string;
     mergeIds: string[];
-  }) => Promise<unknown>;
+  }) => Promise<void>;
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 
