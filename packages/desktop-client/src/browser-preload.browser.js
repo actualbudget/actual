@@ -162,8 +162,10 @@ document.addEventListener('keydown', e => {
     }
   } else if (e.key === '?') {
     // TODO don't show if a modal is already open
-    // TODO pick the right one based on the current page
-    window.__actionsForMenu.pushModal('accounts-keyboard-shortcuts');
-    // window.__actionsForMenu.pushModal('keyboard-shortcuts');
+    if (window.location.pathname.startsWith('/accounts')) {
+      window.__actionsForMenu.pushModal('accounts-keyboard-shortcuts');
+    } else {
+      window.__actionsForMenu.pushModal('keyboard-shortcuts');
+    }
   }
 });
