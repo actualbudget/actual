@@ -4,6 +4,8 @@ import {
   type ButtonProps as ReactAriaButtonProps,
 } from 'react-aria-components';
 
+import { useAuth } from '../../auth/AuthProvider';
+import { type Permissions } from '../../auth/types';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
@@ -119,6 +121,7 @@ const _getActiveStyles = (
 type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
+  permission?: Permissions;
 };
 
 type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
@@ -126,6 +129,7 @@ type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
     const {
+      permission,
       children,
       variant = 'normal',
       bounce = true,
@@ -133,6 +137,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       isDisabled,
       ...restProps
     } = props;
+
+    const { hasPermission } = useAuth();
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       isDisabled ? `${variant}Disabled` : variant;
@@ -170,9 +176,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     });
 
     return (
-      <ReactAriaButton ref={ref} style={buttonStyle} {...restProps}>
-        {children}
-      </ReactAriaButton>
+      <View>
+        {(!permission || hasPermission(permission)) && (
+          <ReactAriaButton ref={ref} style={buttonStyle} {...restProps}>
+            {children}
+          </ReactAriaButton>
+        )}
+      </View>
     );
   },
 );

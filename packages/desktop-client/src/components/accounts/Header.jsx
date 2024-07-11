@@ -290,9 +290,9 @@ export function AccountHeader({
             </Button>
           )}
           {!showEmptyMessage && (
-            <Button 
+            <Button
               permission={Permissions.CAN_EDIT}
-              variant="bare" 
+              variant="bare"
               onPress={onAddTransaction}
             >
               <SvgAdd width={10} height={10} style={{ marginRight: 3 }} /> Add
