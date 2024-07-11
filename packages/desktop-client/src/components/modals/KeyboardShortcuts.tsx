@@ -1,3 +1,5 @@
+import * as Platform from 'loot-core/src/client/platform';
+
 import { Modal, type ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -125,6 +127,7 @@ export function KeyboardShortcuts({
   onAccounts,
   modalProps,
 }: KeyboardShortcutsModalProps) {
+  const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   return (
     <Modal title="Keyboard Shortcuts" {...modalProps}>
       <View
@@ -136,7 +139,7 @@ export function KeyboardShortcuts({
           <Shortcut
             shortcut="O"
             description="Close the current budget and open another"
-            meta="Ctrl"
+            meta={ctrl}
           />
           <Shortcut shortcut="?" description="Show this help dialog" />
           {onAccounts && (
@@ -181,12 +184,12 @@ export function KeyboardShortcuts({
           <Shortcut
             shortcut="Z"
             description="Undo the last change"
-            meta="Ctrl"
+            meta={ctrl}
           />
           <Shortcut
             shortcut="Y"
             description="Redo the last undone change"
-            meta="Ctrl"
+            meta={ctrl}
           />
           {onAccounts && (
             <>
