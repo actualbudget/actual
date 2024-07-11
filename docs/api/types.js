@@ -288,6 +288,76 @@ export let objects = {
     { name: 'conditions', type: 'ConditionOrAction[]' },
     { name: 'actions', type: 'ConditionOrAction[]' },
   ],
+
+  budgetFile: [
+    {
+      name: 'name',
+      type: 'string',
+      required: true,
+      description: (
+        <span>
+          The budget's name.
+        </span>
+      ),
+    },
+    {
+      name: 'cloudFileId',
+      type: 'string',
+      required: true,
+      description: (
+        <span>
+          The id for the budget on the server. This is usually a UUID.
+        </span>
+      ),
+    },
+    {
+      name: 'groupId',
+      type: 'string',
+      required: true,
+      description: (
+        <span>
+          The group id for the budget.
+        </span>
+      ),
+    },
+    {
+      name: 'hasKey',
+      type: 'boolean',
+      required: true,
+      description: (
+        <span>
+          If the file has an encryption key.
+        </span>
+      ),
+    },
+    {
+      name: 'encryptKeyId',
+      type: 'string',
+      description: (
+        <span>
+          The encryption key ID for the file, if it is encrypted.
+        </span>
+      ),
+    },
+    {
+      name: 'state',
+      type: 'string',
+      description: (
+        <span>
+          Remote files have this set to "remote".
+        </span>
+      ),
+    },
+    {
+      name: 'id',
+      type: 'string',
+      description: (
+        <span>
+          The local budget file's local ID.
+        </span>
+      ),
+    },
+  ],
 };
 
 function Table({ style, headers, className, children }) {
