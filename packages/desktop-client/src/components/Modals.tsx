@@ -59,6 +59,7 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
+import { KeyboardShortcuts } from './modals/KeyboardShortcuts';
 
 export type CommonModalProps = {
   onClose: () => PopModalAction;
@@ -95,6 +96,9 @@ export function Modals() {
       };
 
       switch (name) {
+        case 'keyboard-shortcuts':
+          return <KeyboardShortcuts modalProps={modalProps} />;
+
         case 'import-transactions':
           return (
             <ImportTransactions
