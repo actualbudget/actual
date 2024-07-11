@@ -135,7 +135,7 @@ export function KeyboardShortcuts({
         <View>
           <Shortcut
             shortcut="o"
-            description="Close the current budget"
+            description="Close the current budget and open another"
             meta="Ctrl"
           />
           <Shortcut shortcut="?" description="Show this help dialog" />
