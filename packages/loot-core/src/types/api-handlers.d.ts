@@ -3,6 +3,7 @@ import type {
   APIAccountEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIFileEntity,
   APIPayeeEntity,
 } from '../server/api-models';
 
@@ -22,6 +23,8 @@ export interface ApiHandlers {
     syncId: string;
     password?: string;
   }) => Promise<void>;
+
+  'api/get-budgets': () => Promise<APIFileEntity[]>;
 
   'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 
