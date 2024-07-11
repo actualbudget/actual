@@ -58,6 +58,19 @@ describe('API CRUD operations', () => {
     await api.loadBudget(budgetName);
   });
 
+  // api: getBudgets
+  test('getBudgets', async () => {
+    const budgets = await api.getBudgets();
+    expect(budgets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'test-budget',
+          name: 'Default Test Db',
+        }),
+      ]),
+    );
+  });
+
   // apis: getCategoryGroups, createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
   test('CategoryGroups: successfully update category groups', async () => {
     const month = '2023-10';
