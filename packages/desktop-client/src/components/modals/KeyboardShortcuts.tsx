@@ -6,6 +6,10 @@ type KeyboardShortcutsModalProps = {
   modalProps?: Partial<ModalProps>;
 };
 
+type GroupHeadingProps = {
+  group: string;
+};
+
 function KeyIcon(key: string) {
   return (
     <div
@@ -29,7 +33,7 @@ function KeyIcon(key: string) {
   );
 }
 
-function GroupHeading(group: string) {
+function GroupHeading({ group }: GroupHeadingProps) {
   return (
     <Text
       style={{
@@ -118,7 +122,7 @@ export function KeyboardShortcuts({ modalProps }: KeyboardShortcutsModalProps) {
           {Shortcut('Enter', 'Move down when editing')}
           {Shortcut('Tab', 'Move right when editing')}
           {Shortcut('o', 'Close the current budget', 'Ctrl')}
-          {GroupHeading('Select a transaction, then')}
+          <GroupHeading group={'Select a transaction, then'} />
           {Shortcut('j', 'Move to the next transaction down')}
           {Shortcut('k', 'Move to the next transaction up')}
           {Shortcut('↑', 'Move to the next transaction down and scroll')}
@@ -139,7 +143,7 @@ export function KeyboardShortcuts({ modalProps }: KeyboardShortcutsModalProps) {
           {Shortcut('Enter', 'Move up when editing', 'Shift')}
           {Shortcut('Tab', 'Move left when editing', 'Shift')}
           {Shortcut('?', 'Show this help dialog')}
-          {GroupHeading('With transaction(s) selected')}
+          <GroupHeading group={'With transaction(s) selected'} />
           {Shortcut('f', 'Filter to the selected transactions')}
           {Shortcut('d', 'Delete selected transactions')}
           {Shortcut('a', 'Set account for selected transactions')}
