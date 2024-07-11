@@ -1,5 +1,3 @@
-import { useSelector } from 'react-redux';
-
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import * as Platform from 'loot-core/src/client/platform';
