@@ -4,6 +4,7 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   GoCardlessToken,
+  TransactionEntity,
 } from '../../types/models';
 import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
@@ -121,14 +122,13 @@ type FinanceModals = {
     month: string;
   };
 
-  'schedule-edit': { id: string } | null;
+  'schedule-edit': { id: string; transaction?: TransactionEntity } | null;
 
   'schedule-link': { transactionIds: string[] } | null;
 
   'schedules-discover': null;
 
   'schedule-posts-offline-notification': null;
-  'switch-budget-type': { onSwitch: () => void };
   'account-menu': {
     accountId: string;
     onSave: (account: AccountEntity) => void;
@@ -236,7 +236,6 @@ type FinanceModals = {
     onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetFile: () => void;
-    onSwitchBudgetType: () => void;
   };
   'rollover-budget-month-menu': {
     month: string;
@@ -251,6 +250,7 @@ type FinanceModals = {
   'budget-list';
   'confirm-transaction-edit': {
     onConfirm: () => void;
+    onCancel?: () => void;
     confirmReason: string;
   };
   'confirm-transaction-delete': {

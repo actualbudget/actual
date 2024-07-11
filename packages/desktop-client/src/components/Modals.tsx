@@ -53,7 +53,6 @@ import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenu
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInputModal } from './modals/SingleInputModal';
-import { SwitchBudgetTypeModal } from './modals/SwitchBudgetTypeModal';
 import { TransferModal } from './modals/TransferModal';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
@@ -173,6 +172,7 @@ export function Modals() {
             <ConfirmTransactionEdit
               key={name}
               modalProps={modalProps}
+              onCancel={options.onCancel}
               onConfirm={options.onConfirm}
               confirmReason={options.confirmReason}
             />
@@ -401,7 +401,6 @@ export function Modals() {
               actions={actions}
               transactionIds={options?.transactionIds}
               getTransaction={options?.getTransaction}
-              pushModal={options?.pushModal}
             />
           );
 
@@ -420,15 +419,6 @@ export function Modals() {
               key={name}
               modalProps={modalProps}
               actions={actions}
-            />
-          );
-
-        case 'switch-budget-type':
-          return (
-            <SwitchBudgetTypeModal
-              key={name}
-              modalProps={modalProps}
-              onSwitch={options.onSwitch}
             />
           );
 
@@ -623,7 +613,6 @@ export function Modals() {
               onAddCategoryGroup={options.onAddCategoryGroup}
               onToggleHiddenCategories={options.onToggleHiddenCategories}
               onSwitchBudgetFile={options.onSwitchBudgetFile}
-              onSwitchBudgetType={options.onSwitchBudgetType}
             />
           );
 

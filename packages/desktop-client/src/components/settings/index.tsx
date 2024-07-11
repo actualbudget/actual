@@ -6,6 +6,7 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -13,7 +14,7 @@ import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
@@ -23,6 +24,7 @@ import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
+import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
@@ -167,7 +169,7 @@ export function Settings() {
                 style={{ color: theme.buttonNormalDisabledText }}
               />
             </FormField>
-            <Button onClick={closeBudget}>Close Budget</Button>
+            <Button onPress={closeBudget}>Close Budget</Button>
           </View>
         )}
 
@@ -178,6 +180,7 @@ export function Settings() {
         <ThemeSettings />
         <FormatSettings />
         <EncryptionSettings />
+        {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
         <ExportBudget />
 
         <AdvancedToggle>

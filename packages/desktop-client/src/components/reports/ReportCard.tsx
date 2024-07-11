@@ -2,6 +2,7 @@ import React, { type ReactNode } from 'react';
 
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
@@ -10,7 +11,7 @@ type ReportCardProps = {
   to: string;
   children: ReactNode;
   report?: CustomReportEntity;
-  flex?: string;
+  size?: number;
   style?: CSSProperties;
 };
 
@@ -18,10 +19,13 @@ export function ReportCard({
   to,
   report,
   children,
-  flex,
+  size = 1,
   style,
 }: ReportCardProps) {
-  const containerProps = { flex, margin: 15 };
+  const { isNarrowWidth } = useResponsive();
+  const containerProps = {
+    flex: isNarrowWidth ? '1 1' : `0 0 calc(${size * 100}% / 3 - 20px)`,
+  };
 
   const content = (
     <View
