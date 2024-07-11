@@ -606,7 +606,7 @@ handlers['api/category-delete'] = withMutation(async function ({
   });
 });
 
-handlers['api/payees-get'] = async function () {
+handlers['api/common-payees-get'] = async function () {
   checkFileOpen();
   const payees = await handlers['common-payees-get']();
   return payees.map(payeeModel.toExternal);
