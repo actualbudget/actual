@@ -1,3 +1,5 @@
+import { useSelector } from 'react-redux';
+
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -162,11 +164,9 @@ document.addEventListener('keydown', e => {
     }
   } else if (e.key === '?') {
     e.preventDefault();
-    // TODO don't show if a modal is already open
-    if (window.location.pathname.startsWith('/accounts')) {
-      window.__actionsForMenu.pushModal('accounts-keyboard-shortcuts');
-    } else {
-      window.__actionsForMenu.pushModal('keyboard-shortcuts');
-    }
+    const isAccounts = window.location.pathname.startsWith('/accounts');
+    window.__actionsForMenu.pushModal(
+      isAccounts ? 'accounts-keyboard-shortcuts' : 'keyboard-shortcuts',
+    );
   }
 });
