@@ -181,6 +181,10 @@ export function deletePayee(id) {
   return send('api/payee-delete', { id });
 }
 
+export function mergePayees(targetId, mergeIds) {
+  return send('api/payees-merge', { targetId, mergeIds });
+}
+
 export function getRules() {
   return send('api/rules-get');
 }
