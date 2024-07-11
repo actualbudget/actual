@@ -8,14 +8,19 @@ Authelia
 autocompletes
 Blix
 bnp
+BTC
 CAGLESMM
+Caju
 caniuse
 Cardless
 categorygroup
+Cembra
 Certbot
+CLI
 clickable
 clsx
 codemirror
+Coinbase
 commandlet
 Crd
 crdt
@@ -23,7 +28,9 @@ creditcards
 debian
 dedupes
 deleteaccount
+DKB
 dmg
+Edenred
 escodegen
 expando
 Firefox
@@ -35,6 +42,7 @@ HSA
 htpasswd
 IBANs
 iex
+ING
 importtransactions
 invokable
 iwr
@@ -52,9 +60,11 @@ linting
 linuxsvg
 lleskassen
 lte
+mac
 macsvg
 Mariushosting
 minimalistic
+Monobank
 monkeypatch
 Morrisons
 NAIAGB
@@ -76,6 +86,7 @@ protobuf
 publix
 QFX
 QIF
+Quicken
 returnsandreimbursements
 roadmap
 Rezip
@@ -88,6 +99,7 @@ subfolders
 subreaper
 subtransaction
 subtransactions
+Suisse
 tini
 traefik
 Trafico
@@ -102,4 +114,5 @@ Xxxxx
 ynab
 Ynab
 YNAB
+ZKB
 Zsolt
