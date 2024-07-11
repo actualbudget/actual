@@ -411,9 +411,14 @@ handlers['api/transactions-export'] = async function ({
 handlers['api/transactions-import'] = withMutation(async function ({
   accountId,
   transactions,
+  isPreview = false,
 }) {
   checkFileOpen();
-  return handlers['transactions-import']({ accountId, transactions });
+  return handlers['transactions-import']({
+    accountId,
+    transactions,
+    isPreview,
+  });
 });
 
 handlers['api/transactions-add'] = withMutation(async function ({
@@ -531,6 +536,14 @@ handlers['api/account-reopen'] = withMutation(async function ({ id }) {
 handlers['api/account-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
   return handlers['account-close']({ id, forced: true });
+});
+
+handlers['api/account-balance'] = withMutation(async function ({
+  id,
+  cutoff = new Date(),
+}) {
+  checkFileOpen();
+  return handlers['account-balance']({ id, cutoff });
 });
 
 handlers['api/categories-get'] = async function ({

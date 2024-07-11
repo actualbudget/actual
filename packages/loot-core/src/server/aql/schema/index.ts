@@ -70,6 +70,8 @@ export const schema = {
     closed: f('boolean'),
     sort_order: f('float'),
     tombstone: f('boolean'),
+    account_id: f('string'),
+    official_name: f('string'),
     account_sync_source: f('string'),
   },
   categories: {

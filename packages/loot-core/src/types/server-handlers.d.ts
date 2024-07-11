@@ -224,10 +224,15 @@ export interface ServerHandlers {
     updatedAccounts;
   }>;
 
-  'transactions-import': (arg: { accountId; transactions }) => Promise<{
+  'transactions-import': (arg: {
+    accountId;
+    transactions;
+    isPreview;
+  }) => Promise<{
     errors?: { message: string }[];
     added;
     updated;
+    updatedPreview;
   }>;
 
   'account-unlink': (arg: { id }) => Promise<'ok'>;

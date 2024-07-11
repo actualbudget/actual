@@ -13,6 +13,7 @@ import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
+import { dayFromDate } from '../shared/months';
 import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
@@ -582,6 +583,14 @@ handlers['accounts-get'] = async function () {
   return db.getAccounts();
 };
 
+handlers['account-balance'] = async function ({ id, cutoff }) {
+  const { balance } = await db.first(
+    'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
+    [id, db.toDateRepr(dayFromDate(cutoff))],
+  );
+  return balance ? balance : 0;
+};
+
 handlers['account-properties'] = async function ({ id }) {
   const { balance } = await db.first(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
@@ -1135,6 +1144,7 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 handlers['transactions-import'] = mutator(function ({
   accountId,
   transactions,
+  isPreview,
 }) {
   return withUndo(async () => {
     if (typeof accountId !== 'string') {
@@ -1142,10 +1152,20 @@ handlers['transactions-import'] = mutator(function ({
     }
 
     try {
-      return await bankSync.reconcileTransactions(accountId, transactions);
+      return await bankSync.reconcileTransactions(
+        accountId,
+        transactions,
+        false,
+        isPreview,
+      );
     } catch (err) {
       if (err instanceof TransactionError) {
-        return { errors: [{ message: err.message }], added: [], updated: [] };
+        return {
+          errors: [{ message: err.message }],
+          added: [],
+          updated: [],
+          updatedPreview: [],
+        };
       }
 
       throw err;
