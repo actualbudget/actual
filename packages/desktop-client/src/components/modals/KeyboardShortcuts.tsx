@@ -134,7 +134,7 @@ export function KeyboardShortcuts({
       >
         <View>
           <Shortcut
-            shortcut="o"
+            shortcut="O"
             description="Close the current budget and open another"
             meta="Ctrl"
           />
@@ -145,11 +145,11 @@ export function KeyboardShortcuts({
               <Shortcut shortcut="Tab" description="Move right when editing" />
               <GroupHeading group="Select a transaction, then" />
               <Shortcut
-                shortcut="j"
+                shortcut="J"
                 description="Move to the next transaction down"
               />
               <Shortcut
-                shortcut="k"
+                shortcut="K"
                 description="Move to the next transaction up"
               />
               <Shortcut
@@ -179,12 +179,12 @@ export function KeyboardShortcuts({
           }}
         >
           <Shortcut
-            shortcut="z"
+            shortcut="Z"
             description="Undo the last change"
             meta="Ctrl"
           />
           <Shortcut
-            shortcut="y"
+            shortcut="Y"
             description="Redo the last undone change"
             meta="Ctrl"
           />
@@ -202,31 +202,31 @@ export function KeyboardShortcuts({
               />
               <GroupHeading group="With transaction(s) selected" />
               <Shortcut
-                shortcut="f"
+                shortcut="F"
                 description="Filter to the selected transactions"
               />
               <Shortcut
-                shortcut="d"
+                shortcut="D"
                 description="Delete selected transactions"
               />
               <Shortcut
-                shortcut="a"
+                shortcut="A"
                 description="Set account for selected transactions"
               />
               <Shortcut
-                shortcut="p"
+                shortcut="P"
                 description="Set payee for selected transactions"
               />
               <Shortcut
-                shortcut="n"
+                shortcut="N"
                 description="Set notes for selected transactions"
               />
               <Shortcut
-                shortcut="c"
+                shortcut="C"
                 description="Set category for selected transactions"
               />
               <Shortcut
-                shortcut="l"
+                shortcut="L"
                 description="Toggle cleared for current transaction"
               />
             </>
