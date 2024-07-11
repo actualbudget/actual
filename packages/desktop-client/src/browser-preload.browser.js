@@ -161,6 +161,7 @@ document.addEventListener('keydown', e => {
       }
     }
   } else if (e.key === '?') {
+    e.preventDefault();
     // TODO don't show if a modal is already open
     if (window.location.pathname.startsWith('/accounts')) {
       window.__actionsForMenu.pushModal('accounts-keyboard-shortcuts');
