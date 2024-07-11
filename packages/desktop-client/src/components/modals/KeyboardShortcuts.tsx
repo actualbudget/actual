@@ -121,7 +121,10 @@ function Shortcut({ shortcut, description, meta }: ShortcutProps) {
   );
 }
 
-export function KeyboardShortcuts({ onAccounts, modalProps }: KeyboardShortcutsModalProps) {
+export function KeyboardShortcuts({
+  onAccounts,
+  modalProps,
+}: KeyboardShortcutsModalProps) {
   return (
     <Modal title="Keyboard Shortcuts" {...modalProps}>
       <View
@@ -175,8 +178,16 @@ export function KeyboardShortcuts({ onAccounts, modalProps }: KeyboardShortcutsM
             marginRight: 20,
           }}
         >
-          <Shortcut shortcut="z" description="Undo the last change" meta="Ctrl" />
-          <Shortcut shortcut="y" description="Redo the last undone change" meta="Ctrl" />
+          <Shortcut
+            shortcut="z"
+            description="Undo the last change"
+            meta="Ctrl"
+          />
+          <Shortcut
+            shortcut="y"
+            description="Redo the last undone change"
+            meta="Ctrl"
+          />
           {onAccounts && (
             <>
               <Shortcut
@@ -194,7 +205,10 @@ export function KeyboardShortcuts({ onAccounts, modalProps }: KeyboardShortcutsM
                 shortcut="f"
                 description="Filter to the selected transactions"
               />
-              <Shortcut shortcut="d" description="Delete selected transactions" />
+              <Shortcut
+                shortcut="d"
+                description="Delete selected transactions"
+              />
               <Shortcut
                 shortcut="a"
                 description="Set account for selected transactions"

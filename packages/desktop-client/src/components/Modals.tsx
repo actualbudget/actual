@@ -97,11 +97,15 @@ export function Modals() {
 
       switch (name) {
         case 'keyboard-shortcuts':
-          return <KeyboardShortcuts onAccounts={false} modalProps={modalProps} />;
+          return (
+            <KeyboardShortcuts onAccounts={false} modalProps={modalProps} />
+          );
 
         case 'accounts-keyboard-shortcuts':
-          return <KeyboardShortcuts onAccounts={true} modalProps={modalProps} />;
-  
+          return (
+            <KeyboardShortcuts onAccounts={true} modalProps={modalProps} />
+          );
+
         case 'import-transactions':
           return (
             <ImportTransactions
