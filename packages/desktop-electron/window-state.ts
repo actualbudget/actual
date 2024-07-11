@@ -35,11 +35,12 @@ function updateState(win: BrowserWindow, state: WindowState) {
   const screen = electron.screen;
   const bounds = win.getBounds();
   if (!win.isMaximized() && !win.isMinimized() && !win.isFullScreen()) {
-    state.x = bounds.x;
-    state.y = bounds.y;
     state.width = bounds.width;
     state.height = bounds.height;
   }
+
+  state.x = bounds.x;
+  state.y = bounds.y;
   state.isMaximized = win.isMaximized();
   state.isFullScreen = win.isFullScreen();
   state.displayBounds = screen.getDisplayMatching(bounds).bounds;
