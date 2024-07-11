@@ -35,6 +35,7 @@ import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
 import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
 import { HoldBufferModal } from './modals/HoldBufferModal';
 import { ImportTransactions } from './modals/ImportTransactions';
+import { KeyboardShortcuts } from './modals/KeyboardShortcuts';
 import { LoadBackup } from './modals/LoadBackup';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
@@ -59,7 +60,6 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
-import { KeyboardShortcuts } from './modals/KeyboardShortcuts';
 
 export type CommonModalProps = {
   onClose: () => PopModalAction;
