@@ -65,7 +65,7 @@ export function IncomeCategory({
         opacity: cat.hidden ? 0.5 : undefined,
       }}
     >
-    <DropHighlight pos={dropPos} offset={{ top: 1 }} />
+      <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
       <SidebarCategory
         innerRef={dragRef}
