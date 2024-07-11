@@ -1,4 +1,4 @@
-import { Modal, ModalProps } from '../common/Modal';
+import { Modal, type ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
