@@ -12,7 +12,7 @@ export type OpenIdConfig = {
   server_hostname: string;
 };
 
-export type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
+type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
 
 type OpenIdFormProps = {
   onSetOpenId: OpenIdCallback;

@@ -182,20 +182,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     return (
-      (!permission || hasPermission(permission)) && (
-        <Component
-          ref={ref}
-          {...(typeof as === 'string'
-            ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (css(buttonStyle) as any)
-            : { style: buttonStyle })}
-          disabled={disabled}
-          type={isSubmit ? 'submit' : 'button'}
-          {...nativeProps}
-        >
-          {children}
-        </Component>
-      )
+      <View>
+        {(!permission || hasPermission(permission)) && (
+          <Component
+            ref={ref}
+            {...(typeof as === 'string'
+              ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (css(buttonStyle) as any)
+              : { style: buttonStyle })}
+            disabled={disabled}
+            type={isSubmit ? 'submit' : 'button'}
+            {...nativeProps}
+          >
+            {children}
+          </Component>
+        )}
+      </View>
     );
   },
 );
