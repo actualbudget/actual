@@ -3,6 +3,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 type KeyboardShortcutsModalProps = {
+  onAccounts: boolean;
   modalProps?: Partial<ModalProps>;
 };
 
@@ -120,7 +121,7 @@ function Shortcut({ shortcut, description, meta }: ShortcutProps) {
   );
 }
 
-export function KeyboardShortcuts({ modalProps }: KeyboardShortcutsModalProps) {
+export function KeyboardShortcuts({ onAccounts, modalProps }: KeyboardShortcutsModalProps) {
   return (
     <Modal title="Keyboard Shortcuts" {...modalProps}>
       <View
@@ -129,39 +130,44 @@ export function KeyboardShortcuts({ modalProps }: KeyboardShortcutsModalProps) {
         }}
       >
         <View>
-          <Shortcut shortcut="Enter" description="Move down when editing" />
-          <Shortcut shortcut="Tab" description="Move right when editing" />
           <Shortcut
             shortcut="o"
             description="Close the current budget"
             meta="Ctrl"
           />
-          <GroupHeading group="Select a transaction, then" />
-          <Shortcut
-            shortcut="j"
-            description="Move to the next transaction down"
-          />
-          <Shortcut
-            shortcut="k"
-            description="Move to the next transaction up"
-          />
-          <Shortcut
-            shortcut="↑"
-            description="Move to the next transaction down and scroll"
-          />
-          <Shortcut
-            shortcut="↓"
-            description="Move to the next transaction up and scroll"
-          />
-          <Shortcut
-            shortcut="Space"
-            description="Toggle selection of current transaction"
-          />
-          <Shortcut
-            shortcut="Space"
-            description="Toggle all transactions between current and most recently selected transaction"
-            meta="Shift"
-          />
+          <Shortcut shortcut="?" description="Show this help dialog" />
+          {onAccounts && (
+            <>
+              <Shortcut shortcut="Enter" description="Move down when editing" />
+              <Shortcut shortcut="Tab" description="Move right when editing" />
+              <GroupHeading group="Select a transaction, then" />
+              <Shortcut
+                shortcut="j"
+                description="Move to the next transaction down"
+              />
+              <Shortcut
+                shortcut="k"
+                description="Move to the next transaction up"
+              />
+              <Shortcut
+                shortcut="↑"
+                description="Move to the next transaction down and scroll"
+              />
+              <Shortcut
+                shortcut="↓"
+                description="Move to the next transaction up and scroll"
+              />
+              <Shortcut
+                shortcut="Space"
+                description="Toggle selection of current transaction"
+              />
+              <Shortcut
+                shortcut="Space"
+                description="Toggle all transactions between current and most recently selected transaction"
+                meta="Shift"
+              />
+            </>
+          )}
         </View>
         <View
           style={{
@@ -169,43 +175,48 @@ export function KeyboardShortcuts({ modalProps }: KeyboardShortcutsModalProps) {
             marginRight: 20,
           }}
         >
-          <Shortcut
-            shortcut="Enter"
-            description="Move up when editing"
-            meta="Shift"
-          />
-          <Shortcut
-            shortcut="Tab"
-            description="Move left when editing"
-            meta="Shift"
-          />
-          <Shortcut shortcut="?" description="Show this help dialog" />
-          <GroupHeading group="With transaction(s) selected" />
-          <Shortcut
-            shortcut="f"
-            description="Filter to the selected transactions"
-          />
-          <Shortcut shortcut="d" description="Delete selected transactions" />
-          <Shortcut
-            shortcut="a"
-            description="Set account for selected transactions"
-          />
-          <Shortcut
-            shortcut="p"
-            description="Set payee for selected transactions"
-          />
-          <Shortcut
-            shortcut="n"
-            description="Set notes for selected transactions"
-          />
-          <Shortcut
-            shortcut="c"
-            description="Set category for selected transactions"
-          />
-          <Shortcut
-            shortcut="l"
-            description="Toggle cleared for current transaction"
-          />
+          <Shortcut shortcut="z" description="Undo the last change" meta="Ctrl" />
+          <Shortcut shortcut="y" description="Redo the last undone change" meta="Ctrl" />
+          {onAccounts && (
+            <>
+              <Shortcut
+                shortcut="Enter"
+                description="Move up when editing"
+                meta="Shift"
+              />
+              <Shortcut
+                shortcut="Tab"
+                description="Move left when editing"
+                meta="Shift"
+              />
+              <GroupHeading group="With transaction(s) selected" />
+              <Shortcut
+                shortcut="f"
+                description="Filter to the selected transactions"
+              />
+              <Shortcut shortcut="d" description="Delete selected transactions" />
+              <Shortcut
+                shortcut="a"
+                description="Set account for selected transactions"
+              />
+              <Shortcut
+                shortcut="p"
+                description="Set payee for selected transactions"
+              />
+              <Shortcut
+                shortcut="n"
+                description="Set notes for selected transactions"
+              />
+              <Shortcut
+                shortcut="c"
+                description="Set category for selected transactions"
+              />
+              <Shortcut
+                shortcut="l"
+                description="Toggle cleared for current transaction"
+              />
+            </>
+          )}
         </View>
       </View>
     </Modal>

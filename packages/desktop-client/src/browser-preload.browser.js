@@ -161,6 +161,9 @@ document.addEventListener('keydown', e => {
       }
     }
   } else if (e.key === '?') {
-    window.__actionsForMenu.pushModal('keyboard-shortcuts');
+    // TODO don't show if a modal is already open
+    // TODO pick the right one based on the current page
+    window.__actionsForMenu.pushModal('accounts-keyboard-shortcuts');
+    // window.__actionsForMenu.pushModal('keyboard-shortcuts');
   }
 });
