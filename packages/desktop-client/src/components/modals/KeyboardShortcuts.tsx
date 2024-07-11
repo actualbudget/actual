@@ -118,26 +118,39 @@ function Shortcut({ key, description, meta }: ShortcutProps) {
 
 export function KeyboardShortcuts({ modalProps }: KeyboardShortcutsModalProps) {
   return (
-    <Modal title='Keyboard Shortcuts' {...modalProps}>
+    <Modal title="Keyboard Shortcuts" {...modalProps}>
       <View
         style={{
           flexDirection: 'row',
         }}
       >
         <View>
-          <Shortcut key='Enter' description='Move down when editing' />
-          <Shortcut key='Tab' description='Move right when editing' />
-          <Shortcut key='o' description='Close the current budget' meta='Ctrl' />
-          <GroupHeading group={'Select a transaction, then'} />
-          <Shortcut key='j' description='Move to the next transaction down' />
-          <Shortcut key='k' description='Move to the next transaction up' />
-          <Shortcut key='↑' description='Move to the next transaction down and scroll' />
-          <Shortcut key='↓' description='Move to the next transaction up and scroll' />
-          <Shortcut key='Space' description='Toggle selection of current transaction' />
+          <Shortcut key="Enter" description="Move down when editing" />
+          <Shortcut key="Tab" description="Move right when editing" />
           <Shortcut
-            key='Space'
-            description='Toggle all transactions between current and most recently selected transaction'
-            meta='Shift'
+            key="o"
+            description="Close the current budget"
+            meta="Ctrl"
+          />
+          <GroupHeading group="Select a transaction, then" />
+          <Shortcut key="j" description="Move to the next transaction down" />
+          <Shortcut key="k" description="Move to the next transaction up" />
+          <Shortcut
+            key="↑"
+            description="Move to the next transaction down and scroll"
+          />
+          <Shortcut
+            key="↓"
+            description="Move to the next transaction up and scroll"
+          />
+          <Shortcut
+            key="Space"
+            description="Toggle selection of current transaction"
+          />
+          <Shortcut
+            key="Space"
+            description="Toggle all transactions between current and most recently selected transaction"
+            meta="Shift"
           />
         </View>
         <View
@@ -146,17 +159,34 @@ export function KeyboardShortcuts({ modalProps }: KeyboardShortcutsModalProps) {
             marginRight: 20,
           }}
         >
-          <Shortcut key='Enter' description='Move up when editing' meta='Shift' />
-          <Shortcut key='Tab' description='Move left when editing' meta='Shift' />
-          <Shortcut key='?' description='Show this help dialog' />
-          <GroupHeading group={'With transaction(s) selected'} />
-          <Shortcut key='f' description='Filter to the selected transactions' />
-          <Shortcut key='d' description='Delete selected transactions' />
-          <Shortcut key='a' description='Set account for selected transactions' />
-          <Shortcut key='p' description='Set payee for selected transactions' />
-          <Shortcut key='n' description='Set notes for selected transactions' />
-          <Shortcut key='c' description='Set category for selected transactions' />
-          <Shortcut key='l' description='Toggle cleared for current transaction' />
+          <Shortcut
+            key="Enter"
+            description="Move up when editing"
+            meta="Shift"
+          />
+          <Shortcut
+            key="Tab"
+            description="Move left when editing"
+            meta="Shift"
+          />
+          <Shortcut key="?" description="Show this help dialog" />
+          <GroupHeading group="With transaction(s) selected" />
+          <Shortcut key="f" description="Filter to the selected transactions" />
+          <Shortcut key="d" description="Delete selected transactions" />
+          <Shortcut
+            key="a"
+            description="Set account for selected transactions"
+          />
+          <Shortcut key="p" description="Set payee for selected transactions" />
+          <Shortcut key="n" description="Set notes for selected transactions" />
+          <Shortcut
+            key="c"
+            description="Set category for selected transactions"
+          />
+          <Shortcut
+            key="l"
+            description="Toggle cleared for current transaction"
+          />
         </View>
       </View>
     </Modal>
