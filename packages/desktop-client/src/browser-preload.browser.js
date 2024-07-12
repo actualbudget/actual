@@ -161,6 +161,8 @@ document.addEventListener('keydown', e => {
       }
     }
   } else if (e.key === '?') {
-    window.__actionsForMenu.pushModal('keyboard-shortcuts');
+    if (document.activeElement.tagName !== 'INPUT') {
+      window.__actionsForMenu.pushModal('keyboard-shortcuts');
+    }
   }
 });
