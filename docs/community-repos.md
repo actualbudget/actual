@@ -45,6 +45,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
    - *This script pulls data from a USD and BTC wallet in Coinbase and keeps a wallet in ActualBudget synchronized with this balance.*
 * **Easy category archive function** - https://github.com/rvisharma/actual-archive-category
    - *This tool moves transactions over to an _archive_ category, and then deletes the category.*
+* **Actual Budget Backup** - https://github.com/rodriguestiago0/actualbudget-backup
+   - *Tool which will back up Actual Budget and upload it to the configurable destination using the clone utility.*
 
 
 ## Others
