@@ -35,7 +35,7 @@ import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
 import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
 import { HoldBufferModal } from './modals/HoldBufferModal';
 import { ImportTransactions } from './modals/ImportTransactions';
-import { KeyboardShortcuts } from './modals/KeyboardShortcuts';
+import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
 import { LoadBackup } from './modals/LoadBackup';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
@@ -98,12 +98,12 @@ export function Modals() {
       switch (name) {
         case 'keyboard-shortcuts':
           return (
-            <KeyboardShortcuts onAccounts={false} modalProps={modalProps} />
+            <KeyboardShortcutModal onAccounts={false} modalProps={modalProps} />
           );
 
         case 'accounts-keyboard-shortcuts':
           return (
-            <KeyboardShortcuts onAccounts={true} modalProps={modalProps} />
+            <KeyboardShortcutModal onAccounts={true} modalProps={modalProps} />
           );
 
         case 'import-transactions':

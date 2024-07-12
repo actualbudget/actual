@@ -123,7 +123,7 @@ function Shortcut({ shortcut, description, meta }: ShortcutProps) {
   );
 }
 
-export function KeyboardShortcuts({
+export function KeyboardShortcutModal({
   onAccounts,
   modalProps,
 }: KeyboardShortcutsModalProps) {
