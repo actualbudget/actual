@@ -207,16 +207,22 @@ export function CategoryAutocomplete({
     ): CategoryAutocompleteItem[] => {
       return suggestions
         .filter(suggestion => {
-          return (
-            suggestion.id === 'split' ||
-            getNormalisedString(suggestion.group?.name).includes(
-              getNormalisedString(value),
-            ) ||
-            getNormalisedString(
-              suggestion.group?.name + ' ' + suggestion.name,
-            ).includes(getNormalisedString(value)) ||
-            defaultFilterSuggestion(suggestion, value)
-          );
+          if (suggestion.id === 'split') {
+            return true;
+          }
+
+          if (suggestion.group) {
+            return (
+              getNormalisedString(suggestion.group.name).includes(
+                getNormalisedString(value),
+              ) ||
+              getNormalisedString(
+                suggestion.group.name + ' ' + suggestion.name,
+              ).includes(getNormalisedString(value))
+            );
+          }
+
+          return defaultFilterSuggestion(suggestion, value);
         })
         .sort(
           (a, b) =>
