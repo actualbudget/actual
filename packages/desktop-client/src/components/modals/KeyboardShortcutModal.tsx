@@ -22,6 +22,7 @@ type ShortcutProps = {
   shortcut: string;
   description: string;
   meta?: string;
+  shift?: boolean;
 };
 
 function KeyIcon({ shortcut }: KeyIconProps) {
@@ -62,7 +63,7 @@ function GroupHeading({ group }: GroupHeadingProps) {
   );
 }
 
-function Shortcut({ shortcut, description, meta }: ShortcutProps) {
+function Shortcut({ shortcut, description, meta, shift }: ShortcutProps) {
   return (
     <div
       style={{
@@ -87,6 +88,23 @@ function Shortcut({ shortcut, description, meta }: ShortcutProps) {
           {meta && (
             <>
               <KeyIcon shortcut={meta} />
+              <Text
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  fontSize: 16,
+                  paddingLeft: 2,
+                  paddingRight: 2,
+                }}
+              >
+                +
+              </Text>
+            </>
+          )}
+          {shift && (
+            <>
+              <KeyIcon shortcut='Shift' />
               <Text
                 style={{
                   display: 'flex',
@@ -172,7 +190,7 @@ export function KeyboardShortcutModal({
               <Shortcut
                 shortcut="Space"
                 description="Toggle all transactions between current and most recently selected transaction"
-                meta="Shift"
+                shift={true}
               />
             </>
           )}
@@ -189,8 +207,9 @@ export function KeyboardShortcutModal({
             meta={ctrl}
           />
           <Shortcut
-            shortcut="Y"
+            shortcut="Z"
             description="Redo the last undone change"
+            shift={true}
             meta={ctrl}
           />
           {onAccounts && (
@@ -198,12 +217,12 @@ export function KeyboardShortcutModal({
               <Shortcut
                 shortcut="Enter"
                 description="Move up when editing"
-                meta="Shift"
+                shift={true}
               />
               <Shortcut
                 shortcut="Tab"
                 description="Move left when editing"
-                meta="Shift"
+                shift={true}
               />
               <GroupHeading group="With transaction(s) selected" />
               <Shortcut
