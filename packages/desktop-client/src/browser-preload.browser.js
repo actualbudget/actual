@@ -161,8 +161,13 @@ document.addEventListener('keydown', e => {
       }
     }
   } else if (e.key === '?') {
-    if (document.activeElement.tagName !== 'INPUT') {
-      window.__actionsForMenu.pushModal('keyboard-shortcuts');
+    if (
+      e.target.tagName === 'INPUT' ||
+      e.target.tagName === 'TEXTAREA' ||
+      e.target.isContentEditable
+    ) {
+      return;
     }
+    window.__actionsForMenu.pushModal('keyboard-shortcuts');
   }
 });
