@@ -104,7 +104,7 @@ function Shortcut({ shortcut, description, meta, shift }: ShortcutProps) {
           )}
           {shift && (
             <>
-              <KeyIcon shortcut='Shift' />
+              <KeyIcon shortcut="Shift" />
               <Text
                 style={{
                   display: 'flex',
