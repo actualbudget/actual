@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+
 import * as Platform from 'loot-core/src/client/platform';
 
 import { Modal, type ModalProps } from '../common/Modal';
@@ -5,7 +7,6 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 type KeyboardShortcutsModalProps = {
-  onAccounts: boolean;
   modalProps?: Partial<ModalProps>;
 };
 
@@ -124,9 +125,10 @@ function Shortcut({ shortcut, description, meta }: ShortcutProps) {
 }
 
 export function KeyboardShortcutModal({
-  onAccounts,
   modalProps,
 }: KeyboardShortcutsModalProps) {
+  const location = useLocation();
+  const onAccounts = location.pathname.startsWith('/accounts');
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   return (
     <Modal title="Keyboard Shortcuts" {...modalProps}>

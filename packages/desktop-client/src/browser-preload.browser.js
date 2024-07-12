@@ -162,9 +162,6 @@ document.addEventListener('keydown', e => {
     }
   } else if (e.key === '?') {
     e.preventDefault();
-    const isAccounts = window.location.pathname.startsWith('/accounts');
-    window.__actionsForMenu.pushModal(
-      isAccounts ? 'accounts-keyboard-shortcuts' : 'keyboard-shortcuts',
-    );
+    window.__actionsForMenu.pushModal('keyboard-shortcuts');
   }
 });
