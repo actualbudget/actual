@@ -54,7 +54,8 @@ This is the documentation of all available API methods. The API has not been rel
 "getPayees",
 "createPayee",
 "updatePayee",
-"deletePayee"
+"deletePayee",
+"mergePayees"
 ]} />
 
 <APIList title="Rules" sections={[
@@ -452,6 +453,12 @@ Update fields of a payee. `fields` can specify any field described in [`Payee`](
 <Method name="deletePayee" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
 
 Delete a payee.
+
+#### `mergePayees`
+
+<Method name="mergePayees" args={[{ name: 'targetId', type: 'id' }, { name: 'mergeIds', type: 'id[]' }]} returns="Promise<null>" />
+
+Merge one or more payees into the target payee, retaining the name of the target.
 
 ## Rules
 
