@@ -24,6 +24,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
+import { getNormalisedString } from '../../util/normalisation';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
@@ -137,8 +138,8 @@ function CategoryList({
 }
 
 function customSort(obj: CategoryAutocompleteItem, value: string): number {
-  const name = obj.name.toLowerCase();
-  const groupName = obj.group ? obj.group.name.toLowerCase() : '';
+  const name = getNormalisedString(obj.name);
+  const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
   if (obj.id === 'split') {
     return -2;
   }
@@ -208,19 +209,19 @@ export function CategoryAutocomplete({
         .filter(suggestion => {
           return (
             suggestion.id === 'split' ||
-            suggestion.group?.name
-              .toLowerCase()
-              .includes(value.toLowerCase()) ||
-            (suggestion.group?.name + ' ' + suggestion.name)
-              .toLowerCase()
-              .includes(value.toLowerCase()) ||
+            getNormalisedString(suggestion.group?.name).includes(
+              getNormalisedString(value),
+            ) ||
+            getNormalisedString(
+              suggestion.group?.name + ' ' + suggestion.name,
+            ).includes(getNormalisedString(value)) ||
             defaultFilterSuggestion(suggestion, value)
           );
         })
         .sort(
           (a, b) =>
-            customSort(a, value.toLowerCase()) -
-            customSort(b, value.toLowerCase()),
+            customSort(a, getNormalisedString(value)) -
+            customSort(b, getNormalisedString(value)),
         );
     },
     [],
