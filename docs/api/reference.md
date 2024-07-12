@@ -30,7 +30,8 @@ This is the documentation of all available API methods. The API has not been rel
 "updateAccount",
 "closeAccount",
 "reopenAccount",
-"deleteAccount"
+"deleteAccount",
+"getAccountBalance"
 ]} />
 
 <APIList title="Categories" sections={[
@@ -305,6 +306,12 @@ Reopen a closed account.
 <Method name="deleteAccount" args={[{ name: 'id', type: 'id' }]} />
 
 Delete an account.
+
+#### `getAccountBalance`
+
+<Method name="getAccountBalance" args={[{ name: 'id', type: 'id' }, { name: 'cutoff', type: 'Date?'}]} returns="Promise<number>" />
+
+Gets the balance for an account.  If a cutoff is given, it gives the account balance as of that date.  If no cutoff is given, it uses the current date as the cutoff.
 
 #### Examples
 
