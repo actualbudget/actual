@@ -42,6 +42,7 @@ describe('utility functions', () => {
     // `3_45_23` (it needs a decimal amount). This function should be
     // thought through more.
     expect(looselyParseAmount('3_45_23.10')).toBe(34523.1);
+    expect(looselyParseAmount('(1 500.99)')).toBe(-1500.99);
   });
 
   test('number formatting works with comma-dot format', () => {

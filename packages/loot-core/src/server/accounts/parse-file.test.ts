@@ -92,8 +92,10 @@ describe('File import', () => {
     };
 
     expect(transactions).toHaveLength(2);
-    expect(transactions[0].amount).toBe(-30.0);
-    expect(transactions[1].amount).toBe(-3.77);
+    //a bad amount. 3 decimal places
+    expect(transactions[0].amount).toBe("-30.000"); 
+    //a good amount. 5 decimal places
+    expect(transactions[1].amount).toBe("-3.77000"); 
   }, 45000);
 
   test('ofx import works (credit card)', async () => {
