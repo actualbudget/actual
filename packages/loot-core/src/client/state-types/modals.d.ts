@@ -129,7 +129,6 @@ type FinanceModals = {
   'schedules-discover': null;
 
   'schedule-posts-offline-notification': null;
-  'switch-budget-type': { onSwitch: () => void };
   'account-menu': {
     accountId: string;
     onSave: (account: AccountEntity) => void;
@@ -237,7 +236,6 @@ type FinanceModals = {
     onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetFile: () => void;
-    onSwitchBudgetType: () => void;
   };
   'rollover-budget-month-menu': {
     month: string;

@@ -58,7 +58,13 @@ export function IncomeCategory({
   });
 
   return (
-    <Row innerRef={dropRef} collapsed={true}>
+    <Row
+      innerRef={dropRef}
+      collapsed={true}
+      style={{
+        opacity: cat.hidden ? 0.5 : undefined,
+      }}
+    >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
       <SidebarCategory

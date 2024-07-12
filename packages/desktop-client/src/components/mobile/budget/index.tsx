@@ -16,7 +16,6 @@ import {
   updateCategory,
   updateGroup,
   sync,
-  loadPrefs,
 } from 'loot-core/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -31,7 +30,7 @@ import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
-import { prewarmMonth, switchBudgetType } from '../../budget/util';
+import { prewarmMonth } from '../../budget/util';
 import { View } from '../../common/View';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
@@ -289,23 +288,6 @@ function BudgetInner(props: BudgetInnerProps) {
   //   );
   // };
 
-  const onSwitchBudgetType = async () => {
-    setInitialized(false);
-
-    const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
-    await switchBudgetType(
-      newBudgetType,
-      spreadsheet,
-      bounds,
-      startMonth,
-      async () => {
-        dispatch(loadPrefs());
-      },
-    );
-
-    setInitialized(true);
-  };
-
   const onSaveNotes = async (id, notes) => {
     await send('notes-save', { id, note: notes });
   };
@@ -358,17 +340,6 @@ function BudgetInner(props: BudgetInnerProps) {
     );
   };
 
-  const onOpenSwitchBudgetTypeModal = () => {
-    dispatch(
-      pushModal('switch-budget-type', {
-        onSwitch: () => {
-          onSwitchBudgetType();
-          dispatch(collapseModals('budget-page-menu'));
-        },
-      }),
-    );
-  };
-
   const [showHiddenCategories, setShowHiddenCategoriesPref] = useLocalPref(
     'budget.showHiddenCategories',
   );
@@ -408,7 +379,6 @@ function BudgetInner(props: BudgetInnerProps) {
         onAddCategoryGroup: onOpenNewCategoryGroupModal,
         onToggleHiddenCategories,
         onSwitchBudgetFile,
-        onSwitchBudgetType: onOpenSwitchBudgetTypeModal,
       }),
     );
   };

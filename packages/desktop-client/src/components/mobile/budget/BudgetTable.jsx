@@ -378,7 +378,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const onCover = () => {
     dispatch(
       pushModal('cover', {
-        categoryId: category.id,
+        title: category.name,
         month,
         onSubmit: fromCategoryId => {
           onBudgetAction(month, 'cover-overspending', {

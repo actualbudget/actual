@@ -106,11 +106,11 @@ export function SidebarCategory({
               setMenuOpen(false);
             }}
             items={[
+              { name: 'rename', text: 'Rename' },
               !categoryGroup?.hidden && {
                 name: 'toggle-visibility',
                 text: category.hidden ? 'Show' : 'Hide',
               },
-              { name: 'rename', text: 'Rename' },
               { name: 'delete', text: 'Delete' },
             ]}
           />

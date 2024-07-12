@@ -18,6 +18,8 @@ import { Value } from '../rules/Value';
 import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
 
+let isDatepickerClick = false;
+
 type FilterExpressionProps = {
   field: string | undefined;
   customName: string | undefined;
@@ -100,6 +102,21 @@ export function FilterExpression({
         placement="bottom start"
         isOpen={editing}
         onOpenChange={() => setEditing(false)}
+        shouldCloseOnInteractOutside={element => {
+          // Datepicker selections for some reason register 2x clicks
+          // We want to keep the popover open after selecting a date.
+          // So we ignore the "close" event on selection + the subsequent event.
+          if (element instanceof HTMLElement && element.dataset.pikaYear) {
+            isDatepickerClick = true;
+            return false;
+          }
+          if (isDatepickerClick) {
+            isDatepickerClick = false;
+            return false;
+          }
+
+          return true;
+        }}
         style={{ width: 275, padding: 15, color: theme.menuItemText }}
         data-testid="filters-menu-tooltip"
       >

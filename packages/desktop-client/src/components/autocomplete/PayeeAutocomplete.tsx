@@ -420,7 +420,7 @@ export function CreatePayeeButton({
       data-testid="create-payee-button"
       style={{
         display: 'block',
-        flexShrink: 0,
+        flex: '1 0',
         color: highlighted
           ? theme.menuAutoCompleteTextHover
           : theme.noticeTextMenu,

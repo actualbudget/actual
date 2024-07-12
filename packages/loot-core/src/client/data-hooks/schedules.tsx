@@ -1,9 +1,16 @@
 // @ts-strict-ignore
-import React, { createContext, useEffect, useState, useContext } from 'react';
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  useContext,
+  useMemo,
+} from 'react';
 
 import { q, type Query } from '../../shared/query';
 import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
 import { type ScheduleEntity } from '../../types/models';
+import { getAccountFilter } from '../queries';
 import { liveQuery } from '../query-helpers';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
@@ -83,4 +90,27 @@ export function SchedulesProvider({ transform, children }) {
 
 export function useCachedSchedules() {
   return useContext(SchedulesContext);
+}
+
+export function useDefaultSchedulesQueryTransform(accountId) {
+  return useMemo(() => {
+    const filterByAccount = getAccountFilter(accountId, '_account');
+    const filterByPayee = getAccountFilter(accountId, '_payee.transfer_acct');
+
+    return (q: Query) => {
+      q = q.filter({
+        $and: [{ '_account.closed': false }],
+      });
+      if (accountId) {
+        if (accountId === 'uncategorized') {
+          q = q.filter({ next_date: null });
+        } else {
+          q = q.filter({
+            $or: [filterByAccount, filterByPayee],
+          });
+        }
+      }
+      return q.orderBy({ next_date: 'desc' });
+    };
+  }, [accountId]);
 }

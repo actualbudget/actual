@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { css } from 'glamor';
+
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -56,16 +58,21 @@ export function Overview() {
       style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
     >
       <View
-        style={{
-          flexDirection: isNarrowWidth ? 'column' : 'row',
+        className={`${css({
           flex: '0 0 auto',
-        }}
+          flexDirection: isNarrowWidth ? 'column' : 'row',
+          flexWrap: isNarrowWidth ? 'nowrap' : 'wrap',
+          padding: '10',
+          '> a, > div': {
+            margin: '10',
+          },
+        })}`}
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
         {spendingReportFeatureFlag && <SpendingCard />}
+        <CustomReportListCards reports={customReports} />
       </View>
-      <CustomReportListCards reports={customReports} />
     </Page>
   );
 }

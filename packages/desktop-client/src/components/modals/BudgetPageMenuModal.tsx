@@ -1,6 +1,5 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
@@ -18,7 +17,6 @@ export function BudgetPageMenuModal({
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
-  onSwitchBudgetType,
 }: BudgetPageMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -34,7 +32,6 @@ export function BudgetPageMenuModal({
         onAddCategoryGroup={onAddCategoryGroup}
         onToggleHiddenCategories={onToggleHiddenCategories}
         onSwitchBudgetFile={onSwitchBudgetFile}
-        onSwitchBudgetType={onSwitchBudgetType}
       />
     </Modal>
   );
@@ -47,17 +44,14 @@ type BudgetPageMenuProps = Omit<
   onAddCategoryGroup: () => void;
   onToggleHiddenCategories: () => void;
   onSwitchBudgetFile: () => void;
-  onSwitchBudgetType: () => void;
 };
 
 function BudgetPageMenu({
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
-  onSwitchBudgetType,
   ...props
 }: BudgetPageMenuProps) {
-  const isReportBudgetEnabled = useFeatureFlag('reportBudget');
   const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
 
   const onMenuSelect = (name: string) => {
@@ -73,9 +67,6 @@ function BudgetPageMenu({
         break;
       case 'switch-budget-file':
         onSwitchBudgetFile?.();
-        break;
-      case 'switch-budget-type':
-        onSwitchBudgetType?.();
         break;
       default:
         throw new Error(`Unrecognized menu item: ${name}`);
@@ -99,14 +90,6 @@ function BudgetPageMenu({
           name: 'switch-budget-file',
           text: 'Switch budget file',
         },
-        ...(isReportBudgetEnabled
-          ? [
-              {
-                name: 'switch-budget-type',
-                text: 'Switch budget type',
-              },
-            ]
-          : []),
       ]}
     />
   );

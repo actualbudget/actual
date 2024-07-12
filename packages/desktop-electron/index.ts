@@ -1,5 +1,5 @@
 import fs from 'fs';
-import NodeModule from 'module';
+import Module from 'module';
 import path from 'path';
 
 import {
@@ -14,6 +14,8 @@ import {
   UtilityProcess,
 } from 'electron';
 import isDev from 'electron-is-dev';
+// @ts-strict-ignore
+import fetch from 'node-fetch';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -22,13 +24,7 @@ import {
   listen as listenToWindowState,
 } from './window-state';
 
-import './setRequireHook';
-
 import './security';
-
-const Module: typeof NodeModule & { globalPaths: string[] } =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  NodeModule as unknown as any;
 
 Module.globalPaths.push(__dirname + '/..');
 
@@ -38,7 +34,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true } },
 ]);
 
-global.fetch = require('node-fetch');
+global.fetch = fetch;
 
 if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
   process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');

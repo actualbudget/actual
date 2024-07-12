@@ -95,6 +95,11 @@ export function syncAccounts(id?: string) {
           .queries.accounts.filter(
             ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
           )
+          .sort((a, b) =>
+            a.offbudget === b.offbudget
+              ? a.sort_order - b.sort_order
+              : a.offbudget - b.offbudget,
+          )
           .map(({ id }) => id);
 
     dispatch(setAccountsSyncing(accountIdsToSync));
@@ -185,6 +190,27 @@ export function parseTransactions(filepath, options) {
   };
 }
 
+export function importPreviewTransactions(id: string, transactions) {
+  return async (dispatch: Dispatch): Promise<boolean> => {
+    const { errors = [], updatedPreview } = await send('transactions-import', {
+      accountId: id,
+      transactions,
+      isPreview: true,
+    });
+
+    errors.forEach(error => {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: error.message,
+        }),
+      );
+    });
+
+    return updatedPreview;
+  };
+}
+
 export function importTransactions(id: string, transactions, reconcile = true) {
   return async (dispatch: Dispatch): Promise<boolean> => {
     if (!reconcile) {
@@ -203,6 +229,7 @@ export function importTransactions(id: string, transactions, reconcile = true) {
     } = await send('transactions-import', {
       accountId: id,
       transactions,
+      isPreview: false,
     });
 
     errors.forEach(error => {

@@ -523,16 +523,20 @@ const TransactionEditInner = memo(function TransactionEditInner({
     const [unserializedTransaction] = unserializedTransactions;
 
     const onConfirmSave = async () => {
-      const { account: accountId } = unserializedTransaction;
-      const account = accountsById[accountId];
-
       let transactionsToSave = unserializedTransactions;
       if (adding) {
         transactionsToSave = realizeTempTransactions(unserializedTransactions);
       }
 
       props.onSave(transactionsToSave);
-      navigate(`/accounts/${account.id}`, { replace: true });
+
+      if (adding) {
+        const { account: accountId } = unserializedTransaction;
+        const account = accountsById[accountId];
+        navigate(`/accounts/${account.id}`, { replace: true });
+      } else {
+        navigate(-1);
+      }
     };
 
     if (unserializedTransaction.reconciled) {
@@ -639,12 +643,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               return;
             }
 
-            const { account: accountId } = unserializedTransaction;
-            if (accountId) {
-              navigate(`/accounts/${accountId}`, { replace: true });
-            } else {
-              navigate(-1);
-            }
+            navigate(-1);
           },
         }),
       );

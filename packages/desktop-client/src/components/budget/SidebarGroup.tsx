@@ -127,11 +127,11 @@ export function SidebarGroup({
                 }}
                 items={[
                   { name: 'add-category', text: 'Add category' },
+                  { name: 'rename', text: 'Rename' },
                   !group.is_income && {
                     name: 'toggle-visibility',
                     text: group.hidden ? 'Show' : 'Hide',
                   },
-                  { name: 'rename', text: 'Rename' },
                   onDelete && { name: 'delete', text: 'Delete' },
                 ]}
               />

@@ -58,6 +58,19 @@ describe('API CRUD operations', () => {
     await api.loadBudget(budgetName);
   });
 
+  // api: getBudgets
+  test('getBudgets', async () => {
+    const budgets = await api.getBudgets();
+    expect(budgets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'test-budget',
+          name: 'Default Test Db',
+        }),
+      ]),
+    );
+  });
+
   // apis: getCategoryGroups, createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
   test('CategoryGroups: successfully update category groups', async () => {
     const month = '2023-10';
@@ -251,7 +264,7 @@ describe('API CRUD operations', () => {
     );
   });
 
-  //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount
+  //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount, getAccountBalance
   test('Accounts: successfully complete account operators', async () => {
     const accountId1 = await api.createAccount(
       { name: 'test-account1', offbudget: true },
@@ -271,6 +284,9 @@ describe('API CRUD operations', () => {
         expect.objectContaining({ id: accountId2, name: 'test-account2' }),
       ]),
     );
+
+    expect(await api.getAccountBalance(accountId1)).toEqual(1000);
+    expect(await api.getAccountBalance(accountId2)).toEqual(0);
 
     await api.updateAccount(accountId1, { offbudget: false });
     await api.closeAccount(accountId1, accountId2, null);
@@ -568,6 +584,11 @@ describe('API CRUD operations', () => {
       runTransfers: true,
     });
     expect(addResult).toBe('ok');
+
+    expect(await api.getAccountBalance(accountId)).toEqual(200);
+    expect(
+      await api.getAccountBalance(accountId, new Date(2023, 10, 2)),
+    ).toEqual(0);
 
     // confirm added transactions exist
     let transactions = await api.getTransactions(

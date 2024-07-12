@@ -100,6 +100,7 @@ __metadata:
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
     promise-retry: "npm:^2.0.1"
+    re-resizable: "npm:^6.9.17"
     react: "npm:18.2.0"
     react-aria-components: "npm:^1.2.1"
     react-dnd: "npm:^16.0.1"
@@ -15466,6 +15467,16 @@ __metadata:
   bin:
     rc: ./cli.js
   checksum: 5c4d72ae7eec44357171585938c85ce066da8ca79146b5635baf3d55d74584c92575fa4e2c9eac03efbed3b46a0b2e7c30634c012b4b4fa40d654353d3c163eb
+  languageName: node
+  linkType: hard
+
+"re-resizable@npm:^6.9.17":
+  version: 6.9.17
+  resolution: "re-resizable@npm:6.9.17"
+  peerDependencies:
+    react: ^16.13.1 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.13.1 || ^17.0.0 || ^18.0.0
+  checksum: 768c3a0fe39d6916caf4e003240d326d62c4d7512c7d3115cc2a98085416fdba80097afdbb93df57b69543c41ce56b33589f2fea6987cd5149faa83cf11c8ba1
   languageName: node
   linkType: hard
 
