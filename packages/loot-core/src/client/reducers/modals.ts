@@ -13,8 +13,10 @@ export function update(state = initialState, action: Action): ModalsState {
       // special case: don't show the keyboard shortcuts modal if there's already a modal open
       if (
         (state.modalStack.length > 0 &&
-        action.modal.name.endsWith('keyboard-shortcuts')) ||
-        window.document.querySelector('div[data-testid="filters-menu-tooltip"]') !== null
+          action.modal.name.endsWith('keyboard-shortcuts')) ||
+        window.document.querySelector(
+          'div[data-testid="filters-menu-tooltip"]',
+        ) !== null
       ) {
         return state;
       }
