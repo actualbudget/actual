@@ -16,6 +16,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
+import { getNormalisedString } from '../../util/normalisation';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
@@ -203,8 +204,8 @@ export function SchedulesTable({
     }
     const filterIncludes = (str: string) =>
       str
-        ? str.toLowerCase().includes(filter.toLowerCase()) ||
-          filter.toLowerCase().includes(str.toLowerCase())
+        ? getNormalisedString(str).includes(getNormalisedString(filter)) ||
+          getNormalisedString(filter).includes(getNormalisedString(str))
         : false;
 
     return schedules.filter(schedule => {
