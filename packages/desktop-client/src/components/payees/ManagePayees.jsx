@@ -22,6 +22,7 @@ import {
 import { useStableCallback } from '../../hooks/useStableCallback';
 import { SvgExpandArrow } from '../../icons/v0';
 import { theme } from '../../style';
+import { getNormalisedString } from '../../util/normalisation';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
@@ -111,7 +112,7 @@ export const ManagePayees = forwardRef(
       let filtered = payees;
       if (filter) {
         filtered = filtered.filter(p =>
-          p.name.toLowerCase().includes(filter.toLowerCase()),
+          getNormalisedString(p.name).includes(getNormalisedString(filter)),
         );
       }
       if (orphanedOnly) {
