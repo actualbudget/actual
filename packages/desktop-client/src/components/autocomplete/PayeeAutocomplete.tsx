@@ -26,6 +26,7 @@ import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
+import { getNormalisedString } from '../../util/normalisation';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
@@ -379,8 +380,12 @@ export function PayeeAutocomplete({
         });
 
         filtered.sort((p1, p2) => {
-          const r1 = p1.name.toLowerCase().startsWith(value.toLowerCase());
-          const r2 = p2.name.toLowerCase().startsWith(value.toLowerCase());
+          const r1 = getNormalisedString(p1.name).startsWith(
+            getNormalisedString(value),
+          );
+          const r2 = getNormalisedString(p2.name).startsWith(
+            getNormalisedString(value),
+          );
           const r1exact = p1.name.toLowerCase() === value.toLowerCase();
           const r2exact = p2.name.toLowerCase() === value.toLowerCase();
 
