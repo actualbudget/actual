@@ -136,8 +136,12 @@ global.Actual = {
 };
 
 function inputFocused(e) {
-  return e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
-};
+  return (
+    e.target.tagName === 'INPUT' ||
+    e.target.tagName === 'TEXTAREA' ||
+    e.target.isContentEditable
+  );
+}
 
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey) {
