@@ -255,55 +255,11 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
       throw new Error('`date` is required when adding a transaction');
     }
 
-    let payee_name;
-    // When the amount is equal to 0, we need to determine
-    // if this is a "Credited" or "Debited" transaction. This means
-    // that it matters whether the amount is a positive or negative zero.
-    if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
-      const nameParts = [];
-      const name =
-        trans.debtorName ||
-        trans.remittanceInformationUnstructured ||
-        (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
-        trans.additionalInformation;
-
-      if (name) {
-        nameParts.push(title(name));
-      }
-      if (trans.debtorAccount && trans.debtorAccount.iban) {
-        nameParts.push(
-          '(' +
-            trans.debtorAccount.iban.slice(0, 4) +
-            ' XXX ' +
-            trans.debtorAccount.iban.slice(-4) +
-            ')',
-        );
-      }
-      payee_name = nameParts.join(' ');
-    } else {
-      const nameParts = [];
-      const name =
-        trans.creditorName ||
-        trans.remittanceInformationUnstructured ||
-        (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
-        trans.additionalInformation;
-
-      if (name) {
-        nameParts.push(title(name));
-      }
-      if (trans.creditorAccount && trans.creditorAccount.iban) {
-        nameParts.push(
-          '(' +
-            trans.creditorAccount.iban.slice(0, 4) +
-            ' XXX ' +
-            trans.creditorAccount.iban.slice(-4) +
-            ')',
-        );
-      }
-      payee_name = nameParts.join(' ');
+    if (trans.payeeName == null) {
+      throw new Error('`payeeName` is required when adding a transaction');
     }
 
-    trans.imported_payee = trans.imported_payee || payee_name;
+    trans.imported_payee = trans.imported_payee || trans.payeeName;
     if (trans.imported_payee) {
       trans.imported_payee = trans.imported_payee.trim();
     }
@@ -312,12 +268,12 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     // when rules are run, they have the right data. Resolving payees
     // also simplifies the payee creation process
     trans.account = acctId;
-    trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
+    trans.payee = await resolvePayee(trans, trans.payeeName, payeesToCreate);
 
     trans.cleared = Boolean(trans.booked);
 
     normalized.push({
-      payee_name,
+      payee_name: trans.payeeName,
       trans: {
         amount: amountToInteger(trans.amount),
         payee: trans.payee,

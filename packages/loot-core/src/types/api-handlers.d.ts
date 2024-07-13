@@ -3,6 +3,7 @@ import type {
   APIAccountEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIFileEntity,
   APIPayeeEntity,
 } from '../server/api-models';
 
@@ -22,6 +23,8 @@ export interface ApiHandlers {
     syncId: string;
     password?: string;
   }) => Promise<void>;
+
+  'api/get-budgets': () => Promise<APIFileEntity[]>;
 
   'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 
@@ -114,6 +117,11 @@ export interface ApiHandlers {
 
   'api/account-delete': (arg: { id }) => Promise<unknown>;
 
+  'api/account-balance': (arg: {
+    id: string;
+    cutoff?: Date;
+  }) => Promise<number>;
+
   'api/categories-get': (arg: {
     grouped;
   }) => Promise<Array<APICategoryGroupEntity | APICategoryEntity>>;
@@ -145,6 +153,11 @@ export interface ApiHandlers {
   'api/payee-update': (arg: { id; fields }) => Promise<unknown>;
 
   'api/payee-delete': (arg: { id }) => Promise<unknown>;
+
+  'api/payees-merge': (arg: {
+    targetId: string;
+    mergeIds: string[];
+  }) => Promise<void>;
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 
