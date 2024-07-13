@@ -1,4 +1,4 @@
-FILE=$(curl -sS "https://internal.floralily.devx/next-pr-number-api/?owner=actualbudget&name=actual" | head -n 1 | cut -d $' ' -f2)
+FILE=$(curl -sS "https://internal.floralily.dev/next-pr-number-api/?owner=actualbudget&name=actual" | head -n 1 | cut -d $' ' -f2)
 
 if [ -z "$FILE" ]; then
   exit 0
