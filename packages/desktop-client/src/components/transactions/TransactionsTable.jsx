@@ -695,6 +695,7 @@ const Transaction = memo(function Transaction({
   allTransactions,
   transaction: originalTransaction,
   subtransactions,
+  transferAccountsByTransaction,
   editing,
   showAccount,
   showBalance,
@@ -872,19 +873,9 @@ const Transaction = memo(function Transaction({
   // Join in some data
   const payee = payees && payeeId && getPayeesById(payees)[payeeId];
   const account = accounts && accountId && getAccountsById(accounts)[accountId];
-  let transferAcct;
-
-  if (_inverse) {
-    transferAcct =
-      accounts && accountId && getAccountsById(accounts)[accountId];
-  } else {
-    transferAcct =
-      payee &&
-      payee.transfer_acct &&
-      getAccountsById(accounts)[payee.transfer_acct];
-  }
 
   const isChild = transaction.is_child;
+  const transferAcct = transferAccountsByTransaction[transaction.id];
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
@@ -1716,17 +1707,20 @@ function TransactionTableInner({
       error &&
       error.type === 'SplitTransactionError';
 
-    const emptyChildTransactions = transactions.filter(
-      t =>
-        t.parent_id === (trans.is_parent ? trans.id : trans.parent_id) &&
-        t.amount === 0,
-    );
+    const childTransactions = trans.is_parent
+      ? props.transactionsByParent[trans.id]
+      : null;
+    const emptyChildTransactions = props.transactionsByParent[
+      trans.is_parent ? trans.id : trans.parent_id
+    ]?.filter(t => t.amount === 0);
 
     return (
       <Transaction
         allTransactions={props.transactions}
         editing={editing}
         transaction={trans}
+        transferAccountsByTransaction={props.transferAccountsByTransaction}
+        subtransactions={childTransactions}
         showAccount={showAccount}
         showCategory={showCategory}
         showBalance={showBalances}
@@ -1885,7 +1879,7 @@ export const TransactionTable = forwardRef((props, ref) => {
   const listContainerRef = useRef(null);
   const mergedRef = useMergedRefs(tableRef, ref);
 
-  const transactions = useMemo(() => {
+  const transactionsWithExpandedSplits = useMemo(() => {
     let result;
     if (splitsExpanded.state.transitionId != null) {
       const index = props.transactions.findIndex(
@@ -1923,8 +1917,44 @@ export const TransactionTable = forwardRef((props, ref) => {
     return result;
   }, [props.transactions, splitsExpanded]);
   const transactionMap = useMemo(() => {
-    return new Map(transactions.map(trans => [trans.id, trans]));
-  }, [transactions]);
+    return new Map(
+      transactionsWithExpandedSplits.map(trans => [trans.id, trans]),
+    );
+  }, [transactionsWithExpandedSplits]);
+  const transactionsByParent = useMemo(() => {
+    return props.transactions.reduce((acc, trans) => {
+      if (trans.is_child) {
+        acc[trans.parent_id] = [...(acc[trans.parent_id] ?? []), trans];
+      }
+      return acc;
+    }, {});
+  }, [props.transactions]);
+
+  const transferAccountsByTransaction = useMemo(() => {
+    if (!props.accounts) {
+      return {};
+    }
+    const accounts = getAccountsById(props.accounts);
+    const payees = getPayeesById(props.payees);
+
+    return Object.fromEntries(
+      props.transactions.map(t => {
+        if (!props.accounts) {
+          return [t.id, null];
+        }
+
+        const payee = t.payee && payees[t.payee];
+        let transferAccount;
+        if (t._inverse) {
+          transferAccount = t.account && accounts[t.account];
+        } else {
+          transferAccount =
+            payee?.transfer_acct && accounts[payee.transfer_acct];
+        }
+        return [t.id, transferAccount || null];
+      }),
+    );
+  }, [props.transactions, props.payees, props.accounts]);
 
   useEffect(() => {
     // If it's anchored that means we've also disabled animations. To
@@ -1937,7 +1967,10 @@ export const TransactionTable = forwardRef((props, ref) => {
   }, [prevSplitsExpanded.current]);
 
   const newNavigator = useTableNavigator(newTransactions, getFields);
-  const tableNavigator = useTableNavigator(transactions, getFields);
+  const tableNavigator = useTableNavigator(
+    transactionsWithExpandedSplits,
+    getFields,
+  );
   const shouldAdd = useRef(false);
   const latestState = useRef({ newTransactions, newNavigator, tableNavigator });
   const savePending = useRef(false);
@@ -2297,8 +2330,10 @@ export const TransactionTable = forwardRef((props, ref) => {
       tableRef={mergedRef}
       listContainerRef={listContainerRef}
       {...props}
-      transactions={transactions}
+      transactions={transactionsWithExpandedSplits}
       transactionMap={transactionMap}
+      transactionsByParent={transactionsByParent}
+      transferAccountsByTransaction={transferAccountsByTransaction}
       selectedItems={selectedItems}
       isExpanded={splitsExpanded.expanded}
       onSave={onSave}
