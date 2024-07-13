@@ -54,17 +54,17 @@ export function makeBalanceAmountStyle(
     return { color: theme.errorText };
   }
 
-  if (goalValue == null) {
-    const greyed = makeAmountGrey(value);
-    if (greyed) {
-      return greyed;
-    }
-  } else {
+  if (goalValue != null) {
     if (budgetedValue < goalValue) {
       return { color: theme.warningText };
     }
+  }
+
+  if (value > 0) {
     return { color: theme.noticeText };
   }
+
+  return makeAmountGrey(value) || null;
 }
 
 export function makeAmountFullStyle(
