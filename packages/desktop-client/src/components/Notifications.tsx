@@ -13,6 +13,7 @@ import type { NotificationWithId } from 'loot-core/src/client/state-types/notifi
 import { useActions } from '../hooks/useActions';
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
+import { useResponsive } from '../ResponsiveProvider';
 import { styles, theme, type CSSProperties } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button';
@@ -245,6 +246,7 @@ function Notification({
 
 export function Notifications({ style }: { style?: CSSProperties }) {
   const { removeNotification } = useActions();
+  const { isNarrowWidth } = useResponsive();
   const notifications = useSelector(
     (state: State) => state.notifications.notifications,
   );
@@ -254,6 +256,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
         position: 'fixed',
         bottom: 20,
         right: 13,
+        left: isNarrowWidth ? 13 : undefined,
         zIndex: 10000,
         ...style,
       }}
