@@ -317,7 +317,10 @@ const TransactionHeader = memo(
 
 TransactionHeader.displayName = 'TransactionHeader';
 
-function getPayeePretty(transaction, payee, transferAcct) {
+function getPayeePretty(transaction, payee, transferAcct, numHiddenPayees = 0) {
+  const formatPayeeName = payeeName =>
+    numHiddenPayees > 0 ? `${payeeName} (+${numHiddenPayees} more)` : payeeName;
+
   const { payee: payeeId } = transaction;
 
   if (transferAcct) {
@@ -334,14 +337,14 @@ function getPayeePretty(transaction, payee, transferAcct) {
             textOverflow: 'ellipsis',
           }}
         >
-          {transferAcct.name}
+          {formatPayeeName(transferAcct.name)}
         </div>
       </View>
     );
   } else if (payee) {
-    return payee.name;
+    return formatPayeeName(payee.name);
   } else if (payeeId && payeeId.startsWith('new:')) {
-    return payeeId.slice('new:'.length);
+    return formatPayeeName(payeeId.slice('new:'.length));
   }
 
   return '';
@@ -472,15 +475,56 @@ function HeaderCell({
   );
 }
 
+const useParentPayee = (
+  payees,
+  subtransactions,
+  transferAccountsByTransaction,
+) =>
+  useMemo(() => {
+    if (!subtransactions) {
+      return null;
+    }
+
+    const { counts, mostCommonPayeeTransaction } =
+      subtransactions?.reduce(
+        ({ counts, ...result }, sub) => {
+          if (sub.payee) {
+            counts[sub.payee] = (counts[sub.payee] || 0) + 1;
+            if (counts[sub.payee] > result.maxCount) {
+              return {
+                counts,
+                maxCount: counts[sub.payee],
+                mostCommonPayeeTransaction: sub,
+              };
+            }
+          }
+          return { counts, ...result };
+        },
+        { counts: {}, maxCount: 0, mostCommonPayeeTransaction: null },
+      ) || {};
+
+    const mostCommonPayee =
+      getPayeesById(payees)[mostCommonPayeeTransaction.payee];
+    const numDistinctPayees = Object.keys(counts).length;
+    return getPayeePretty(
+      mostCommonPayeeTransaction,
+      mostCommonPayee,
+      transferAccountsByTransaction[mostCommonPayeeTransaction.id],
+      numDistinctPayees - 1,
+    );
+  }, [subtransactions, payees, transferAccountsByTransaction]);
+
 function PayeeCell({
   id,
   payee,
   focused,
   payees,
   accounts,
+  transferAccountsByTransaction,
   valueStyle,
   transaction,
-  transferAcct,
+  subtransactions,
+  transferAccount,
   isPreview,
   onEdit,
   onUpdate,
@@ -492,6 +536,12 @@ function PayeeCell({
   const isCreatingPayee = useRef(false);
 
   const dispatch = useDispatch();
+
+  const parentPayee = useParentPayee(
+    payees,
+    subtransactions,
+    transferAccountsByTransaction,
+  );
 
   return transaction.is_parent ? (
     <Cell
@@ -538,7 +588,7 @@ function PayeeCell({
               color: 'inherit',
               width: 14,
               height: 14,
-              marginRight: 2,
+              marginRight: 5,
             }}
           />
           <Text
@@ -548,7 +598,7 @@ function PayeeCell({
               userSelect: 'none',
             }}
           >
-            Split
+            {parentPayee}
           </Text>
         </View>
       </CellButton>
@@ -572,12 +622,12 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-      formatter={() => getPayeePretty(transaction, payee, transferAcct)}
+      formatter={() => getPayeePretty(transaction, payee, transferAccount)}
       unexposedContent={props => (
         <>
           <PayeeIcons
             transaction={transaction}
-            transferAccount={transferAcct}
+            transferAccount={transferAccount}
             onNavigateToTransferAccount={onNavigateToTransferAccount}
             onNavigateToSchedule={onNavigateToSchedule}
           />
@@ -1107,7 +1157,8 @@ const Transaction = memo(function Transaction({
           payees={payees.filter(payee => payee.transfer_acct !== accountId)}
           valueStyle={valueStyle}
           transaction={transaction}
-          transferAcct={transferAcct}
+          subtransactions={subtransactions}
+          transferAccountsByTransaction={transferAccountsByTransaction}
           importedPayee={importedPayee}
           isPreview={isPreview}
           onEdit={onEdit}
