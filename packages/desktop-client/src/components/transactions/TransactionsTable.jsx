@@ -524,7 +524,6 @@ function PayeeCell({
   valueStyle,
   transaction,
   subtransactions,
-  transferAccount,
   isPreview,
   onEdit,
   onUpdate,
@@ -542,6 +541,8 @@ function PayeeCell({
     subtransactions,
     transferAccountsByTransaction,
   );
+
+  const transferAccount = transferAccountsByTransaction[transaction.id];
 
   return transaction.is_parent ? (
     <Cell
