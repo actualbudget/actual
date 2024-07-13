@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useDebounceCallback } from 'usehooks-ts';
+
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
@@ -14,25 +16,30 @@ export function FloatableSidebar() {
   const { isNarrowWidth } = useResponsive();
 
   const sidebarShouldFloat = floatingSidebar || sidebar.alwaysFloats;
+  const debouncedHideSidebar = useDebounceCallback(
+    () => sidebar.setHidden(true),
+    350,
+  );
 
   return isNarrowWidth ? null : (
     <View
       onMouseOver={
         sidebarShouldFloat
           ? e => {
+              debouncedHideSidebar.cancel();
               e.stopPropagation();
               sidebar.setHidden(false);
             }
           : undefined
       }
       onMouseLeave={
-        sidebarShouldFloat ? () => sidebar.setHidden(true) : undefined
+        sidebarShouldFloat ? () => debouncedHideSidebar() : undefined
       }
       style={{
         position: sidebarShouldFloat ? 'absolute' : undefined,
-        top: 12,
+        top: 8,
         // If not floating, the -50 takes into account the transform below
-        bottom: sidebarShouldFloat ? 12 : -50,
+        bottom: sidebarShouldFloat ? 8 : -50,
         zIndex: 1001,
         borderRadius: sidebarShouldFloat ? '0 6px 6px 0' : 0,
         overflow: 'hidden',
@@ -40,7 +47,7 @@ export function FloatableSidebar() {
           !sidebarShouldFloat || sidebar.hidden
             ? 'none'
             : '0 15px 30px 0 rgba(0,0,0,0.25), 0 3px 15px 0 rgba(0,0,0,.5)',
-        transform: `translateY(${!sidebarShouldFloat ? -12 : 0}px)
+        transform: `translateY(${!sidebarShouldFloat ? -8 : 0}px)
                       translateX(${
                         sidebarShouldFloat && sidebar.hidden ? '-100' : '0'
                       }%)`,

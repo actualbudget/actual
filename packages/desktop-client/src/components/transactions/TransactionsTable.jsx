@@ -342,6 +342,7 @@ function StatusCell({
   selected,
   status,
   isChild,
+  isPreview,
   onEdit,
   onUpdate,
 }) {
@@ -384,12 +385,19 @@ function StatusCell({
           border: '1px solid transparent',
           borderRadius: 50,
           ':focus': {
-            border: '1px solid ' + theme.formInputBorderSelected,
-            boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+            ...(isPreview
+              ? {
+                  boxShadow: 'none',
+                }
+              : {
+                  border: '1px solid ' + theme.formInputBorderSelected,
+                  boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+                }),
           },
           cursor: isClearedField ? 'pointer' : 'default',
           ...(isChild && { visibility: 'hidden' }),
         }}
+        disabled={isPreview || isChild}
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
       >
@@ -1965,7 +1973,7 @@ export const TransactionTable = forwardRef((props, ref) => {
         );
 
     if (isPreviewId(item.id)) {
-      fields = ['select', 'cleared'];
+      fields = ['select'];
     }
     if (isTemporaryId(item.id)) {
       // You can't focus the select/delete button of temporary

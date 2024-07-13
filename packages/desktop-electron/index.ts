@@ -9,6 +9,7 @@ import {
   Menu,
   dialog,
   shell,
+  powerMonitor,
   protocol,
   utilityProcess,
   UtilityProcess,
@@ -23,8 +24,6 @@ import {
   get as getWindowState,
   listen as listenToWindowState,
 } from './window-state';
-
-import './setRequireHook';
 
 import './security';
 
@@ -243,7 +242,7 @@ app.on('ready', async () => {
 
   // This is mainly to aid debugging Sentry errors - it will add a
   // breadcrumb
-  require('electron').powerMonitor.on('suspend', () => {
+  powerMonitor.on('suspend', () => {
     console.log('Suspending', new Date());
   });
 
