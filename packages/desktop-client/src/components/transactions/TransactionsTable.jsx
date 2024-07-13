@@ -503,6 +503,10 @@ const useParentPayee = (
         { counts: {}, maxCount: 0, mostCommonPayeeTransaction: null },
       ) || {};
 
+    if (!mostCommonPayeeTransaction) {
+      return 'Split (no payee)';
+    }
+
     const mostCommonPayee =
       getPayeesById(payees)[mostCommonPayeeTransaction.payee];
     const numDistinctPayees = Object.keys(counts).length;
@@ -926,7 +930,7 @@ const Transaction = memo(function Transaction({
   const account = accounts && accountId && getAccountsById(accounts)[accountId];
 
   const isChild = transaction.is_child;
-  const transferAcct = transferAccountsByTransaction[transaction.id];
+  const transferAcct = transferAccountsByTransaction[id];
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
@@ -1553,6 +1557,7 @@ function NewTransaction({
   accounts,
   categoryGroups,
   payees,
+  transferAccountsByTransaction,
   editingTransaction,
   focusedField,
   showAccount,
@@ -1605,6 +1610,7 @@ function NewTransaction({
           editing={editingTransaction === transaction.id}
           transaction={transaction}
           subtransactions={transaction.is_parent ? childTransactions : null}
+          transferAccountsByTransaction={transferAccountsByTransaction}
           showAccount={showAccount}
           showCategory={showCategory}
           showBalance={showBalance}
@@ -1848,6 +1854,9 @@ function TransactionTableInner({
           >
             <NewTransaction
               transactions={props.newTransactions}
+              transferAccountsByTransaction={
+                props.transferAccountsByTransaction
+              }
               editingTransaction={newNavigator.editingId}
               focusedField={newNavigator.focusedField}
               accounts={props.accounts}
