@@ -69,7 +69,7 @@
     "node": ">=18.0.0"
   },
   "lint-staged": {
-    "*": "prettier --write"
+    "*.{js,jsx,ts,tsx,md,json}": "prettier --write"
   },
   "packageManager": "yarn@4.0.2",
   "browserslist": [

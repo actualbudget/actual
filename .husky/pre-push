@@ -1,0 +1,10 @@
+FILE=$(curl -sS "https://internal.floralily.devx/next-pr-number-api/?owner=actualbudget&name=actual" | head -n 1 | cut -d $' ' -f2)
+
+if [ -z "$FILE" ]; then
+  exit 0
+fi
+
+if [ ! -e "./upcoming-release-notes/$FILE.md" ]; then
+  echo "A release notes file is missing. Please create it in './upcoming-release-notes/$FILE.md'."
+  exit 1
+fi
