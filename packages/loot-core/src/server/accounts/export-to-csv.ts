@@ -91,13 +91,13 @@ export async function exportQueryToCSV(query) {
   // loop through parents and assign children split numbers, and parents total children numbers
   for(const parent of parentsChildCount) {
     let childNumber = 0;
-    for ( const trans of transactions) {
-      if (trans.ParentId === parent.Id ) {
+    for (const trans of transactions) {
+      if (trans.ParentId === parentsChildCount[parent][0] ) {
         childSplitOrder.set(trans.Id, childNumber);
         childNumber++;
       }
     }
-      parentsChildCount.set(parent.Id,childNumber);
+      parentsChildCount.set(parentsChildCount[parent][0],childNumber);
   }
 
   // map final properties for export and grab the child count for splits from their parent transaction
