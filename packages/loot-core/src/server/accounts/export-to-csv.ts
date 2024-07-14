@@ -79,23 +79,25 @@ export async function exportQueryToCSV(query) {
 
   // initialize a map to allow splits to have correct number of split from
   const parentsChildCount = new Map();
+  const childSplitOrder = new Map();
+
+  // first loop through and find parent transactions
   for (const trans of transactions) {
     if (trans.IsParent) {
       parentsChildCount.set(trans.Id, 0);
     }
   }
-
-  // sort order for children is negative number in their sort order, so invert when mapping
-  // count how many children each parent has by incrementing for each child found
-  const childSplitOrder = new Map();
-  for (const trans of transactions) {
-    if (trans.IsChild) {
-      childSplitOrder.set(trans.Id, trans.SortOrder * -1);
-      parentsChildCount.set(
-        trans.ParentId,
-        parentsChildCount.get(trans.ParentId) + 1,
-      );
+  
+  // loop through parents and assign children split numbers, and parents total children numbers
+  for(const parent of parentsChildCount) {
+    let childNumber = 0;
+    for ( const trans of transactions) {
+      if (trans.ParentId === parent.Id {
+        childSplitOrder.set(trans.Id, childNumber);
+        childNumber++;
+      }
     }
+      parentsChildCount.set(parent.Id,childNumber);
   }
 
   // map final properties for export and grab the child count for splits from their parent transaction
@@ -118,7 +120,8 @@ export async function exportQueryToCSV(query) {
             (trans.Notes || '')
           : trans.Notes,
       Category: trans.Category,
-      Amount: trans.Amount == null ? 0 : integerToAmount(trans.Amount),
+      Amount: trans.IsParent ? 0 : trans.Amount == null ? 0 : integerToAmount(trans.Amount),
+      Split_Amount: trans.IsParent ? trans.Amount : 0
       Cleared:
         trans.Reconciled === true
           ? 'Reconciled'
