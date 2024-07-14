@@ -8,7 +8,11 @@ import {
   makeChild as makeChildTransaction,
   recalculateSplit,
 } from '../../shared/transactions';
-import { hasFieldsChanged, amountToInteger } from '../../shared/util';
+import {
+  hasFieldsChanged,
+  amountToInteger,
+  integerToAmount,
+} from '../../shared/util';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { post } from '../post';
@@ -251,55 +255,11 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
       throw new Error('`date` is required when adding a transaction');
     }
 
-    let payee_name;
-    // When the amount is equal to 0, we need to determine
-    // if this is a "Credited" or "Debited" transaction. This means
-    // that it matters whether the amount is a positive or negative zero.
-    if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
-      const nameParts = [];
-      const name =
-        trans.debtorName ||
-        trans.remittanceInformationUnstructured ||
-        (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
-        trans.additionalInformation;
-
-      if (name) {
-        nameParts.push(title(name));
-      }
-      if (trans.debtorAccount && trans.debtorAccount.iban) {
-        nameParts.push(
-          '(' +
-            trans.debtorAccount.iban.slice(0, 4) +
-            ' XXX ' +
-            trans.debtorAccount.iban.slice(-4) +
-            ')',
-        );
-      }
-      payee_name = nameParts.join(' ');
-    } else {
-      const nameParts = [];
-      const name =
-        trans.creditorName ||
-        trans.remittanceInformationUnstructured ||
-        (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
-        trans.additionalInformation;
-
-      if (name) {
-        nameParts.push(title(name));
-      }
-      if (trans.creditorAccount && trans.creditorAccount.iban) {
-        nameParts.push(
-          '(' +
-            trans.creditorAccount.iban.slice(0, 4) +
-            ' XXX ' +
-            trans.creditorAccount.iban.slice(-4) +
-            ')',
-        );
-      }
-      payee_name = nameParts.join(' ');
+    if (trans.payeeName == null) {
+      throw new Error('`payeeName` is required when adding a transaction');
     }
 
-    trans.imported_payee = trans.imported_payee || payee_name;
+    trans.imported_payee = trans.imported_payee || trans.payeeName;
     if (trans.imported_payee) {
       trans.imported_payee = trans.imported_payee.trim();
     }
@@ -308,12 +268,12 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     // when rules are run, they have the right data. Resolving payees
     // also simplifies the payee creation process
     trans.account = acctId;
-    trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
+    trans.payee = await resolvePayee(trans, trans.payeeName, payeesToCreate);
 
     trans.cleared = Boolean(trans.booked);
 
     normalized.push({
-      payee_name,
+      payee_name: trans.payeeName,
       trans: {
         amount: amountToInteger(trans.amount),
         payee: trans.payee,
@@ -350,12 +310,117 @@ export async function reconcileTransactions(
   transactions,
   isBankSyncAccount = false,
   useFuzzyMatchV2 = true,
+  isPreview = false,
 ) {
   console.log('Performing transaction reconciliation');
 
-  const hasMatched = new Set();
   const updated = [];
   const added = [];
+  const updatedPreview = [];
+  const existingPayeeMap = new Map<string, string>();
+
+  const {
+    payeesToCreate,
+    transactionsStep1,
+    transactionsStep2,
+    transactionsStep3,
+  } = await matchTransactions(acctId, transactions, isBankSyncAccount);
+
+  // Finally, generate & commit the changes
+  for (const { trans, subtransactions, match } of transactionsStep3) {
+    if (match && !trans.forceAddTransaction) {
+      // Skip updating already reconciled (locked) transactions
+      if (match.reconciled) {
+        updatedPreview.push({ transaction: trans, ignored: true });
+        continue;
+      }
+
+      // TODO: change the above sql query to use aql
+      const existing = {
+        ...match,
+        cleared: match.cleared === 1,
+        date: db.fromDateRepr(match.date),
+      };
+
+      // Update the transaction
+      const updates = {
+        imported_id: trans.imported_id || null,
+        payee: existing.payee || trans.payee || null,
+        category: existing.category || trans.category || null,
+        imported_payee: trans.imported_payee || null,
+        notes: existing.notes || trans.notes || null,
+        cleared: trans.cleared != null ? trans.cleared : true,
+      };
+
+      if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
+        updated.push({ id: existing.id, ...updates });
+        if (!existingPayeeMap.has(existing.payee)) {
+          const payee = await db.getPayee(existing.payee);
+          existingPayeeMap.set(existing.payee, payee?.name);
+        }
+        existing.payee_name = existingPayeeMap.get(existing.payee);
+        existing.amount = integerToAmount(existing.amount);
+        updatedPreview.push({ transaction: trans, existing });
+      } else {
+        updatedPreview.push({ transaction: trans, ignored: true });
+      }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
+      }
+    } else {
+      // Insert a new transaction
+      const { forceAddTransaction, ...newTrans } = trans;
+      const finalTransaction = {
+        ...newTrans,
+        id: uuidv4(),
+        category: trans.category || null,
+        cleared: trans.cleared != null ? trans.cleared : true,
+      };
+
+      if (subtransactions && subtransactions.length > 0) {
+        added.push(...makeSplitTransaction(finalTransaction, subtransactions));
+      } else {
+        added.push(finalTransaction);
+      }
+    }
+  }
+
+  if (!isPreview) {
+    await createNewPayees(payeesToCreate, [...added, ...updated]);
+    await batchUpdateTransactions({ added, updated });
+  }
+
+  console.log('Debug data for the operations:', {
+    transactionsStep1,
+    transactionsStep2,
+    transactionsStep3,
+    added,
+    updated,
+    updatedPreview,
+  });
+
+  return {
+    added: added.map(trans => trans.id),
+    updated: updated.map(trans => trans.id),
+    updatedPreview,
+  };
+}
+
+export async function matchTransactions(
+  acctId,
+  transactions,
+  isBankSyncAccount = false,
+) {
+  console.log('Performing transaction reconciliation matching');
+
+  const hasMatched = new Set();
 
   const transactionNormalization = isBankSyncAccount
     ? normalizeBankSyncTransactions
@@ -399,7 +464,6 @@ export async function reconcileTransactions(
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
       // fields.
-
       const sevenDaysBefore = db.toDateRepr(monthUtils.subDays(trans.date, 7));
       const sevenDaysAfter = db.toDateRepr(monthUtils.addDays(trans.date, 7));
       // useFuzzyMatchV2 has the added behaviour of only matching on transactions with no import ID
@@ -495,75 +559,11 @@ export async function reconcileTransactions(
     return data;
   });
 
-  // Finally, generate & commit the changes
-  for (const { trans, subtransactions, match } of transactionsStep3) {
-    if (match) {
-      // Skip updating already reconciled (locked) transactions
-      if (match.reconciled) {
-        continue;
-      }
-
-      // TODO: change the above sql query to use aql
-      const existing = {
-        ...match,
-        cleared: match.cleared === 1,
-        date: db.fromDateRepr(match.date),
-      };
-
-      // Update the transaction
-      const updates = {
-        imported_id: trans.imported_id || null,
-        payee: existing.payee || trans.payee || null,
-        category: existing.category || trans.category || null,
-        imported_payee: trans.imported_payee || null,
-        notes: existing.notes || trans.notes || null,
-        cleared: trans.cleared != null ? trans.cleared : true,
-      };
-
-      if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
-        updated.push({ id: existing.id, ...updates });
-      }
-
-      if (existing.is_parent && existing.cleared !== updates.cleared) {
-        const children = await db.all(
-          'SELECT id FROM v_transactions WHERE parent_id = ?',
-          [existing.id],
-        );
-        for (const child of children) {
-          updated.push({ id: child.id, cleared: updates.cleared });
-        }
-      }
-    } else {
-      // Insert a new transaction
-      const finalTransaction = {
-        ...trans,
-        id: uuidv4(),
-        category: trans.category || null,
-        cleared: trans.cleared != null ? trans.cleared : true,
-      };
-
-      if (subtransactions && subtransactions.length > 0) {
-        added.push(...makeSplitTransaction(finalTransaction, subtransactions));
-      } else {
-        added.push(finalTransaction);
-      }
-    }
-  }
-
-  await createNewPayees(payeesToCreate, [...added, ...updated]);
-  await batchUpdateTransactions({ added, updated });
-
-  console.log('Debug data for the operations:', {
+  return {
+    payeesToCreate,
     transactionsStep1,
     transactionsStep2,
     transactionsStep3,
-    added,
-    updated,
-  });
-
-  return {
-    added: added.map(trans => trans.id),
-    updated: updated.map(trans => trans.id),
   };
 }
 

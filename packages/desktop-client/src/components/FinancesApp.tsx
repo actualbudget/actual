@@ -42,7 +42,7 @@ import { ScrollProvider } from './ScrollProvider';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
-import { Titlebar, TitlebarProvider } from './Titlebar';
+import { Titlebar } from './Titlebar';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -246,15 +246,13 @@ export function FinancesApp() {
 
   return (
     <SpreadsheetProvider>
-      <TitlebarProvider>
-        <SidebarProvider>
-          <BudgetMonthCountProvider>
-            <DndProvider backend={Backend}>
-              <ScrollProvider>{app}</ScrollProvider>
-            </DndProvider>
-          </BudgetMonthCountProvider>
-        </SidebarProvider>
-      </TitlebarProvider>
+      <SidebarProvider>
+        <BudgetMonthCountProvider>
+          <DndProvider backend={Backend}>
+            <ScrollProvider>{app}</ScrollProvider>
+          </DndProvider>
+        </BudgetMonthCountProvider>
+      </SidebarProvider>
     </SpreadsheetProvider>
   );
 }

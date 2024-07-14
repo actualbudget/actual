@@ -16,6 +16,7 @@ export { SvgCheck } from './Check';
 export { SvgCloudUnknown } from './CloudUnknown';
 export { SvgCloudUpload } from './CloudUpload';
 export { SvgCustomNotesPaper } from './CustomNotesPaper';
+export { SvgDownAndRightArrow } from './DownAndRightArrow';
 export { SvgDownloadThickBottom } from './DownloadThickBottom';
 export { SvgEditSkull1 } from './EditSkull1';
 export { SvgFavoriteStar } from './FavoriteStar';
