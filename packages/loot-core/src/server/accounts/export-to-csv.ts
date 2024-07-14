@@ -92,7 +92,7 @@ export async function exportQueryToCSV(query) {
   for(const parent of parentsChildCount) {
     let childNumber = 0;
     for ( const trans of transactions) {
-      if (trans.ParentId === parent.Id {
+      if (trans.ParentId === parent.Id ) {
         childSplitOrder.set(trans.Id, childNumber);
         childNumber++;
       }
@@ -121,7 +121,7 @@ export async function exportQueryToCSV(query) {
           : trans.Notes,
       Category: trans.Category,
       Amount: trans.IsParent ? 0 : trans.Amount == null ? 0 : integerToAmount(trans.Amount),
-      Split_Amount: trans.IsParent ? trans.Amount : 0
+      Split_Amount: trans.IsParent ? trans.Amount : 0,
       Cleared:
         trans.Reconciled === true
           ? 'Reconciled'
