@@ -54,10 +54,10 @@ export function LoggedInUser({
         await closeBudget();
         window.__navigate('/login');
         break;
-      case 'admin':
-        navigate('/admin');
+      case 'users':
+        navigate('/users');
         break;
-        case 'sign-out':
+      case 'sign-out':
         signOut();
         break;
       case 'config-server':
@@ -134,7 +134,8 @@ export function LoggedInUser({
                 text: 'Change password',
               },
             serverUrl && { name: 'sign-out', text: 'Sign out' },
-            serverUrl && { name: 'admin', text: 'Admin Dashboard' },
+            serverUrl &&
+              !userData?.offline && { name: 'users', text: 'User Management' },
             {
               name: 'config-server',
               text: serverUrl ? 'Change server URL' : 'Start using a server',
