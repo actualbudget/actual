@@ -83,7 +83,6 @@ export function ImportYNAB5({ modalProps }: ImportProps) {
             <View>
               <ButtonWithLoading
                 variant="primary"
-                aria-label="Select file"
                 isLoading={importing}
                 onPress={onImport}
               >

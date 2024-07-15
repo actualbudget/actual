@@ -64,31 +64,19 @@ export function Import({ modalProps, actions }: ImportProps) {
             process.
           </Text>
 
-          <Button
-            aria-label="YNAB4"
-            style={itemStyle}
-            onPress={() => onSelectType('ynab4')}
-          >
+          <Button style={itemStyle} onPress={() => onSelectType('ynab4')}>
             <span style={{ fontWeight: 700 }}>YNAB4</span>
             <View style={{ color: theme.pageTextLight }}>
               The old unsupported desktop app
             </View>
           </Button>
-          <Button
-            aria-label="nYNAB"
-            style={itemStyle}
-            onPress={() => onSelectType('ynab5')}
-          >
+          <Button style={itemStyle} onPress={() => onSelectType('ynab5')}>
             <span style={{ fontWeight: 700 }}>nYNAB</span>
             <View style={{ color: theme.pageTextLight }}>
               <div>The newer web app</div>
             </View>
           </Button>
-          <Button
-            aria-label="Actual"
-            style={itemStyle}
-            onPress={() => onSelectType('actual')}
-          >
+          <Button style={itemStyle} onPress={() => onSelectType('actual')}>
             <span style={{ fontWeight: 700 }}>Actual</span>
             <View style={{ color: theme.pageTextLight }}>
               <div>Import a file exported from Actual</div>

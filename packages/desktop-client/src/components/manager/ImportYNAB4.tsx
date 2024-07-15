@@ -73,7 +73,6 @@ export function ImportYNAB4({ modalProps }: ImportProps) {
             <View>
               <ButtonWithLoading
                 variant="primary"
-                aria-label="Select zip file"
                 isLoading={importing}
                 onPress={onImport}
               >

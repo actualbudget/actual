@@ -84,7 +84,6 @@ export function ImportActual({ modalProps }: ImportProps) {
             <View style={{ alignSelf: 'center' }}>
               <ButtonWithLoading
                 variant="primary"
-                aria-label="Select file"
                 isLoading={importing}
                 onPress={onImport}
               >
