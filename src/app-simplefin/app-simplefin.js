@@ -2,7 +2,6 @@ import express from 'express';
 import { inspect } from 'util';
 import https from 'https';
 import { SecretName, secretsService } from '../services/secrets-service.js';
-import { formatPayeeName } from '../util/payee-name.js';
 import { handleError } from '../app-gocardless/util/handle-error.js';
 
 const app = express();
@@ -144,9 +143,7 @@ app.post(
           .split('T')[0];
 
         newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
-        newTrans.debtorName = trans.payee;
-        newTrans.payeeName = formatPayeeName(trans);
-        //newTrans.debtorAccount = don't have compared to GoCardless
+        newTrans.payeeName = trans.payee;
         newTrans.remittanceInformationUnstructured = trans.description;
         newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
         newTrans.transactionId = trans.id;
