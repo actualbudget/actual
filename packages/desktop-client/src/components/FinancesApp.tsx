@@ -17,7 +17,8 @@ import { type State } from 'loot-core/src/client/state-types';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
-import { AuthProvider } from '../auth/AuthProvider';
+import { ProtectedRoute } from '../auth/ProtectedRoute';
+import { Permissions } from '../auth/types';
 import { useAccounts } from '../hooks/useAccounts';
 import { useActions } from '../hooks/useActions';
 import { useNavigate } from '../hooks/useNavigate';
@@ -218,6 +219,20 @@ function FinancesAppWithoutContext() {
                     <WideNotSupported>
                       <Category />
                     </WideNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/users"
+                  element={
+                    <ProtectedRoute
+                      permission={Permissions.ADMINISTRATOR}
+                      element={
+                        <NarrowNotSupported>
+                          <WideComponent name="Users" />
+                        </NarrowNotSupported>
+                      }
+                    />
                   }
                 />
 

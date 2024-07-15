@@ -4,7 +4,6 @@ import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
-import { Permissions } from '../../auth/types';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -106,9 +105,7 @@ export function Schedules() {
           flexShrink: 0,
         }}
       >
-        <Button onPress={onDiscover}>
-          Find schedules
-        </Button>
+        <Button onPress={onDiscover}>Find schedules</Button>
         <Button variant="primary" onPress={onAdd}>
           Add new schedule
         </Button>

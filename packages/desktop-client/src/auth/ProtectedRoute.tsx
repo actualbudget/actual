@@ -1,11 +1,11 @@
 import { type ReactElement } from 'react';
-import { useLocation, Navigate } from 'react-router-dom';
 
-import { useAuth } from './AuthProvider';
-import { type Permissions } from './types';
 import { View } from '../components/common/View';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
+
+import { useAuth } from './AuthProvider';
+import { type Permissions } from './types';
 
 type ProtectedRouteProps = {
   permission: Permissions;
@@ -17,18 +17,20 @@ export const ProtectedRoute = ({
   permission,
 }: ProtectedRouteProps) => {
   const { hasPermission } = useAuth();
-  const location = useLocation();
   const { isNarrowWidth } = useResponsive();
 
   return hasPermission(permission) ? (
     element
   ) : (
-    <View style={{margin: '50px',
-      backgroundColor: isNarrowWidth
+    <View
+      style={{
+        margin: '50px',
+        backgroundColor: isNarrowWidth
           ? theme.mobilePageBackground
-          : theme.pageBackground
-    }}>
-      <h3>You don't have permission to view this</h3>
+          : theme.pageBackground,
+      }}
+    >
+      <h3>You don&apos;t have permission to view this</h3>
     </View>
   );
 };

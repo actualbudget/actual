@@ -1,5 +1,5 @@
-import { View } from "../common/View";
+import { View } from '../common/View';
 
 export function Users() {
-    return <View>Users</View>
+  return <View>Users</View>;
 }

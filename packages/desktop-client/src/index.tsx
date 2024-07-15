@@ -25,6 +25,7 @@ import { initialState as initialAppState } from 'loot-core/src/client/reducers/a
 import { send } from 'loot-core/src/platform/client/fetch';
 import { q } from 'loot-core/src/shared/query';
 
+import { AuthProvider } from './auth/AuthProvider';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
@@ -33,7 +34,6 @@ import { type BoundActions } from './hooks/useActions';
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 import 'focus-visible';
-import { AuthProvider } from './auth/AuthProvider';
 
 const appReducer = combineReducers(reducers);
 function rootReducer(state, action) {

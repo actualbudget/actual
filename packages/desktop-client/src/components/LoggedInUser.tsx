@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { type State } from 'loot-core/src/client/state-types';
 
 import { useActions } from '../hooks/useActions';
+import { useNavigate } from '../hooks/useNavigate';
 import { theme, styles, type CSSProperties } from '../style';
 
 import { Button } from './common/Button';
@@ -14,7 +15,6 @@ import { Text } from './common/Text';
 import { View } from './common/View';
 import { BlurredOverlay } from './PrivacyFilter';
 import { useServerURL } from './ServerContext';
-import { useNavigate } from '../hooks/useNavigate';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
