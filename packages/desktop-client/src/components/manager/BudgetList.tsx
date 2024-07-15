@@ -460,7 +460,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           <Button
             variant="primary"
             aria-label="Create new file"
-            onPress={onCreate}
+            onPress={() => onCreate()}
             style={{
               ...narrowButtonStyle,
               marginLeft: 10,
