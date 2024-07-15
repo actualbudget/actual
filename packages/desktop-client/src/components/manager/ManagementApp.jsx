@@ -106,8 +106,9 @@ export function ManagementApp({ isLoading }) {
   }
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <View  style={{ height: '100%', color: theme.pageText }}>
+     {/* <AuthProvider>
+       <BrowserRouter> */}
         <ExposeNavigate />
         <View style={{ height: '100%', color: theme.pageText }}>
           <View
@@ -156,12 +157,7 @@ export function ManagementApp({ isLoading }) {
 
                     <Route
                       path="/change-password"
-                      element={
-                        <ProtectedRoute
-                          permission={Permissions.CAN_EDIT}
-                          element={<ChangePassword />}
-                        />
-                      }
+                      element={<ChangePassword />}
                     />
                     {files && files.length > 0 ? (
                       <Route path="/" element={<BudgetList />} />
@@ -219,7 +215,8 @@ export function ManagementApp({ isLoading }) {
           <Version />
         </View>
         <Modals />
-      </BrowserRouter>
-    </AuthProvider>
+      {/* </BrowserRouter>
+    </AuthProvider> */}
+    </View>
   );
 }

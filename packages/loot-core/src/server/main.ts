@@ -1234,6 +1234,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 });
 
 handlers['save-global-prefs'] = async function (prefs) {
+  debugger;
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }

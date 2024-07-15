@@ -14,6 +14,7 @@ import { Text } from './common/Text';
 import { View } from './common/View';
 import { BlurredOverlay } from './PrivacyFilter';
 import { useServerURL } from './ServerContext';
+import { useNavigate } from '../hooks/useNavigate';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
@@ -31,6 +32,7 @@ export function LoggedInUser({
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
   const triggerRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getUserData().then(() => setLoading(false));
@@ -52,7 +54,10 @@ export function LoggedInUser({
         await closeBudget();
         window.__navigate('/login');
         break;
-      case 'sign-out':
+      case 'admin':
+        navigate('/admin');
+        break;
+        case 'sign-out':
         signOut();
         break;
       case 'config-server':
@@ -129,6 +134,7 @@ export function LoggedInUser({
                 text: 'Change password',
               },
             serverUrl && { name: 'sign-out', text: 'Sign out' },
+            serverUrl && { name: 'admin', text: 'Admin Dashboard' },
             {
               name: 'config-server',
               text: serverUrl ? 'Change server URL' : 'Start using a server',

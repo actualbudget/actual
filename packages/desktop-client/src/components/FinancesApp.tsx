@@ -117,8 +117,9 @@ function FinancesAppWithoutContext() {
   }, []);
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <View style={{ height: '100%' }}>
+     {/* <AuthProvider>
+       <BrowserRouter> */}
         <RouterBehaviors />
         <ExposeNavigate />
 
@@ -187,12 +188,7 @@ function FinancesAppWithoutContext() {
                   <Route path="/rules" element={<ManageRulesPage />} />
                   <Route
                     path="/settings"
-                    element={
-                      <ProtectedRoute
-                        permission={Permissions.CAN_DELETE}
-                        element={<Settings />}
-                      />
-                    }
+                    element={<Settings />}
                   />
 
                   <Route
@@ -252,8 +248,9 @@ function FinancesAppWithoutContext() {
             </View>
           </View>
         </View>
-      </BrowserRouter>
-    </AuthProvider>
+       {/* </BrowserRouter>
+     </AuthProvider> */}
+    </View>
   );
 }
 

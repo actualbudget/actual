@@ -35,6 +35,8 @@ import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { MobileWebMessage } from './mobile/MobileWebMessage';
 import { UpdateNotification } from './UpdateNotification';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Admin } from './admin/Admin';
 
 type AppInnerProps = {
   budgetId: string;
@@ -116,12 +118,23 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
       {(initializing || !budgetId) && (
         <AppBackground initializing={initializing} loadingText={loadingText} />
       )}
-      {!initializing &&
-        (budgetId ? (
-          <FinancesApp />
-        ) : (
-          <ManagementApp isLoading={loadingText != null} />
-        ))}
+      {!initializing && (
+        <BrowserRouter>
+          <Routes>
+            <Route path="/admin/*" element={<Admin />} />
+            <Route
+              path="/*"
+              element={
+                budgetId ? (
+                  <FinancesApp />
+                ) : (
+                  <ManagementApp isLoading={loadingText != null} />
+                )
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      )}
 
       <UpdateNotification />
       <MobileWebMessage />

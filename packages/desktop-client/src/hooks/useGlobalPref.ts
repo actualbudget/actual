@@ -15,6 +15,7 @@ export function useGlobalPref<K extends keyof GlobalPrefs>(
   const dispatch = useDispatch();
   const setGlobalPref = useCallback<SetGlobalPrefAction<K>>(
     value => {
+      debugger;
       dispatch(saveGlobalPrefs({ [prefName]: value } as GlobalPrefs));
     },
     [prefName, dispatch],

@@ -33,6 +33,10 @@ import { type BoundActions } from './hooks/useActions';
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 import 'focus-visible';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Admin } from './components/admin/Admin';
+import { AuthProvider } from './auth/AuthProvider';
+import { AdminApp } from './components/admin/AdminApp';
 
 const appReducer = combineReducers(reducers);
 function rootReducer(state, action) {
@@ -89,7 +93,9 @@ const root = createRoot(container);
 root.render(
   <Provider store={store}>
     <ServerProvider>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </ServerProvider>
   </Provider>,
 );

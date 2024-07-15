@@ -78,7 +78,6 @@ function EmptyMessage({ onAdd }) {
         </Text>
 
         <Button variant="primary" style={{ marginTop: 20 }} onPress={onAdd}>
-          permission={Permissions.CAN_EDIT}
           Add account
         </Button>
 

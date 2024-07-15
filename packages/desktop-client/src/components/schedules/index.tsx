@@ -106,7 +106,7 @@ export function Schedules() {
           flexShrink: 0,
         }}
       >
-        <Button permission={Permissions.CAN_EDIT} onPress={onDiscover}>
+        <Button onPress={onDiscover}>
           Find schedules
         </Button>
         <Button variant="primary" onPress={onAdd}>

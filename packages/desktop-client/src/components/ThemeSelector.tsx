@@ -30,6 +30,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
   } as const;
 
   function onMenuSelect(newTheme: Theme) {
+    console.log(newTheme);
     setMenuOpen(false);
     switchTheme(newTheme);
   }
