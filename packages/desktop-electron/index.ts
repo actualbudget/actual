@@ -13,6 +13,8 @@ import {
   protocol,
   utilityProcess,
   UtilityProcess,
+  OpenDialogSyncOptions,
+  SaveDialogOptions,
 } from 'electron';
 import isDev from 'electron-is-dev';
 // @ts-strict-ignore
@@ -269,11 +271,18 @@ app.on('activate', () => {
   }
 });
 
+export type GetBootstrapDataPayload = {
+  version: string;
+  isDev: boolean;
+};
+
 ipcMain.on('get-bootstrap-data', event => {
-  event.returnValue = {
+  const payload: GetBootstrapDataPayload = {
     version: app.getVersion(),
     isDev,
   };
+
+  event.returnValue = payload;
 });
 
 ipcMain.handle('relaunch', () => {
@@ -281,16 +290,33 @@ ipcMain.handle('relaunch', () => {
   app.exit();
 });
 
-ipcMain.handle('open-file-dialog', (event, { filters, properties }) => {
-  return dialog.showOpenDialogSync({
-    properties: properties || ['openFile'],
-    filters,
-  });
-});
+export type OpenFileDialogPayload = {
+  properties: OpenDialogSyncOptions['properties'];
+  filters?: OpenDialogSyncOptions['filters'];
+};
+
+ipcMain.handle(
+  'open-file-dialog',
+  (_event, { filters, properties }: OpenFileDialogPayload) => {
+    return dialog.showOpenDialogSync({
+      properties: properties || ['openFile'],
+      filters,
+    });
+  },
+);
+
+export type SaveFileDialogPayload = {
+  title: SaveDialogOptions['title'];
+  defaultPath?: SaveDialogOptions['defaultPath'];
+  fileContents: string | NodeJS.ArrayBufferView;
+};
 
 ipcMain.handle(
   'save-file-dialog',
-  async (event, { title, defaultPath, fileContents }) => {
+  async (
+    _event,
+    { title, defaultPath, fileContents }: SaveFileDialogPayload,
+  ) => {
     const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
 
     return new Promise<void>((resolve, reject) => {
@@ -327,15 +353,15 @@ ipcMain.on('screenshot', () => {
   }
 });
 
-ipcMain.on('update-menu', (event, budgetId?: string) => {
+ipcMain.on('update-menu', (_event, budgetId?: string) => {
   updateMenu(budgetId);
 });
 
-ipcMain.on('set-theme', theme => {
+ipcMain.on('set-theme', (_event, theme: string) => {
   const obj = { theme };
   if (clientWin) {
     clientWin.webContents.executeJavaScript(
-      `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${obj})`,
+      `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${JSON.stringify(obj)})`,
     );
   }
 });
