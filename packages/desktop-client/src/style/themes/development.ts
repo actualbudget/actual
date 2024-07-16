@@ -75,6 +75,7 @@ export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
+export const mobileTransactionSelected = colorPalette.purple500;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = mobileHeaderBackground;
@@ -202,4 +203,5 @@ export const budgetHeaderCurrentMonth = budgetOtherMonth;
 export const budgetHeaderOtherMonth = colorPalette.gray80;
 
 export const floatingActionBarBackground = colorPalette.purple400;
+export const floatingActionBarBorder = floatingActionBarBackground;
 export const floatingActionBarText = colorPalette.navy50;

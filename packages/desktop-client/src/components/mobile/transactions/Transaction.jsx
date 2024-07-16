@@ -126,7 +126,7 @@ export const Transaction = memo(function Transaction({
         backgroundColor: theme.tableBackground,
         border: 'none',
         ...(isSelected && {
-          borderLeft: `4px solid ${theme.pillBorderSelected}`,
+          borderLeft: `4px solid ${theme.mobileTransactionSelected}`,
         }),
         userSelect: 'none',
         width: '100%',

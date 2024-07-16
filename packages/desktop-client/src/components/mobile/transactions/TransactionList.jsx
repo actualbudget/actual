@@ -217,6 +217,7 @@ function FloatingActionBar({
         height: 60,
         zIndex: 100,
         borderRadius: 8,
+        border: `1px solid ${theme.floatingActionBarBorder}`,
         ...style,
       }}
     >
