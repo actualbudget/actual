@@ -146,7 +146,6 @@ async function storeTemplates() {
   }
 }
 
-//type is the directive class of the template to return
 async function getTemplates(category, directive: string) {
   //retrieves template definitions from the database
   const goal_def = await db.all(
@@ -224,12 +223,10 @@ async function processTemplate(
         categories_remove.push(c);
       } else {
         // add all categories with a template to the list to unset budget
-        if (template) {
-          if (template.length > 0) {
-            setToZero.push({
-              category: category.id,
-            });
-          }
+        if (template?.length > 0) {
+          setToZero.push({
+            category: category.id,
+          });
         }
       }
     }
