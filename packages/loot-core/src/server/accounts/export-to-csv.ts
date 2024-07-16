@@ -120,7 +120,7 @@ export async function exportQueryToCSV(query) {
             (trans.Notes || '')
           : trans.Notes,
       Category: trans.Category,
-      Amount: trans.IsParent ? 0 : trans.Amount == null
+      Amount: trans.IsParent
         ? 0
         : trans.Amount == null
         : integerToAmount(trans.Amount),
