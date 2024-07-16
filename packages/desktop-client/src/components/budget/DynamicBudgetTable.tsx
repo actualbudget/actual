@@ -103,6 +103,7 @@ export const DynamicBudgetTable = (props: DynamicBudgetTableProps) => {
       preventDefault: true,
       scopes: ['app'],
     },
+    [props, props.startMonth, props.maxMonths],
   );
   useHotkeys(
     'right',
@@ -116,6 +117,7 @@ export const DynamicBudgetTable = (props: DynamicBudgetTableProps) => {
       preventDefault: true,
       scopes: ['app'],
     },
+    [props, props.startMonth, props.maxMonths],
   );
   useHotkeys(
     '0',
@@ -132,6 +134,7 @@ export const DynamicBudgetTable = (props: DynamicBudgetTableProps) => {
       preventDefault: true,
       scopes: ['app'],
     },
+    [props, props.maxMonths],
   );
 
   return (

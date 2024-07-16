@@ -73,6 +73,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
       preventDefault: true,
       scopes: ['app'],
     },
+    [setPrivacyEnabledPref, isPrivacyEnabled],
   );
 
   return (
