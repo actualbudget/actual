@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
 
+import { type CSSProperties } from '../../style';
 import { Modal, type ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -12,6 +13,7 @@ type KeyboardShortcutsModalProps = {
 
 type KeyIconProps = {
   shortcut: string;
+  style?: CSSProperties;
 };
 
 type GroupHeadingProps = {
@@ -23,9 +25,10 @@ type ShortcutProps = {
   description: string;
   meta?: string;
   shift?: boolean;
+  style?: CSSProperties;
 };
 
-function KeyIcon({ shortcut }: KeyIconProps) {
+function KeyIcon({ shortcut, style }: KeyIconProps) {
   return (
     <div
       style={{
@@ -41,6 +44,7 @@ function KeyIcon({ shortcut }: KeyIconProps) {
         minHeight: 35,
         filter: 'drop-shadow(1px 1px)',
         padding: 5,
+        ...style,
       }}
     >
       {shortcut}
@@ -63,7 +67,13 @@ function GroupHeading({ group }: GroupHeadingProps) {
   );
 }
 
-function Shortcut({ shortcut, description, meta, shift }: ShortcutProps) {
+function Shortcut({
+  shortcut,
+  description,
+  meta,
+  shift,
+  style,
+}: ShortcutProps) {
   return (
     <div
       style={{
@@ -119,7 +129,7 @@ function Shortcut({ shortcut, description, meta, shift }: ShortcutProps) {
               </Text>
             </>
           )}
-          <KeyIcon shortcut={shortcut} />
+          <KeyIcon shortcut={shortcut} style={style} />
         </div>
         <div
           style={{
@@ -165,7 +175,13 @@ export function KeyboardShortcutModal({
           <Shortcut shortcut="?" description="Show this help dialog" />
           <Shortcut shortcut="P" description="Toggle the privacy filter" />
           {onBudget && (
-            <Shortcut shortcut="0" description="View current month" />
+            <Shortcut
+              shortcut="0"
+              description="View current month"
+              style={{
+                fontVariantNumeric: 'slashed-zero',
+              }}
+            />
           )}
           {onAccounts && (
             <>
