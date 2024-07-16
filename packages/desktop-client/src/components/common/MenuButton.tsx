@@ -4,7 +4,7 @@ import { SvgDotsHorizontalTriple } from '../../icons/v1';
 
 import { Button } from './Button2';
 
-type MenuButtonProps = ComponentPropsWithoutRef<Button>;
+type MenuButtonProps = ComponentPropsWithoutRef<typeof Button>;
 
 export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(
   (props, ref) => {
