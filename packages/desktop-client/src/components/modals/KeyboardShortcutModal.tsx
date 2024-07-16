@@ -261,7 +261,7 @@ export function KeyboardShortcutModal({
                 description="Move left when editing"
                 shift={true}
               />
-              <Shortcut shortcut="A" description="Add a new transaction" />
+              <Shortcut shortcut="T" description="Add a new transaction" />
               <Shortcut shortcut="F" description="Filter transactions" />
               <GroupHeading group="With transaction(s) selected" />
               <Shortcut
