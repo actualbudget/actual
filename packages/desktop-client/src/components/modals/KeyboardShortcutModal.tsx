@@ -146,6 +146,7 @@ export function KeyboardShortcutModal({
   modalProps,
 }: KeyboardShortcutsModalProps) {
   const location = useLocation();
+  const onBudget = location.pathname.startsWith('/budget');
   const onAccounts = location.pathname.startsWith('/accounts');
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   return (
@@ -162,10 +163,18 @@ export function KeyboardShortcutModal({
             meta={ctrl}
           />
           <Shortcut shortcut="?" description="Show this help dialog" />
+          {onBudget && (
+            <>
+              <Shortcut shortcut="←" description="View previous month" />
+              <Shortcut shortcut="→" description="View next month" />
+            </>
+          )}
           {onAccounts && (
             <>
               <Shortcut shortcut="Enter" description="Move down when editing" />
               <Shortcut shortcut="Tab" description="Move right when editing" />
+              <Shortcut shortcut="I" description="Import transactions" />
+              <Shortcut shortcut="B" description="Bank sync" meta={ctrl} />
               <GroupHeading group="Select a transaction, then" />
               <Shortcut
                 shortcut="J"
@@ -212,6 +221,11 @@ export function KeyboardShortcutModal({
             shift={true}
             meta={ctrl}
           />
+          {onBudget && (
+            <>
+              <Shortcut shortcut="0" description="View current month" />
+            </>
+          )}
           {onAccounts && (
             <>
               <Shortcut
@@ -224,6 +238,8 @@ export function KeyboardShortcutModal({
                 description="Move left when editing"
                 shift={true}
               />
+              <Shortcut shortcut="A" description="Add a new transaction" />
+              <Shortcut shortcut="F" description="Filter transactions" />
               <GroupHeading group="With transaction(s) selected" />
               <Shortcut
                 shortcut="F"
