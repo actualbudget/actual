@@ -163,11 +163,9 @@ export function KeyboardShortcutModal({
             meta={ctrl}
           />
           <Shortcut shortcut="?" description="Show this help dialog" />
+          <Shortcut shortcut="P" description="Toggle the privacy filter" />
           {onBudget && (
-            <>
-              <Shortcut shortcut="←" description="View previous month" />
-              <Shortcut shortcut="→" description="View next month" />
-            </>
+            <Shortcut shortcut="0" description="View current month" />
           )}
           {onAccounts && (
             <>
@@ -222,7 +220,10 @@ export function KeyboardShortcutModal({
             meta={ctrl}
           />
           {onBudget && (
-            <Shortcut shortcut="0" description="View current month" />
+            <>
+              <Shortcut shortcut="←" description="View previous month" />
+              <Shortcut shortcut="→" description="View next month" />
+            </>
           )}
           {onAccounts && (
             <>
