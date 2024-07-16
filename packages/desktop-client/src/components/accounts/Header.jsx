@@ -131,7 +131,7 @@ export function AccountHeader({
     [searchInput],
   );
   useHotkeys(
-    'n',
+    'a',
     () => onAddTransaction(),
     {
       preventDefault: true,
