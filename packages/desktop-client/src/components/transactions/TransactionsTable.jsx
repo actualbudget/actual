@@ -61,6 +61,7 @@ import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
@@ -79,7 +80,6 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
-import { Tooltip } from '../tooltips';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -681,6 +681,7 @@ function PayeeIcons({
 }
 
 const Transaction = memo(function Transaction({
+  allTransactions,
   transaction: originalTransaction,
   subtransactions,
   editing,
@@ -711,9 +712,12 @@ const Transaction = memo(function Transaction({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onNotesTagClick,
+  splitError,
+  listContainerRef,
 }) {
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
+  const triggerRef = useRef(null);
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
@@ -881,8 +885,31 @@ const Transaction = memo(function Transaction({
     ? balance
     : balance + (_inverse ? -1 : 1) * amount;
 
+  // Ok this entire logic is a dirty, dirty hack.. but let me explain.
+  // Problem: the split-error Popover (which has the buttons to distribute/add split)
+  // renders before schedules are added to the table. After schedules finally load
+  // the entire table gets pushed down. But the Popover does not re-calculate
+  // its positioning. This is because there is nothing in react-aria that would be
+  // watching for the position of the trigger element.
+  // Solution: when transactions (this includes schedules) change - we increment
+  // a variable (with a small delay in order for the next render cycle to pick up
+  // the change instead of the current). We pass the integer to the Popover which
+  // causes it to re-calculate the positioning. Thus fixing the problem.
+  const [updateId, setUpdateId] = useState(1);
+  useEffect(() => {
+    // The hack applies to only transactions with split errors
+    if (!splitError) {
+      return;
+    }
+
+    setTimeout(() => {
+      setUpdateId(state => state + 1);
+    }, 1);
+  }, [splitError, allTransactions]);
+
   return (
     <Row
+      ref={triggerRef}
       style={{
         backgroundColor: selected
           ? theme.tableRowBackgroundHighlight
@@ -909,6 +936,21 @@ const Transaction = memo(function Transaction({
         ...(_unmatched && { opacity: 0.5 }),
       }}
     >
+      {splitError && listContainerRef.current && (
+        <Popover
+          arrowSize={updateId}
+          triggerRef={triggerRef}
+          isOpen
+          isNonModal
+          style={{ width: 375, padding: 5, maxHeight: '38px !important' }}
+          shouldFlip={false}
+          placement="bottom end"
+          UNSTABLE_portalContainer={listContainerRef.current}
+        >
+          {splitError}
+        </Popover>
+      )}
+
       {isChild && (
         <Field
           /* Checkmark blank placeholder for Child transaction */
@@ -1579,6 +1621,7 @@ function NewTransaction({
 function TransactionTableInner({
   tableNavigator,
   tableRef,
+  listContainerRef,
   dateFormat = 'MM/dd/yyyy',
   newNavigator,
   renderEmpty,
@@ -1625,7 +1668,7 @@ function TransactionTableInner({
     }
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
-  const renderRow = ({ item, index, position, editing }) => {
+  const renderRow = ({ item, index, editing }) => {
     const {
       transactions,
       selectedItems,
@@ -1669,15 +1712,39 @@ function TransactionTableInner({
     );
 
     return (
-      <>
-        {hasSplitError && (
-          <Tooltip
-            position="bottom-right"
-            width={350}
-            forceTop={position}
-            forceLayout={true}
-            style={{ transform: 'translate(-5px, 2px)' }}
-          >
+      <Transaction
+        allTransactions={props.transactions}
+        editing={editing}
+        transaction={trans}
+        showAccount={showAccount}
+        showCategory={showCategory}
+        showBalance={showBalances}
+        showCleared={showCleared}
+        selected={selected}
+        highlighted={false}
+        added={isNew?.(trans.id)}
+        expanded={isExpanded?.(trans.id)}
+        matched={isMatched?.(trans.id)}
+        showZeroInDeposit={isChildDeposit}
+        balance={balances?.[trans.id]?.balance}
+        focusedField={editing && tableNavigator.focusedField}
+        accounts={accounts}
+        categoryGroups={categoryGroups}
+        payees={payees}
+        dateFormat={dateFormat}
+        hideFraction={hideFraction}
+        onEdit={tableNavigator.onEdit}
+        onSave={props.onSave}
+        onDelete={props.onDelete}
+        onSplit={props.onSplit}
+        onManagePayees={props.onManagePayees}
+        onCreatePayee={props.onCreatePayee}
+        onToggleSplit={props.onToggleSplit}
+        onNavigateToTransferAccount={onNavigateToTransferAccount}
+        onNavigateToSchedule={onNavigateToSchedule}
+        onNotesTagClick={onNotesTagClick}
+        splitError={
+          hasSplitError && (
             <TransactionError
               error={error}
               isDeposit={isChildDeposit}
@@ -1687,40 +1754,10 @@ function TransactionTableInner({
               }
               canDistributeRemainder={emptyChildTransactions.length > 0}
             />
-          </Tooltip>
-        )}
-        <Transaction
-          editing={editing}
-          transaction={trans}
-          showAccount={showAccount}
-          showCategory={showCategory}
-          showBalance={showBalances}
-          showCleared={showCleared}
-          selected={selected}
-          highlighted={false}
-          added={isNew?.(trans.id)}
-          expanded={isExpanded?.(trans.id)}
-          matched={isMatched?.(trans.id)}
-          showZeroInDeposit={isChildDeposit}
-          balance={balances?.[trans.id]?.balance}
-          focusedField={editing && tableNavigator.focusedField}
-          accounts={accounts}
-          categoryGroups={categoryGroups}
-          payees={payees}
-          dateFormat={dateFormat}
-          hideFraction={hideFraction}
-          onEdit={tableNavigator.onEdit}
-          onSave={props.onSave}
-          onDelete={props.onDelete}
-          onSplit={props.onSplit}
-          onManagePayees={props.onManagePayees}
-          onCreatePayee={props.onCreatePayee}
-          onToggleSplit={props.onToggleSplit}
-          onNavigateToTransferAccount={onNavigateToTransferAccount}
-          onNavigateToSchedule={onNavigateToSchedule}
-          onNotesTagClick={onNotesTagClick}
-        />
-      </>
+          )
+        }
+        listContainerRef={listContainerRef}
+      />
     );
   };
 
@@ -1797,6 +1834,7 @@ function TransactionTableInner({
         <Table
           navigator={tableNavigator}
           ref={tableRef}
+          listContainerRef={listContainerRef}
           items={props.transactions}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
@@ -1833,6 +1871,7 @@ export const TransactionTable = forwardRef((props, ref) => {
   const prevSplitsExpanded = useRef(null);
 
   const tableRef = useRef(null);
+  const listContainerRef = useRef(null);
   const mergedRef = useMergedRefs(tableRef, ref);
 
   const transactions = useMemo(() => {
@@ -2245,6 +2284,7 @@ export const TransactionTable = forwardRef((props, ref) => {
   return (
     <TransactionTableInner
       tableRef={mergedRef}
+      listContainerRef={listContainerRef}
       {...props}
       transactions={transactions}
       transactionMap={transactionMap}
