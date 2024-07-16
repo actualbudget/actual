@@ -89,7 +89,7 @@ export async function exportQueryToCSV(query) {
   }
   
   // loop through parents and assign children split numbers, and parents total children numbers
-  for(let parentNum = 0; parentNum < parentsChildCountlgenth; parentNum++) {
+  for(let parentNum = 0; parentNum < parentsChildCount.length; parentNum++) {
     let childNumber = 0;
     for (const trans of transactions) {
       if (trans.ParentId === parentsChildCount[parentNum][0] ) {
