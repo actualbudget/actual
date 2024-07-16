@@ -1089,9 +1089,6 @@ function TransactionEditUnconnected({
           }
         });
 
-        alert(JSON.stringify(diff));
-        alert(JSON.stringify(newTransaction));
-
         // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
         if (
           newTransaction.is_parent &&
