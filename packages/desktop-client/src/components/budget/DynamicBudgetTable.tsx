@@ -54,9 +54,60 @@ const DynamicBudgetTableInner = ({
     setDisplayMax(numPossible);
   }, [numPossible]);
 
-  function _onMonthSelect(month) {
-    onMonthSelect(month, numMonths);
+  function getValidMonth(month) {
+    const start = monthBounds.start;
+    const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
+
+    if (month < start) {
+      return start;
+    } else if (month > end) {
+      return end;
+    }
+    return month;
   }
+
+  function _onMonthSelect(month) {
+    onMonthSelect(getValidMonth(month), numMonths);
+  }
+
+  useHotkeys(
+    'left',
+    () => {
+      _onMonthSelect(monthUtils.prevMonth(startMonth));
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [_onMonthSelect, startMonth],
+  );
+  useHotkeys(
+    'right',
+    () => {
+      _onMonthSelect(monthUtils.nextMonth(startMonth));
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [_onMonthSelect, startMonth],
+  );
+  useHotkeys(
+    '0',
+    () => {
+      _onMonthSelect(
+        monthUtils.subMonths(
+          monthUtils.currentMonth(),
+          Math.floor(numMonths / 2),
+        ),
+      );
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [_onMonthSelect, startMonth, numMonths],
+  );
 
   return (
     <View
@@ -91,52 +142,6 @@ DynamicBudgetTableInner.displayName = 'DynamicBudgetTableInner';
 type DynamicBudgetTableProps = ComponentProps<typeof BudgetTable>;
 
 export const DynamicBudgetTable = (props: DynamicBudgetTableProps) => {
-  useHotkeys(
-    'left',
-    () => {
-      props.onMonthSelect(
-        monthUtils.prevMonth(props.startMonth),
-        props.maxMonths,
-      );
-    },
-    {
-      preventDefault: true,
-      scopes: ['app'],
-    },
-    [props, props.startMonth, props.maxMonths],
-  );
-  useHotkeys(
-    'right',
-    () => {
-      props.onMonthSelect(
-        monthUtils.nextMonth(props.startMonth),
-        props.maxMonths,
-      );
-    },
-    {
-      preventDefault: true,
-      scopes: ['app'],
-    },
-    [props, props.startMonth, props.maxMonths],
-  );
-  useHotkeys(
-    '0',
-    () => {
-      props.onMonthSelect(
-        monthUtils.subMonths(
-          monthUtils.currentMonth(),
-          Math.floor(props.maxMonths / 2),
-        ),
-        props.maxMonths,
-      );
-    },
-    {
-      preventDefault: true,
-      scopes: ['app'],
-    },
-    [props, props.maxMonths],
-  );
-
   return (
     <AutoSizer>
       {({ width, height }) => (
