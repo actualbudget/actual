@@ -39,7 +39,7 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { applyChanges } from 'loot-core/shared/util';
+import { applyChanges, integerToCurrency } from 'loot-core/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -409,6 +409,9 @@ function TransactionListWithPreviews({ account }) {
           break;
         case 'payee':
           displayValue = payees.find(p => p.id === value).name;
+          break;
+        case 'amount':
+          displayValue = integerToCurrency(value);
           break;
         default:
           displayValue = value;
