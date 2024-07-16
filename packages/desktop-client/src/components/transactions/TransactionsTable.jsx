@@ -11,6 +11,7 @@ import React, {
   useEffect,
 } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import {
   format as formatDate,
@@ -174,6 +175,16 @@ const TransactionHeader = memo(
   }) => {
     const dispatchSelected = useSelectedDispatch();
 
+    useHotkeys(
+      'ctrl+a, cmd+a, meta+a',
+      (e) => dispatchSelected({ type: 'select-all', event: e }),
+      {
+        preventDefault: true,
+        scopes: ['app'],
+      },
+      [dispatchSelected],
+    );
+  
     return (
       <Row
         style={{
