@@ -316,13 +316,9 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
       dispatch({ type: 'close' });
     }
   }
-  useHotkeys(
-    'f',
-    () => dispatch({ type: 'select-field' }),
-    {
-      scopes: ['app'],
-    },
-  );
+  useHotkeys('f', () => dispatch({ type: 'select-field' }), {
+    scopes: ['app'],
+  });
 
   return (
     <View>
