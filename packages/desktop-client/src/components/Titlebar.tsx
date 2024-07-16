@@ -65,7 +65,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
   const privacyIconStyle = { width: 15, height: 15 };
 
   useHotkeys(
-    'p',
+    'ctrl+p, cmd+p, meta+p',
     () => {
       setPrivacyEnabledPref(!isPrivacyEnabled);
     },
