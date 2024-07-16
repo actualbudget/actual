@@ -275,40 +275,50 @@ export function updateWithSchema(table, fields) {
 
 export async function getCategories(): Promise<CategoryEntity[]> {
   return await all(`
-    SELECT c.* FROM categories c WHERE c.tombstone = 0
+    SELECT c.* FROM categories c WHERE c.tombstone = 0 AND c.hidden = 0
       ORDER BY c.sort_order, c.id
   `);
 }
 
-export async function getCategoriesGrouped(): Promise<
+export async function getCategoriesGrouped(hidden: boolean = false): Promise<
   Array<CategoryGroupEntity>
 > {
+  const hiddenValue = hidden ? 1 : 0;
   const groups = await all(`
     SELECT cg.* FROM category_groups cg WHERE cg.tombstone = 0 ORDER BY cg.is_income, cg.sort_order, cg.id
   `);
   const categories = await all(`
-    SELECT c.* FROM categories c WHERE c.tombstone = 0
+    SELECT c.* FROM categories c WHERE c.tombstone = 0 AND c.hidden = ?
       ORDER BY c.sort_order, c.id
-  `);
+  `, [hiddenValue]);
 
   return groups.map(group => {
     return {
       ...group,
-      categories: categories.filter(c => c.cat_group === group.id),
+      categories: categories.filter(c => c.cat_group === group.id && c.hidden === hidden),
     };
   });
 }
 
 export async function insertCategoryGroup(group) {
-  // Don't allow duplicate group
+  // Don't allow duplicate group if hidden flag is the same
   const existingGroup = await first(
-    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
-    [group.name.toUpperCase()],
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND hidden = ? AND tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase(), group.hidden !== undefined ? group.hidden : 0],
   );
   if (existingGroup) {
-    throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
+    if (existingGroup.hidden === group.hidden) {
+      throw new Error(`A ‘${existingGroup.name}’ category group already exists at visibility level '${group.hidden}'.`);
+    }
+    // If the hidden flag is different, we can insert the new group as long as the
+    // name is different
+    const existingNames = await all(
+      `SELECT name FROM category_groups WHERE UPPER(name) = ? AND tombstone = 0`,
+      [group.name.toUpperCase()],
     );
+    if (existingNames.some(n => n.name !== group.name)) {
+      throw new Error(`A ‘${group.name}’ category group already exists.`);
+    }
   }
 
   const lastGroup = await first(`
@@ -358,14 +368,18 @@ export async function insertCategory(
 
   let id_;
   await batchMessages(async () => {
-    // Dont allow duplicated names in groups
+    // Check for existing category with the same name, group, and hidden flag
     const existingCatInGroup = await first(
-      `SELECT id FROM categories WHERE cat_group = ? AND UPPER(name) = ? AND IFNULL(hidden, 0) = IFNULL(?, 0) AND tombstone = 0 LIMIT 1`,
-      [category.cat_group, category.name.toUpperCase(), category.hidden],
+      `SELECT id FROM categories WHERE cat_group = ? AND UPPER(name) = ? AND tombstone = 0 LIMIT 1`,
+      [category.cat_group, category.name.toUpperCase()],
     );
-    if (existingCatInGroup) {
+
+    // If a category exists with the same name and group, but different hidden flag, allow insertion
+    if (existingCatInGroup && category.hidden !== existingCatInGroup.hidden) {
+      // Allow the insertion since the hidden flag is different
+    } else if (existingCatInGroup) {
       throw new Error(
-        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’ with visibility '${category.hidden}'`,
+        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’.`,
       );
     }
 
@@ -375,8 +389,7 @@ export async function insertCategory(
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
     } else {
-      // Unfortunately since we insert at the beginning, we need to shove
-      // the sort orders to make sure there's room for it
+      // Adjust sort orders for insertion at the beginning
       const categories = await all(
         `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
         [category.cat_group],
