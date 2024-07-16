@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { usePress, useLongPress, mergeProps } from 'react-aria';
 
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
@@ -6,7 +7,6 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccount } from '../../../hooks/useAccount';
 import { useCategories } from '../../../hooks/useCategories';
-import { useLongPress } from '../../../hooks/useLongPress';
 import { usePayee } from '../../../hooks/usePayee';
 import { SvgSplit } from '../../../icons/v0';
 import {
@@ -74,12 +74,21 @@ export const Transaction = memo(function Transaction({
 
   const isPreview = isPreviewId(id);
 
-  const longPressEvents = useLongPress(() => {
-    if (isPreview) {
-      return;
-    }
+  const { longPressProps } = useLongPress({
+    accessibilityDescription: 'Long press to select multiple transactions',
+    onLongPress: () => {
+      if (isPreview) {
+        return;
+      }
 
-    onLongPress(transaction);
+      onLongPress(transaction);
+    },
+  });
+
+  const { pressProps } = usePress({
+    onPress: () => {
+      onPress(transaction);
+    },
   });
 
   let amount = originalAmount;
@@ -112,10 +121,7 @@ export const Transaction = memo(function Transaction({
 
   return (
     <Button
-      onPress={() => {
-        onPress(transaction);
-      }}
-      {...longPressEvents}
+      {...mergeProps(pressProps, longPressProps)}
       style={{
         backgroundColor: theme.tableBackground,
         border: 'none',
