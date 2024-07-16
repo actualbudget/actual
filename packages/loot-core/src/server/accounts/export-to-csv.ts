@@ -87,17 +87,17 @@ export async function exportQueryToCSV(query) {
       parentsChildCount.set(trans.Id, 0);
     }
   }
-  
+
   // loop through parents and assign children split numbers, and parents total children numbers
-  for(const parent of parentsChildCount.keys()) {
-    let childNumber: number = 0;
+  for (const parent of parentsChildCount.keys()) {
+    let childNumber = 0;
     for (const trans of transactions) {
-      if (trans.ParentId === parent ) {
+      if (trans.ParentId === parent) {
         childSplitOrder.set(trans.Id, childNumber);
         childNumber++;
       }
     }
-      parentsChildCount.set(parent,childNumber);
+    parentsChildCount.set(parent, childNumber);
   }
 
   // map final properties for export and grab the child count for splits from their parent transaction
@@ -120,7 +120,10 @@ export async function exportQueryToCSV(query) {
             (trans.Notes || '')
           : trans.Notes,
       Category: trans.Category,
-      Amount: trans.IsParent ? 0 : trans.Amount == null ? 0 : integerToAmount(trans.Amount),
+      Amount: trans.IsParent ? 0 : trans.Amount == null
+        ? 0
+        : trans.Amount == null
+        : integerToAmount(trans.Amount),
       Split_Amount: trans.IsParent ? trans.Amount : 0,
       Cleared:
         trans.Reconciled === true
