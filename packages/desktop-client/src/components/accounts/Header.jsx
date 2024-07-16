@@ -140,7 +140,7 @@ export function AccountHeader({
     [onAddTransaction],
   );
   useHotkeys(
-    'i',
+    'ctrl+i, cmd+i, meta+i',
     () => onImport(),
     {
       scopes: ['app'],

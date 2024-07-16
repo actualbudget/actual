@@ -190,8 +190,16 @@ export function KeyboardShortcutModal({
           {onAccounts && (
             <>
               <Shortcut shortcut="Enter" description="Move down when editing" />
-              <Shortcut shortcut="Tab" description="Move right when editing" />
-              <Shortcut shortcut="I" description="Import transactions" />
+              <Shortcut
+                shortcut="Enter"
+                description="Move up when editing"
+                shift={true}
+              />
+              <Shortcut
+                shortcut="I"
+                description="Import transactions"
+                meta={ctrl}
+              />
               <Shortcut shortcut="B" description="Bank sync" meta={ctrl} />
               <GroupHeading group="Select a transaction, then" />
               <Shortcut
@@ -247,11 +255,7 @@ export function KeyboardShortcutModal({
           )}
           {onAccounts && (
             <>
-              <Shortcut
-                shortcut="Enter"
-                description="Move up when editing"
-                shift={true}
-              />
+              <Shortcut shortcut="Tab" description="Move right when editing" />
               <Shortcut
                 shortcut="Tab"
                 description="Move left when editing"
