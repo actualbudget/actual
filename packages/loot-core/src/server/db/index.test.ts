@@ -298,3 +298,19 @@ describe('Database', () => {
     expect(rows[0].id).toBe('trans1');
   });
 });
+
+test('import duplicate categories', async () => {
+  await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+  await db.insertCategory({
+    id: 'dup1',
+    name: 'duplicate',
+    hidden: true,
+  });
+  await db.insertCategory({
+    id: 'dup2',
+    name: 'duplicate',
+    hidden: false,
+  });
+
+  expect(await db.getCategories()).toMatchSnapshot();
+});
