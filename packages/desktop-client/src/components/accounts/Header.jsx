@@ -130,26 +130,32 @@ export function AccountHeader({
     },
     [searchInput],
   );
-  useHotkeys('+', () => onAddTransaction(),
+  useHotkeys(
+    '+',
+    () => onAddTransaction(),
     {
-      combinationKey='-',
+      combinationKey: '-',
       scopes: ['app'],
     },
-    [onAddTransaction]
+    [onAddTransaction],
   );
-  useHotkeys('i', () => onImport(),
+  useHotkeys(
+    'i',
+    () => onImport(),
     {
       scopes: ['app'],
     },
-    [onImport]
+    [onImport],
   );
-  useHotkeys('ctrl+b, cmd+b, meta+b', () => onSync(),
+  useHotkeys(
+    'ctrl+b, cmd+b, meta+b',
+    () => onSync(),
     {
       enabled: canSync && !isServerOffline,
       preventDefault: true,
       scopes: ['app'],
     },
-    [onSync]
+    [onSync],
   );
 
   return (
