@@ -130,6 +130,27 @@ export function AccountHeader({
     },
     [searchInput],
   );
+  useHotkeys('+', () => onAddTransaction(),
+    {
+      combinationKey='-',
+      scopes: ['app'],
+    },
+    [onAddTransaction]
+  );
+  useHotkeys('i', () => onImport(),
+    {
+      scopes: ['app'],
+    },
+    [onImport]
+  );
+  useHotkeys('ctrl+b, cmd+b, meta+b', () => onSync(),
+    {
+      enabled: canSync && !isServerOffline,
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [onSync]
+  );
 
   return (
     <>
