@@ -131,10 +131,10 @@ export function AccountHeader({
     [searchInput],
   );
   useHotkeys(
-    '+',
+    'n',
     () => onAddTransaction(),
     {
-      combinationKey: '-',
+      preventDefault: true,
       scopes: ['app'],
     },
     [onAddTransaction],
