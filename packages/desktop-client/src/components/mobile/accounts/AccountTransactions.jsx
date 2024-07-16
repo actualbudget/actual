@@ -156,7 +156,7 @@ function TransactionListWithPreviews({ account }) {
   const accounts = useAccounts();
   const payees = usePayees();
   const { list: categories } = useCategories();
-  const { schedules } = useCachedSchedules();
+  const scheduleData = useCachedSchedules();
   const [currentQuery, setCurrentQuery] = useState();
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -552,50 +552,59 @@ function TransactionListWithPreviews({ account }) {
   };
 
   const onBatchDelete = async ids => {
-    const onConfirmDelete = async ids => {
-      const { data } = await runQuery(
-        q('transactions')
-          .filter({ id: { $oneof: ids } })
-          .select('*')
-          .options({ splits: 'grouped' }),
+    const onConfirmDelete = ids => {
+      dispatch(
+        pushModal('confirm-transaction-delete', {
+          message: hasMoreThanOneSelected
+            ? `Are you sure you want to delete these ${ids.length} transaction${hasMoreThanOneSelected ? 's' : ''}?`
+            : undefined,
+          onConfirm: async () => {
+            const { data } = await runQuery(
+              q('transactions')
+                .filter({ id: { $oneof: ids } })
+                .select('*')
+                .options({ splits: 'grouped' }),
+            );
+            let transactions = ungroupTransactions(data);
+
+            const idSet = new Set(ids);
+            const changes = { deleted: [], updated: [] };
+
+            transactions.forEach(trans => {
+              const parentId = trans.parent_id;
+
+              // First, check if we're actually deleting this transaction by
+              // checking `idSet`. Then, we don't need to do anything if it's
+              // a child transaction and the parent is already being deleted
+              if (!idSet.has(trans.id) || (parentId && idSet.has(parentId))) {
+                return;
+              }
+
+              const { diff } = deleteTransaction(transactions, trans.id);
+
+              // TODO: We need to keep an updated list of transactions so
+              // the logic in `updateTransaction`, particularly about
+              // updating split transactions, works. This isn't ideal and we
+              // should figure something else out
+              transactions = applyChanges(diff, transactions);
+
+              changes.deleted = diff.deleted
+                ? changes.deleted.concat(diff.deleted)
+                : diff.deleted;
+              changes.updated = diff.updated
+                ? changes.updated.concat(diff.updated)
+                : diff.updated;
+            });
+
+            await send('transactions-batch-update', changes);
+            showUndoNotification({
+              type: 'warning',
+              message: `Successfully deleted ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''}.`,
+            });
+            onClearSelectedTransactions();
+          },
+        }),
       );
-      let transactions = ungroupTransactions(data);
-
-      const idSet = new Set(ids);
-      const changes = { deleted: [], updated: [] };
-
-      transactions.forEach(trans => {
-        const parentId = trans.parent_id;
-
-        // First, check if we're actually deleting this transaction by
-        // checking `idSet`. Then, we don't need to do anything if it's
-        // a child transaction and the parent is already being deleted
-        if (!idSet.has(trans.id) || (parentId && idSet.has(parentId))) {
-          return;
-        }
-
-        const { diff } = deleteTransaction(transactions, trans.id);
-
-        // TODO: We need to keep an updated list of transactions so
-        // the logic in `updateTransaction`, particularly about
-        // updating split transactions, works. This isn't ideal and we
-        // should figure something else out
-        transactions = applyChanges(diff, transactions);
-
-        changes.deleted = diff.deleted
-          ? changes.deleted.concat(diff.deleted)
-          : diff.deleted;
-        changes.updated = diff.updated
-          ? changes.updated.concat(diff.updated)
-          : diff.updated;
-      });
-
-      await send('transactions-batch-update', changes);
-      showUndoNotification({
-        type: 'warning',
-        message: `Successfully deleted ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''}.`,
-      });
-      onClearSelectedTransactions();
     };
 
     await checkForReconciledTransactions(
@@ -611,7 +620,9 @@ function TransactionListWithPreviews({ account }) {
         transactionIds: ids,
         getTransaction: id => transactions.find(t => t.id === id),
         onScheduleLinked: scheduleId => {
-          const scheduleName = schedules.find(s => s.id === scheduleId).name;
+          const scheduleName = scheduleData.schedules.find(
+            s => s.id === scheduleId,
+          ).name;
           // TODO: When schedule becomes available in mobile, update undo notification message
           // to open the schedule when the schedule name is clicked.
           showUndoNotification({

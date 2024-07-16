@@ -260,6 +260,7 @@ type FinanceModals = {
     confirmReason: string;
   };
   'confirm-transaction-delete': {
+    message?: string;
     onConfirm: () => void;
   };
 };

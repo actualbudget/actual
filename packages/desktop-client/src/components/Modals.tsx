@@ -157,6 +157,7 @@ export function Modals() {
           return (
             <ConfirmTransactionDelete
               key={name}
+              message={options.message}
               onConfirm={options.onConfirm}
             />
           );
