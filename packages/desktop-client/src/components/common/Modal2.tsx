@@ -67,6 +67,7 @@ export const Modal = ({
 
   return (
     <ReactAriaModalOverlay
+      data-testid={`${name}-modal`}
       isDismissable
       defaultOpen={true}
       onOpenChange={isOpen => !isOpen && handleOnClose?.()}
@@ -85,7 +86,7 @@ export const Modal = ({
     >
       <ReactAriaModal>
         {modalProps => (
-          <Dialog aria-label="Modal Dialog">
+          <Dialog aria-label="Modal dialog">
             <ModalContentContainer
               noAnimation={noAnimation}
               isActive={isActive(name)}
@@ -281,7 +282,7 @@ export function ModalHeader({
 }: ModalHeaderProps) {
   return (
     <View
-      aria-label="Modal Header"
+      aria-label="Modal header"
       style={{
         justifyContent: 'center',
         alignItems: 'center',
