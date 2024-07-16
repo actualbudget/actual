@@ -22,6 +22,7 @@ import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
+import { getNormalisedString } from '../util/normalisation';
 
 import { Button } from './common/Button';
 import { Link } from './common/Link';
@@ -125,9 +126,9 @@ function ManageRulesContent({
       (filter === ''
         ? allRules
         : allRules.filter(rule =>
-            ruleToString(rule, filterData)
-              .toLowerCase()
-              .includes(filter.toLowerCase()),
+            getNormalisedString(ruleToString(rule, filterData)).includes(
+              getNormalisedString(filter),
+            ),
           )
       ).slice(0, 100 + page * 50),
     [allRules, filter, filterData, page],
