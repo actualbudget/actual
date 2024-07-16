@@ -154,7 +154,7 @@ export function KeyboardShortcutModal() {
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   return (
     <Modal name="keyboard-shortcuts">
-      {({ close }) => (
+      {({ state: { close } }) => (
         <>
           <ModalHeader
             title="Keyboard Shortcuts"
