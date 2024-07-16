@@ -1,4 +1,4 @@
-import React, { type MouseEventHandler } from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { SvgPin } from '../../icons/v1';
 import { SvgArrowButtonLeft1 } from '../../icons/v2';
@@ -8,7 +8,7 @@ import { View } from '../common/View';
 
 type ToggleButtonProps = {
   isFloating: boolean;
-  onFloat: MouseEventHandler<HTMLButtonElement>;
+  onFloat: ComponentPropsWithoutRef<typeof Button>['onPress'];
   style?: CSSProperties;
 };
 
