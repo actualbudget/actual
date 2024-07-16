@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, type ComponentProps } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { View } from '../common/View';
@@ -7,6 +8,8 @@ import { View } from '../common/View';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
+
+import * as monthUtils from 'loot-core/src/shared/months';
 
 function getNumPossibleMonths(width: number) {
   const estimatedTableWidth = width - 200;
@@ -88,6 +91,37 @@ DynamicBudgetTableInner.displayName = 'DynamicBudgetTableInner';
 type DynamicBudgetTableProps = ComponentProps<typeof BudgetTable>;
 
 export const DynamicBudgetTable = (props: DynamicBudgetTableProps) => {
+  useHotkeys(
+    'left',
+    () => {
+      props.onMonthSelect(monthUtils.prevMonth(props.startMonth), props.maxMonths);
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+  );
+  useHotkeys(
+    'right',
+    () => {
+      props.onMonthSelect(monthUtils.nextMonth(props.startMonth), props.maxMonths);
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+  );
+  useHotkeys(
+    '0',
+    () => {
+      props.onMonthSelect(monthUtils.subMonths(monthUtils.currentMonth(), Math.floor(props.maxMonths / 2)), props.maxMonths);
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+  );
+
   return (
     <AutoSizer>
       {({ width, height }) => (
