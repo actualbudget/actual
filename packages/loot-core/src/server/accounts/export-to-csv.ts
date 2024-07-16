@@ -123,6 +123,7 @@ export async function exportQueryToCSV(query) {
       Amount: trans.IsParent
         ? 0
         : trans.Amount == null
+        ? 0
         : integerToAmount(trans.Amount),
       Split_Amount: trans.IsParent ? trans.Amount : 0,
       Cleared:
