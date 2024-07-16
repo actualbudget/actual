@@ -1,4 +1,4 @@
-import { ipcRenderer, contextBridge } from 'electron';
+import { ipcRenderer, contextBridge, IpcRenderer } from 'electron';
 
 import {
   GetBootstrapDataPayload,
@@ -16,12 +16,17 @@ contextBridge.exposeInMainWorld('Actual', {
     console.log(...args);
   },
 
-  ipcConnect: func => {
+  ipcConnect: (
+    func: (payload: {
+      on: IpcRenderer['on'];
+      emit: (name: string, data: unknown) => void;
+    }) => void,
+  ) => {
     func({
-      on(name: string, handler: (payload: unknown) => void) {
+      on(name, handler) {
         return ipcRenderer.on(name, (_event, value) => handler(value));
       },
-      emit(name: string, data: unknown) {
+      emit(name, data) {
         return ipcRenderer.send('message', { name, args: data });
       },
     });
