@@ -138,7 +138,6 @@ export function ConfigServer() {
         />
         <ButtonWithLoading
           variant="primary"
-          aria-label="OK"
           isLoading={loading}
           style={{ fontSize: 15 }}
           onPress={onSubmit}
@@ -148,7 +147,6 @@ export function ConfigServer() {
         {currentUrl && (
           <Button
             variant="bare"
-            aria-label="Cancel"
             style={{ fontSize: 15, marginLeft: 10 }}
             onPress={() => navigate(-1)}
           >
@@ -168,7 +166,6 @@ export function ConfigServer() {
         {currentUrl ? (
           <Button
             variant="bare"
-            aria-label="Stop using a server"
             style={{ color: theme.pageTextLight }}
             onPress={onSkip}
           >
@@ -179,7 +176,6 @@ export function ConfigServer() {
             {!isElectron() && (
               <Button
                 variant="bare"
-                aria-label="Use current domain"
                 style={{
                   color: theme.pageTextLight,
                   margin: 5,

@@ -444,7 +444,6 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         >
           <Button
             variant="bare"
-            aria-label="Import file"
             style={{
               ...narrowButtonStyle,
               marginLeft: 10,
@@ -459,7 +458,6 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 
           <Button
             variant="primary"
-            aria-label="Create new file"
             onPress={() => onCreate()}
             style={{
               ...narrowButtonStyle,
@@ -472,7 +470,6 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           {isNonProductionEnvironment() && (
             <Button
               variant="primary"
-              aria-label="Create test file"
               onPress={() => onCreate({ testMode: true })}
               style={{
                 ...narrowButtonStyle,
