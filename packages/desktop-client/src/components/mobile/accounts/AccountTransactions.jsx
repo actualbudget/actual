@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import {
+  addNotification,
   collapseModals,
   getPayees,
   markAccountRead,
@@ -17,10 +18,12 @@ import {
   pushModal,
   reopenAccount,
   syncAndDownload,
+  undo,
   updateAccount,
 } from 'loot-core/client/actions';
 import {
   SchedulesProvider,
+  useCachedSchedules,
   useDefaultSchedulesQueryTransform,
 } from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
@@ -38,8 +41,11 @@ import {
 } from 'loot-core/shared/transactions';
 import { applyChanges } from 'loot-core/shared/util';
 
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { usePayees } from '../../../hooks/usePayees';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { styles, theme } from '../../../style';
@@ -147,6 +153,10 @@ function AccountName({ account, pending, failed }) {
 }
 
 function TransactionListWithPreviews({ account }) {
+  const accounts = useAccounts();
+  const payees = usePayees();
+  const { list: categories } = useCategories();
+  const { schedules } = useCachedSchedules();
   const [currentQuery, setCurrentQuery] = useState();
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -245,7 +255,7 @@ function TransactionListWithPreviews({ account }) {
     updateSearchQuery(text);
   };
 
-  const onSelectTransaction = transaction => {
+  const onOpenTransaction = transaction => {
     if (!isPreviewId(transaction.id)) {
       navigate(`/transactions/${transaction.id}`);
     } else {
@@ -274,6 +284,43 @@ function TransactionListWithPreviews({ account }) {
   const balance = queries.accountBalance(account);
   const balanceCleared = queries.accountBalanceCleared(account);
   const balanceUncleared = queries.accountBalanceUncleared(account);
+
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
+  const hasMoreThanOneSelected = selectedTransactions.length > 1;
+
+  const onAddSelectedTransaction = transactionId =>
+    setSelectedTransactions(prev =>
+      prev.includes(transactionId)
+        ? prev.filter(id => id !== transactionId)
+        : [...prev, transactionId],
+    );
+
+  const onClearSelectedTransactions = () => {
+    setSelectedTransactions([]);
+  };
+
+  const showUndoNotification = ({
+    type = 'message',
+    title = 'Batch operation complete',
+    message,
+    messageActions,
+  }) => {
+    dispatch(
+      addNotification({
+        type,
+        title,
+        message,
+        messageActions,
+        sticky: true,
+        button: {
+          title: 'Undo',
+          action: async () => {
+            await dispatch(undo());
+          },
+        },
+      }),
+    );
+  };
 
   const onBatchEdit = async (name, ids) => {
     const { data } = await runQuery(
@@ -351,6 +398,44 @@ function TransactionListWithPreviews({ account }) {
       });
 
       await send('transactions-batch-update', changes);
+
+      let displayValue = value;
+      switch (name) {
+        case 'account':
+          displayValue = accounts.find(a => a.id === value).name;
+          break;
+        case 'category':
+          displayValue = categories.find(c => c.id === value).name;
+          break;
+        case 'payee':
+          displayValue = payees.find(p => p.id === value).name;
+          break;
+        default:
+          displayValue = value;
+          break;
+      }
+
+      showUndoNotification({
+        message: `Successfully updated ${name} of ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''} to [${displayValue}](#${displayValue}).`,
+        messageActions: {
+          [displayValue]: () => {
+            switch (name) {
+              case 'account':
+                navigate(`/accounts/${value}`);
+                break;
+              case 'category':
+                navigate(`/categories/${value}`);
+                break;
+              case 'payee':
+                navigate(`/payees`);
+                break;
+              default:
+                break;
+            }
+          },
+        },
+      });
+      onClearSelectedTransactions();
     };
 
     const pushPayeeAutocompleteModal = () => {
@@ -452,6 +537,11 @@ function TransactionListWithPreviews({ account }) {
       };
 
       await send('transactions-batch-update', changes);
+
+      showUndoNotification({
+        message: `Successfully duplicated ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''}.`,
+      });
+      onClearSelectedTransactions();
     };
 
     await checkForReconciledTransactions(
@@ -501,6 +591,11 @@ function TransactionListWithPreviews({ account }) {
       });
 
       await send('transactions-batch-update', changes);
+      showUndoNotification({
+        type: 'warning',
+        message: `Successfully deleted ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''}.`,
+      });
+      onClearSelectedTransactions();
     };
 
     await checkForReconciledTransactions(
@@ -515,6 +610,15 @@ function TransactionListWithPreviews({ account }) {
       pushModal('schedule-link', {
         transactionIds: ids,
         getTransaction: id => transactions.find(t => t.id === id),
+        onScheduleLinked: scheduleId => {
+          const scheduleName = schedules.find(s => s.id === scheduleId).name;
+          // TODO: When schedule becomes available in mobile, update undo notification message
+          // to open the schedule when the schedule name is clicked.
+          showUndoNotification({
+            message: `Successfully linked ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''} to ${scheduleName}.`,
+          });
+          onClearSelectedTransactions();
+        },
       }),
     );
   };
@@ -523,6 +627,10 @@ function TransactionListWithPreviews({ account }) {
     await send('transactions-batch-update', {
       updated: ids.map(id => ({ id, schedule: null })),
     });
+    showUndoNotification({
+      message: `Successfully unlinked ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''} from their respective schedules.`,
+    });
+    onClearSelectedTransactions();
   };
 
   const onSetTransfer = () => {
@@ -559,13 +667,16 @@ function TransactionListWithPreviews({ account }) {
     <TransactionListWithBalances
       isLoading={isLoading}
       transactions={allTransactions}
+      selectedTransactions={selectedTransactions}
+      onAddSelectedTransaction={onAddSelectedTransaction}
+      onClearSelectedTransactions={onClearSelectedTransactions}
       balance={balance}
       balanceCleared={balanceCleared}
       balanceUncleared={balanceUncleared}
       onLoadMore={onLoadMore}
       searchPlaceholder={`Search ${account.name}`}
       onSearch={onSearch}
-      onSelectTransaction={onSelectTransaction}
+      onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
       onBatchEdit={onBatchEdit}
       onBatchDuplicate={onBatchDuplicate}

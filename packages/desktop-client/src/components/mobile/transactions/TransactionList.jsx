@@ -21,8 +21,11 @@ import { Transaction } from './Transaction';
 export function TransactionList({
   isLoading,
   transactions,
+  selectedTransactions,
+  onAddSelectedTransaction,
+  onClearSelectedTransactions,
   isNewTransaction,
-  onSelect,
+  onOpenTransaction,
   scrollProps = {},
   onLoadMore,
   onBatchEdit,
@@ -60,19 +63,13 @@ export function TransactionList({
     return sections;
   }, [transactions]);
 
-  const [selectedTransactions, setSelectedTransactions] = useState([]);
-
   const onTransactionPress = (transaction, isLongPress = false) => {
     const isPreview = isPreviewId(transaction.id);
 
     if (!isPreview && (isLongPress || selectedTransactions.length > 0)) {
-      setSelectedTransactions(prev =>
-        prev.includes(transaction.id)
-          ? prev.filter(id => id !== transaction.id)
-          : [...prev, transaction.id],
-      );
+      onAddSelectedTransaction?.(transaction.id);
     } else {
-      onSelect(transaction);
+      onOpenTransaction(transaction);
     }
   };
 
@@ -152,9 +149,7 @@ export function TransactionList({
         <FloatingActionBar
           transactions={transactions}
           selectedTransactions={selectedTransactions}
-          onClearSelectedTransactions={() => {
-            setSelectedTransactions([]);
-          }}
+          onClearSelectedTransactions={onClearSelectedTransactions}
           onEdit={onBatchEdit}
           onDuplicate={onBatchDuplicate}
           onLinkSchedule={onLinkSchedule}
@@ -208,6 +203,8 @@ function FloatingActionBar({
       .every(t => t.schedule);
   }, [transactions, selectedTransactions]);
 
+  const isMoreThanOne = selectedTransactions.length > 1;
+
   return (
     <View
       style={{
@@ -249,8 +246,7 @@ function FloatingActionBar({
           </Button>
           <Text style={styles.mediumText}>
             {selectedTransactions.length}{' '}
-            {selectedTransactions.length > 1 ? 'transactions' : 'transaction'}{' '}
-            selected
+            {isMoreThanOne ? 'transactions' : 'transaction'} selected
           </Text>
         </View>
         <View
@@ -324,15 +320,6 @@ function FloatingActionBar({
 
           <Button
             type="bare"
-            {...buttonProps}
-            onClick={() => {
-              onDuplicate?.(selectedTransactions);
-            }}
-          >
-            Duplicate
-          </Button>
-          <Button
-            type="bare"
             ref={moreOptionsMenuTriggerRef}
             aria-label="More options"
             onClick={() => {
@@ -357,7 +344,9 @@ function FloatingActionBar({
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
-                if (type === 'link-schedule') {
+                if (type === 'duplicate') {
+                  onDuplicate?.(selectedTransactions);
+                } else if (type === 'link-schedule') {
                   onLinkSchedule?.(selectedTransactions);
                 } else if (type === 'unlink-schedule') {
                   onUnlinkSchedule?.(selectedTransactions);
@@ -367,6 +356,10 @@ function FloatingActionBar({
                 setIsMoreOptionsMenuOpen(false);
               }}
               items={[
+                {
+                  name: 'duplicate',
+                  text: 'Duplicate',
+                },
                 ...(allTransactionsAreLinked
                   ? [
                       {

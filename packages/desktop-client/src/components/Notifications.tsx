@@ -120,6 +120,11 @@ function Notification({
     [message, messageActions],
   );
 
+  const { isNarrowWidth } = useResponsive();
+  const narrowStyle: CSSProperties = isNarrowWidth
+    ? { minHeight: styles.mobileMinHeight }
+    : {};
+
   return (
     <View
       style={{
@@ -133,10 +138,11 @@ function Notification({
     >
       <Stack
         align="center"
+        justify="space-between"
         direction="row"
         style={{
           padding: '14px 14px',
-          fontSize: 14,
+          ...styles.mediumText,
           backgroundColor: positive
             ? theme.noticeBackgroundLight
             : error
@@ -156,7 +162,15 @@ function Notification({
       >
         <Stack align="flex-start">
           {title && (
-            <View style={{ fontWeight: 700, marginBottom: 10 }}>{title}</View>
+            <View
+              style={{
+                ...styles.mediumText,
+                fontWeight: 700,
+                marginBottom: 10,
+              }}
+            >
+              {title}
+            </View>
           )}
           <View>{processedMessage}</View>
           {pre
@@ -196,7 +210,7 @@ function Notification({
                       : theme.warningBorder
                 }`,
                 color: 'currentColor',
-                fontSize: 14,
+                ...styles.mediumText,
                 flexShrink: 0,
                 ...(isHovered || isPressed
                   ? {
@@ -207,6 +221,7 @@ function Notification({
                           : theme.warningBackground,
                     }
                   : {}),
+                ...narrowStyle,
               })}
             >
               {button.title}

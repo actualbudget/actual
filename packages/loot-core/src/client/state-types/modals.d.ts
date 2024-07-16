@@ -124,7 +124,11 @@ type FinanceModals = {
 
   'schedule-edit': { id: string; transaction?: TransactionEntity } | null;
 
-  'schedule-link': { transactionIds: string[] } | null;
+  'schedule-link': {
+    transactionIds: string[];
+    getTransaction: (transactionId: string) => TransactionEntity;
+    onScheduleLinked: (scheduleId: string) => void;
+  } | null;
 
   'schedules-discover': null;
 

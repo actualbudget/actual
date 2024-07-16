@@ -342,6 +342,7 @@ export function Modals() {
               transactionIds={options?.transactionIds}
               getTransaction={options?.getTransaction}
               accountName={options?.accountName}
+              onScheduleLinked={options?.onScheduleLinked}
             />
           );
 

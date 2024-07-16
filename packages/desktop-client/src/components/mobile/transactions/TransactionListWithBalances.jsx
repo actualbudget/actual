@@ -58,13 +58,16 @@ function TransactionSearchInput({ placeholder, onSearch }) {
 export function TransactionListWithBalances({
   isLoading,
   transactions,
+  selectedTransactions = [],
+  onAddSelectedTransaction,
+  onClearSelectedTransactions,
   balance,
   balanceCleared,
   balanceUncleared,
   searchPlaceholder = 'Search...',
   onSearch,
   onLoadMore,
-  onSelectTransaction,
+  onOpenTransaction,
   onRefresh,
   onBatchEdit,
   onBatchDuplicate,
@@ -163,9 +166,12 @@ export function TransactionListWithBalances({
         <TransactionList
           isLoading={isLoading}
           transactions={transactions}
+          selectedTransactions={selectedTransactions}
+          onAddSelectedTransaction={onAddSelectedTransaction}
+          onClearSelectedTransactions={onClearSelectedTransactions}
           isNewTransaction={isNewTransaction}
           onLoadMore={onLoadMore}
-          onSelect={onSelectTransaction}
+          onOpenTransaction={onOpenTransaction}
           onBatchEdit={onBatchEdit}
           onBatchDuplicate={onBatchDuplicate}
           onSetTransfer={onSetTransfer}
