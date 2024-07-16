@@ -280,22 +280,27 @@ export async function getCategories(): Promise<CategoryEntity[]> {
   `);
 }
 
-export async function getCategoriesGrouped(hidden: boolean = false): Promise<
-  Array<CategoryGroupEntity>
-> {
+export async function getCategoriesGrouped(
+  hidden = false,
+): Promise<Array<CategoryGroupEntity>> {
   const hiddenValue = hidden ? 1 : 0;
   const groups = await all(`
     SELECT cg.* FROM category_groups cg WHERE cg.tombstone = 0 ORDER BY cg.is_income, cg.sort_order, cg.id
   `);
-  const categories = await all(`
+  const categories = await all(
+    `
     SELECT c.* FROM categories c WHERE c.tombstone = 0 AND c.hidden = ?
       ORDER BY c.sort_order, c.id
-  `, [hiddenValue]);
+  `,
+    [hiddenValue],
+  );
 
   return groups.map(group => {
     return {
       ...group,
-      categories: categories.filter(c => c.cat_group === group.id && c.hidden === hidden),
+      categories: categories.filter(
+        c => c.cat_group === group.id && c.hidden === hidden,
+      ),
     };
   });
 }
@@ -308,7 +313,9 @@ export async function insertCategoryGroup(group) {
   );
   if (existingGroup) {
     if (existingGroup.hidden === group.hidden) {
-      throw new Error(`A ‘${existingGroup.name}’ category group already exists at visibility level '${group.hidden}'.`);
+      throw new Error(
+        `A ‘${existingGroup.name}’ category group already exists at visibility level '${group.hidden}'.`,
+      );
     }
     // If the hidden flag is different, we can insert the new group as long as the
     // name is different
@@ -379,7 +386,7 @@ export async function insertCategory(
       // Allow the insertion since the hidden flag is different
     } else if (existingCatInGroup) {
       throw new Error(
-        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’.`,
+        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’`,
       );
     }
 
@@ -389,7 +396,8 @@ export async function insertCategory(
       `);
       sort_order = (lastCat ? lastCat.sort_order : 0) + SORT_INCREMENT;
     } else {
-      // Adjust sort orders for insertion at the beginning
+      // Unfortunately since we insert at the beginning, we need to shove
+      // the sort orders to make sure there's room for it
       const categories = await all(
         `SELECT id, sort_order FROM categories WHERE cat_group = ? AND tombstone = 0 ORDER BY sort_order, id`,
         [category.cat_group],
