@@ -222,9 +222,7 @@ export function KeyboardShortcutModal({
             meta={ctrl}
           />
           {onBudget && (
-            <>
-              <Shortcut shortcut="0" description="View current month" />
-            </>
+            <Shortcut shortcut="0" description="View current month" />
           )}
           {onAccounts && (
             <>
