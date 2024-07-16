@@ -272,7 +272,6 @@ export function GoCardlessExternalMsg({
           ) : success ? (
             <Button
               variant="primary"
-              aria-label="Continue"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
@@ -290,11 +289,7 @@ export function GoCardlessExternalMsg({
               <Paragraph style={{ color: theme.errorText }}>
                 GoCardless integration has not yet been configured.
               </Paragraph>
-              <Button
-                variant="primary"
-                aria-label="Configure GoCardless integration"
-                onPress={onGoCardlessInit}
-              >
+              <Button variant="primary" onPress={onGoCardlessInit}>
                 Configure GoCardless integration
               </Button>
             </>

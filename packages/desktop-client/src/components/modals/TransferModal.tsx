@@ -110,7 +110,6 @@ export function TransferModal({
         >
           <Button
             variant="primary"
-            aria-label="Transfer"
             style={{
               height: styles.mobileMinHeight,
               marginLeft: styles.mobileEditingPadding,

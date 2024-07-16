@@ -1463,9 +1463,7 @@ export function ImportTransactions({ modalProps, options }) {
             <strong>Error:</strong> {error.message}
           </Text>
           {error.parsed && (
-            <Button aria-label="Select new file" onPress={() => onNewFile()}>
-              Select new file...
-            </Button>
+            <Button onPress={() => onNewFile()}>Select new file...</Button>
           )}
         </View>
       )}

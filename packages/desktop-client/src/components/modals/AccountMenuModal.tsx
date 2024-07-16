@@ -134,11 +134,7 @@ export function AccountMenuModal({
             paddingTop: 10,
           }}
         >
-          <Button
-            aria-label="Edit notes"
-            style={buttonStyle}
-            onPress={_onEditNotes}
-          >
+          <Button style={buttonStyle} onPress={_onEditNotes}>
             <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
             Edit notes
           </Button>

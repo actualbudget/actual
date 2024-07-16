@@ -80,7 +80,6 @@ export const SimpleFinInitialise = ({
       <ModalButtons>
         <ButtonWithLoading
           variant="primary"
-          aria-label="Save and continue"
           isLoading={isLoading}
           onPress={onSubmit}
         >

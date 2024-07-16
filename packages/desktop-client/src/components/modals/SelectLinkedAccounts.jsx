@@ -161,7 +161,6 @@ export function SelectLinkedAccounts({
           >
             <Button
               variant="primary"
-              aria-label="Link accounts"
               onPress={onNext}
               isDisabled={!Object.keys(chosenAccounts).length}
             >
@@ -221,7 +220,6 @@ function TableRow({
       <Field width="20%">
         {chosenAccount ? (
           <Button
-            aria-label="Remove bank sync"
             onPress={() => {
               onSetLinkedAccount(externalAccount, null);
             }}
@@ -232,7 +230,6 @@ function TableRow({
         ) : (
           <Button
             variant="primary"
-            aria-label="Setup bank-sync"
             onPress={() => {
               setFocusedField('account');
             }}

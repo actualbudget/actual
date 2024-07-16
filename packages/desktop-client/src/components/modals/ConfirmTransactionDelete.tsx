@@ -35,7 +35,6 @@ export function ConfirmTransactionDelete({
           }}
         >
           <Button
-            aria-label="Cancel"
             style={{
               marginRight: 10,
               ...narrowButtonStyle,
@@ -46,7 +45,6 @@ export function ConfirmTransactionDelete({
           </Button>
           <Button
             variant="primary"
-            aria-label="Delete"
             style={narrowButtonStyle}
             onPress={() => {
               onConfirm();

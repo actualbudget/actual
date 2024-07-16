@@ -67,7 +67,6 @@ export function HoldBufferModal({
       >
         <Button
           variant="primary"
-          aria-label="Hold"
           style={{
             height: styles.mobileMinHeight,
             marginLeft: styles.mobileEditingPadding,

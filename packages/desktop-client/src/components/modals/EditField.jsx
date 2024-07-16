@@ -92,7 +92,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
             }}
           >
             <Button
-              aria-label="Prepend note"
               selected={noteAmend === 'prepend'}
               style={{
                 padding: '5px 10px',
@@ -125,7 +124,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
               Prepend
             </Button>
             <Button
-              aria-label="Replace note"
               selected={noteAmend === 'replace'}
               style={{
                 padding: '5px 10px',
@@ -158,7 +156,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
               Replace
             </Button>
             <Button
-              aria-label="Append note"
               selected={noteAmend === 'append'}
               style={{
                 padding: '5px 10px',

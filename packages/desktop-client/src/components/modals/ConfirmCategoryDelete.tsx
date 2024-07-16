@@ -119,7 +119,6 @@ export function ConfirmCategoryDelete({
 
             <Button
               variant="primary"
-              aria-label="Delete"
               onPress={() => {
                 if (!transferCategory) {
                   setError('required-transfer');

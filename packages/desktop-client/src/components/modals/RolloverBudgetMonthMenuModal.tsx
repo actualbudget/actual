@@ -106,11 +106,7 @@ export function RolloverBudgetMonthMenuModal({
               alignContent: 'space-between',
             }}
           >
-            <Button
-              aria-label="Edit notes"
-              style={buttonStyle}
-              onPress={_onEditNotes}
-            >
+            <Button style={buttonStyle} onPress={_onEditNotes}>
               <SvgNotesPaper
                 width={20}
                 height={20}
@@ -122,7 +118,6 @@ export function RolloverBudgetMonthMenuModal({
           <View>
             <Button
               variant="bare"
-              aria-label="Show more actions"
               style={({ isPressed, isHovered }) => ({
                 ...buttonStyle,
                 ...(isPressed || isHovered

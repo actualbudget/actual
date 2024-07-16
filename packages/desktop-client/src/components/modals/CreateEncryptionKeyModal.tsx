@@ -188,7 +188,6 @@ export function CreateEncryptionKeyModal({
         <ModalButtons style={{ marginTop: 20 }}>
           <ButtonWithLoading
             variant="primary"
-            aria-label="Enable encryption"
             style={{
               height: isNarrowWidth ? styles.mobileMinHeight : undefined,
             }}

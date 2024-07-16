@@ -73,7 +73,6 @@ export function NotesModal({ modalProps, id, name, onSave }: NotesModalProps) {
         >
           <Button
             variant="primary"
-            aria-label="Save notes"
             style={{
               fontSize: 17,
               fontWeight: 400,

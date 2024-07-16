@@ -140,19 +140,11 @@ export function CategoryGroupMenuModal({
             paddingTop: 10,
           }}
         >
-          <Button
-            aria-label="Add category"
-            style={buttonStyle}
-            onPress={_onAddCategory}
-          >
+          <Button style={buttonStyle} onPress={_onAddCategory}>
             <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
             Add category
           </Button>
-          <Button
-            aria-label="Edit notes"
-            style={buttonStyle}
-            onPress={_onEditNotes}
-          >
+          <Button style={buttonStyle} onPress={_onEditNotes}>
             <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
             Edit notes
           </Button>

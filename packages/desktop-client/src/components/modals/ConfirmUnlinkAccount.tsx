@@ -36,16 +36,11 @@ export function ConfirmUnlinkAccount({
               justifyContent: 'flex-end',
             }}
           >
-            <Button
-              aria-label="Cancel"
-              style={{ marginRight: 10 }}
-              onPress={modalProps.onClose}
-            >
+            <Button style={{ marginRight: 10 }} onPress={modalProps.onClose}>
               Cancel
             </Button>
             <Button
               variant="primary"
-              aria-label="Unlink"
               onPress={() => {
                 onUnlink();
                 modalProps.onClose();

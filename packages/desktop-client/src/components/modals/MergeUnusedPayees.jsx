@@ -158,7 +158,6 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
             <ModalButtons style={{ marginTop: 20 }} focusButton>
               <Button
                 variant="primary"
-                aria-label="Merge"
                 style={{ marginRight: 10 }}
                 onPress={onMerge}
               >
@@ -166,7 +165,6 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
               </Button>
               {!isEditingRule && (
                 <Button
-                  aria-label="Merge and edit rule"
                   style={{ marginRight: 10 }}
                   onPress={onMergeAndCreateRule}
                 >
@@ -174,7 +172,6 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
                 </Button>
               )}
               <Button
-                aria-label="Do nothing"
                 style={{ marginRight: 10 }}
                 onPress={() => modalProps.onBack()}
               >

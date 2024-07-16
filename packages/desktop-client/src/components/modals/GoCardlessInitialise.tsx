@@ -104,7 +104,6 @@ export const GoCardlessInitialise = ({
       <ModalButtons>
         <ButtonWithLoading
           variant="primary"
-          aria-label="Save and continue"
           isLoading={isLoading}
           onPress={onSubmit}
         >

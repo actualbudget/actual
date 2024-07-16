@@ -146,7 +146,6 @@ export function FixEncryptionKeyModal({
         <ModalButtons style={{ marginTop: 20 }}>
           <Button
             variant="normal"
-            aria-label="Back"
             style={{
               height: isNarrowWidth ? styles.mobileMinHeight : undefined,
               marginRight: 10,
@@ -158,7 +157,6 @@ export function FixEncryptionKeyModal({
           <ButtonWithLoading
             type="submit"
             variant="primary"
-            aria-label={hasExistingKey ? 'Update key' : 'Create key'}
             style={{
               height: isNarrowWidth ? styles.mobileMinHeight : undefined,
             }}

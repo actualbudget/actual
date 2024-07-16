@@ -240,7 +240,6 @@ export function CloseAccountModal({
               }}
             >
               <Button
-                aria-label="Cancel"
                 style={{
                   marginRight: 10,
                   height: isNarrowWidth ? styles.mobileMinHeight : undefined,
@@ -252,7 +251,6 @@ export function CloseAccountModal({
               <Button
                 type="submit"
                 variant="primary"
-                aria-label="Close account"
                 style={{
                   height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                 }}

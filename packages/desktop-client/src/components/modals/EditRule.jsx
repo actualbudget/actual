@@ -611,11 +611,7 @@ function ConditionsList({
   }
 
   return conditions.length === 0 ? (
-    <Button
-      aria-label="Add condition"
-      style={{ alignSelf: 'flex-start' }}
-      onPress={addInitialCondition}
-    >
+    <Button style={{ alignSelf: 'flex-start' }} onPress={addInitialCondition}>
       Add condition
     </Button>
   ) : (
@@ -999,7 +995,6 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
               <View style={{ flex: 1 }}>
                 {actionSplits.length === 0 && (
                   <Button
-                    aria-label="Add action"
                     style={{ alignSelf: 'flex-start' }}
                     onPress={addInitialAction}
                   >
@@ -1082,7 +1077,6 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
 
                       {actions.length === 0 && (
                         <Button
-                          aria-label="Add action"
                           style={{ alignSelf: 'flex-start', marginTop: 5 }}
                           onPress={() =>
                             addActionToSplitAfterIndex(splitIndex, -1)
@@ -1096,11 +1090,6 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                 </Stack>
                 {showSplitButton && (
                   <Button
-                    aria-label={
-                      actionSplits.length > 1
-                        ? 'Add another split'
-                        : 'Split into multiple transactions'
-                    }
                     style={{ alignSelf: 'flex-start', marginTop: 15 }}
                     onPress={() => {
                       addActionToSplitAfterIndex(actionSplits.length, -1);
@@ -1131,7 +1120,6 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
 
                 <View style={{ flex: 1 }} />
                 <Button
-                  aria-label={`Apply actions (${selectedInst.items.size})`}
                   isDisabled={selectedInst.items.size === 0}
                   onPress={onApply}
                 >
@@ -1156,17 +1144,8 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                 justify="flex-end"
                 style={{ marginTop: 20 }}
               >
-                <Button
-                  aria-label="Cancel"
-                  onPress={() => modalProps.onClose()}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  aria-label="Save"
-                  onPress={() => onSave()}
-                >
+                <Button onPress={() => modalProps.onClose()}>Cancel</Button>
+                <Button variant="primary" onPress={() => onSave()}>
                   Save
                 </Button>
               </Stack>

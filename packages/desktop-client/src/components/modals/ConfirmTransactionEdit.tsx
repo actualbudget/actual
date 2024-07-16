@@ -74,7 +74,6 @@ export function ConfirmTransactionEdit({
               }}
             >
               <Button
-                aria-label="Cancel"
                 style={{ marginRight: 10 }}
                 onPress={() => {
                   modalProps.onClose();
@@ -85,7 +84,6 @@ export function ConfirmTransactionEdit({
               </Button>
               <Button
                 variant="primary"
-                aria-label="Confirm"
                 onPress={() => {
                   modalProps.onClose();
                   onConfirm();

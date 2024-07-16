@@ -96,7 +96,6 @@ export function LoadBackup({
                 </Block>
                 <Button
                   variant="primary"
-                  aria-label="Revert to original version"
                   onPress={() =>
                     actions.loadBackup(budgetIdToLoad, latestBackup.id)
                   }
@@ -116,7 +115,6 @@ export function LoadBackup({
                 </Block>
                 <Button
                   variant="primary"
-                  aria-label="Backup now"
                   isDisabled={backupDisabled}
                   onPress={() => actions.makeBackup()}
                 >
