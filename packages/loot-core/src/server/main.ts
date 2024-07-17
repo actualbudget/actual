@@ -1275,7 +1275,8 @@ handlers['load-global-prefs'] = async function () {
       theme === 'dark' ||
       theme === 'auto' ||
       theme === 'development' ||
-      theme === 'midnight'
+      theme === 'midnight' ||
+      theme === 'lightprotanopia'
         ? theme
         : 'auto',
   };

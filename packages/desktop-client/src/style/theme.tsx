@@ -10,11 +10,13 @@ import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
+import * as lightprotanopiaTheme from './themes/lightprotanopia';
 
 const themes = {
   light: { name: 'Light', colors: lightTheme },
   dark: { name: 'Dark', colors: darkTheme },
   midnight: { name: 'Midnight', colors: midnightTheme },
+  lightprotanopia: { name: 'Light Protanopia', colors: lightprotanopiaTheme },
   auto: { name: 'System default', colors: darkTheme },
   ...(isNonProductionEnvironment() && {
     development: { name: 'Development', colors: developmentTheme },
@@ -37,6 +39,7 @@ export function ThemeStyle() {
     | typeof darkTheme
     | typeof midnightTheme
     | typeof developmentTheme
+    | typeof lightprotanopiaTheme
     | undefined
   >(undefined);
 
@@ -71,6 +74,8 @@ export function ThemeStyle() {
         );
       };
     } else {
+      console.log(theme);
+      console.log(themes[theme].colors.sidebarBackground);
       setThemeColors(themes[theme].colors);
     }
   }, [theme]);
