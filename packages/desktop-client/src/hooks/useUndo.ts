@@ -24,7 +24,12 @@ type UndoActions = {
 export function useUndo(): UndoActions {
   const dispatch = useDispatch();
   const showUndoNotification = useCallback(
-    ({ type = 'message', title = 'Undo?', message, messageActions }) => {
+    ({
+      type = 'message',
+      title = 'Undo?',
+      message,
+      messageActions,
+    }: UndoNotification) => {
       dispatch(
         addNotification({
           type,
@@ -45,7 +50,12 @@ export function useUndo(): UndoActions {
   );
 
   const showRedoNotification = useCallback(
-    ({ type = 'message', title = 'Redo?', message, messageActions }) => {
+    ({
+      type = 'message',
+      title = 'Redo?',
+      message,
+      messageActions,
+    }: RedoNotification) => {
       dispatch(
         addNotification({
           type,
