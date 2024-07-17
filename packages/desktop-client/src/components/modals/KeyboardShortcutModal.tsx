@@ -95,9 +95,9 @@ function Shortcut({
             marginRight: 10,
           }}
         >
-          {meta && (
+          {shift && (
             <>
-              <KeyIcon shortcut={meta} />
+              <KeyIcon shortcut="Shift" />
               <Text
                 style={{
                   display: 'flex',
@@ -112,9 +112,9 @@ function Shortcut({
               </Text>
             </>
           )}
-          {shift && (
+          {meta && (
             <>
-              <KeyIcon shortcut="Shift" />
+              <KeyIcon shortcut={meta} />
               <Text
                 style={{
                   display: 'flex',
