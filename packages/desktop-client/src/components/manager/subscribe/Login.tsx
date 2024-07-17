@@ -130,7 +130,6 @@ export function Login() {
           />
           <ButtonWithLoading
             variant="primary"
-            aria-label="Sign in"
             isLoading={loading}
             style={{ fontSize: 15 }}
             onPress={onSubmit}
@@ -174,7 +173,6 @@ export function Login() {
       >
         <Button
           variant="bare"
-          aria-label="Try Demo"
           style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
           onPress={onDemo}
         >

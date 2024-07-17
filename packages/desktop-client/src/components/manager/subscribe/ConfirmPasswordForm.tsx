@@ -70,7 +70,6 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         {buttons}
         <ButtonWithLoading
           variant="primary"
-          aria-label="OK"
           isLoading={loading}
           onPress={onSubmit}
         >

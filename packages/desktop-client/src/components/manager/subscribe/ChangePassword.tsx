@@ -87,7 +87,6 @@ export function ChangePassword() {
         buttons={
           <Button
             variant="bare"
-            aria-label="Cancel"
             style={{ fontSize: 15, marginRight: 10 }}
             onPress={() => navigate('/')}
           >

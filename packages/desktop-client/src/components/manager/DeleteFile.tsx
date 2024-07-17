@@ -55,7 +55,6 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
 
               <ButtonWithLoading
                 variant="primary"
-                aria-label="Delete file from all devices"
                 isLoading={loadingState === 'cloud'}
                 style={{
                   backgroundColor: theme.errorText,
@@ -107,7 +106,6 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
 
               <ButtonWithLoading
                 variant={isCloudFile ? 'normal' : 'primary'}
-                aria-label="Delete file locally"
                 isLoading={loadingState === 'local'}
                 style={{
                   alignSelf: 'center',

@@ -64,12 +64,7 @@ export function WelcomeScreen() {
           flexShrink: 0,
         }}
       >
-        <Button
-          aria-label="Import my budget"
-          onPress={() => pushModal('import')}
-        >
-          Import my budget
-        </Button>
+        <Button onPress={() => pushModal('import')}>Import my budget</Button>
         <View
           style={{
             flexDirection: 'row',
@@ -77,17 +72,10 @@ export function WelcomeScreen() {
             gap: 10,
           }}
         >
-          <Button
-            aria-label="View demo"
-            onPress={() => createBudget({ testMode: true })}
-          >
+          <Button onPress={() => createBudget({ testMode: true })}>
             View demo
           </Button>
-          <Button
-            variant="primary"
-            aria-label="Start fresh"
-            onPress={() => createBudget()}
-          >
+          <Button variant="primary" onPress={() => createBudget()}>
             Start fresh
           </Button>
         </View>

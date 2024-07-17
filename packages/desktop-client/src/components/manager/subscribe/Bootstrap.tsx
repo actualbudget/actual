@@ -88,7 +88,6 @@ export function Bootstrap() {
         buttons={
           <Button
             variant="bare"
-            aria-label="Try Demo"
             style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
             onPress={onDemo}
           >

@@ -37,11 +37,7 @@ export function Error() {
       >
         {getErrorMessage(error)}
       </Text>
-      <Button
-        aria-label="Try again"
-        onPress={onTryAgain}
-        style={{ marginTop: 20 }}
-      >
+      <Button onPress={onTryAgain} style={{ marginTop: 20 }}>
         Try again
       </Button>
     </View>
