@@ -1,5 +1,5 @@
 import type React from 'react';
-import { memo, useRef, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -158,6 +158,14 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
 
+  const onPopoverAction = useCallback(
+    (...args: Parameters<typeof onBudgetAction>) => {
+      onBudgetAction(...args);
+      setBudgetMenuOpen(false);
+    },
+    [onBudgetAction],
+  );
+
   return (
     <View
       style={{
@@ -221,7 +229,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
-                  onBudgetAction?.(month, 'copy-single-last', {
+                  onPopoverAction(month, 'copy-single-last', {
                     category: category.id,
                   });
                 }}
@@ -234,12 +242,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     return;
                   }
 
-                  onBudgetAction?.(month, `set-single-${numberOfMonths}-avg`, {
+                  onPopoverAction(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
                 }}
                 onApplyBudgetTemplate={() => {
-                  onBudgetAction?.(month, 'apply-single-category-template', {
+                  onPopoverAction(month, 'apply-single-category-template', {
                     category: category.id,
                   });
                 }}
