@@ -40,8 +40,8 @@ function KeyIcon({ shortcut, style }: KeyIconProps) {
         color: '#000',
         border: '1px solid #000',
         borderRadius: 8,
-        minWidth: 35,
-        minHeight: 35,
+        minWidth: 30,
+        minHeight: 30,
         filter: 'drop-shadow(1px 1px)',
         padding: 5,
         ...style,
@@ -164,6 +164,7 @@ export function KeyboardShortcutModal({
       <View
         style={{
           flexDirection: 'row',
+          fontSize: 13,
         }}
       >
         <View>
@@ -232,8 +233,7 @@ export function KeyboardShortcutModal({
         </View>
         <View
           style={{
-            marginLeft: 20,
-            marginRight: 20,
+            marginRight: 15,
           }}
         >
           <Shortcut
