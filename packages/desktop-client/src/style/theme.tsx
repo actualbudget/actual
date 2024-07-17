@@ -9,8 +9,8 @@ import { useGlobalPref } from '../hooks/useGlobalPref';
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
-import * as midnightTheme from './themes/midnight';
 import * as lightprotanopiaTheme from './themes/lightprotanopia';
+import * as midnightTheme from './themes/midnight';
 
 const themes = {
   light: { name: 'Light', colors: lightTheme },

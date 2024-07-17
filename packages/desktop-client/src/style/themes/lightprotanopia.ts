@@ -1,4 +1,5 @@
 import * as colorPalette from '../palette';
+
 import * as lightTheme from './light';
 
 export const pageBackground = lightTheme.pageBackground;
@@ -34,15 +35,20 @@ export const tableBorder = lightTheme.tableBorder;
 export const tableBorderSelected = lightTheme.tableBorderSelected;
 export const tableBorderHover = lightTheme.tableBorderHover;
 export const tableBorderSeparator = lightTheme.tableBorderSeparator;
-export const tableRowBackgroundHighlight = lightTheme.tableRowBackgroundHighlight;
-export const tableRowBackgroundHighlightText = lightTheme.tableRowBackgroundHighlightText;
+export const tableRowBackgroundHighlight =
+  lightTheme.tableRowBackgroundHighlight;
+export const tableRowBackgroundHighlightText =
+  lightTheme.tableRowBackgroundHighlightText;
 export const tableRowHeaderBackground = lightTheme.tableRowHeaderBackground;
 export const tableRowHeaderText = lightTheme.tableRowHeaderText;
 
 export const sidebarBackground = lightTheme.sidebarBackground;
-export const sidebarItemBackgroundPending = lightTheme.sidebarItemBackgroundPending;
-export const sidebarItemBackgroundPositive = lightTheme.sidebarItemBackgroundPositive;
-export const sidebarItemBackgroundFailed = lightTheme.sidebarItemBackgroundFailed;
+export const sidebarItemBackgroundPending =
+  lightTheme.sidebarItemBackgroundPending;
+export const sidebarItemBackgroundPositive =
+  lightTheme.sidebarItemBackgroundPositive;
+export const sidebarItemBackgroundFailed =
+  lightTheme.sidebarItemBackgroundFailed;
 export const sidebarItemBackgroundHover = lightTheme.sidebarItemBackgroundHover;
 export const sidebarItemAccentSelected = lightTheme.sidebarItemAccentSelected;
 export const sidebarItemText = lightTheme.sidebarItemText;
@@ -59,11 +65,13 @@ export const menuBorder = lightTheme.menuBorder;
 export const menuBorderHover = lightTheme.menuBorderHover;
 export const menuKeybindingText = lightTheme.menuKeybindingText;
 export const menuAutoCompleteBackground = lightTheme.menuAutoCompleteBackground;
-export const menuAutoCompleteBackgroundHover = lightTheme.menuAutoCompleteBackgroundHover;
+export const menuAutoCompleteBackgroundHover =
+  lightTheme.menuAutoCompleteBackgroundHover;
 export const menuAutoCompleteText = lightTheme.menuAutoCompleteText;
 export const menuAutoCompleteTextHover = lightTheme.menuAutoCompleteTextHover;
 export const menuAutoCompleteTextHeader = lightTheme.menuAutoCompleteTextHeader;
-export const menuAutoCompleteItemTextHover = lightTheme.menuAutoCompleteItemTextHover;
+export const menuAutoCompleteItemTextHover =
+  lightTheme.menuAutoCompleteItemTextHover;
 export const menuAutoCompleteItemText = lightTheme.menuAutoCompleteItemText;
 
 export const modalBackground = lightTheme.modalBackground;
@@ -81,7 +89,8 @@ export const mobileAccountText = lightTheme.mobileAccountText;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = lightTheme.mobileViewTheme;
-export const mobileConfigServerViewTheme = lightTheme.mobileConfigServerViewTheme;
+export const mobileConfigServerViewTheme =
+  lightTheme.mobileConfigServerViewTheme;
 
 export const markdownNormal = lightTheme.markdownNormal;
 export const markdownDark = lightTheme.markdownDark;
@@ -94,31 +103,40 @@ export const buttonMenuBackground = lightTheme.buttonMenuBackground;
 export const buttonMenuBackgroundHover = lightTheme.buttonMenuBackgroundHover;
 export const buttonMenuBorder = lightTheme.buttonMenuBorder;
 export const buttonMenuSelectedText = lightTheme.buttonMenuSelectedText;
-export const buttonMenuSelectedTextHover = lightTheme.buttonMenuSelectedTextHover;
-export const buttonMenuSelectedBackground = lightTheme.buttonMenuSelectedBackground;
-export const buttonMenuSelectedBackgroundHover = lightTheme.buttonMenuSelectedBackgroundHover;
+export const buttonMenuSelectedTextHover =
+  lightTheme.buttonMenuSelectedTextHover;
+export const buttonMenuSelectedBackground =
+  lightTheme.buttonMenuSelectedBackground;
+export const buttonMenuSelectedBackgroundHover =
+  lightTheme.buttonMenuSelectedBackgroundHover;
 export const buttonMenuSelectedBorder = lightTheme.buttonMenuSelectedBorder;
 
 export const buttonPrimaryText = lightTheme.buttonPrimaryText;
 export const buttonPrimaryTextHover = lightTheme.buttonPrimaryTextHover;
 export const buttonPrimaryBackground = lightTheme.buttonPrimaryBackground;
-export const buttonPrimaryBackgroundHover = lightTheme.buttonPrimaryBackgroundHover;
+export const buttonPrimaryBackgroundHover =
+  lightTheme.buttonPrimaryBackgroundHover;
 export const buttonPrimaryBorder = lightTheme.buttonPrimaryBorder;
 export const buttonPrimaryShadow = lightTheme.buttonPrimaryShadow;
 export const buttonPrimaryDisabledText = lightTheme.buttonPrimaryDisabledText;
-export const buttonPrimaryDisabledBackground = lightTheme.buttonPrimaryDisabledBackground;
-export const buttonPrimaryDisabledBorder = lightTheme.buttonPrimaryDisabledBorder;
+export const buttonPrimaryDisabledBackground =
+  lightTheme.buttonPrimaryDisabledBackground;
+export const buttonPrimaryDisabledBorder =
+  lightTheme.buttonPrimaryDisabledBorder;
 
 export const buttonNormalText = lightTheme.buttonNormalText;
 export const buttonNormalTextHover = lightTheme.buttonNormalTextHover;
 export const buttonNormalBackground = lightTheme.buttonNormalBackground;
-export const buttonNormalBackgroundHover = lightTheme.buttonNormalBackgroundHover;
+export const buttonNormalBackgroundHover =
+  lightTheme.buttonNormalBackgroundHover;
 export const buttonNormalBorder = lightTheme.buttonNormalBorder;
 export const buttonNormalShadow = lightTheme.buttonNormalShadow;
 export const buttonNormalSelectedText = lightTheme.buttonNormalSelectedText;
-export const buttonNormalSelectedBackground = lightTheme.buttonNormalSelectedBackground;
+export const buttonNormalSelectedBackground =
+  lightTheme.buttonNormalSelectedBackground;
 export const buttonNormalDisabledText = lightTheme.buttonNormalDisabledText;
-export const buttonNormalDisabledBackground = lightTheme.buttonNormalDisabledBackground;
+export const buttonNormalDisabledBackground =
+  lightTheme.buttonNormalDisabledBackground;
 export const buttonNormalDisabledBorder = lightTheme.buttonNormalDisabledBorder;
 
 export const calendarText = lightTheme.calendarText;
@@ -133,7 +151,8 @@ export const buttonBareBackground = lightTheme.buttonBareBackground;
 export const buttonBareBackgroundHover = lightTheme.buttonBareBackgroundHover;
 export const buttonBareBackgroundActive = lightTheme.buttonBareBackgroundActive;
 export const buttonBareDisabledText = lightTheme.buttonBareDisabledText;
-export const buttonBareDisabledBackground = lightTheme.buttonBareDisabledBackground;
+export const buttonBareDisabledBackground =
+  lightTheme.buttonBareDisabledBackground;
 
 export const noticeBackground = lightTheme.noticeBackground;
 export const noticeBackgroundLight = lightTheme.noticeBackgroundLight;
@@ -160,15 +179,19 @@ export const upcomingBorder = lightTheme.upcomingBorder;
 export const formLabelText = lightTheme.formLabelText;
 export const formLabelBackground = lightTheme.formLabelBackground;
 export const formInputBackground = lightTheme.formInputBackground;
-export const formInputBackgroundSelected = lightTheme.formInputBackgroundSelected;
-export const formInputBackgroundSelection = lightTheme.formInputBackgroundSelection;
+export const formInputBackgroundSelected =
+  lightTheme.formInputBackgroundSelected;
+export const formInputBackgroundSelection =
+  lightTheme.formInputBackgroundSelection;
 export const formInputBorder = lightTheme.formInputBorder;
-export const formInputTextReadOnlySelection = lightTheme.formInputTextReadOnlySelection;
+export const formInputTextReadOnlySelection =
+  lightTheme.formInputTextReadOnlySelection;
 export const formInputBorderSelected = lightTheme.formInputBorderSelected;
 export const formInputText = lightTheme.formInputText;
 export const formInputTextSelected = lightTheme.formInputTextSelected;
 export const formInputTextPlaceholder = lightTheme.formInputTextPlaceholder;
-export const formInputTextPlaceholderSelected = lightTheme.formInputTextPlaceholderSelected;
+export const formInputTextPlaceholderSelected =
+  lightTheme.formInputTextPlaceholderSelected;
 export const formInputTextSelection = lightTheme.formInputTextSelection;
 export const formInputShadowSelected = lightTheme.formInputShadowSelected;
 export const formInputTextHighlight = lightTheme.formInputTextHighlight;

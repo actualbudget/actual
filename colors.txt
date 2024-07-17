@@ -1,0 +1,62 @@
+ colorPalette.blue150;
+ colorPalette.blue200;
+ colorPalette.blue300;
+ colorPalette.blue400;
+ colorPalette.blue500;
+ colorPalette.blue600;
+ colorPalette.blue800;
+ colorPalette.blue900;
+
+ colorPalette.green100;
+ colorPalette.green150;
+ colorPalette.green200;
+ colorPalette.green400;
+ colorPalette.green500;
+ colorPalette.green700;
+ colorPalette.green800;
+ colorPalette.green900;
+
+ colorPalette.navy100;
+ colorPalette.navy150;
+ colorPalette.navy200;
+ colorPalette.navy300;
+ colorPalette.navy400;
+ colorPalette.navy500;
+ colorPalette.navy50;
+ colorPalette.navy600;
+ colorPalette.navy700;
+ colorPalette.navy800;
+ colorPalette.navy900;
+
+ colorPalette.orange150;
+ colorPalette.orange200;
+ colorPalette.orange300;
+ colorPalette.orange500;
+ colorPalette.orange700;
+ colorPalette.orange800;
+ colorPalette.orange900;
+
+ colorPalette.purple100;
+ colorPalette.purple150;
+ colorPalette.purple200;
+ colorPalette.purple300;
+ colorPalette.purple400;
+ colorPalette.purple500;
+ colorPalette.purple600;
+ colorPalette.purple700;
+
+ colorPalette.red100;
+ colorPalette.red200;
+ colorPalette.red300;
+ colorPalette.red500;
+ colorPalette.red700;
+ colorPalette.red900;
+
+
+
+
+
+ colorPalette.white;
+ colorPalette.gray200;
+ colorPalette.gray300;
+ colorPalette.gray400;
