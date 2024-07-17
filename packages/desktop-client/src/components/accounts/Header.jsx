@@ -34,6 +34,7 @@ import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 export function AccountHeader({
   tableRef,
   editingName,
+  error,
   isNameEditable,
   workingHard,
   accountName,
@@ -239,6 +240,19 @@ export function AccountHeader({
               </View>
             )}
           </View>
+
+          {error && (
+            <View
+              style={{
+                color: theme.errorText,
+                fontSize: 14,
+                fontWeight: 500,
+                marginTop: 10,
+              }}
+            >
+              {error}
+            </View>
+          )}
         </View>
 
         <Balances
