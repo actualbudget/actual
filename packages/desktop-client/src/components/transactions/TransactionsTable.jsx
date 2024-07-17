@@ -282,7 +282,17 @@ const TransactionHeader = memo(
             onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
           }
         />
-        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
+        {showBalance && (
+          <Cell
+            value="Balance"
+            width={88}
+            textAlign="right"
+            style={{
+              borderTopWidth: 0,
+              borderBottomWidth: 0,
+            }}
+          />
+        )}
 
         {showCleared && (
           <HeaderCell
