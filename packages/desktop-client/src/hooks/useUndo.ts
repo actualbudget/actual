@@ -15,8 +15,8 @@ type RedoNotification = Pick<
 >;
 
 type UndoActions = {
-  undo: typeof undo;
-  redo: typeof redo;
+  undo: ReturnType<typeof undo>;
+  redo: ReturnType<typeof redo>;
   showUndoNotification: (undoNotification: UndoNotification) => void;
   showRedoNotification: (redoNotification: RedoNotification) => void;
 };
