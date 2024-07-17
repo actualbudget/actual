@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { Item, Section } from '@react-stately/collections';
 
@@ -177,25 +177,31 @@ function FloatingActionBar({
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const moreOptionsMenuTriggerRef = useRef(null);
   const [isMoreOptionsMenuOpen, setIsMoreOptionsMenuOpen] = useState(false);
-  const getMenuItemStyle = item => ({
-    ...styles.mobileMenuItem,
-    color: theme.mobileHeaderText,
-    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
-  });
-
-  const buttonProps = {
-    style: {
+  const getMenuItemStyle = useCallback(
+    item => ({
       ...styles.mobileMenuItem,
-      color: 'currentColor',
-      height: styles.mobileMinHeight,
-    },
-    activeStyle: {
-      color: 'currentColor',
-    },
-    hoveredStyle: {
-      color: 'currentColor',
-    },
-  };
+      color: theme.mobileHeaderText,
+      ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+    }),
+    [],
+  );
+
+  const buttonProps = useMemo(
+    () => ({
+      style: {
+        ...styles.mobileMenuItem,
+        color: 'currentColor',
+        height: styles.mobileMinHeight,
+      },
+      activeStyle: {
+        color: 'currentColor',
+      },
+      hoveredStyle: {
+        color: 'currentColor',
+      },
+    }),
+    [],
+  );
 
   const allTransactionsAreLinked = useMemo(() => {
     return transactions
