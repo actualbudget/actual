@@ -122,7 +122,7 @@ export function OpSelect({
       .map(op => [op, formatOp(op, type)]);
 
     if (type === 'string' || type === 'id') {
-      options.splice(options.length / 2, 0, Menu.line);
+      options.splice(Math.ceil(options.length / 2), 0, Menu.line);
     }
 
     return options;

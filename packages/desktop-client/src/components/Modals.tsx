@@ -35,6 +35,7 @@ import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
 import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
 import { HoldBufferModal } from './modals/HoldBufferModal';
 import { ImportTransactions } from './modals/ImportTransactions';
+import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
 import { LoadBackup } from './modals/LoadBackup';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
@@ -53,7 +54,6 @@ import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenu
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInputModal } from './modals/SingleInputModal';
-import { SwitchBudgetTypeModal } from './modals/SwitchBudgetTypeModal';
 import { TransferModal } from './modals/TransferModal';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
@@ -96,6 +96,9 @@ export function Modals() {
       };
 
       switch (name) {
+        case 'keyboard-shortcuts':
+          return <KeyboardShortcutModal modalProps={modalProps} />;
+
         case 'import-transactions':
           return (
             <ImportTransactions
@@ -423,15 +426,6 @@ export function Modals() {
             />
           );
 
-        case 'switch-budget-type':
-          return (
-            <SwitchBudgetTypeModal
-              key={name}
-              modalProps={modalProps}
-              onSwitch={options.onSwitch}
-            />
-          );
-
         case 'account-menu':
           return (
             <AccountMenuModal
@@ -623,7 +617,6 @@ export function Modals() {
               onAddCategoryGroup={options.onAddCategoryGroup}
               onToggleHiddenCategories={options.onToggleHiddenCategories}
               onSwitchBudgetFile={options.onSwitchBudgetFile}
-              onSwitchBudgetType={options.onSwitchBudgetType}
             />
           );
 

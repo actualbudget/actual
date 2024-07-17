@@ -288,6 +288,7 @@ export function PayeeAutocomplete({
       focused={payeeFieldFocused}
       inputProps={{
         ...inputProps,
+        autoCapitalize: 'words',
         onBlur: () => {
           setRawPayee('');
           setPayeeFieldFocused(false);
@@ -420,7 +421,7 @@ export function CreatePayeeButton({
       data-testid="create-payee-button"
       style={{
         display: 'block',
-        flexShrink: 0,
+        flex: '1 0',
         color: highlighted
           ? theme.menuAutoCompleteTextHover
           : theme.noticeTextMenu,
