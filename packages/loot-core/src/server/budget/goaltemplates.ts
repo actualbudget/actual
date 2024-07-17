@@ -442,9 +442,6 @@ async function applyCategoryTemplate(
     'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
   );
   all_schedule_names = all_schedule_names.map(v => v.name);
-  let g = await db.all(`select * from zero_budgets where category='${category.id}'`);
-  console.log("heere", category, g);
-
   let scheduleFlag = false; //only run schedules portion once
 
   // remove lines for past dates, calculate repeating dates
