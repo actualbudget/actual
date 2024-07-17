@@ -255,6 +255,7 @@ export function KeyboardShortcutModal({
           )}
           {onAccounts && (
             <>
+              <Shortcut shortcut="A" description="Select all transactions" meta={ctrl} />
               <Shortcut shortcut="Tab" description="Move right when editing" />
               <Shortcut
                 shortcut="Tab"
