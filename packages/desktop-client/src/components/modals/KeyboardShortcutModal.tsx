@@ -178,6 +178,7 @@ export function KeyboardShortcutModal({
             shortcut="P"
             description="Toggle the privacy filter"
             meta={ctrl}
+            shift={true}
           />
           {onBudget && (
             <Shortcut
