@@ -12,9 +12,7 @@ const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
 contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
   ACTUAL_VERSION: VERSION,
-  logToTerminal: (...args: unknown[]) => {
-    console.log(...args);
-  },
+  logToTerminal: console.log,
 
   ipcConnect: (
     func: (payload: {
