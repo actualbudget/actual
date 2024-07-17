@@ -81,23 +81,14 @@ export async function exportQueryToCSV(query) {
   const parentsChildCount: Map<number, number> = new Map();
   const childSplitOrder: Map<number, number> = new Map();
 
-  // first loop through and find parent transactions
+  // find children, their order, and total # siblings
   for (const trans of transactions) {
-    if (trans.IsParent) {
-      parentsChildCount.set(trans.Id, 0);
+    if (trans.IsChild) {
+      let childNumber = parentsChildCount.get(trans.ParentId) || 0;
+      childNumber++;
+      childSplitOrder.set(trans.Id,childNumber);
+      parentsChildCount.set(trans.ParentId, childNumber);
     }
-  }
-
-  // loop through parents and assign children split numbers, and parents total children numbers
-  for (const parent of parentsChildCount.keys()) {
-    let childNumber = 0;
-    for (const trans of transactions) {
-      if (trans.ParentId === parent) {
-        childSplitOrder.set(trans.Id, childNumber);
-        childNumber++;
-      }
-    }
-    parentsChildCount.set(parent, childNumber);
   }
 
   // map final properties for export and grab the child count for splits from their parent transaction
