@@ -293,7 +293,7 @@ const TransactionHeader = memo(
             onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
           }
         />
-        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
+        {showBalance && <Cell value="Balance" width={103} textAlign="right" />}
 
         {showCleared && (
           <HeaderCell
@@ -1399,7 +1399,7 @@ const Transaction = memo(function Transaction({
             color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
           }}
           style={{ ...styles.tnum, ...amountStyle }}
-          width={88}
+          width={103}
           textAlign="right"
           privacyFilter
         />
