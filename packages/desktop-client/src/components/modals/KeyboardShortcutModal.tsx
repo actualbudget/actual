@@ -78,7 +78,7 @@ function Shortcut({
     <div
       style={{
         display: 'flex',
-        marginBottom: 10,
+        marginBottom: 5,
         marginLeft: 20,
       }}
     >
