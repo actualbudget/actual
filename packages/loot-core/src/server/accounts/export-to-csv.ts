@@ -86,7 +86,7 @@ export async function exportQueryToCSV(query) {
     if (trans.IsChild) {
       let childNumber = parentsChildCount.get(trans.ParentId) || 0;
       childNumber++;
-      childSplitOrder.set(trans.Id,childNumber);
+      childSplitOrder.set(trans.Id, childNumber);
       parentsChildCount.set(trans.ParentId, childNumber);
     }
   }
