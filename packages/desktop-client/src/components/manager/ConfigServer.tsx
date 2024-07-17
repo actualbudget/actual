@@ -188,7 +188,6 @@ export function ConfigServer() {
             )}
             <Button
               variant="bare"
-              aria-label="Don’t use a server"
               style={{ color: theme.pageTextLight, margin: 5 }}
               onPress={onSkip}
             >
@@ -198,7 +197,6 @@ export function ConfigServer() {
             {isNonProductionEnvironment() && (
               <Button
                 variant="primary"
-                aria-label="Create test file"
                 style={{ marginLeft: 15 }}
                 onPress={onCreateTestFile}
               >
