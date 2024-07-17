@@ -100,7 +100,6 @@ export function CloseAccountModal({
       dispatch(
         closeAccount(account.id, transferAccountId || null, categoryId || null),
       );
-      modalProps.onClose();
     }
   };
 
@@ -131,7 +130,12 @@ export function CloseAccountModal({
                 </span>
               )}
             </Paragraph>
-            <Form onSubmit={onSubmit}>
+            <Form
+              onSubmit={e => {
+                onSubmit(e);
+                close();
+              }}
+            >
               {balance !== 0 && (
                 <View>
                   <Paragraph>
