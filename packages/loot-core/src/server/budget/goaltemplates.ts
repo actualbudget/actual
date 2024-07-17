@@ -176,8 +176,13 @@ async function processTemplate(
       `budget-${category.id}`,
     );
     const template = category_templates[category.id];
+    let adder = false; //This is the bool that will skip the zeroing of budgeted.
     if (template) {
       for (let l = 0; l < template.length; l++) {
+        //check to see if this catagory accepts adding and set the adder bool
+        if (template[l].adder) {
+          adder = true;
+        }
         //add each priority we need to a list.  Will sort later
         if (template[l].priority == null) {
           continue;
@@ -188,15 +193,21 @@ async function processTemplate(
     if (budgeted) {
       if (!force) {
         // save index of category to remove
-        categories_remove.push(c);
+        //unless template states otherwise
+        if (!adder) {
+          categories_remove.push(c);
+        }
       } else {
         // if we are overwritting add this category to list to zero
-        setToZero.push({
-          category: category.id,
-          amount: 0,
-          isIncome: category.is_income,
-          isTemplate: template ? true : false,
-        });
+        //unless template states otherwise
+        if (!adder) {
+          setToZero.push({
+            category: category.id,
+            amount: 0,
+            isIncome: category.is_income,
+            isTemplate: template ? true : false,
+          });
+        }
       }
     }
   }
@@ -431,6 +442,8 @@ async function applyCategoryTemplate(
     'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
   );
   all_schedule_names = all_schedule_names.map(v => v.name);
+  let g = await db.all(`select * from zero_budgets where category='${category.id}'`);
+  console.log("heere", category, g);
 
   let scheduleFlag = false; //only run schedules portion once
 
