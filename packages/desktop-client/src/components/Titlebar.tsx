@@ -307,11 +307,7 @@ export function Titlebar({ style }: TitlebarProps) {
           path="/accounts"
           element={
             location.state?.goBack ? (
-              <Button
-                variant="bare"
-                aria-label="Back"
-                onPress={() => navigate(-1)}
-              >
+              <Button variant="bare" onPress={() => navigate(-1)}>
                 <SvgArrowLeft
                   width={10}
                   height={10}

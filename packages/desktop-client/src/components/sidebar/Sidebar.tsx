@@ -239,7 +239,6 @@ function EditableBudgetName() {
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label="Open budget menu"
         style={{
           color: theme.buttonNormalBorder,
           fontSize: 16,

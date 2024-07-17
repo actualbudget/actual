@@ -314,18 +314,11 @@ function ManageRulesContent({
         >
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
-              <Button
-                aria-label={`Delete ${selectedInst.items.size} rules`}
-                onPress={onDeleteSelected}
-              >
+              <Button onPress={onDeleteSelected}>
                 Delete {selectedInst.items.size} rules
               </Button>
             )}
-            <Button
-              variant="primary"
-              aria-label="Create new rule"
-              onPress={onCreateRule}
-            >
+            <Button variant="primary" onPress={onCreateRule}>
               Create new rule
             </Button>
           </Stack>

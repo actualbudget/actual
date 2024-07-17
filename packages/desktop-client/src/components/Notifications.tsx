@@ -179,7 +179,6 @@ function Notification({
           {button && (
             <ButtonWithLoading
               variant="bare"
-              aria-label={button.title}
               isLoading={loading}
               onPress={async () => {
                 setLoading(true);

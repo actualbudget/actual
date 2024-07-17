@@ -98,7 +98,6 @@ export function LoggedInUser({
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label={serverMessage()}
         onPress={() => setMenuOpen(true)}
         style={color && { color }}
       >

@@ -444,12 +444,9 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
       <div
         style={{ display: 'flex', marginTop: 15, justifyContent: 'flex-end' }}
       >
-        <Button aria-label="Cancel" onPress={onClose}>
-          Cancel
-        </Button>
+        <Button onPress={onClose}>Cancel</Button>
         <Button
           variant="primary"
-          aria-label="Apply"
           onPress={() => onSave(unparseConfig(config))}
           style={{ marginLeft: 10 }}
         >
@@ -474,7 +471,6 @@ export function RecurringSchedulePicker({ value, buttonStyle, onChange }) {
     <View>
       <Button
         ref={triggerRef}
-        aria-label="Edit recurring schedule"
         style={{ textAlign: 'left', ...buttonStyle }}
         onPress={() => setIsOpen(true)}
       >

@@ -149,7 +149,6 @@ function SharedArrayBufferOverride() {
         I understand the risks, run Actual in the unsupported fallback mode
       </label>
       <Button
-        aria-label="Open Actual"
         isDisabled={!understand}
         onPress={() => {
           window.localStorage.setItem('SharedArrayBufferOverride', 'true');
