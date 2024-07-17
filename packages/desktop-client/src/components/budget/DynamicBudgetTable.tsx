@@ -35,6 +35,7 @@ type DynamicBudgetTableInnerProps = {
 } & DynamicBudgetTableProps;
 
 const DynamicBudgetTableInner = ({
+  type,
   width,
   height,
   prewarmStartMonth,
@@ -98,7 +99,11 @@ const DynamicBudgetTableInner = ({
       _onMonthSelect(
         monthUtils.subMonths(
           monthUtils.currentMonth(),
-          Math.floor(numMonths / 2),
+          type === 'rollover'
+            ? Math.floor((numMonths - 1) / 2)
+            : numMonths === 2
+              ? 1
+              : Math.max(numMonths - 2, 0),
         ),
       );
     },
