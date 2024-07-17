@@ -11,7 +11,7 @@ import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
@@ -185,13 +185,13 @@ export function CreateAccountModal({
           {upgradingAccountId == null && (
             <View style={{ gap: 10 }}>
               <Button
-                type="primary"
+                variant="primary"
                 style={{
                   padding: '10px 0',
                   fontSize: 15,
                   fontWeight: 600,
                 }}
-                onClick={onCreateLocalAccount}
+                onPress={onCreateLocalAccount}
               >
                 Create local account
               </Button>
@@ -222,14 +222,14 @@ export function CreateAccountModal({
                   }}
                 >
                   <ButtonWithLoading
-                    disabled={syncServerStatus !== 'online'}
+                    isDisabled={syncServerStatus !== 'online'}
                     style={{
                       padding: '10px 0',
                       fontSize: 15,
                       fontWeight: 600,
                       flex: 1,
                     }}
-                    onClick={onConnectGoCardless}
+                    onPress={onConnectGoCardless}
                   >
                     {isGoCardlessSetupComplete
                       ? 'Link bank account with GoCardless'
@@ -239,9 +239,9 @@ export function CreateAccountModal({
                     <>
                       <Button
                         ref={triggerRef}
-                        type="bare"
-                        onClick={() => setGoCardlessMenuOpen(true)}
-                        aria-label="Menu"
+                        variant="bare"
+                        onPress={() => setGoCardlessMenuOpen(true)}
+                        aria-label="GoCardless menu"
                       >
                         <SvgDotsHorizontalTriple
                           width={15}
@@ -290,15 +290,15 @@ export function CreateAccountModal({
                       }}
                     >
                       <ButtonWithLoading
-                        disabled={syncServerStatus !== 'online'}
-                        loading={loadingSimpleFinAccounts}
+                        isDisabled={syncServerStatus !== 'online'}
+                        isLoading={loadingSimpleFinAccounts}
                         style={{
                           padding: '10px 0',
                           fontSize: 15,
                           fontWeight: 600,
                           flex: 1,
                         }}
-                        onClick={onConnectSimpleFin}
+                        onPress={onConnectSimpleFin}
                       >
                         {isSimpleFinSetupComplete
                           ? 'Link bank account with SimpleFIN'
@@ -308,9 +308,9 @@ export function CreateAccountModal({
                         <>
                           <Button
                             ref={triggerRef}
-                            type="bare"
-                            onClick={() => setSimplefinMenuOpen(true)}
-                            aria-label="Menu"
+                            variant="bare"
+                            onPress={() => setSimplefinMenuOpen(true)}
+                            aria-label="SimpleFIN menu"
                           >
                             <SvgDotsHorizontalTriple
                               width={15}
@@ -353,7 +353,7 @@ export function CreateAccountModal({
             ) : (
               <>
                 <Button
-                  disabled
+                  isDisabled
                   style={{
                     padding: '10px 0',
                     fontSize: 15,

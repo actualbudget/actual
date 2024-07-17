@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useNotes } from '../../hooks/useNotes';
 import { SvgCheck } from '../../icons/v2';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
@@ -72,13 +72,13 @@ export function NotesModal({ modalProps, id, name, onSave }: NotesModalProps) {
           }}
         >
           <Button
-            type="primary"
+            variant="primary"
             style={{
               fontSize: 17,
               fontWeight: 400,
               width: '100%',
             }}
-            onClick={_onSave}
+            onPress={_onSave}
           >
             <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />
             Save notes
