@@ -1,3 +1,5 @@
+import { getNormalisedString } from '../../../../desktop-client/src/util/normalisation';
+
 // @ts-strict-ignore
 let _uid = 0;
 function resetUid() {
@@ -720,7 +722,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
     }
     case '$like': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
-      return `UNICODE_LIKE(${right}, ${left})`;
+      return `UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))`;
     }
     case '$regexp': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
