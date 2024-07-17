@@ -10,7 +10,6 @@ import { useDispatch } from 'react-redux';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import {
-  addNotification,
   collapseModals,
   getPayees,
   markAccountRead,
@@ -18,7 +17,6 @@ import {
   pushModal,
   reopenAccount,
   syncAndDownload,
-  undo,
   updateAccount,
 } from 'loot-core/client/actions';
 import {
@@ -48,6 +46,7 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { useUndo } from '../../../hooks/useUndo';
 import { styles, theme } from '../../../style';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -299,28 +298,7 @@ function TransactionListWithPreviews({ account }) {
     setSelectedTransactions([]);
   };
 
-  const showUndoNotification = ({
-    type = 'message',
-    title = 'Batch operation complete',
-    message,
-    messageActions,
-  }) => {
-    dispatch(
-      addNotification({
-        type,
-        title,
-        message,
-        messageActions,
-        sticky: true,
-        button: {
-          title: 'Undo',
-          action: async () => {
-            await dispatch(undo());
-          },
-        },
-      }),
-    );
-  };
+  const { showUndoNotification } = useUndo();
 
   const onBatchEdit = async (name, ids) => {
     const { data } = await runQuery(
@@ -419,6 +397,7 @@ function TransactionListWithPreviews({ account }) {
       }
 
       showUndoNotification({
+        title: 'Batch operation complete',
         message: `Successfully updated ${name} of ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''} to [${displayValue}](#${displayValue}).`,
         messageActions: {
           [displayValue]: () => {
@@ -541,6 +520,7 @@ function TransactionListWithPreviews({ account }) {
       await send('transactions-batch-update', changes);
 
       showUndoNotification({
+        title: 'Batch operation complete',
         message: `Successfully duplicated ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''}.`,
       });
     };
@@ -600,6 +580,7 @@ function TransactionListWithPreviews({ account }) {
             await send('transactions-batch-update', changes);
             showUndoNotification({
               type: 'warning',
+              title: 'Batch operation complete',
               message: `Successfully deleted ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''}.`,
             });
           },
@@ -626,6 +607,7 @@ function TransactionListWithPreviews({ account }) {
           // TODO: When schedule becomes available in mobile, update undo notification message
           // to open the schedule when the schedule name is clicked.
           showUndoNotification({
+            title: 'Batch operation complete',
             message: `Successfully linked ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''} to ${scheduleName}.`,
           });
         },
@@ -638,6 +620,7 @@ function TransactionListWithPreviews({ account }) {
       updated: ids.map(id => ({ id, schedule: null })),
     });
     showUndoNotification({
+      title: 'Batch operation complete',
       message: `Successfully unlinked ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''} from their respective schedules.`,
     });
   };
