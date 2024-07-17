@@ -10,7 +10,7 @@
     "build": "tsc",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest  --coverage",
     "types": "tsc --noEmit --incremental",
-    "verify": "yarn -s lint && yarn types",
+    "verify": "yarn lint && yarn types",
     "reset-password": "node src/scripts/reset-password.js",
     "health-check": "node src/scripts/health-check.js"
   },
