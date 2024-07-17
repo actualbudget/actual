@@ -1,4 +1,4 @@
-import { getNormalisedString } from '../../../../../desktop-client/src/util/normalisation';
+import { getNormalisedString } from '../../../shared/normalisation';
 
 export function normalise(value: string | null): string {
   if (!value) {

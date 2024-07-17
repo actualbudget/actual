@@ -1,4 +1,4 @@
-import { getNormalisedString } from '../../../../desktop-client/src/util/normalisation';
+import { getNormalisedString } from '../../shared/normalisation';
 
 // @ts-strict-ignore
 let _uid = 0;
