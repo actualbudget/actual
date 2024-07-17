@@ -630,8 +630,23 @@ function PayeeCell({
         }
       }}
       formatter={() => getPayeePretty(transaction, payee, transferAccount)}
-      unexposedContent={props =>
-        importedPayee ? (
+      unexposedContent={props => {
+        const payeeInfo = (
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            <PayeeIcons
+              transaction={transaction}
+              transferAccount={transferAccount}
+              onNavigateToTransferAccount={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToSchedule}
+            />
+            <UnexposedCellContent
+              {...props}
+              style={{ borderBottom: `1px dashed ${theme.pageTextSubdued}` }}
+            />
+          </div>
+        );
+
+        return importedPayee ? (
           <Tooltip
             content={
               <View style={{ padding: 10 }}>
@@ -643,33 +658,12 @@ function PayeeCell({
             placement="bottom"
             triggerProps={{ delay: 750 }}
           >
-            <div
-              style={{ display: 'flex', alignItems: 'center', width: '100%' }}
-            >
-              <PayeeIcons
-                transaction={transaction}
-                transferAccount={transferAccount}
-                onNavigateToTransferAccount={onNavigateToTransferAccount}
-                onNavigateToSchedule={onNavigateToSchedule}
-              />
-              <UnexposedCellContent
-                {...props}
-                style={{ borderBottom: `1px dashed ${theme.pageTextSubdued}` }}
-              />
-            </div>
+            {payeeInfo}
           </Tooltip>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <PayeeIcons
-              transaction={transaction}
-              transferAccount={transferAccount}
-              onNavigateToTransferAccount={onNavigateToTransferAccount}
-              onNavigateToSchedule={onNavigateToSchedule}
-            />
-            <UnexposedCellContent {...props} />
-          </div>
-        )
-      }
+          payeeInfo
+        );
+      }}
     >
       {({
         onBlur,
