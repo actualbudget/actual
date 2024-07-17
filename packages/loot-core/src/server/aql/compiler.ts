@@ -730,7 +730,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
     }
     case '$notlike': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
-      return `(NOT UNICODE_LIKE(${right}, ${left})\n OR ${left} IS NULL)`;
+      return `(NOT UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))\n OR ${left} IS NULL)`;
     }
     default:
       throw new CompileError(`Unknown operator: ${op}`);
