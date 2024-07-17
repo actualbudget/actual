@@ -47,8 +47,8 @@ export function ScheduleLink({
       await send('transactions-batch-update', {
         updated: ids.map(id => ({ id, schedule: scheduleId })),
       });
+      onScheduleLinked?.(scheduleId);
     }
-    onScheduleLinked?.(scheduleId);
   }
 
   async function onCreate() {
