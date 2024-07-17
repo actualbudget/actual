@@ -121,6 +121,10 @@ export const schema = {
     id: f('id'),
     note: f('string'),
   },
+  preferences: {
+    id: f('id'),
+    value: f('string'),
+  },
   transaction_filters: {
     id: f('id'),
     name: f('string'),

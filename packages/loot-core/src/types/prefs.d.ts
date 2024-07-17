@@ -30,7 +30,6 @@ export type LocalPrefs = Partial<
     'budget.collapsed': string[];
     'budget.summaryCollapsed': boolean;
     'budget.showHiddenCategories': boolean;
-    'budget.startMonth': string;
     // TODO: pull from src/components/modals/ImportTransactions.js
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
@@ -57,6 +56,10 @@ export type LocalPrefs = Partial<
     'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
+
+export type SyncedBudgetPrefs = Partial<{
+  'budget.startMonth': string;
+}>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type GlobalPrefs = Partial<{

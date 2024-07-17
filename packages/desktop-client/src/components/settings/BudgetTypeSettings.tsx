@@ -6,6 +6,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSyncedBudgetPref } from '../../hooks/useSyncedBudgetPref';
 import { switchBudgetType } from '../budget/util';
 import { ButtonWithLoading } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -19,7 +20,7 @@ export function BudgetTypeSettings() {
   const [loading, setLoading] = useState(false);
 
   const currentMonth = monthUtils.currentMonth();
-  const [startMonthPref] = useLocalPref('budget.startMonth');
+  const [startMonthPref] = useSyncedBudgetPref('budget.startMonth');
   const startMonth = startMonthPref || currentMonth;
   const spreadsheet = useSpreadsheet();
 

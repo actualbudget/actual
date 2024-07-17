@@ -1,0 +1,7 @@
+BEGIN TRANSACTION;
+
+CREATE TABLE preferences
+  (id TEXT PRIMARY KEY,
+   value TEXT);
+
+COMMIT;
