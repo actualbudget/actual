@@ -9,14 +9,11 @@ type UndoNotification = Pick<
   'type' | 'title' | 'message' | 'messageActions'
 >;
 
-type RedoNotification = Pick<
-  Notification,
-  'type' | 'title' | 'message' | 'messageActions'
->;
+type RedoNotification = UndoNotification;
 
 type UndoActions = {
-  undo: ReturnType<typeof undo>;
-  redo: ReturnType<typeof redo>;
+  undo: () => void;
+  redo: () => void;
   showUndoNotification: (undoNotification: UndoNotification) => void;
   showRedoNotification: (redoNotification: RedoNotification) => void;
 };
@@ -24,12 +21,12 @@ type UndoActions = {
 export function useUndo(): UndoActions {
   const dispatch = useDispatch();
 
-  const dispatchUndo = useCallback(async () => {
-    await dispatch(undo());
+  const dispatchUndo = useCallback(() => {
+    dispatch(undo());
   }, [dispatch]);
 
-  const dispatchRedo = useCallback(async () => {
-    await dispatch(redo());
+  const dispatchRedo = useCallback(() => {
+    dispatch(redo());
   }, [dispatch]);
 
   const showUndoNotification = useCallback(

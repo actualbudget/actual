@@ -284,6 +284,8 @@ function TransactionListWithPreviews({ account }) {
   const balanceCleared = queries.accountBalanceCleared(account);
   const balanceUncleared = queries.accountBalanceUncleared(account);
 
+  // Note: deleted transactions will still be in this list so that
+  // when the user undoes the delete, the transactions will still be selected.
   const [selectedTransactions, setSelectedTransactions] = useState([]);
   const hasMoreThanOneSelected = selectedTransactions.length > 1;
 
@@ -659,7 +661,9 @@ function TransactionListWithPreviews({ account }) {
     <TransactionListWithBalances
       isLoading={isLoading}
       transactions={allTransactions}
-      selectedTransactions={selectedTransactions}
+      selectedTransactions={selectedTransactions.filter(id =>
+        allTransactions.find(t => t.id === id),
+      )}
       onAddSelectedTransaction={onAddSelectedTransaction}
       onClearSelectedTransactions={onClearSelectedTransactions}
       balance={balance}
