@@ -23,6 +23,15 @@ type UndoActions = {
 
 export function useUndo(): UndoActions {
   const dispatch = useDispatch();
+
+  const dispatchUndo = useCallback(async () => {
+    await dispatch(undo());
+  }, [dispatch]);
+
+  const dispatchRedo = useCallback(async () => {
+    await dispatch(redo());
+  }, [dispatch]);
+
   const showUndoNotification = useCallback(
     ({
       type = 'message',
@@ -39,14 +48,12 @@ export function useUndo(): UndoActions {
           sticky: true,
           button: {
             title: 'Undo',
-            action: async () => {
-              await dispatch(undo());
-            },
+            action: dispatchUndo,
           },
         }),
       );
     },
-    [dispatch],
+    [dispatch, dispatchUndo],
   );
 
   const showRedoNotification = useCallback(
@@ -65,19 +72,17 @@ export function useUndo(): UndoActions {
           sticky: true,
           button: {
             title: 'Redo',
-            action: async () => {
-              await dispatch(redo());
-            },
+            action: dispatchRedo,
           },
         }),
       );
     },
-    [dispatch],
+    [dispatch, dispatchRedo],
   );
 
   return {
-    undo,
-    redo,
+    undo: dispatchUndo,
+    redo: dispatchRedo,
     showUndoNotification,
     showRedoNotification,
   };
