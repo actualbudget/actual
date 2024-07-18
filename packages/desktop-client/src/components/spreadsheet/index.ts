@@ -61,5 +61,5 @@ export type Binding<
 export const parametrizedField =
   <SheetName extends SheetNames>() =>
   <SheetFieldName extends SheetFields<SheetName>>(field: SheetFieldName) =>
-  (id: string): SheetFieldName =>
+  (id?: string): SheetFieldName =>
     `${field}-${id}` as SheetFieldName;
