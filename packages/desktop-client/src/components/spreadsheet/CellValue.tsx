@@ -9,10 +9,13 @@ import { type FormatType, useFormat } from './useFormat';
 import { useSheetName } from './useSheetName';
 import { useSheetValue } from './useSheetValue';
 
-import { type Binding } from '.';
+import { type Binding, type SheetNames, type SheetFields } from '.';
 
-type CellValueProps = {
-  binding: string | Binding;
+export type CellValueProps<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+> = {
+  binding: Binding<SheetName, FieldName>;
   type?: FormatType;
   formatter?: (value) => ReactNode;
   style?: CSSProperties;
@@ -32,7 +35,7 @@ export function CellValue({
   privacyFilter,
   'data-testid': testId,
   ...props
-}: CellValueProps) {
+}: CellValueProps<any, any>) {
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
   const format = useFormat();

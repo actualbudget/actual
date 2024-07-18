@@ -14,6 +14,31 @@ export type Spreadsheets = {
     balanceCleared: number;
     balanceUncleared: number;
   };
+  'rollover-budget': {
+    // Common fields
+    'uncategorized-amount': number;
+    'uncategorized-balance': number;
+
+    // Rollover fields
+    'available-funds': number;
+    'last-month-overspent': number;
+    buffered: number;
+    'to-budget': number;
+    'from-last-month': number;
+    'total-budgeted': number;
+    'total-income': number;
+    'total-spent': number;
+    'total-leftover': number;
+    'group-sum-amount': number;
+    'group-budget': number;
+    'group-leftover': number;
+    budget: number;
+    'sum-amount': number;
+    leftover: number;
+    carryover: number;
+    goal: number;
+    'long-goal': number;
+  };
 };
 
 export type SheetNames = keyof Spreadsheets & string;

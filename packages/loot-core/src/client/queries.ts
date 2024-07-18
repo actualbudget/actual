@@ -3,6 +3,7 @@ import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
 import {
   parametrizedField,
+  type SheetFields,
   type Binding,
   type SheetNames,
 } from '../../../desktop-client/src/components/spreadsheet';
@@ -18,7 +19,13 @@ import { currencyToAmount, amountToInteger } from '../shared/util';
 import { type CategoryEntity, type AccountEntity } from '../types/models';
 import { type LocalPrefs } from '../types/prefs';
 
+type BudgetType<SheetName extends SheetNames> = Record<
+  string,
+  SheetFields<SheetName> | ((id: string) => SheetFields<SheetName>)
+>;
+
 const accountParametrizedField = parametrizedField<'account'>();
+const rolloverParametrizedField = parametrizedField<'rollover-budget'>();
 
 export function getAccountFilter(accountId: string, field = 'account') {
   if (accountId) {
@@ -263,19 +270,19 @@ export const rolloverBudget = {
   totalSpent: 'total-spent',
   totalBalance: 'total-leftover',
 
-  groupSumAmount: id => `group-sum-amount-${id}`,
+  groupSumAmount: rolloverParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: id => `group-budget-${id}`,
-  groupBalance: id => `group-leftover-${id}`,
+  groupBudgeted: rolloverParametrizedField('group-budget'),
+  groupBalance: rolloverParametrizedField('group-leftover'),
 
-  catBudgeted: id => `budget-${id}`,
-  catSumAmount: id => `sum-amount-${id}`,
-  catBalance: id => `leftover-${id}`,
-  catCarryover: id => `carryover-${id}`,
-  catGoal: id => `goal-${id}`,
-  catLongGoal: id => `long-goal-${id}`,
-};
+  catBudgeted: rolloverParametrizedField('budget'),
+  catSumAmount: rolloverParametrizedField('sum-amount'),
+  catBalance: rolloverParametrizedField('leftover'),
+  catCarryover: rolloverParametrizedField('carryover'),
+  catGoal: rolloverParametrizedField('goal'),
+  catLongGoal: rolloverParametrizedField('long-goal'),
+} satisfies BudgetType<'rollover-budget'>;
 
 export const reportBudget = {
   totalBudgetedExpense: 'total-budgeted',
