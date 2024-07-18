@@ -10,7 +10,9 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { type TransactionEntity } from '../../../loot-core/src/types/models/transaction.d';
 
-export function usePreviewTransactions() {
+export function usePreviewTransactions(
+  collapseTransactions: (ids: string[]) => void,
+) {
   const scheduleData = useCachedSchedules();
   const [previousScheduleData, setPreviousScheduleData] =
     useState<ReturnType<typeof useCachedSchedules>>(scheduleData);
@@ -51,6 +53,7 @@ export function usePreviewTransactions() {
           })),
         }));
         setPreviewTransactions(ungroupTransactions(withDefaults));
+        collapseTransactions(withDefaults.map(t => t.id));
       });
     }
 

@@ -51,6 +51,17 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
           }
           return { ...state, ids };
         }
+        case 'close-splits': {
+          const ids = new Set([...state.ids]);
+          action.ids.forEach(id => {
+            if (state.mode === 'collapse') {
+              ids.add(id);
+            } else {
+              ids.delete(id);
+            }
+          });
+          return { ...state, ids };
+        }
         case 'set-mode': {
           return {
             ...state,
