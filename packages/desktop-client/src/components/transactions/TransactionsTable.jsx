@@ -631,7 +631,18 @@ function PayeeCell({
       }}
       formatter={() => getPayeePretty(transaction, payee, transferAccount)}
       unexposedContent={props => {
-        const payeeInfo = (
+        const payeeName = (
+          <UnexposedCellContent
+            {...props}
+            style={
+              importedPayee
+                ? { borderBottom: `1px dashed ${theme.pageTextSubdued}` }
+                : {}
+            }
+          />
+        );
+
+        return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <PayeeIcons
               transaction={transaction}
@@ -639,33 +650,26 @@ function PayeeCell({
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
             />
-            <UnexposedCellContent
-              {...props}
-              style={
-                importedPayee
-                  ? { borderBottom: `1px dashed ${theme.pageTextSubdued}` }
-                  : {}
-              }
-            />
+            {importedPayee ? (
+              <Tooltip
+                content={
+                  <View style={{ padding: 10 }}>
+                    <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
+                    <Text style={{ fontWeight: 'normal' }}>
+                      {importedPayee}
+                    </Text>
+                  </View>
+                }
+                style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                placement="bottom"
+                triggerProps={{ delay: 750 }}
+              >
+                {payeeName}
+              </Tooltip>
+            ) : (
+              payeeName
+            )}
           </div>
-        );
-
-        return importedPayee ? (
-          <Tooltip
-            content={
-              <View style={{ padding: 10 }}>
-                <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
-                <Text style={{ fontWeight: 'normal' }}>{importedPayee}</Text>
-              </View>
-            }
-            style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
-            placement="bottom"
-            triggerProps={{ delay: 750 }}
-          >
-            {payeeInfo}
-          </Tooltip>
-        ) : (
-          payeeInfo
         );
       }}
     >
