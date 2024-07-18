@@ -96,12 +96,15 @@ function AllTransactions({
   showBalances,
   filtered,
   children,
+  collapseTransactions,
 }) {
   const accountId = account.id;
-  const prependTransactions = usePreviewTransactions().map(trans => ({
-    ...trans,
-    _inverse: accountId ? accountId !== trans.account : false,
-  }));
+  const prependTransactions = usePreviewTransactions(collapseTransactions).map(
+    trans => ({
+      ...trans,
+      _inverse: accountId ? accountId !== trans.account : false,
+    }),
+  );
 
   transactions ??= [];
 
@@ -1448,6 +1451,9 @@ class AccountInternal extends PureComponent {
         balances={balances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
+        collapseTransactions={ids =>
+          this.props.splitsExpandedDispatch({ type: 'close-splits', ids })
+        }
       >
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
