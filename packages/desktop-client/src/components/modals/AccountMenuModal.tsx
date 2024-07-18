@@ -7,7 +7,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { SvgClose, SvgDotsHorizontalTriple, SvgLockOpen } from '../../icons/v1';
 import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Modal, ModalTitle } from '../common/Modal';
 import { Popover } from '../common/Popover';
@@ -134,7 +134,7 @@ export function AccountMenuModal({
             paddingTop: 10,
           }}
         >
-          <Button style={buttonStyle} onClick={_onEditNotes}>
+          <Button style={buttonStyle} onPress={_onEditNotes}>
             <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
             Edit notes
           </Button>
@@ -171,9 +171,9 @@ function AdditionalAccountMenu({
     <View>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         aria-label="Menu"
-        onClick={() => {
+        onPress={() => {
           setMenuOpen(true);
         }}
       >
