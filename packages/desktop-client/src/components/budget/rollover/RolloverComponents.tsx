@@ -1,5 +1,5 @@
 import type React from 'react';
-import { memo, useCallback, useRef, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
