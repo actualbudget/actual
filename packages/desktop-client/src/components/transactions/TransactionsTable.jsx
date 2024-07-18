@@ -632,7 +632,7 @@ function PayeeCell({
       formatter={() => getPayeePretty(transaction, payee, transferAccount)}
       unexposedContent={props => {
         const payeeInfo = (
-          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <PayeeIcons
               transaction={transaction}
               transferAccount={transferAccount}
@@ -641,7 +641,11 @@ function PayeeCell({
             />
             <UnexposedCellContent
               {...props}
-              style={{ borderBottom: `1px dashed ${theme.pageTextSubdued}` }}
+              style={
+                importedPayee
+                  ? { borderBottom: `1px dashed ${theme.pageTextSubdued}` }
+                  : {}
+              }
             />
           </div>
         );
