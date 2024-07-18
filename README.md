@@ -33,7 +33,7 @@ Read about [Envelope budgeting](https://actualbudget.org/docs/getting-started/en
 
 Check out the community's [Starting Fresh](https://actualbudget.org/docs/getting-started/starting-fresh) guide so you can quickly get up and running!
 
-### Are you migrating from other budgeting app?
+### Are you migrating from other budgeting apps?
 
 Check out the community's [Migration](https://actualbudget.org/docs/migration/) guide to start jumping on the Actual Budget train!
 
