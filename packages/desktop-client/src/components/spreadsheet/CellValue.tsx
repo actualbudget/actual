@@ -38,7 +38,6 @@ export function CellValue<
   privacyFilter,
   'data-testid': testId,
   ...props
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: CellValueProps<SheetName, FieldName>) {
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
