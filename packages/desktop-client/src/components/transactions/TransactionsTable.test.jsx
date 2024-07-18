@@ -817,9 +817,7 @@ describe('Transactions', () => {
     expect(getTransactions()[1].amount).toBe(0);
     expectErrorToExist(getTransactions().slice(0, 2));
 
-    const toolbars = container.querySelectorAll(
-      '[data-testid="transaction-error"]',
-    );
+    const toolbars = screen.queryAllByTestId('transaction-error');
     // Make sure the toolbar has appeared
     expect(toolbars.length).toBe(1);
     const toolbar = toolbars[0];
@@ -926,9 +924,7 @@ describe('Transactions', () => {
     expect(getTransactions().length).toBe(5);
     await userEvent.click(screen.getByTestId('split-transaction-button'));
     await waitForAutocomplete();
-    await userEvent.click(
-      container.querySelector('[data-testid="add-split-button"]'),
-    );
+    await userEvent.click(screen.getByTestId('add-split-button'));
     expect(getTransactions().length).toBe(7);
 
     // The debit field should show the zeros

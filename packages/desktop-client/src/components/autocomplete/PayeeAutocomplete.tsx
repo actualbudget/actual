@@ -351,6 +351,7 @@ export function PayeeAutocomplete({
       focused={payeeFieldFocused}
       inputProps={{
         ...inputProps,
+        autoCapitalize: 'words',
         onBlur: () => {
           setRawPayee('');
           setPayeeFieldFocused(false);

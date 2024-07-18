@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -47,9 +47,9 @@ export function CustomReportListCards({
   const payees = usePayees();
   const accounts = useAccounts();
   const categories = useCategories();
-  const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const { isNarrowWidth } = useResponsive();
 
   const [isCardHovered, setIsCardHovered] = useState('');
 
@@ -118,137 +118,90 @@ export function CustomReportListCards({
     setNameMenuOpen({ ...nameMenuOpen, [item]: state });
   };
 
-  const chunkSize = 3;
-
-  const groups = useMemo(() => {
-    return reports
-      .map((report: CustomReportEntity, i: number) => {
-        return i % chunkSize === 0 ? reports.slice(i, i + chunkSize) : null;
-      })
-      .filter(e => {
-        return e;
-      });
-  }, [reports]);
-
-  const remainder = 3 - (reports.length % 3);
-
   if (reports.length === 0) return null;
   return (
-    <View>
-      {groups.map((group, i) => (
+    <>
+      {reports.map((report, id) => (
         <View
-          key={i}
+          key={id}
           style={{
-            flex: '0 0 auto',
-            flexDirection: isNarrowWidth ? 'column' : 'row',
+            flex: isNarrowWidth ? '1 1' : `0 0 calc(100% / 3 - 20px)`,
           }}
         >
-          {group &&
-            group.map((report, id) => (
+          <ReportCard to="/reports/custom" report={report}>
+            <View
+              style={{ flex: 1, padding: 10 }}
+              onMouseEnter={() =>
+                setIsCardHovered(report.id === undefined ? '' : report.id)
+              }
+              onMouseLeave={() => {
+                setIsCardHovered('');
+                onMenuOpen(report.id === undefined ? '' : report.id, false);
+              }}
+            >
               <View
-                key={id}
-                style={
-                  !isNarrowWidth
-                    ? {
-                        position: 'relative',
-                        flex: '1',
-                      }
-                    : {
-                        position: 'relative',
-                      }
-                }
+                style={{
+                  flexShrink: 0,
+                  paddingBottom: 5,
+                }}
               >
-                <View style={{ width: '100%', height: '100%' }}>
-                  <ReportCard to="/reports/custom" report={report}>
-                    <View
-                      style={{ flex: 1, padding: 10 }}
-                      onMouseEnter={() =>
-                        setIsCardHovered(
-                          report.id === undefined ? '' : report.id,
-                        )
-                      }
-                      onMouseLeave={() => {
-                        setIsCardHovered('');
-                        onMenuOpen(
-                          report.id === undefined ? '' : report.id,
-                          false,
-                        );
-                      }}
-                    >
-                      <View
-                        style={{
-                          flexShrink: 0,
-                          paddingBottom: 5,
-                        }}
-                      >
-                        <View style={{ flex: 1 }}>
-                          <Block
-                            style={{
-                              ...styles.mediumText,
-                              fontWeight: 500,
-                              marginBottom: 5,
-                            }}
-                            role="heading"
-                          >
-                            {report.name}
-                          </Block>
-                          {report.isDateStatic ? (
-                            <DateRange
-                              start={report.startDate}
-                              end={report.endDate}
-                            />
-                          ) : (
-                            <Text style={{ color: theme.pageTextSubdued }}>
-                              {report.dateRange}
-                            </Text>
-                          )}
-                        </View>
-                      </View>
-                      <GetCardData
-                        report={report}
-                        payees={payees}
-                        accounts={accounts}
-                        categories={categories}
-                        earliestTransaction={earliestTransaction}
-                        firstDayOfWeekIdx={firstDayOfWeekIdx}
-                      />
-                    </View>
-                  </ReportCard>
-                </View>
-                <View
-                  style={{
-                    textAlign: 'right',
-                    position: 'absolute',
-                    right: 25,
-                    top: 25,
-                  }}
-                >
-                  <ListCardsPopover
-                    report={report}
-                    onMenuOpen={onMenuOpen}
-                    isCardHovered={isCardHovered}
-                    reportMenu={reportMenu}
-                    onMenuSelect={onMenuSelect}
-                    nameMenuOpen={nameMenuOpen}
-                    name={name}
-                    setName={setName}
-                    onAddUpdate={onAddUpdate}
-                    err={err}
-                    onNameMenuOpen={onNameMenuOpen}
-                    deleteMenuOpen={deleteMenuOpen}
-                    onDeleteMenuOpen={onDeleteMenuOpen}
-                    onDelete={onDelete}
-                  />
+                <View style={{ flex: 1 }}>
+                  <Block
+                    style={{
+                      ...styles.mediumText,
+                      fontWeight: 500,
+                      marginBottom: 5,
+                    }}
+                    role="heading"
+                  >
+                    {report.name}
+                  </Block>
+                  {report.isDateStatic ? (
+                    <DateRange start={report.startDate} end={report.endDate} />
+                  ) : (
+                    <Text style={{ color: theme.pageTextSubdued }}>
+                      {report.dateRange}
+                    </Text>
+                  )}
                 </View>
               </View>
-            ))}
-          {remainder !== 3 &&
-            i + 1 === groups.length &&
-            [...Array(remainder)].map((e, i) => (
-              <View key={i} style={{ flex: 1 }} />
-            ))}
+              <GetCardData
+                report={report}
+                payees={payees}
+                accounts={accounts}
+                categories={categories}
+                earliestTransaction={earliestTransaction}
+                firstDayOfWeekIdx={firstDayOfWeekIdx}
+              />
+            </View>
+          </ReportCard>
+          <View
+            style={{
+              textAlign: 'right',
+              position: 'absolute',
+              right: 10,
+              top: 10,
+            }}
+          >
+            <ListCardsPopover
+              report={report}
+              onMenuOpen={onMenuOpen}
+              isCardHovered={isCardHovered}
+              reportMenu={reportMenu}
+              onMenuSelect={onMenuSelect}
+              nameMenuOpen={nameMenuOpen}
+              name={name}
+              setName={setName}
+              onAddUpdate={onAddUpdate}
+              err={err}
+              onNameMenuOpen={onNameMenuOpen}
+              deleteMenuOpen={deleteMenuOpen}
+              onDeleteMenuOpen={onDeleteMenuOpen}
+              onDelete={onDelete}
+            />
+          </View>
         </View>
       ))}
-    </View>
+    </>
   );
 }

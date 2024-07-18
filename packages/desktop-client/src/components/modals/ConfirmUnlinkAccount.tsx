@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
@@ -36,12 +36,12 @@ export function ConfirmUnlinkAccount({
               justifyContent: 'flex-end',
             }}
           >
-            <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
+            <Button style={{ marginRight: 10 }} onPress={modalProps.onClose}>
               Cancel
             </Button>
             <Button
-              type="primary"
-              onClick={() => {
+              variant="primary"
+              onPress={() => {
                 onUnlink();
                 modalProps.onClose();
               }}

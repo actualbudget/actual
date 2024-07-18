@@ -22,9 +22,11 @@ import { ServerHandlers } from '../types/server-handlers';
 import { addTransactions } from './accounts/sync';
 import {
   accountModel,
+  budgetModel,
   categoryModel,
   categoryGroupModel,
   payeeModel,
+  remoteFileModel,
 } from './api-models';
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -224,6 +226,15 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     throw new Error(getDownloadError(result.error));
   }
   await handlers['load-budget']({ id: result.id });
+};
+
+handlers['api/get-budgets'] = async function () {
+  const budgets = await handlers['get-budgets']();
+  const files = (await handlers['get-remote-files']()) || [];
+  return [
+    ...budgets.map(file => budgetModel.toExternal(file)),
+    ...files.map(file => remoteFileModel.toExternal(file)).filter(file => file),
+  ];
 };
 
 handlers['api/sync'] = async function () {
@@ -646,6 +657,14 @@ handlers['api/payee-update'] = withMutation(async function ({ id, fields }) {
 handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
   return handlers['payees-batch-change']({ deleted: [{ id }] });
+});
+
+handlers['api/payees-merge'] = withMutation(async function ({
+  targetId,
+  mergeIds,
+}) {
+  checkFileOpen();
+  return handlers['payees-merge']({ targetId, mergeIds });
 });
 
 handlers['api/rules-get'] = async function () {
