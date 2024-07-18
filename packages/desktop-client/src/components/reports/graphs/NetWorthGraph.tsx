@@ -199,7 +199,7 @@ function computePadding(netWorthData: Array<{ y: number }>) {
    */
   const maxLength = Math.max(
     ...netWorthData.map(({ y }) => {
-      return Math.round(y).toLocaleString().length;
+      return integerToCurrency(Math.round(y)).length;
     }),
   );
 
