@@ -23,7 +23,19 @@ If you are only interested in running the latest version and not contributing to
 
 The easiest way to get Actual running is to use the [actual-server](https://github.com/actualbudget/actual-server) project. That is the server for syncing changes across devices, and it comes with the latest version of Actual. The server will provide both the web project and a server for syncing.
 
-You can get up and running quickly and easily by following our [Running Actual Locally Guide](https://actualbudget.org/docs/install/local)
+You can get up and running quickly and easily by following our [Running Actual Locally Guide](https://actualbudget.org/docs/install/local).
+
+## Ready to Start Budgeting?
+
+Read about [Envelope budgeting](https://actualbudget.org/docs/getting-started/envelope-budgeting) to know more about the idea behind Actual Budget.
+
+### Are you new to budgeting or want to start fresh?
+
+Check out the community's [Starting Fresh](https://actualbudget.org/docs/getting-started/starting-fresh) guide so you can quickly get up and running!
+
+### Are you migrating from other budgeting app?
+
+Check out the community's [Migration](https://actualbudget.org/docs/migration/) guide to start jumping on the Actual Budget train!
 
 ## Documentation
 
