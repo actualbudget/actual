@@ -7,7 +7,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
@@ -86,13 +86,13 @@ export function CoverModal({
         }}
       >
         <Button
-          type="primary"
+          variant="primary"
           style={{
             height: styles.mobileMinHeight,
             marginLeft: styles.mobileEditingPadding,
             marginRight: styles.mobileEditingPadding,
           }}
-          onClick={() => _onSubmit(fromCategoryId)}
+          onPress={() => _onSubmit(fromCategoryId)}
         >
           Transfer
         </Button>

@@ -29,6 +29,10 @@ export function Modals() {
     };
 
     switch (name) {
+      case 'keyboard-shortcuts':
+        // don't show the hotkey help modal when a budget is not open
+        return null;
+
       case 'delete-budget':
         return (
           <DeleteFile

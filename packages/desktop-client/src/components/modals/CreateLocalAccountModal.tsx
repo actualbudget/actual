@@ -1,12 +1,13 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type FormEvent, useState } from 'react';
+import { Form } from 'react-aria-components';
 
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import { type BoundActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
 import { InlineField } from '../common/InlineField';
@@ -37,6 +38,25 @@ export function CreateLocalAccountModal({
 
   const validateBalance = balance => !isNaN(parseFloat(balance));
 
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nameError = !name;
+    setNameError(nameError);
+
+    const balanceError = !validateBalance(balance);
+    setBalanceError(balanceError);
+
+    if (!nameError && !balanceError) {
+      actions.closeModal();
+      const id = await actions.createAccount(
+        name,
+        toRelaxedNumber(balance),
+        offbudget,
+      );
+      navigate('/accounts/' + id);
+    }
+  };
   return (
     <Modal
       title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
@@ -44,27 +64,7 @@ export function CreateLocalAccountModal({
     >
       {() => (
         <View>
-          <form
-            onSubmit={async event => {
-              event.preventDefault();
-
-              const nameError = !name;
-              setNameError(nameError);
-
-              const balanceError = !validateBalance(balance);
-              setBalanceError(balanceError);
-
-              if (!nameError && !balanceError) {
-                actions.closeModal();
-                const id = await actions.createAccount(
-                  name,
-                  toRelaxedNumber(balance),
-                  offbudget,
-                );
-                navigate('/accounts/' + id);
-              }
-            }}
-          >
+          <Form onSubmit={onSubmit}>
             <InlineField label="Name" width="100%">
               <InitialFocus>
                 <Input
@@ -163,12 +163,16 @@ export function CreateLocalAccountModal({
             )}
 
             <ModalButtons>
-              <Button onClick={() => modalProps.onBack()}>Back</Button>
-              <Button type="primary" style={{ marginLeft: 10 }}>
+              <Button onPress={() => modalProps.onBack()}>Back</Button>
+              <Button
+                type="submit"
+                variant="primary"
+                style={{ marginLeft: 10 }}
+              >
                 Create
               </Button>
             </ModalButtons>
-          </form>
+          </Form>
         </View>
       )}
     </Modal>
