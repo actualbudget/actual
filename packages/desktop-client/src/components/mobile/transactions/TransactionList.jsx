@@ -14,6 +14,7 @@ import { Menu } from '../../common/Menu';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { FloatingActionBar } from '../FloatingActionBar';
 
 import { ListBox } from './ListBox';
 import { Transaction } from './Transaction';
@@ -21,7 +22,7 @@ import { Transaction } from './Transaction';
 export function TransactionList({
   isLoading,
   transactions,
-  selectedTransactions,
+  selectedTransactions = [],
   onAddSelectedTransaction,
   onClearSelectedTransactions,
   isNewTransaction,
@@ -146,7 +147,7 @@ export function TransactionList({
         })}
       </ListBox>
       {selectedTransactions?.length > 0 && (
-        <FloatingActionBar
+        <SelectedTransactionsFloatingActionBar
           transactions={transactions}
           selectedTransactions={selectedTransactions}
           onClearSelectedTransactions={onClearSelectedTransactions}
@@ -162,7 +163,7 @@ export function TransactionList({
   );
 }
 
-function FloatingActionBar({
+function SelectedTransactionsFloatingActionBar({
   transactions,
   selectedTransactions,
   onClearSelectedTransactions,
@@ -212,21 +213,7 @@ function FloatingActionBar({
   const isMoreThanOne = selectedTransactions.length > 1;
 
   return (
-    <View
-      style={{
-        backgroundColor: theme.floatingActionBarBackground,
-        color: theme.floatingActionBarText,
-        position: 'fixed',
-        bottom: 10,
-        margin: '0 10px',
-        width: '95vw',
-        height: 60,
-        zIndex: 100,
-        borderRadius: 8,
-        border: `1px solid ${theme.floatingActionBarBorder}`,
-        ...style,
-      }}
-    >
+    <FloatingActionBar style={style}>
       <View
         style={{
           flex: 1,
@@ -247,7 +234,7 @@ function FloatingActionBar({
             type="bare"
             {...buttonProps}
             style={{ ...buttonProps.style, marginRight: 4 }}
-            onClick={() => onClearSelectedTransactions()}
+            onClick={() => onClearSelectedTransactions?.()}
           >
             <SvgDelete width={10} height={10} />
           </Button>
@@ -389,6 +376,6 @@ function FloatingActionBar({
           </Popover>
         </View>
       </View>
-    </View>
+    </FloatingActionBar>
   );
 }

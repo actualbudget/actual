@@ -58,7 +58,7 @@ function TransactionSearchInput({ placeholder, onSearch }) {
 export function TransactionListWithBalances({
   isLoading,
   transactions,
-  selectedTransactions = [],
+  selectedTransactions,
   onAddSelectedTransaction,
   onClearSelectedTransactions,
   balance,
