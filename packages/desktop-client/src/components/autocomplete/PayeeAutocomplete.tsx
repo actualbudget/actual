@@ -23,7 +23,7 @@ import {
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';
-import { SvgAdd } from '../../icons/v1';
+import { SvgAdd, SvgBookmark } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Button } from '../common/Button';
@@ -50,7 +50,9 @@ function getPayeeSuggestions(
     let additionalCommonPayees: PayeeAutocompleteItem[] = [];
     if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
       additionalCommonPayees = commonPayees
-        .filter(p => !p.favorite)
+        .filter(
+          p => !(p.favorite || favoritePayees.map(fp => fp.id).includes(p.id)),
+        )
         .slice(0, MAX_AUTO_SUGGESTIONS - favoritePayees.length);
     }
     const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] =
@@ -192,7 +194,7 @@ function PayeeList({
           let title;
 
           if (itemType === 'common_payee' && lastType !== itemType) {
-            title = 'Frequent Payees';
+            title = 'Suggested Payees';
           } else if (itemType === 'payee' && lastType !== itemType) {
             title = 'Payees';
           } else if (itemType === 'account' && lastType !== itemType) {
@@ -553,7 +555,19 @@ function PayeeItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
-
+  const iconSize = isNarrowWidth ? 14 : 8;
+  let paddingLeftOverFromIcon = 20;
+  let itemIcon = undefined;
+  if (item.favorite) {
+    itemIcon = (
+      <SvgBookmark
+        width={iconSize}
+        height={iconSize}
+        style={{ marginRight: 5, display: 'inline-block' }}
+      />
+    );
+    paddingLeftOverFromIcon -= iconSize + 5;
+  }
   return (
     <div
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
@@ -588,7 +602,7 @@ function PayeeItem({
             : theme.menuAutoCompleteItemText,
           borderRadius: embedded ? 4 : 0,
           padding: 4,
-          paddingLeft: 20,
+          paddingLeft: paddingLeftOverFromIcon,
           ...narrowStyle,
         },
       ])}`}
@@ -596,7 +610,10 @@ function PayeeItem({
       data-highlighted={highlighted || undefined}
       {...props}
     >
-      <TextOneLine>{item.name}</TextOneLine>
+      <TextOneLine>
+        {itemIcon}
+        {item.name}
+      </TextOneLine>
     </div>
   );
 }
