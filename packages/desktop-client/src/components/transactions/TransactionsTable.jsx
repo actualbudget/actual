@@ -10,6 +10,7 @@ import React, {
   useLayoutEffect,
   useEffect,
 } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -174,6 +175,16 @@ const TransactionHeader = memo(
   }) => {
     const dispatchSelected = useSelectedDispatch();
 
+    useHotkeys(
+      'ctrl+a, cmd+a, meta+a',
+      e => dispatchSelected({ type: 'select-all', event: e }),
+      {
+        preventDefault: true,
+        scopes: ['app'],
+      },
+      [dispatchSelected],
+    );
+
     return (
       <Row
         style={{
@@ -282,7 +293,7 @@ const TransactionHeader = memo(
             onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
           }
         />
-        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
+        {showBalance && <Cell value="Balance" width={103} textAlign="right" />}
 
         {showCleared && (
           <HeaderCell
@@ -1388,7 +1399,7 @@ const Transaction = memo(function Transaction({
             color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
           }}
           style={{ ...styles.tnum, ...amountStyle }}
-          width={88}
+          width={103}
           textAlign="right"
           privacyFilter
         />

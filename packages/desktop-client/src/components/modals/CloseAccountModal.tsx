@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type FormEvent, useState } from 'react';
+import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -16,7 +17,7 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
 import { Link } from '../common/Link';
 import { Modal } from '../common/Modal';
@@ -86,6 +87,26 @@ export function CloseAccountModal({
       }
     : {};
 
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const transferError = balance !== 0 && transferAccountId === '';
+    setTransferError(transferError);
+
+    const categoryError =
+      needsCategory(account, transferAccountId, accounts) && categoryId === '';
+    setCategoryError(categoryError);
+
+    if (!transferError && !categoryError) {
+      setLoading(true);
+
+      dispatch(
+        closeAccount(account.id, transferAccountId || null, categoryId || null),
+      );
+      modalProps.onClose();
+    }
+  };
+
   return (
     <Modal
       title="Close Account"
@@ -108,32 +129,7 @@ export function CloseAccountModal({
               </span>
             )}
           </Paragraph>
-          <form
-            onSubmit={event => {
-              event.preventDefault();
-
-              const transferError = balance !== 0 && transferAccountId === '';
-              setTransferError(transferError);
-
-              const categoryError =
-                needsCategory(account, transferAccountId, accounts) &&
-                categoryId === '';
-              setCategoryError(categoryError);
-
-              if (!transferError && !categoryError) {
-                setLoading(true);
-
-                dispatch(
-                  closeAccount(
-                    account.id,
-                    transferAccountId || null,
-                    categoryId || null,
-                  ),
-                );
-                modalProps.onClose();
-              }
-            }}
-          >
+          <Form onSubmit={onSubmit}>
             {balance !== 0 && (
               <View>
                 <Paragraph>
@@ -248,12 +244,13 @@ export function CloseAccountModal({
                   marginRight: 10,
                   height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                 }}
-                onClick={modalProps.onClose}
+                onPress={modalProps.onClose}
               >
                 Cancel
               </Button>
               <Button
-                type="primary"
+                type="submit"
+                variant="primary"
                 style={{
                   height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                 }}
@@ -261,7 +258,7 @@ export function CloseAccountModal({
                 Close Account
               </Button>
             </View>
-          </form>
+          </Form>
         </View>
       )}
     </Modal>
