@@ -54,13 +54,12 @@ export function NotesButton({
           ref={triggerRef}
           variant="bare"
           aria-label="View notes"
-          className={!hasNotes && !isOpen ? 'hover-visible' : ''}
-          style={{
+          style={({ isHovered }) => ({
+            opacity: isHovered || hasNotes || isOpen ? undefined : 0,
             color: defaultColor,
-            ...style,
-            ...(hasNotes && { display: 'flex !important' }),
             ...(isOpen && { color: theme.buttonNormalText }),
-          }}
+            ...style,
+          })}
           onPress={() => {
             setIsOpen(true);
           }}
