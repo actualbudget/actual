@@ -1,15 +1,13 @@
-const electron = require('electron');
+import { app, session } from 'electron';
 
-electron.app.on('web-contents-created', function (event, contents) {
+app.on('web-contents-created', function (event, contents) {
   contents.on('will-attach-webview', function (event, webPreferences) {
-    delete webPreferences.preloadURL;
     delete webPreferences.preload;
 
     webPreferences.nodeIntegration = false;
     webPreferences.webSecurity = true;
     webPreferences.allowRunningInsecureContent = false;
     webPreferences.experimentalFeatures = false;
-    webPreferences.enableBlinkFeatures = false;
 
     // For now, we never use <webview>. Just disable it entirely.
     event.preventDefault();
@@ -18,14 +16,10 @@ electron.app.on('web-contents-created', function (event, contents) {
   contents.on('will-navigate', event => {
     event.preventDefault();
   });
-
-  contents.on('new-window', event => {
-    event.preventDefault();
-  });
 });
 
-electron.app.on('ready', function () {
-  electron.session.defaultSession.setPermissionRequestHandler(
+app.on('ready', function () {
+  session.defaultSession.setPermissionRequestHandler(
     function (webContents, permission, callback) {
       const url = webContents.getURL();
       if (url.startsWith('file://')) {

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
-import { ButtonWithLoading } from '../common/Button';
+import { ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import { Modal, ModalButtons } from '../common/Modal';
@@ -79,9 +79,9 @@ export const SimpleFinInitialise = ({
 
       <ModalButtons>
         <ButtonWithLoading
-          type="primary"
-          loading={isLoading}
-          onClick={onSubmit}
+          variant="primary"
+          isLoading={isLoading}
+          onPress={onSubmit}
         >
           Save and continue
         </ButtonWithLoading>

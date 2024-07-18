@@ -363,7 +363,6 @@ export function SchedulesTable({
         items={items as ScheduleEntity[]}
         renderItem={renderItem}
         renderEmpty={filter ? 'No matching schedules' : 'No schedules'}
-        allowPopupsEscape={items.length < 6}
       />
     </View>
   );

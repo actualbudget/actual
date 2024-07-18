@@ -86,6 +86,9 @@ function convertToNumberOrNull(value: string): number | null {
 }
 
 function getDtOrDtTm(Date: DateRef | null): string | null {
+  if (!Date) {
+    return null;
+  }
   if ('DtTm' in Date) {
     return Date.DtTm.slice(0, 10);
   }

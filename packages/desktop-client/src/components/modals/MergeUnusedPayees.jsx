@@ -7,7 +7,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { usePayees } from '../../hooks/usePayees';
 import { theme } from '../../style';
 import { Information } from '../alerts';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal, ModalButtons } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
@@ -157,24 +157,23 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
 
             <ModalButtons style={{ marginTop: 20 }} focusButton>
               <Button
-                type="primary"
-                isSubmit={false}
+                variant="primary"
                 style={{ marginRight: 10 }}
-                onClick={onMerge}
+                onPress={onMerge}
               >
                 Merge
               </Button>
               {!isEditingRule && (
                 <Button
                   style={{ marginRight: 10 }}
-                  onClick={onMergeAndCreateRule}
+                  onPress={onMergeAndCreateRule}
                 >
                   Merge and edit rule
                 </Button>
               )}
               <Button
                 style={{ marginRight: 10 }}
-                onClick={() => modalProps.onBack()}
+                onPress={() => modalProps.onBack()}
               >
                 Do nothing
               </Button>

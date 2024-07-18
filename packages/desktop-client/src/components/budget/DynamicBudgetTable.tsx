@@ -1,6 +1,9 @@
 // @ts-strict-ignore
 import React, { useEffect, type ComponentProps } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import AutoSizer from 'react-virtualized-auto-sizer';
+
+import * as monthUtils from 'loot-core/src/shared/months';
 
 import { View } from '../common/View';
 
@@ -32,6 +35,7 @@ type DynamicBudgetTableInnerProps = {
 } & DynamicBudgetTableProps;
 
 const DynamicBudgetTableInner = ({
+  type,
   width,
   height,
   prewarmStartMonth,
@@ -51,9 +55,64 @@ const DynamicBudgetTableInner = ({
     setDisplayMax(numPossible);
   }, [numPossible]);
 
-  function _onMonthSelect(month) {
-    onMonthSelect(month, numMonths);
+  function getValidMonth(month) {
+    const start = monthBounds.start;
+    const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
+
+    if (month < start) {
+      return start;
+    } else if (month > end) {
+      return end;
+    }
+    return month;
   }
+
+  function _onMonthSelect(month) {
+    onMonthSelect(getValidMonth(month), numMonths);
+  }
+
+  useHotkeys(
+    'left',
+    () => {
+      _onMonthSelect(monthUtils.prevMonth(startMonth));
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [_onMonthSelect, startMonth],
+  );
+  useHotkeys(
+    'right',
+    () => {
+      _onMonthSelect(monthUtils.nextMonth(startMonth));
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [_onMonthSelect, startMonth],
+  );
+  useHotkeys(
+    '0',
+    () => {
+      _onMonthSelect(
+        monthUtils.subMonths(
+          monthUtils.currentMonth(),
+          type === 'rollover'
+            ? Math.floor((numMonths - 1) / 2)
+            : numMonths === 2
+              ? 1
+              : Math.max(numMonths - 2, 0),
+        ),
+      );
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [_onMonthSelect, startMonth, numMonths],
+  );
 
   return (
     <View

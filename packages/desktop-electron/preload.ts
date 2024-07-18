@@ -1,16 +1,25 @@
-const { ipcRenderer, contextBridge } = require('electron');
+import { ipcRenderer, contextBridge, IpcRenderer } from 'electron';
 
-const { version: VERSION, isDev: IS_DEV } =
+import {
+  GetBootstrapDataPayload,
+  OpenFileDialogPayload,
+  SaveFileDialogPayload,
+} from './index';
+
+const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
   ipcRenderer.sendSync('get-bootstrap-data');
 
 contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
   ACTUAL_VERSION: VERSION,
-  logToTerminal: (...args) => {
-    require('console').log(...args);
-  },
+  logToTerminal: console.log,
 
-  ipcConnect: func => {
+  ipcConnect: (
+    func: (payload: {
+      on: IpcRenderer['on'];
+      emit: (name: string, data: unknown) => void;
+    }) => void,
+  ) => {
     func({
       on(name, handler) {
         return ipcRenderer.on(name, (_event, value) => handler(value));
@@ -25,11 +34,15 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.invoke('relaunch');
   },
 
-  openFileDialog: opts => {
+  openFileDialog: (opts: OpenFileDialogPayload) => {
     return ipcRenderer.invoke('open-file-dialog', opts);
   },
 
-  saveFile: async (contents, filename, dialogTitle) => {
+  saveFile: async (
+    contents: SaveFileDialogPayload['fileContents'],
+    filename: SaveFileDialogPayload['defaultPath'],
+    dialogTitle: SaveFileDialogPayload['title'],
+  ) => {
     await ipcRenderer.invoke('save-file-dialog', {
       title: dialogTitle,
       defaultPath: filename,
@@ -37,15 +50,15 @@ contextBridge.exposeInMainWorld('Actual', {
     });
   },
 
-  openURLInBrowser: url => {
+  openURLInBrowser: (url: string) => {
     ipcRenderer.invoke('open-external-url', url);
   },
 
-  onEventFromMain: (type, handler) => {
+  onEventFromMain: (type: string, handler: (...args: unknown[]) => void) => {
     ipcRenderer.on(type, handler);
   },
 
-  updateAppMenu: budgetId => {
+  updateAppMenu: (budgetId?: string) => {
     ipcRenderer.send('update-menu', budgetId);
   },
 
@@ -53,7 +66,7 @@ contextBridge.exposeInMainWorld('Actual', {
     return null;
   },
 
-  setTheme: theme => {
+  setTheme: (theme: string) => {
     ipcRenderer.send('set-theme', theme);
   },
 });

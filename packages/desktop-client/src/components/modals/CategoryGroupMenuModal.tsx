@@ -8,7 +8,7 @@ import { useNotes } from '../../hooks/useNotes';
 import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
 import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Modal, ModalTitle } from '../common/Modal';
 import { Popover } from '../common/Popover';
@@ -140,11 +140,11 @@ export function CategoryGroupMenuModal({
             paddingTop: 10,
           }}
         >
-          <Button style={buttonStyle} onClick={_onAddCategory}>
+          <Button style={buttonStyle} onPress={_onAddCategory}>
             <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
             Add category
           </Button>
-          <Button style={buttonStyle} onClick={_onEditNotes}>
+          <Button style={buttonStyle} onPress={_onEditNotes}>
             <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
             Edit notes
           </Button>
@@ -172,9 +172,9 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
       {!group.is_income && (
         <Button
           ref={triggerRef}
-          type="bare"
+          variant="bare"
           aria-label="Menu"
-          onClick={() => {
+          onPress={() => {
             setMenuOpen(true);
           }}
         >

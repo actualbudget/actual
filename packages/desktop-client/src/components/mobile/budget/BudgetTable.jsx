@@ -742,6 +742,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                 width: sidebarColumnWidth,
                 textAlign: 'left',
                 ...styles.smallText,
+                fontWeight: '500',
               }}
               data-testid="group-name"
             >

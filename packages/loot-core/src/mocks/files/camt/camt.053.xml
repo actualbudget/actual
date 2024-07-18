@@ -129,9 +129,7 @@
                 <BookgDt>
                     <Dt>2013-12-30</Dt>
                 </BookgDt>
-                <ValDt>
-                    <Dt>2013-12-30</Dt>
-                </ValDt>
+                <!-- ValDt deliberately omitted -->
                 <AcctSvcrRef>2013123001153870001</AcctSvcrRef>
                 <BkTxCd />
                 <NtryDtls>

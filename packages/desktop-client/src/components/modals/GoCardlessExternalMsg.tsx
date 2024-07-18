@@ -14,7 +14,7 @@ import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
@@ -213,15 +213,15 @@ export function GoCardlessExternalMsg({
 
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Button
-            type="primary"
+            variant="primary"
             style={{
               padding: '10px 0',
               fontSize: 15,
               fontWeight: 600,
               flexGrow: 1,
             }}
-            onClick={onJump}
-            disabled={!institutionId || !country}
+            onPress={onJump}
+            isDisabled={!institutionId || !country}
           >
             Link bank in browser &rarr;
           </Button>
@@ -271,14 +271,14 @@ export function GoCardlessExternalMsg({
             </View>
           ) : success ? (
             <Button
-              type="primary"
+              variant="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
               }}
-              onClick={onContinue}
+              onPress={onContinue}
             >
               Success! Click to continue &rarr;
             </Button>
@@ -289,7 +289,7 @@ export function GoCardlessExternalMsg({
               <Paragraph style={{ color: theme.errorText }}>
                 GoCardless integration has not yet been configured.
               </Paragraph>
-              <Button type="primary" onClick={onGoCardlessInit}>
+              <Button variant="primary" onPress={onGoCardlessInit}>
                 Configure GoCardless integration
               </Button>
             </>

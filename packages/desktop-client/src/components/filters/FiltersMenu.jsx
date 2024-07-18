@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { FocusScope } from '@react-aria/focus';
 import {
@@ -315,6 +316,9 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
       dispatch({ type: 'close' });
     }
   }
+  useHotkeys('f', () => dispatch({ type: 'select-field' }), {
+    scopes: ['app'],
+  });
 
   return (
     <View>

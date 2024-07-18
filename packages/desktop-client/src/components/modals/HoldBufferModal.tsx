@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { rolloverBudget } from 'loot-core/client/queries';
 
 import { styles } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
@@ -66,13 +66,13 @@ export function HoldBufferModal({
         }}
       >
         <Button
-          type="primary"
+          variant="primary"
           style={{
             height: styles.mobileMinHeight,
             marginLeft: styles.mobileEditingPadding,
             marginRight: styles.mobileEditingPadding,
           }}
-          onClick={() => _onSubmit(amount)}
+          onPress={() => _onSubmit(amount)}
         >
           Hold
         </Button>

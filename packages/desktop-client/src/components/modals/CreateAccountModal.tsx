@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -11,15 +11,15 @@ import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
-import { Tooltip } from '../tooltips';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -38,6 +38,7 @@ export function CreateAccountModal({
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] =
     useState(null);
   const [menuGoCardlessOpen, setGoCardlessMenuOpen] = useState<boolean>(false);
+  const triggerRef = useRef(null);
   const [menuSimplefinOpen, setSimplefinMenuOpen] = useState<boolean>(false);
 
   const onConnectGoCardless = () => {
@@ -184,13 +185,13 @@ export function CreateAccountModal({
           {upgradingAccountId == null && (
             <View style={{ gap: 10 }}>
               <Button
-                type="primary"
+                variant="primary"
                 style={{
                   padding: '10px 0',
                   fontSize: 15,
                   fontWeight: 600,
                 }}
-                onClick={onCreateLocalAccount}
+                onPress={onCreateLocalAccount}
               >
                 Create local account
               </Button>
@@ -221,53 +222,54 @@ export function CreateAccountModal({
                   }}
                 >
                   <ButtonWithLoading
-                    disabled={syncServerStatus !== 'online'}
+                    isDisabled={syncServerStatus !== 'online'}
                     style={{
                       padding: '10px 0',
                       fontSize: 15,
                       fontWeight: 600,
                       flex: 1,
                     }}
-                    onClick={onConnectGoCardless}
+                    onPress={onConnectGoCardless}
                   >
                     {isGoCardlessSetupComplete
                       ? 'Link bank account with GoCardless'
                       : 'Set up GoCardless for bank sync'}
                   </ButtonWithLoading>
                   {isGoCardlessSetupComplete && (
-                    <Button
-                      type="bare"
-                      onClick={() => setGoCardlessMenuOpen(true)}
-                      aria-label="Menu"
-                    >
-                      <SvgDotsHorizontalTriple
-                        width={15}
-                        height={15}
-                        style={{ transform: 'rotateZ(90deg)' }}
-                      />
-                      {menuGoCardlessOpen && (
-                        <Tooltip
-                          position="bottom-right"
-                          width={200}
-                          style={{ padding: 0 }}
-                          onClose={() => setGoCardlessMenuOpen(false)}
-                        >
-                          <Menu
-                            onMenuSelect={item => {
-                              if (item === 'reconfigure') {
-                                onGoCardlessReset();
-                              }
-                            }}
-                            items={[
-                              {
-                                name: 'reconfigure',
-                                text: 'Reset GoCardless credentials',
-                              },
-                            ]}
-                          />
-                        </Tooltip>
-                      )}
-                    </Button>
+                    <>
+                      <Button
+                        ref={triggerRef}
+                        variant="bare"
+                        onPress={() => setGoCardlessMenuOpen(true)}
+                        aria-label="GoCardless menu"
+                      >
+                        <SvgDotsHorizontalTriple
+                          width={15}
+                          height={15}
+                          style={{ transform: 'rotateZ(90deg)' }}
+                        />
+                      </Button>
+
+                      <Popover
+                        triggerRef={triggerRef}
+                        isOpen={menuGoCardlessOpen}
+                        onOpenChange={() => setGoCardlessMenuOpen(false)}
+                      >
+                        <Menu
+                          onMenuSelect={item => {
+                            if (item === 'reconfigure') {
+                              onGoCardlessReset();
+                            }
+                          }}
+                          items={[
+                            {
+                              name: 'reconfigure',
+                              text: 'Reset GoCardless credentials',
+                            },
+                          ]}
+                        />
+                      </Popover>
+                    </>
                   )}
                 </View>
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
@@ -288,54 +290,54 @@ export function CreateAccountModal({
                       }}
                     >
                       <ButtonWithLoading
-                        disabled={syncServerStatus !== 'online'}
-                        loading={loadingSimpleFinAccounts}
+                        isDisabled={syncServerStatus !== 'online'}
+                        isLoading={loadingSimpleFinAccounts}
                         style={{
                           padding: '10px 0',
                           fontSize: 15,
                           fontWeight: 600,
                           flex: 1,
                         }}
-                        onClick={onConnectSimpleFin}
+                        onPress={onConnectSimpleFin}
                       >
                         {isSimpleFinSetupComplete
                           ? 'Link bank account with SimpleFIN'
                           : 'Set up SimpleFIN for bank sync'}
                       </ButtonWithLoading>
                       {isSimpleFinSetupComplete && (
-                        <Button
-                          type="bare"
-                          onClick={() => setSimplefinMenuOpen(true)}
-                          aria-label="Menu"
-                        >
-                          <SvgDotsHorizontalTriple
-                            width={15}
-                            height={15}
-                            style={{ transform: 'rotateZ(90deg)' }}
-                          />
-                          {menuSimplefinOpen && (
-                            <Tooltip
-                              position="bottom-right"
-                              width={200}
-                              style={{ padding: 0 }}
-                              onClose={() => setSimplefinMenuOpen(false)}
-                            >
-                              <Menu
-                                onMenuSelect={item => {
-                                  if (item === 'reconfigure') {
-                                    onSimpleFinReset();
-                                  }
-                                }}
-                                items={[
-                                  {
-                                    name: 'reconfigure',
-                                    text: 'Reset SimpleFIN credentials',
-                                  },
-                                ]}
-                              />
-                            </Tooltip>
-                          )}
-                        </Button>
+                        <>
+                          <Button
+                            ref={triggerRef}
+                            variant="bare"
+                            onPress={() => setSimplefinMenuOpen(true)}
+                            aria-label="SimpleFIN menu"
+                          >
+                            <SvgDotsHorizontalTriple
+                              width={15}
+                              height={15}
+                              style={{ transform: 'rotateZ(90deg)' }}
+                            />
+                          </Button>
+                          <Popover
+                            triggerRef={triggerRef}
+                            isOpen={menuSimplefinOpen}
+                            onOpenChange={() => setSimplefinMenuOpen(false)}
+                          >
+                            <Menu
+                              onMenuSelect={item => {
+                                if (item === 'reconfigure') {
+                                  onSimpleFinReset();
+                                }
+                              }}
+                              items={[
+                                {
+                                  name: 'reconfigure',
+                                  text: 'Reset SimpleFIN credentials',
+                                },
+                              ]}
+                            />
+                          </Popover>
+                        </>
                       )}
                     </View>
                     <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
@@ -351,7 +353,7 @@ export function CreateAccountModal({
             ) : (
               <>
                 <Button
-                  disabled
+                  isDisabled
                   style={{
                     padding: '10px 0',
                     fontSize: 15,

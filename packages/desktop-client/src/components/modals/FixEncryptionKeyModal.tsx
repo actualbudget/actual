@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { Form } from 'react-aria-components';
 
 import { type FinanceModals } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -7,7 +8,7 @@ import { getTestKeyError } from 'loot-core/src/shared/errors';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
@@ -95,7 +96,7 @@ export function FixEncryptionKeyModal({
           </Paragraph>
         )}
       </View>
-      <form
+      <Form
         onSubmit={e => {
           e.preventDefault();
           onUpdateKey();
@@ -144,27 +145,27 @@ export function FixEncryptionKeyModal({
 
         <ModalButtons style={{ marginTop: 20 }}>
           <Button
+            variant="normal"
             style={{
               height: isNarrowWidth ? styles.mobileMinHeight : undefined,
               marginRight: 10,
             }}
-            onClick={() => modalProps.onBack()}
-            type="normal"
+            onPress={() => modalProps.onBack()}
           >
             Back
           </Button>
           <ButtonWithLoading
-            type="primary"
+            type="submit"
+            variant="primary"
             style={{
               height: isNarrowWidth ? styles.mobileMinHeight : undefined,
             }}
-            loading={loading}
-            onClick={onUpdateKey}
+            isLoading={loading}
           >
             {hasExistingKey ? 'Update key' : 'Create key'}
           </ButtonWithLoading>
         </ModalButtons>
-      </form>
+      </Form>
     </Modal>
   );
 }

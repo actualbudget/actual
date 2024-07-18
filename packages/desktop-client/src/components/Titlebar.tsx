@@ -64,6 +64,18 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
 
   const privacyIconStyle = { width: 15, height: 15 };
 
+  useHotkeys(
+    'shift+ctrl+p, shift+cmd+p, shift+meta+p',
+    () => {
+      setPrivacyEnabledPref(!isPrivacyEnabled);
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+    },
+    [setPrivacyEnabledPref, isPrivacyEnabled],
+  );
+
   return (
     <Button
       type="bare"

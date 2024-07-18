@@ -10,6 +10,16 @@ const initialState: ModalsState = {
 export function update(state = initialState, action: Action): ModalsState {
   switch (action.type) {
     case constants.PUSH_MODAL:
+      // special case: don't show the keyboard shortcuts modal if there's already a modal open
+      if (
+        action.modal.name.endsWith('keyboard-shortcuts') &&
+        (state.modalStack.length > 0 ||
+          window.document.querySelector(
+            'div[data-testid="filters-menu-tooltip"]',
+          ) !== null)
+      ) {
+        return state;
+      }
       return {
         ...state,
         modalStack: [...state.modalStack, action.modal],

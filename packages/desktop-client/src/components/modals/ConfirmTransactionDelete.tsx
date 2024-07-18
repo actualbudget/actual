@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
@@ -39,14 +39,14 @@ export function ConfirmTransactionDelete({
               marginRight: 10,
               ...narrowButtonStyle,
             }}
-            onClick={modalProps.onClose}
+            onPress={modalProps.onClose}
           >
             Cancel
           </Button>
           <Button
-            type="primary"
+            variant="primary"
             style={narrowButtonStyle}
-            onClick={() => {
+            onPress={() => {
               onConfirm();
               modalProps.onClose();
             }}
