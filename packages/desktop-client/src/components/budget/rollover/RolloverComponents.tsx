@@ -158,13 +158,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
 
-  const onPopoverAction = useCallback(
-    (...args: Parameters<typeof onBudgetAction>) => {
-      onBudgetAction(...args);
-      setBudgetMenuOpen(false);
-    },
-    [onBudgetAction],
-  );
+  const onPopoverAction = (...args: Parameters<typeof onBudgetAction>) => {
+    onBudgetAction(...args);
+    setBudgetMenuOpen(false);
+  };
 
   return (
     <View
