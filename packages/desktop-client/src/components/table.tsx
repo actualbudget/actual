@@ -20,12 +20,6 @@ import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import {
-  type SpreadsheetFieldTypes,
-  type BudgetField,
-  type SheetNames,
-} from 'loot-core/client/queries';
-
-import {
   AvoidRefocusScrollProvider,
   useProperFocus,
 } from '../hooks/useProperFocus';
@@ -46,7 +40,12 @@ import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
-import { type Binding } from './spreadsheet';
+import {
+  type SpreadsheetFieldTypes,
+  type SheetFields,
+  type SheetNames,
+  type Binding,
+} from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 
@@ -679,7 +678,7 @@ export function SelectCell({
 
 type SheetCellValueProps<
   SheetName extends SheetNames,
-  FieldName extends BudgetField<SheetName>,
+  FieldName extends SheetFields<SheetName>,
 > = {
   binding: Binding<SheetName, FieldName>;
   type: FormatType;
@@ -695,7 +694,7 @@ type SheetCellValueProps<
 
 export type SheetCellProps<
   SheetName extends SheetNames,
-  FieldName extends BudgetField<SheetName>,
+  FieldName extends SheetFields<SheetName>,
 > = ComponentProps<typeof Cell> & {
   valueProps: SheetCellValueProps<SheetName, FieldName>;
   inputProps?: Omit<ComponentProps<typeof InputValue>, 'value' | 'onUpdate'>;
@@ -704,7 +703,7 @@ export type SheetCellProps<
 };
 export function SheetCell<
   SheetName extends SheetNames = any,
-  FieldName extends BudgetField<SheetName> = any,
+  FieldName extends SheetFields<SheetName> = any,
 >({
   valueProps,
   valueStyle,

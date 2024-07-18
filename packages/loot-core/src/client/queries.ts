@@ -11,27 +11,6 @@ import {
 import { q } from '../shared/query';
 import { currencyToAmount, amountToInteger } from '../shared/util';
 
-export type SpreadsheetFieldTypes = {
-  account: {
-    // Common fields
-    'uncategorized-amount': number;
-    'uncategorized-balance': number;
-
-    // Account fields
-    balance: number;
-    'accounts-balance': number;
-    'budgeted-accounts-balance': number;
-    'offbudget-accounts-balance': number;
-    balanceCleared: number;
-    balanceUncleared: number;
-  };
-};
-
-export type SheetNames = keyof SpreadsheetFieldTypes & string;
-
-export type BudgetField<SheetName extends SheetNames> =
-  keyof SpreadsheetFieldTypes[SheetName] & string;
-
 export function getAccountFilter(accountId, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
