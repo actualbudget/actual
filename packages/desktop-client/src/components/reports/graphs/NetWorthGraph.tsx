@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import { integerToCurrency } from 'loot-core/shared/util';
+import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { useResponsive } from '../../../ResponsiveProvider';
@@ -37,7 +37,11 @@ export function NetWorthGraph({
   const { isNarrowWidth } = useResponsive();
 
   const tickFormatter = tick => {
-    return privacyMode ? '...' : `${integerToCurrency(Math.round(tick))}`; // Formats the tick values as strings with commas
+    const res = privacyMode
+      ? '...'
+      : `${amountToCurrencyNoDecimal(Math.round(tick))}`; // Formats the tick values as strings with commas
+
+    return res;
   };
 
   const gradientOffset = () => {
@@ -199,7 +203,7 @@ function computePadding(netWorthData: Array<{ y: number }>) {
    */
   const maxLength = Math.max(
     ...netWorthData.map(({ y }) => {
-      return integerToCurrency(Math.round(y)).length;
+      return amountToCurrencyNoDecimal(Math.round(y)).length;
     }),
   );
 
