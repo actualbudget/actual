@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import type React from 'react';
+import { useState, useRef, type CSSProperties } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -12,6 +13,12 @@ import {
   pushModal,
 } from 'loot-core/client/actions';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
+import {
+  type File,
+  type LocalFile,
+  type SyncableLocalFile,
+  type SyncedLocalFile,
+} from 'loot-core/types/file';
 
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -26,13 +33,13 @@ import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-function getFileDescription(file) {
+function getFileDescription(file: File) {
   if (file.state === 'unknown') {
     return (
       'This is a cloud-based file but its state is unknown because you ' +
@@ -50,8 +57,14 @@ function getFileDescription(file) {
   return null;
 }
 
-function FileMenu({ onDelete, onClose }) {
-  function onMenuSelect(type) {
+function FileMenu({
+  onDelete,
+  onClose,
+}: {
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  function onMenuSelect(type: string) {
     onClose();
 
     switch (type) {
@@ -83,7 +96,7 @@ function FileMenu({ onDelete, onClose }) {
   );
 }
 
-function FileMenuButton({ state, onDelete }) {
+function FileMenuButton({ onDelete }: { onDelete: () => void }) {
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -91,10 +104,9 @@ function FileMenuButton({ state, onDelete }) {
     <View>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         aria-label="Menu"
-        onClick={e => {
-          e.stopPropagation();
+        onPress={() => {
           setMenuOpen(true);
         }}
       >
@@ -106,17 +118,13 @@ function FileMenuButton({ state, onDelete }) {
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
       >
-        <FileMenu
-          state={state}
-          onDelete={onDelete}
-          onClose={() => setMenuOpen(false)}
-        />
+        <FileMenu onDelete={onDelete} onClose={() => setMenuOpen(false)} />
       </Popover>
     </View>
   );
 }
 
-function FileState({ file }) {
+function FileState({ file }: { file: File }) {
   let Icon;
   let status;
   let color;
@@ -164,10 +172,20 @@ function FileState({ file }) {
   );
 }
 
-function File({ file, quickSwitchMode, onSelect, onDelete }) {
+function FileItem({
+  file,
+  quickSwitchMode,
+  onSelect,
+  onDelete,
+}: {
+  file: File;
+  quickSwitchMode: boolean;
+  onSelect: (file: File) => void;
+  onDelete: (file: File) => void;
+}) {
   const selecting = useRef(false);
 
-  async function _onSelect(file) {
+  async function _onSelect(file: File) {
     // Never allow selecting the file while uploading/downloading, and
     // make sure to never allow duplicate clicks
     if (!selecting.current) {
@@ -180,7 +198,7 @@ function File({ file, quickSwitchMode, onSelect, onDelete }) {
   return (
     <View
       onClick={() => _onSelect(file)}
-      title={getFileDescription(file)}
+      title={getFileDescription(file) || ''}
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -193,7 +211,7 @@ function File({ file, quickSwitchMode, onSelect, onDelete }) {
         flexShrink: 0,
         cursor: 'pointer',
         ':hover': {
-          backgroundColor: theme.hover,
+          backgroundColor: theme.menuItemBackgroundHover,
         },
       }}
     >
@@ -219,15 +237,27 @@ function File({ file, quickSwitchMode, onSelect, onDelete }) {
           />
         )}
 
-        {!quickSwitchMode && (
-          <FileMenuButton state={file.state} onDelete={() => onDelete(file)} />
-        )}
+        {!quickSwitchMode && <FileMenuButton onDelete={() => onDelete(file)} />}
       </View>
     </View>
   );
 }
 
-function BudgetFiles({ files, quickSwitchMode, onSelect, onDelete }) {
+function BudgetFiles({
+  files,
+  quickSwitchMode,
+  onSelect,
+  onDelete,
+}: {
+  files: File[];
+  quickSwitchMode: boolean;
+  onSelect: (file: File) => void;
+  onDelete: (file: File) => void;
+}) {
+  function isLocalFile(file: File): file is LocalFile {
+    return file.state === 'local';
+  }
+
   return (
     <View
       style={{
@@ -252,8 +282,8 @@ function BudgetFiles({ files, quickSwitchMode, onSelect, onDelete }) {
         </Text>
       ) : (
         files.map(file => (
-          <File
-            key={file.id || file.cloudFileId}
+          <FileItem
+            key={isLocalFile(file) ? file.id : file.cloudFileId}
             file={file}
             quickSwitchMode={quickSwitchMode}
             onSelect={onSelect}
@@ -265,7 +295,13 @@ function BudgetFiles({ files, quickSwitchMode, onSelect, onDelete }) {
   );
 }
 
-function RefreshButton({ style, onRefresh }) {
+function RefreshButton({
+  style,
+  onRefresh,
+}: {
+  style?: CSSProperties;
+  onRefresh: () => void;
+}) {
   const [loading, setLoading] = useState(false);
 
   async function _onRefresh() {
@@ -278,17 +314,23 @@ function RefreshButton({ style, onRefresh }) {
 
   return (
     <Button
-      type="bare"
+      variant="bare"
       aria-label="Refresh"
       style={{ padding: 10, ...style }}
-      onClick={_onRefresh}
+      onPress={_onRefresh}
     >
       <Icon style={{ width: 18, height: 18 }} />
     </Button>
   );
 }
 
-function BudgetListHeader({ quickSwitchMode, onRefresh }) {
+function BudgetListHeader({
+  quickSwitchMode,
+  onRefresh,
+}: {
+  quickSwitchMode: boolean;
+  onRefresh: () => void;
+}) {
   return (
     <View
       style={{
@@ -314,7 +356,14 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const allFiles = useSelector(state => state.budgets.allFiles || []);
   const [id] = useLocalPref('id');
 
-  const files = id ? allFiles.filter(f => f.id !== id) : allFiles;
+  // Remote files do not have the 'id' field
+  function isNonRemoteFile(
+    file: File,
+  ): file is LocalFile | SyncableLocalFile | SyncedLocalFile {
+    return file.state !== 'remote';
+  }
+  const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
+  const files = id ? nonRemoteFiles.filter(f => f.id !== id) : allFiles;
 
   const [creating, setCreating] = useState(false);
   const { isNarrowWidth } = useResponsive();
@@ -324,7 +373,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       }
     : {};
 
-  const onCreate = ({ testMode } = {}) => {
+  const onCreate = ({ testMode = false } = {}) => {
     if (!creating) {
       setCreating(true);
       dispatch(createBudget({ testMode }));
@@ -340,6 +389,22 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   if (initialMount && quickSwitchMode) {
     refresh();
   }
+
+  const onSelect = (file: File): void => {
+    const isRemoteFile = file.state === 'remote';
+
+    if (!id) {
+      if (isRemoteFile) {
+        dispatch(downloadBudget(file.cloudFileId));
+      } else {
+        dispatch(loadBudget(file.id));
+      }
+    } else if (!isRemoteFile && file.id !== id) {
+      dispatch(closeAndLoadBudget(file.id));
+    } else if (isRemoteFile) {
+      dispatch(closeAndDownloadBudget(file.cloudFileId));
+    }
+  };
 
   return (
     <View
@@ -365,21 +430,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       <BudgetFiles
         files={files}
         quickSwitchMode={quickSwitchMode}
-        onSelect={file => {
-          if (!id) {
-            if (file.state === 'remote') {
-              dispatch(downloadBudget(file.cloudFileId));
-            } else {
-              dispatch(loadBudget(file.id));
-            }
-          } else if (file.id !== id) {
-            if (file.state === 'remote') {
-              dispatch(closeAndDownloadBudget(file.cloudFileId));
-            } else {
-              dispatch(closeAndLoadBudget(file.id));
-            }
-          }
-        }}
+        onSelect={onSelect}
         onDelete={file => dispatch(pushModal('delete-budget', { file }))}
       />
       {!quickSwitchMode && (
@@ -392,14 +443,13 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           }}
         >
           <Button
-            type="bare"
+            variant="bare"
             style={{
               ...narrowButtonStyle,
               marginLeft: 10,
               color: theme.pageTextLight,
             }}
-            onClick={e => {
-              e.preventDefault();
+            onPress={() => {
               dispatch(pushModal('import'));
             }}
           >
@@ -407,8 +457,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           </Button>
 
           <Button
-            type="primary"
-            onClick={onCreate}
+            variant="primary"
+            onPress={() => onCreate()}
             style={{
               ...narrowButtonStyle,
               marginLeft: 10,
@@ -419,9 +469,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 
           {isNonProductionEnvironment() && (
             <Button
-              type="primary"
-              isSubmit={false}
-              onClick={() => onCreate({ testMode: true })}
+              variant="primary"
+              onPress={() => onCreate({ testMode: true })}
               style={{
                 ...narrowButtonStyle,
                 marginLeft: 10,
