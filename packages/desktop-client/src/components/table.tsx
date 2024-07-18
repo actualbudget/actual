@@ -311,7 +311,7 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
-type InputValueProps = ComponentProps<typeof Input> & {
+type InputValueProps = Omit<ComponentProps<typeof Input>, 'value'> & {
   value?: string;
 };
 
@@ -705,10 +705,10 @@ export function SheetCell({
     privacyFilter,
   } = valueProps;
 
-  const sheetValue = useSheetValue(binding, e => {
+  const sheetValue = useSheetValue(binding, () => {
     // "close" the cell if it's editing
     if (props.exposed && inputProps && inputProps.onBlur) {
-      inputProps.onBlur(e);
+      inputProps.onBlur();
     }
   });
   const format = useFormat();
