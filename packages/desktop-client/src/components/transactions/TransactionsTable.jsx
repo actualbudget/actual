@@ -695,22 +695,25 @@ function PayeeIcons({
       ? scheduleData.schedules.find(s => s.id === scheduleId)
       : null;
 
+  const buttonStyle = useMemo(
+    () => ({
+      marginLeft: -5,
+      marginRight: 2,
+      width: 23,
+      height: 23,
+      color: 'inherit',
+    }),
+    [],
+  );
+
+  const scheduleIconStyle = useMemo(() => ({ width: 13, height: 13 }), []);
+
+  const transferIconStyle = useMemo(() => ({ width: 10, height: 10 }), []);
+
   if (schedule == null && transferAccount == null) {
     // Neither a valid scheduled transaction nor a transfer.
     return null;
   }
-
-  const buttonStyle = ({ isHovered }) => ({
-    marginLeft: -5,
-    marginRight: 2,
-    width: 23,
-    height: 23,
-    color: isHovered ? theme.tableText : theme.tableTextSubdued,
-  });
-
-  const scheduleIconStyle = { width: 13, height: 13 };
-
-  const transferIconStyle = { width: 10, height: 10 };
 
   const recurring = schedule && schedule._date && !!schedule._date.frequency;
 
