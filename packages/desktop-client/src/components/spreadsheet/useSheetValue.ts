@@ -1,13 +1,23 @@
-// @ts-strict-ignore
 import { useState, useRef, useLayoutEffect } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 import { useSheetName } from './useSheetName';
 
-import { type Binding } from '.';
+import {
+  type SpreadsheetFieldTypes,
+  type SheetFields,
+  type SheetNames,
+  type Binding,
+} from '.';
 
-export function useSheetValue(binding: Binding, onChange?: (result) => void) {
+export function useSheetValue<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+>(
+  binding: Binding<SheetName, FieldName>,
+  onChange?: (result) => void,
+): SpreadsheetFieldTypes[SheetName][FieldName] | null {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
   const bindingObj =

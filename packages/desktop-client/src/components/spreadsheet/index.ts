@@ -39,6 +39,29 @@ export type Spreadsheets = {
     goal: number;
     'long-goal': number;
   };
+  'report-budget': {
+    // Common fields
+    'uncategorized-amount': number;
+    'uncategorized-balance': number;
+
+    // Report fields
+    'total-budgeted': number;
+    'total-budget-income': number;
+    'total-saved': number;
+    'total-income': number;
+    'total-spent': number;
+    'real-saved': number;
+    'total-leftover': number;
+    'group-sum-amount': number;
+    'group-budget': number;
+    'group-leftover': number;
+    budget: number;
+    'sum-amount': number;
+    leftover: number;
+    carryover: number;
+    goal: number;
+    'long-goal': number;
+  };
 };
 
 export type SheetNames = keyof Spreadsheets & string;
