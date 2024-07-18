@@ -171,6 +171,7 @@ export const errorBackground = lightTheme.errorBackground;
 export const errorText = lightTheme.errorText;
 export const errorTextDark = lightTheme.errorTextDark;
 export const errorTextDarker = lightTheme.errorTextDarker;
+export const errorTextMenu = lightTheme.errorTextMenu;
 export const errorBorder = lightTheme.errorBorder;
 export const upcomingBackground = lightTheme.upcomingBackground;
 export const upcomingText = lightTheme.upcomingText;
