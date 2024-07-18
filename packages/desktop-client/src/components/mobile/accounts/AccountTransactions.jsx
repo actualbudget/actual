@@ -21,7 +21,6 @@ import {
 } from 'loot-core/client/actions';
 import {
   SchedulesProvider,
-  useCachedSchedules,
   useDefaultSchedulesQueryTransform,
 } from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
@@ -155,7 +154,6 @@ function TransactionListWithPreviews({ account }) {
   const accounts = useAccounts();
   const payees = usePayees();
   const { list: categories } = useCategories();
-  const scheduleData = useCachedSchedules();
   const [currentQuery, setCurrentQuery] = useState();
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -602,15 +600,12 @@ function TransactionListWithPreviews({ account }) {
       pushModal('schedule-link', {
         transactionIds: ids,
         getTransaction: id => transactions.find(t => t.id === id),
-        onScheduleLinked: scheduleId => {
-          const scheduleName = scheduleData.schedules.find(
-            s => s.id === scheduleId,
-          ).name;
+        onScheduleLinked: schedule => {
           // TODO: When schedule becomes available in mobile, update undo notification message
-          // to open the schedule when the schedule name is clicked.
+          // with `messageActions` to open the schedule when the schedule name is clicked.
           showUndoNotification({
             title: 'Batch operation complete',
-            message: `Successfully linked ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''} to ${scheduleName}.`,
+            message: `Successfully linked ${selectedTransactions.length} transaction${hasMoreThanOneSelected ? 's' : ''} to ${schedule.name}.`,
           });
         },
       }),

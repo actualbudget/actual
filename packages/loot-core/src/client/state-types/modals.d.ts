@@ -4,6 +4,7 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   GoCardlessToken,
+  ScheduleEntity,
   TransactionEntity,
 } from '../../types/models';
 import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
@@ -127,7 +128,7 @@ type FinanceModals = {
   'schedule-link': {
     transactionIds: string[];
     getTransaction: (transactionId: string) => TransactionEntity;
-    onScheduleLinked: (scheduleId: string) => void;
+    onScheduleLinked: (schedule: ScheduleEntity) => void;
   } | null;
 
   'schedules-discover': null;
