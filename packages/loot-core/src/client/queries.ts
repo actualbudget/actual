@@ -1,6 +1,10 @@
-// @ts-strict-ignore
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
+import {
+  type SheetNames,
+  type Binding,
+  type SheetFields,
+} from '../../../desktop-client/src/components/spreadsheet';
 import {
   dayFromDate,
   getDayMonthRegex,
@@ -10,6 +14,13 @@ import {
 } from '../shared/months';
 import { q } from '../shared/query';
 import { currencyToAmount, amountToInteger } from '../shared/util';
+
+const parametrizedField =
+  <SheetName extends SheetNames>() =>
+  <FieldName extends SheetFields<SheetName>>(field: FieldName) =>
+  (id: string): FieldName =>
+    `${field}-${id}` as FieldName;
+const accountParametrizedField = parametrizedField<'account'>();
 
 export function getAccountFilter(accountId, field = 'account') {
   if (accountId) {
@@ -94,9 +105,9 @@ export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
   });
 }
 
-export function accountBalance(acct) {
+export function accountBalance(acct): Binding<'account', 'balance'> {
   return {
-    name: `balance-${acct.id}`,
+    name: accountParametrizedField('balance')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id })
       .options({ splits: 'none' })
@@ -104,9 +115,11 @@ export function accountBalance(acct) {
   };
 }
 
-export function accountBalanceCleared(acct) {
+export function accountBalanceCleared(
+  acct,
+): Binding<'account', 'balanceCleared'> {
   return {
-    name: `balanceCleared-${acct.id}`,
+    name: accountParametrizedField('balanceCleared')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id, cleared: true })
       .options({ splits: 'none' })
@@ -114,9 +127,11 @@ export function accountBalanceCleared(acct) {
   };
 }
 
-export function accountBalanceUncleared(acct) {
+export function accountBalanceUncleared(
+  acct,
+): Binding<'account', 'balanceUncleared'> {
   return {
-    name: `balanceUncleared-${acct.id}`,
+    name: accountParametrizedField('balanceUncleared')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id, cleared: false })
       .options({ splits: 'none' })
@@ -124,7 +139,7 @@ export function accountBalanceUncleared(acct) {
   };
 }
 
-export function allAccountBalance() {
+export function allAccountBalance(): Binding<'account', 'accounts-balance'> {
   return {
     query: q('transactions')
       .filter({ 'account.closed': false })
@@ -133,7 +148,10 @@ export function allAccountBalance() {
   };
 }
 
-export function budgetedAccountBalance() {
+export function budgetedAccountBalance(): Binding<
+  'account',
+  'budgeted-accounts-balance'
+> {
   return {
     name: `budgeted-accounts-balance`,
     query: q('transactions')
@@ -142,7 +160,10 @@ export function budgetedAccountBalance() {
   };
 }
 
-export function offbudgetAccountBalance() {
+export function offbudgetAccountBalance(): Binding<
+  'account',
+  'offbudget-accounts-balance'
+> {
   return {
     name: `offbudget-accounts-balance`,
     query: q('transactions')
@@ -210,7 +231,10 @@ export function uncategorizedBalance() {
   };
 }
 
-export function uncategorizedCount() {
+export function uncategorizedCount<SheetName extends SheetNames>(): Binding<
+  SheetName,
+  'uncategorized-amount'
+> {
   return {
     name: 'uncategorized-amount',
     query: uncategorizedQuery.calculate({ $count: '$id' }),
