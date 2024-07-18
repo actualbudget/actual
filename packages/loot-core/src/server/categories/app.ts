@@ -163,7 +163,7 @@ app.method('category-create', mutator(async function ({
 
   app.method('get-category-groups', async function () {
     return await db.getCategoriesGrouped();
-  };
+  });
   
   app.method('category-group-create', mutator(async function ({
     name,
