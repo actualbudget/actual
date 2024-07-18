@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
 
+import { type CSSProperties } from '../../style';
 import { Modal, type ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -12,6 +13,7 @@ type KeyboardShortcutsModalProps = {
 
 type KeyIconProps = {
   shortcut: string;
+  style?: CSSProperties;
 };
 
 type GroupHeadingProps = {
@@ -23,9 +25,10 @@ type ShortcutProps = {
   description: string;
   meta?: string;
   shift?: boolean;
+  style?: CSSProperties;
 };
 
-function KeyIcon({ shortcut }: KeyIconProps) {
+function KeyIcon({ shortcut, style }: KeyIconProps) {
   return (
     <div
       style={{
@@ -37,10 +40,11 @@ function KeyIcon({ shortcut }: KeyIconProps) {
         color: '#000',
         border: '1px solid #000',
         borderRadius: 8,
-        minWidth: 35,
-        minHeight: 35,
+        minWidth: 30,
+        minHeight: 30,
         filter: 'drop-shadow(1px 1px)',
         padding: 5,
+        ...style,
       }}
     >
       {shortcut}
@@ -63,12 +67,18 @@ function GroupHeading({ group }: GroupHeadingProps) {
   );
 }
 
-function Shortcut({ shortcut, description, meta, shift }: ShortcutProps) {
+function Shortcut({
+  shortcut,
+  description,
+  meta,
+  shift,
+  style,
+}: ShortcutProps) {
   return (
     <div
       style={{
         display: 'flex',
-        marginBottom: 10,
+        marginBottom: 5,
         marginLeft: 20,
       }}
     >
@@ -85,23 +95,6 @@ function Shortcut({ shortcut, description, meta, shift }: ShortcutProps) {
             marginRight: 10,
           }}
         >
-          {meta && (
-            <>
-              <KeyIcon shortcut={meta} />
-              <Text
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  fontSize: 16,
-                  paddingLeft: 2,
-                  paddingRight: 2,
-                }}
-              >
-                +
-              </Text>
-            </>
-          )}
           {shift && (
             <>
               <KeyIcon shortcut="Shift" />
@@ -119,7 +112,24 @@ function Shortcut({ shortcut, description, meta, shift }: ShortcutProps) {
               </Text>
             </>
           )}
-          <KeyIcon shortcut={shortcut} />
+          {meta && (
+            <>
+              <KeyIcon shortcut={meta} />
+              <Text
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  fontSize: 16,
+                  paddingLeft: 2,
+                  paddingRight: 2,
+                }}
+              >
+                +
+              </Text>
+            </>
+          )}
+          <KeyIcon shortcut={shortcut} style={style} />
         </div>
         <div
           style={{
@@ -146,6 +156,7 @@ export function KeyboardShortcutModal({
   modalProps,
 }: KeyboardShortcutsModalProps) {
   const location = useLocation();
+  const onBudget = location.pathname.startsWith('/budget');
   const onAccounts = location.pathname.startsWith('/accounts');
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   return (
@@ -153,19 +164,45 @@ export function KeyboardShortcutModal({
       <View
         style={{
           flexDirection: 'row',
+          fontSize: 13,
         }}
       >
         <View>
+          <Shortcut shortcut="?" description="Show this help dialog" />
           <Shortcut
             shortcut="O"
             description="Close the current budget and open another"
             meta={ctrl}
           />
-          <Shortcut shortcut="?" description="Show this help dialog" />
+          <Shortcut
+            shortcut="P"
+            description="Toggle the privacy filter"
+            meta={ctrl}
+            shift={true}
+          />
+          {onBudget && (
+            <Shortcut
+              shortcut="0"
+              description="View current month"
+              style={{
+                fontVariantNumeric: 'slashed-zero',
+              }}
+            />
+          )}
           {onAccounts && (
             <>
               <Shortcut shortcut="Enter" description="Move down when editing" />
-              <Shortcut shortcut="Tab" description="Move right when editing" />
+              <Shortcut
+                shortcut="Enter"
+                description="Move up when editing"
+                shift={true}
+              />
+              <Shortcut
+                shortcut="I"
+                description="Import transactions"
+                meta={ctrl}
+              />
+              <Shortcut shortcut="B" description="Bank sync" meta={ctrl} />
               <GroupHeading group="Select a transaction, then" />
               <Shortcut
                 shortcut="J"
@@ -197,8 +234,7 @@ export function KeyboardShortcutModal({
         </View>
         <View
           style={{
-            marginLeft: 20,
-            marginRight: 20,
+            marginRight: 15,
           }}
         >
           <Shortcut
@@ -212,18 +248,27 @@ export function KeyboardShortcutModal({
             shift={true}
             meta={ctrl}
           />
+          {onBudget && (
+            <>
+              <Shortcut shortcut="←" description="View previous month" />
+              <Shortcut shortcut="→" description="View next month" />
+            </>
+          )}
           {onAccounts && (
             <>
               <Shortcut
-                shortcut="Enter"
-                description="Move up when editing"
-                shift={true}
+                shortcut="A"
+                description="Select all transactions"
+                meta={ctrl}
               />
+              <Shortcut shortcut="Tab" description="Move right when editing" />
               <Shortcut
                 shortcut="Tab"
                 description="Move left when editing"
                 shift={true}
               />
+              <Shortcut shortcut="T" description="Add a new transaction" />
+              <Shortcut shortcut="F" description="Filter transactions" />
               <GroupHeading group="With transaction(s) selected" />
               <Shortcut
                 shortcut="F"

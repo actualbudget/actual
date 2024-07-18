@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useAccounts } from '../../hooks/useAccounts';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -160,9 +160,9 @@ export function SelectLinkedAccounts({
             }}
           >
             <Button
-              type="primary"
-              onClick={onNext}
-              disabled={!Object.keys(chosenAccounts).length}
+              variant="primary"
+              onPress={onNext}
+              isDisabled={!Object.keys(chosenAccounts).length}
             >
               Link accounts
             </Button>
@@ -220,7 +220,7 @@ function TableRow({
       <Field width="20%">
         {chosenAccount ? (
           <Button
-            onClick={() => {
+            onPress={() => {
               onSetLinkedAccount(externalAccount, null);
             }}
             style={{ float: 'right' }}
@@ -229,8 +229,8 @@ function TableRow({
           </Button>
         ) : (
           <Button
-            type="primary"
-            onClick={() => {
+            variant="primary"
+            onPress={() => {
               setFocusedField('account');
             }}
             style={{ float: 'right' }}

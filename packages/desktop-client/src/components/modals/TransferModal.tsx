@@ -6,7 +6,7 @@ import { pushModal } from 'loot-core/client/actions';
 import { useCategories } from '../../hooks/useCategories';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
@@ -109,14 +109,13 @@ export function TransferModal({
           }}
         >
           <Button
-            type="primary"
-            tabIndex={0}
+            variant="primary"
             style={{
               height: styles.mobileMinHeight,
               marginLeft: styles.mobileEditingPadding,
               marginRight: styles.mobileEditingPadding,
             }}
-            onClick={() => _onSubmit(amount, toCategoryId)}
+            onPress={() => _onSubmit(amount, toCategoryId)}
           >
             Transfer
           </Button>
