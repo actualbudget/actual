@@ -68,9 +68,3 @@ export function CellValue<
     </ConditionalPrivacyFilter>
   );
 }
-
-export function RolloverCellValue<
-  FieldName extends SheetFields<'rollover-budget'>,
->(props: CellValueProps<'rollover-budget', FieldName>) {
-  return <CellValue {...props} />;
-}

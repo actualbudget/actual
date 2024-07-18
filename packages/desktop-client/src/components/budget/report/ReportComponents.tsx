@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { memo, useRef, useState } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
