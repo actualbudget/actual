@@ -10,6 +10,7 @@ import React, {
   useLayoutEffect,
   useEffect,
 } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -173,6 +174,16 @@ const TransactionHeader = memo(
     field,
   }) => {
     const dispatchSelected = useSelectedDispatch();
+
+    useHotkeys(
+      'ctrl+a, cmd+a, meta+a',
+      e => dispatchSelected({ type: 'select-all', event: e }),
+      {
+        preventDefault: true,
+        scopes: ['app'],
+      },
+      [dispatchSelected],
+    );
 
     return (
       <Row
