@@ -296,7 +296,6 @@ const TransactionHeader = memo(
         {showBalance && (
           <HeaderCell
             value="Balance"
-            alignItems="flex-end"
             width={103}
             alignItems="flex-end"
             marginRight={-5}
