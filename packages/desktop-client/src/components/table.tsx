@@ -20,6 +20,12 @@ import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import {
+  type SpreadsheetFieldTypes,
+  type BudgetField,
+  type SheetNames,
+} from 'loot-core/client/queries';
+
+import {
   AvoidRefocusScrollProvider,
   useProperFocus,
 } from '../hooks/useProperFocus';
@@ -671,31 +677,42 @@ export function SelectCell({
   );
 }
 
-type SheetCellValueProps = {
-  binding: Binding;
+type SheetCellValueProps<
+  SheetName extends SheetNames,
+  FieldName extends BudgetField<SheetName>,
+> = {
+  binding: Binding<SheetName, FieldName>;
   type: FormatType;
-  getValueStyle?: (value: string | number) => CSSProperties;
-  formatExpr?: (value) => string;
+  getValueStyle?: (
+    value: SpreadsheetFieldTypes[SheetName][FieldName],
+  ) => CSSProperties;
+  formatExpr?: (value: SpreadsheetFieldTypes[SheetName][FieldName]) => string;
   unformatExpr?: (value: string) => unknown;
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
 };
 
-type SheetCellProps = ComponentProps<typeof Cell> & {
-  valueProps: SheetCellValueProps;
+export type SheetCellProps<
+  SheetName extends SheetNames,
+  FieldName extends BudgetField<SheetName>,
+> = ComponentProps<typeof Cell> & {
+  valueProps: SheetCellValueProps<SheetName, FieldName>;
   inputProps?: Omit<ComponentProps<typeof InputValue>, 'value' | 'onUpdate'>;
   onSave?: (value) => void;
   textAlign?: CSSProperties['textAlign'];
 };
-export function SheetCell({
+export function SheetCell<
+  SheetName extends SheetNames = any,
+  FieldName extends BudgetField<SheetName> = any,
+>({
   valueProps,
   valueStyle,
   inputProps,
   textAlign,
   onSave,
   ...props
-}: SheetCellProps) {
+}: SheetCellProps<SheetName, FieldName>) {
   const {
     binding,
     type,
@@ -722,7 +739,7 @@ export function SheetCell({
       }
       textAlign={textAlign}
       {...props}
-      value={sheetValue}
+      value={(sheetValue ?? '').toString()}
       formatter={value =>
         props.formatter ? props.formatter(value, type) : format(value, type)
       }
@@ -738,7 +755,7 @@ export function SheetCell({
       {() => {
         return (
           <InputValue
-            value={formatExpr ? formatExpr(sheetValue) : sheetValue}
+            value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
             onUpdate={value => {
               onSave(unformatExpr ? unformatExpr(value) : value);
             }}
