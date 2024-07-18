@@ -154,6 +154,13 @@ app.method('category-create', mutator(async function ({
     });
   }));
   
+  app.method('get-categories', async function () {
+    return {
+      grouped: await db.getCategoriesGrouped(),
+      list: await db.getCategories(),
+    };
+  });
+
   app.method('get-category-groups', async function () {
     return await db.getCategoriesGrouped();
   };
@@ -231,5 +238,30 @@ app.method('category-create', mutator(async function ({
       return value != null && value !== 0;
     });
   });
-  
+
+  app.method('must-category-transfer', async function ({ id }) {
+    const res = await db.runQuery(
+        `SELECT count(t.id) as count FROM transactions t
+           LEFT JOIN category_mapping cm ON cm.id = t.category
+           WHERE cm.transferId = ? AND t.tombstone = 0`,
+        [id],
+        true,
+      );
+    
+      // If there are transactions with this category, return early since
+      // we already know it needs to be tranferred
+      if (res[0].count !== 0) {
+        return true;
+      }
+    
+      // If there are any non-zero budget values, also force the user to
+      // transfer the category.
+      return [...sheet.get().meta().createdMonths].some(month => {
+        const sheetName = monthUtils.sheetForMonth(month);
+        const value = sheet.get().getCellValue(sheetName, 'budget-' + id);
+    
+        return value != null && value !== 0;
+      });
+    });
+
   export default app;

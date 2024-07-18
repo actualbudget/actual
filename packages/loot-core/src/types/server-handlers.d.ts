@@ -52,11 +52,6 @@ export interface ServerHandlers {
 
   'transactions-export-query': (arg: { query: QueryState }) => Promise<unknown>;
 
-  'get-categories': () => Promise<{
-    grouped: Array<CategoryGroupEntity>;
-    list: Array<CategoryEntity>;
-  }>;
-
   'get-earliest-transaction': () => Promise<{ date: string }>;
 
   'get-budget-bounds': () => Promise<{ start: string; end: string }>;
@@ -76,32 +71,6 @@ export interface ServerHandlers {
   >;
 
   'budget-set-type': (arg: { type }) => Promise<unknown>;
-
-  'category-create': (arg: {
-    name;
-    groupId;
-    isIncome?;
-    hidden?: boolean;
-  }) => Promise<string>;
-
-  'category-update': (category) => Promise<unknown>;
-
-  'category-move': (arg: { id; groupId; targetId }) => Promise<unknown>;
-
-  'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
-
-  'category-group-create': (arg: {
-    name;
-    isIncome?: boolean;
-  }) => Promise<string>;
-
-  'category-group-update': (group) => Promise<unknown>;
-
-  'category-group-move': (arg: { id; targetId }) => Promise<unknown>;
-
-  'category-group-delete': (arg: { id; transferId }) => Promise<unknown>;
-
-  'must-category-transfer': (arg: { id }) => Promise<unknown>;
 
   'payee-create': (arg: { name }) => Promise<string>;
 
