@@ -33,7 +33,7 @@ import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -104,10 +104,9 @@ function FileMenuButton({ onDelete }: { onDelete: () => void }) {
     <View>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         aria-label="Menu"
-        onClick={e => {
-          e.stopPropagation();
+        onPress={() => {
           setMenuOpen(true);
         }}
       >
@@ -315,10 +314,10 @@ function RefreshButton({
 
   return (
     <Button
-      type="bare"
+      variant="bare"
       aria-label="Refresh"
       style={{ padding: 10, ...style }}
-      onClick={_onRefresh}
+      onPress={_onRefresh}
     >
       <Icon style={{ width: 18, height: 18 }} />
     </Button>
@@ -444,14 +443,13 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           }}
         >
           <Button
-            type="bare"
+            variant="bare"
             style={{
               ...narrowButtonStyle,
               marginLeft: 10,
               color: theme.pageTextLight,
             }}
-            onClick={e => {
-              e.preventDefault();
+            onPress={() => {
               dispatch(pushModal('import'));
             }}
           >
@@ -459,8 +457,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           </Button>
 
           <Button
-            type="primary"
-            onClick={() => onCreate()}
+            variant="primary"
+            onPress={() => onCreate()}
             style={{
               ...narrowButtonStyle,
               marginLeft: 10,
@@ -471,9 +469,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 
           {isNonProductionEnvironment() && (
             <Button
-              type="primary"
-              isSubmit={false}
-              onClick={() => onCreate({ testMode: true })}
+              variant="primary"
+              onPress={() => onCreate({ testMode: true })}
               style={{
                 ...narrowButtonStyle,
                 marginLeft: 10,

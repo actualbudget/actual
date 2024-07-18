@@ -5,7 +5,7 @@ import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -95,8 +95,8 @@ export function LoadBackup({
                   version below.
                 </Block>
                 <Button
-                  type="primary"
-                  onClick={() =>
+                  variant="primary"
+                  onPress={() =>
                     actions.loadBackup(budgetIdToLoad, latestBackup.id)
                   }
                 >
@@ -114,11 +114,11 @@ export function LoadBackup({
                   </Text>
                 </Block>
                 <Button
-                  type="primary"
-                  disabled={backupDisabled}
-                  onClick={() => actions.makeBackup()}
+                  variant="primary"
+                  isDisabled={backupDisabled}
+                  onPress={() => actions.makeBackup()}
                 >
-                  Backup Now
+                  Backup now
                 </Button>
               </View>
             )}
