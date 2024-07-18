@@ -38,8 +38,8 @@ describe('utility functions', () => {
   });
 
   test('looseParseAmount works with leading decimal characters', () => {
-    expect(looselyParseAmount('.45')).toBe(.45);
-    expect(looselyParseAmount(',45')).toBe(.45);
+    expect(looselyParseAmount('.45')).toBe(0.45);
+    expect(looselyParseAmount(',45')).toBe(0.45);
   });
 
   test('looseParseAmount ignores non-numeric characters', () => {
