@@ -5,6 +5,10 @@ import { Item, Section } from '@react-stately/collections';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
 
+import {
+  useSelectedDispatch,
+  useSelectedItems,
+} from '../../../hooks/useSelected';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
@@ -22,9 +26,6 @@ import { Transaction } from './Transaction';
 export function TransactionList({
   isLoading,
   transactions,
-  selectedTransactions = [],
-  onAddSelectedTransaction,
-  onClearSelectedTransactions,
   isNewTransaction,
   onOpenTransaction,
   scrollProps = {},
@@ -64,11 +65,14 @@ export function TransactionList({
     return sections;
   }, [transactions]);
 
+  const dispatchSelected = useSelectedDispatch();
+  const selectedTransactions = useSelectedItems();
+
   const onTransactionPress = (transaction, isLongPress = false) => {
     const isPreview = isPreviewId(transaction.id);
 
-    if (!isPreview && (isLongPress || selectedTransactions.length > 0)) {
-      onAddSelectedTransaction(transaction.id);
+    if (!isPreview && (isLongPress || selectedTransactions.size > 0)) {
+      dispatchSelected({ type: 'select', id: transaction.id });
     } else {
       onOpenTransaction(transaction);
     }
@@ -135,7 +139,7 @@ export function TransactionList({
                     <Transaction
                       transaction={transaction}
                       isAdded={isNewTransaction(transaction.id)}
-                      isSelected={selectedTransactions.includes(transaction.id)}
+                      isSelected={selectedTransactions.has(transaction.id)}
                       onPress={trans => onTransactionPress(trans)}
                       onLongPress={trans => onTransactionPress(trans, true)}
                     />
@@ -146,11 +150,9 @@ export function TransactionList({
           );
         })}
       </ListBox>
-      {selectedTransactions?.length > 0 && (
+      {selectedTransactions.size > 0 && (
         <SelectedTransactionsFloatingActionBar
           transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          onClearSelectedTransactions={onClearSelectedTransactions}
           onEdit={onBatchEdit}
           onDuplicate={onBatchDuplicate}
           onLinkSchedule={onLinkSchedule}
@@ -165,8 +167,6 @@ export function TransactionList({
 
 function SelectedTransactionsFloatingActionBar({
   transactions,
-  selectedTransactions,
-  onClearSelectedTransactions,
   onEdit,
   onDuplicate,
   onLinkSchedule,
@@ -186,6 +186,9 @@ function SelectedTransactionsFloatingActionBar({
     }),
     [],
   );
+  const selectedTransactions = useSelectedItems();
+  const selectedTransactionsArray = Array.from(selectedTransactions);
+  const dispatchSelected = useSelectedDispatch();
 
   const buttonProps = useMemo(
     () => ({
@@ -206,11 +209,11 @@ function SelectedTransactionsFloatingActionBar({
 
   const allTransactionsAreLinked = useMemo(() => {
     return transactions
-      .filter(t => selectedTransactions.includes(t.id))
+      .filter(t => selectedTransactions.has(t.id))
       .every(t => t.schedule);
   }, [transactions, selectedTransactions]);
 
-  const isMoreThanOne = selectedTransactions.length > 1;
+  const isMoreThanOne = selectedTransactions.size > 1;
 
   return (
     <FloatingActionBar style={style}>
@@ -235,15 +238,15 @@ function SelectedTransactionsFloatingActionBar({
             {...buttonProps}
             style={{ ...buttonProps.style, marginRight: 4 }}
             onClick={() => {
-              if (selectedTransactions.length > 0) {
-                onClearSelectedTransactions();
+              if (selectedTransactions.size > 0) {
+                dispatchSelected({ type: 'select-none' });
               }
             }}
           >
             <SvgDelete width={10} height={10} />
           </Button>
           <Text style={styles.mediumText}>
-            {selectedTransactions.length}{' '}
+            {selectedTransactions.size}{' '}
             {isMoreThanOne ? 'transactions' : 'transaction'} selected
           </Text>
         </View>
@@ -277,7 +280,7 @@ function SelectedTransactionsFloatingActionBar({
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
-                onEdit?.(type, selectedTransactions);
+                onEdit?.(type, selectedTransactionsArray);
                 setIsEditMenuOpen(false);
               }}
               items={[
@@ -343,13 +346,13 @@ function SelectedTransactionsFloatingActionBar({
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
                 if (type === 'duplicate') {
-                  onDuplicate?.(selectedTransactions);
+                  onDuplicate?.(selectedTransactionsArray);
                 } else if (type === 'link-schedule') {
-                  onLinkSchedule?.(selectedTransactions);
+                  onLinkSchedule?.(selectedTransactionsArray);
                 } else if (type === 'unlink-schedule') {
-                  onUnlinkSchedule?.(selectedTransactions);
+                  onUnlinkSchedule?.(selectedTransactionsArray);
                 } else if (type === 'delete') {
-                  onDelete?.(selectedTransactions);
+                  onDelete?.(selectedTransactionsArray);
                 }
                 setIsMoreOptionsMenuOpen(false);
               }}

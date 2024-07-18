@@ -208,7 +208,9 @@ const TransactionHeader = memo(
             borderTopWidth: 0,
             borderBottomWidth: 0,
           }}
-          onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
+          onSelect={e =>
+            dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
+          }
         />
         <HeaderCell
           value="Date"
@@ -1115,7 +1117,11 @@ const Transaction = memo(function Transaction({
           }}
           focused={focusedField === 'select'}
           onSelect={e => {
-            dispatchSelected({ type: 'select', id: transaction.id, event: e });
+            dispatchSelected({
+              type: 'select',
+              id: transaction.id,
+              isRangeSelect: e.shiftKey,
+            });
           }}
           onEdit={() => onEdit(id, 'select')}
           selected={selected}

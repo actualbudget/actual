@@ -58,9 +58,6 @@ function TransactionSearchInput({ placeholder, onSearch }) {
 export function TransactionListWithBalances({
   isLoading,
   transactions,
-  selectedTransactions,
-  onAddSelectedTransaction,
-  onClearSelectedTransactions,
   balance,
   balanceCleared,
   balanceUncleared,
@@ -166,9 +163,6 @@ export function TransactionListWithBalances({
         <TransactionList
           isLoading={isLoading}
           transactions={transactions}
-          selectedTransactions={selectedTransactions}
-          onAddSelectedTransaction={onAddSelectedTransaction}
-          onClearSelectedTransactions={onClearSelectedTransactions}
           isNewTransaction={isNewTransaction}
           onLoadMore={onLoadMore}
           onOpenTransaction={onOpenTransaction}
