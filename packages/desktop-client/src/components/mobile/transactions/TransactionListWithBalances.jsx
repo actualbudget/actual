@@ -66,12 +66,6 @@ export function TransactionListWithBalances({
   onLoadMore,
   onOpenTransaction,
   onRefresh,
-  onBatchEdit,
-  onBatchDuplicate,
-  onSetTransfer,
-  onLinkSchedule,
-  onUnlinkSchedule,
-  onBatchDelete,
 }) {
   const newTransactions = useSelector(state => state.queries.newTransactions);
 
@@ -166,12 +160,6 @@ export function TransactionListWithBalances({
           isNewTransaction={isNewTransaction}
           onLoadMore={onLoadMore}
           onOpenTransaction={onOpenTransaction}
-          onBatchEdit={onBatchEdit}
-          onBatchDuplicate={onBatchDuplicate}
-          onSetTransfer={onSetTransfer}
-          onLinkSchedule={onLinkSchedule}
-          onUnlinkSchedule={onUnlinkSchedule}
-          onBatchDelete={onBatchDelete}
         />
       </PullToRefresh>
     </>

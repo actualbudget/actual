@@ -19,6 +19,7 @@ import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { FloatingActionBar } from '../FloatingActionBar';
+import { useTransactionBatchActions } from '../hooks/useTransactionBatchActions';
 
 import { ListBox } from './ListBox';
 import { Transaction } from './Transaction';
@@ -30,12 +31,6 @@ export function TransactionList({
   onOpenTransaction,
   scrollProps = {},
   onLoadMore,
-  onBatchEdit,
-  onBatchDuplicate,
-  onSetTransfer,
-  onLinkSchedule,
-  onUnlinkSchedule,
-  onBatchDelete,
 }) {
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
@@ -151,29 +146,13 @@ export function TransactionList({
         })}
       </ListBox>
       {selectedTransactions.size > 0 && (
-        <SelectedTransactionsFloatingActionBar
-          transactions={transactions}
-          onEdit={onBatchEdit}
-          onDuplicate={onBatchDuplicate}
-          onLinkSchedule={onLinkSchedule}
-          onUnlinkSchedule={onUnlinkSchedule}
-          onSetTransfer={onSetTransfer}
-          onDelete={onBatchDelete}
-        />
+        <SelectedTransactionsFloatingActionBar transactions={transactions} />
       )}
     </>
   );
 }
 
-function SelectedTransactionsFloatingActionBar({
-  transactions,
-  onEdit,
-  onDuplicate,
-  onLinkSchedule,
-  onUnlinkSchedule,
-  onDelete,
-  style,
-}) {
+function SelectedTransactionsFloatingActionBar({ transactions, style }) {
   const editMenuTriggerRef = useRef(null);
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const moreOptionsMenuTriggerRef = useRef(null);
@@ -214,6 +193,14 @@ function SelectedTransactionsFloatingActionBar({
   }, [transactions, selectedTransactions]);
 
   const isMoreThanOne = selectedTransactions.size > 1;
+
+  const {
+    onBatchEdit,
+    onBatchDuplicate,
+    onBatchDelete,
+    onLinkSchedule,
+    onUnlinkSchedule,
+  } = useTransactionBatchActions();
 
   return (
     <FloatingActionBar style={style}>
@@ -279,8 +266,8 @@ function SelectedTransactionsFloatingActionBar({
             <Menu
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
-              onMenuSelect={type => {
-                onEdit?.(type, selectedTransactionsArray);
+              onMenuSelect={name => {
+                onBatchEdit?.(name, selectedTransactionsArray);
                 setIsEditMenuOpen(false);
               }}
               items={[
@@ -346,13 +333,13 @@ function SelectedTransactionsFloatingActionBar({
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
                 if (type === 'duplicate') {
-                  onDuplicate?.(selectedTransactionsArray);
+                  onBatchDuplicate?.(selectedTransactionsArray);
                 } else if (type === 'link-schedule') {
                   onLinkSchedule?.(selectedTransactionsArray);
                 } else if (type === 'unlink-schedule') {
                   onUnlinkSchedule?.(selectedTransactionsArray);
                 } else if (type === 'delete') {
-                  onDelete?.(selectedTransactionsArray);
+                  onBatchDelete?.(selectedTransactionsArray);
                 }
                 setIsMoreOptionsMenuOpen(false);
               }}
