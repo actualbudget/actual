@@ -416,8 +416,8 @@ export function looselyParseAmount(amount: string) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
 
-  // for numbers starting with decimal
-  if (m.index === 0 && amount.charAt(0) != '0') {
+  // for numbers starting with a decimal marker
+  if (m.index === 0) {
     amount = '0' + amount;
   }
 
