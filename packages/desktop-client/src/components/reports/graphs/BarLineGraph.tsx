@@ -13,6 +13,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { integerToCurrency } from 'loot-core/shared/util';
+
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -77,7 +79,7 @@ type BarLineGraphProps = {
 
 export function BarLineGraph({ style, data, compact }: BarLineGraphProps) {
   const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    return `${integerToCurrency(Math.round(tick))}`; // Formats the tick values as strings with commas
   };
 
   return (
