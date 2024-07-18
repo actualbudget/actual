@@ -247,7 +247,7 @@ function FloatingActionBar({
             type="bare"
             {...buttonProps}
             style={{ ...buttonProps.style, marginRight: 4 }}
-            onClick={() => onClearSelectedTransactions?.()}
+            onClick={() => onClearSelectedTransactions()}
           >
             <SvgDelete width={10} height={10} />
           </Button>
