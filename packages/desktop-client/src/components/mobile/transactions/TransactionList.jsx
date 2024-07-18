@@ -68,7 +68,7 @@ export function TransactionList({
     const isPreview = isPreviewId(transaction.id);
 
     if (!isPreview && (isLongPress || selectedTransactions.length > 0)) {
-      onAddSelectedTransaction?.(transaction.id);
+      onAddSelectedTransaction(transaction.id);
     } else {
       onOpenTransaction(transaction);
     }
@@ -234,7 +234,11 @@ function SelectedTransactionsFloatingActionBar({
             type="bare"
             {...buttonProps}
             style={{ ...buttonProps.style, marginRight: 4 }}
-            onClick={() => onClearSelectedTransactions?.()}
+            onClick={() => {
+              if (selectedTransactions.length > 0) {
+                onClearSelectedTransactions();
+              }
+            }}
           >
             <SvgDelete width={10} height={10} />
           </Button>
