@@ -26,7 +26,10 @@ export type CellValueProps<
   ['data-testid']?: string;
 };
 
-export function CellValue({
+export function CellValue<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+>({
   binding,
   type,
   formatter,
@@ -36,7 +39,7 @@ export function CellValue({
   'data-testid': testId,
   ...props
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}: CellValueProps<any, any>) {
+}: CellValueProps<SheetName, FieldName>) {
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
   const format = useFormat();
@@ -65,4 +68,10 @@ export function CellValue({
       </Text>
     </ConditionalPrivacyFilter>
   );
+}
+
+export function RolloverCellValue<
+  FieldName extends SheetFields<'rollover-budget'>,
+>(props: CellValueProps<'rollover-budget', FieldName>) {
+  return <CellValue {...props} />;
 }
