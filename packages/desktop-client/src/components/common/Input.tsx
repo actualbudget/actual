@@ -1,5 +1,4 @@
-import type React from 'react';
-import {
+import React, {
   type InputHTMLAttributes,
   type KeyboardEvent,
   type Ref,
