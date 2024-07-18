@@ -73,52 +73,48 @@ async function importCategories(
   // correct sort order.
 
   for (const group of data.category_groups) {
-    if (!group.deleted) {
-      let groupId;
-      // Ignores internal category and credit cards
-      if (
-        !equalsIgnoreCase(group.name, 'Internal Master Category') &&
-        !equalsIgnoreCase(group.name, 'Credit Card Payments') &&
-        !equalsIgnoreCase(group.name, 'Income')
-      ) {
-        groupId = await actual.createCategoryGroup({
-          name: group.name,
-          is_income: false,
-        });
-        entityIdMap.set(group.id, groupId);
-      }
+    if (!group.deleted && group.hidden) {
+      const newName = `${group.name} (hidden)`;
+      const groupId = await actual.createCategoryGroup({
+        name: newName,
+        is_income: false,
+      });
+      entityIdMap.set(group.id, groupId);
+    } else if (!group.deleted && !group.hidden) {
+      const groupId = await actual.createCategoryGroup({
+        name: group.name,
+        is_income: false,
+      });
+      entityIdMap.set(group.id, groupId);
+    }
 
-      if (equalsIgnoreCase(group.name, 'Income')) {
-        groupId = incomeCatId;
-        entityIdMap.set(group.id, groupId);
-      }
+    if (equalsIgnoreCase(group.name, 'Income')) {
+      const groupId = incomeCatId;
+      entityIdMap.set(group.id, groupId);
+    }
 
-      const cats = data.categories.filter(
-        cat => cat.category_group_id === group.id,
-      );
-
-      for (const cat of cats.reverse()) {
-        if (!cat.deleted) {
-          // Handles special categories. Starting balance is a payee
-          // in YNAB so it's handled in importTransactions
-          switch (checkSpecialCat(cat)) {
-            case 'income': {
-              // doesn't create new category, only assigns id
-              const id = incomeCatId;
-              entityIdMap.set(cat.id, id);
-              break;
-            }
-            case 'creditCard': // ignores it
-            case 'internal': // uncategorized is ignored too, handled by actual
-              break;
-            default: {
-              const id = await actual.createCategory({
-                name: cat.name,
-                group_id: groupId,
-              });
-              entityIdMap.set(cat.id, id);
-              break;
-            }
+    for (const cat of cats.reverse()) {
+      if (!cat.deleted) {
+        // Handles special categories. Starting balance is a payee
+        // in YNAB so it's handled in importTransactions
+        switch (checkSpecialCat(cat)) {
+          case 'income': {
+            // doesn't create new category, only assigns id
+            const id = incomeCatId;
+            entityIdMap.set(cat.id, id);
+            break;
+          }
+          case 'creditCard': // ignores it
+          case 'internal': // uncategorized is ignored too, handled by actual
+            break;
+          default: {
+            const groupId = entityIdMap.get(cat.category_group_id);
+            const id = await actual.createCategory({
+              name: cat.name,
+              group_id: groupId,
+            });
+            entityIdMap.set(cat.id, id);
+            break;
           }
         }
       }
