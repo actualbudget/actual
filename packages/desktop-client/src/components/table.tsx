@@ -692,17 +692,24 @@ type SheetCellValueProps<
   >['privacyFilter'];
 };
 
-export type SheetCellProps<
+type SheetCellProps<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
 > = ComponentProps<typeof Cell> & {
   valueProps: SheetCellValueProps<SheetName, FieldName>;
-  inputProps?: Omit<ComponentProps<typeof InputValue>, 'value' | 'onUpdate'>;
+  inputProps?: Omit<
+    ComponentProps<typeof InputValue>,
+    'value' | 'onUpdate' | 'onBlur'
+  > & {
+    onBlur?: () => void;
+  };
   onSave?: (value) => void;
   textAlign?: CSSProperties['textAlign'];
 };
 export function SheetCell<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetName extends SheetNames = any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   FieldName extends SheetFields<SheetName> = any,
 >({
   valueProps,

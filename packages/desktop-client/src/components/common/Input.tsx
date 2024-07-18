@@ -2,7 +2,6 @@ import type React from 'react';
 import {
   type InputHTMLAttributes,
   type KeyboardEvent,
-  type FocusEvent,
   type Ref,
   useRef,
 } from 'react';
@@ -30,7 +29,6 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   onEscape?: (event: KeyboardEvent<HTMLInputElement>) => void;
   onChangeValue?: (newValue: string) => void;
   onUpdate?: (newValue: string) => void;
-  onBlur?: (event?: FocusEvent<HTMLInputElement>) => void;
   focused?: boolean;
 };
 

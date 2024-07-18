@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
 import {
@@ -12,8 +13,10 @@ import {
   getShortYearRegex,
   getShortYearFormat,
 } from '../shared/months';
-import { q } from '../shared/query';
+import { q, type Query } from '../shared/query';
 import { currencyToAmount, amountToInteger } from '../shared/util';
+import { type CategoryEntity, type AccountEntity } from '../types/models';
+import { type LocalPrefs } from '../types/prefs';
 
 const parametrizedField =
   <SheetName extends SheetNames>() =>
@@ -22,7 +25,7 @@ const parametrizedField =
     `${field}-${id}` as FieldName;
 const accountParametrizedField = parametrizedField<'account'>();
 
-export function getAccountFilter(accountId, field = 'account') {
+export function getAccountFilter(accountId: string, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
       return {
@@ -58,7 +61,7 @@ export function getAccountFilter(accountId, field = 'account') {
   return null;
 }
 
-export function makeTransactionsQuery(accountId) {
+export function makeTransactionsQuery(accountId: string) {
   let query = q('transactions').options({ splits: 'grouped' });
 
   const filter = getAccountFilter(accountId);
@@ -69,7 +72,11 @@ export function makeTransactionsQuery(accountId) {
   return query;
 }
 
-export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
+export function makeTransactionSearchQuery(
+  currentQuery: Query,
+  search: string,
+  dateFormat: LocalPrefs['dateFormat'],
+) {
   const amount = currencyToAmount(search);
 
   // Support various date formats
@@ -105,7 +112,9 @@ export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
   });
 }
 
-export function accountBalance(acct): Binding<'account', 'balance'> {
+export function accountBalance(
+  acct: AccountEntity,
+): Binding<'account', 'balance'> {
   return {
     name: accountParametrizedField('balance')(acct.id),
     query: q('transactions')
@@ -116,7 +125,7 @@ export function accountBalance(acct): Binding<'account', 'balance'> {
 }
 
 export function accountBalanceCleared(
-  acct,
+  acct: AccountEntity,
 ): Binding<'account', 'balanceCleared'> {
   return {
     name: accountParametrizedField('balanceCleared')(acct.id),
@@ -128,7 +137,7 @@ export function accountBalanceCleared(
 }
 
 export function accountBalanceUncleared(
-  acct,
+  acct: AccountEntity,
 ): Binding<'account', 'balanceUncleared'> {
   return {
     name: accountParametrizedField('balanceUncleared')(acct.id),
@@ -172,7 +181,7 @@ export function offbudgetAccountBalance(): Binding<
   };
 }
 
-export function categoryBalance(category, month) {
+export function categoryBalance(category: CategoryEntity, month: string) {
   return {
     name: `balance-${category.id}`,
     query: q('transactions')
@@ -185,7 +194,10 @@ export function categoryBalance(category, month) {
   };
 }
 
-export function categoryBalanceCleared(category, month) {
+export function categoryBalanceCleared(
+  category: CategoryEntity,
+  month: string,
+) {
   return {
     name: `balanceCleared-${category.id}`,
     query: q('transactions')
@@ -199,7 +211,10 @@ export function categoryBalanceCleared(category, month) {
   };
 }
 
-export function categoryBalanceUncleared(category, month) {
+export function categoryBalanceUncleared(
+  category: CategoryEntity,
+  month: string,
+) {
   return {
     name: `balanceUncleared-${category.id}`,
     query: q('transactions')

@@ -22,7 +22,9 @@ export type SheetFields<SheetName extends SheetNames> =
   keyof SpreadsheetFieldTypes[SheetName] & string;
 
 export type Binding<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetName extends SheetNames = any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   FieldName extends SheetFields<SheetName> = any,
 > =
   | FieldName
