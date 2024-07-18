@@ -18,6 +18,8 @@ type UndoActions = {
   showRedoNotification: (redoNotification: RedoNotification) => void;
 };
 
+const timeout = 3000;
+
 export function useUndo(): UndoActions {
   const dispatch = useDispatch();
 
@@ -42,7 +44,7 @@ export function useUndo(): UndoActions {
           title,
           message,
           messageActions,
-          sticky: true,
+          timeout,
           button: {
             title: 'Undo',
             action: dispatchUndo,
@@ -66,7 +68,7 @@ export function useUndo(): UndoActions {
           title,
           message,
           messageActions,
-          sticky: true,
+          timeout,
           button: {
             title: 'Redo',
             action: dispatchRedo,
