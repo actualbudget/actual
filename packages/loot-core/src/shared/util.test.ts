@@ -37,6 +37,11 @@ describe('utility functions', () => {
     expect(looselyParseAmount('(3)')).toBe(-3);
   });
 
+  test('looseParseAmount works with leading decimal characters', () => {
+    expect(looselyParseAmount('.45')).toBe(.45);
+    expect(looselyParseAmount(',45')).toBe(.45);
+  });
+
   test('looseParseAmount ignores non-numeric characters', () => {
     // This is strange behavior because it does not work for just
     // `3_45_23` (it needs a decimal amount). This function should be
