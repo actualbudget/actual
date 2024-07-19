@@ -126,7 +126,6 @@ export function useTransactionBatchActions() {
       }
 
       showUndoNotification({
-        title: 'Batch operation complete',
         message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${displayValue}](#${displayValue}).`,
         messageActions: {
           [displayValue]: () => {
@@ -249,7 +248,6 @@ export function useTransactionBatchActions() {
       await send('transactions-batch-update', changes);
 
       showUndoNotification({
-        title: 'Batch operation complete',
         message: `Successfully duplicated ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
       });
     };
@@ -310,7 +308,7 @@ export function useTransactionBatchActions() {
             await send('transactions-batch-update', changes);
             showUndoNotification({
               type: 'warning',
-              title: 'Batch operation complete',
+
               message: `Successfully deleted ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
             });
           },
@@ -334,7 +332,6 @@ export function useTransactionBatchActions() {
           // TODO: When schedule becomes available in mobile, update undo notification message
           // with `messageActions` to open the schedule when the schedule name is clicked.
           showUndoNotification({
-            title: 'Batch operation complete',
             message: `Successfully linked ${ids.length} transaction${ids.length > 1 ? 's' : ''} to ${schedule.name}.`,
           });
         },
@@ -347,7 +344,6 @@ export function useTransactionBatchActions() {
       updated: ids.map(id => ({ id, schedule: null })),
     });
     showUndoNotification({
-      title: 'Batch operation complete',
       message: `Successfully unlinked ${ids.length} transaction${ids.length > 1 ? 's' : ''} from their respective schedules.`,
     });
   };

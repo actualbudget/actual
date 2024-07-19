@@ -34,7 +34,7 @@ export function useUndo(): UndoActions {
   const showUndoNotification = useCallback(
     ({
       type = 'message',
-      title = 'Undo?',
+      title,
       message,
       messageActions,
     }: UndoNotification) => {
@@ -58,7 +58,7 @@ export function useUndo(): UndoActions {
   const showRedoNotification = useCallback(
     ({
       type = 'message',
-      title = 'Redo?',
+      title,
       message,
       messageActions,
     }: RedoNotification) => {
