@@ -1,7 +1,9 @@
+import { AccountEntity } from './account';
+
 export interface NewPayeeEntity {
   id?: string;
   name: string;
-  transfer_acct?: string;
+  transfer_acct?: AccountEntity['id'];
   favorite?: boolean;
   tombstone?: boolean;
 }

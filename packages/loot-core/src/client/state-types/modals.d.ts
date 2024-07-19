@@ -94,14 +94,17 @@ type FinanceModals = {
   };
 
   'edit-field': {
-    name: string;
-    month: string;
-    onSubmit: (name: string, value: string, mode?: string) => void;
-    onClose: () => void;
+    name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
+    onSubmit: (
+      name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
+      value: string | number,
+      mode?: 'prepend' | 'append' | 'replace' | null,
+    ) => void;
+    onClose?: () => void;
   };
 
   'category-autocomplete': {
-    categoryGroups: CategoryGroupEntity[];
+    categoryGroups?: CategoryGroupEntity[];
     onSelect: (categoryId: string, categoryName: string) => void;
     month?: string;
     showHiddenCategories?: boolean;
@@ -127,9 +130,11 @@ type FinanceModals = {
 
   'schedule-link': {
     transactionIds: string[];
-    getTransaction: (transactionId: string) => TransactionEntity;
-    onScheduleLinked: (schedule: ScheduleEntity) => void;
-  } | null;
+    getTransaction: (
+      transactionId: TransactionEntity['id'],
+    ) => TransactionEntity;
+    onScheduleLinked?: (schedule: ScheduleEntity) => void;
+  };
 
   'schedules-discover': null;
 
