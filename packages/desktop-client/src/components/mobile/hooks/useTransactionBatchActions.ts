@@ -11,8 +11,13 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { applyChanges, integerToCurrency } from 'loot-core/shared/util';
+import {
+  applyChanges,
+  integerToCurrency,
+  type Diff,
+} from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
@@ -29,20 +34,31 @@ export function useTransactionBatchActions() {
 
   const { showUndoNotification } = useUndo();
 
-  const onBatchEdit = async (name, ids) => {
+  const onBatchEdit = async (
+    name: keyof TransactionEntity,
+    ids: Array<TransactionEntity['id']>,
+  ) => {
     const { data } = await runQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
         .options({ splits: 'grouped' }),
     );
-    const transactions = ungroupTransactions(data);
+    const transactions = ungroupTransactions(data as TransactionEntity[]);
 
-    const onChange = async (name, value, mode) => {
+    const onChange = async (
+      name: keyof TransactionEntity,
+      value: string | number | boolean | null,
+      mode?: 'prepend' | 'append' | 'replace' | null | undefined,
+    ) => {
       let transactionsToChange = transactions;
 
       const newValue = value === null ? '' : value;
-      const changes = { deleted: [], updated: [] };
+      const changes: Diff<TransactionEntity> = {
+        added: [],
+        deleted: [],
+        updated: [],
+      };
 
       // Cleared is a special case right now
       if (name === 'cleared') {
@@ -91,7 +107,10 @@ export function useTransactionBatchActions() {
         // the logic in `updateTransaction`, particularly about
         // updating split transactions, works. This isn't ideal and we
         // should figure something else out
-        transactionsToChange = applyChanges(diff, transactionsToChange);
+        transactionsToChange = applyChanges<TransactionEntity>(
+          diff,
+          transactionsToChange,
+        );
 
         changes.deleted = changes.deleted
           ? changes.deleted.concat(diff.deleted)
@@ -109,16 +128,16 @@ export function useTransactionBatchActions() {
       let displayValue = value;
       switch (name) {
         case 'account':
-          displayValue = accounts.find(a => a.id === value).name;
+          displayValue = accounts.find(a => a.id === value)?.name ?? value;
           break;
         case 'category':
-          displayValue = categories.find(c => c.id === value).name;
+          displayValue = categories.find(c => c.id === value)?.name ?? value;
           break;
         case 'payee':
-          displayValue = payees.find(p => p.id === value).name;
+          displayValue = payees.find(p => p.id === value)?.name ?? value;
           break;
         case 'amount':
-          displayValue = integerToCurrency(value);
+          displayValue = integerToCurrency(value as number);
           break;
         default:
           displayValue = value;
@@ -128,7 +147,7 @@ export function useTransactionBatchActions() {
       showUndoNotification({
         message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${displayValue}](#${displayValue}).`,
         messageActions: {
-          [displayValue]: () => {
+          [String(displayValue)]: () => {
             switch (name) {
               case 'account':
                 navigate(`/accounts/${value}`);
@@ -164,7 +183,16 @@ export function useTransactionBatchActions() {
     };
 
     const pushEditField = () => {
-      dispatch(pushModal('edit-field', { name, onSubmit: onChange }));
+      if (name !== 'date' && name !== 'amount' && name !== 'notes') {
+        return;
+      }
+
+      dispatch(
+        pushModal('edit-field', {
+          name,
+          onSubmit: (name, value, mode) => onChange(name, value, mode),
+        }),
+      );
     };
 
     const pushCategoryAutocompleteModal = () => {
@@ -226,8 +254,8 @@ export function useTransactionBatchActions() {
     }
   };
 
-  const onBatchDuplicate = async ids => {
-    const onConfirmDuplicate = async ids => {
+  const onBatchDuplicate = async (ids: Array<TransactionEntity['id']>) => {
+    const onConfirmDuplicate = async (ids: Array<TransactionEntity['id']>) => {
       const { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
@@ -235,14 +263,22 @@ export function useTransactionBatchActions() {
           .options({ splits: 'grouped' }),
       );
 
+      const transactions = data as TransactionEntity[];
+
       const changes = {
-        added: data
-          .reduce((newTransactions, trans) => {
-            return newTransactions.concat(
-              realizeTempTransactions(ungroupTransaction(trans)),
-            );
-          }, [])
-          .map(({ sort_order, ...trans }) => ({ ...trans })),
+        added: transactions
+          .reduce(
+            (
+              newTransactions: TransactionEntity[],
+              trans: TransactionEntity,
+            ) => {
+              return newTransactions.concat(
+                realizeTempTransactions(ungroupTransaction(trans)),
+              );
+            },
+            [],
+          )
+          .map(({ sort_order, ...trans }: TransactionEntity) => ({ ...trans })),
       };
 
       await send('transactions-batch-update', changes);
@@ -259,8 +295,8 @@ export function useTransactionBatchActions() {
     );
   };
 
-  const onBatchDelete = async ids => {
-    const onConfirmDelete = ids => {
+  const onBatchDelete = async (ids: Array<TransactionEntity['id']>) => {
+    const onConfirmDelete = (ids: Array<TransactionEntity['id']>) => {
       dispatch(
         pushModal('confirm-transaction-delete', {
           message:
@@ -274,10 +310,14 @@ export function useTransactionBatchActions() {
                 .select('*')
                 .options({ splits: 'grouped' }),
             );
-            let transactions = ungroupTransactions(data);
+            let transactions = ungroupTransactions(data as TransactionEntity[]);
 
             const idSet = new Set(ids);
-            const changes = { deleted: [], updated: [] };
+            const changes: Diff<TransactionEntity> = {
+              added: [],
+              deleted: [],
+              updated: [],
+            };
 
             transactions.forEach(trans => {
               const parentId = trans.parent_id;
@@ -295,7 +335,10 @@ export function useTransactionBatchActions() {
               // the logic in `updateTransaction`, particularly about
               // updating split transactions, works. This isn't ideal and we
               // should figure something else out
-              transactions = applyChanges(diff, transactions);
+              transactions = applyChanges<TransactionEntity>(
+                diff,
+                transactions,
+              );
 
               changes.deleted = diff.deleted
                 ? changes.deleted.concat(diff.deleted)
@@ -323,11 +366,19 @@ export function useTransactionBatchActions() {
     );
   };
 
-  const onLinkSchedule = ids => {
+  const onLinkSchedule = async (ids: Array<TransactionEntity['id']>) => {
+    const { data: transactions } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+
     dispatch(
       pushModal('schedule-link', {
         transactionIds: ids,
-        getTransaction: id => transactions.find(t => t.id === id),
+        getTransaction: (id: TransactionEntity['id']) =>
+          transactions.find((t: TransactionEntity) => t.id === id),
         onScheduleLinked: schedule => {
           // TODO: When schedule becomes available in mobile, update undo notification message
           // with `messageActions` to open the schedule when the schedule name is clicked.
@@ -339,19 +390,22 @@ export function useTransactionBatchActions() {
     );
   };
 
-  const onUnlinkSchedule = async ids => {
-    await send('transactions-batch-update', {
-      updated: ids.map(id => ({ id, schedule: null })),
-    });
+  const onUnlinkSchedule = async (ids: Array<TransactionEntity['id']>) => {
+    const changes = {
+      updated: ids.map(
+        id => ({ id, schedule: null }) as unknown as Partial<TransactionEntity>,
+      ),
+    };
+    await send('transactions-batch-update', changes);
     showUndoNotification({
       message: `Successfully unlinked ${ids.length} transaction${ids.length > 1 ? 's' : ''} from their respective schedules.`,
     });
   };
 
   const checkForReconciledTransactions = async (
-    ids,
-    confirmReason,
-    onConfirm,
+    ids: Array<TransactionEntity['id']>,
+    confirmReason: string,
+    onConfirm: (ids: Array<TransactionEntity['id']>) => void,
   ) => {
     const { data } = await runQuery(
       q('transactions')
@@ -359,7 +413,7 @@ export function useTransactionBatchActions() {
         .select('*')
         .options({ splits: 'grouped' }),
     );
-    const transactions = ungroupTransactions(data);
+    const transactions = ungroupTransactions(data as TransactionEntity[]);
     if (transactions.length > 0) {
       dispatch(
         pushModal('confirm-transaction-edit', {
