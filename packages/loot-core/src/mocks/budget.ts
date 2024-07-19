@@ -735,7 +735,6 @@ export async function createTestBudget(handlers: Handlers) {
 
   // Bust the cache and reload the spreadsheet
   setSyncingMode('disabled');
-  await prefs.savePrefs({ isCached: false });
   await sheet.reloadSpreadsheet(db);
   await budget.createAllBudgets();
 
