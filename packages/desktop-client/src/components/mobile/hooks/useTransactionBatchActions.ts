@@ -53,7 +53,7 @@ export function useTransactionBatchActions() {
     ) => {
       let transactionsToChange = transactions;
 
-      const newValue = value === null ? '' : value;
+      value = value === null ? '' : value;
       const changes: Diff<TransactionEntity> = {
         added: [],
         deleted: [],
@@ -81,20 +81,22 @@ export function useTransactionBatchActions() {
           return;
         }
 
+        let valueToSet = value;
+
         if (name === 'notes') {
           if (mode === 'prepend') {
-            value =
-              trans.notes === null ? newValue : newValue + ' ' + trans.notes;
+            valueToSet =
+              trans.notes === null ? value : value + ' ' + trans.notes;
           } else if (mode === 'append') {
-            value =
-              trans.notes === null ? newValue : trans.notes + ' ' + newValue;
+            valueToSet =
+              trans.notes === null ? value : trans.notes + ' ' + value;
           } else if (mode === 'replace') {
-            value = newValue;
+            valueToSet = value;
           }
         }
         const transaction = {
           ...trans,
-          [name]: value,
+          [name]: valueToSet,
         };
 
         if (name === 'account' && trans.account !== value) {
@@ -138,6 +140,9 @@ export function useTransactionBatchActions() {
           break;
         case 'amount':
           displayValue = integerToCurrency(value as number);
+          break;
+        case 'notes':
+          displayValue = `${mode} with ${value}`;
           break;
         default:
           displayValue = value;
