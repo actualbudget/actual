@@ -5,7 +5,6 @@ import * as budgetActions from '../server/budget/actions';
 import * as budget from '../server/budget/base';
 import * as db from '../server/db';
 import { runHandler, runMutator } from '../server/mutators';
-import * as prefs from '../server/prefs';
 import * as sheet from '../server/sheet';
 import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
