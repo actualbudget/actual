@@ -36,17 +36,6 @@ function toJS(rows: CustomReportData[]) {
   return reports;
 }
 
-// Sort reports by alphabetical order
-function sort(reports: CustomReportEntity[]) {
-  return reports.sort((a, b) =>
-    a.name && b.name
-      ? a.name.trim().localeCompare(b.name.trim(), undefined, {
-          ignorePunctuation: true,
-        })
-      : 0,
-  );
-}
-
 export function useReports(): {
   data: CustomReportEntity[];
   isLoading: boolean;
@@ -59,7 +48,7 @@ export function useReports(): {
   return useMemo(
     () => ({
       isLoading: queryData === null,
-      data: sort(toJS(queryData || [])),
+      data: toJS(queryData || []),
     }),
     [queryData],
   );

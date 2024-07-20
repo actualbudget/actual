@@ -6,6 +6,7 @@ import { Database } from '@jlongster/sql.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
+import m1721506826000 from '../../../migrations/1721506826000_create_dashboard_table';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 
@@ -13,6 +14,7 @@ let MIGRATIONS_DIR = fs.migrationsPath;
 
 const javascriptMigrations = {
   1632571489012: m1632571489012,
+  1721506826000: m1721506826000,
 };
 
 export async function withMigrationsDir(

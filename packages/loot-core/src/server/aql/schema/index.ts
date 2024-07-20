@@ -169,6 +169,15 @@ export const schema = {
     carryover: f('integer'),
     goal: f('integer'),
   },
+  dashboard: {
+    id: f('id'),
+    type: f('string', { required: true }),
+    width: f('integer', { required: true }),
+    height: f('integer', { required: true }),
+    x: f('integer', { required: true }),
+    y: f('integer', { required: true }),
+    meta: f('json'),
+  },
 };
 
 export const schemaConfig: SchemaConfig = {
