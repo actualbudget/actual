@@ -19,6 +19,8 @@ const initialState: QueriesState = {
     list: [],
   },
   categoriesLoaded: false,
+  commonPayees: [],
+  commonPayeesLoaded: false,
   payees: [],
   payeesLoaded: false,
   earliestTransaction: null,
@@ -83,6 +85,12 @@ export function update(state = initialState, action: Action): QueriesState {
         ...state,
         categories: action.categories,
         categoriesLoaded: true,
+      };
+    case constants.LOAD_COMMON_PAYEES:
+      return {
+        ...state,
+        commonPayees: action.payees,
+        commonPayeesLoaded: true,
       };
     case constants.LOAD_PAYEES:
       return {
