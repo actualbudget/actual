@@ -8,7 +8,6 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayees } from '../../../hooks/usePayees';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
@@ -32,11 +31,11 @@ function index(data: CustomReportEntity[]): { [key: string]: boolean }[] {
 }
 
 export function CustomReportListCards({
-  reports,
+  report,
 }: {
-  reports: CustomReportEntity[];
+  report: CustomReportEntity;
 }) {
-  const result: { [key: string]: boolean }[] = index(reports);
+  const result: { [key: string]: boolean }[] = index([report]);
   const [reportMenu, setReportMenu] = useState(result);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(result);
   const [nameMenuOpen, setNameMenuOpen] = useState(result);
@@ -49,7 +48,6 @@ export function CustomReportListCards({
   const categories = useCategories();
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const { isNarrowWidth } = useResponsive();
 
   const [isCardHovered, setIsCardHovered] = useState('');
 
@@ -118,90 +116,80 @@ export function CustomReportListCards({
     setNameMenuOpen({ ...nameMenuOpen, [item]: state });
   };
 
-  if (reports.length === 0) return null;
   return (
     <>
-      {reports.map((report, id) => (
+      <ReportCard to="/reports/custom" report={report}>
         <View
-          key={id}
-          style={{
-            flex: isNarrowWidth ? '1 1' : `0 0 calc(100% / 3 - 20px)`,
+          style={{ flex: 1, padding: 10 }}
+          onMouseEnter={() =>
+            setIsCardHovered(report.id === undefined ? '' : report.id)
+          }
+          onMouseLeave={() => {
+            setIsCardHovered('');
+            onMenuOpen(report.id === undefined ? '' : report.id, false);
           }}
         >
-          <ReportCard to="/reports/custom" report={report}>
-            <View
-              style={{ flex: 1, padding: 10 }}
-              onMouseEnter={() =>
-                setIsCardHovered(report.id === undefined ? '' : report.id)
-              }
-              onMouseLeave={() => {
-                setIsCardHovered('');
-                onMenuOpen(report.id === undefined ? '' : report.id, false);
-              }}
-            >
-              <View
-                style={{
-                  flexShrink: 0,
-                  paddingBottom: 5,
-                }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Block
-                    style={{
-                      ...styles.mediumText,
-                      fontWeight: 500,
-                      marginBottom: 5,
-                    }}
-                    role="heading"
-                  >
-                    {report.name}
-                  </Block>
-                  {report.isDateStatic ? (
-                    <DateRange start={report.startDate} end={report.endDate} />
-                  ) : (
-                    <Text style={{ color: theme.pageTextSubdued }}>
-                      {report.dateRange}
-                    </Text>
-                  )}
-                </View>
-              </View>
-              <GetCardData
-                report={report}
-                payees={payees}
-                accounts={accounts}
-                categories={categories}
-                earliestTransaction={earliestTransaction}
-                firstDayOfWeekIdx={firstDayOfWeekIdx}
-              />
-            </View>
-          </ReportCard>
           <View
             style={{
-              textAlign: 'right',
-              position: 'absolute',
-              right: 10,
-              top: 10,
+              flexShrink: 0,
+              paddingBottom: 5,
             }}
           >
-            <ListCardsPopover
-              report={report}
-              onMenuOpen={onMenuOpen}
-              isCardHovered={isCardHovered}
-              reportMenu={reportMenu}
-              onMenuSelect={onMenuSelect}
-              nameMenuOpen={nameMenuOpen}
-              name={name}
-              setName={setName}
-              onAddUpdate={onAddUpdate}
-              err={err}
-              onNameMenuOpen={onNameMenuOpen}
-              deleteMenuOpen={deleteMenuOpen}
-              onDeleteMenuOpen={onDeleteMenuOpen}
-              onDelete={onDelete}
-            />
+            <View style={{ flex: 1 }}>
+              <Block
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 500,
+                  marginBottom: 5,
+                }}
+                role="heading"
+              >
+                {report.name}
+              </Block>
+              {report.isDateStatic ? (
+                <DateRange start={report.startDate} end={report.endDate} />
+              ) : (
+                <Text style={{ color: theme.pageTextSubdued }}>
+                  {report.dateRange}
+                </Text>
+              )}
+            </View>
           </View>
+          <GetCardData
+            report={report}
+            payees={payees}
+            accounts={accounts}
+            categories={categories}
+            earliestTransaction={earliestTransaction}
+            firstDayOfWeekIdx={firstDayOfWeekIdx}
+          />
         </View>
-      ))}
+      </ReportCard>
+      <View
+        style={{
+          textAlign: 'right',
+          position: 'absolute',
+          right: 10,
+          top: 10,
+        }}
+      >
+        <ListCardsPopover
+          report={report}
+          onMenuOpen={onMenuOpen}
+          isCardHovered={isCardHovered}
+          reportMenu={reportMenu}
+          onMenuSelect={onMenuSelect}
+          nameMenuOpen={nameMenuOpen}
+          name={name}
+          setName={setName}
+          onAddUpdate={onAddUpdate}
+          err={err}
+          onNameMenuOpen={onNameMenuOpen}
+          deleteMenuOpen={deleteMenuOpen}
+          onDeleteMenuOpen={onDeleteMenuOpen}
+          onDelete={onDelete}
+        />
+      </View>
     </>
   );
 }

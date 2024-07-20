@@ -7,6 +7,8 @@ import { type CSSProperties, theme } from '../../style';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
 
+const DRAG_HANDLE_HEIGHT = 5;
+
 type ReportCardProps = {
   to: string;
   children: ReactNode;
@@ -31,8 +33,9 @@ export function ReportCard({
     <View
       style={{
         backgroundColor: theme.tableBackground,
-        borderRadius: 2,
-        height: 200,
+        borderBottomLeftRadius: 2,
+        borderBottomRightRadius: 2,
+        height: `calc(100% - ${DRAG_HANDLE_HEIGHT}px)`,
         boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
         transition: 'box-shadow .25s',
         '& .recharts-surface:hover': {
@@ -51,13 +54,28 @@ export function ReportCard({
 
   if (to) {
     return (
-      <Link
-        to={to}
-        report={report}
-        style={{ textDecoration: 'none', ...containerProps }}
-      >
-        {content}
-      </Link>
+      <>
+        <View
+          className="draggable-handle"
+          style={{
+            borderTopLeftRadius: 2,
+            borderTopRightRadius: 2,
+            height: DRAG_HANDLE_HEIGHT,
+            backgroundColor: 'rgba(0, 0, 0, .15)',
+            ':hover': {
+              cursor: 'grab',
+            },
+          }}
+        />
+
+        <Link
+          to={to}
+          report={report}
+          style={{ textDecoration: 'none', ...containerProps }}
+        >
+          {content}
+        </Link>
+      </>
     );
   }
   return content;

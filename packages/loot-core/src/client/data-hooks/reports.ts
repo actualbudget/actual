@@ -36,21 +36,31 @@ function toJS(rows: CustomReportData[]) {
   return reports;
 }
 
-export function useReports(): CustomReportEntity[] {
-  const reports: CustomReportEntity[] = toJS(
-    useLiveQuery(() => q('custom_reports').select('*'), []) || [],
+// Sort reports by alphabetical order
+function sort(reports: CustomReportEntity[]) {
+  return reports.sort((a, b) =>
+    a.name && b.name
+      ? a.name.trim().localeCompare(b.name.trim(), undefined, {
+          ignorePunctuation: true,
+        })
+      : 0,
+  );
+}
+
+export function useReports(): {
+  data: CustomReportEntity[];
+  isLoading: boolean;
+} {
+  const queryData = useLiveQuery<CustomReportData[]>(
+    () => q('custom_reports').select('*'),
+    [],
   );
 
-  // Sort reports by alphabetical order
-  function sort(reports: CustomReportEntity[]) {
-    return reports.sort((a, b) =>
-      a.name && b.name
-        ? a.name.trim().localeCompare(b.name.trim(), undefined, {
-            ignorePunctuation: true,
-          })
-        : 0,
-    );
-  }
-
-  return useMemo(() => sort(reports), [reports]);
+  return useMemo(
+    () => ({
+      isLoading: queryData === null,
+      data: sort(toJS(queryData || [])),
+    }),
+    [queryData],
+  );
 }
