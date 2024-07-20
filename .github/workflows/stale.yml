@@ -14,3 +14,13 @@ jobs:
           days-before-stale: 30
           days-before-close: 5
           days-before-issue-stale: -1
+  stale-wip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v8
+        with:
+          stale-pr-message: ':wave: Hi! It looks like this PR has not had any changes for a week now. Would you like someone to review this PR? If so - please remove the "[WIP]" prefix from the PR title. That will let the community know that this PR is open for a review.'
+          days-before-stale: 7
+          any-of-labels: ':construction: WIP'
+          days-before-close: -1
+          days-before-issue-stale: -1
