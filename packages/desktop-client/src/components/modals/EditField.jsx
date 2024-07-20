@@ -8,7 +8,7 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
@@ -116,7 +116,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
                   },
                 }),
               }}
-              onClick={() => {
+              onPress={() => {
                 onChangeMode('prepend');
                 document.getElementById('noteInput').focus();
               }}
@@ -148,7 +148,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
                   },
                 }),
               }}
-              onClick={() => {
+              onPress={() => {
                 onChangeMode('replace');
                 document.getElementById('noteInput').focus();
               }}
@@ -180,7 +180,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
                   },
                 }),
               }}
-              onClick={() => {
+              onPress={() => {
                 onChangeMode('append');
                 document.getElementById('noteInput').focus();
               }}

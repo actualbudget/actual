@@ -105,6 +105,8 @@ export interface ServerHandlers {
 
   'payee-create': (arg: { name }) => Promise<string>;
 
+  'common-payees-get': () => Promise<PayeeEntity[]>;
+
   'payees-get': () => Promise<PayeeEntity[]>;
 
   'payees-get-rule-counts': () => Promise<unknown>;
