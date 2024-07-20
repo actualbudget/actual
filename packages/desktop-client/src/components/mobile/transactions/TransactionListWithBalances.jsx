@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
 import { InputWithContent } from '../../common/InputWithContent';
@@ -74,9 +75,10 @@ export function TransactionListWithBalances({
   };
 
   const unclearedAmount = useSheetValue(balanceUncleared);
+  const selectedInst = useSelected('transactions', transactions);
 
   return (
-    <>
+    <SelectedProvider instance={selectedInst}>
       <View
         style={{
           flexShrink: 0,
@@ -162,6 +164,6 @@ export function TransactionListWithBalances({
           onOpenTransaction={onOpenTransaction}
         />
       </PullToRefresh>
-    </>
+    </SelectedProvider>
   );
 }

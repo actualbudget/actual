@@ -13,7 +13,6 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
@@ -122,7 +121,6 @@ export function CategoryTransactions({ category, month }) {
   const balance = queries.categoryBalance(category, month);
   const balanceCleared = queries.categoryBalanceCleared(category, month);
   const balanceUncleared = queries.categoryBalanceUncleared(category, month);
-  const selectedInst = useSelected('transactions', transactions);
 
   return (
     <Page
@@ -142,19 +140,17 @@ export function CategoryTransactions({ category, month }) {
       }
       padding={0}
     >
-      <SelectedProvider instance={selectedInst}>
-        <TransactionListWithBalances
-          isLoading={isLoading}
-          transactions={transactions}
-          balance={balance}
-          balanceCleared={balanceCleared}
-          balanceUncleared={balanceUncleared}
-          searchPlaceholder={`Search ${category.name}`}
-          onSearch={onSearch}
-          onLoadMore={onLoadMore}
-          onOpenTransaction={onOpenTranasction}
-        />
-      </SelectedProvider>
+      <TransactionListWithBalances
+        isLoading={isLoading}
+        transactions={transactions}
+        balance={balance}
+        balanceCleared={balanceCleared}
+        balanceUncleared={balanceUncleared}
+        searchPlaceholder={`Search ${category.name}`}
+        onSearch={onSearch}
+        onLoadMore={onLoadMore}
+        onOpenTransaction={onOpenTranasction}
+      />
     </Page>
   );
 }

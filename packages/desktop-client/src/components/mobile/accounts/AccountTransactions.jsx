@@ -31,7 +31,6 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
-import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { styles, theme } from '../../../style';
 import { Text } from '../../common/Text';
@@ -266,22 +265,18 @@ function TransactionListWithPreviews({ account }) {
   const balanceCleared = queries.accountBalanceCleared(account);
   const balanceUncleared = queries.accountBalanceUncleared(account);
 
-  const selectedInst = useSelected('transactions', allTransactions);
-
   return (
-    <SelectedProvider instance={selectedInst}>
-      <TransactionListWithBalances
-        isLoading={isLoading}
-        transactions={allTransactions}
-        balance={balance}
-        balanceCleared={balanceCleared}
-        balanceUncleared={balanceUncleared}
-        onLoadMore={onLoadMore}
-        searchPlaceholder={`Search ${account.name}`}
-        onSearch={onSearch}
-        onOpenTransaction={onOpenTransaction}
-        onRefresh={onRefresh}
-      />
-    </SelectedProvider>
+    <TransactionListWithBalances
+      isLoading={isLoading}
+      transactions={allTransactions}
+      balance={balance}
+      balanceCleared={balanceCleared}
+      balanceUncleared={balanceUncleared}
+      onLoadMore={onLoadMore}
+      searchPlaceholder={`Search ${account.name}`}
+      onSearch={onSearch}
+      onOpenTransaction={onOpenTransaction}
+      onRefresh={onRefresh}
+    />
   );
 }
