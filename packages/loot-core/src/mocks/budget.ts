@@ -15,13 +15,13 @@ import type { Handlers } from '../types/handlers';
 import type {
   CategoryGroupEntity,
   NewCategoryGroupEntity,
-  NewPayeeEntity,
+  PayeeEntity,
   TransactionEntity,
 } from '../types/models';
 
 import { random } from './random';
 
-type MockPayeeEntity = NewPayeeEntity & { bill?: boolean };
+type MockPayeeEntity = Partial<PayeeEntity> & { bill?: boolean };
 
 function pickRandom<T>(list: T[]): T {
   return list[Math.floor(random() * list.length) % list.length];
@@ -621,7 +621,7 @@ export async function createTestBudget(handlers: Handlers) {
     }
   });
 
-  const payees: Array<MockPayeeEntity> = [
+  const newPayees: Array<MockPayeeEntity> = [
     { name: 'Starting Balance' },
     { name: 'Kroger' },
     { name: 'Publix' },
@@ -636,10 +636,17 @@ export async function createTestBudget(handlers: Handlers) {
     { name: 'T-mobile', bill: true },
   ];
 
+  const payees: PayeeEntity[] = [];
+
   await runMutator(() =>
     batchMessages(async () => {
-      for (const payee of payees) {
-        payee.id = await handlers['payee-create']({ name: payee.name });
+      for (const newPayee of newPayees) {
+        const id = await handlers['payee-create']({ name: newPayee.name });
+        payees.push({
+          id,
+          name: newPayee.name,
+          ...newPayee,
+        });
       }
     }),
   );
