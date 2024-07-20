@@ -14,16 +14,18 @@ Want to say thanks? Click the ⭐ at the top of the page.
 
 - Actual [discord](https://discord.gg/pRYNYr4W5A) community.
 - Actual [Community Documentation](https://actualbudget.org/docs)
+- [Frequently asked questions](https://actualbudget.org/docs/faq)
 
 ## Installation
 
-If you are only interested in running the latest version and not contributing to the source code, you don't need to clone this repo. You can get the latest version through npm.
+There are four ways to deploy Actual:
 
-### The easy way: using a server (recommended)
+1. One-click deployment [via PikaPods](https://www.pikapods.com/pods?run=actual) (~1.40 $/month) - recommended for non-technical users
+1. Managed hosting [via Fly.io](https://actualbudget.org/docs/install/docker) (~1.50 $/month)
+1. Self-hosted by using [a Docker image](https://actualbudget.org/docs/install/docker)
+1. Local-only apps - [downloadable Windows, Mac and Linux apps](https://actualbudget.org/download/) you can run on your device
 
-The easiest way to get Actual running is to use the [actual-server](https://github.com/actualbudget/actual-server) project. That is the server for syncing changes across devices, and it comes with the latest version of Actual. The server will provide both the web project and a server for syncing.
-
-You can get up and running quickly and easily by following our [Running Actual Locally Guide](https://actualbudget.org/docs/install/local).
+Learn more in the [installation instructions docs](https://actualbudget.org/docs/install/).
 
 ## Ready to Start Budgeting?
 
@@ -41,7 +43,11 @@ Check out the community's [Migration](https://actualbudget.org/docs/migration/) 
 
 We have a wide range of documentation on how to use Actual, this is all available in our [Community Documentation](https://actualbudget.org/docs), this includes topics on Budgeting, Account Management, Tips & Tricks and some documentation for developers.
 
-## Code structure
+## Contributing
+
+Actual is a community driven product. Learn more about [contributing to Actual](https://actualbudget.org/docs/contributing/).
+
+### Code structure
 
 The Actual app is split up into a few packages:
 
@@ -51,12 +57,16 @@ The Actual app is split up into a few packages:
 
 More information on the project structure is available in our [community documentation](https://actualbudget.org/docs/contributing/project-details).
 
-## Feature Requests
+### Feature Requests
 
 Current feature requests can be seen [here](https://github.com/actualbudget/actual/issues?q=is%3Aissue+label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc).
 Vote for your favorite requests by reacting :+1: to the top comment of the request.
 
 To add new feature requests, open a new Issue of the "Feature Request" type.
+
+## Repo Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/e20537dd8b74956f86736726ccfbc6f0565bec22.svg 'Repobeats analytics image')
 
 ## Sponsors
 
