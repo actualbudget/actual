@@ -129,6 +129,11 @@ export const MonthPicker = ({
                   selected && {
                     filter: 'brightness(65%)',
                   }),
+                ...(current && {
+                  border: '1px dotted', borderRadius: '3',
+                  paddingTop: 2,
+                  paddingBottom: 2,
+                }),
                 ...(hovered &&
                   !selected && {
                     backgroundColor: theme.buttonBareBackgroundHover,

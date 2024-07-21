@@ -53,6 +53,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
       style={{
         backgroundColor: theme.tableBackground,
         boxShadow: styles.cardShadow,
+        ...(month === monthUtils.currentMonth() && {filter: 'brightness(120%)'}),
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,

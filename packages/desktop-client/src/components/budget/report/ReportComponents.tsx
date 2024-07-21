@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { memo, useRef, useState } from 'react';
 
+import * as monthUtils from 'loot-core/src/shared/months';
+
 import { reportBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
@@ -168,6 +170,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
+        ...(month === monthUtils.currentMonth() && {backdropFilter: 'brightness(120%)'}),
         '& .hover-visible': {
           opacity: 0,
           transition: 'opacity .25s',
