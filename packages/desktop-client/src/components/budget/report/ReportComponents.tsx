@@ -169,7 +169,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(month === monthUtils.currentMonth() && {
+        ...(monthUtils.isCurrentMonth(month) && {
           backdropFilter: 'brightness(120%)',
         }),
         '& .hover-visible': {

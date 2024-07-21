@@ -164,7 +164,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(month === monthUtils.currentMonth() && {
+        ...(monthUtils.isCurrentMonth(month) && {
           backdropFilter: 'brightness(120%)',
         }),
         '& .hover-visible': {
@@ -397,7 +397,7 @@ export function IncomeCategoryMonth({
         style={{
           paddingRight: styles.monthRightPadding,
           textAlign: 'right',
-          ...(month === monthUtils.currentMonth() && {
+          ...(monthUtils.isCurrentMonth(month) && {
             backdropFilter: 'brightness(120%)',
           }),
           ...(isLast && { borderBottomWidth: 0 }),

@@ -56,7 +56,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
         marginLeft: 0,
         marginRight: 0,
         marginTop: 5,
-        ...(month === monthUtils.currentMonth() && {
+        ...(month === currentMonth && {
           filter: 'brightness(120%)',
         }),
         flex: 1,
