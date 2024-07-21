@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
+
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button2';
@@ -7,14 +9,35 @@ import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
 import { addToBeBudgetedGroup } from '../util';
 
+function removeSelectedCategory(
+  categoryGroups: CategoryGroupEntity[],
+  selectedCategoryId?: string,
+) {
+  if (!selectedCategoryId) return categoryGroups;
+
+  const newCategoryGroups: CategoryGroupEntity[] = JSON.parse(
+    JSON.stringify(categoryGroups),
+  );
+
+  newCategoryGroups.forEach(group => {
+    group.categories = group.categories?.filter(
+      category => category.id !== selectedCategoryId,
+    );
+  });
+
+  return newCategoryGroups.filter(g => g.categories?.length);
+}
+
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
+  targetCategory?: string;
   onSubmit: (categoryId: string) => void;
   onClose: () => void;
 };
 
 export function CoverMenu({
   showToBeBudgeted = true,
+  targetCategory,
   onSubmit,
   onClose,
 }: CoverMenuProps) {
@@ -40,7 +63,10 @@ export function CoverMenu({
       <InitialFocus>
         {node => (
           <CategoryAutocomplete
-            categoryGroups={categoryGroups}
+            categoryGroups={removeSelectedCategory(
+              categoryGroups,
+              targetCategory,
+            )}
             value={categoryGroups.find(g => g.id === categoryId) ?? null}
             openOnFocus={true}
             onSelect={(id: string | undefined) => setCategoryId(id || null)}
