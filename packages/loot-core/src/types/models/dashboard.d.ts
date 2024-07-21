@@ -19,8 +19,8 @@ export type CustomReportWidget = AbstractWidget<
   { id: string }
 >;
 
-export type Widget =
+export type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
-  | SpendingWidget
-  | CustomReportWidget;
+  | SpendingWidget;
+export type Widget = SpecializedWidget | CustomReportWidget;

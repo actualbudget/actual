@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useLocation } from 'react-router-dom';
 
@@ -8,14 +8,18 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import {
   type CustomReportEntity,
   type CustomReportWidget,
+  type SpecializedWidget,
   type Widget,
 } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-// import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
+import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
@@ -27,6 +31,11 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
 
 import './overview.scss';
+
+type MenuItem = {
+  name: Widget['type'];
+  text: string;
+};
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -95,6 +104,9 @@ function useWidgetLayout(
 }
 
 export function Overview() {
+  const triggerRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
@@ -102,11 +114,12 @@ export function Overview() {
   const isLoading = isCustomReportsLoading || isWidgetsLoading;
 
   const { isNarrowWidth } = useResponsive();
+  const navigate = useNavigate();
 
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
 
-  // const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
+  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const layout = useWidgetLayout(widgets, customReports);
 
@@ -121,6 +134,16 @@ export function Overview() {
         y: item.y,
       })),
     );
+  };
+
+  const onAddWidget = (type: SpecializedWidget['type']) => {
+    send('dashboard-add-widget', {
+      type,
+      width: 4,
+      height: 2,
+      meta: null,
+    });
+    setMenuOpen(false);
   };
 
   const accounts = useAccounts();
@@ -154,18 +177,51 @@ export function Overview() {
               {!isNarrowWidth && (
                 <>
                   <Button
+                    ref={triggerRef}
                     variant="primary"
-                    onPress={() =>
-                      alert('This functionality is not yet implemented')
-                    }
+                    onPress={() => setMenuOpen(true)}
                   >
                     Add new widget
                   </Button>
-                  {/*
-                  <Link variant="button" type="primary" to="/reports/custom">
-                    Create new custom report
-                  </Link>
-                  *}
+
+                  <Popover
+                    triggerRef={triggerRef}
+                    isOpen={menuOpen}
+                    onOpenChange={() => setMenuOpen(false)}
+                  >
+                    <Menu<MenuItem>
+                      onMenuSelect={item => {
+                        if (item === 'custom-report') {
+                          navigate('/reports/custom');
+                          return;
+                        }
+                        onAddWidget(item);
+                      }}
+                      items={[
+                        {
+                          name: 'cash-flow-card' as const,
+                          text: 'Cash Flow graph',
+                        },
+                        {
+                          name: 'net-worth-card' as const,
+                          text: 'Net Worth graph',
+                        },
+                        ...(spendingReportFeatureFlag
+                          ? [
+                              {
+                                name: 'spending-card' as const,
+                                text: 'Spending Analysis',
+                              },
+                            ]
+                          : []),
+                        {
+                          name: 'custom-report' as const,
+                          text: 'Custom Report',
+                        },
+                      ]}
+                    />
+                  </Popover>
+
                   {/* TODO: should we have a reset button too? */}
                   {/* TODO: make this button work.. and think about how to improve the UI for it (icon maybe?) */}
                   <Button
