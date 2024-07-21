@@ -130,8 +130,6 @@ export const MonthPicker = ({
                     filter: 'brightness(65%)',
                   }),
                 ...(current && {
-                  border: '1px dotted',
-                  borderRadius: '3',
                   paddingTop: 2,
                   paddingBottom: 2,
                 }),
@@ -153,29 +151,37 @@ export const MonthPicker = ({
                   borderTopRightRadius: 2,
                   borderBottomRightRadius: 2,
                 }),
-                ...(current && { fontWeight: 'bold' }),
               }}
               onClick={() => onSelect(month)}
               onMouseEnter={() => setHoverId(idx)}
               onMouseLeave={() => setHoverId(null)}
             >
-              {size === 'small' ? monthName[0] : monthName}
-              {showYearHeader && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: -14,
-                    left: 0,
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                    color: isMonthBudgeted
-                      ? theme.pageText
-                      : theme.pageTextSubdued,
-                  }}
-                >
-                  {year}
-                </View>
-              )}
+              <View
+                style={{
+                  ...(current && {
+                    border: '1px solid',
+                    borderRadius: '3',
+                  }),
+                }}
+              >
+                {size === 'small' ? monthName[0] : monthName}
+                {showYearHeader && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: -14,
+                      left: 0,
+                      fontSize: 10,
+                      fontWeight: 'bold',
+                      color: isMonthBudgeted
+                        ? theme.pageText
+                        : theme.pageTextSubdued,
+                    }}
+                  >
+                    {year}
+                  </View>
+                )}
+              </View>
             </View>
           );
         })}
