@@ -130,7 +130,8 @@ export const MonthPicker = ({
                     filter: 'brightness(65%)',
                   }),
                 ...(current && {
-                  border: '1px dotted', borderRadius: '3',
+                  border: '1px dotted',
+                  borderRadius: '3',
                   paddingTop: 2,
                   paddingBottom: 2,
                 }),

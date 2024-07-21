@@ -1,10 +1,9 @@
 import type React from 'react';
 import { memo, useRef, useState } from 'react';
 
-import * as monthUtils from 'loot-core/src/shared/months';
-
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { SvgCheveronDown } from '../../../icons/v1';
@@ -165,7 +164,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(month === monthUtils.currentMonth() && {backdropFilter: 'brightness(120%)'}),
+        ...(month === monthUtils.currentMonth() && {
+          backdropFilter: 'brightness(120%)',
+        }),
         '& .hover-visible': {
           opacity: 0,
           transition: 'opacity .25s',
@@ -396,7 +397,9 @@ export function IncomeCategoryMonth({
         style={{
           paddingRight: styles.monthRightPadding,
           textAlign: 'right',
-          ...(month === monthUtils.currentMonth() && {backdropFilter: 'brightness(120%)'}),
+          ...(month === monthUtils.currentMonth() && {
+            backdropFilter: 'brightness(120%)',
+          }),
           ...(isLast && { borderBottomWidth: 0 }),
         }}
       >
