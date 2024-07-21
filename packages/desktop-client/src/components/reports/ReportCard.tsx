@@ -61,7 +61,7 @@ export function ReportCard({
             borderTopLeftRadius: 2,
             borderTopRightRadius: 2,
             height: DRAG_HANDLE_HEIGHT,
-            backgroundColor: 'rgba(0, 0, 0, .15)',
+            backgroundColor: theme.buttonNormalBorder,
             ':hover': {
               cursor: 'grab',
             },
