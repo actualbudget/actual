@@ -28,8 +28,10 @@ Here are some initial guidelines for how contributions will be treated:
 (sorted alphabetically)
 
 - @carkom
+- @jfdoming
 - @joel-jeremy
 - @MatissJanis
+- @matt-fidd
 - @teprifer
 - @twk3
 - @youngcw
