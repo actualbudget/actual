@@ -3,8 +3,6 @@ import Module from 'module';
 // @ts-strict-ignore
 import fetch from 'node-fetch';
 
-import './setRequireHook';
-
 Module.globalPaths.push(__dirname + '/..');
 global.fetch = fetch;
 

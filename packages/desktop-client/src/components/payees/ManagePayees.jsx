@@ -198,6 +198,22 @@ export const ManagePayees = forwardRef(
       selected.dispatch({ type: 'select-none' });
     }
 
+    function onFavorite() {
+      const allFavorited = [...selected.items]
+        .map(id => payeesById[id].favorite)
+        .every(f => f === 1);
+      if (allFavorited) {
+        onBatchChange({
+          updated: [...selected.items].map(id => ({ id, favorite: 0 })),
+        });
+      } else {
+        onBatchChange({
+          updated: [...selected.items].map(id => ({ id, favorite: 1 })),
+        });
+      }
+      selected.dispatch({ type: 'select-none' });
+    }
+
     async function onMerge() {
       const ids = [...selected.items];
       await props.onMerge(ids);
@@ -262,6 +278,7 @@ export const ManagePayees = forwardRef(
                 onClose={() => setMenuOpen(false)}
                 onDelete={onDelete}
                 onMerge={onMerge}
+                onFavorite={onFavorite}
               />
             </Popover>
           </View>

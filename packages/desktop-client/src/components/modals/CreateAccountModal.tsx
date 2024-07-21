@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -11,24 +11,21 @@ import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
-import { Tooltip } from '../tooltips';
 
 type CreateAccountProps = {
-  modalProps: CommonModalProps;
   syncServerStatus: SyncServerStatus;
   upgradingAccountId?: string;
 };
 
 export function CreateAccountModal({
-  modalProps,
   syncServerStatus,
   upgradingAccountId,
 }: CreateAccountProps) {
@@ -38,6 +35,7 @@ export function CreateAccountModal({
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] =
     useState(null);
   const [menuGoCardlessOpen, setGoCardlessMenuOpen] = useState<boolean>(false);
+  const triggerRef = useRef(null);
   const [menuSimplefinOpen, setSimplefinMenuOpen] = useState<boolean>(false);
 
   const onConnectGoCardless = () => {
@@ -178,79 +176,86 @@ export function CreateAccountModal({
   const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
 
   return (
-    <Modal title={title} {...modalProps}>
-      {() => (
-        <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
-          {upgradingAccountId == null && (
-            <View style={{ gap: 10 }}>
-              <Button
-                type="primary"
-                style={{
-                  padding: '10px 0',
-                  fontSize: 15,
-                  fontWeight: 600,
-                }}
-                onClick={onCreateLocalAccount}
-              >
-                Create local account
-              </Button>
-              <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                <Text>
-                  <strong>Create a local account</strong> if you want to add
-                  transactions manually. You can also{' '}
-                  <Link
-                    variant="external"
-                    to="https://actualbudget.org/docs/transactions/importing"
-                    linkColor="muted"
-                  >
-                    import QIF/OFX/QFX files into a local account
-                  </Link>
-                  .
-                </Text>
-              </View>
-            </View>
-          )}
-          <View style={{ gap: 10 }}>
-            {syncServerStatus === 'online' ? (
-              <>
-                <View
+    <Modal name="add-account">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title={title}
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
+            {upgradingAccountId == null && (
+              <View style={{ gap: 10 }}>
+                <Button
+                  variant="primary"
                   style={{
-                    flexDirection: 'row',
-                    gap: 10,
-                    alignItems: 'center',
+                    padding: '10px 0',
+                    fontSize: 15,
+                    fontWeight: 600,
                   }}
+                  onPress={onCreateLocalAccount}
                 >
-                  <ButtonWithLoading
-                    disabled={syncServerStatus !== 'online'}
-                    style={{
-                      padding: '10px 0',
-                      fontSize: 15,
-                      fontWeight: 600,
-                      flex: 1,
-                    }}
-                    onClick={onConnectGoCardless}
-                  >
-                    {isGoCardlessSetupComplete
-                      ? 'Link bank account with GoCardless'
-                      : 'Set up GoCardless for bank sync'}
-                  </ButtonWithLoading>
-                  {isGoCardlessSetupComplete && (
-                    <Button
-                      type="bare"
-                      onClick={() => setGoCardlessMenuOpen(true)}
-                      aria-label="Menu"
+                  Create local account
+                </Button>
+                <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                  <Text>
+                    <strong>Create a local account</strong> if you want to add
+                    transactions manually. You can also{' '}
+                    <Link
+                      variant="external"
+                      to="https://actualbudget.org/docs/transactions/importing"
+                      linkColor="muted"
                     >
-                      <SvgDotsHorizontalTriple
-                        width={15}
-                        height={15}
-                        style={{ transform: 'rotateZ(90deg)' }}
-                      />
-                      {menuGoCardlessOpen && (
-                        <Tooltip
-                          position="bottom-right"
-                          width={200}
-                          style={{ padding: 0 }}
-                          onClose={() => setGoCardlessMenuOpen(false)}
+                      import QIF/OFX/QFX files into a local account
+                    </Link>
+                    .
+                  </Text>
+                </View>
+              </View>
+            )}
+            <View style={{ gap: 10 }}>
+              {syncServerStatus === 'online' ? (
+                <>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      gap: 10,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <ButtonWithLoading
+                      isDisabled={syncServerStatus !== 'online'}
+                      style={{
+                        padding: '10px 0',
+                        fontSize: 15,
+                        fontWeight: 600,
+                        flex: 1,
+                      }}
+                      onPress={onConnectGoCardless}
+                    >
+                      {isGoCardlessSetupComplete
+                        ? 'Link bank account with GoCardless'
+                        : 'Set up GoCardless for bank sync'}
+                    </ButtonWithLoading>
+                    {isGoCardlessSetupComplete && (
+                      <>
+                        <Button
+                          ref={triggerRef}
+                          variant="bare"
+                          onPress={() => setGoCardlessMenuOpen(true)}
+                          aria-label="GoCardless menu"
+                        >
+                          <SvgDotsHorizontalTriple
+                            width={15}
+                            height={15}
+                            style={{ transform: 'rotateZ(90deg)' }}
+                          />
+                        </Button>
+
+                        <Popover
+                          triggerRef={triggerRef}
+                          isOpen={menuGoCardlessOpen}
+                          onOpenChange={() => setGoCardlessMenuOpen(false)}
                         >
                           <Menu
                             onMenuSelect={item => {
@@ -265,60 +270,60 @@ export function CreateAccountModal({
                               },
                             ]}
                           />
-                        </Tooltip>
-                      )}
-                    </Button>
-                  )}
-                </View>
-                <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                  <strong>
-                    Link a <em>European</em> bank account
-                  </strong>{' '}
-                  to automatically download transactions. GoCardless provides
-                  reliable, up-to-date information from hundreds of banks.
-                </Text>
-                {simpleFinSyncFeatureFlag === true && (
-                  <>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        gap: 10,
-                        marginTop: '18px',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <ButtonWithLoading
-                        disabled={syncServerStatus !== 'online'}
-                        loading={loadingSimpleFinAccounts}
+                        </Popover>
+                      </>
+                    )}
+                  </View>
+                  <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                    <strong>
+                      Link a <em>European</em> bank account
+                    </strong>{' '}
+                    to automatically download transactions. GoCardless provides
+                    reliable, up-to-date information from hundreds of banks.
+                  </Text>
+                  {simpleFinSyncFeatureFlag === true && (
+                    <>
+                      <View
                         style={{
-                          padding: '10px 0',
-                          fontSize: 15,
-                          fontWeight: 600,
-                          flex: 1,
+                          flexDirection: 'row',
+                          gap: 10,
+                          marginTop: '18px',
+                          alignItems: 'center',
                         }}
-                        onClick={onConnectSimpleFin}
                       >
-                        {isSimpleFinSetupComplete
-                          ? 'Link bank account with SimpleFIN'
-                          : 'Set up SimpleFIN for bank sync'}
-                      </ButtonWithLoading>
-                      {isSimpleFinSetupComplete && (
-                        <Button
-                          type="bare"
-                          onClick={() => setSimplefinMenuOpen(true)}
-                          aria-label="Menu"
+                        <ButtonWithLoading
+                          isDisabled={syncServerStatus !== 'online'}
+                          isLoading={loadingSimpleFinAccounts}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onPress={onConnectSimpleFin}
                         >
-                          <SvgDotsHorizontalTriple
-                            width={15}
-                            height={15}
-                            style={{ transform: 'rotateZ(90deg)' }}
-                          />
-                          {menuSimplefinOpen && (
-                            <Tooltip
-                              position="bottom-right"
-                              width={200}
-                              style={{ padding: 0 }}
-                              onClose={() => setSimplefinMenuOpen(false)}
+                          {isSimpleFinSetupComplete
+                            ? 'Link bank account with SimpleFIN'
+                            : 'Set up SimpleFIN for bank sync'}
+                        </ButtonWithLoading>
+                        {isSimpleFinSetupComplete && (
+                          <>
+                            <Button
+                              ref={triggerRef}
+                              variant="bare"
+                              onPress={() => setSimplefinMenuOpen(true)}
+                              aria-label="SimpleFIN menu"
+                            >
+                              <SvgDotsHorizontalTriple
+                                width={15}
+                                height={15}
+                                style={{ transform: 'rotateZ(90deg)' }}
+                              />
+                            </Button>
+                            <Popover
+                              triggerRef={triggerRef}
+                              isOpen={menuSimplefinOpen}
+                              onOpenChange={() => setSimplefinMenuOpen(false)}
                             >
                               <Menu
                                 onMenuSelect={item => {
@@ -333,48 +338,49 @@ export function CreateAccountModal({
                                   },
                                 ]}
                               />
-                            </Tooltip>
-                          )}
-                        </Button>
-                      )}
-                    </View>
-                    <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                      <strong>
-                        Link a <em>North American</em> bank account
-                      </strong>{' '}
-                      to automatically download transactions. SimpleFIN provides
-                      reliable, up-to-date information from hundreds of banks.
-                    </Text>
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <Button
-                  disabled
-                  style={{
-                    padding: '10px 0',
-                    fontSize: 15,
-                    fontWeight: 600,
-                  }}
-                >
-                  Set up bank sync
-                </Button>
-                <Paragraph style={{ fontSize: 15 }}>
-                  Connect to an Actual server to set up{' '}
-                  <Link
-                    variant="external"
-                    to="https://actualbudget.org/docs/advanced/bank-sync"
-                    linkColor="muted"
+                            </Popover>
+                          </>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <strong>
+                          Link a <em>North American</em> bank account
+                        </strong>{' '}
+                        to automatically download transactions. SimpleFIN
+                        provides reliable, up-to-date information from hundreds
+                        of banks.
+                      </Text>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Button
+                    isDisabled
+                    style={{
+                      padding: '10px 0',
+                      fontSize: 15,
+                      fontWeight: 600,
+                    }}
                   >
-                    automatic syncing
-                  </Link>
-                  .
-                </Paragraph>
-              </>
-            )}
+                    Set up bank sync
+                  </Button>
+                  <Paragraph style={{ fontSize: 15 }}>
+                    Connect to an Actual server to set up{' '}
+                    <Link
+                      variant="external"
+                      to="https://actualbudget.org/docs/advanced/bank-sync"
+                      linkColor="muted"
+                    >
+                      automatic syncing
+                    </Link>
+                    .
+                  </Paragraph>
+                </>
+              )}
+            </View>
           </View>
-        </View>
+        </>
       )}
     </Modal>
   );

@@ -105,6 +105,8 @@ export interface ServerHandlers {
 
   'payee-create': (arg: { name }) => Promise<string>;
 
+  'common-payees-get': () => Promise<PayeeEntity[]>;
+
   'payees-get': () => Promise<PayeeEntity[]>;
 
   'payees-get-rule-counts': () => Promise<unknown>;
@@ -222,10 +224,15 @@ export interface ServerHandlers {
     updatedAccounts;
   }>;
 
-  'transactions-import': (arg: { accountId; transactions }) => Promise<{
+  'transactions-import': (arg: {
+    accountId;
+    transactions;
+    isPreview;
+  }) => Promise<{
     errors?: { message: string }[];
     added;
     updated;
+    updatedPreview;
   }>;
 
   'account-unlink': (arg: { id }) => Promise<'ok'>;
