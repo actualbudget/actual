@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
+import { send } from 'loot-core/src/platform/client/fetch';
 import {
   type CustomReportEntity,
   type CustomReportWidget,
@@ -90,29 +91,7 @@ function useWidgetLayout(
       meta: { report },
     }));
 
-  // Sort the layout by positioning (i.e top of the dashboard in first list items)
-  const layout = [...dashboardWidgets, ...additionalWidgets].sort(
-    (a, b) => a.y * 100 + a.x - (b.y * 100 + b.x),
-  );
-
-  // const lastWidget = layout[layout.length - 1];
-
-  return layout;
-  // TODO: re-consider the "add new widget" inline button
-  // return [
-  //   ...layout,
-  //   {
-  //     i: 'add-new-widget',
-  //     type: 'add-new-widget',
-  //     x: (lastWidget?.x + 4) % 12,
-  //     y: lastWidget?.y + (lastWidget?.x + 4 > 12 ? 2 : 0),
-  //     w: 4,
-  //     h: 2,
-  //     isDraggable: false,
-  //     isResizable: false,
-  //     meta: {},
-  //   },
-  // ];
+  return [...dashboardWidgets, ...additionalWidgets];
 }
 
 export function Overview() {
@@ -131,8 +110,18 @@ export function Overview() {
 
   const layout = useWidgetLayout(widgets, customReports);
 
-  // TODO: store in DB
-  const onLayoutChange = console.log;
+  const onLayoutChange = (newLayout: Layout[]) => {
+    send(
+      'dashboard-update',
+      newLayout.map(item => ({
+        id: item.i,
+        width: item.w,
+        height: item.h,
+        x: item.x,
+        y: item.y,
+      })),
+    );
+  };
 
   const accounts = useAccounts();
 
@@ -218,31 +207,6 @@ export function Overview() {
               ) : null}
             </div>
           ))}
-
-          {/* TODO: make the button work */}
-          {/* TODO: do we need a button here? */}
-          {/*
-          <Button
-            key="add-new-widget"
-            variant="bare"
-            style={{
-              border: `2px dashed ${theme.buttonMenuBorder}`,
-              opacity: 0.5,
-              textAlign: 'center',
-              justifyContent: 'center',
-            }}
-            onPress={() =>
-              alert(
-                'Clicking this button will allow to choose a widget type to add to the dashboard',
-              )
-            }
-          >
-            <View>
-              <View style={{ fontSize: 50 }}>+</View>
-              <Text style={{ fontSize: 20 }}>Add new widget</Text>
-            </View>
-          </Button>
-          */}
         </ResponsiveGridLayout>
       </View>
     </Page>

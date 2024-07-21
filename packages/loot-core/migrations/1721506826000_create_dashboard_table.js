@@ -11,7 +11,8 @@ export default async function runMigration(db) {
          height INTEGER,
          x INTEGER,
          y INTEGER,
-         meta TEXT);
+         meta TEXT,
+         tombstone INTEGER DEFAULT 0);
 
       INSERT INTO dashboard (id, type, width, height, x, y)
       VALUES
