@@ -26,6 +26,7 @@ export function SpendingCard() {
   const [spendingReportFilter = defaultFilter] = useLocalPref(
     'spendingReportFilter',
   );
+  const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
 
   const getGraphData = useMemo(() => {
     return createSpendingSpreadsheet({
@@ -100,7 +101,7 @@ export function SpendingCard() {
             style={{ flex: 1 }}
             compact={true}
             data={data}
-            mode="lastMonth"
+            mode={spendingReportTime}
           />
         ) : (
           <LoadingIndicator message="Loading report..." />

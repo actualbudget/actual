@@ -40,12 +40,20 @@ export function Spending() {
     onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
-  const [dataCheck, setDataCheck] = useState(false);
-  const [mode, setMode] = useState('lastMonth');
-
   const defaultFilter: SavedFilter = { name: 'spendingReport' };
   const [spendingReportFilter = defaultFilter, setSpendingReportFilter] =
     useLocalPref('spendingReportFilter');
+  const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
+    useLocalPref('spendingReportTime');
+
+  const [dataCheck, setDataCheck] = useState(false);
+  const [mode, setMode] = useState(spendingReportTime);
+
+  const filterSaved =
+    JSON.stringify(spendingReportFilter.conditions) ===
+      JSON.stringify(conditions) &&
+    spendingReportFilter.conditionsOp === conditionsOp &&
+    spendingReportTime === mode;
 
   useEffect(() => {
     if (spendingReportFilter.conditions) {
@@ -77,6 +85,7 @@ export function Spending() {
       conditionsOp,
       name: 'spendingReport',
     });
+    setSpendingReportTime(mode);
   };
 
   const showAverage =
@@ -135,8 +144,9 @@ export function Spending() {
                   marginLeft: 10,
                 }}
                 onClick={saveFilter}
+                disabled={filterSaved ? true : false}
               >
-                Save
+                {filterSaved ? 'Saved' : 'Save'}
               </Button>
               <View style={{ flex: 1 }} />
             </View>
