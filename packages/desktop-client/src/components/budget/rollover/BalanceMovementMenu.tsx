@@ -5,8 +5,9 @@ import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { groupById, integerToCurrency } from 'loot-core/src/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
+import { type WithRequired } from 'loot-core/types/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
@@ -34,7 +35,7 @@ export function BalanceMovementMenu({
   );
   const [menu, setMenu] = useState('menu');
 
-  const { onAddTransferBudgetNotes } = useTransferBudgetNotes({
+  const { onAddTransferBudgetNotes } = useBudgetTransferNotes({
     month,
   });
 
@@ -91,21 +92,20 @@ export function BalanceMovementMenu({
   );
 }
 
-const useTransferBudgetNotes = ({ month }: { month: string }) => {
+const useBudgetTransferNotes = ({ month }: { month: string }) => {
   const { list: categories } = useCategories();
-  const categoryNamesById = useMemo(
-    () => categories.reduce((acc, c) => ({ ...acc, [c.id]: c.name }), {}),
-    [categories],
-  );
+  const categoryNamesById = useMemo(() => {
+    return groupById(categories as WithRequired<CategoryEntity, 'id'>[]);
+  }, [categories]);
 
-  const getNotes = async id => {
+  const getNotes = async (id: string) => {
     const { data: notes } = await runQuery(
       q('notes').filter({ id }).select('note'),
     );
     return (notes && notes[0]?.note) ?? '';
   };
 
-  const addNewLine = notes => `${notes}${notes && '\n'}`;
+  const addNewLine = (notes?: string) => `${notes}${notes && '\n'}`;
 
   const onAddTransferBudgetNotes = useCallback(
     async ({
@@ -113,8 +113,8 @@ const useTransferBudgetNotes = ({ month }: { month: string }) => {
       toCategoryId,
       amount,
     }: {
-      fromCategoryId: CategoryEntity['id'];
-      toCategoryId: CategoryEntity['id'];
+      fromCategoryId: Required<CategoryEntity['id']>;
+      toCategoryId: Required<CategoryEntity['id']>;
       amount: number;
     }) => {
       const displayAmount = integerToCurrency(amount);
