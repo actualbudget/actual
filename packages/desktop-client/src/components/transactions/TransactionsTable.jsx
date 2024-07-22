@@ -294,29 +294,12 @@ const TransactionHeader = memo(
           }
         />
         {showBalance && (
-          <CustomCell
+          <HeaderCell
+            value="Balance"
             width={103}
             alignItems="flex-end"
-            value="Balance"
-            style={{
-              borderTopWidth: 0,
-              borderBottomWidth: 0,
-            }}
-            unexposedContent={({ value: cellValue }) => (
-              <Text
-                style={{
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  textAlign: 'right',
-                  color: theme.tableHeaderText,
-                  fontWeight: 300,
-                  marginRight: -5,
-                }}
-              >
-                {cellValue}
-              </Text>
-            )}
+            marginRight={-5}
+            id="balance"
           />
         )}
         {showCleared && (
@@ -459,6 +442,16 @@ function HeaderCell({
   icon,
   onClick,
 }) {
+  const style = {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    color: theme.tableHeaderText,
+    fontWeight: 300,
+    marginLeft,
+    marginRight,
+  };
+
   return (
     <CustomCell
       width={width}
@@ -469,29 +462,21 @@ function HeaderCell({
         borderTopWidth: 0,
         borderBottomWidth: 0,
       }}
-      unexposedContent={({ value: cellValue }) => (
-        <Button
-          type="bare"
-          onClick={onClick}
-          style={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            color: theme.tableHeaderText,
-            fontWeight: 300,
-            marginLeft,
-            marginRight,
-          }}
-        >
-          <UnexposedCellContent value={cellValue} />
-          {icon === 'asc' && (
-            <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
-          )}
-          {icon === 'desc' && (
-            <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
-          )}
-        </Button>
-      )}
+      unexposedContent={({ value: cellValue }) =>
+        onClick ? (
+          <Button type="bare" onClick={onClick} style={style}>
+            <UnexposedCellContent value={cellValue} />
+            {icon === 'asc' && (
+              <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
+            )}
+            {icon === 'desc' && (
+              <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+            )}
+          </Button>
+        ) : (
+          <Text style={style}>{cellValue}</Text>
+        )
+      }
     />
   );
 }
