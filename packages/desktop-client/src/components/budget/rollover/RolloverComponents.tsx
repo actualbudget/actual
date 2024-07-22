@@ -11,6 +11,7 @@ import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { NotesButton } from '../../NotesButton';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, type CellValueProps } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
@@ -195,7 +196,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const balanceMenuTriggerRef = useRef(null);
   const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
-  const [hover, setHover] = useState(false);
 
   const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
     onBudgetAction(...args);
@@ -224,22 +224,21 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           flex: 1,
           flexDirection: 'row',
         }}
-        onMouseOverCapture={() => setHover(true)}
-        onMouseLeave={() => {
-          setHover(false);
-        }}
       >
-        {!editing && (hover || budgetMenuOpen) ? (
+        {!editing && (
           <View
             style={{
+              flexDirection: 'row',
               flexShrink: 1,
               paddingLeft: 3,
+              alignItems: 'center',
               justifyContent: 'center',
               borderTopWidth: 1,
               borderBottomWidth: 1,
               borderColor: theme.tableBorder,
             }}
           >
+            <NotesButton id={`budget-${month}-${category.id}`} />
             <Button
               ref={budgetMenuTriggerRef}
               variant="bare"
@@ -290,7 +289,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               />
             </Popover>
           </View>
-        ) : null}
+        )}
         <RolloverSheetCell
           name="budget"
           exposed={editing}

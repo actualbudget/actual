@@ -1,6 +1,16 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
+import { runQuery } from 'loot-core/client/query-helpers';
+import { send } from 'loot-core/platform/client/fetch';
+import { q } from 'loot-core/shared/query';
 import { rolloverBudget } from 'loot-core/src/client/queries';
+import * as monthUtils from 'loot-core/src/shared/months';
+import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type CategoryEntity } from 'loot-core/types/models';
+
+import { useCategories } from '../../../hooks/useCategories';
+import { useNotes } from '../../../hooks/useNotes';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 import { BalanceMenu } from './BalanceMenu';
 import { CoverMenu } from './CoverMenu';
@@ -24,6 +34,10 @@ export function BalanceMovementMenu({
     rolloverBudget.catBalance(categoryId),
   );
   const [menu, setMenu] = useState('menu');
+
+  const { onAddTransferBudgetNotes } = useTransferBudgetNotes({
+    month,
+  });
 
   return (
     <>
@@ -53,6 +67,11 @@ export function BalanceMovementMenu({
               from: categoryId,
               to: toCategoryId,
             });
+            onAddTransferBudgetNotes({
+              fromCategoryId: categoryId,
+              toCategoryId,
+              amount,
+            });
           }}
         />
       )}
@@ -72,3 +91,59 @@ export function BalanceMovementMenu({
     </>
   );
 }
+
+const useTransferBudgetNotes = ({ month }: { month: string }) => {
+  const { list: categories } = useCategories();
+  const categoryNamesById = useMemo(
+    () => categories.reduce((acc, c) => ({ ...acc, [c.id]: c.name }), {}),
+    [categories],
+  );
+
+  const getNotes = async id => {
+    const { data: notes } = await runQuery(
+      q('notes').filter({ id }).select('note'),
+    );
+    return (notes && notes[0]?.note) ?? '';
+  };
+
+  const addNewLine = notes => `${notes}${notes && '\n'}`;
+
+  const onAddTransferBudgetNotes = useCallback(
+    async ({
+      fromCategoryId,
+      toCategoryId,
+      amount,
+    }: {
+      fromCategoryId: CategoryEntity['id'];
+      toCategoryId: CategoryEntity['id'];
+      amount: number;
+    }) => {
+      const displayAmount = integerToCurrency(amount);
+
+      const fromCategoryBudgetNotesId = `budget-${month}-${fromCategoryId}`;
+      const fromCategoryBudgetNotes = addNewLine(
+        await getNotes(fromCategoryBudgetNotesId),
+      );
+
+      const toCategoryBudgetNotesId = `budget-${month}-${toCategoryId}`;
+      const toCategoryBudgetNotes = addNewLine(
+        await getNotes(toCategoryBudgetNotesId),
+      );
+
+      const displayDay = monthUtils.currentDay();
+
+      await send('notes-save', {
+        id: fromCategoryBudgetNotesId,
+        note: `${fromCategoryBudgetNotes}- Transferred ${displayAmount} to ${categoryNamesById[toCategoryId]} on ${displayDay}`,
+      });
+
+      await send('notes-save', {
+        id: toCategoryBudgetNotesId,
+        note: `${toCategoryBudgetNotes}- Transferred ${displayAmount} from ${categoryNamesById[fromCategoryId]} on ${displayDay}`,
+      });
+    },
+    [categoryNamesById, month],
+  );
+
+  return { onAddTransferBudgetNotes };
+};
