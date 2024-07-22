@@ -11,33 +11,28 @@ import { addToBeBudgetedGroup } from '../util';
 
 function removeSelectedCategory(
   categoryGroups: CategoryGroupEntity[],
-  selectedCategoryId?: string,
+  category?: string,
 ) {
-  if (!selectedCategoryId) return categoryGroups;
+  if (!category) return categoryGroups;
 
-  const newCategoryGroups: CategoryGroupEntity[] = JSON.parse(
-    JSON.stringify(categoryGroups),
-  );
-
-  newCategoryGroups.forEach(group => {
-    group.categories = group.categories?.filter(
-      category => category.id !== selectedCategoryId,
-    );
-  });
-
-  return newCategoryGroups.filter(g => g.categories?.length);
+  return categoryGroups
+    .map(group => ({
+      ...group,
+      categories: group.categories?.filter(cat => cat.id !== category),
+    }))
+    .filter(group => group.categories?.length);
 }
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
-  targetCategory?: string;
+  category?: string;
   onSubmit: (categoryId: string) => void;
   onClose: () => void;
 };
 
 export function CoverMenu({
   showToBeBudgeted = true,
-  targetCategory,
+  category,
   onSubmit,
   onClose,
 }: CoverMenuProps) {
@@ -63,10 +58,7 @@ export function CoverMenu({
       <InitialFocus>
         {node => (
           <CategoryAutocomplete
-            categoryGroups={removeSelectedCategory(
-              categoryGroups,
-              targetCategory,
-            )}
+            categoryGroups={removeSelectedCategory(categoryGroups, category)}
             value={categoryGroups.find(g => g.id === categoryId) ?? null}
             openOnFocus={true}
             onSelect={(id: string | undefined) => setCategoryId(id || null)}

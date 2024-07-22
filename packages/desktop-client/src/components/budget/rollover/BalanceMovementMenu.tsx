@@ -59,7 +59,7 @@ export function BalanceMovementMenu({
 
       {menu === 'cover' && (
         <CoverMenu
-          targetCategory={categoryId}
+          category={categoryId}
           onClose={onClose}
           onSubmit={fromCategoryId => {
             onBudgetAction(month, 'cover-overspending', {
