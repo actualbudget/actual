@@ -435,6 +435,9 @@ export function ReportSidebar({
               onChange={onSelectRange}
               options={rangeOptions}
             />
+            {customReportItems.includeCurrentInterval && (
+              <Text style={{ marginLeft: 10 }}>+1</Text>
+            )}
           </View>
         ) : (
           <>
