@@ -1,3 +1,4 @@
+import { SavedFilter } from '../../../desktop-client/src/components/filters/SavedFilterMenuButton';
 import { type numberFormats } from '../shared/util';
 
 export type FeatureFlag =
@@ -50,6 +51,8 @@ export type LocalPrefs = Partial<
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
+    spendingReportFilter: SavedFilter;
+    spendingReportTime: string;
     sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>

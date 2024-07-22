@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -6,16 +6,19 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
+import { Button } from '../../common/Button';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
+import { type SavedFilter } from '../../filters/SavedFilterMenuButton';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -37,8 +40,26 @@ export function Spending() {
     onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
+  const defaultFilter: SavedFilter = { name: 'spendingReport' };
+  const [spendingReportFilter = defaultFilter, setSpendingReportFilter] =
+    useLocalPref('spendingReportFilter');
+  const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
+    useLocalPref('spendingReportTime');
+
   const [dataCheck, setDataCheck] = useState(false);
-  const [mode, setMode] = useState('lastMonth');
+  const [mode, setMode] = useState(spendingReportTime);
+
+  const filterSaved =
+    JSON.stringify(spendingReportFilter.conditions) ===
+      JSON.stringify(conditions) &&
+    spendingReportFilter.conditionsOp === conditionsOp &&
+    spendingReportTime === mode;
+
+  useEffect(() => {
+    if (spendingReportFilter.conditions) {
+      onApplyFilter(spendingReportFilter);
+    }
+  }, [onApplyFilter, spendingReportFilter]);
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
@@ -57,6 +78,15 @@ export function Spending() {
   if (!data) {
     return null;
   }
+
+  const saveFilter = () => {
+    setSpendingReportFilter({
+      conditions,
+      conditionsOp,
+      name: 'spendingReport',
+    });
+    setSpendingReportTime(mode);
+  };
 
   const showAverage =
     Math.abs(
@@ -108,6 +138,16 @@ export function Spending() {
                 hover={false}
                 exclude={['date']}
               />
+              <Button
+                type="primary"
+                style={{
+                  marginLeft: 10,
+                }}
+                onClick={saveFilter}
+                disabled={filterSaved ? true : false}
+              >
+                {filterSaved ? 'Saved' : 'Save'}
+              </Button>
               <View style={{ flex: 1 }} />
             </View>
           )}
