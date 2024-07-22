@@ -294,15 +294,31 @@ const TransactionHeader = memo(
           }
         />
         {showBalance && (
-          <HeaderCell
-            value="Balance"
+          <CustomCell
             width={103}
             alignItems="flex-end"
-            marginRight={-5}
-            textAlign="right"
+            value="Balance"
+            style={{
+              borderTopWidth: 0,
+              borderBottomWidth: 0,
+            }}
+            unexposedContent={({ value: cellValue }) => (
+              <Text
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  textAlign: 'right',
+                  color: theme.tableHeaderText,
+                  fontWeight: 300,
+                  marginRight: -5,
+                }}
+              >
+                {cellValue}
+              </Text>
+            )}
           />
         )}
-
         {showCleared && (
           <HeaderCell
             value="✓"
