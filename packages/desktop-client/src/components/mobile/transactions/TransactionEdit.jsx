@@ -561,7 +561,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const onUpdate = async (serializedTransaction, name, value) => {
     const newTransaction = { ...serializedTransaction, [name]: value };
-    await props.onUpdate(newTransaction);
+    await props.onUpdate(newTransaction, name);
     onClearActiveEdit();
   };
 
@@ -1061,7 +1061,7 @@ function TransactionEditUnconnected({
     return null;
   }
 
-  const onUpdate = async serializedTransaction => {
+  const onUpdate = async (serializedTransaction, updatedField) => {
     const transaction = deserializeTransaction(
       serializedTransaction,
       null,
@@ -1070,22 +1070,46 @@ function TransactionEditUnconnected({
 
     // Run the rules to auto-fill in any data. Right now we only do
     // this on new transactions because that's how desktop works.
-    if (isTemporary(transaction)) {
-      const afterRules = await send('rules-run', { transaction });
-      const diff = getChangedValues(transaction, afterRules);
+    const newTransaction = { ...transaction };
+    if (isTemporary(newTransaction)) {
+      const afterRules = await send('rules-run', {
+        transaction: newTransaction,
+      });
+      const diff = getChangedValues(newTransaction, afterRules);
 
       if (diff) {
         Object.keys(diff).forEach(field => {
-          if (transaction[field] == null) {
-            transaction[field] = diff[field];
+          if (
+            newTransaction[field] == null ||
+            newTransaction[field] === '' ||
+            newTransaction[field] === 0 ||
+            newTransaction[field] === false
+          ) {
+            newTransaction[field] = diff[field];
           }
         });
+
+        // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
+        if (
+          newTransaction.is_parent &&
+          diff.subtransactions !== undefined &&
+          updatedField !== null
+        ) {
+          newTransaction.subtransactions = diff.subtransactions.map(
+            (st, idx) => ({
+              ...(newTransaction.subtransactions[idx] || st),
+              ...(st[updatedField] != null && {
+                [updatedField]: st[updatedField],
+              }),
+            }),
+          );
+        }
       }
     }
 
     const { data: newTransactions } = updateTransaction(
       transactions,
-      transaction,
+      newTransaction,
     );
     setTransactions(newTransactions);
   };
