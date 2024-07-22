@@ -131,12 +131,12 @@ const useBudgetTransferNotes = ({ month }: { month: string }) => {
 
       await send('notes-save', {
         id: fromCategoryBudgetNotesId,
-        note: `${fromCategoryBudgetNotes}- Transferred ${displayAmount} to ${categoryNamesById[toCategoryId || '']} on ${displayDay}`,
+        note: `${fromCategoryBudgetNotes}- Transferred ${displayAmount} to ${categoryNamesById[toCategoryId || ''].name} on ${displayDay}`,
       });
 
       await send('notes-save', {
         id: toCategoryBudgetNotesId,
-        note: `${toCategoryBudgetNotes}- Transferred ${displayAmount} from ${categoryNamesById[fromCategoryId || '']} on ${displayDay}`,
+        note: `${toCategoryBudgetNotes}- Transferred ${displayAmount} from ${categoryNamesById[fromCategoryId || ''].name} on ${displayDay}`,
       });
     },
     [categoryNamesById, month],
