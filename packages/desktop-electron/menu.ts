@@ -173,6 +173,21 @@ export function getMenu(
       role: 'help',
       submenu: [
         {
+          label: 'Keyboard Shortcuts Reference',
+          accelerator: '?',
+          enabled: !!budgetId,
+          click: function (_menuItem, focusedWin) {
+            if (focusedWin) {
+              focusedWin.webContents.executeJavaScript(
+                'window.__actionsForMenu && window.__actionsForMenu.pushModal("keyboard-shortcuts")',
+              );
+            }
+          },
+        },
+        {
+          type: 'separator',
+        },
+        {
           label: 'Learn More',
           click() {
             shell.openExternal('https://actualbudget.org/docs/');
