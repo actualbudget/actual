@@ -16,6 +16,7 @@ import { css } from 'glamor';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type AccountEntity,
   type PayeeEntity,
@@ -26,7 +27,6 @@ import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
-import { getNormalisedString } from '../../util/normalisation';
 import { Button } from '../common/Button';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';

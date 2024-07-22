@@ -14,10 +14,11 @@ import React, {
 import Downshift, { type StateChangeTypes } from 'downshift';
 import { css } from 'glamor';
 
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
+
 import { SvgRemove } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
-import { getNormalisedString } from '../../util/normalisation';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';

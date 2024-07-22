@@ -14,6 +14,7 @@ import { css } from 'glamor';
 
 import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -24,7 +25,6 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
-import { getNormalisedString } from '../../util/normalisation';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';

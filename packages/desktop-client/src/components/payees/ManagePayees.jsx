@@ -11,6 +11,7 @@ import {
 
 import memoizeOne from 'memoize-one';
 
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { groupById } from 'loot-core/src/shared/util';
 
 import {
@@ -22,7 +23,6 @@ import {
 import { useStableCallback } from '../../hooks/useStableCallback';
 import { SvgExpandArrow } from '../../icons/v0';
 import { theme } from '../../style';
-import { getNormalisedString } from '../../util/normalisation';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
