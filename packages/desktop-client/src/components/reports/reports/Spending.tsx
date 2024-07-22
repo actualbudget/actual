@@ -15,6 +15,7 @@ import { Block } from '../../common/Block';
 import { Button } from '../../common/Button';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
+import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
@@ -138,16 +139,27 @@ export function Spending() {
                 hover={false}
                 exclude={['date']}
               />
-              <Button
-                type="primary"
+              <Tooltip
+                placement="bottom start"
+                content={<Text>Save compare and filter options</Text>}
                 style={{
+                  ...styles.tooltip,
+                  lineHeight: 1.5,
+                  padding: '6px 10px',
                   marginLeft: 10,
                 }}
-                onClick={saveFilter}
-                disabled={filterSaved ? true : false}
               >
-                {filterSaved ? 'Saved' : 'Save'}
-              </Button>
+                <Button
+                  type="primary"
+                  style={{
+                    marginLeft: 10,
+                  }}
+                  onClick={saveFilter}
+                  disabled={filterSaved ? true : false}
+                >
+                  {filterSaved ? 'Saved' : 'Save'}
+                </Button>
+              </Tooltip>
               <View style={{ flex: 1 }} />
             </View>
           )}
