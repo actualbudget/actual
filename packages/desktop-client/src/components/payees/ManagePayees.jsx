@@ -11,6 +11,7 @@ import {
 
 import memoizeOne from 'memoize-one';
 
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { groupById } from 'loot-core/src/shared/util';
 
 import {
@@ -111,7 +112,7 @@ export const ManagePayees = forwardRef(
       let filtered = payees;
       if (filter) {
         filtered = filtered.filter(p =>
-          p.name.toLowerCase().includes(filter.toLowerCase()),
+          getNormalisedString(p.name).includes(getNormalisedString(filter)),
         );
       }
       if (orphanedOnly) {
