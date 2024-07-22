@@ -9,7 +9,6 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
-import { useNotes } from '../../../hooks/useNotes';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 import { BalanceMenu } from './BalanceMenu';
