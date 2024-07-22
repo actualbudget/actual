@@ -67,7 +67,7 @@ function CustomLabel({
   );
 }
 
-export function CashFlowCard() {
+export function CashFlowCard({ onRemove }) {
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
 
@@ -83,7 +83,22 @@ export function CashFlowCard() {
   const income = graphData?.income || 0;
 
   return (
-    <ReportCard to="/reports/cash-flow">
+    <ReportCard
+      to="/reports/cash-flow"
+      menuItems={[
+        {
+          name: 'remove',
+          text: 'Remove',
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}

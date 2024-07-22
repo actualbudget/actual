@@ -146,6 +146,10 @@ export function Overview() {
     setMenuOpen(false);
   };
 
+  const onRemoveWidget = (widgetId: string) => {
+    send('dashboard-remove-widget', widgetId);
+  };
+
   const accounts = useAccounts();
 
   if (isLoading) {
@@ -192,6 +196,9 @@ export function Overview() {
                     <Menu<MenuItem>
                       onMenuSelect={item => {
                         if (item === 'custom-report') {
+                          alert(
+                            'Adding custom reports to dashboard is still very much WIP',
+                          );
                           navigate('/reports/custom');
                           return;
                         }
@@ -252,9 +259,12 @@ export function Overview() {
           {layout.map(item => (
             <div key={item.i}>
               {item.type === 'net-worth-card' ? (
-                <NetWorthCard accounts={accounts} />
+                <NetWorthCard
+                  accounts={accounts}
+                  onRemove={() => onRemoveWidget(item.i)}
+                />
               ) : item.type === 'cash-flow-card' ? (
-                <CashFlowCard />
+                <CashFlowCard onRemove={() => onRemoveWidget(item.i)} />
               ) : item.type === 'spending-card' ? (
                 <SpendingCard />
               ) : item.type === 'custom-report' ? (

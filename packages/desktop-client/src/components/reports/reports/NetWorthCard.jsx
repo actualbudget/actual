@@ -15,7 +15,7 @@ import { ReportCard } from '../ReportCard';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
-export function NetWorthCard({ accounts }) {
+export function NetWorthCard({ accounts, onRemove }) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -29,7 +29,22 @@ export function NetWorthCard({ accounts }) {
   const data = useReport('net_worth', params);
 
   return (
-    <ReportCard size={2} to="/reports/net-worth">
+    <ReportCard
+      to="/reports/net-worth"
+      menuItems={[
+        {
+          name: 'remove',
+          text: 'Remove',
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}
