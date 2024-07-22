@@ -1,4 +1,4 @@
-import { getNormalisedString } from 'loot-core/src/shared/normalisation';
+import { getNormalisedString } from '../../../shared/normalisation';
 
 export function normalise(value: string | null): string | null {
   if (!value) {
