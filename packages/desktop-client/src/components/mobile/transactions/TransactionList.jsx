@@ -294,10 +294,11 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
                   name: 'category',
                   text: 'Category',
                 },
-                {
-                  name: 'amount',
-                  text: 'Amount',
-                },
+                // Add support later on until we have more user friendly amount input modal.
+                // {
+                //   name: 'amount',
+                //   text: 'Amount',
+                // },
                 {
                   name: 'cleared',
                   text: 'Cleared',
