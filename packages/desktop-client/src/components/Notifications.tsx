@@ -97,7 +97,6 @@ function Notification({
     internal,
     button,
     timeout,
-    inset,
   } = notification;
 
   const [loading, setLoading] = useState(false);
@@ -130,10 +129,6 @@ function Notification({
     <View
       style={{
         marginTop: 10,
-        bottom: inset?.bottom,
-        top: inset?.top,
-        right: inset?.right,
-        left: inset?.left,
         color: positive
           ? theme.noticeText
           : error

@@ -16,12 +16,6 @@ export type Notification = {
   messageActions?: Record<string, () => void>;
   onClose?: () => void;
   internal?: string;
-  inset?: {
-    top?: number;
-    bottom?: number;
-    right?: number;
-    left?: number;
-  };
 };
 type NotificationWithId = Notification & { id: string };
 
