@@ -1,7 +1,15 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { useDispatch } from 'react-redux';
 
 import { Item, Section } from '@react-stately/collections';
 
+import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
@@ -30,7 +38,7 @@ import { FloatingActionBar } from '../FloatingActionBar';
 import { ListBox } from './ListBox';
 import { Transaction } from './Transaction';
 
-const NOTIFICATION_BOTTOM_OFFSET = 55;
+const NOTIFICATION_BOTTOM_OFFSET = 75;
 
 export function TransactionList({
   isLoading,
@@ -220,6 +228,14 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
 
   const { list: categories } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_OFFSET }));
+    return () => {
+      dispatch(setNotificationInset(null));
+    };
+  }, [dispatch]);
 
   return (
     <FloatingActionBar style={style}>

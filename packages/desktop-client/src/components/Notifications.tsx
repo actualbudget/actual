@@ -97,7 +97,6 @@ function Notification({
     internal,
     button,
     timeout,
-    inset,
   } = notification;
 
   const [loading, setLoading] = useState(false);
@@ -130,10 +129,6 @@ function Notification({
     <View
       style={{
         marginTop: 10,
-        bottom: inset?.bottom,
-        top: inset?.top,
-        right: inset?.right,
-        left: inset?.left,
         color: positive
           ? theme.noticeText
           : error
@@ -270,13 +265,17 @@ export function Notifications({ style }: { style?: CSSProperties }) {
   const notifications = useSelector(
     (state: State) => state.notifications.notifications,
   );
+  const notificationInset = useSelector(
+    (state: State) => state.notifications.inset,
+  );
   return (
     <View
       style={{
         position: 'fixed',
-        bottom: 20,
-        right: 13,
-        left: isNarrowWidth ? 13 : undefined,
+        bottom: notificationInset?.bottom || 20,
+        top: notificationInset?.top,
+        right: notificationInset?.right || 13,
+        left: notificationInset?.left || (isNarrowWidth ? 13 : undefined),
         zIndex: 10000,
         ...style,
       }}
