@@ -40,8 +40,7 @@ export function Spending() {
     onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
-  const defaultFilter: string = JSON.stringify({ name: 'spendingReport' });
-  const [spendingReportFilter = defaultFilter, setSpendingReportFilter] =
+  const [spendingReportFilter = '', setSpendingReportFilter] =
     useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
     useLocalPref('spendingReportTime');
