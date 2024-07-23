@@ -141,7 +141,7 @@ async function updateReport(item: CustomReportEntity) {
     throw new Error('There is already a filter named ' + item.name);
   }
 
-  await db.insertWithSchema('custom_reports', reportModel.fromJS(item));
+  await db.updateWithSchema('custom_reports', reportModel.fromJS(item));
 }
 
 async function deleteReport(id: string) {
