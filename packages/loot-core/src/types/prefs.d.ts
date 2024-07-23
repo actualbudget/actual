@@ -18,8 +18,6 @@ export type LocalPrefs = Partial<
       | 'dd.MM.yyyy';
     numberFormat: (typeof numberFormats)[number]['value'];
     hideFraction: boolean;
-    hideClosedAccounts: boolean;
-    hideMobileMessage: boolean;
     isPrivacyEnabled: boolean;
     budgetName: string;
     'ui.showClosedAccounts': boolean;
@@ -40,7 +38,6 @@ export type LocalPrefs = Partial<
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
     'flags.updateNotificationShownForVersion': string;
     id: string;
-    isCached: boolean;
     lastUploaded: string;
     cloudFileId: string;
     groupId: string;
