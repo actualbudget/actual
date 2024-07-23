@@ -67,6 +67,54 @@ export async function post(url, data, headers = {}, timeout = null) {
   return res.data;
 }
 
+export async function patch(url, data, headers = {}, timeout = null) {
+  let text;
+  let res;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    const signal = timeout ? controller.signal : null;
+    res = await fetch(url, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      signal,
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+      },
+    });
+    clearTimeout(timeoutId);
+    text = await res.text();
+  } catch (err) {
+    throw new PostError('network-failure');
+  }
+
+  throwIfNot200(res, text);
+
+  try {
+    res = JSON.parse(text);
+  } catch (err) {
+    // Something seriously went wrong. TODO handle errors
+    throw new PostError('parse-json', { meta: text });
+  }
+
+  if (res.status !== 'ok') {
+    console.log(
+      'API call failed: ' +
+        url +
+        '\nData: ' +
+        JSON.stringify(data, null, 2) +
+        '\nResponse: ' +
+        JSON.stringify(res, null, 2),
+    );
+
+    throw new PostError(res.description || res.reason || 'unknown');
+  }
+
+  return res.data;
+}
+
 export async function postBinary(url, data, headers) {
   let res;
   try {

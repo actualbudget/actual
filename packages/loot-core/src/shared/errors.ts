@@ -105,3 +105,39 @@ export class LazyLoadFailedError extends Error {
     this.meta = { name };
   }
 }
+
+export function getUserDirectoryErrors(reason: string) {
+  switch (reason) {
+    case 'unauthorized':
+      return 'You are not logged in.';
+    case 'token-expired':
+      return 'Login expired, please login again.';
+    case 'user-cant-be-empty':
+      return 'Please enter a value for the username; the field cannot be empty.';
+    case 'role-cant-be-empty':
+      return 'Select a role; the field cannot be empty.';
+    case 'user-already-exists':
+      return 'The username you entered already exists. Please choose a different username.';
+    case 'not-all-deleted':
+      return 'Not all users were deleted. Check if one of the selected users is the master user.';
+    default:
+      return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
+  }
+}
+
+export function getUserAccessErrors(reason: string) {
+  switch (reason) {
+    case 'unauthorized':
+      return 'You are not logged in.';
+    case 'user-cant-be-empty':
+      return 'Please select a user.';
+    case 'invalid-file-id':
+      return 'This file is invalid.';
+    case 'file-denied':
+      return `You don't have permissions over this file.`;
+    case 'user-already-have-access':
+      return `User already have.`;
+    default:
+      return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
+  }
+}

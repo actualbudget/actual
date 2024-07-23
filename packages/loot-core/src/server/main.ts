@@ -26,6 +26,7 @@ import { getStartingBalancePayee } from './accounts/payees';
 import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
 import { batchUpdateTransactions } from './accounts/transactions';
+import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
 import {
@@ -1234,7 +1235,6 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 });
 
 handlers['save-global-prefs'] = async function (prefs) {
-  debugger;
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
@@ -1488,7 +1488,7 @@ handlers['subscribe-get-user'] = async function () {
     const {
       status,
       reason,
-      data: { userName, permissions },
+      data: { userName, permissions, userId, displayName },
     } = JSON.parse(res);
 
     if (status === 'error') {
@@ -1498,7 +1498,7 @@ handlers['subscribe-get-user'] = async function () {
       return { offline: true };
     }
 
-    return { offline: false, userName, permissions };
+    return { offline: false, userName, permissions, userId, displayName };
   } catch (e) {
     console.log(e);
     return { offline: true };
@@ -1641,6 +1641,7 @@ handlers['get-budgets'] = async function () {
                 ? { encryptKeyId: prefs.encryptKeyId }
                 : {}),
               ...(prefs.groupId ? { groupId: prefs.groupId } : {}),
+              ...(prefs.owner ? { owner: prefs.owner } : {}),
               name: prefs.budgetName || '(no name)',
             } satisfies Budget;
           }
@@ -2079,6 +2080,7 @@ app.combine(
   filtersApp,
   reportsApp,
   rulesApp,
+  adminApp,
 );
 
 function getDefaultDocumentDir() {

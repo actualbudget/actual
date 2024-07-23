@@ -29,6 +29,7 @@ export interface RemoteFile {
   name: string;
   encryptKeyId: string;
   hasKey: boolean;
+  owner: string;
 }
 
 async function checkHTTPStatus(res) {
@@ -36,6 +37,13 @@ async function checkHTTPStatus(res) {
     return res.text().then(str => {
       throw new HTTPError(res.status, str);
     });
+  } else if(res.status === 403) {
+    debugger;
+    const data = JSON.parse(res.text())?.data;
+    if(data && data.reason === "token-expired") {
+      asyncStorage.removeItem('user-token');
+      window.location.href = "/";
+    }
   } else {
     return res;
   }

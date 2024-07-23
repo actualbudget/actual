@@ -59,6 +59,8 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
+import { EditUserAccess } from './modals/EditAccess';
+import { TransferOwnership } from './modals/TransferOwnership';
 
 export type CommonModalProps = {
   onClose: () => PopModalAction;
@@ -648,6 +650,26 @@ export function Modals() {
 
         case 'budget-list':
           return <BudgetListModal key={name} modalProps={modalProps} />;
+
+        case 'edit-access':
+          return (
+            <EditUserAccess
+              key={name}
+              modalProps={modalProps}
+              defaultUserAccess={options.access}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'transfer-ownership':
+          return (
+            <TransferOwnership
+              key={name}
+              modalProps={modalProps}
+              defaultUserAccess={options.access}
+              onSave={options.onSave}
+            />
+          );
 
         default:
           console.error('Unknown modal:', name);

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -11,6 +11,7 @@ import {
   loadBudget,
   pushModal,
 } from 'loot-core/client/actions';
+import { send } from 'loot-core/platform/client/fetch';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { useInitialMount } from '../../hooks/useInitialMount';
@@ -21,6 +22,8 @@ import {
   SvgCloudDownload,
   SvgDotsHorizontalTriple,
   SvgFileDouble,
+  SvgUser,
+  SvgUserGroup,
 } from '../../icons/v1';
 import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
@@ -30,6 +33,7 @@ import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 
 function getFileDescription(file) {
@@ -116,55 +120,110 @@ function FileMenuButton({ state, onDelete }) {
   );
 }
 
-function FileState({ file }) {
+function FileState({ file, users, currentUserId }) {
   let Icon;
   let status;
   let color;
+  let ownerName = null;
 
   switch (file.state) {
     case 'unknown':
       Icon = SvgCloudUnknown;
       status = 'Network unavailable';
       color = theme.buttonNormalDisabledText;
+      ownerName = 'unknown';
       break;
     case 'remote':
       Icon = SvgCloudDownload;
       status = 'Available for download';
+      ownerName = getOwnerDisplayName();
       break;
     case 'local':
+      Icon = SvgFileDouble;
+      status = 'Local';
+      break;
+
     case 'broken':
+      ownerName = 'unknown';
       Icon = SvgFileDouble;
       status = 'Local';
       break;
     default:
       Icon = SvgCloudCheck;
       status = 'Syncing';
+      ownerName = getOwnerDisplayName();
       break;
   }
 
-  return (
-    <View
-      style={{
-        color,
-        alignItems: 'center',
-        flexDirection: 'row',
-        marginTop: 8,
-      }}
-    >
-      <Icon
-        style={{
-          width: 18,
-          height: 18,
-          color: 'currentColor',
-        }}
-      />
+  const showOwnerContent = ownerName !== null && file.owner !== currentUserId;
 
-      <Text style={{ marginLeft: 5 }}>{status}</Text>
+  return (
+    <View style={{ width: '100%' }}>
+      <View
+        style={{
+          color,
+          alignItems: 'center',
+          flexDirection: 'row',
+          marginTop: 8,
+        }}
+      >
+        <Icon
+          style={{
+            width: 18,
+            height: 18,
+            color: 'currentColor',
+          }}
+        />
+
+        <Text style={{ marginLeft: 5 }}>{status}</Text>
+      </View>
+
+      <View style={{ paddingTop: 10, flexDirection: 'row', width: '100%' }}>
+        {showOwnerContent && (
+          <View style={{ flexDirection: 'row' }}>
+            <Text
+              style={{
+                ...styles.altMenuHeaderText,
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+              }}
+            >
+              Owner:
+            </Text>
+            <Text
+              style={{
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+                paddingLeft: 10,
+              }}
+            >
+              {ownerName}
+            </Text>
+          </View>
+        )}
+      </View>
     </View>
   );
+
+  function getOwnerDisplayName() {
+    const userFiltered = users.filter(item => item.id === file.owner);
+
+    if (userFiltered.length > 0) {
+      return userFiltered[0].displayName ?? userFiltered[0].userName;
+    }
+    return null;
+  }
 }
 
-function File({ file, quickSwitchMode, onSelect, onDelete }) {
+function File({
+  file,
+  quickSwitchMode,
+  onSelect,
+  onDelete,
+  users,
+  currentUserId,
+  usersPerFile,
+}) {
   const selecting = useRef(false);
 
   async function _onSelect(file) {
@@ -197,10 +256,19 @@ function File({ file, quickSwitchMode, onSelect, onDelete }) {
         },
       }}
     >
-      <View style={{ alignItems: 'flex-start' }}>
-        <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
+      <View style={{ alignItems: 'flex-start', width: '100%' }}>
+        <View style={{ flexDirection: 'row', width: '100%' }}>
+          <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
+          <UserAccessForFile
+            style={{ marginLeft: '5px' }}
+            fileId={file.cloudFileId}
+            ownerId={file.owner}
+            currentUserId={currentUserId}
+            usersPerFile={usersPerFile}
+          />
+        </View>
 
-        <FileState file={file} />
+        <FileState file={file} users={users} currentUserId={currentUserId} />
       </View>
 
       <View
@@ -219,23 +287,36 @@ function File({ file, quickSwitchMode, onSelect, onDelete }) {
           />
         )}
 
-        {!quickSwitchMode && (
-          <FileMenuButton state={file.state} onDelete={() => onDelete(file)} />
-        )}
+        <View>
+          {!quickSwitchMode && (
+            <FileMenuButton
+              state={file.state}
+              onDelete={() => onDelete(file)}
+            />
+          )}
+        </View>
       </View>
     </View>
   );
 }
 
-function BudgetFiles({ files, quickSwitchMode, onSelect, onDelete }) {
+function BudgetFiles({
+  files,
+  quickSwitchMode,
+  onSelect,
+  onDelete,
+  users,
+  currentUserId,
+  usersPerFile,
+}) {
   return (
     <View
       style={{
         flexGrow: 1,
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
           flexGrow: 0,
-          maxHeight: 310,
         },
+        maxHeight: '100%',
         overflow: 'auto',
         '& *': { userSelect: 'none' },
       }}
@@ -255,6 +336,9 @@ function BudgetFiles({ files, quickSwitchMode, onSelect, onDelete }) {
           <File
             key={file.id || file.cloudFileId}
             file={file}
+            users={users}
+            currentUserId={currentUserId}
+            usersPerFile={usersPerFile}
             quickSwitchMode={quickSwitchMode}
             onSelect={onSelect}
             onDelete={onDelete}
@@ -313,6 +397,25 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
   const allFiles = useSelector(state => state.budgets.allFiles || []);
   const [id] = useLocalPref('id');
+  const [users, setUsers] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState('');
+  const userData = useSelector(state => state.user.data);
+  const [usersPerFile, setUsersPerFile] = useState(new Map());
+
+  useEffect(() => {
+    if (!userData.offline) {
+      send('users-get').then(data => {
+        setUsers(data);
+        setCurrentUserId(userData.userId);
+      });
+      send(
+        'users-get-access',
+        allFiles.map(file => file.cloudFileId),
+      ).then(data => {
+        setUsersPerFile(data);
+      });
+    }
+  }, [allFiles, userData.offline, userData.userId]);
 
   const files = id ? allFiles.filter(f => f.id !== id) : allFiles;
 
@@ -344,6 +447,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   return (
     <View
       style={{
+        maxHeight: '100%',
         flex: 1,
         justifyContent: 'center',
         ...(!quickSwitchMode && {
@@ -364,6 +468,9 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       )}
       <BudgetFiles
         files={files}
+        users={users}
+        usersPerFile={usersPerFile}
+        currentUserId={currentUserId}
         quickSwitchMode={quickSwitchMode}
         onSelect={file => {
           if (!id) {
@@ -433,5 +540,86 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         </View>
       )}
     </View>
+  );
+}
+
+function UserAccessForFile({ fileId, currentUserId, ownerId, usersPerFile, ...props }) {
+  let usersAccess = usersPerFile?.has(fileId) ? usersPerFile.get(fileId) : [];
+  usersAccess = usersAccess.filter(user => user.userId !== ownerId);
+
+  const sortedUsersAccess = [...usersAccess].sort((a, b) => {
+    const textA = a.userId === currentUserId ? 'You' : (a.displayName ?? a.userName);
+    const textB = b.userId === currentUserId ? 'You' : (b.displayName ?? b.userName);
+    return textA.localeCompare(textB);
+  });
+
+  return (
+    usersAccess.length > 0 && (
+      <View
+        style={{
+          ...props.style,
+          alignSelf: 'center',
+        }}
+      >
+        <Tooltip
+          content={
+            <View
+              style={{
+                margin: 5,
+              }}
+            >
+              <Text
+                style={{
+                  ...styles.altMenuHeaderText,
+                  ...styles.verySmallText,
+                  color: theme.pageTextLight,
+                }}
+              >
+                File shared with:
+              </Text>
+              <View
+                style={{
+                  padding: 0,
+                }}
+              >
+                {sortedUsersAccess.map(user => (
+                  <View key={user.userId} style={{ flexDirection: 'row' }}>
+                    <SvgUser
+                      style={{
+                        width: 10,
+                        height: 10,
+                        opacity: 0.7,
+                        marginTop: 3,
+                        marginRight: 5,
+                      }}
+                    />
+                    <View
+                      style={{
+                        ...styles.verySmallText,
+                        color: theme.pageTextLight,
+                        margin: 0,
+                        listStylePosition: 'inside',
+                      }}
+                    >
+                      {user.userId === currentUserId ? 'You' : (user.displayName ?? user.userName)}
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          }
+          placement="bottom end"
+        >
+          <SvgUserGroup
+            style={{
+              width: 15,
+              height: 15,
+              alignSelf: 'flex-end',
+              opacity: 0.7,
+            }}
+          />
+        </Tooltip>
+      </View>
+    )
   );
 }

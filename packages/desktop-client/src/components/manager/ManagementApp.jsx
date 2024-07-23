@@ -2,10 +2,13 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import { ProtectedRoute } from '../../auth/ProtectedRoute';
+import { Permissions } from '../../auth/types';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { ExposeNavigate } from '../../util/router-tools';
+import { UserDirectoryPage } from '../admin/UserDirectory/UserDirectoryPage';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
@@ -156,6 +159,16 @@ export function ManagementApp({ isLoading }) {
                   ) : (
                     <Route path="/" element={<WelcomeScreen />} />
                   )}
+
+                  <Route
+                    path="/user-directory"
+                    element={
+                      <ProtectedRoute
+                        permission={Permissions.ADMINISTRATOR}
+                        element={<UserDirectoryPage />}
+                      />
+                    }
+                  />
                   {/* Redirect all other pages to this route */}
                   <Route path="/*" element={<Navigate to="/" />} />
                 </Routes>
@@ -190,6 +203,15 @@ export function ManagementApp({ isLoading }) {
                 <Route path="/error" element={<Error />} />
                 <Route path="/config-server" element={<ConfigServer />} />
                 <Route path="/bootstrap" element={<Bootstrap />} />
+                <Route
+                  path="/userdirectory"
+                  element={
+                    <ProtectedRoute
+                      permission={Permissions.ADMINISTRATOR}
+                      element={<UserDirectoryPage />}
+                    />
+                  }
+                />
                 {/* Redirect all other pages to this route */}
                 <Route
                   path="/*"

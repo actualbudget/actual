@@ -248,6 +248,20 @@ export function listenForSyncEvent(actions, store) {
         case 'network':
           // Show nothing
           break;
+        case 'token-expired':
+          notif = {
+            title: 'Login expired',
+            message:
+              'Please login again.',
+            sticky: true,
+            id: 'login-expired',
+            button: {
+              title: 'Go to login',
+              action: () =>
+                actions.goToLogin(),
+            },
+          };
+          break;
         default:
           console.trace('unkown error', info);
           notif = {

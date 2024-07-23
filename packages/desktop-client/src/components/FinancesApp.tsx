@@ -27,6 +27,7 @@ import { theme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
+import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common/View';
@@ -223,19 +224,15 @@ function FinancesAppWithoutContext() {
                 />
 
                 <Route
-                  path="/users"
+                  path="/user-access"
                   element={
                     <ProtectedRoute
                       permission={Permissions.ADMINISTRATOR}
-                      element={
-                        <NarrowNotSupported>
-                          <WideComponent name="Users" />
-                        </NarrowNotSupported>
-                      }
+                      validateOwner={true}
+                      element={<UserAccessPage />}
                     />
                   }
                 />
-
                 {/* redirect all other traffic to the budget page */}
                 <Route path="/*" element={<Navigate to="/budget" replace />} />
               </Routes>

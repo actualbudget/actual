@@ -50,7 +50,6 @@ export function loadGlobalPrefs() {
 
 export function saveGlobalPrefs(prefs: prefs.GlobalPrefs) {
   return async (dispatch: Dispatch) => {
-    debugger;
     await send('save-global-prefs', prefs);
     dispatch({
       type: constants.MERGE_GLOBAL_PREFS,

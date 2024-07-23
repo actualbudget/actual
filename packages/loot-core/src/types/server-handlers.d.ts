@@ -282,6 +282,8 @@ export interface ServerHandlers {
   'subscribe-get-user': () => Promise<{
     offline: boolean;
     userName?: string;
+    userId?: string;
+    displayName?: string;
     permissions?: string[];
   } | null>;
 

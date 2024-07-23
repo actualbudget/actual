@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { useActions } from '../../hooks/useActions';
 import { View } from '../common/View';
 import { CreateEncryptionKeyModal } from '../modals/CreateEncryptionKeyModal';
+import { EditUser } from '../modals/EditUser';
 import { FixEncryptionKeyModal } from '../modals/FixEncryptionKeyModal';
 import { LoadBackup } from '../modals/LoadBackup';
 
@@ -12,6 +13,7 @@ import { Import } from './Import';
 import { ImportActual } from './ImportActual';
 import { ImportYNAB4 } from './ImportYNAB4';
 import { ImportYNAB5 } from './ImportYNAB5';
+import { EditUserAccess } from '../modals/EditAccess';
 
 export function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);
@@ -81,6 +83,17 @@ export function Modals() {
             options={options}
           />
         );
+
+      case 'edit-user':
+        return (
+          <EditUser
+            key={name}
+            modalProps={modalProps}
+            defaultUser={options.user}
+            onSave={options.onSave}
+          />
+        );
+
       default:
         throw new Error('Unknown modal: ' + name);
     }
