@@ -56,7 +56,8 @@ export function Spending() {
     spendingReportTime === mode;
 
   useEffect(() => {
-    const checkFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
+    const checkFilter =
+      spendingReportFilter && JSON.parse(spendingReportFilter);
     if (checkFilter.conditions) {
       onApplyFilter(checkFilter);
     }
