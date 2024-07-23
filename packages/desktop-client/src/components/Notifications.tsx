@@ -233,16 +233,14 @@ function Notification({
             </ButtonWithLoading>
           )}
         </Stack>
-        {sticky && (
-          <Button
-            variant="bare"
-            aria-label="Close"
-            style={{ flexShrink: 0, color: 'currentColor' }}
-            onPress={onRemove}
-          >
-            <SvgDelete style={{ width: 9, height: 9, color: 'currentColor' }} />
-          </Button>
-        )}
+        <Button
+          variant="bare"
+          aria-label="Close"
+          style={{ flexShrink: 0, color: 'currentColor' }}
+          onPress={onRemove}
+        >
+          <SvgDelete style={{ width: 9, height: 9, color: 'currentColor' }} />
+        </Button>
       </Stack>
       {overlayLoading && (
         <View
