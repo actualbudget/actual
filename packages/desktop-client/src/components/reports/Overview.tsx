@@ -267,9 +267,6 @@ export function Overview() {
                     <Menu<MenuItem>
                       onMenuSelect={item => {
                         if (item === 'custom-report') {
-                          alert(
-                            'Adding custom reports to dashboard is still very much WIP',
-                          );
                           navigate('/reports/custom');
                           return;
                         }

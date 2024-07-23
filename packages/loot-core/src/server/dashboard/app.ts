@@ -26,7 +26,7 @@ app.method('dashboard-add-widget', async widget => {
   // The new widget should be the very last one in the list of all widgets
   if (!('x' in widget) && !('y' in widget)) {
     const data = await db.first(
-      'SELECT x, y FROM dashboard ORDER BY y DESC, x DESC',
+      'SELECT x, y, width, height FROM dashboard WHERE tombstone = 0 ORDER BY y DESC, x DESC',
     );
 
     if (!data) {
