@@ -4,6 +4,8 @@ import {
   type ButtonProps as ReactAriaButtonProps,
 } from 'react-aria-components';
 
+import { css } from 'glamor';
+
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
@@ -129,8 +131,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       variant = 'normal',
       bounce = true,
-      style,
       isDisabled,
+      className,
       ...restProps
     } = props;
 
@@ -147,10 +149,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ..._getActiveStyles(variant, bounce),
     };
 
-    const buttonStyle: ComponentPropsWithoutRef<
-      typeof Button
-    >['style'] = props => ({
-      ...props.defaultStyle,
+    const buttonStyle: ComponentPropsWithoutRef<typeof Button>['style'] = {
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
@@ -165,16 +164,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       transition: 'box-shadow .25s',
       WebkitAppRegion: 'no-drag',
       ...styles.smallText,
-      ...(props.isHovered && !isDisabled ? hoveredStyle : {}),
-      ...(props.isPressed && !isDisabled ? pressedStyle : {}),
-      ...(typeof style === 'function' ? style(props) : style),
-    });
+      ...(isDisabled ? {} : { ':hover': hoveredStyle }),
+      ...(isDisabled ? {} : { ':focus,:active': pressedStyle }),
+    };
 
     return (
       <ReactAriaButton
         ref={ref}
         isDisabled={isDisabled}
-        style={buttonStyle}
+        className={`${String(css(buttonStyle))} ${className}`}
         {...restProps}
       >
         {children}
@@ -193,12 +191,15 @@ export const ButtonWithLoading = forwardRef<
   HTMLButtonElement,
   ButtonWithLoadingProps
 >((props, ref) => {
-  const { isLoading, children, ...buttonProps } = props;
+  const { isLoading, children, style, ...buttonProps } = props;
   return (
     <Button
       {...buttonProps}
       ref={ref}
-      style={{ position: 'relative', ...buttonProps.style }}
+      style={buttonRenderProps => ({
+        position: 'relative',
+        ...(typeof style === 'function' ? style(buttonRenderProps) : style),
+      })}
     >
       {renderProps => (
         <>
