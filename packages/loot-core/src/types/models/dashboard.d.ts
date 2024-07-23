@@ -1,3 +1,5 @@
+import { type CustomReportEntity } from './reports';
+
 type AbstractWidget<
   T extends string,
   Meta extends Record<string, unknown> = null,
@@ -24,3 +26,17 @@ export type SpecializedWidget =
   | CashFlowWidget
   | SpendingWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
+
+// Exported/imported (json) widget definition
+export type ExportImportCustomReportWidget = Omit<Widget, 'meta' | 'type'> & {
+  type: CustomReportWidget['type'];
+  meta: Omit<CustomReportEntity, 'selectedCategories' | 'data' | 'tombstone'>;
+};
+export type ExportImportDashboardWidget =
+  | ExportImportCustomReportWidget
+  | (Omit<Widget, 'meta' | 'type'> & { type: SpecializedWidget['type'] });
+
+export type ExportImportDashboard = {
+  version: 1;
+  widgets: ExportImportDashboardWidget[];
+};

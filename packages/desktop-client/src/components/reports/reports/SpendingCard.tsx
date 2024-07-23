@@ -16,7 +16,7 @@ import { ReportCard } from '../ReportCard';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
-export function SpendingCard() {
+export function SpendingCard({ onRemove }) {
   const categories = useCategories();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -39,7 +39,22 @@ export function SpendingCard() {
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
   return (
-    <ReportCard to="/reports/spending">
+    <ReportCard
+      to="/reports/spending"
+      menuItems={[
+        {
+          name: 'remove',
+          text: 'Remove',
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={() => setIsCardHovered(true)}

@@ -12,7 +12,7 @@ import { undoable } from '../undo';
 
 import { ReportsHandlers } from './types/handlers';
 
-const reportModel = {
+export const reportModel = {
   validate(report: CustomReportEntity, { update }: { update?: boolean } = {}) {
     requiredFields('Report', report, ['conditionsOp'], update);
 

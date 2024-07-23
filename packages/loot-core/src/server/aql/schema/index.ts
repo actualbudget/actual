@@ -177,6 +177,7 @@ export const schema = {
     x: f('integer', { required: true }),
     y: f('integer', { required: true }),
     meta: f('json'),
+    tombstone: f('boolean'),
   },
 };
 

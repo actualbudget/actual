@@ -13,4 +13,7 @@ export interface DashboardHandlers {
     widget: Omit<Widget, 'id' | 'x' | 'y'> & Partial<Pick<Widget, 'x' | 'y'>>,
   ) => Promise<void>;
   'dashboard-remove-widget': (widgetId: string) => Promise<void>;
+  'dashboard-import': (args: {
+    filepath: string;
+  }) => Promise<{ status: 'ok' } | { error: 'internal-error' }>;
 }

@@ -94,7 +94,6 @@ export function ReportCard({
           }}
         />
 
-        {/* TODO: I think it makes sense to move this code outside ReportCard? Also: how does the consumer control the actions? */}
         {menuItems && (
           <View
             className={menuOpen ? undefined : 'hover-visible'}

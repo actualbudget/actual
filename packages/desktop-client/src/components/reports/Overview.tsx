@@ -1,6 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+
+import { addNotification } from 'loot-core/src/client/actions';
 
 import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
@@ -8,6 +11,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import {
   type CustomReportEntity,
   type CustomReportWidget,
+  type ExportImportDashboard,
   type SpecializedWidget,
   type Widget,
 } from 'loot-core/src/types/models';
@@ -17,7 +21,7 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
 import { breakpoints } from '../../tokens';
-import { Button } from '../common/Button2';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
@@ -66,19 +70,26 @@ function useWidgetLayout(
     customReports.map(report => [report.id, report]),
   );
 
-  const dashboardWidgets = widgets.map(widget => ({
-    i: widget.id,
-    type: widget.type,
-    x: widget.x,
-    y: widget.y,
-    w: widget.width,
-    h: widget.height,
-    minW: isCustomReportWidget(widget) ? 2 : 3,
-    minH: isCustomReportWidget(widget) ? 1 : 2,
-    meta: isCustomReportWidget(widget)
-      ? { report: customReportMap.get(widget.meta.id) }
-      : {},
-  }));
+  const dashboardWidgets = widgets
+    .filter(
+      widget =>
+        !isCustomReportWidget(widget) ||
+        // Edge case: remove widgets referencing non-existing custom reports
+        customReportMap.has(widget.meta.id),
+    )
+    .map(widget => ({
+      i: widget.id,
+      type: widget.type,
+      x: widget.x,
+      y: widget.y,
+      w: widget.width,
+      h: widget.height,
+      minW: isCustomReportWidget(widget) ? 2 : 3,
+      minH: isCustomReportWidget(widget) ? 1 : 2,
+      meta: isCustomReportWidget(widget)
+        ? { report: customReportMap.get(widget.meta.id) }
+        : {},
+    }));
 
   // Calculate the max layout Y in order to know where to insert the missing
   // custom reports
@@ -104,8 +115,11 @@ function useWidgetLayout(
 }
 
 export function Overview() {
+  const dispatch = useDispatch();
+
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
@@ -150,6 +164,62 @@ export function Overview() {
     send('dashboard-remove-widget', widgetId);
   };
 
+  const onExport = () => {
+    const widgetMap = new Map(layout.map(item => [item.i, item]));
+
+    const data = {
+      version: 1,
+      widgets: layout
+        .map(item => widgetMap.get(item.i))
+        .map(item => ({
+          id: item.i,
+          type: item.type,
+          width: item.w,
+          height: item.h,
+          x: item.x,
+          y: item.y,
+          meta:
+            item.type === 'custom-report'
+              ? {
+                  ...item.meta.report,
+                  data: undefined,
+                  selectedCategories: undefined,
+                }
+              : undefined,
+        })),
+    } satisfies ExportImportDashboard;
+
+    window.Actual?.saveFile(
+      JSON.stringify(data, null, 2),
+      'dashboard.json',
+      'Export Dashboard',
+    );
+  };
+  const onImport = async () => {
+    const [filepath] = await window.Actual?.openFileDialog({
+      properties: ['openFile'],
+      filters: [
+        {
+          name: 'JSON files',
+          extensions: ['json'],
+        },
+      ],
+    });
+
+    setIsImporting(true);
+    const res = await send('dashboard-import', { filepath });
+    setIsImporting(false);
+
+    if (res.error) {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: 'Failed importing the dashboard file.',
+        }),
+      );
+    }
+  };
+
   const accounts = useAccounts();
 
   if (isLoading) {
@@ -183,6 +253,7 @@ export function Overview() {
                   <Button
                     ref={triggerRef}
                     variant="primary"
+                    isDisabled={isImporting}
                     onPress={() => setMenuOpen(true)}
                   >
                     Add new widget
@@ -230,14 +301,12 @@ export function Overview() {
                   </Popover>
 
                   {/* TODO: should we have a reset button too? */}
-                  {/* TODO: make this button work.. and think about how to improve the UI for it (icon maybe?) */}
-                  <Button
-                    onPress={() =>
-                      alert('This functionality is not yet implemented')
-                    }
-                  >
-                    Export/Import
+                  <Button isDisabled={isImporting} onPress={onExport}>
+                    Export
                   </Button>
+                  <ButtonWithLoading isLoading={isImporting} onPress={onImport}>
+                    Import
+                  </ButtonWithLoading>
                 </>
               )}
             </View>
@@ -247,34 +316,41 @@ export function Overview() {
       padding={10}
       style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
     >
-      <View style={{ userSelect: 'none' }}>
-        <ResponsiveGridLayout
-          breakpoints={{ desktop: breakpoints.medium, mobile: 0 }}
-          layouts={{ desktop: layout, mobile: layout }}
-          onLayoutChange={onLayoutChange}
-          cols={{ desktop: 12, mobile: 1 }}
-          rowHeight={100}
-          draggableHandle=".draggable-handle"
-        >
-          {layout.map(item => (
-            <div key={item.i}>
-              {item.type === 'net-worth-card' ? (
-                <NetWorthCard
-                  accounts={accounts}
-                  onRemove={() => onRemoveWidget(item.i)}
-                />
-              ) : item.type === 'cash-flow-card' ? (
-                <CashFlowCard onRemove={() => onRemoveWidget(item.i)} />
-              ) : item.type === 'spending-card' ? (
-                <SpendingCard />
-              ) : item.type === 'custom-report' ? (
-                // @ts-expect-error newer TS version should allow doing this
-                <CustomReportListCards report={item.meta.report} />
-              ) : null}
-            </div>
-          ))}
-        </ResponsiveGridLayout>
-      </View>
+      {isImporting ? (
+        <LoadingIndicator message="Import is running..." />
+      ) : (
+        <View style={{ userSelect: 'none' }}>
+          <ResponsiveGridLayout
+            breakpoints={{ desktop: breakpoints.medium, mobile: 0 }}
+            layouts={{ desktop: layout, mobile: layout }}
+            onLayoutChange={onLayoutChange}
+            cols={{ desktop: 12, mobile: 1 }}
+            rowHeight={100}
+            draggableHandle=".draggable-handle"
+          >
+            {layout.map(item => (
+              <div key={item.i}>
+                {item.type === 'net-worth-card' ? (
+                  <NetWorthCard
+                    accounts={accounts}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
+                ) : item.type === 'cash-flow-card' ? (
+                  <CashFlowCard onRemove={() => onRemoveWidget(item.i)} />
+                ) : item.type === 'spending-card' ? (
+                  <SpendingCard onRemove={() => onRemoveWidget(item.i)} />
+                ) : item.type === 'custom-report' ? (
+                  // @ts-expect-error newer TS version should allow doing this
+                  <CustomReportListCards
+                    report={item.meta.report}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
+                ) : null}
+              </div>
+            ))}
+          </ResponsiveGridLayout>
+        </View>
+      )}
     </Page>
   );
 }

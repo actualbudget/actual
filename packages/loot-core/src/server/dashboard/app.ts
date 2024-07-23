@@ -1,5 +1,13 @@
+import {
+  type ExportImportDashboard,
+  type ExportImportDashboardWidget,
+  type ExportImportCustomReportWidget,
+} from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
+import { reportModel } from '../reports/app';
+import * as fs from '../../platform/server/fs';
+import { captureException, captureBreadcrumb } from '../../platform/exceptions';
 
 import { DashboardHandlers } from './types/handlers';
 
@@ -35,5 +43,94 @@ app.method('dashboard-add-widget', async widget => {
 });
 
 app.method('dashboard-remove-widget', async widgetId => {
-  await db.delete_('dashboard', { id: widgetId });
+  await db.delete_('dashboard', widgetId);
+});
+
+app.method('dashboard-import', async ({ filepath }) => {
+  function isCustomReportWidget(
+    widget: ExportImportDashboardWidget,
+  ): widget is ExportImportCustomReportWidget {
+    return widget.type === 'custom-report';
+  }
+
+  try {
+    if (!(await fs.exists(filepath))) {
+      throw new Error(`File not found at the provided path: ${filepath}`);
+    }
+
+    const content = await fs.readFile(filepath);
+    const parsedContent: ExportImportDashboard = JSON.parse(content); // TODO: what if this fails?
+
+    // TODO: validate the input json?
+
+    const customReportIds = await db.all('SELECT id from custom_reports');
+    const customReportIdSet = new Set(customReportIds.map(({ id }) => id));
+    const importedCustomReportIdSet = new Set(
+      parsedContent.widgets
+        .filter(isCustomReportWidget)
+        .map(({ meta }) => meta.id),
+    );
+
+    // TODO: custom reports - do I even need to manage the "tombstone" state?
+    // Perhaps we can just use the dashboard definition as the source of truth
+    // for deletion and then ignore the custom report tombstone status. TBD
+    // TODO: transactions dont actually work
+    await db.asyncTransaction(async () => {
+      await Promise.all([
+        // Delete all widgets
+        db.deleteAll('dashboard'),
+
+        // Insert new widgets
+        ...parsedContent.widgets.map(widget =>
+          db.insertWithSchema('dashboard', {
+            type: widget.type,
+            width: widget.width,
+            height: widget.height,
+            x: widget.x,
+            y: widget.y,
+            meta: isCustomReportWidget(widget) ? { id: widget.meta.id } : null,
+          }),
+        ),
+
+        // Delete all custom reports that do not match the IDs in the imported json
+        ...customReportIds
+          .filter(({ id }) => !importedCustomReportIdSet.has(id))
+          .map(({ id }) => db.delete_('custom_reports', id)),
+
+        // Insert new custom reports
+        ...parsedContent.widgets
+          .filter(isCustomReportWidget)
+          .filter(({ meta }) => !customReportIdSet.has(meta.id))
+          .map(({ meta }) =>
+            db.insertWithSchema('custom_reports', reportModel.fromJS(meta)),
+          ),
+
+        // Update existing reports
+        // TODO: test this
+        ...parsedContent.widgets
+          .filter(isCustomReportWidget)
+          .filter(({ meta }) => customReportIdSet.has(meta.id))
+          .map(({ meta }) =>
+            db.updateWithSchema('custom_reports', {
+              // Replace `undefined` values with `null`
+              // (null clears the value in DB; undefined breaks the operation)
+              ...Object.fromEntries(
+                Object.entries(reportModel.fromJS(meta)).map(([key, value]) => [
+                  key,
+                  value ?? null,
+                ]),
+              ),
+              tombstone: false, // TODO: should this be bool?
+            }),
+          ),
+      ]);
+    });
+
+    // TODO: return IDs of widgets that might have issues
+    return { status: 'ok' as const };
+  } catch (err) {
+    err.message = 'Error importing file: ' + err.message;
+    captureException(err);
+    return { error: 'internal-error' as const };
+  }
 });
