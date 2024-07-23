@@ -38,7 +38,7 @@ import { FloatingActionBar } from '../FloatingActionBar';
 import { ListBox } from './ListBox';
 import { Transaction } from './Transaction';
 
-const NOTIFICATION_BOTTOM_OFFSET = 75;
+const NOTIFICATION_BOTTOM_INSET = 75;
 
 export function TransactionList({
   isLoading,
@@ -231,7 +231,7 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_OFFSET }));
+    dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_INSET }));
     return () => {
       dispatch(setNotificationInset(null));
     };
@@ -347,9 +347,6 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
                           }
                         },
                       },
-                      inset: {
-                        bottom: NOTIFICATION_BOTTOM_OFFSET,
-                      },
                     });
                   },
                 });
@@ -424,9 +421,6 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
                     onSuccess: ids => {
                       showUndoNotification({
                         message: `Successfully duplicated ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
-                        inset: {
-                          bottom: NOTIFICATION_BOTTOM_OFFSET,
-                        },
                       });
                     },
                   });
@@ -438,9 +432,6 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
                       // with `messageActions` to open the schedule when the schedule name is clicked.
                       showUndoNotification({
                         message: `Successfully linked ${ids.length} transaction${ids.length > 1 ? 's' : ''} to ${schedule.name}.`,
-                        inset: {
-                          bottom: NOTIFICATION_BOTTOM_OFFSET,
-                        },
                       });
                     },
                   });
@@ -450,9 +441,6 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
                     onSuccess: ids => {
                       showUndoNotification({
                         message: `Successfully unlinked ${ids.length} transaction${ids.length > 1 ? 's' : ''} from their respective schedules.`,
-                        inset: {
-                          bottom: NOTIFICATION_BOTTOM_OFFSET,
-                        },
                       });
                     },
                   });
