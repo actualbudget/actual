@@ -11,33 +11,53 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import {
-  applyChanges,
-  integerToCurrency,
-  type Diff,
-} from 'loot-core/shared/util';
+import { applyChanges, type Diff } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { type TransactionEntity } from 'loot-core/types/models';
+import {
+  type AccountEntity,
+  type ScheduleEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
-import { useUndo } from '../../../hooks/useUndo';
+type BatchEditProps = {
+  name: keyof TransactionEntity;
+  ids: Array<TransactionEntity['id']>;
+  onSuccess?: (
+    ids: Array<TransactionEntity['id']>,
+    name: keyof TransactionEntity,
+    value: string | number | boolean | null,
+    mode: 'prepend' | 'append' | 'replace' | null | undefined,
+  ) => void;
+};
+
+type BatchDuplicateProps = {
+  ids: Array<TransactionEntity['id']>;
+  onSuccess?: (ids: Array<TransactionEntity['id']>) => void;
+};
+
+type BatchDeleteProps = {
+  ids: Array<TransactionEntity['id']>;
+  onSuccess?: (ids: Array<TransactionEntity['id']>) => void;
+};
+
+type BatchLinkScheduleProps = {
+  ids: Array<TransactionEntity['id']>;
+  account?: AccountEntity;
+  onSuccess?: (
+    ids: Array<TransactionEntity['id']>,
+    schedule: ScheduleEntity,
+  ) => void;
+};
+
+type BatchUnlinkScheduleProps = {
+  ids: Array<TransactionEntity['id']>;
+  onSuccess?: (ids: Array<TransactionEntity['id']>) => void;
+};
 
 export function useTransactionBatchActions() {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const accounts = useAccounts();
-  const payees = usePayees();
-  const { list: categories } = useCategories();
 
-  const { showUndoNotification } = useUndo();
-
-  const onBatchEdit = async (
-    name: keyof TransactionEntity,
-    ids: Array<TransactionEntity['id']>,
-  ) => {
+  const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
     const { data } = await runQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
@@ -127,48 +147,7 @@ export function useTransactionBatchActions() {
 
       await send('transactions-batch-update', changes);
 
-      let displayValue = value;
-      switch (name) {
-        case 'account':
-          displayValue = accounts.find(a => a.id === value)?.name ?? value;
-          break;
-        case 'category':
-          displayValue = categories.find(c => c.id === value)?.name ?? value;
-          break;
-        case 'payee':
-          displayValue = payees.find(p => p.id === value)?.name ?? value;
-          break;
-        case 'amount':
-          displayValue = integerToCurrency(value as number);
-          break;
-        case 'notes':
-          displayValue = `${mode} with ${value}`;
-          break;
-        default:
-          displayValue = value;
-          break;
-      }
-
-      showUndoNotification({
-        message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${displayValue}](#${displayValue}).`,
-        messageActions: {
-          [String(displayValue)]: () => {
-            switch (name) {
-              case 'account':
-                navigate(`/accounts/${value}`);
-                break;
-              case 'category':
-                navigate(`/categories/${value}`);
-                break;
-              case 'payee':
-                navigate(`/payees`);
-                break;
-              default:
-                break;
-            }
-          },
-        },
-      });
+      onSuccess?.(ids, name, value, mode);
     };
 
     const pushPayeeAutocompleteModal = () => {
@@ -259,7 +238,7 @@ export function useTransactionBatchActions() {
     }
   };
 
-  const onBatchDuplicate = async (ids: Array<TransactionEntity['id']>) => {
+  const onBatchDuplicate = async ({ ids, onSuccess }: BatchDuplicateProps) => {
     const onConfirmDuplicate = async (ids: Array<TransactionEntity['id']>) => {
       const { data } = await runQuery(
         q('transactions')
@@ -288,9 +267,7 @@ export function useTransactionBatchActions() {
 
       await send('transactions-batch-update', changes);
 
-      showUndoNotification({
-        message: `Successfully duplicated ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
-      });
+      onSuccess?.(ids);
     };
 
     await checkForReconciledTransactions(
@@ -300,7 +277,7 @@ export function useTransactionBatchActions() {
     );
   };
 
-  const onBatchDelete = async (ids: Array<TransactionEntity['id']>) => {
+  const onBatchDelete = async ({ ids, onSuccess }: BatchDeleteProps) => {
     const onConfirmDelete = (ids: Array<TransactionEntity['id']>) => {
       dispatch(
         pushModal('confirm-transaction-delete', {
@@ -354,11 +331,7 @@ export function useTransactionBatchActions() {
             });
 
             await send('transactions-batch-update', changes);
-            showUndoNotification({
-              type: 'warning',
-
-              message: `Successfully deleted ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
-            });
+            onSuccess?.(ids);
           },
         }),
       );
@@ -371,7 +344,11 @@ export function useTransactionBatchActions() {
     );
   };
 
-  const onLinkSchedule = async (ids: Array<TransactionEntity['id']>) => {
+  const onBatchLinkSchedule = async ({
+    ids,
+    account,
+    onSuccess,
+  }: BatchLinkScheduleProps) => {
     const { data: transactions } = await runQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
@@ -384,27 +361,25 @@ export function useTransactionBatchActions() {
         transactionIds: ids,
         getTransaction: (id: TransactionEntity['id']) =>
           transactions.find((t: TransactionEntity) => t.id === id),
+        accountName: account?.name ?? '',
         onScheduleLinked: schedule => {
-          // TODO: When schedule becomes available in mobile, update undo notification message
-          // with `messageActions` to open the schedule when the schedule name is clicked.
-          showUndoNotification({
-            message: `Successfully linked ${ids.length} transaction${ids.length > 1 ? 's' : ''} to ${schedule.name}.`,
-          });
+          onSuccess?.(ids, schedule);
         },
       }),
     );
   };
 
-  const onUnlinkSchedule = async (ids: Array<TransactionEntity['id']>) => {
+  const onBatchUnlinkSchedule = async ({
+    ids,
+    onSuccess,
+  }: BatchUnlinkScheduleProps) => {
     const changes = {
       updated: ids.map(
         id => ({ id, schedule: null }) as unknown as Partial<TransactionEntity>,
       ),
     };
     await send('transactions-batch-update', changes);
-    showUndoNotification({
-      message: `Successfully unlinked ${ids.length} transaction${ids.length > 1 ? 's' : ''} from their respective schedules.`,
-    });
+    onSuccess?.(ids);
   };
 
   const checkForReconciledTransactions = async (
@@ -437,7 +412,7 @@ export function useTransactionBatchActions() {
     onBatchEdit,
     onBatchDuplicate,
     onBatchDelete,
-    onLinkSchedule,
-    onUnlinkSchedule,
+    onBatchLinkSchedule,
+    onBatchUnlinkSchedule,
   };
 }

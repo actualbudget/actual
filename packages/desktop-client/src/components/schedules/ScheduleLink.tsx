@@ -28,11 +28,11 @@ export function ScheduleLink({
 }: {
   transactionIds: string[];
   getTransaction: (transactionId: string) => TransactionEntity;
-  accountName: string;
+  accountName?: string;
   onScheduleLinked?: (schedule: ScheduleEntity) => void;
 }) {
   const dispatch = useDispatch();
-  const [filter, setFilter] = useState(accountName);
+  const [filter, setFilter] = useState(accountName || '');
 
   const scheduleData = useSchedules({
     transform: useCallback((q: Query) => q.filter({ completed: false }), []),

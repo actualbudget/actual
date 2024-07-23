@@ -2,13 +2,20 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { Item, Section } from '@react-stately/collections';
 
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
 
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useCategories } from '../../../hooks/useCategories';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { usePayees } from '../../../hooks/usePayees';
 import {
   useSelectedDispatch,
   useSelectedItems,
 } from '../../../hooks/useSelected';
+import { useTransactionBatchActions } from '../../../hooks/useTransactionBatchActions';
+import { useUndo } from '../../../hooks/useUndo';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
@@ -19,10 +26,11 @@ import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { FloatingActionBar } from '../FloatingActionBar';
-import { useTransactionBatchActions } from '../hooks/useTransactionBatchActions';
 
 import { ListBox } from './ListBox';
 import { Transaction } from './Transaction';
+
+const NOTIFICATION_BOTTOM_OFFSET = 55;
 
 export function TransactionList({
   isLoading,
@@ -194,13 +202,24 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
 
   const isMoreThanOne = selectedTransactions.size > 1;
 
+  const { showUndoNotification } = useUndo();
   const {
     onBatchEdit,
     onBatchDuplicate,
     onBatchDelete,
-    onLinkSchedule,
-    onUnlinkSchedule,
+    onBatchLinkSchedule,
+    onBatchUnlinkSchedule,
   } = useTransactionBatchActions();
+
+  const navigate = useNavigate();
+  const accounts = useAccounts();
+  const accountsById = useMemo(() => groupById(accounts), [accounts]);
+
+  const payees = usePayees();
+  const payeesById = useMemo(() => groupById(payees), [payees]);
+
+  const { list: categories } = useCategories();
+  const categoriesById = useMemo(() => groupById(categories), [categories]);
 
   return (
     <FloatingActionBar style={style}>
@@ -267,7 +286,57 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={name => {
-                onBatchEdit?.(name, selectedTransactionsArray);
+                onBatchEdit?.({
+                  name,
+                  ids: selectedTransactionsArray,
+                  onSuccess: (ids, name, value, mode) => {
+                    let displayValue = value;
+                    switch (name) {
+                      case 'account':
+                        displayValue = accountsById[value]?.name ?? value;
+                        break;
+                      case 'category':
+                        displayValue = categoriesById[value]?.name ?? value;
+                        break;
+                      case 'payee':
+                        displayValue = payeesById[value]?.name ?? value;
+                        break;
+                      case 'amount':
+                        displayValue = integerToCurrency(value);
+                        break;
+                      case 'notes':
+                        displayValue = `${mode} with ${value}`;
+                        break;
+                      default:
+                        displayValue = value;
+                        break;
+                    }
+
+                    showUndoNotification({
+                      message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${displayValue}](#${displayValue}).`,
+                      messageActions: {
+                        [String(displayValue)]: () => {
+                          switch (name) {
+                            case 'account':
+                              navigate(`/accounts/${value}`);
+                              break;
+                            case 'category':
+                              navigate(`/categories/${value}`);
+                              break;
+                            case 'payee':
+                              navigate(`/payees`);
+                              break;
+                            default:
+                              break;
+                          }
+                        },
+                      },
+                      inset: {
+                        bottom: NOTIFICATION_BOTTOM_OFFSET,
+                      },
+                    });
+                  },
+                });
                 setIsEditMenuOpen(false);
               }}
               items={[
@@ -334,13 +403,53 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
                 if (type === 'duplicate') {
-                  onBatchDuplicate?.(selectedTransactionsArray);
+                  onBatchDuplicate?.({
+                    ids: selectedTransactionsArray,
+                    onSuccess: ids => {
+                      showUndoNotification({
+                        message: `Successfully duplicated ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
+                        inset: {
+                          bottom: NOTIFICATION_BOTTOM_OFFSET,
+                        },
+                      });
+                    },
+                  });
                 } else if (type === 'link-schedule') {
-                  onLinkSchedule?.(selectedTransactionsArray);
+                  onBatchLinkSchedule?.({
+                    ids: selectedTransactionsArray,
+                    onSuccess: (ids, schedule) => {
+                      // TODO: When schedule becomes available in mobile, update undo notification message
+                      // with `messageActions` to open the schedule when the schedule name is clicked.
+                      showUndoNotification({
+                        message: `Successfully linked ${ids.length} transaction${ids.length > 1 ? 's' : ''} to ${schedule.name}.`,
+                        inset: {
+                          bottom: NOTIFICATION_BOTTOM_OFFSET,
+                        },
+                      });
+                    },
+                  });
                 } else if (type === 'unlink-schedule') {
-                  onUnlinkSchedule?.(selectedTransactionsArray);
+                  onBatchUnlinkSchedule?.({
+                    ids: selectedTransactionsArray,
+                    onSuccess: ids => {
+                      showUndoNotification({
+                        message: `Successfully unlinked ${ids.length} transaction${ids.length > 1 ? 's' : ''} from their respective schedules.`,
+                        inset: {
+                          bottom: NOTIFICATION_BOTTOM_OFFSET,
+                        },
+                      });
+                    },
+                  });
                 } else if (type === 'delete') {
-                  onBatchDelete?.(selectedTransactionsArray);
+                  onBatchDelete?.({
+                    ids: selectedTransactionsArray,
+                    onSuccess: ids => {
+                      showUndoNotification({
+                        type: 'warning',
+                        message: `Successfully deleted ${ids.length} transaction${ids.length > 1 ? 's' : ''}.`,
+                      });
+                    },
+                  });
                 }
                 setIsMoreOptionsMenuOpen(false);
               }}

@@ -133,6 +133,7 @@ type FinanceModals = {
     getTransaction: (
       transactionId: TransactionEntity['id'],
     ) => TransactionEntity;
+    accountName?: string;
     onScheduleLinked?: (schedule: ScheduleEntity) => void;
   };
 

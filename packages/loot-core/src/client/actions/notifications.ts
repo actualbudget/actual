@@ -9,7 +9,7 @@ import type {
 } from '../state-types/notifications';
 
 export function addNotification(
-  notification: Omit<Notification, 'id'> & { id?: string },
+  notification: Notification,
 ): AddNotificationAction {
   return {
     type: constants.ADD_NOTIFICATION,

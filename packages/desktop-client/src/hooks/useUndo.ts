@@ -4,21 +4,14 @@ import { useDispatch } from 'react-redux';
 import { undo, redo, addNotification } from 'loot-core/client/actions';
 import { type Notification } from 'loot-core/client/state-types/notifications';
 
-type UndoNotification = Pick<
-  Notification,
-  'type' | 'title' | 'message' | 'messageActions'
->;
-
-type RedoNotification = UndoNotification;
-
 type UndoActions = {
   undo: () => void;
   redo: () => void;
-  showUndoNotification: (undoNotification: UndoNotification) => void;
-  showRedoNotification: (redoNotification: RedoNotification) => void;
+  showUndoNotification: (undoNotification: Notification) => void;
+  showRedoNotification: (redoNotification: Notification) => void;
 };
 
-const timeout = 3000;
+const timeout = 10000;
 
 export function useUndo(): UndoActions {
   const dispatch = useDispatch();
@@ -32,23 +25,16 @@ export function useUndo(): UndoActions {
   }, [dispatch]);
 
   const showUndoNotification = useCallback(
-    ({
-      type = 'message',
-      title,
-      message,
-      messageActions,
-    }: UndoNotification) => {
+    (notification: Notification) => {
       dispatch(
         addNotification({
-          type,
-          title,
-          message,
-          messageActions,
+          type: 'message',
           timeout,
           button: {
             title: 'Undo',
             action: dispatchUndo,
           },
+          ...notification,
         }),
       );
     },
@@ -56,23 +42,16 @@ export function useUndo(): UndoActions {
   );
 
   const showRedoNotification = useCallback(
-    ({
-      type = 'message',
-      title,
-      message,
-      messageActions,
-    }: RedoNotification) => {
+    (notificaton: Notification) => {
       dispatch(
         addNotification({
-          type,
-          title,
-          message,
-          messageActions,
+          type: 'message',
           timeout,
           button: {
             title: 'Redo',
             action: dispatchRedo,
           },
+          ...notificaton,
         }),
       );
     },

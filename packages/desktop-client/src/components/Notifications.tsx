@@ -5,12 +5,12 @@ import React, {
   useMemo,
   type SetStateAction,
 } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { removeNotification } from 'loot-core/client/actions';
 import { type State } from 'loot-core/src/client/state-types';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
-import { useActions } from '../hooks/useActions';
 import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { SvgDelete } from '../icons/v0';
 import { useResponsive } from '../ResponsiveProvider';
@@ -97,6 +97,7 @@ function Notification({
     internal,
     button,
     timeout,
+    inset,
   } = notification;
 
   const [loading, setLoading] = useState(false);
@@ -129,6 +130,10 @@ function Notification({
     <View
       style={{
         marginTop: 10,
+        bottom: inset?.bottom,
+        top: inset?.top,
+        right: inset?.right,
+        left: inset?.left,
         color: positive
           ? theme.noticeText
           : error
@@ -262,7 +267,7 @@ function Notification({
 }
 
 export function Notifications({ style }: { style?: CSSProperties }) {
-  const { removeNotification } = useActions();
+  const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
   const notifications = useSelector(
     (state: State) => state.notifications.notifications,
@@ -286,7 +291,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
             if (note.onClose) {
               note.onClose();
             }
-            removeNotification(note.id);
+            dispatch(removeNotification(note.id));
           }}
         />
       ))}
