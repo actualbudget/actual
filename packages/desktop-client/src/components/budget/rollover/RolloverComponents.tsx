@@ -158,7 +158,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
 
-  const onPopoverAction = (...args: Parameters<typeof onBudgetAction>) => {
+  const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
     onBudgetAction(...args);
     setBudgetMenuOpen(false);
   };
@@ -226,7 +226,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
-                  onPopoverAction(month, 'copy-single-last', {
+                  onMenuAction(month, 'copy-single-last', {
                     category: category.id,
                   });
                 }}
@@ -239,12 +239,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     return;
                   }
 
-                  onPopoverAction(month, `set-single-${numberOfMonths}-avg`, {
+                  onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
                 }}
                 onApplyBudgetTemplate={() => {
-                  onPopoverAction(month, 'apply-single-category-template', {
+                  onMenuAction(month, 'apply-single-category-template', {
                     category: category.id,
                   });
                 }}
