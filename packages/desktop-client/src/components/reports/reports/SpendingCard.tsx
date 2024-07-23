@@ -9,7 +9,6 @@ import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
-import { type SavedFilter } from '../../filters/SavedFilterMenuButton';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { DateRange } from '../DateRange';
 import { SpendingGraph } from '../graphs/SpendingGraph';
@@ -22,19 +21,20 @@ export function SpendingCard() {
   const categories = useCategories();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const defaultFilter: SavedFilter = { name: 'spendingReport' };
+  const defaultFilter: string = JSON.stringify({ name: 'spendingReport' });
   const [spendingReportFilter = defaultFilter] = useLocalPref(
     'spendingReportFilter',
   );
   const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
 
+  const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const getGraphData = useMemo(() => {
     return createSpendingSpreadsheet({
       categories,
-      conditions: spendingReportFilter.conditions,
-      conditionsOp: spendingReportFilter.conditionsOp,
+      conditions: parseFilter.conditions,
+      conditionsOp: parseFilter.conditionsOp,
     });
-  }, [categories, spendingReportFilter]);
+  }, [categories, parseFilter]);
 
   const data = useReport('default', getGraphData);
   const todayDay =

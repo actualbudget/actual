@@ -19,7 +19,6 @@ import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
-import { type SavedFilter } from '../../filters/SavedFilterMenuButton';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -41,7 +40,7 @@ export function Spending() {
     onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
-  const defaultFilter: SavedFilter = { name: 'spendingReport' };
+  const defaultFilter: string = JSON.stringify({ name: 'spendingReport' });
   const [spendingReportFilter = defaultFilter, setSpendingReportFilter] =
     useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
@@ -50,15 +49,16 @@ export function Spending() {
   const [dataCheck, setDataCheck] = useState(false);
   const [mode, setMode] = useState(spendingReportTime);
 
+  const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const filterSaved =
-    JSON.stringify(spendingReportFilter.conditions) ===
-      JSON.stringify(conditions) &&
-    spendingReportFilter.conditionsOp === conditionsOp &&
+    JSON.stringify(parseFilter.conditions) === JSON.stringify(conditions) &&
+    parseFilter.conditionsOp === conditionsOp &&
     spendingReportTime === mode;
 
   useEffect(() => {
-    if (spendingReportFilter.conditions) {
-      onApplyFilter(spendingReportFilter);
+    const checkFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
+    if (checkFilter.conditions) {
+      onApplyFilter(checkFilter);
     }
   }, [onApplyFilter, spendingReportFilter]);
 
@@ -81,11 +81,12 @@ export function Spending() {
   }
 
   const saveFilter = () => {
-    setSpendingReportFilter({
-      conditions,
-      conditionsOp,
-      name: 'spendingReport',
-    });
+    setSpendingReportFilter(
+      JSON.stringify({
+        conditionsOp,
+        conditions,
+      }),
+    );
     setSpendingReportTime(mode);
   };
 
