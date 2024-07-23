@@ -40,8 +40,9 @@ export function Spending() {
     onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
-  const [spendingReportFilter = '', setSpendingReportFilter] =
-    useLocalPref('spendingReportFilter');
+  const [spendingReportFilter = '', setSpendingReportFilter] = useLocalPref(
+    'spendingReportFilter',
+  );
   const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
     useLocalPref('spendingReportTime');
 

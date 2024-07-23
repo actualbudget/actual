@@ -21,9 +21,7 @@ export function SpendingCard() {
   const categories = useCategories();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const [spendingReportFilter = ''] = useLocalPref(
-    'spendingReportFilter',
-  );
+  const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
 
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
