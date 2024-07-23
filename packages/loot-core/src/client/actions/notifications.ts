@@ -43,6 +43,6 @@ export function setNotificationInset(
 ): SetNotificationInsetAction {
   return {
     type: constants.SET_NOTIFICATION_INSET,
-    inset,
+    inset: inset ? inset : {},
   };
 }
