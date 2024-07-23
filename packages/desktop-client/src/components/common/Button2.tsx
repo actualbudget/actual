@@ -149,7 +149,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ..._getActiveStyles(variant, bounce),
     };
 
-    const buttonStyle: ComponentPropsWithoutRef<typeof Button>['style'] = {
+    const buttonStyle: CSSProperties = {
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
