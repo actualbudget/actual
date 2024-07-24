@@ -3,13 +3,9 @@ import { useLocation } from 'react-router-dom';
 import * as Platform from 'loot-core/src/client/platform';
 
 import { type CSSProperties } from '../../style';
-import { Modal, type ModalProps } from '../common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-
-type KeyboardShortcutsModalProps = {
-  modalProps?: Partial<ModalProps>;
-};
 
 type KeyIconProps = {
   shortcut: string;
@@ -152,156 +148,191 @@ function Shortcut({
   );
 }
 
-export function KeyboardShortcutModal({
-  modalProps,
-}: KeyboardShortcutsModalProps) {
+export function KeyboardShortcutModal() {
   const location = useLocation();
   const onBudget = location.pathname.startsWith('/budget');
   const onAccounts = location.pathname.startsWith('/accounts');
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   return (
-    <Modal title="Keyboard Shortcuts" {...modalProps}>
-      <View
-        style={{
-          flexDirection: 'row',
-          fontSize: 13,
-        }}
-      >
-        <View>
-          <Shortcut shortcut="?" description="Show this help dialog" />
-          <Shortcut
-            shortcut="O"
-            description="Close the current budget and open another"
-            meta={ctrl}
+    <Modal name="keyboard-shortcuts">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Keyboard Shortcuts"
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-          <Shortcut
-            shortcut="P"
-            description="Toggle the privacy filter"
-            meta={ctrl}
-            shift={true}
-          />
-          {onBudget && (
-            <Shortcut
-              shortcut="0"
-              description="View current month"
-              style={{
-                fontVariantNumeric: 'slashed-zero',
-              }}
-            />
-          )}
-          {onAccounts && (
-            <>
-              <Shortcut shortcut="Enter" description="Move down when editing" />
+          <View
+            style={{
+              flexDirection: 'row',
+              fontSize: 13,
+            }}
+          >
+            <View>
+              <Shortcut shortcut="?" description="Show this help dialog" />
               <Shortcut
-                shortcut="Enter"
-                description="Move up when editing"
-                shift={true}
-              />
-              <Shortcut
-                shortcut="I"
-                description="Import transactions"
+                shortcut="O"
+                description="Close the current budget and open another"
                 meta={ctrl}
-              />
-              <Shortcut shortcut="B" description="Bank sync" meta={ctrl} />
-              <GroupHeading group="Select a transaction, then" />
-              <Shortcut
-                shortcut="J"
-                description="Move to the next transaction down"
-              />
-              <Shortcut
-                shortcut="K"
-                description="Move to the next transaction up"
-              />
-              <Shortcut
-                shortcut="↑"
-                description="Move to the next transaction down and scroll"
-              />
-              <Shortcut
-                shortcut="↓"
-                description="Move to the next transaction up and scroll"
-              />
-              <Shortcut
-                shortcut="Space"
-                description="Toggle selection of current transaction"
-              />
-              <Shortcut
-                shortcut="Space"
-                description="Toggle all transactions between current and most recently selected transaction"
-                shift={true}
-              />
-            </>
-          )}
-        </View>
-        <View
-          style={{
-            marginRight: 15,
-          }}
-        >
-          <Shortcut
-            shortcut="Z"
-            description="Undo the last change"
-            meta={ctrl}
-          />
-          <Shortcut
-            shortcut="Z"
-            description="Redo the last undone change"
-            shift={true}
-            meta={ctrl}
-          />
-          {onBudget && (
-            <>
-              <Shortcut shortcut="←" description="View previous month" />
-              <Shortcut shortcut="→" description="View next month" />
-            </>
-          )}
-          {onAccounts && (
-            <>
-              <Shortcut
-                shortcut="A"
-                description="Select all transactions"
-                meta={ctrl}
-              />
-              <Shortcut shortcut="Tab" description="Move right when editing" />
-              <Shortcut
-                shortcut="Tab"
-                description="Move left when editing"
-                shift={true}
-              />
-              <Shortcut shortcut="T" description="Add a new transaction" />
-              <Shortcut shortcut="F" description="Filter transactions" />
-              <GroupHeading group="With transaction(s) selected" />
-              <Shortcut
-                shortcut="F"
-                description="Filter to the selected transactions"
-              />
-              <Shortcut
-                shortcut="D"
-                description="Delete selected transactions"
-              />
-              <Shortcut
-                shortcut="A"
-                description="Set account for selected transactions"
               />
               <Shortcut
                 shortcut="P"
-                description="Set payee for selected transactions"
+                description="Toggle the privacy filter"
+                meta={ctrl}
+                shift={true}
+              />
+              {onBudget && (
+                <Shortcut
+                  shortcut="0"
+                  description="View current month"
+                  style={{
+                    fontVariantNumeric: 'slashed-zero',
+                  }}
+                />
+              )}
+              {onAccounts && (
+                <>
+                  <Shortcut
+                    shortcut="Enter"
+                    description="Move down when editing"
+                  />
+                  <Shortcut
+                    shortcut="Enter"
+                    description="Move up when editing"
+                    shift={true}
+                  />
+                  <Shortcut
+                    shortcut="I"
+                    description="Import transactions"
+                    meta={ctrl}
+                  />
+                  <Shortcut shortcut="B" description="Bank sync" meta={ctrl} />
+                  <GroupHeading group="Select a transaction, then" />
+                  <Shortcut
+                    shortcut="J"
+                    description="Move to the next transaction down"
+                  />
+                  <Shortcut
+                    shortcut="K"
+                    description="Move to the next transaction up"
+                  />
+                  <Shortcut
+                    shortcut="↑"
+                    description="Move to the next transaction down and scroll"
+                  />
+                  <Shortcut
+                    shortcut="↓"
+                    description="Move to the next transaction up and scroll"
+                  />
+                  <Shortcut
+                    shortcut="Space"
+                    description="Toggle selection of current transaction"
+                  />
+                  <Shortcut
+                    shortcut="Space"
+                    description="Toggle all transactions between current and most recently selected transaction"
+                    shift={true}
+                  />
+                </>
+              )}
+            </View>
+            <View
+              style={{
+                marginRight: 15,
+              }}
+            >
+              <Shortcut
+                shortcut="Z"
+                description="Undo the last change"
+                meta={ctrl}
               />
               <Shortcut
-                shortcut="N"
-                description="Set notes for selected transactions"
+                shortcut="Z"
+                description="Redo the last undone change"
+                shift={true}
+                meta={ctrl}
               />
-              <Shortcut
-                shortcut="C"
-                description="Set category for selected transactions"
-              />
-              <Shortcut
-                shortcut="L"
-                description="Toggle cleared for current transaction"
-              />
-            </>
-          )}
-        </View>
-      </View>
+              {onAccounts && (
+                <>
+                  <Shortcut
+                    shortcut="Enter"
+                    description="Move up when editing"
+                    shift={true}
+                  />
+                  <Shortcut
+                    shortcut="Tab"
+                    description="Move left when editing"
+                    shift={true}
+                  />
+                  {onBudget && (
+                    <>
+                      <Shortcut
+                        shortcut="←"
+                        description="View previous month"
+                      />
+                      <Shortcut shortcut="→" description="View next month" />
+                    </>
+                  )}
+                  {onAccounts && (
+                    <>
+                      <Shortcut
+                        shortcut="A"
+                        description="Select all transactions"
+                        meta={ctrl}
+                      />
+                      <Shortcut
+                        shortcut="Tab"
+                        description="Move right when editing"
+                      />
+                      <Shortcut
+                        shortcut="Tab"
+                        description="Move left when editing"
+                        shift={true}
+                      />
+                      <Shortcut
+                        shortcut="T"
+                        description="Add a new transaction"
+                      />
+                      <Shortcut
+                        shortcut="F"
+                        description="Filter transactions"
+                      />
+                      <GroupHeading group="With transaction(s) selected" />
+                      <Shortcut
+                        shortcut="F"
+                        description="Filter to the selected transactions"
+                      />
+                      <Shortcut
+                        shortcut="D"
+                        description="Delete selected transactions"
+                      />
+                      <Shortcut
+                        shortcut="A"
+                        description="Set account for selected transactions"
+                      />
+                      <Shortcut
+                        shortcut="P"
+                        description="Set payee for selected transactions"
+                      />
+                      <Shortcut
+                        shortcut="N"
+                        description="Set notes for selected transactions"
+                      />
+                      <Shortcut
+                        shortcut="C"
+                        description="Set category for selected transactions"
+                      />
+                      <Shortcut
+                        shortcut="L"
+                        description="Toggle cleared for current transaction"
+                      />
+                    </>
+                  )}
+                </>
+              )}
+            </View>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }
