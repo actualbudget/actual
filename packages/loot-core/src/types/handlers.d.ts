@@ -5,6 +5,8 @@ import type { ReportsHandlers } from '../server/reports/types/handlers';
 import type { RulesHandlers } from '../server/rules/types/handlers';
 import type { SchedulesHandlers } from '../server/schedules/types/handlers';
 import type { ToolsHandlers } from '../server/tools/types/handlers';
+import type { CategoriesHandlers } from '../server/categories/types/handlers';
+
 
 import type { ApiHandlers } from './api-handlers';
 import type { ServerHandlers } from './server-handlers';
