@@ -20,7 +20,7 @@ export interface CategoryHandlers {
   'get-api-category-groups': () => Promise<Array<APICategoryGroupEntity>>;
 
   'category-validate': (
-    rule: Partial<CategoryEntity>,
+    category: Partial<CategoryEntity>,
   ) => Promise<{ error: ValidationError | null }>;
 
   'category-create': (arg: {
@@ -28,9 +28,9 @@ export interface CategoryHandlers {
     groupId?: string;
     isIncome?: boolean;
     hidden?: boolean;
-  }) => Promise<string>;
+  }) => Promise<CategoryEntity>;
 
-  'category-update': (category: CategoryEntity) => Promise<unknown>;
+  'category-update': (category: Partial<CategoryEntity>) => Promise<{ error: ValidationError | object }>;
 
   'category-move': (arg: {
     id: string;
@@ -46,9 +46,9 @@ export interface CategoryHandlers {
   'category-group-create': (arg: {
     name: string;
     isIncome?: boolean;
-  }) => Promise<string>;
+  }) => Promise<CategoryGroupEntity>;
 
-  'category-group-update': (group: CategoryGroupEntity) => Promise<unknown>;
+  'category-group-update': (group: CategoryGroupEntity) => Promise<{ error: ValidationError | object }>;
 
   'category-group-move': (arg: {
     id: string;
@@ -60,5 +60,4 @@ export interface CategoryHandlers {
     transferId: string;
   }) => Promise<unknown>;
 
-  'must-category-transfer': (arg: { id: string }) => Promise<unknown>;
-}
+  'must-category-transfer': (arg: { id: string }) => Promise<{ error: ValidationError | object }>;

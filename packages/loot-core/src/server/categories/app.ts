@@ -16,18 +16,21 @@ export const app = createApp<CategoryHandlers>();
 
 app.method(
   'category-create',
-  mutator(async function (category: CategoryEntity) {
+  mutator(async function (category: CategoryEntity): Promise<CategoryEntity> {
     return withUndo(async () => {
       if (!category.cat_group) {
         throw APIError('Creating a category: groupId is required');
       }
-
-      return db.insertCategory({
+      const newCategory = await db.insertCategory({
         name: category.name,
         cat_group: category.cat_group,
-        is_income: category.is_income ? 1 : 0,
-        hidden: category.hidden ? 1 : 0,
+        is_income: category.is_income ? true : false,
+        hidden: category.hidden ? true : false,
       });
+
+      return {
+        ...newCategory,
+      };
     });
   }),
 );
