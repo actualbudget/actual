@@ -13,7 +13,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
-import { useIsOpenId, useServerVersion } from '../ServerContext';
+import { useMultiuserEnabled, useServerVersion } from '../ServerContext';
 
 import { BudgetList } from './BudgetList';
 import { ConfigServer } from './ConfigServer';
@@ -54,7 +54,7 @@ function Version() {
 export function ManagementApp({ isLoading }) {
   const files = useSelector(state => state.budgets.allFiles);
   const userData = useSelector(state => state.user.data);
-  const isOpenID = useIsOpenId();
+  const multiuserEnabled = useMultiuserEnabled();
 
   const managerHasInitialized = useSelector(
     state => state.app.managerHasInitialized,
@@ -162,7 +162,7 @@ export function ManagementApp({ isLoading }) {
                     <Route path="/" element={<WelcomeScreen />} />
                   )}
 
-                  {isOpenID && (
+                  {multiuserEnabled && (
                     <Route
                       path="/user-directory"
                       element={
@@ -207,7 +207,7 @@ export function ManagementApp({ isLoading }) {
                 <Route path="/error" element={<Error />} />
                 <Route path="/config-server" element={<ConfigServer />} />
                 <Route path="/bootstrap" element={<Bootstrap />} />
-                {isOpenID && (
+                {multiuserEnabled && (
                   <Route
                     path="/userdirectory"
                     element={

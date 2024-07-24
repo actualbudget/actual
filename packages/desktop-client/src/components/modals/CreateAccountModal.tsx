@@ -23,7 +23,7 @@ import { Tooltip } from '../tooltips';
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
 import { Error, Warning } from '../alerts';
-import { useIsOpenId } from '../ServerContext';
+import { useMultiuserEnabled } from '../ServerContext';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -44,7 +44,7 @@ export function CreateAccountModal({
   const [menuGoCardlessOpen, setGoCardlessMenuOpen] = useState<boolean>(false);
   const [menuSimplefinOpen, setSimplefinMenuOpen] = useState<boolean>(false);
   const { hasPermission } = useAuth();
-  const isOpenID = useIsOpenId();
+  const multiuserEnabled = useMultiuserEnabled();
 
   const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
@@ -183,7 +183,7 @@ export function CreateAccountModal({
 
   const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
 
-  const canSetSecrets = !isOpenID || hasPermission(Permissions.ADMINISTRATOR);
+  const canSetSecrets = !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
 
   return (
     <Modal title={title} {...modalProps}>

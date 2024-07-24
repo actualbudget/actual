@@ -11,10 +11,10 @@ import { Button } from '../common/Button';
 import { Label } from '../common/Label';
 import { useDispatch } from 'react-redux';
 import { pushModal } from 'loot-core/client/actions';
-import { useIsOpenId, useLoginMethod } from '../ServerContext';
+import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 
 export function AuthSettings() {
-  const isOpenID = useIsOpenId();
+  const multiuserEnabled     = useMultiuserEnabled();
   const loginMethod = useLoginMethod();
   const dispatch = useDispatch();
 
@@ -36,7 +36,7 @@ export function AuthSettings() {
               },
             }}
           />
-          {!isOpenID && (
+          {!multiuserEnabled && (
             <>
               <Button
                 id="start-using"
@@ -60,7 +60,7 @@ export function AuthSettings() {
               />
             </>
           )}
-          {isOpenID && (
+          {multiuserEnabled && (
             <>
               <Button
                 style={{

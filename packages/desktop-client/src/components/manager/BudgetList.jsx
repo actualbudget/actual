@@ -35,7 +35,7 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
-import { useIsOpenId } from '../ServerContext';
+import { useMultiuserEnabled } from '../ServerContext';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -413,10 +413,10 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const [currentUserId, setCurrentUserId] = useState('');
   const userData = useSelector(state => state.user.data);
   const [usersPerFile, setUsersPerFile] = useState(new Map());
-  const isOpenID = useIsOpenId();
+  const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
-    if (isOpenID) {
+    if (multiuserEnabled) {
       if (!userData.offline) {
         send('users-get').then(data => {
           setUsers(data);
@@ -430,7 +430,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         });
       }
     }
-  }, [allFiles, userData.offline, userData.userId, isOpenID]);
+  }, [allFiles, userData.offline, userData.userId, multiuserEnabled]);
 
   const files = id ? allFiles.filter(f => f.id !== id) : allFiles;
 
@@ -487,7 +487,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         usersPerFile={usersPerFile}
         currentUserId={currentUserId}
         quickSwitchMode={quickSwitchMode}
-        isOpenID={isOpenID}
+        isOpenID={multiuserEnabled}
         onSelect={file => {
           if (!id) {
             if (file.state === 'remote') {

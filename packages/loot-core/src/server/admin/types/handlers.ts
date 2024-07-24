@@ -48,4 +48,6 @@ export interface AdminHandlers {
   'file-owner-get': (fileId: string) => Promise<UserEntity | null>;
 
   'auth-mode': () => Promise<string>;
+
+  'multiuser-get': () => Promise<boolean | null>;
 }

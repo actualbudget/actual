@@ -13,7 +13,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 type ServerContextValue = {
   url: string | null;
   version: string;
-  isOpenId: boolean;
+  multiuserEnabled: boolean;
   loginMethod: string;
   setURL: (
     url: string,
@@ -24,7 +24,7 @@ type ServerContextValue = {
 const ServerContext = createContext<ServerContextValue>({
   url: null,
   version: '',
-  isOpenId: false,
+  multiuserEnabled: false,
   loginMethod: '',
   setURL: () => Promise.reject(new Error('ServerContext not initialized')),
 });
@@ -32,7 +32,7 @@ const ServerContext = createContext<ServerContextValue>({
 export const useServerURL = () => useContext(ServerContext).url;
 export const useServerVersion = () => useContext(ServerContext).version;
 export const useSetServerURL = () => useContext(ServerContext).setURL;
-export const useIsOpenId = () => useContext(ServerContext).isOpenId;
+export const useMultiuserEnabled = () => useContext(ServerContext).multiuserEnabled;
 export const useLoginMethod = () => useContext(ServerContext).loginMethod;
 
 async function getServerVersion() {
@@ -46,7 +46,7 @@ async function getServerVersion() {
 export function ServerProvider({ children }: { children: ReactNode }) {
   const [serverURL, setServerURL] = useState('');
   const [version, setVersion] = useState('');
-  const [isOpenId, setIsOpenId] = useState(false);
+  const [multiuserEnabled, setMultiuserEnabled] = useState(false);
   const [loginMethod, setLoginMethod] = useState(false);
 
   useEffect(() => {
@@ -60,8 +60,10 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (serverURL) {
       send('auth-mode').then(data => {
-        setIsOpenId(data === 'openid');
         setLoginMethod(data);
+      });
+      send('multiuser-get').then(data => {
+        setMultiuserEnabled(data);
       });
     }
   }, [serverURL]);
@@ -82,7 +84,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
     <ServerContext.Provider
       value={{
         url: serverURL,
-        isOpenId,
+        multiuserEnabled: multiuserEnabled,
         loginMethod,
         setURL,
         version: version ? `v${version}` : 'N/A',

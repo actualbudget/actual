@@ -17,7 +17,7 @@ import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
-import { useIsOpenId, useServerURL } from './ServerContext';
+import { useMultiuserEnabled, useServerURL } from './ServerContext';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
@@ -42,7 +42,7 @@ export function LoggedInUser({
   const location = useLocation();
   const { hasPermission } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
-  const isOpenID = useIsOpenId();
+  const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
     getUserData().then(() => setLoading(false));
@@ -128,7 +128,7 @@ export function LoggedInUser({
     ];
 
     const adminMenu = [];
-    if (isOpenID && isAdmin) {
+    if (multiuserEnabled && isAdmin) {
       if (!budgetId && location.pathname !== '/') {
         adminMenu.push({ name: 'index', text: 'View file list' });
       } else if (serverUrl && !userData?.offline && !budgetId) {
@@ -137,7 +137,7 @@ export function LoggedInUser({
     }
 
     if (
-      isOpenID &&
+      multiuserEnabled &&
       (isOwner || isAdmin) &&
       serverUrl &&
       !userData?.offline &&
@@ -165,7 +165,7 @@ export function LoggedInUser({
         {serverMessage()}
       </Button>
 
-      {!loading && isOpenID && userData?.userName && (
+      {!loading && multiuserEnabled && userData?.userName && (
         <small>
           (logged as: <span>{userData?.displayName}</span>)
         </small>

@@ -46,7 +46,7 @@ import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar } from './Titlebar';
-import { useIsOpenId } from './ServerContext';
+import { useMultiuserEnabled } from './ServerContext';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -102,7 +102,7 @@ function RouterBehaviors() {
 
 function FinancesAppWithoutContext() {
   const actions = useActions();
-  const isOpenID = useIsOpenId();
+  const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
     // Wait a little bit to make sure the sync button will get the
@@ -227,7 +227,7 @@ function FinancesAppWithoutContext() {
                   }
                 />
 
-                {isOpenID && (
+                {multiuserEnabled && (
                   <Route
                     path="/user-access"
                     element={

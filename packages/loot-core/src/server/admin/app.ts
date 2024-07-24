@@ -240,3 +240,14 @@ app.method('auth-mode', async function () {
 
   return null;
 });
+
+app.method('multiuser-get', async function () {
+  const res = await get(getServer().BASE_SERVER + '/admin/multiuser/');
+
+  if (res) {
+    return (JSON.parse(res) as boolean) || false;
+  }
+
+  return null;
+});
+
