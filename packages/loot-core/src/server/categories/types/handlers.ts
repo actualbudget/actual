@@ -1,4 +1,4 @@
-import { type CategoryEntity } from '../../../types/models';
+import { type CategoryEntity, CategoryGroupEntity } from '../../../types/models';
 
 type ValidationError = {
   conditionErrors: string[];
