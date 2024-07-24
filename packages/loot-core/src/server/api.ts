@@ -569,7 +569,7 @@ handlers['api/categories-get'] = async function ({
 
 handlers['api/category-groups-get'] = async function () {
   checkFileOpen();
-  return handlers['get-category-groups']();
+  return handlers['get-api-category-groups']();
 };
 
 handlers['api/category-group-create'] = withMutation(async function ({
