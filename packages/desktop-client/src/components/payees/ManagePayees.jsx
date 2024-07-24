@@ -11,6 +11,7 @@ import {
 
 import memoizeOne from 'memoize-one';
 
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { groupById } from 'loot-core/src/shared/util';
 
 import {
@@ -111,7 +112,7 @@ export const ManagePayees = forwardRef(
       let filtered = payees;
       if (filter) {
         filtered = filtered.filter(p =>
-          p.name.toLowerCase().includes(filter.toLowerCase()),
+          getNormalisedString(p.name).includes(getNormalisedString(filter)),
         );
       }
       if (orphanedOnly) {
@@ -198,6 +199,22 @@ export const ManagePayees = forwardRef(
       selected.dispatch({ type: 'select-none' });
     }
 
+    function onFavorite() {
+      const allFavorited = [...selected.items]
+        .map(id => payeesById[id].favorite)
+        .every(f => f === 1);
+      if (allFavorited) {
+        onBatchChange({
+          updated: [...selected.items].map(id => ({ id, favorite: 0 })),
+        });
+      } else {
+        onBatchChange({
+          updated: [...selected.items].map(id => ({ id, favorite: 1 })),
+        });
+      }
+      selected.dispatch({ type: 'select-none' });
+    }
+
     async function onMerge() {
       const ids = [...selected.items];
       await props.onMerge(ids);
@@ -262,6 +279,7 @@ export const ManagePayees = forwardRef(
                 onClose={() => setMenuOpen(false)}
                 onDelete={onDelete}
                 onMerge={onMerge}
+                onFavorite={onFavorite}
               />
             </Popover>
           </View>

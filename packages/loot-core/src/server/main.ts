@@ -276,6 +276,10 @@ handlers['payee-create'] = mutator(async function ({ name }) {
   });
 });
 
+handlers['common-payees-get'] = async function () {
+  return db.getCommonPayees();
+};
+
 handlers['payees-get'] = async function () {
   return db.getPayees();
 };

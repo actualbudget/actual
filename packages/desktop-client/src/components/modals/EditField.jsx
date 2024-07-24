@@ -8,25 +8,20 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
-import { Modal } from '../common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 
-export function EditField({ modalProps, name, onSubmit, onClose }) {
+export function EditField({ name, onSubmit, onClose }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const onCloseInner = () => {
-    modalProps.onClose();
-    onClose?.();
-  };
 
   function onSelectNote(value, mode) {
     if (value != null) {
       onSubmit(name, value, mode);
     }
-    onCloseInner();
   }
 
   function onSelect(value) {
@@ -38,7 +33,6 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
       onSubmit(name, value);
     }
-    onCloseInner();
   }
 
   const itemStyle = {
@@ -62,7 +56,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
       const today = currentDay();
       label = 'Date';
       minWidth = 350;
-      editor = (
+      editor = ({ close }) => (
         <DateSelect
           value={formatDate(parseISO(today), dateFormat)}
           dateFormat={dateFormat}
@@ -71,6 +65,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
           onUpdate={() => {}}
           onSelect={date => {
             onSelect(dayFromDate(parseDate(date, 'yyyy-MM-dd', new Date())));
+            close();
           }}
         />
       );
@@ -78,7 +73,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
     case 'notes':
       label = 'Notes';
-      editor = (
+      editor = ({ close }) => (
         <>
           <View
             style={{
@@ -116,7 +111,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
                   },
                 }),
               }}
-              onClick={() => {
+              onPress={() => {
                 onChangeMode('prepend');
                 document.getElementById('noteInput').focus();
               }}
@@ -148,7 +143,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
                   },
                 }),
               }}
-              onClick={() => {
+              onPress={() => {
                 onChangeMode('replace');
                 document.getElementById('noteInput').focus();
               }}
@@ -180,7 +175,7 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
                   },
                 }),
               }}
-              onClick={() => {
+              onPress={() => {
                 onChangeMode('append');
                 document.getElementById('noteInput').focus();
               }}
@@ -192,7 +187,10 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
             id="noteInput"
             autoFocus
             focused={true}
-            onEnter={e => onSelectNote(e.target.value, noteAmend)}
+            onEnter={e => {
+              onSelectNote(e.target.value, noteAmend);
+              close();
+            }}
             style={inputStyle}
           />
         </>
@@ -201,10 +199,13 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
     case 'amount':
       label = 'Amount';
-      editor = (
+      editor = ({ close }) => (
         <Input
           focused={true}
-          onEnter={e => onSelect(e.target.value)}
+          onEnter={e => {
+            onSelect(e.target.value);
+            close();
+          }}
           style={inputStyle}
         />
       );
@@ -215,34 +216,40 @@ export function EditField({ modalProps, name, onSubmit, onClose }) {
 
   return (
     <Modal
-      title={label}
+      name="edit-field"
       noAnimation={!isNarrowWidth}
-      showHeader={isNarrowWidth}
-      focusAfterClose={false}
-      {...modalProps}
-      onClose={onCloseInner}
-      style={{
-        flex: 0,
-        height: isNarrowWidth ? '85vh' : 275,
-        padding: '15px 10px',
-        ...(minWidth && { minWidth }),
-        backgroundColor: theme.menuAutoCompleteBackground,
+      onClose={onClose}
+      containerProps={{
+        style: {
+          height: isNarrowWidth ? '85vh' : 275,
+          padding: '15px 10px',
+          ...(minWidth && { minWidth }),
+          backgroundColor: theme.menuAutoCompleteBackground,
+        },
       }}
     >
-      {() => (
-        <View>
-          {!isNarrowWidth && (
-            <SectionLabel
+      {({ state: { close } }) => (
+        <>
+          {isNarrowWidth && (
+            <ModalHeader
               title={label}
-              style={{
-                alignSelf: 'center',
-                color: theme.menuAutoCompleteText,
-                marginBottom: 10,
-              }}
+              rightContent={<ModalCloseButton onClick={close} />}
             />
           )}
-          <View style={{ flex: 1 }}>{editor}</View>
-        </View>
+          <View>
+            {!isNarrowWidth && (
+              <SectionLabel
+                title={label}
+                style={{
+                  alignSelf: 'center',
+                  color: theme.menuAutoCompleteText,
+                  marginBottom: 10,
+                }}
+              />
+            )}
+            <View style={{ flex: 1 }}>{editor({ close })}</View>
+          </View>
+        </>
       )}
     </Modal>
   );
