@@ -12,11 +12,13 @@ export interface CategoryHandlers {
     list: Array<CategoryEntity>;
   }>;
 
-  'get-category-groups': () => Promise<{
-    grouped: Array<CategoryGroupEntity>;
-  }>;
+  'get-category-groups': () => Promise<
+  Array<CategoryGroupEntity>> => 
+    {
+      return grouped: Array<CategoryGroupEntity>;
+  };
 
-  'get-api-category-groups' () => Promise<{
+  'get-api-category-groups': () => Promise<{
     grouped: Array<APICategoryGroupEntity>;
   }>;
 
