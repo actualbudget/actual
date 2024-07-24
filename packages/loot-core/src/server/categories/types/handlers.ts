@@ -20,7 +20,7 @@ export interface CategoryHandlers {
   'get-api-category-groups': () => Promise<Array<APICategoryGroupEntity>>;
 
   'category-validate': (
-    category: Partial<CategoryEntity>,
+    category: Promise<CategoryEntity>,
   ) => Promise<{ error: ValidationError | null }>;
 
   'category-create': (arg: {
@@ -30,7 +30,7 @@ export interface CategoryHandlers {
     hidden?: boolean;
   }) => Promise<CategoryEntity>;
 
-  'category-update': (category: Partial<CategoryEntity>) => Promise<{ error: ValidationError | object }>;
+  'category-update': (category: Promise<CategoryEntity>) => Promise<{ error: ValidationError | object }>;
 
   'category-move': (arg: {
     id: string;

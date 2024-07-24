@@ -21,6 +21,7 @@ export interface Handlers
     SchedulesHandlers,
     ToolsHandlers,
     CategoryHandlers {
+  name: string;
   isIncome: boolean;
 }
 
