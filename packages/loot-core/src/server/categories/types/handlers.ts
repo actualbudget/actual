@@ -1,3 +1,4 @@
+import { APICategoryGroupEntity } from 'loot-core/server/api-models';
 import { type CategoryEntity, CategoryGroupEntity } from '../../../types/models';
 
 type ValidationError = {
@@ -12,7 +13,7 @@ export interface CategoryHandlers {
   }>;
 
   'get-category-groups': () => Promise<{
-    grouped: Array<CategoryGroupEntity>;
+    grouped: Array<APICategoryGroupEntity>;
   }>;
 
   'category-validate': (
@@ -21,7 +22,7 @@ export interface CategoryHandlers {
 
   'category-create': (arg: {
     name: string;
-    groupId: string;
+    groupId?: string;
     isIncome?: boolean;
     hidden?: boolean;
   }) => Promise<string>;
