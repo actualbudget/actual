@@ -1888,6 +1888,7 @@ app.combine(
   filtersApp,
   reportsApp,
   rulesApp,
+  categoriesApp,
 );
 
 function getDefaultDocumentDir() {
