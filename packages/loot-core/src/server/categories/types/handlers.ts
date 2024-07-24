@@ -60,4 +60,4 @@ export interface CategoryHandlers {
     transferId: string;
   }) => Promise<unknown>;
 
-  'must-category-transfer': (arg: { id: string }) => Promise<{ error: ValidationError | object }>;
+  'must-category-transfer': (arg: { id: string }) => Promise<{ error: ValidationError | object }>;}
