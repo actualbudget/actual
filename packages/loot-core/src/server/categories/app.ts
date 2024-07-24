@@ -166,8 +166,8 @@ app.method(
 
       return batchMessages(async () => {
         if (transferId) {
-          await budget.doTransfer(
-            groupCategories.map(c => c.id),
+          await budget.doTransfer(  
+            groupCategories.map((c: { id: string; }) => c.id),
             transferId,
           );
         }
