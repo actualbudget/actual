@@ -324,7 +324,12 @@ export async function reconcileTransactions(
     transactionsStep1,
     transactionsStep2,
     transactionsStep3,
-  } = await matchTransactions(acctId, transactions, isBankSyncAccount);
+  } = await matchTransactions(
+    acctId,
+    transactions,
+    isBankSyncAccount,
+    useFuzzyMatchV2,
+  );
 
   // Finally, generate & commit the changes
   for (const { trans, subtransactions, match } of transactionsStep3) {
@@ -417,6 +422,7 @@ export async function matchTransactions(
   acctId,
   transactions,
   isBankSyncAccount = false,
+  useFuzzyMatchV2 = true,
 ) {
   console.log('Performing transaction reconciliation matching');
 
