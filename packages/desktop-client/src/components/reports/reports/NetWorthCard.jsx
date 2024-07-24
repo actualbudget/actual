@@ -15,7 +15,7 @@ import { ReportCard } from '../ReportCard';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
-export function NetWorthCard({ accounts, onRemove }) {
+export function NetWorthCard({ isEditing, accounts, onRemove }) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -30,6 +30,7 @@ export function NetWorthCard({ accounts, onRemove }) {
 
   return (
     <ReportCard
+      isEditing={isEditing}
       to="/reports/net-worth"
       menuItems={[
         {

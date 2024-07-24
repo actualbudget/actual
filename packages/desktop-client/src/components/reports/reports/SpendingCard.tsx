@@ -17,10 +17,11 @@ import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet'
 import { useReport } from '../useReport';
 
 type SpendingCardProps = {
+  isEditing?: boolean;
   onRemove: () => void;
 };
 
-export function SpendingCard({ onRemove }: SpendingCardProps) {
+export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
   const categories = useCategories();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -44,6 +45,7 @@ export function SpendingCard({ onRemove }: SpendingCardProps) {
 
   return (
     <ReportCard
+      isEditing={isEditing}
       to="/reports/spending"
       menuItems={[
         {

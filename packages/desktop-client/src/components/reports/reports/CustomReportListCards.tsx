@@ -23,9 +23,11 @@ import { ReportCard } from '../ReportCard';
 import { GetCardData } from './GetCardData';
 
 export function CustomReportListCards({
+  isEditing,
   report,
   onRemove,
 }: {
+  isEditing?: boolean;
   report: CustomReportEntity;
   onRemove: () => void;
 }) {
@@ -76,6 +78,7 @@ export function CustomReportListCards({
 
   return (
     <ReportCard
+      isEditing={isEditing}
       to="/reports/custom"
       report={report}
       menuItems={[

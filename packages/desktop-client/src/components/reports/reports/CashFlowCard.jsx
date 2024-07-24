@@ -67,7 +67,7 @@ function CustomLabel({
   );
 }
 
-export function CashFlowCard({ onRemove }) {
+export function CashFlowCard({ isEditing, onRemove }) {
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
 
@@ -84,6 +84,7 @@ export function CashFlowCard({ onRemove }) {
 
   return (
     <ReportCard
+      isEditing={isEditing}
       to="/reports/cash-flow"
       menuItems={[
         {

@@ -72,6 +72,7 @@ export function Overview() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [extraMenuOpen, setExtraMenuOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
@@ -202,7 +203,7 @@ export function Overview() {
               marginRight: 15,
             }}
           >
-            <PageHeader title="Reports" />
+            <PageHeader title={`Reports${isEditing ? ' (editing)' : ''}`} />
 
             <View
               style={{
@@ -272,6 +273,9 @@ export function Overview() {
                     <Menu
                       onMenuSelect={item => {
                         switch (item) {
+                          case 'edit-mode':
+                            setIsEditing(state => !state);
+                            break;
                           case 'export':
                             onExport();
                             break;
@@ -282,6 +286,13 @@ export function Overview() {
                         setExtraMenuOpen(false);
                       }}
                       items={[
+                        {
+                          name: 'edit-mode',
+                          text: isEditing
+                            ? 'Exit edit mode'
+                            : 'Enter edit mode',
+                          disabled: isImporting,
+                        },
                         {
                           name: 'import',
                           text: 'Import',
@@ -311,35 +322,45 @@ export function Overview() {
       ) : (
         <View style={{ userSelect: 'none' }}>
           <ResponsiveGridLayout
-            compactType={null}
             breakpoints={{ desktop: breakpoints.medium, mobile: 0 }}
             layouts={{ desktop: layout, mobile: layout }}
             onLayoutChange={onLayoutChange}
             cols={{ desktop: 12, mobile: 1 }}
             rowHeight={100}
-            draggableHandle=".draggable-handle"
+            draggableCancel=".hover-visible"
+            isDraggable={isEditing}
+            isResizable={isEditing}
           >
             {layout.map(item => (
               <div key={item.i}>
                 {item.type === 'net-worth-card' ? (
                   <NetWorthCard
+                    isEditing={isEditing}
                     accounts={accounts}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'cash-flow-card' ? (
-                  <CashFlowCard onRemove={() => onRemoveWidget(item.i)} />
+                  <CashFlowCard
+                    isEditing={isEditing}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
                 ) : item.type === 'spending-card' ? (
-                  <SpendingCard onRemove={() => onRemoveWidget(item.i)} />
+                  <SpendingCard
+                    isEditing={isEditing}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
                 ) : item.type === 'custom-report' ? (
                   item.meta &&
                   'id' in item.meta &&
                   customReportMap.has(item.meta.id) ? (
                     <CustomReportListCards
+                      isEditing={isEditing}
                       report={customReportMap.get(item.meta.id)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
                   ) : (
                     <MissingReportCard
+                      isEditing={isEditing}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
                   )

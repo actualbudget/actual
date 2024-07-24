@@ -7,17 +7,16 @@ import React, {
 
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
+import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
-import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 
-const DRAG_HANDLE_HEIGHT = 5;
-
 type ReportCardProps = {
+  isEditing?: boolean;
   to?: string;
   children: ReactNode;
   report?: CustomReportEntity;
@@ -28,6 +27,7 @@ type ReportCardProps = {
 };
 
 export function ReportCard({
+  isEditing,
   to,
   report,
   menuItems,
@@ -36,12 +36,14 @@ export function ReportCard({
   size = 1,
   style,
 }: ReportCardProps) {
+  const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const containerProps = {
     flex: isNarrowWidth ? '1 1' : `0 0 calc(${size * 100}% / 3 - 20px)`,
   };
 
   const layoutProps = {
+    isEditing,
     menuItems,
     onMenuSelect,
   };
@@ -52,14 +54,15 @@ export function ReportCard({
         backgroundColor: theme.tableBackground,
         borderBottomLeftRadius: 2,
         borderBottomRightRadius: 2,
-        height: `calc(100% - ${DRAG_HANDLE_HEIGHT}px)`,
+        height: '100%',
         boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
         transition: 'box-shadow .25s',
         '& .recharts-surface:hover': {
           cursor: 'pointer',
         },
-        ':hover': to && {
-          boxShadow: '0 4px 6px rgba(0, 0, 0, .15)',
+        ':hover': {
+          ...(to ? { boxShadow: '0 4px 6px rgba(0, 0, 0, .15)' } : null),
+          ...(isEditing ? { cursor: 'pointer' } : null),
         },
         ...(to ? null : containerProps),
         ...style,
@@ -72,13 +75,24 @@ export function ReportCard({
   if (to) {
     return (
       <Layout {...layoutProps}>
-        <Link
-          to={to}
-          report={report}
-          style={{ textDecoration: 'none', ...containerProps }}
+        <View
+          onClick={
+            isEditing
+              ? undefined
+              : () => {
+                  navigate(to, { state: { report } });
+                }
+          }
+          style={{
+            height: '100%',
+            width: '100%',
+            ':hover': {
+              cursor: 'pointer',
+            },
+          }}
         >
           {content}
-        </Link>
+        </View>
       </Layout>
     );
   }
@@ -88,9 +102,9 @@ export function ReportCard({
 
 type LayoutProps = {
   children: ReactNode;
-} & Pick<ReportCardProps, 'menuItems' | 'onMenuSelect'>;
+} & Pick<ReportCardProps, 'isEditing' | 'menuItems' | 'onMenuSelect'>;
 
-function Layout({ children, menuItems, onMenuSelect }: LayoutProps) {
+function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -108,20 +122,7 @@ function Layout({ children, menuItems, onMenuSelect }: LayoutProps) {
         },
       }}
     >
-      <View
-        className="draggable-handle"
-        style={{
-          borderTopLeftRadius: 2,
-          borderTopRightRadius: 2,
-          height: DRAG_HANDLE_HEIGHT,
-          backgroundColor: theme.buttonNormalBorder,
-          ':hover': {
-            cursor: 'grab',
-          },
-        }}
-      />
-
-      {menuItems && (
+      {menuItems && isEditing && (
         <View
           className={menuOpen ? undefined : 'hover-visible'}
           style={{

@@ -4,13 +4,18 @@ import { View } from '../../common/View';
 import { ReportCard } from '../ReportCard';
 
 type MissingReportCardProps = {
+  isEditing?: boolean;
   onRemove: () => void;
 };
 
 // TODO: the content and design of this component could be improved
-export function MissingReportCard({ onRemove }: MissingReportCardProps) {
+export function MissingReportCard({
+  isEditing,
+  onRemove,
+}: MissingReportCardProps) {
   return (
     <ReportCard
+      isEditing={isEditing}
       menuItems={[
         {
           name: 'remove',
