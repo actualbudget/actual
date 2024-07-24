@@ -476,7 +476,7 @@ export async function matchTransactions(
       // if the transaction being imported has an import ID.
       if (useFuzzyMatchV2) {
         fuzzyDataset = await db.all(
-          `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled
+          `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE
             -- If both ids are set, and we didn't match earlier then skip dedup
@@ -493,7 +493,7 @@ export async function matchTransactions(
         );
       } else {
         fuzzyDataset = await db.all(
-          `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled
+          `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
           [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],
