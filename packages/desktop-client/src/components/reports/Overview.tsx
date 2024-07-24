@@ -318,6 +318,7 @@ export function Overview() {
       ) : (
         <View style={{ userSelect: 'none' }}>
           <ResponsiveGridLayout
+            compactType={null}
             breakpoints={{ desktop: breakpoints.medium, mobile: 0 }}
             layouts={{ desktop: layout, mobile: layout }}
             onLayoutChange={onLayoutChange}

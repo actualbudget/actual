@@ -20,17 +20,6 @@ import { ReportCard } from '../ReportCard';
 
 import { GetCardData } from './GetCardData';
 
-function index(data: CustomReportEntity[]): { [key: string]: boolean }[] {
-  return data.reduce((carry, report) => {
-    const reportId: string = report.id === undefined ? '' : report.id;
-
-    return {
-      ...carry,
-      [reportId]: false,
-    };
-  }, []);
-}
-
 export function CustomReportListCards({
   report,
   onRemove,
