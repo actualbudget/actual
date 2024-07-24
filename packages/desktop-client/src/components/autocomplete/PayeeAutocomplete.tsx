@@ -16,6 +16,7 @@ import { css } from 'glamor';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type AccountEntity,
   type PayeeEntity,
@@ -379,8 +380,12 @@ export function PayeeAutocomplete({
         });
 
         filtered.sort((p1, p2) => {
-          const r1 = p1.name.toLowerCase().startsWith(value.toLowerCase());
-          const r2 = p2.name.toLowerCase().startsWith(value.toLowerCase());
+          const r1 = getNormalisedString(p1.name).startsWith(
+            getNormalisedString(value),
+          );
+          const r2 = getNormalisedString(p2.name).startsWith(
+            getNormalisedString(value),
+          );
           const r1exact = p1.name.toLowerCase() === value.toLowerCase();
           const r2exact = p2.name.toLowerCase() === value.toLowerCase();
 
