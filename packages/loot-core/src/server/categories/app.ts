@@ -36,8 +36,10 @@ app.method(
       try {
         await db.updateCategory(category);
       } catch (e) {
-        if (e.message.toLowerCase().includes('unique constraint')) {
-          return { error: { type: 'category-exists' } };
+        if (e instanceof CategoryError) {
+          if (e.message.toLowerCase().includes('unique constraint')) {
+            return e.type;
+          }
         }
         throw e;
       }
