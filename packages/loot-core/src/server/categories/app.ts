@@ -1,7 +1,7 @@
 import { CategoryEntity } from 'loot-core/types/models';
 
 import { createApp } from '../app';
-import { CategoryError } from '../errors';
+import { CategoryError, APIError } from '../errors';
 import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
 import { withUndo } from '../undo';
