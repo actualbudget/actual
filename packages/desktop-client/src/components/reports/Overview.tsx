@@ -63,14 +63,11 @@ function useWidgetLayout(
         };
       }
   ))[] {
-  const usedCustomReportIds = new Set(
-    widgets.filter(isCustomReportWidget).map(widget => widget.meta.id),
-  );
   const customReportMap = new Map(
     customReports.map(report => [report.id, report]),
   );
 
-  const dashboardWidgets = widgets
+  return widgets
     .filter(
       widget =>
         !isCustomReportWidget(widget) ||
@@ -90,28 +87,6 @@ function useWidgetLayout(
         ? { report: customReportMap.get(widget.meta.id) }
         : {},
     }));
-
-  // Calculate the max layout Y in order to know where to insert the missing
-  // custom reports
-  const trackingY = Math.max(...dashboardWidgets.map(({ y }) => y), 0) + 2;
-
-  // Prepend newly created custom reports that have not yet been stored in
-  // the dashboard table
-  const additionalWidgets = customReports
-    .filter(({ id }) => !usedCustomReportIds.has(id))
-    .map((report, idx) => ({
-      i: report.id,
-      type: 'custom-report' as const,
-      x: (idx * 4) % 12,
-      y: trackingY + Math.floor(idx / 3) * 2,
-      w: 4,
-      h: 2,
-      minW: 3,
-      minH: 2,
-      meta: { report },
-    }));
-
-  return [...dashboardWidgets, ...additionalWidgets];
 }
 
 export function Overview() {

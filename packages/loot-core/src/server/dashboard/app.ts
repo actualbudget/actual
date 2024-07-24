@@ -106,15 +106,8 @@ app.method(
 
         const customReportIds = await db.all('SELECT id from custom_reports');
         const customReportIdSet = new Set(customReportIds.map(({ id }) => id));
-        const importedCustomReportIdSet = new Set(
-          parsedContent.widgets
-            .filter(isCustomReportWidget)
-            .map(({ meta }) => meta.id),
-        );
 
         // TODO: custom reports - do I even need to manage the "tombstone" state?
-        // Perhaps we can just use the dashboard definition as the source of truth
-        // for deletion and then ignore the custom report tombstone status. TBD
         // TODO: transactions dont actually work
         await db.asyncTransaction(async () => {
           await Promise.all([
@@ -135,11 +128,6 @@ app.method(
               }),
             ),
 
-            // Delete all custom reports that do not match the IDs in the imported json
-            ...customReportIds
-              .filter(({ id }) => !importedCustomReportIdSet.has(id))
-              .map(({ id }) => db.delete_('custom_reports', id)),
-
             // Insert new custom reports
             ...parsedContent.widgets
               .filter(isCustomReportWidget)
@@ -149,7 +137,6 @@ app.method(
               ),
 
             // Update existing reports
-            // TODO: test this
             ...parsedContent.widgets
               .filter(isCustomReportWidget)
               .filter(({ meta }) => customReportIdSet.has(meta.id))
