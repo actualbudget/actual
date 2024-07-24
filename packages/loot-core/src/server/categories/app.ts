@@ -1,15 +1,18 @@
-import { CategoryEntity } from 'loot-core/types/models';
-
 import { createApp } from '../app';
+import * as db from '../db';
 import { CategoryError, APIError } from '../errors';
 import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
 import { withUndo } from '../undo';
+import * as budget from './budget/base';
+import * as sheet from './sheet';
+import * as monthUtils from '../shared/months';
 
 import { CategoryHandlers } from './types/handlers';
-
+import { CategoryEntity } from './types/models';
+import { CategoryGroupEntity } from 'loot-core/types/models';
 // Expose functions to the client
-const app = createApp<CategoryHandlers>();
+export const app = createApp<CategoryHandlers>();
 
 app.method(
   'category-create',
@@ -31,7 +34,7 @@ app.method(
 
 app.method(
   'category-update',
-  mutator(async function (category) {
+  mutator(async function (category: CategoryEntity) {
     return withUndo(async () => {
       try {
         await db.updateCategory(category);
@@ -118,11 +121,11 @@ app.method('get-category-groups', async function () {
 
 app.method(
   'category-group-create',
-  mutator(async function ({ name, isIncome }) {
+  mutator(async function (group:CategoryGroupEntity) {
     return withUndo(async () => {
       return db.insertCategoryGroup({
-        name,
-        is_income: isIncome ? 1 : 0,
+        name: group.name,
+        is_income: group.isIncome ? 1 : 0,
       });
     });
   }),
@@ -220,5 +223,3 @@ app.method('must-category-transfer', async function ({ id }) {
     return value != null && value !== 0;
   });
 });
-
-export default app;
