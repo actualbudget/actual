@@ -37,6 +37,7 @@ import {
 } from './backups';
 import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
+import { app as categoriesApp } from './categories/app';
 import * as cloudStorage from './cloud-storage';
 import * as db from './db';
 import * as mappings from './db/mappings';
@@ -50,7 +51,6 @@ import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
 import * as prefs from './prefs';
-import { app as categoriesApp } from './categories/app';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';

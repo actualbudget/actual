@@ -4,65 +4,9 @@ import { createApp } from '../app';
 import { CategoryError } from '../errors';
 import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
-import { undoable } from '../undo';
+import { withUndo } from '../undo';
 
 import { CategoryHandlers } from './types/handlers';
-
-function validateCategory(rule: Partial<CategoryEntity>) {
-  // Returns an array of errors, the array is the same link as the
-  // passed-in `array`, or null if there are no errors
-  function runValidation<T>(array: T[], validate: (item: T) => unknown) {
-    const result = array
-      .map(item => {
-        try {
-          validate(item);
-        } catch (e) {
-          if (e instanceof CategoryError) {
-            console.warn('Invalid rule', e);
-            return e.type;
-          }
-          throw e;
-        }
-        return null;
-      })
-      .filter((res): res is string => typeof res === 'string');
-
-    return result.length ? result : null;
-  }
-
-  const conditionErrors = runValidation(
-    rule.conditions,
-    cond =>
-      new Condition(
-        cond.op,
-        cond.field,
-        cond.value,
-        cond.options,
-        ruleFieldTypes,
-      ),
-  );
-
-  const actionErrors = runValidation(rule.actions, action =>
-    action.op === 'link-schedule'
-      ? new Action(action.op, null, action.value, null, ruleFieldTypes)
-      : new Action(
-          action.op,
-          action.field,
-          action.value,
-          action.options,
-          ruleFieldTypes,
-        ),
-  );
-
-  if (conditionErrors || actionErrors) {
-    return {
-      conditionErrors,
-      actionErrors,
-    };
-  }
-
-  return null;
-}
 
 // Expose functions to the client
 const app = createApp<CategoryHandlers>();

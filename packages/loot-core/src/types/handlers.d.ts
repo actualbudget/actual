@@ -20,6 +20,6 @@ export interface Handlers
     RulesHandlers,
     SchedulesHandlers,
     ToolsHandlers,
-    CategoryHandlers{}
+    CategoryHandlers {}
 
 export type HandlerFunctions = Handlers[keyof Handlers];
