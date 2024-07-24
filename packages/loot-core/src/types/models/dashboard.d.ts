@@ -11,6 +11,7 @@ type AbstractWidget<
   width: number;
   height: number;
   meta: Meta;
+  tombstone: boolean;
 };
 
 type NetWorthWidget = AbstractWidget<'net-worth-card'>;
@@ -28,13 +29,18 @@ export type SpecializedWidget =
 export type Widget = SpecializedWidget | CustomReportWidget;
 
 // Exported/imported (json) widget definition
-export type ExportImportCustomReportWidget = Omit<Widget, 'meta' | 'type'> & {
+export type ExportImportCustomReportWidget = Omit<
+  Widget,
+  'meta' | 'type' | 'tombstone'
+> & {
   type: CustomReportWidget['type'];
   meta: Omit<CustomReportEntity, 'tombstone'>;
 };
 export type ExportImportDashboardWidget =
   | ExportImportCustomReportWidget
-  | (Omit<Widget, 'meta' | 'type'> & { type: SpecializedWidget['type'] });
+  | (Omit<Widget, 'meta' | 'type' | 'tombstone'> & {
+      type: SpecializedWidget['type'];
+    });
 
 export type ExportImportDashboard = {
   version: 1;

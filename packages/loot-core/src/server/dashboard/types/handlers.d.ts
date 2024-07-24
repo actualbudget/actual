@@ -1,16 +1,16 @@
 import { type Widget } from '../../../types/models';
-
-type EverythingButIdOptional<T> = { id: T['id'] } & Partial<Omit<T, 'id'>>;
+import { type EverythingButIdOptional } from '../../../types/util';
 
 export interface DashboardHandlers {
   'dashboard-update': (
-    widgets: EverythingButIdOptional<Widget>[],
+    widgets: EverythingButIdOptional<Omit<Widget, 'tombstone'>>[],
   ) => Promise<void>;
   'dashboard-update-widget': (
-    widget: EverythingButIdOptional<Widget>,
+    widget: EverythingButIdOptional<Omit<Widget, 'tombstone'>>,
   ) => Promise<void>;
   'dashboard-add-widget': (
-    widget: Omit<Widget, 'id' | 'x' | 'y'> & Partial<Pick<Widget, 'x' | 'y'>>,
+    widget: Omit<Widget, 'id' | 'x' | 'y' | 'tombstone'> &
+      Partial<Pick<Widget, 'x' | 'y'>>,
   ) => Promise<void>;
   'dashboard-remove-widget': (widgetId: string) => Promise<void>;
   'dashboard-import': (args: {

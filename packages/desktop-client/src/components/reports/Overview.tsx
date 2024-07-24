@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -19,8 +19,9 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
 import { breakpoints } from '../../tokens';
-import { Button, ButtonWithLoading } from '../common/Button2';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
+import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
@@ -67,7 +68,9 @@ export function Overview() {
   const dispatch = useDispatch();
 
   const triggerRef = useRef(null);
+  const extraMenuTriggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [extraMenuOpen, setExtraMenuOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
@@ -125,13 +128,16 @@ export function Overview() {
       version: 1,
       widgets: layout
         .map(item => widgetMap.get(item.i))
-        .map(item => ({
-          ...item,
-          meta: isCustomReportWidget(item)
-            ? customReportMap.get(item.meta.id)
-            : undefined,
-          tombstone: undefined,
-        })),
+        .map(item => {
+          delete item.tombstone; // We don't want to export this
+
+          return {
+            ...item,
+            meta: isCustomReportWidget(item)
+              ? customReportMap.get(item.meta.id)
+              : undefined,
+          };
+        }),
     } satisfies ExportImportDashboard;
 
     window.Actual?.saveFile(
@@ -141,7 +147,19 @@ export function Overview() {
     );
   };
   const onImport = async () => {
-    const [filepath] = await window.Actual?.openFileDialog({
+    const openFileDialog = window.Actual?.openFileDialog;
+
+    if (!openFileDialog) {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: 'Fatal error occurred: unable to open import file dialog.',
+        }),
+      );
+      return;
+    }
+
+    const [filepath] = await openFileDialog({
       properties: ['openFile'],
       filters: [
         {
@@ -242,13 +260,43 @@ export function Overview() {
                     />
                   </Popover>
 
-                  {/* TODO: should we have a reset button too? */}
-                  <Button isDisabled={isImporting} onPress={onExport}>
-                    Export
-                  </Button>
-                  <ButtonWithLoading isLoading={isImporting} onPress={onImport}>
-                    Import
-                  </ButtonWithLoading>
+                  <MenuButton
+                    ref={extraMenuTriggerRef}
+                    onClick={() => setExtraMenuOpen(true)}
+                  />
+                  <Popover
+                    triggerRef={extraMenuTriggerRef}
+                    isOpen={extraMenuOpen}
+                    onOpenChange={() => setExtraMenuOpen(false)}
+                  >
+                    <Menu
+                      onMenuSelect={item => {
+                        switch (item) {
+                          case 'export':
+                            onExport();
+                            break;
+                          case 'import':
+                            onImport();
+                            break;
+                        }
+                        setExtraMenuOpen(false);
+                      }}
+                      items={[
+                        {
+                          name: 'import',
+                          text: 'Import',
+                          disabled: isImporting,
+                        },
+                        {
+                          name: 'export',
+                          text: 'Export',
+                          disabled: isImporting,
+                        },
+                        // TODO: reset to original state?
+                        // TODO: undo/redo?
+                      ]}
+                    />
+                  </Popover>
                 </>
               )}
             </View>
@@ -283,7 +331,9 @@ export function Overview() {
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard onRemove={() => onRemoveWidget(item.i)} />
                 ) : item.type === 'custom-report' ? (
-                  'id' in item.meta ? (
+                  item.meta &&
+                  'id' in item.meta &&
+                  customReportMap.has(item.meta.id) ? (
                     <CustomReportListCards
                       report={customReportMap.get(item.meta.id)}
                       onRemove={() => onRemoveWidget(item.i)}
