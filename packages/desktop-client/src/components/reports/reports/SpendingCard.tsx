@@ -16,7 +16,11 @@ import { ReportCard } from '../ReportCard';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
-export function SpendingCard({ onRemove }) {
+type SpendingCardProps = {
+  onRemove: () => void;
+};
+
+export function SpendingCard({ onRemove }: SpendingCardProps) {
   const categories = useCategories();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -52,6 +56,8 @@ export function SpendingCard({ onRemove }) {
           case 'remove':
             onRemove();
             break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
         }
       }}
     >

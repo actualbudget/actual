@@ -86,7 +86,11 @@ export function ReportCard({
   return <Layout {...layoutProps}>{content}</Layout>;
 }
 
-function Layout({ children, menuItems, onMenuSelect }) {
+type LayoutProps = {
+  children: ReactNode;
+} & Pick<ReportCardProps, 'menuItems' | 'onMenuSelect'>;
+
+function Layout({ children, menuItems, onMenuSelect }: LayoutProps) {
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 

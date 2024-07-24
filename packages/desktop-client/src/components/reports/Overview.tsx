@@ -8,7 +8,6 @@ import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
-  type CustomReportEntity,
   type CustomReportWidget,
   type ExportImportDashboard,
   type SpecializedWidget,
@@ -47,26 +46,10 @@ function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
   return widget.type === 'custom-report';
 }
 
-function useWidgetLayout(
-  widgets: Widget[],
-  customReports: CustomReportEntity[],
-): (Layout &
-  (
-    | {
-        type: Omit<Widget['type'], CustomReportWidget['type']>;
-        meta: {};
-      }
-    | {
-        type: CustomReportWidget['type'];
-        meta: {
-          report: CustomReportEntity;
-        };
-      }
-  ))[] {
-  const customReportMap = new Map(
-    customReports.map(report => [report.id, report]),
-  );
-
+function useWidgetLayout(widgets: Widget[]): (Layout & {
+  type: Widget['type'];
+  meta: Widget['meta'];
+})[] {
   return widgets.map(widget => ({
     i: widget.id,
     type: widget.type,
@@ -76,9 +59,7 @@ function useWidgetLayout(
     h: widget.height,
     minW: isCustomReportWidget(widget) ? 2 : 3,
     minH: isCustomReportWidget(widget) ? 1 : 2,
-    meta: isCustomReportWidget(widget)
-      ? { report: customReportMap.get(widget.meta.id) }
-      : {},
+    meta: widget.meta,
   }));
 }
 
@@ -93,6 +74,11 @@ export function Overview() {
     useReports();
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
 
+  const customReportMap = useMemo(
+    () => new Map(customReports.map(report => [report.id, report])),
+    [customReports],
+  );
+
   const isLoading = isCustomReportsLoading || isWidgetsLoading;
 
   const { isNarrowWidth } = useResponsive();
@@ -103,7 +89,7 @@ export function Overview() {
 
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
-  const layout = useWidgetLayout(widgets, customReports);
+  const layout = useWidgetLayout(widgets);
 
   const onLayoutChange = (newLayout: Layout[]) => {
     send(
@@ -133,26 +119,18 @@ export function Overview() {
   };
 
   const onExport = () => {
-    const widgetMap = new Map(layout.map(item => [item.i, item]));
+    const widgetMap = new Map(widgets.map(item => [item.id, item]));
 
     const data = {
       version: 1,
       widgets: layout
         .map(item => widgetMap.get(item.i))
         .map(item => ({
-          id: item.i,
-          type: item.type,
-          width: item.w,
-          height: item.h,
-          x: item.x,
-          y: item.y,
-          meta:
-            item.type === 'custom-report'
-              ? {
-                  ...item.meta.report,
-                  data: undefined, // TODO: can remove this (soon)
-                }
-              : undefined,
+          ...item,
+          meta: isCustomReportWidget(item)
+            ? customReportMap.get(item.meta.id)
+            : undefined,
+          tombstone: undefined,
         })),
     } satisfies ExportImportDashboard;
 
@@ -305,9 +283,9 @@ export function Overview() {
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard onRemove={() => onRemoveWidget(item.i)} />
                 ) : item.type === 'custom-report' ? (
-                  'report' in item.meta && item.meta.report ? (
+                  'id' in item.meta ? (
                     <CustomReportListCards
-                      report={item.meta.report}
+                      report={customReportMap.get(item.meta.id)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
                   ) : (

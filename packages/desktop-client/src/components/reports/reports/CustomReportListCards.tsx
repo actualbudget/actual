@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
+import { addNotification } from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
@@ -111,7 +112,9 @@ export function CustomReportListCards({
               <InitialFocus>
                 <Input
                   defaultValue={report.name}
-                  onEnter={e => onSaveName(e.target.value)}
+                  onEnter={e =>
+                    onSaveName((e.target as HTMLInputElement).value)
+                  }
                   onBlur={e => onSaveName(e.target.value)}
                   onEscape={() => setNameMenuOpen(false)}
                   style={{
