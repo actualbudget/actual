@@ -6,6 +6,7 @@ import {
   type ScheduleStatuses,
 } from 'loot-core/src/client/data-hooks/schedules';
 import { format as monthUtilFormat } from 'loot-core/src/shared/months';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
@@ -203,8 +204,8 @@ export function SchedulesTable({
     }
     const filterIncludes = (str: string) =>
       str
-        ? str.toLowerCase().includes(filter.toLowerCase()) ||
-          filter.toLowerCase().includes(str.toLowerCase())
+        ? getNormalisedString(str).includes(getNormalisedString(filter)) ||
+          getNormalisedString(filter).includes(getNormalisedString(str))
         : false;
 
     return schedules.filter(schedule => {
