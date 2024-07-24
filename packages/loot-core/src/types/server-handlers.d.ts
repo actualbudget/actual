@@ -9,8 +9,6 @@ import { QueryState } from '../shared/query';
 import { Budget } from './budget';
 import {
   AccountEntity,
-  CategoryEntity,
-  CategoryGroupEntity,
   GoCardlessToken,
   GoCardlessInstitution,
   SimpleFinAccount,
