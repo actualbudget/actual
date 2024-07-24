@@ -1,19 +1,20 @@
+import isMatch from 'lodash/isMatch';
+
+import { captureException } from '../../platform/exceptions';
+import * as fs from '../../platform/server/fs';
+import { q } from '../../shared/query';
 import {
   type ExportImportDashboard,
   type ExportImportDashboardWidget,
   type ExportImportCustomReportWidget,
   type Widget,
 } from '../../types/models';
-import { q } from '../../shared/query';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
-import { reportModel } from '../reports/app';
-import * as fs from '../../platform/server/fs';
-import { captureException } from '../../platform/exceptions';
 import { mutator } from '../mutators';
+import { reportModel } from '../reports/app';
 import { undoable } from '../undo';
-import isMatch from 'lodash/isMatch';
 
 import { DashboardHandlers } from './types/handlers';
 
@@ -28,7 +29,9 @@ app.method(
           .filter({ id: { $oneof: widgets.map(({ id }) => id) } })
           .select('*'),
       );
-      const dbWidgetMap = new Map(dbWidgets.map(widget => [widget.id, widget]));
+      const dbWidgetMap = new Map<string, Widget>(
+        dbWidgets.map(widget => [widget.id, widget]),
+      );
 
       await Promise.all(
         widgets

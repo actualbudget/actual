@@ -42,6 +42,8 @@ export function NetWorthCard({ accounts, onRemove }) {
           case 'remove':
             onRemove();
             break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
         }
       }}
     >

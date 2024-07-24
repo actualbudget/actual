@@ -96,6 +96,8 @@ export function CashFlowCard({ onRemove }) {
           case 'remove':
             onRemove();
             break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
         }
       }}
     >

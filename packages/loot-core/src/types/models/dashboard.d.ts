@@ -30,7 +30,7 @@ export type Widget = SpecializedWidget | CustomReportWidget;
 // Exported/imported (json) widget definition
 export type ExportImportCustomReportWidget = Omit<Widget, 'meta' | 'type'> & {
   type: CustomReportWidget['type'];
-  meta: Omit<CustomReportEntity, 'selectedCategories' | 'data' | 'tombstone'>;
+  meta: Omit<CustomReportEntity, 'data' | 'tombstone'>;
 };
 export type ExportImportDashboardWidget =
   | ExportImportCustomReportWidget

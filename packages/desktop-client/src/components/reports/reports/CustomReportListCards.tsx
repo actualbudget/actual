@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -27,8 +28,9 @@ export function CustomReportListCards({
   report: CustomReportEntity;
   onRemove: () => void;
 }) {
+  const dispatch = useDispatch();
+
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-  const [err, setErr] = useState('');
   const [earliestTransaction, setEarliestTransaction] = useState('');
 
   const payees = usePayees();
@@ -58,8 +60,12 @@ export function CustomReportListCards({
     const response = await sendCatch('report/update', updatedReport);
 
     if (response.error) {
-      // TODO: display error somewhere
-      setErr(response.error.message);
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: `Failed saving report name: ${response.error.message}`,
+        }),
+      );
       setNameMenuOpen(true);
       return;
     }

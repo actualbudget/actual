@@ -1,10 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
-import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { addNotification } from 'loot-core/src/client/actions';
-
 import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -31,6 +30,7 @@ import { MobilePageHeader, Page, PageHeader } from '../Page';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
+import { MissingReportCard } from './reports/MissingReportCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
 
@@ -67,26 +67,19 @@ function useWidgetLayout(
     customReports.map(report => [report.id, report]),
   );
 
-  return widgets
-    .filter(
-      widget =>
-        !isCustomReportWidget(widget) ||
-        // Edge case: remove widgets referencing non-existing custom reports
-        customReportMap.has(widget.meta.id),
-    )
-    .map(widget => ({
-      i: widget.id,
-      type: widget.type,
-      x: widget.x,
-      y: widget.y,
-      w: widget.width,
-      h: widget.height,
-      minW: isCustomReportWidget(widget) ? 2 : 3,
-      minH: isCustomReportWidget(widget) ? 1 : 2,
-      meta: isCustomReportWidget(widget)
-        ? { report: customReportMap.get(widget.meta.id) }
-        : {},
-    }));
+  return widgets.map(widget => ({
+    i: widget.id,
+    type: widget.type,
+    x: widget.x,
+    y: widget.y,
+    w: widget.width,
+    h: widget.height,
+    minW: isCustomReportWidget(widget) ? 2 : 3,
+    minH: isCustomReportWidget(widget) ? 1 : 2,
+    meta: isCustomReportWidget(widget)
+      ? { report: customReportMap.get(widget.meta.id) }
+      : {},
+  }));
 }
 
 export function Overview() {
@@ -157,8 +150,7 @@ export function Overview() {
             item.type === 'custom-report'
               ? {
                   ...item.meta.report,
-                  data: undefined,
-                  selectedCategories: undefined,
+                  data: undefined, // TODO: can remove this (soon)
                 }
               : undefined,
         })),
@@ -313,11 +305,16 @@ export function Overview() {
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard onRemove={() => onRemoveWidget(item.i)} />
                 ) : item.type === 'custom-report' ? (
-                  // @ts-expect-error newer TS version should allow doing this
-                  <CustomReportListCards
-                    report={item.meta.report}
-                    onRemove={() => onRemoveWidget(item.i)}
-                  />
+                  'report' in item.meta && item.meta.report ? (
+                    <CustomReportListCards
+                      report={item.meta.report}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : (
+                    <MissingReportCard
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  )
                 ) : null}
               </div>
             ))}
