@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+
+import { type State } from 'loot-core/client/state-types';
+import { send } from 'loot-core/platform/client/fetch';
+import { getUserAccessErrors } from 'loot-core/shared/errors';
 
 import { useActions } from '../../hooks/useActions';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import { FormField, FormLabel } from '../forms';
-import { getUserAccessErrors } from 'loot-core/shared/errors';
-import { send } from 'loot-core/platform/client/fetch';
 import { View } from '../common/View';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useSelector } from 'react-redux';
-import { State } from 'loot-core/client/state-types';
+import { FormField, FormLabel } from '../forms';
 
 export function TransferOwnership({ modalProps, onSave: originalOnSave }) {
   const userData = useSelector((state: State) => state.user.data);
@@ -26,19 +27,24 @@ export function TransferOwnership({ modalProps, onSave: originalOnSave }) {
   useEffect(() => {
     send('users-get').then(users =>
       setAvailableUsers(
-        users.filter(user => userData?.userId === user.id).map(user => [
-          user.id,
-          user.displayName
-            ? `${user.displayName} (${user.userName})`
-            : user.userName,
-        ]),
+        users
+          .filter(user => userData?.userId === user.id)
+          .map(user => [
+            user.id,
+            user.displayName
+              ? `${user.displayName} (${user.userName})`
+              : user.userName,
+          ]),
       ),
     );
   }, []);
 
   async function onSave() {
-    debugger;
-    const { error } = await send('transfer-ownership', {fileId: cloudFileId, newUserId: userId}) || {};
+    const { error } =
+      (await send('transfer-ownership', {
+        fileId: cloudFileId,
+        newUserId: userId,
+      })) || {};
     if (!error) {
       originalOnSave?.();
       modalProps.onClose();
@@ -62,7 +68,7 @@ export function TransferOwnership({ modalProps, onSave: originalOnSave }) {
               <Select
                 options={availableUsers}
                 onChange={newValue => {
-                    setUserId(newValue);
+                  setUserId(newValue);
                 }}
                 value={userId}
               />
@@ -97,7 +103,7 @@ export function TransferOwnership({ modalProps, onSave: originalOnSave }) {
               </label>
             </View>
           )}
-          {availableUsers.length == 0 && (
+          {availableUsers.length === 0 && (
             <Text
               style={{
                 ...styles.verySmallText,

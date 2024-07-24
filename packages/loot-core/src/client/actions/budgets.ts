@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 import * as asyncStorage from '../../platform/server/asyncStorage';
-
 import { getDownloadError, getSyncError } from '../../shared/errors';
 import type { Handlers } from '../../types/handlers';
 import * as constants from '../constants';
@@ -238,11 +237,11 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
 export function goToLogin() {
   return async (dispatch: Dispatch) => {
     asyncStorage.removeItem('user-token');
-    await dispatch(closeBudget());    
+    await dispatch(closeBudget());
   };
 }
 
 export function goToLoginFromManagement() {
   asyncStorage.removeItem('user-token');
-  window.location.href = "/";
+  window.location.href = '/';
 }

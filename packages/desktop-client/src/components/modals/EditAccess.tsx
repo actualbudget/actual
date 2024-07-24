@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 
+import { send } from 'loot-core/platform/client/fetch';
+import { getUserAccessErrors } from 'loot-core/shared/errors';
+
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
@@ -7,10 +10,8 @@ import { Modal } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import { FormField, FormLabel } from '../forms';
-import { getUserAccessErrors } from 'loot-core/shared/errors';
-import { send } from 'loot-core/platform/client/fetch';
 import { View } from '../common/View';
+import { FormField, FormLabel } from '../forms';
 
 export function EditUserAccess({
   modalProps,
@@ -78,7 +79,7 @@ export function EditUserAccess({
               </label>
             </View>
           )}
-          {availableUsers.length == 0 && (
+          {availableUsers.length === 0 && (
             <Text
               style={{
                 ...styles.verySmallText,

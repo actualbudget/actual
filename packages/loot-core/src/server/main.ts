@@ -877,8 +877,7 @@ handlers['secret-set'] = async function ({ name, value }) {
       },
     );
   } catch (error) {
-    console.error(error);
-    return { error: 'failed' };
+    return { error: 'failed', reason: error.reason };
   }
 };
 
@@ -1896,6 +1895,24 @@ handlers['export-budget'] = async function () {
     captureException(err);
     return { error: 'internal-error' };
   }
+};
+
+handlers['enable-openid'] = async function (loginConfig) {
+  try {
+    await post(getServer().SIGNUP_SERVER + '/enable-openid', loginConfig);
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
+};
+
+handlers['enable-password'] = async function (loginConfig) {
+  try {
+    await post(getServer().SIGNUP_SERVER + '/enable-password', loginConfig);
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
 };
 
 async function loadBudget(id) {

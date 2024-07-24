@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ReactElement, useEffect, useMemo } from 'react';
+import React, { type ReactElement, useEffect, useMemo, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
@@ -46,6 +46,7 @@ import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar } from './Titlebar';
+import { useIsOpenId } from './ServerContext';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -81,6 +82,7 @@ function RouterBehaviors() {
   const accountsLoaded = useSelector(
     (state: State) => state.queries.accountsLoaded,
   );
+
   useEffect(() => {
     // If there are no accounts, we want to redirect the user to
     // the All Accounts screen which will prompt them to add an account
@@ -100,6 +102,8 @@ function RouterBehaviors() {
 
 function FinancesAppWithoutContext() {
   const actions = useActions();
+  const isOpenID = useIsOpenId();
+
   useEffect(() => {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
@@ -223,16 +227,18 @@ function FinancesAppWithoutContext() {
                   }
                 />
 
-                <Route
-                  path="/user-access"
-                  element={
-                    <ProtectedRoute
-                      permission={Permissions.ADMINISTRATOR}
-                      validateOwner={true}
-                      element={<UserAccessPage />}
-                    />
-                  }
-                />
+                {isOpenID && (
+                  <Route
+                    path="/user-access"
+                    element={
+                      <ProtectedRoute
+                        permission={Permissions.ADMINISTRATOR}
+                        validateOwner={true}
+                        element={<UserAccessPage />}
+                      />
+                    }
+                  />
+                )}
                 {/* redirect all other traffic to the budget page */}
                 <Route path="/*" element={<Navigate to="/budget" replace />} />
               </Routes>

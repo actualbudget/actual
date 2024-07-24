@@ -34,6 +34,7 @@ import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+import { AuthSettings } from './AuthSettings';
 
 function About() {
   const version = useServerVersion();
@@ -179,6 +180,7 @@ export function Settings() {
 
         <ThemeSettings />
         <FormatSettings />
+        <AuthSettings />
         <EncryptionSettings />
         {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
         <ExportBudget />

@@ -51,7 +51,7 @@ export function Bootstrap() {
     if (error) {
       setError(error);
     } else {
-      navigate('/login');
+      navigate('/login/password');
     }
   }
 

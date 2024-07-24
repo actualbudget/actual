@@ -1,4 +1,3 @@
-import { UserAccessEntity } from 'loot-core/types/models/userAccess';
 import { type File } from '../../types/file';
 import type {
   AccountEntity,
@@ -9,6 +8,7 @@ import type {
 } from '../../types/models';
 import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
 import { type NewUserEntity, type UserEntity } from '../../types/models/user';
+import { type UserAccessEntity } from '../../types/models/userAccess';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
 export type ModalType = keyof FinanceModals;
@@ -265,8 +265,14 @@ type FinanceModals = {
   'edit-access': {
     access: UserAccessEntity | NewUserAccessEntity;
     onSave: (rule: UserEntity) => void;
-  }
+  };
   'transfer-ownership': {
+    onSave: () => void;
+  };
+  'enable-openid': {
+    onSave: () => void;
+  };
+  'enable-password-auth': {
     onSave: () => void;
   };
 };

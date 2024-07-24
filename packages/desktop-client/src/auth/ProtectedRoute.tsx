@@ -1,13 +1,12 @@
 import { useEffect, useState, type ReactElement } from 'react';
 
+import { send } from 'loot-core/platform/client/fetch';
+
 import { View } from '../components/common/View';
+import { useLocalPref } from '../hooks/useLocalPref';
 
 import { useAuth } from './AuthProvider';
 import { type Permissions } from './types';
-import { useLocalPref } from '../hooks/useLocalPref';
-import { useSelector } from 'react-redux';
-import { State } from 'loot-core/client/state-types';
-import { send } from 'loot-core/platform/client/fetch';
 
 type ProtectedRouteProps = {
   permission: Permissions;
@@ -21,14 +20,14 @@ export const ProtectedRoute = ({
   validateOwner,
 }: ProtectedRouteProps) => {
   const { hasPermission } = useAuth();
-  const [permissionGrated, setPermissionGrated] = useState(false)
-  const [budgetId] = useLocalPref('cloudFileId');
+  const [permissionGrated, setPermissionGrated] = useState(false);
+  const [cloudFileId] = useLocalPref('cloudFileId');
 
   useEffect(() => {
     setPermissionGrated(hasPermission(permission));
 
     if (!permissionGrated && validateOwner) {
-      send('check-file-access', budgetId).then(({ granted }) => {
+      send('check-file-access', cloudFileId).then(({ granted }) => {
         setPermissionGrated(granted);
       });
     }

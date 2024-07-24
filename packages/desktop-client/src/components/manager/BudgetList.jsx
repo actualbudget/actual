@@ -35,6 +35,7 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
+import { useIsOpenId } from '../ServerContext';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -120,7 +121,7 @@ function FileMenuButton({ state, onDelete }) {
   );
 }
 
-function FileState({ file, users, currentUserId }) {
+function FileState({ file, users, currentUserId, isOpenID }) {
   let Icon;
   let status;
   let color;
@@ -136,7 +137,7 @@ function FileState({ file, users, currentUserId }) {
     case 'remote':
       Icon = SvgCloudDownload;
       status = 'Available for download';
-      ownerName = getOwnerDisplayName();
+      ownerName = isOpenID ? getOwnerDisplayName() : '';
       break;
     case 'local':
       Icon = SvgFileDouble;
@@ -151,11 +152,12 @@ function FileState({ file, users, currentUserId }) {
     default:
       Icon = SvgCloudCheck;
       status = 'Syncing';
-      ownerName = getOwnerDisplayName();
+      ownerName = isOpenID ? getOwnerDisplayName() : '';
       break;
   }
 
-  const showOwnerContent = ownerName !== null && file.owner !== currentUserId;
+  const showOwnerContent =
+    isOpenID && ownerName !== null && file.owner !== currentUserId;
 
   return (
     <View style={{ width: '100%' }}>
@@ -223,6 +225,7 @@ function File({
   users,
   currentUserId,
   usersPerFile,
+  isOpenID,
 }) {
   const selecting = useRef(false);
 
@@ -259,16 +262,23 @@ function File({
       <View style={{ alignItems: 'flex-start', width: '100%' }}>
         <View style={{ flexDirection: 'row', width: '100%' }}>
           <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
-          <UserAccessForFile
-            style={{ marginLeft: '5px' }}
-            fileId={file.cloudFileId}
-            ownerId={file.owner}
-            currentUserId={currentUserId}
-            usersPerFile={usersPerFile}
-          />
+          {isOpenID && (
+            <UserAccessForFile
+              style={{ marginLeft: '5px' }}
+              fileId={file.cloudFileId}
+              ownerId={file.owner}
+              currentUserId={currentUserId}
+              usersPerFile={usersPerFile}
+            />
+          )}
         </View>
 
-        <FileState file={file} users={users} currentUserId={currentUserId} />
+        <FileState
+          file={file}
+          users={users}
+          currentUserId={currentUserId}
+          isOpenID={isOpenID}
+        />
       </View>
 
       <View
@@ -308,6 +318,7 @@ function BudgetFiles({
   users,
   currentUserId,
   usersPerFile,
+  isOpenID,
 }) {
   return (
     <View
@@ -342,6 +353,7 @@ function BudgetFiles({
             quickSwitchMode={quickSwitchMode}
             onSelect={onSelect}
             onDelete={onDelete}
+            isOpenID={isOpenID}
           />
         ))
       )}
@@ -401,21 +413,24 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const [currentUserId, setCurrentUserId] = useState('');
   const userData = useSelector(state => state.user.data);
   const [usersPerFile, setUsersPerFile] = useState(new Map());
+  const isOpenID = useIsOpenId();
 
   useEffect(() => {
-    if (!userData.offline) {
-      send('users-get').then(data => {
-        setUsers(data);
-        setCurrentUserId(userData.userId);
-      });
-      send(
-        'users-get-access',
-        allFiles.map(file => file.cloudFileId),
-      ).then(data => {
-        setUsersPerFile(data);
-      });
+    if (isOpenID) {
+      if (!userData.offline) {
+        send('users-get').then(data => {
+          setUsers(data);
+          setCurrentUserId(userData.userId);
+        });
+        send(
+          'users-get-access',
+          allFiles.map(file => file.cloudFileId),
+        ).then(data => {
+          setUsersPerFile(data);
+        });
+      }
     }
-  }, [allFiles, userData.offline, userData.userId]);
+  }, [allFiles, userData.offline, userData.userId, isOpenID]);
 
   const files = id ? allFiles.filter(f => f.id !== id) : allFiles;
 
@@ -472,6 +487,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         usersPerFile={usersPerFile}
         currentUserId={currentUserId}
         quickSwitchMode={quickSwitchMode}
+        isOpenID={isOpenID}
         onSelect={file => {
           if (!id) {
             if (file.state === 'remote') {
@@ -543,13 +559,21 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   );
 }
 
-function UserAccessForFile({ fileId, currentUserId, ownerId, usersPerFile, ...props }) {
+function UserAccessForFile({
+  fileId,
+  currentUserId,
+  ownerId,
+  usersPerFile,
+  ...props
+}) {
   let usersAccess = usersPerFile?.has(fileId) ? usersPerFile.get(fileId) : [];
   usersAccess = usersAccess.filter(user => user.userId !== ownerId);
 
   const sortedUsersAccess = [...usersAccess].sort((a, b) => {
-    const textA = a.userId === currentUserId ? 'You' : (a.displayName ?? a.userName);
-    const textB = b.userId === currentUserId ? 'You' : (b.displayName ?? b.userName);
+    const textA =
+      a.userId === currentUserId ? 'You' : a.displayName ?? a.userName;
+    const textB =
+      b.userId === currentUserId ? 'You' : b.displayName ?? b.userName;
     return textA.localeCompare(textB);
   });
 
@@ -601,7 +625,9 @@ function UserAccessForFile({ fileId, currentUserId, ownerId, usersPerFile, ...pr
                         listStylePosition: 'inside',
                       }}
                     >
-                      {user.userId === currentUserId ? 'You' : (user.displayName ?? user.userName)}
+                      {user.userId === currentUserId
+                        ? 'You'
+                        : user.displayName ?? user.userName}
                     </View>
                   </View>
                 ))}

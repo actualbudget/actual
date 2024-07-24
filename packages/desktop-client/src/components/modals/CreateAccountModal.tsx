@@ -20,6 +20,10 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
 import { Tooltip } from '../tooltips';
+import { useAuth } from '../../auth/AuthProvider';
+import { Permissions } from '../../auth/types';
+import { Error, Warning } from '../alerts';
+import { useIsOpenId } from '../ServerContext';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -39,6 +43,8 @@ export function CreateAccountModal({
     useState(null);
   const [menuGoCardlessOpen, setGoCardlessMenuOpen] = useState<boolean>(false);
   const [menuSimplefinOpen, setSimplefinMenuOpen] = useState<boolean>(false);
+  const { hasPermission } = useAuth();
+  const isOpenID = useIsOpenId();
 
   const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
@@ -177,6 +183,8 @@ export function CreateAccountModal({
 
   const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
 
+  const canSetSecrets = !isOpenID || hasPermission(Permissions.ADMINISTRATOR);
+
   return (
     <Modal title={title} {...modalProps}>
       {() => (
@@ -213,99 +221,33 @@ export function CreateAccountModal({
           <View style={{ gap: 10 }}>
             {syncServerStatus === 'online' ? (
               <>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    gap: 10,
-                    alignItems: 'center',
-                  }}
-                >
-                  <ButtonWithLoading
-                    disabled={syncServerStatus !== 'online'}
-                    style={{
-                      padding: '10px 0',
-                      fontSize: 15,
-                      fontWeight: 600,
-                      flex: 1,
-                    }}
-                    onClick={onConnectGoCardless}
-                  >
-                    {isGoCardlessSetupComplete
-                      ? 'Link bank account with GoCardless'
-                      : 'Set up GoCardless for bank sync'}
-                  </ButtonWithLoading>
-                  {isGoCardlessSetupComplete && (
-                    <Button
-                      type="bare"
-                      onClick={() => setGoCardlessMenuOpen(true)}
-                      aria-label="Menu"
-                    >
-                      <SvgDotsHorizontalTriple
-                        width={15}
-                        height={15}
-                        style={{ transform: 'rotateZ(90deg)' }}
-                      />
-                      {menuGoCardlessOpen && (
-                        <Tooltip
-                          position="bottom-right"
-                          width={200}
-                          style={{ padding: 0 }}
-                          onClose={() => setGoCardlessMenuOpen(false)}
-                        >
-                          <Menu
-                            onMenuSelect={item => {
-                              if (item === 'reconfigure') {
-                                onGoCardlessReset();
-                              }
-                            }}
-                            items={[
-                              {
-                                name: 'reconfigure',
-                                text: 'Reset GoCardless credentials',
-                              },
-                            ]}
-                          />
-                        </Tooltip>
-                      )}
-                    </Button>
-                  )}
-                </View>
-                <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                  <strong>
-                    Link a <em>European</em> bank account
-                  </strong>{' '}
-                  to automatically download transactions. GoCardless provides
-                  reliable, up-to-date information from hundreds of banks.
-                </Text>
-                {simpleFinSyncFeatureFlag === true && (
+                {(canSetSecrets || isGoCardlessSetupComplete) && (
                   <>
                     <View
                       style={{
                         flexDirection: 'row',
                         gap: 10,
-                        marginTop: '18px',
                         alignItems: 'center',
                       }}
                     >
                       <ButtonWithLoading
                         disabled={syncServerStatus !== 'online'}
-                        loading={loadingSimpleFinAccounts}
                         style={{
                           padding: '10px 0',
                           fontSize: 15,
                           fontWeight: 600,
                           flex: 1,
                         }}
-                        onClick={onConnectSimpleFin}
+                        onClick={onConnectGoCardless}
                       >
-                        {isSimpleFinSetupComplete
-                          ? 'Link bank account with SimpleFIN'
-                          : 'Set up SimpleFIN for bank sync'}
+                        {isGoCardlessSetupComplete
+                          ? 'Link bank account with GoCardless'
+                          : 'Set up GoCardless for bank sync'}
                       </ButtonWithLoading>
-                      {isSimpleFinSetupComplete && (
+                      {isGoCardlessSetupComplete && canSetSecrets && (
                         <Button
                           type="bare"
-                          onClick={() => setSimplefinMenuOpen(true)}
+                          onClick={() => setGoCardlessMenuOpen(true)}
                           aria-label="Menu"
                         >
                           <SvgDotsHorizontalTriple
@@ -313,23 +255,23 @@ export function CreateAccountModal({
                             height={15}
                             style={{ transform: 'rotateZ(90deg)' }}
                           />
-                          {menuSimplefinOpen && (
+                          {menuGoCardlessOpen && (
                             <Tooltip
                               position="bottom-right"
                               width={200}
                               style={{ padding: 0 }}
-                              onClose={() => setSimplefinMenuOpen(false)}
+                              onClose={() => setGoCardlessMenuOpen(false)}
                             >
                               <Menu
                                 onMenuSelect={item => {
                                   if (item === 'reconfigure') {
-                                    onSimpleFinReset();
+                                    onGoCardlessReset();
                                   }
                                 }}
                                 items={[
                                   {
                                     name: 'reconfigure',
-                                    text: 'Reset SimpleFIN credentials',
+                                    text: 'Reset GoCardless credentials',
                                   },
                                 ]}
                               />
@@ -340,13 +282,101 @@ export function CreateAccountModal({
                     </View>
                     <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                       <strong>
-                        Link a <em>North American</em> bank account
+                        Link a <em>European</em> bank account
                       </strong>{' '}
-                      to automatically download transactions. SimpleFIN provides
-                      reliable, up-to-date information from hundreds of banks.
+                      to automatically download transactions. GoCardless
+                      provides reliable, up-to-date information from hundreds of
+                      banks.
                     </Text>
                   </>
                 )}
+                {(canSetSecrets || isSimpleFinSetupComplete) &&
+                  simpleFinSyncFeatureFlag === true && (
+                    <>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 10,
+                          marginTop: '18px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonWithLoading
+                          disabled={syncServerStatus !== 'online'}
+                          loading={loadingSimpleFinAccounts}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onClick={onConnectSimpleFin}
+                        >
+                          {isSimpleFinSetupComplete
+                            ? 'Link bank account with SimpleFIN'
+                            : 'Set up SimpleFIN for bank sync'}
+                        </ButtonWithLoading>
+                        {isSimpleFinSetupComplete && canSetSecrets && (
+                          <Button
+                            type="bare"
+                            onClick={() => setSimplefinMenuOpen(true)}
+                            aria-label="Menu"
+                          >
+                            <SvgDotsHorizontalTriple
+                              width={15}
+                              height={15}
+                              style={{ transform: 'rotateZ(90deg)' }}
+                            />
+                            {menuSimplefinOpen && (
+                              <Tooltip
+                                position="bottom-right"
+                                width={200}
+                                style={{ padding: 0 }}
+                                onClose={() => setSimplefinMenuOpen(false)}
+                              >
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onSimpleFinReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: 'Reset SimpleFIN credentials',
+                                    },
+                                  ]}
+                                />
+                              </Tooltip>
+                            )}
+                          </Button>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <strong>
+                          Link a <em>North American</em> bank account
+                        </strong>{' '}
+                        to automatically download transactions. SimpleFIN
+                        provides reliable, up-to-date information from hundreds
+                        of banks.
+                      </Text>
+                    </>
+                  )}
+                {(!isGoCardlessSetupComplete ||
+                  (simpleFinSyncFeatureFlag && !isSimpleFinSetupComplete)) &&
+                  !canSetSecrets && (
+                    <Warning>
+                      You don't have the required permissions to set up secrets.
+                      Please contact an Admin to configure{' '}
+                      {[
+                        isGoCardlessSetupComplete ? '' : 'GoCardless',
+                        isSimpleFinSetupComplete ? '' : 'SimpleFin',
+                      ]
+                        .filter(Boolean) // Remove empty values
+                        .join(' or ')}
+                      .
+                    </Warning>
+                  )}
               </>
             ) : (
               <>

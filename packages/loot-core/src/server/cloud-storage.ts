@@ -37,12 +37,11 @@ async function checkHTTPStatus(res) {
     return res.text().then(str => {
       throw new HTTPError(res.status, str);
     });
-  } else if(res.status === 403) {
-    debugger;
+  } else if (res.status === 403) {
     const data = JSON.parse(res.text())?.data;
-    if(data && data.reason === "token-expired") {
+    if (data && data.reason === 'token-expired') {
       asyncStorage.removeItem('user-token');
-      window.location.href = "/";
+      window.location.href = '/';
     }
   } else {
     return res;

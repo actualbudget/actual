@@ -13,6 +13,8 @@ import { send } from 'loot-core/src/platform/client/fetch';
 type ServerContextValue = {
   url: string | null;
   version: string;
+  isOpenId: boolean;
+  loginMethod: string;
   setURL: (
     url: string,
     opts?: { validate?: boolean },
@@ -22,12 +24,16 @@ type ServerContextValue = {
 const ServerContext = createContext<ServerContextValue>({
   url: null,
   version: '',
+  isOpenId: false,
+  loginMethod: '',
   setURL: () => Promise.reject(new Error('ServerContext not initialized')),
 });
 
 export const useServerURL = () => useContext(ServerContext).url;
 export const useServerVersion = () => useContext(ServerContext).version;
 export const useSetServerURL = () => useContext(ServerContext).setURL;
+export const useIsOpenId = () => useContext(ServerContext).isOpenId;
+export const useLoginMethod = () => useContext(ServerContext).loginMethod;
 
 async function getServerVersion() {
   const result = await send('get-server-version');
@@ -40,6 +46,8 @@ async function getServerVersion() {
 export function ServerProvider({ children }: { children: ReactNode }) {
   const [serverURL, setServerURL] = useState('');
   const [version, setVersion] = useState('');
+  const [isOpenId, setIsOpenId] = useState(false);
+  const [loginMethod, setLoginMethod] = useState(false);
 
   useEffect(() => {
     async function run() {
@@ -48,6 +56,15 @@ export function ServerProvider({ children }: { children: ReactNode }) {
     }
     run();
   }, []);
+
+  useEffect(() => {
+    if (serverURL) {
+      send('auth-mode').then(data => {
+        setIsOpenId(data === 'openid');
+        setLoginMethod(data);
+      });
+    }
+  }, [serverURL]);
 
   const setURL = useCallback(
     async (url: string, opts: { validate?: boolean } = {}) => {
@@ -65,6 +82,8 @@ export function ServerProvider({ children }: { children: ReactNode }) {
     <ServerContext.Provider
       value={{
         url: serverURL,
+        isOpenId,
+        loginMethod,
         setURL,
         version: version ? `v${version}` : 'N/A',
       }}

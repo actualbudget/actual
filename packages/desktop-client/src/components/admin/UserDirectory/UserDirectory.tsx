@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { getUserDirectoryErrors } from 'loot-core/shared/errors';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
@@ -17,6 +18,7 @@ import {
   type UserEntity,
 } from 'loot-core/types/models/user';
 
+import { useActions } from '../../../hooks/useActions';
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button';
@@ -29,8 +31,6 @@ import { SimpleTable } from '../../rules/SimpleTable';
 
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';
-import { useActions } from '../../../hooks/useActions';
-import { getUserDirectoryErrors } from 'loot-core/shared/errors';
 
 type ManageUserDirectoryContentProps = {
   isModal: boolean;
@@ -200,7 +200,7 @@ function UserDirectoryContent({
             onChange={onSearchChange}
           />
         </View>
-        
+
         <View style={{ flex: 1 }}>
           <UserDirectoryHeader />
           <SimpleTable

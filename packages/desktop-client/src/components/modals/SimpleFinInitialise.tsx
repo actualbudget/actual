@@ -12,6 +12,7 @@ import type { ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { getSecretsError } from 'loot-core/shared/errors';
 
 type SimpleFinInitialiseProps = {
   modalProps?: Partial<ModalProps>;
@@ -25,6 +26,7 @@ export const SimpleFinInitialise = ({
   const [token, setToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('It is required to provide a token.');
 
   const onSubmit = async () => {
     if (!token) {
@@ -34,13 +36,18 @@ export const SimpleFinInitialise = ({
 
     setIsLoading(true);
 
-    await send('secret-set', {
+    const { error, reason } = await send('secret-set', {
       name: 'simplefin_token',
       value: token,
-    });
+    }) || {};
 
-    onSuccess();
-    modalProps.onClose();
+    if(error) {
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+    } else {
+      onSuccess();
+      modalProps.onClose();
+    }
     setIsLoading(false);
   };
 
@@ -74,7 +81,7 @@ export const SimpleFinInitialise = ({
           />
         </FormField>
 
-        {!isValid && <Error>It is required to provide a token.</Error>}
+        {!isValid && <Error>{error}</Error>}
       </View>
 
       <ModalButtons>

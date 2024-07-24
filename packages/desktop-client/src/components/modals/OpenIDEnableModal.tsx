@@ -1,0 +1,78 @@
+import { useEffect, useState } from 'react';
+
+import { send } from 'loot-core/platform/client/fetch';
+import { getOpenIdErrors } from 'loot-core/shared/errors';
+
+import { useActions } from '../../hooks/useActions';
+import { Modal } from '../common/Modal';
+
+import { OpenIdConfig, OpenIdForm } from '../manager/subscribe/OpenIdForm';
+import { Label } from '../common/Label';
+import { theme, styles } from '../../style';
+import { Error } from '../alerts';
+import { View } from '../common/View';
+import { Button } from '../common/Button';
+import * as asyncStorage from '../../../../loot-core/src/platform/server/asyncStorage';
+
+export function OpenIDEnableModal({ modalProps, onSave: originalOnSave }) {
+  const [error, setError] = useState('');
+  const actions = useActions();
+  const { closeBudget } = useActions();
+
+  async function onSave(config: OpenIdConfig) {
+    debugger;
+    const { error } = await send('enable-openid', { openId: config }) || {};
+    if (!error) {
+      originalOnSave?.();
+      modalProps.onClose();
+      await asyncStorage.removeItem('user-token');
+      await closeBudget();
+    } else {
+      setError(getOpenIdErrors(error));
+    }
+  }
+
+  return (
+    <Modal
+      title="Enable OpenID"
+      size="medium"
+      {...modalProps}
+      style={{ ...modalProps.style, flex: 'inherit' }}
+    >
+      <View style={{ flexDirection: 'column' }}>
+        <OpenIdForm
+          onSetOpenId={onSave}
+          otherButtons={[
+            <Button type='bare' style={{ marginRight: 10 }} onClick={actions.popModal}>
+              Cancel
+            </Button>,
+          ]}
+        />
+        <Label
+          style={{
+            ...styles.verySmallText,
+            color: theme.pageTextLight,
+            paddingTop: 5,
+          }}
+          title="After enabling openid all sessions will be closed"
+        />
+        <Label
+          style={{
+            ...styles.verySmallText,
+            color: theme.pageTextLight,
+          }}
+          title="The first user to login will become the server master"
+        />
+        <Label
+          style={{
+            ...styles.verySmallText,
+            color: theme.warningText,
+          }}
+          title="The current password will be disabled"
+        />
+
+        {error && <Error>{error}</Error>}
+      </View>
+    </Modal>
+  );
+}

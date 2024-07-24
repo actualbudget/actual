@@ -28,6 +28,7 @@ import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
+import { EditUserAccess } from './modals/EditAccess';
 import { EditField } from './modals/EditField';
 import { EditRule } from './modals/EditRule';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
@@ -54,13 +55,14 @@ import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInputModal } from './modals/SingleInputModal';
 import { TransferModal } from './modals/TransferModal';
+import { TransferOwnership } from './modals/TransferOwnership';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
-import { EditUserAccess } from './modals/EditAccess';
-import { TransferOwnership } from './modals/TransferOwnership';
+import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
+import { PasswordEnableModal } from './modals/PasswordEnableModal';
 
 export type CommonModalProps = {
   onClose: () => PopModalAction;
@@ -666,7 +668,24 @@ export function Modals() {
             <TransferOwnership
               key={name}
               modalProps={modalProps}
-              defaultUserAccess={options.access}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'enable-openid':
+          return (
+            <OpenIDEnableModal
+              key={name}
+              modalProps={modalProps}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'enable-password-auth':
+          return (
+            <PasswordEnableModal
+              key={name}
+              modalProps={modalProps}
               onSave={options.onSave}
             />
           );

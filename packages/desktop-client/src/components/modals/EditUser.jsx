@@ -34,7 +34,7 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
     };
 
     const method = user.id ? 'user-update' : 'user-add';
-    const { error, id: newId } = await send(method, user) || {};
+    const { error, id: newId } = (await send(method, user)) || {};
     if (!error) {
       if (newId) {
         user.id = newId;
@@ -45,7 +45,7 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
     } else {
       setError(getUserDirectoryErrors(error));
       actions.addNotification({
-        type: error == 'token-expired' ? 'error' : 'warning',
+        type: error === 'token-expired' ? 'error' : 'warning',
         title: 'Something wrong happened',
         sticky: true,
         message: getUserDirectoryErrors(error),

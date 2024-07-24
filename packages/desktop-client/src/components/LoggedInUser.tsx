@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+
+import { send } from 'loot-core/platform/client/fetch';
 import { type State } from 'loot-core/src/client/state-types';
 
+import { useAuth } from '../auth/AuthProvider';
+import { Permissions } from '../auth/types';
 import { useActions } from '../hooks/useActions';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useNavigate } from '../hooks/useNavigate';
@@ -13,10 +17,7 @@ import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
-import { useServerURL } from './ServerContext';
-import { useAuth } from '../auth/AuthProvider';
-import { Permissions } from '../auth/types';
-import { send } from 'loot-core/platform/client/fetch';
+import { useIsOpenId, useServerURL } from './ServerContext';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
@@ -41,6 +42,7 @@ export function LoggedInUser({
   const location = useLocation();
   const { hasPermission } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
+  const isOpenID = useIsOpenId();
 
   useEffect(() => {
     getUserData().then(() => setLoading(false));
@@ -126,7 +128,7 @@ export function LoggedInUser({
     ];
 
     const adminMenu = [];
-    if (isAdmin) {
+    if (isOpenID && isAdmin) {
       if (!budgetId && location.pathname !== '/') {
         adminMenu.push({ name: 'index', text: 'View file list' });
       } else if (serverUrl && !userData?.offline && !budgetId) {
@@ -135,6 +137,7 @@ export function LoggedInUser({
     }
 
     if (
+      isOpenID &&
       (isOwner || isAdmin) &&
       serverUrl &&
       !userData?.offline &&
@@ -162,7 +165,7 @@ export function LoggedInUser({
         {serverMessage()}
       </Button>
 
-      {!loading && userData?.userName && (
+      {!loading && isOpenID && userData?.userName && (
         <small>
           (logged as: <span>{userData?.displayName}</span>)
         </small>

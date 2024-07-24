@@ -374,4 +374,18 @@ export interface ServerHandlers {
   'get-last-opened-backup': () => Promise<string | null>;
 
   'app-focused': () => Promise<void>;
+
+  'enable-openid': (arg: {
+    openId?: {
+      issuer: string;
+      client_id: string;
+      client_secret: string;
+      server_hostname: string;
+    };
+  }) => Promise<{ error?: string }>;
+
+  'enable-password': (arg: {
+    password: string;
+  }) => Promise<{ error?: string }>;  
+
 }

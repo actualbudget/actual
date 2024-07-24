@@ -1,7 +1,10 @@
 import { ValidationError } from 'webpack';
 
 import { UserEntity, UserEntityDropdown } from '../../../types/models/user';
-import { NewUserAccessEntity, UserAccessEntity } from '../../../types/models/userAccess';
+import {
+  NewUserAccessEntity,
+  UserAccessEntity,
+} from '../../../types/models/userAccess';
 
 export interface AdminHandlers {
   'users-get': () => Promise<UserEntity[] | null>;
@@ -26,13 +29,23 @@ export interface AdminHandlers {
 
   'access-add': (
     user: NewUserAccessEntity,
-  ) => Promise<{ error: ValidationError } | { }>;
+  ) => Promise<{ error: ValidationError } | Record<string, never>>;
 
   'access-get': (fileId: string) => Promise<UserAccessEntity[]>;
 
-  'access-get-available-users': (fileId: string) => Promise<UserEntityDropdown[]>;
+  'access-get-available-users': (
+    fileId: string,
+  ) => Promise<UserEntityDropdown[]>;
 
-  'transfer-ownership': ({fileId, newUserId}: {fileId: string, newUserId: string}) => Promise<{ error: ValidationError } | {}>;
+  'transfer-ownership': ({
+    fileId,
+    newUserId,
+  }: {
+    fileId: string;
+    newUserId: string;
+  }) => Promise<{ error: ValidationError } | Record<string, never>>;
 
   'file-owner-get': (fileId: string) => Promise<UserEntity | null>;
+
+  'auth-mode': () => Promise<string>;
 }

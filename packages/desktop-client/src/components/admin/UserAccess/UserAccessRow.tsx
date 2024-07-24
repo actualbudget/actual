@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 import React, { memo } from 'react';
 
+import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
+
 import { useSelectedDispatch } from '../../../hooks/useSelected';
 import { theme } from '../../../style';
 import { View } from '../../common/View';
-import { BlurredOverlay } from '../../PrivacyFilter';
 import { SelectCell, Row, Cell } from '../../table';
-import { UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 type UserAccessProps = {
   access: UserAccessEntity;
@@ -35,9 +35,7 @@ export const UserAccessRow = memo(
               : theme.tableBackground,
         }}
         collapsed={true}
-        onMouseEnter={() =>
-          onHover && onHover(access.userId)
-        }
+        onMouseEnter={() => onHover && onHover(access.userId)}
         onMouseLeave={() => onHover && onHover(null)}
       >
         <SelectCell

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -13,7 +13,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
-import { useServerVersion } from '../ServerContext';
+import { useIsOpenId, useServerVersion } from '../ServerContext';
 
 import { BudgetList } from './BudgetList';
 import { ConfigServer } from './ConfigServer';
@@ -54,6 +54,8 @@ function Version() {
 export function ManagementApp({ isLoading }) {
   const files = useSelector(state => state.budgets.allFiles);
   const userData = useSelector(state => state.user.data);
+  const isOpenID = useIsOpenId();
+
   const managerHasInitialized = useSelector(
     state => state.app.managerHasInitialized,
   );
@@ -160,15 +162,17 @@ export function ManagementApp({ isLoading }) {
                     <Route path="/" element={<WelcomeScreen />} />
                   )}
 
-                  <Route
-                    path="/user-directory"
-                    element={
-                      <ProtectedRoute
-                        permission={Permissions.ADMINISTRATOR}
-                        element={<UserDirectoryPage />}
-                      />
-                    }
-                  />
+                  {isOpenID && (
+                    <Route
+                      path="/user-directory"
+                      element={
+                        <ProtectedRoute
+                          permission={Permissions.ADMINISTRATOR}
+                          element={<UserDirectoryPage />}
+                        />
+                      }
+                    />
+                  )}
                   {/* Redirect all other pages to this route */}
                   <Route path="/*" element={<Navigate to="/" />} />
                 </Routes>
@@ -203,15 +207,18 @@ export function ManagementApp({ isLoading }) {
                 <Route path="/error" element={<Error />} />
                 <Route path="/config-server" element={<ConfigServer />} />
                 <Route path="/bootstrap" element={<Bootstrap />} />
-                <Route
-                  path="/userdirectory"
-                  element={
-                    <ProtectedRoute
-                      permission={Permissions.ADMINISTRATOR}
-                      element={<UserDirectoryPage />}
-                    />
-                  }
-                />
+                {isOpenID && (
+                  <Route
+                    path="/userdirectory"
+                    element={
+                      <ProtectedRoute
+                        permission={Permissions.ADMINISTRATOR}
+                        element={<UserDirectoryPage />}
+                      />
+                    }
+                  />
+                )}
+
                 {/* Redirect all other pages to this route */}
                 <Route
                   path="/*"

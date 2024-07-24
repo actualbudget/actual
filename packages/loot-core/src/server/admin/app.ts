@@ -230,3 +230,13 @@ app.method('file-owner-get', async function (fileId) {
 
   return null;
 });
+
+app.method('auth-mode', async function () {
+  const res = await get(getServer().BASE_SERVER + '/admin/auth-mode/');
+
+  if (res) {
+    return (JSON.parse(res)?.method as string) || '';
+  }
+
+  return null;
+});

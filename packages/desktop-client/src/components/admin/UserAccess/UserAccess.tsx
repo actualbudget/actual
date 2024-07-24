@@ -13,11 +13,19 @@ import { useDispatch } from 'react-redux';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
+import {
+  type NewUserAccessEntity,
+  type UserAccessEntity,
+} from 'loot-core/types/models/userAccess';
 
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
+import { SvgDotsHorizontalTriple, SvgLockOpen } from '../../../icons/v1';
+import { SvgLockClosed } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Link } from '../../common/Link';
+import { Popover } from '../../common/Popover';
 import { Search } from '../../common/Search';
 import { Stack } from '../../common/Stack';
 import { Text } from '../../common/Text';
@@ -26,14 +34,6 @@ import { SimpleTable } from '../../rules/SimpleTable';
 
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';
-import {
-  NewUserAccessEntity,
-  UserAccessEntity,
-} from 'loot-core/types/models/userAccess';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { SvgDotsHorizontalTriple, SvgLockOpen } from '../../../icons/v1';
-import { Popover } from '../../common/Popover';
-import { SvgLockClosed } from '../../../icons/v2';
 
 type ManageUserAccessContentProps = {
   isModal: boolean;
@@ -47,7 +47,7 @@ function UserAccessContent({
   const [allAccess, setAllAccess] = useState([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
-  const [budgetId] = useLocalPref('cloudFileId');
+  const [cloudFileId] = useLocalPref('cloudFileId');
   const dispatch = useDispatch();
   const [ownerName, setOwnerName] = useState('unknown');
   const triggerRef = useRef(null);
@@ -57,8 +57,11 @@ function UserAccessContent({
     () =>
       (filter === ''
         ? allAccess
-        : allAccess.filter(access =>
-            access?.displayName.toLowerCase().includes(filter.toLowerCase()) ?? false,
+        : allAccess.filter(
+            access =>
+              access?.displayName
+                .toLowerCase()
+                .includes(filter.toLowerCase()) ?? false,
           )
       ).slice(0, 100 + page * 50),
     [allAccess, filter, page],
@@ -77,14 +80,14 @@ function UserAccessContent({
   async function loadAccess() {
     setLoading(true);
 
-    const loadedAccess = (await send('access-get', budgetId)) ?? [];
+    const loadedAccess = (await send('access-get', cloudFileId)) ?? [];
 
     setAllAccess(loadedAccess);
     return loadedAccess;
   }
 
   async function loadOwner() {
-    const owner = (await send('file-owner-get', budgetId)) ?? {};
+    const owner = (await send('file-owner-get', cloudFileId)) ?? {};
     return owner;
   }
 
@@ -92,7 +95,7 @@ function UserAccessContent({
     async function loadData() {
       await loadAccess();
       const owner = await loadOwner();
-      if(owner) {
+      if (owner) {
         setOwnerName(owner?.displayName ?? owner?.userName);
       }
       setLoading(false);
@@ -127,7 +130,7 @@ function UserAccessContent({
   function onAddAccess() {
     const access: NewUserAccessEntity = {
       userId: '',
-      fileId: budgetId,
+      fileId: cloudFileId,
     };
 
     dispatch(
@@ -246,14 +249,13 @@ function UserAccessContent({
                       },
                     }),
                   );
-              
                 }}
               >
                 <LockToggle style={{ width: 16, height: 16 }} />
               </Button>
             </View>
           </Popover>
-        </View>        
+        </View>
         <View style={{ flex: 1 }}>
           <UserAccessHeader />
           <SimpleTable
@@ -363,7 +365,7 @@ function UserAccessList({
   );
 }
 
-const LockToggle = (props) => {
+const LockToggle = props => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
