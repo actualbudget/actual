@@ -46,7 +46,6 @@ const reportModel = {
       graphType: row.graph_type,
       conditions: row.conditions,
       conditionsOp: row.conditions_op,
-      data: row.metadata,
     };
   },
 
@@ -71,7 +70,6 @@ const reportModel = {
       graph_type: report.graphType,
       conditions: report.conditions,
       conditions_op: report.conditionsOp,
-      metadata: report.data,
     };
   },
 };
