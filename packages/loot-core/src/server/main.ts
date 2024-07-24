@@ -50,6 +50,7 @@ import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
 import * as prefs from './prefs';
+import { app as categoriesApp } from './categories/app';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
