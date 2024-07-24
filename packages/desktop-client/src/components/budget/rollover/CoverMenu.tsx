@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/src/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
@@ -11,7 +14,7 @@ import { addToBeBudgetedGroup } from '../util';
 
 function removeSelectedCategory(
   categoryGroups: CategoryGroupEntity[],
-  category?: string,
+  category?: CategoryEntity['id'],
 ) {
   if (!category) return categoryGroups;
 
@@ -25,7 +28,7 @@ function removeSelectedCategory(
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
-  category?: string;
+  category?: CategoryEntity['id'];
   onSubmit: (categoryId: string) => void;
   onClose: () => void;
 };
@@ -43,6 +46,11 @@ export function CoverMenu({
     : categoryGroups;
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
+  const filteredCategoryGroups = useMemo(
+    () => removeSelectedCategory(categoryGroups, category),
+    [categoryGroups, category],
+  );
+
   function submit() {
     if (categoryId) {
       onSubmit(categoryId);
@@ -56,7 +64,7 @@ export function CoverMenu({
       <InitialFocus>
         {node => (
           <CategoryAutocomplete
-            categoryGroups={removeSelectedCategory(categoryGroups, category)}
+            categoryGroups={filteredCategoryGroups}
             value={categoryGroups.find(g => g.id === categoryId)}
             openOnFocus={true}
             onSelect={(id: string | undefined) => setCategoryId(id || null)}
