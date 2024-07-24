@@ -1,16 +1,15 @@
+import * as monthUtils from '../../shared/months';
+import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { createApp } from '../app';
+import * as budget from '../budget/base';
 import * as db from '../db';
 import { CategoryError, APIError } from '../errors';
 import { mutator } from '../mutators';
+import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 import { withUndo } from '../undo';
-import * as budget from '../budget/base';
-import * as sheet from '../sheet';
-import * as monthUtils from '../../shared/months';
 
 import { CategoryHandlers } from './types/handlers';
-import { CategoryEntity } from '../../types/models';
-import { CategoryGroupEntity } from '../../types/models';
 
 // Expose functions to the client
 export const app = createApp<CategoryHandlers>();
@@ -19,13 +18,13 @@ app.method(
   'category-create',
   mutator(async function (category: CategoryEntity) {
     return withUndo(async () => {
-      if (!groupId) {
+      if (!category.cat_group) {
         throw APIError('Creating a category: groupId is required');
       }
 
       return db.insertCategory({
         name: category.name,
-        cat_group: category.groupId,
+        cat_group: category.cat_group,
         is_income: category.is_income ? 1 : 0,
         hidden: category.hidden ? 1 : 0,
       });
@@ -122,7 +121,7 @@ app.method('get-category-groups', async function () {
 
 app.method(
   'category-group-create',
-  mutator(async function (group:CategoryGroupEntity) {
+  mutator(async function (group: CategoryGroupEntity) {
     return withUndo(async () => {
       return db.insertCategoryGroup({
         name: group.name,

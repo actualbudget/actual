@@ -1,5 +1,8 @@
-import { APICategoryGroupEntity } from '../../../server/api-models';
-import { type CategoryEntity, CategoryGroupEntity } from '../../../types/models';
+import {
+  type CategoryEntity,
+  CategoryGroupEntity,
+} from '../../../types/models';
+import { APICategoryGroupEntity } from '../../api-models';
 
 type ValidationError = {
   conditionErrors: string[];
@@ -12,15 +15,9 @@ export interface CategoryHandlers {
     list: Array<CategoryEntity>;
   }>;
 
-  'get-category-groups': () => Promise<
-  Array<CategoryGroupEntity>> => 
-    {
-      return grouped: Array<CategoryGroupEntity>;
-  };
+  'get-category-groups': () => Promise<Array<CategoryGroupEntity>>;
 
-  'get-api-category-groups': () => Promise<{
-    grouped: Array<APICategoryGroupEntity>;
-  }>;
+  'get-api-category-groups': () => Promise<Array<APICategoryGroupEntity>>;
 
   'category-validate': (
     rule: Partial<CategoryEntity>,
@@ -35,9 +32,16 @@ export interface CategoryHandlers {
 
   'category-update': (category: CategoryEntity) => Promise<unknown>;
 
-  'category-move': (arg: { id: string; groupId: string; targetId: string }) => Promise<unknown>;
+  'category-move': (arg: {
+    id: string;
+    groupId: string;
+    targetId: string;
+  }) => Promise<unknown>;
 
-  'category-delete': (arg: { id: string; transferId?: string }) => Promise<{ error?: string }>;
+  'category-delete': (arg: {
+    id: string;
+    transferId?: string;
+  }) => Promise<{ error?: string }>;
 
   'category-group-create': (arg: {
     name: string;
@@ -46,9 +50,15 @@ export interface CategoryHandlers {
 
   'category-group-update': (group: CategoryGroupEntity) => Promise<unknown>;
 
-  'category-group-move': (arg: { id: string; targetId: string }) => Promise<unknown>;
+  'category-group-move': (arg: {
+    id: string;
+    targetId: string;
+  }) => Promise<unknown>;
 
-  'category-group-delete': (arg: { id: string; transferId: string }) => Promise<unknown>;
+  'category-group-delete': (arg: {
+    id: string;
+    transferId: string;
+  }) => Promise<unknown>;
 
   'must-category-transfer': (arg: { id: string }) => Promise<unknown>;
 }
