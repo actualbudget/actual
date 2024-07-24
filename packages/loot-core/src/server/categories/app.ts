@@ -4,29 +4,30 @@ import { CategoryError, APIError } from '../errors';
 import { mutator } from '../mutators';
 import { batchMessages } from '../sync';
 import { withUndo } from '../undo';
-import * as budget from './budget/base';
-import * as sheet from './sheet';
-import * as monthUtils from '../shared/months';
+import * as budget from '../budget/base';
+import * as sheet from '../sheet';
+import * as monthUtils from '../../shared/months';
 
 import { CategoryHandlers } from './types/handlers';
-import { CategoryEntity } from './types/models';
-import { CategoryGroupEntity } from 'loot-core/types/models';
+import { CategoryEntity } from '../../types/models';
+import { CategoryGroupEntity } from '../../types/models';
+
 // Expose functions to the client
 export const app = createApp<CategoryHandlers>();
 
 app.method(
   'category-create',
-  mutator(async function ({ name, groupId, isIncome, hidden }) {
+  mutator(async function (category: CategoryEntity) {
     return withUndo(async () => {
       if (!groupId) {
         throw APIError('Creating a category: groupId is required');
       }
 
       return db.insertCategory({
-        name,
-        cat_group: groupId,
-        is_income: isIncome ? 1 : 0,
-        hidden: hidden ? 1 : 0,
+        name: category.name,
+        cat_group: category.groupId,
+        is_income: category.is_income ? 1 : 0,
+        hidden: category.hidden ? 1 : 0,
       });
     });
   }),
@@ -125,7 +126,7 @@ app.method(
     return withUndo(async () => {
       return db.insertCategoryGroup({
         name: group.name,
-        is_income: group.isIncome ? 1 : 0,
+        is_income: group.is_income ? 1 : 0,
       });
     });
   }),
@@ -133,7 +134,7 @@ app.method(
 
 app.method(
   'category-group-update',
-  mutator(async function (group) {
+  mutator(async function (group: CategoryGroupEntity) {
     return withUndo(async () => {
       return db.updateCategoryGroup(group);
     });
