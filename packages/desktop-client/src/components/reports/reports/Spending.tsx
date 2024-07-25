@@ -44,18 +44,21 @@ export function Spending() {
   const [spendingReportFilter = '', setSpendingReportFilter] = useLocalPref(
     'spendingReportFilter',
   );
-  const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
+  const [spendingReportTime = 'previousMonth', setSpendingReportTime] =
     useLocalPref('spendingReportTime');
+  const [spendingReportCompare = 'this month', setSpendingReportCompare] =
+    useLocalPref('spendingReportCompare');
 
   const [dataCheck, setDataCheck] = useState(false);
-  const [compare, setCompare] = useState('this month');
-  const [mode, setMode] = useState('previousMonth');
+  const [compare, setCompare] = useState(spendingReportCompare);
+  const [mode, setMode] = useState(spendingReportTime);
 
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const filterSaved =
     JSON.stringify(parseFilter.conditions) === JSON.stringify(conditions) &&
     parseFilter.conditionsOp === conditionsOp &&
-    spendingReportTime === mode;
+    spendingReportTime === mode &&
+    spendingReportCompare === compare;
 
   useEffect(() => {
     const checkFilter =
@@ -91,6 +94,7 @@ export function Spending() {
       }),
     );
     setSpendingReportTime(mode);
+    setSpendingReportCompare(compare);
   };
 
   const showAverage =

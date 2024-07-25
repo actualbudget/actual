@@ -22,7 +22,11 @@ export function SpendingCard() {
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
-  const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
+  const [spendingReportTime = 'previousMonth'] =
+    useLocalPref('spendingReportTime');
+  const [spendingReportCompare = 'this month'] = useLocalPref(
+    'spendingReportCompare',
+  );
 
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const getGraphData = useMemo(() => {
@@ -99,7 +103,7 @@ export function SpendingCard() {
             compact={true}
             data={data}
             mode={spendingReportTime}
-            compare="this month"
+            compare={spendingReportCompare}
           />
         ) : (
           <LoadingIndicator message="Loading report..." />
