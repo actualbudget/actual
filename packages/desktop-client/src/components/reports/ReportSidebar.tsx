@@ -6,12 +6,14 @@ import { type CategoryGroupEntity } from 'loot-core/types/models/category-group'
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type LocalPrefs } from 'loot-core/types/prefs';
 
+import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 
 import { CategorySelector } from './CategorySelector';
@@ -437,7 +439,18 @@ export function ReportSidebar({
             />
             {!disabledList.currentInterval.get(customReportItems.dateRange) &&
               customReportItems.includeCurrentInterval && (
-                <Text style={{ marginLeft: 10 }}>+1</Text>
+                <Tooltip
+                  placement="bottom start"
+                  content={<Text>Current month</Text>}
+                  style={{
+                    ...styles.tooltip,
+                    lineHeight: 1.5,
+                    padding: '6px 10px',
+                    marginTop: 5,
+                  }}
+                >
+                  <Text style={{ marginLeft: 10 }}>+1</Text>
+                </Tooltip>
               )}
           </View>
         ) : (
