@@ -21,6 +21,7 @@ import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 
 import { GetCardData } from './GetCardData';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { MissingReportCard } from './MissingReportCard';
 
 type CustomReportListCardsProps = {
@@ -139,6 +140,7 @@ function CustomReportListCardsInner({
             {nameMenuOpen ? (
               <InitialFocus>
                 <Input
+                  className={NON_DRAGGABLE_AREA_CLASS_NAME}
                   defaultValue={report.name}
                   onEnter={e =>
                     onSaveName((e.target as HTMLInputElement).value)
