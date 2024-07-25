@@ -14,6 +14,7 @@ import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
+
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 
 type ReportCardProps = {

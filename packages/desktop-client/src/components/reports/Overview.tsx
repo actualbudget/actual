@@ -27,13 +27,12 @@ import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
 
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
-import { MissingReportCard } from './reports/MissingReportCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
-import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 
 import './overview.scss';
 
@@ -128,18 +127,30 @@ export function Overview() {
 
     const data = {
       version: 1,
-      widgets: layout
-        .map(item => widgetMap.get(item.i))
-        .map(item => {
-          delete item.tombstone; // We don't want to export this
+      widgets: layout.map(item => {
+        const widget = widgetMap.get(item.i);
+
+        if (!widget) {
+          throw new Error(`Unable to query widget: ${item.i}`);
+        }
+
+        delete widget.tombstone; // We don't want to export this
+
+        if (isCustomReportWidget(widget)) {
+          const customReport = customReportMap.get(widget.meta.id);
+
+          if (!customReport) {
+            throw new Error(`Custom report not found for widget: ${item.i}`);
+          }
 
           return {
-            ...item,
-            meta: isCustomReportWidget(item)
-              ? customReportMap.get(item.meta.id)
-              : undefined,
+            ...widget,
+            meta: customReport,
           };
-        }),
+        }
+
+        return widget;
+      }),
     } satisfies ExportImportDashboard;
 
     window.Actual?.saveFile(
@@ -351,20 +362,15 @@ export function Overview() {
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'custom-report' ? (
-                  item.meta &&
-                  'id' in item.meta &&
-                  customReportMap.has(item.meta.id) ? (
-                    <CustomReportListCards
-                      isEditing={isEditing}
-                      report={customReportMap.get(item.meta.id)}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  ) : (
-                    <MissingReportCard
-                      isEditing={isEditing}
-                      onRemove={() => onRemoveWidget(item.i)}
-                    />
-                  )
+                  <CustomReportListCards
+                    isEditing={isEditing}
+                    report={
+                      item.meta && 'id' in item.meta
+                        ? customReportMap.get(item.meta.id)
+                        : undefined
+                    }
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
                 ) : null}
               </div>
             ))}

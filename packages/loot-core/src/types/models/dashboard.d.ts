@@ -30,19 +30,20 @@ export type Widget = SpecializedWidget | CustomReportWidget;
 
 // Exported/imported (json) widget definition
 export type ExportImportCustomReportWidget = Omit<
-  Widget,
-  'meta' | 'type' | 'tombstone'
+  CustomReportWidget,
+  'meta' | 'tombstone'
 > & {
-  type: CustomReportWidget['type'];
   meta: Omit<CustomReportEntity, 'tombstone'>;
 };
-export type ExportImportDashboardWidget =
-  | ExportImportCustomReportWidget
-  | (Omit<Widget, 'meta' | 'type' | 'tombstone'> & {
-      type: SpecializedWidget['type'];
-    });
+export type ExportImportDashboardWidget = Omit<
+  ExportImportCustomReportWidget | SpecializedWidget,
+  'tombstone'
+>;
 
 export type ExportImportDashboard = {
+  // Dashboard exports can be versioned; currently we support
+  // only a single version, but lets account for multiple
+  // future versions
   version: 1;
   widgets: ExportImportDashboardWidget[];
 };

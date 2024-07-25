@@ -21,15 +21,40 @@ import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 
 import { GetCardData } from './GetCardData';
+import { MissingReportCard } from './MissingReportCard';
+
+type CustomReportListCardsProps = {
+  isEditing?: boolean;
+  report?: CustomReportEntity;
+  onRemove: () => void;
+};
 
 export function CustomReportListCards({
   isEditing,
   report,
   onRemove,
-}: {
-  isEditing?: boolean;
+}: CustomReportListCardsProps) {
+  // It's possible for a dashboard to reference a non-existing
+  // custom report
+  if (!report) {
+    return <MissingReportCard isEditing={isEditing} onRemove={onRemove} />;
+  }
+
+  return (
+    <CustomReportListCardsInner
+      isEditing={isEditing}
+      report={report}
+      onRemove={onRemove}
+    />
+  );
+}
+
+function CustomReportListCardsInner({
+  isEditing,
+  report,
+  onRemove,
+}: Omit<CustomReportListCardsProps, 'report'> & {
   report: CustomReportEntity;
-  onRemove: () => void;
 }) {
   const dispatch = useDispatch();
 
