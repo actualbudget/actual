@@ -152,7 +152,7 @@ export function SpendingGraph({
   const lastYear = monthUtils.prevYear(thisMonth);
   let selection;
   switch (mode) {
-    case 'Average':
+    case 'average':
       selection = 'average';
       break;
     case 'lastYear':
