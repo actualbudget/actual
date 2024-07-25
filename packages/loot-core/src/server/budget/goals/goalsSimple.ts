@@ -2,7 +2,7 @@
 import { amountToInteger } from '../../../shared/util';
 import { SimpleTemplate } from '../template.types';
 
-export interface GoalReturnType {
+interface GoalReturnType {
   to_budget: number;
   errors: string[];
   limit: number;

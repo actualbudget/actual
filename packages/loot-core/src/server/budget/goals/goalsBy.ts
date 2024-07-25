@@ -2,7 +2,7 @@
 import * as monthUtils from '../../../shared/months';
 import { amountToInteger } from '../../../shared/util';
 import { isReflectBudget } from '../actions';
-import { Template, ByTemplate } from '../template.types';
+import { ByTemplate } from '../template.types';
 
 export async function goalsBy(
   current_month,

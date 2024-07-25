@@ -1,12 +1,12 @@
-export interface BaseTemplate {
+interface BaseTemplate {
   line: unknown;
 }
 
-export interface TemplateWithPriority extends BaseTemplate {
+interface TemplateWithPriority extends BaseTemplate {
   priority: number;
 }
 
-export interface ScheduleTemplate extends TemplateWithPriority {
+interface ScheduleTemplate extends TemplateWithPriority {
   type: 'schedule';
   name: string;
 }
@@ -65,7 +65,7 @@ export interface AverageTemplate extends TemplateWithPriority {
   amount: number;
 }
 
-export interface ErrorTemplate extends BaseTemplate {
+interface ErrorTemplate extends BaseTemplate {
   type: 'error';
   error: Error;
 }
