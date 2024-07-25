@@ -14,6 +14,7 @@ import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 
 type ReportCardProps = {
   isEditing?: boolean;
@@ -124,7 +125,10 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
     >
       {menuItems && isEditing && (
         <View
-          className={menuOpen ? undefined : 'hover-visible'}
+          className={[
+            menuOpen ? undefined : 'hover-visible',
+            NON_DRAGGABLE_AREA_CLASS_NAME,
+          ].join(' ')}
           style={{
             position: 'absolute',
             top: 7,
@@ -138,7 +142,11 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
             isOpen={menuOpen}
             onOpenChange={() => setMenuOpen(false)}
           >
-            <Menu onMenuSelect={onMenuSelect} items={menuItems} />
+            <Menu
+              className={NON_DRAGGABLE_AREA_CLASS_NAME}
+              onMenuSelect={onMenuSelect}
+              items={menuItems}
+            />
           </Popover>
         </View>
       )}

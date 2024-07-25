@@ -33,6 +33,7 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { MissingReportCard } from './reports/MissingReportCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 
 import './overview.scss';
 
@@ -327,7 +328,7 @@ export function Overview() {
             onLayoutChange={onLayoutChange}
             cols={{ desktop: 12, mobile: 1 }}
             rowHeight={100}
-            draggableCancel=".hover-visible"
+            draggableCancel={`.${NON_DRAGGABLE_AREA_CLASS_NAME}`}
             isDraggable={isEditing}
             isResizable={isEditing}
           >
