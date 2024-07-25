@@ -12,6 +12,7 @@ import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Paragraph } from '../../common/Paragraph';
+import { Select } from '../../common/Select';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
@@ -38,7 +39,8 @@ export function Spending() {
   } = useFilters<RuleConditionEntity>();
 
   const [dataCheck, setDataCheck] = useState(false);
-  const [mode, setMode] = useState('lastMonth');
+  const [compare, setCompare] = useState('this month');
+  const [mode, setMode] = useState('previousMonth');
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
@@ -66,12 +68,16 @@ export function Spending() {
     ) > 0;
 
   const todayDay =
-    monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+    compare === 'last month'
       ? 27
-      : monthUtils.getDay(monthUtils.currentDay()) - 1;
+      : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+        ? 27
+        : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
+  const previousMonth =
+    compare === 'this month' ? 'lastMonth' : 'twoMonthsPrevious';
   const showLastYear = Math.abs(data.intervalData[27].lastYear) > 0;
-  const showLastMonth = Math.abs(data.intervalData[27].lastMonth) > 0;
+  const showPreviousMonth = Math.abs(data.intervalData[27][previousMonth]) > 0;
   return (
     <Page
       header={
@@ -177,7 +183,7 @@ export function Spending() {
                     marginBottom: 5,
                   }}
                 >
-                  {showLastMonth && (
+                  {showPreviousMonth && (
                     <View
                       style={{
                         ...styles.mediumText,
@@ -186,24 +192,45 @@ export function Spending() {
                       }}
                     >
                       <AlignedText
-                        left={<Block>Spent MTD:</Block>}
+                        left={
+                          <Block>
+                            Spent{' '}
+                            {compare === 'this month' ? 'MTD' : 'Last Month'}:
+                          </Block>
+                        }
                         right={
                           <Text>
                             <PrivacyFilter blurIntensity={5}>
                               {amountToCurrency(
-                                Math.abs(data.intervalData[todayDay].thisMonth),
+                                Math.abs(
+                                  data.intervalData[todayDay][
+                                    compare === 'this month'
+                                      ? 'thisMonth'
+                                      : 'lastMonth'
+                                  ],
+                                ),
                               )}
                             </PrivacyFilter>
                           </Text>
                         }
                       />
                       <AlignedText
-                        left={<Block>Spent Last MTD:</Block>}
+                        left={
+                          <Block>
+                            Spent{' '}
+                            {compare === 'this month'
+                              ? ' Last MTD'
+                              : '2 Months Ago'}
+                            :
+                          </Block>
+                        }
                         right={
                           <Text>
                             <PrivacyFilter blurIntensity={5}>
                               {amountToCurrency(
-                                Math.abs(data.intervalData[todayDay].lastMonth),
+                                Math.abs(
+                                  data.intervalData[todayDay][previousMonth],
+                                ),
                               )}
                             </PrivacyFilter>
                           </Text>
@@ -213,7 +240,11 @@ export function Spending() {
                   )}
                   {showAverage && (
                     <AlignedText
-                      left={<Block>Spent Average MTD:</Block>}
+                      left={
+                        <Block>
+                          Spent Average{compare === 'this month' && ' MTD'}:
+                        </Block>
+                      }
                       right={
                         <Text>
                           <PrivacyFilter blurIntensity={5}>
@@ -227,7 +258,7 @@ export function Spending() {
                   )}
                 </View>
               </View>
-              {!showLastMonth ? (
+              {!showPreviousMonth ? (
                 <View style={{ marginTop: 30 }}>
                   <h1>Additional data required to generate graph</h1>
                   <Paragraph>
@@ -246,16 +277,32 @@ export function Spending() {
                   >
                     <Text
                       style={{
-                        paddingRight: 10,
+                        paddingRight: 5,
                       }}
                     >
-                      Compare this month to:
+                      Compare
+                    </Text>
+                    <Select
+                      value={compare}
+                      onChange={setCompare}
+                      options={[
+                        ['this month', 'this month'],
+                        ['last month', 'last month'],
+                      ]}
+                    />
+                    <Text
+                      style={{
+                        paddingRight: 10,
+                        paddingLeft: 5,
+                      }}
+                    >
+                      to the:
                     </Text>
                     <ModeButton
-                      selected={mode === 'lastMonth'}
-                      onSelect={() => setMode('lastMonth')}
+                      selected={mode === 'previousMonth'}
+                      onSelect={() => setMode('previousMonth')}
                     >
-                      Last month
+                      Month previous
                     </ModeButton>
                     {showLastYear && (
                       <ModeButton
@@ -281,6 +328,7 @@ export function Spending() {
                       compact={false}
                       data={data}
                       mode={mode}
+                      compare={compare}
                     />
                   ) : (
                     <LoadingIndicator message="Loading report..." />

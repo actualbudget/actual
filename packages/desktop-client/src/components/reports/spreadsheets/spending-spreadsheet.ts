@@ -33,7 +33,7 @@ export function createSpendingSpreadsheet({
   conditionsOp,
   setDataCheck,
 }: createSpendingSpreadsheetProps) {
-  const [startDate, endDate] = getSpecificRange(3, null, 'Months');
+  const [startDate, endDate] = getSpecificRange(4, null, 'Months');
   const [lastYearStartDate, lastYearEndDate] = getSpecificRange(
     12,
     0,
@@ -181,8 +181,9 @@ export function createSpendingSpreadsheet({
         months: indexedData,
         day,
         average: integerToAmount(averageSum) / monthCount,
-        thisMonth: dayData[4].cumulative,
-        lastMonth: dayData[3].cumulative,
+        thisMonth: dayData[5].cumulative,
+        lastMonth: dayData[4].cumulative,
+        twoMonthsPrevious: dayData[3].cumulative,
         lastYear: dayData[0].cumulative,
       };
     });

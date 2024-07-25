@@ -93,6 +93,7 @@ export function SpendingCard() {
             compact={true}
             data={data}
             mode="lastMonth"
+            compare="this month"
           />
         ) : (
           <LoadingIndicator message="Loading report..." />

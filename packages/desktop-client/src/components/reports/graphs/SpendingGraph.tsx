@@ -47,6 +47,7 @@ type CustomTooltipProps = {
   thisMonth?: string;
   lastYear?: string;
   selection?: string;
+  compare?: string;
 };
 
 const CustomTooltip = ({
@@ -56,6 +57,7 @@ const CustomTooltip = ({
   thisMonth,
   lastYear,
   selection,
+  compare,
 }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const comparison =
@@ -86,7 +88,7 @@ const CustomTooltip = ({
           <div style={{ lineHeight: 1.5 }}>
             {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
-                left="This month:"
+                left={compare === 'this month' ? 'This month:' : 'Last month:'}
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1,
                 )}
@@ -99,7 +101,9 @@ const CustomTooltip = ({
                     ? 'Average'
                     : selection === lastYear
                       ? 'Last year'
-                      : 'Last month'
+                      : compare === 'this month'
+                        ? 'Last month'
+                        : '2 months ago:'
                 }
                 right={amountToCurrency(comparison)}
               />
@@ -125,6 +129,7 @@ type SpendingGraphProps = {
   data: SpendingEntity;
   compact?: boolean;
   mode: string;
+  compare: string;
 };
 
 export function SpendingGraph({
@@ -132,11 +137,18 @@ export function SpendingGraph({
   data,
   compact,
   mode,
+  compare,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
   const balanceTypeOp = 'cumulative';
-  const thisMonth = monthUtils.currentMonth();
-  const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+  const thisMonth = monthUtils.subMonths(
+    monthUtils.currentMonth(),
+    compare === 'this month' ? 0 : 1,
+  );
+  const previousMonth = monthUtils.subMonths(
+    monthUtils.currentMonth(),
+    compare === 'this month' ? 1 : 2,
+  );
   const lastYear = monthUtils.prevYear(monthUtils.currentMonth());
   let selection;
   switch (mode) {
@@ -147,7 +159,7 @@ export function SpendingGraph({
       selection = lastYear;
       break;
     default:
-      selection = lastMonth;
+      selection = previousMonth;
       break;
   }
 
@@ -256,6 +268,7 @@ export function SpendingGraph({
                       thisMonth={thisMonth}
                       lastYear={lastYear}
                       selection={selection}
+                      compare={compare}
                     />
                   }
                   formatter={numberFormatterTooltip}
