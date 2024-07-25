@@ -120,6 +120,8 @@ export function getUserDirectoryErrors(reason: string) {
       return 'The username you entered already exists. Please choose a different username.';
     case 'not-all-deleted':
       return 'Not all users were deleted. Check if one of the selected users is the master user.';
+    case 'role-does-not-exists':
+      return 'Selected role does not exists, possibly a bug? Visit https://actualbudget.org/contact/ for support.';
     default:
       return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
   }

@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 
-import { AuthMethods } from 'loot-core/types/prefs';
+import { pushModal } from 'loot-core/client/actions';
+import { type AuthMethods } from 'loot-core/types/prefs';
 
 import { theme, theme as themeStyle } from '../../style';
-import { Select } from '../common/Select';
-import { Text } from '../common/Text';
-
-import { Setting } from './UI';
 import { Button } from '../common/Button';
 import { Label } from '../common/Label';
-import { useDispatch } from 'react-redux';
-import { pushModal } from 'loot-core/client/actions';
+import { Select } from '../common/Select';
+import { Text } from '../common/Text';
 import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 
+import { Setting } from './UI';
+
 export function AuthSettings() {
-  const multiuserEnabled     = useMultiuserEnabled();
+  const multiuserEnabled = useMultiuserEnabled();
   const loginMethod = useLoginMethod();
   const dispatch = useDispatch();
 
@@ -23,7 +23,6 @@ export function AuthSettings() {
       primaryAction={
         <>
           <Select<AuthMethods>
-            onChange={value => {}}
             disabled={true}
             value={loginMethod as AuthMethods}
             options={[
@@ -36,7 +35,7 @@ export function AuthSettings() {
               },
             }}
           />
-          {!multiuserEnabled && (
+          {loginMethod === 'password' && (
             <>
               <Button
                 id="start-using"
@@ -60,7 +59,7 @@ export function AuthSettings() {
               />
             </>
           )}
-          {multiuserEnabled && (
+          {loginMethod !== 'password' && (
             <>
               <Button
                 style={{
@@ -68,19 +67,21 @@ export function AuthSettings() {
                 }}
                 type="normal"
                 onClick={() =>
-                    dispatch(
-                      pushModal('enable-password-auth', {
-                        onSave: async () => {},
-                      }),
-                    )
-                  }
+                  dispatch(
+                    pushModal('enable-password-auth', {
+                      onSave: async () => {},
+                    }),
+                  )
+                }
               >
                 Revert to password
               </Button>
-              <Label
-                style={{ paddingTop: 5, color: theme.warningText }}
-                title="Disabling OpenID will deactivate multi-user mode."
-              />
+              {multiuserEnabled && (
+                <Label
+                  style={{ paddingTop: 5, color: theme.warningText }}
+                  title="Disabling OpenID will deactivate multi-user mode."
+                />
+              )}
             </>
           )}
         </>

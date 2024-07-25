@@ -1487,7 +1487,7 @@ handlers['subscribe-get-user'] = async function () {
     const {
       status,
       reason,
-      data: { userName, permissions, userId, displayName },
+      data: { userName, permissions, userId, displayName, loginMethod },
     } = JSON.parse(res);
 
     if (status === 'error') {
@@ -1497,7 +1497,14 @@ handlers['subscribe-get-user'] = async function () {
       return { offline: true };
     }
 
-    return { offline: false, userName, permissions, userId, displayName };
+    return {
+      offline: false,
+      userName,
+      permissions,
+      userId,
+      displayName,
+      loginMethod,
+    };
   } catch (e) {
     console.log(e);
     return { offline: true };

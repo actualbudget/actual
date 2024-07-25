@@ -1,13 +1,12 @@
-import type { ChangeEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 
+import { theme, styles } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button';
 import { Input } from '../../common/Input';
-import { useServerURL } from '../../ServerContext';
-import { View } from '../../common/View';
 import { Stack } from '../../common/Stack';
 import { FormField, FormLabel } from '../../forms';
-import { theme, styles } from '../../../style';
+import { useServerURL } from '../../ServerContext';
 
 export type OpenIdConfig = {
   issuer: string;
@@ -109,7 +108,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
         style={{ marginTop: 20 }}
       >
         {otherButtons}
-        <ButtonWithLoading type='primary' loading={loading} onClick={onSubmit}>
+        <ButtonWithLoading type="primary" loading={loading} onClick={onSubmit}>
           OK
         </ButtonWithLoading>
       </Stack>

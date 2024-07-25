@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -202,7 +202,7 @@ export function ManagementApp({ isLoading }) {
               </>
             ) : (
               <Routes>
-                <Route path="/login/:method?" element={<Login />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/openid-cb" element={<OpenIdCallback />} />
                 <Route path="/error" element={<Error />} />
                 <Route path="/config-server" element={<ConfigServer />} />

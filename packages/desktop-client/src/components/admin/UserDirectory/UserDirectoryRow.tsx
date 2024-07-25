@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { memo } from 'react';
 
-import { type UserEntity } from 'loot-core/types/models/user';
+import { PossibleRoles, type UserEntity } from 'loot-core/types/models/user';
 
 import { useSelectedDispatch } from '../../../hooks/useSelected';
 import { theme } from '../../../style';
@@ -42,14 +42,22 @@ export const UserDirectoryRow = memo(
         onMouseEnter={() => onHover && onHover(user.id)}
         onMouseLeave={() => onHover && onHover(null)}
       >
-        <SelectCell
-          exposed={hovered || selected}
-          focused={true}
-          onSelect={e => {
-            dispatchSelected({ type: 'select', id: user.id, event: e });
-          }}
-          selected={selected}
-        />
+        {!user.master && (
+          <SelectCell
+            exposed={hovered || selected}
+            focused={true}
+            onSelect={e => {
+              dispatchSelected({ type: 'select', id: user.id, event: e });
+            }}
+            selected={selected}
+          />
+        )}
+        {user.master && (
+          <Cell
+            width={20}
+            style={{ alignItems: 'center', userSelect: 'none' }}
+          />
+        )}
 
         <Cell
           name="userName"
@@ -91,7 +99,7 @@ export const UserDirectoryRow = memo(
           plain
           style={{ padding: '0 15px', paddingLeft: 5 }}
         >
-          <View>{user.role}</View>
+          <View>{PossibleRoles[user.role]}</View>
         </Cell>
 
         <Cell
@@ -101,6 +109,15 @@ export const UserDirectoryRow = memo(
           style={{ padding: '0 15px', paddingLeft: 5 }}
         >
           <Checkbox checked={user.enabled} readOnly={true} />
+        </Cell>
+
+        <Cell
+          name="enabled"
+          width={100}
+          plain
+          style={{ padding: '0 15px', paddingLeft: 5 }}
+        >
+          <Checkbox checked={user.master} readOnly={true} />
         </Cell>
 
         <Cell

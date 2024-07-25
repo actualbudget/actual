@@ -1,5 +1,3 @@
-import { ValidationError } from 'webpack';
-
 import { UserEntity, UserEntityDropdown } from '../../../types/models/user';
 import {
   NewUserAccessEntity,
@@ -19,17 +17,17 @@ export interface AdminHandlers {
 
   'user-add': (
     user: Omit<UserEntity, 'id'>,
-  ) => Promise<{ error: ValidationError } | { id: string }>;
+  ) => Promise<{ error?: string } | { id: string }>;
 
   'user-update': (
     user: Omit<UserEntity, 'id'>,
-  ) => Promise<{ error: ValidationError } | { id: string }>;
+  ) => Promise<{ error?: string } | { id: string }>;
 
   'check-file-access': (fileId: string) => Promise<{ granted: boolean }>;
 
   'access-add': (
     user: NewUserAccessEntity,
-  ) => Promise<{ error: ValidationError } | Record<string, never>>;
+  ) => Promise<{ error?: string } | Record<string, never>>;
 
   'access-get': (fileId: string) => Promise<UserAccessEntity[]>;
 
@@ -43,7 +41,7 @@ export interface AdminHandlers {
   }: {
     fileId: string;
     newUserId: string;
-  }) => Promise<{ error: ValidationError } | Record<string, never>>;
+  }) => Promise<{ error?: string } | Record<string, never>>;
 
   'file-owner-get': (fileId: string) => Promise<UserEntity | null>;
 

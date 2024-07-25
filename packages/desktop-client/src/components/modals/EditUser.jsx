@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserDirectoryErrors } from 'loot-core/shared/errors';
 
+import { PossibleRoles } from '../../../../loot-core/src/types/models/user';
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
@@ -20,9 +21,11 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
   const [displayName, setDisplayName] = useState(defaultUser.displayName ?? '');
   const [enabled, setEnabled] = useState(defaultUser.enabled);
   const [role, setRole] = useState(
-    defaultUser.value ?? 'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc',
+    defaultUser.role ?? 'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc',
   );
   const [error, setError] = useState('');
+
+  console.log(role);
 
   async function onSave() {
     const user = {
@@ -44,26 +47,23 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
       modalProps.onClose();
     } else {
       setError(getUserDirectoryErrors(error));
-      actions.addNotification({
-        type: error === 'token-expired' ? 'error' : 'warning',
-        title: 'Something wrong happened',
-        sticky: true,
-        message: getUserDirectoryErrors(error),
-        button: {
-          title: 'Go to login',
-          action: () => {
-            actions.popModal();
-            actions.goToLoginFromManagement();
+      if (error === 'token-expired') {
+        actions.addNotification({
+          type: 'error',
+          title: 'Login expired',
+          sticky: true,
+          message: getUserDirectoryErrors(error),
+          button: {
+            title: 'Go to login',
+            action: () => {
+              actions.popModal();
+              actions.goToLoginFromManagement();
+            },
           },
-        },
-      });
+        });
+      }
     }
   }
-
-  const possibleRoles = [
-    ['213733c1-5645-46ad-8784-a7b20b400f93', 'Admin'],
-    ['e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc', 'Basic'],
-  ];
 
   return (
     <Modal
@@ -85,6 +85,17 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
           >
             The username registered within the OpenID provider.
           </label>
+          {defaultUser.master && (
+            <label
+              style={{
+                ...styles.verySmallText,
+                color: theme.warningTextLight,
+                marginTop: 5,
+              }}
+            >
+              Change this username with caution; it is the master user.
+            </label>
+          )}
         </FormField>
         <View
           style={{
@@ -98,6 +109,7 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
           <Checkbox
             id="name-field"
             checked={enabled}
+            disabled={defaultUser.master}
             onChange={() => setEnabled(!enabled)}
           />
           <label
@@ -141,7 +153,7 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Role" htmlFor="name-field" />
           <Select
-            options={possibleRoles}
+            options={Object.entries(PossibleRoles)}
             value={role}
             onChange={newValue => setRole(newValue)}
             buttonStyle={{ color: theme.pageTextPositive }}
@@ -157,10 +169,14 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
         style={{ marginTop: 20 }}
       >
         {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-        <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
+        <Button
+          type="bare"
+          style={{ marginRight: 10 }}
+          onClick={actions.popModal}
+        >
           Cancel
         </Button>
-        <Button variant="primary" onClick={onSave}>
+        <Button type="primary" onClick={onSave}>
           {defaultUser.id ? 'Save' : 'Add'}
         </Button>
       </Stack>

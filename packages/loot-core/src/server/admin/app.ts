@@ -250,4 +250,3 @@ app.method('multiuser-get', async function () {
 
   return null;
 });
-

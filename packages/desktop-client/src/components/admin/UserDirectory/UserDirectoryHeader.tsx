@@ -22,6 +22,7 @@ export function UserDirectoryHeader() {
       <Cell value="Display Name" width={250} />
       <Cell value="Role" width={100} />
       <Cell value="Enabled" width={100} />
+      <Cell value="Master" width={100} />
       <Cell value="" width={80} />
     </TableHeader>
   );

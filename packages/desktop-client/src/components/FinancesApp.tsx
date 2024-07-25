@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { type ReactElement, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
@@ -42,11 +42,11 @@ import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { ScrollProvider } from './ScrollProvider';
+import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar } from './Titlebar';
-import { useMultiuserEnabled } from './ServerContext';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

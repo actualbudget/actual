@@ -116,7 +116,8 @@ export function LoggedInUser({
     const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
     const baseMenu = [
       serverUrl &&
-        !userData?.offline && {
+        !userData?.offline &&
+        userData.loginMethod === 'password' && {
           name: 'change-password',
           text: 'Change password',
         },

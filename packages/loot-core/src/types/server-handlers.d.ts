@@ -265,7 +265,7 @@ export interface ServerHandlers {
   >;
 
   'subscribe-get-login-methods': () => Promise<{
-    methods?: string[];
+    methods?: { method: string; displayName: string; active: boolean }[];
     error?: string;
   }>;
 
@@ -285,6 +285,7 @@ export interface ServerHandlers {
     userId?: string;
     displayName?: string;
     permissions?: string[];
+    loginMethod?: string;
   } | null>;
 
   'subscribe-change-password': (arg: {
@@ -384,8 +385,5 @@ export interface ServerHandlers {
     };
   }) => Promise<{ error?: string }>;
 
-  'enable-password': (arg: {
-    password: string;
-  }) => Promise<{ error?: string }>;  
-
+  'enable-password': (arg: { password: string }) => Promise<{ error?: string }>;
 }

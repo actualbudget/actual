@@ -53,7 +53,7 @@ export function useBootstrapped(redirect = true) {
         await setServerURL(serverURL, { validate: false });
 
         if (result.bootstrapped) {
-          ensure(`/login/${result.loginMethod}`);
+          ensure(`/login`);
         } else {
           ensure('/bootstrap');
         }
@@ -62,7 +62,7 @@ export function useBootstrapped(redirect = true) {
         if ('error' in result) {
           navigate('/error', { state: { error: result.error } });
         } else if (result.bootstrapped) {
-          ensure(`/login/${result.loginMethod}`);
+          ensure(`/login`);
         } else {
           ensure('/bootstrap');
         }

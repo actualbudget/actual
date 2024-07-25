@@ -34,7 +34,7 @@ export function EditUserAccess({
         ]),
       ),
     );
-  }, []);
+  }, [defaultUserAccess.fileId]);
 
   async function onSave() {
     const userAccess = {
@@ -100,10 +100,18 @@ export function EditUserAccess({
         style={{ marginTop: 20 }}
       >
         {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-        <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
+        <Button
+          type="bare"
+          style={{ marginRight: 10 }}
+          onClick={actions.popModal}
+        >
           Cancel
         </Button>
-        <Button readOnly={availableUsers.length > 0} onClick={onSave}>
+        <Button
+          type="primary"
+          readOnly={availableUsers.length > 0}
+          onClick={onSave}
+        >
           {defaultUserAccess.id ? 'Save' : 'Add'}
         </Button>
       </Stack>

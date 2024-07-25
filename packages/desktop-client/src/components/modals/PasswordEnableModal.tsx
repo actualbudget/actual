@@ -1,35 +1,37 @@
 import { useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { getOpenIdErrors } from 'loot-core/shared/errors';
 
-import { useActions } from '../../hooks/useActions';
-
-import { OpenIdConfig, OpenIdForm } from '../manager/subscribe/OpenIdForm';
-import { theme, styles } from '../../style';
-import { View } from '../common/View';
-import { Button } from '../common/Button';
 import * as asyncStorage from '../../../../loot-core/src/platform/server/asyncStorage';
-import { Title } from '../manager/subscribe/common';
-import { Text } from '../common/Text';
-import { ConfirmPasswordForm } from '../manager/subscribe/ConfirmPasswordForm';
-import { useNavigate } from '../../hooks/useNavigate';
-import { Modal } from '../common/Modal';
-import { Stack } from '../common/Stack';
-import { FormField } from '../forms';
+import { useActions } from '../../hooks/useActions';
+import { theme, styles } from '../../style';
 import { Error } from '../alerts';
+import { Button } from '../common/Button';
 import { Label } from '../common/Label';
+import { Modal } from '../common/Modal';
+import { View } from '../common/View';
+import { FormField } from '../forms';
+import {
+  ConfirmOldPasswordForm,
+  ConfirmPasswordForm,
+} from '../manager/subscribe/ConfirmPasswordForm';
+import {
+  useAvailableLoginMethods,
+  useMultiuserEnabled,
+  useRefreshLoginMethods,
+} from '../ServerContext';
 
 export function PasswordEnableModal({ modalProps, onSave: originalOnSave }) {
-  const navigate = useNavigate();
   const [error, setError] = useState('');
-  const actions = useActions();
-  const { closeBudget } = useActions();
+  const { closeBudget, popModal } = useActions();
+  const multiuserEnabled = useMultiuserEnabled();
+  const availableLoginMethods = useAvailableLoginMethods();
+  const refreshLoginMethods = useRefreshLoginMethods();
 
   function getErrorMessage(error) {
     switch (error) {
       case 'invalid-password':
-        return 'Password cannot be empty';
+        return 'Invalid Password';
       case 'password-match':
         return 'Passwords do not match';
       case 'network-failure':
@@ -47,6 +49,7 @@ export function PasswordEnableModal({ modalProps, onSave: originalOnSave }) {
     if (!error) {
       originalOnSave?.();
       modalProps.onClose();
+      await refreshLoginMethods();
       await asyncStorage.removeItem('user-token');
       await closeBudget();
     } else {
@@ -61,21 +64,39 @@ export function PasswordEnableModal({ modalProps, onSave: originalOnSave }) {
       {...modalProps}
       style={{ ...modalProps.style, flex: 'inherit' }}
     >
-      <View style={{flexDirection:'column'}}>
+      <View style={{ flexDirection: 'column' }}>
         <FormField style={{ flex: 1 }}>
-          <ConfirmPasswordForm
-            buttons={
-              <Button
-                type="bare"
-                style={{ fontSize: 15, marginRight: 10 }}
-                onClick={() => navigate('/')}
-              >
-                Cancel
-              </Button>
-            }
-            onSetPassword={onSetPassword}
-            onError={error => setError(getErrorMessage(error))}
-          />
+          {!availableLoginMethods.some(
+            login => login.method === 'password',
+          ) && (
+            <ConfirmPasswordForm
+              buttons={
+                <Button
+                  type="bare"
+                  style={{ fontSize: 15, marginRight: 10 }}
+                  onClick={() => popModal()}
+                >
+                  Cancel
+                </Button>
+              }
+              onSetPassword={onSetPassword}
+              onError={error => setError(getErrorMessage(error))}
+            />
+          )}
+          {availableLoginMethods.some(login => login.method === 'password') && (
+            <ConfirmOldPasswordForm
+              buttons={
+                <Button
+                  type="bare"
+                  style={{ fontSize: 15, marginRight: 10 }}
+                  onClick={() => popModal()}
+                >
+                  Cancel
+                </Button>
+              }
+              onSetPassword={onSetPassword}
+            />
+          )}
         </FormField>
         <Label
           style={{
@@ -85,14 +106,16 @@ export function PasswordEnableModal({ modalProps, onSave: originalOnSave }) {
           }}
           title="After disabling openid all sessions will be closed"
         />
-        <Label
-          style={{
-            ...styles.verySmallText,
-            color: theme.warningText,
-          }}
-          title="Multi-user will not work after disabling"
-        />
-        {error && (<Error>{error}</Error>)}
+        {multiuserEnabled && (
+          <Label
+            style={{
+              ...styles.verySmallText,
+              color: theme.warningText,
+            }}
+            title="Multi-user will not work after disabling"
+          />
+        )}
+        {error && <Error>{error}</Error>}
       </View>
     </Modal>
   );

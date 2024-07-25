@@ -24,6 +24,10 @@ export const ProtectedRoute = ({
   const [cloudFileId] = useLocalPref('cloudFileId');
 
   useEffect(() => {
+    if (permissionGrated) {
+      return;
+    }
+
     setPermissionGrated(hasPermission(permission));
 
     if (!permissionGrated && validateOwner) {
@@ -31,7 +35,7 @@ export const ProtectedRoute = ({
         setPermissionGrated(granted);
       });
     }
-  }, []);
+  }, [cloudFileId, permission, validateOwner, hasPermission, permissionGrated]);
 
   return permissionGrated ? (
     element

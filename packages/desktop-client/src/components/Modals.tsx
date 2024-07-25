@@ -40,6 +40,8 @@ import { LoadBackup } from './modals/LoadBackup';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
 import { NotesModal } from './modals/NotesModal';
+import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
+import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
@@ -61,8 +63,6 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
-import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
-import { PasswordEnableModal } from './modals/PasswordEnableModal';
 
 export type CommonModalProps = {
   onClose: () => PopModalAction;

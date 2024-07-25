@@ -51,7 +51,7 @@ export function Bootstrap() {
     if (error) {
       setError(error);
     } else {
-      navigate('/login/password');
+      navigate('/login');
     }
   }
 
@@ -62,7 +62,7 @@ export function Bootstrap() {
     if (error) {
       setError(error);
     } else {
-      navigate('/login/openid');
+      navigate('/login');
     }
   }
 

@@ -37,7 +37,7 @@ export function TransferOwnership({ modalProps, onSave: originalOnSave }) {
           ]),
       ),
     );
-  }, []);
+  }, [userData?.userId]);
 
   async function onSave() {
     const { error } =

@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useAuth } from '../../auth/AuthProvider';
+import { Permissions } from '../../auth/types';
 import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
@@ -11,6 +13,7 @@ import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
+import { Warning } from '../alerts';
 import { Button, ButtonWithLoading } from '../common/Button';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
@@ -19,11 +22,8 @@ import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { type CommonModalProps } from '../Modals';
-import { Tooltip } from '../tooltips';
-import { useAuth } from '../../auth/AuthProvider';
-import { Permissions } from '../../auth/types';
-import { Error, Warning } from '../alerts';
 import { useMultiuserEnabled } from '../ServerContext';
+import { Tooltip } from '../tooltips';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -183,7 +183,8 @@ export function CreateAccountModal({
 
   const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
 
-  const canSetSecrets = !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
+  const canSetSecrets =
+    !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
 
   return (
     <Modal title={title} {...modalProps}>
@@ -366,8 +367,8 @@ export function CreateAccountModal({
                   (simpleFinSyncFeatureFlag && !isSimpleFinSetupComplete)) &&
                   !canSetSecrets && (
                     <Warning>
-                      You don't have the required permissions to set up secrets.
-                      Please contact an Admin to configure{' '}
+                      You don&apos;t have the required permissions to set up
+                      secrets. Please contact an Admin to configure{' '}
                       {[
                         isGoCardlessSetupComplete ? '' : 'GoCardless',
                         isSimpleFinSetupComplete ? '' : 'SimpleFin',

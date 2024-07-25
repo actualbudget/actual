@@ -70,14 +70,15 @@ function UserDirectoryContent({
     [setFilter],
   );
 
-  async function loadUsers() {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
 
     const loadedUsers = (await send('users-get')) ?? [];
 
     setAllUsers(loadedUsers);
+    setLoading(false);
     return loadedUsers;
-  }
+  }, [setLoading]);
 
   useEffect(() => {
     async function loadData() {
@@ -90,13 +91,13 @@ function UserDirectoryContent({
     return () => {
       undo.setUndoState('openModal', null);
     };
-  }, [setLoading]);
+  }, [setLoading, loadUsers]);
 
   function loadMore() {
     setPage(page => page + 1);
   }
 
-  async function onDeleteSelected() {
+  const onDeleteSelected = useCallback(async () => {
     setLoading(true);
     const { error } = await send('user-delete-all', [...selectedInst.items]);
 
@@ -125,24 +126,27 @@ function UserDirectoryContent({
     await loadUsers();
     selectedInst.dispatch({ type: 'select-none' });
     setLoading(false);
-  }
+  }, [actions, loadUsers, selectedInst, setLoading]);
 
-  const onEditUser = useCallback(user => {
-    dispatch(
-      pushModal('edit-user', {
-        user,
-        onSave: async () => {
-          await loadUsers();
-          setLoading(false);
-        },
-      }),
-    );
-  }, []);
+  const onEditUser = useCallback(
+    user => {
+      dispatch(
+        pushModal('edit-user', {
+          user,
+          onSave: async () => {
+            await loadUsers();
+            setLoading(false);
+          },
+        }),
+      );
+    },
+    [dispatch, loadUsers, setLoading],
+  );
 
   function onAddUser() {
     const user: NewUserEntity = {
       userName: '',
-      role: 'Basic',
+      role: null,
       enabled: true,
       displayName: '',
     };
@@ -282,7 +286,7 @@ type UsersListProps = {
   onEditUser?: (rule: UserEntity) => void;
 };
 
-export function UsersList({
+function UsersList({
   users,
   selectedItems,
   hoveredUser,

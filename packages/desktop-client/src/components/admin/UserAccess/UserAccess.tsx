@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, {
   useState,
   useEffect,
@@ -77,19 +76,19 @@ function UserAccessContent({
     [setFilter],
   );
 
-  async function loadAccess() {
+  const loadAccess = useCallback(async () => {
     setLoading(true);
 
     const loadedAccess = (await send('access-get', cloudFileId)) ?? [];
 
     setAllAccess(loadedAccess);
     return loadedAccess;
-  }
+  }, [cloudFileId, setLoading]);
 
-  async function loadOwner() {
+  const loadOwner = useCallback(async () => {
     const owner = (await send('file-owner-get', cloudFileId)) ?? {};
     return owner;
-  }
+  }, [cloudFileId]);
 
   useEffect(() => {
     async function loadData() {
@@ -106,7 +105,7 @@ function UserAccessContent({
     return () => {
       undo.setUndoState('openModal', null);
     };
-  }, [setLoading]);
+  }, [setLoading, loadAccess, loadOwner]);
 
   function loadMore() {
     setPage(page => page + 1);

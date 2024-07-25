@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
+import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
@@ -12,7 +13,6 @@ import type { ModalProps } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-import { getSecretsError } from 'loot-core/shared/errors';
 
 type SimpleFinInitialiseProps = {
   modalProps?: Partial<ModalProps>;
@@ -36,12 +36,13 @@ export const SimpleFinInitialise = ({
 
     setIsLoading(true);
 
-    const { error, reason } = await send('secret-set', {
-      name: 'simplefin_token',
-      value: token,
-    }) || {};
+    const { error, reason } =
+      (await send('secret-set', {
+        name: 'simplefin_token',
+        value: token,
+      })) || {};
 
-    if(error) {
+    if (error) {
       setIsValid(false);
       setError(getSecretsError(error, reason));
     } else {
