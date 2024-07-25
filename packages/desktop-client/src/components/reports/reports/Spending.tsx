@@ -321,8 +321,8 @@ export function Spending() {
                     )}
                     {showAverage && (
                       <ModeButton
-                        selected={mode === 'Average'}
-                        onSelect={() => setMode('Average')}
+                        selected={mode === 'average'}
+                        onSelect={() => setMode('average')}
                       >
                         Average
                       </ModeButton>
