@@ -547,7 +547,7 @@ export function getCommonPayees() {
   const threeMonthsAgo = '20240201';
   const limit = 10;
   return all(`
-    SELECT  p.id as id, p.name as name, p.favorite as favorite,
+    SELECT     p.id as id, p.name as name, p.favorite as favorite,
       p.category as category, TRUE as common, NULL as transfer_acct,
     count(*) as c, 
     max(t.date) as latest

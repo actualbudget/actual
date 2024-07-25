@@ -455,7 +455,6 @@ class AccountInternal extends PureComponent {
 
     if (account) {
       const res = await window.Actual?.openFileDialog({
-        properties: ['openFile'],
         filters: [
           {
             name: 'Financial Files',

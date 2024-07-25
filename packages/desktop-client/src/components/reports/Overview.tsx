@@ -134,8 +134,6 @@ export function Overview() {
           throw new Error(`Unable to query widget: ${item.i}`);
         }
 
-        delete widget.tombstone; // We don't want to export this
-
         if (isCustomReportWidget(widget)) {
           const customReport = customReportMap.get(widget.meta.id);
 
@@ -146,10 +144,11 @@ export function Overview() {
           return {
             ...widget,
             meta: customReport,
+            tombstone: undefined,
           };
         }
 
-        return widget;
+        return { ...widget, tombstone: undefined };
       }),
     } satisfies ExportImportDashboard;
 
