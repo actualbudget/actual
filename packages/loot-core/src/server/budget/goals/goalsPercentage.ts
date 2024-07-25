@@ -2,9 +2,10 @@
 import * as monthUtils from '../../../shared/months';
 import * as db from '../../db';
 import { getSheetValue } from '../actions';
+import { PercentageTemplate } from '../template.types';
 
 export async function goalsPercentage(
-  template,
+  template: PercentageTemplate,
   month,
   available_start,
   sheetName,

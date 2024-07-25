@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../../shared/months';
 import { amountToInteger } from '../../../shared/util';
+import { WeekTemplate } from '../template.types';
 
 export async function goalsWeek(
-  template,
+  template: WeekTemplate,
   limit,
   limitCheck,
   hold,

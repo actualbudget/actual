@@ -2,9 +2,10 @@
 import * as monthUtils from '../../../shared/months';
 import { amountToInteger } from '../../../shared/util';
 import { getSheetValue } from '../actions';
+import { SpendTemplate } from '../template.types';
 
 export async function goalsSpend(
-  template,
+  template: SpendTemplate,
   last_month_balance,
   current_month,
   to_budget,

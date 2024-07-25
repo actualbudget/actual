@@ -15,6 +15,7 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
+import type { Template } from './template.types';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
@@ -155,7 +156,7 @@ async function processTemplate(
   category?,
 ): Promise<Notification> {
   let num_applied = 0;
-  let errors = [];
+  let errors: string[] = [];
   const idealTemplate = [];
   const setToZero = [];
   let priority_list = [];
@@ -397,7 +398,7 @@ async function getCategoryTemplates(category) {
 
   for (let n = 0; n < notes.length; n++) {
     const lines = notes[n].note.split('\n');
-    const template_lines = [];
+    const template_lines: Template[] = [];
     for (let l = 0; l < lines.length; l++) {
       const line = lines[l].trim();
       if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
@@ -406,7 +407,7 @@ async function getCategoryTemplates(category) {
         const parsed = parse(expression);
         template_lines.push(parsed);
       } catch (e) {
-        template_lines.push({ type: 'error', line, error: e });
+        template_lines.push({ type: 'error', line, error: e } as const);
       }
     }
     if (template_lines.length) {
@@ -418,7 +419,7 @@ async function getCategoryTemplates(category) {
 
 async function applyCategoryTemplate(
   category,
-  template_lines,
+  template_lines: Template[],
   month,
   remainder_scale,
   available_start,
@@ -484,12 +485,16 @@ async function applyCategoryTemplate(
 
   if (template_lines.length > 1) {
     template_lines = template_lines.sort((a, b) => {
-      if (a.type === 'by' && !a.annual) {
+      if (a.type === 'by' && !a.annual && 'month' in b) {
         return monthUtils.differenceInCalendarMonths(
           `${a.month}-01`,
           `${b.month}-01`,
         );
-      } else if (a.type === 'schedule' || b.type === 'schedule') {
+      } else if (
+        (a.type === 'schedule' || b.type === 'schedule') &&
+        'priority' in a &&
+        'priority' in b
+      ) {
         return a.priority - b.priority;
       } else {
         return a.type.localeCompare(b.type);
@@ -529,7 +534,6 @@ async function applyCategoryTemplate(
       }
       case 'by': {
         const goalsReturn = await goalsBy(
-          template_lines,
           current_month,
           template,
           l,

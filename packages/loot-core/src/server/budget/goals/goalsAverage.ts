@@ -2,9 +2,10 @@
 
 import * as monthUtils from '../../../shared/months';
 import { getSheetValue } from '../actions';
+import { AverageTemplate } from '../template.types';
 
 export async function goalsAverage(
-  template,
+  template: AverageTemplate,
   month,
   category,
   errors,

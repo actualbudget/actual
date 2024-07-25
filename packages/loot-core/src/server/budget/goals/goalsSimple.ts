@@ -1,15 +1,24 @@
 // @ts-strict-ignore
 import { amountToInteger } from '../../../shared/util';
+import { SimpleTemplate } from '../template.types';
+
+export interface GoalReturnType {
+  to_budget: number;
+  errors: string[];
+  limit: number;
+  limitCheck: boolean;
+  hold: boolean;
+}
 
 export async function goalsSimple(
-  template,
-  limitCheck,
-  errors,
-  limit,
-  hold,
-  to_budget,
-  last_month_balance,
-) {
+  template: SimpleTemplate,
+  limitCheck: boolean,
+  errors: string[],
+  limit: number,
+  hold: boolean,
+  to_budget: number,
+  last_month_balance: number,
+): Promise<GoalReturnType> {
   // simple has 'monthly' and/or 'limit' params
   if (template.limit != null) {
     if (limitCheck) {

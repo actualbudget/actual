@@ -2,11 +2,11 @@
 import * as monthUtils from '../../../shared/months';
 import { amountToInteger } from '../../../shared/util';
 import { isReflectBudget } from '../actions';
+import { Template, ByTemplate } from '../template.types';
 
 export async function goalsBy(
-  template_lines,
   current_month,
-  template,
+  template: ByTemplate,
   l,
   remainder,
   last_month_balance,
@@ -16,7 +16,7 @@ export async function goalsBy(
   // by has 'amount' and 'month' params
   if (!isReflectBudget()) {
     let target = 0;
-    let target_month = `${template_lines[l].month}-01`;
+    let target_month = `${template.month}-01`;
     let num_months = monthUtils.differenceInCalendarMonths(
       target_month,
       current_month,
@@ -26,12 +26,12 @@ export async function goalsBy(
     while (num_months < 0 && repeat) {
       target_month = monthUtils.addMonths(target_month, repeat);
       num_months = monthUtils.differenceInCalendarMonths(
-        template_lines[l].month,
+        template.month,
         current_month,
       );
     }
     if (l === 0) remainder = last_month_balance;
-    remainder = amountToInteger(template_lines[l].amount) - remainder;
+    remainder = amountToInteger(template.amount) - remainder;
     if (remainder >= 0) {
       target = remainder;
       remainder = 0;

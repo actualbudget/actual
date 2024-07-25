@@ -1,6 +1,8 @@
+import { RemainderTemplate } from '../template.types';
+
 // @ts-strict-ignore
 export async function goalsRemainder(
-  template,
+  template: RemainderTemplate,
   budgetAvailable,
   remainder_scale,
   to_budget,
