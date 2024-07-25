@@ -309,7 +309,7 @@ export async function reconcileTransactions(
   acctId,
   transactions,
   isBankSyncAccount = false,
-  useFuzzyMatchV2 = true,
+  strictIdChecking = true,
   isPreview = false,
 ) {
   console.log('Performing transaction reconciliation');
@@ -328,7 +328,7 @@ export async function reconcileTransactions(
     acctId,
     transactions,
     isBankSyncAccount,
-    useFuzzyMatchV2,
+    strictIdChecking,
   );
 
   // Finally, generate & commit the changes
@@ -422,7 +422,7 @@ export async function matchTransactions(
   acctId,
   transactions,
   isBankSyncAccount = false,
-  useFuzzyMatchV2 = true,
+  strictIdChecking = true,
 ) {
   console.log('Performing transaction reconciliation matching');
 
@@ -472,9 +472,9 @@ export async function matchTransactions(
       // fields.
       const sevenDaysBefore = db.toDateRepr(monthUtils.subDays(trans.date, 7));
       const sevenDaysAfter = db.toDateRepr(monthUtils.addDays(trans.date, 7));
-      // useFuzzyMatchV2 has the added behaviour of only matching on transactions with no import ID
+      // strictIdChecking has the added behaviour of only matching on transactions with no import ID
       // if the transaction being imported has an import ID.
-      if (useFuzzyMatchV2) {
+      if (strictIdChecking) {
         fuzzyDataset = await db.all(
           `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
@@ -646,10 +646,10 @@ export async function syncAccount(
   );
 
   const acctRow = await db.select('accounts', id);
-  // If syncing an account from Go Cardless it must not use FuzzySearchV2. This allows
+  // If syncing an account from Go Cardless it must not use strictIdChecking. This allows
   // the fuzzy search to match transactions where the import IDs are different. It is a known quirk
   // that Go Cardless can give two different transaction IDs even though it's the same transaction.
-  const useFuzzySearchV2 = acctRow.account_sync_source !== 'goCardless';
+  const useStrictIdChecking = acctRow.account_sync_source !== 'goCardless';
 
   if (latestTransaction) {
     const startingTransaction = await db.first(
@@ -704,7 +704,7 @@ export async function syncAccount(
         id,
         transactions,
         true,
-        useFuzzySearchV2,
+        useStrictIdChecking,
       );
       await updateAccountBalance(id, accountBalance);
       return result;
@@ -764,7 +764,7 @@ export async function syncAccount(
         id,
         transactions,
         true,
-        useFuzzySearchV2,
+        useStrictIdChecking,
       );
       return {
         ...result,
