@@ -76,7 +76,12 @@ export function Spending() {
 
   const previousMonth =
     compare === 'this month' ? 'lastMonth' : 'twoMonthsPrevious';
-  const showLastYear = Math.abs(data.intervalData[27].lastYear) > 0;
+  const showLastYear =
+    Math.abs(
+      data.intervalData[27][
+        compare === 'this month' ? 'lastYear' : 'lastYearPrevious'
+      ],
+    ) > 0;
   const showPreviousMonth = Math.abs(data.intervalData[27][previousMonth]) > 0;
   return (
     <Page

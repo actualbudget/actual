@@ -35,8 +35,8 @@ export function createSpendingSpreadsheet({
 }: createSpendingSpreadsheetProps) {
   const [startDate, endDate] = getSpecificRange(4, null, 'Months');
   const [lastYearStartDate, lastYearEndDate] = getSpecificRange(
-    12,
-    0,
+    13,
+    1,
     'Months',
   );
   const interval = 'Daily';
@@ -91,6 +91,14 @@ export function createSpendingSpreadsheet({
       .map(month => {
         return { month, perMonthAssets: 0, perMonthDebts: 0 };
       });
+
+    months.unshift({
+      month: monthUtils.prevYear(
+        monthUtils.subMonths(monthUtils.currentMonth(), 1),
+      ),
+      perMonthAssets: 0,
+      perMonthDebts: 0,
+    });
 
     months.unshift({
       month: monthUtils.prevYear(monthUtils.currentMonth()),
@@ -181,10 +189,11 @@ export function createSpendingSpreadsheet({
         months: indexedData,
         day,
         average: integerToAmount(averageSum) / monthCount,
-        thisMonth: dayData[5].cumulative,
-        lastMonth: dayData[4].cumulative,
-        twoMonthsPrevious: dayData[3].cumulative,
+        thisMonth: dayData[6].cumulative,
+        lastMonth: dayData[5].cumulative,
+        twoMonthsPrevious: dayData[4].cumulative,
         lastYear: dayData[0].cumulative,
+        lastYearPrevious: dayData[1].cumulative,
       };
     });
 

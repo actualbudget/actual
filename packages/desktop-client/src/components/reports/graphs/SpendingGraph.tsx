@@ -98,11 +98,11 @@ const CustomTooltip = ({
               <AlignedText
                 left={
                   selection === 'average'
-                    ? 'Average'
+                    ? 'Average:'
                     : selection === lastYear
-                      ? 'Last year'
+                      ? 'Last year:'
                       : compare === 'this month'
-                        ? 'Last month'
+                        ? 'Last month:'
                         : '2 months ago:'
                 }
                 right={amountToCurrency(comparison)}
@@ -149,7 +149,7 @@ export function SpendingGraph({
     monthUtils.currentMonth(),
     compare === 'this month' ? 1 : 2,
   );
-  const lastYear = monthUtils.prevYear(monthUtils.currentMonth());
+  const lastYear = monthUtils.prevYear(thisMonth);
   let selection;
   switch (mode) {
     case 'Average':
