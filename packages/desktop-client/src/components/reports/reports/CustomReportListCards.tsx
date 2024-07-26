@@ -17,11 +17,11 @@ import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 
 import { GetCardData } from './GetCardData';
-import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { MissingReportCard } from './MissingReportCard';
 
 type CustomReportListCardsProps = {
