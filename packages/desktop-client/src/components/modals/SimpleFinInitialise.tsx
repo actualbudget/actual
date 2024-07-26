@@ -5,22 +5,24 @@ import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
-import { ButtonWithLoading } from '../common/Button';
+import { ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
-import { Modal, ModalButtons } from '../common/Modal';
-import type { ModalProps } from '../common/Modal';
+import {
+  Modal,
+  ModalButtons,
+  ModalCloseButton,
+  ModalHeader,
+} from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type SimpleFinInitialiseProps = {
-  modalProps?: Partial<ModalProps>;
   onSuccess: () => void;
 };
 
 export const SimpleFinInitialise = ({
-  modalProps,
   onSuccess,
 }: SimpleFinInitialiseProps) => {
   const [token, setToken] = useState('');
@@ -53,47 +55,58 @@ export const SimpleFinInitialise = ({
   };
 
   return (
-    <Modal title="Set-up SimpleFIN" size={{ width: 300 }} {...modalProps}>
-      <View style={{ display: 'flex', gap: 10 }}>
-        <Text>
-          In order to enable bank-sync via SimpleFIN (only for North American
-          banks) you will need to create a token. This can be done by creating
-          an account with{' '}
-          <Link
-            variant="external"
-            to="https://beta-bridge.simplefin.org/"
-            linkColor="purple"
-          >
-            SimpleFIN
-          </Link>
-          .
-        </Text>
-
-        <FormField>
-          <FormLabel title="Token:" htmlFor="token-field" />
-          <Input
-            id="token-field"
-            type="password"
-            value={token}
-            onChangeValue={value => {
-              setToken(value);
-              setIsValid(true);
-            }}
+    <Modal name="simplefin-init" containerProps={{ style: { width: 300 } }}>
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Set-up SimpleFIN"
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-        </FormField>
+          <View style={{ display: 'flex', gap: 10 }}>
+            <Text>
+              In order to enable bank-sync via SimpleFIN (only for North
+              American banks) you will need to create a token. This can be done
+              by creating an account with{' '}
+              <Link
+                variant="external"
+                to="https://beta-bridge.simplefin.org/"
+                linkColor="purple"
+              >
+                SimpleFIN
+              </Link>
+              .
+            </Text>
+
+            <FormField>
+              <FormLabel title="Token:" htmlFor="token-field" />
+              <Input
+                id="token-field"
+                type="password"
+                value={token}
+                onChangeValue={value => {
+                  setToken(value);
+                  setIsValid(true);
+                }}
+              />
+            </FormField>
 
         {!isValid && <Error>{error}</Error>}
       </View>
 
-      <ModalButtons>
-        <ButtonWithLoading
-          type="primary"
-          loading={isLoading}
-          onClick={onSubmit}
-        >
-          Save and continue
-        </ButtonWithLoading>
-      </ModalButtons>
+          <ModalButtons>
+            <ButtonWithLoading
+              variant="primary"
+              isLoading={isLoading}
+              onPress={() => {
+                onSubmit();
+                close();
+              }}
+            >
+              Save and continue
+            </ButtonWithLoading>
+          </ModalButtons>
+        </>
+      )}
     </Modal>
   );
 };

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import type React from 'react';
+import { useState, useRef, useEffect, type CSSProperties } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -13,6 +14,13 @@ import {
 } from 'loot-core/client/actions';
 import { send } from 'loot-core/platform/client/fetch';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
+import {
+  type RemoteFile,
+  type File,
+  type LocalFile,
+  type SyncableLocalFile,
+  type SyncedLocalFile,
+} from 'loot-core/types/file';
 
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -29,15 +37,17 @@ import { SvgCloudUnknown, SvgKey, SvgRefreshArrow } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { useMultiuserEnabled } from '../ServerContext';
+import { UserEntity } from 'loot-core/types/models';
+import { UserAccessEntity } from 'loot-core/types/models/userAccess';
 
-function getFileDescription(file) {
+function getFileDescription(file: File) {
   if (file.state === 'unknown') {
     return (
       'This is a cloud-based file but its state is unknown because you ' +
@@ -55,8 +65,18 @@ function getFileDescription(file) {
   return null;
 }
 
-function FileMenu({ onDelete, onClose }) {
-  function onMenuSelect(type) {
+function isLocalFile(file: File): file is LocalFile {
+  return file.state === 'local';
+}
+
+function FileMenu({
+  onDelete,
+  onClose,
+}: {
+  onDelete: () => void;
+  onClose: () => void;
+}) {
+  function onMenuSelect(type: string) {
     onClose();
 
     switch (type) {
@@ -88,7 +108,7 @@ function FileMenu({ onDelete, onClose }) {
   );
 }
 
-function FileMenuButton({ state, onDelete }) {
+function FileMenuButton({ onDelete }: { onDelete: () => void }) {
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -96,10 +116,9 @@ function FileMenuButton({ state, onDelete }) {
     <View>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         aria-label="Menu"
-        onClick={e => {
-          e.stopPropagation();
+        onPress={() => {
           setMenuOpen(true);
         }}
       >
@@ -111,17 +130,23 @@ function FileMenuButton({ state, onDelete }) {
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
       >
-        <FileMenu
-          state={state}
-          onDelete={onDelete}
-          onClose={() => setMenuOpen(false)}
-        />
+        <FileMenu onDelete={onDelete} onClose={() => setMenuOpen(false)} />
       </Popover>
     </View>
   );
 }
 
-function FileState({ file, users, currentUserId, isOpenID }) {
+function FileState({
+  file,
+  users,
+  currentUserId,
+  isOpenID,
+}: {
+  file: File;
+  users: UserEntity[];
+  currentUserId: string;
+  isOpenID: boolean;
+}) {
   let Icon;
   let status;
   let color;
@@ -157,7 +182,10 @@ function FileState({ file, users, currentUserId, isOpenID }) {
   }
 
   const showOwnerContent =
-    isOpenID && ownerName !== null && file.owner !== currentUserId;
+    isOpenID &&
+    ownerName !== null &&
+    !isLocalFile(file) &&
+    file.owner !== currentUserId;
 
   return (
     <View style={{ width: '100%' }}>
@@ -217,7 +245,7 @@ function FileState({ file, users, currentUserId, isOpenID }) {
   }
 }
 
-function File({
+function FileItem({
   file,
   quickSwitchMode,
   onSelect,
@@ -226,10 +254,19 @@ function File({
   currentUserId,
   usersPerFile,
   isOpenID,
+}: {
+  file: File;
+  quickSwitchMode: boolean;
+  onSelect: (file: File) => void;
+  onDelete: (file: File) => void;
+  users: UserEntity[];
+  currentUserId: string;
+  usersPerFile: Map<string, UserAccessEntity[]>;
+  isOpenID: boolean;
 }) {
   const selecting = useRef(false);
 
-  async function _onSelect(file) {
+  async function _onSelect(file: File) {
     // Never allow selecting the file while uploading/downloading, and
     // make sure to never allow duplicate clicks
     if (!selecting.current) {
@@ -242,7 +279,7 @@ function File({
   return (
     <View
       onClick={() => _onSelect(file)}
-      title={getFileDescription(file)}
+      title={getFileDescription(file) || ''}
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -255,7 +292,7 @@ function File({
         flexShrink: 0,
         cursor: 'pointer',
         ':hover': {
-          backgroundColor: theme.hover,
+          backgroundColor: theme.menuItemBackgroundHover,
         },
       }}
     >
@@ -265,7 +302,7 @@ function File({
           {isOpenID && (
             <UserAccessForFile
               style={{ marginLeft: '5px' }}
-              fileId={file.cloudFileId}
+              fileId={(file as RemoteFile).cloudFileId}
               ownerId={file.owner}
               currentUserId={currentUserId}
               usersPerFile={usersPerFile}
@@ -297,14 +334,7 @@ function File({
           />
         )}
 
-        <View>
-          {!quickSwitchMode && (
-            <FileMenuButton
-              state={file.state}
-              onDelete={() => onDelete(file)}
-            />
-          )}
-        </View>
+        {!quickSwitchMode && <FileMenuButton onDelete={() => onDelete(file)} />}
       </View>
     </View>
   );
@@ -319,6 +349,15 @@ function BudgetFiles({
   currentUserId,
   usersPerFile,
   isOpenID,
+}: {
+  files: File[];
+  quickSwitchMode: boolean;
+  onSelect: (file: File) => void;
+  onDelete: (file: File) => void;
+  users: UserEntity[];
+  currentUserId: string;
+  usersPerFile: Map<string, UserAccessEntity[]>;
+  isOpenID: boolean;
 }) {
   return (
     <View
@@ -344,8 +383,8 @@ function BudgetFiles({
         </Text>
       ) : (
         files.map(file => (
-          <File
-            key={file.id || file.cloudFileId}
+          <FileItem
+            key={isLocalFile(file) ? file.id : file.cloudFileId}
             file={file}
             users={users}
             currentUserId={currentUserId}
@@ -361,7 +400,13 @@ function BudgetFiles({
   );
 }
 
-function RefreshButton({ style, onRefresh }) {
+function RefreshButton({
+  style,
+  onRefresh,
+}: {
+  style?: CSSProperties;
+  onRefresh: () => void;
+}) {
   const [loading, setLoading] = useState(false);
 
   async function _onRefresh() {
@@ -374,17 +419,23 @@ function RefreshButton({ style, onRefresh }) {
 
   return (
     <Button
-      type="bare"
+      variant="bare"
       aria-label="Refresh"
       style={{ padding: 10, ...style }}
-      onClick={_onRefresh}
+      onPress={_onRefresh}
     >
       <Icon style={{ width: 18, height: 18 }} />
     </Button>
   );
 }
 
-function BudgetListHeader({ quickSwitchMode, onRefresh }) {
+function BudgetListHeader({
+  quickSwitchMode,
+  onRefresh,
+}: {
+  quickSwitchMode: boolean;
+  onRefresh: () => void;
+}) {
   return (
     <View
       style={{
@@ -407,7 +458,7 @@ function BudgetListHeader({ quickSwitchMode, onRefresh }) {
 
 export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const allFiles = useSelector(state => state.budgets.allFiles?.filter(file => !isLocalFile(file)) || []);
   const [id] = useLocalPref('id');
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState('');
@@ -424,7 +475,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         });
         send(
           'users-get-access',
-          allFiles.map(file => file.cloudFileId),
+          allFiles
+            .map(file => (file as RemoteFile | SyncedLocalFile | SyncableLocalFile).cloudFileId),
         ).then(data => {
           setUsersPerFile(data);
         });
@@ -432,7 +484,14 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     }
   }, [allFiles, userData.offline, userData.userId, multiuserEnabled]);
 
-  const files = id ? allFiles.filter(f => f.id !== id) : allFiles;
+  // Remote files do not have the 'id' field
+  function isNonRemoteFile(
+    file: File,
+  ): file is LocalFile | SyncableLocalFile | SyncedLocalFile {
+    return file.state !== 'remote';
+  }
+  const nonRemoteFiles = allFiles.filter(isNonRemoteFile);
+  const files = id ? nonRemoteFiles.filter(f => f.id !== id) : allFiles;
 
   const [creating, setCreating] = useState(false);
   const { isNarrowWidth } = useResponsive();
@@ -442,7 +501,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       }
     : {};
 
-  const onCreate = ({ testMode } = {}) => {
+  const onCreate = ({ testMode = false } = {}) => {
     if (!creating) {
       setCreating(true);
       dispatch(createBudget({ testMode }));
@@ -458,6 +517,22 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   if (initialMount && quickSwitchMode) {
     refresh();
   }
+
+  const onSelect = (file: File): void => {
+    const isRemoteFile = file.state === 'remote';
+
+    if (!id) {
+      if (isRemoteFile) {
+        dispatch(downloadBudget(file.cloudFileId));
+      } else {
+        dispatch(loadBudget(file.id));
+      }
+    } else if (!isRemoteFile && file.id !== id) {
+      dispatch(closeAndLoadBudget(file.id));
+    } else if (isRemoteFile) {
+      dispatch(closeAndDownloadBudget(file.cloudFileId));
+    }
+  };
 
   return (
     <View
@@ -488,21 +563,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         currentUserId={currentUserId}
         quickSwitchMode={quickSwitchMode}
         isOpenID={multiuserEnabled}
-        onSelect={file => {
-          if (!id) {
-            if (file.state === 'remote') {
-              dispatch(downloadBudget(file.cloudFileId));
-            } else {
-              dispatch(loadBudget(file.id));
-            }
-          } else if (file.id !== id) {
-            if (file.state === 'remote') {
-              dispatch(closeAndDownloadBudget(file.cloudFileId));
-            } else {
-              dispatch(closeAndLoadBudget(file.id));
-            }
-          }
-        }}
+        onSelect={onSelect}
         onDelete={file => dispatch(pushModal('delete-budget', { file }))}
       />
       {!quickSwitchMode && (
@@ -515,14 +576,13 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           }}
         >
           <Button
-            type="bare"
+            variant="bare"
             style={{
               ...narrowButtonStyle,
               marginLeft: 10,
               color: theme.pageTextLight,
             }}
-            onClick={e => {
-              e.preventDefault();
+            onPress={() => {
               dispatch(pushModal('import'));
             }}
           >
@@ -530,8 +590,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           </Button>
 
           <Button
-            type="primary"
-            onClick={onCreate}
+            variant="primary"
+            onPress={() => onCreate()}
             style={{
               ...narrowButtonStyle,
               marginLeft: 10,
@@ -542,9 +602,8 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 
           {isNonProductionEnvironment() && (
             <Button
-              type="primary"
-              isSubmit={false}
-              onClick={() => onCreate({ testMode: true })}
+              variant="primary"
+              onPress={() => onCreate({ testMode: true })}
               style={{
                 ...narrowButtonStyle,
                 marginLeft: 10,

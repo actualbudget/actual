@@ -10,6 +10,7 @@ import React, {
   useLayoutEffect,
   useEffect,
 } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -61,6 +62,7 @@ import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
@@ -79,7 +81,6 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
-import { Tooltip } from '../tooltips';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -173,6 +174,16 @@ const TransactionHeader = memo(
     field,
   }) => {
     const dispatchSelected = useSelectedDispatch();
+
+    useHotkeys(
+      'ctrl+a, cmd+a, meta+a',
+      e => dispatchSelected({ type: 'select-all', event: e }),
+      {
+        preventDefault: true,
+        scopes: ['app'],
+      },
+      [dispatchSelected],
+    );
 
     return (
       <Row
@@ -282,7 +293,7 @@ const TransactionHeader = memo(
             onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
           }
         />
-        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
+        {showBalance && <Cell value="Balance" width={103} textAlign="right" />}
 
         {showCleared && (
           <HeaderCell
@@ -306,7 +317,10 @@ const TransactionHeader = memo(
 
 TransactionHeader.displayName = 'TransactionHeader';
 
-function getPayeePretty(transaction, payee, transferAcct) {
+function getPayeePretty(transaction, payee, transferAcct, numHiddenPayees = 0) {
+  const formatPayeeName = payeeName =>
+    numHiddenPayees > 0 ? `${payeeName} (+${numHiddenPayees} more)` : payeeName;
+
   const { payee: payeeId } = transaction;
 
   if (transferAcct) {
@@ -323,14 +337,14 @@ function getPayeePretty(transaction, payee, transferAcct) {
             textOverflow: 'ellipsis',
           }}
         >
-          {transferAcct.name}
+          {formatPayeeName(transferAcct.name)}
         </div>
       </View>
     );
   } else if (payee) {
-    return payee.name;
+    return formatPayeeName(payee.name);
   } else if (payeeId && payeeId.startsWith('new:')) {
-    return payeeId.slice('new:'.length);
+    return formatPayeeName(payeeId.slice('new:'.length));
   }
 
   return '';
@@ -461,15 +475,59 @@ function HeaderCell({
   );
 }
 
+const useParentPayee = (
+  payees,
+  subtransactions,
+  transferAccountsByTransaction,
+) =>
+  useMemo(() => {
+    if (!subtransactions) {
+      return null;
+    }
+
+    const { counts, mostCommonPayeeTransaction } =
+      subtransactions?.reduce(
+        ({ counts, ...result }, sub) => {
+          if (sub.payee) {
+            counts[sub.payee] = (counts[sub.payee] || 0) + 1;
+            if (counts[sub.payee] > result.maxCount) {
+              return {
+                counts,
+                maxCount: counts[sub.payee],
+                mostCommonPayeeTransaction: sub,
+              };
+            }
+          }
+          return { counts, ...result };
+        },
+        { counts: {}, maxCount: 0, mostCommonPayeeTransaction: null },
+      ) || {};
+
+    if (!mostCommonPayeeTransaction) {
+      return 'Split (no payee)';
+    }
+
+    const mostCommonPayee =
+      getPayeesById(payees)[mostCommonPayeeTransaction.payee];
+    const numDistinctPayees = Object.keys(counts).length;
+    return getPayeePretty(
+      mostCommonPayeeTransaction,
+      mostCommonPayee,
+      transferAccountsByTransaction[mostCommonPayeeTransaction.id],
+      numDistinctPayees - 1,
+    );
+  }, [subtransactions, payees, transferAccountsByTransaction]);
+
 function PayeeCell({
   id,
   payee,
   focused,
   payees,
   accounts,
+  transferAccountsByTransaction,
   valueStyle,
   transaction,
-  transferAcct,
+  subtransactions,
   isPreview,
   onEdit,
   onUpdate,
@@ -481,6 +539,14 @@ function PayeeCell({
   const isCreatingPayee = useRef(false);
 
   const dispatch = useDispatch();
+
+  const parentPayee = useParentPayee(
+    payees,
+    subtransactions,
+    transferAccountsByTransaction,
+  );
+
+  const transferAccount = transferAccountsByTransaction[transaction.id];
 
   return transaction.is_parent ? (
     <Cell
@@ -527,7 +593,7 @@ function PayeeCell({
               color: 'inherit',
               width: 14,
               height: 14,
-              marginRight: 2,
+              marginRight: 5,
             }}
           />
           <Text
@@ -537,7 +603,7 @@ function PayeeCell({
               userSelect: 'none',
             }}
           >
-            Split
+            {parentPayee}
           </Text>
         </View>
       </CellButton>
@@ -561,12 +627,12 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-      formatter={() => getPayeePretty(transaction, payee, transferAcct)}
+      formatter={() => getPayeePretty(transaction, payee, transferAccount)}
       unexposedContent={props => (
         <>
           <PayeeIcons
             transaction={transaction}
-            transferAccount={transferAcct}
+            transferAccount={transferAccount}
             onNavigateToTransferAccount={onNavigateToTransferAccount}
             onNavigateToSchedule={onNavigateToSchedule}
           />
@@ -681,8 +747,10 @@ function PayeeIcons({
 }
 
 const Transaction = memo(function Transaction({
+  allTransactions,
   transaction: originalTransaction,
   subtransactions,
+  transferAccountsByTransaction,
   editing,
   showAccount,
   showBalance,
@@ -711,9 +779,12 @@ const Transaction = memo(function Transaction({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onNotesTagClick,
+  splitError,
+  listContainerRef,
 }) {
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
+  const triggerRef = useRef(null);
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
@@ -857,19 +928,9 @@ const Transaction = memo(function Transaction({
   // Join in some data
   const payee = payees && payeeId && getPayeesById(payees)[payeeId];
   const account = accounts && accountId && getAccountsById(accounts)[accountId];
-  let transferAcct;
-
-  if (_inverse) {
-    transferAcct =
-      accounts && accountId && getAccountsById(accounts)[accountId];
-  } else {
-    transferAcct =
-      payee &&
-      payee.transfer_acct &&
-      getAccountsById(accounts)[payee.transfer_acct];
-  }
 
   const isChild = transaction.is_child;
+  const transferAcct = transferAccountsByTransaction[id];
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
@@ -881,8 +942,31 @@ const Transaction = memo(function Transaction({
     ? balance
     : balance + (_inverse ? -1 : 1) * amount;
 
+  // Ok this entire logic is a dirty, dirty hack.. but let me explain.
+  // Problem: the split-error Popover (which has the buttons to distribute/add split)
+  // renders before schedules are added to the table. After schedules finally load
+  // the entire table gets pushed down. But the Popover does not re-calculate
+  // its positioning. This is because there is nothing in react-aria that would be
+  // watching for the position of the trigger element.
+  // Solution: when transactions (this includes schedules) change - we increment
+  // a variable (with a small delay in order for the next render cycle to pick up
+  // the change instead of the current). We pass the integer to the Popover which
+  // causes it to re-calculate the positioning. Thus fixing the problem.
+  const [updateId, setUpdateId] = useState(1);
+  useEffect(() => {
+    // The hack applies to only transactions with split errors
+    if (!splitError) {
+      return;
+    }
+
+    setTimeout(() => {
+      setUpdateId(state => state + 1);
+    }, 1);
+  }, [splitError, allTransactions]);
+
   return (
     <Row
+      ref={triggerRef}
       style={{
         backgroundColor: selected
           ? theme.tableRowBackgroundHighlight
@@ -909,6 +993,21 @@ const Transaction = memo(function Transaction({
         ...(_unmatched && { opacity: 0.5 }),
       }}
     >
+      {splitError && listContainerRef.current && (
+        <Popover
+          arrowSize={updateId}
+          triggerRef={triggerRef}
+          isOpen
+          isNonModal
+          style={{ width: 375, padding: 5, maxHeight: '38px !important' }}
+          shouldFlip={false}
+          placement="bottom end"
+          UNSTABLE_portalContainer={listContainerRef.current}
+        >
+          {splitError}
+        </Popover>
+      )}
+
       {isChild && (
         <Field
           /* Checkmark blank placeholder for Child transaction */
@@ -1063,7 +1162,8 @@ const Transaction = memo(function Transaction({
           payees={payees.filter(payee => payee.transfer_acct !== accountId)}
           valueStyle={valueStyle}
           transaction={transaction}
-          transferAcct={transferAcct}
+          subtransactions={subtransactions}
+          transferAccountsByTransaction={transferAccountsByTransaction}
           importedPayee={importedPayee}
           isPreview={isPreview}
           onEdit={onEdit}
@@ -1346,7 +1446,7 @@ const Transaction = memo(function Transaction({
             color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
           }}
           style={{ ...styles.tnum, ...amountStyle }}
-          width={88}
+          width={103}
           textAlign="right"
           privacyFilter
         />
@@ -1457,6 +1557,7 @@ function NewTransaction({
   accounts,
   categoryGroups,
   payees,
+  transferAccountsByTransaction,
   editingTransaction,
   focusedField,
   showAccount,
@@ -1509,6 +1610,7 @@ function NewTransaction({
           editing={editingTransaction === transaction.id}
           transaction={transaction}
           subtransactions={transaction.is_parent ? childTransactions : null}
+          transferAccountsByTransaction={transferAccountsByTransaction}
           showAccount={showAccount}
           showCategory={showCategory}
           showBalance={showBalance}
@@ -1579,6 +1681,7 @@ function NewTransaction({
 function TransactionTableInner({
   tableNavigator,
   tableRef,
+  listContainerRef,
   dateFormat = 'MM/dd/yyyy',
   newNavigator,
   renderEmpty,
@@ -1625,7 +1728,7 @@ function TransactionTableInner({
     }
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
-  const renderRow = ({ item, index, position, editing }) => {
+  const renderRow = ({ item, index, editing }) => {
     const {
       transactions,
       selectedItems,
@@ -1662,22 +1765,49 @@ function TransactionTableInner({
       error &&
       error.type === 'SplitTransactionError';
 
-    const emptyChildTransactions = transactions.filter(
-      t =>
-        t.parent_id === (trans.is_parent ? trans.id : trans.parent_id) &&
-        t.amount === 0,
-    );
+    const childTransactions = trans.is_parent
+      ? props.transactionsByParent[trans.id]
+      : null;
+    const emptyChildTransactions = props.transactionsByParent[
+      trans.is_parent ? trans.id : trans.parent_id
+    ]?.filter(t => t.amount === 0);
 
     return (
-      <>
-        {hasSplitError && (
-          <Tooltip
-            position="bottom-right"
-            width={350}
-            forceTop={position}
-            forceLayout={true}
-            style={{ transform: 'translate(-5px, 2px)' }}
-          >
+      <Transaction
+        allTransactions={props.transactions}
+        editing={editing}
+        transaction={trans}
+        transferAccountsByTransaction={props.transferAccountsByTransaction}
+        subtransactions={childTransactions}
+        showAccount={showAccount}
+        showCategory={showCategory}
+        showBalance={showBalances}
+        showCleared={showCleared}
+        selected={selected}
+        highlighted={false}
+        added={isNew?.(trans.id)}
+        expanded={isExpanded?.(trans.id)}
+        matched={isMatched?.(trans.id)}
+        showZeroInDeposit={isChildDeposit}
+        balance={balances?.[trans.id]?.balance}
+        focusedField={editing && tableNavigator.focusedField}
+        accounts={accounts}
+        categoryGroups={categoryGroups}
+        payees={payees}
+        dateFormat={dateFormat}
+        hideFraction={hideFraction}
+        onEdit={tableNavigator.onEdit}
+        onSave={props.onSave}
+        onDelete={props.onDelete}
+        onSplit={props.onSplit}
+        onManagePayees={props.onManagePayees}
+        onCreatePayee={props.onCreatePayee}
+        onToggleSplit={props.onToggleSplit}
+        onNavigateToTransferAccount={onNavigateToTransferAccount}
+        onNavigateToSchedule={onNavigateToSchedule}
+        onNotesTagClick={onNotesTagClick}
+        splitError={
+          hasSplitError && (
             <TransactionError
               error={error}
               isDeposit={isChildDeposit}
@@ -1687,40 +1817,10 @@ function TransactionTableInner({
               }
               canDistributeRemainder={emptyChildTransactions.length > 0}
             />
-          </Tooltip>
-        )}
-        <Transaction
-          editing={editing}
-          transaction={trans}
-          showAccount={showAccount}
-          showCategory={showCategory}
-          showBalance={showBalances}
-          showCleared={showCleared}
-          selected={selected}
-          highlighted={false}
-          added={isNew?.(trans.id)}
-          expanded={isExpanded?.(trans.id)}
-          matched={isMatched?.(trans.id)}
-          showZeroInDeposit={isChildDeposit}
-          balance={balances?.[trans.id]?.balance}
-          focusedField={editing && tableNavigator.focusedField}
-          accounts={accounts}
-          categoryGroups={categoryGroups}
-          payees={payees}
-          dateFormat={dateFormat}
-          hideFraction={hideFraction}
-          onEdit={tableNavigator.onEdit}
-          onSave={props.onSave}
-          onDelete={props.onDelete}
-          onSplit={props.onSplit}
-          onManagePayees={props.onManagePayees}
-          onCreatePayee={props.onCreatePayee}
-          onToggleSplit={props.onToggleSplit}
-          onNavigateToTransferAccount={onNavigateToTransferAccount}
-          onNavigateToSchedule={onNavigateToSchedule}
-          onNotesTagClick={onNotesTagClick}
-        />
-      </>
+          )
+        }
+        listContainerRef={listContainerRef}
+      />
     );
   };
 
@@ -1754,6 +1854,9 @@ function TransactionTableInner({
           >
             <NewTransaction
               transactions={props.newTransactions}
+              transferAccountsByTransaction={
+                props.transferAccountsByTransaction
+              }
               editingTransaction={newNavigator.editingId}
               focusedField={newNavigator.focusedField}
               accounts={props.accounts}
@@ -1797,6 +1900,7 @@ function TransactionTableInner({
         <Table
           navigator={tableNavigator}
           ref={tableRef}
+          listContainerRef={listContainerRef}
           items={props.transactions}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
@@ -1833,9 +1937,10 @@ export const TransactionTable = forwardRef((props, ref) => {
   const prevSplitsExpanded = useRef(null);
 
   const tableRef = useRef(null);
+  const listContainerRef = useRef(null);
   const mergedRef = useMergedRefs(tableRef, ref);
 
-  const transactions = useMemo(() => {
+  const transactionsWithExpandedSplits = useMemo(() => {
     let result;
     if (splitsExpanded.state.transitionId != null) {
       const index = props.transactions.findIndex(
@@ -1873,8 +1978,44 @@ export const TransactionTable = forwardRef((props, ref) => {
     return result;
   }, [props.transactions, splitsExpanded]);
   const transactionMap = useMemo(() => {
-    return new Map(transactions.map(trans => [trans.id, trans]));
-  }, [transactions]);
+    return new Map(
+      transactionsWithExpandedSplits.map(trans => [trans.id, trans]),
+    );
+  }, [transactionsWithExpandedSplits]);
+  const transactionsByParent = useMemo(() => {
+    return props.transactions.reduce((acc, trans) => {
+      if (trans.is_child) {
+        acc[trans.parent_id] = [...(acc[trans.parent_id] ?? []), trans];
+      }
+      return acc;
+    }, {});
+  }, [props.transactions]);
+
+  const transferAccountsByTransaction = useMemo(() => {
+    if (!props.accounts) {
+      return {};
+    }
+    const accounts = getAccountsById(props.accounts);
+    const payees = getPayeesById(props.payees);
+
+    return Object.fromEntries(
+      props.transactions.map(t => {
+        if (!props.accounts) {
+          return [t.id, null];
+        }
+
+        const payee = t.payee && payees[t.payee];
+        let transferAccount;
+        if (t._inverse) {
+          transferAccount = t.account && accounts[t.account];
+        } else {
+          transferAccount =
+            payee?.transfer_acct && accounts[payee.transfer_acct];
+        }
+        return [t.id, transferAccount || null];
+      }),
+    );
+  }, [props.transactions, props.payees, props.accounts]);
 
   useEffect(() => {
     // If it's anchored that means we've also disabled animations. To
@@ -1887,7 +2028,10 @@ export const TransactionTable = forwardRef((props, ref) => {
   }, [prevSplitsExpanded.current]);
 
   const newNavigator = useTableNavigator(newTransactions, getFields);
-  const tableNavigator = useTableNavigator(transactions, getFields);
+  const tableNavigator = useTableNavigator(
+    transactionsWithExpandedSplits,
+    getFields,
+  );
   const shouldAdd = useRef(false);
   const latestState = useRef({ newTransactions, newNavigator, tableNavigator });
   const savePending = useRef(false);
@@ -2245,9 +2389,12 @@ export const TransactionTable = forwardRef((props, ref) => {
   return (
     <TransactionTableInner
       tableRef={mergedRef}
+      listContainerRef={listContainerRef}
       {...props}
-      transactions={transactions}
+      transactions={transactionsWithExpandedSplits}
       transactionMap={transactionMap}
+      transactionsByParent={transactionsByParent}
+      transferAccountsByTransaction={transferAccountsByTransaction}
       selectedItems={selectedItems}
       isExpanded={splitsExpanded.expanded}
       onSave={onSave}

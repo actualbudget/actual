@@ -9,7 +9,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { styles, theme } from '../../../style';
-import { Button, ButtonWithLoading } from '../../common/Button';
+import { Button, ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
 import { Label } from '../../common/Label';
 import { Link } from '../../common/Link';
@@ -58,8 +58,8 @@ function PasswordLogin({ setError, dispatch }) {
         style={{ flex: 1, marginRight: 10 }}
       />
       <ButtonWithLoading
-        type="primary"
-        loading={loading}
+        variant="primary"
+        isLoading={loading}
         style={{ fontSize: 15 }}
       >
         Sign in
@@ -86,7 +86,7 @@ function OpenIdLogin({ setError }) {
 
   return (
     <form style={{ marginTop: 20 }} onSubmit={onSubmitOpenId}>
-      <Button style={{ fontSize: 15 }} onClick={onSubmitOpenId}>
+      <Button style={{ fontSize: 15 }} onPress={onSubmitOpenId}>
         Sign in with OpenId
       </Button>
     </form>
@@ -167,6 +167,7 @@ export function Login() {
     }
   }
 
+
   async function onDemo() {
     await dispatch(createBudget({ demoMode: true }));
   }
@@ -239,9 +240,9 @@ export function Login() {
         }}
       >
         <Button
-          type="bare"
+          variant="bare"
           style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
-          onClick={onDemo}
+          onPress={onDemo}
         >
           Try Demo &rarr;
         </Button>

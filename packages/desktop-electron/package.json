@@ -38,7 +38,15 @@
       "artifactName": "${productName}-mac.${ext}",
       "notarize": {
         "teamId": "79ANZ983YF"
-      }
+      },
+      "target": [
+        {
+          "target": "default",
+          "arch": [
+            "universal"
+          ]
+        }
+      ]
     },
     "linux": {
       "target": [

@@ -168,6 +168,10 @@ export function deleteCategory(id, transferCategoryId?) {
   return send('api/category-delete', { id, transferCategoryId });
 }
 
+export function getCommonPayees() {
+  return send('api/common-payees-get');
+}
+
 export function getPayees() {
   return send('api/payees-get');
 }

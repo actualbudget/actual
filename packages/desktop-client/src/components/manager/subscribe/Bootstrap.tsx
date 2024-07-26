@@ -7,7 +7,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
@@ -109,13 +109,13 @@ export function Bootstrap() {
           <ConfirmPasswordForm
             buttons={
               <Button
-                type="bare"
+                variant="bare"
                 style={{
                   fontSize: 15,
                   color: theme.pageTextLink,
                   marginRight: 15,
                 }}
-                onClick={onDemo}
+                onPress={onDemo}
               >
                 Try Demo
               </Button>
@@ -124,8 +124,9 @@ export function Bootstrap() {
             onError={setError}
           />
           <Button
-            style={{ marginTop: 10 }}
-            onClick={() => setLoginMethod('openid')}
+            style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
+            onPress={() => setLoginMethod('openid')}
+            variant="bare"
           >
             Configure OpenID authentication instead (Advanced)
           </Button>
@@ -136,8 +137,8 @@ export function Bootstrap() {
         <>
           <OpenIdForm onSetOpenId={onSetOpenId} />
           <Button
-            style={{ marginTop: 10 }}
-            onClick={() => setLoginMethod('password')}
+            style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
+            onPress={() => setLoginMethod('password')}
           >
             Configure password authentication instead
           </Button>
