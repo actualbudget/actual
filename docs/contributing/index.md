@@ -32,6 +32,7 @@ Here are some initial guidelines for how contributions will be treated:
 - @joel-jeremy
 - @MatissJanis
 - @matt-fidd
+- @MikesGlitch
 - @teprifer
 - @twk3
 - @youngcw

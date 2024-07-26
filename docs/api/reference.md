@@ -5,8 +5,6 @@ title: API Reference
 import { types, objects, PrimitiveTypeList, PrimitiveType, StructType, Method, MethodBox } from './types';
 import APIList from './APIList';
 
-This is the documentation of all available API methods. The API has not been released yet, but it will be available in the next update. This section is a work in progress.
-
 <APIList title="Budgets" sections={[
 "getBudgetMonths",
 "getBudgetMonth",
@@ -311,7 +309,7 @@ Delete an account.
 
 <Method name="getAccountBalance" args={[{ name: 'id', type: 'id' }, { name: 'cutoff', type: 'Date?'}]} returns="Promise<number>" />
 
-Gets the balance for an account.  If a cutoff is given, it gives the account balance as of that date.  If no cutoff is given, it uses the current date as the cutoff.
+Gets the balance for an account. If a cutoff is given, it gives the account balance as of that date. If no cutoff is given, it uses the current date as the cutoff.
 
 #### Examples
 
@@ -505,7 +503,7 @@ Create a rule. Returns the new rule, including the `id`.
 
 <Method name="updateRule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<Rule>" />
 
-Update fields of a rule. `fields` can specify any field described in [`Rule`](#rule).  Returns the updated rule.
+Update fields of a rule. `fields` can specify any field described in [`Rule`](#rule). Returns the updated rule.
 
 #### `deleteRule`
 
@@ -582,7 +580,7 @@ Creates a new budget file with the given name, and then runs the custom importer
 
 <Method name="getBudgets" args={[]} returns="Promise<BudgetFile[]>" />
 
-Returns a list of all budget files either locally cached or on the remote server.  Remote files have a `state` field and local files have an `id` field.
+Returns a list of all budget files either locally cached or on the remote server. Remote files have a `state` field and local files have an `id` field.
 
 #### `loadBudget`
 
