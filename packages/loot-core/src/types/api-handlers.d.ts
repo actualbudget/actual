@@ -68,9 +68,7 @@ export interface ApiHandlers {
     amount: number;
   }) => Promise<void>;
 
-  'api/reset-hold': (arg: {
-    month: string;
-  }) => Promise<void>;
+  'api/reset-hold': (arg: { month: string }) => Promise<void>;
 
   'api/transactions-export': (arg: {
     transactions;

@@ -413,7 +413,7 @@ handlers['api/hold-for-next-month'] = withMutation(async function ({
   checkFileOpen();
   await validateMonth(month);
   if (amount <= 0) {
-      throw APIError('Amount to hold need to greater than 0');
+    throw APIError('Amount to hold needs to be greater than 0');
   }
   return handlers['budget/hold-for-next-month']({
     month,
@@ -421,15 +421,10 @@ handlers['api/hold-for-next-month'] = withMutation(async function ({
   });
 });
 
-
-handlers['api/reset-hold'] = withMutation(async function ({
-  month,
-}) {
+handlers['api/reset-hold'] = withMutation(async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
-  return handlers['budget/reset-hold']({
-    month,
-  });
+  return handlers['budget/reset-hold']({ month });
 });
 
 handlers['api/transactions-export'] = async function ({

@@ -213,7 +213,6 @@ export function holdForNextMonth(month, amount) {
   return send('api/hold-for-next-month', { month, amount });
 }
 
-
 export function resetHold(month) {
   return send('api/reset-hold', { month });
 }
