@@ -22,7 +22,7 @@ export default async function runMigration(db) {
 
     // Add custom reports to the dashboard
     const reports = db.runQuery(
-      'SELECT id FROM custom_reports WHERE tombstone = 0 ORDER BY name ASC',
+      'SELECT id FROM custom_reports WHERE tombstone = 0 ORDER BY name COLLATE NOCASE ASC',
       [],
       true,
     );
