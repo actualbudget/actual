@@ -66,22 +66,16 @@ function conditionExists(item, filters, newItem) {
       !filter.tombstone &&
       filter.conditions.length === conditions.length
     ) {
-      let allConditionsMatch = true;
-
-      conditions.some(cond => {
-        const matchingCondition = filter.conditions.find(
-          fcond =>
-            cond.value === fcond.value &&
-            cond.op === fcond.op &&
-            cond.field === fcond.field &&
-            filterOptionsMatch(cond.options, fcond.options),
-        );
-        if (!matchingCondition) {
-          allConditionsMatch = false;
-          return true;
-        }
-        return false;
-      });
+      const allConditionsMatch = !conditions.some(
+        cond =>
+          !filter.conditions.some(
+            fcond =>
+              cond.value === fcond.value &&
+              cond.op === fcond.op &&
+              cond.field === fcond.field &&
+              filterOptionsMatch(cond.options, fcond.options),
+          ),
+      );
 
       if (allConditionsMatch) {
         fConditionFound = filter;
