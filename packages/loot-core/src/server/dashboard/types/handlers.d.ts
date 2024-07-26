@@ -15,5 +15,7 @@ export interface DashboardHandlers {
   'dashboard-remove-widget': (widgetId: string) => Promise<void>;
   'dashboard-import': (args: {
     filepath: string;
-  }) => Promise<{ status: 'ok' } | { error: 'internal-error' }>;
+  }) => Promise<
+    { status: 'ok' } | { error: 'json-parse-error' | 'internal-error' }
+  >;
 }

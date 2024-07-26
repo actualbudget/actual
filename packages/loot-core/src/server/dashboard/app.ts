@@ -150,6 +150,9 @@ async function importDashboard({ filepath }: { filepath: string }) {
       err.message = 'Error importing file: ' + err.message;
       captureException(err);
     }
+    if (err instanceof SyntaxError) {
+      return { error: 'json-parse-error' as const };
+    }
     return { error: 'internal-error' as const };
   }
 }

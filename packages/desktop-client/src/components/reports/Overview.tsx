@@ -186,12 +186,25 @@ export function Overview() {
     setIsImporting(false);
 
     if (res.error) {
-      dispatch(
-        addNotification({
-          type: 'error',
-          message: 'Failed importing the dashboard file.',
-        }),
-      );
+      switch (res.error) {
+        case 'json-parse-error':
+          dispatch(
+            addNotification({
+              type: 'error',
+              message: 'Failed parsing the imported JSON.',
+            }),
+          );
+          break;
+
+        default:
+          dispatch(
+            addNotification({
+              type: 'error',
+              message: 'Failed importing the dashboard file.',
+            }),
+          );
+          break;
+      }
     }
   };
 
