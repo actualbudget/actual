@@ -18,6 +18,7 @@ export type SyncableLocalFile = Budget & {
   groupId: string;
   state: 'broken' | 'unknown';
   hasKey: boolean;
+  owner: string;
 };
 
 export type SyncedLocalFile = Budget & {
@@ -26,6 +27,7 @@ export type SyncedLocalFile = Budget & {
   encryptKeyId?: string;
   hasKey: boolean;
   state: 'synced' | 'detached';
+  owner: string;
 };
 
 export type RemoteFile = {
@@ -35,6 +37,7 @@ export type RemoteFile = {
   encryptKeyId?: string;
   hasKey: boolean;
   state: 'remote';
+  owner: string;
 };
 
 export type File = LocalFile | SyncableLocalFile | SyncedLocalFile | RemoteFile;

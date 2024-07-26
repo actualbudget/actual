@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { type ChangeEvent, useState } from 'react';
 
 import { ButtonWithLoading } from '../../common/Button2';
 import { BigInput } from '../../common/Input';
@@ -134,7 +134,7 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
         </label>
         <View style={{ flex: 1 }} />
         {buttons}
-        <ButtonWithLoading type="primary" loading={loading}>
+        <ButtonWithLoading variant="primary" isLoading={loading}>
           OK
         </ButtonWithLoading>
       </View>

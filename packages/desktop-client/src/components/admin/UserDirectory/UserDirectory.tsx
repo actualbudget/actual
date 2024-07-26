@@ -21,7 +21,7 @@ import {
 import { useActions } from '../../../hooks/useActions';
 import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Search } from '../../common/Search';
 import { Stack } from '../../common/Stack';
@@ -235,11 +235,11 @@ function UserDirectoryContent({
         >
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
-              <Button onClick={onDeleteSelected}>
+              <Button onPress={onDeleteSelected}>
                 Delete {selectedInst.items.size} users
               </Button>
             )}
-            <Button type="primary" onClick={onAddUser}>
+            <Button variant="primary" onPress={onAddUser}>
               Add new user
             </Button>
           </Stack>

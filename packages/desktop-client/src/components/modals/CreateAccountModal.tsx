@@ -22,9 +22,7 @@ import { Paragraph } from '../common/Paragraph';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { useMultiuserEnabled } from '../ServerContext';
-import { Tooltip } from '../tooltips';
 
 type CreateAccountProps = {
   syncServerStatus: SyncServerStatus;

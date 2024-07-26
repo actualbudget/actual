@@ -48,6 +48,7 @@ function reconcileFiles(
           deleted: false,
           state: 'unknown',
           hasKey: true,
+          owner: '',
         };
       }
 
@@ -89,6 +90,7 @@ function reconcileFiles(
           deleted: false,
           state: 'broken',
           hasKey: true,
+          owner: '',
         };
       }
     } else {

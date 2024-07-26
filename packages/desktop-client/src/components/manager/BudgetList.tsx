@@ -21,6 +21,8 @@ import {
   type SyncableLocalFile,
   type SyncedLocalFile,
 } from 'loot-core/types/file';
+import { type UserEntity } from 'loot-core/types/models';
+import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -44,8 +46,6 @@ import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { useMultiuserEnabled } from '../ServerContext';
-import { UserEntity } from 'loot-core/types/models';
-import { UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 function getFileDescription(file: File) {
   if (file.state === 'unknown') {
@@ -458,7 +458,7 @@ function BudgetListHeader({
 
 export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
-  const allFiles = useSelector(state => state.budgets.allFiles?.filter(file => !isLocalFile(file)) || []);
+  const allFiles = useSelector(state => state.budgets.allFiles || []);
   const [id] = useLocalPref('id');
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState('');
@@ -476,13 +476,18 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         send(
           'users-get-access',
           allFiles
-            .map(file => (file as RemoteFile | SyncedLocalFile | SyncableLocalFile).cloudFileId),
+            .filter(file => !isLocalFile(file))
+            .map(
+              file =>
+                (file as RemoteFile | SyncedLocalFile | SyncableLocalFile)
+                  .cloudFileId,
+            ),
         ).then(data => {
           setUsersPerFile(data);
         });
       }
     }
-  }, [allFiles, userData.offline, userData.userId, multiuserEnabled]);
+  }, [multiuserEnabled, userData.offline, allFiles, userData.userId]);
 
   // Remote files do not have the 'id' field
   function isNonRemoteFile(

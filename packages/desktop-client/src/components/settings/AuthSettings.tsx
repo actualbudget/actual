@@ -5,7 +5,7 @@ import { pushModal } from 'loot-core/client/actions';
 import { type AuthMethods } from 'loot-core/types/prefs';
 
 import { theme, theme as themeStyle } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Label } from '../common/Label';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
@@ -42,8 +42,8 @@ export function AuthSettings() {
                 style={{
                   marginTop: '10px',
                 }}
-                type="normal"
-                onClick={() =>
+                variant="normal"
+                onPress={() =>
                   dispatch(
                     pushModal('enable-openid', {
                       onSave: async () => {},
@@ -65,8 +65,8 @@ export function AuthSettings() {
                 style={{
                   marginTop: '10px',
                 }}
-                type="normal"
-                onClick={() =>
+                variant="normal"
+                onPress={() =>
                   dispatch(
                     pushModal('enable-password-auth', {
                       onSave: async () => {},

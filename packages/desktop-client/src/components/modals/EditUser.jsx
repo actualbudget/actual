@@ -6,7 +6,7 @@ import { getUserDirectoryErrors } from 'loot-core/shared/errors';
 import { PossibleRoles } from '../../../../loot-core/src/types/models/user';
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { Select } from '../common/Select';
@@ -170,13 +170,13 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
       >
         {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
         <Button
-          type="bare"
+          variant="bare"
           style={{ marginRight: 10 }}
-          onClick={actions.popModal}
+          onPress={actions.popModal}
         >
           Cancel
         </Button>
-        <Button type="primary" onClick={onSave}>
+        <Button variant="primary" onPress={onSave}>
           {defaultUser.id ? 'Save' : 'Add'}
         </Button>
       </Stack>

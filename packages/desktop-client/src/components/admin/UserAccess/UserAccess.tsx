@@ -22,7 +22,7 @@ import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgDotsHorizontalTriple, SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Popover } from '../../common/Popover';
 import { Search } from '../../common/Search';
@@ -194,12 +194,9 @@ function UserAccessContent({
         >
           <Button
             ref={triggerRef}
-            type="bare"
+            variant="bare"
             aria-label="Menu"
-            onClick={e => {
-              e.stopPropagation();
-              setMenuOpen(true);
-            }}
+            onPress={() => setMenuOpen(true)}
           >
             <SvgDotsHorizontalTriple style={{ width: 16, height: 16 }} />
           </Button>
@@ -236,19 +233,17 @@ function UserAccessContent({
                 {ownerName}
               </View>
               <Button
-                type="bare"
+                variant="bare"
                 aria-label="Menu"
-                onClick={e => {
-                  e.stopPropagation();
+                onPress={() =>
                   dispatch(
-                    pushModal('transfer-ownership', {
-                      onSave: async () => {
-                        await loadAccess();
-                        setLoading(false);
-                      },
-                    }),
-                  );
-                }}
+                  pushModal('transfer-ownership', {
+                    onSave: async () => {
+                      await loadAccess();
+                      setLoading(false);
+                    },
+                  }),
+                )}
               >
                 <LockToggle style={{ width: 16, height: 16 }} />
               </Button>
@@ -284,11 +279,11 @@ function UserAccessContent({
         >
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
-              <Button onClick={onDeleteSelected}>
+              <Button onPress={onDeleteSelected}>
                 Revoke access from {selectedInst.items.size} users
               </Button>
             )}
-            <Button type="primary" onClick={onAddAccess}>
+            <Button variant="primary" onPress={onAddAccess}>
               Give access
             </Button>
           </Stack>

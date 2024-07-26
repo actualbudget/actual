@@ -571,38 +571,19 @@ export function Modals() {
           return (
             <EditUserAccess
               key={name}
-              modalProps={modalProps}
               defaultUserAccess={options.access}
               onSave={options.onSave}
             />
           );
 
         case 'transfer-ownership':
-          return (
-            <TransferOwnership
-              key={name}
-              modalProps={modalProps}
-              onSave={options.onSave}
-            />
-          );
+          return <TransferOwnership key={name} onSave={options.onSave} />;
 
         case 'enable-openid':
-          return (
-            <OpenIDEnableModal
-              key={name}
-              modalProps={modalProps}
-              onSave={options.onSave}
-            />
-          );
+          return <OpenIDEnableModal key={name} onSave={options.onSave} />;
 
         case 'enable-password-auth':
-          return (
-            <PasswordEnableModal
-              key={name}
-              modalProps={modalProps}
-              onSave={options.onSave}
-            />
-          );
+          return <PasswordEnableModal key={name} onSave={options.onSave} />;
 
         default:
           console.error('Unknown modal:', name);

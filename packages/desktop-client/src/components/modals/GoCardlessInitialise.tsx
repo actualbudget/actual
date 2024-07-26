@@ -121,8 +121,8 @@ export const GoCardlessInitialise = ({
               />
             </FormField>
 
-        {!isValid && <Error>{error}</Error>}
-      </View>
+            {!isValid && <Error>{error}</Error>}
+          </View>
 
           <ModalButtons>
             <ButtonWithLoading

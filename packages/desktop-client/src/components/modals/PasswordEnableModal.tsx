@@ -6,9 +6,9 @@ import * as asyncStorage from '../../../../loot-core/src/platform/server/asyncSt
 import { useActions } from '../../hooks/useActions';
 import { theme, styles } from '../../style';
 import { Error } from '../alerts';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Label } from '../common/Label';
-import { Modal } from '../common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FormField } from '../forms';
 import {
@@ -21,7 +21,7 @@ import {
   useRefreshLoginMethods,
 } from '../ServerContext';
 
-export function PasswordEnableModal({ modalProps, onSave: originalOnSave }) {
+export function PasswordEnableModal({ onSave: originalOnSave }) {
   const [error, setError] = useState('');
   const { closeBudget, popModal } = useActions();
   const multiuserEnabled = useMultiuserEnabled();
@@ -48,7 +48,6 @@ export function PasswordEnableModal({ modalProps, onSave: originalOnSave }) {
     const { error } = (await send('enable-password', { password })) || {};
     if (!error) {
       originalOnSave?.();
-      modalProps.onClose();
       await refreshLoginMethods();
       await asyncStorage.removeItem('user-token');
       await closeBudget();
@@ -58,65 +57,71 @@ export function PasswordEnableModal({ modalProps, onSave: originalOnSave }) {
   }
 
   return (
-    <Modal
-      title="Revert to server password"
-      size="medium"
-      {...modalProps}
-      style={{ ...modalProps.style, flex: 'inherit' }}
-    >
-      <View style={{ flexDirection: 'column' }}>
-        <FormField style={{ flex: 1 }}>
-          {!availableLoginMethods.some(
-            login => login.method === 'password',
-          ) && (
-            <ConfirmPasswordForm
-              buttons={
-                <Button
-                  type="bare"
-                  style={{ fontSize: 15, marginRight: 10 }}
-                  onClick={() => popModal()}
-                >
-                  Cancel
-                </Button>
-              }
-              onSetPassword={onSetPassword}
-              onError={error => setError(getErrorMessage(error))}
-            />
-          )}
-          {availableLoginMethods.some(login => login.method === 'password') && (
-            <ConfirmOldPasswordForm
-              buttons={
-                <Button
-                  type="bare"
-                  style={{ fontSize: 15, marginRight: 10 }}
-                  onClick={() => popModal()}
-                >
-                  Cancel
-                </Button>
-              }
-              onSetPassword={onSetPassword}
-            />
-          )}
-        </FormField>
-        <Label
-          style={{
-            ...styles.verySmallText,
-            color: theme.pageTextLight,
-            paddingTop: 5,
-          }}
-          title="After disabling openid all sessions will be closed"
-        />
-        {multiuserEnabled && (
-          <Label
-            style={{
-              ...styles.verySmallText,
-              color: theme.warningText,
-            }}
-            title="Multi-user will not work after disabling"
+    <Modal name="Revert to server password">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Enable OpenID"
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-        )}
-        {error && <Error>{error}</Error>}
-      </View>
+
+          <View style={{ flexDirection: 'column' }}>
+            <FormField style={{ flex: 1 }}>
+              {!availableLoginMethods.some(
+                login => login.method === 'password',
+              ) && (
+                <ConfirmPasswordForm
+                  buttons={
+                    <Button
+                      variant="bare"
+                      style={{ fontSize: 15, marginRight: 10 }}
+                      onPress={() => popModal()}
+                    >
+                      Cancel
+                    </Button>
+                  }
+                  onSetPassword={onSetPassword}
+                  onError={error => setError(getErrorMessage(error))}
+                />
+              )}
+              {availableLoginMethods.some(
+                login => login.method === 'password',
+              ) && (
+                <ConfirmOldPasswordForm
+                  buttons={
+                    <Button
+                      variant="bare"
+                      style={{ fontSize: 15, marginRight: 10 }}
+                      onPress={() => popModal()}
+                    >
+                      Cancel
+                    </Button>
+                  }
+                  onSetPassword={onSetPassword}
+                />
+              )}
+            </FormField>
+            <Label
+              style={{
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+                paddingTop: 5,
+              }}
+              title="After disabling openid all sessions will be closed"
+            />
+            {multiuserEnabled && (
+              <Label
+                style={{
+                  ...styles.verySmallText,
+                  color: theme.warningText,
+                }}
+                title="Multi-user will not work after disabling"
+              />
+            )}
+            {error && <Error>{error}</Error>}
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

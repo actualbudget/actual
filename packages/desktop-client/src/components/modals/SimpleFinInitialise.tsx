@@ -49,7 +49,6 @@ export const SimpleFinInitialise = ({
       setError(getSecretsError(error, reason));
     } else {
       onSuccess();
-      modalProps.onClose();
     }
     setIsLoading(false);
   };
@@ -90,8 +89,8 @@ export const SimpleFinInitialise = ({
               />
             </FormField>
 
-        {!isValid && <Error>{error}</Error>}
-      </View>
+            {!isValid && <Error>{error}</Error>}
+          </View>
 
           <ModalButtons>
             <ButtonWithLoading

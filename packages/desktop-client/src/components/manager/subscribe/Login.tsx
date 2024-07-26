@@ -24,8 +24,7 @@ function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function onSubmitPassword(e) {
-    e.preventDefault();
+  async function onSubmitPassword() {
     if (password === '' || loading) {
       return;
     }
@@ -46,10 +45,7 @@ function PasswordLogin({ setError, dispatch }) {
   }
 
   return (
-    <form
-      style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-      onSubmit={onSubmitPassword}
-    >
+    <>
       <BigInput
         autoFocus={true}
         placeholder="Password"
@@ -61,17 +57,16 @@ function PasswordLogin({ setError, dispatch }) {
         variant="primary"
         isLoading={loading}
         style={{ fontSize: 15 }}
+        onPress={onSubmitPassword}
       >
         Sign in
       </ButtonWithLoading>
-    </form>
+    </>
   );
 }
 
 function OpenIdLogin({ setError }) {
-  async function onSubmitOpenId(e) {
-    e.preventDefault();
-
+  async function onSubmitOpenId() {
     const { error, redirect_url } = await send('subscribe-sign-in', {
       return_url: window.location.origin,
       loginMethod: 'openid',
@@ -85,11 +80,9 @@ function OpenIdLogin({ setError }) {
   }
 
   return (
-    <form style={{ marginTop: 20 }} onSubmit={onSubmitOpenId}>
-      <Button style={{ fontSize: 15 }} onPress={onSubmitOpenId}>
-        Sign in with OpenId
-      </Button>
-    </form>
+    <Button style={{ fontSize: 15 }} onPress={onSubmitOpenId}>
+      Sign in with OpenId
+    </Button>
   );
 }
 
@@ -166,7 +159,6 @@ export function Login() {
         return `An unknown error occurred: ${error}`;
     }
   }
-
 
   async function onDemo() {
     await dispatch(createBudget({ demoMode: true }));
