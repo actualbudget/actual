@@ -58,6 +58,16 @@ jest.mock('uuid', () => ({
     return 'id' + _id++;
   },
 }));
+jest.mock('../server/migrate/migrations', () => {
+  const realMigrations = jest.requireActual('../server/migrate/migrations');
+  return {
+    ...realMigrations,
+    migrate: async db => {
+      await realMigrations.migrate(db);
+      _id = 1;
+    },
+  };
+});
 
 global.getDatabaseDump = async function (tables) {
   if (!tables) {
