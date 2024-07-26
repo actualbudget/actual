@@ -13,7 +13,7 @@ Create a template by adding a note to a category and adding a line that begins w
 
 You are welcome to have other lines in your note, but the #template line must match the syntax.
 
-## How to use the templates
+## Available Templates
 
 <!-- prettier-ignore -->
 |Syntax|Description|Example Application|
@@ -42,6 +42,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template schedule full {SCHEDULE NAME}|Fund upcoming scheduled transaction only on needed month| Small schedules that are non-monthly|
 |#template average 6 months | Budget the average amount spent over the last 6 months.  Can set the number to any number > 0.  Matches the existing option on the budget page but with flexible month ranges |
 |#template remainder | Add all remaining funds to this category| See the [Remainder Template](#remainder-template) Section for info |
+| #goal 1000         | Set a long term goal instead of a monthly goal | See the [Goal Directive](#goal-directive) Section for info |
 
 ### Notes
 
@@ -80,18 +81,19 @@ For examples:
     #template $10 repeat every 2 weeks starting 2025-01-04
     #template $100
 
-### Template Priorities
+## Template Priorities
 
 Templates can be given a priority flag to change the order that the templates get applied to your budget. Set a priority by adding `-X` to the `#template` flag. EX `#template-4` will be priority level 4. Any template with a priority other than 0 will not apply more funds then are available.
 
-#### Notes
+### Notes
 
 - Lower priority values get run first. EX 0 is run first, then 1, then 2, etc.
 - No priority flag defaults to priority 0 and is the same as a standard template.
 - Negative priorities are not allowed and will result in the template being skipped.
-- Template application order is based on the database order, not the view order.  To guarantee a specific fill order use separate priorities for each category
+- Template application order is based on the database order, not the view order.  To guarantee a specific fill order use separate priorities for each category.
 - If you have multiple `schedule` or `by` template lines in a single category, they will be forced to match the same priority level as the line run first.
 - If the `up to` key words are used with a category that has multiple templates with different priorities, the lowest priority will take precedence because it is evaluated last as shown in the following examples.
+- It is recommended to use the "overwrite with budget template" option when applying templates if you use priorities.
 
     - **Expected budgeted amount is 200**  
     **Expected maximum category balance is 200**
@@ -105,7 +107,7 @@ Templates can be given a priority flag to change the order that the templates ge
         #template 150 up to 500
         #template-1 300
 
-### Remainder Template
+## Remainder Template
 
 The remainder template is run differently to the other templates. Any remainder templates will be forced to run last in their own pass. This way the remaining budget is after all other templates have had a chance to run. Below are a few considerations when using the remainder template
 
@@ -115,7 +117,7 @@ The remainder template is run differently to the other templates. Any remainder 
 - If no weight is provided, the weight will be defaulted to 1
 - The budgeted amount is calculated as `budgeted_amount=available_funds/sum_of_weights*category_weight`
 
-#### Examples
+### Examples
 
 All the examples below use the case of $100 leftover when the remainder pass is run.
 
@@ -146,6 +148,56 @@ All the examples below use the case of $100 leftover when the remainder pass is 
 | Savings         | #template remainder 3 | $50            |
 | Vacation Fund   | #template remainder   | $16.66         |
 | Investment Fund | #template remainder 2 | $33.34         |
+
+## Goal Directive
+
+This option is unique enough to warrant its own directive `goal` instead of the standard `template` option.
+The `goal` option overrides how the goal indicator typically functions.  
+In the standard templates, the goal indication colors are based on the current month's budgeted value.
+When using the `goal` option, the indication is based on the total balance.  
+This shifts the indication to a long-term goal you are saving up to instead of just the current monthly portion.  
+A few examples have been given to illustrate this difference.
+
+### Notes 
+* The `goal` templates are run the same way as the other templates but using the month options or the category budget options.
+* If there is a `goal` directive in a category, the indicator for that category will be based on the total balance compared to the amount set in the template line.
+* The `goal` directive will not budget any funds, and funds budgeted by hand will not get reset by running templates.
+* A `goal` line can be stacked with templates to automatically budget the category(via the templates) but override how the category goal is indicated(the goal line).
+* If templates are included with a `goal`, the budgeted amount will get overwritten when using the "overwrite with budget template" button.
+* There is no priority on a `goal` line.
+
+### Examples
+All examples assume that $400 was carried over from the previous month
+
+####  1. I'm saving for a large purchase, but I'm still determining how much I can allocate each month.
+In this case, a balance greater than or equal to 500 will set the balance green, marking a met goal.
+If you run the template, you get the following:
+
+| Template Line(s) | Amount budgeted | Balance(color) |
+|:---|:--:|---:|
+| `#goal 500` | 0 | 400(yellow) |
+
+If you were able to budget 100 this month, you would then hit your goal and get a green indication.
+
+| Template Line(s) | Amount budgeted | Balance(color) |
+|:---|:--:|---:|
+| `#goal 500` | 100 | 500(green) |
+
+#### 2. I'm saving for a purchase, but I will budget 50 a month until I reach my goal.
+In this example, a template is used to automatically budget 50 into the category when templates are run.
+The goal line will override the goal indication from the `template` line, and only go green when a balance of 500 is reached.
+If you run templates, you get the following:
+
+| Template Line(s) | Amount budgeted | Balance(indication color) |
+|:---|:---:|---:|
+| `#template 50` `#goal 500` | 50 | 450(yellow) |
+
+If you have some extra funds after templates are run and can budget that last 50, you get the following:
+
+| Template Line(s) | Amount budgeted | Balance(indication color) |
+|:---|:---:|---:|
+| `#template 50` `#goal 500` | 100 | 500(green) |
+
 
 ## Apply the templates
 
