@@ -22,8 +22,7 @@ export function SpendingCard() {
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
-  const [spendingReportTime = 'previousMonth'] =
-    useLocalPref('spendingReportTime');
+  const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
   const [spendingReportCompare = 'this month'] = useLocalPref(
     'spendingReportCompare',
   );

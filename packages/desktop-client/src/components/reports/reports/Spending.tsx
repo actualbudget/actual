@@ -44,7 +44,7 @@ export function Spending() {
   const [spendingReportFilter = '', setSpendingReportFilter] = useLocalPref(
     'spendingReportFilter',
   );
-  const [spendingReportTime = 'previousMonth', setSpendingReportTime] =
+  const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
     useLocalPref('spendingReportTime');
   const [spendingReportCompare = 'this month', setSpendingReportCompare] =
     useLocalPref('spendingReportCompare');
@@ -111,15 +111,14 @@ export function Spending() {
         ? 27
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
-  const previousMonth =
-    compare === 'this month' ? 'lastMonth' : 'twoMonthsPrevious';
   const showLastYear =
     Math.abs(
       data.intervalData[27][
         compare === 'this month' ? 'lastYear' : 'lastYearPrevious'
       ],
     ) > 0;
-  const showPreviousMonth = Math.abs(data.intervalData[27][previousMonth]) > 0;
+  const showPreviousMonth =
+    Math.abs(data.intervalData[27][spendingReportTime]) > 0;
   return (
     <Page
       header={
@@ -292,7 +291,9 @@ export function Spending() {
                             <PrivacyFilter blurIntensity={5}>
                               {amountToCurrency(
                                 Math.abs(
-                                  data.intervalData[todayDay][previousMonth],
+                                  data.intervalData[todayDay][
+                                    spendingReportTime
+                                  ],
                                 ),
                               )}
                             </PrivacyFilter>
@@ -362,8 +363,16 @@ export function Spending() {
                       to the:
                     </Text>
                     <ModeButton
-                      selected={mode === 'previousMonth'}
-                      onSelect={() => setMode('previousMonth')}
+                      selected={['lastMonth', 'twoMonthsPrevious'].includes(
+                        mode,
+                      )}
+                      onSelect={() =>
+                        setMode(
+                          compare === 'this month'
+                            ? 'lastMonth'
+                            : 'twoMonthsPrevious',
+                        )
+                      }
                     >
                       Month previous
                     </ModeButton>
