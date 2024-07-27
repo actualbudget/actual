@@ -76,6 +76,9 @@ export function Overview() {
   const [extraMenuOpen, setExtraMenuOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [currentBreakpoint, setCurrentBreakpoint] = useState<
+    'mobile' | 'desktop'
+  >('desktop');
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
@@ -98,7 +101,15 @@ export function Overview() {
 
   const layout = useWidgetLayout(widgets);
 
+  const onBreakpointChange = (breakpoint: 'mobile' | 'desktop') => {
+    setCurrentBreakpoint(breakpoint);
+  };
+
   const onLayoutChange = (newLayout: Layout[]) => {
+    if (!isEditing) {
+      return;
+    }
+
     send(
       'dashboard-update',
       newLayout.map(item => ({
@@ -261,7 +272,7 @@ export function Overview() {
                 gap: 5,
               }}
             >
-              {!isNarrowWidth && (
+              {currentBreakpoint === 'desktop' && (
                 <>
                   <Button
                     ref={triggerRef}
@@ -372,14 +383,17 @@ export function Overview() {
       ) : (
         <View style={{ userSelect: 'none' }}>
           <ResponsiveGridLayout
-            breakpoints={{ desktop: breakpoints.medium, mobile: 0 }}
+            breakpoints={{ desktop: breakpoints.medium, mobile: 1 }}
             layouts={{ desktop: layout, mobile: layout }}
-            onLayoutChange={onLayoutChange}
+            onLayoutChange={
+              currentBreakpoint === 'desktop' ? onLayoutChange : undefined
+            }
+            onBreakpointChange={onBreakpointChange}
             cols={{ desktop: 12, mobile: 1 }}
             rowHeight={100}
             draggableCancel={`.${NON_DRAGGABLE_AREA_CLASS_NAME}`}
-            isDraggable={isEditing}
-            isResizable={isEditing}
+            isDraggable={currentBreakpoint === 'desktop' && isEditing}
+            isResizable={currentBreakpoint === 'desktop' && isEditing}
           >
             {layout.map(item => (
               <div key={item.i}>
