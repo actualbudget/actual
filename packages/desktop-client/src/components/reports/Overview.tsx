@@ -287,23 +287,23 @@ export function Overview() {
                       items={[
                         {
                           name: 'cash-flow-card' as const,
-                          text: 'Cash Flow graph',
+                          text: 'Cash flow graph',
                         },
                         {
                           name: 'net-worth-card' as const,
-                          text: 'Net Worth graph',
+                          text: 'Net worth graph',
                         },
                         ...(spendingReportFeatureFlag
                           ? [
                               {
                                 name: 'spending-card' as const,
-                                text: 'Spending Analysis',
+                                text: 'Spending analysis',
                               },
                             ]
                           : []),
                         {
                           name: 'custom-report' as const,
-                          text: 'Custom Report',
+                          text: 'Custom report',
                         },
                       ]}
                     />
@@ -341,6 +341,7 @@ export function Overview() {
                             : 'Enter edit mode',
                           disabled: isImporting,
                         },
+                        Menu.line,
                         {
                           name: 'import',
                           text: 'Import',

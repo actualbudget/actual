@@ -87,7 +87,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
     }
 
     const content = await fs.readFile(filepath);
-    const parsedContent: ExportImportDashboard = JSON.parse(content); // TODO: what if this fails?
+    const parsedContent: ExportImportDashboard = JSON.parse(content);
 
     // TODO: validate the input json?
 
