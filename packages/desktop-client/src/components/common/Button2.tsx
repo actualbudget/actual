@@ -141,6 +141,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ...(variant !== 'bare' && styles.shadow),
       backgroundColor: backgroundColorHover[variant],
       color: textColorHover[variant],
+      cursor: 'pointer',
     };
     const pressedStyle = {
       ..._getActiveStyles(variant, bounce),
