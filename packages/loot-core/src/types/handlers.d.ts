@@ -20,6 +20,9 @@ export interface Handlers
     RulesHandlers,
     SchedulesHandlers,
     ToolsHandlers,
-    CategoryHandlers {}
+    CategoryHandlers {
+  name: string;
+  isIncome: boolean;
+}
 
 export type HandlerFunctions = Handlers[keyof Handlers];

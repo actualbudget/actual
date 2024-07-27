@@ -1,33 +1,36 @@
+import * as monthUtils from '../../shared/months';
+import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { createApp } from '../app';
+import * as budget from '../budget/base';
 import * as db from '../db';
 import { CategoryError, APIError } from '../errors';
 import { mutator } from '../mutators';
+import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 import { withUndo } from '../undo';
-import * as budget from './budget/base';
-import * as sheet from './sheet';
-import * as monthUtils from '../shared/months';
 
 import { CategoryHandlers } from './types/handlers';
-import { CategoryEntity } from './types/models';
-import { CategoryGroupEntity } from 'loot-core/types/models';
+
 // Expose functions to the client
 export const app = createApp<CategoryHandlers>();
 
 app.method(
   'category-create',
-  mutator(async function ({ name, groupId, isIncome, hidden }) {
+  mutator(async function (category: CategoryEntity): Promise<CategoryEntity> {
     return withUndo(async () => {
-      if (!groupId) {
+      if (!category.cat_group) {
         throw APIError('Creating a category: groupId is required');
       }
-
-      return db.insertCategory({
-        name,
-        cat_group: groupId,
-        is_income: isIncome ? 1 : 0,
-        hidden: hidden ? 1 : 0,
+      const newCategory = await db.insertCategory({
+        name: category.name,
+        cat_group: category.cat_group,
+        is_income: category.is_income ? true : false,
+        hidden: category.hidden ? true : false,
       });
+
+      return {
+        ...newCategory,
+      };
     });
   }),
 );
@@ -121,11 +124,11 @@ app.method('get-category-groups', async function () {
 
 app.method(
   'category-group-create',
-  mutator(async function (group:CategoryGroupEntity) {
+  mutator(async function (group: CategoryGroupEntity) {
     return withUndo(async () => {
       return db.insertCategoryGroup({
         name: group.name,
-        is_income: group.isIncome ? 1 : 0,
+        is_income: group.is_income ? 1 : 0,
       });
     });
   }),
@@ -133,7 +136,7 @@ app.method(
 
 app.method(
   'category-group-update',
-  mutator(async function (group) {
+  mutator(async function (group: CategoryGroupEntity) {
     return withUndo(async () => {
       return db.updateCategoryGroup(group);
     });
@@ -163,8 +166,8 @@ app.method(
 
       return batchMessages(async () => {
         if (transferId) {
-          await budget.doTransfer(
-            groupCategories.map(c => c.id),
+          await budget.doTransfer(  
+            groupCategories.map((c: { id: string; }) => c.id),
             transferId,
           );
         }

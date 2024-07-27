@@ -655,17 +655,15 @@ export async function createTestBudget(handlers: Handlers) {
 
   await runMutator(async () => {
     for (const group of categoryGroups) {
-      group.id = await handlers['category-group-create']({
-        name: group.name,
-        isIncome: group.is_income,
-      });
-
+      const createdGroup = await handlers['category-group-create'];
+        group.name = createdGroup.name;
+        group.is_income = createdGroup.isIncome ?? false;
       for (const category of group.categories) {
-        category.id = await handlers['category-create']({
-          ...category,
-          isIncome: category.is_income ? 1 : 0,
-          groupId: group.id,
-        });
+          const createdCategory = await handlers['category-create'];
+          category.name = createdCategory.name;
+          category.is_income = createdCategory.isIncome ?? false;
+          category.cat_group = group.id;
+          category.hidden = createdCategory.hidden ?? false;
       }
     }
   });
