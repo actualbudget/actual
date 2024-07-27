@@ -33,7 +33,6 @@ import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
-import { MobileWebMessage } from './mobile/MobileWebMessage';
 import { UpdateNotification } from './UpdateNotification';
 
 type AppInnerProps = {
@@ -124,7 +123,6 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
         ))}
 
       <UpdateNotification />
-      <MobileWebMessage />
     </>
   );
 }

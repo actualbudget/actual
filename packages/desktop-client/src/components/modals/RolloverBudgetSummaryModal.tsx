@@ -8,13 +8,11 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/rollover/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
-import { Modal } from '../common/Modal';
-import { type CommonModalProps } from '../Modals';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type RolloverBudgetSummaryModalProps = {
-  modalProps: CommonModalProps;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   month: string;
 };
@@ -22,7 +20,6 @@ type RolloverBudgetSummaryModalProps = {
 export function RolloverBudgetSummaryModal({
   month,
   onBudgetAction,
-  modalProps,
 }: RolloverBudgetSummaryModalProps) {
   const dispatch = useDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM');
@@ -79,42 +76,52 @@ export function RolloverBudgetSummaryModal({
 
   const onResetHoldBuffer = () => {
     onBudgetAction(month, 'reset-hold');
-    modalProps.onClose();
   };
 
-  const onClick = () => {
+  const onClick = ({ close }: { close: () => void }) => {
     dispatch(
       pushModal('rollover-summary-to-budget-menu', {
         month,
         onTransfer: openTransferAvailableModal,
         onCover: openCoverOverbudgetedModal,
-        onResetHoldBuffer,
+        onResetHoldBuffer: () => {
+          onResetHoldBuffer();
+          close();
+        },
         onHoldBuffer,
       }),
     );
   };
 
   return (
-    <Modal title="Budget Summary" {...modalProps}>
-      <NamespaceContext.Provider value={sheetForMonth(month)}>
-        <TotalsList
-          prevMonthName={prevMonthName}
-          style={{
-            ...styles.mediumText,
-          }}
-        />
-        <ToBudgetAmount
-          prevMonthName={prevMonthName}
-          style={{
-            ...styles.mediumText,
-            marginTop: 15,
-          }}
-          amountStyle={{
-            ...styles.underlinedText,
-          }}
-          onClick={onClick}
-        />
-      </NamespaceContext.Provider>
+    <Modal name="rollover-budget-summary">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Budget Summary"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <NamespaceContext.Provider value={sheetForMonth(month)}>
+            <TotalsList
+              prevMonthName={prevMonthName}
+              style={{
+                ...styles.mediumText,
+              }}
+            />
+            <ToBudgetAmount
+              prevMonthName={prevMonthName}
+              style={{
+                ...styles.mediumText,
+                marginTop: 15,
+              }}
+              amountStyle={{
+                ...styles.underlinedText,
+              }}
+              onClick={() => onClick({ close })}
+            />
+          </NamespaceContext.Provider>
+        </>
+      )}
     </Modal>
   );
 }

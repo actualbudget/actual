@@ -16,14 +16,15 @@ import { css } from 'glamor';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type AccountEntity,
   type PayeeEntity,
 } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { usePayees } from '../../hooks/usePayees';
-import { SvgAdd } from '../../icons/v1';
+import { useCommonPayees, usePayees } from '../../hooks/usePayees';
+import { SvgAdd, SvgBookmark } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Button } from '../common/Button';
@@ -39,11 +40,48 @@ import { ItemHeader } from './ItemHeader';
 
 type PayeeAutocompleteItem = PayeeEntity;
 
+const MAX_AUTO_SUGGESTIONS = 5;
+
 function getPayeeSuggestions(
+  commonPayees: PayeeAutocompleteItem[],
+  payees: PayeeAutocompleteItem[],
+): (PayeeAutocompleteItem & PayeeItemType)[] {
+  if (commonPayees?.length > 0) {
+    const favoritePayees = payees.filter(p => p.favorite);
+    let additionalCommonPayees: PayeeAutocompleteItem[] = [];
+    if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
+      additionalCommonPayees = commonPayees
+        .filter(
+          p => !(p.favorite || favoritePayees.map(fp => fp.id).includes(p.id)),
+        )
+        .slice(0, MAX_AUTO_SUGGESTIONS - favoritePayees.length);
+    }
+    const frequentPayees: (PayeeAutocompleteItem & PayeeItemType)[] =
+      favoritePayees.concat(additionalCommonPayees).map(p => {
+        return { ...p, itemType: 'common_payee' };
+      });
+
+    const filteredPayees: (PayeeAutocompleteItem & PayeeItemType)[] = payees
+      .filter(p => !frequentPayees.find(fp => fp.id === p.id))
+      .map<PayeeAutocompleteItem & PayeeItemType>(p => {
+        return { ...p, itemType: determineItemType(p, false) };
+      });
+
+    return frequentPayees
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .concat(filteredPayees);
+  }
+
+  return payees.map(p => {
+    return { ...p, itemType: determineItemType(p, false) };
+  });
+}
+
+function filterActivePayees(
   payees: PayeeAutocompleteItem[],
   focusTransferPayees: boolean,
   accounts: AccountEntity[],
-): PayeeAutocompleteItem[] {
+) {
   let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
 
   if (focusTransferPayees && activePayees) {
@@ -70,7 +108,8 @@ function stripNew(value) {
 }
 
 type PayeeListProps = {
-  items: PayeeAutocompleteItem[];
+  items: (PayeeAutocompleteItem & PayeeItemType)[];
+  commonPayees: PayeeEntity[];
   getItemProps: (arg: {
     item: PayeeAutocompleteItem;
   }) => ComponentProps<typeof View>;
@@ -88,6 +127,25 @@ type PayeeListProps = {
   ) => ReactNode;
   footer: ReactNode;
 };
+
+type ItemTypes = 'account' | 'payee' | 'common_payee';
+type PayeeItemType = {
+  itemType: ItemTypes;
+};
+
+function determineItemType(
+  item: PayeeAutocompleteItem,
+  isCommon: boolean,
+): ItemTypes {
+  if (item.transfer_acct) {
+    return 'account';
+  }
+  if (isCommon) {
+    return 'common_payee';
+  } else {
+    return 'payee';
+  }
+}
 
 function PayeeList({
   items,
@@ -133,16 +191,19 @@ function PayeeList({
           })}
 
         {items.map((item, idx) => {
-          const type = item.transfer_acct ? 'account' : 'payee';
+          const itemType = item.itemType;
           let title;
-          if (type === 'payee' && lastType !== type) {
+
+          if (itemType === 'common_payee' && lastType !== itemType) {
+            title = 'Suggested Payees';
+          } else if (itemType === 'payee' && lastType !== itemType) {
             title = 'Payees';
-          } else if (type === 'account' && lastType !== type) {
+          } else if (itemType === 'account' && lastType !== itemType) {
             title = 'Transfer To/From';
           }
           const showMoreMessage =
             idx === items.length - 1 && items.length > 100;
-          lastType = type;
+          lastType = itemType;
 
           return (
             <Fragment key={item.id}>
@@ -219,6 +280,7 @@ export function PayeeAutocomplete({
   payees,
   ...props
 }: PayeeAutocompleteProps) {
+  const commonPayees = useCommonPayees();
   const retrievedPayees = usePayees();
   if (!payees) {
     payees = retrievedPayees;
@@ -233,17 +295,21 @@ export function PayeeAutocomplete({
   const [rawPayee, setRawPayee] = useState('');
   const hasPayeeInput = !!rawPayee;
   const payeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
-    const suggestions = getPayeeSuggestions(
-      payees,
+    const suggestions = getPayeeSuggestions(commonPayees, payees);
+    const filteredSuggestions = filterActivePayees(
+      suggestions,
       focusTransferPayees,
       accounts,
     );
 
     if (!hasPayeeInput) {
-      return suggestions;
+      return filteredSuggestions;
     }
-    return [{ id: 'new', name: '' }, ...suggestions];
-  }, [payees, focusTransferPayees, accounts, hasPayeeInput]);
+    filteredSuggestions.forEach(s => {
+      console.log(s.name + ' ' + s.id);
+    });
+    return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
+  }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
   const dispatch = useDispatch();
 
@@ -314,8 +380,12 @@ export function PayeeAutocomplete({
         });
 
         filtered.sort((p1, p2) => {
-          const r1 = p1.name.toLowerCase().startsWith(value.toLowerCase());
-          const r2 = p2.name.toLowerCase().startsWith(value.toLowerCase());
+          const r1 = getNormalisedString(p1.name).startsWith(
+            getNormalisedString(value),
+          );
+          const r2 = getNormalisedString(p2.name).startsWith(
+            getNormalisedString(value),
+          );
           const r1exact = p1.name.toLowerCase() === value.toLowerCase();
           const r2exact = p2.name.toLowerCase() === value.toLowerCase();
 
@@ -356,6 +426,7 @@ export function PayeeAutocomplete({
       renderItems={(items, getItemProps, highlightedIndex, inputValue) => (
         <PayeeList
           items={items}
+          commonPayees={commonPayees}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
           inputValue={inputValue}
@@ -489,7 +560,19 @@ function PayeeItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
-
+  const iconSize = isNarrowWidth ? 14 : 8;
+  let paddingLeftOverFromIcon = 20;
+  let itemIcon = undefined;
+  if (item.favorite) {
+    itemIcon = (
+      <SvgBookmark
+        width={iconSize}
+        height={iconSize}
+        style={{ marginRight: 5, display: 'inline-block' }}
+      />
+    );
+    paddingLeftOverFromIcon -= iconSize + 5;
+  }
   return (
     <div
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
@@ -524,7 +607,7 @@ function PayeeItem({
             : theme.menuAutoCompleteItemText,
           borderRadius: embedded ? 4 : 0,
           padding: 4,
-          paddingLeft: 20,
+          paddingLeft: paddingLeftOverFromIcon,
           ...narrowStyle,
         },
       ])}`}
@@ -532,7 +615,10 @@ function PayeeItem({
       data-highlighted={highlighted || undefined}
       {...props}
     >
-      <TextOneLine>{item.name}</TextOneLine>
+      <TextOneLine>
+        {itemIcon}
+        {item.name}
+      </TextOneLine>
     </div>
   );
 }

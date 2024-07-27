@@ -74,8 +74,8 @@ const TextLink = ({ style, onClick, children, ...props }: TextLinkProps) => {
         display: 'inline',
         border: 0,
         cursor: 'pointer',
+        textDecoration: 'underline',
         ':hover': {
-          textDecoration: 'underline',
           boxShadow: 'none',
         },
         ...style,

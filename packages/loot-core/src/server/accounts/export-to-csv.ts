@@ -66,6 +66,8 @@ export async function exportQueryToCSV(query) {
         { Payee: 'payee.name' },
         { ParentId: 'parent_id' },
         { IsParent: 'is_parent' },
+        { IsChild: 'is_child' },
+        { SortOrder: 'sort_order' },
         { Notes: 'notes' },
         { Category: 'category.name' },
         { Amount: 'amount' },
@@ -75,25 +77,46 @@ export async function exportQueryToCSV(query) {
       .options({ splits: 'all' }),
   );
 
-  const parentsPayees = new Map();
+  // initialize a map to allow splits to have correct number of split from
+  const parentsChildCount: Map<number, number> = new Map();
+  const childSplitOrder: Map<number, number> = new Map();
+
+  // find children, their order, and total # siblings
   for (const trans of transactions) {
-    if (trans.IsParent) {
-      parentsPayees.set(trans.Id, trans.Payee);
+    if (trans.IsChild) {
+      let childNumber = parentsChildCount.get(trans.ParentId) || 0;
+      childNumber++;
+      childSplitOrder.set(trans.Id, childNumber);
+      parentsChildCount.set(trans.ParentId, childNumber);
     }
   }
 
-  // filter out any parent transactions
-  const noParents = transactions.filter(t => !t.IsParent);
-
-  // map final properties for export and grab the payee for splits from their parent transaction
-  const transactionsForExport = noParents.map(trans => {
+  // map final properties for export and grab the child count for splits from their parent transaction
+  const transactionsForExport = transactions.map(trans => {
     return {
       Account: trans.Account,
       Date: trans.Date,
-      Payee: trans.ParentId ? parentsPayees.get(trans.ParentId) : trans.Payee,
-      Notes: trans.Notes,
+      Payee: trans.Payee,
+      Notes: trans.IsParent
+        ? '(SPLIT INTO ' +
+          parentsChildCount.get(trans.Id) +
+          ') ' +
+          (trans.Notes || '')
+        : trans.IsChild
+          ? '(SPLIT ' +
+            childSplitOrder.get(trans.Id) +
+            ' OF ' +
+            parentsChildCount.get(trans.ParentId) +
+            ') ' +
+            (trans.Notes || '')
+          : trans.Notes,
       Category: trans.Category,
-      Amount: trans.Amount == null ? 0 : integerToAmount(trans.Amount),
+      Amount: trans.IsParent
+        ? 0
+        : trans.Amount == null
+          ? 0
+          : integerToAmount(trans.Amount),
+      Split_Amount: trans.IsParent ? integerToAmount(trans.Amount) : 0,
       Cleared:
         trans.Reconciled === true
           ? 'Reconciled'

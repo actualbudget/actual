@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { removeFile, readFile } from '../fs';
 
+import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';
 
 function verifyParamTypes(sql, arr) {
@@ -117,6 +118,8 @@ export function openDatabase(pathOrBuffer: string | Buffer) {
   db.function('UNICODE_LIKE', { deterministic: true }, unicodeLike);
   // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('REGEXP', { deterministic: true }, regexp);
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
+  db.function('NORMALISE', { deterministic: true }, normalise);
   return db;
 }
 

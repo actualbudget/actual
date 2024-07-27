@@ -71,7 +71,7 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,json}": "prettier --write"
   },
-  "packageManager": "yarn@4.0.2",
+  "packageManager": "yarn@4.3.1",
   "browserslist": [
     "electron 24.0",
     "defaults"

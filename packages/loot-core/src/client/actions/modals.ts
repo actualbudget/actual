@@ -8,6 +8,7 @@ import type {
   ModalWithOptions,
   ModalType,
   FinanceModals,
+  Modal,
 } from '../state-types/modals';
 
 export function pushModal<M extends keyof ModalWithOptions>(
@@ -36,8 +37,7 @@ export function replaceModal<M extends ModalType>(
   name: M,
   options?: FinanceModals[M],
 ): ReplaceModalAction {
-  // @ts-expect-error TS is unable to determine that `name` and `options` match
-  const modal: M = { name, options };
+  const modal: Modal = { name, options };
   return { type: constants.REPLACE_MODAL, modal };
 }
 

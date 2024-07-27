@@ -8,14 +8,14 @@ import { usePayees } from '../../hooks/usePayees';
 import { theme } from '../../style';
 import { Information } from '../alerts';
 import { Button } from '../common/Button2';
-import { Modal, ModalButtons } from '../common/Modal';
+import { Modal, ModalButtons } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
-export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
+export function MergeUnusedPayees({ payeeIds, targetPayeeId }) {
   const allPayees = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
@@ -63,8 +63,6 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
       ruleId = id;
     }
 
-    modalProps.onClose();
-
     return ruleId;
   }
 
@@ -78,13 +76,8 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
   }
 
   return (
-    <Modal
-      title="Merge payee?"
-      showHeader={false}
-      {...modalProps}
-      style={modalProps.style}
-    >
-      {() => (
+    <Modal name="merge-unused-payees">
+      {({ state: { close } }) => (
         <View style={{ padding: 20, maxWidth: 500 }}>
           <View>
             <Paragraph style={{ marginBottom: 10, fontWeight: 500 }}>
@@ -159,22 +152,25 @@ export function MergeUnusedPayees({ modalProps, payeeIds, targetPayeeId }) {
               <Button
                 variant="primary"
                 style={{ marginRight: 10 }}
-                onPress={onMerge}
+                onPress={() => {
+                  onMerge();
+                  close();
+                }}
               >
                 Merge
               </Button>
               {!isEditingRule && (
                 <Button
                   style={{ marginRight: 10 }}
-                  onPress={onMergeAndCreateRule}
+                  onPress={() => {
+                    onMergeAndCreateRule();
+                    close();
+                  }}
                 >
                   Merge and edit rule
                 </Button>
               )}
-              <Button
-                style={{ marginRight: 10 }}
-                onPress={() => modalProps.onBack()}
-              >
+              <Button style={{ marginRight: 10 }} onPress={close}>
                 Do nothing
               </Button>
             </ModalButtons>

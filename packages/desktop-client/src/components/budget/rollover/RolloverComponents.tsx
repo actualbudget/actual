@@ -158,6 +158,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
 
+  const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
+    onBudgetAction(...args);
+    setBudgetMenuOpen(false);
+  };
+
   return (
     <View
       style={{
@@ -221,7 +226,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
-                  onBudgetAction?.(month, 'copy-single-last', {
+                  onMenuAction(month, 'copy-single-last', {
                     category: category.id,
                   });
                 }}
@@ -234,12 +239,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     return;
                   }
 
-                  onBudgetAction?.(month, `set-single-${numberOfMonths}-avg`, {
+                  onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
                 }}
                 onApplyBudgetTemplate={() => {
-                  onBudgetAction?.(month, 'apply-single-category-template', {
+                  onMenuAction(month, 'apply-single-category-template', {
                     category: category.id,
                   });
                 }}
@@ -322,6 +327,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             balance={rolloverBudget.catBalance(category.id)}
             goal={rolloverBudget.catGoal(category.id)}
             budgeted={rolloverBudget.catBudgeted(category.id)}
+            longGoal={rolloverBudget.catLongGoal(category.id)}
             style={{
               ':hover': { textDecoration: 'underline' },
             }}

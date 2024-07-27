@@ -5,7 +5,6 @@ import * as budgetActions from '../server/budget/actions';
 import * as budget from '../server/budget/base';
 import * as db from '../server/db';
 import { runHandler, runMutator } from '../server/mutators';
-import * as prefs from '../server/prefs';
 import * as sheet from '../server/sheet';
 import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
@@ -735,7 +734,6 @@ export async function createTestBudget(handlers: Handlers) {
 
   // Bust the cache and reload the spreadsheet
   setSyncingMode('disabled');
-  await prefs.savePrefs({ isCached: false });
   await sheet.reloadSpreadsheet(db);
   await budget.createAllBudgets();
 

@@ -42,7 +42,9 @@
       "target": [
         {
           "target": "default",
-          "arch": ["universal"]
+          "arch": [
+            "universal"
+          ]
         }
       ]
     },

@@ -14,6 +14,7 @@ import { css } from 'glamor';
 
 import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -137,8 +138,8 @@ function CategoryList({
 }
 
 function customSort(obj: CategoryAutocompleteItem, value: string): number {
-  const name = obj.name.toLowerCase();
-  const groupName = obj.group ? obj.group.name.toLowerCase() : '';
+  const name = getNormalisedString(obj.name);
+  const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
   if (obj.id === 'split') {
     return -2;
   }
@@ -206,21 +207,27 @@ export function CategoryAutocomplete({
     ): CategoryAutocompleteItem[] => {
       return suggestions
         .filter(suggestion => {
-          return (
-            suggestion.id === 'split' ||
-            suggestion.group?.name
-              .toLowerCase()
-              .includes(value.toLowerCase()) ||
-            (suggestion.group?.name + ' ' + suggestion.name)
-              .toLowerCase()
-              .includes(value.toLowerCase()) ||
-            defaultFilterSuggestion(suggestion, value)
-          );
+          if (suggestion.id === 'split') {
+            return true;
+          }
+
+          if (suggestion.group) {
+            return (
+              getNormalisedString(suggestion.group.name).includes(
+                getNormalisedString(value),
+              ) ||
+              getNormalisedString(
+                suggestion.group.name + ' ' + suggestion.name,
+              ).includes(getNormalisedString(value))
+            );
+          }
+
+          return defaultFilterSuggestion(suggestion, value);
         })
         .sort(
           (a, b) =>
-            customSort(a, value.toLowerCase()) -
-            customSort(b, value.toLowerCase()),
+            customSort(a, getNormalisedString(value)) -
+            customSort(b, getNormalisedString(value)),
         );
     },
     [],

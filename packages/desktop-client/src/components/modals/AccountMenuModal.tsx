@@ -9,14 +9,17 @@ import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Modal, ModalTitle } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+  ModalTitle,
+} from '../common/Modal2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 import { Notes } from '../Notes';
 
 type AccountMenuModalProps = {
-  modalProps: CommonModalProps;
   accountId: string;
   onSave: (account: AccountEntity) => void;
   onCloseAccount: (accountId: string) => void;
@@ -26,7 +29,6 @@ type AccountMenuModalProps = {
 };
 
 export function AccountMenuModal({
-  modalProps,
   accountId,
   onSave,
   onCloseAccount,
@@ -36,11 +38,6 @@ export function AccountMenuModal({
 }: AccountMenuModalProps) {
   const account = useAccount(accountId);
   const originalNotes = useNotes(`account-${accountId}`);
-
-  const _onClose = () => {
-    modalProps?.onClose();
-    onClose?.();
-  };
 
   const onRename = (newName: string) => {
     if (!account) {
@@ -77,69 +74,84 @@ export function AccountMenuModal({
 
   return (
     <Modal
-      title={
-        <ModalTitle isEditable title={account.name} onTitleUpdate={onRename} />
-      }
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-      onClose={_onClose}
-      style={{
-        height: '45vh',
+      name="account-menu"
+      onClose={onClose}
+      containerProps={{
+        style: {
+          height: '45vh',
+        },
       }}
-      leftHeaderContent={
-        <AdditionalAccountMenu
-          account={account}
-          onClose={onCloseAccount}
-          onReopen={onReopenAccount}
-        />
-      }
     >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-        }}
-      >
-        <View
-          style={{
-            overflowY: 'auto',
-            flex: 1,
-          }}
-        >
-          <Notes
-            notes={
-              originalNotes && originalNotes.length > 0
-                ? originalNotes
-                : 'No notes'
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            leftContent={
+              <AdditionalAccountMenu
+                account={account}
+                onClose={onCloseAccount}
+                onReopen={onReopenAccount}
+              />
             }
-            editable={false}
-            focused={false}
-            getStyle={() => ({
-              borderRadius: 6,
-              ...((!originalNotes || originalNotes.length === 0) && {
-                justifySelf: 'center',
-                alignSelf: 'center',
-                color: theme.pageTextSubdued,
-              }),
-            })}
+            title={
+              <ModalTitle
+                isEditable
+                title={account.name}
+                onTitleUpdate={onRename}
+              />
+            }
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignContent: 'space-between',
-            paddingTop: 10,
-          }}
-        >
-          <Button style={buttonStyle} onPress={_onEditNotes}>
-            <SvgNotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
-            Edit notes
-          </Button>
-        </View>
-      </View>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'column',
+            }}
+          >
+            <View
+              style={{
+                overflowY: 'auto',
+                flex: 1,
+              }}
+            >
+              <Notes
+                notes={
+                  originalNotes && originalNotes.length > 0
+                    ? originalNotes
+                    : 'No notes'
+                }
+                editable={false}
+                focused={false}
+                getStyle={() => ({
+                  borderRadius: 6,
+                  ...((!originalNotes || originalNotes.length === 0) && {
+                    justifySelf: 'center',
+                    alignSelf: 'center',
+                    color: theme.pageTextSubdued,
+                  }),
+                })}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                alignContent: 'space-between',
+                paddingTop: 10,
+              }}
+            >
+              <Button style={buttonStyle} onPress={_onEditNotes}>
+                <SvgNotesPaper
+                  width={20}
+                  height={20}
+                  style={{ paddingRight: 5 }}
+                />
+                Edit notes
+              </Button>
+            </View>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

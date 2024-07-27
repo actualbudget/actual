@@ -14,6 +14,8 @@ import React, {
 import Downshift, { type StateChangeTypes } from 'downshift';
 import { css } from 'glamor';
 
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
+
 import { SvgRemove } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
@@ -92,16 +94,8 @@ export function defaultFilterSuggestion<T extends Item>(
   suggestion: T,
   value: string,
 ) {
-  return getItemName(suggestion)
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .includes(
-      value
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/\p{Diacritic}/gu, ''),
-    );
+  const name = getItemName(suggestion);
+  return getNormalisedString(name).includes(getNormalisedString(value));
 }
 
 function defaultFilterSuggestions<T extends Item>(

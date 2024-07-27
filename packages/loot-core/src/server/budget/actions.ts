@@ -114,7 +114,7 @@ export function setBudget({
   });
 }
 
-export function setGoal({ month, category, goal }): Promise<void> {
+export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   const table = getBudgetTable();
   const existing = db.firstSync(
     `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
@@ -124,6 +124,7 @@ export function setGoal({ month, category, goal }): Promise<void> {
     return db.update(table, {
       id: existing.id,
       goal,
+      long_goal,
     });
   }
   return db.insert(table, {
@@ -131,6 +132,7 @@ export function setGoal({ month, category, goal }): Promise<void> {
     month: dbMonth(month),
     category,
     goal,
+    long_goal,
   });
 }
 

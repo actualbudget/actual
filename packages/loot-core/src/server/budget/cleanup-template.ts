@@ -214,6 +214,7 @@ async function processCleanup(month: string): Promise<Notification> {
             category: category.id,
             month,
             goal: budgeted - balance,
+            long_goal: 0,
           });
           num_sources += 1;
         } else {

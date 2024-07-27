@@ -341,7 +341,10 @@ export function amountToCurrency(n) {
 }
 
 export function amountToCurrencyNoDecimal(n) {
-  return getNumberFormat({ hideFraction: true }).formatter.format(n);
+  return getNumberFormat({
+    ...numberFormatConfig,
+    hideFraction: true,
+  }).formatter.format(n);
 }
 
 export function currencyToAmount(str: string) {

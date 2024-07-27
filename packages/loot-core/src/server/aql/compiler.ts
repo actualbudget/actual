@@ -1,3 +1,5 @@
+import { getNormalisedString } from '../../shared/normalisation';
+
 // @ts-strict-ignore
 let _uid = 0;
 function resetUid() {
@@ -720,7 +722,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
     }
     case '$like': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
-      return `UNICODE_LIKE(${right}, ${left})`;
+      return `UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))`;
     }
     case '$regexp': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
@@ -728,7 +730,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
     }
     case '$notlike': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
-      return `(NOT UNICODE_LIKE(${right}, ${left})\n OR ${left} IS NULL)`;
+      return `(NOT UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))\n OR ${left} IS NULL)`;
     }
     default:
       throw new CompileError(`Unknown operator: ${op}`);
