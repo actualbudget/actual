@@ -28,7 +28,7 @@ export const SimpleFinInitialise = ({
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async () => {
+  const onSubmit = async (close: () => void) => {
     if (!token) {
       setIsValid(false);
       return;
@@ -43,6 +43,7 @@ export const SimpleFinInitialise = ({
 
     onSuccess();
     setIsLoading(false);
+    close();
   };
 
   return (
@@ -89,8 +90,7 @@ export const SimpleFinInitialise = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                onSubmit();
-                close();
+                onSubmit(close);
               }}
             >
               Save and continue
