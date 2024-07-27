@@ -88,7 +88,7 @@ const CustomTooltip = ({
           <div style={{ lineHeight: 1.5 }}>
             {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
-                left={compare === 'this month' ? 'This month:' : 'Last month:'}
+                left={compare === 'thisMonth' ? 'This month:' : 'Last month:'}
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1,
                 )}
@@ -101,7 +101,7 @@ const CustomTooltip = ({
                     ? 'Average:'
                     : selection === lastYear
                       ? 'Last year:'
-                      : compare === 'this month'
+                      : compare === 'thisMonth'
                         ? 'Last month:'
                         : '2 months ago:'
                 }
@@ -143,11 +143,11 @@ export function SpendingGraph({
   const balanceTypeOp = 'cumulative';
   const thisMonth = monthUtils.subMonths(
     monthUtils.currentMonth(),
-    compare === 'this month' ? 0 : 1,
+    compare === 'thisMonth' ? 0 : 1,
   );
   const previousMonth = monthUtils.subMonths(
     monthUtils.currentMonth(),
-    compare === 'this month' ? 1 : 2,
+    compare === 'thisMonth' ? 1 : 2,
   );
   const lastYear = monthUtils.prevYear(thisMonth);
   let selection;

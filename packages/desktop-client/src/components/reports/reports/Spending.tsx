@@ -46,7 +46,7 @@ export function Spending() {
   );
   const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
     useLocalPref('spendingReportTime');
-  const [spendingReportCompare = 'this month', setSpendingReportCompare] =
+  const [spendingReportCompare = 'thisMonth', setSpendingReportCompare] =
     useLocalPref('spendingReportCompare');
 
   const [dataCheck, setDataCheck] = useState(false);
@@ -75,8 +75,9 @@ export function Spending() {
       conditions,
       conditionsOp,
       setDataCheck,
+      compare,
     });
-  }, [categories, conditions, conditionsOp]);
+  }, [categories, conditions, conditionsOp, compare]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
@@ -105,7 +106,7 @@ export function Spending() {
     ) > 0;
 
   const todayDay =
-    compare === 'last month'
+    compare === 'lastMonth'
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
         ? 27
@@ -114,7 +115,7 @@ export function Spending() {
   const showLastYear =
     Math.abs(
       data.intervalData[27][
-        compare === 'this month' ? 'lastYear' : 'lastYearPrevious'
+        compare === 'thisMonth' ? 'lastYear' : 'lastYearPrevious'
       ],
     ) > 0;
   const showPreviousMonth =
@@ -257,7 +258,7 @@ export function Spending() {
                         left={
                           <Block>
                             Spent{' '}
-                            {compare === 'this month' ? 'MTD' : 'Last Month'}:
+                            {compare === 'thisMonth' ? 'MTD' : 'Last Month'}:
                           </Block>
                         }
                         right={
@@ -266,7 +267,7 @@ export function Spending() {
                               {amountToCurrency(
                                 Math.abs(
                                   data.intervalData[todayDay][
-                                    compare === 'this month'
+                                    compare === 'thisMonth'
                                       ? 'thisMonth'
                                       : 'lastMonth'
                                   ],
@@ -280,7 +281,7 @@ export function Spending() {
                         left={
                           <Block>
                             Spent{' '}
-                            {compare === 'this month'
+                            {compare === 'thisMonth'
                               ? ' Last MTD'
                               : '2 Months Ago'}
                             :
@@ -292,7 +293,9 @@ export function Spending() {
                               {amountToCurrency(
                                 Math.abs(
                                   data.intervalData[todayDay][
-                                    spendingReportTime
+                                    compare === 'thisMonth'
+                                      ? 'lastMonth'
+                                      : 'twoMonthsPrevious'
                                   ],
                                 ),
                               )}
@@ -306,7 +309,7 @@ export function Spending() {
                     <AlignedText
                       left={
                         <Block>
-                          Spent Average{compare === 'this month' && ' MTD'}:
+                          Spent Average{compare === 'thisMonth' && ' MTD'}:
                         </Block>
                       }
                       right={
@@ -348,10 +351,14 @@ export function Spending() {
                     </Text>
                     <Select
                       value={compare}
-                      onChange={setCompare}
+                      onChange={e => {
+                        setCompare(e);
+                        if (mode === 'lastMonth') setMode('twoMonthsPrevious');
+                        if (mode === 'twoMonthsPrevious') setMode('lastMonth');
+                      }}
                       options={[
-                        ['this month', 'this month'],
-                        ['last month', 'last month'],
+                        ['thisMonth', 'this month'],
+                        ['lastMonth', 'last month'],
                       ]}
                     />
                     <Text
@@ -368,7 +375,7 @@ export function Spending() {
                       )}
                       onSelect={() =>
                         setMode(
-                          compare === 'this month'
+                          compare === 'thisMonth'
                             ? 'lastMonth'
                             : 'twoMonthsPrevious',
                         )
