@@ -63,6 +63,7 @@ jest.mock('../server/migrate/migrations', () => {
   return {
     ...realMigrations,
     migrate: async db => {
+      _id = 100_000_000;
       await realMigrations.migrate(db);
       _id = 1;
     },
