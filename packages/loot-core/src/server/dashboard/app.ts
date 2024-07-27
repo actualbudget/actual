@@ -96,7 +96,6 @@ async function importDashboard({ filepath }: { filepath: string }) {
     );
     const customReportIdSet = new Set(customReportIds.map(({ id }) => id));
 
-    // TODO: custom reports - do I even need to manage the "tombstone" state?
     // TODO: transactions dont actually work
     await db.asyncTransaction(async () => {
       await Promise.all([
@@ -137,13 +136,12 @@ async function importDashboard({ filepath }: { filepath: string }) {
                   value ?? null,
                 ]),
               ),
-              tombstone: false, // TODO: should this be bool?
+              tombstone: false,
             }),
           ),
       ]);
     });
 
-    // TODO: return IDs of widgets that might have issues
     return { status: 'ok' as const };
   } catch (err: unknown) {
     if (err instanceof Error) {

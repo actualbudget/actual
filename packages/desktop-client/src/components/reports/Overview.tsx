@@ -3,7 +3,10 @@ import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-import { addNotification } from 'loot-core/src/client/actions';
+import {
+  addNotification,
+  removeNotification,
+} from 'loot-core/src/client/actions';
 import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -181,6 +184,7 @@ export function Overview() {
       ],
     });
 
+    dispatch(removeNotification('import'));
     setIsImporting(true);
     const res = await send('dashboard-import', { filepath });
     setIsImporting(false);
@@ -190,6 +194,7 @@ export function Overview() {
         case 'json-parse-error':
           dispatch(
             addNotification({
+              id: 'import',
               type: 'error',
               message: 'Failed parsing the imported JSON.',
             }),
@@ -199,13 +204,32 @@ export function Overview() {
         default:
           dispatch(
             addNotification({
+              id: 'import',
               type: 'error',
               message: 'Failed importing the dashboard file.',
             }),
           );
           break;
       }
+      return;
     }
+
+    dispatch(
+      addNotification({
+        id: 'import',
+        type: 'message',
+        sticky: true,
+        message:
+          "Dashboard has been successfully imported. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
+        messageActions: {
+          undo: () => {
+            // TODO: why do we need to perform 2x undo operations to successfully roll back?
+            window.__actionsForMenu.undo();
+            window.__actionsForMenu.undo();
+          },
+        },
+      }),
+    );
   };
 
   const accounts = useAccounts();
