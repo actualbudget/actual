@@ -92,7 +92,7 @@ export function BalanceMovementMenu({
 
 const useBudgetTransferNotes = ({ month }: { month: string }) => {
   const { list: categories } = useCategories();
-  const categoryNamesById = useMemo(() => {
+  const categoriesById = useMemo(() => {
     return groupById(categories as WithRequired<CategoryEntity, 'id'>[]);
   }, [categories]);
 
@@ -117,29 +117,21 @@ const useBudgetTransferNotes = ({ month }: { month: string }) => {
     }) => {
       const displayAmount = integerToCurrency(amount);
 
-      const fromCategoryBudgetNotesId = `budget-${month}-${fromCategoryId}`;
-      const fromCategoryBudgetNotes = addNewLine(
-        await getNotes(fromCategoryBudgetNotesId),
+      const monthBudgetNotesId = `budget-${month}`;
+      const existingMonthBudgetNotes = addNewLine(
+        await getNotes(monthBudgetNotesId),
       );
 
-      const toCategoryBudgetNotesId = `budget-${month}-${toCategoryId}`;
-      const toCategoryBudgetNotes = addNewLine(
-        await getNotes(toCategoryBudgetNotesId),
-      );
-
-      const displayDay = monthUtils.currentDay();
+      const displayDay = monthUtils.format(monthUtils.currentDate(), 'MMMM dd');
+      const fromCategoryName = categoriesById[fromCategoryId || ''].name;
+      const toCategoryName = categoriesById[toCategoryId || ''].name;
 
       await send('notes-save', {
-        id: fromCategoryBudgetNotesId,
-        note: `${fromCategoryBudgetNotes}- Reassigned ${displayAmount} to ${categoryNamesById[toCategoryId || ''].name} on ${displayDay}`,
-      });
-
-      await send('notes-save', {
-        id: toCategoryBudgetNotesId,
-        note: `${toCategoryBudgetNotes}- Reassigned ${displayAmount} from ${categoryNamesById[fromCategoryId || ''].name} on ${displayDay}`,
+        id: monthBudgetNotesId,
+        note: `${existingMonthBudgetNotes}- Reassigned ${displayAmount} from ${fromCategoryName} to ${toCategoryName} on ${displayDay}`,
       });
     },
-    [categoryNamesById, month],
+    [categoriesById, month],
   );
 
   return { addBudgetTransferNotes };

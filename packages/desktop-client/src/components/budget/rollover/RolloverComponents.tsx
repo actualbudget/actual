@@ -11,7 +11,6 @@ import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { NotesButton } from '../../NotesButton';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, type CellValueProps } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
@@ -238,7 +237,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               borderColor: theme.tableBorder,
             }}
           >
-            <NotesButton id={`budget-${month}-${category.id}`} />
             <Button
               ref={budgetMenuTriggerRef}
               variant="bare"
