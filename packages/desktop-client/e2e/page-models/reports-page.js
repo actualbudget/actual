@@ -20,7 +20,7 @@ export class ReportsPage {
 
   async getAvailableReportList() {
     return this.pageContent
-      .getByRole('link')
+      .getByRole('button')
       .getByRole('heading')
       .allTextContents();
   }

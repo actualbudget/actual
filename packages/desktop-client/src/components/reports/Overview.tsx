@@ -219,8 +219,9 @@ export function Overview() {
         id: 'import',
         type: 'message',
         sticky: true,
+        timeout: 30_000, // 30s
         message:
-          "Dashboard has been successfully imported. Don't like what you see? You can always press [ctrl+z](#undo) to undo.",
+          'Dashboard has been successfully imported. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
         messageActions: {
           undo: () => {
             // TODO: why do we need to perform 2x undo operations to successfully roll back?

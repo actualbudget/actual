@@ -10,6 +10,7 @@ import { type CustomReportEntity } from 'loot-core/src/types/models';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
@@ -56,6 +57,7 @@ export function ReportCard({
         backgroundColor: theme.tableBackground,
         borderBottomLeftRadius: 2,
         borderBottomRightRadius: 2,
+        width: '100%',
         height: '100%',
         boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
         transition: 'box-shadow .25s',
@@ -77,8 +79,9 @@ export function ReportCard({
   if (to) {
     return (
       <Layout {...layoutProps}>
-        <View
-          onClick={
+        <Button
+          variant="bare"
+          onPress={
             isEditing
               ? undefined
               : () => {
@@ -86,15 +89,15 @@ export function ReportCard({
                 }
           }
           style={{
+            padding: 0,
+            textAlign: 'left',
             height: '100%',
             width: '100%',
-            ':hover': {
-              cursor: 'pointer',
-            },
+            overflow: 'visible',
           }}
         >
           {content}
-        </View>
+        </Button>
       </Layout>
     );
   }
