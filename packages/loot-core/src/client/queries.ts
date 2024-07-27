@@ -2,9 +2,9 @@
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
 import {
-  type SheetNames,
+  parametrizedField,
   type Binding,
-  type SheetFields,
+  type SheetNames,
 } from '../../../desktop-client/src/components/spreadsheet';
 import {
   dayFromDate,
@@ -18,11 +18,6 @@ import { currencyToAmount, amountToInteger } from '../shared/util';
 import { type CategoryEntity, type AccountEntity } from '../types/models';
 import { type LocalPrefs } from '../types/prefs';
 
-const parametrizedField =
-  <SheetName extends SheetNames>() =>
-  <FieldName extends SheetFields<SheetName>>(field: FieldName) =>
-  (id: string): FieldName =>
-    `${field}-${id}` as FieldName;
 const accountParametrizedField = parametrizedField<'account'>();
 
 export function getAccountFilter(accountId: string, field = 'account') {

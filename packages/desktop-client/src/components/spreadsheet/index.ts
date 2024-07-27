@@ -1,6 +1,6 @@
 import { type Query } from 'loot-core/src/shared/query';
 
-export type SpreadsheetFieldTypes = {
+export type Spreadsheets = {
   account: {
     // Common fields
     'uncategorized-amount': number;
@@ -16,20 +16,25 @@ export type SpreadsheetFieldTypes = {
   };
 };
 
-export type SheetNames = keyof SpreadsheetFieldTypes & string;
+export type SheetNames = keyof Spreadsheets & string;
 
 export type SheetFields<SheetName extends SheetNames> =
-  keyof SpreadsheetFieldTypes[SheetName] & string;
+  keyof Spreadsheets[SheetName] & string;
 
 export type Binding<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetName extends SheetNames = any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  FieldName extends SheetFields<SheetName> = any,
+  SheetFieldName extends SheetFields<SheetName> = any,
 > =
-  | FieldName
+  | SheetFieldName
   | {
-      name: FieldName;
-      value?: SpreadsheetFieldTypes[SheetName][FieldName];
+      name: SheetFieldName;
+      value?: Spreadsheets[SheetName][SheetFieldName];
       query?: Query;
     };
+export const parametrizedField =
+  <SheetName extends SheetNames>() =>
+  <SheetFieldName extends SheetFields<SheetName>>(field: SheetFieldName) =>
+  (id: string): SheetFieldName =>
+    `${field}-${id}` as SheetFieldName;

@@ -41,7 +41,7 @@ import {
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import {
-  type SpreadsheetFieldTypes,
+  type Spreadsheets,
   type SheetFields,
   type SheetNames,
   type Binding,
@@ -682,10 +682,8 @@ type SheetCellValueProps<
 > = {
   binding: Binding<SheetName, FieldName>;
   type: FormatType;
-  getValueStyle?: (
-    value: SpreadsheetFieldTypes[SheetName][FieldName],
-  ) => CSSProperties;
-  formatExpr?: (value: SpreadsheetFieldTypes[SheetName][FieldName]) => string;
+  getValueStyle?: (value: Spreadsheets[SheetName][FieldName]) => CSSProperties;
+  formatExpr?: (value: Spreadsheets[SheetName][FieldName]) => string;
   unformatExpr?: (value: string) => unknown;
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
@@ -745,7 +743,7 @@ export function SheetCell<
       }
       textAlign={textAlign}
       {...props}
-      value={(sheetValue ?? '').toString()}
+      value={String(sheetValue ?? '')}
       formatter={value =>
         props.formatter ? props.formatter(value, type) : format(value, type)
       }
