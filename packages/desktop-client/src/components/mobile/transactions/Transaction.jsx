@@ -15,7 +15,7 @@ import {
 } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
@@ -100,7 +100,9 @@ export const Transaction = memo(function Transaction({
 
   return (
     <Button
-      onClick={() => onSelect(transaction)}
+      onPress={() => {
+        onSelect(transaction);
+      }}
       style={{
         backgroundColor: theme.tableBackground,
         border: 'none',

@@ -70,6 +70,7 @@ export function ReportBalanceMenuModal({
               balance={reportBudget.catBalance(categoryId)}
               goal={reportBudget.catGoal(categoryId)}
               budgeted={reportBudget.catBudgeted(categoryId)}
+              longGoal={reportBudget.catLongGoal(categoryId)}
               carryoverIndicator={({ style }) =>
                 DefaultCarryoverIndicator({
                   style: {
