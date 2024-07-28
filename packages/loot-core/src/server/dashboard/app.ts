@@ -18,6 +18,7 @@ import { ValidationError } from '../errors';
 import { requiredFields } from '../models';
 import { mutator } from '../mutators';
 import { reportModel } from '../reports/app';
+import { batchMessages } from '../sync';
 import { undoable } from '../undo';
 
 import { DashboardHandlers } from './types/handlers';
@@ -163,8 +164,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
     );
     const customReportIdSet = new Set(customReportIds.map(({ id }) => id));
 
-    // TODO: transactions dont actually work
-    await db.asyncTransaction(async () => {
+    await batchMessages(async () => {
       await Promise.all([
         // Delete all widgets
         db.deleteAll('dashboard'),

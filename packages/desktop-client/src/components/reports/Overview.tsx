@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -101,6 +102,20 @@ export function Overview() {
 
   const layout = useWidgetLayout(widgets);
 
+  const closeNotifications = () => {
+    dispatch(removeNotification('import'));
+  };
+
+  // Close import notifications when doing "undo" operation
+  useHotkeys(
+    'ctrl+z, cmd+z, meta+z',
+    closeNotifications,
+    {
+      scopes: ['app'],
+    },
+    [closeNotifications],
+  );
+
   const onBreakpointChange = (breakpoint: 'mobile' | 'desktop') => {
     setCurrentBreakpoint(breakpoint);
   };
@@ -195,7 +210,7 @@ export function Overview() {
       ],
     });
 
-    dispatch(removeNotification('import'));
+    closeNotifications();
     setIsImporting(true);
     const res = await send('dashboard-import', { filepath });
     setIsImporting(false);
@@ -245,8 +260,7 @@ export function Overview() {
           'Dashboard has been successfully imported. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
         messageActions: {
           undo: () => {
-            // TODO: why do we need to perform 2x undo operations to successfully roll back?
-            window.__actionsForMenu.undo();
+            closeNotifications();
             window.__actionsForMenu.undo();
           },
         },
@@ -375,7 +389,6 @@ export function Overview() {
                           disabled: isImporting,
                         },
                         // TODO: reset to original state?
-                        // TODO: undo/redo?
                       ]}
                     />
                   </Popover>
