@@ -7,6 +7,7 @@ import React, {
 
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
+import { useIsInViewport } from '../../hooks/useIsInViewport';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
@@ -39,6 +40,8 @@ export function ReportCard({
   size = 1,
   style,
 }: ReportCardProps) {
+  const ref = useRef(null);
+  const isInViewport = useIsInViewport(ref);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const containerProps = {
@@ -53,6 +56,7 @@ export function ReportCard({
 
   const content = (
     <View
+      ref={ref}
       style={{
         backgroundColor: theme.tableBackground,
         borderBottomLeftRadius: 2,
@@ -72,7 +76,10 @@ export function ReportCard({
         ...style,
       }}
     >
-      {children}
+      {/* we render the content only if it is in the viewport
+      this reduces the amount of concurrent server api calls and thus
+      has a better performance */}
+      {isInViewport ? children : null}
     </View>
   );
 
