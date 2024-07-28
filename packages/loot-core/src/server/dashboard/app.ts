@@ -14,11 +14,84 @@ import { type EverythingButIdOptional } from '../../types/util';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
+import { ValidationError } from '../errors';
+import { requiredFields } from '../models';
 import { mutator } from '../mutators';
 import { reportModel } from '../reports/app';
 import { undoable } from '../undo';
 
 import { DashboardHandlers } from './types/handlers';
+
+function isExportedCustomReportWidget(
+  widget: ExportImportDashboardWidget,
+): widget is ExportImportCustomReportWidget {
+  return widget.type === 'custom-report';
+}
+
+const exportModel = {
+  validate(dashboard: ExportImportDashboard) {
+    requiredFields('Dashboard', dashboard, ['version', 'widgets']);
+
+    if (!Array.isArray(dashboard.widgets)) {
+      throw new ValidationError(
+        'Invalid dashboard.widgets data type: it must be an array of widgets.',
+      );
+    }
+
+    dashboard.widgets.forEach((widget, idx) => {
+      requiredFields(`Dashboard widget #${idx}`, widget, [
+        'id',
+        'type',
+        'x',
+        'y',
+        'width',
+        'height',
+        ...(isExportedCustomReportWidget(widget) ? ['meta' as const] : []),
+      ]);
+
+      if (!Number.isInteger(widget.x)) {
+        throw new ValidationError(
+          `Invalid widget.${idx}.x data-type for value ${widget.x}.`,
+        );
+      }
+
+      if (!Number.isInteger(widget.y)) {
+        throw new ValidationError(
+          `Invalid widget.${idx}.y data-type for value ${widget.y}.`,
+        );
+      }
+
+      if (!Number.isInteger(widget.width)) {
+        throw new ValidationError(
+          `Invalid widget.${idx}.width data-type for value ${widget.width}.`,
+        );
+      }
+
+      if (!Number.isInteger(widget.height)) {
+        throw new ValidationError(
+          `Invalid widget.${idx}.height data-type for value ${widget.height}.`,
+        );
+      }
+
+      if (
+        ![
+          'net-worth-card',
+          'cash-flow-card',
+          'spending-card',
+          'custom-report',
+        ].includes(widget.type)
+      ) {
+        throw new ValidationError(
+          `Invalid widget.${idx}.type value ${widget.type}.`,
+        );
+      }
+
+      if (isExportedCustomReportWidget(widget)) {
+        reportModel.validate(widget.meta);
+      }
+    });
+  },
+};
 
 async function updateDashboard(
   widgets: EverythingButIdOptional<Omit<Widget, 'tombstone'>>[],
@@ -75,12 +148,6 @@ async function removeDashboardWidget(widgetId: string) {
 }
 
 async function importDashboard({ filepath }: { filepath: string }) {
-  function isCustomReportWidget(
-    widget: ExportImportDashboardWidget,
-  ): widget is ExportImportCustomReportWidget {
-    return widget.type === 'custom-report';
-  }
-
   try {
     if (!(await fs.exists(filepath))) {
       throw new Error(`File not found at the provided path: ${filepath}`);
@@ -89,7 +156,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
     const content = await fs.readFile(filepath);
     const parsedContent: ExportImportDashboard = JSON.parse(content);
 
-    // TODO: validate the input json?
+    exportModel.validate(parsedContent);
 
     const customReportIds: CustomReportEntity[] = await db.all(
       'SELECT id from custom_reports',
@@ -110,13 +177,15 @@ async function importDashboard({ filepath }: { filepath: string }) {
             height: widget.height,
             x: widget.x,
             y: widget.y,
-            meta: isCustomReportWidget(widget) ? { id: widget.meta.id } : null,
+            meta: isExportedCustomReportWidget(widget)
+              ? { id: widget.meta.id }
+              : null,
           }),
         ),
 
         // Insert new custom reports
         ...parsedContent.widgets
-          .filter(isCustomReportWidget)
+          .filter(isExportedCustomReportWidget)
           .filter(({ meta }) => !customReportIdSet.has(meta.id))
           .map(({ meta }) =>
             db.insertWithSchema('custom_reports', reportModel.fromJS(meta)),
@@ -124,7 +193,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
 
         // Update existing reports
         ...parsedContent.widgets
-          .filter(isCustomReportWidget)
+          .filter(isExportedCustomReportWidget)
           .filter(({ meta }) => customReportIdSet.has(meta.id))
           .map(({ meta }) =>
             db.updateWithSchema('custom_reports', {
@@ -150,6 +219,9 @@ async function importDashboard({ filepath }: { filepath: string }) {
     }
     if (err instanceof SyntaxError) {
       return { error: 'json-parse-error' as const };
+    }
+    if (err instanceof ValidationError) {
+      return { error: 'validation-error' as const, message: err.message };
     }
     return { error: 'internal-error' as const };
   }

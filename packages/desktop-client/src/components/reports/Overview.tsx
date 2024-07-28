@@ -212,6 +212,16 @@ export function Overview() {
           );
           break;
 
+        case 'validation-error':
+          dispatch(
+            addNotification({
+              id: 'import',
+              type: 'error',
+              message: res.message,
+            }),
+          );
+          break;
+
         default:
           dispatch(
             addNotification({
