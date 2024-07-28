@@ -544,6 +544,12 @@ function SingleAutocomplete<T extends Item>({
                       close();
                     }
                   }
+
+                  if (!isOpen) {
+                    // When autocomplete dropdown is closed, allow any unhandled keydown events to be passed back to the parent
+                    // E.g. When user selects item (closing the dropdown), then presses "Enter" to confirm the selection
+                    onKeyDown?.(e);
+                  }
                 },
                 onChange: (e: ChangeEvent<HTMLInputElement>) => {
                   const { onChange } = inputProps || {};
