@@ -546,8 +546,8 @@ function SingleAutocomplete<T extends Item>({
                   }
 
                   if (!isOpen) {
-                    // When autocomplete dropdown is closed, allow any unhandled keydown events to be passed back to the parent
-                    // E.g. When user selects item (closing the dropdown), then presses "Enter" to confirm the selection
+                    // When autocomplete dropdown is closed, allow any keydown events to be passed back to the parent
+                    // E.g. When user selects an item, then presses "Enter" to confirm the selection
                     onKeyDown?.(e);
                   }
                 },
