@@ -388,7 +388,6 @@ export function Overview() {
                           text: 'Export',
                           disabled: isImporting,
                         },
-                        // TODO: reset to original state?
                       ]}
                     />
                   </Popover>

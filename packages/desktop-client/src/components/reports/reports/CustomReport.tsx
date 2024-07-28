@@ -147,7 +147,7 @@ export function CustomReport() {
   );
 
   useEffect(() => {
-    if (selectedCategories === undefined && categories.list.length !== 0) {
+    if (!selectedCategories && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
   }, [categories, selectedCategories]);
