@@ -471,6 +471,10 @@ export class Action {
       this.type = 'id';
     }
 
+    if (field === 'account') {
+      assert(value, 'no-null', `Field cannot be empty: ${field}`);
+    }
+
     this.op = op;
     this.rawValue = value;
     this.value = value;
