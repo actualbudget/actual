@@ -8,7 +8,7 @@ import { Tooltip } from '../common/Tooltip';
 type GraphButtonProps = HTMLProps<HTMLButtonElement> & {
   selected?: boolean;
   style?: CSSProperties;
-  onSelect?: (newValue: string) => void;
+  onSelect?: () => void;
   title?: string;
   disabled?: boolean;
 };

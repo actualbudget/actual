@@ -1,4 +1,4 @@
-import React, { type MouseEventHandler, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 import { css } from 'glamor';
 
@@ -9,7 +9,7 @@ type ModeButtonProps = {
   selected: boolean;
   children: ReactNode;
   style?: CSSProperties;
-  onSelect: MouseEventHandler<HTMLButtonElement>;
+  onSelect: () => void;
 };
 
 export function ModeButton({
