@@ -127,17 +127,10 @@ type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
-    const {
-      children,
-      variant = 'normal',
-      bounce = true,
-      isDisabled,
-      className,
-      ...restProps
-    } = props;
+    const { children, variant = 'normal', bounce = true, ...restProps } = props;
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
-      isDisabled ? `${variant}Disabled` : variant;
+      props.isDisabled ? `${variant}Disabled` : variant;
 
     const hoveredStyle = {
       ...(variant !== 'bare' && styles.shadow),
@@ -164,16 +157,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       transition: 'box-shadow .25s',
       WebkitAppRegion: 'no-drag',
       ...styles.smallText,
-      ...(isDisabled ? {} : { ':hover': hoveredStyle }),
-      ...(isDisabled ? {} : { ':active': activeStyle }),
+      ...(props.isDisabled ? {} : { ':hover': hoveredStyle }),
+      ...(props.isDisabled ? {} : { ':active': activeStyle }),
     };
 
     return (
       <ReactAriaButton
         ref={ref}
-        isDisabled={isDisabled}
-        className={`${String(css(buttonStyle))} ${className}`}
         {...restProps}
+        className={({ defaultClassName }) =>
+          `${defaultClassName} ${String(css(buttonStyle))} ${props.className}`
+        }
       >
         {children}
       </ReactAriaButton>
