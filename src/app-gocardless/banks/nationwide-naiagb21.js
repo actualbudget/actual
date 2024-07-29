@@ -9,17 +9,18 @@ export default {
   accessValidForDays: 90,
 
   normalizeTransaction(transaction, booked) {
-    // Nationwide returns pending transactions with a date representing
-    // the latest a transaction could be booked. This stops actual's
-    // deduplication logic from working as it only checks 7 days ahead/behind
-    // and the transactionID from Nationwide changes when a transaction is
-    // booked
+    // Nationwide can sometimes return pending transactions with a date
+    // representing the latest a transaction could be booked. This stops
+    // actual's deduplication logic from working as it only checks 7 days
+    // ahead/behind and the transactionID from Nationwide changes when a
+    // transaction is booked
     if (!booked) {
-      const d = new Date(transaction.bookingDate);
-      d.setDate(d.getDate() - 8);
-
-      const useDate = new Date(Math.min(d.getTime(), new Date().getTime()));
-
+      const useDate = new Date(
+        Math.min(
+          new Date(transaction.bookingDate).getTime(),
+          new Date().getTime(),
+        ),
+      );
       transaction.bookingDate = useDate.toISOString().slice(0, 10);
     }
 
