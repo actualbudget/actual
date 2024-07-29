@@ -31,9 +31,11 @@ export const ProtectedRoute = ({
     setPermissionGrated(hasPermission(permission));
 
     if (!permissionGrated && validateOwner) {
-      send('check-file-access', cloudFileId).then(({ granted }) => {
-        setPermissionGrated(granted);
-      });
+      send('check-file-access', cloudFileId).then(
+        ({ granted }: { granted: boolean }) => {
+          setPermissionGrated(granted);
+        },
+      );
     }
   }, [cloudFileId, permission, validateOwner, hasPermission, permissionGrated]);
 

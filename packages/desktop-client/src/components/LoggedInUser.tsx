@@ -35,7 +35,7 @@ export function LoggedInUser({
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
-  const triggerRef = useRef(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const navigate = useNavigate();
   const [budgetId] = useLocalPref('id');
   const [cloudFileId] = useLocalPref('cloudFileId');
@@ -50,7 +50,7 @@ export function LoggedInUser({
 
   useEffect(() => {
     if (cloudFileId) {
-      send('check-file-access', cloudFileId).then(({ granted }) =>
+      send('check-file-access', cloudFileId).then(({ granted }: { granted: boolean }) =>
         setIsOwner(granted),
       );
     }
@@ -112,23 +112,27 @@ export function LoggedInUser({
     );
   }
 
-  const getMenuItems = () => {
+  type MenuItem = {
+    name: string,
+    text: string,
+  };
+  
+  const getMenuItems = (): (MenuItem | typeof Menu.line)[] => {
     const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
-    const baseMenu = [
-      serverUrl &&
-        !userData?.offline &&
-        userData?.loginMethod === 'password' && {
-          name: 'change-password',
-          text: 'Change password',
-        },
-      serverUrl && { name: 'sign-out', text: 'Sign out' },
-      {
-        name: 'config-server',
-        text: serverUrl ? 'Change server URL' : 'Start using a server',
-      },
-    ];
-
-    const adminMenu = [];
+    
+    const baseMenu: (MenuItem | typeof Menu.line)[] = [];
+    if (serverUrl && !userData?.offline && userData?.loginMethod === 'password') {
+      baseMenu.push({ name: 'change-password', text: 'Change password' });
+    }
+    if (serverUrl) {
+      baseMenu.push({ name: 'sign-out', text: 'Sign out' });
+    }
+    baseMenu.push({
+      name: 'config-server',
+      text: serverUrl ? 'Change server URL' : 'Start using a server',
+    });
+  
+    const adminMenu: (MenuItem | typeof Menu.line)[] = [];
     if (multiuserEnabled && isAdmin) {
       if (!budgetId && location.pathname !== '/') {
         adminMenu.push({ name: 'index', text: 'View file list' });
@@ -136,7 +140,7 @@ export function LoggedInUser({
         adminMenu.push({ name: 'user-directory', text: 'User Directory' });
       }
     }
-
+  
     if (
       multiuserEnabled &&
       (isOwner || isAdmin) &&
@@ -147,11 +151,11 @@ export function LoggedInUser({
     ) {
       adminMenu.push({ name: 'user-access', text: 'User Access Management' });
     }
-
+  
     if (adminMenu.length > 0) {
       adminMenu.push(Menu.line);
     }
-
+  
     return [...adminMenu, ...baseMenu];
   };
 
@@ -161,7 +165,7 @@ export function LoggedInUser({
         ref={triggerRef}
         type="bare"
         onClick={() => setMenuOpen(true)}
-        style={color && { color }}
+        style={color ? { color } : undefined}
       >
         {serverMessage()}
       </Button>
@@ -177,7 +181,7 @@ export function LoggedInUser({
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
       >
-        <Menu onMenuSelect={handleMenuSelect} items={getMenuItems()} />
+        <Menu onMenuSelect={handleMenuSelect} items={getMenuItems().filter(Boolean)} />
       </Popover>
     </View>
   );

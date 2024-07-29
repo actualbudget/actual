@@ -460,16 +460,16 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
   const allFiles = useSelector(state => state.budgets.allFiles || []);
   const [id] = useLocalPref('id');
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<UserEntity[]>([]);
   const [currentUserId, setCurrentUserId] = useState('');
   const userData = useSelector(state => state.user.data);
-  const [usersPerFile, setUsersPerFile] = useState(new Map());
+  const [usersPerFile, setUsersPerFile] = useState(new Map<string, UserAccessEntity[]>());
   const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
     if (multiuserEnabled) {
       if (!userData?.offline) {
-        send('users-get').then(data => {
+        send('users-get').then((data: UserEntity[]) => {
           setUsers(data);
           setCurrentUserId(userData?.userId);
         });
@@ -482,7 +482,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
                 (file as RemoteFile | SyncedLocalFile | SyncableLocalFile)
                   .cloudFileId,
             ),
-        ).then(data => {
+        ).then((data: Map<string, UserAccessEntity[]>) => {
           setUsersPerFile(data);
         });
       }
@@ -629,6 +629,12 @@ function UserAccessForFile({
   ownerId,
   usersPerFile,
   ...props
+}: {
+  fileId: string;
+  currentUserId: string;
+  ownerId: string;
+  usersPerFile: Map<string, UserAccessEntity[]>;
+  style?: React.CSSProperties;
 }) {
   let usersAccess = usersPerFile?.has(fileId) ? usersPerFile.get(fileId) : [];
   usersAccess = usersAccess.filter(user => user.userId !== ownerId);

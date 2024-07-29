@@ -95,7 +95,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refreshLoginMethods();
     if (serverURL) {
-      send('multiuser-get').then(data => {
+      send('multiuser-get').then((data: boolean) => {
         setMultiuserEnabled(data);
       });
     }

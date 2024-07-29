@@ -15,20 +15,25 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { UserEntity } from 'loot-core/types/models';
 
-export function TransferOwnership({ onSave: originalOnSave }) {
+type TransferOwnershipProps = {
+  onSave?: () => void;
+};
+
+export function TransferOwnership({ onSave: originalOnSave }: TransferOwnershipProps) {
   const userData = useSelector((state: State) => state.user.data);
   const actions = useActions();
   const [userId, setUserId] = useState('');
-  const [error, setSetError] = useState('');
-  const [availableUsers, setAvailableUsers] = useState([]);
+  const [error, setSetError] = useState<string | null>(null);
+  const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
   const [cloudFileId] = useLocalPref('cloudFileId');
 
   useEffect(() => {
-    send('users-get').then(users =>
+    send('users-get').then((users: UserEntity[]) =>
       setAvailableUsers(
         users
-          .filter(user => userData?.userId === user.id)
+          .filter(user => userData?.userId !== user.id)
           .map(user => [
             user.id,
             user.displayName
@@ -54,7 +59,7 @@ export function TransferOwnership({ onSave: originalOnSave }) {
 
   return (
     <Modal name="transfer-ownership">
-      {({ state: { close } }) => (
+      {({ state: { close } }: { state: { close: () => void } }) => (
         <>
           <ModalHeader
             title="Transfer ownership"
@@ -67,7 +72,7 @@ export function TransferOwnership({ onSave: originalOnSave }) {
                 <View>
                   <Select
                     options={availableUsers}
-                    onChange={newValue => {
+                    onChange={(newValue: string) => {
                       setUserId(newValue);
                     }}
                     value={userId}
@@ -127,7 +132,7 @@ export function TransferOwnership({ onSave: originalOnSave }) {
             <Button style={{ marginRight: 10 }} onPress={actions.popModal}>
               Cancel
             </Button>
-            <Button isDisabled={availableUsers.length > 0} onPress={onSave}>
+            <Button isDisabled={availableUsers.length === 0} onPress={onSave}>
               Transfer ownership
             </Button>
           </Stack>

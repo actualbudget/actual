@@ -14,7 +14,11 @@ import { View } from '../common/View';
 import { type OpenIdConfig, OpenIdForm } from '../manager/subscribe/OpenIdForm';
 import { useRefreshLoginMethods } from '../ServerContext';
 
-export function OpenIDEnableModal({ onSave: originalOnSave }) {
+type OpenIDEnableModalProps = {
+  onSave?: () => void;
+};
+
+export function OpenIDEnableModal({ onSave: originalOnSave }: OpenIDEnableModalProps) {
   const [error, setError] = useState('');
   const actions = useActions();
   const { closeBudget } = useActions();

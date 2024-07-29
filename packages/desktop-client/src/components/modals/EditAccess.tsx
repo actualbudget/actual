@@ -12,15 +12,30 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { UserAccessEntity } from 'loot-core/types/models/userAccess';
 
-export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
+type UserAvailable = {
+  userId: string;
+  displayName?: string;
+  userName: string;
+};
+
+type EditUserAccessProps = {
+  defaultUserAccess: UserAccessEntity;
+  onSave?: (userAccess: UserAccessEntity) => void;
+};
+
+export function EditUserAccess({
+  defaultUserAccess,
+  onSave: originalOnSave,
+}: EditUserAccessProps) {
   const actions = useActions();
   const [userId, setUserId] = useState(defaultUserAccess.userId ?? '');
   const [error, setSetError] = useState('');
-  const [availableUsers, setAvailableUsers] = useState([]);
+  const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
 
   useEffect(() => {
-    send('access-get-available-users', defaultUserAccess.fileId).then(users =>
+    send('access-get-available-users', defaultUserAccess.fileId).then((users: UserAvailable[]) =>
       setAvailableUsers(
         users.map(user => [
           user.userId,
@@ -32,7 +47,7 @@ export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
     );
   }, [defaultUserAccess.fileId]);
 
-  async function onSave(close) {
+  async function onSave(close: () => void) {
     const userAccess = {
       ...defaultUserAccess,
       userId,
@@ -49,7 +64,7 @@ export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
 
   return (
     <Modal name="edit-access">
-      {({ state: { close } }) => (
+      {({ state: { close } }: { state: { close: () => void } }) => (
         <>
           <ModalHeader
             title="User Access"
@@ -62,7 +77,7 @@ export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
                 <View>
                   <Select
                     options={availableUsers}
-                    onChange={newValue => setUserId(newValue)}
+                    onChange={(newValue: string) => setUserId(newValue)}
                     value={userId}
                   />
                   <label
@@ -72,7 +87,7 @@ export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
                       marginTop: 5,
                     }}
                   >
-                    Select an user from the directory
+                    Select a user from the directory
                   </label>
                 </View>
               )}
@@ -109,7 +124,7 @@ export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
               isDisabled={availableUsers.length === 0}
               onPress={() => onSave(close)}
             >
-              {defaultUserAccess.id ? 'Save' : 'Add'}
+              {defaultUserAccess.userId ? 'Save' : 'Add'}
             </Button>
           </Stack>
         </>

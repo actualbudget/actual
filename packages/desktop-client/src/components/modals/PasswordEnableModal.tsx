@@ -21,14 +21,18 @@ import {
   useRefreshLoginMethods,
 } from '../ServerContext';
 
-export function PasswordEnableModal({ onSave: originalOnSave }) {
-  const [error, setError] = useState('');
+type PasswordEnableModalProps = {
+  onSave?: () => void;
+};
+
+export function PasswordEnableModal({ onSave: originalOnSave }: PasswordEnableModalProps) {
+  const [error, setError] = useState<string | null>(null);
   const { closeBudget, popModal } = useActions();
   const multiuserEnabled = useMultiuserEnabled();
   const availableLoginMethods = useAvailableLoginMethods();
   const refreshLoginMethods = useRefreshLoginMethods();
 
-  function getErrorMessage(error) {
+  function getErrorMessage(error: string): string {
     switch (error) {
       case 'invalid-password':
         return 'Invalid Password';
@@ -43,7 +47,7 @@ export function PasswordEnableModal({ onSave: originalOnSave }) {
     }
   }
 
-  async function onSetPassword(password) {
+  async function onSetPassword(password: string) {
     setError(null);
     const { error } = (await send('enable-password', { password })) || {};
     if (!error) {
@@ -81,7 +85,7 @@ export function PasswordEnableModal({ onSave: originalOnSave }) {
                     </Button>
                   }
                   onSetPassword={onSetPassword}
-                  onError={error => setError(getErrorMessage(error))}
+                  onError={(error: string) => setError(getErrorMessage(error))}
                 />
               )}
               {availableLoginMethods.some(
