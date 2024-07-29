@@ -139,24 +139,29 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ..._getActiveStyles(variant, bounce),
     };
 
-    const buttonStyle: CSSProperties = {
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      padding: _getPadding(variant),
-      margin: 0,
-      overflow: 'hidden',
-      display: 'flex',
-      borderRadius: 4,
-      backgroundColor: backgroundColor[variantWithDisabled],
-      border: _getBorder(variant, variantWithDisabled),
-      color: textColor[variantWithDisabled],
-      transition: 'box-shadow .25s',
-      WebkitAppRegion: 'no-drag',
-      ...styles.smallText,
-      ...(props.isDisabled ? {} : { ':hover': hoveredStyle }),
-      ...(props.isDisabled ? {} : { ':active': activeStyle }),
-    };
+    const defaultButtonClassName: ComponentPropsWithoutRef<
+      typeof Button
+    >['className'] = renderProps =>
+      String(
+        css({
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          padding: _getPadding(variant),
+          margin: 0,
+          overflow: 'hidden',
+          display: 'flex',
+          borderRadius: 4,
+          backgroundColor: backgroundColor[variantWithDisabled],
+          border: _getBorder(variant, variantWithDisabled),
+          color: textColor[variantWithDisabled],
+          transition: 'box-shadow .25s',
+          WebkitAppRegion: 'no-drag',
+          ...styles.smallText,
+          ...(renderProps.isDisabled ? {} : { ':hover': hoveredStyle }),
+          ...(renderProps.isDisabled ? {} : { ':active': activeStyle }),
+        }),
+      );
 
     const buttonClassName: ComponentPropsWithoutRef<
       typeof ReactAriaButton
@@ -170,7 +175,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...restProps}
         className={renderProps =>
-          `${renderProps.defaultClassName} ${String(css(buttonStyle))} ${buttonClassName(renderProps)}`
+          `${renderProps.defaultClassName} ${defaultButtonClassName(renderProps)} ${buttonClassName(renderProps)}`
         }
       >
         {children}
