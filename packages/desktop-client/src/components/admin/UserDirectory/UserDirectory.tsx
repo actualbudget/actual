@@ -9,7 +9,6 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { getUserDirectoryErrors } from 'loot-core/shared/errors';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
@@ -31,6 +30,7 @@ import { SimpleTable } from '../../rules/SimpleTable';
 
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';
+import { getUserDirectoryErrors } from '@actual-app/api/@types/loot-core/shared/errors';
 
 type ManageUserDirectoryContentProps = {
   isModal: boolean;
