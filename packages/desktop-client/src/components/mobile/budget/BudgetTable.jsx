@@ -5,9 +5,11 @@ import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useCategories } from '../../../hooks/useCategories';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -358,6 +360,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const dispatch = useDispatch();
+  const { showUndoNotification } = useUndo();
+  const { list: categories } = useCategories();
+  const categoriesById = groupById(categories);
 
   const onCarryover = carryover => {
     onBudgetAction(month, 'carryover', {
@@ -394,6 +399,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
             to: toCategoryId,
           });
           dispatch(collapseModals(`${budgetType}-balance-menu`));
+          showUndoNotification({
+            message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
+          });
         },
         showToBeBudgeted: true,
       }),
@@ -412,6 +420,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
             from: fromCategoryId,
           });
           dispatch(collapseModals(`${budgetType}-balance-menu`));
+          showUndoNotification({
+            message: `Covered ${category.name} overspending from ${categoriesById[fromCategoryId].name}.`,
+          });
         },
       }),
     );
