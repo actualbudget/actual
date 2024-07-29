@@ -169,7 +169,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <ReactAriaButton
         ref={ref}
         {...restProps}
-        className={`${renderProps.defaultClassName} ${String(css(buttonStyle))} ${buttonClassName(renderProps)}`}
+        className={renderProps =>
+          `${renderProps.defaultClassName} ${String(css(buttonStyle))} ${buttonClassName(renderProps)}`
+        }
       >
         {children}
       </ReactAriaButton>
