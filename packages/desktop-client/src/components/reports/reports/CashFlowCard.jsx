@@ -11,6 +11,7 @@ import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { chartTheme } from '../chart-theme';
+import { Container } from '../Container';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
@@ -127,35 +128,50 @@ export function CashFlowCard({ isEditing, onRemove }) {
         </View>
 
         {data ? (
-          <ResponsiveContainer width="100%" height="100%" debounce={500}>
-            <BarChart
-              data={[
-                {
-                  income,
-                  expenses,
-                },
-              ]}
-              margin={{
-                top: 10,
-                bottom: 0,
-              }}
-            >
-              <Bar dataKey="income" fill={chartTheme.colors.blue} barSize={14}>
-                <LabelList
-                  dataKey="income"
-                  position="left"
-                  content={<CustomLabel name="Income" />}
-                />
-              </Bar>
-              <Bar dataKey="expenses" fill={chartTheme.colors.red} barSize={14}>
-                <LabelList
-                  dataKey="expenses"
-                  position="right"
-                  content={<CustomLabel name="Expenses" />}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <Container style={{ height: 'auto', flex: 1 }}>
+            {(width, height) => (
+              <ResponsiveContainer>
+                <BarChart
+                  width={width}
+                  height={height}
+                  data={[
+                    {
+                      income,
+                      expenses,
+                    },
+                  ]}
+                  margin={{
+                    top: 10,
+                    bottom: 0,
+                  }}
+                >
+                  <Bar
+                    dataKey="income"
+                    fill={chartTheme.colors.blue}
+                    barSize={14}
+                  >
+                    <LabelList
+                      dataKey="income"
+                      position="left"
+                      content={<CustomLabel name="Income" />}
+                    />
+                  </Bar>
+
+                  <Bar
+                    dataKey="expenses"
+                    fill={chartTheme.colors.red}
+                    barSize={14}
+                  >
+                    <LabelList
+                      dataKey="expenses"
+                      position="right"
+                      content={<CustomLabel name="Expenses" />}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </Container>
         ) : (
           <LoadingIndicator />
         )}
