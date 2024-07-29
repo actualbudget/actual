@@ -1,6 +1,6 @@
 # Custom Reports
 
-Custom reports allow analyzing transaction data by using charts or a data table with summary statistics. The following types of reports available: 
+Custom reports allow analyzing transaction data by using charts or a data table with summary statistics. The following types of reports are available: 
 
 1. Table View
 2. Bar Graph
