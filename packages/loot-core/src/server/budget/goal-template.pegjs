@@ -77,4 +77,3 @@ date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
 
 name 'Name' = $([^\r\n\t]+)
-
