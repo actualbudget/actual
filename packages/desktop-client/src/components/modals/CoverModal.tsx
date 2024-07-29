@@ -2,6 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useInitialMount } from '../../hooks/useInitialMount';
@@ -12,10 +16,25 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 
+function removeSelectedCategory(
+  categoryGroups: CategoryGroupEntity[],
+  category?: CategoryEntity['id'],
+) {
+  if (!category) return categoryGroups;
+
+  return categoryGroups
+    .map(group => ({
+      ...group,
+      categories: group.categories?.filter(cat => cat.id !== category),
+    }))
+    .filter(group => group.categories?.length);
+}
+
 type CoverModalProps = {
   title: string;
   month: string;
   showToBeBudgeted?: boolean;
+  category?: CategoryEntity['id'];
   onSubmit: (categoryId: string) => void;
 };
 
@@ -23,6 +42,7 @@ export function CoverModal({
   title,
   month,
   showToBeBudgeted = true,
+  category,
   onSubmit,
 }: CoverModalProps) {
   const { grouped: originalCategoryGroups } = useCategories();
@@ -37,20 +57,25 @@ export function CoverModal({
     return [expenseGroups, expenseCategories];
   }, [originalCategoryGroups, showToBeBudgeted]);
 
+  const filteredCategoryGroups = useMemo(
+    () => removeSelectedCategory(categoryGroups, category),
+    [categoryGroups, category],
+  );
+
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
   const onCategoryClick = useCallback(() => {
     dispatch(
       pushModal('category-autocomplete', {
-        categoryGroups,
+        categoryGroups: filteredCategoryGroups,
         month,
         onSelect: categoryId => {
           setFromCategoryId(categoryId);
         },
       }),
     );
-  }, [categoryGroups, dispatch, month]);
+  }, [filteredCategoryGroups, dispatch, month]);
 
   const _onSubmit = (categoryId: string | null) => {
     if (categoryId) {
