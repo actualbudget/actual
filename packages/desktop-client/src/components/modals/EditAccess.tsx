@@ -32,7 +32,7 @@ export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
     );
   }, [defaultUserAccess.fileId]);
 
-  async function onSave() {
+  async function onSave(close) {
     const userAccess = {
       ...defaultUserAccess,
       userId,
@@ -41,13 +41,14 @@ export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
     const { error } = await send('access-add', userAccess);
     if (!error) {
       originalOnSave?.(userAccess);
+      close();
     } else {
       setSetError(getUserAccessErrors(error));
     }
   }
 
   return (
-    <Modal name="User Access">
+    <Modal name="edit-access">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -105,8 +106,8 @@ export function EditUserAccess({ defaultUserAccess, onSave: originalOnSave }) {
             </Button>
             <Button
               variant="primary"
-              isDisabled={availableUsers.length > 0}
-              onPress={onSave}
+              isDisabled={availableUsers.length === 0}
+              onPress={() => onSave(close)}
             >
               {defaultUserAccess.id ? 'Save' : 'Add'}
             </Button>

@@ -57,11 +57,11 @@ export function PasswordEnableModal({ onSave: originalOnSave }) {
   }
 
   return (
-    <Modal name="Revert to server password">
+    <Modal name="enable-password-auth">
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Enable OpenID"
+            title="Revert to server password"
             rightContent={<ModalCloseButton onClick={close} />}
           />
 

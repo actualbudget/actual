@@ -53,7 +53,7 @@ export function TransferOwnership({ onSave: originalOnSave }) {
   }
 
   return (
-    <Modal name="Transfer ownership">
+    <Modal name="transfer-ownership">
       {({ state: { close } }) => (
         <>
           <ModalHeader

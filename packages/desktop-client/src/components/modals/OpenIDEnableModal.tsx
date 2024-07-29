@@ -33,7 +33,7 @@ export function OpenIDEnableModal({ onSave: originalOnSave }) {
   }
 
   return (
-    <Modal name="Enable OpenID">
+    <Modal name="enable-openid">
       {({ state: { close } }) => (
         <>
           <ModalHeader
