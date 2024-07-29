@@ -1,24 +1,23 @@
 // https://peggyjs.org
 
 expr
-  = priority: priority? _? adder:adder? percentOf:percentOf category: name
-    { return { type: 'percentage', adder:adder, percent: +percentOf.percent, previous: percentOf.prev, category, priority: +priority }}
-  / priority: priority? _? adder:adder? amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
-    { return { type: 'week',adder:adder, amount, weeks, starting, limit, priority: +priority }}
-  / priority: priority? _? adder:adder? amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
+  = priority: priority? _?  percentOf:percentOf category: name
+    { return { type: 'percentage',  percent: +percentOf.percent, previous: percentOf.prev, category, priority: +priority }}
+  / priority: priority? _?  amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
+    { return { type: 'week', amount, weeks, starting, limit, priority: +priority }}
+  / priority: priority? _?  amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
     { return {
       type: from ? 'spend' : 'by',
-      adder:adder,
       amount,
       month,
       ...(repeat ? repeat[3] : {}),
       from,
       priority: +priority
     } }
-  / priority: priority? _? adder:adder? monthly: amount limit: limit?
-    { return { type: 'simple',adder:adder, monthly, limit, priority: +priority } }
-  / priority: priority? _? adder:adder limit: limit
-    { return { type: 'simple',adder:adder, limit , priority: +priority } }
+  / priority: priority? _? monthly: amount limit: limit?
+    { return { type: 'simple', monthly, limit, priority: +priority } }
+  / priority: priority? _?  limit: limit
+    { return { type: 'simple', limit , priority: +priority } }
   / priority: priority? _? schedule _ full:full? name: name
     { return { type: 'schedule', name, priority: +priority, full } }
   / priority: priority? _? '+' _? remainder: remainder
@@ -46,8 +45,6 @@ limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true
 percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true} }
 		/ percent:percent _ of _ { return { percent: percent, prev: false} }
 
-adder = '+' {return true}
-            /_?{return false}
 
 weekCount
   = week { return null }
