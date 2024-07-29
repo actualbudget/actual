@@ -1,6 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { css } from 'glamor';
+
 import { replaceModal, syncAndDownload } from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
@@ -79,15 +81,12 @@ function AccountCard({
     >
       <Button
         onPress={() => onSelect(account.id)}
-        style={({ isPressed }) => ({
+        className={css({
           flexDirection: 'row',
           border: '1px solid ' + theme.pillBorder,
           flex: 1,
           alignItems: 'center',
           borderRadius: 6,
-          ...(isPressed && {
-            opacity: 0.1,
-          }),
         })}
       >
         <View
@@ -171,10 +170,6 @@ function AccountList({
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
-  const noBackgroundColorStyle = {
-    backgroundColor: 'transparent',
-    color: 'white',
-  };
 
   return (
     <Page
@@ -184,10 +179,14 @@ function AccountList({
           rightContent={
             <Button
               variant="bare"
-              style={({ isHovered, isPressed }) => ({
+              aria-label="Add account"
+              className={css({
                 color: theme.mobileHeaderText,
                 margin: 10,
-                ...(isHovered || isPressed ? noBackgroundColorStyle : {}),
+                ':hover': {
+                  color: theme.mobileHeaderText,
+                  background: theme.mobileHeaderTextHover,
+                },
               })}
               onPress={onAddAccount}
             >

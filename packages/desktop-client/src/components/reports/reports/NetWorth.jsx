@@ -94,7 +94,7 @@ export function NetWorth() {
           <MobilePageHeader
             title="Net Worth"
             leftContent={
-              <MobileBackButton onClick={() => navigate('/reports')} />
+              <MobileBackButton onPress={() => navigate('/reports')} />
             }
           />
         ) : (
