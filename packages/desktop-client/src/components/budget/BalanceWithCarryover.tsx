@@ -83,13 +83,15 @@ export function BalanceWithCarryover({
   const budgetedValue = useSheetValue(budgeted);
   const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const differenceToGoal = budgetedValue - goalValue;
   const valueStyle = makeBalanceAmountStyle(
     balanceValue,
     isGoalTemplatesEnabled ? goalValue : null,
     longGoalValue === 1 ? balanceValue : budgetedValue,
   );
   const format = useFormat();
+
+  const differenceToGoal =
+    longGoalValue === 1 ? balanceValue - goalValue : budgetedValue - goalValue;
 
   const balanceCellValue = (
     <CellValue
@@ -150,8 +152,17 @@ export function BalanceWithCarryover({
                 <div>{format(goalValue, 'financial')}</div>
               </GoalTooltipRow>
               <GoalTooltipRow>
-                <div>Budgeted:</div>
-                <div>{format(budgetedValue, 'financial')}</div>
+                {longGoalValue !== 1 ? (
+                  <>
+                    <div>Budgeted:</div>
+                    <div>{format(budgetedValue, 'financial')}</div>
+                  </>
+                ) : (
+                  <>
+                    <div>Balance:</div>
+                    <div>{format(balanceValue, 'financial')}</div>
+                  </>
+                )}
               </GoalTooltipRow>
             </View>
           }
