@@ -108,7 +108,7 @@ export const Modal = ({
                 [`@media (min-width: ${tokens.breakpoint_small})`]: {
                   minWidth: tokens.breakpoint_small,
                 },
-                overflowY: 'scroll',
+                overflowY: 'auto',
                 ...styles.shadowLarge,
                 ...styles.lightScrollbar,
                 ...containerProps?.style,
