@@ -139,9 +139,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ..._getActiveStyles(variant, bounce),
     };
 
-    const defaultButtonClassName: ComponentPropsWithoutRef<
-      typeof Button
-    >['className'] = renderProps =>
+    const defaultButtonClassName: Extract<
+      ComponentPropsWithoutRef<typeof Button>['className'],
+      (renderProps) => string
+    > = renderProps =>
       String(
         css({
           alignItems: 'center',
@@ -163,9 +164,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         }),
       );
 
-    const buttonClassName: ComponentPropsWithoutRef<
-      typeof ReactAriaButton
-    >['className'] = renderProps =>
+    const buttonClassName: Extract<
+      ComponentPropsWithoutRef<typeof ReactAriaButton>['className'],
+      (renderProps) => string
+    > = renderProps =>
       typeof props.className === 'function'
         ? props.className(renderProps)
         : props.className;
