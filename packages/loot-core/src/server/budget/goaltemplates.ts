@@ -15,6 +15,7 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
+import { payDistribution } from './goals/payDistribution';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
@@ -168,6 +169,9 @@ async function processTemplate(
     categories = await getCategories();
   }
 
+  //The current amount we have after income to Distribute amoung the categories.
+  const payToDistribute = await getSheetValue(monthUtils.sheetForMonth(month), `to-budget`); 
+  //Prevents other tmeplates in category from wiping budgted and instead just changes goal.
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
     const category = categories[c];
@@ -175,13 +179,16 @@ async function processTemplate(
       monthUtils.sheetForMonth(month),
       `budget-${category.id}`,
     );
+
+    categories[c].budgeted = budgeted;
     const template = category_templates[category.id];
     let adder = false; //This is the bool that will skip the zeroing of budgeted.
     if (template) {
       for (let l = 0; l < template.length; l++) {
-        //check to see if this catagory accepts adding and set the adder bool
-        if (template[l].adder) {
-          adder = true;
+        //if template contains pay distribution then add current amount budgeted.
+        if (template[l].type === 'payDistribute') {
+          template[l].budgeted = budgeted;
+          categories[c].payDistributeTemplateActive = true;
         }
         //add each priority we need to a list.  Will sort later
         if (template[l].priority == null) {
@@ -191,7 +198,7 @@ async function processTemplate(
       }
     }
     if (budgeted) {
-      if (!force) {
+      if (!force && !category.payDistributeTemplateActive) {
         // save index of category to remove
         //unless template states otherwise
         if (!adder) {
@@ -312,7 +319,9 @@ async function processTemplate(
               sheetName,
               `budget-${category.id}`,
             );
-            const { amount: originalToBudget, errors: applyErrors } =
+
+
+            const { amount: originalToBudget,set_budget:set_budget, errors: applyErrors } =
               await applyCategoryTemplate(
                 category,
                 template_lines,
@@ -321,6 +330,7 @@ async function processTemplate(
                 available_start,
                 budgetAvailable,
                 prev_budgeted,
+                payToDistribute,
               );
 
             let to_budget = originalToBudget;
@@ -345,7 +355,7 @@ async function processTemplate(
               if (to_budget <= budgetAvailable || !priority) {
                 templateBudget.push({
                   category: category.id,
-                  amount: to_budget + prev_budgeted,
+                  amount: set_budget + prev_budgeted,
                 });
               } else if (to_budget > budgetAvailable && budgetAvailable >= 0) {
                 to_budget = budgetAvailable;
@@ -435,7 +445,10 @@ async function applyCategoryTemplate(
   available_start,
   budgetAvailable,
   prev_budgeted,
+  payToDistribute,
+
 ) {
+  const payDistributeTemplateActive = category.payDistributeTemplateActive === true;
   const current_month = `${month}-01`;
   let errors = [];
   let all_schedule_names = await db.all(
@@ -511,7 +524,9 @@ async function applyCategoryTemplate(
   const spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   const last_month_balance = balance - spent - prev_budgeted;
+  
   let to_budget = 0;
+  let set_budget = 0;
   let limit = 0;
   let hold = false;
   let limitCheck = false;
@@ -520,6 +535,26 @@ async function applyCategoryTemplate(
   for (let l = 0; l < template_lines.length; l++) {
     const template = template_lines[l];
     switch (template.type) {
+      case 'payDistribute': {
+        const goalsReturn = await payDistribution(
+          template,
+          limitCheck,
+          errors,
+          limit,
+          hold,
+          to_budget,
+          last_month_balance,
+          set_budget,
+          payToDistribute,
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
+        limit = goalsReturn.limit;
+        limitCheck = goalsReturn.limitCheck;
+        hold = goalsReturn.hold;
+        set_budget = goalsReturn.set_budget;
+        break;
+      }
       case 'simple': {
         const goalsReturn = await goalsSimple(
           template,
@@ -529,12 +564,18 @@ async function applyCategoryTemplate(
           hold,
           to_budget,
           last_month_balance,
+          set_budget,
+          payDistributeTemplateActive,
         );
+        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
         limitCheck = goalsReturn.limitCheck;
         hold = goalsReturn.hold;
+        if (!payDistributeTemplateActive){
+        set_budget = to_budget;
+        }
         break;
       }
       case 'by': {
@@ -547,7 +588,10 @@ async function applyCategoryTemplate(
           last_month_balance,
           to_budget,
           errors,
+          set_budget,
+          payDistributeTemplateActive
         );
+        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
@@ -562,8 +606,11 @@ async function applyCategoryTemplate(
           current_month,
           to_budget,
           errors,
+          set_budget,
+          payDistributeTemplateActive
         );
         to_budget = goalsReturn.to_budget;
+        set_budget = goalsReturn.set_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
         limitCheck = goalsReturn.limitCheck;
@@ -578,7 +625,10 @@ async function applyCategoryTemplate(
           to_budget,
           errors,
           category,
+          set_budget,
+          payDistributeTemplateActive,
         );
+        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         break;
@@ -591,7 +641,10 @@ async function applyCategoryTemplate(
           sheetName,
           to_budget,
           errors,
+          set_budget,
+          payDistributeTemplateActive,
         );
+        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         break;
@@ -607,7 +660,10 @@ async function applyCategoryTemplate(
           to_budget,
           errors,
           category,
+          set_budget,
+          payDistributeTemplateActive,
         );
+        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
@@ -620,8 +676,11 @@ async function applyCategoryTemplate(
           budgetAvailable,
           remainder_scale,
           to_budget,
+          set_budget,
+          payToDistribute
         );
         to_budget = goalsReturn.to_budget;
+        set_budget = goalsReturn.set_budget;
         break;
       }
       case 'average': {
@@ -631,6 +690,8 @@ async function applyCategoryTemplate(
           category,
           errors,
           to_budget,
+          set_budget,
+          payDistributeTemplateActive,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
@@ -641,12 +702,19 @@ async function applyCategoryTemplate(
       default:
     }
   }
-
   if (limitCheck) {
-    if (hold && balance > limit) {
-      to_budget = 0;
-    } else if (to_budget + balance > limit) {
-      to_budget = limit - balance;
+    if (
+      hold &&
+      (balance > limit ||
+        (payDistributeTemplateActive && balance + category.budgeted > limit))
+    ) {
+      if (payDistributeTemplateActive) {
+        set_budget = category.budgeted;
+      } else {
+        set_budget = 0;
+      }
+    } else if (set_budget + balance > limit) {
+      set_budget = limit - balance;
     }
   }
   // setup notifications
@@ -658,7 +726,7 @@ async function applyCategoryTemplate(
     integerToAmount(last_month_balance + to_budget);
   str += ' ' + template_lines.map(x => x.line).join('\n');
   console.log(str);
-  return { amount: to_budget, errors };
+  return { amount: to_budget, set_budget, errors };
 }
 
 async function checkTemplates(): Promise<Notification> {

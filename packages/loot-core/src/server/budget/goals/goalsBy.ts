@@ -12,6 +12,8 @@ export async function goalsBy(
   last_month_balance,
   to_budget,
   errors,
+  set_budget,
+  payDistributeTemplateActive
 ) {
   // by has 'amount' and 'month' params
   if (!isReflectBudget()) {
@@ -42,8 +44,14 @@ export async function goalsBy(
     const increment =
       num_months >= 0 ? Math.round(target / (num_months + 1)) : 0;
     to_budget += increment;
+  
+    //if Pay Distribution isnt active on this category then set the budgeted
+    if (!payDistributeTemplateActive) {
+      set_budget += increment;
+    }
+    
   } else {
     errors.push(`by templates are not supported in Report budgets`);
   }
-  return { to_budget, errors, remainder };
+  return { to_budget, errors, remainder, set_budget };
 }

@@ -21,17 +21,24 @@ expr
     { return { type: 'simple',adder:adder, limit , priority: +priority } }
   / priority: priority? _? schedule _ full:full? name: name
     { return { type: 'schedule', name, priority: +priority, full } }
-  / priority: priority? _? adder:adder remainder: remainder
-    { return { type: 'remainder', adder:adder, priority: null, weight: remainder } }
-  / priority: priority? _? adder:adder? 'average'i _ amount: positive _ 'months'i?
-    { return { type: 'average',adder:adder, amount: +amount, priority: +priority }}
-
-
+  / priority: priority? _? '+' _? remainder: remainder
+    { return { type: 'remainder', priority: null, weight: remainder } }
+  / priority: priority? _? remainder: remainder
+    { return { type: 'remainder', priority: null, weight: remainder } }
+  / priority: priority? _? 'average'i _ amount: positive _ 'months'i?
+    { return { type: 'average', amount: +amount, priority: +priority }}
+  / priority: priority? _? '+' _? percent: $(d+ ('.' (d+)?)?) _? '%'
+  	{ return {type: 'payDistribute',priority: 0,percent: +percent} }
+  / priority: priority? _? '+' _? amount: amount
+    { return { type: 'payDistribute',priority:0, amount} }
+	
+   
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
   / months: positive _ 'months'i { return { annual: false, repeat: +months } }
   / 'year'i { return { annual: true } }
   / years: positive _ 'years'i { return { annual: true, repeat: +years } }
+
 
 limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
         / _? upTo _ amount: amount { return {amount: amount, hold: false } }

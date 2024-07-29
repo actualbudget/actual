@@ -10,6 +10,8 @@ export async function goalsWeek(
   current_month,
   to_budget,
   errors,
+  set_budget,
+  payDistributeTemplateActive
 ) {
   // week has 'amount', 'starting', 'weeks' and optional 'limit' params
   const amount = amountToInteger(template.amount);
@@ -29,9 +31,13 @@ export async function goalsWeek(
 
   while (w < next_month) {
     if (w >= current_month) {
+       //if Pay Distribution isnt active on this category then set the budgeted
+      if (!payDistributeTemplateActive) {
+        set_budget += amount;
+      }
       to_budget += amount;
     }
     w = monthUtils.addWeeks(w, weeks);
   }
-  return { to_budget, errors, limit, limitCheck, hold };
+  return { to_budget, errors, limit, limitCheck, hold, set_budget };
 }

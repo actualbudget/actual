@@ -9,6 +9,8 @@ export async function goalsAverage(
   category,
   errors,
   to_budget,
+  set_budget,
+  payDistributeTemplateActive
 ) {
   // simple has an 'amount' param
   let increment = 0;
@@ -24,8 +26,12 @@ export async function goalsAverage(
     increment = sum / template.amount;
   } else {
     errors.push('Number of months to average is not valid');
-    return { to_budget, errors };
+    return { to_budget, errors, set_budget };
+  }
+  //if Pay Distribution isnt active on this category then set the budgeted
+  if (!payDistributeTemplateActive) {
+    set_budget += -Math.round(increment);
   }
   to_budget += -Math.round(increment);
-  return { to_budget, errors };
+  return { to_budget, errors, set_budget };
 }

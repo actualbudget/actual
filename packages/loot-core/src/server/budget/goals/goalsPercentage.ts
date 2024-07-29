@@ -10,6 +10,8 @@ export async function goalsPercentage(
   sheetName,
   to_budget,
   errors,
+  set_budget,
+  payDistributeTemplateActive,
 ) {
   const percent = template.percent;
   let monthlyIncome = 0;
@@ -32,7 +34,7 @@ export async function goalsPercentage(
     );
     if (!income_category) {
       errors.push(`Could not find category “${template.category}”`);
-      return { to_budget, errors };
+      return { to_budget, errors, set_budget };
     }
     if (template.previous) {
       const sheetName_lastmonth = monthUtils.sheetForMonth(
@@ -51,6 +53,11 @@ export async function goalsPercentage(
   }
 
   const increment = Math.max(0, Math.round(monthlyIncome * (percent / 100)));
+
+  //if Pay Distribution isnt active on this category then set the budgeted
+  if (!payDistributeTemplateActive) {
+    set_budget += increment;
+  }
   to_budget += increment;
-  return { to_budget, errors };
+  return { to_budget, errors, set_budget };
 }
