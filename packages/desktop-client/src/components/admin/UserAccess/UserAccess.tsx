@@ -237,13 +237,14 @@ function UserAccessContent({
                 aria-label="Menu"
                 onPress={() =>
                   dispatch(
-                  pushModal('transfer-ownership', {
-                    onSave: async () => {
-                      await loadAccess();
-                      setLoading(false);
-                    },
-                  }),
-                )}
+                    pushModal('transfer-ownership', {
+                      onSave: async () => {
+                        await loadAccess();
+                        setLoading(false);
+                      },
+                    }),
+                  )
+                }
               >
                 <LockToggle style={{ width: 16, height: 16 }} />
               </Button>

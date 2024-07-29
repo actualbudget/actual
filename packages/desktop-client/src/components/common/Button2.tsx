@@ -177,7 +177,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     });
 
     return (
-      <>
+      <View>
         {(!permission || hasPermission(permission)) && (
           <ReactAriaButton
             ref={ref}
@@ -188,7 +188,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             {children}
           </ReactAriaButton>
         )}
-      </>
+      </View>
     );
   },
 );
