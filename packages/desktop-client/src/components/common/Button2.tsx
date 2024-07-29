@@ -145,7 +145,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       color: textColorHover[variant],
       cursor: 'pointer',
     };
-    const pressedStyle = {
+    const activeStyle = {
       ..._getActiveStyles(variant, bounce),
     };
 
@@ -165,7 +165,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       WebkitAppRegion: 'no-drag',
       ...styles.smallText,
       ...(isDisabled ? {} : { ':hover': hoveredStyle }),
-      ...(isDisabled ? {} : { ':focus,:active': pressedStyle }),
+      ...(isDisabled ? {} : { ':active': activeStyle }),
     };
 
     return (
