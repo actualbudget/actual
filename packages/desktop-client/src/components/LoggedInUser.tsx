@@ -117,7 +117,7 @@ export function LoggedInUser({
     const baseMenu = [
       serverUrl &&
         !userData?.offline &&
-        userData.loginMethod === 'password' && {
+        userData?.loginMethod === 'password' && {
           name: 'change-password',
           text: 'Change password',
         },

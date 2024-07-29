@@ -468,10 +468,10 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
 
   useEffect(() => {
     if (multiuserEnabled) {
-      if (!userData.offline) {
+      if (!userData?.offline) {
         send('users-get').then(data => {
           setUsers(data);
-          setCurrentUserId(userData.userId);
+          setCurrentUserId(userData?.userId);
         });
         send(
           'users-get-access',
@@ -487,7 +487,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
         });
       }
     }
-  }, [multiuserEnabled, userData.offline, allFiles, userData.userId]);
+  }, [multiuserEnabled, userData?.offline, allFiles, userData?.userId]);
 
   // Remote files do not have the 'id' field
   function isNonRemoteFile(
