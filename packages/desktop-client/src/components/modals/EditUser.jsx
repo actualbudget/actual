@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
-
 import { PossibleRoles } from 'loot-core/src/types/models/user';
 
 import { useActions } from '../../hooks/useActions';
@@ -15,7 +14,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox, FormField, FormLabel } from '../forms';
 
-export function getUserDirectoryErrors(reason) {
+function getUserDirectoryErrors(reason) {
   switch (reason) {
     case 'unauthorized':
       return 'You are not logged in.';
