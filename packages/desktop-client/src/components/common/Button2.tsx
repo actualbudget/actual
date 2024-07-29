@@ -147,6 +147,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ...(variant !== 'bare' && styles.shadow),
       backgroundColor: backgroundColorHover[variant],
       color: textColorHover[variant],
+      cursor: 'pointer',
     };
     const pressedStyle = {
       ..._getActiveStyles(variant, bounce),
@@ -176,6 +177,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     });
 
     return (
+<<<<<<< HEAD
       <View>
         {(!permission || hasPermission(permission)) && (
           <ReactAriaButton ref={ref} style={buttonStyle} {...restProps}>
@@ -183,6 +185,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           </ReactAriaButton>
         )}
       </View>
+=======
+      <ReactAriaButton
+        ref={ref}
+        isDisabled={isDisabled}
+        style={buttonStyle}
+        {...restProps}
+      >
+        {children}
+      </ReactAriaButton>
+>>>>>>> org/master
     );
   },
 );

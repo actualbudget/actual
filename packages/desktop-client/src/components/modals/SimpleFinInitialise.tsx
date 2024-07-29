@@ -68,7 +68,7 @@ export const SimpleFinInitialise = ({
               by creating an account with{' '}
               <Link
                 variant="external"
-                to="https://beta-bridge.simplefin.org/"
+                to="https://bridge.simplefin.org/"
                 linkColor="purple"
               >
                 SimpleFIN
