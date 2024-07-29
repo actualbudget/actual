@@ -1,5 +1,8 @@
 import React, { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import { Button as ReactAriaButton } from 'react-aria-components';
+import {
+  type ButtonRenderProps as ReactAriaButtonRenderProps,
+  Button as ReactAriaButton,
+} from 'react-aria-components';
 
 import { css } from 'glamor';
 
@@ -139,10 +142,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ..._getActiveStyles(variant, bounce),
     };
 
-    const defaultButtonClassName: Extract<
-      ComponentPropsWithoutRef<typeof Button>['className'],
-      (renderProps) => string
-    > = renderProps =>
+    const defaultButtonClassName: ReactAriaButtonClassNameFn = renderProps =>
       String(
         css({
           alignItems: 'center',
@@ -164,10 +164,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         }),
       );
 
-    const buttonClassName: Extract<
-      ComponentPropsWithoutRef<typeof ReactAriaButton>['className'],
-      (renderProps) => string
-    > = renderProps =>
+    const buttonClassName: ReactAriaButtonClassNameFn = renderProps =>
       typeof props.className === 'function'
         ? props.className(renderProps)
         : props.className;
@@ -239,3 +236,10 @@ export const ButtonWithLoading = forwardRef<
 });
 
 ButtonWithLoading.displayName = 'ButtonWithLoading';
+
+type ReactAriaButtonClassNameFn = Extract<
+  ComponentPropsWithoutRef<typeof ReactAriaButton>['className'],
+  (
+    renderProps: ReactAriaButtonRenderProps & { defaultClassName: string },
+  ) => string
+>;
