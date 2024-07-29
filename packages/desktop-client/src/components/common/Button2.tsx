@@ -1,8 +1,5 @@
 import React, { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import {
-  Button as ReactAriaButton,
-  type ButtonProps as ReactAriaButtonProps,
-} from 'react-aria-components';
+import { Button as ReactAriaButton } from 'react-aria-components';
 
 import { css } from 'glamor';
 
@@ -161,13 +158,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ...(props.isDisabled ? {} : { ':active': activeStyle }),
     };
 
+    const buttonClassName: ComponentPropsWithoutRef<
+      typeof ReactAriaButton
+    >['className'] = renderProps =>
+      typeof props.className === 'function'
+        ? props.className(renderProps)
+        : props.className;
+
     return (
       <ReactAriaButton
         ref={ref}
         {...restProps}
-        className={({ defaultClassName }) =>
-          `${defaultClassName} ${String(css(buttonStyle))} ${props.className}`
-        }
+        className={`${renderProps.defaultClassName} ${String(css(buttonStyle))} ${buttonClassName(renderProps)}`}
       >
         {children}
       </ReactAriaButton>
