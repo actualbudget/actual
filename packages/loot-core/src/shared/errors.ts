@@ -106,27 +106,6 @@ export class LazyLoadFailedError extends Error {
   }
 }
 
-export function getUserDirectoryErrors(reason: string) {
-  switch (reason) {
-    case 'unauthorized':
-      return 'You are not logged in.';
-    case 'token-expired':
-      return 'Login expired, please login again.';
-    case 'user-cant-be-empty':
-      return 'Please enter a value for the username; the field cannot be empty.';
-    case 'role-cant-be-empty':
-      return 'Select a role; the field cannot be empty.';
-    case 'user-already-exists':
-      return 'The username you entered already exists. Please choose a different username.';
-    case 'not-all-deleted':
-      return 'Not all users were deleted. Check if one of the selected users is the master user.';
-    case 'role-does-not-exists':
-      return 'Selected role does not exists, possibly a bug? Visit https://actualbudget.org/contact/ for support.';
-    default:
-      return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
-  }
-}
-
 export function getUserAccessErrors(reason: string) {
   switch (reason) {
     case 'unauthorized':
