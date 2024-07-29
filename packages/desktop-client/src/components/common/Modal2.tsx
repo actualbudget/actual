@@ -108,12 +108,13 @@ export const Modal = ({
                 [`@media (min-width: ${tokens.breakpoint_small})`]: {
                   minWidth: tokens.breakpoint_small,
                 },
+                overflowY: 'scroll',
                 ...styles.shadowLarge,
                 ...styles.lightScrollbar,
                 ...containerProps?.style,
               }}
             >
-              <View style={{ paddingTop: 0, flex: 1 }}>
+              <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
                 {typeof children === 'function'
                   ? children(modalProps)
                   : children}
