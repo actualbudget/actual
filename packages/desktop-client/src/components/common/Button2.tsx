@@ -167,7 +167,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const buttonClassName: ReactAriaButtonClassNameFn = renderProps =>
       typeof props.className === 'function'
         ? props.className(renderProps)
-        : props.className;
+        : props.className || '';
 
     return (
       <ReactAriaButton
