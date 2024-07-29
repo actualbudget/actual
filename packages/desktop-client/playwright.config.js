@@ -58,7 +58,7 @@ export default defineConfig({
   retries: 1,
   testDir: 'e2e/',
   reporter: !process.env.CI
-    ? ['html', { open: 'never', outputFolder: 'test-results/html' }]
+    ? [['html', { open: 'never', outputFolder: 'test-results/html' }]]
     : undefined,
   use: {
     userAgent: 'playwright',
