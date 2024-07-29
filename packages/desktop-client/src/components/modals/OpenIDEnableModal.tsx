@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
+import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
 
-import * as asyncStorage from '../../../../loot-core/src/platform/server/asyncStorage';
 import { useActions } from '../../hooks/useActions';
 import { theme, styles } from '../../style';
 import { Error } from '../alerts';

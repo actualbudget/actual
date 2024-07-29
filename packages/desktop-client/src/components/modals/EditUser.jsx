@@ -1,9 +1,11 @@
 import { useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { getUserDirectoryErrors } from 'loot-core/shared/errors';
 
-import { PossibleRoles } from '../../../../loot-core/src/types/models/user';
+import { getUserDirectoryErrors } from '/loot-core/shared/errors';
+
+import { PossibleRoles } from 'loot-core/src/types/models/user';
+
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
