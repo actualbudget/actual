@@ -45,12 +45,14 @@ export function LoggedInUser({
   const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
-    getUserData().then(() => setLoading(false));
+    if (getUserData) {
+      getUserData().then(() => setLoading(false));
+    }
   }, [getUserData]);
 
   useEffect(() => {
     if (cloudFileId) {
-      send('check-file-access', cloudFileId).then(
+      send?.('check-file-access', cloudFileId).then(
         ({ granted }: { granted: boolean }) => setIsOwner(granted),
       );
     }
@@ -78,7 +80,9 @@ export function LoggedInUser({
         navigate('/');
         break;
       case 'sign-out':
-        signOut();
+        if (signOut) {
+          signOut();
+        }
         break;
       case 'config-server':
         await closeBudget();

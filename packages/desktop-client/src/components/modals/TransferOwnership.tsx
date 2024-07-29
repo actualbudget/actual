@@ -47,15 +47,19 @@ export function TransferOwnership({
   }, [userData?.userId]);
 
   async function onSave() {
-    const { error } =
-      (await send('transfer-ownership', {
+    if (cloudFileId) {
+      const response = await send('transfer-ownership', {
         fileId: cloudFileId,
         newUserId: userId,
-      })) || {};
-    if (!error) {
-      originalOnSave?.();
+      });
+      const { error } = response || {};
+      if (!error) {
+        originalOnSave?.();
+      } else {
+        setSetError(getUserAccessErrors(error));
+      }
     } else {
-      setSetError(getUserAccessErrors(error));
+      setSetError('Cloud file ID is missing.');
     }
   }
 
