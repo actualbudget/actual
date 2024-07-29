@@ -1,7 +1,9 @@
 import React, { type MouseEventHandler, type ReactNode } from 'react';
 
+import { css } from 'glamor';
+
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 
 type ModeButtonProps = {
   selected: boolean;
@@ -18,23 +20,26 @@ export function ModeButton({
 }: ModeButtonProps) {
   return (
     <Button
-      type="bare"
-      style={{
-        padding: '5px 10px',
-        backgroundColor: theme.menuBackground,
-        marginRight: 5,
-        fontSize: 'inherit',
-        ...style,
-        ...(selected && {
-          backgroundColor: theme.buttonPrimaryBackground,
-          color: theme.buttonPrimaryText,
-          ':hover': {
-            backgroundColor: theme.buttonPrimaryBackgroundHover,
-            color: theme.buttonPrimaryTextHover,
-          },
+      variant="bare"
+      className={String(
+        css({
+          padding: '5px 10px',
+          backgroundColor: theme.menuBackground,
+          marginRight: 5,
+          fontSize: 'inherit',
+          ...style,
+          ...(selected && {
+            backgroundColor: theme.buttonPrimaryBackground,
+            color: theme.buttonPrimaryText,
+            ':hover': {
+              backgroundColor: theme.buttonPrimaryBackgroundHover,
+              color: theme.buttonPrimaryTextHover,
+            },
+          }),
+          ...style,
         }),
-      }}
-      onClick={onSelect}
+      )}
+      onPress={onSelect}
     >
       {children}
     </Button>

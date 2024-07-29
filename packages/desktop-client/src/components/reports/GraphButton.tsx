@@ -1,7 +1,7 @@
 import React, { type HTMLProps } from 'react';
 
 import { type CSSProperties, styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 
@@ -28,15 +28,15 @@ export const GraphButton = ({
       style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
     >
       <Button
-        type="bare"
+        variant="bare"
         style={{
           ...(selected && {
             backgroundColor: theme.buttonBareBackgroundHover,
           }),
           ...style,
         }}
-        onClick={onSelect}
-        disabled={disabled}
+        onPress={onSelect}
+        isDisabled={disabled}
       >
         {children}
       </Button>
