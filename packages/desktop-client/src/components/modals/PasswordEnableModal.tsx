@@ -25,7 +25,9 @@ type PasswordEnableModalProps = {
   onSave?: () => void;
 };
 
-export function PasswordEnableModal({ onSave: originalOnSave }: PasswordEnableModalProps) {
+export function PasswordEnableModal({
+  onSave: originalOnSave,
+}: PasswordEnableModalProps) {
   const [error, setError] = useState<string | null>(null);
   const { closeBudget, popModal } = useActions();
   const multiuserEnabled = useMultiuserEnabled();

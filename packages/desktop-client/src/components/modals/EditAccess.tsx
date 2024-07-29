@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
+import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
@@ -12,7 +13,6 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-import { UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 type UserAvailable = {
   userId: string;
@@ -35,15 +35,16 @@ export function EditUserAccess({
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
 
   useEffect(() => {
-    send('access-get-available-users', defaultUserAccess.fileId).then((users: UserAvailable[]) =>
-      setAvailableUsers(
-        users.map(user => [
-          user.userId,
-          user.displayName
-            ? `${user.displayName} (${user.userName})`
-            : user.userName,
-        ]),
-      ),
+    send('access-get-available-users', defaultUserAccess.fileId).then(
+      (users: UserAvailable[]) =>
+        setAvailableUsers(
+          users.map(user => [
+            user.userId,
+            user.displayName
+              ? `${user.displayName} (${user.userName})`
+              : user.userName,
+          ]),
+        ),
     );
   }, [defaultUserAccess.fileId]);
 

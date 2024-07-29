@@ -18,7 +18,9 @@ type OpenIDEnableModalProps = {
   onSave?: () => void;
 };
 
-export function OpenIDEnableModal({ onSave: originalOnSave }: OpenIDEnableModalProps) {
+export function OpenIDEnableModal({
+  onSave: originalOnSave,
+}: OpenIDEnableModalProps) {
   const [error, setError] = useState('');
   const actions = useActions();
   const { closeBudget } = useActions();

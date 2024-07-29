@@ -463,7 +463,9 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const [users, setUsers] = useState<UserEntity[]>([]);
   const [currentUserId, setCurrentUserId] = useState('');
   const userData = useSelector(state => state.user.data);
-  const [usersPerFile, setUsersPerFile] = useState(new Map<string, UserAccessEntity[]>());
+  const [usersPerFile, setUsersPerFile] = useState(
+    new Map<string, UserAccessEntity[]>(),
+  );
   const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
@@ -634,7 +636,7 @@ function UserAccessForFile({
   currentUserId: string;
   ownerId: string;
   usersPerFile: Map<string, UserAccessEntity[]>;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }) {
   let usersAccess = usersPerFile?.has(fileId) ? usersPerFile.get(fileId) : [];
   usersAccess = usersAccess.filter(user => user.userId !== ownerId);

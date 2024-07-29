@@ -50,8 +50,8 @@ export function LoggedInUser({
 
   useEffect(() => {
     if (cloudFileId) {
-      send('check-file-access', cloudFileId).then(({ granted }: { granted: boolean }) =>
-        setIsOwner(granted),
+      send('check-file-access', cloudFileId).then(
+        ({ granted }: { granted: boolean }) => setIsOwner(granted),
       );
     }
   }, [cloudFileId]);
@@ -113,15 +113,19 @@ export function LoggedInUser({
   }
 
   type MenuItem = {
-    name: string,
-    text: string,
+    name: string;
+    text: string;
   };
-  
+
   const getMenuItems = (): (MenuItem | typeof Menu.line)[] => {
     const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
-    
+
     const baseMenu: (MenuItem | typeof Menu.line)[] = [];
-    if (serverUrl && !userData?.offline && userData?.loginMethod === 'password') {
+    if (
+      serverUrl &&
+      !userData?.offline &&
+      userData?.loginMethod === 'password'
+    ) {
       baseMenu.push({ name: 'change-password', text: 'Change password' });
     }
     if (serverUrl) {
@@ -131,7 +135,7 @@ export function LoggedInUser({
       name: 'config-server',
       text: serverUrl ? 'Change server URL' : 'Start using a server',
     });
-  
+
     const adminMenu: (MenuItem | typeof Menu.line)[] = [];
     if (multiuserEnabled && isAdmin) {
       if (!budgetId && location.pathname !== '/') {
@@ -140,7 +144,7 @@ export function LoggedInUser({
         adminMenu.push({ name: 'user-directory', text: 'User Directory' });
       }
     }
-  
+
     if (
       multiuserEnabled &&
       (isOwner || isAdmin) &&
@@ -151,11 +155,11 @@ export function LoggedInUser({
     ) {
       adminMenu.push({ name: 'user-access', text: 'User Access Management' });
     }
-  
+
     if (adminMenu.length > 0) {
       adminMenu.push(Menu.line);
     }
-  
+
     return [...adminMenu, ...baseMenu];
   };
 
@@ -181,7 +185,10 @@ export function LoggedInUser({
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
       >
-        <Menu onMenuSelect={handleMenuSelect} items={getMenuItems().filter(Boolean)} />
+        <Menu
+          onMenuSelect={handleMenuSelect}
+          items={getMenuItems().filter(Boolean)}
+        />
       </Popover>
     </View>
   );

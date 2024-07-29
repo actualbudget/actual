@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { type State } from 'loot-core/client/state-types';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
+import { type UserEntity } from 'loot-core/types/models';
 
 import { useActions } from '../../hooks/useActions';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -15,13 +16,14 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-import { UserEntity } from 'loot-core/types/models';
 
 type TransferOwnershipProps = {
   onSave?: () => void;
 };
 
-export function TransferOwnership({ onSave: originalOnSave }: TransferOwnershipProps) {
+export function TransferOwnership({
+  onSave: originalOnSave,
+}: TransferOwnershipProps) {
   const userData = useSelector((state: State) => state.user.data);
   const actions = useActions();
   const [userId, setUserId] = useState('');
