@@ -86,9 +86,9 @@ export function ReportCard({
   if (to) {
     return (
       <Layout {...layoutProps}>
-        <Button
-          variant="bare"
-          onPress={
+        <View
+          role="button"
+          onClick={
             isEditing
               ? undefined
               : () => {
@@ -96,15 +96,15 @@ export function ReportCard({
                 }
           }
           style={{
-            padding: 0,
-            textAlign: 'left',
             height: '100%',
             width: '100%',
-            overflow: 'visible',
+            ':hover': {
+              cursor: 'pointer',
+            },
           }}
         >
           {content}
-        </Button>
+        </View>
       </Layout>
     );
   }
