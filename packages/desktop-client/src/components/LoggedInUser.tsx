@@ -62,11 +62,11 @@ export function LoggedInUser({
     switch (type) {
       case 'change-password':
         await closeBudget();
-        window.__navigate('/change-password');
+        window?.__navigate('/change-password');
         break;
       case 'sign-in':
         await closeBudget();
-        window.__navigate('/login');
+        window?.__navigate('/login');
         break;
       case 'user-access':
         navigate('/user-access');
@@ -82,7 +82,7 @@ export function LoggedInUser({
         break;
       case 'config-server':
         await closeBudget();
-        window.__navigate('/config-server');
+        window?.__navigate('/config-server');
         break;
       default:
         break;

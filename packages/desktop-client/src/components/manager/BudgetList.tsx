@@ -473,7 +473,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       if (!userData?.offline) {
         send('users-get').then((data: UserEntity[]) => {
           setUsers(data);
-          setCurrentUserId(userData?.userId);
+          setCurrentUserId(userData?.userId ?? '');
         });
         send(
           'users-get-access',
@@ -634,12 +634,12 @@ function UserAccessForFile({
 }: {
   fileId: string;
   currentUserId: string;
-  ownerId: string;
+  ownerId?: string;
   usersPerFile: Map<string, UserAccessEntity[]>;
   style?: CSSProperties;
 }) {
   let usersAccess = usersPerFile?.has(fileId) ? usersPerFile.get(fileId) : [];
-  usersAccess = usersAccess.filter(user => user.userId !== ownerId);
+  usersAccess = usersAccess?.filter(user => user.userId !== ownerId) ?? [];
 
   const sortedUsersAccess = [...usersAccess].sort((a, b) => {
     const textA =
