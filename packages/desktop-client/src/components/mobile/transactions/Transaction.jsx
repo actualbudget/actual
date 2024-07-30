@@ -130,16 +130,23 @@ export const Transaction = memo(function Transaction({
       <Button
         style={{
           backgroundColor: theme.tableBackground,
-          border: 'none',
-          ...(isSelected && {
-            borderLeft: `4px solid ${theme.mobileTransactionSelected}`,
-          }),
+          ...(isSelected
+            ? {
+                borderWidth: '0 0 0 4px',
+                borderColor: theme.mobileTransactionSelected,
+                borderStyle: 'solid',
+              }
+            : {
+                border: 'none',
+              }),
           userSelect: 'none',
           width: '100%',
           height: 60,
-          ...(isPreview && {
-            backgroundColor: theme.tableRowHeaderBackground,
-          }),
+          ...(isPreview
+            ? {
+                backgroundColor: theme.tableRowHeaderBackground,
+              }
+            : {}),
         }}
       >
         <ListItem
