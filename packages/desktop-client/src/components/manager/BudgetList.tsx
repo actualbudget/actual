@@ -65,103 +65,6 @@ function getFileDescription(file: File) {
   return null;
 }
 
-function UserAccessForFile({
-  fileId,
-  currentUserId,
-  ownerId,
-  usersPerFile,
-  style,
-}: {
-  fileId: string;
-  currentUserId: string;
-  ownerId?: string;
-  usersPerFile: Map<string, UserAccessEntity[]>;
-  style?: CSSProperties;
-}) {
-  let usersAccess = usersPerFile?.has(fileId) ? usersPerFile.get(fileId) : [];
-  usersAccess = usersAccess?.filter(user => user.userId !== ownerId) ?? [];
-
-  const sortedUsersAccess = [...usersAccess].sort((a, b) => {
-    const textA =
-      a.userId === currentUserId ? 'You' : a.displayName ?? a.userName;
-    const textB =
-      b.userId === currentUserId ? 'You' : b.displayName ?? b.userName;
-    return textA.localeCompare(textB);
-  });
-
-  return (
-    usersAccess.length > 0 && (
-      <View
-        style={{
-          ...style,
-          alignSelf: 'center',
-        }}
-      >
-        <Tooltip
-          content={
-            <View
-              style={{
-                margin: 5,
-              }}
-            >
-              <Text
-                style={{
-                  ...styles.altMenuHeaderText,
-                  ...styles.verySmallText,
-                  color: theme.pageTextLight,
-                }}
-              >
-                File shared with:
-              </Text>
-              <View
-                style={{
-                  padding: 0,
-                }}
-              >
-                {sortedUsersAccess.map(user => (
-                  <View key={user.userId} style={{ flexDirection: 'row' }}>
-                    <SvgUser
-                      style={{
-                        width: 10,
-                        height: 10,
-                        opacity: 0.7,
-                        marginTop: 3,
-                        marginRight: 5,
-                      }}
-                    />
-                    <View
-                      style={{
-                        ...styles.verySmallText,
-                        color: theme.pageTextLight,
-                        margin: 0,
-                        listStylePosition: 'inside',
-                      }}
-                    >
-                      {user.userId === currentUserId
-                        ? 'You'
-                        : user.displayName ?? user.userName}
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
-          }
-          placement="bottom end"
-        >
-          <SvgUserGroup
-            style={{
-              width: 15,
-              height: 15,
-              alignSelf: 'flex-end',
-              opacity: 0.7,
-            }}
-          />
-        </Tooltip>
-      </View>
-    )
-  );
-}
-
 function isLocalFile(file: File): file is LocalFile {
   return file.state === 'local';
 }
@@ -398,7 +301,6 @@ function FileItem({
           <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
           {isOpenID && (
             <UserAccessForFile
-              style={{ marginLeft: '5px' }}
               fileId={(file as RemoteFile).cloudFileId}
               ownerId={file.owner}
               currentUserId={currentUserId}
@@ -716,6 +618,105 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               Create test file
             </Button>
           )}
+        </View>
+      )}
+    </View>
+  );
+}
+
+type UserAccessForFileProps = {
+  fileId: string;
+  currentUserId: string;
+  ownerId?: string;
+  usersPerFile: Map<string, UserAccessEntity[]>;
+};
+
+function UserAccessForFile({
+  fileId,
+  currentUserId,
+  ownerId,
+  usersPerFile,
+}: UserAccessForFileProps) {
+  let usersAccess = usersPerFile?.has(fileId) ? usersPerFile.get(fileId) : [];
+  usersAccess = usersAccess?.filter(user => user.userId !== ownerId) ?? [];
+
+  const sortedUsersAccess = [...usersAccess].sort((a, b) => {
+    const textA =
+      a.userId === currentUserId ? 'You' : a.displayName ?? a.userName;
+    const textB =
+      b.userId === currentUserId ? 'You' : b.displayName ?? b.userName;
+    return textA.localeCompare(textB);
+  });
+
+  return (
+    <View>
+      {usersAccess.length > 0 && (
+        <View
+          style={{
+            marginLeft: '5px',
+            alignSelf: 'center',
+          }}
+        >
+          <Tooltip
+            content={
+              <View
+                style={{
+                  margin: 5,
+                }}
+              >
+                <Text
+                  style={{
+                    ...styles.altMenuHeaderText,
+                    ...styles.verySmallText,
+                    color: theme.pageTextLight,
+                  }}
+                >
+                  File shared with:
+                </Text>
+                <View
+                  style={{
+                    padding: 0,
+                  }}
+                >
+                  {sortedUsersAccess.map(user => (
+                    <View key={user.userId} style={{ flexDirection: 'row' }}>
+                      <SvgUser
+                        style={{
+                          width: 10,
+                          height: 10,
+                          opacity: 0.7,
+                          marginTop: 3,
+                          marginRight: 5,
+                        }}
+                      />
+                      <View
+                        style={{
+                          ...styles.verySmallText,
+                          color: theme.pageTextLight,
+                          margin: 0,
+                          listStylePosition: 'inside',
+                        }}
+                      >
+                        {user.userId === currentUserId
+                          ? 'You'
+                          : user.displayName ?? user.userName}
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            }
+            placement="bottom end"
+          >
+            <SvgUserGroup
+              style={{
+                width: 15,
+                height: 15,
+                alignSelf: 'flex-end',
+                opacity: 0.7,
+              }}
+            />
+          </Tooltip>
         </View>
       )}
     </View>

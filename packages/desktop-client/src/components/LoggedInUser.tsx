@@ -64,11 +64,19 @@ export function LoggedInUser({
     switch (type) {
       case 'change-password':
         await closeBudget();
-        window?.__navigate('/change-password');
+        if (window.__navigate) {
+          window.__navigate('/change-password');
+        } else {
+          window.location.href = '/change-password';
+        }
         break;
       case 'sign-in':
         await closeBudget();
-        window?.__navigate('/login');
+        if (window.__navigate) {
+          window.__navigate('/login');
+        } else {
+          window.location.href = '/login';
+        }
         break;
       case 'user-access':
         navigate('/user-access');
@@ -86,7 +94,11 @@ export function LoggedInUser({
         break;
       case 'config-server':
         await closeBudget();
-        window?.__navigate('/config-server');
+        if (window.__navigate) {
+          window.__navigate('/config-server');
+        } else {
+          window.location.href = '/config-server';
+        }
         break;
       default:
         break;
