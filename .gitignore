@@ -1,6 +1,5 @@
 # Sample Data
 /data/*
-!data/.gitkeep
 /data2
 Actual-*
 **/xcuserdata/*
