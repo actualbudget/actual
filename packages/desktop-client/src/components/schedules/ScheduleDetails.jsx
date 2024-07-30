@@ -353,7 +353,7 @@ export function ScheduleDetails({ id, transaction }) {
     transaction ? [transaction.id] : [],
   );
 
-  async function onSave() {
+  async function onSave(close) {
     dispatch({ type: 'form-error', error: null });
     if (state.fields.name) {
       const { data: sameName } = await runQuery(
@@ -396,11 +396,14 @@ export function ScheduleDetails({ id, transaction }) {
         error:
           'An error occurred while saving. Please visit https://actualbudget.org/contact/ for support.',
       });
-    } else {
-      if (adding) {
-        await onLinkTransactions([...selectedInst.items], res.data);
-      }
+      return;
     }
+
+    if (adding) {
+      await onLinkTransactions([...selectedInst.items], res.data);
+    }
+
+    close();
   }
 
   async function onEditRule(ruleId) {
@@ -788,8 +791,7 @@ export function ScheduleDetails({ id, transaction }) {
             <Button
               variant="primary"
               onPress={() => {
-                onSave();
-                close();
+                onSave(close);
               }}
             >
               {adding ? 'Add' : 'Save'}

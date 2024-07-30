@@ -129,7 +129,7 @@ export function Menu<T extends MenuItem>({
         } else if (item.type === Menu.label) {
           return (
             <Text
-              key={item.name}
+              key={idx}
               style={{
                 color: theme.menuItemTextHeader,
                 fontSize: 11,
@@ -167,7 +167,7 @@ export function Menu<T extends MenuItem>({
             }}
             onPointerEnter={() => setHoveredIndex(idx)}
             onPointerLeave={() => setHoveredIndex(null)}
-            onClick={e => {
+            onPointerUp={e => {
               e.stopPropagation();
 
               if (!item.disabled && item.toggle === undefined) {

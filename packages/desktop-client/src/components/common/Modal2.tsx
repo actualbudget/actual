@@ -80,13 +80,19 @@ export const Modal = ({
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: 14,
+        backdropFilter: 'blur(1px) brightness(0.9)',
         ...style,
       }}
       {...props}
     >
       <ReactAriaModal>
         {modalProps => (
-          <Dialog aria-label="Modal dialog">
+          <Dialog
+            aria-label="Modal dialog"
+            style={{
+              outline: 'none', // remove focus outline
+            }}
+          >
             <ModalContentContainer
               noAnimation={noAnimation}
               isActive={isActive(name)}

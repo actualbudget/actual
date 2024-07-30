@@ -37,7 +37,7 @@ export function FixEncryptionKeyModal({
   const [showPassword, setShowPassword] = useState(false);
   const { isNarrowWidth } = useResponsive();
 
-  async function onUpdateKey() {
+  async function onUpdateKey(close: () => void) {
     if (password !== '' && !loading) {
       setLoading(true);
       setError(null);
@@ -53,6 +53,7 @@ export function FixEncryptionKeyModal({
       }
 
       onSuccess?.();
+      close();
     }
   }
 
@@ -104,8 +105,7 @@ export function FixEncryptionKeyModal({
           <Form
             onSubmit={e => {
               e.preventDefault();
-              onUpdateKey();
-              close();
+              onUpdateKey(close);
             }}
           >
             <View
