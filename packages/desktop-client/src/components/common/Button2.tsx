@@ -177,16 +177,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     });
 
     return (
-      (!permission || hasPermission(permission)) && (
-        <ReactAriaButton
-          ref={ref}
-          isDisabled={isDisabled}
-          style={buttonStyle}
-          {...restProps}
-        >
-          {children}
-        </ReactAriaButton>
-      )
+      <ReactAriaButton
+        ref={ref}
+        isDisabled={
+          isDisabled ? isDisabled : !permission || hasPermission(permission)
+        }
+        style={buttonStyle}
+        {...restProps}
+      >
+        {children}
+      </ReactAriaButton>
     );
   },
 );
