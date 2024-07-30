@@ -504,7 +504,6 @@ async function applyCategoryTemplate(
   prev_budgeted,
   payToDistribute,
 ) {
-  console.log("PAY:",payToDistribute);
   const payDistributeTemplateActive =
     category.payDistributeTemplateActive === true; //Pay Distribution: if the flag is contained in the categoy then true
   const current_month = `${month}-01`;
