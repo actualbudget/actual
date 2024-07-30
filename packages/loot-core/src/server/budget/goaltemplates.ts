@@ -202,7 +202,10 @@ async function processTemplate(
   }
 
   //The current amount we have after income to Distribute amoung the categories.
-  const payToDistribute = await getSheetValue(monthUtils.sheetForMonth(month), `to-budget`); 
+  const payToDistribute = await getSheetValue(
+    monthUtils.sheetForMonth(month),
+    `to-budget`,
+  );
 
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
@@ -217,7 +220,6 @@ async function processTemplate(
     const template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
-
         //if template contains pay distribution then flip flag for category
         if (template[l].type === 'payDistribute') {
           categories[c].payDistributeTemplateActive = true;
@@ -345,17 +347,20 @@ async function processTemplate(
               sheetName,
               `budget-${category.id}`,
             );
-            const { amount: originalToBudget,set_budget:set_budget, errors: applyErrors } =
-              await applyCategoryTemplate(
-                category,
-                template_lines,
-                month,
-                remainder_scale,
-                available_start,
-                budgetAvailable,
-                prev_budgeted,
-                payToDistribute,
-              );
+            const {
+              amount: originalToBudget,
+              set_budget,
+              errors: applyErrors,
+            } = await applyCategoryTemplate(
+              category,
+              template_lines,
+              month,
+              remainder_scale,
+              available_start,
+              budgetAvailable,
+              prev_budgeted,
+              payToDistribute,
+            );
 
             let to_budget = originalToBudget;
             if (to_budget != null) {
@@ -499,7 +504,8 @@ async function applyCategoryTemplate(
   prev_budgeted,
   payToDistribute,
 ) {
-  const payDistributeTemplateActive = category.payDistributeTemplateActive === true; //Pay Distribution: if the flag is contained in the categoy then true
+  const payDistributeTemplateActive =
+    category.payDistributeTemplateActive === true; //Pay Distribution: if the flag is contained in the categoy then true
   const current_month = `${month}-01`;
   let errors = [];
   let all_schedule_names = await db.all(
@@ -598,7 +604,7 @@ async function applyCategoryTemplate(
           last_month_balance,
           set_budget,
           payToDistribute,
-          category.budgeted
+          category.budgeted,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
@@ -619,7 +625,9 @@ async function applyCategoryTemplate(
           last_month_balance,
         );
         //Pay distribution, set_budget sets budgeted while to_budget sets the goal.
-        set_budget = !payDistributeTemplateActive ? goalsReturn.to_budget : set_budget;
+        set_budget = !payDistributeTemplateActive
+          ? goalsReturn.to_budget
+          : set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
@@ -639,7 +647,9 @@ async function applyCategoryTemplate(
           errors,
         );
         //Pay distribution, set_budget sets budgeted while to_budget sets the goal.
-        set_budget = !payDistributeTemplateActive ? goalsReturn.to_budget : set_budget;
+        set_budget = !payDistributeTemplateActive
+          ? goalsReturn.to_budget
+          : set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
@@ -656,7 +666,9 @@ async function applyCategoryTemplate(
           errors,
         );
         //Pay distribution, set_budget sets budgeted while to_budget sets the goal.
-        set_budget = !payDistributeTemplateActive ? goalsReturn.to_budget : set_budget;
+        set_budget = !payDistributeTemplateActive
+          ? goalsReturn.to_budget
+          : set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
@@ -674,7 +686,9 @@ async function applyCategoryTemplate(
           category,
         );
         //Pay distribution, set_budget sets budgeted while to_budget sets the goal.
-        set_budget = !payDistributeTemplateActive ? goalsReturn.to_budget : set_budget;
+        set_budget = !payDistributeTemplateActive
+          ? goalsReturn.to_budget
+          : set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         break;
@@ -689,7 +703,9 @@ async function applyCategoryTemplate(
           errors,
         );
         //Pay distribution, set_budget sets budgeted while to_budget sets the goal.
-        set_budget = !payDistributeTemplateActive ? goalsReturn.to_budget : set_budget;
+        set_budget = !payDistributeTemplateActive
+          ? goalsReturn.to_budget
+          : set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         break;
@@ -707,7 +723,9 @@ async function applyCategoryTemplate(
           category,
         );
         //Pay distribution, set_budget sets budgeted while to_budget sets the goal.
-        set_budget = !payDistributeTemplateActive ? goalsReturn.to_budget : set_budget; 
+        set_budget = !payDistributeTemplateActive
+          ? goalsReturn.to_budget
+          : set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
@@ -735,7 +753,9 @@ async function applyCategoryTemplate(
           to_budget,
         );
         //Pay distribution, set_budget sets budgeted while to_budget sets the goal.
-        set_budget = !payDistributeTemplateActive ? goalsReturn.to_budget : set_budget;
+        set_budget = !payDistributeTemplateActive
+          ? goalsReturn.to_budget
+          : set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         break;

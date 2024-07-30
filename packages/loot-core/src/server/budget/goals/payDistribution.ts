@@ -11,24 +11,29 @@ export async function payDistribution(
   last_month_balance,
   set_budget,
   payToDistribute,
-  currentBudgeted
+  currentBudgeted,
 ) {
   let increment = 0;
-  if (template.percent)  {
-
-    increment =  Math.max(0, Math.round(payToDistribute * (template.percent / 100)));
+  if (template.percent) {
+    increment = Math.max(
+      0,
+      Math.round(payToDistribute * (template.percent / 100)),
+    );
   } else {
-    increment =  amountToInteger(template.amount);
+    increment = amountToInteger(template.amount);
   }
 
   if (increment > payToDistribute) {
-    if (payToDistribute != 0) {
-      errors.push("not enough funds to distribute only " + payToDistribute + " could be budgeted");
+    if (payToDistribute !== 0) {
+      errors.push(
+        'not enough funds to distribute only ' +
+          payToDistribute +
+          ' could be budgeted',
+      );
 
-      increment = currentBudgeted+ payToDistribute;
+      increment = currentBudgeted + payToDistribute;
     } else {
-
-      errors.push("not enough funds to distribute");
+      errors.push('not enough funds to distribute');
       increment = currentBudgeted;
     }
   } else {
@@ -43,6 +48,6 @@ export async function payDistribution(
     limitCheck,
     hold,
     set_budget,
-    payToDistribute
+    payToDistribute,
   };
 }

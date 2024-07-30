@@ -8,10 +8,9 @@ export async function goalsRemainder(
 ) {
   to_budget = set_budget;
 
-
   if (remainder_scale >= 0) {
     to_budget +=
-      (remainder_scale === 0 && template.payDistributeTemplateActive) //Was getting 1cent error when Paydistribution was active, this fixed it
+      remainder_scale === 0 && template.payDistributeTemplateActive //Was getting 1cent error when Paydistribution was active, this fixed it
         ? Math.round(template.weight)
         : Math.round(remainder_scale * template.weight);
     // can over budget with the rounding, so checking that
