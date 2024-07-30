@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import { type State } from 'loot-core/src/client/state-types';
+import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import { theme, styles, type CSSProperties } from '../style';
@@ -33,7 +34,21 @@ export function LoggedInUser({
 
   useEffect(() => {
     getUserData().then(() => setLoading(false));
-  }, []);
+
+    const unlisten = listen('sync-event', ({ type }) => {
+      console.log(userData?.offline);
+      if (type === 'start' && userData?.offline) {
+        setLoading(true);
+      } else {
+        // Give the layout some time to apply the starting animation
+        // so we always finish it correctly even if it's almost
+        // instant
+        getUserData().then(() => (loading ? setLoading(false) : null));
+      }
+    });
+
+    return unlisten;
+  }, [userData, loading]);
 
   async function onChangePassword() {
     await closeBudget();
