@@ -15,6 +15,7 @@ import {
 import { useHotkeysContext } from 'react-hotkeys-hook';
 
 import { AutoTextSize } from 'auto-text-size';
+import { css } from 'glamor';
 
 import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -87,7 +88,10 @@ export const Modal = ({
     >
       <ReactAriaModal>
         {modalProps => (
-          <Dialog aria-label="Modal dialog">
+          <Dialog 
+            aria-label="Modal dialog"
+            className={`${css({ ...styles.lightScrollbar })}`}
+          >
             <ModalContentContainer
               noAnimation={noAnimation}
               isActive={isActive(name)}
@@ -110,7 +114,6 @@ export const Modal = ({
                 },
                 overflowY: 'auto',
                 ...styles.shadowLarge,
-                ...styles.lightScrollbar,
                 ...containerProps?.style,
               }}
             >
