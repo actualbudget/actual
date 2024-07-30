@@ -40,11 +40,6 @@ import { SpendingCard } from './reports/SpendingCard';
 
 import './overview.scss';
 
-type MenuItem = {
-  name: Widget['type'];
-  text: string;
-};
-
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
@@ -312,7 +307,7 @@ export function Overview() {
                     isOpen={menuOpen}
                     onOpenChange={() => setMenuOpen(false)}
                   >
-                    <Menu<MenuItem>
+                    <Menu
                       onMenuSelect={item => {
                         if (item === 'custom-report') {
                           navigate('/reports/custom');
@@ -320,28 +315,33 @@ export function Overview() {
                         }
                         onAddWidget(item);
                       }}
-                      items={[
-                        {
-                          name: 'cash-flow-card' as const,
-                          text: 'Cash flow graph',
-                        },
-                        {
-                          name: 'net-worth-card' as const,
-                          text: 'Net worth graph',
-                        },
-                        ...(spendingReportFeatureFlag
-                          ? [
-                              {
-                                name: 'spending-card' as const,
-                                text: 'Spending analysis',
-                              },
-                            ]
-                          : []),
-                        {
-                          name: 'custom-report' as const,
-                          text: 'Custom report',
-                        },
-                      ]}
+                      items={
+                        [
+                          {
+                            name: 'cash-flow-card',
+                            text: 'Cash flow graph',
+                          },
+                          {
+                            name: 'net-worth-card',
+                            text: 'Net worth graph',
+                          },
+                          ...(spendingReportFeatureFlag
+                            ? [
+                                {
+                                  name: 'spending-card' as const,
+                                  text: 'Spending analysis',
+                                },
+                              ]
+                            : []),
+                          {
+                            name: 'custom-report',
+                            text: 'Custom report',
+                          },
+                        ] satisfies Array<{
+                          name: Widget['type'];
+                          text: string;
+                        }>
+                      }
                     />
                   </Popover>
 
