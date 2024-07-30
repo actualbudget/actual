@@ -232,25 +232,3 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
     return id;
   };
 }
-
-export function goToLogin() {
-  if (window.__clearUserToken) {
-    window.__clearUserToken();
-  }
-
-  return async (dispatch: Dispatch) => {
-    await dispatch(closeBudget());
-  };
-}
-
-export function goToLoginFromManagement() {
-  if (window.__clearUserToken) {
-    window.__clearUserToken();
-  }
-
-  if (window.__navigate) {
-    window.__navigate('/');
-  } else {
-    window.location.href = '/';
-  }
-}

@@ -1488,17 +1488,27 @@ handlers['subscribe-get-user'] = async function () {
         'X-ACTUAL-TOKEN': userToken,
       },
     });
+    let tokenExpired = false;
     const {
       status,
       reason,
-      data: { userName, permissions, userId, displayName, loginMethod },
-    } = JSON.parse(res);
+      data: {
+        userName = null,
+        permissions = [],
+        userId = null,
+        displayName = null,
+        loginMethod = null,
+      } = {},
+    } = JSON.parse(res) || {};
 
     if (status === 'error') {
       if (reason === 'unauthorized') {
         return null;
+      } else if (reason === 'token-expired') {
+        tokenExpired = true;
+      } else {
+        return { offline: true };
       }
-      return { offline: true };
     }
 
     return {
@@ -1508,6 +1518,7 @@ handlers['subscribe-get-user'] = async function () {
       userId,
       displayName,
       loginMethod,
+      tokenExpired,
     };
   } catch (e) {
     console.log(e);

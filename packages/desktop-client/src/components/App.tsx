@@ -22,6 +22,7 @@ import {
   send,
 } from 'loot-core/src/platform/client/fetch';
 
+import { useActions } from '../hooks/useActions';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
@@ -45,6 +46,8 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const loadingText = useSelector((state: State) => state.app.loadingText);
   const dispatch = useDispatch();
+  const userData = useSelector((state: State) => state.user.data);
+  const { signOut, addNotification } = useActions();
 
   async function init() {
     const socketName = await global.Actual.getServerSocket();
@@ -109,6 +112,24 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   useEffect(() => {
     global.Actual.updateAppMenu(budgetId);
   }, [budgetId]);
+
+  useEffect(() => {
+    if (userData?.tokenExpired) {
+      addNotification({
+        type: 'error',
+        id: 'login-expired',
+        title: 'Login expired',
+        sticky: true,
+        message: 'Login expired, please login again.',
+        button: {
+          title: 'Go to login',
+          action: () => {
+            signOut();
+          },
+        },
+      });
+    }
+  }, [userData, userData?.tokenExpired]);
 
   return (
     <>

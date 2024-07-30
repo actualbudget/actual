@@ -110,6 +110,8 @@ export function getUserAccessErrors(reason: string) {
   switch (reason) {
     case 'unauthorized':
       return 'You are not logged in.';
+    case 'token-expired':
+      return 'Login expired, please login again.';
     case 'user-cant-be-empty':
       return 'Please select a user.';
     case 'invalid-file-id':

@@ -70,14 +70,14 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
       if (error === 'token-expired') {
         actions.addNotification({
           type: 'error',
+          id: 'login-expired',
           title: 'Login expired',
           sticky: true,
           message: getUserDirectoryErrors(error),
           button: {
             title: 'Go to login',
             action: () => {
-              actions.popModal();
-              actions.goToLoginFromManagement();
+              actions.signOut();
             },
           },
         });

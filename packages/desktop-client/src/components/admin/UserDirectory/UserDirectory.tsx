@@ -125,12 +125,13 @@ function UserDirectoryContent({
       if (error === 'token-expired') {
         actions.addNotification({
           type: 'error',
+          id: 'login-expired',
           title: 'Login expired',
           sticky: true,
           message: getUserDirectoryErrors(error),
           button: {
             title: 'Go to login',
-            action: () => actions.goToLoginFromManagement(),
+            action: () => actions.signOut(),
           },
         });
       } else {

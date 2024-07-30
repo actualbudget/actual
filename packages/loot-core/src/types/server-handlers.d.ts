@@ -288,6 +288,7 @@ export interface ServerHandlers {
     displayName?: string;
     permissions?: string[];
     loginMethod?: string;
+    tokenExpired?: boolean;
   } | null>;
 
   'subscribe-change-password': (arg: {

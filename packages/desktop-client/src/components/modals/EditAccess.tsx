@@ -59,7 +59,23 @@ export function EditUserAccess({
       originalOnSave?.(userAccess);
       close();
     } else {
-      setSetError(getUserAccessErrors(error));
+      if (error === 'token-expired') {
+        actions.addNotification({
+          type: 'error',
+          id: 'login-expired',
+          title: 'Login expired',
+          sticky: true,
+          message: getUserAccessErrors(error),
+          button: {
+            title: 'Go to login',
+            action: () => {
+              actions.signOut();
+            },
+          },
+        });
+      } else {
+        setSetError(getUserAccessErrors(error));
+      }
     }
   }
 

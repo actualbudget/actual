@@ -256,7 +256,7 @@ export function listenForSyncEvent(actions, store) {
             id: 'login-expired',
             button: {
               title: 'Go to login',
-              action: () => actions.goToLogin(),
+              action: () => actions.signOut(),
             },
           };
           break;
