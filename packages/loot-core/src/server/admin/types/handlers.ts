@@ -29,6 +29,14 @@ export interface AdminHandlers {
     user: NewUserAccessEntity,
   ) => Promise<{ error?: string } | Record<string, never>>;
 
+  'access-delete-all': ({
+    fileId,
+    ids,
+  }: {
+    fileId: string;
+    ids: string[];
+  }) => Promise<{ someDeletionsFailed: boolean; ids?: number[] }>;
+
   'access-get': (fileId: string) => Promise<UserAccessEntity[]>;
 
   'access-get-available-users': (
@@ -48,4 +56,6 @@ export interface AdminHandlers {
   'auth-mode': () => Promise<string>;
 
   'multiuser-get': () => Promise<boolean | null>;
+
+  'master-created': () => Promise<boolean>;
 }

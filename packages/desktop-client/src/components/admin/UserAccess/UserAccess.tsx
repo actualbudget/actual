@@ -114,9 +114,10 @@ function UserAccessContent({
 
   async function onDeleteSelected() {
     setLoading(true);
-    const { someDeletionsFailed } = await send('user-delete-all', [
-      ...selectedInst.items,
-    ]);
+    const { someDeletionsFailed } = await send('access-delete-all', {
+      fileId: cloudFileId,
+      ids: [...selectedInst.items],
+    });
 
     if (someDeletionsFailed) {
       alert('Some access were not revoked');

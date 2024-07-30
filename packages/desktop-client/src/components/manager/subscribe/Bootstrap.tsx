@@ -12,6 +12,7 @@ import { Link } from '../../common/Link';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -21,6 +22,7 @@ export function Bootstrap() {
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
   const [loginMethod, setLoginMethod] = useState('password');
+  const refreshLoginMethods = useRefreshLoginMethods();
 
   const { checked } = useBootstrapped();
   const navigate = useNavigate();
@@ -51,6 +53,7 @@ export function Bootstrap() {
     if (error) {
       setError(error);
     } else {
+      await refreshLoginMethods();
       navigate('/login');
     }
   }
@@ -62,6 +65,7 @@ export function Bootstrap() {
     if (error) {
       setError(error);
     } else {
+      await refreshLoginMethods();
       navigate('/login');
     }
   }
@@ -124,9 +128,9 @@ export function Bootstrap() {
             onError={setError}
           />
           <Button
-            style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
+            style={{ fontSize: 15, color: theme.pageTextLink, marginTop: 10 }}
             onPress={() => setLoginMethod('openid')}
-            variant="bare"
+            variant="normal"
           >
             Configure OpenID authentication instead (Advanced)
           </Button>
@@ -137,7 +141,8 @@ export function Bootstrap() {
         <>
           <OpenIdForm onSetOpenId={onSetOpenId} />
           <Button
-            style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
+            style={{ fontSize: 15, color: theme.pageTextLink, marginTop: 10 }}
+            variant="normal"
             onPress={() => setLoginMethod('password')}
           >
             Configure password authentication instead

@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
-import * as asyncStorage from '../../platform/server/asyncStorage';
 import { getDownloadError, getSyncError } from '../../shared/errors';
 import type { Handlers } from '../../types/handlers';
 import * as constants from '../constants';
@@ -235,13 +234,23 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
 }
 
 export function goToLogin() {
+  if (window.__clearUserToken) {
+    window.__clearUserToken();
+  }
+
   return async (dispatch: Dispatch) => {
-    asyncStorage.removeItem('user-token');
     await dispatch(closeBudget());
   };
 }
 
 export function goToLoginFromManagement() {
-  asyncStorage.removeItem('user-token');
-  window.location.href = '/';
+  if (window.__clearUserToken) {
+    window.__clearUserToken();
+  }
+
+  if (window.__navigate) {
+    window.__navigate('/');
+  } else {
+    window.location.href = '/';
+  }
 }

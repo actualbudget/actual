@@ -105,41 +105,37 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
           >
             The username registered within the OpenID provider.
           </label>
-          {defaultUser.master && (
-            <label
-              style={{
-                ...styles.verySmallText,
-                color: theme.warningTextLight,
-                marginTop: 5,
-              }}
-            >
-              Change this username with caution; it is the master user.
-            </label>
-          )}
         </FormField>
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
             userSelect: 'none',
-            justifyContent: 'flex-end',
           }}
         >
           {' '}
           <Checkbox
-            id="name-field"
+            id="enabled-field"
             checked={enabled}
             disabled={defaultUser.master}
             onChange={() => setEnabled(!enabled)}
           />
-          <label
-            htmlFor="form_posts_transaction"
-            style={{ userSelect: 'none' }}
-          >
+          <label htmlFor="enabled-field" style={{ userSelect: 'none' }}>
             Enabled
           </label>
         </View>
       </Stack>
+      {defaultUser.master && (
+        <label
+          style={{
+            ...styles.verySmallText,
+            color: theme.warningTextLight,
+            marginTop: 5,
+          }}
+        >
+          Change this username with caution; it is the master user.
+        </label>
+      )}
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Display Name" htmlFor="dispalyname-field" />
@@ -173,6 +169,7 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Role" htmlFor="name-field" />
           <Select
+            disabled={defaultUser.master}
             options={Object.entries(PossibleRoles)}
             value={role}
             onChange={newValue => setRole(newValue)}

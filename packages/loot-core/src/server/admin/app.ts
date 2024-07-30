@@ -169,6 +169,29 @@ app.method('access-add', async function (access) {
   return null;
 });
 
+app.method('access-delete-all', async function ({ fileId, ids }) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (userToken) {
+    try {
+      const res = await post(
+        getServer().BASE_SERVER + `/admin/access/delete-all?fileId=${fileId}`,
+        {
+          token: userToken,
+          ids,
+        },
+      );
+
+      if (res) {
+        return res;
+      }
+    } catch (err) {
+      return { error: err.reason };
+    }
+  }
+
+  return { someDeletionsFailed: true };
+});
+
 app.method('access-get-available-users', async function (fileId) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -246,6 +269,16 @@ app.method('multiuser-get', async function () {
 
   if (res) {
     return (JSON.parse(res) as boolean) || false;
+  }
+
+  return null;
+});
+
+app.method('master-created', async function () {
+  const res = await get(getServer().BASE_SERVER + '/admin/masterCreated/');
+
+  if (res) {
+    return JSON.parse(res) as boolean;
   }
 
   return null;

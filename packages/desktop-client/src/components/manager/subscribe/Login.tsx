@@ -46,6 +46,16 @@ function PasswordLogin({ setError, dispatch }) {
 
   return (
     <>
+      <Text
+        style={{
+          fontSize: 16,
+          color: theme.pageTextDark,
+          lineHeight: 1.4,
+        }}
+      >
+        If you lost your password, you likely still have access to your server
+        to manually reset it.
+      </Text>
       <BigInput
         autoFocus={true}
         placeholder="Password"
@@ -66,6 +76,12 @@ function PasswordLogin({ setError, dispatch }) {
 }
 
 function OpenIdLogin({ setError }) {
+  const [warnMasterCreation, setWarnMasterCreation] = useState(false);
+
+  useEffect(() => {
+    send('master-created').then(created => setWarnMasterCreation(!created));
+  }, []);
+
   async function onSubmitOpenId() {
     const { error, redirect_url } = await send('subscribe-sign-in', {
       return_url: window.location.origin,
@@ -80,10 +96,21 @@ function OpenIdLogin({ setError }) {
   }
 
   return (
-    <Button style={{ fontSize: 15 }} onPress={onSubmitOpenId}>
-      Sign in with OpenId
-    </Button>
+    <View>
+      <Button style={{ fontSize: 15 }} onPress={onSubmitOpenId}>
+        Sign in with OpenId
+      </Button>
+      {warnMasterCreation && (
+        <label style={{ color: theme.warningText, marginTop: 10 }}>
+          The first user to login with OpenId will be the{' '}
+          <Text style={{ fontWeight: 'bold' }}>server master</Text>. This
+          can&apos;t be changed using UI.
+        </label>
+      )}
+    </View>
   );
+
+  ///warnMasterCreation
 }
 
 function HeaderLogin({ error }) {
@@ -141,7 +168,7 @@ export function Login() {
         }
       })();
     }
-  }, [checked, searchParams, method, dispatch]);
+  }, [loginMethods, checked, searchParams, method, dispatch]);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -171,17 +198,6 @@ export function Login() {
   return (
     <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
       <Title text="Sign in to this Actual instance" />
-      <Text
-        style={{
-          fontSize: 16,
-          color: theme.pageTextDark,
-          lineHeight: 1.4,
-        }}
-      >
-        If you lost your password, you likely still have access to your server
-        to manually reset it.
-      </Text>
-
       {loginMethods.length > 1 && (
         <View style={{ marginTop: 10 }}>
           <Select

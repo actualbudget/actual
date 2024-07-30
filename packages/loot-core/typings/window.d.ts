@@ -18,5 +18,6 @@ declare global {
     };
 
     __navigate?: import('react-router').NavigateFunction;
+    __clearUserToken?: () => void;
   }
 }
