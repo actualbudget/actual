@@ -88,7 +88,7 @@ export const Modal = ({
     >
       <ReactAriaModal>
         {modalProps => (
-          <Dialog 
+          <Dialog
             aria-label="Modal dialog"
             className={`${css(styles.lightScrollbar)}`}
             style={{
