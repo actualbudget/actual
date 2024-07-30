@@ -33,7 +33,7 @@ import { View } from './common/View';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
 import { SchedulesQuery } from './rules/SchedulesQuery';
-import { SimpleTable } from './rules/SimpleTable';
+import { SimpleTable } from './common/SimpleTable';
 
 function mapValue(field, value, { payees, categories, accounts }) {
   if (!value) return '';

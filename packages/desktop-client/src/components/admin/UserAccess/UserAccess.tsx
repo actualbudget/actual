@@ -30,7 +30,7 @@ import { Search } from '../../common/Search';
 import { Stack } from '../../common/Stack';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { SimpleTable } from '../../rules/SimpleTable';
+import { SimpleTable } from '../../common/SimpleTable';
 
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';
