@@ -21,12 +21,12 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import { AuthProvider } from '../../auth/AuthProvider';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../../ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
-import { AuthProvider } from '../../auth/AuthProvider';
 
 vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => vi.fn().mockReturnValue(false));
