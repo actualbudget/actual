@@ -91,6 +91,9 @@ export const Modal = ({
           <Dialog 
             aria-label="Modal dialog"
             className={`${css(styles.lightScrollbar)}`}
+            style={{
+              outline: 'none', // remove focus outline
+            }}
           >
             <ModalContentContainer
               noAnimation={noAnimation}
