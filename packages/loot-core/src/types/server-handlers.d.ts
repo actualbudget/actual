@@ -28,11 +28,8 @@ export interface ServerHandlers {
   redo: () => Promise<void>;
 
   'transactions-batch-update': (
-    arg: Omit<
-      Parameters<typeof batchUpdateTransactions>[0],
-      'detectOrphanPayees'
-    >,
-  ) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>>;
+    ...arg: Parameters<typeof batchUpdateTransactions>
+  ) => ReturnType<typeof batchUpdateTransactions>;
 
   'transaction-add': (transaction) => Promise<EmptyObject>;
 

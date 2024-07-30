@@ -6,7 +6,10 @@ import { pushModal } from 'loot-core/client/actions';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Query } from 'loot-core/src/shared/query';
-import { type TransactionEntity } from 'loot-core/src/types/models';
+import {
+  type ScheduleEntity,
+  type TransactionEntity,
+} from 'loot-core/src/types/models';
 
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button2';
@@ -20,9 +23,11 @@ import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 export function ScheduleLink({
   transactionIds: ids,
   getTransaction,
+  onScheduleLinked,
 }: {
   transactionIds: string[];
   getTransaction: (transactionId: string) => TransactionEntity;
+  onScheduleLinked?: (schedule: ScheduleEntity) => void;
 }) {
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
@@ -43,6 +48,7 @@ export function ScheduleLink({
       await send('transactions-batch-update', {
         updated: ids.map(id => ({ id, schedule: scheduleId })),
       });
+      onScheduleLinked?.(schedules.find(s => s.id === scheduleId));
     }
   }
 

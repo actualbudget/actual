@@ -49,7 +49,11 @@ function DiscoverSchedulesTable({
         height={ROW_HEIGHT}
         inset={15}
         onClick={e => {
-          dispatchSelected({ type: 'select', id: item.id, event: e });
+          dispatchSelected({
+            type: 'select',
+            id: item.id,
+            isRangeSelect: e.shiftKey,
+          });
         }}
         style={{
           borderColor: selected ? theme.tableBorderSelected : theme.tableBorder,
@@ -71,7 +75,11 @@ function DiscoverSchedulesTable({
           focused={false}
           selected={selected}
           onSelect={e => {
-            dispatchSelected({ type: 'select', id: item.id, event: e });
+            dispatchSelected({
+              type: 'select',
+              id: item.id,
+              isRangeSelect: e.shiftKey,
+            });
           }}
         />
         <Field width="flex">
@@ -95,7 +103,9 @@ function DiscoverSchedulesTable({
           exposed={!loading}
           focused={false}
           selected={selectedItems.size > 0}
-          onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
+          onSelect={e =>
+            dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
+          }
         />
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
@@ -114,7 +124,7 @@ function DiscoverSchedulesTable({
         }}
         items={schedules}
         loading={loading}
-        isSelected={id => selectedItems.has(id)}
+        isSelected={id => selectedItems.has(String(id))}
         renderItem={renderItem}
         renderEmpty="No schedules found"
       />

@@ -5,12 +5,16 @@ import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useCategories } from '../../../hooks/useCategories';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useNotes } from '../../../hooks/useNotes';
+import { useUndo } from '../../../hooks/useUndo';
 import { SvgLogo } from '../../../icons/logo';
 import { SvgExpandArrow } from '../../../icons/v0';
 import {
@@ -219,30 +223,35 @@ function BudgetCell({
   name,
   binding,
   style,
-  categoryId,
+  category,
   month,
   onBudgetAction,
   ...props
 }) {
   const dispatch = useDispatch();
+  const { showUndoNotification } = useUndo();
   const [budgetType = 'rollover'] = useLocalPref('budgetType');
 
   const categoryBudgetMenuModal = `${budgetType}-budget-menu`;
+  const categoryNotes = useNotes(category.id);
 
   const onOpenCategoryBudgetMenu = () => {
     dispatch(
       pushModal(categoryBudgetMenuModal, {
-        categoryId,
+        categoryId: category.id,
         month,
         onUpdateBudget: amount => {
           onBudgetAction(month, 'budget-amount', {
-            category: categoryId,
+            category: category.id,
             amount,
           });
         },
         onCopyLastMonthAverage: () => {
           onBudgetAction(month, 'copy-single-last', {
-            category: categoryId,
+            category: category.id,
+          });
+          showUndoNotification({
+            message: `${category.name} budget has been set last to month’s budgeted amount.`,
           });
         },
         onSetMonthsAverage: numberOfMonths => {
@@ -255,12 +264,19 @@ function BudgetCell({
           }
 
           onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
-            category: categoryId,
+            category: category.id,
+          });
+          showUndoNotification({
+            message: `${category.name} budget has been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
           });
         },
         onApplyBudgetTemplate: () => {
           onBudgetAction(month, 'apply-single-category-template', {
-            category: categoryId,
+            category: category.id,
+          });
+          showUndoNotification({
+            message: `${category.name} budget templates have been applied.`,
+            pre: categoryNotes,
           });
         },
       }),
@@ -349,6 +365,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const dispatch = useDispatch();
+  const { showUndoNotification } = useUndo();
+  const { list: categories } = useCategories();
+  const categoriesById = groupById(categories);
 
   const onCarryover = carryover => {
     onBudgetAction(month, 'carryover', {
@@ -385,6 +404,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
             to: toCategoryId,
           });
           dispatch(collapseModals(`${budgetType}-balance-menu`));
+          showUndoNotification({
+            message: `Transferred ${integerToCurrency(amount)} from ${category.name} to ${categoriesById[toCategoryId].name}.`,
+          });
         },
         showToBeBudgeted: true,
       }),
@@ -402,6 +424,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
             from: fromCategoryId,
           });
           dispatch(collapseModals(`${budgetType}-balance-menu`));
+          showUndoNotification({
+            message: `Covered ${category.name} overspending from ${categoriesById[fromCategoryId].name}.`,
+          });
         },
       }),
     );
@@ -502,7 +527,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
           <BudgetCell
             name="budgeted"
             binding={budgeted}
-            categoryId={category.id}
+            category={category}
             month={month}
             onBudgetAction={onBudgetAction}
             formatter={value => (
@@ -1190,7 +1215,7 @@ const IncomeCategory = memo(function IncomeCategory({
             <BudgetCell
               name="budgeted"
               binding={budgeted}
-              categoryId={category.id}
+              category={category}
               month={month}
               onBudgetAction={onBudgetAction}
               formatter={value => (

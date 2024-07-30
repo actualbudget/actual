@@ -234,7 +234,7 @@ function TransactionListWithPreviews({ account }) {
     updateSearchQuery(text);
   };
 
-  const onSelectTransaction = transaction => {
+  const onOpenTransaction = transaction => {
     if (!isPreviewId(transaction.id)) {
       navigate(`/transactions/${transaction.id}`);
     } else {
@@ -274,7 +274,7 @@ function TransactionListWithPreviews({ account }) {
       onLoadMore={onLoadMore}
       searchPlaceholder={`Search ${account.name}`}
       onSearch={onSearch}
-      onSelectTransaction={onSelectTransaction}
+      onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
     />
   );

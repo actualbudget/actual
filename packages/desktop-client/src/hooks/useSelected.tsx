@@ -8,7 +8,6 @@ import React, {
   useRef,
   type Dispatch,
   type ReactElement,
-  type MouseEvent,
 } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -16,7 +15,6 @@ import { type State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type UndoState } from 'loot-core/src/server/undo';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 type Range<T> = { start: T; end: T | null };
 type Item = { id: string };
@@ -35,20 +33,20 @@ type SelectedState = {
   selectedItems: Set<string>;
 };
 
-type WithOptionalMouseEvent = {
-  event?: MouseEvent;
-};
 type SelectAction = {
   type: 'select';
   id: string;
-} & WithOptionalMouseEvent;
+  isRangeSelect?: boolean;
+};
 type SelectNoneAction = {
   type: 'select-none';
-} & WithOptionalMouseEvent;
+  isRangeSelect?: boolean;
+};
 type SelectAllAction = {
   type: 'select-all';
   ids?: string[];
-} & WithOptionalMouseEvent;
+  isRangeSelect?: boolean;
+};
 
 type Actions = SelectAction | SelectNoneAction | SelectAllAction;
 
@@ -64,9 +62,9 @@ export function useSelected<T extends Item>(
         case 'select': {
           const { selectedRange } = state;
           const selectedItems = new Set(state.selectedItems);
-          const { id, event } = action;
+          const { id, isRangeSelect } = action;
 
-          if (event.shiftKey && selectedRange) {
+          if (isRangeSelect && selectedRange) {
             const idx = items.findIndex(p => p.id === id);
             const startIdx = items.findIndex(p => p.id === selectedRange.start);
             const endIdx = items.findIndex(p => p.id === selectedRange.end);
@@ -246,7 +244,7 @@ export function useSelected<T extends Item>(
 }
 
 const SelectedDispatch = createContext<(action: Actions) => void>(null);
-const SelectedItems = createContext<Set<unknown>>(null);
+const SelectedItems = createContext<Set<string>>(null);
 
 export function useSelectedDispatch() {
   return useContext(SelectedDispatch);
@@ -275,24 +273,24 @@ export function SelectedProvider<T extends Item>({
 
   const dispatch = useCallback(
     async (action: Actions) => {
-      if (!action.event && isNonProductionEnvironment()) {
-        throw new Error('SelectedDispatch actions must have an event');
-      }
       if (action.type === 'select-all') {
         if (latestItems.current && latestItems.current.size > 0) {
           return instance.dispatch({
             type: 'select-none',
-            event: action.event,
+            isRangeSelect: action.isRangeSelect,
           });
         } else {
           if (fetchAllIds) {
             return instance.dispatch({
               type: 'select-all',
               ids: await fetchAllIds(),
-              event: action.event,
+              isRangeSelect: action.isRangeSelect,
             });
           }
-          return instance.dispatch({ type: 'select-all', event: action.event });
+          return instance.dispatch({
+            type: 'select-all',
+            isRangeSelect: action.isRangeSelect,
+          });
         }
       }
       return instance.dispatch(action);
