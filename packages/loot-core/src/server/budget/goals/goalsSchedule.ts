@@ -190,8 +190,6 @@ export async function goalsSchedule(
   to_budget,
   errors,
   category,
-  set_budget,
-  payDistributeTemplateActive
 ) {
   if (!scheduleFlag) {
     scheduleFlag = true;
@@ -223,7 +221,6 @@ export async function goalsSchedule(
 
     if (balance >= totalSinking + totalPayMonthOf) {
       to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
-      if (!payDistributeTemplateActive) { set_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);}
     } else {
       const totalSinkingContribution = await getSinkingContributionTotal(
         t_sinking,
@@ -234,18 +231,10 @@ export async function goalsSchedule(
         to_budget +=
           Math.round(totalPayMonthOf + totalSinkingContribution) -
           last_month_balance;
-          if (!payDistributeTemplateActive) { 
-            set_budget += Math.round(totalPayMonthOf + totalSinkingContribution) -
-            last_month_balance;
-          }
-
       } else {
         to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
-        if (!payDistributeTemplateActive) { 
-          set_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
-        }
       }
     }
   }
-  return { to_budget, errors, remainder, scheduleFlag, set_budget };
+  return { to_budget, errors, remainder, scheduleFlag };
 }
