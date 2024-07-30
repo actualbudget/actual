@@ -25,7 +25,12 @@ expr
   / template: template _ 'average'i _ amount: positive _ 'months'i?
     { return { type: 'average', amount: +amount, priority: template.priority, directive: template.directive }}
   / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: null, directive: 'goal' }}
-
+  //----PAY DISTRIBUTION------------------------------------------------------
+  / template: template _? '+' _? percent: $(d+ ('.' (d+)?)?) _? '%'
+  	{ return {type: 'payDistribute',priority: 0,directive: template.directive,percent: +percent} }
+  / template: template _? '+' _? amount: amount
+    { return { type: 'payDistribute',priority:0,directive: template.directive, amount} }
+  //----PAY DISTRIBUTION-------------------------------------------------------
 
 repeat 'repeat interval'
   = 'month'i { return { annual: false } }
