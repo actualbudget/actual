@@ -646,10 +646,10 @@ export async function syncAccount(
   );
 
   const acctRow = await db.select('accounts', id);
-  // If syncing an account from Go Cardless it must not use strictIdChecking. This allows
+  // If syncing an account from sync source it must not use strictIdChecking. This allows
   // the fuzzy search to match transactions where the import IDs are different. It is a known quirk
-  // that Go Cardless can give two different transaction IDs even though it's the same transaction.
-  const useStrictIdChecking = acctRow.account_sync_source !== 'goCardless';
+  // that account sync sources can give two different transaction IDs even though it's the same transaction.
+  const useStrictIdChecking = !acctRow.account_sync_source;
 
   if (latestTransaction) {
     const startingTransaction = await db.first(
