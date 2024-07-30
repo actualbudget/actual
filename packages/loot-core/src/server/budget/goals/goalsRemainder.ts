@@ -4,18 +4,12 @@ export async function goalsRemainder(
   budgetAvailable,
   remainder_scale,
   to_budget,
-  set_budget,
-  payToDistribute
 ) {
-  to_budget = set_budget;
-
-
   if (remainder_scale >= 0) {
     to_budget +=
-      (remainder_scale === 0 && template.payDistributeTemplateActive)
+      remainder_scale === 0
         ? Math.round(template.weight)
         : Math.round(remainder_scale * template.weight);
-   
     // can over budget with the rounding, so checking that
     if (to_budget >= budgetAvailable) {
       to_budget = budgetAvailable;
@@ -24,8 +18,7 @@ export async function goalsRemainder(
       to_budget = to_budget + 1;
     }
   }
-  set_budget = to_budget;
-  return { to_budget, set_budget };
+  return { to_budget };
 }
 
 export function findRemainder(priority_list, categories, category_templates) {

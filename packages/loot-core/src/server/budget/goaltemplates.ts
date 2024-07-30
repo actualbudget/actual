@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
-import { integerToAmount } from '../../shared/util';
+import { integerToAmount, amountToInteger } from '../../shared/util';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
@@ -15,18 +15,26 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
-import { payDistribution } from './goals/payDistribution';
+
+const TEMPLATE_PREFIX = '#template';
+const GOAL_PREFIX = '#goal';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
-  const category_templates = await getTemplates(null);
-  return processTemplate(month, false, category_templates);
+  const category_templates = await getTemplates(null, 'template');
+  const category_goals = await getTemplates(null, 'goal');
+  const ret = await processTemplate(month, false, category_templates);
+  await processGoals(category_goals, month);
+  return ret;
 }
 
 export async function overwriteTemplate({ month }) {
   await storeTemplates();
-  const category_templates = await getTemplates(null);
-  return processTemplate(month, true, category_templates);
+  const category_templates = await getTemplates(null, 'template');
+  const category_goals = await getTemplates(null, 'goal');
+  const ret = await processTemplate(month, true, category_templates);
+  await processGoals(category_goals, month);
+  return ret;
 }
 
 export async function applySingleCategoryTemplate({ month, category }) {
@@ -34,8 +42,16 @@ export async function applySingleCategoryTemplate({ month, category }) {
     category,
   ]);
   await storeTemplates();
-  const category_templates = await getTemplates(categories[0]);
-  return processTemplate(month, true, category_templates, categories[0]);
+  const category_templates = await getTemplates(categories[0], 'template');
+  const category_goals = await getTemplates(categories[0], 'goal');
+  const ret = await processTemplate(
+    month,
+    true,
+    category_templates,
+    categories[0],
+  );
+  await processGoals(category_goals, month, categories[0]);
+  return ret;
 }
 
 export function runCheckTemplates() {
@@ -84,6 +100,7 @@ async function setCategoryTargets({ month, idealTemplate }) {
         category: element.category,
         goal: element.amount,
         month,
+        long_goal: 0,
       });
     });
   });
@@ -102,6 +119,7 @@ async function resetCategoryTargets(month, category) {
         category: categories[i].id,
         goal: null,
         month,
+        long_goal: null,
       });
     }
   });
@@ -128,7 +146,7 @@ async function storeTemplates() {
   }
 }
 
-async function getTemplates(category) {
+async function getTemplates(category, directive: string) {
   //retrieves template definitions from the database
   const goal_def = await db.all(
     'SELECT * FROM categories WHERE goal_def IS NOT NULL',
@@ -139,13 +157,26 @@ async function getTemplates(category) {
     templates[goal_def[ll].id] = JSON.parse(goal_def[ll].goal_def);
   }
   if (category) {
-    const singleCategoryTemplate = {};
+    const singleCategoryTemplate = [];
     if (templates[category.id] !== undefined) {
-      singleCategoryTemplate[category.id] = templates[category.id];
+      singleCategoryTemplate[category.id] = templates[category.id].filter(
+        t => t.directive === directive,
+      );
+      return singleCategoryTemplate;
     }
+    singleCategoryTemplate[category.id] = undefined;
     return singleCategoryTemplate;
   } else {
-    return templates;
+    const categories = await getCategories();
+    const ret = [];
+    for (let cc = 0; cc < categories.length; cc++) {
+      const id = categories[cc].id;
+      if (templates[id]) {
+        ret[id] = templates[id];
+        ret[id] = ret[id].filter(t => t.directive === directive);
+      }
+    }
+    return ret;
   }
 }
 
@@ -169,9 +200,6 @@ async function processTemplate(
     categories = await getCategories();
   }
 
-  //The current amount we have after income to Distribute amoung the categories.
-  const payToDistribute = await getSheetValue(monthUtils.sheetForMonth(month), `to-budget`); 
-  //Prevents other tmeplates in category from wiping budgted and instead just changes goal.
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
     const category = categories[c];
@@ -179,17 +207,9 @@ async function processTemplate(
       monthUtils.sheetForMonth(month),
       `budget-${category.id}`,
     );
-
-    categories[c].budgeted = budgeted;
     const template = category_templates[category.id];
-    let adder = false; //This is the bool that will skip the zeroing of budgeted.
     if (template) {
       for (let l = 0; l < template.length; l++) {
-        //if template contains pay distribution then add current amount budgeted.
-        if (template[l].type === 'payDistribute') {
-          template[l].budgeted = budgeted;
-          categories[c].payDistributeTemplateActive = true;
-        }
         //add each priority we need to a list.  Will sort later
         if (template[l].priority == null) {
           continue;
@@ -198,21 +218,14 @@ async function processTemplate(
       }
     }
     if (budgeted) {
-      if (!force && !category.payDistributeTemplateActive) {
+      if (!force) {
         // save index of category to remove
-        //unless template states otherwise
-        if (!adder) {
-          categories_remove.push(c);
-        }
+        categories_remove.push(c);
       } else {
-        // if we are overwritting add this category to list to zero
-        //unless template states otherwise
-        if (!adder) {
+        // add all categories with a template to the list to unset budget
+        if (template?.length > 0) {
           setToZero.push({
             category: category.id,
-            amount: 0,
-            isIncome: category.is_income,
-            isTemplate: template ? true : false,
           });
         }
       }
@@ -229,7 +242,7 @@ async function processTemplate(
   // zero out budget and goal from categories that need it
   await setGoalBudget({
     month,
-    templateBudget: setToZero.filter(f => f.isTemplate === true),
+    templateBudget: setToZero,
   });
   await resetCategoryTargets(month, categories);
 
@@ -319,9 +332,7 @@ async function processTemplate(
               sheetName,
               `budget-${category.id}`,
             );
-
-
-            const { amount: originalToBudget,set_budget:set_budget, errors: applyErrors } =
+            const { amount: originalToBudget, errors: applyErrors } =
               await applyCategoryTemplate(
                 category,
                 template_lines,
@@ -330,7 +341,6 @@ async function processTemplate(
                 available_start,
                 budgetAvailable,
                 prev_budgeted,
-                payToDistribute,
               );
 
             let to_budget = originalToBudget;
@@ -355,7 +365,7 @@ async function processTemplate(
               if (to_budget <= budgetAvailable || !priority) {
                 templateBudget.push({
                   category: category.id,
-                  amount: set_budget + prev_budgeted,
+                  amount: to_budget + prev_budgeted,
                 });
               } else if (to_budget > budgetAvailable && budgetAvailable >= 0) {
                 to_budget = budgetAvailable;
@@ -379,6 +389,7 @@ async function processTemplate(
     await setGoalBudget({ month, templateBudget });
   }
   await setCategoryTargets({ month, idealTemplate });
+
   if (num_applied === 0) {
     if (errors.length) {
       return {
@@ -407,12 +418,35 @@ async function processTemplate(
   }
 }
 
-const TEMPLATE_PREFIX = '#template';
+async function processGoals(goals, month, category?) {
+  let categories = [];
+  if (category) {
+    categories[0] = category;
+  } else {
+    categories = await getCategories();
+  }
+  for (let c = 0; c < categories.length; c++) {
+    const cat_id = categories[c].id;
+    const goal_lines = goals[cat_id];
+    if (goal_lines?.length > 0) {
+      await setGoal({
+        month,
+        category: cat_id,
+        goal: amountToInteger(goal_lines[0].amount),
+        long_goal: 1,
+      });
+    }
+  }
+}
 async function getCategoryTemplates(category) {
   const templates = {};
 
   let notes = await db.all(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
+    `
+    SELECT * FROM notes 
+    WHERE lower(note) like '%${TEMPLATE_PREFIX}%' 
+    OR lower(note) like '%${GOAL_PREFIX}%'
+     `,
   );
   if (category) notes = notes.filter(n => n.id === category.id);
 
@@ -421,10 +455,14 @@ async function getCategoryTemplates(category) {
     const template_lines = [];
     for (let l = 0; l < lines.length; l++) {
       const line = lines[l].trim();
-      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
-      const expression = line.slice(TEMPLATE_PREFIX.length);
+      if (
+        !line.toLowerCase().startsWith(TEMPLATE_PREFIX) &&
+        !line.toLowerCase().startsWith(GOAL_PREFIX)
+      ) {
+        continue;
+      }
       try {
-        const parsed = parse(expression);
+        const parsed = parse(line);
         template_lines.push(parsed);
       } catch (e) {
         template_lines.push({ type: 'error', line, error: e });
@@ -445,16 +483,14 @@ async function applyCategoryTemplate(
   available_start,
   budgetAvailable,
   prev_budgeted,
-  payToDistribute,
-
 ) {
-  const payDistributeTemplateActive = category.payDistributeTemplateActive === true;
   const current_month = `${month}-01`;
   let errors = [];
   let all_schedule_names = await db.all(
     'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
   );
   all_schedule_names = all_schedule_names.map(v => v.name);
+
   let scheduleFlag = false; //only run schedules portion once
 
   // remove lines for past dates, calculate repeating dates
@@ -524,9 +560,7 @@ async function applyCategoryTemplate(
   const spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   const last_month_balance = balance - spent - prev_budgeted;
-  
   let to_budget = 0;
-  let set_budget = 0;
   let limit = 0;
   let hold = false;
   let limitCheck = false;
@@ -535,26 +569,6 @@ async function applyCategoryTemplate(
   for (let l = 0; l < template_lines.length; l++) {
     const template = template_lines[l];
     switch (template.type) {
-      case 'payDistribute': {
-        const goalsReturn = await payDistribution(
-          template,
-          limitCheck,
-          errors,
-          limit,
-          hold,
-          to_budget,
-          last_month_balance,
-          set_budget,
-          payToDistribute,
-        );
-        to_budget = goalsReturn.to_budget;
-        errors = goalsReturn.errors;
-        limit = goalsReturn.limit;
-        limitCheck = goalsReturn.limitCheck;
-        hold = goalsReturn.hold;
-        set_budget = goalsReturn.set_budget;
-        break;
-      }
       case 'simple': {
         const goalsReturn = await goalsSimple(
           template,
@@ -564,18 +578,12 @@ async function applyCategoryTemplate(
           hold,
           to_budget,
           last_month_balance,
-          set_budget,
-          payDistributeTemplateActive,
         );
-        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
         limitCheck = goalsReturn.limitCheck;
         hold = goalsReturn.hold;
-        if (!payDistributeTemplateActive){
-        set_budget = to_budget;
-        }
         break;
       }
       case 'by': {
@@ -588,10 +596,7 @@ async function applyCategoryTemplate(
           last_month_balance,
           to_budget,
           errors,
-          set_budget,
-          payDistributeTemplateActive
         );
-        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
@@ -606,11 +611,8 @@ async function applyCategoryTemplate(
           current_month,
           to_budget,
           errors,
-          set_budget,
-          payDistributeTemplateActive
         );
         to_budget = goalsReturn.to_budget;
-        set_budget = goalsReturn.set_budget;
         errors = goalsReturn.errors;
         limit = goalsReturn.limit;
         limitCheck = goalsReturn.limitCheck;
@@ -625,10 +627,7 @@ async function applyCategoryTemplate(
           to_budget,
           errors,
           category,
-          set_budget,
-          payDistributeTemplateActive,
         );
-        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         break;
@@ -641,10 +640,7 @@ async function applyCategoryTemplate(
           sheetName,
           to_budget,
           errors,
-          set_budget,
-          payDistributeTemplateActive,
         );
-        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         break;
@@ -660,10 +656,7 @@ async function applyCategoryTemplate(
           to_budget,
           errors,
           category,
-          set_budget,
-          payDistributeTemplateActive,
         );
-        set_budget = goalsReturn.set_budget;
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
@@ -676,11 +669,8 @@ async function applyCategoryTemplate(
           budgetAvailable,
           remainder_scale,
           to_budget,
-          set_budget,
-          payToDistribute
         );
         to_budget = goalsReturn.to_budget;
-        set_budget = goalsReturn.set_budget;
         break;
       }
       case 'average': {
@@ -690,8 +680,6 @@ async function applyCategoryTemplate(
           category,
           errors,
           to_budget,
-          set_budget,
-          payDistributeTemplateActive,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
@@ -702,19 +690,12 @@ async function applyCategoryTemplate(
       default:
     }
   }
+
   if (limitCheck) {
-    if (
-      hold &&
-      (balance > limit ||
-        (payDistributeTemplateActive && balance + category.budgeted > limit))
-    ) {
-      if (payDistributeTemplateActive) {
-        set_budget = category.budgeted;
-      } else {
-        set_budget = 0;
-      }
-    } else if (set_budget + balance > limit) {
-      set_budget = limit - balance;
+    if (hold && balance > limit) {
+      to_budget = 0;
+    } else if (to_budget + balance > limit) {
+      to_budget = limit - balance;
     }
   }
   // setup notifications
@@ -726,7 +707,7 @@ async function applyCategoryTemplate(
     integerToAmount(last_month_balance + to_budget);
   str += ' ' + template_lines.map(x => x.line).join('\n');
   console.log(str);
-  return { amount: to_budget, set_budget, errors };
+  return { amount: to_budget, errors };
 }
 
 async function checkTemplates(): Promise<Notification> {
