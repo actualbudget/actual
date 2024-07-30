@@ -16,7 +16,7 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const userData = useSelector((state: State) => state.user.data);
 
-  const hasPermission = (permission: string) => {
+  const hasPermission = (permission?: string) => {
     if (!permission) {
       return true;
     }

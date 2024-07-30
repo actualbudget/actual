@@ -26,6 +26,7 @@ import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../../ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
+import { AuthProvider } from '../../auth/AuthProvider';
 
 vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => vi.fn().mockReturnValue(false));
@@ -119,29 +120,31 @@ function LiveTransactionTable(props) {
   return (
     <TestProvider>
       <ResponsiveProvider>
-        <SpreadsheetProvider>
-          <SelectedProviderWithItems
-            name="transactions"
-            items={transactions}
-            fetchAllIds={() => transactions.map(t => t.id)}
-          >
-            <SplitsExpandedProvider>
-              <TransactionTable
-                {...props}
-                transactions={transactions}
-                loadMoreTransactions={() => {}}
-                commonPayees={[]}
-                payees={payees}
-                addNotification={n => console.log(n)}
-                onSave={onSave}
-                onSplit={onSplit}
-                onAdd={onAdd}
-                onAddSplit={onAddSplit}
-                onCreatePayee={onCreatePayee}
-              />
-            </SplitsExpandedProvider>
-          </SelectedProviderWithItems>
-        </SpreadsheetProvider>
+        <AuthProvider>
+          <SpreadsheetProvider>
+            <SelectedProviderWithItems
+              name="transactions"
+              items={transactions}
+              fetchAllIds={() => transactions.map(t => t.id)}
+            >
+              <SplitsExpandedProvider>
+                <TransactionTable
+                  {...props}
+                  transactions={transactions}
+                  loadMoreTransactions={() => {}}
+                  commonPayees={[]}
+                  payees={payees}
+                  addNotification={n => console.log(n)}
+                  onSave={onSave}
+                  onSplit={onSplit}
+                  onAdd={onAdd}
+                  onAddSplit={onAddSplit}
+                  onCreatePayee={onCreatePayee}
+                />
+              </SplitsExpandedProvider>
+            </SelectedProviderWithItems>
+          </SpreadsheetProvider>
+        </AuthProvider>
       </ResponsiveProvider>
     </TestProvider>
   );
