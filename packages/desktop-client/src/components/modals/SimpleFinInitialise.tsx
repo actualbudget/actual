@@ -30,7 +30,7 @@ export const SimpleFinInitialise = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('It is required to provide a token.');
 
-  const onSubmit = async () => {
+  const onSubmit = async (close: () => void) => {
     if (!token) {
       setIsValid(false);
       return;
@@ -51,6 +51,7 @@ export const SimpleFinInitialise = ({
       onSuccess();
     }
     setIsLoading(false);
+    close();
   };
 
   return (
@@ -97,8 +98,7 @@ export const SimpleFinInitialise = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                onSubmit();
-                close();
+                onSubmit(close);
               }}
             >
               Save and continue

@@ -33,7 +33,7 @@ export const GoCardlessInitialise = ({
     'It is required to provide both the secret id and secret key.',
   );
 
-  const onSubmit = async () => {
+  const onSubmit = async (close: () => void) => {
     if (!secretId || !secretKey) {
       setIsValid(false);
       setError('It is required to provide both the secret id and secret key.');
@@ -70,6 +70,7 @@ export const GoCardlessInitialise = ({
     setIsValid(true);
     onSuccess();
     setIsLoading(false);
+    close();
   };
 
   return (
@@ -129,8 +130,7 @@ export const GoCardlessInitialise = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                onSubmit();
-                close();
+                onSubmit(close);
               }}
             >
               Save and continue
