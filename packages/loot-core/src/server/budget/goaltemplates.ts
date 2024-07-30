@@ -202,7 +202,7 @@ async function processTemplate(
   }
 
   //The current amount we have after income to Distribute amoung the categories.
-  const payToDistribute = await getSheetValue(
+  let payToDistribute = await getSheetValue(
     monthUtils.sheetForMonth(month),
     `to-budget`,
   );
@@ -361,7 +361,7 @@ async function processTemplate(
               prev_budgeted,
               payToDistribute,
             );
-
+            payToDistribute += category.budgeted - set_budget; //Removes amounts off paytodistribute
             let to_budget = originalToBudget;
             if (to_budget != null) {
               num_applied++;
@@ -504,6 +504,7 @@ async function applyCategoryTemplate(
   prev_budgeted,
   payToDistribute,
 ) {
+  console.log("PAY:",payToDistribute);
   const payDistributeTemplateActive =
     category.payDistributeTemplateActive === true; //Pay Distribution: if the flag is contained in the categoy then true
   const current_month = `${month}-01`;
