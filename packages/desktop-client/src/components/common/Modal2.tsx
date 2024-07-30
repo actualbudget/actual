@@ -90,7 +90,7 @@ export const Modal = ({
         {modalProps => (
           <Dialog 
             aria-label="Modal dialog"
-            className={`${css({ ...styles.lightScrollbar })}`}
+            className={`${css(styles.lightScrollbar)}`}
           >
             <ModalContentContainer
               noAnimation={noAnimation}
