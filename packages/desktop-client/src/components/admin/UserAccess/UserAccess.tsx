@@ -27,10 +27,10 @@ import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Popover } from '../../common/Popover';
 import { Search } from '../../common/Search';
+import { SimpleTable } from '../../common/SimpleTable';
 import { Stack } from '../../common/Stack';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { SimpleTable } from '../../common/SimpleTable';
 
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';

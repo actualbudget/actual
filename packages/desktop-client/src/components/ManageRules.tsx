@@ -27,13 +27,13 @@ import { theme } from '../style';
 import { Button } from './common/Button';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
+import { SimpleTable } from './common/SimpleTable';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
 import { SchedulesQuery } from './rules/SchedulesQuery';
-import { SimpleTable } from './common/SimpleTable';
 
 function mapValue(field, value, { payees, categories, accounts }) {
   if (!value) return '';
