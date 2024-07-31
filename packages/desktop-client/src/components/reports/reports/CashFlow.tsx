@@ -159,7 +159,7 @@ export function CashFlow() {
       >
         <View
           style={{
-            paddingTop: 10,
+            paddingTop: 20,
             alignItems: 'flex-end',
             color: theme.pageText,
           }}
