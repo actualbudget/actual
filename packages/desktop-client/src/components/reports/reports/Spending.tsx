@@ -14,6 +14,7 @@ import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Button } from '../../common/Button';
 import { Paragraph } from '../../common/Paragraph';
+import { Select } from '../../common/Select';
 import { Text } from '../../common/Text';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
@@ -45,15 +46,19 @@ export function Spending() {
   );
   const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
     useLocalPref('spendingReportTime');
+  const [spendingReportCompare = 'thisMonth', setSpendingReportCompare] =
+    useLocalPref('spendingReportCompare');
 
   const [dataCheck, setDataCheck] = useState(false);
+  const [compare, setCompare] = useState(spendingReportCompare);
   const [mode, setMode] = useState(spendingReportTime);
 
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const filterSaved =
     JSON.stringify(parseFilter.conditions) === JSON.stringify(conditions) &&
     parseFilter.conditionsOp === conditionsOp &&
-    spendingReportTime === mode;
+    spendingReportTime === mode &&
+    spendingReportCompare === compare;
 
   useEffect(() => {
     const checkFilter =
@@ -70,8 +75,9 @@ export function Spending() {
       conditions,
       conditionsOp,
       setDataCheck,
+      compare,
     });
-  }, [categories, conditions, conditionsOp]);
+  }, [categories, conditions, conditionsOp, compare]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
@@ -89,6 +95,7 @@ export function Spending() {
       }),
     );
     setSpendingReportTime(mode);
+    setSpendingReportCompare(compare);
   };
 
   const showAverage =
@@ -99,12 +106,20 @@ export function Spending() {
     ) > 0;
 
   const todayDay =
-    monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+    compare === 'lastMonth'
       ? 27
-      : monthUtils.getDay(monthUtils.currentDay()) - 1;
+      : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+        ? 27
+        : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
-  const showLastYear = Math.abs(data.intervalData[27].lastYear) > 0;
-  const showLastMonth = Math.abs(data.intervalData[27].lastMonth) > 0;
+  const showLastYear =
+    Math.abs(
+      data.intervalData[27][
+        compare === 'thisMonth' ? 'lastYear' : 'lastYearPrevious'
+      ],
+    ) > 0;
+  const showPreviousMonth =
+    Math.abs(data.intervalData[27][spendingReportTime]) > 0;
   return (
     <Page
       header={
@@ -139,37 +154,67 @@ export function Spending() {
         >
           <strong
             style={{
-              paddingRight: 10,
-              fontWeight: 'bold',
+              paddingRight: 5,
             }}
           >
-            Compare this month to:
+            Compare
           </strong>
-          <ModeButton
-            selected={mode === 'lastMonth'}
-            onSelect={() => setMode('lastMonth')}
-            color="inherit"
-          >
-            Last month
-          </ModeButton>
-          {showLastYear && (
-            <ModeButton
-              selected={mode === 'lastYear'}
-              onSelect={() => setMode('lastYear')}
-              color="inherit"
-            >
-              Last year
-            </ModeButton>
-          )}
-          {showAverage && (
-            <ModeButton
-              selected={mode === 'average'}
-              onSelect={() => setMode('average')}
-              color="inherit"
-            >
-              Average
-            </ModeButton>
-          )}
+                    <Select
+                      value={compare}
+                      style={{
+              fontWeight: 'bold',
+            }}
+                      onChange={e => {
+                        setCompare(e);
+                        if (mode === 'lastMonth') setMode('twoMonthsPrevious');
+                        if (mode === 'twoMonthsPrevious') setMode('lastMonth');
+                      }}
+                      options={[
+                        ['thisMonth', 'this month'],
+                        ['lastMonth', 'last month'],
+                      ]}
+                    />
+                    <strong
+                      style={{
+                        paddingRight: 10,
+                        paddingLeft: 5,
+                      }}
+                    >
+                      to the:
+                    </strong>
+                    <ModeButton
+                      color="inherit"
+                      selected={['lastMonth', 'twoMonthsPrevious'].includes(
+                        mode,
+                      )}
+                      onSelect={() =>
+                        setMode(
+                          compare === 'thisMonth'
+                            ? 'lastMonth'
+                            : 'twoMonthsPrevious',
+                        )
+                      }
+                    >
+                      Month previous
+                    </ModeButton>
+                    {showLastYear && (
+                      <ModeButton
+                        color="inherit"
+                        selected={mode === 'lastYear'}
+                        onSelect={() => setMode('lastYear')}
+                      >
+                        Last year
+                      </ModeButton>
+                    )}
+                    {showAverage && (
+                      <ModeButton
+                        color="inherit"
+                        selected={mode === 'average'}
+                        onSelect={() => setMode('average')}
+                      >
+                        Average
+                      </ModeButton>
+                    )}
         </View>
         <View
           style={{
@@ -272,16 +317,27 @@ export function Spending() {
                     color: theme.pageText,
                   }}
                 >
-                  {showLastMonth && (
+                  {showPreviousMonth && (
                     <View>
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
-                        left={<Block>Spent MTD:</Block>}
+                        left={
+                          <Block>
+                            Spent{' '}
+                            {compare === 'thisMonth' ? 'MTD' : 'Last Month'}:
+                          </Block>
+                        }
                         right={
                           <Text style={{ fontWeight: 600 }}>
                             <PrivacyFilter blurIntensity={5}>
                               {amountToCurrency(
-                                Math.abs(data.intervalData[todayDay].thisMonth),
+                                Math.abs(
+                                  data.intervalData[todayDay][
+                                    compare === 'thisMonth'
+                                      ? 'thisMonth'
+                                      : 'lastMonth'
+                                  ],
+                                ),
                               )}
                             </PrivacyFilter>
                           </Text>
@@ -289,12 +345,26 @@ export function Spending() {
                       />
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
-                        left={<Block>Spent Last MTD:</Block>}
+                        left={
+                          <Block>
+                            Spent{' '}
+                            {compare === 'thisMonth'
+                              ? ' Last MTD'
+                              : '2 Months Ago'}
+                            :
+                          </Block>
+                        }
                         right={
                           <Text style={{ fontWeight: 600 }}>
                             <PrivacyFilter blurIntensity={5}>
                               {amountToCurrency(
-                                Math.abs(data.intervalData[todayDay].lastMonth),
+                                Math.abs(
+                                  data.intervalData[todayDay][
+                                    compare === 'thisMonth'
+                                      ? 'lastMonth'
+                                      : 'twoMonthsPrevious'
+                                  ],
+                                ),
                               )}
                             </PrivacyFilter>
                           </Text>
@@ -305,7 +375,11 @@ export function Spending() {
                   {showAverage && (
                     <AlignedText
                       style={{ marginBottom: 5, minWidth: 210 }}
-                      left={<Block>Spent Average MTD:</Block>}
+                      left={
+                        <Block>
+                          Spent Average{compare === 'thisMonth' && ' MTD'}:
+                        </Block>
+                      }
                       right={
                         <Text style={{ fontWeight: 600 }}>
                           <PrivacyFilter blurIntensity={5}>
@@ -319,7 +393,7 @@ export function Spending() {
                   )}
                 </View>
               </View>
-              {!showLastMonth ? (
+              {!showPreviousMonth ? (
                 <View style={{ marginTop: 20 }}>
                   <h1>Additional data required to generate graph</h1>
                   <Paragraph>
