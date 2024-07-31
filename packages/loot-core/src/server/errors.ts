@@ -62,6 +62,15 @@ export class RuleError extends Error {
   }
 }
 
+export class CategoryError extends Error {
+  type: string;
+
+  constructor(name: string, message: string) {
+    super('CategoryError: ' + message);
+    this.type = name;
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function APIError(msg: string, meta?: Record<string, any>) {
   return { type: 'APIError', message: msg, meta };

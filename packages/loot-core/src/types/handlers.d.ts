@@ -1,4 +1,5 @@
 import type { BudgetHandlers } from '../server/budget/types/handlers';
+import type { CategoryHandlers } from '../server/categories/types/handlers';
 import type { FiltersHandlers } from '../server/filters/types/handlers';
 import type { NotesHandlers } from '../server/notes/types/handlers';
 import type { ReportsHandlers } from '../server/reports/types/handlers';
@@ -18,6 +19,10 @@ export interface Handlers
     ReportsHandlers,
     RulesHandlers,
     SchedulesHandlers,
-    ToolsHandlers {}
+    ToolsHandlers,
+    CategoryHandlers {
+  name: string;
+  isIncome: boolean;
+}
 
 export type HandlerFunctions = Handlers[keyof Handlers];
