@@ -159,62 +159,58 @@ export function Spending() {
           >
             Compare
           </strong>
-                    <Select
-                      value={compare}
-                      style={{
+          <Select
+            value={compare}
+            buttonStyle={{
               fontWeight: 'bold',
             }}
-                      onChange={e => {
-                        setCompare(e);
-                        if (mode === 'lastMonth') setMode('twoMonthsPrevious');
-                        if (mode === 'twoMonthsPrevious') setMode('lastMonth');
-                      }}
-                      options={[
-                        ['thisMonth', 'this month'],
-                        ['lastMonth', 'last month'],
-                      ]}
-                    />
-                    <strong
-                      style={{
-                        paddingRight: 10,
-                        paddingLeft: 5,
-                      }}
-                    >
-                      to the:
-                    </strong>
-                    <ModeButton
-                      color="inherit"
-                      selected={['lastMonth', 'twoMonthsPrevious'].includes(
-                        mode,
-                      )}
-                      onSelect={() =>
-                        setMode(
-                          compare === 'thisMonth'
-                            ? 'lastMonth'
-                            : 'twoMonthsPrevious',
-                        )
-                      }
-                    >
-                      Month previous
-                    </ModeButton>
-                    {showLastYear && (
-                      <ModeButton
-                        color="inherit"
-                        selected={mode === 'lastYear'}
-                        onSelect={() => setMode('lastYear')}
-                      >
-                        Last year
-                      </ModeButton>
-                    )}
-                    {showAverage && (
-                      <ModeButton
-                        color="inherit"
-                        selected={mode === 'average'}
-                        onSelect={() => setMode('average')}
-                      >
-                        Average
-                      </ModeButton>
-                    )}
+            onChange={e => {
+              setCompare(e);
+              if (mode === 'lastMonth') setMode('twoMonthsPrevious');
+              if (mode === 'twoMonthsPrevious') setMode('lastMonth');
+            }}
+            options={[
+              ['thisMonth', 'this month'],
+              ['lastMonth', 'last month'],
+            ]}
+          />
+          <strong
+            style={{
+              paddingRight: 10,
+              paddingLeft: 5,
+            }}
+          >
+            to the:
+          </strong>
+          <ModeButton
+            color="inherit"
+            selected={['lastMonth', 'twoMonthsPrevious'].includes(mode)}
+            onSelect={() =>
+              setMode(
+                compare === 'thisMonth' ? 'lastMonth' : 'twoMonthsPrevious',
+              )
+            }
+          >
+            Month previous
+          </ModeButton>
+          {showLastYear && (
+            <ModeButton
+              color="inherit"
+              selected={mode === 'lastYear'}
+              onSelect={() => setMode('lastYear')}
+            >
+              Last year
+            </ModeButton>
+          )}
+          {showAverage && (
+            <ModeButton
+              color="inherit"
+              selected={mode === 'average'}
+              onSelect={() => setMode('average')}
+            >
+              Average
+            </ModeButton>
+          )}
         </View>
         <View
           style={{
@@ -408,6 +404,7 @@ export function Spending() {
                   compact={false}
                   data={data}
                   mode={mode}
+                  compare={compare}
                 />
               ) : (
                 <LoadingIndicator message="Loading report..." />
