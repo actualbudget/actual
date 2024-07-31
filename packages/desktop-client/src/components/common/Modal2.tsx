@@ -15,6 +15,7 @@ import {
 import { useHotkeysContext } from 'react-hotkeys-hook';
 
 import { AutoTextSize } from 'auto-text-size';
+import { css } from 'glamor';
 
 import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -89,6 +90,7 @@ export const Modal = ({
         {modalProps => (
           <Dialog
             aria-label="Modal dialog"
+            className={`${css(styles.lightScrollbar)}`}
             style={{
               outline: 'none', // remove focus outline
             }}
@@ -114,11 +116,12 @@ export const Modal = ({
                   minWidth: tokens.breakpoint_small,
                 },
                 ...styles.shadowLarge,
-                ...styles.lightScrollbar,
+                overflowY: 'auto',
+                // ...styles.lightScrollbar,
                 ...containerProps?.style,
               }}
             >
-              <View style={{ paddingTop: 0, flex: 1 }}>
+              <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
                 {typeof children === 'function'
                   ? children(modalProps)
                   : children}
