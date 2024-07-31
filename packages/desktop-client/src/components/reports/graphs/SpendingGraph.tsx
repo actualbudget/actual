@@ -215,13 +215,13 @@ export function SpendingGraph({
         data.intervalData && (
           <ResponsiveContainer>
             <div>
-              {!compact && <div style={{ marginTop: '15px' }} />}
+              {!compact && <div style={{ marginTop: '5px' }} />}
               <AreaChart
                 width={width}
                 height={height}
                 data={data.intervalData}
                 margin={{
-                  top: 10,
+                  top: 0,
                   right: 0,
                   left: 0,
                   bottom: 0,
