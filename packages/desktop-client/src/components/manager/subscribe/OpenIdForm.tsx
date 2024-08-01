@@ -62,21 +62,21 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
     if (provider) {
       const newIssuer =
         typeof provider.issuer === 'function'
-          ? provider.issuer(location, serverUrl ?? "")
+          ? provider.issuer(location, serverUrl ?? '')
           : provider.issuer;
 
       setIssuer(newIssuer ?? '');
 
       const newClientId =
         typeof provider.clientId === 'function'
-          ? provider.clientId(location, serverUrl ?? "")
+          ? provider.clientId(location, serverUrl ?? '')
           : provider.clientId;
 
       setClientId(newClientId ?? '');
 
       const newclientSecret =
         typeof provider.clientSecret === 'function'
-          ? provider.clientSecret(location, serverUrl ?? "")
+          ? provider.clientSecret(location, serverUrl ?? '')
           : provider.clientSecret;
 
       setClientSecret(newclientSecret ?? '');
@@ -86,7 +86,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
       setClientSecretRequired(provider.clientSecretRequired ?? true);
       setClientSecretDisabled(provider.clientSecretDisabled ?? false);
 
-      setTip(provider.tip ?? <Text></Text>);
+      setTip(provider.tip ?? <Text />);
 
       setSubmitButtonDisabled(provider.submitButtonDisabled ?? false);
     }
