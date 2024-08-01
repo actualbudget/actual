@@ -102,6 +102,7 @@ __metadata:
     promise-retry: "npm:^2.0.1"
     re-resizable: "npm:^6.9.17"
     react: "npm:18.2.0"
+    react-aria: "npm:^3.33.1"
     react-aria-components: "npm:^1.2.1"
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"

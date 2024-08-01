@@ -54,7 +54,11 @@ const TransactionRow = memo(function TransactionRow({
         exposed={true}
         focused={false}
         onSelect={e => {
-          dispatchSelected({ type: 'select', id: transaction.id, event: e });
+          dispatchSelected({
+            type: 'select',
+            id: transaction.id,
+            isRangeSelect: e.shiftKey,
+          });
         }}
         selected={selected}
       />
@@ -182,7 +186,12 @@ export function SimpleTransactionsTable({
             focused={false}
             selected={selectedItems.size > 0}
             width={20}
-            onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
+            onSelect={e =>
+              dispatchSelected({
+                type: 'select-all',
+                isRangeSelect: e.shiftKey,
+              })
+            }
           />
           {fields.map((field, i) => {
             switch (field) {

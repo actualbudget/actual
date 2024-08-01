@@ -157,6 +157,7 @@ export function Modals() {
           return (
             <ConfirmTransactionDelete
               key={name}
+              message={options.message}
               onConfirm={options.onConfirm}
             />
           );
@@ -341,6 +342,7 @@ export function Modals() {
               key={name}
               transactionIds={options?.transactionIds}
               getTransaction={options?.getTransaction}
+              onScheduleLinked={options?.onScheduleLinked}
             />
           );
 

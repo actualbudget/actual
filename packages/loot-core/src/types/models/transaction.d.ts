@@ -1,40 +1,27 @@
-import type { AccountEntity } from './account';
-import type { CategoryEntity } from './category';
-import type { PayeeEntity } from './payee';
-import type { ScheduleEntity } from './schedule';
+import { AccountEntity } from './account';
+import { CategoryEntity } from './category';
+import { PayeeEntity } from './payee';
+import { ScheduleEntity } from './schedule';
 
-export interface NewTransactionEntity {
-  id?: string;
+export interface TransactionEntity {
+  id: string;
   is_parent?: boolean;
   is_child?: boolean;
-  parent_id?: string;
-  account: string;
-  category?: string;
+  parent_id?: TransactionEntity['id'];
+  account: AccountEntity['id'];
+  category?: CategoryEntity['id'];
   amount: number;
-  payee?: string;
+  payee?: PayeeEntity['id'];
   notes?: string;
   date: string;
   imported_id?: string;
   imported_payee?: string;
   starting_balance_flag?: boolean;
-  transfer_id?: string;
+  transfer_id?: TransactionEntity['id'];
   sort_order?: number;
   cleared?: boolean;
   reconciled?: boolean;
   tombstone?: boolean;
-  schedule?: string;
-  subtransactions?: Omit<NewTransactionEntity, 'account' | 'date'>[];
-}
-
-export interface TransactionEntity
-  extends Omit<
-    NewTransactionEntity,
-    'account' | 'category' | 'payee' | 'schedule' | 'subtransactions'
-  > {
-  id: string;
-  account: AccountEntity;
-  category?: CategoryEntity;
-  payee?: PayeeEntity;
-  schedule?: ScheduleEntity;
+  schedule?: ScheduleEntity['id'];
   subtransactions?: TransactionEntity[];
 }

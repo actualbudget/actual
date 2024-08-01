@@ -13,7 +13,9 @@ export function RulesHeader() {
         exposed={true}
         focused={false}
         selected={selectedItems.size > 0}
-        onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
+        onSelect={e =>
+          dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
+        }
       />
       <Cell value="Stage" width={50} />
       <Cell value="Rule" width="flex" />

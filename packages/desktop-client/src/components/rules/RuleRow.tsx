@@ -64,7 +64,11 @@ export const RuleRow = memo(
           exposed={hovered || selected}
           focused={true}
           onSelect={e => {
-            dispatchSelected({ type: 'select', id: rule.id, event: e });
+            dispatchSelected({
+              type: 'select',
+              id: rule.id,
+              isRangeSelect: e.shiftKey,
+            });
           }}
           selected={selected}
         />

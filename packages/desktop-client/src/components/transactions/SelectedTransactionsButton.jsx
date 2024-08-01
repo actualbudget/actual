@@ -16,7 +16,8 @@ export function SelectedTransactionsButton({
   onDuplicate,
   onDelete,
   onEdit,
-  onUnlink,
+  onLinkSchedule,
+  onUnlinkSchedule,
   onCreateRule,
   onSetTransfer,
   onScheduleAction,
@@ -257,15 +258,10 @@ export function SelectedTransactionsButton({
             }
             break;
           case 'link-schedule':
-            dispatch(
-              pushModal('schedule-link', {
-                transactionIds: selectedIds,
-                getTransaction,
-              }),
-            );
+            onLinkSchedule(selectedIds);
             break;
           case 'unlink-schedule':
-            onUnlink(selectedIds);
+            onUnlinkSchedule(selectedIds);
             break;
           case 'create-rule':
             onCreateRule(selectedIds);
