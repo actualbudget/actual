@@ -1,15 +1,17 @@
-import { ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import { theme, styles } from '../../../style';
-import { ButtonWithLoading } from '../../common/Button';
+import { ButtonWithLoading } from '../../common/Button2';
 import { Input } from '../../common/Input';
+import { Link } from '../../common/Link';
+import { Menu } from '../../common/Menu';
+import { Select } from '../../common/Select';
 import { Stack } from '../../common/Stack';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
-import { Select } from '../../common/Select';
-import { Menu } from '../../common/Menu';
-import { useLocation } from 'react-router-dom';
-import { Text } from '../../common/Text';
-import { Link } from '../../common/Link';
 
 export type OpenIdConfig = {
   issuer: string;
@@ -28,12 +30,14 @@ type OpenIdFormProps = {
 type OpenIdProviderOption = {
   label: string;
   value: string;
-  issuer: string | ((location: Location, serverUrl: string) => string);
+  issuer?: string | ((location: Location, serverUrl: string) => string);
   clientId?: string | ((location: Location, serverUrl: string) => string);
   clientSecret?: string | ((location: Location, serverUrl: string) => string);
   clientIdRequired: boolean;
+  clientIdDisabled?: boolean;
   clientSecretRequired: boolean;
   clientSecretDisabled: boolean;
+  submitButtonDisabled?: boolean;
   tip: string | ReactNode;
 };
 
@@ -42,11 +46,13 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [clientIdRequired, setClientIdRequired] = useState(true);
+  const [clientIdDisabled, setClientIdDisabled] = useState(false);
   const [clientSecretRequired, setClientSecretRequired] = useState(true);
   const [clientSecretDisabled, setClientSecretDisabled] = useState(false);
   const serverUrl = useServerURL();
   const location = useLocation();
   const [tip, setTip] = useState(null);
+  const [submitButtonDisabled, setSubmitButtonDisabled] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -74,10 +80,13 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
       setClientSecret(newclientSecret ?? '');
 
       setClientIdRequired(provider.clientIdRequired);
+      setClientIdDisabled(provider.clientIdDisabled);
       setClientSecretRequired(provider.clientSecretRequired);
       setClientSecretDisabled(provider.clientSecretDisabled);
 
       setTip(provider.tip);
+
+      setSubmitButtonDisabled(provider.submitButtonDisabled);
     }
   };
 
@@ -101,30 +110,67 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
       <OpenIdProviderSelector onProviderChange={handleProviderChange} />
 
       <FormField style={{ flex: 1 }}>
-        <Input
-          type="text"
-          value={issuer}
-          onChangeValue={newValue => setIssuer(newValue)}
-        />
-        <label
-          style={{
-            ...styles.verySmallText,
-            color: theme.pageTextLight,
-            marginTop: 5,
-          }}
-        >
-          The OpenID provider URL. {tip}
-        </label>
+        {!submitButtonDisabled && (
+          <View>
+            <Input
+              id="issuer-field"
+              type="text"
+              value={issuer}
+              onChangeValue={newValue => setIssuer(newValue)}
+            />
+            <Text
+              style={{
+                flexDirection: 'row',
+                paddingTop: 3,
+              }}
+            >
+              <label
+                htmlFor="issuer-field"
+                style={{
+                  ...styles.verySmallText,
+                  color: theme.pageTextLight,
+                  marginTop: 5,
+                  minWidth: '150px',
+                }}
+              >
+                The OpenID provider URL.
+              </label>{' '}
+              <Text
+                style={{
+                  ...styles.verySmallText,
+                  color: theme.pageTextLight,
+                  marginTop: 5,
+                }}
+              >
+                {tip}
+              </Text>
+            </Text>
+          </View>
+        )}
+        {submitButtonDisabled && (
+          <label
+            style={{
+              ...styles.verySmallText,
+              color: theme.pageTextLight,
+              marginTop: 5,
+            }}
+          >
+            {tip}
+          </label>
+        )}
       </FormField>
       <FormField style={{ flex: 1 }}>
         <FormLabel title="Client ID" htmlFor="clientid-field" />
         <Input
           type="text"
+          id="clientid-field"
           value={clientId}
+          disabled={clientIdDisabled}
           onChangeValue={newValue => setClientId(newValue)}
           required={clientIdRequired}
         />
         <label
+          htmlFor="clientid-field"
           style={{
             ...styles.verySmallText,
             color: theme.pageTextLight,
@@ -138,12 +184,14 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
         <FormLabel title="Client secret" htmlFor="clientsecret-field" />
         <Input
           type="text"
+          id="clientsecret-field"
           value={clientSecret}
           onChangeValue={newValue => setClientSecret(newValue)}
           disabled={clientSecretDisabled}
           required={clientSecretRequired}
         />
         <label
+          htmlFor="clientsecret-field"
           style={{
             ...styles.verySmallText,
             color: theme.pageTextLight,
@@ -162,7 +210,12 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
         style={{ marginTop: 20 }}
       >
         {otherButtons}
-        <ButtonWithLoading type="primary" loading={loading} onClick={onSubmit}>
+        <ButtonWithLoading
+          variant="primary"
+          isLoading={loading}
+          onPress={onSubmit}
+          isDisabled={submitButtonDisabled}
+        >
           OK
         </ButtonWithLoading>
       </Stack>
@@ -173,7 +226,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
 const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
   ...[
     {
-      label: 'Google',
+      label: 'Google Accounts',
       value: 'google',
       issuer: 'https://accounts.google.com',
       clientIdRequired: true,
@@ -199,12 +252,51 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
       clientIdRequired: true,
       clientSecretRequired: true,
       clientSecretDisabled: true,
-      tip: <Link
-      variant='external'
-      to="https://passwordless.id/"
-      >
-        Get started with passwordless.id
-      </Link>,
+      tip: (
+        <Link variant="external" to="https://passwordless.id/">
+          Get started with passwordless.id
+        </Link>
+      ),
+    },
+    {
+      label: 'Microsoft Entra',
+      value: 'microsoft',
+      issuer: 'https://login.microsoftonline.com/common/v2.0/',
+      clientIdRequired: true,
+      clientSecretRequired: true,
+      clientSecretDisabled: false,
+      tip: (
+        <Link
+          variant="external"
+          to="https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc"
+        >
+          OpenID Connect on the Microsoft identity platform
+        </Link>
+      ),
+    },
+    {
+      label: 'Github',
+      value: 'github',
+      clientIdRequired: true,
+      clientSecretRequired: true,
+      clientSecretDisabled: true,
+      clientIdDisabled: true,
+      submitButtonDisabled: true,
+      tip: (
+        <>
+          <Text style={{ color: theme.errorText }}>
+            Github does not support discovery. You need to configure it in the
+            server.
+          </Text>{' '}
+          <Link
+            variant="external"
+            to="https://actualbudget.org/docs/budgeting/users/"
+            linkColor="muted"
+          >
+            Learn more
+          </Link>
+        </>
+      ),
     },
   ].sort((a, b) => a.label.localeCompare(b.label)),
   Menu.line,
@@ -214,8 +306,23 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
     issuer: '',
     clientIdRequired: true,
     clientSecretRequired: true,
-    clientSecretDisabled: true,
-    tip: 'Use any OpenId provider of your preference',
+    clientSecretDisabled: false,
+    tip: (
+      <>
+        Use any OpenId provider of your preference.{' '}
+        <Text style={{ color: theme.warningText }}>
+          If your provider does not support discovery, configure it manually
+          from server
+        </Text>{' '}
+        <Link
+          variant="external"
+          to="https://actualbudget.org/docs/budgeting/users/"
+          linkColor="muted"
+        >
+          Learn more
+        </Link>
+      </>
+    ),
   },
 ];
 
@@ -223,7 +330,7 @@ function OpenIdProviderSelector({ onProviderChange }) {
   const [value, setValue] = useState('');
   const handleProviderChange = newValue => {
     const selectedProvider = openIdProviders.find(provider =>
-      provider != Menu.line ? provider.value === newValue : false,
+      provider !== Menu.line ? provider.value === newValue : false,
     );
     onProviderChange(selectedProvider);
     setValue(newValue);
@@ -239,7 +346,7 @@ function OpenIdProviderSelector({ onProviderChange }) {
         defaultLabel="Select Provider"
         value={value}
         onChange={handleProviderChange}
-      ></Select>
+      />
     </FormField>
   );
 }

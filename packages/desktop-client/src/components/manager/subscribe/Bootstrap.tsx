@@ -79,7 +79,7 @@ export function Bootstrap() {
   }
 
   return (
-    <View style={{ maxWidth: 450, marginTop: -30 }}>
+    <View style={{ maxWidth: 450 }}>
       <Title text="Welcome to Actual!" />
       <Paragraph style={{ fontSize: 16, color: theme.pageTextDark }}>
         Actual is a super fast privacy-focused app for managing your finances.

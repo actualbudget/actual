@@ -45,25 +45,23 @@ function PasswordLogin({ setError, dispatch }) {
   }
 
   return (
-    <>
-      <View style={{ flexDirection: 'row', marginTop: 5 }}>
-        <BigInput
-          autoFocus={true}
-          placeholder="Password"
-          type="password"
-          onChangeValue={newValue => setPassword(newValue)}
-          style={{ flex: 1, marginRight: 10 }}
-        />
-        <ButtonWithLoading
-          variant="primary"
-          isLoading={loading}
-          style={{ fontSize: 15 }}
-          onPress={onSubmitPassword}
-        >
-          Sign in
-        </ButtonWithLoading>
-      </View>
-    </>
+    <View style={{ flexDirection: 'row', marginTop: 5 }}>
+      <BigInput
+        autoFocus={true}
+        placeholder="Password"
+        type="password"
+        onChangeValue={newValue => setPassword(newValue)}
+        style={{ flex: 1, marginRight: 10 }}
+      />
+      <ButtonWithLoading
+        variant="primary"
+        isLoading={loading}
+        style={{ fontSize: 15 }}
+        onPress={onSubmitPassword}
+      >
+        Sign in
+      </ButtonWithLoading>
+    </View>
   );
 }
 
@@ -209,7 +207,7 @@ export function Login() {
   return (
     <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
       <Title text="Sign in to this Actual instance" />
-      
+
       {loginMethods.length > 1 && (
         <Text
           style={{
