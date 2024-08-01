@@ -3,7 +3,7 @@ import React, { type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties, styles } from '../../style';
 import { Text } from '../common/Text';
-import { ConditionalPrivacyFilter } from '../PrivacyFilter';
+import { ConditionalPrivacyFilter, MaskedText } from '../PrivacyFilter';
 
 import { type FormatType, useFormat } from './useFormat';
 import { useSheetName } from './useSheetName';
@@ -57,7 +57,11 @@ export function CellValue({
         data-cellname={fullSheetName}
         {...props}
       >
-        {formatter ? formatter(sheetValue) : format(sheetValue, type)}
+        {formatter ? (
+          formatter(sheetValue)
+        ) : (
+          <MaskedText>{format(sheetValue, type)}</MaskedText>
+        )}
       </Text>
     </ConditionalPrivacyFilter>
   );
