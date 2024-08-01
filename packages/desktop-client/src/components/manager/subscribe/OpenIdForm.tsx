@@ -86,7 +86,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
       setClientSecretRequired(provider.clientSecretRequired ?? true);
       setClientSecretDisabled(provider.clientSecretDisabled ?? false);
 
-      setTip(provider.tip ?? null);
+      setTip(provider.tip ?? <Text></Text>);
 
       setSubmitButtonDisabled(provider.submitButtonDisabled ?? false);
     }
