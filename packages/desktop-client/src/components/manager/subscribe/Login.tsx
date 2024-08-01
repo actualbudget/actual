@@ -46,36 +46,28 @@ function PasswordLogin({ setError, dispatch }) {
 
   return (
     <>
-      <Text
-        style={{
-          fontSize: 16,
-          color: theme.pageTextDark,
-          lineHeight: 1.4,
-        }}
-      >
-        If you lost your password, you likely still have access to your server
-        to manually reset it.
-      </Text>
-      <BigInput
-        autoFocus={true}
-        placeholder="Password"
-        type="password"
-        onChangeValue={newValue => setPassword(newValue)}
-        style={{ flex: 1, marginRight: 10 }}
-      />
-      <ButtonWithLoading
-        variant="primary"
-        isLoading={loading}
-        style={{ fontSize: 15 }}
-        onPress={onSubmitPassword}
-      >
-        Sign in
-      </ButtonWithLoading>
+      <View style={{ flexDirection: 'row', marginTop: 5 }}>
+        <BigInput
+          autoFocus={true}
+          placeholder="Password"
+          type="password"
+          onChangeValue={newValue => setPassword(newValue)}
+          style={{ flex: 1, marginRight: 10 }}
+        />
+        <ButtonWithLoading
+          variant="primary"
+          isLoading={loading}
+          style={{ fontSize: 15 }}
+          onPress={onSubmitPassword}
+        >
+          Sign in
+        </ButtonWithLoading>
+      </View>
     </>
   );
 }
 
-function OpenIdLogin({ setError }) {
+function OpenIdLogin({ setError, loginMethods }) {
   const [warnMasterCreation, setWarnMasterCreation] = useState(false);
 
   useEffect(() => {
@@ -97,9 +89,28 @@ function OpenIdLogin({ setError }) {
 
   return (
     <View>
-      <Button style={{ fontSize: 15 }} onPress={onSubmitOpenId}>
-        Sign in with OpenId
-      </Button>
+      <View style={{ flexDirection: 'row' }}>
+        {loginMethods.length > 1 && (
+          <BigInput
+            autoFocus={true}
+            placeholder="Password"
+            type="password"
+            disabled={true}
+            style={{
+              flex: 1,
+              marginRight: 10,
+              backgroundColor: theme.buttonBareDisabledBackground,
+            }}
+          />
+        )}
+        <Button
+          variant="primary"
+          style={{ fontSize: 15, alignSelf: 'center', flexGrow: 1 }}
+          onPress={onSubmitOpenId}
+        >
+          Sign in with OpenId
+        </Button>
+      </View>
       {warnMasterCreation && (
         <label style={{ color: theme.warningText, marginTop: 10 }}>
           The first user to login with OpenId will be the{' '}
@@ -198,16 +209,23 @@ export function Login() {
   return (
     <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
       <Title text="Sign in to this Actual instance" />
+      
+      {loginMethods.length > 1 && (
+        <Text
+          style={{
+            fontSize: 16,
+            color: theme.pageTextDark,
+            lineHeight: 1.4,
+            marginBottom: 10,
+          }}
+        >
+          If you lost your password, you likely still have access to your server
+          to manually reset it.
+        </Text>
+      )}
+
       {loginMethods.length > 1 && (
         <View style={{ marginTop: 10 }}>
-          <Select
-            value={method}
-            onChange={newValue => {
-              setError(null);
-              setMethod(newValue);
-            }}
-            options={loginMethods.map(m => [m.method, m.displayName])}
-          />
           <Label
             style={{
               ...styles.verySmallText,
@@ -215,6 +233,14 @@ export function Login() {
               paddingTop: 5,
             }}
             title="Select the login method"
+          />
+          <Select
+            value={method}
+            onChange={newValue => {
+              setError(null);
+              setMethod(newValue);
+            }}
+            options={loginMethods.map(m => [m.method, m.displayName])}
           />
         </View>
       )}
@@ -236,7 +262,9 @@ export function Login() {
         <PasswordLogin setError={setError} dispatch={dispatch} />
       )}
 
-      {method === 'openid' && <OpenIdLogin setError={setError} />}
+      {method === 'openid' && (
+        <OpenIdLogin setError={setError} loginMethods={loginMethods} />
+      )}
 
       {method === 'header' && <HeaderLogin error={error} />}
 
