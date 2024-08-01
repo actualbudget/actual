@@ -43,7 +43,7 @@ export function CreateEncryptionKeyModal({
 
   const isRecreating = options.recreate;
 
-  async function onCreateKey() {
+  async function onCreateKey(close: () => void) {
     if (password !== '' && !loading) {
       setLoading(true);
       setError(null);
@@ -60,6 +60,7 @@ export function CreateEncryptionKeyModal({
       dispatch(sync());
 
       setLoading(false);
+      close();
     }
   }
 
@@ -151,8 +152,7 @@ export function CreateEncryptionKeyModal({
           <Form
             onSubmit={e => {
               e.preventDefault();
-              onCreateKey();
-              close();
+              onCreateKey(close);
             }}
           >
             <View style={{ alignItems: 'center' }}>
