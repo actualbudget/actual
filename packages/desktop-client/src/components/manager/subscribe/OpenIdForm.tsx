@@ -1,12 +1,15 @@
-import type { ReactNode } from 'react';
-import { useState } from 'react';
-
+import { ReactNode, useState } from 'react';
 import { theme, styles } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button';
 import { Input } from '../../common/Input';
 import { Stack } from '../../common/Stack';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
+import { Select } from '../../common/Select';
+import { Menu } from '../../common/Menu';
+import { useLocation } from 'react-router-dom';
+import { Text } from '../../common/Text';
+import { Link } from '../../common/Link';
 
 export type OpenIdConfig = {
   issuer: string;
@@ -22,13 +25,61 @@ type OpenIdFormProps = {
   otherButtons?: ReactNode[];
 };
 
+type OpenIdProviderOption = {
+  label: string;
+  value: string;
+  issuer: string | ((location: Location, serverUrl: string) => string);
+  clientId?: string | ((location: Location, serverUrl: string) => string);
+  clientSecret?: string | ((location: Location, serverUrl: string) => string);
+  clientIdRequired: boolean;
+  clientSecretRequired: boolean;
+  clientSecretDisabled: boolean;
+  tip: string | ReactNode;
+};
+
 export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
   const [issuer, setIssuer] = useState('');
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
+  const [clientIdRequired, setClientIdRequired] = useState(true);
+  const [clientSecretRequired, setClientSecretRequired] = useState(true);
+  const [clientSecretDisabled, setClientSecretDisabled] = useState(false);
   const serverUrl = useServerURL();
+  const location = useLocation();
+  const [tip, setTip] = useState(null);
 
   const [loading, setLoading] = useState(false);
+
+  const handleProviderChange = provider => {
+    if (provider) {
+      const newIssuer =
+        typeof provider.issuer === 'function'
+          ? provider.issuer(location, serverUrl)
+          : provider.issuer;
+
+      setIssuer(newIssuer ?? '');
+
+      const newClientId =
+        typeof provider.clientId === 'function'
+          ? provider.clientId(location, serverUrl)
+          : provider.clientId;
+
+      setClientId(newClientId ?? '');
+
+      const newclientSecret =
+        typeof provider.clientSecret === 'function'
+          ? provider.clientSecret(location, serverUrl)
+          : provider.clientSecret;
+
+      setClientSecret(newclientSecret ?? '');
+
+      setClientIdRequired(provider.clientIdRequired);
+      setClientSecretRequired(provider.clientSecretRequired);
+      setClientSecretDisabled(provider.clientSecretDisabled);
+
+      setTip(provider.tip);
+    }
+  };
 
   async function onSubmit() {
     if (loading) {
@@ -47,10 +98,10 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
 
   return (
     <Stack direction="column" style={{ marginTop: 10 }}>
+      <OpenIdProviderSelector onProviderChange={handleProviderChange} />
+
       <FormField style={{ flex: 1 }}>
-        <FormLabel title="OpenID provider" htmlFor="provider-field" />
         <Input
-          placeholder="https://accounts.openid-provider.tld"
           type="text"
           value={issuer}
           onChangeValue={newValue => setIssuer(newValue)}
@@ -62,15 +113,16 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
             marginTop: 5,
           }}
         >
-          The OpenID provider URL.
+          The OpenID provider URL. {tip}
         </label>
       </FormField>
       <FormField style={{ flex: 1 }}>
-        <FormLabel title="Client ID" htmlFor="clienid-field" />
+        <FormLabel title="Client ID" htmlFor="clientid-field" />
         <Input
           type="text"
           value={clientId}
           onChangeValue={newValue => setClientId(newValue)}
+          required={clientIdRequired}
         />
         <label
           style={{
@@ -83,11 +135,13 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
         </label>
       </FormField>
       <FormField style={{ flex: 1 }}>
-        <FormLabel title="Client secret" htmlFor="cliensecret-field" />
+        <FormLabel title="Client secret" htmlFor="clientsecret-field" />
         <Input
           type="text"
           value={clientSecret}
           onChangeValue={newValue => setClientSecret(newValue)}
+          disabled={clientSecretDisabled}
+          required={clientSecretRequired}
         />
         <label
           style={{
@@ -113,5 +167,79 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
         </ButtonWithLoading>
       </Stack>
     </Stack>
+  );
+}
+
+const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
+  ...[
+    {
+      label: 'Google',
+      value: 'google',
+      issuer: 'https://accounts.google.com',
+      clientIdRequired: true,
+      clientSecretRequired: true,
+      clientSecretDisabled: false,
+      tip: (
+        <Link
+          variant="external"
+          to="https://developers.google.com/identity/sign-in/web/sign-in"
+        >
+          Integrating Google Sign-In into your web app
+        </Link>
+      ),
+    },
+    {
+      label: 'Passwordless.id',
+      value: 'passwordless',
+      issuer: 'https://api.passwordless.id',
+      clientId: (location: Location, serverUrl: string) =>
+        serverUrl
+          ? serverUrl
+          : window.location.href.replace(location.pathname, ''),
+      clientIdRequired: true,
+      clientSecretRequired: true,
+      clientSecretDisabled: true,
+      tip: <Link
+      variant='external'
+      to="https://passwordless.id/"
+      >
+        Get started with passwordless.id
+      </Link>,
+    },
+  ].sort((a, b) => a.label.localeCompare(b.label)),
+  Menu.line,
+  {
+    label: 'Other',
+    value: 'other',
+    issuer: '',
+    clientIdRequired: true,
+    clientSecretRequired: true,
+    clientSecretDisabled: true,
+    tip: 'Use any OpenId provider of your preference',
+  },
+];
+
+function OpenIdProviderSelector({ onProviderChange }) {
+  const [value, setValue] = useState('');
+  const handleProviderChange = newValue => {
+    const selectedProvider = openIdProviders.find(provider =>
+      provider != Menu.line ? provider.value === newValue : false,
+    );
+    onProviderChange(selectedProvider);
+    setValue(newValue);
+  };
+
+  return (
+    <FormField style={{ flex: 1 }}>
+      <FormLabel title="OpenID Provider" htmlFor="provider-selector" />
+      <Select
+        options={openIdProviders.map(provider =>
+          provider === Menu.line ? Menu.line : [provider.value, provider.label],
+        )}
+        defaultLabel="Select Provider"
+        value={value}
+        onChange={handleProviderChange}
+      ></Select>
+    </FormField>
   );
 }
