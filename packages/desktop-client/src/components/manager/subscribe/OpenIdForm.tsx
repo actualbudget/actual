@@ -273,6 +273,25 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
       ),
     },
     {
+      label: 'Keycloak',
+      value: 'keycloak',
+      issuer: 'https://{domain}/realms/{realm}/',
+      clientIdRequired: true,
+      clientSecretRequired: true,
+      clientSecretDisabled: false,
+      tip: (
+        <Text style={{ color: theme.warningText }}>
+          Note that the URL depends on your Keycloak domain and realm.{' '}
+          <Link
+            variant="external"
+            to="https://www.keycloak.org/docs/22.0.0/securing_apps/"
+          >
+            Securing Applications with Keycloak
+          </Link>
+        </Text>
+      ),
+    },
+    {
       label: 'Github',
       value: 'github',
       clientIdRequired: true,
