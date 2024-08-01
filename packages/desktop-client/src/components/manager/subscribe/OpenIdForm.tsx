@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, type Location } from 'react-router-dom';
 
 import { theme, styles } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button2';
@@ -21,6 +21,8 @@ export type OpenIdConfig = {
 };
 
 type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
+
+type OnProviderChangeCallback = (provider: OpenIdProviderOption) => void;
 
 type OpenIdFormProps = {
   onSetOpenId: OpenIdCallback;
@@ -56,7 +58,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
 
   const [loading, setLoading] = useState(false);
 
-  const handleProviderChange = provider => {
+  const handleProviderChange = (provider: OpenIdProviderOption) => {
     if (provider) {
       const newIssuer =
         typeof provider.issuer === 'function'
@@ -343,14 +345,20 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
   },
 ];
 
-function OpenIdProviderSelector({ onProviderChange }) {
+function OpenIdProviderSelector({
+  onProviderChange,
+}: {
+  onProviderChange: OnProviderChangeCallback;
+}) {
   const [value, setValue] = useState('');
   const handleProviderChange = newValue => {
     const selectedProvider = openIdProviders.find(provider =>
       provider !== Menu.line ? provider.value === newValue : false,
     );
-    onProviderChange(selectedProvider);
-    setValue(newValue);
+    if (selectedProvider !== Menu.line) {
+      onProviderChange(selectedProvider);
+      setValue(newValue);
+    }
   };
 
   return (
