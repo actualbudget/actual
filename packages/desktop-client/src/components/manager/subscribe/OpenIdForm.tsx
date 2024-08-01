@@ -261,14 +261,14 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
       clientSecretRequired: true,
       clientSecretDisabled: false,
       tip: (
-        <Text style={{color: theme.warningText}}>
+        <Text style={{ color: theme.warningText }}>
           Note that the URL depends on your application domain and region.{' '}
-        <Link
-          variant="external"
-          to="https://auth0.com/docs/get-started/applications/application-settings"
-        >
-          Auth0 application settings
-        </Link>
+          <Link
+            variant="external"
+            to="https://auth0.com/docs/get-started/applications/application-settings"
+          >
+            Auth0 application settings
+          </Link>
         </Text>
       ),
     },
