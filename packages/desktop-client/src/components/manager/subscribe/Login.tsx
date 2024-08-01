@@ -147,7 +147,7 @@ export function Login() {
   const [method, setMethod] = useState(defaultLoginMethod);
   const [searchParams, _setSearchParams] = useSearchParams();
   const [error, setError] = useState(null);
-  const { checked } = useBootstrapped(false);
+  const { checked } = useBootstrapped();
   const loginMethods = useAvailableLoginMethods();
 
   useEffect(() => {

@@ -159,7 +159,7 @@ export default defineConfig(async ({ mode }) => {
               ],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
-              navigateFallbackDenylist: [/^\/account\/.*$/, /^\/admin\/.*$/],
+              navigateFallbackDenylist: [/^\/account\/.*$/, /^\/admin\/.*$/, /^\/secret\/.*$/],
             },
           }),
       injectShims(),
