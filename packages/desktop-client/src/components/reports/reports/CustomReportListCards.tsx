@@ -10,12 +10,14 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayees } from '../../../hooks/usePayees';
+import { SvgExclamationSolid } from '../../../icons/v1';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
 import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { Text } from '../../common/Text';
+import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { DateRange } from '../DateRange';
@@ -23,6 +25,49 @@ import { ReportCard } from '../ReportCard';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
+
+function calculateHasWarning(
+  report: CustomReportEntity,
+  {
+    categoryIds,
+    accountIds,
+    payeeIds,
+  }: {
+    categoryIds: Set<string>;
+    accountIds: Set<string>;
+    payeeIds: Set<string>;
+  },
+) {
+  if (report.selectedCategories?.some(({ id }) => !categoryIds.has(id))) {
+    return true;
+  }
+
+  if (!report.conditions) {
+    return false;
+  }
+
+  for (const { field, value } of report.conditions) {
+    const strValue = String(value);
+    switch (field) {
+      case 'account':
+        if (!accountIds.has(strValue)) {
+          return true;
+        }
+        break;
+      case 'payees':
+        if (!payeeIds.has(strValue)) {
+          return true;
+        }
+        break;
+      case 'categories':
+        if (!categoryIds.has(strValue)) {
+          return true;
+        }
+        break;
+    }
+  }
+  return false;
+}
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;
@@ -65,6 +110,17 @@ function CustomReportListCardsInner({
   const payees = usePayees();
   const accounts = useAccounts();
   const categories = useCategories();
+
+  const categoryIds = new Set(categories.list.map(({ id }) => id));
+  const payeeIds = new Set(payees.map(({ id }) => id));
+  const accountIds = new Set(accounts.map(({ id }) => id));
+
+  const hasWarning = calculateHasWarning(report, {
+    categoryIds,
+    payeeIds,
+    accountIds,
+  });
+
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
@@ -187,6 +243,20 @@ function CustomReportListCardsInner({
           firstDayOfWeekIdx={firstDayOfWeekIdx}
         />
       </View>
+      {hasWarning && (
+        <View style={{ float: 'left', padding: 5 }}>
+          <Tooltip
+            content="The widget is configured to use a non-existing filter value (i.e. category/account/payee). Edit the filters used in this report widget to remove the warning."
+            placement="bottom start"
+          >
+            <SvgExclamationSolid
+              width={20}
+              height={20}
+              style={{ color: theme.warningText }}
+            />
+          </Tooltip>
+        </View>
+      )}
     </ReportCard>
   );
 }
