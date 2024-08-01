@@ -25,6 +25,7 @@ type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];
   conditionsOp?: string;
   setDataCheck?: (value: boolean) => void;
+  compare?: string;
 };
 
 export function createSpendingSpreadsheet({
@@ -32,11 +33,20 @@ export function createSpendingSpreadsheet({
   conditions = [],
   conditionsOp,
   setDataCheck,
+  compare,
 }: createSpendingSpreadsheetProps) {
-  const [startDate, endDate] = getSpecificRange(3, null, 'Months');
+  const thisMonth = monthUtils.subMonths(
+    monthUtils.currentMonth(),
+    compare === 'thisMonth' ? 0 : 1,
+  );
+  const [startDate, endDate] = getSpecificRange(
+    compare === 'thisMonth' ? 3 : 4,
+    null,
+    'Months',
+  );
   const [lastYearStartDate, lastYearEndDate] = getSpecificRange(
-    12,
-    0,
+    13,
+    1,
     'Months',
   );
   const interval = 'Daily';
@@ -93,6 +103,14 @@ export function createSpendingSpreadsheet({
       });
 
     months.unshift({
+      month: monthUtils.prevYear(
+        monthUtils.subMonths(monthUtils.currentMonth(), 1),
+      ),
+      perMonthAssets: 0,
+      perMonthDebts: 0,
+    });
+
+    months.unshift({
       month: monthUtils.prevYear(monthUtils.currentMonth()),
       perMonthAssets: 0,
       perMonthDebts: 0,
@@ -141,10 +159,22 @@ export function createSpendingSpreadsheet({
             });
             if (
               month.month !== monthUtils.currentMonth() &&
-              month.month !== monthUtils.prevYear(monthUtils.currentMonth())
+              month.month !== thisMonth &&
+              month.month !== monthUtils.prevYear(monthUtils.currentMonth()) &&
+              month.month !==
+                monthUtils.prevYear(
+                  monthUtils.subMonths(monthUtils.currentMonth(), 1),
+                )
             ) {
-              averageSum += cumulativeAssets + cumulativeDebts;
-              monthCount += 1;
+              if (day === '28') {
+                if (monthUtils.getMonthEnd(intervalItem) === intervalItem) {
+                  averageSum += cumulativeAssets + cumulativeDebts;
+                  monthCount += 1;
+                }
+              } else {
+                averageSum += cumulativeAssets + cumulativeDebts;
+                monthCount += 1;
+              }
             }
 
             arr.push({
@@ -181,9 +211,11 @@ export function createSpendingSpreadsheet({
         months: indexedData,
         day,
         average: integerToAmount(averageSum) / monthCount,
-        thisMonth: dayData[4].cumulative,
-        lastMonth: dayData[3].cumulative,
+        thisMonth: dayData[dayData.length - 1].cumulative,
+        lastMonth: dayData[dayData.length - 2].cumulative,
+        twoMonthsPrevious: dayData[dayData.length - 3].cumulative,
         lastYear: dayData[0].cumulative,
+        lastYearPrevious: dayData[1].cumulative,
       };
     });
 
