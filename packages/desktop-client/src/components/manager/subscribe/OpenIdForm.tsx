@@ -133,7 +133,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
           marginBottom: 10,
         }}
       >
-        The OpenID provider URL.
+        {!submitButtonDisabled && 'The OpenID provider URL.'}
         <Text
           style={{
             ...styles.verySmallText,
