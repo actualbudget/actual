@@ -13,12 +13,11 @@ export default {
     //For booked transactions, this can be set to the internalTransactionId
     //For pending transactions, this needs to be removed for them to show up in Actual
 
-    //For deduplication to work, payeeName needs to be standardized.
-    //And converted from a pending transaction form ("payeeName":"Card no: xxxxxxxxxxxx1111"') to a booked transaction form ("payeeName":"Card no: Xxxx Xxxx Xxxx 1111")
+    //For deduplication to work better, payeeName needs to be standardized
+    //and converted from a pending transaction form ("payeeName":"Card no: xxxxxxxxxxxx1111"') to a booked transaction form ("payeeName":"Card no: Xxxx Xxxx Xxxx 1111")
     if (transaction.transactionId === 'NOTPROVIDED') {
       if (booked) {
         transaction.transactionId = transaction.internalTransactionId;
-
         if (
           transaction.remittanceInformationUnstructured
             .toLowerCase()
@@ -26,6 +25,10 @@ export default {
         ) {
           transaction.creditorName =
             transaction.remittanceInformationUnstructured.split(',')[0];
+          //Catch all case for other types of payees
+        } else {
+          transaction.creditorName =
+            transaction.remittanceInformationUnstructured;
         }
       } else {
         transaction.transactionId = null;
@@ -39,7 +42,14 @@ export default {
               /x{4}/g,
               'Xxxx ',
             );
+          //Catch all case for other types of payees
+        } else {
+          transaction.creditorName =
+            transaction.remittanceInformationUnstructured;
         }
+        //Remove remittanceInformationUnstructured from pending transactions, so the `notes` field remains empty (there is no merchant information)
+        //Once booked, the right `notes` (containing the merchant) will be populated
+        transaction.remittanceInformationUnstructured = null;
       }
     }
 
