@@ -40,7 +40,7 @@ type OpenIdProviderOption = {
   clientSecretRequired: boolean;
   clientSecretDisabled: boolean;
   submitButtonDisabled?: boolean;
-  tip: string | ReactNode;
+  tip: ReactNode;
 };
 
 export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
@@ -53,7 +53,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
   const [clientSecretDisabled, setClientSecretDisabled] = useState(false);
   const serverUrl = useServerURL();
   const location = useLocation();
-  const [tip, setTip] = useState(null);
+  const [tip, setTip] = useState((<Text />) as ReactNode);
   const [submitButtonDisabled, setSubmitButtonDisabled] = useState(false);
 
   const [loading, setLoading] = useState(false);
