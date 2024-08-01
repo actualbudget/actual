@@ -75,8 +75,7 @@ function BudgetInner(props: BudgetInnerProps) {
     start: startMonth,
     end: startMonth,
   });
-  const [budgetTypePref] = useLocalPref('budgetType');
-  const budgetType = budgetTypePref || 'rollover';
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
