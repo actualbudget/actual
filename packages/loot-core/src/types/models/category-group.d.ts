@@ -1,7 +1,6 @@
 import { CategoryEntity } from './category';
 
 export interface NewCategoryGroupEntity {
-  id?: string;
   name: string;
   is_income?: boolean;
   sort_order?: number;

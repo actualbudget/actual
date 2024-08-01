@@ -672,7 +672,7 @@ export async function createTestBudget(handlers: Handlers) {
         const categoryId = await handlers['category-create']({
           ...category,
           isIncome: category.is_income ? 1 : 0,
-          groupId: group.id,
+          groupId,
         });
 
         categoryGroups[categoryGroups.length - 1].categories.push({
