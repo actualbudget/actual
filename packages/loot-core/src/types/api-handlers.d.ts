@@ -63,12 +63,12 @@ export interface ApiHandlers {
     flag: boolean;
   }) => Promise<void>;
 
-  'api/hold-budget-for-next-month': (arg: {
+  'api/budget-hold-for-next-month': (arg: {
     month: string;
     amount: number;
   }) => Promise<void>;
 
-  'api/reset-budget-hold': (arg: { month: string }) => Promise<void>;
+  'api/budget-reset-hold': (arg: { month: string }) => Promise<void>;
 
   'api/transactions-export': (arg: {
     transactions;

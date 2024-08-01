@@ -210,9 +210,9 @@ export function deleteRule(id) {
 }
 
 export function holdBudgetForNextMonth(month, amount) {
-  return send('api/hold-budget-for-next-month', { month, amount });
+  return send('api/budget-hold-for-next-month', { month, amount });
 }
 
 export function resetBudgetHold(month) {
-  return send('api/reset-budget-hold', { month });
+  return send('api/budget-reset-hold', { month });
 }

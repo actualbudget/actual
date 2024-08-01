@@ -406,7 +406,7 @@ handlers['api/budget-set-carryover'] = withMutation(async function ({
   });
 });
 
-handlers['api/hold-budget-for-next-month'] = withMutation(async function ({
+handlers['api/budget-hold-for-next-month'] = withMutation(async function ({
   month,
   amount,
 }) {
@@ -421,7 +421,7 @@ handlers['api/hold-budget-for-next-month'] = withMutation(async function ({
   });
 });
 
-handlers['api/reset-budget-hold'] = withMutation(async function ({ month }) {
+handlers['api/budget-reset-hold'] = withMutation(async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
   return handlers['budget/reset-hold']({ month });
