@@ -62,33 +62,33 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
     if (provider) {
       const newIssuer =
         typeof provider.issuer === 'function'
-          ? provider.issuer(location, serverUrl)
+          ? provider.issuer(location, serverUrl ?? "")
           : provider.issuer;
 
       setIssuer(newIssuer ?? '');
 
       const newClientId =
         typeof provider.clientId === 'function'
-          ? provider.clientId(location, serverUrl)
+          ? provider.clientId(location, serverUrl ?? "")
           : provider.clientId;
 
       setClientId(newClientId ?? '');
 
       const newclientSecret =
         typeof provider.clientSecret === 'function'
-          ? provider.clientSecret(location, serverUrl)
+          ? provider.clientSecret(location, serverUrl ?? "")
           : provider.clientSecret;
 
       setClientSecret(newclientSecret ?? '');
 
-      setClientIdRequired(provider.clientIdRequired);
-      setClientIdDisabled(provider.clientIdDisabled);
-      setClientSecretRequired(provider.clientSecretRequired);
-      setClientSecretDisabled(provider.clientSecretDisabled);
+      setClientIdRequired(provider.clientIdRequired ?? true);
+      setClientIdDisabled(provider.clientIdDisabled ?? false);
+      setClientSecretRequired(provider.clientSecretRequired ?? true);
+      setClientSecretDisabled(provider.clientSecretDisabled ?? false);
 
-      setTip(provider.tip);
+      setTip(provider.tip ?? null);
 
-      setSubmitButtonDisabled(provider.submitButtonDisabled);
+      setSubmitButtonDisabled(provider.submitButtonDisabled ?? false);
     }
   };
 
@@ -351,11 +351,11 @@ function OpenIdProviderSelector({
   onProviderChange: OnProviderChangeCallback;
 }) {
   const [value, setValue] = useState('');
-  const handleProviderChange = newValue => {
+  const handleProviderChange = (newValue: string) => {
     const selectedProvider = openIdProviders.find(provider =>
       provider !== Menu.line ? provider.value === newValue : false,
     );
-    if (selectedProvider !== Menu.line) {
+    if (selectedProvider && selectedProvider !== Menu.line) {
       onProviderChange(selectedProvider);
       setValue(newValue);
     }
