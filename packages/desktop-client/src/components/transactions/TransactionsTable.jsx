@@ -575,9 +575,11 @@ function PayeeCell({
           alignSelf: 'flex-start',
           borderRadius: 4,
           border: '1px solid transparent', // so it doesn't shift on hover
-          ':hover': {
-            border: '1px solid ' + theme.buttonNormalBorder,
-          },
+          ':hover': isPreview
+            ? {}
+            : {
+                border: '1px solid ' + theme.buttonNormalBorder,
+              },
         }}
         disabled={isPreview}
         onSelect={() =>
@@ -601,6 +603,12 @@ function PayeeCell({
             color: theme.pageTextSubdued,
           }}
         >
+          <PayeeIcons
+            transaction={transaction}
+            transferAccount={transferAccount}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
+          />
           <SvgSplit
             style={{
               color: 'inherit',
