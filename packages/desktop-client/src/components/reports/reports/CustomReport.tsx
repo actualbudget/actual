@@ -82,19 +82,17 @@ function useSelectedCategories(
 
       case 'oneOf':
         return categories.filter(({ id }) =>
-          // @ts-expect-error TODO: fixed in dashboard pr
           existingCategoryCondition.value.includes(id),
         );
 
       case 'notOneOf':
         return categories.filter(
-          // @ts-expect-error TODO: fixed in dashboard pr
           ({ id }) => !existingCategoryCondition.value.includes(id),
         );
     }
 
     return categories;
-  }, [existingCategoryCondition]);
+  }, [existingCategoryCondition, categories]);
 }
 
 export function CustomReport() {
@@ -144,8 +142,6 @@ export function CustomReport() {
     }>
   >([]);
 
-  console.log(' ccc', conditions);
-
   // TODO: if there are multiple category conditions - do not allow calling this
   const setSelectedCategories = (newCategories: CategoryEntity[]) => {
     const newCategoryIdSet = new Set(newCategories.map(({ id }) => id));
@@ -156,8 +152,7 @@ export function CustomReport() {
     const newCondition = {
       field: 'category',
       op: 'oneOf',
-      // TODO: manual type coercion should be fixed by dashboard PR
-      value: newCategories.map(({ id }) => id) as string[],
+      value: newCategories.map(({ id }) => id),
       type: 'id',
     } satisfies RuleConditionEntity;
 
