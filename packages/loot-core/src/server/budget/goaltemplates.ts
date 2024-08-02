@@ -583,7 +583,7 @@ async function applyCategoryTemplate(
   const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   const last_month_balance = balance - spent - prev_budgeted;
   let to_budget = 0; //Sets the Goal
-  let set_budget = 0;//Set the Budgeted
+  let set_budget = 0; //Set the Budgeted
   let limit = 0;
   let hold = false;
   let limitCheck = false;
