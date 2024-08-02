@@ -9,7 +9,7 @@ export default {
 
   institutionIds: ['MBANK_RETAIL_BREXPLPW'],
 
-  accessValidForDays: 180,
+  accessValidForDays: 179,
 
   normalizeAccount(account) {
     return {
