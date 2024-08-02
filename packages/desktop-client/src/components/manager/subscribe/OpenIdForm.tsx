@@ -309,12 +309,32 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
           </Text>{' '}
           <Link
             variant="external"
-            to="https://actualbudget.org/docs/budgeting/users/"
+            to="https://actualbudget.org/docs/"
             linkColor="muted"
           >
             Learn more
           </Link>
         </>
+      ),
+    },
+    {
+      label: 'Authentik',
+      value: 'authentik',
+      issuer: 'https://{domain}/application/o/{provider-slug-name}/',
+      clientIdRequired: true,
+      clientSecretRequired: true,
+      clientSecretDisabled: false,
+      tip: (
+        <Text style={{ color: theme.warningText }}>
+          Note that the URL depends on your Authentik domain and provider slug
+          name.{' '}
+          <Link
+            variant="external"
+            to="https://docs.goauthentik.io/docs/providers/oauth2/"
+          >
+            Configure OAuth2 Provider
+          </Link>
+        </Text>
       ),
     },
   ].sort((a, b) => a.label.localeCompare(b.label)),
@@ -335,7 +355,7 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
         </Text>{' '}
         <Link
           variant="external"
-          to="https://actualbudget.org/docs/budgeting/users/"
+          to="https://actualbudget.org/docs/"
           linkColor="muted"
         >
           Learn more
