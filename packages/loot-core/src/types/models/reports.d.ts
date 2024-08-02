@@ -32,13 +32,7 @@ export type balanceTypeOpType =
   | 'netAssets'
   | 'netDebts';
 
-export type spendingReportTimeType =
-  | 'average'
-  | 'thisMonth'
-  | 'lastMonth'
-  | 'twoMonthsPrevious'
-  | 'lastYear'
-  | 'lastYearPrevious';
+export type spendingReportTimeType = 'lastMonth' | 'lastYear' | 'average';
 
 export type SpendingMonthEntity = Record<
   string | number,
@@ -65,9 +59,7 @@ export interface SpendingEntity {
     average: number;
     thisMonth: number;
     lastMonth: number;
-    twoMonthsPrevious: number;
     lastYear: number;
-    lastYearPrevious: number;
   }[];
   startDate?: string;
   endDate?: string;

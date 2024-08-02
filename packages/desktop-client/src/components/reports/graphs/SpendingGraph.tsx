@@ -47,7 +47,6 @@ type CustomTooltipProps = {
   thisMonth?: string;
   lastYear?: string;
   selection?: string;
-  compare?: string;
 };
 
 const CustomTooltip = ({
@@ -57,7 +56,6 @@ const CustomTooltip = ({
   thisMonth,
   lastYear,
   selection,
-  compare,
 }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const comparison =
@@ -88,7 +86,7 @@ const CustomTooltip = ({
           <div style={{ lineHeight: 1.5 }}>
             {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
-                left={compare === 'thisMonth' ? 'This month:' : 'Last month:'}
+                left="This month:"
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1,
                 )}
@@ -98,12 +96,10 @@ const CustomTooltip = ({
               <AlignedText
                 left={
                   selection === 'average'
-                    ? 'Average:'
+                    ? 'Average'
                     : selection === lastYear
-                      ? 'Last year:'
-                      : compare === 'thisMonth'
-                        ? 'Last month:'
-                        : '2 months ago:'
+                      ? 'Last year'
+                      : 'Last month'
                 }
                 right={amountToCurrency(comparison)}
               />
@@ -129,7 +125,6 @@ type SpendingGraphProps = {
   data: SpendingEntity;
   compact?: boolean;
   mode: string;
-  compare: string;
 };
 
 export function SpendingGraph({
@@ -137,19 +132,12 @@ export function SpendingGraph({
   data,
   compact,
   mode,
-  compare,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
   const balanceTypeOp = 'cumulative';
-  const thisMonth = monthUtils.subMonths(
-    monthUtils.currentMonth(),
-    compare === 'thisMonth' ? 0 : 1,
-  );
-  const previousMonth = monthUtils.subMonths(
-    monthUtils.currentMonth(),
-    compare === 'thisMonth' ? 1 : 2,
-  );
-  const lastYear = monthUtils.prevYear(thisMonth);
+  const thisMonth = monthUtils.currentMonth();
+  const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+  const lastYear = monthUtils.prevYear(monthUtils.currentMonth());
   let selection;
   switch (mode) {
     case 'average':
@@ -159,7 +147,7 @@ export function SpendingGraph({
       selection = lastYear;
       break;
     default:
-      selection = previousMonth;
+      selection = lastMonth;
       break;
   }
 
@@ -268,7 +256,6 @@ export function SpendingGraph({
                       thisMonth={thisMonth}
                       lastYear={lastYear}
                       selection={selection}
-                      compare={compare}
                     />
                   }
                   formatter={numberFormatterTooltip}

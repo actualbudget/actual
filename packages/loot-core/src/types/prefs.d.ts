@@ -54,7 +54,6 @@ export type LocalPrefs = Partial<
     reportsViewLabel: boolean;
     spendingReportFilter: string;
     spendingReportTime: spendingReportTimeType;
-    spendingReportCompare: spendingReportTimeType;
     sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>

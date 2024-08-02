@@ -57,7 +57,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType] = useLocalPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (

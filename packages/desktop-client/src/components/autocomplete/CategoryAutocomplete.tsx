@@ -375,7 +375,7 @@ function CategoryItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType] = useLocalPref('budgetType');
 
   const balance = useSheetValue(
     budgetType === 'rollover'
