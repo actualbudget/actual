@@ -55,6 +55,48 @@ import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
+function useSelectedCategories(
+  conditions: RuleConditionEntity[],
+  categories: CategoryEntity[],
+): CategoryEntity[] {
+  const existingCategoryCondition = useMemo(
+    () => conditions.find(({ field }) => field === 'category'),
+    [conditions],
+  );
+
+  return useMemo(() => {
+    if (!existingCategoryCondition) {
+      return categories;
+    }
+
+    switch (existingCategoryCondition.op) {
+      case 'is':
+        return categories.filter(
+          ({ id }) => id === existingCategoryCondition.value,
+        );
+
+      case 'isNot':
+        return categories.filter(
+          ({ id }) => existingCategoryCondition.value !== id,
+        );
+
+      case 'oneOf':
+        return categories.filter(({ id }) =>
+          // @ts-expect-error TODO: fixed in dashboard pr
+          existingCategoryCondition.value.includes(id),
+        );
+
+      case 'notOneOf':
+        return categories.filter(
+          // @ts-expect-error TODO: fixed in dashboard pr
+          ({ id }) => !existingCategoryCondition.value.includes(id),
+        );
+    }
+
+    return categories;
+  }, [existingCategoryCondition]);
+}
+
 export function CustomReport() {
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
@@ -102,9 +144,59 @@ export function CustomReport() {
     }>
   >([]);
 
-  const [selectedCategories, setSelectedCategories] = useState(
-    loadReport.selectedCategories,
-  );
+  console.log(' ccc', conditions);
+
+  // TODO: if there are multiple category conditions - do not allow calling this
+  const setSelectedCategories = (newCategories: CategoryEntity[]) => {
+    const newCategoryIdSet = new Set(newCategories.map(({ id }) => id));
+    const allCategoryIds = categories.list.map(({ id }) => id);
+    const allCategoriesSelected = !allCategoryIds.find(
+      id => !newCategoryIdSet.has(id),
+    );
+    const newCondition = {
+      field: 'category',
+      op: 'oneOf',
+      // TODO: manual type coercion should be fixed by dashboard PR
+      value: newCategories.map(({ id }) => id) as string[],
+      type: 'id',
+    } satisfies RuleConditionEntity;
+
+    const existingCategoryCondition = conditions.find(
+      ({ field }) => field === 'category',
+    );
+
+    // If the existing conditions already have one for "category" - replace it
+    if (existingCategoryCondition) {
+      // If we selected all categories - remove the filter (default state)
+      if (allCategoriesSelected) {
+        onDeleteFilter(existingCategoryCondition);
+        return;
+      }
+
+      // Update the "notOneOf" condition if it's already set
+      if (existingCategoryCondition.op === 'notOneOf') {
+        onUpdateFilter(existingCategoryCondition, {
+          ...existingCategoryCondition,
+          value: allCategoryIds.filter(id => !newCategoryIdSet.has(id)),
+        });
+        return;
+      }
+
+      // Otherwise use `oneOf` condition
+      onUpdateFilter(existingCategoryCondition, newCondition);
+      return;
+    }
+
+    // Don't add a new filter if all categories are selected (default state)
+    if (allCategoriesSelected) {
+      return;
+    }
+
+    // If the existing conditions does not have a "category" - append a new one
+    onApplyFilter(newCondition);
+  };
+
+  const selectedCategories = useSelectedCategories(conditions, categories.list);
   const [startDate, setStartDate] = useState(loadReport.startDate);
   const [endDate, setEndDate] = useState(loadReport.endDate);
   const [mode, setMode] = useState(loadReport.mode);
@@ -145,12 +237,6 @@ export function CustomReport() {
         : loadReport.savedStatus ?? 'new'
       : loadReport.savedStatus ?? 'new',
   );
-
-  useEffect(() => {
-    if (selectedCategories === undefined && categories.list.length !== 0) {
-      setSelectedCategories(categories.list);
-    }
-  }, [categories, selectedCategories]);
 
   useEffect(() => {
     async function run() {
