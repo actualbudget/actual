@@ -46,7 +46,6 @@ const reportModel = {
       graphType: row.graph_type,
       conditions: row.conditions,
       conditionsOp: row.conditions_op,
-      data: row.metadata,
     };
   },
 
@@ -71,7 +70,6 @@ const reportModel = {
       graph_type: report.graphType,
       conditions: report.conditions,
       conditions_op: report.conditionsOp,
-      metadata: report.data,
     };
   },
 };
@@ -141,7 +139,7 @@ async function updateReport(item: CustomReportEntity) {
     throw new Error('There is already a filter named ' + item.name);
   }
 
-  await db.insertWithSchema('custom_reports', reportModel.fromJS(item));
+  await db.updateWithSchema('custom_reports', reportModel.fromJS(item));
 }
 
 async function deleteReport(id: string) {

@@ -129,7 +129,6 @@ type FinanceModals = {
   'schedules-discover': null;
 
   'schedule-posts-offline-notification': null;
-  'switch-budget-type': { onSwitch: () => void };
   'account-menu': {
     accountId: string;
     onSave: (account: AccountEntity) => void;
@@ -143,6 +142,7 @@ type FinanceModals = {
     onSave: (category: CategoryEntity) => void;
     onEditNotes: (id: string) => void;
     onDelete: (categoryId: string) => void;
+    onToggleVisibility: (categoryId: string) => void;
     onBudgetAction: (month: string, action: string, args?: unknown) => void;
     onClose?: () => void;
   };
@@ -168,6 +168,7 @@ type FinanceModals = {
     onAddCategory: (groupId: string, isIncome: boolean) => void;
     onEditNotes: (id: string) => void;
     onDelete: (groupId: string) => void;
+    onToggleVisibility: (groupId: string) => void;
     onClose?: () => void;
   };
   notes: {
@@ -237,7 +238,6 @@ type FinanceModals = {
     onAddCategoryGroup: () => void;
     onToggleHiddenCategories: () => void;
     onSwitchBudgetFile: () => void;
-    onSwitchBudgetType: () => void;
   };
   'rollover-budget-month-menu': {
     month: string;
@@ -293,4 +293,10 @@ export type ModalsActions =
 export type ModalsState = {
   modalStack: Modal[];
   isHidden: boolean;
+};
+
+type Modal = {
+  name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  options?: any;
 };

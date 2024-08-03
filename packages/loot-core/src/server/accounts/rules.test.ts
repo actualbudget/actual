@@ -12,6 +12,7 @@ import {
 const fieldTypes = new Map(
   Object.entries({
     id: 'id',
+    account: 'id',
     date: 'date',
     name: 'string',
     category: 'string',
@@ -321,6 +322,12 @@ describe('Action', () => {
     expect(() => {
       new Action(null, 'name', 'James', null, fieldTypes);
     }).toThrow(/invalid action operation/i);
+  });
+
+  test('empty account values result in error', () => {
+    expect(() => {
+      new Action('set', 'account', '', null, fieldTypes);
+    }).toThrow(/Field cannot be empty/i);
   });
 });
 

@@ -11,6 +11,8 @@ export type QueriesState = {
   accountsLoaded: boolean;
   categories: Awaited<ReturnType<Handlers['get-categories']>>;
   categoriesLoaded: boolean;
+  commonPayeesLoaded: boolean;
+  commonPayees: Awaited<ReturnType<Handlers['common-payees-get']>>;
   payees: Awaited<ReturnType<Handlers['payees-get']>>;
   payeesLoaded: boolean;
   earliestTransaction: unknown | null;
@@ -58,6 +60,11 @@ type LoadPayeesAction = {
   payees: State['payees'];
 };
 
+type LoadCommonPayeesAction = {
+  type: typeof constants.LOAD_COMMON_PAYEES;
+  payees: State['common_payees'];
+};
+
 export type QueriesActions =
   | SetNewTransactionsAction
   | UpdateNewTransactionsAction
@@ -66,4 +73,5 @@ export type QueriesActions =
   | LoadAccountsAction
   | UpdateAccountAction
   | LoadCategoriesAction
+  | LoadCommonPayeesAction
   | LoadPayeesAction;

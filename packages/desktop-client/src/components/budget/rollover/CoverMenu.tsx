@@ -44,11 +44,7 @@ export function CoverMenu({
             onSelect={(id: string | undefined) => setCategoryId(id || null)}
             inputProps={{
               inputRef: node,
-              onKeyDown: e => {
-                if (e.key === 'Enter') {
-                  submit();
-                }
-              },
+              onEnter: event => !event.defaultPrevented && submit(),
               placeholder: '(none)',
             }}
             showHiddenCategories={false}

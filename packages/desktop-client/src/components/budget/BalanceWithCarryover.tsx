@@ -3,10 +3,12 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
-import { type CSSProperties } from '../../style';
+import { type CSSProperties, theme, styles } from '../../style';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
+import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { makeBalanceAmountStyle } from './util';
@@ -23,6 +25,7 @@ type BalanceWithCarryoverProps = Omit<
   balance: Binding;
   goal: Binding;
   budgeted: Binding;
+  longGoal: Binding;
   disabled?: boolean;
   carryoverIndicator?: ({ style }: CarryoverIndicatorProps) => JSX.Element;
 };
@@ -49,11 +52,27 @@ export function DefaultCarryoverIndicator({ style }: CarryoverIndicatorProps) {
   );
 }
 
+function GoalTooltipRow({ children }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 10,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function BalanceWithCarryover({
   carryover,
   balance,
   goal,
   budgeted,
+  longGoal,
   disabled,
   carryoverIndicator = DefaultCarryoverIndicator,
   ...props
@@ -62,11 +81,40 @@ export function BalanceWithCarryover({
   const balanceValue = useSheetValue(balance);
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
+  const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const valueStyle = makeBalanceAmountStyle(
     balanceValue,
     isGoalTemplatesEnabled ? goalValue : null,
-    budgetedValue,
+    longGoalValue === 1 ? balanceValue : budgetedValue,
+  );
+  const format = useFormat();
+
+  const differenceToGoal =
+    longGoalValue === 1 ? balanceValue - goalValue : budgetedValue - goalValue;
+
+  const balanceCellValue = (
+    <CellValue
+      {...props}
+      binding={balance}
+      type="financial"
+      getStyle={value =>
+        makeBalanceAmountStyle(
+          value,
+          isGoalTemplatesEnabled ? goalValue : null,
+          longGoalValue === 1 ? balanceValue : budgetedValue,
+        )
+      }
+      style={{
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        textAlign: 'right',
+        ...(!disabled && {
+          cursor: 'pointer',
+        }),
+        ...props.style,
+      }}
+    />
   );
 
   return (
@@ -78,27 +126,55 @@ export function BalanceWithCarryover({
         maxWidth: '100%',
       }}
     >
-      <CellValue
-        {...props}
-        binding={balance}
-        type="financial"
-        getStyle={value =>
-          makeBalanceAmountStyle(
-            value,
-            isGoalTemplatesEnabled ? goalValue : null,
-            budgetedValue,
-          )
-        }
-        style={{
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          textAlign: 'right',
-          ...(!disabled && {
-            cursor: 'pointer',
-          }),
-          ...props.style,
-        }}
-      />
+      {isGoalTemplatesEnabled && goalValue !== null ? (
+        <Tooltip
+          content={
+            <View style={{ padding: 10 }}>
+              <span style={{ fontWeight: 'bold' }}>
+                {differenceToGoal === 0 ? (
+                  <span style={{ color: theme.noticeText }}>Fully funded</span>
+                ) : differenceToGoal > 0 ? (
+                  <span style={{ color: theme.noticeText }}>
+                    Overfunded ({format(differenceToGoal, 'financial')})
+                  </span>
+                ) : (
+                  <span style={{ color: theme.errorText }}>
+                    Underfunded ({format(differenceToGoal, 'financial')})
+                  </span>
+                )}
+              </span>
+              <GoalTooltipRow>
+                <div>Goal Type:</div>
+                <div>{longGoalValue === 1 ? 'Long' : 'Template'}</div>
+              </GoalTooltipRow>
+              <GoalTooltipRow>
+                <div>Goal:</div>
+                <div>{format(goalValue, 'financial')}</div>
+              </GoalTooltipRow>
+              <GoalTooltipRow>
+                {longGoalValue !== 1 ? (
+                  <>
+                    <div>Budgeted:</div>
+                    <div>{format(budgetedValue, 'financial')}</div>
+                  </>
+                ) : (
+                  <>
+                    <div>Balance:</div>
+                    <div>{format(balanceValue, 'financial')}</div>
+                  </>
+                )}
+              </GoalTooltipRow>
+            </View>
+          }
+          style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+          placement="bottom"
+          triggerProps={{ delay: 750 }}
+        >
+          {balanceCellValue}
+        </Tooltip>
+      ) : (
+        balanceCellValue
+      )}
       {carryoverValue && carryoverIndicator({ style: valueStyle })}
     </span>
   );
