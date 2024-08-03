@@ -8,7 +8,6 @@ type ModeButtonProps = {
   children: ReactNode;
   style?: CSSProperties;
   onSelect: MouseEventHandler<HTMLButtonElement>;
-  color?: string;
 };
 
 export function ModeButton({
@@ -16,16 +15,16 @@ export function ModeButton({
   children,
   style,
   onSelect,
-  color = theme.menuBackground,
 }: ModeButtonProps) {
   return (
     <Button
       type="bare"
       style={{
         padding: '5px 10px',
-        backgroundColor: color,
+        backgroundColor: theme.menuBackground,
         marginRight: 5,
         fontSize: 'inherit',
+        ...style,
         ...(selected && {
           backgroundColor: theme.buttonPrimaryBackground,
           color: theme.buttonPrimaryText,
@@ -34,7 +33,6 @@ export function ModeButton({
             color: theme.buttonPrimaryTextHover,
           },
         }),
-        ...style,
       }}
       onClick={onSelect}
     >

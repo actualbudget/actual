@@ -152,18 +152,15 @@ export function Spending() {
             marginRight: 5,
           }}
         >
-          <strong
+          <Text
             style={{
               paddingRight: 5,
             }}
           >
             Compare
-          </strong>
+          </Text>
           <Select
             value={compare}
-            buttonStyle={{
-              fontWeight: 'bold',
-            }}
             onChange={e => {
               setCompare(e);
               if (mode === 'lastMonth') setMode('twoMonthsPrevious');
@@ -174,39 +171,45 @@ export function Spending() {
               ['lastMonth', 'last month'],
             ]}
           />
-          <strong
+          <Text
             style={{
               paddingRight: 10,
               paddingLeft: 5,
             }}
           >
             to the:
-          </strong>
+          </Text>
           <ModeButton
-            color="inherit"
             selected={['lastMonth', 'twoMonthsPrevious'].includes(mode)}
+            style={{
+              backgroundColor: 'inherit',
+            }}
             onSelect={() =>
               setMode(
                 compare === 'thisMonth' ? 'lastMonth' : 'twoMonthsPrevious',
               )
             }
           >
-            Month previous
+            Previous month
           </ModeButton>
           {showLastYear && (
             <ModeButton
-              color="inherit"
               selected={mode === 'lastYear'}
               onSelect={() => setMode('lastYear')}
+              style={{
+                backgroundColor: 'inherit',
+              }}
             >
               Last year
             </ModeButton>
           )}
           {showAverage && (
             <ModeButton
-              color="inherit"
               selected={mode === 'average'}
               onSelect={() => setMode('average')}
+              style={{
+                backgroundColor: 'inherit',
+              }}
             >
               Average
             </ModeButton>
@@ -266,7 +269,7 @@ export function Spending() {
             <View
               style={{
                 marginBottom: 10,
-                marginLeft: 5,
+                marginLeft: 20,
                 flexShrink: 0,
                 flexDirection: 'row',
                 spacing: 2,
