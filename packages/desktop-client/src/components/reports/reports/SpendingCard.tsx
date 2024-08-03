@@ -23,6 +23,9 @@ export function SpendingCard() {
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
+  const [spendingReportCompare = 'thisMonth'] = useLocalPref(
+    'spendingReportCompare',
+  );
 
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const getGraphData = useMemo(() => {
@@ -30,18 +33,21 @@ export function SpendingCard() {
       categories,
       conditions: parseFilter.conditions,
       conditionsOp: parseFilter.conditionsOp,
+      compare: spendingReportCompare,
     });
-  }, [categories, parseFilter]);
+  }, [categories, parseFilter, spendingReportCompare]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
-    monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+    spendingReportCompare === 'lastMonth'
       ? 27
-      : monthUtils.getDay(monthUtils.currentDay()) - 1;
+      : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+        ? 27
+        : monthUtils.getDay(monthUtils.currentDay()) - 1;
   const difference =
     data &&
     data.intervalData[todayDay][spendingReportTime] -
-      data.intervalData[todayDay].thisMonth;
+      data.intervalData[todayDay][spendingReportCompare];
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
   return (
@@ -99,6 +105,7 @@ export function SpendingCard() {
             compact={true}
             data={data}
             mode={spendingReportTime}
+            compare={spendingReportCompare}
           />
         ) : (
           <LoadingIndicator message="Loading report..." />
