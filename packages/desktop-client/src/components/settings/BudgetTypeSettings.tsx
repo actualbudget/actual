@@ -15,7 +15,7 @@ import { Setting } from './UI';
 
 export function BudgetTypeSettings() {
   const dispatch = useDispatch();
-  const [budgetType] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const [loading, setLoading] = useState(false);
 
   const currentMonth = monthUtils.currentMonth();
