@@ -26,6 +26,7 @@ import { setSessionReport } from './setSessionReport';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;
+  selectedCategories: CategoryEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   dateRangeLine: number;
   allIntervals: { name: string; pretty: string }[];
@@ -59,6 +60,7 @@ type ReportSidebarProps = {
 
 export function ReportSidebar({
   customReportItems,
+  selectedCategories,
   categories,
   dateRangeLine,
   allIntervals,
@@ -542,7 +544,7 @@ export function ReportSidebar({
               ? true
               : false;
           })}
-          selectedCategories={customReportItems.selectedCategories || []}
+          selectedCategories={selectedCategories || []}
           setSelectedCategories={e => {
             setSelectedCategories(e);
             onReportChange({ type: 'modify' });

@@ -55,6 +55,9 @@ import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
+/**
+ * Transform `selectedCategories` into `conditions`.
+ */
 function useSelectedCategories(
   conditions: RuleConditionEntity[],
   categories: CategoryEntity[],
@@ -341,7 +344,6 @@ export function CustomReport() {
       endDate,
       interval,
       categories,
-      selectedCategories,
       conditions,
       conditionsOp,
       showEmpty,
@@ -357,7 +359,6 @@ export function CustomReport() {
     interval,
     balanceTypeOp,
     categories,
-    selectedCategories,
     conditions,
     conditionsOp,
     showEmpty,
@@ -374,7 +375,6 @@ export function CustomReport() {
       endDate,
       interval,
       categories,
-      selectedCategories,
       conditions,
       conditionsOp,
       showEmpty,
@@ -396,7 +396,6 @@ export function CustomReport() {
     groupBy,
     balanceTypeOp,
     categories,
-    selectedCategories,
     payees,
     accounts,
     conditions,
@@ -429,7 +428,6 @@ export function CustomReport() {
     showHiddenCategories,
     includeCurrentInterval,
     showUncategorized,
-    selectedCategories,
     graphType,
     conditions,
     conditionsOp,
@@ -552,13 +550,6 @@ export function CustomReport() {
   };
 
   const setReportData = (input: CustomReportEntity) => {
-    const selectAll: CategoryEntity[] = [];
-    categories.grouped.map(categoryGroup =>
-      (categoryGroup.categories || []).map(category =>
-        selectAll.push(category),
-      ),
-    );
-
     setStartDate(input.startDate);
     setEndDate(input.endDate);
     setIsDateStatic(input.isDateStatic);
@@ -572,7 +563,6 @@ export function CustomReport() {
     setShowHiddenCategories(input.showHiddenCategories);
     setIncludeCurrentInterval(input.includeCurrentInterval);
     setShowUncategorized(input.showUncategorized);
-    setSelectedCategories(input.selectedCategories || selectAll);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => onApplyFilter(condition));
@@ -659,6 +649,7 @@ export function CustomReport() {
         {!isNarrowWidth && (
           <ReportSidebar
             customReportItems={customReportItems}
+            selectedCategories={selectedCategories}
             categories={categories}
             dateRangeLine={dateRangeLine}
             allIntervals={allIntervals}

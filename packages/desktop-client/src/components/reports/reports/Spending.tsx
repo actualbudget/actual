@@ -4,7 +4,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
-import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -30,8 +29,6 @@ import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet'
 import { useReport } from '../useReport';
 
 export function Spending() {
-  const categories = useCategories();
-
   const {
     conditions,
     conditionsOp,
@@ -71,13 +68,12 @@ export function Spending() {
   const getGraphData = useMemo(() => {
     setDataCheck(false);
     return createSpendingSpreadsheet({
-      categories,
       conditions,
       conditionsOp,
       setDataCheck,
       compare,
     });
-  }, [categories, conditions, conditionsOp, compare]);
+  }, [conditions, conditionsOp, compare]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
