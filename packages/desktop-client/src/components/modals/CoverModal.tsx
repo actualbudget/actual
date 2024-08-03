@@ -8,13 +8,11 @@ import { useInitialMount } from '../../hooks/useInitialMount';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
 import { Button } from '../common/Button2';
-import { Modal } from '../common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
-import { type CommonModalProps } from '../Modals';
 
 type CoverModalProps = {
-  modalProps: CommonModalProps;
   title: string;
   month: string;
   showToBeBudgeted?: boolean;
@@ -22,7 +20,6 @@ type CoverModalProps = {
 };
 
 export function CoverModal({
-  modalProps,
   title,
   month,
   showToBeBudgeted = true,
@@ -30,10 +27,12 @@ export function CoverModal({
 }: CoverModalProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
-    let expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
-    expenseGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(expenseGroups)
-      : expenseGroups;
+    const filteredCategoryGroups = originalCategoryGroups.filter(
+      g => !g.is_income,
+    );
+    const expenseGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(filteredCategoryGroups)
+      : filteredCategoryGroups;
     const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
   }, [originalCategoryGroups, showToBeBudgeted]);
@@ -57,8 +56,6 @@ export function CoverModal({
     if (categoryId) {
       onSubmit?.(categoryId);
     }
-
-    modalProps.onClose();
   };
 
   const initialMount = useInitialMount();
@@ -72,31 +69,42 @@ export function CoverModal({
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   return (
-    <Modal title={title} showHeader focusAfterClose={false} {...modalProps}>
-      <View>
-        <FieldLabel title="Cover from category:" />
-        <TapField value={fromCategory?.name} onClick={onCategoryClick} />
-      </View>
+    <Modal name="cover">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title={title}
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View>
+            <FieldLabel title="Cover from category:" />
+            <TapField value={fromCategory?.name} onClick={onCategoryClick} />
+          </View>
 
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingTop: 10,
-        }}
-      >
-        <Button
-          variant="primary"
-          style={{
-            height: styles.mobileMinHeight,
-            marginLeft: styles.mobileEditingPadding,
-            marginRight: styles.mobileEditingPadding,
-          }}
-          onPress={() => _onSubmit(fromCategoryId)}
-        >
-          Transfer
-        </Button>
-      </View>
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingTop: 10,
+            }}
+          >
+            <Button
+              variant="primary"
+              style={{
+                height: styles.mobileMinHeight,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+              }}
+              onPress={() => {
+                _onSubmit(fromCategoryId);
+                close();
+              }}
+            >
+              Transfer
+            </Button>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

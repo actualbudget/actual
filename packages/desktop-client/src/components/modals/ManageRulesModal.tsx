@@ -4,19 +4,14 @@ import { useLocation } from 'react-router-dom';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
-import { Modal } from '../common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { ManageRules } from '../ManageRules';
-import { type CommonModalProps } from '../Modals';
 
 type ManageRulesModalProps = {
-  modalProps: CommonModalProps;
   payeeId?: string;
 };
 
-export function ManageRulesModal({
-  modalProps,
-  payeeId,
-}: ManageRulesModalProps) {
+export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   if (isNonProductionEnvironment()) {
@@ -28,8 +23,16 @@ export function ManageRulesModal({
   }
 
   return (
-    <Modal title="Rules" loading={loading} {...modalProps}>
-      {() => <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />}
+    <Modal name="manage-rules" isLoading={loading}>
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Rules"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />
+        </>
+      )}
     </Modal>
   );
 }
