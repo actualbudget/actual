@@ -20,7 +20,7 @@ export interface CustomReportEntity {
   selectedCategories?: CategoryEntity[];
   graphType: string;
   conditions?: RuleConditionEntity[];
-  conditionsOp: string;
+  conditionsOp: 'and' | 'or';
   data?: GroupedEntity;
   tombstone?: boolean;
 }
@@ -143,7 +143,7 @@ export interface CustomReportData {
   selected_categories?: CategoryEntity[];
   graph_type: string;
   conditions?: RuleConditionEntity[];
-  conditions_op: string;
+  conditions_op: 'and' | 'or';
   metadata?: GroupedEntity;
   interval: string;
   color_scheme?: string;
