@@ -145,7 +145,16 @@ export function CustomReport() {
     }>
   >([]);
 
-  // TODO: if there are multiple category conditions - do not allow calling this
+  // Complex category conditions are:
+  // - conditions with multiple "category" fields
+  // - conditions with "category" field that use "contains", "doesNotContain" or "matches" operations
+  const isComplexCategoryCondition =
+    !!conditions.find(
+      ({ field, op }) =>
+        field === 'category' &&
+        ['contains', 'doesNotContain', 'matches'].includes(op),
+    ) || conditions.filter(({ field }) => field === 'category').length >= 2;
+
   const setSelectedCategories = (newCategories: CategoryEntity[]) => {
     const newCategoryIdSet = new Set(newCategories.map(({ id }) => id));
     const allCategoryIds = categories.list.map(({ id }) => id);
@@ -673,6 +682,7 @@ export function CustomReport() {
             defaultModeItems={defaultModeItems}
             earliestTransaction={earliestTransaction}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
+            isComplexCategoryCondition={isComplexCategoryCondition}
           />
         )}
         <View
