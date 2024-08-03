@@ -6,7 +6,7 @@ import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
 import { type CSSProperties, themeOptions, useTheme } from '../style';
 
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 
@@ -44,9 +44,9 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     <>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         aria-label="Switch theme"
-        onClick={() => setMenuOpen(true)}
+        onPress={() => setMenuOpen(true)}
         style={style}
       >
         <Icon style={{ width: 13, height: 13, color: 'inherit' }} />

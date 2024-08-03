@@ -5,7 +5,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { View } from '../../common/View';
@@ -79,13 +79,13 @@ export function TransferMenu({
         }}
       >
         <Button
-          type="primary"
+          variant="primary"
           style={{
             fontSize: 12,
             paddingTop: 3,
             paddingBottom: 3,
           }}
-          onClick={() => _onSubmit(amount, categoryId)}
+          onPress={() => _onSubmit(amount, categoryId)}
         >
           Transfer
         </Button>

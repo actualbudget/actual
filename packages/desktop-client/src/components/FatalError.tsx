@@ -3,7 +3,7 @@ import React, { useState, type ReactNode } from 'react';
 import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
 
 import { Block } from './common/Block';
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { Modal } from './common/Modal';
 import { Paragraph } from './common/Paragraph';
@@ -149,8 +149,8 @@ function SharedArrayBufferOverride() {
         I understand the risks, run Actual in the unsupported fallback mode
       </label>
       <Button
-        disabled={!understand}
-        onClick={() => {
+        isDisabled={!understand}
+        onPress={() => {
           window.localStorage.setItem('SharedArrayBufferOverride', 'true');
           window.location.reload();
         }}
@@ -191,7 +191,7 @@ export function FatalError({ error }: FatalErrorProps) {
         )}
 
         <Paragraph>
-          <Button onClick={() => window.Actual?.relaunch()}>Restart app</Button>
+          <Button onPress={() => window.Actual?.relaunch()}>Restart app</Button>
         </Paragraph>
         <Paragraph isLast={true} style={{ fontSize: 11 }}>
           <Link variant="text" onClick={() => setShowError(state => !state)}>

@@ -16,7 +16,7 @@ import { SvgDelete } from '../icons/v0';
 import { useResponsive } from '../ResponsiveProvider';
 import { styles, theme, type CSSProperties } from '../style';
 
-import { Button, ButtonWithLoading } from './common/Button';
+import { Button, ButtonWithLoading } from './common/Button2';
 import { Link } from './common/Link';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
@@ -178,15 +178,15 @@ function Notification({
             : null}
           {button && (
             <ButtonWithLoading
-              type="bare"
-              loading={loading}
-              onClick={async () => {
+              variant="bare"
+              isLoading={loading}
+              onPress={async () => {
                 setLoading(true);
                 await button.action();
                 onRemove();
                 setLoading(false);
               }}
-              style={{
+              style={({ isHovered, isPressed }) => ({
                 backgroundColor: 'transparent',
                 border: `1px solid ${
                   positive
@@ -198,14 +198,16 @@ function Notification({
                 color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
-                '&:hover, &:active': {
-                  backgroundColor: positive
-                    ? theme.noticeBackground
-                    : error
-                      ? theme.errorBackground
-                      : theme.warningBackground,
-                },
-              }}
+                ...(isHovered || isPressed
+                  ? {
+                      backgroundColor: positive
+                        ? theme.noticeBackground
+                        : error
+                          ? theme.errorBackground
+                          : theme.warningBackground,
+                    }
+                  : {}),
+              })}
             >
               {button.title}
             </ButtonWithLoading>
@@ -213,10 +215,10 @@ function Notification({
         </Stack>
         {sticky && (
           <Button
-            type="bare"
+            variant="bare"
             aria-label="Close"
             style={{ flexShrink: 0, color: 'currentColor' }}
-            onClick={onRemove}
+            onPress={onRemove}
           >
             <SvgDelete style={{ width: 9, height: 9, color: 'currentColor' }} />
           </Button>

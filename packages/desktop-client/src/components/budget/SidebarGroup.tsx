@@ -5,7 +5,7 @@ import { type ConnectDragSource } from 'react-dnd';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -94,12 +94,9 @@ export function SidebarGroup({
         <>
           <View style={{ marginLeft: 5, flexShrink: 0 }} ref={triggerRef}>
             <Button
-              type="bare"
+              variant="bare"
               className="hover-visible"
-              onClick={e => {
-                e.stopPropagation();
-                setMenuOpen(true);
-              }}
+              onPress={() => setMenuOpen(true)}
               style={{ padding: 3 }}
             >
               <SvgCheveronDown width={14} height={14} />

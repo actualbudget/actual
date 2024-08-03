@@ -24,7 +24,7 @@ import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
 import { Stack } from './common/Stack';
@@ -314,11 +314,11 @@ function ManageRulesContent({
         >
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
-              <Button onClick={onDeleteSelected}>
+              <Button onPress={onDeleteSelected}>
                 Delete {selectedInst.items.size} rules
               </Button>
             )}
-            <Button type="primary" onClick={onCreateRule}>
+            <Button variant="primary" onPress={onCreateRule}>
               Create new rule
             </Button>
           </Stack>

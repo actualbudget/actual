@@ -198,43 +198,42 @@ type ButtonWithLoadingProps = ButtonProps & {
   loading?: boolean;
 };
 
-export const ButtonWithLoading = forwardRef<
-  HTMLButtonElement,
-  ButtonWithLoadingProps
->((props, ref) => {
-  const { loading, children, ...buttonProps } = props;
-  return (
-    <Button
-      {...buttonProps}
-      ref={ref}
-      style={{ position: 'relative', ...buttonProps.style }}
-    >
-      {loading && (
+const ButtonWithLoading = forwardRef<HTMLButtonElement, ButtonWithLoadingProps>(
+  (props, ref) => {
+    const { loading, children, ...buttonProps } = props;
+    return (
+      <Button
+        {...buttonProps}
+        ref={ref}
+        style={{ position: 'relative', ...buttonProps.style }}
+      >
+        {loading && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <AnimatedLoading style={{ width: 20, height: 20 }} />
+          </View>
+        )}
         <View
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            opacity: loading ? 0 : 1,
+            flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
           }}
         >
-          <AnimatedLoading style={{ width: 20, height: 20 }} />
+          {children}
         </View>
-      )}
-      <View
-        style={{
-          opacity: loading ? 0 : 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
-        {children}
-      </View>
-    </Button>
-  );
-});
+      </Button>
+    );
+  },
+);
 
 ButtonWithLoading.displayName = 'ButtonWithLoading';

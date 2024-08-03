@@ -13,7 +13,7 @@ import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -143,7 +143,7 @@ export function CashFlow() {
             justifyContent: 'flex-end',
           }}
         >
-          <Button onClick={() => setShowBalance(state => !state)}>
+          <Button onPress={() => setShowBalance(state => !state)}>
             {showBalance ? 'Hide balance' : 'Show balance'}
           </Button>
         </View>

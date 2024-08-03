@@ -6,7 +6,7 @@ import { useNotes } from '../hooks/useNotes';
 import { SvgCustomNotesPaper } from '../icons/v2';
 import { type CSSProperties, theme } from '../style';
 
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Popover } from './common/Popover';
 import { Tooltip } from './common/Tooltip';
 import { View } from './common/View';
@@ -52,7 +52,7 @@ export function NotesButton({
       <View style={{ flexShrink: 0 }}>
         <Button
           ref={triggerRef}
-          type="bare"
+          variant="bare"
           aria-label="View notes"
           className={!hasNotes && !isOpen ? 'hover-visible' : ''}
           style={{
@@ -61,8 +61,7 @@ export function NotesButton({
             ...(hasNotes && { display: 'flex !important' }),
             ...(isOpen && { color: theme.buttonNormalText }),
           }}
-          onClick={event => {
-            event.stopPropagation();
+          onPress={() => {
             setIsOpen(true);
           }}
         >
