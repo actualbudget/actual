@@ -60,9 +60,16 @@
       "baseVersion": "23.08"
     },
     "win": {
-      "target": "nsis",
+      "target": {
+        "target": "nsis",
+        "arch": [
+          "x64",
+          "ia32",
+          "arm64"
+        ]
+      },
       "icon": "icons/icon.ico",
-      "artifactName": "${productName}-windows.${ext}"
+      "artifactName": "${productName}-windows-${arch}.${ext}"
     }
   },
   "dependencies": {
