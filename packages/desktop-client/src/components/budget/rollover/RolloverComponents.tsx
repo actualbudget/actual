@@ -99,12 +99,13 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(monthUtils.isCurrentMonth(month) && {
-          backgroundColor: theme.budgetHeaderCurrentMonth,
-        }),
-        ...(!monthUtils.isCurrentMonth(month) && {
-          backgroundColor: theme.budgetHeaderOtherMonth,
-        }),
+        ...(monthUtils.isCurrentMonth(month)
+          ? {
+              backgroundColor: theme.budgetHeaderCurrentMonth,
+            }
+          : {
+              backgroundColor: theme.budgetHeaderOtherMonth,
+            }),
       }}
     >
       <SheetCell
