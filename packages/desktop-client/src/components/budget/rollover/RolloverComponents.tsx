@@ -386,11 +386,13 @@ export function IncomeGroupMonth({ month }) {
           fontWeight: 600,
           paddingRight: styles.monthRightPadding,
           ...styles.tnum,
-          ...(monthUtils.isCurrentMonth(month) ? {
-            backgroundColor: theme.budgetHeaderCurrentMonth,
-          } : {
-            backgroundColor: theme.budgetHeaderOtherMonth,
-          }),
+          ...(monthUtils.isCurrentMonth(month)
+            ? {
+                backgroundColor: theme.budgetHeaderCurrentMonth,
+              }
+            : {
+                backgroundColor: theme.budgetHeaderOtherMonth,
+              }),
         }}
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
@@ -427,11 +429,13 @@ export function IncomeCategoryMonth({
           paddingRight: styles.monthRightPadding,
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
-          ...(monthUtils.isCurrentMonth(month) ? {
-            backgroundColor: theme.budgetCurrentMonth,
-          } : {
-            backgroundColor: theme.budgetOtherMonth,
-          }),
+          ...(monthUtils.isCurrentMonth(month)
+            ? {
+                backgroundColor: theme.budgetCurrentMonth,
+              }
+            : {
+                backgroundColor: theme.budgetOtherMonth,
+              }),
         }}
       >
         <span onClick={() => onShowActivity(category.id, month)}>
