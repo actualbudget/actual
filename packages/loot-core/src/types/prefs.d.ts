@@ -1,5 +1,7 @@
 import { type numberFormats } from '../shared/util';
 
+import { spendingReportTimeType } from './models/reports';
+
 export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
@@ -50,6 +52,9 @@ export type LocalPrefs = Partial<
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
+    spendingReportFilter: string;
+    spendingReportTime: spendingReportTimeType;
+    spendingReportCompare: spendingReportTimeType;
     sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>

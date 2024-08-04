@@ -164,6 +164,12 @@ export const CategoryMonth = memo(function CategoryMonth({
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
 
+  const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
+    onBudgetAction(...args);
+    setBalanceMenuOpen(false);
+    setMenuOpen(false);
+  };
+
   return (
     <View
       style={{
@@ -229,10 +235,9 @@ export const CategoryMonth = memo(function CategoryMonth({
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
-                  onBudgetAction?.(month, 'copy-single-last', {
+                  onMenuAction(month, 'copy-single-last', {
                     category: category.id,
                   });
-                  setMenuOpen(false);
                 }}
                 onSetMonthsAverage={numberOfMonths => {
                   if (
@@ -243,16 +248,14 @@ export const CategoryMonth = memo(function CategoryMonth({
                     return;
                   }
 
-                  onBudgetAction?.(month, `set-single-${numberOfMonths}-avg`, {
+                  onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
-                  setMenuOpen(false);
                 }}
                 onApplyBudgetTemplate={() => {
-                  onBudgetAction?.(month, 'apply-single-category-template', {
+                  onMenuAction(month, 'apply-single-category-template', {
                     category: category.id,
                   });
-                  setMenuOpen(false);
                 }}
               />
             </Popover>
@@ -340,6 +343,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               balance={reportBudget.catBalance(category.id)}
               goal={reportBudget.catGoal(category.id)}
               budgeted={reportBudget.catBudgeted(category.id)}
+              longGoal={reportBudget.catLongGoal(category.id)}
               style={{
                 ':hover': { textDecoration: 'underline' },
               }}
@@ -355,11 +359,10 @@ export const CategoryMonth = memo(function CategoryMonth({
             <BalanceMenu
               categoryId={category.id}
               onCarryover={carryover => {
-                onBudgetAction?.(month, 'carryover', {
+                onMenuAction(month, 'carryover', {
                   category: category.id,
                   flag: carryover,
                 });
-                setBalanceMenuOpen(false);
               }}
             />
           </Popover>

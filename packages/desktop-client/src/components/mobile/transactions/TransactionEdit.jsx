@@ -342,7 +342,11 @@ const ChildTransactionEdit = forwardRef(
               value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
               style={{ marginRight: 8 }}
-              inputStyle={{ ...styles.smallText, textAlign: 'right' }}
+              inputStyle={{
+                ...styles.smallText,
+                textAlign: 'right',
+                minWidth: 0,
+              }}
               onFocus={() =>
                 onRequestActiveEdit(getFieldName(transaction.id, 'amount'))
               }
