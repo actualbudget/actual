@@ -129,13 +129,20 @@ export const MonthPicker = ({
                   selected && {
                     filter: 'brightness(65%)',
                   }),
-                ...(current && {
-                  paddingTop: 2,
-                  paddingBottom: 2,
-                }),
                 ...(hovered &&
                   !selected && {
                     backgroundColor: theme.buttonBareBackgroundHover,
+                  }),
+                ...(!hovered &&
+                  !selected &&
+                  current && {
+                    backgroundColor: theme.buttonBareBackgroundHover,
+                    filter: 'brightness(120%)',
+                  }),
+                ...(hovered &&
+                  selected &&
+                  current && {
+                    filter: 'brightness(120%)',
                   }),
                 ...(hovered &&
                   selected && {
@@ -151,37 +158,29 @@ export const MonthPicker = ({
                   borderTopRightRadius: 2,
                   borderBottomRightRadius: 2,
                 }),
+                ...(current && { fontWeight: 'bold' }),
               }}
               onClick={() => onSelect(month)}
               onMouseEnter={() => setHoverId(idx)}
               onMouseLeave={() => setHoverId(null)}
             >
-              <View
-                style={{
-                  ...(current && {
-                    border: '1px solid',
-                    borderRadius: '3',
-                  }),
-                }}
-              >
-                {size === 'small' ? monthName[0] : monthName}
-                {showYearHeader && (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: -14,
-                      left: 0,
-                      fontSize: 10,
-                      fontWeight: 'bold',
-                      color: isMonthBudgeted
-                        ? theme.pageText
-                        : theme.pageTextSubdued,
-                    }}
-                  >
-                    {year}
-                  </View>
-                )}
-              </View>
+              {size === 'small' ? monthName[0] : monthName}
+              {showYearHeader && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: -14,
+                    left: 0,
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    color: isMonthBudgeted
+                      ? theme.pageText
+                      : theme.pageTextSubdued,
+                  }}
+                >
+                  {year}
+                </View>
+              )}
             </View>
           );
         })}
