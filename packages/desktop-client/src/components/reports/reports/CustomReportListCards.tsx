@@ -79,7 +79,11 @@ export function CustomReportListCards({
   // It's possible for a dashboard to reference a non-existing
   // custom report
   if (!report) {
-    return <MissingReportCard isEditing={isEditing} onRemove={onRemove} />;
+    return (
+      <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
+        This custom report has been deleted.
+      </MissingReportCard>
+    );
   }
 
   return (
@@ -244,6 +248,7 @@ function CustomReportListCardsInner({
           <Tooltip
             content="The widget is configured to use a non-existing filter value (i.e. category/account/payee). Edit the filters used in this report widget to remove the warning."
             placement="bottom start"
+            style={{ ...styles.tooltip, maxWidth: 300 }}
           >
             <SvgExclamationSolid
               width={20}

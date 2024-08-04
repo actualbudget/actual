@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
@@ -15,6 +16,8 @@ import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
+
+import { MissingReportCard } from './MissingReportCard';
 
 type SpendingCardProps = {
   isEditing?: boolean;
@@ -50,6 +53,16 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
     data.intervalData[todayDay][spendingReportTime] -
       data.intervalData[todayDay][spendingReportCompare];
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
+
+  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
+
+  if (!spendingReportFeatureFlag) {
+    return (
+      <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
+        The experimental spending report feature has not been enabled.
+      </MissingReportCard>
+    );
+  }
 
   return (
     <ReportCard

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 import { View } from '../../common/View';
 import { ReportCard } from '../ReportCard';
@@ -6,12 +6,13 @@ import { ReportCard } from '../ReportCard';
 type MissingReportCardProps = {
   isEditing?: boolean;
   onRemove: () => void;
+  children: ReactNode;
 };
 
-// TODO: the content and design of this component could be improved
 export function MissingReportCard({
   isEditing,
   onRemove,
+  children,
 }: MissingReportCardProps) {
   return (
     <ReportCard
@@ -35,9 +36,10 @@ export function MissingReportCard({
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
+          padding: 10,
         }}
       >
-        This custom report has been deleted.
+        {children}
       </View>
     </ReportCard>
   );
