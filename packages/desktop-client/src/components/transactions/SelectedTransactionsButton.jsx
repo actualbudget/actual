@@ -118,7 +118,7 @@ export function SelectedTransactionsButton({
       pushModal('schedule-link', {
         transactionIds: selectedIds,
         getTransaction,
-        accountName: account.name,
+        accountName: account?.name ?? '',
       }),
     );
   }
