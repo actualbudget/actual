@@ -39,7 +39,6 @@ export type createCustomSpreadsheetProps = {
   endDate: string;
   interval: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
-  selectedCategories: CategoryEntity[];
   conditions: RuleConditionEntity[];
   conditionsOp: string;
   showEmpty: boolean;
@@ -60,7 +59,6 @@ export function createCustomSpreadsheet({
   endDate,
   interval,
   categories,
-  selectedCategories,
   conditions = [],
   conditionsOp,
   showEmpty,
@@ -76,14 +74,6 @@ export function createCustomSpreadsheet({
   setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
-
-  const categoryFilter = (categories.list || []).filter(
-    category =>
-      selectedCategories &&
-      selectedCategories.some(
-        selectedCategory => selectedCategory.id === category.id,
-      ),
-  );
 
   const [groupByList, groupByLabel]: [
     groupByList: UncategorizedEntity[],
@@ -112,7 +102,6 @@ export function createCustomSpreadsheet({
           startDate,
           endDate,
           interval,
-          categoryFilter,
           conditionsOpKey,
           filters,
         ),
@@ -123,7 +112,6 @@ export function createCustomSpreadsheet({
           startDate,
           endDate,
           interval,
-          categoryFilter,
           conditionsOpKey,
           filters,
         ),
