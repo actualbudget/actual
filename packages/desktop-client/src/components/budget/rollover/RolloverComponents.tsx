@@ -375,7 +375,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   );
 });
 
-export function IncomeGroupMonth({ month }) {
+type IncomeGroupMonthProps = {
+  month: string;
+};
+export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
   return (
     <View style={{ flex: 1 }}>
       <SheetCell
