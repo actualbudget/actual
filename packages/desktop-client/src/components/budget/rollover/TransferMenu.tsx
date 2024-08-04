@@ -25,10 +25,12 @@ export function TransferMenu({
   onClose,
 }: TransferMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
-  let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
-  if (showToBeBudgeted) {
-    categoryGroups = addToBeBudgetedGroup(categoryGroups);
-  }
+  const filteredCategoryGroups = originalCategoryGroups.filter(
+    g => !g.is_income,
+  );
+  const categoryGroups = showToBeBudgeted
+    ? addToBeBudgetedGroup(filteredCategoryGroups)
+    : filteredCategoryGroups;
 
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
   const [amount, setAmount] = useState<string | null>(null);

@@ -38,10 +38,6 @@ function calculateHasWarning(
     payeeIds: Set<string>;
   },
 ) {
-  if (report.selectedCategories?.some(({ id }) => !categoryIds.has(id))) {
-    return true;
-  }
-
   if (!report.conditions) {
     return false;
   }
@@ -54,12 +50,12 @@ function calculateHasWarning(
           return true;
         }
         break;
-      case 'payees':
+      case 'payee':
         if (!payeeIds.has(strValue)) {
           return true;
         }
         break;
-      case 'categories':
+      case 'category':
         if (!categoryIds.has(strValue)) {
           return true;
         }

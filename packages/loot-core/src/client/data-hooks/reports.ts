@@ -25,7 +25,6 @@ function toJS(rows: CustomReportData[]) {
       showHiddenCategories: row.show_hidden === 1,
       includeCurrentInterval: row.include_current === 1,
       showUncategorized: row.show_uncategorized === 1,
-      selectedCategories: row.selected_categories,
       graphType: row.graph_type,
       conditions: row.conditions,
       conditionsOp: row.conditions_op ?? 'and',

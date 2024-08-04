@@ -19,10 +19,12 @@ export function CoverMenu({
   onClose,
 }: CoverMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
-  let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
-  categoryGroups = showToBeBudgeted
-    ? addToBeBudgetedGroup(categoryGroups)
-    : categoryGroups;
+  const filteredCategoryGroups = originalCategoryGroups.filter(
+    g => !g.is_income,
+  );
+  const categoryGroups = showToBeBudgeted
+    ? addToBeBudgetedGroup(filteredCategoryGroups)
+    : filteredCategoryGroups;
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   function submit() {
