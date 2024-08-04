@@ -543,7 +543,7 @@ export function ReportSidebar({
       >
         {isComplexCategoryCondition ? (
           <Information>
-            Remove active category filters to show the simple category selector.
+            Remove active category filters to show the category selector.
           </Information>
         ) : (
           <CategorySelector
