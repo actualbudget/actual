@@ -36,9 +36,10 @@ function toJS(rows: CustomReportData[]) {
   return reports;
 }
 
-export function useReports(): CustomReportEntity[] {
-  const reports: CustomReportEntity[] = toJS(
-    useLiveQuery(() => q('custom_reports').select('*'), []) || [],
+export function useReports() {
+  const queryData = useLiveQuery<CustomReportData[]>(
+    () => q('custom_reports').select('*'),
+    [],
   );
 
   // Sort reports by alphabetical order
@@ -52,5 +53,11 @@ export function useReports(): CustomReportEntity[] {
     );
   }
 
-  return useMemo(() => sort(reports), [reports]);
+  return useMemo(
+    () => ({
+      isLoading: queryData === null,
+      data: sort(toJS(queryData || [])),
+    }),
+    [queryData],
+  );
 }
