@@ -89,13 +89,28 @@ export function IncomeHeaderMonth() {
 }
 
 type GroupMonthProps = {
+  month: string;
   group: { id: string; is_income: boolean };
 };
-export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
+export const GroupMonth = memo(function GroupMonth({
+  month,
+  group,
+}: GroupMonthProps) {
   const { id } = group;
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        ...(monthUtils.isCurrentMonth(month) && {
+          backgroundColor: theme.budgetHeaderCurrentMonth,
+        }),
+        ...(!monthUtils.isCurrentMonth(month) && {
+          backgroundColor: theme.budgetHeaderOtherMonth,
+        }),
+      }}
+    >
       <SheetCell
         name="budgeted"
         width="flex"
@@ -175,9 +190,13 @@ export const CategoryMonth = memo(function CategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(monthUtils.isCurrentMonth(month) && {
-          backdropFilter: 'brightness(120%)',
-        }),
+        ...(monthUtils.isCurrentMonth(month)
+          ? {
+              backgroundColor: theme.budgetCurrentMonth,
+            }
+          : {
+              backgroundColor: theme.budgetOtherMonth,
+            }),
         '& .hover-visible': {
           opacity: 0,
           transition: 'opacity .25s',

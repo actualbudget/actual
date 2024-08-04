@@ -56,9 +56,13 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
         marginLeft: 0,
         marginRight: 0,
         marginTop: 5,
-        ...(month === currentMonth && {
-          filter: 'brightness(120%)',
-        }),
+        ...(month === currentMonth
+          ? {
+              backgroundColor: theme.budgetCurrentMonth,
+            }
+          : {
+              backgroundColor: theme.budgetOtherMonth,
+            }),
         flex: 1,
         cursor: 'default',
         marginBottom: 5,
