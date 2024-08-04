@@ -281,7 +281,12 @@ async function getAccounts(accessKey, startDate, endDate) {
           data += d;
         });
         res.on('end', () => {
-          resolve(JSON.parse(data));
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            console.log(`Error parsing JSON response: ${data}`);
+            reject(e);
+          }
         });
       },
     );
