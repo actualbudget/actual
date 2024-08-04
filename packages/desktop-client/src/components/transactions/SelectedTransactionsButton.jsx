@@ -11,6 +11,7 @@ import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
 export function SelectedTransactionsButton({
+  account,
   getTransaction,
   onShow,
   onDuplicate,
@@ -117,6 +118,7 @@ export function SelectedTransactionsButton({
       pushModal('schedule-link', {
         transactionIds: selectedIds,
         getTransaction,
+        accountName: account.name,
       }),
     );
   }
