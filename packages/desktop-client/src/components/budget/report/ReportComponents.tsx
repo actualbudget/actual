@@ -7,7 +7,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -206,11 +206,8 @@ export const CategoryMonth = memo(function CategoryMonth({
           >
             <Button
               ref={triggerRef}
-              type="bare"
-              onClick={e => {
-                e.stopPropagation();
-                setMenuOpen(true);
-              }}
+              variant="bare"
+              onPress={() => setMenuOpen(true)}
               style={{
                 padding: 3,
               }}

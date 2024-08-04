@@ -7,10 +7,9 @@ import React, {
 import { css } from 'glamor';
 
 import { theme, styles, type CSSProperties } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 
 type FieldLabelProps = {
   title: string;
@@ -71,60 +70,36 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
 
 InputField.displayName = 'InputField';
 
-type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
-  rightContent?: ReactNode;
-};
+type TapFieldProps = ComponentPropsWithRef<typeof Button>;
 
 export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
-  (
-    {
-      value,
-      children,
-      disabled,
-      rightContent,
-      style,
-      textStyle,
-      onClick,
-      ...props
-    },
-    ref,
-  ) => {
+  ({ style, ...props }, ref) => {
     return (
       <Button
-        // @ts-expect-error fix this later
-        as={View}
+        variant="bare"
         ref={ref}
-        onClick={!disabled ? onClick : undefined}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          ...style,
-          ...valueStyle,
-          backgroundColor: theme.tableBackground,
-          ...(disabled && {
-            backgroundColor: theme.formInputTextReadOnlySelection,
-          }),
-        }}
+        className={({ isDisabled }) =>
+          css({
+            display: 'block',
+            userSelect: 'none',
+            textAlign: 'left',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: `0 ${styles.mobileEditingPadding}px`,
+            ...style,
+            ...valueStyle,
+            backgroundColor: theme.tableBackground,
+            ...(isDisabled && {
+              backgroundColor: theme.formInputTextReadOnlySelection,
+            }),
+            ':active': { opacity: 0.5, boxShadow: 'none' },
+            ':hover': { boxShadow: 'none' },
+          })
+        }
         bounce={false}
-        activeStyle={{
-          opacity: 0.5,
-          boxShadow: 'none',
-        }}
-        hoveredStyle={{
-          boxShadow: 'none',
-        }}
         // activeOpacity={0.05}
         {...props}
-      >
-        {children ? (
-          children
-        ) : (
-          <Text style={{ flex: 1, userSelect: 'none', ...textStyle }}>
-            {value}
-          </Text>
-        )}
-        {!disabled && rightContent}
-      </Button>
+      />
     );
   },
 );

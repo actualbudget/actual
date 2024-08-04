@@ -1,7 +1,9 @@
 import React, { type MouseEventHandler, type ReactNode } from 'react';
 
+import { css } from 'glamor';
+
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 
 type ModeButtonProps = {
   selected: boolean;
@@ -18,8 +20,8 @@ export function ModeButton({
 }: ModeButtonProps) {
   return (
     <Button
-      type="bare"
-      style={{
+      variant="bare"
+      className={css({
         padding: '5px 10px',
         backgroundColor: theme.menuBackground,
         marginRight: 5,
@@ -33,8 +35,8 @@ export function ModeButton({
           },
         }),
         ...style,
-      }}
-      onClick={onSelect}
+      })}
+      onPress={onSelect}
     >
       {children}
     </Button>

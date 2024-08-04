@@ -24,7 +24,7 @@ import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
-import { Button } from './Button';
+import { Button } from './Button2';
 import { Input } from './Input';
 import { Text } from './Text';
 import { TextOneLine } from './TextOneLine';
@@ -450,15 +450,15 @@ export function ModalTitle({
 }
 
 type ModalCloseButtonProps = {
-  onClick: ComponentPropsWithoutRef<typeof Button>['onClick'];
+  onClick: ComponentPropsWithoutRef<typeof Button>['onPress'];
   style?: CSSProperties;
 };
 
 export function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
   return (
     <Button
-      type="bare"
-      onClick={onClick}
+      variant="bare"
+      onPress={onClick}
       style={{ padding: '10px 10px' }}
       aria-label="Close"
     >

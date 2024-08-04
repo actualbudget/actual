@@ -54,7 +54,7 @@ import { SvgSplit } from '../../../icons/v0';
 import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
 import { SvgPencilWriteAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
@@ -201,11 +201,10 @@ function Footer({
     >
       {transaction.error?.type === 'SplitTransactionError' ? (
         <Button
-          type="primary"
+          variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          disabled={editingField}
-          onClick={onClickRemainingSplit}
-          onPointerDown={e => e.preventDefault()}
+          isDisabled={editingField}
+          onPress={onClickRemainingSplit}
         >
           <SvgSplit width={17} height={17} />
           <Text
@@ -224,11 +223,10 @@ function Footer({
         </Button>
       ) : !transaction.account ? (
         <Button
-          type="primary"
+          variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          disabled={editingField}
-          onClick={() => onEditField(transaction.id, 'account')}
-          onPointerDown={e => e.preventDefault()}
+          isDisabled={editingField}
+          onPress={() => onEditField(transaction.id, 'account')}
         >
           <SvgPiggyBank width={17} height={17} />
           <Text
@@ -242,11 +240,10 @@ function Footer({
         </Button>
       ) : adding ? (
         <Button
-          type="primary"
+          variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          disabled={editingField}
-          onClick={onAdd}
-          onPointerDown={e => e.preventDefault()}
+          isDisabled={editingField}
+          onPress={onAdd}
         >
           <SvgAdd width={17} height={17} />
           <Text
@@ -260,11 +257,10 @@ function Footer({
         </Button>
       ) : (
         <Button
-          type="primary"
+          variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          disabled={editingField}
-          onClick={onSave}
-          onPointerDown={e => e.preventDefault()}
+          isDisabled={editingField}
+          onPress={onSave}
         >
           <SvgPencilWriteAlternate width={16} height={16} />
           <Text
@@ -318,14 +314,15 @@ const ChildTransactionEdit = forwardRef(
           <View style={{ flexBasis: '75%' }}>
             <FieldLabel title="Payee" />
             <TapField
-              disabled={
+              isDisabled={
                 editingField &&
                 editingField !== getFieldName(transaction.id, 'payee')
               }
-              value={getPrettyPayee(transaction)}
-              onClick={() => onEditField(transaction.id, 'payee')}
+              onPress={() => onEditField(transaction.id, 'payee')}
               data-testid={`payee-field-${transaction.id}`}
-            />
+            >
+              {getPrettyPayee(transaction)}
+            </TapField>
           </View>
           <View
             style={{
@@ -366,23 +363,24 @@ const ChildTransactionEdit = forwardRef(
         <View>
           <FieldLabel title="Category" />
           <TapField
-            textStyle={{
+            style={{
               ...((isOffBudget || isBudgetTransfer(transaction)) && {
                 fontStyle: 'italic',
                 color: theme.pageTextSubdued,
                 fontWeight: 300,
               }),
             }}
-            value={getCategory(transaction, isOffBudget)}
-            disabled={
+            isDisabled={
               (editingField &&
                 editingField !== getFieldName(transaction.id, 'category')) ||
               isOffBudget ||
               isBudgetTransfer(transaction)
             }
-            onClick={() => onEditField(transaction.id, 'category')}
+            onPress={() => onEditField(transaction.id, 'category')}
             data-testid={`category-field-${transaction.id}`}
-          />
+          >
+            {getCategory(transaction, isOffBudget)}
+          </TapField>
         </View>
 
         <View>
@@ -402,8 +400,7 @@ const ChildTransactionEdit = forwardRef(
 
         <View style={{ alignItems: 'center' }}>
           <Button
-            onClick={() => onDelete(transaction.id)}
-            onPointerDown={e => e.preventDefault()}
+            onPress={() => onDelete(transaction.id)}
             style={{
               height: 40,
               borderWidth: 0,
@@ -412,7 +409,7 @@ const ChildTransactionEdit = forwardRef(
               marginTop: 10,
               backgroundColor: 'transparent',
             }}
-            type="bare"
+            variant="bare"
           >
             <SvgTrash
               width={17}
@@ -769,20 +766,21 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title="Payee" />
           <TapField
-            textStyle={{
+            style={{
               ...(transaction.is_parent && {
                 fontStyle: 'italic',
                 fontWeight: 300,
               }),
             }}
-            value={getPrettyPayee(transaction)}
-            disabled={
+            isDisabled={
               editingField &&
               editingField !== getFieldName(transaction.id, 'payee')
             }
-            onClick={() => onEditField(transaction.id, 'payee')}
+            onPress={() => onEditField(transaction.id, 'payee')}
             data-testid="payee-field"
-          />
+          >
+            {getPrettyPayee(transaction)}
+          </TapField>
         </View>
 
         {!transaction.is_parent && (
@@ -796,16 +794,17 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   fontWeight: 300,
                 }),
               }}
-              value={getCategory(transaction, isOffBudget)}
-              disabled={
+              isDisabled={
                 (editingField &&
                   editingField !== getFieldName(transaction.id, 'category')) ||
                 isOffBudget ||
                 isBudgetTransfer(transaction)
               }
-              onClick={() => onEditField(transaction.id, 'category')}
+              onPress={() => onEditField(transaction.id, 'category')}
               data-testid="category-field"
-            />
+            >
+              {getCategory(transaction, isOffBudget)}
+            </TapField>
           </View>
         )}
 
@@ -834,7 +833,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         {transaction.amount !== 0 && childTransactions.length === 0 && (
           <View style={{ alignItems: 'center' }}>
             <Button
-              disabled={editingField}
+              isDisabled={editingField}
               style={{
                 height: 40,
                 borderWidth: 0,
@@ -843,8 +842,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 marginTop: 10,
                 backgroundColor: 'transparent',
               }}
-              onClick={() => onSplit(transaction.id)}
-              type="bare"
+              onPress={() => onSplit(transaction.id)}
+              variant="bare"
             >
               <SvgSplit
                 width={17}
@@ -867,15 +866,16 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title="Account" />
           <TapField
-            disabled={
+            isDisabled={
               !adding ||
               (editingField &&
                 editingField !== getFieldName(transaction.id, 'account'))
             }
-            value={account?.name}
-            onClick={() => onEditField(transaction.id, 'account')}
+            onPress={() => onEditField(transaction.id, 'account')}
             data-testid="account-field"
-          />
+          >
+            {account?.name}
+          </TapField>
         </View>
 
         <View style={{ flexDirection: 'row' }}>
@@ -950,7 +950,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         {!adding && (
           <View style={{ alignItems: 'center' }}>
             <Button
-              onClick={() => onDelete(transaction.id)}
+              onPress={() => onDelete(transaction.id)}
               style={{
                 height: 40,
                 borderWidth: 0,
@@ -959,7 +959,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 marginTop: 10,
                 backgroundColor: 'transparent',
               }}
-              type="bare"
+              variant="bare"
             >
               <SvgTrash
                 width={17}

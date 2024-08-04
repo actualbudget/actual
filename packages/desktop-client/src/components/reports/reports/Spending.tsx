@@ -12,7 +12,7 @@ import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Select } from '../../common/Select';
 import { Text } from '../../common/Text';
@@ -127,7 +127,7 @@ export function Spending() {
           <MobilePageHeader
             title="Monthly Spending"
             leftContent={
-              <MobileBackButton onClick={() => navigate('/reports')} />
+              <MobileBackButton onPress={() => navigate('/reports')} />
             }
           />
         ) : (
@@ -167,12 +167,12 @@ export function Spending() {
                 }}
               >
                 <Button
-                  type="primary"
+                  variant="primary"
                   style={{
                     marginLeft: 10,
                   }}
-                  onClick={saveFilter}
-                  disabled={filterSaved ? true : false}
+                  onPress={saveFilter}
+                  isDisabled={filterSaved ? true : false}
                 >
                   {filterSaved ? 'Saved' : 'Save'}
                 </Button>

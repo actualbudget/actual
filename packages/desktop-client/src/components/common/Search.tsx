@@ -3,8 +3,9 @@ import { type Ref } from 'react';
 import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
 
-import { Button } from './Button';
+import { Button } from './Button2';
 import { InputWithContent } from './InputWithContent';
+import { View } from './View';
 
 type SearchProps = {
   inputRef?: Ref<HTMLInputElement>;
@@ -54,14 +55,15 @@ export function Search({
       }
       rightContent={
         value && (
-          <Button
-            type="bare"
-            style={{ padding: 8 }}
-            onClick={() => onChange('')}
-            title="Clear search term"
-          >
-            <SvgRemove style={{ width: 8, height: 8 }} />
-          </Button>
+          <View title="Clear search term">
+            <Button
+              variant="bare"
+              style={{ padding: 8 }}
+              onPress={() => onChange('')}
+            >
+              <SvgRemove style={{ width: 8, height: 8 }} />
+            </Button>
+          </View>
         )
       }
       inputStyle={{

@@ -1,25 +1,15 @@
-import React, { forwardRef } from 'react';
+import React, { type ComponentPropsWithoutRef, forwardRef } from 'react';
 
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
-import { type CSSProperties } from '../../style';
 
-import { Button } from './Button';
+import { Button } from './Button2';
 
-type MenuButtonProps = {
-  onClick: () => void;
-  style?: CSSProperties;
-};
+type MenuButtonProps = ComponentPropsWithoutRef<typeof Button>;
 
 export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(
-  ({ onClick, style }, ref) => {
+  (props, ref) => {
     return (
-      <Button
-        ref={ref}
-        type="bare"
-        onClick={onClick}
-        aria-label="Menu"
-        style={style}
-      >
+      <Button ref={ref} variant="bare" aria-label="Menu" {...props}>
         <SvgDotsHorizontalTriple
           width={15}
           height={15}

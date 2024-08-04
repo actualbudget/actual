@@ -13,7 +13,7 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { type CSSProperties, styles } from '../../style';
 import { theme } from '../../style/theme';
 
-import { Button } from './Button';
+import { Button } from './Button2';
 import { Text } from './Text';
 
 type TextLinkProps = {
@@ -94,14 +94,13 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const match = useMatch({ path });
   return (
     <Button
-      style={{
+      style={({ isPressed }) => ({
         ...style,
-        ...(match ? activeStyle : {}),
-      }}
-      activeStyle={activeStyle}
+        ...(match || isPressed ? activeStyle : {}),
+      })}
       {...props}
-      onClick={e => {
-        props.onClick?.(e);
+      onPress={e => {
+        props.onPress?.(e);
         if (!e.defaultPrevented) {
           navigate(path);
         }
