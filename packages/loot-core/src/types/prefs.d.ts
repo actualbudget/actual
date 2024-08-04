@@ -1,5 +1,7 @@
 import { type numberFormats } from '../shared/util';
 
+import { spendingReportTimeType } from './models/reports';
+
 export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
@@ -18,8 +20,6 @@ export type LocalPrefs = Partial<
       | 'dd.MM.yyyy';
     numberFormat: (typeof numberFormats)[number]['value'];
     hideFraction: boolean;
-    hideClosedAccounts: boolean;
-    hideMobileMessage: boolean;
     isPrivacyEnabled: boolean;
     budgetName: string;
     'ui.showClosedAccounts': boolean;
@@ -40,7 +40,6 @@ export type LocalPrefs = Partial<
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
     'flags.updateNotificationShownForVersion': string;
     id: string;
-    isCached: boolean;
     lastUploaded: string;
     cloudFileId: string;
     groupId: string;
@@ -53,6 +52,9 @@ export type LocalPrefs = Partial<
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
+    spendingReportFilter: string;
+    spendingReportTime: spendingReportTimeType;
+    spendingReportCompare: spendingReportTimeType;
     sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>

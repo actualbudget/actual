@@ -135,6 +135,14 @@ global.Actual = {
   },
 };
 
+function inputFocused(e) {
+  return (
+    e.target.tagName === 'INPUT' ||
+    e.target.tagName === 'TEXTAREA' ||
+    e.target.isContentEditable
+  );
+}
+
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey) {
     // Cmd/Ctrl+o
@@ -144,11 +152,7 @@ document.addEventListener('keydown', e => {
     }
     // Cmd/Ctrl+z
     else if (e.key.toLowerCase() === 'z') {
-      if (
-        e.target.tagName === 'INPUT' ||
-        e.target.tagName === 'TEXTAREA' ||
-        e.target.isContentEditable
-      ) {
+      if (inputFocused(e)) {
         return;
       }
       e.preventDefault();
@@ -160,5 +164,10 @@ document.addEventListener('keydown', e => {
         window.__actionsForMenu.undo();
       }
     }
+  } else if (e.key === '?') {
+    if (inputFocused(e)) {
+      return;
+    }
+    window.__actionsForMenu.pushModal('keyboard-shortcuts');
   }
 });

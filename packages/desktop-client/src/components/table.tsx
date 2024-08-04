@@ -14,6 +14,7 @@ import React, {
   type UIEvent,
   type ReactElement,
   type Ref,
+  type MutableRefObject,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -39,10 +40,14 @@ import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
-import { type Binding } from './spreadsheet';
+import {
+  type Spreadsheets,
+  type SheetFields,
+  type SheetNames,
+  type Binding,
+} from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
-import { IntersectionBoundary } from './tooltips';
 
 export const ROW_HEIGHT = 32;
 
@@ -276,16 +281,13 @@ type RowProps = ComponentProps<typeof View> & {
   inset?: number;
   collapsed?: boolean;
 };
-export function Row({
-  inset = 0,
-  collapsed,
-  children,
-  height,
-  style,
-  ...nativeProps
-}: RowProps) {
+export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
+  { inset = 0, collapsed, children, height, style, ...nativeProps },
+  ref,
+) {
   return (
     <View
+      ref={ref}
       style={{
         flexDirection: 'row',
         height: height || ROW_HEIGHT,
@@ -302,7 +304,7 @@ export function Row({
       {inset !== 0 && <Field width={inset} />}
     </View>
   );
-}
+});
 
 const inputCellStyle = {
   padding: '5px 3px',
@@ -314,7 +316,7 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
-type InputValueProps = ComponentProps<typeof Input> & {
+type InputValueProps = Omit<ComponentProps<typeof Input>, 'value'> & {
   value?: string;
 };
 
@@ -674,31 +676,47 @@ export function SelectCell({
   );
 }
 
-type SheetCellValueProps = {
-  binding: Binding;
+type SheetCellValueProps<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+> = {
+  binding: Binding<SheetName, FieldName>;
   type: FormatType;
-  getValueStyle?: (value: string | number) => CSSProperties;
-  formatExpr?: (value) => string;
+  getValueStyle?: (value: Spreadsheets[SheetName][FieldName]) => CSSProperties;
+  formatExpr?: (value: Spreadsheets[SheetName][FieldName]) => string;
   unformatExpr?: (value: string) => unknown;
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
 };
 
-type SheetCellProps = ComponentProps<typeof Cell> & {
-  valueProps: SheetCellValueProps;
-  inputProps?: Omit<ComponentProps<typeof InputValue>, 'value' | 'onUpdate'>;
+type SheetCellProps<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+> = ComponentProps<typeof Cell> & {
+  valueProps: SheetCellValueProps<SheetName, FieldName>;
+  inputProps?: Omit<
+    ComponentProps<typeof InputValue>,
+    'value' | 'onUpdate' | 'onBlur'
+  > & {
+    onBlur?: () => void;
+  };
   onSave?: (value) => void;
   textAlign?: CSSProperties['textAlign'];
 };
-export function SheetCell({
+export function SheetCell<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  SheetName extends SheetNames = any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  FieldName extends SheetFields<SheetName> = any,
+>({
   valueProps,
   valueStyle,
   inputProps,
   textAlign,
   onSave,
   ...props
-}: SheetCellProps) {
+}: SheetCellProps<SheetName, FieldName>) {
   const {
     binding,
     type,
@@ -708,10 +726,10 @@ export function SheetCell({
     privacyFilter,
   } = valueProps;
 
-  const sheetValue = useSheetValue(binding, e => {
+  const sheetValue = useSheetValue(binding, () => {
     // "close" the cell if it's editing
     if (props.exposed && inputProps && inputProps.onBlur) {
-      inputProps.onBlur(e);
+      inputProps.onBlur();
     }
   });
   const format = useFormat();
@@ -725,7 +743,7 @@ export function SheetCell({
       }
       textAlign={textAlign}
       {...props}
-      value={sheetValue}
+      value={String(sheetValue ?? '')}
       formatter={value =>
         props.formatter ? props.formatter(value, type) : format(value, type)
       }
@@ -741,7 +759,7 @@ export function SheetCell({
       {() => {
         return (
           <InputValue
-            value={formatExpr ? formatExpr(sheetValue) : sheetValue}
+            value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
             onUpdate={value => {
               onSave(unformatExpr ? unformatExpr(value) : value);
             }}
@@ -900,9 +918,8 @@ type TableProps<T extends TableItem = TableItem> = {
   loadMore?: () => void;
   style?: CSSProperties;
   navigator?: ReturnType<typeof useTableNavigator<T>>;
-  listRef?: unknown;
+  listContainerRef?: MutableRefObject<HTMLDivElement>;
   onScroll?: () => void;
-  allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
 };
@@ -924,9 +941,9 @@ export const Table = forwardRef(
       style,
       navigator,
       onScroll,
-      allowPopupsEscape,
       isSelected,
       saveScrollWidth,
+      listContainerRef,
       ...props
     },
     ref,
@@ -942,7 +959,8 @@ export const Table = forwardRef(
 
     const { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
     const list = useRef(null);
-    const listContainer = useRef(null);
+    const listContainerInnerRef = useRef<HTMLDivElement>(null);
+    const listContainer = listContainerRef || listContainerInnerRef;
     const scrollContainer = useRef(null);
     const initialScrollTo = useRef(null);
     const listInitialized = useRef(false);
@@ -1144,37 +1162,33 @@ export const Table = forwardRef(
                 }
 
                 return (
-                  <IntersectionBoundary.Provider
-                    value={!allowPopupsEscape && listContainer}
-                  >
-                    <AvoidRefocusScrollProvider>
-                      <FixedSizeList
-                        ref={list}
-                        header={contentHeader}
-                        innerRef={listContainer}
-                        outerRef={scrollContainer}
-                        width={width}
-                        height={height}
-                        renderRow={renderRow}
-                        itemCount={count || items.length}
-                        itemSize={rowHeight - 1}
-                        itemKey={
-                          getItemKey || ((index: number) => items[index].id)
-                        }
-                        indexForKey={key =>
-                          items.findIndex(item => item.id === key)
-                        }
-                        initialScrollOffset={
-                          initialScrollTo.current
-                            ? getScrollOffset(height, initialScrollTo.current)
-                            : 0
-                        }
-                        overscanCount={5}
-                        onItemsRendered={onItemsRendered}
-                        onScroll={onScroll}
-                      />
-                    </AvoidRefocusScrollProvider>
-                  </IntersectionBoundary.Provider>
+                  <AvoidRefocusScrollProvider>
+                    <FixedSizeList
+                      ref={list}
+                      header={contentHeader}
+                      innerRef={listContainer}
+                      outerRef={scrollContainer}
+                      width={width}
+                      height={height}
+                      renderRow={renderRow}
+                      itemCount={count || items.length}
+                      itemSize={rowHeight - 1}
+                      itemKey={
+                        getItemKey || ((index: number) => items[index].id)
+                      }
+                      indexForKey={key =>
+                        items.findIndex(item => item.id === key)
+                      }
+                      initialScrollOffset={
+                        initialScrollTo.current
+                          ? getScrollOffset(height, initialScrollTo.current)
+                          : 0
+                      }
+                      overscanCount={5}
+                      onItemsRendered={onItemsRendered}
+                      onScroll={onScroll}
+                    />
+                  </AvoidRefocusScrollProvider>
                 );
               }}
             </AutoSizer>

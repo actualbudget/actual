@@ -13,6 +13,7 @@ import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
+import { dayFromDate } from '../shared/months';
 import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
@@ -445,6 +446,10 @@ handlers['payee-create'] = mutator(async function ({ name }) {
   });
 });
 
+handlers['common-payees-get'] = async function () {
+  return db.getCommonPayees();
+};
+
 handlers['payees-get'] = async function () {
   return db.getPayees();
 };
@@ -576,6 +581,14 @@ handlers['account-update'] = mutator(async function ({ id, name }) {
 
 handlers['accounts-get'] = async function () {
   return db.getAccounts();
+};
+
+handlers['account-balance'] = async function ({ id, cutoff }) {
+  const { balance } = await db.first(
+    'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
+    [id, db.toDateRepr(dayFromDate(cutoff))],
+  );
+  return balance ? balance : 0;
 };
 
 handlers['account-properties'] = async function ({ id }) {
@@ -1053,7 +1066,8 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}`,
+         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}
+         ORDER BY a.offbudget, a.sort_order`,
     id ? [id] : [],
     true,
   );
