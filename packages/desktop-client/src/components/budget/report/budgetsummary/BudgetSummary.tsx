@@ -50,7 +50,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   return (
     <View
       style={{
-        backgroundColor: theme.tableBackground,
         boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
