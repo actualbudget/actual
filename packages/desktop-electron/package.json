@@ -60,16 +60,33 @@
       "baseVersion": "23.08"
     },
     "win": {
-      "target": {
-        "target": "nsis",
-        "arch": [
-          "x64",
-          "ia32",
-          "arm64"
-        ]
-      },
+      "target": [
+        {
+          "target": "appx",
+          "arch": [
+            "x64",
+            "ia32",
+            "arm64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32",
+            "arm64"
+          ]
+        }
+      ],
       "icon": "icons/icon.ico",
       "artifactName": "${productName}-windows-${arch}.${ext}"
+    },
+    "appx": {
+      "identityName": "actualbudget.org.ActualBudget",
+      "applicationId": "org.actualbudget",
+      "publisherDisplayName": "actualbudget.org",
+      "displayName": "Actual Budget",
+      "publisher": "CN=19454997-90E1-4473-879D-96D6A77A6056"
     }
   },
   "dependencies": {
