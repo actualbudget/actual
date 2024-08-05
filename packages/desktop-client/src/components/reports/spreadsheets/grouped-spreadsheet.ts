@@ -25,7 +25,6 @@ export function createGroupedSpreadsheet({
   endDate,
   interval,
   categories,
-  selectedCategories,
   conditions = [],
   conditionsOp,
   showEmpty,
@@ -36,14 +35,6 @@ export function createGroupedSpreadsheet({
   firstDayOfWeekIdx,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
-
-  const categoryFilter = (categories.list || []).filter(
-    category =>
-      selectedCategories &&
-      selectedCategories.some(
-        selectedCategory => selectedCategory.id === category.id,
-      ),
-  );
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -67,7 +58,6 @@ export function createGroupedSpreadsheet({
           startDate,
           endDate,
           interval,
-          categoryFilter,
           conditionsOpKey,
           filters,
         ),
@@ -78,7 +68,6 @@ export function createGroupedSpreadsheet({
           startDate,
           endDate,
           interval,
-          categoryFilter,
           conditionsOpKey,
           filters,
         ),

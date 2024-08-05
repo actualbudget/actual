@@ -4,7 +4,7 @@ export function subfieldFromFilter({
   field,
   options,
   value,
-}: RuleConditionEntity) {
+}: Pick<RuleConditionEntity, 'field' | 'options' | 'value'>) {
   if (field === 'date') {
     if (typeof value === 'string') {
       if (value.length === 7) {

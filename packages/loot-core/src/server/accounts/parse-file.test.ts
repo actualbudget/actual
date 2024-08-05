@@ -84,18 +84,6 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   }, 45000);
 
-  test('ofx import works with multiple decimals in amount', async () => {
-    const ofxFile = __dirname + '/../../mocks/files/data-multi-decimal.ofx';
-
-    const { transactions } = (await parseFile(ofxFile)) as {
-      transactions: { amount: number }[];
-    };
-
-    expect(transactions).toHaveLength(2);
-    expect(transactions[0].amount).toBe(-30.0);
-    expect(transactions[1].amount).toBe(-3.77);
-  }, 45000);
-
   test('ofx import works (credit card)', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });

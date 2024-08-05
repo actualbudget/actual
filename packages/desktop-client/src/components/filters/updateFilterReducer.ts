@@ -2,8 +2,11 @@ import { makeValue, FIELD_TYPES } from 'loot-core/src/shared/rules';
 import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
 export function updateFilterReducer(
-  state: { field: string; value: string | string[] | number | boolean | null },
-  action: RuleConditionEntity,
+  state: Pick<RuleConditionEntity, 'op' | 'field' | 'value'>,
+  action: { type: 'set-op' | 'set-value' } & Pick<
+    RuleConditionEntity,
+    'op' | 'value'
+  >,
 ) {
   switch (action.type) {
     case 'set-op': {

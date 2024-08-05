@@ -15,6 +15,7 @@ import {
 import { useHotkeysContext } from 'react-hotkeys-hook';
 
 import { AutoTextSize } from 'auto-text-size';
+import { css } from 'glamor';
 
 import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -80,13 +81,20 @@ export const Modal = ({
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: 14,
+        backdropFilter: 'blur(1px) brightness(0.9)',
         ...style,
       }}
       {...props}
     >
       <ReactAriaModal>
         {modalProps => (
-          <Dialog aria-label="Modal dialog">
+          <Dialog
+            aria-label="Modal dialog"
+            className={`${css(styles.lightScrollbar)}`}
+            style={{
+              outline: 'none', // remove focus outline
+            }}
+          >
             <ModalContentContainer
               noAnimation={noAnimation}
               isActive={isActive(name)}
@@ -107,12 +115,12 @@ export const Modal = ({
                 [`@media (min-width: ${tokens.breakpoint_small})`]: {
                   minWidth: tokens.breakpoint_small,
                 },
+                overflowY: 'auto',
                 ...styles.shadowLarge,
-                ...styles.lightScrollbar,
                 ...containerProps?.style,
               }}
             >
-              <View style={{ paddingTop: 0, flex: 1 }}>
+              <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
                 {typeof children === 'function'
                   ? children(modalProps)
                   : children}

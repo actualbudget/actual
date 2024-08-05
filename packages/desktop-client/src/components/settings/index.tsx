@@ -2,8 +2,8 @@ import React, { type ReactNode, useEffect } from 'react';
 
 import { media } from 'glamor';
 
-import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
+import { isElectron } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
@@ -172,17 +172,13 @@ export function Settings() {
             <Button onPress={closeBudget}>Close Budget</Button>
           </View>
         )}
-
         <About />
-
-        {!Platform.isBrowser && <GlobalSettings />}
-
+        {isElectron() && <GlobalSettings />}
         <ThemeSettings />
         <FormatSettings />
         <EncryptionSettings />
         {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
         <ExportBudget />
-
         <AdvancedToggle>
           <AdvancedAbout />
           <ResetCache />

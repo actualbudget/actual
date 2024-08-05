@@ -29,7 +29,7 @@ export const GoCardlessInitialise = ({
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSubmit = async () => {
+  const onSubmit = async (close: () => void) => {
     if (!secretId || !secretKey) {
       setIsValid(false);
       return;
@@ -50,6 +50,7 @@ export const GoCardlessInitialise = ({
 
     onSuccess();
     setIsLoading(false);
+    close();
   };
 
   return (
@@ -113,8 +114,7 @@ export const GoCardlessInitialise = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                onSubmit();
-                close();
+                onSubmit(close);
               }}
             >
               Save and continue

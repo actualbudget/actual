@@ -461,8 +461,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [_budgetType] = useLocalPref('budgetType');
-  const budgetType = _budgetType || 'rollover';
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const spreadsheet = useSpreadsheet();
   useSetThemeColor(theme.mobileViewTheme);
   return (

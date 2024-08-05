@@ -171,7 +171,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     });
 
     return (
-      <ReactAriaButton ref={ref} style={buttonStyle} {...restProps}>
+      <ReactAriaButton
+        ref={ref}
+        isDisabled={isDisabled}
+        style={buttonStyle}
+        {...restProps}
+      >
         {children}
       </ReactAriaButton>
     );

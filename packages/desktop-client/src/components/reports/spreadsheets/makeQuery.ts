@@ -1,5 +1,4 @@
 import { q } from 'loot-core/src/shared/query';
-import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { ReportOptions } from '../ReportOptions';
 
@@ -8,7 +7,6 @@ export function makeQuery(
   startDate: string,
   endDate: string,
   interval: string,
-  categoryFilter: CategoryEntity[],
   conditionsOpKey: string,
   filters: unknown[],
 ) {
@@ -24,19 +22,6 @@ export function makeQuery(
       : '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
 
   const query = q('transactions')
-    //Apply Category_Selector
-    .filter(
-      categoryFilter && {
-        $or: [
-          {
-            category: null,
-            $or: categoryFilter.map(category => ({
-              category: category.id,
-            })),
-          },
-        ],
-      },
-    )
     //Apply filters and split by "Group By"
     .filter({
       [conditionsOpKey]: filters,

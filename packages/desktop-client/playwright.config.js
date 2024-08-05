@@ -57,6 +57,9 @@ export default defineConfig({
   timeout: 20000, // 20 seconds
   retries: 1,
   testDir: 'e2e/',
+  reporter: !process.env.CI
+    ? [['html', { open: 'never', outputFolder: 'test-results/html' }]]
+    : undefined,
   use: {
     userAgent: 'playwright',
     screenshot: 'on',

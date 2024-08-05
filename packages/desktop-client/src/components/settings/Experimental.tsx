@@ -57,7 +57,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  const [budgetType] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (
@@ -80,7 +80,7 @@ export function ExperimentalFeatures() {
         expanded ? (
           <View style={{ gap: '1em' }}>
             <FeatureToggle flag="spendingReport">
-              Monthly spending
+              Monthly spending report
             </FeatureToggle>
 
             <ReportBudgetFeature />

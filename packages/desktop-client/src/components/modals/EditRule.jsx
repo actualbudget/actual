@@ -861,7 +861,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
     });
   }
 
-  async function onSave() {
+  async function onSave(close) {
     const rule = {
       ...defaultRule,
       stage,
@@ -879,7 +879,16 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
       }
 
       if (error.actionErrors) {
-        setActionSplits(applyErrors(actionSplits, error.actionErrors));
+        let usedErrorIdx = 0;
+        setActionSplits(
+          actionSplits.map(item => ({
+            ...item,
+            actions: item.actions.map(action => ({
+              ...action,
+              error: error.actionErrors[usedErrorIdx++] ?? null,
+            })),
+          })),
+        );
       }
     } else {
       // If adding a rule, we got back an id
@@ -888,6 +897,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
       }
 
       originalOnSave?.(rule);
+      close();
     }
   }
 
@@ -1145,13 +1155,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
                   style={{ marginTop: 20 }}
                 >
                   <Button onClick={close}>Cancel</Button>
-                  <Button
-                    variant="primary"
-                    onPress={() => {
-                      onSave();
-                      close();
-                    }}
-                  >
+                  <Button variant="primary" onPress={() => onSave(close)}>
                     Save
                   </Button>
                 </Stack>

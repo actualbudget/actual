@@ -24,6 +24,7 @@ export function ModeButton({
         backgroundColor: theme.menuBackground,
         marginRight: 5,
         fontSize: 'inherit',
+        ...style,
         ...(selected && {
           backgroundColor: theme.buttonPrimaryBackground,
           color: theme.buttonPrimaryText,
@@ -32,7 +33,6 @@ export function ModeButton({
             color: theme.buttonPrimaryTextHover,
           },
         }),
-        ...style,
       }}
       onClick={onSelect}
     >
