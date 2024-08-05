@@ -50,14 +50,19 @@ app.post(
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const accounts = await getAccounts(accessKey, startDate, endDate);
+    try {
+      const accounts = await getAccounts(accessKey, startDate, endDate);
 
-    res.send({
-      status: 'ok',
-      data: {
-        accounts: accounts.accounts,
-      },
-    });
+      res.send({
+        status: 'ok',
+        data: {
+          accounts: accounts.accounts,
+        },
+      });
+    } catch (e) {
+      serverDown(e, res);
+      return;
+    }
   }),
 );
 
@@ -73,9 +78,15 @@ app.post(
       return;
     }
 
+    let results;
     try {
-      const results = await getTransactions(accessKey, new Date(startDate));
+      results = await getTransactions(accessKey, new Date(startDate));
+    } catch (e) {
+      serverDown(e, res);
+      return;
+    }
 
+    try {
       const account = results.accounts.find((a) => a.id === accountId);
 
       const needsAttention = results.errors.find(
@@ -190,6 +201,19 @@ function invalidToken(res) {
       status: 'rejected',
       reason:
         'Invalid SimpleFIN access token.  Reset the token and re-link any broken accounts.',
+    },
+  });
+}
+
+function serverDown(e, res) {
+  console.log(e);
+  res.send({
+    status: 'ok',
+    data: {
+      error_type: 'SERVER_DOWN',
+      error_code: 'SERVER_DOWN',
+      status: 'rejected',
+      reason: 'There was an error communciating with SimpleFIN.',
     },
   });
 }
