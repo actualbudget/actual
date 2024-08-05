@@ -71,8 +71,24 @@ async function importCategories(
           // on insertion order
           for (const category of subCategories) {
             if (!category.isTombstone) {
+              let categoryName = category.name;
+
+              // Hidden categories have the parent category entity id
+              // appended to the end of the sub category name.
+              // The format is 'MasterCategory ` SubCategory ` entityId'.
+              // Remove the id to shorten the name.
+              if (masterCategory.name === 'Hidden Categories') {
+                const categoryNameParts = categoryName.split(' ` ');
+
+                // Remove the last part, which is the entityId.
+                categoryNameParts.pop();
+
+                // Join the remaining parts with a slash between them.
+                categoryName = categoryNameParts.join('/').trim();
+              }
+
               const id = await actual.createCategory({
-                name: category.name,
+                name: categoryName,
                 group_id: entityIdMap.get(category.masterCategoryId),
               });
               entityIdMap.set(category.entityId, id);

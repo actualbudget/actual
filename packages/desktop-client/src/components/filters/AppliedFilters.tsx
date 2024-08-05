@@ -15,10 +15,7 @@ type AppliedFiltersProps = {
   ) => void;
   onDelete: (filter: RuleConditionEntity) => void;
   conditionsOp: string;
-  onConditionsOpChange: (
-    value: string,
-    conditions: RuleConditionEntity[],
-  ) => void;
+  onConditionsOpChange: (value: 'and' | 'or') => void;
 };
 
 export function AppliedFilters({

@@ -3,7 +3,6 @@ import React, { useState, useMemo } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
-import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
@@ -18,8 +17,6 @@ import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet'
 import { useReport } from '../useReport';
 
 export function SpendingCard() {
-  const categories = useCategories();
-
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
@@ -30,12 +27,11 @@ export function SpendingCard() {
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const getGraphData = useMemo(() => {
     return createSpendingSpreadsheet({
-      categories,
       conditions: parseFilter.conditions,
       conditionsOp: parseFilter.conditionsOp,
       compare: spendingReportCompare,
     });
-  }, [categories, parseFilter, spendingReportCompare]);
+  }, [parseFilter, spendingReportCompare]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
