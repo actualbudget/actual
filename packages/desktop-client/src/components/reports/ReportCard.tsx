@@ -63,11 +63,7 @@ export function ReportCard({
         width: '100%',
         height: '100%',
         boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
-        transition: 'box-shadow .25s',
-        ':hover': {
-          ...(to ? { boxShadow: '0 4px 6px rgba(0, 0, 0, .15)' } : null),
-          ...(isEditing ? { cursor: 'move' } : null),
-        },
+        transition: 'box-shadow .25s, filter 0.2s ease-in-out',
         ...(isEditing
           ? {
               '& .recharts-surface:hover': {
@@ -75,12 +71,17 @@ export function ReportCard({
                 ':active': { cursor: 'grabbing' },
               },
               ':active': { cursor: 'grabbing' },
+              filter: 'grayscale(1)',
             }
           : {
               '& .recharts-surface:hover': {
                 cursor: 'pointer',
               },
             }),
+        ':hover': {
+          ...(to ? { boxShadow: '0 4px 6px rgba(0, 0, 0, .15)' } : null),
+          ...(isEditing ? { cursor: 'move', filter: 'grayscale(0)' } : null),
+        },
         ...(to ? null : containerProps),
         ...style,
       }}
