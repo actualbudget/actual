@@ -111,8 +111,35 @@ export function Overview() {
     [closeNotifications],
   );
 
+  const onDispatchSucessNotification = () => {
+    dispatch(
+      addNotification({
+        id: 'import',
+        type: 'message',
+        sticky: true,
+        timeout: 30_000, // 30s
+        message:
+          'Dashboard has been successfully reset to default state. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+        messageActions: {
+          undo: () => {
+            closeNotifications();
+            window.__actionsForMenu.undo();
+          },
+        },
+      }),
+    );
+  };
+
   const onBreakpointChange = (breakpoint: 'mobile' | 'desktop') => {
     setCurrentBreakpoint(breakpoint);
+  };
+
+  const onResetDashboard = async () => {
+    setIsImporting(true);
+    await send('dashboard-reset');
+    setIsImporting(false);
+
+    onDispatchSucessNotification();
   };
 
   const onLayoutChange = (newLayout: Layout[]) => {
@@ -245,22 +272,7 @@ export function Overview() {
       return;
     }
 
-    dispatch(
-      addNotification({
-        id: 'import',
-        type: 'message',
-        sticky: true,
-        timeout: 30_000, // 30s
-        message:
-          'Dashboard has been successfully imported. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
-        messageActions: {
-          undo: () => {
-            closeNotifications();
-            window.__actionsForMenu.undo();
-          },
-        },
-      }),
-    );
+    onDispatchSucessNotification();
   };
 
   const accounts = useAccounts();
@@ -300,6 +312,12 @@ export function Overview() {
                     onPress={() => setMenuOpen(true)}
                   >
                     Add new widget
+                  </Button>
+                  <Button
+                    isDisabled={isImporting}
+                    onPress={() => setIsEditing(false)}
+                  >
+                    Finish editing dashboard
                   </Button>
 
                   <Popover
@@ -357,8 +375,8 @@ export function Overview() {
                     <Menu
                       onMenuSelect={item => {
                         switch (item) {
-                          case 'edit-mode':
-                            setIsEditing(state => !state);
+                          case 'reset':
+                            onResetDashboard();
                             break;
                           case 'export':
                             onExport();
@@ -371,8 +389,8 @@ export function Overview() {
                       }}
                       items={[
                         {
-                          name: 'edit-mode',
-                          text: 'Exit edit mode',
+                          name: 'reset',
+                          text: 'Reset to default',
                           disabled: isImporting,
                         },
                         Menu.line,

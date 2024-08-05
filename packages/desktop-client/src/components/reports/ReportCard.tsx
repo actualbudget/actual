@@ -64,13 +64,23 @@ export function ReportCard({
         height: '100%',
         boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
         transition: 'box-shadow .25s',
-        '& .recharts-surface:hover': {
-          cursor: 'pointer',
-        },
         ':hover': {
           ...(to ? { boxShadow: '0 4px 6px rgba(0, 0, 0, .15)' } : null),
-          ...(isEditing ? { cursor: 'pointer' } : null),
+          ...(isEditing ? { cursor: 'move' } : null),
         },
+        ...(isEditing
+          ? {
+              '& .recharts-surface:hover': {
+                cursor: 'move',
+                ':active': { cursor: 'grabbing' },
+              },
+              ':active': { cursor: 'grabbing' },
+            }
+          : {
+              '& .recharts-surface:hover': {
+                cursor: 'pointer',
+              },
+            }),
         ...(to ? null : containerProps),
         ...style,
       }}
@@ -88,11 +98,7 @@ export function ReportCard({
         <View
           role="button"
           onClick={
-            isEditing
-              ? undefined
-              : () => {
-                  navigate(to, { state: { report } });
-                }
+            isEditing ? undefined : () => navigate(to, { state: { report } })
           }
           style={{
             height: '100%',

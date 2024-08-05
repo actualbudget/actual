@@ -2,6 +2,7 @@ import isMatch from 'lodash/isMatch';
 
 import { captureException } from '../../platform/exceptions';
 import * as fs from '../../platform/server/fs';
+import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
 import { q } from '../../shared/query';
 import {
   type CustomReportEntity,
@@ -120,6 +121,20 @@ async function updateDashboardWidget(
   await db.update('dashboard', widget);
 }
 
+async function resetDashboard() {
+  await batchMessages(async () => {
+    await Promise.all([
+      // Delete all widgets
+      db.deleteAll('dashboard'),
+
+      // Insert the default state
+      ...DEFAULT_DASHBOARD_STATE.map(widget =>
+        db.insertWithSchema('dashboard', widget),
+      ),
+    ]);
+  });
+}
+
 async function addDashboardWidget(
   widget: Omit<Widget, 'id' | 'x' | 'y' | 'tombstone'> &
     Partial<Pick<Widget, 'x' | 'y'>>,
@@ -231,6 +246,7 @@ export const app = createApp<DashboardHandlers>();
 
 app.method('dashboard-update', mutator(undoable(updateDashboard)));
 app.method('dashboard-update-widget', mutator(undoable(updateDashboardWidget)));
+app.method('dashboard-reset', mutator(undoable(resetDashboard)));
 app.method('dashboard-add-widget', mutator(undoable(addDashboardWidget)));
 app.method('dashboard-remove-widget', mutator(undoable(removeDashboardWidget)));
 app.method('dashboard-import', mutator(undoable(importDashboard)));

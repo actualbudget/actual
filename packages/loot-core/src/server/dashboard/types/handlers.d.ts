@@ -8,6 +8,7 @@ export interface DashboardHandlers {
   'dashboard-update-widget': (
     widget: EverythingButIdOptional<Omit<Widget, 'tombstone'>>,
   ) => Promise<void>;
+  'dashboard-reset': () => Promise<void>;
   'dashboard-add-widget': (
     widget: Omit<Widget, 'id' | 'x' | 'y' | 'tombstone'> &
       Partial<Pick<Widget, 'x' | 'y'>>,

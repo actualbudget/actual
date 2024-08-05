@@ -27,6 +27,7 @@ export type SpecializedWidget =
   | CashFlowWidget
   | SpendingWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
+export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
 // Exported/imported (json) widget definition
 export type ExportImportCustomReportWidget = Omit<
