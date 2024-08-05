@@ -42,11 +42,9 @@ const reportModel = {
       showHiddenCategories: row.show_hidden === 1,
       showUncategorized: row.show_uncategorized === 1,
       includeCurrentInterval: row.include_current === 1,
-      selectedCategories: row.selected_categories,
       graphType: row.graph_type,
       conditions: row.conditions,
       conditionsOp: row.conditions_op,
-      data: row.metadata,
     };
   },
 
@@ -67,11 +65,9 @@ const reportModel = {
       show_hidden: report.showHiddenCategories ? 1 : 0,
       show_uncategorized: report.showUncategorized ? 1 : 0,
       include_current: report.includeCurrentInterval ? 1 : 0,
-      selected_categories: report.selectedCategories,
       graph_type: report.graphType,
       conditions: report.conditions,
       conditions_op: report.conditionsOp,
-      metadata: report.data,
     };
   },
 };
@@ -141,7 +137,7 @@ async function updateReport(item: CustomReportEntity) {
     throw new Error('There is already a filter named ' + item.name);
   }
 
-  await db.insertWithSchema('custom_reports', reportModel.fromJS(item));
+  await db.updateWithSchema('custom_reports', reportModel.fromJS(item));
 }
 
 async function deleteReport(id: string) {

@@ -6,12 +6,15 @@ import { type CategoryGroupEntity } from 'loot-core/types/models/category-group'
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type LocalPrefs } from 'loot-core/types/prefs';
 
+import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';
+import { Information } from '../alerts';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 
 import { CategorySelector } from './CategorySelector';
@@ -24,6 +27,7 @@ import { setSessionReport } from './setSessionReport';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;
+  selectedCategories: CategoryEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   dateRangeLine: number;
   allIntervals: { name: string; pretty: string }[];
@@ -53,10 +57,12 @@ type ReportSidebarProps = {
   defaultModeItems: (graph: string, item: string) => void;
   earliestTransaction: string;
   firstDayOfWeekIdx: LocalPrefs['firstDayOfWeekIdx'];
+  isComplexCategoryCondition?: boolean;
 };
 
 export function ReportSidebar({
   customReportItems,
+  selectedCategories,
   categories,
   dateRangeLine,
   allIntervals,
@@ -80,6 +86,7 @@ export function ReportSidebar({
   defaultModeItems,
   earliestTransaction,
   firstDayOfWeekIdx,
+  isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -435,6 +442,21 @@ export function ReportSidebar({
               onChange={onSelectRange}
               options={rangeOptions}
             />
+            {!disabledList.currentInterval.get(customReportItems.dateRange) &&
+              customReportItems.includeCurrentInterval && (
+                <Tooltip
+                  placement="bottom start"
+                  content={<Text>Current month</Text>}
+                  style={{
+                    ...styles.tooltip,
+                    lineHeight: 1.5,
+                    padding: '6px 10px',
+                    marginTop: 5,
+                  }}
+                >
+                  <Text style={{ marginLeft: 10 }}>+1</Text>
+                </Tooltip>
+              )}
           </View>
         ) : (
           <>
@@ -519,19 +541,25 @@ export function ReportSidebar({
           minHeight: 200,
         }}
       >
-        <CategorySelector
-          categoryGroups={categories.grouped.filter(f => {
-            return customReportItems.showHiddenCategories || !f.hidden
-              ? true
-              : false;
-          })}
-          selectedCategories={customReportItems.selectedCategories || []}
-          setSelectedCategories={e => {
-            setSelectedCategories(e);
-            onReportChange({ type: 'modify' });
-          }}
-          showHiddenCategories={customReportItems.showHiddenCategories}
-        />
+        {isComplexCategoryCondition ? (
+          <Information>
+            Remove active category filters to show the category selector.
+          </Information>
+        ) : (
+          <CategorySelector
+            categoryGroups={categories.grouped.filter(f => {
+              return customReportItems.showHiddenCategories || !f.hidden
+                ? true
+                : false;
+            })}
+            selectedCategories={selectedCategories || []}
+            setSelectedCategories={e => {
+              setSelectedCategories(e);
+              onReportChange({ type: 'modify' });
+            }}
+            showHiddenCategories={customReportItems.showHiddenCategories}
+          />
+        )}
       </View>
     </View>
   );

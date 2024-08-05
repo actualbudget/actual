@@ -12,7 +12,7 @@ import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { SvgAdd } from '../../../icons/v1';
 import { theme, styles } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
@@ -78,17 +78,17 @@ function AccountCard({
       data-testid="account"
     >
       <Button
-        onMouseDown={() => onSelect(account.id)}
-        style={{
+        onPress={() => onSelect(account.id)}
+        style={({ isPressed }) => ({
           flexDirection: 'row',
           border: '1px solid ' + theme.pillBorder,
           flex: 1,
           alignItems: 'center',
           borderRadius: 6,
-          '&:active': {
+          ...(isPressed && {
             opacity: 0.1,
-          },
-        }}
+          }),
+        })}
       >
         <View
           style={{
@@ -182,14 +182,13 @@ function AccountList({
           title="Accounts"
           rightContent={
             <Button
-              type="bare"
-              style={{
+              variant="bare"
+              style={({ isHovered, isPressed }) => ({
                 color: theme.mobileHeaderText,
                 margin: 10,
-              }}
-              activeStyle={noBackgroundColorStyle}
-              hoveredStyle={noBackgroundColorStyle}
-              onClick={onAddAccount}
+                ...(isHovered || isPressed ? noBackgroundColorStyle : {}),
+              })}
+              onPress={onAddAccount}
             >
               <SvgAdd width={20} height={20} />
             </Button>

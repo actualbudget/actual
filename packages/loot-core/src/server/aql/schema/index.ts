@@ -144,7 +144,6 @@ export const schema = {
     show_hidden: f('integer', { default: 0 }),
     show_uncategorized: f('integer', { default: 0 }),
     include_current: f('integer', { default: 0 }),
-    selected_categories: f('json'),
     graph_type: f('string', { default: 'BarGraph' }),
     conditions: f('json'),
     conditions_op: f('string'),
@@ -160,6 +159,7 @@ export const schema = {
     amount: f('integer'),
     carryover: f('integer'),
     goal: f('integer'),
+    long_goal: f('integer'),
   },
   zero_budgets: {
     id: f('id'),
@@ -168,6 +168,7 @@ export const schema = {
     amount: f('integer'),
     carryover: f('integer'),
     goal: f('integer'),
+    long_goal: f('integer'),
   },
 };
 
