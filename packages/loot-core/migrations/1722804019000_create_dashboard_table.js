@@ -1,7 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_DASHBOARD_STATE } from '../src/shared/dashboard';
 
-/* eslint-disable rulesdir/typography */
 export default async function runMigration(db) {
   db.transaction(() => {
     db.execQuery(`
@@ -14,22 +12,12 @@ export default async function runMigration(db) {
          y INTEGER,
          meta TEXT,
          tombstone INTEGER DEFAULT 0);
-    `);
 
-    DEFAULT_DASHBOARD_STATE.forEach(widget =>
-      db.runQuery(
-        `INSERT INTO dashboard (id, type, width, height, x, y, meta) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          uuidv4(),
-          widget.type,
-          widget.width,
-          widget.height,
-          widget.x,
-          widget.y,
-          widget.meta,
-        ],
-      ),
-    );
+      INSERT INTO dashboard (id, type, width, height, x, y)
+      VALUES
+        ('${uuidv4()}','net-worth-card', 8, 2, 0, 0),
+        ('${uuidv4()}', 'cash-flow-card', 4, 2, 8, 0);
+    `);
 
     // Add custom reports to the dashboard
     const reports = db.runQuery(
