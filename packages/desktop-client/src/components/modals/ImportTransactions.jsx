@@ -201,7 +201,7 @@ function getInitialMappings(transactions) {
   );
 
   const payeeField = key(
-    fields.find(([name]) => name.toLowerCase().includes('payee')) ??
+    fields.find(([name]) => name.toLowerCase().includes('payee')) ||
       fields.find(
         ([name]) =>
           name !== dateField && name !== amountField && name !== categoryField,
@@ -209,7 +209,7 @@ function getInitialMappings(transactions) {
   );
 
   const notesField = key(
-    fields.find(([name]) => name.toLowerCase().includes('notes')) ??
+    fields.find(([name]) => name.toLowerCase().includes('notes')) ||
       fields.find(
         ([name]) =>
           name !== dateField &&
