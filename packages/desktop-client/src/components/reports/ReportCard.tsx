@@ -63,7 +63,7 @@ export function ReportCard({
         width: '100%',
         height: '100%',
         boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
-        transition: 'box-shadow .25s, filter 0.2s ease-in-out',
+        transition: 'box-shadow .25s',
         ...(isEditing
           ? {
               '& .recharts-surface:hover': {
