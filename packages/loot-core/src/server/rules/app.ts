@@ -15,22 +15,22 @@ function validateRule(rule: Partial<RuleEntity>) {
   // Returns an array of errors, the array is the same link as the
   // passed-in `array`, or null if there are no errors
   function runValidation<T>(array: T[], validate: (item: T) => unknown) {
-    const result = array
-      .map(item => {
-        try {
-          validate(item);
-        } catch (e) {
-          if (e instanceof RuleError) {
-            console.warn('Invalid rule', e);
-            return e.type;
-          }
-          throw e;
+    const result = array.map(item => {
+      try {
+        validate(item);
+      } catch (e) {
+        if (e instanceof RuleError) {
+          console.warn('Invalid rule', e);
+          return e.type;
         }
-        return null;
-      })
-      .filter((res): res is string => typeof res === 'string');
+        throw e;
+      }
+      return null;
+    });
 
-    return result.length ? result : null;
+    return result.filter((res): res is string => typeof res === 'string').length
+      ? result
+      : null;
   }
 
   const conditionErrors = runValidation(

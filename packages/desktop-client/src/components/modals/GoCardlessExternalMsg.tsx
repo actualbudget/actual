@@ -14,13 +14,12 @@ import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
-import { Modal } from '../common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-import { type CommonModalProps } from '../Modals';
 
 import { COUNTRY_OPTIONS } from './countries';
 
@@ -74,7 +73,6 @@ function renderError(error: 'unknown' | 'timeout') {
 }
 
 type GoCardlessExternalMsgProps = {
-  modalProps: CommonModalProps;
   onMoveExternal: (arg: {
     institutionId: string;
   }) => Promise<{ error?: 'unknown' | 'timeout'; data?: GoCardlessToken }>;
@@ -83,10 +81,9 @@ type GoCardlessExternalMsgProps = {
 };
 
 export function GoCardlessExternalMsg({
-  modalProps,
   onMoveExternal,
   onSuccess,
-  onClose: originalOnClose,
+  onClose,
 }: GoCardlessExternalMsgProps) {
   const dispatch = useDispatch();
 
@@ -124,11 +121,6 @@ export function GoCardlessExternalMsg({
     data.current = res.data;
     setWaiting(null);
     setSuccess(true);
-  }
-
-  function onClose() {
-    originalOnClose?.();
-    modalProps.onClose();
   }
 
   async function onContinue() {
@@ -213,15 +205,15 @@ export function GoCardlessExternalMsg({
 
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Button
-            type="primary"
+            variant="primary"
             style={{
               padding: '10px 0',
               fontSize: 15,
               fontWeight: 600,
               flexGrow: 1,
             }}
-            onClick={onJump}
-            disabled={!institutionId || !country}
+            onPress={onJump}
+            isDisabled={!institutionId || !country}
           >
             Link bank in browser &rarr;
           </Button>
@@ -232,69 +224,78 @@ export function GoCardlessExternalMsg({
 
   return (
     <Modal
-      title="Link Your Bank"
-      {...modalProps}
+      name="gocardless-external-msg"
       onClose={onClose}
-      style={{ flex: 0 }}
+      containerProps={{ style: { width: '30vw' } }}
     >
-      {() => (
-        <View>
-          <Paragraph style={{ fontSize: 15 }}>
-            To link your bank account, you will be redirected to a new page
-            where GoCardless will ask to connect to your bank. GoCardless will
-            not be able to withdraw funds from your accounts.
-          </Paragraph>
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Link Your Bank"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View>
+            <Paragraph style={{ fontSize: 15 }}>
+              To link your bank account, you will be redirected to a new page
+              where GoCardless will ask to connect to your bank. GoCardless will
+              not be able to withdraw funds from your accounts.
+            </Paragraph>
 
-          {error && renderError(error)}
+            {error && renderError(error)}
 
-          {waiting || isConfigurationLoading ? (
-            <View style={{ alignItems: 'center', marginTop: 15 }}>
-              <AnimatedLoading
-                color={theme.pageTextDark}
-                style={{ width: 20, height: 20 }}
-              />
-              <View style={{ marginTop: 10, color: theme.pageText }}>
-                {isConfigurationLoading
-                  ? 'Checking GoCardless configuration..'
-                  : waiting === 'browser'
-                    ? 'Waiting on GoCardless...'
-                    : waiting === 'accounts'
-                      ? 'Loading accounts...'
-                      : null}
+            {waiting || isConfigurationLoading ? (
+              <View style={{ alignItems: 'center', marginTop: 15 }}>
+                <AnimatedLoading
+                  color={theme.pageTextDark}
+                  style={{ width: 20, height: 20 }}
+                />
+                <View style={{ marginTop: 10, color: theme.pageText }}>
+                  {isConfigurationLoading
+                    ? 'Checking GoCardless configuration..'
+                    : waiting === 'browser'
+                      ? 'Waiting on GoCardless...'
+                      : waiting === 'accounts'
+                        ? 'Loading accounts...'
+                        : null}
+                </View>
+
+                {waiting === 'browser' && (
+                  <Link
+                    variant="text"
+                    onClick={onJump}
+                    style={{ marginTop: 10 }}
+                  >
+                    (Account linking not opening in a new tab? Click here)
+                  </Link>
+                )}
               </View>
-
-              {waiting === 'browser' && (
-                <Link variant="text" onClick={onJump} style={{ marginTop: 10 }}>
-                  (Account linking not opening in a new tab? Click here)
-                </Link>
-              )}
-            </View>
-          ) : success ? (
-            <Button
-              type="primary"
-              style={{
-                padding: '10px 0',
-                fontSize: 15,
-                fontWeight: 600,
-                marginTop: 10,
-              }}
-              onClick={onContinue}
-            >
-              Success! Click to continue &rarr;
-            </Button>
-          ) : isConfigured || isGoCardlessSetupComplete ? (
-            renderLinkButton()
-          ) : (
-            <>
-              <Paragraph style={{ color: theme.errorText }}>
-                GoCardless integration has not yet been configured.
-              </Paragraph>
-              <Button type="primary" onClick={onGoCardlessInit}>
-                Configure GoCardless integration
+            ) : success ? (
+              <Button
+                variant="primary"
+                style={{
+                  padding: '10px 0',
+                  fontSize: 15,
+                  fontWeight: 600,
+                  marginTop: 10,
+                }}
+                onPress={onContinue}
+              >
+                Success! Click to continue &rarr;
               </Button>
-            </>
-          )}
-        </View>
+            ) : isConfigured || isGoCardlessSetupComplete ? (
+              renderLinkButton()
+            ) : (
+              <>
+                <Paragraph style={{ color: theme.errorText }}>
+                  GoCardless integration has not yet been configured.
+                </Paragraph>
+                <Button variant="primary" onPress={onGoCardlessInit}>
+                  Configure GoCardless integration
+                </Button>
+              </>
+            )}
+          </View>
+        </>
       )}
     </Modal>
   );

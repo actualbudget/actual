@@ -322,7 +322,8 @@ type ModalButtonsProps = {
   children: ReactNode;
 };
 
-export const ModalButtons = ({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ModalButtons = ({
   style,
   leftContent,
   focusButton = false,
@@ -367,7 +368,7 @@ type ModalTitleProps = {
   shrinkOnOverflow?: boolean;
 };
 
-export function ModalTitle({
+function ModalTitle({
   title,
   isEditable,
   getStyle,
@@ -466,7 +467,7 @@ type ModalCloseButtonProps = {
   style?: CSSProperties;
 };
 
-export function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
+function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
   return (
     <Button
       type="bare"

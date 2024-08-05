@@ -32,6 +32,7 @@ test.describe('Rules', () => {
   });
 
   test('creates a rule and makes sure it is applied when creating a transaction', async () => {
+    await rulesPage.searchFor('Fast Internet');
     await rulesPage.createRule({
       conditions: [
         {
@@ -48,7 +49,6 @@ test.describe('Rules', () => {
       ],
     });
 
-    await rulesPage.searchFor('Fast Internet');
     const rule = rulesPage.getNthRule(0);
     await expect(rule.conditions).toHaveText(['payee is Fast Internet']);
     await expect(rule.actions).toHaveText(['set category to General']);
@@ -120,7 +120,7 @@ test.describe('Rules', () => {
     });
 
     const transaction = accountPage.getNthTransaction(0);
-    await expect(transaction.payee).toHaveText('Split');
+    await expect(transaction.payee).toHaveText('Ikea');
     await expect(transaction.notes).toHaveText('food / entertainment');
     await expect(transaction.category).toHaveText('Split');
     await expect(transaction.debit).toHaveText('100.00');

@@ -341,7 +341,10 @@ export function amountToCurrency(n) {
 }
 
 export function amountToCurrencyNoDecimal(n) {
-  return getNumberFormat({ hideFraction: true }).formatter.format(n);
+  return getNumberFormat({
+    ...numberFormatConfig,
+    hideFraction: true,
+  }).formatter.format(n);
 }
 
 export function currencyToAmount(str: string) {
@@ -412,7 +415,7 @@ export function looselyParseAmount(amount: string) {
   // Look for a decimal marker, then look for either 1-2 or 5-9 decimal places.
   // This avoids matching against 3 places which may not actually be decimal
   const m = amount.match(/[.,]([^.,]{5,9}|[^.,]{1,2})$/);
-  if (!m || m.index === undefined || m.index === 0) {
+  if (!m || m.index === undefined) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
 

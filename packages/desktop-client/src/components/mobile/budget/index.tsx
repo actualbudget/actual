@@ -170,6 +170,15 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
+  const onToggleGroupVisibility = groupId => {
+    const group = categoryGroups.find(g => g.id === groupId);
+    onSaveGroup({
+      ...group,
+      hidden: !!!group.hidden,
+    });
+    dispatch(collapseModals('category-group-menu'));
+  };
+
   const onSaveCategory = category => {
     dispatch(updateCategory(category));
   };
@@ -195,6 +204,15 @@ function BudgetInner(props: BudgetInnerProps) {
       dispatch(collapseModals('category-menu'));
       dispatch(deleteCategory(categoryId));
     }
+  };
+
+  const onToggleCategoryVisibility = categoryId => {
+    const category = categories.find(c => c.id === categoryId);
+    onSaveCategory({
+      ...category,
+      hidden: !!!category.hidden,
+    });
+    dispatch(collapseModals('category-menu'));
   };
 
   const onReorderCategory = (id, { inGroup, aroundCategory }) => {
@@ -324,6 +342,7 @@ function BudgetInner(props: BudgetInnerProps) {
         onAddCategory: onOpenNewCategoryModal,
         onEditNotes: onOpenCategoryGroupNotesModal,
         onDelete: onDeleteGroup,
+        onToggleVisibility: onToggleGroupVisibility,
       }),
     );
   };
@@ -336,6 +355,7 @@ function BudgetInner(props: BudgetInnerProps) {
         onSave: onSaveCategory,
         onEditNotes: onOpenCategoryNotesModal,
         onDelete: onDeleteCategory,
+        onToggleVisibility: onToggleCategoryVisibility,
         onBudgetAction,
       }),
     );
@@ -442,8 +462,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [_budgetType] = useLocalPref('budgetType');
-  const budgetType = _budgetType || 'rollover';
+  const [budgetType = 'rollover'] = useLocalPref('budgetType');
   const spreadsheet = useSpreadsheet();
   useSetThemeColor(theme.mobileViewTheme);
   return (

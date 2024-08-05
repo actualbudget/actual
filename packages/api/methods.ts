@@ -165,6 +165,10 @@ export function deleteCategory(id, transferCategoryId?) {
   return send('api/category-delete', { id, transferCategoryId });
 }
 
+export function getCommonPayees() {
+  return send('api/common-payees-get');
+}
+
 export function getPayees() {
   return send('api/payees-get');
 }
@@ -203,4 +207,12 @@ export function updateRule(rule) {
 
 export function deleteRule(id) {
   return send('api/rule-delete', { id });
+}
+
+export function holdBudgetForNextMonth(month, amount) {
+  return send('api/budget-hold-for-next-month', { month, amount });
+}
+
+export function resetBudgetHold(month) {
+  return send('api/budget-reset-hold', { month });
 }
