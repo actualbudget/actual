@@ -303,65 +303,85 @@ export function Overview() {
                 gap: 5,
               }}
             >
-              {currentBreakpoint === 'desktop' && isEditing ? (
+              {currentBreakpoint === 'desktop' && (
                 <>
-                  <Button
-                    ref={triggerRef}
-                    variant="primary"
-                    isDisabled={isImporting}
-                    onPress={() => setMenuOpen(true)}
-                  >
-                    Add new widget
-                  </Button>
-                  <Button
-                    isDisabled={isImporting}
-                    onPress={() => setIsEditing(false)}
-                  >
-                    Finish editing dashboard
-                  </Button>
+                  {isEditing ? (
+                    <>
+                      <Button
+                        ref={triggerRef}
+                        variant="primary"
+                        isDisabled={isImporting}
+                        onPress={() => setMenuOpen(true)}
+                      >
+                        Add new widget
+                      </Button>
+                      <Button
+                        isDisabled={isImporting}
+                        onPress={() => setIsEditing(false)}
+                      >
+                        Finish editing dashboard
+                      </Button>
 
-                  <Popover
-                    triggerRef={triggerRef}
-                    isOpen={menuOpen}
-                    onOpenChange={() => setMenuOpen(false)}
-                  >
-                    <Menu
-                      onMenuSelect={item => {
-                        if (item === 'custom-report') {
-                          navigate('/reports/custom');
-                          return;
-                        }
-                        onAddWidget(item);
-                      }}
-                      items={
-                        [
-                          {
-                            name: 'cash-flow-card',
-                            text: 'Cash flow graph',
-                          },
-                          {
-                            name: 'net-worth-card',
-                            text: 'Net worth graph',
-                          },
-                          ...(spendingReportFeatureFlag
-                            ? [
-                                {
-                                  name: 'spending-card' as const,
-                                  text: 'Spending analysis',
-                                },
-                              ]
-                            : []),
-                          {
-                            name: 'custom-report',
-                            text: 'Custom report',
-                          },
-                        ] satisfies Array<{
-                          name: Widget['type'];
-                          text: string;
-                        }>
-                      }
-                    />
-                  </Popover>
+                      <Popover
+                        triggerRef={triggerRef}
+                        isOpen={menuOpen}
+                        onOpenChange={() => setMenuOpen(false)}
+                      >
+                        <Menu
+                          onMenuSelect={item => {
+                            if (item === 'custom-report') {
+                              navigate('/reports/custom');
+                              return;
+                            }
+                            onAddWidget(item);
+                          }}
+                          items={
+                            [
+                              {
+                                name: 'cash-flow-card',
+                                text: 'Cash flow graph',
+                              },
+                              {
+                                name: 'net-worth-card',
+                                text: 'Net worth graph',
+                              },
+                              ...(spendingReportFeatureFlag
+                                ? [
+                                    {
+                                      name: 'spending-card' as const,
+                                      text: 'Spending analysis',
+                                    },
+                                  ]
+                                : []),
+                              {
+                                name: 'custom-report',
+                                text: 'Custom report',
+                              },
+                            ] satisfies Array<{
+                              name: Widget['type'];
+                              text: string;
+                            }>
+                          }
+                        />
+                      </Popover>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="primary"
+                        isDisabled={isImporting}
+                        onPress={() => navigate('/reports/custom')}
+                      >
+                        Create new custom report
+                      </Button>
+                      <Button
+                        isDisabled={isImporting}
+                        onPress={() => setIsEditing(true)}
+                      >
+                        Edit dashboard
+                      </Button>
+                    </>
+                  )}
 
                   <MenuButton
                     ref={extraMenuTriggerRef}
@@ -407,18 +427,6 @@ export function Overview() {
                       ]}
                     />
                   </Popover>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="primary"
-                    onPress={() => navigate('/reports/custom')}
-                  >
-                    Create new custom report
-                  </Button>
-                  <Button onPress={() => setIsEditing(true)}>
-                    Edit dashboard
-                  </Button>
                 </>
               )}
             </View>
