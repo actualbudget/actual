@@ -201,14 +201,14 @@ function getInitialMappings(transactions) {
   );
 
   const payeeField = key(
-    fields.find(
+    fields.find(([name]) => name.toLowerCase().includes('payee')) ?? fields.find(
       ([name]) =>
         name !== dateField && name !== amountField && name !== categoryField,
     ),
   );
 
   const notesField = key(
-    fields.find(
+    fields.find(([name]) => name.toLowerCase().includes('notes')) ?? fields.find(
       ([name]) =>
         name !== dateField &&
         name !== amountField &&
