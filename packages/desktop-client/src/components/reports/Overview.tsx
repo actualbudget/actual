@@ -282,7 +282,7 @@ export function Overview() {
               marginRight: 15,
             }}
           >
-            <PageHeader title={`Reports${isEditing ? ' (editing)' : ''}`} />
+            <PageHeader title="Reports" />
 
             <View
               style={{
@@ -291,7 +291,7 @@ export function Overview() {
                 gap: 5,
               }}
             >
-              {currentBreakpoint === 'desktop' && (
+              {currentBreakpoint === 'desktop' && isEditing ? (
                 <>
                   <Button
                     ref={triggerRef}
@@ -372,9 +372,7 @@ export function Overview() {
                       items={[
                         {
                           name: 'edit-mode',
-                          text: isEditing
-                            ? 'Exit edit mode'
-                            : 'Enter edit mode',
+                          text: 'Exit edit mode',
                           disabled: isImporting,
                         },
                         Menu.line,
@@ -391,6 +389,18 @@ export function Overview() {
                       ]}
                     />
                   </Popover>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="primary"
+                    onPress={() => navigate('/reports/custom')}
+                  >
+                    Create new custom report
+                  </Button>
+                  <Button onPress={() => setIsEditing(true)}>
+                    Edit dashboard
+                  </Button>
                 </>
               )}
             </View>
