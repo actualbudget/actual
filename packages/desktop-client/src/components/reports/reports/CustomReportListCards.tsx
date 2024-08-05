@@ -241,6 +241,7 @@ function CustomReportListCardsInner({
           categories={categories}
           earliestTransaction={earliestTransaction}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
+          showTooltip={!isEditing}
         />
       </View>
       {hasWarning && (

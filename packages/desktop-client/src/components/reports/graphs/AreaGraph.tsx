@@ -22,7 +22,6 @@ import {
 } from 'loot-core/src/types/models/reports';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -152,6 +151,7 @@ type AreaGraphProps = {
   balanceTypeOp: balanceTypeOpType;
   compact?: boolean;
   viewLabels: boolean;
+  showTooltip?: boolean;
 };
 
 export function AreaGraph({
@@ -160,9 +160,9 @@ export function AreaGraph({
   balanceTypeOp,
   compact,
   viewLabels,
+  showTooltip = true,
 }: AreaGraphProps) {
   const privacyMode = usePrivacyMode();
-  const { isNarrowWidth } = useResponsive();
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
   const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
 
@@ -249,7 +249,7 @@ export function AreaGraph({
                     tickSize={0}
                   />
                 )}
-                {(!isNarrowWidth || !compact) && (
+                {showTooltip && (
                   <Tooltip
                     content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
                     isAnimationActive={false}

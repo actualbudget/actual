@@ -26,12 +26,14 @@ type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
+  showTooltip?: boolean;
 };
 
 export function NetWorthGraph({
   style,
   graphData,
   compact,
+  showTooltip = true,
 }: NetWorthGraphProps) {
   const privacyMode = usePrivacyMode();
   const { isNarrowWidth } = useResponsive();
@@ -151,7 +153,7 @@ export function NetWorthGraph({
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
                 />
-                {(!isNarrowWidth || !compact) && (
+                {showTooltip && (!isNarrowWidth || !compact) && (
                   <Tooltip
                     content={<CustomTooltip />}
                     formatter={numberFormatterTooltip}

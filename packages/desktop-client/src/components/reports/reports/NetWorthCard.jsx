@@ -89,6 +89,7 @@ export function NetWorthCard({ isEditing, accounts, onRemove }) {
             end={end}
             graphData={data.graphData}
             compact={true}
+            showTooltip={!isEditing}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (

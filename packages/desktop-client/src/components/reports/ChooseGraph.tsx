@@ -29,6 +29,7 @@ type ChooseGraphProps = {
   style?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showTooltip?: boolean;
   intervalsCount: number;
 };
 
@@ -46,6 +47,7 @@ export function ChooseGraph({
   style,
   showHiddenCategories = false,
   showOffBudget = false,
+  showTooltip = true,
   intervalsCount,
 }: ChooseGraphProps) {
   const graphStyle = compact
@@ -102,6 +104,7 @@ export function ChooseGraph({
         data={data}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
+        showTooltip={showTooltip}
       />
     );
   }
@@ -117,11 +120,19 @@ export function ChooseGraph({
         viewLabels={viewLabels}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showTooltip={showTooltip}
       />
     );
   }
   if (graphType === 'BarLineGraph') {
-    return <BarLineGraph style={graphStyle} compact={compact} data={data} />;
+    return (
+      <BarLineGraph
+        style={graphStyle}
+        compact={compact}
+        data={data}
+        showTooltip={showTooltip}
+      />
+    );
   }
   if (graphType === 'DonutGraph') {
     return (
@@ -150,6 +161,7 @@ export function ChooseGraph({
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
         interval={interval}
+        showTooltip={showTooltip}
       />
     );
   }
@@ -166,6 +178,7 @@ export function ChooseGraph({
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
         interval={interval}
+        showTooltip={showTooltip}
       />
     );
   }
