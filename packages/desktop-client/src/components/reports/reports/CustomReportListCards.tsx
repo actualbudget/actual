@@ -124,10 +124,6 @@ function CustomReportListCardsInner({
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
-  const onDelete = async () => {
-    await send('report/delete', report.id);
-  };
-
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
@@ -176,7 +172,6 @@ function CustomReportListCardsInner({
       onMenuSelect={item => {
         switch (item) {
           case 'remove':
-            onDelete();
             onRemove();
             break;
           case 'rename':
