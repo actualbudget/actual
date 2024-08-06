@@ -99,13 +99,9 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(monthUtils.isCurrentMonth(month)
-          ? {
-              backgroundColor: theme.budgetHeaderCurrentMonth,
-            }
-          : {
-              backgroundColor: theme.budgetHeaderOtherMonth,
-            }),
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetHeaderCurrentMonth
+          : theme.budgetHeaderOtherMonth,
       }}
     >
       <SheetCell
@@ -183,13 +179,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(monthUtils.isCurrentMonth(month)
-          ? {
-              backgroundColor: theme.budgetCurrentMonth,
-            }
-          : {
-              backgroundColor: theme.budgetOtherMonth,
-            }),
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
         '& .hover-visible': {
           opacity: 0,
           transition: 'opacity .25s',
@@ -386,13 +378,9 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
           fontWeight: 600,
           paddingRight: styles.monthRightPadding,
           ...styles.tnum,
-          ...(monthUtils.isCurrentMonth(month)
-            ? {
-                backgroundColor: theme.budgetHeaderCurrentMonth,
-              }
-            : {
-                backgroundColor: theme.budgetHeaderOtherMonth,
-              }),
+          backgroundColor: monthUtils.isCurrentMonth(month)
+            ? theme.budgetHeaderCurrentMonth
+            : theme.budgetHeaderOtherMonth,
         }}
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
@@ -429,13 +417,9 @@ export function IncomeCategoryMonth({
           paddingRight: styles.monthRightPadding,
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
-          ...(monthUtils.isCurrentMonth(month)
-            ? {
-                backgroundColor: theme.budgetCurrentMonth,
-              }
-            : {
-                backgroundColor: theme.budgetOtherMonth,
-              }),
+          backgroundColor: monthUtils.isCurrentMonth(month)
+            ? theme.budgetCurrentMonth
+            : theme.budgetOtherMonth,
         }}
       >
         <span onClick={() => onShowActivity(category.id, month)}>

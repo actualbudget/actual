@@ -52,13 +52,10 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
       data-testid="budget-summary"
       style={{
         boxShadow: styles.cardShadow,
-        ...(month === currentMonth
-          ? {
-              backgroundColor: theme.budgetCurrentMonth,
-            }
-          : {
-              backgroundColor: theme.budgetOtherMonth,
-            }),
+        backgroundColor:
+          month === currentMonth
+            ? theme.budgetCurrentMonth
+            : theme.budgetOtherMonth,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,

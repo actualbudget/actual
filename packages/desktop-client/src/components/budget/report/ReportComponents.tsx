@@ -187,13 +187,9 @@ export const CategoryMonth = memo(function CategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(monthUtils.isCurrentMonth(month)
-          ? {
-              backgroundColor: theme.budgetCurrentMonth,
-            }
-          : {
-              backgroundColor: theme.budgetOtherMonth,
-            }),
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
         '& .hover-visible': {
           opacity: 0,
           transition: 'opacity .25s',
