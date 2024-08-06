@@ -9,7 +9,9 @@ import APIList from './APIList';
 "getBudgetMonths",
 "getBudgetMonth",
 "setBudgetAmount",
-"setBudgetCarryover"
+"setBudgetCarryover",
+"holdBudgetForNextMonth",
+"resetBudgetHold"
 ]} />
 
 <APIList title="Transactions" sections={[
@@ -123,6 +125,14 @@ These are types.
 #### `setBudgetCarryover`
 
 <Method name="setBudgetCarryover" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'flag', type: 'bool' }]} returns="Promise<null>" />
+
+#### `holdBudgetForNextMonth`
+
+<Method name="holdBudgetForNextMonth" args={[{ name: 'month', type: 'month' }, { name: 'value', type: 'amount' }]} returns="Promise<null>" />
+
+#### `resetBudgetHold`
+
+<Method name="resetBudgetHold" args={[{ name: 'month', type: 'month' }]} returns="Promise<null>" />
 
 ## Transactions
 
