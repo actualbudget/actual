@@ -24,7 +24,7 @@ import { theme, type CSSProperties, styles } from '../style';
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { Text } from './common/Text';
 import { View } from './common/View';
@@ -78,9 +78,9 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
 
   return (
     <Button
-      type="bare"
+      variant="bare"
       aria-label={`${isPrivacyEnabled ? 'Disable' : 'Enable'} privacy mode`}
-      onClick={() => setPrivacyEnabledPref(!isPrivacyEnabled)}
+      onPress={() => setPrivacyEnabledPref(!isPrivacyEnabled)}
       style={style}
     >
       {isPrivacyEnabled ? (
@@ -196,10 +196,10 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 
   return (
     <Button
-      type="bare"
+      variant="bare"
       aria-label="Sync"
-      style={
-        isMobile
+      style={({ isHovered, isPressed }) => ({
+        ...(isMobile
           ? {
               ...style,
               WebkitAppRegion: 'none',
@@ -209,11 +209,11 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
               ...style,
               WebkitAppRegion: 'none',
               color: desktopColor,
-            }
-      }
-      hoveredStyle={hoveredStyle}
-      activeStyle={activeStyle}
-      onClick={sync}
+            }),
+        ...(isHovered ? hoveredStyle : {}),
+        ...(isPressed ? activeStyle : {}),
+      })}
+      onPress={sync}
     >
       {isMobile ? (
         syncState === 'error' ? (
@@ -281,14 +281,15 @@ export function Titlebar({ style }: TitlebarProps) {
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
-          type="bare"
+          aria-label="Sidebar menu"
+          variant="bare"
           style={{ marginRight: 8 }}
-          onPointerEnter={e => {
+          onHoverStart={e => {
             if (e.pointerType === 'mouse') {
               sidebar.setHidden(false);
             }
           }}
-          onPointerUp={e => {
+          onPress={e => {
             if (e.pointerType !== 'mouse') {
               sidebar.setHidden(!sidebar.hidden);
             }
@@ -306,7 +307,7 @@ export function Titlebar({ style }: TitlebarProps) {
           path="/accounts"
           element={
             location.state?.goBack ? (
-              <Button type="bare" onClick={() => navigate(-1)}>
+              <Button variant="bare" onPress={() => navigate(-1)}>
                 <SvgArrowLeft
                   width={10}
                   height={10}

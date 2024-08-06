@@ -112,6 +112,7 @@ function AccountCard({
                       : theme.sidebarItemBackgroundPositive,
                   marginRight: '8px',
                   width: 8,
+                  flexShrink: 0,
                   height: 8,
                   borderRadius: 8,
                   opacity: connected ? 1 : 0,
