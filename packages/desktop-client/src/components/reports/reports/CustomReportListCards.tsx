@@ -42,21 +42,50 @@ function calculateHasWarning(
     return false;
   }
 
-  for (const { field, value } of report.conditions) {
-    const strValue = String(value);
+  for (const cond of report.conditions) {
+    const { field, value, op } = cond;
+    const isMultiCondition = Array.isArray(value);
+    const isSupportedSingleCondition = ['is', 'isNot'].includes(op);
+
+    // Regex and other more complicated operations are not supported
+    if (!isSupportedSingleCondition) {
+      continue;
+    }
+
     switch (field) {
       case 'account':
-        if (!accountIds.has(strValue)) {
+        if (isMultiCondition) {
+          if (value.find(val => !accountIds.has(val))) {
+            return true;
+          }
+          break;
+        }
+
+        if (!accountIds.has(value)) {
           return true;
         }
         break;
       case 'payee':
-        if (!payeeIds.has(strValue)) {
+        if (isMultiCondition) {
+          if (value.find(val => !payeeIds.has(val))) {
+            return true;
+          }
+          break;
+        }
+
+        if (!payeeIds.has(value)) {
           return true;
         }
         break;
       case 'category':
-        if (!categoryIds.has(strValue)) {
+        if (isMultiCondition) {
+          if (value.find(val => !categoryIds.has(val))) {
+            return true;
+          }
+          break;
+        }
+
+        if (!categoryIds.has(value)) {
           return true;
         }
         break;
@@ -240,7 +269,7 @@ function CustomReportListCardsInner({
         />
       </View>
       {hasWarning && (
-        <View style={{ float: 'left', padding: 5 }}>
+        <View style={{ padding: 5, position: 'absolute', bottom: 0 }}>
           <Tooltip
             content="The widget is configured to use a non-existing filter value (i.e. category/account/payee). Edit the filters used in this report widget to remove the warning."
             placement="bottom start"
