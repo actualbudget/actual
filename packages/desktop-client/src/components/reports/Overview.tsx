@@ -21,7 +21,7 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
 
 export function Overview() {
-  const customReports = useReports();
+  const { data: customReports } = useReports();
   const { isNarrowWidth } = useResponsive();
 
   const location = useLocation();
