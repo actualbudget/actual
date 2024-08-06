@@ -5,7 +5,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { View } from '../../common/View';
@@ -25,10 +25,12 @@ export function TransferMenu({
   onClose,
 }: TransferMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
-  let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
-  if (showToBeBudgeted) {
-    categoryGroups = addToBeBudgetedGroup(categoryGroups);
-  }
+  const filteredCategoryGroups = originalCategoryGroups.filter(
+    g => !g.is_income,
+  );
+  const categoryGroups = showToBeBudgeted
+    ? addToBeBudgetedGroup(filteredCategoryGroups)
+    : filteredCategoryGroups;
 
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
   const [amount, setAmount] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export function TransferMenu({
 
       <CategoryAutocomplete
         categoryGroups={categoryGroups}
-        value={categoryGroups.find(g => g.id === categoryId)}
+        value={categoryGroups.find(g => g.id === categoryId) ?? null}
         openOnFocus={true}
         onSelect={(id: string | undefined) => setCategoryId(id || null)}
         inputProps={{
@@ -77,13 +79,13 @@ export function TransferMenu({
         }}
       >
         <Button
-          type="primary"
+          variant="primary"
           style={{
             fontSize: 12,
             paddingTop: 3,
             paddingBottom: 3,
           }}
-          onClick={() => _onSubmit(amount, categoryId)}
+          onPress={() => _onSubmit(amount, categoryId)}
         >
           Transfer
         </Button>

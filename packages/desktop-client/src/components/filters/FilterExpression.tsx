@@ -2,10 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import {
-  type RuleConditionOp,
-  type RuleConditionEntity,
-} from 'loot-core/src/types/models';
+import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
 import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, theme } from '../../style';
@@ -20,18 +17,18 @@ import { subfieldFromFilter } from './subfieldFromFilter';
 
 let isDatepickerClick = false;
 
-type FilterExpressionProps = {
-  field: string | undefined;
-  customName: string | undefined;
-  op: RuleConditionOp | undefined;
-  value: string | string[] | number | boolean | undefined;
-  options: RuleConditionEntity['options'];
+type FilterExpressionProps<T extends RuleConditionEntity> = {
+  field: T['field'];
+  customName: T['customName'];
+  op: T['op'];
+  value: T['value'];
+  options: T['options'];
   style?: CSSProperties;
-  onChange: (cond: RuleConditionEntity) => void;
+  onChange: (cond: T) => void;
   onDelete: () => void;
 };
 
-export function FilterExpression({
+export function FilterExpression<T extends RuleConditionEntity>({
   field: originalField,
   customName,
   op,
@@ -40,7 +37,7 @@ export function FilterExpression({
   style,
   onChange,
   onDelete,
-}: FilterExpressionProps) {
+}: FilterExpressionProps<T>) {
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef(null);
 

@@ -116,6 +116,7 @@ function AccountName({ account, pending, failed }) {
             width: 8,
             height: 8,
             borderRadius: 8,
+            flexShrink: 0,
             backgroundColor: pending
               ? theme.sidebarItemBackgroundPending
               : failed

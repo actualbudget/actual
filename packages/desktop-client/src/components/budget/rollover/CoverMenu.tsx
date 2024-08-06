@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
 import { addToBeBudgetedGroup } from '../util';
@@ -19,10 +19,12 @@ export function CoverMenu({
   onClose,
 }: CoverMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
-  let categoryGroups = originalCategoryGroups.filter(g => !g.is_income);
-  categoryGroups = showToBeBudgeted
-    ? addToBeBudgetedGroup(categoryGroups)
-    : categoryGroups;
+  const filteredCategoryGroups = originalCategoryGroups.filter(
+    g => !g.is_income,
+  );
+  const categoryGroups = showToBeBudgeted
+    ? addToBeBudgetedGroup(filteredCategoryGroups)
+    : filteredCategoryGroups;
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   function submit() {
@@ -39,7 +41,7 @@ export function CoverMenu({
         {node => (
           <CategoryAutocomplete
             categoryGroups={categoryGroups}
-            value={categoryGroups.find(g => g.id === categoryId)}
+            value={categoryGroups.find(g => g.id === categoryId) ?? null}
             openOnFocus={true}
             onSelect={(id: string | undefined) => setCategoryId(id || null)}
             inputProps={{
@@ -59,12 +61,12 @@ export function CoverMenu({
         }}
       >
         <Button
-          type="primary"
+          variant="primary"
           style={{
             fontSize: 12,
             paddingTop: 3,
           }}
-          onClick={submit}
+          onPress={submit}
         >
           Transfer
         </Button>
