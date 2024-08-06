@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import i18n from 'i18next';
+import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
@@ -22,8 +22,8 @@ export function listenForSyncEvent(actions, store) {
         attemptedSyncRepair = false;
 
         actions.addNotification({
-          title: i18n.t('Syncing has been fixed!'),
-          message: i18n.t('Happy budgeting!'),
+          title: t('Syncing has been fixed!'),
+          message: t('Happy budgeting!'),
           type: 'message',
         });
       }
@@ -49,7 +49,7 @@ export function listenForSyncEvent(actions, store) {
       }
     } else if (type === 'error') {
       let notif: Notification | null = null;
-      const learnMore = i18n.t(
+      const learnMore = t(
         '[Learn more](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)',
       );
       const githubIssueLink =
@@ -59,9 +59,9 @@ export function listenForSyncEvent(actions, store) {
         case 'out-of-sync':
           if (attemptedSyncRepair) {
             notif = {
-              title: i18n.t('Your data is still out of sync'),
+              title: t('Your data is still out of sync'),
               message:
-                i18n.t(
+                t(
                   'We were unable to repair your sync state, sorry! You need to reset your sync state.',
                 ) +
                 ' ' +
@@ -69,7 +69,7 @@ export function listenForSyncEvent(actions, store) {
               sticky: true,
               id: 'reset-sync',
               button: {
-                title: i18n.t('Reset sync'),
+                title: t('Reset sync'),
                 action: actions.resetSync,
               },
             };
@@ -77,9 +77,9 @@ export function listenForSyncEvent(actions, store) {
             // A bug happened during the sync process. Sync state needs
             // to be reset.
             notif = {
-              title: i18n.t('Your data is out of sync'),
+              title: t('Your data is out of sync'),
               message:
-                i18n.t(
+                t(
                   'There was a problem syncing your data. We can try to repair your sync state to fix it.',
                 ) +
                 ' ' +
@@ -88,7 +88,7 @@ export function listenForSyncEvent(actions, store) {
               sticky: true,
               id: 'repair-sync',
               button: {
-                title: i18n.t('Repair'),
+                title: t('Repair'),
                 action: async () => {
                   attemptedSyncRepair = true;
                   await send('sync-repair');
@@ -103,8 +103,8 @@ export function listenForSyncEvent(actions, store) {
           // Tell the user something is wrong with the key state on
           // the server and the key needs to be recreated
           notif = {
-            title: i18n.t('Actual has updated the syncing format'),
-            message: i18n.t(
+            title: t('Actual has updated the syncing format'),
+            message: t(
               'This happens rarely (if ever again). The internal syncing format ' +
                 'has changed and you need to reset sync. This will upload data from ' +
                 'this device and revert all other devices. ' +
@@ -118,7 +118,7 @@ export function listenForSyncEvent(actions, store) {
             sticky: true,
             id: 'old-file',
             button: {
-              title: i18n.t('Reset sync'),
+              title: t('Reset sync'),
               action: actions.resetSync,
             },
           };
@@ -128,16 +128,16 @@ export function listenForSyncEvent(actions, store) {
           // Tell the user something is wrong with the key state on
           // the server and the key needs to be recreated
           notif = {
-            title: i18n.t('Your encryption key need to be reset'),
+            title: t('Your encryption key need to be reset'),
             message:
-              i18n.t(
+              t(
                 'Something went wrong when registering your encryption key id. ' +
                   'You need to recreate your key. ',
               ) + learnMore,
             sticky: true,
             id: 'invalid-key-state',
             button: {
-              title: i18n.t('Reset key'),
+              title: t('Reset key'),
               action: () => actions.pushModal('create-encryption-key'),
             },
           };
@@ -146,9 +146,9 @@ export function listenForSyncEvent(actions, store) {
 
         case 'file-not-found':
           notif = {
-            title: i18n.t('This file is not a cloud file'),
+            title: t('This file is not a cloud file'),
             message:
-              i18n.t(
+              t(
                 'You need to register it to take advantage ' +
                   'of syncing which allows you to use it across devices and never worry ' +
                   'about losing your data.',
@@ -159,7 +159,7 @@ export function listenForSyncEvent(actions, store) {
             sticky: true,
             id: 'register-file',
             button: {
-              title: i18n.t('Register'),
+              title: t('Register'),
               action: async () => {
                 await actions.uploadBudget();
                 actions.sync();
@@ -171,9 +171,9 @@ export function listenForSyncEvent(actions, store) {
 
         case 'file-needs-upload':
           notif = {
-            title: i18n.t('File needs upload'),
+            title: t('File needs upload'),
             message:
-              i18n.t(
+              t(
                 'Something went wrong when creating this cloud file. You need ' +
                   'to upload this file to fix it.',
               ) +
@@ -182,7 +182,7 @@ export function listenForSyncEvent(actions, store) {
             sticky: true,
             id: 'upload-file',
             button: {
-              title: i18n.t('Upload'),
+              title: t('Upload'),
               action: actions.resetSync,
             },
           };
@@ -197,9 +197,9 @@ export function listenForSyncEvent(actions, store) {
           const { cloudFileId } = store.getState().prefs.local;
 
           notif = {
-            title: i18n.t('Syncing has been reset on this cloud file'),
+            title: t('Syncing has been reset on this cloud file'),
             message:
-              i18n.t(
+              t(
                 'You need to revert it to continue syncing. Any unsynced ' +
                   'data will be lost. If you like, you can instead ' +
                   '[upload this file](#upload) to be the latest version.',
@@ -210,7 +210,7 @@ export function listenForSyncEvent(actions, store) {
             sticky: true,
             id: 'needs-revert',
             button: {
-              title: i18n.t('Revert'),
+              title: t('Revert'),
               action: () => actions.closeAndDownloadBudget(cloudFileId),
             },
           };
@@ -219,15 +219,15 @@ export function listenForSyncEvent(actions, store) {
         case 'decrypt-failure':
           if (meta.isMissingKey) {
             notif = {
-              title: i18n.t('Missing encryption key'),
-              message: i18n.t(
+              title: t('Missing encryption key'),
+              message: t(
                 'Unable to encrypt your data because you are missing the key. ' +
                   'Create your key to sync your data.',
               ),
               sticky: true,
               id: 'encrypt-failure-missing',
               button: {
-                title: i18n.t('Create key'),
+                title: t('Create key'),
                 action: () =>
                   actions.pushModal('fix-encryption-key', {
                     onSuccess: () => actions.sync(),
@@ -236,7 +236,7 @@ export function listenForSyncEvent(actions, store) {
             };
           } else {
             notif = {
-              message: i18n.t(
+              message: t(
                 'Unable to encrypt your data. You have the correct ' +
                   'key so this is likely an internal failure. To fix this, ' +
                   'reset your sync data with a new key.',
@@ -244,7 +244,7 @@ export function listenForSyncEvent(actions, store) {
               sticky: true,
               id: 'encrypt-failure',
               button: {
-                title: i18n.t('Reset key'),
+                title: t('Reset key'),
                 action: () =>
                   actions.pushModal('create-encryption-key', {
                     onSuccess: () => actions.sync(),
@@ -256,8 +256,8 @@ export function listenForSyncEvent(actions, store) {
         case 'invalid-schema':
           console.trace('invalid-schema', meta);
           notif = {
-            title: i18n.t('Update required'),
-            message: i18n.t(
+            title: t('Update required'),
+            message: t(
               'We couldn’t apply changes from the server. This probably means you ' +
                 'need to update the app to support the latest database.',
             ),
@@ -267,7 +267,7 @@ export function listenForSyncEvent(actions, store) {
         case 'apply-failure':
           console.trace('apply-failure', meta);
           notif = {
-            message: i18n.t(
+            message: t(
               'We couldn’t apply that change to the database. Please report this as a bug by [opening a Github issue]({{githubIssueLink}}).',
               { githubIssueLink },
             ),
@@ -279,7 +279,7 @@ export function listenForSyncEvent(actions, store) {
         default:
           console.trace('unknown error', info);
           notif = {
-            message: i18n.t(
+            message: t(
               'We had problems syncing your changes. Please report this as a bug by [opening a Github issue]({{githubIssueLink}}).',
               { githubIssueLink },
             ),

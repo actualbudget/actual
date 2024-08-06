@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import i18n from 'i18next';
+import { t } from 'i18next';
 import throttle from 'throttleit';
 
 import { send } from '../../platform/client/fetch';
@@ -167,7 +167,7 @@ export function deleteCategory(id: string, transferId?: string) {
           dispatch(
             addNotification({
               type: 'error',
-              message: i18n.t(
+              message: t(
                 'A category must be transferred to another of the same type (expense or income)',
               ),
             }),
