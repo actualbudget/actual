@@ -51,11 +51,11 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     <View
       data-testid="budget-summary"
       style={{
-        boxShadow: styles.cardShadow,
         backgroundColor:
           month === currentMonth
             ? theme.budgetCurrentMonth
             : theme.budgetOtherMonth,
+        boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,

@@ -50,15 +50,15 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   return (
     <View
       style={{
+        backgroundColor:
+          month === currentMonth
+            ? theme.budgetCurrentMonth
+            : theme.budgetOtherMonth,
         boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,
         marginTop: 5,
-        backgroundColor:
-          month === currentMonth
-            ? theme.budgetCurrentMonth
-            : theme.budgetOtherMonth,
         flex: 1,
         cursor: 'default',
         marginBottom: 5,
