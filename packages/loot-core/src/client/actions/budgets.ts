@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import i18n from 'i18next';
+import { t } from 'i18next';
 
 import { send } from '../../platform/client/fetch';
 import { getDownloadError, getSyncError } from '../../shared/errors';
@@ -63,7 +63,7 @@ export function loadBudget(id: string, loadingText = '', options = {}) {
           const showBackups = window.confirm(
             message +
               ' ' +
-              i18n.t(
+              t(
                 'Make sure the app is up-to-date. Do you want to load a backup?',
               ),
           );
@@ -72,7 +72,7 @@ export function loadBudget(id: string, loadingText = '', options = {}) {
             dispatch(pushModal('load-backup', { budgetId: id }));
           }
         } else {
-          alert(message + ' ' + i18n.t('Make sure the app is up-to-date.'));
+          alert(message + ' ' + t('Make sure the app is up-to-date.'));
         }
       } else {
         alert(message);
@@ -97,7 +97,7 @@ export function closeBudget() {
       // This clears out all the app state so the user starts fresh
       dispatch({ type: constants.CLOSE_BUDGET });
 
-      dispatch(setAppState({ loadingText: i18n.t('Closing...') }));
+      dispatch(setAppState({ loadingText: t('Closing...') }));
       await send('close-budget');
       dispatch(setAppState({ loadingText: null }));
       if (localStorage.getItem('SharedArrayBufferOverride')) {
@@ -127,7 +127,7 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   return async (dispatch: Dispatch) => {
     dispatch(
       setAppState({
-        loadingText: testMode || demoMode ? i18n.t('Making demo...') : '',
+        loadingText: testMode || demoMode ? t('Making demo...') : '',
       }),
     );
 
@@ -180,7 +180,7 @@ export function uploadBudget(id: string) {
 export function closeAndLoadBudget(fileId: string) {
   return async (dispatch: Dispatch) => {
     await dispatch(closeBudget());
-    dispatch(loadBudget(fileId, i18n.t('Loading...')));
+    dispatch(loadBudget(fileId, t('Loading...')));
   };
 }
 
@@ -195,7 +195,7 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
   return async (dispatch: Dispatch) => {
     dispatch(
       setAppState({
-        loadingText: i18n.t('Downloading...'),
+        loadingText: t('Downloading...'),
       }),
     );
 
@@ -218,7 +218,7 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
         dispatch(setAppState({ loadingText: null }));
       } else if (error.reason === 'file-exists') {
         alert(
-          i18n.t(
+          t(
             'A file with id “{{id}}” already exists with the name “{{name}}”. ' +
               'This file will be replaced. This probably happened because files were manually ' +
               'moved around outside of Actual.',
