@@ -160,8 +160,8 @@ export function ChooseGraph({
         balanceTypeOp={balanceTypeOp}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
-        interval={interval}
         showTooltip={showTooltip}
+        interval={interval}
       />
     );
   }
@@ -177,8 +177,8 @@ export function ChooseGraph({
         groupBy={groupBy}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
-        interval={interval}
         showTooltip={showTooltip}
+        interval={interval}
       />
     );
   }

@@ -153,7 +153,7 @@ function Layout({ children, isEditing, menuItems, onMenuSelect }: LayoutProps) {
             zIndex: 1,
           }}
         >
-          <MenuButton ref={triggerRef} onClick={() => setMenuOpen(true)} />
+          <MenuButton ref={triggerRef} onPress={() => setMenuOpen(true)} />
           <Popover
             triggerRef={triggerRef}
             isOpen={menuOpen}

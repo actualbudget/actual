@@ -385,7 +385,7 @@ export function Overview() {
 
                   <MenuButton
                     ref={extraMenuTriggerRef}
-                    onClick={() => setExtraMenuOpen(true)}
+                    onPress={() => setExtraMenuOpen(true)}
                   />
                   <Popover
                     triggerRef={extraMenuTriggerRef}

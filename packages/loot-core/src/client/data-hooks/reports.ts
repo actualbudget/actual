@@ -35,10 +35,7 @@ function toJS(rows: CustomReportData[]) {
   return reports;
 }
 
-export function useReports(): {
-  data: CustomReportEntity[];
-  isLoading: boolean;
-} {
+export function useReports() {
   const queryData = useLiveQuery<CustomReportData[]>(
     () => q('custom_reports').select('*'),
     [],

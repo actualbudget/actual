@@ -8,7 +8,7 @@ import {
 
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
@@ -57,6 +57,7 @@ export function SidebarCategory({
         userSelect: 'none',
         WebkitUserSelect: 'none',
         opacity: category.hidden || categoryGroup?.hidden ? 0.33 : undefined,
+        backgroundColor: 'transparent',
       }}
     >
       <div
@@ -72,13 +73,10 @@ export function SidebarCategory({
       </div>
       <View style={{ flexShrink: 0, marginLeft: 5 }} ref={triggerRef}>
         <Button
-          type="bare"
+          variant="bare"
           className="hover-visible"
-          onClick={e => {
-            e.stopPropagation();
-            setMenuOpen(true);
-          }}
           style={{ color: 'currentColor', padding: 3 }}
+          onPress={() => setMenuOpen(true)}
         >
           <SvgCheveronDown
             width={14}
