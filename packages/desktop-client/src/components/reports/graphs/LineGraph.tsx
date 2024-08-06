@@ -121,6 +121,7 @@ type LineGraphProps = {
   balanceTypeOp: balanceTypeOpType;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showTooltip?: boolean;
   interval?: string;
 };
 
@@ -133,6 +134,7 @@ export function LineGraph({
   balanceTypeOp,
   showHiddenCategories,
   showOffBudget,
+  showTooltip = true,
   interval,
 }: LineGraphProps) {
   const navigate = useNavigate();
@@ -186,7 +188,7 @@ export function LineGraph({
                 margin={{ top: 10, right: 10, left: leftMargin, bottom: 10 }}
                 style={{ cursor: pointer }}
               >
-                {(!isNarrowWidth || !compact) && (
+                {showTooltip && (
                   <Tooltip
                     content={
                       <CustomTooltip compact={compact} tooltip={tooltip} />
