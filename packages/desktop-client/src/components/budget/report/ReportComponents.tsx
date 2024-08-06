@@ -103,13 +103,7 @@ export const GroupMonth = memo(function GroupMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...(monthUtils.isCurrentMonth(month)
-          ? {
-              backgroundColor: theme.budgetHeaderCurrentMonth,
-            }
-          : {
-              backgroundColor: theme.budgetHeaderOtherMonth,
-            }),
+          backgroundColor: monthUtils.isCurrentMonth(month) ? theme.budgetHeaderCurrentMonth : theme.budgetHeaderOtherMonth,
       }}
     >
       <SheetCell
