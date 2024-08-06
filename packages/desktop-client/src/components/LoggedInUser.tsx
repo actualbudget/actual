@@ -185,7 +185,7 @@ export function LoggedInUser({
         ref={triggerRef}
         variant="bare"
         onPress={() => setMenuOpen(true)}
-        style={color && { color }}
+        style={{ color: color || 'inherit' }}
       >
         {serverMessage()}
       </Button>
