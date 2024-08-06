@@ -1,4 +1,3 @@
-import { CategoryEntity } from './category';
 import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
@@ -17,10 +16,9 @@ export interface CustomReportEntity {
   showHiddenCategories: boolean;
   includeCurrentInterval: boolean;
   showUncategorized: boolean;
-  selectedCategories?: CategoryEntity[];
   graphType: string;
   conditions?: RuleConditionEntity[];
-  conditionsOp: string;
+  conditionsOp: 'and' | 'or';
   data?: GroupedEntity;
   tombstone?: boolean;
 }
@@ -140,10 +138,9 @@ export interface CustomReportData {
   show_hidden: number;
   include_current: number;
   show_uncategorized: number;
-  selected_categories?: CategoryEntity[];
   graph_type: string;
   conditions?: RuleConditionEntity[];
-  conditions_op: string;
+  conditions_op: 'and' | 'or';
   metadata?: GroupedEntity;
   interval: string;
   color_scheme?: string;

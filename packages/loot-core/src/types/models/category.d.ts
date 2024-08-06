@@ -1,5 +1,5 @@
 export interface CategoryEntity {
-  id?: string;
+  id: string;
   name: string;
   is_income?: boolean;
   cat_group?: string;
