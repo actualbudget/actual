@@ -175,7 +175,7 @@ export function GetCardData({
         compact={true}
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
-        showTooltip={showTooltip && !isNarrowWidth}
+        showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>
   ) : (
