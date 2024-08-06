@@ -7,7 +7,7 @@ import { type State } from 'loot-core/src/client/state-types';
 import { useActions } from '../hooks/useActions';
 import { theme, styles, type CSSProperties } from '../style';
 
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Menu } from './common/Menu';
 import { Popover } from './common/Popover';
 import { Text } from './common/Text';
@@ -97,8 +97,8 @@ export function LoggedInUser({
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
       <Button
         ref={triggerRef}
-        type="bare"
-        onClick={() => setMenuOpen(true)}
+        variant="bare"
+        onPress={() => setMenuOpen(true)}
         style={color && { color }}
       >
         {serverMessage()}
