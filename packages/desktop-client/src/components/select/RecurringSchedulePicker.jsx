@@ -7,7 +7,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
@@ -242,10 +242,10 @@ function MonthlyPatterns({ config, dispatch }) {
             buttonStyle={{ flex: 1, marginRight: 10 }}
           />
           <Button
-            type="bare"
+            variant="bare"
             aria-label="Remove recurrence"
             style={{ padding: 7 }}
-            onClick={() =>
+            onPress={() =>
               dispatch({
                 type: 'remove-recurrence',
                 recurrence,
@@ -255,10 +255,10 @@ function MonthlyPatterns({ config, dispatch }) {
             <SvgSubtract style={{ width: 8, height: 8 }} />
           </Button>
           <Button
-            type="bare"
+            variant="bare"
             aria-label="Add recurrence"
             style={{ padding: 7, marginLeft: 5 }}
-            onClick={() => dispatch({ type: 'add-recurrence' })}
+            onPress={() => dispatch({ type: 'add-recurrence' })}
           >
             <SvgAdd style={{ width: 10, height: 10 }} />
           </Button>
@@ -384,7 +384,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
               backgroundColor: theme.tableBackground,
               ':hover': { backgroundColor: theme.tableBackground },
             }}
-            onClick={() => dispatch({ type: 'add-recurrence' })}
+            onPress={() => dispatch({ type: 'add-recurrence' })}
           >
             Add specific days
           </Button>
@@ -447,10 +447,10 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
       <div
         style={{ display: 'flex', marginTop: 15, justifyContent: 'flex-end' }}
       >
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onPress={onClose}>Cancel</Button>
         <Button
-          type="primary"
-          onClick={() => onSave(unparseConfig(config))}
+          variant="primary"
+          onPress={() => onSave(unparseConfig(config))}
           style={{ marginLeft: 10 }}
         >
           Apply
@@ -475,7 +475,7 @@ export function RecurringSchedulePicker({ value, buttonStyle, onChange }) {
       <Button
         ref={triggerRef}
         style={{ textAlign: 'left', ...buttonStyle }}
-        onClick={() => setIsOpen(true)}
+        onPress={() => setIsOpen(true)}
       >
         {value
           ? getRecurringDescription(value, dateFormat)

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
 import { addToBeBudgetedGroup } from '../util';
@@ -61,12 +61,12 @@ export function CoverMenu({
         }}
       >
         <Button
-          type="primary"
+          variant="primary"
           style={{
             fontSize: 12,
             paddingTop: 3,
           }}
-          onClick={submit}
+          onPress={submit}
         >
           Transfer
         </Button>

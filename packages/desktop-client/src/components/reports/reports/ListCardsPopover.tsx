@@ -47,8 +47,9 @@ export function ListCardsPopover({
   return (
     <>
       <MenuButton
+        aria-label="Report menu"
         ref={triggerRef}
-        onClick={() =>
+        onPress={() =>
           onMenuOpen(report.id === undefined ? '' : report.id, true)
         }
         style={{

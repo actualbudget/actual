@@ -201,20 +201,22 @@ function getInitialMappings(transactions) {
   );
 
   const payeeField = key(
-    fields.find(
-      ([name]) =>
-        name !== dateField && name !== amountField && name !== categoryField,
-    ),
+    fields.find(([name]) => name.toLowerCase().includes('payee')) ||
+      fields.find(
+        ([name]) =>
+          name !== dateField && name !== amountField && name !== categoryField,
+      ),
   );
 
   const notesField = key(
-    fields.find(
-      ([name]) =>
-        name !== dateField &&
-        name !== amountField &&
-        name !== categoryField &&
-        name !== payeeField,
-    ),
+    fields.find(([name]) => name.toLowerCase().includes('notes')) ||
+      fields.find(
+        ([name]) =>
+          name !== dateField &&
+          name !== amountField &&
+          name !== categoryField &&
+          name !== payeeField,
+      ),
   );
 
   const inOutField = key(
