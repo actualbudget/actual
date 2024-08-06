@@ -16,6 +16,7 @@ import React, {
   type Ref,
   type MutableRefObject,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -31,7 +32,7 @@ import { type CSSProperties, styles, theme } from '../style';
 
 import { Button } from './common/Button';
 import { Input } from './common/Input';
-import { Menu } from './common/Menu';
+import { Menu, type MenuItem } from './common/Menu';
 import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
@@ -817,14 +818,32 @@ export function TableHeader({
   );
 }
 
-export function SelectedItemsButton({ name, items, onSelect }) {
-  const selectedItems = useSelectedItems();
+type SelectedItemsButtonNames = 'transactions' | 'schedules';
+
+type SelectedItemsButtonProps<T extends MenuItem = MenuItem> = {
+  name: SelectedItemsButtonNames;
+  items: Array<T | typeof Menu.line>;
+  onSelect: (name: string, items: Array<T | typeof Menu.line>) => void;
+};
+
+export function SelectedItemsButton<T extends MenuItem = MenuItem>({
+  name,
+  items,
+  onSelect,
+}: SelectedItemsButtonProps<T>) {
+  const { t } = useTranslation();
+  const selectedItems = useSelectedItems() as Set<T>;
   const [menuOpen, setMenuOpen] = useState(null);
   const triggerRef = useRef(null);
 
   if (selectedItems.size === 0) {
     return null;
   }
+
+  const label = {
+    transactions: t('{{count}} transactions', { count: selectedItems.size }),
+    schedules: t('{{count}} schedules', { count: selectedItems.size }),
+  }[name];
 
   return (
     <View style={{ marginLeft: 10, flexShrink: 0 }}>
@@ -840,7 +859,7 @@ export function SelectedItemsButton({ name, items, onSelect }) {
           height={8}
           style={{ marginRight: 5, color: theme.pageText }}
         />
-        {selectedItems.size} {name}
+        {label}
       </Button>
 
       <Popover
