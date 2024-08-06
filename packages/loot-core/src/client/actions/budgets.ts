@@ -224,7 +224,7 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
               'moved around outside of Actual.',
             {
               id: error.meta.id,
-              name: error.meta.id,
+              name: error.meta.name,
             },
           ),
         );

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -25,6 +26,7 @@ export function SelectedTransactionsButton({
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
 }) {
+  const i18n = useTranslation();
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
@@ -182,7 +184,7 @@ export function SelectedTransactionsButton({
 
   return (
     <SelectedItemsButton
-      name="transactions"
+      name={count => i18n.t('{{count}} transactions', { count })}
       items={[
         ...(!types.trans
           ? [
