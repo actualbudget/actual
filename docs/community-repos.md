@@ -17,6 +17,7 @@ The following are implementations of bank syncing using the Actual API. For inst
 * **Credit Suisse, Cembra Money Bank, DKB, ZKB, and Interactive Brokers CVS import** - https://github.com/wirhabenzeit/actual-budget-cli
 * **ING bank CSV import** - https://github.com/jvmap/ActualBudgetTransformer
 * **Monobank bank sync** - https://github.com/dnullproject/mono-to-actualbudget
+* **Norwegian Trumf Visa PDF invoice to Actual Budget friendly CSV converter** - https://github.com/RubenOlsen/TrumfVisa2ActualBudget
 * **Plaid bank sync** - https://github.com/youngcw/actualplaid
 * **SimpleFIN bank sync** - https://github.com/duplaja/actual-simplefin-sync/
 
