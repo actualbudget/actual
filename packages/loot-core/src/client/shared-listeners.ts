@@ -59,7 +59,7 @@ export function listenForSyncEvent(actions, store) {
         case 'out-of-sync':
           if (attemptedSyncRepair) {
             notif = {
-              title: i18n.t('Your data is still out of sync', {}),
+              title: i18n.t('Your data is still out of sync'),
               message:
                 i18n.t(
                   'We were unable to repair your sync state, sorry! You need to reset your sync state.',
@@ -103,7 +103,7 @@ export function listenForSyncEvent(actions, store) {
           // Tell the user something is wrong with the key state on
           // the server and the key needs to be recreated
           notif = {
-            title: i18n.t('Actual has updated the syncing format', {}),
+            title: i18n.t('Actual has updated the syncing format'),
             message: i18n.t(
               'This happens rarely (if ever again). The internal syncing format ' +
                 'has changed and you need to reset sync. This will upload data from ' +
@@ -128,7 +128,7 @@ export function listenForSyncEvent(actions, store) {
           // Tell the user something is wrong with the key state on
           // the server and the key needs to be recreated
           notif = {
-            title: i18n.t('Your encryption key need to be reset', {}),
+            title: i18n.t('Your encryption key need to be reset'),
             message:
               i18n.t(
                 'Something went wrong when registering your encryption key id. ' +
@@ -197,7 +197,7 @@ export function listenForSyncEvent(actions, store) {
           const { cloudFileId } = store.getState().prefs.local;
 
           notif = {
-            title: i18n.t('Syncing has been reset on this cloud file', {}),
+            title: i18n.t('Syncing has been reset on this cloud file'),
             message:
               i18n.t(
                 'You need to revert it to continue syncing. Any unsynced ' +
