@@ -820,7 +820,7 @@ export function TableHeader({
 type SelectedItemsButtonProps<T extends MenuItem = MenuItem> = {
   name: ((count: number) => string) | string;
   items: Array<T | typeof Menu.line>;
-  onSelect: (name: string, items: Array<T | typeof Menu.line>) => void;
+  onSelect: (name: string, items: Array<string>) => void;
 };
 
 export function SelectedItemsButton<T extends MenuItem = MenuItem>({
@@ -828,7 +828,7 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
   items,
   onSelect,
 }: SelectedItemsButtonProps<T>) {
-  const selectedItems = useSelectedItems<T>();
+  const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(null);
   const triggerRef = useRef(null);
 
