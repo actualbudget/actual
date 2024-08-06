@@ -83,7 +83,6 @@
     },
     "appx": {
       "identityName": "actualbudget.org.ActualBudget",
-      "applicationId": "org.actualbudget",
       "publisherDisplayName": "actualbudget.org",
       "displayName": "Actual Budget",
       "publisher": "CN=19454997-90E1-4473-879D-96D6A77A6056"
