@@ -104,20 +104,14 @@ export function listenForSyncEvent(actions, store) {
           // the server and the key needs to be recreated
           notif = {
             title: i18n.t('Actual has updated the syncing format', {}),
-            message:
-              i18n.t(
-                'This happens rarely (if ever again). The internal syncing format ' +
-                  'has changed and you need to reset sync. This will upload data from ' +
-                  'this device and revert all other devices.',
-              ) +
-              ' ' +
-              i18n.t(
-                '[Learn more about what this means](https://actualbudget.org/docs/getting-started/sync/#what-does-resetting-sync-mean).',
-              ) +
-              '\n\n' +
-              i18n.t(
+            message: i18n.t(
+              'This happens rarely (if ever again). The internal syncing format ' +
+                'has changed and you need to reset sync. This will upload data from ' +
+                'this device and revert all other devices. ' +
+                '[Learn more about what this means](https://actualbudget.org/docs/getting-started/sync/#what-does-resetting-sync-mean).' +
+                '\n\n' +
                 'Old encryption keys are not migrated. If using encryption, [reset encryption here](#makeKey).',
-              ),
+            ),
             messageActions: {
               makeKey: () => actions.pushModal('create-encryption-key'),
             },

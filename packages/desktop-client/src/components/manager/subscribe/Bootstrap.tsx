@@ -60,12 +60,10 @@ export function Bootstrap() {
     <View style={{ maxWidth: 450, marginTop: -30 }}>
       <Title text={t('Welcome to Actual!')} />
       <Paragraph style={{ fontSize: 16, color: theme.pageTextDark }}>
-        {t(
-          'Actual is a super fast privacy-focused app for managing your finances.',
-        )}
-        {t(
-          'To secure your data, you’ll need to set a password for your server.',
-        )}
+        <Trans>
+          Actual is a super fast privacy-focused app for managing your finances.
+          To secure your data, you’ll need to set a password for your server.
+        </Trans>
       </Paragraph>
 
       <Paragraph isLast style={{ fontSize: 16, color: theme.pageTextDark }}>

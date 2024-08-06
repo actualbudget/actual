@@ -252,8 +252,8 @@ export function useSelectedDispatch() {
   return useContext(SelectedDispatch);
 }
 
-export function useSelectedItems() {
-  return useContext(SelectedItems);
+export function useSelectedItems<T = unknown>() {
+  return useContext<Set<T>>(SelectedItems);
 }
 
 type SelectedProviderProps<T extends Item> = {

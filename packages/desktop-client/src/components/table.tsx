@@ -16,7 +16,6 @@ import React, {
   type Ref,
   type MutableRefObject,
 } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -818,10 +817,8 @@ export function TableHeader({
   );
 }
 
-type SelectedItemsButtonNames = 'transactions' | 'schedules';
-
 type SelectedItemsButtonProps<T extends MenuItem = MenuItem> = {
-  name: SelectedItemsButtonNames;
+  name: ((count: number) => string) | string;
   items: Array<T | typeof Menu.line>;
   onSelect: (name: string, items: Array<T | typeof Menu.line>) => void;
 };
@@ -831,8 +828,7 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
   items,
   onSelect,
 }: SelectedItemsButtonProps<T>) {
-  const { t } = useTranslation();
-  const selectedItems = useSelectedItems() as Set<T>;
+  const selectedItems = useSelectedItems<T>();
   const [menuOpen, setMenuOpen] = useState(null);
   const triggerRef = useRef(null);
 
@@ -840,10 +836,8 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
     return null;
   }
 
-  const label = {
-    transactions: t('{{count}} transactions', { count: selectedItems.size }),
-    schedules: t('{{count}} schedules', { count: selectedItems.size }),
-  }[name];
+  const buttonLabel =
+    typeof name === 'function' ? name(selectedItems.size) : name;
 
   return (
     <View style={{ marginLeft: 10, flexShrink: 0 }}>
@@ -859,7 +853,7 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
           height={8}
           style={{ marginRight: 5, color: theme.pageText }}
         />
-        {label}
+        {buttonLabel}
       </Button>
 
       <Popover
