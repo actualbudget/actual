@@ -22,10 +22,7 @@ export type CustomReportWidget = AbstractWidget<
   { id: string }
 >;
 
-export type SpecializedWidget =
-  | NetWorthWidget
-  | CashFlowWidget
-  | SpendingWidget;
+type SpecializedWidget = NetWorthWidget | CashFlowWidget | SpendingWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 

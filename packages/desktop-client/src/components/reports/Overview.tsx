@@ -14,7 +14,6 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import {
   type CustomReportWidget,
   type ExportImportDashboard,
-  type SpecializedWidget,
   type Widget,
 } from 'loot-core/src/types/models';
 
@@ -159,12 +158,15 @@ export function Overview() {
     );
   };
 
-  const onAddWidget = (type: SpecializedWidget['type']) => {
+  const onAddWidget = <T extends Widget>(
+    type: T['type'],
+    meta: T['meta'] = null,
+  ) => {
     send('dashboard-add-widget', {
       type,
       width: 4,
       height: 2,
-      meta: null,
+      meta,
     });
     setMenuOpen(false);
   };
@@ -333,35 +335,49 @@ export function Overview() {
                               navigate('/reports/custom');
                               return;
                             }
+
+                            function isExistingCustomReport(
+                              name: string,
+                            ): name is `custom-report-${string}` {
+                              return name.startsWith('custom-report-');
+                            }
+                            if (isExistingCustomReport(item)) {
+                              const [, reportId] = item.split('custom-report-');
+                              onAddWidget('custom-report', { id: reportId });
+                              return;
+                            }
+
                             onAddWidget(item);
                           }}
-                          items={
-                            [
-                              {
-                                name: 'cash-flow-card',
-                                text: 'Cash flow graph',
-                              },
-                              {
-                                name: 'net-worth-card',
-                                text: 'Net worth graph',
-                              },
-                              ...(spendingReportFeatureFlag
-                                ? [
-                                    {
-                                      name: 'spending-card' as const,
-                                      text: 'Spending analysis',
-                                    },
-                                  ]
-                                : []),
-                              {
-                                name: 'custom-report',
-                                text: 'Custom report',
-                              },
-                            ] satisfies Array<{
-                              name: Widget['type'];
-                              text: string;
-                            }>
-                          }
+                          items={[
+                            {
+                              name: 'cash-flow-card' as const,
+                              text: 'Cash flow graph',
+                            },
+                            {
+                              name: 'net-worth-card' as const,
+                              text: 'Net worth graph',
+                            },
+                            ...(spendingReportFeatureFlag
+                              ? [
+                                  {
+                                    name: 'spending-card' as const,
+                                    text: 'Spending analysis',
+                                  },
+                                ]
+                              : []),
+                            {
+                              name: 'custom-report' as const,
+                              text: 'New custom report',
+                            },
+                            ...(customReports.length
+                              ? ([Menu.line] satisfies Array<typeof Menu.line>)
+                              : []),
+                            ...customReports.map(report => ({
+                              name: `custom-report-${report.id}` as const,
+                              text: report.name,
+                            })),
+                          ]}
                         />
                       </Popover>
                     </>
