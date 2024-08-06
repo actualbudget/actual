@@ -21,7 +21,7 @@ import {
   type OnDragChangeCallback,
   type OnDropCallback,
 } from '../sort';
-import { type SheetFields, type Binding } from '../spreadsheet';
+import { type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
 
 export const accountNameStyle: CSSProperties = {
@@ -37,10 +37,10 @@ export const accountNameStyle: CSSProperties = {
   ...styles.smallText,
 };
 
-type AccountProps<FieldName extends SheetFields<'account'>> = {
+type AccountProps = {
   name: string;
   to: string;
-  query: Binding<'account', FieldName>;
+  query: Binding;
   account?: AccountEntity;
   connected?: boolean;
   pending?: boolean;
@@ -52,7 +52,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   onDrop?: OnDropCallback;
 };
 
-export function Account<FieldName extends SheetFields<'account'>>({
+export function Account({
   name,
   account,
   connected,
@@ -65,7 +65,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   outerStyle,
   onDragChange,
   onDrop,
-}: AccountProps<FieldName>) {
+}: AccountProps) {
   const type = account
     ? account.closed
       ? 'account-closed'

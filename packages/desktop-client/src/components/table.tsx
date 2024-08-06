@@ -40,12 +40,7 @@ import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
-import {
-  type Spreadsheets,
-  type SheetFields,
-  type SheetNames,
-  type Binding,
-} from './spreadsheet';
+import { type Binding } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 
@@ -316,7 +311,7 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
-type InputValueProps = Omit<ComponentProps<typeof Input>, 'value'> & {
+type InputValueProps = ComponentProps<typeof Input> & {
   value?: string;
 };
 
@@ -676,47 +671,31 @@ export function SelectCell({
   );
 }
 
-type SheetCellValueProps<
-  SheetName extends SheetNames,
-  FieldName extends SheetFields<SheetName>,
-> = {
-  binding: Binding<SheetName, FieldName>;
+type SheetCellValueProps = {
+  binding: Binding;
   type: FormatType;
-  getValueStyle?: (value: Spreadsheets[SheetName][FieldName]) => CSSProperties;
-  formatExpr?: (value: Spreadsheets[SheetName][FieldName]) => string;
+  getValueStyle?: (value: string | number) => CSSProperties;
+  formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
 };
 
-type SheetCellProps<
-  SheetName extends SheetNames,
-  FieldName extends SheetFields<SheetName>,
-> = ComponentProps<typeof Cell> & {
-  valueProps: SheetCellValueProps<SheetName, FieldName>;
-  inputProps?: Omit<
-    ComponentProps<typeof InputValue>,
-    'value' | 'onUpdate' | 'onBlur'
-  > & {
-    onBlur?: () => void;
-  };
+type SheetCellProps = ComponentProps<typeof Cell> & {
+  valueProps: SheetCellValueProps;
+  inputProps?: Omit<ComponentProps<typeof InputValue>, 'value' | 'onUpdate'>;
   onSave?: (value) => void;
   textAlign?: CSSProperties['textAlign'];
 };
-export function SheetCell<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  SheetName extends SheetNames = any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  FieldName extends SheetFields<SheetName> = any,
->({
+export function SheetCell({
   valueProps,
   valueStyle,
   inputProps,
   textAlign,
   onSave,
   ...props
-}: SheetCellProps<SheetName, FieldName>) {
+}: SheetCellProps) {
   const {
     binding,
     type,
@@ -726,10 +705,10 @@ export function SheetCell<
     privacyFilter,
   } = valueProps;
 
-  const sheetValue = useSheetValue(binding, () => {
+  const sheetValue = useSheetValue(binding, e => {
     // "close" the cell if it's editing
     if (props.exposed && inputProps && inputProps.onBlur) {
-      inputProps.onBlur();
+      inputProps.onBlur(e);
     }
   });
   const format = useFormat();
@@ -743,7 +722,7 @@ export function SheetCell<
       }
       textAlign={textAlign}
       {...props}
-      value={String(sheetValue ?? '')}
+      value={sheetValue}
       formatter={value =>
         props.formatter ? props.formatter(value, type) : format(value, type)
       }
@@ -759,7 +738,7 @@ export function SheetCell<
       {() => {
         return (
           <InputValue
-            value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
+            value={formatExpr ? formatExpr(sheetValue) : sheetValue}
             onUpdate={value => {
               onSave(unformatExpr ? unformatExpr(value) : value);
             }}

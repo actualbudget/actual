@@ -1,3 +1,4 @@
+/* eslint-disable rulesdir/typography */
 const path = require('path');
 
 const rulesDirPlugin = require('eslint-plugin-rulesdir');
@@ -329,18 +330,6 @@ module.exports = {
       ],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: [
-        '.eslintrc.js',
-        '*.test.js',
-        '*.test.ts',
-        '*.test.jsx',
-        '*.test.tsx',
-      ],
-      rules: {
-        'rulesdir/typography': 'off',
       },
     },
   ],

@@ -44,7 +44,6 @@ export function InputWithContent({
         {...props}
         focused={focused}
         style={{
-          width: '100%',
           ...inputStyle,
           flex: 1,
           '&, &:focus, &:hover': {

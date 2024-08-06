@@ -286,7 +286,7 @@ type UncategorizedGroupEntity = Pick<
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
   name: 'Uncategorized & Off Budget',
-  id: 'uncategorized',
+  id: undefined,
   hidden: false,
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };

@@ -273,12 +273,6 @@ export function makeValue(value, cond) {
     default:
   }
 
-  const isMulti = ['oneOf', 'notOneOf'].includes(cond.op);
-
-  if (isMulti) {
-    return { ...cond, error: null, value: value || [] };
-  }
-
   return { ...cond, error: null, value };
 }
 

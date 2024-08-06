@@ -4,6 +4,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
+import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
@@ -29,6 +30,8 @@ import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet'
 import { useReport } from '../useReport';
 
 export function Spending() {
+  const categories = useCategories();
+
   const {
     conditions,
     conditionsOp,
@@ -68,12 +71,13 @@ export function Spending() {
   const getGraphData = useMemo(() => {
     setDataCheck(false);
     return createSpendingSpreadsheet({
+      categories,
       conditions,
       conditionsOp,
       setDataCheck,
       compare,
     });
-  }, [conditions, conditionsOp, compare]);
+  }, [categories, conditions, conditionsOp, compare]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
@@ -135,118 +139,48 @@ export function Spending() {
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'center',
-          padding: 20,
-          paddingBottom: conditions.length > 0 ? 0 : 10,
           flexShrink: 0,
         }}
       >
         <View
           style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            marginRight: 5,
+            padding: 20,
+            flexShrink: 0,
           }}
         >
-          <Text
-            style={{
-              paddingRight: 5,
-            }}
-          >
-            Compare
-          </Text>
-          <Select
-            value={compare}
-            onChange={e => {
-              setCompare(e);
-              if (mode === 'lastMonth') setMode('twoMonthsPrevious');
-              if (mode === 'twoMonthsPrevious') setMode('lastMonth');
-            }}
-            options={[
-              ['thisMonth', 'this month'],
-              ['lastMonth', 'last month'],
-            ]}
-          />
-          <Text
-            style={{
-              paddingRight: 10,
-              paddingLeft: 5,
-            }}
-          >
-            to the:
-          </Text>
-          <ModeButton
-            selected={['lastMonth', 'twoMonthsPrevious'].includes(mode)}
-            style={{
-              backgroundColor: 'inherit',
-            }}
-            onSelect={() =>
-              setMode(
-                compare === 'thisMonth' ? 'lastMonth' : 'twoMonthsPrevious',
-              )
-            }
-          >
-            Previous month
-          </ModeButton>
-          {showLastYear && (
-            <ModeButton
-              selected={mode === 'lastYear'}
-              onSelect={() => setMode('lastYear')}
-              style={{
-                backgroundColor: 'inherit',
-              }}
-            >
-              Last year
-            </ModeButton>
-          )}
-          {showAverage && (
-            <ModeButton
-              selected={mode === 'average'}
-              onSelect={() => setMode('average')}
-              style={{
-                backgroundColor: 'inherit',
-              }}
-            >
-              Average
-            </ModeButton>
+          {conditions && (
+            <View style={{ flexDirection: 'row' }}>
+              <FilterButton
+                onApply={onApplyFilter}
+                compact={false}
+                hover={false}
+                exclude={['date']}
+              />
+              <Tooltip
+                placement="bottom start"
+                content={<Text>Save compare and filter options</Text>}
+                style={{
+                  ...styles.tooltip,
+                  lineHeight: 1.5,
+                  padding: '6px 10px',
+                  marginLeft: 10,
+                }}
+              >
+                <Button
+                  type="primary"
+                  style={{
+                    marginLeft: 10,
+                  }}
+                  onClick={saveFilter}
+                  disabled={filterSaved ? true : false}
+                >
+                  {filterSaved ? 'Saved' : 'Save'}
+                </Button>
+              </Tooltip>
+              <View style={{ flex: 1 }} />
+            </View>
           )}
         </View>
-        <View
-          style={{
-            width: 1,
-            height: 30,
-            backgroundColor: theme.pillBorderDark,
-            marginRight: 10,
-          }}
-        />{' '}
-        <FilterButton
-          onApply={onApplyFilter}
-          compact={false}
-          hover={false}
-          exclude={['date']}
-        />
-        <View style={{ flex: 1 }} />
-        <Tooltip
-          placement="bottom start"
-          content={<Text>Save compare and filter options</Text>}
-          style={{
-            ...styles.tooltip,
-            lineHeight: 1.5,
-            padding: '6px 10px',
-            marginLeft: 10,
-          }}
-        >
-          <Button
-            type="primary"
-            style={{
-              marginLeft: 10,
-            }}
-            onClick={saveFilter}
-            disabled={filterSaved ? true : false}
-          >
-            {filterSaved ? 'Saved' : 'Save'}
-          </Button>
-        </Tooltip>
       </View>
       <View
         style={{
@@ -265,7 +199,7 @@ export function Spending() {
             <View
               style={{
                 marginBottom: 10,
-                marginLeft: 20,
+                marginLeft: 5,
                 flexShrink: 0,
                 flexDirection: 'row',
                 spacing: 2,
@@ -301,21 +235,26 @@ export function Spending() {
             >
               <View
                 style={{
-                  alignItems: 'center',
-                  flexDirection: 'row',
+                  alignItems: 'flex-end',
+                  paddingTop: 10,
                 }}
               >
-                <View style={{ flex: 1 }} />
                 <View
                   style={{
-                    alignItems: 'flex-end',
-                    color: theme.pageText,
+                    ...styles.mediumText,
+                    fontWeight: 500,
+                    marginBottom: 5,
                   }}
                 >
                   {showPreviousMonth && (
-                    <View>
+                    <View
+                      style={{
+                        ...styles.mediumText,
+                        fontWeight: 500,
+                        marginBottom: 5,
+                      }}
+                    >
                       <AlignedText
-                        style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
                             Spent{' '}
@@ -323,7 +262,7 @@ export function Spending() {
                           </Block>
                         }
                         right={
-                          <Text style={{ fontWeight: 600 }}>
+                          <Text>
                             <PrivacyFilter blurIntensity={5}>
                               {amountToCurrency(
                                 Math.abs(
@@ -339,7 +278,6 @@ export function Spending() {
                         }
                       />
                       <AlignedText
-                        style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
                             Spent{' '}
@@ -350,7 +288,7 @@ export function Spending() {
                           </Block>
                         }
                         right={
-                          <Text style={{ fontWeight: 600 }}>
+                          <Text>
                             <PrivacyFilter blurIntensity={5}>
                               {amountToCurrency(
                                 Math.abs(
@@ -369,14 +307,13 @@ export function Spending() {
                   )}
                   {showAverage && (
                     <AlignedText
-                      style={{ marginBottom: 5, minWidth: 210 }}
                       left={
                         <Block>
                           Spent Average{compare === 'thisMonth' && ' MTD'}:
                         </Block>
                       }
                       right={
-                        <Text style={{ fontWeight: 600 }}>
+                        <Text>
                           <PrivacyFilter blurIntensity={5}>
                             {amountToCurrency(
                               Math.abs(data.intervalData[todayDay].average),
@@ -389,7 +326,7 @@ export function Spending() {
                 </View>
               </View>
               {!showPreviousMonth ? (
-                <View style={{ marginTop: 20 }}>
+                <View style={{ marginTop: 30 }}>
                   <h1>Additional data required to generate graph</h1>
                   <Paragraph>
                     Currently, there is insufficient data to display any
@@ -397,16 +334,85 @@ export function Spending() {
                     transactions from last month to enable graph visualization.
                   </Paragraph>
                 </View>
-              ) : dataCheck ? (
-                <SpendingGraph
-                  style={{ flexGrow: 1 }}
-                  compact={false}
-                  data={data}
-                  mode={mode}
-                  compare={compare}
-                />
               ) : (
-                <LoadingIndicator message="Loading report..." />
+                <>
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      flexDirection: 'row',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        paddingRight: 5,
+                      }}
+                    >
+                      Compare
+                    </Text>
+                    <Select
+                      value={compare}
+                      onChange={e => {
+                        setCompare(e);
+                        if (mode === 'lastMonth') setMode('twoMonthsPrevious');
+                        if (mode === 'twoMonthsPrevious') setMode('lastMonth');
+                      }}
+                      options={[
+                        ['thisMonth', 'this month'],
+                        ['lastMonth', 'last month'],
+                      ]}
+                    />
+                    <Text
+                      style={{
+                        paddingRight: 10,
+                        paddingLeft: 5,
+                      }}
+                    >
+                      to the:
+                    </Text>
+                    <ModeButton
+                      selected={['lastMonth', 'twoMonthsPrevious'].includes(
+                        mode,
+                      )}
+                      onSelect={() =>
+                        setMode(
+                          compare === 'thisMonth'
+                            ? 'lastMonth'
+                            : 'twoMonthsPrevious',
+                        )
+                      }
+                    >
+                      Month previous
+                    </ModeButton>
+                    {showLastYear && (
+                      <ModeButton
+                        selected={mode === 'lastYear'}
+                        onSelect={() => setMode('lastYear')}
+                      >
+                        Last year
+                      </ModeButton>
+                    )}
+                    {showAverage && (
+                      <ModeButton
+                        selected={mode === 'average'}
+                        onSelect={() => setMode('average')}
+                      >
+                        Average
+                      </ModeButton>
+                    )}
+                  </View>
+
+                  {dataCheck ? (
+                    <SpendingGraph
+                      style={{ flexGrow: 1 }}
+                      compact={false}
+                      data={data}
+                      mode={mode}
+                      compare={compare}
+                    />
+                  ) : (
+                    <LoadingIndicator message="Loading report..." />
+                  )}
+                </>
               )}
               {showAverage && (
                 <View style={{ marginTop: 30 }}>

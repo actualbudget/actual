@@ -27,12 +27,10 @@ export function CoverModal({
 }: CoverModalProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
-    const filteredCategoryGroups = originalCategoryGroups.filter(
-      g => !g.is_income,
-    );
-    const expenseGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(filteredCategoryGroups)
-      : filteredCategoryGroups;
+    let expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+    expenseGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(expenseGroups)
+      : expenseGroups;
     const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
   }, [originalCategoryGroups, showToBeBudgeted]);

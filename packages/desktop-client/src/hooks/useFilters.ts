@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useCallback, useMemo, useState } from 'react';
 
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
@@ -7,19 +8,14 @@ export function useFilters<T extends RuleConditionEntity>(
 ) {
   const [conditions, setConditions] = useState<T[]>(initialConditions);
   const [conditionsOp, setConditionsOp] = useState<'and' | 'or'>('and');
-  const [saved, setSaved] = useState<T[] | null>(null);
+  const [saved, setSaved] = useState<T[]>(null);
 
   const onApply = useCallback(
-    (
-      conditionsOrSavedFilter:
-        | null
-        | { conditions: T[]; conditionsOp: 'and' | 'or'; id: T[] | null }
-        | T,
-    ) => {
+    conditionsOrSavedFilter => {
       if (conditionsOrSavedFilter === null) {
         setConditions([]);
         setSaved(null);
-      } else if ('conditions' in conditionsOrSavedFilter) {
+      } else if (conditionsOrSavedFilter.conditions) {
         setConditions([...conditionsOrSavedFilter.conditions]);
         setConditionsOp(conditionsOrSavedFilter.conditionsOp);
         setSaved(conditionsOrSavedFilter.id);
@@ -49,6 +45,13 @@ export function useFilters<T extends RuleConditionEntity>(
     [setConditions],
   );
 
+  const onConditionsOpChange = useCallback(
+    condOp => {
+      setConditionsOp(condOp);
+    },
+    [setConditionsOp],
+  );
+
   return useMemo(
     () => ({
       conditions,
@@ -57,7 +60,7 @@ export function useFilters<T extends RuleConditionEntity>(
       onApply,
       onUpdate,
       onDelete,
-      onConditionsOpChange: setConditionsOp,
+      onConditionsOpChange,
     }),
     [
       conditions,
@@ -65,7 +68,7 @@ export function useFilters<T extends RuleConditionEntity>(
       onApply,
       onUpdate,
       onDelete,
-      setConditionsOp,
+      onConditionsOpChange,
       conditionsOp,
     ],
   );

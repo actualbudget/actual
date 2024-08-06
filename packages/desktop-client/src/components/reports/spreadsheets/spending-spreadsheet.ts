@@ -6,7 +6,11 @@ import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
-import { type RuleConditionEntity } from 'loot-core/src/types/models';
+import {
+  type CategoryEntity,
+  type RuleConditionEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
 import {
   type SpendingMonthEntity,
   type SpendingEntity,
@@ -17,6 +21,7 @@ import { getSpecificRange } from '../reportRanges';
 import { makeQuery } from './makeQuery';
 
 type createSpendingSpreadsheetProps = {
+  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   conditions?: RuleConditionEntity[];
   conditionsOp?: string;
   setDataCheck?: (value: boolean) => void;
@@ -24,6 +29,7 @@ type createSpendingSpreadsheetProps = {
 };
 
 export function createSpendingSpreadsheet({
+  categories,
   conditions = [],
   conditionsOp,
   setDataCheck,
@@ -61,6 +67,7 @@ export function createSpendingSpreadsheet({
           lastYearStartDate,
           endDate,
           interval,
+          categories.list,
           conditionsOpKey,
           filters,
         ),
@@ -71,6 +78,7 @@ export function createSpendingSpreadsheet({
           lastYearStartDate,
           endDate,
           interval,
+          categories.list,
           conditionsOpKey,
           filters,
         ),

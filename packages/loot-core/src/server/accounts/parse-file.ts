@@ -137,7 +137,7 @@ async function parseOFX(
     errors,
     transactions: data.transactions.map(trans => {
       return {
-        amount: trans.amount,
+        amount: Number(trans.amount),
         imported_id: trans.fitId,
         date: trans.date,
         payee_name: trans.name || (useMemoFallback ? trans.memo : null),

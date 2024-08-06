@@ -12,7 +12,6 @@ import { q } from '../shared/query';
 import type { Handlers } from '../types/handlers';
 import type {
   CategoryGroupEntity,
-  NewCategoryGroupEntity,
   NewPayeeEntity,
   NewTransactionEntity,
 } from '../types/models';
@@ -619,7 +618,7 @@ export async function createTestBudget(handlers: Handlers) {
     }),
   );
 
-  const newCategoryGroups: Array<NewCategoryGroupEntity> = [
+  const categoryGroups: Array<CategoryGroupEntity> = [
     {
       name: 'Usual Expenses',
       categories: [
@@ -653,31 +652,19 @@ export async function createTestBudget(handlers: Handlers) {
       ],
     },
   ];
-  const categoryGroups: Array<CategoryGroupEntity> = [];
 
   await runMutator(async () => {
-    for (const group of newCategoryGroups) {
-      const groupId = await handlers['category-group-create']({
+    for (const group of categoryGroups) {
+      group.id = await handlers['category-group-create']({
         name: group.name,
         isIncome: group.is_income,
       });
 
-      categoryGroups.push({
-        ...group,
-        id: groupId,
-        categories: [],
-      });
-
       for (const category of group.categories) {
-        const categoryId = await handlers['category-create']({
+        category.id = await handlers['category-create']({
           ...category,
           isIncome: category.is_income ? 1 : 0,
-          groupId,
-        });
-
-        categoryGroups[categoryGroups.length - 1].categories.push({
-          ...category,
-          id: categoryId,
+          groupId: group.id,
         });
       }
     }
