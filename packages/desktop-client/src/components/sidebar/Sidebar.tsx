@@ -20,7 +20,7 @@ import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
@@ -238,15 +238,15 @@ function EditableBudgetName() {
     <>
       <Button
         ref={triggerRef}
-        type="bare"
-        color={theme.buttonNormalBorder}
+        variant="bare"
         style={{
+          color: theme.buttonNormalBorder,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,
           flex: '0 auto',
         }}
-        onClick={() => setMenuOpen(true)}
+        onPress={() => setMenuOpen(true)}
       >
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           {budgetName || 'A budget has no name'}

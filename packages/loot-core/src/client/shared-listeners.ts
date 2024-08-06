@@ -249,7 +249,7 @@ export function listenForSyncEvent(actions, store) {
           // Show nothing
           break;
         default:
-          console.trace('unkown error', info);
+          console.trace('unknown error', info);
           notif = {
             message: `We had problems syncing your changes. Please report this as a bug by [opening a Github issue](${githubIssueLink}).`,
           };
