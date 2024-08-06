@@ -191,6 +191,18 @@ Open a terminal window and navigate to the folder where you set up Actual. Run t
 fly deploy
 ```
 
+## Cost Optimizations
+
+If you're looking to lower your monthly compute costs for Actual Budget and can accept a 5-15 second delay when starting your budgeting session, you can add this feature to your services section and re-deploy.
+
+```toml
+[[services]]
+  auto_start_machines = true
+  auto_stop_machines = true
+```
+
+With these settings, Fly.io will automatically stop your instance after a few minutes of inactivity. When a new request comes in, the instance will start up again, which may take 5-15 seconds.
+
 ## Frequent Issues
 
 - **Q.** _I have deployed actual to Fly.io but I am being charged, why is this?_
