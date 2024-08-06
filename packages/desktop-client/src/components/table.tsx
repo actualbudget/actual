@@ -927,13 +927,13 @@ type TableProps<T extends TableItem = TableItem> = {
     position: number;
   }) => ReactNode;
   renderEmpty?: ReactNode | (() => ReactNode);
-  getItemKey?: (index: number) => TableItem['id'];
+  getItemKey?: (index: number) => T['id'];
   loadMore?: () => void;
   style?: CSSProperties;
   navigator?: ReturnType<typeof useTableNavigator<T>>;
   listContainerRef?: MutableRefObject<HTMLDivElement>;
   onScroll?: () => void;
-  isSelected?: (id: TableItem['id']) => boolean;
+  isSelected?: (id: T['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
 };
 
