@@ -134,10 +134,10 @@ export function Spending() {
     >
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
+          flexDirection: isNarrowWidth ? 'column' : 'row',
+          alignItems: isNarrowWidth ? 'inherit' : 'center',
           padding: 20,
-          paddingBottom: conditions.length > 0 ? 0 : 10,
+          paddingBottom: 0,
           flexShrink: 0,
         }}
       >
@@ -146,6 +146,8 @@ export function Spending() {
             alignItems: 'center',
             flexDirection: 'row',
             marginRight: 5,
+            marginBottom: 5,
+            marginTop: 5,
           }}
         >
           <Text
@@ -175,6 +177,15 @@ export function Spending() {
           >
             to the:
           </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginRight: 5,
+            marginTop: 5,
+            marginBottom: 5,
+          }}
+        >
           <ModeButton
             selected={['lastMonth', 'twoMonthsPrevious'].includes(mode)}
             style={{
@@ -211,42 +222,56 @@ export function Spending() {
             </ModeButton>
           )}
         </View>
+        {!isNarrowWidth && (
+          <>
+            <View
+              style={{
+                width: 1,
+                height: 30,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+              }}
+            />{' '}
+          </>
+        )}
         <View
           style={{
-            width: 1,
-            height: 30,
-            backgroundColor: theme.pillBorderDark,
-            marginRight: 10,
-          }}
-        />{' '}
-        <FilterButton
-          onApply={onApplyFilter}
-          compact={false}
-          hover={false}
-          exclude={['date']}
-        />
-        <View style={{ flex: 1 }} />
-        <Tooltip
-          placement="bottom start"
-          content={<Text>Save compare and filter options</Text>}
-          style={{
-            ...styles.tooltip,
-            lineHeight: 1.5,
-            padding: '6px 10px',
-            marginLeft: 10,
+            alignItems: 'center',
+            flexDirection: 'row',
+            marginBottom: 5,
+            marginTop: 5,
+            flex: 1,
           }}
         >
-          <Button
-            type="primary"
+          <FilterButton
+            onApply={onApplyFilter}
+            compact={isNarrowWidth}
+            hover={false}
+            exclude={['date']}
+          />
+          <View style={{ flex: 1 }} />
+          <Tooltip
+            placement="bottom start"
+            content={<Text>Save compare and filter options</Text>}
             style={{
+              ...styles.tooltip,
+              lineHeight: 1.5,
+              padding: '6px 10px',
               marginLeft: 10,
             }}
-            onClick={saveFilter}
-            disabled={filterSaved ? true : false}
           >
-            {filterSaved ? 'Saved' : 'Save'}
-          </Button>
-        </Tooltip>
+            <Button
+              type="primary"
+              style={{
+                marginLeft: 10,
+              }}
+              onClick={saveFilter}
+              disabled={filterSaved ? true : false}
+            >
+              {filterSaved ? 'Saved' : 'Save'}
+            </Button>
+          </Tooltip>
+        </View>
       </View>
       <View
         style={{
@@ -269,8 +294,6 @@ export function Spending() {
                 flexShrink: 0,
                 flexDirection: 'row',
                 spacing: 2,
-                justifyContent: 'flex-start',
-                alignContent: 'flex-start',
               }}
             >
               <AppliedFilters
