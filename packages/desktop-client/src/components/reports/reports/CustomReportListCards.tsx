@@ -48,7 +48,7 @@ function calculateHasWarning(
     const isSupportedSingleCondition = ['is', 'isNot'].includes(op);
 
     // Regex and other more complicated operations are not supported
-    if (!isSupportedSingleCondition) {
+    if (!isSupportedSingleCondition && !isMultiCondition) {
       continue;
     }
 
