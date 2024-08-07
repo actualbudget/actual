@@ -95,14 +95,14 @@ export class RulesPage {
       }
 
       if (field) {
-        await row.getByRole('button').first().click();
+        await row.getByTestId('field-select').first().click();
         await this.page
           .getByRole('button', { exact: true, name: field })
           .click();
       }
 
       if (op) {
-        await row.getByRole('button', { name: 'is' }).click();
+        await row.getByTestId('op-select').first().click();
         await this.page.getByRole('button', { name: op, exact: true }).click();
       }
 

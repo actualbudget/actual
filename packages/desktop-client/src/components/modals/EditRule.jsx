@@ -89,7 +89,7 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={style}>
+    <View style={style} data-testid="field-select">
       <Select
         bare
         options={fields}
@@ -135,6 +135,7 @@ export function OpSelect({
       value={value}
       onChange={value => onChange('op', value)}
       buttonStyle={style}
+      data-testid="op-select"
     />
   );
 }
