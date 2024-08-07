@@ -62,6 +62,7 @@ jobs:
           path: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
+            packages/desktop-electron/dist/*.appx
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
       - name: Add to Release
@@ -70,5 +71,6 @@ jobs:
           files: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
+            packages/desktop-electron/dist/*.appx
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
