@@ -10,8 +10,8 @@ import {
   type LinkScheduleRuleActionEntity,
   type RuleActionEntity,
   type SetRuleActionEntity,
-  AppendNoteRuleActionEntity,
-  PrependNoteRuleActionEntity,
+  type AppendNoteRuleActionEntity,
+  type PrependNoteRuleActionEntity,
 } from 'loot-core/src/types/models';
 
 import { type CSSProperties, theme } from '../../style';
@@ -116,18 +116,17 @@ function PrependNoteActionExpression({
 }: PrependNoteRuleActionEntity) {
   return (
     <>
-      <Text>{friendlyOp(op)}</Text> <Value style={valueStyle} value={value} field={'notes'} />
+      <Text>{friendlyOp(op)}</Text>{' '}
+      <Value style={valueStyle} value={value} field="notes" />
     </>
   );
 }
 
-function AppendNoteActionExpression({
-  op,
-  value,
-}: AppendNoteRuleActionEntity) {
+function AppendNoteActionExpression({ op, value }: AppendNoteRuleActionEntity) {
   return (
     <>
-      <Text>{friendlyOp(op)}</Text> <Value style={valueStyle} value={value} field={'notes'} />
+      <Text>{friendlyOp(op)}</Text>{' '}
+      <Value style={valueStyle} value={value} field="notes" />
     </>
   );
 }

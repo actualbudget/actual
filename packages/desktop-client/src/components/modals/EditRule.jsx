@@ -359,7 +359,11 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
     <Editor style={editorStyle} error={error}>
       {op === 'set' ? (
         <>
-          <OpSelect ops={['set', 'prepend-notes', 'append-notes']} value={op} onChange={onChange} />
+          <OpSelect
+            ops={['set', 'prepend-notes', 'append-notes']}
+            value={op}
+            onChange={onChange}
+          />
 
           <FieldSelect
             fields={options?.splitIndex ? splitActionFields : actionFields}
@@ -420,13 +424,17 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
         </>
       ) : op === 'prepend-notes' || op === 'append-notes' ? (
         <>
-          <OpSelect ops={['set', 'prepend-notes', 'append-notes']} value={op} onChange={onChange} />
+          <OpSelect
+            ops={['set', 'prepend-notes', 'append-notes']}
+            value={op}
+            onChange={onChange}
+          />
 
           <View style={{ flex: 1 }}>
             <GenericInput
               key={inputKey}
               field={field}
-              type={'string'}
+              type="string"
               op={op}
               value={value}
               onChange={v => onChange('value', v)}
@@ -1078,7 +1086,12 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
                           {actions.map((action, actionIndex) => (
                             <View key={actionIndex}>
                               <ActionEditor
-                                ops={['set', 'link-schedule', 'prepend-notes', 'append-notes']}
+                                ops={[
+                                  'set',
+                                  'link-schedule',
+                                  'prepend-notes',
+                                  'append-notes',
+                                ]}
                                 action={action}
                                 editorStyle={editorStyle}
                                 onChange={(name, value) => {

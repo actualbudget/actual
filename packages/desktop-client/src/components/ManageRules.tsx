@@ -82,7 +82,7 @@ function ruleToString(rule, data) {
     } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {
       return [
         friendlyOp(action.op),
-        '"' + mapValue(action.field, action.value, data) + '"',
+        '“' + mapValue(action.field, action.value, data) + '”',
       ];
     } else {
       return [];

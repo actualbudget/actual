@@ -440,7 +440,13 @@ export class Condition {
   }
 }
 
-const ACTION_OPS = ['set', 'set-split-amount', 'link-schedule', 'prepend-notes', 'append-notes'] as const;
+const ACTION_OPS = [
+  'set',
+  'set-split-amount',
+  'link-schedule',
+  'prepend-notes',
+  'append-notes',
+] as const;
 type ActionOperator = (typeof ACTION_OPS)[number];
 
 export class Action {
