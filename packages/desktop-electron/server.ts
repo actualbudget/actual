@@ -8,7 +8,7 @@ global.fetch = fetch;
 
 const lazyLoadBackend = async (isDev: boolean) => {
   // eslint-disable-next-line import/extensions
-  const bundle = require('loot-core/lib-dist/bundle.desktop.js'); // "require" is needed due to it being a forked processes - it needs to know the origin
+  const bundle = await import('loot-core/lib-dist/bundle.desktop.js');
   bundle.initApp(isDev);
 };
 
