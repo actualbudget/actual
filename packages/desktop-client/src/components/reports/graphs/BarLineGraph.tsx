@@ -75,9 +75,15 @@ type BarLineGraphProps = {
   style?: CSSProperties;
   data;
   compact?: boolean;
+  showTooltip?: boolean;
 };
 
-export function BarLineGraph({ style, data, compact }: BarLineGraphProps) {
+export function BarLineGraph({
+  style,
+  data,
+  compact,
+  showTooltip = true,
+}: BarLineGraphProps) {
   const tickFormatter = tick => {
     return `${amountToCurrencyNoDecimal(Math.round(tick))}`; // Formats the tick values as strings with commas
   };
@@ -100,11 +106,13 @@ export function BarLineGraph({ style, data, compact }: BarLineGraphProps) {
                 data={data.data}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                <Tooltip
-                  content={<CustomTooltip />}
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
+                {showTooltip && (
+                  <Tooltip
+                    content={<CustomTooltip />}
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                  />
+                )}
                 {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />

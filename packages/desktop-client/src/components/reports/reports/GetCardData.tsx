@@ -9,6 +9,7 @@ import { type PayeeEntity } from 'loot-core/types/models/payee';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type LocalPrefs } from 'loot-core/types/prefs';
 
+import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
 import { Text } from '../../common/Text';
@@ -66,6 +67,7 @@ export function GetCardData({
   categories,
   earliestTransaction,
   firstDayOfWeekIdx,
+  showTooltip,
 }: {
   report: CustomReportEntity;
   payees: PayeeEntity[];
@@ -73,7 +75,10 @@ export function GetCardData({
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   earliestTransaction: string;
   firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
+  showTooltip?: boolean;
 }) {
+  const { isNarrowWidth } = useResponsive();
+
   let startDate = report.startDate;
   let endDate = report.endDate;
 
@@ -170,6 +175,7 @@ export function GetCardData({
         compact={true}
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
+        showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>
   ) : (

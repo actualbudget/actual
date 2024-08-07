@@ -3,7 +3,8 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
 import { Menu } from '../../common/Menu';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
+
+import { useRolloverSheetValue } from './RolloverComponents';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
@@ -22,8 +23,10 @@ export function BalanceMenu({
   onCover,
   ...props
 }: BalanceMenuProps) {
-  const carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
-  const balance = useSheetValue(rolloverBudget.catBalance(categoryId));
+  const carryover = useRolloverSheetValue(
+    rolloverBudget.catCarryover(categoryId),
+  );
+  const balance = useRolloverSheetValue(rolloverBudget.catBalance(categoryId));
   return (
     <Menu
       {...props}
