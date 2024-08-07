@@ -88,12 +88,17 @@ export function Header({
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
+              buttonStyle={{ marginRight: 10 }}
             />
+            {filters && (
+              <FilterButton
+                compact={isNarrowWidth}
+                onApply={onApply}
+                type="accounts"
+              />
+            )}
           </View>
 
-          {!isNarrowWidth && filters && (
-            <FilterButton onApply={onApply} type="accounts" />
-          )}
           <View
             style={{
               flexDirection: 'row',

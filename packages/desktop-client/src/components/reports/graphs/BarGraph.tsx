@@ -159,6 +159,7 @@ type BarGraphProps = {
   viewLabels: boolean;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showTooltip?: boolean;
 };
 
 export function BarGraph({
@@ -171,6 +172,7 @@ export function BarGraph({
   viewLabels,
   showHiddenCategories,
   showOffBudget,
+  showTooltip = true,
 }: BarGraphProps) {
   const navigate = useNavigate();
   const categories = useCategories();
@@ -230,7 +232,7 @@ export function BarGraph({
                   bottom: 0,
                 }}
               >
-                {(!isNarrowWidth || !compact) && (
+                {showTooltip && (
                   <Tooltip
                     cursor={{ fill: 'transparent' }}
                     content={

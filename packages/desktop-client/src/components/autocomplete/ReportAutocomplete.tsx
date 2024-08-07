@@ -14,7 +14,7 @@ export function ReportAutocomplete({
   embedded,
   ...props
 }: ReportAutocompleteProps) {
-  const reports = useReports() || [];
+  const { data: reports } = useReports();
 
   return (
     <Autocomplete

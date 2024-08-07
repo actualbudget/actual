@@ -34,7 +34,7 @@ export function GenericInput({
   onChange,
 }) {
   const { grouped: categoryGroups } = useCategories();
-  const savedReports = useReports();
+  const { data: savedReports } = useReports();
   const saved = useSelector(state => state.queries.saved);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
