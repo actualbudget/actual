@@ -8,9 +8,9 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/rollover/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
+import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type RolloverBudgetSummaryModalProps = {
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
@@ -23,7 +23,7 @@ export function RolloverBudgetSummaryModal({
 }: RolloverBudgetSummaryModalProps) {
   const dispatch = useDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM');
-  const sheetValue = useSheetValue({
+  const sheetValue = useRolloverSheetValue({
     name: rolloverBudget.toBudget,
     value: 0,
   });
