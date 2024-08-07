@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.8.0",
+  "version": "24.8.1",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -24,12 +24,6 @@
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
       "build"
     ],
-    "publish": {
-      "provider": "github",
-      "repo": "actual",
-      "owner": "actualbudget",
-      "vPrefixedTagName": true
-    },
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
