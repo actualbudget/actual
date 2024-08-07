@@ -9,6 +9,7 @@
     "build:api": "cross-env NODE_ENV=development ./bin/build-api",
     "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
     "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
+    "generate:i18n": "i18next",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "jest -c jest.config.js",
     "test:web": "jest -c jest.web.config.js"
@@ -58,6 +59,7 @@
     "cross-env": "^7.0.3",
     "fake-indexeddb": "^3.1.8",
     "fast-check": "3.15.0",
+    "i18next": "^23.11.5",
     "jest": "^27.5.1",
     "jsverify": "^0.8.4",
     "memfs": "3.5.3",

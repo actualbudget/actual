@@ -1,3 +1,5 @@
+import { t } from 'i18next';
+
 // @ts-strict-ignore
 export async function checkForUpdateNotification(
   addNotification,
@@ -18,12 +20,14 @@ export async function checkForUpdateNotification(
 
   addNotification({
     type: 'message',
-    title: 'A new version of Actual is available!',
-    message: `Version ${latestVersion} of Actual was recently released.`,
+    title: t('A new version of Actual is available!'),
+    message: t('Version {{latestVersion}} of Actual was recently released.', {
+      latestVersion,
+    }),
     sticky: true,
     id: 'update-notification',
     button: {
-      title: 'Open changelog',
+      title: t('Open changelog'),
       action: () => {
         window.open('https://actualbudget.org/docs/releases');
       },

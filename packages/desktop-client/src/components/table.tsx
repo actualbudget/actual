@@ -31,7 +31,7 @@ import { type CSSProperties, styles, theme } from '../style';
 
 import { Button } from './common/Button';
 import { Input } from './common/Input';
-import { Menu } from './common/Menu';
+import { Menu, type MenuItem } from './common/Menu';
 import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
@@ -817,7 +817,19 @@ export function TableHeader({
   );
 }
 
-export function SelectedItemsButton({ name, items, onSelect }) {
+type SelectedItemsButtonProps<T extends MenuItem = MenuItem> = {
+  id: string;
+  name: ((count: number) => string) | string;
+  items: Array<T | typeof Menu.line>;
+  onSelect: (name: string, items: Array<string>) => void;
+};
+
+export function SelectedItemsButton<T extends MenuItem = MenuItem>({
+  id,
+  name,
+  items,
+  onSelect,
+}: SelectedItemsButtonProps<T>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(null);
   const triggerRef = useRef(null);
@@ -826,6 +838,9 @@ export function SelectedItemsButton({ name, items, onSelect }) {
     return null;
   }
 
+  const buttonLabel =
+    typeof name === 'function' ? name(selectedItems.size) : name;
+
   return (
     <View style={{ marginLeft: 10, flexShrink: 0 }}>
       <Button
@@ -833,14 +848,14 @@ export function SelectedItemsButton({ name, items, onSelect }) {
         type="bare"
         style={{ color: theme.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
-        data-testid={name + '-select-button'}
+        data-testid={id + '-select-button'}
       >
         <SvgExpandArrow
           width={8}
           height={8}
           style={{ marginRight: 5, color: theme.pageText }}
         />
-        {selectedItems.size} {name}
+        {buttonLabel}
       </Button>
 
       <Popover
@@ -852,7 +867,7 @@ export function SelectedItemsButton({ name, items, onSelect }) {
         }}
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
-        data-testid={name + '-select-tooltip'}
+        data-testid={id + '-select-tooltip'}
       >
         <Menu
           onMenuSelect={name => {
@@ -914,13 +929,13 @@ type TableProps<T extends TableItem = TableItem> = {
     position: number;
   }) => ReactNode;
   renderEmpty?: ReactNode | (() => ReactNode);
-  getItemKey?: (index: number) => TableItem['id'];
+  getItemKey?: (index: number) => T['id'];
   loadMore?: () => void;
   style?: CSSProperties;
   navigator?: ReturnType<typeof useTableNavigator<T>>;
   listContainerRef?: MutableRefObject<HTMLDivElement>;
   onScroll?: () => void;
-  isSelected?: (id: TableItem['id']) => boolean;
+  isSelected?: (id: T['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
 };
 

@@ -6,6 +6,7 @@ import {
   type FallbackProps,
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -41,6 +42,7 @@ type AppInnerProps = {
 };
 
 function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
+  const { t } = useTranslation();
   const [initializing, setInitializing] = useState(true);
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const loadingText = useSelector((state: State) => state.app.loadingText);
@@ -51,7 +53,7 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
 
     dispatch(
       setAppState({
-        loadingText: 'Initializing the connection to the local database...',
+        loadingText: t('Initializing the connection to the local database...'),
       }),
     );
     await initConnection(socketName);
@@ -59,7 +61,7 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
     // Load any global prefs
     dispatch(
       setAppState({
-        loadingText: 'Loading global preferences...',
+        loadingText: t('Loading global preferences...'),
       }),
     );
     await dispatch(loadGlobalPrefs());
@@ -67,18 +69,20 @@ function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
     // Open the last opened budget, if any
     dispatch(
       setAppState({
-        loadingText: 'Opening last budget...',
+        loadingText: t('Opening last budget...'),
       }),
     );
     const budgetId = await send('get-last-opened-backup');
     if (budgetId) {
-      await dispatch(loadBudget(budgetId, 'Loading the last budget file...'));
+      await dispatch(
+        loadBudget(budgetId, t('Loading the last budget file...')),
+      );
 
       // Check to see if this file has been remotely deleted (but
       // don't block on this in case they are offline or something)
       dispatch(
         setAppState({
-          loadingText: 'Retrieving remote files...',
+          loadingText: t('Retrieving remote files...'),
         }),
       );
       send('get-remote-files').then(files => {

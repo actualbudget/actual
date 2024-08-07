@@ -1,6 +1,8 @@
 import React, { useEffect, useReducer } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { getPayeesById } from 'loot-core/client/reducers/queries';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
@@ -735,7 +737,8 @@ export function ScheduleDetails({ id, transaction }) {
                   </Button>
                   <View style={{ flex: 1 }} />
                   <SelectedItemsButton
-                    name="transactions"
+                    id="transactions"
+                    name={count => t('{{count}} transactions', { count })}
                     items={
                       state.transactionsMode === 'linked'
                         ? [{ name: 'unlink', text: 'Unlink from schedule' }]
