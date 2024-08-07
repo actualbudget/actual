@@ -737,6 +737,7 @@ export function ScheduleDetails({ id, transaction }) {
                   </Button>
                   <View style={{ flex: 1 }} />
                   <SelectedItemsButton
+                    id="transactions"
                     name={count => t('{{count}} transactions', { count })}
                     items={
                       state.transactionsMode === 'linked'

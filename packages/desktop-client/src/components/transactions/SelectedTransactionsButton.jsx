@@ -149,6 +149,7 @@ export function SelectedTransactionsButton({
 
   return (
     <SelectedItemsButton
+      id="transactions"
       name={count => t('{{count}} transactions', { count })}
       items={[
         ...(!types.trans
