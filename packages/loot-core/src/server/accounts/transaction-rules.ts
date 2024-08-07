@@ -519,7 +519,7 @@ export async function applyActions(
           );
         } else if (action.op === 'link-schedule') {
           return new Action(action.op, null, action.value, null, FIELD_TYPES);
-        } else if (action.op === 'append-notes') {
+        } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {
           return new Action(action.op, null, action.value, null, FIELD_TYPES);
         }
 

@@ -125,6 +125,7 @@ export type RuleActionEntity =
   | SetRuleActionEntity
   | SetSplitAmountRuleActionEntity
   | LinkScheduleRuleActionEntity
+  | PrependNoteRuleActionEntity
   | AppendNoteRuleActionEntity;
 
 export interface SetRuleActionEntity {
@@ -149,6 +150,11 @@ export interface SetSplitAmountRuleActionEntity {
 export interface LinkScheduleRuleActionEntity {
   op: 'link-schedule';
   value: ScheduleEntity;
+}
+
+export interface PrependNoteRuleActionEntity {
+  op: 'prepend-notes';
+  value: string;
 }
 
 export interface AppendNoteRuleActionEntity {
