@@ -35,7 +35,7 @@
       },
       "target": [
         {
-          "target": "default",
+          "target": "dmg",
           "arch": [
             "universal"
           ]
