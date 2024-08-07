@@ -3,6 +3,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
@@ -16,6 +17,8 @@ import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-wo
 import { useReport } from '../useReport';
 
 export function NetWorthCard({ isEditing, accounts, onRemove }) {
+  const { isNarrowWidth } = useResponsive();
+
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -89,7 +92,7 @@ export function NetWorthCard({ isEditing, accounts, onRemove }) {
             end={end}
             graphData={data.graphData}
             compact={true}
-            showTooltip={!isEditing}
+            showTooltip={!isEditing && !isNarrowWidth}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (

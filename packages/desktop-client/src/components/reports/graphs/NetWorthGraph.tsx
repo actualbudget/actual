@@ -15,7 +15,6 @@ import {
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -36,7 +35,6 @@ export function NetWorthGraph({
   showTooltip = true,
 }: NetWorthGraphProps) {
   const privacyMode = usePrivacyMode();
-  const { isNarrowWidth } = useResponsive();
 
   const tickFormatter = tick => {
     const res = privacyMode
@@ -153,7 +151,7 @@ export function NetWorthGraph({
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
                 />
-                {showTooltip && (!isNarrowWidth || !compact) && (
+                {showTooltip && (
                   <Tooltip
                     content={<CustomTooltip />}
                     formatter={numberFormatterTooltip}
