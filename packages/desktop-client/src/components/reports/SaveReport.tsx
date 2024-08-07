@@ -34,7 +34,7 @@ export function SaveReport({
   savedStatus,
   onReportChange,
 }: SaveReportProps) {
-  const listReports = useReports();
+  const { data: listReports } = useReports();
   const triggerRef = useRef(null);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
