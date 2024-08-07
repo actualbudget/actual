@@ -440,7 +440,7 @@ export class Condition {
   }
 }
 
-const ACTION_OPS = ['set', 'set-split-amount', 'link-schedule'] as const;
+const ACTION_OPS = ['set', 'set-split-amount', 'link-schedule', 'append-notes'] as const;
 type ActionOperator = (typeof ACTION_OPS)[number];
 
 export class Action {
@@ -469,6 +469,9 @@ export class Action {
     } else if (op === 'link-schedule') {
       this.field = null;
       this.type = 'id';
+    } else if (op === 'append-notes') {
+      this.field = 'notes';
+      this.type = 'id';
     }
 
     if (field === 'account') {
@@ -496,6 +499,9 @@ export class Action {
         break;
       case 'link-schedule':
         object.schedule = this.value;
+        break;
+      case 'append-notes':
+        object[this.field] = object[this.field] + this.value;
         break;
       default:
     }

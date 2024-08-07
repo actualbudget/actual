@@ -124,7 +124,8 @@ export type RuleConditionEntity =
 export type RuleActionEntity =
   | SetRuleActionEntity
   | SetSplitAmountRuleActionEntity
-  | LinkScheduleRuleActionEntity;
+  | LinkScheduleRuleActionEntity
+  | AppendNoteRuleActionEntity;
 
 export interface SetRuleActionEntity {
   field: string;
@@ -148,4 +149,9 @@ export interface SetSplitAmountRuleActionEntity {
 export interface LinkScheduleRuleActionEntity {
   op: 'link-schedule';
   value: ScheduleEntity;
+}
+
+export interface AppendNoteRuleActionEntity {
+  op: 'append-notes';
+  value: string;
 }

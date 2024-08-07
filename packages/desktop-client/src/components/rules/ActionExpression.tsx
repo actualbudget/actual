@@ -10,6 +10,7 @@ import {
   type LinkScheduleRuleActionEntity,
   type RuleActionEntity,
   type SetRuleActionEntity,
+  AppendNoteRuleActionEntity,
 } from 'loot-core/src/types/models';
 
 import { type CSSProperties, theme } from '../../style';
@@ -49,6 +50,8 @@ export function ActionExpression({ style, ...props }: ActionExpressionProps) {
         <SetSplitAmountActionExpression {...props} />
       ) : props.op === 'link-schedule' ? (
         <LinkScheduleActionExpression {...props} />
+      ) : props.op === 'append-notes' ? (
+        <AppendNoteActionExpression {...props} />
       ) : null}
     </View>
   );
@@ -100,6 +103,17 @@ function LinkScheduleActionExpression({
   return (
     <>
       <Text>{friendlyOp(op)}</Text> <ScheduleValue value={value} />
+    </>
+  );
+}
+
+function AppendNoteActionExpression({
+  op,
+  value,
+}: AppendNoteRuleActionEntity) {
+  return (
+    <>
+      <Text>{friendlyOp(op)}</Text> <Value style={valueStyle} value={value} field={'notes'} />
     </>
   );
 }

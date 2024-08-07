@@ -217,6 +217,7 @@ function ConditionEditor({
   condition,
   editorStyle,
   isSchedule,
+  isAppendNote,
   onChange,
   onDelete,
   onAdd,
@@ -357,13 +358,9 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
 
   return (
     <Editor style={editorStyle} error={error}>
-      {/*<OpSelect ops={ops} value={op} onChange={onChange} />*/}
-
       {op === 'set' ? (
         <>
-          <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
-            {friendlyOp(op)}
-          </View>
+          <OpSelect ops={['set', 'append-notes']} value={op} onChange={onChange} />
 
           <FieldSelect
             fields={options?.splitIndex ? splitActionFields : actionFields}
@@ -421,6 +418,21 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             {friendlyOp(op)}
           </View>
           <ScheduleDescription id={value || null} />
+        </>
+      ) : op === 'append-notes' ? (
+        <>
+          <OpSelect ops={['set', 'append-notes']} value={op} onChange={onChange} />
+
+          <View style={{ flex: 1 }}>
+            <GenericInput
+              key={inputKey}
+              field={field}
+              type={'string'}
+              op={op}
+              value={value}
+              onChange={v => onChange('value', v)}
+            />
+          </View>
         </>
       ) : null}
 
@@ -487,6 +499,7 @@ function ConditionsList({
   conditions,
   editorStyle,
   isSchedule,
+  isAppendNote,
   onChangeConditions,
 }) {
   function addCondition(index) {
@@ -637,6 +650,7 @@ function ConditionsList({
               ops={ops}
               condition={cond}
               isSchedule={isSchedule}
+              isAppendNote={isAppendNote}
               onChange={(name, value) => {
                 updateCondition(cond, name, value);
               }}
@@ -696,6 +710,9 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
 
   const isSchedule = getActions(actionSplits).some(
     action => action.op === 'link-schedule',
+  );
+  const isAppendNote = getActions(actionSplits).some(
+    action => action.op === 'append-notes',
   );
 
   useEffect(() => {
@@ -995,6 +1012,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
                     conditions={conditions}
                     editorStyle={editorStyle}
                     isSchedule={isSchedule}
+                    isAppendNote={isAppendNote}
                     onChangeConditions={conds => setConditions(conds)}
                   />
                 </View>
@@ -1067,7 +1085,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
                           {actions.map((action, actionIndex) => (
                             <View key={actionIndex}>
                               <ActionEditor
-                                ops={['set', 'link-schedule']}
+                                ops={['set', 'link-schedule', 'append-notes']}
                                 action={action}
                                 editorStyle={editorStyle}
                                 onChange={(name, value) => {
