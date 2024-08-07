@@ -818,12 +818,14 @@ export function TableHeader({
 }
 
 type SelectedItemsButtonProps<T extends MenuItem = MenuItem> = {
+  id: string;
   name: ((count: number) => string) | string;
   items: Array<T | typeof Menu.line>;
   onSelect: (name: string, items: Array<string>) => void;
 };
 
 export function SelectedItemsButton<T extends MenuItem = MenuItem>({
+  id,
   name,
   items,
   onSelect,
@@ -846,7 +848,7 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
         type="bare"
         style={{ color: theme.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
-        data-testid={name + '-select-button'}
+        data-testid={id + '-select-button'}
       >
         <SvgExpandArrow
           width={8}
@@ -865,7 +867,7 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
         }}
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
-        data-testid={name + '-select-tooltip'}
+        data-testid={id + '-select-tooltip'}
       >
         <Menu
           onMenuSelect={name => {
