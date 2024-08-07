@@ -10,6 +10,7 @@ import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
 import { BudgetMenu } from '../budget/rollover/BudgetMenu';
+import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
 import {
   Modal,
   ModalCloseButton,
@@ -19,7 +20,6 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type RolloverBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof BudgetMenu
@@ -42,7 +42,9 @@ export function RolloverBudgetMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
-  const budgeted = useSheetValue(rolloverBudget.catBudgeted(categoryId));
+  const budgeted = useRolloverSheetValue(
+    rolloverBudget.catBudgeted(categoryId),
+  );
   const category = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
 

@@ -16,8 +16,8 @@ export class AccountPage {
     this.cancelTransactionButton = this.page.getByRole('button', {
       name: 'Cancel',
     });
-    this.menuButton = this.page.getByRole('button', {
-      name: 'Menu',
+    this.accountMenuButton = this.page.getByRole('button', {
+      name: 'Account menu',
     });
 
     this.transactionTable = this.page.getByTestId('transaction-table');
@@ -103,7 +103,7 @@ export class AccountPage {
    * Open the modal for closing the account.
    */
   async clickCloseAccount() {
-    await this.menuButton.click();
+    await this.accountMenuButton.click();
     await this.page.getByRole('button', { name: 'Close Account' }).click();
     return new CloseAccountModal(
       this.page.getByTestId('close-account-modal'),

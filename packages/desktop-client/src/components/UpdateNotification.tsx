@@ -7,7 +7,7 @@ import { useActions } from '../hooks/useActions';
 import { SvgClose } from '../icons/v1';
 import { theme } from '../style';
 
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { Text } from './common/Text';
 import { View } from './common/View';
@@ -72,10 +72,10 @@ export function UpdateNotification() {
               </Link>
               )
               <Button
-                type="bare"
+                variant="bare"
                 aria-label="Close"
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
-                onClick={() => {
+                onPress={() => {
                   // Set a flag to never show an update notification again for this session
                   setAppState({
                     updateInfo: null,

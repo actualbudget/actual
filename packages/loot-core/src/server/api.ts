@@ -406,6 +406,27 @@ handlers['api/budget-set-carryover'] = withMutation(async function ({
   });
 });
 
+handlers['api/budget-hold-for-next-month'] = withMutation(async function ({
+  month,
+  amount,
+}) {
+  checkFileOpen();
+  await validateMonth(month);
+  if (amount <= 0) {
+    throw APIError('Amount to hold needs to be greater than 0');
+  }
+  return handlers['budget/hold-for-next-month']({
+    month,
+    amount,
+  });
+});
+
+handlers['api/budget-reset-hold'] = withMutation(async function ({ month }) {
+  checkFileOpen();
+  await validateMonth(month);
+  return handlers['budget/reset-hold']({ month });
+});
+
 handlers['api/transactions-export'] = async function ({
   transactions,
   categoryGroups,
