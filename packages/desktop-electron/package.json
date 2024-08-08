@@ -72,6 +72,7 @@
     "electron-log": "4.4.8",
     "loot-core": "*",
     "node-fetch": "^2.7.0",
+    "node-gyp": "^10.2.0",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
