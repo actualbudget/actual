@@ -132,6 +132,7 @@ export async function exportBuffer() {
   // sure that we get a valid snapshot of it so we want this to be
   // serialized with all other mutations.
   await runMutator(async () => {
+    console.info('database file is at', fs.join(budgetDir, 'db.sqlite'));
     const rawDbContent = await fs.readFile(
       fs.join(budgetDir, 'db.sqlite'),
       'binary',
@@ -140,7 +141,12 @@ export async function exportBuffer() {
     // Do some post-processing of the database. We NEVER upload the cache with
     // the database; this forces new downloads to always recompute everything
     // which is not only safer, but reduces the filesize a lot.
+    console.info(
+      'Apparently we have a buffer, about to open the database',
+      rawDbContent.length,
+    );
     const memDb = await sqlite.openDatabase(rawDbContent);
+    console.info('opened the database');
     sqlite.execQuery(
       memDb,
       `
