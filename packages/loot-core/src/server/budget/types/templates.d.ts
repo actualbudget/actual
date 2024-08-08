@@ -65,10 +65,11 @@ interface GoalTemplate extends BaseTemplate {
 
 interface ErrorTemplate extends BaseTemplate {
   type: 'error';
+  line: string;
   error: string;
 }
 
-type Template =
+export type Template =
   | PercentageTemplate
   | WeekTemplate
   | ByTemplate

@@ -1,112 +1,157 @@
+import * as db from '../db';
+import { Schedule, TemplateNote } from '../db/types';
+
 import {
-  getActiveCategories,
   getActiveSchedules,
   getTemplateNotesForCategories,
-  getTemplateNotesForCategory,
+  resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
-import {
-  checkTemplateNotes,
-  getCategoriesWithTemplates,
-} from './template-notes';
+import { checkTemplates, storeTemplates } from './template-notes';
 
 jest.mock('../db');
 jest.mock('./statements');
 
-describe('getCategoriesWithTemplates', () => {
+function mockGetTemplateNotesForCategories(templateNotes: TemplateNote[]) {
+  (getTemplateNotesForCategories as jest.Mock).mockResolvedValue(templateNotes);
+}
+
+function mockGetActiveSchedules(schedules: Schedule[]) {
+  (getActiveSchedules as jest.Mock).mockResolvedValue(schedules);
+}
+
+function mockDbUpdate() {
+  (db.update as jest.Mock).mockResolvedValue(undefined);
+}
+
+describe('storeTemplates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   const testCases = [
     {
-      description: 'Returns categories with parsed templates',
+      description: 'Stores templates for categories',
       mockTemplateNotes: [
-        { category_id: 'category 1', note: '#template 10' },
-        { category_id: 'category 2', note: '#template up to 100' },
-      ],
-      expected: [
-        {
-          category_id: 'category 1',
-          templates: [
-            {
-              directive: 'template',
-              limit: null,
-              monthly: 10,
-              priority: 0,
-              type: 'simple',
-            },
-          ],
-        },
-        {
-          category_id: 'category 2',
-          templates: [
-            {
-              directive: 'template',
-              limit: {
-                amount: 100,
-                hold: false,
-              },
-              priority: 0,
-              type: 'simple',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      description: 'Handles parsing errors gracefully',
-      mockTemplateNotes: [{ category_id: 'cat1', note: 'template1\ninvalid' }],
-      expected: [{ category_id: 'cat1', templates: [] }],
-    },
-    {
-      description: 'Handles empty notes',
-      mockTemplateNotes: [{ category_id: 'cat1', note: '' }],
-      expected: [{ category_id: 'cat1', templates: [] }],
-    },
-    {
-      description: 'Handles non template notes',
-      mockTemplateNotes: [{ category_id: 'cat1', note: 'test note' }],
-      expected: [{ category_id: 'cat1', templates: [] }],
-    },
-    {
-      description: 'Handles multiple lines in notes',
-      mockTemplateNotes: [
-        { category_id: 'cat1', note: '#template 100\n #template 200' },
-      ],
-      expected: [
         {
           category_id: 'cat1',
-          templates: [
-            {
-              directive: 'template',
-              limit: null,
-              monthly: 100,
-              priority: 0,
-              type: 'simple',
-            },
-            {
-              directive: 'template',
-              limit: null,
-              monthly: 200,
-              priority: 0,
-              type: 'simple',
-            },
-          ],
+          note: '#template 10',
         },
       ],
+      expectedTemplates: [
+        {
+          type: 'simple',
+          monthly: 10,
+          limit: null,
+          priority: 0,
+          directive: 'template',
+        },
+      ],
+    },
+    {
+      description: 'Handles empty template notes',
+      mockTemplateNotes: [{ category_id: 'cat1', note: '' }],
+      expectedTemplates: [],
+    },
+    {
+      description: 'Handles null template notes',
+      mockTemplateNotes: [{ category_id: 'cat1', note: null }],
+      expectedTemplates: [],
     },
   ];
 
   it.each(testCases)(
     '$description',
-    async ({ mockTemplateNotes, expected }) => {
+    async ({ mockTemplateNotes, expectedTemplates }) => {
       // Given
-      (getTemplateNotesForCategories as jest.Mock).mockResolvedValue(
-        mockTemplateNotes,
-      );
+      mockGetTemplateNotesForCategories(mockTemplateNotes);
+      mockDbUpdate();
 
       // When
-      const result = await getCategoriesWithTemplates();
+      await storeTemplates();
+
+      // Then
+      if (expectedTemplates.length === 0) {
+        expect(db.update).not.toHaveBeenCalled();
+        expect(resetCategoryGoalDefsWithNoTemplates).toHaveBeenCalled();
+        return;
+      }
+
+      mockTemplateNotes.forEach(({ category_id }) => {
+        expect(db.update).toHaveBeenCalledWith('categories', {
+          id: category_id,
+          goal_def: JSON.stringify(expectedTemplates),
+        });
+      });
+      expect(resetCategoryGoalDefsWithNoTemplates).toHaveBeenCalled();
+    },
+  );
+});
+
+describe('checkTemplates', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const testCases = [
+    {
+      description: 'Returns message when all templates pass',
+      mockTemplateNotes: [
+        {
+          category_id: 'cat1',
+          note: '#template 10',
+        },
+        {
+          category_id: 'cat1',
+          note: '#template schedule Mock Schedule 1',
+        },
+      ],
+      mockSchedules: mockSchedules(),
+      expected: {
+        type: 'message',
+        message: 'All templates passed! 🎉',
+      },
+    },
+    {
+      description: 'Returns errors for templates with parsing errors',
+      mockTemplateNotes: [
+        {
+          category_id: 'cat1',
+          note: '#template broken template',
+        },
+      ],
+      mockSchedules: mockSchedules(),
+      expected: {
+        sticky: true,
+        message: 'There were errors interpreting some templates:',
+        pre: 'cat1: #template broken template',
+      },
+    },
+    {
+      description: 'Returns errors for non-existent schedules',
+      mockTemplateNotes: [
+        {
+          category_id: 'cat1',
+          note: '#template schedule Non-existent Schedule',
+        },
+      ],
+      mockSchedules: mockSchedules(),
+      expected: {
+        sticky: true,
+        message: 'There were errors interpreting some templates:',
+        pre: 'cat1: Schedule “Non-existent Schedule” does not exist',
+      },
+    },
+  ];
+
+  it.each(testCases)(
+    '$description',
+    async ({ mockTemplateNotes, mockSchedules, expected }) => {
+      // Given
+      mockGetTemplateNotesForCategories(mockTemplateNotes);
+      mockGetActiveSchedules(mockSchedules);
+
+      // When
+      const result = await checkTemplates();
 
       // Then
       expect(result).toEqual(expected);
@@ -114,101 +159,25 @@ describe('getCategoriesWithTemplates', () => {
   );
 });
 
-describe('checkTemplateNotes', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('Returns message when all templates pass', async () => {
-    // Given
-    (getActiveCategories as jest.Mock).mockResolvedValue([
-      { id: 'cat1', name: 'Category 1' },
-    ]);
-    (getActiveSchedules as jest.Mock).mockResolvedValue([createMockSchedule()]);
-    (getTemplateNotesForCategory as jest.Mock).mockResolvedValue([
-      { type: 'schedule', name: 'Schedule 1' },
-    ]);
-
-    // When
-    const result = await checkTemplateNotes();
-
-    // Then
-    expect(result).toEqual({
-      type: 'message',
-      message: 'All templates passed! 🎉',
-    });
-  });
-
-  it('Returns errors for templates with parsing errors', async () => {
-    // Given
-    (getActiveCategories as jest.Mock).mockResolvedValue([
-      { id: 'cat1', name: 'Category 1' },
-    ]);
-    (getActiveSchedules as jest.Mock).mockResolvedValue([createMockSchedule()]);
-    (getTemplateNotesForCategory as jest.Mock).mockResolvedValue([
-      { type: 'error', line: 'Invalid template' },
-    ]);
-
-    // When
-    const result = await checkTemplateNotes();
-
-    // Then
-    expect(result).toEqual({
-      sticky: true,
-      message: 'There were errors interpreting some templates:',
-      pre: 'Category 1: Invalid template',
-    });
-  });
-
-  it('Returns errors for non-existent schedules', async () => {
-    // Given
-    (getActiveCategories as jest.Mock).mockResolvedValue([
-      { id: 'cat1', name: 'Category 1' },
-    ]);
-    (getActiveSchedules as jest.Mock).mockResolvedValue([createMockSchedule()]);
-    (getTemplateNotesForCategory as jest.Mock).mockResolvedValue([
-      { type: 'schedule', name: 'Non-existent Schedule' },
-    ]);
-
-    // When
-    const result = await checkTemplateNotes();
-
-    // Then
-    expect(result).toEqual({
-      sticky: true,
-      message: 'There were errors interpreting some templates:',
-      pre: 'Category 1: Schedule “Non-existent Schedule” does not exist',
-    });
-  });
-
-  it('Handles multiple categories and notes', async () => {
-    (getActiveCategories as jest.Mock).mockResolvedValue([
-      { id: 'cat1', name: 'Category 1' },
-      { id: 'cat2', name: 'Category 2' },
-    ]);
-    (getActiveSchedules as jest.Mock).mockResolvedValue([createMockSchedule()]);
-    (getTemplateNotesForCategory as jest.Mock)
-      .mockResolvedValueOnce([{ type: 'schedule', name: 'Schedule 1' }])
-      .mockResolvedValueOnce([{ type: 'error', line: 'Invalid template' }]);
-
-    const result = await checkTemplateNotes();
-
-    expect(result).toEqual({
-      sticky: true,
-      message: 'There were errors interpreting some templates:',
-      pre: 'Category 2: Invalid template',
-    });
-  });
-});
-
-function createMockSchedule(name = 'Schedule 1'): Schedule {
-  return {
-    id: 'schedule1',
-    rule: 'rule string',
-    active: 1,
-    completed: 0,
-    posts_transaction: 0,
-    tombstone: 0,
-    name,
-  };
+function mockSchedules(): Schedule[] {
+  return [
+    {
+      id: 'mock-schedule-1',
+      rule: 'mock-rule',
+      active: 1,
+      completed: 0,
+      posts_transaction: 0,
+      tombstone: 0,
+      name: 'Mock Schedule 1',
+    },
+    {
+      id: 'mock-schedule-2',
+      rule: 'mock-rule',
+      active: 1,
+      completed: 0,
+      posts_transaction: 0,
+      tombstone: 0,
+      name: 'Mock Schedule 2',
+    },
+  ];
 }

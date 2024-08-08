@@ -14,7 +14,7 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
-import { checkTemplateNotes, storeTemplates } from './template-notes';
+import { checkTemplates, storeTemplates } from './template-notes';
 
 const TEMPLATE_PREFIX = '#template';
 
@@ -54,7 +54,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
 }
 
 export function runCheckTemplates() {
-  return checkTemplateNotes();
+  return checkTemplates();
 }
 
 async function getCategories() {
