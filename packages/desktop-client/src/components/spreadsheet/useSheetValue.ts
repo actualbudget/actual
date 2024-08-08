@@ -6,7 +6,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { useSheetName } from './useSheetName';
 
 import {
-  type SpreadsheetFieldTypes,
+  type Spreadsheets,
   type SheetFields,
   type SheetNames,
   type Binding,
@@ -18,7 +18,7 @@ export function useSheetValue<
 >(
   binding: Binding<SheetName, FieldName>,
   onChange?: (result) => void,
-): SpreadsheetFieldTypes[SheetName][FieldName] {
+): Spreadsheets[SheetName][FieldName] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
   const bindingObj =
