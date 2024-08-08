@@ -64,7 +64,8 @@
       "icon": "icons/icon.ico",
       "artifactName": "${productName}-windows.${ext}"
     },
-    "npmRebuild": true
+    "npmRebuild": true,
+    "nodeGypRebuild": true
   },
   "dependencies": {
     "electron-is-dev": "2.0.0",
