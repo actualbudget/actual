@@ -28,6 +28,7 @@ import {
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { useSyncedBudgetPref } from '../../../hooks/useSyncedBudgetPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';
@@ -49,7 +50,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
-    useLocalPref('budget.startMonth');
+    useSyncedBudgetPref('budget.startMonth');
   const [bounds, setBounds] = useState({
     start: startMonth,
     end: startMonth,

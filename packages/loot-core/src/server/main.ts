@@ -49,6 +49,7 @@ import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
+import { app as preferencesApp } from './preferences/app';
 import * as prefs from './prefs';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
@@ -2056,6 +2057,7 @@ app.combine(
   schedulesApp,
   budgetApp,
   notesApp,
+  preferencesApp,
   toolsApp,
   filtersApp,
   reportsApp,

@@ -24,6 +24,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useSyncedBudgetPref } from '../../hooks/useSyncedBudgetPref';
 import { styles } from '../../style';
 import { View } from '../common/View';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
@@ -69,7 +70,8 @@ function BudgetInner(props: BudgetInnerProps) {
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
-  const [startMonthPref, setStartMonthPref] = useLocalPref('budget.startMonth');
+  const [startMonthPref, setStartMonthPref] =
+    useSyncedBudgetPref('budget.startMonth');
   const startMonth = startMonthPref || currentMonth;
   const [bounds, setBounds] = useState({
     start: startMonth,
