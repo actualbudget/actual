@@ -24,12 +24,6 @@
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
       "build"
     ],
-    "publish": {
-      "provider": "github",
-      "repo": "actual",
-      "owner": "actualbudget",
-      "vPrefixedTagName": true
-    },
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
@@ -43,8 +37,7 @@
         {
           "target": "dmg",
           "arch": [
-            "x64",
-            "arm64"
+            "universal"
           ]
         }
       ]
@@ -65,9 +58,10 @@
       "icon": "icons/icon.ico",
       "artifactName": "${productName}-windows.${ext}"
     },
-    "npmRebuild": true
+    "npmRebuild": false
   },
   "dependencies": {
+    "better-sqlite3": "file:../../node_modules/better-sqlite3",
     "electron-is-dev": "2.0.0",
     "electron-log": "4.4.8",
     "loot-core": "*",
