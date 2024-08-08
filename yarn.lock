@@ -6829,16 +6829,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@file:../../node_modules/better-sqlite3::locator=desktop-electron%40workspace%3Apackages%2Fdesktop-electron":
-  version: 9.6.0
-  resolution: "better-sqlite3@file:../../node_modules/better-sqlite3#../../node_modules/better-sqlite3::hash=638879&locator=desktop-electron%40workspace%3Apackages%2Fdesktop-electron"
-  dependencies:
-    bindings: "npm:^1.5.0"
-    prebuild-install: "npm:^7.1.1"
-  checksum: 10/82e100c2f9b939bd9f651b3f9b590c0bf3b3cd8afb8e6ca90baa0b37d33134b7f8db949d46f9fe1b08043311b8d44929094a20955ecb3a4a4df171516ebe4e78
-  languageName: node
-  linkType: hard
-
 "better-sqlite3@npm:^9.6.0":
   version: 9.6.0
   resolution: "better-sqlite3@npm:9.6.0"
@@ -8428,7 +8418,6 @@ __metadata:
   dependencies:
     "@electron/notarize": "npm:2.2.0"
     "@types/copyfiles": "npm:^2"
-    better-sqlite3: "file:../../node_modules/better-sqlite3"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     electron: "npm:30.0.6"

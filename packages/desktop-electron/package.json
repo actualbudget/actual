@@ -61,7 +61,6 @@
     "npmRebuild": false
   },
   "dependencies": {
-    "better-sqlite3": "file:../../node_modules/better-sqlite3",
     "electron-is-dev": "2.0.0",
     "electron-log": "4.4.8",
     "loot-core": "*",
