@@ -60,8 +60,20 @@ function createBackgroundProcess() {
   serverProcess = utilityProcess.fork(
     __dirname + '/server.js',
     ['--subprocess', app.getVersion()],
-    isDev ? { execArgv: ['--inspect'] } : undefined,
+    isDev ? { execArgv: ['--inspect'], stdio: 'pipe' } : { stdio: 'pipe' },
   );
+
+  serverProcess.stdout.on('data', (chunk: Buffer) => {
+    // Send the Server console.log messages to the main browser window
+    clientWin?.webContents.executeJavaScript(`
+      console.info('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+  });
+
+  serverProcess.stderr.on('data', (chunk: Buffer) => {
+    // Send the Server console.error messages out to the main browser window
+    clientWin?.webContents.executeJavaScript(`
+      console.error('Server Log:', ${JSON.stringify(chunk.toString('utf8'))})`);
+  });
 
   serverProcess.on('message', msg => {
     switch (msg.type) {
@@ -73,6 +85,14 @@ function createBackgroundProcess() {
       case 'push':
         if (clientWin) {
           clientWin.webContents.send('message', msg);
+        }
+        break;
+      case 'log':
+        if (clientWin) {
+          console.log('msg', msg.log);
+          clientWin.webContents.executeJavaScript(
+            `console.log('Electron error log: ${msg.log}')`,
+          );
         }
         break;
       default:
