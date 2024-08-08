@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "yarn start:browser",
-    "start:desktop": "yarn rebuild-electron && npm-run-all --parallel 'start:desktop-*'",
+    "start:desktop": "npm-run-all --parallel 'start:desktop-*'",
     "start:desktop-node": "yarn workspace loot-core watch:node",
     "start:desktop-client": "yarn workspace @actual-app/web watch",
     "start:desktop-electron": "yarn workspace desktop-electron watch",
@@ -35,13 +35,12 @@
     "e2e": "yarn workspaces foreach --all --parallel --verbose run e2e",
     "vrt": "yarn workspaces foreach --all --parallel --verbose run vrt",
     "vrt:docker": "./bin/run-vrt",
-    "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
     "lint": "eslint . --max-warnings 0 --ext .js,.jsx,.ts,.tsx",
     "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
     "typecheck": "yarn tsc && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
-    "prepare": "husky"
+    "prepare": "husky",
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

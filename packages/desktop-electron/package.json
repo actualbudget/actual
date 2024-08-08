@@ -10,7 +10,8 @@
     "build": "yarn build:dist && electron-builder",
     "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-html",
     "copy-static-html": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build",
-    "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
+    "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
+    "postinstall": "electron-builder install-app-deps"
   },
   "main": "build/index.js",
   "build": {
@@ -65,7 +66,7 @@
       "artifactName": "${productName}-windows.${ext}"
     },
     "nodeGypRebuild": true,
-    "npmrebuild": true
+    "npmRebuild": true
   },
   "dependencies": {
     "electron-is-dev": "2.0.0",
@@ -76,7 +77,6 @@
   },
   "devDependencies": {
     "@electron/notarize": "2.2.0",
-    "@electron/rebuild": "3.6.0",
     "@types/copyfiles": "^2",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
