@@ -14,14 +14,9 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
-import {
-  checkTemplateNotes,
-  getCategoriesWithTemplates,
-  storeTemplates,
-} from './template-notes';
+import { checkTemplateNotes, storeTemplates } from './template-notes';
 
 const TEMPLATE_PREFIX = '#template';
-const GOAL_PREFIX = '#goal';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
@@ -420,9 +415,6 @@ async function processGoals(goals, month, category?) {
       });
     }
   }
-}
-async function getCategoryTemplates(category) {
-  return await getCategoriesWithTemplates();
 }
 
 async function applyCategoryTemplate(

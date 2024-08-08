@@ -22,8 +22,8 @@ export async function getTemplateNotesForCategories(): Promise[TemplateNote[]] {
       SELECT n.id AS category_id, n.note AS note
       FROM notes n
       WHERE n.id IN (SELECT id FROM categories)
-        AND (lower(note) like '%${TEMPLATE_PREFIX}%'
-        OR lower(note) like '%${GOAL_PREFIX}%')
+        AND (lower(note) LIKE '%${TEMPLATE_PREFIX}%'
+        OR lower(note) LIKE '%${GOAL_PREFIX}%')
     `,
   );
 }
@@ -36,8 +36,8 @@ export async function getTemplateNotesForCategory(
       SELECT id, note
       FROM notes
       WHERE id IN (SELECT id FROM categories WHERE categories.id = ?)
-        AND lower(note) like '%${TEMPLATE_PREFIX}%'
-         OR lower(note) like '%${GOAL_PREFIX}%'
+        AND lower(note) LIKE '%${TEMPLATE_PREFIX}%'
+         OR lower(note) LIKE '%${GOAL_PREFIX}%'
     `,
     [categoryId],
   );
