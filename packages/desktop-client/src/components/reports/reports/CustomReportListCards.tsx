@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { addNotification } from 'loot-core/src/client/actions';
+import { calculateHasWarning } from 'loot-core/src/client/reports';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
@@ -25,74 +26,6 @@ import { ReportCard } from '../ReportCard';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
-
-function calculateHasWarning(
-  report: CustomReportEntity,
-  {
-    categoryIds,
-    accountIds,
-    payeeIds,
-  }: {
-    categoryIds: Set<string>;
-    accountIds: Set<string>;
-    payeeIds: Set<string>;
-  },
-) {
-  if (!report.conditions) {
-    return false;
-  }
-
-  for (const cond of report.conditions) {
-    const { field, value, op } = cond;
-    const isMultiCondition = Array.isArray(value);
-    const isSupportedSingleCondition = ['is', 'isNot'].includes(op);
-
-    // Regex and other more complicated operations are not supported
-    if (!isSupportedSingleCondition && !isMultiCondition) {
-      continue;
-    }
-
-    switch (field) {
-      case 'account':
-        if (isMultiCondition) {
-          if (value.find(val => !accountIds.has(val))) {
-            return true;
-          }
-          break;
-        }
-
-        if (!accountIds.has(value)) {
-          return true;
-        }
-        break;
-      case 'payee':
-        if (isMultiCondition) {
-          if (value.find(val => !payeeIds.has(val))) {
-            return true;
-          }
-          break;
-        }
-
-        if (!payeeIds.has(value)) {
-          return true;
-        }
-        break;
-      case 'category':
-        if (isMultiCondition) {
-          if (value.find(val => !categoryIds.has(val))) {
-            return true;
-          }
-          break;
-        }
-
-        if (!categoryIds.has(value)) {
-          return true;
-        }
-        break;
-    }
-  }
-  return false;
-}
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;
@@ -140,14 +73,10 @@ function CustomReportListCardsInner({
   const accounts = useAccounts();
   const categories = useCategories();
 
-  const categoryIds = new Set(categories.list.map(({ id }) => id));
-  const payeeIds = new Set(payees.map(({ id }) => id));
-  const accountIds = new Set(accounts.map(({ id }) => id));
-
   const hasWarning = calculateHasWarning(report, {
-    categoryIds,
-    payeeIds,
-    accountIds,
+    categories: categories.list,
+    payees,
+    accounts,
   });
 
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
