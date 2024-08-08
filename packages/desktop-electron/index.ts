@@ -87,14 +87,6 @@ function createBackgroundProcess() {
           clientWin.webContents.send('message', msg);
         }
         break;
-      case 'log':
-        if (clientWin) {
-          console.log('msg', msg.log);
-          clientWin.webContents.executeJavaScript(
-            `console.log('Electron error log: ${msg.log}')`,
-          );
-        }
-        break;
       default:
         console.log('Unknown server message: ' + msg.type);
     }
