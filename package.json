@@ -40,7 +40,7 @@
     "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
     "typecheck": "yarn tsc && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
-    "prepare": "husky",
+    "prepare": "husky"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
