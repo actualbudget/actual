@@ -11,6 +11,7 @@ import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
 export function SelectedTransactionsButton({
+  account,
   getTransaction,
   onShow,
   onDuplicate,
@@ -112,6 +113,32 @@ export function SelectedTransactionsButton({
     return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
 
+  function onLinkSchedule() {
+    dispatch(
+      pushModal('schedule-link', {
+        transactionIds: selectedIds,
+        getTransaction,
+        accountName: account?.name ?? '',
+      }),
+    );
+  }
+
+  function onViewSchedule() {
+    const firstId = selectedIds[0];
+    let scheduleId;
+    if (isPreviewId(firstId)) {
+      const parts = firstId.split('/');
+      scheduleId = parts[1];
+    } else {
+      const trans = getTransaction(firstId);
+      scheduleId = trans && trans.schedule;
+    }
+
+    if (scheduleId) {
+      dispatch(pushModal('schedule-edit', { id: scheduleId }));
+    }
+  }
+
   const hotKeyOptions = {
     enabled: types.trans,
     scopes: ['app'],
@@ -144,6 +171,14 @@ export function SelectedTransactionsButton({
     onEdit,
     selectedIds,
   ]);
+  useHotkeys(
+    's',
+    () => (!types.trans || linked ? onViewSchedule() : onLinkSchedule()),
+    {
+      scopes: ['app'],
+    },
+    [onLinkSchedule, onViewSchedule, linked, selectedIds],
+  );
 
   return (
     <SelectedItemsButton
@@ -151,7 +186,7 @@ export function SelectedTransactionsButton({
       items={[
         ...(!types.trans
           ? [
-              { name: 'view-schedule', text: 'View schedule' },
+              { name: 'view-schedule', text: 'View schedule', key: 'S' },
               { name: 'post-transaction', text: 'Post transaction' },
               { name: 'skip', text: 'Skip scheduled date' },
             ]
@@ -168,6 +203,7 @@ export function SelectedTransactionsButton({
                     {
                       name: 'view-schedule',
                       text: 'View schedule',
+                      key: 'S',
                       disabled: selectedIds.length > 1,
                     },
                     { name: 'unlink-schedule', text: 'Unlink schedule' },
@@ -176,6 +212,7 @@ export function SelectedTransactionsButton({
                     {
                       name: 'link-schedule',
                       text: 'Link schedule',
+                      key: 'S',
                     },
                     {
                       name: 'create-rule',
@@ -242,27 +279,10 @@ export function SelectedTransactionsButton({
             onScheduleAction(name, selectedIds);
             break;
           case 'view-schedule':
-            const firstId = selectedIds[0];
-            let scheduleId;
-            if (isPreviewId(firstId)) {
-              const parts = firstId.split('/');
-              scheduleId = parts[1];
-            } else {
-              const trans = getTransaction(firstId);
-              scheduleId = trans && trans.schedule;
-            }
-
-            if (scheduleId) {
-              dispatch(pushModal('schedule-edit', { id: scheduleId }));
-            }
+            onViewSchedule();
             break;
           case 'link-schedule':
-            dispatch(
-              pushModal('schedule-link', {
-                transactionIds: selectedIds,
-                getTransaction,
-              }),
-            );
+            onLinkSchedule();
             break;
           case 'unlink-schedule':
             onUnlink(selectedIds);

@@ -206,31 +206,38 @@ export function KeyboardShortcutModal() {
                     meta={ctrl}
                   />
                   <Shortcut shortcut="B" description="Bank sync" meta={ctrl} />
-                  <GroupHeading group="Select a transaction, then" />
+                  <GroupHeading group="With transaction(s) selected" />
                   <Shortcut
-                    shortcut="J"
-                    description="Move to the next transaction down"
+                    shortcut="F"
+                    description="Filter to the selected transactions"
                   />
                   <Shortcut
-                    shortcut="K"
-                    description="Move to the next transaction up"
+                    shortcut="D"
+                    description="Delete selected transactions"
                   />
                   <Shortcut
-                    shortcut="↑"
-                    description="Move to the next transaction down and scroll"
+                    shortcut="A"
+                    description="Set account for selected transactions"
                   />
                   <Shortcut
-                    shortcut="↓"
-                    description="Move to the next transaction up and scroll"
+                    shortcut="P"
+                    description="Set payee for selected transactions"
                   />
                   <Shortcut
-                    shortcut="Space"
-                    description="Toggle selection of current transaction"
+                    shortcut="N"
+                    description="Set notes for selected transactions"
                   />
                   <Shortcut
-                    shortcut="Space"
-                    description="Toggle all transactions between current and most recently selected transaction"
-                    shift={true}
+                    shortcut="C"
+                    description="Set category for selected transactions"
+                  />
+                  <Shortcut
+                    shortcut="L"
+                    description="Toggle cleared for selected transactions"
+                  />
+                  <Shortcut
+                    shortcut="S"
+                    description="Link or view schedule for selected transactions"
                   />
                 </>
               )}
@@ -296,34 +303,31 @@ export function KeyboardShortcutModal() {
                         shortcut="F"
                         description="Filter transactions"
                       />
-                      <GroupHeading group="With transaction(s) selected" />
+                      <GroupHeading group="Select a transaction, then" />
                       <Shortcut
-                        shortcut="F"
-                        description="Filter to the selected transactions"
+                        shortcut="J"
+                        description="Move to the next transaction down"
                       />
                       <Shortcut
-                        shortcut="D"
-                        description="Delete selected transactions"
+                        shortcut="K"
+                        description="Move to the next transaction up"
                       />
                       <Shortcut
-                        shortcut="A"
-                        description="Set account for selected transactions"
+                        shortcut="↑"
+                        description="Move to the next transaction down and scroll"
                       />
                       <Shortcut
-                        shortcut="P"
-                        description="Set payee for selected transactions"
+                        shortcut="↓"
+                        description="Move to the next transaction up and scroll"
                       />
                       <Shortcut
-                        shortcut="N"
-                        description="Set notes for selected transactions"
+                        shortcut="Space"
+                        description="Toggle selection of current transaction"
                       />
                       <Shortcut
-                        shortcut="C"
-                        description="Set category for selected transactions"
-                      />
-                      <Shortcut
-                        shortcut="L"
-                        description="Toggle cleared for current transaction"
+                        shortcut="Space"
+                        description="Toggle all transactions between current and most recently selected transaction"
+                        shift={true}
                       />
                     </>
                   )}
