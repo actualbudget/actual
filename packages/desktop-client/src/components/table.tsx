@@ -38,6 +38,7 @@ import { View } from './common/View';
 import { FixedSizeList } from './FixedSizeList';
 import {
   ConditionalPrivacyFilter,
+  MaskedText,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import {
@@ -133,7 +134,7 @@ export function UnexposedCellContent({
         ...props,
       }}
     >
-      {formatter ? formatter(value) : value}
+      {formatter ? formatter(value) : <MaskedText>{value}</MaskedText>}
     </Text>
   );
 }
@@ -371,19 +372,21 @@ function InputValue({
   }
 
   return (
-    <Input
-      {...props}
-      value={value}
-      onChangeValue={text => setValue_(text)}
-      onBlur={onBlur_}
-      onUpdate={onUpdate}
-      onKeyDown={onKeyDown}
-      style={{
-        ...inputCellStyle,
-        ...(props.readOnly ? readonlyInputStyle : null),
-        ...props.style,
-      }}
-    />
+    <MaskedText>
+      <Input
+        {...props}
+        value={value}
+        onChangeValue={text => setValue_(text)}
+        onBlur={onBlur_}
+        onUpdate={onUpdate}
+        onKeyDown={onKeyDown}
+        style={{
+          ...inputCellStyle,
+          ...(props.readOnly ? readonlyInputStyle : null),
+          ...props.style,
+        }}
+      />
+    </MaskedText>
   );
 }
 

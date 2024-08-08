@@ -5,6 +5,10 @@ import React, {
   Children,
   type ComponentPropsWithRef,
   type ReactNode,
+  type PropsWithChildren,
+  createContext,
+  useContext,
+  useMemo,
 } from 'react';
 
 import { usePrivacyMode } from '../hooks/usePrivacyMode';
@@ -42,6 +46,34 @@ export function ConditionalPrivacyFilter({
   );
 }
 
+const MaskedContext = createContext<boolean>(false);
+
+const MASK_STRING = '0123456789';
+
+function generateMask(input: string) {
+  const maskedLengthMultiplier = Math.random() * 0.6 + 0.7;
+  const unboundedMaskedLength = Math.floor(
+    input.length * maskedLengthMultiplier,
+  );
+  const maskLength = Math.min(
+    Math.max(3, unboundedMaskedLength),
+    MASK_STRING.length,
+  );
+  return MASK_STRING.slice(0, maskLength);
+}
+
+export function MaskedText({ children }: PropsWithChildren) {
+  const masked = useContext(MaskedContext);
+  const childString = Children.toArray(children).join('');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const mask = useMemo(() => generateMask(childString), [childString.length]);
+
+  if (!masked) {
+    return <>{Children.toArray(children)}</>;
+  }
+  return <>{mask}</>;
+}
+
 type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
   activationFilters?: (boolean | (() => boolean))[];
   blurIntensity?: number;
@@ -65,19 +97,23 @@ export function PrivacyFilter({
 
   const blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
 
-  return !activate ? (
-    <>{Children.toArray(children)}</>
-  ) : (
-    <BlurredOverlay blurIntensity={blurAmount} {...props}>
+  return (
+    <BlurredOverlay activate={activate} blurIntensity={blurAmount} {...props}>
       {children}
     </BlurredOverlay>
   );
 }
 
-function BlurredOverlay({ blurIntensity, children, ...props }) {
+function BlurredOverlay({ activate, blurIntensity, children, ...props }) {
   const [hovered, setHovered] = useState(false);
   const onHover = useCallback(() => setHovered(true), [setHovered]);
   const onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
+
+  if (!activate) {
+    return (
+      <MaskedContext.Provider value={false}>{children}</MaskedContext.Provider>
+    );
+  }
 
   const blurStyle = {
     ...(!hovered && {
@@ -92,18 +128,20 @@ function BlurredOverlay({ blurIntensity, children, ...props }) {
   const { style, ...restProps } = props;
 
   return (
-    <View
-      style={{
-        display: style?.display ? style.display : 'inline-flex',
-        ...blurStyle,
-        ...style,
-      }}
-      onPointerEnter={onHover}
-      onPointerLeave={onHoverEnd}
-      {...restProps}
-    >
-      {children}
-    </View>
+    <MaskedContext.Provider value={!hovered}>
+      <View
+        style={{
+          display: style?.display ? style.display : 'inline-flex',
+          ...blurStyle,
+          ...style,
+        }}
+        onPointerEnter={onHover}
+        onPointerLeave={onHoverEnd}
+        {...restProps}
+      >
+        {children}
+      </View>
+    </MaskedContext.Provider>
   );
 }
 export function mergeConditionalPrivacyFilterProps(
