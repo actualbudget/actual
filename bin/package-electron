@@ -50,10 +50,10 @@ yarn workspace desktop-electron update-client
         if [ -f ../../.secret-tokens ]; then
             source ../../.secret-tokens
         fi
-        yarn build --publish never --arm64 --x64
+        yarn build --publish
 
         echo "\nCreated release"
     else
-        SKIP_NOTARIZATION=true yarn build --publish never --x64
+        SKIP_NOTARIZATION=true yarn build
     fi
 )

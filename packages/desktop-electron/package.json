@@ -41,7 +41,7 @@
       },
       "target": [
         {
-          "target": "default",
+          "target": "dmg",
           "arch": [
             "universal"
           ]
@@ -63,7 +63,9 @@
       "target": "nsis",
       "icon": "icons/icon.ico",
       "artifactName": "${productName}-windows.${ext}"
-    }
+    },
+    "nodeGypRebuild": true,
+    "npmrebuild": true
   },
   "dependencies": {
     "electron-is-dev": "2.0.0",
