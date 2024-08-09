@@ -35,8 +35,10 @@ if [ "$OSTYPE" == "msys" ]; then
 fi
 
 # removed the better-sqlite to try and force it to be rebuilt per machine - mac/windows/linux
-rm -rf node_modules/better-sqlite
 yarn
+
+yarn rebuild-electron
+
 yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build --mode=desktop

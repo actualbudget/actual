@@ -40,7 +40,8 @@
     "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
     "typecheck": "yarn tsc && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
-    "prepare": "husky"
+    "prepare": "husky",
+    "rebuild-electron": "./node_modules/.bin/electron-rebuild.cmd -f -m ./node_modules/better-sqlite3"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
