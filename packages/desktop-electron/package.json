@@ -24,6 +24,7 @@
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
       "build"
     ],
+    "beforePack": "./build/beforePackHook.js",
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
