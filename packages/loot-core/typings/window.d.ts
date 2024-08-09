@@ -7,7 +7,7 @@ declare global {
       ACTUAL_VERSION: string;
       openURLInBrowser: (url: string) => void;
       saveFile: (
-        contents: Buffer,
+        contents: string | Buffer,
         filename: string,
         dialogTitle: string,
       ) => void;

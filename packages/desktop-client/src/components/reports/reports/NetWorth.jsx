@@ -151,6 +151,7 @@ export function NetWorth() {
           domain={{
             y: [data.lowestNetWorth * 0.99, data.highestNetWorth * 1.01],
           }}
+          showTooltip={!isNarrowWidth}
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>

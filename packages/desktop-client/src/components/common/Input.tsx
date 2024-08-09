@@ -39,6 +39,7 @@ export function Input({
   onChangeValue,
   onUpdate,
   focused,
+  className,
   ...nativeProps
 }: InputProps) {
   const ref = useRef<HTMLInputElement>(null);
@@ -63,7 +64,7 @@ export function Input({
         },
         styles.smallText,
         style,
-      )}`}
+      )} ${className}`}
       {...nativeProps}
       onKeyDown={e => {
         nativeProps.onKeyDown?.(e);

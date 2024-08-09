@@ -71,6 +71,14 @@ export function SaveReport({
         return;
       }
 
+      // Add to dashboard
+      await send('dashboard-add-widget', {
+        type: 'custom-report',
+        width: 4,
+        height: 2,
+        meta: { id: response.data },
+      });
+
       setNameMenuOpen(false);
       onReportChange({
         savedReport: {

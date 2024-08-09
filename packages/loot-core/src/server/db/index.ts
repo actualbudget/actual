@@ -241,6 +241,13 @@ export async function delete_(table, id) {
   ]);
 }
 
+export async function deleteAll(table: string) {
+  const rows: Array<{ id: string }> = await all(`
+    SELECT id FROM ${table} WHERE tombstone = 0
+  `);
+  await Promise.all(rows.map(({ id }) => delete_(table, id)));
+}
+
 export async function selectWithSchema(table, sql, params) {
   const rows = await runQuery(sql, params, true);
   return rows
@@ -540,7 +547,7 @@ export function getCommonPayees() {
   const threeMonthsAgo = '20240201';
   const limit = 10;
   return all(`
-    SELECT 	p.id as id, p.name as name, p.favorite as favorite, 
+    SELECT     p.id as id, p.name as name, p.favorite as favorite,
       p.category as category, TRUE as common, NULL as transfer_acct,
     count(*) as c, 
     max(t.date) as latest

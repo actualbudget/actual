@@ -5,6 +5,8 @@ import {
   PayeeEntity,
 } from '../types/models';
 
+import { ValidationError } from './errors';
+
 export function requiredFields<T extends object, K extends keyof T>(
   name: string,
   row: T,
@@ -14,11 +16,11 @@ export function requiredFields<T extends object, K extends keyof T>(
   fields.forEach(field => {
     if (update) {
       if (row.hasOwnProperty(field) && row[field] == null) {
-        throw new Error(`${name} is missing field ${String(field)}`);
+        throw new ValidationError(`${name} is missing field ${String(field)}`);
       }
     } else {
       if (!row.hasOwnProperty(field) || row[field] == null) {
-        throw new Error(`${name} is missing field ${String(field)}`);
+        throw new ValidationError(`${name} is missing field ${String(field)}`);
       }
     }
   });

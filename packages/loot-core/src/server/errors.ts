@@ -51,6 +51,8 @@ export class SyncError extends Error {
   }
 }
 
+export class ValidationError extends Error {}
+
 export class TransactionError extends Error {}
 
 export class RuleError extends Error {

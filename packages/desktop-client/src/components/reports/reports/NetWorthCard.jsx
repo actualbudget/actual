@@ -3,6 +3,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
@@ -15,7 +16,9 @@ import { ReportCard } from '../ReportCard';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
-export function NetWorthCard({ accounts }) {
+export function NetWorthCard({ isEditing, accounts, onRemove }) {
+  const { isNarrowWidth } = useResponsive();
+
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -29,7 +32,25 @@ export function NetWorthCard({ accounts }) {
   const data = useReport('net_worth', params);
 
   return (
-    <ReportCard size={2} to="/reports/net-worth">
+    <ReportCard
+      isEditing={isEditing}
+      to="/reports/net-worth"
+      menuItems={[
+        {
+          name: 'remove',
+          text: 'Remove',
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}
@@ -71,6 +92,7 @@ export function NetWorthCard({ accounts }) {
             end={end}
             graphData={data.graphData}
             compact={true}
+            showTooltip={!isEditing && !isNarrowWidth}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (
