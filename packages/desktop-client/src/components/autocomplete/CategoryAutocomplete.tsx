@@ -25,6 +25,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
+import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
@@ -377,14 +378,17 @@ function CategoryItem({
     : {};
   const [budgetType = 'rollover'] = useLocalPref('budgetType');
 
-  const balance = useSheetValue(
+  const balanceBinding =
     budgetType === 'rollover'
       ? rolloverBudget.catBalance(item.id)
-      : reportBudget.catBalance(item.id),
-  );
+      : reportBudget.catBalance(item.id);
+  const balance = useSheetValue<
+    'rollover-budget' | 'report-budget',
+    typeof balanceBinding
+  >(balanceBinding);
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
-  const toBudget = useSheetValue(rolloverBudget.toBudget);
+  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget);
 
   return (
     <div

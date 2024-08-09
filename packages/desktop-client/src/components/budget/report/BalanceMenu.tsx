@@ -3,7 +3,8 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { reportBudget } from 'loot-core/src/client/queries';
 
 import { Menu } from '../../common/Menu';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
+
+import { useReportSheetValue } from './ReportComponents';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
@@ -18,7 +19,7 @@ export function BalanceMenu({
   onCarryover,
   ...props
 }: BalanceMenuProps) {
-  const carryover = useSheetValue(reportBudget.catCarryover(categoryId));
+  const carryover = useReportSheetValue(reportBudget.catCarryover(categoryId));
   return (
     <Menu
       {...props}
