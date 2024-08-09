@@ -1,8 +1,3 @@
-export type Note = {
-  category_id: string;
-  note: string;
-};
-
 export type Schedule = {
   id: string;
   rule: string;

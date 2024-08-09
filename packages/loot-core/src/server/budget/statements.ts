@@ -1,8 +1,7 @@
 import * as db from '../db';
 import { Schedule } from '../db/types';
 
-const TEMPLATE_PREFIX = '#template';
-const GOAL_PREFIX = '#goal';
+import { GOAL_PREFIX, TEMPLATE_PREFIX } from './template-notes';
 
 /* eslint-disable rulesdir/typography */
 export async function resetCategoryGoalDefsWithNoTemplates(): Promise<void> {

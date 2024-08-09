@@ -1,7 +1,8 @@
 import * as db from '../db';
-import { Note, Schedule } from '../db/types';
+import { Schedule } from '../db/types';
 
 import {
+  CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
@@ -11,7 +12,9 @@ import { checkTemplates, storeTemplates } from './template-notes';
 jest.mock('../db');
 jest.mock('./statements');
 
-function mockGetTemplateNotesForCategories(templateNotes: Note[]) {
+function mockGetTemplateNotesForCategories(
+  templateNotes: CategoryWithTemplateNote[],
+) {
   (getCategoriesWithTemplateNotes as jest.Mock).mockResolvedValue(
     templateNotes,
   );
@@ -32,7 +35,7 @@ describe('storeTemplates', () => {
 
   const testCases = [
     {
-      description: 'Stores templates for categories',
+      description: 'Stores templates for categories with valid template notes',
       mockTemplateNotes: [
         {
           id: 'cat1',
@@ -51,13 +54,34 @@ describe('storeTemplates', () => {
       ],
     },
     {
-      description: 'Handles empty template notes',
+      description:
+        'Stores templates for categories with valid goal directive template notes',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: '#goal 10',
+        },
+      ],
+      expectedTemplates: [
+        {
+          type: 'simple',
+          amount: 10,
+          priority: null,
+          directive: 'goal',
+        },
+      ],
+    },
+    {
+      description: 'Does not store empty template notes',
       mockTemplateNotes: [{ id: 'cat1', name: 'Category 1', note: '' }],
       expectedTemplates: [],
     },
     {
-      description: 'Handles null template notes',
-      mockTemplateNotes: [{ id: 'cat1', name: 'Category 1', note: null }],
+      description: 'Does not store non template notes',
+      mockTemplateNotes: [
+        { id: 'cat1', name: 'Category 1', note: 'Not a template note' },
+      ],
       expectedTemplates: [],
     },
   ];
@@ -97,7 +121,7 @@ describe('checkTemplates', () => {
 
   const testCases = [
     {
-      description: 'Returns message when all templates pass',
+      description: 'Returns success message when templates pass',
       mockTemplateNotes: [
         {
           id: 'cat1',
@@ -106,7 +130,23 @@ describe('checkTemplates', () => {
         },
         {
           id: 'cat1',
+          name: 'Category 1',
           note: '#template schedule Mock Schedule 1',
+        },
+      ],
+      mockSchedules: mockSchedules(),
+      expected: {
+        type: 'message',
+        message: 'All templates passed! 🎉',
+      },
+    },
+    {
+      description: 'Skips notes that are not templates',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: 'Not a template note',
         },
       ],
       mockSchedules: mockSchedules(),

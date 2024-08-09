@@ -1,14 +1,17 @@
 import { Notification } from '../../client/state-types/notifications';
 import * as db from '../db';
-import { Note } from '../db/types';
 
 import { parse } from './goal-template.pegjs';
 import {
+  CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import { Template } from './types/templates';
+
+export const TEMPLATE_PREFIX = '#template';
+export const GOAL_PREFIX = '#goal';
 
 export async function storeTemplates(): Promise<void> {
   const categoriesWithTemplates = await getCategoriesWithTemplates();
@@ -32,14 +35,12 @@ type CategoryWithTemplates = {
 };
 
 export async function checkTemplates(): Promise<Notification> {
-  const templatesForCategory = await getCategoriesWithTemplates();
+  const categoryWithTemplates = await getCategoriesWithTemplates();
   const schedules = await getActiveSchedules();
   const scheduleNames = schedules.map(({ name }) => name);
   const errors: string[] = [];
 
-  templatesForCategory.forEach(({ id, name, templates }) => {
-    console.log('checking templates for category', id);
-    console.log('templates', templates);
+  categoryWithTemplates.forEach(({ id, name, templates }) => {
     templates.forEach(template => {
       if (template.type === 'error') {
         errors.push(`${name}: ${template.line}`);
@@ -70,21 +71,40 @@ async function getCategoriesWithTemplates(): Promise<CategoryWithTemplates[]> {
   const templatesForCategory: CategoryWithTemplates[] = [];
   const templateNotes = await getCategoriesWithTemplateNotes();
 
-  templateNotes.forEach(({ id, name, note }: Note) => {
+  templateNotes.forEach(({ id, name, note }: CategoryWithTemplateNote) => {
     if (!note) {
       return;
     }
 
-    const parsedTemplates = [];
+    const parsedTemplates: Template[] = [];
 
     note.split('\n').forEach(line => {
+      const trimmedLine = line.trim();
+
+      if (
+        !trimmedLine.startsWith(TEMPLATE_PREFIX) &&
+        !trimmedLine.startsWith(GOAL_PREFIX)
+      ) {
+        return;
+      }
+
       try {
-        const parsedTemplate = parse(line.trim());
+        const parsedTemplate: Template = parse(trimmedLine);
+
         parsedTemplates.push(parsedTemplate);
-      } catch (e) {
-        parsedTemplates.push({ type: 'error', line, error: e });
+      } catch (e: unknown) {
+        parsedTemplates.push({
+          type: 'error',
+          directive: 'error',
+          line,
+          error: (e as Error).message,
+        });
       }
     });
+
+    if (!parsedTemplates.length) {
+      return;
+    }
 
     templatesForCategory.push({
       id,
