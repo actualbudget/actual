@@ -337,6 +337,7 @@ export function AccountHeader({
             </View>
           ) : (
             <SelectedTransactionsButton
+              account={account}
               getTransaction={id => transactions.find(t => t.id === id)}
               onShow={onShowTransactions}
               onDuplicate={onBatchDuplicate}
