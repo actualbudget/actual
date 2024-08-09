@@ -141,6 +141,10 @@ export function friendlyOp(op, type?) {
       return 'allocate';
     case 'link-schedule':
       return 'link schedule';
+    case 'prepend-notes':
+      return 'prepend to notes';
+    case 'append-notes':
+      return 'append to notes';
     case 'and':
       return 'and';
     case 'or':

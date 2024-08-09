@@ -89,7 +89,7 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={style}>
+    <View style={style} data-testid="field-select">
       <Select
         bare
         options={fields}
@@ -135,6 +135,7 @@ export function OpSelect({
       value={value}
       onChange={value => onChange('op', value)}
       buttonStyle={style}
+      data-testid="op-select"
     />
   );
 }
@@ -357,13 +358,13 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
 
   return (
     <Editor style={editorStyle} error={error}>
-      {/*<OpSelect ops={ops} value={op} onChange={onChange} />*/}
-
       {op === 'set' ? (
         <>
-          <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
-            {friendlyOp(op)}
-          </View>
+          <OpSelect
+            ops={['set', 'prepend-notes', 'append-notes']}
+            value={op}
+            onChange={onChange}
+          />
 
           <FieldSelect
             fields={options?.splitIndex ? splitActionFields : actionFields}
@@ -421,6 +422,25 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             {friendlyOp(op)}
           </View>
           <ScheduleDescription id={value || null} />
+        </>
+      ) : op === 'prepend-notes' || op === 'append-notes' ? (
+        <>
+          <OpSelect
+            ops={['set', 'prepend-notes', 'append-notes']}
+            value={op}
+            onChange={onChange}
+          />
+
+          <View style={{ flex: 1 }}>
+            <GenericInput
+              key={inputKey}
+              field={field}
+              type="string"
+              op={op}
+              value={value}
+              onChange={v => onChange('value', v)}
+            />
+          </View>
         </>
       ) : null}
 
@@ -1067,7 +1087,12 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
                           {actions.map((action, actionIndex) => (
                             <View key={actionIndex}>
                               <ActionEditor
-                                ops={['set', 'link-schedule']}
+                                ops={[
+                                  'set',
+                                  'link-schedule',
+                                  'prepend-notes',
+                                  'append-notes',
+                                ]}
                                 action={action}
                                 editorStyle={editorStyle}
                                 onChange={(name, value) => {
