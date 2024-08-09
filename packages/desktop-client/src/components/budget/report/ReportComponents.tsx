@@ -3,6 +3,7 @@ import React, { memo, useRef, useState } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { SvgCheveronDown } from '../../../icons/v1';
@@ -88,13 +89,25 @@ export function IncomeHeaderMonth() {
 }
 
 type GroupMonthProps = {
+  month: string;
   group: { id: string; is_income: boolean };
 };
-export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
+export const GroupMonth = memo(function GroupMonth({
+  month,
+  group,
+}: GroupMonthProps) {
   const { id } = group;
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetHeaderCurrentMonth
+          : theme.budgetHeaderOtherMonth,
+      }}
+    >
       <SheetCell
         name="budgeted"
         width="flex"
@@ -174,6 +187,9 @@ export const CategoryMonth = memo(function CategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
         '& .hover-visible': {
           opacity: 0,
           transition: 'opacity .25s',

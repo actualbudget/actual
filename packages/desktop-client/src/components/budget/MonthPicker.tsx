@@ -133,6 +133,17 @@ export const MonthPicker = ({
                   !selected && {
                     backgroundColor: theme.buttonBareBackgroundHover,
                   }),
+                ...(!hovered &&
+                  !selected &&
+                  current && {
+                    backgroundColor: theme.buttonBareBackgroundHover,
+                    filter: 'brightness(120%)',
+                  }),
+                ...(hovered &&
+                  selected &&
+                  current && {
+                    filter: 'brightness(120%)',
+                  }),
                 ...(hovered &&
                   selected && {
                     backgroundColor: theme.tableBorderHover,

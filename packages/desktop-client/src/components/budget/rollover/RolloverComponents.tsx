@@ -3,6 +3,7 @@ import { memo, useRef, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { SvgCheveronDown } from '../../../icons/v1';
@@ -113,15 +114,25 @@ export function IncomeHeaderMonth() {
 }
 
 type ExpenseGroupMonthProps = {
+  month: string;
   group: { id: string };
 };
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
+  month,
   group,
 }: ExpenseGroupMonthProps) {
   const { id } = group;
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetHeaderCurrentMonth
+          : theme.budgetHeaderOtherMonth,
+      }}
+    >
       <RolloverSheetCell
         name="budgeted"
         width="flex"
@@ -197,6 +208,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
         '& .hover-visible': {
           opacity: 0,
           transition: 'opacity .25s',
@@ -379,7 +393,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   );
 });
 
-export function IncomeGroupMonth() {
+type IncomeGroupMonthProps = {
+  month: string;
+};
+export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
   return (
     <View style={{ flex: 1 }}>
       <RolloverSheetCell
@@ -390,6 +407,9 @@ export function IncomeGroupMonth() {
           fontWeight: 600,
           paddingRight: styles.monthRightPadding,
           ...styles.tnum,
+          backgroundColor: monthUtils.isCurrentMonth(month)
+            ? theme.budgetHeaderCurrentMonth
+            : theme.budgetHeaderOtherMonth,
         }}
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
@@ -426,6 +446,9 @@ export function IncomeCategoryMonth({
           paddingRight: styles.monthRightPadding,
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
+          backgroundColor: monthUtils.isCurrentMonth(month)
+            ? theme.budgetCurrentMonth
+            : theme.budgetOtherMonth,
         }}
       >
         <span onClick={() => onShowActivity(category.id, month)}>
