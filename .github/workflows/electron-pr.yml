@@ -51,6 +51,7 @@ jobs:
           name: actual-electron-${{ matrix.os }}
           path: |
             packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/*.appx
             packages/desktop-electron/dist/*.exe
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
