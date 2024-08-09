@@ -41,7 +41,7 @@
     "typecheck": "yarn tsc && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
     "prepare": "husky",
-    "rebuild-electron": "./node_modules/.bin/electron-rebuild.cmd -f -m ./node_modules/better-sqlite3"
+    "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./node_modules/better-sqlite3"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
