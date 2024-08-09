@@ -15,8 +15,8 @@ let MIGRATIONS_DIR = fs.migrationsPath;
 
 const javascriptMigrations = {
   1632571489012: m1632571489012,
-  1722804019000: m1722804019000,
   1722717601000: m1722717601000,
+  1722804019000: m1722804019000,
 };
 
 export async function withMigrationsDir(

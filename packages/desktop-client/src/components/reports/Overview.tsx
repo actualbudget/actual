@@ -110,15 +110,14 @@ export function Overview() {
     [closeNotifications],
   );
 
-  const onDispatchSucessNotification = () => {
+  const onDispatchSucessNotification = (message: string) => {
     dispatch(
       addNotification({
         id: 'import',
         type: 'message',
         sticky: true,
         timeout: 30_000, // 30s
-        message:
-          'Dashboard has been successfully reset to default state. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+        message,
         messageActions: {
           undo: () => {
             closeNotifications();
@@ -138,7 +137,9 @@ export function Overview() {
     await send('dashboard-reset');
     setIsImporting(false);
 
-    onDispatchSucessNotification();
+    onDispatchSucessNotification(
+      'Dashboard has been successfully reset to default state. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+    );
   };
 
   const onLayoutChange = (newLayout: Layout[]) => {
@@ -197,11 +198,12 @@ export function Overview() {
           return {
             ...widget,
             meta: customReport,
+            id: undefined,
             tombstone: undefined,
           };
         }
 
-        return { ...widget, tombstone: undefined };
+        return { ...widget, id: undefined, tombstone: undefined };
       }),
     } satisfies ExportImportDashboard;
 
@@ -274,7 +276,9 @@ export function Overview() {
       return;
     }
 
-    onDispatchSucessNotification();
+    onDispatchSucessNotification(
+      'Dashboard has been successfully imported. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+    );
   };
 
   const accounts = useAccounts();

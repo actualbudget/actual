@@ -29,7 +29,7 @@ export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 // Exported/imported (json) widget definition
 export type ExportImportCustomReportWidget = Omit<
   CustomReportWidget,
-  'meta' | 'tombstone'
+  'id' | 'meta' | 'tombstone'
 > & {
   meta: Omit<CustomReportEntity, 'tombstone'>;
 };
