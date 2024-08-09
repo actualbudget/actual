@@ -1,9 +1,9 @@
 import * as db from '../db';
-import { Schedule, TemplateNote } from '../db/types';
+import { Note, Schedule } from '../db/types';
 
 import {
   getActiveSchedules,
-  getTemplateNotesForCategories,
+  getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import { checkTemplates, storeTemplates } from './template-notes';
@@ -11,8 +11,10 @@ import { checkTemplates, storeTemplates } from './template-notes';
 jest.mock('../db');
 jest.mock('./statements');
 
-function mockGetTemplateNotesForCategories(templateNotes: TemplateNote[]) {
-  (getTemplateNotesForCategories as jest.Mock).mockResolvedValue(templateNotes);
+function mockGetTemplateNotesForCategories(templateNotes: Note[]) {
+  (getCategoriesWithTemplateNotes as jest.Mock).mockResolvedValue(
+    templateNotes,
+  );
 }
 
 function mockGetActiveSchedules(schedules: Schedule[]) {
@@ -33,7 +35,8 @@ describe('storeTemplates', () => {
       description: 'Stores templates for categories',
       mockTemplateNotes: [
         {
-          category_id: 'cat1',
+          id: 'cat1',
+          name: 'Category 1',
           note: '#template 10',
         },
       ],
@@ -49,12 +52,12 @@ describe('storeTemplates', () => {
     },
     {
       description: 'Handles empty template notes',
-      mockTemplateNotes: [{ category_id: 'cat1', note: '' }],
+      mockTemplateNotes: [{ id: 'cat1', name: 'Category 1', note: '' }],
       expectedTemplates: [],
     },
     {
       description: 'Handles null template notes',
-      mockTemplateNotes: [{ category_id: 'cat1', note: null }],
+      mockTemplateNotes: [{ id: 'cat1', name: 'Category 1', note: null }],
       expectedTemplates: [],
     },
   ];
@@ -76,9 +79,9 @@ describe('storeTemplates', () => {
         return;
       }
 
-      mockTemplateNotes.forEach(({ category_id }) => {
+      mockTemplateNotes.forEach(({ id }) => {
         expect(db.update).toHaveBeenCalledWith('categories', {
-          id: category_id,
+          id,
           goal_def: JSON.stringify(expectedTemplates),
         });
       });
@@ -97,11 +100,12 @@ describe('checkTemplates', () => {
       description: 'Returns message when all templates pass',
       mockTemplateNotes: [
         {
-          category_id: 'cat1',
+          id: 'cat1',
+          name: 'Category 1',
           note: '#template 10',
         },
         {
-          category_id: 'cat1',
+          id: 'cat1',
           note: '#template schedule Mock Schedule 1',
         },
       ],
@@ -115,7 +119,8 @@ describe('checkTemplates', () => {
       description: 'Returns errors for templates with parsing errors',
       mockTemplateNotes: [
         {
-          category_id: 'cat1',
+          id: 'cat1',
+          name: 'Category 1',
           note: '#template broken template',
         },
       ],
@@ -123,14 +128,15 @@ describe('checkTemplates', () => {
       expected: {
         sticky: true,
         message: 'There were errors interpreting some templates:',
-        pre: 'cat1: #template broken template',
+        pre: 'Category 1: #template broken template',
       },
     },
     {
       description: 'Returns errors for non-existent schedules',
       mockTemplateNotes: [
         {
-          category_id: 'cat1',
+          id: 'cat1',
+          name: 'Category 1',
           note: '#template schedule Non-existent Schedule',
         },
       ],

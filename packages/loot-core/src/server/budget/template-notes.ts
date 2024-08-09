@@ -1,11 +1,11 @@
 import { Notification } from '../../client/state-types/notifications';
 import * as db from '../db';
-import { TemplateNote } from '../db/types';
+import { Note } from '../db/types';
 
 import { parse } from './goal-template.pegjs';
 import {
   getActiveSchedules,
-  getTemplateNotesForCategories,
+  getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import { Template } from './types/templates';
@@ -13,11 +13,11 @@ import { Template } from './types/templates';
 export async function storeTemplates(): Promise<void> {
   const categoriesWithTemplates = await getCategoriesWithTemplates();
 
-  for (const { category_id, templates } of categoriesWithTemplates) {
+  for (const { id, templates } of categoriesWithTemplates) {
     const goalDefs = JSON.stringify(templates);
 
     await db.update('categories', {
-      id: category_id,
+      id,
       goal_def: goalDefs,
     });
   }
@@ -26,7 +26,8 @@ export async function storeTemplates(): Promise<void> {
 }
 
 type CategoryWithTemplates = {
-  category_id: string;
+  id: string;
+  name: string;
   templates: Template[];
 };
 
@@ -36,19 +37,17 @@ export async function checkTemplates(): Promise<Notification> {
   const scheduleNames = schedules.map(({ name }) => name);
   const errors: string[] = [];
 
-  templatesForCategory.forEach(({ category_id, templates }) => {
-    console.log('checking templates for category', category_id);
+  templatesForCategory.forEach(({ id, name, templates }) => {
+    console.log('checking templates for category', id);
     console.log('templates', templates);
     templates.forEach(template => {
       if (template.type === 'error') {
-        errors.push(`${category_id}: ${template.line}`);
+        errors.push(`${name}: ${template.line}`);
       } else if (
         template.type === 'schedule' &&
         !scheduleNames.includes(template.name)
       ) {
-        errors.push(
-          `${category_id}: Schedule “${template.name}” does not exist`,
-        );
+        errors.push(`${id}: Schedule “${template.name}” does not exist`);
       }
     });
   });
@@ -69,9 +68,9 @@ export async function checkTemplates(): Promise<Notification> {
 
 async function getCategoriesWithTemplates(): Promise<CategoryWithTemplates[]> {
   const templatesForCategory: CategoryWithTemplates[] = [];
-  const templateNotes: TemplateNote[] = await getTemplateNotesForCategories();
+  const templateNotes = await getCategoriesWithTemplateNotes();
 
-  templateNotes.forEach(({ category_id, note }: TemplateNote) => {
+  templateNotes.forEach(({ id, name, note }: Note) => {
     if (!note) {
       return;
     }
@@ -87,7 +86,11 @@ async function getCategoriesWithTemplates(): Promise<CategoryWithTemplates[]> {
       }
     });
 
-    templatesForCategory.push({ category_id, templates: parsedTemplates });
+    templatesForCategory.push({
+      id,
+      name,
+      templates: parsedTemplates,
+    });
   });
 
   return templatesForCategory;

@@ -1,4 +1,4 @@
-export type TemplateNote = {
+export type Note = {
   category_id: string;
   note: string;
 };
