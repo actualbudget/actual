@@ -69,12 +69,12 @@
   },
   "devDependencies": {
     "@electron/notarize": "2.2.0",
+    "@electron/rebuild": "3.6.0",
     "@types/copyfiles": "^2",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "electron": "30.0.6",
     "electron-builder": "24.13.3",
-    "electron-rebuild": "^3.2.9",
     "typescript": "^5.0.2"
   }
 }

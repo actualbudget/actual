@@ -50,7 +50,7 @@ yarn workspace desktop-electron update-client
         if [ -f ../../.secret-tokens ]; then
             source ../../.secret-tokens
         fi
-        yarn build --publish
+        yarn build
 
         echo "\nCreated release"
     else
