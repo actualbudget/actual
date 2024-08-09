@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { Query } from 'loot-core/shared/query';
+import { Query } from '../../shared/query';
 import { exportQueryToCSV, exportToCSV } from '../accounts/export-to-csv';
 import { parseFile } from '../accounts/parse-file';
 import { batchUpdateTransactions } from '../accounts/transactions';
