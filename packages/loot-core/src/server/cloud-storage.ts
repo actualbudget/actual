@@ -146,7 +146,7 @@ export async function exportBuffer() {
       rawDbContent.length,
     );
     const memDb = await sqlite.openDatabase(rawDbContent);
-    console.info('opened the database');
+    console.info('opened the database, about to execute a query');
     sqlite.execQuery(
       memDb,
       `
@@ -155,9 +155,12 @@ export async function exportBuffer() {
       `,
     );
 
+    console.info('executed query, about to export db');
     const dbContent = await sqlite.exportDatabase(memDb);
+    console.info('exported db, about to close db');
 
     sqlite.closeDatabase(memDb);
+    console.info('closed db');
 
     // mark it as a file that needs a new clock so when a new client
     // downloads it, it'll get set to a unique node
