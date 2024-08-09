@@ -5127,12 +5127,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/better-sqlite3@npm:^7.6.8":
-  version: 7.6.8
-  resolution: "@types/better-sqlite3@npm:7.6.8"
+"@types/better-sqlite3@npm:^7.6.11":
+  version: 7.6.11
+  resolution: "@types/better-sqlite3@npm:7.6.11"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10/404e9b7210564866b0f8878353cc6a16c6ffb313077cbb5aec6176ad2b0a30f64236f03f0a40d36d86bf4eab7658bdcd6d6a8a65dc377de7910fc9e9932885a4
+  checksum: 10/660f29485803e8f1a443b6009c48d172130e5d91f5b2728d8868ed9b39650cf5835b6747fb61141ea4f706dd321fcbf442dac245437ed7f3511901d3578380d3
   languageName: node
   linkType: hard
 
@@ -6826,6 +6826,17 @@ __metadata:
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 10/669632eb3745404c2f822a18fc3a0122d2f9a7a13f7fb8b5823ee19d1d2ff9ee5b52c53367176ea4ad093c332fd5ab4bd0ebae5a8e27917a4105a4cfc86b1005
+  languageName: node
+  linkType: hard
+
+"better-sqlite3@npm:^11.1.2":
+  version: 11.1.2
+  resolution: "better-sqlite3@npm:11.1.2"
+  dependencies:
+    bindings: "npm:^1.5.0"
+    node-gyp: "npm:latest"
+    prebuild-install: "npm:^7.1.1"
+  checksum: 10/0427f596149a8dead90d7e80d948a281292dc1bd88dfa7feaea1277e4673c75a724b70bcd460baf92a067118688d656bc4aa94f1fe977767722ad3e282488f03
   languageName: node
   linkType: hard
 
@@ -12859,7 +12870,7 @@ __metadata:
     "@swc/helpers": "npm:^0.5.11"
     "@swc/jest": "npm:^0.2.36"
     "@types/adm-zip": "npm:^0.5.0"
-    "@types/better-sqlite3": "npm:^7.6.8"
+    "@types/better-sqlite3": "npm:^7.6.11"
     "@types/jest": "npm:^27.5.2"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/pegjs": "npm:^0.10.3"
@@ -12870,7 +12881,7 @@ __metadata:
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.10"
     assert: "npm:^2.1.0"
-    better-sqlite3: "npm:^9.6.0"
+    better-sqlite3: "npm:^11.1.2"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
     cross-env: "npm:^7.0.3"
