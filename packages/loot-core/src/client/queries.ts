@@ -150,6 +150,25 @@ export function accountBalanceUncleared(
   };
 }
 
+//Gets Accounts with the Grouping Syntex
+export function getGroupBalance(
+  groupName,
+  OffBudget,
+): Binding<'account', 'balance'> {
+  return {
+    query: q('transactions')
+      .filter({
+        'account.closed': false,
+        'account.offbudget': OffBudget,
+        'account.name': { $likeDis: `${'[' + groupName + ']'}%` },
+      })
+      .calculate({ $sum: '$amount' }),
+    name: accountParametrizedField('balance')(
+      `GroupedAccount-${groupName}-${OffBudget ? 'OffBudget' : 'OnBudget'}`,
+    ),
+  };
+}
+
 export function allAccountBalance(): Binding<'account', 'accounts-balance'> {
   return {
     query: q('transactions')

@@ -48,6 +48,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   updated?: boolean;
   style?: CSSProperties;
   outerStyle?: CSSProperties;
+  grouped?: boolean;
   onDragChange?: OnDragChangeCallback<{ id: string }>;
   onDrop?: OnDropCallback;
 };
@@ -65,6 +66,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   outerStyle,
   onDragChange,
   onDrop,
+  grouped,
 }: AccountProps<FieldName>) {
   const type = account
     ? account.closed
@@ -149,13 +151,27 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
             <AlignedText
               style={
-                (name === 'Off budget' || name === 'For budget') && {
+                (name === 'Off budget' ||
+                  name === 'For budget' ||
+                  grouped === true) && {
                   borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
                   paddingBottom: '3px',
                 }
               }
               left={name}
-              right={<CellValue binding={query} type="financial" />}
+              right={
+                <CellValue
+                  binding={query}
+                  type="financial"
+                  style={
+                    grouped === true && {
+                      background: 'rgba(0,0,0,0.2)',
+                      borderRadius: '5px',
+                      padding: '1px',
+                    }
+                  }
+                />
+              }
             />
           </Link>
         </View>
