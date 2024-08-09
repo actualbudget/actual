@@ -98,6 +98,10 @@ export function TransactionList({
               key={section.id}
             >
               {section.data.map((transaction, index, transactions) => {
+                if (isPreviewId(transaction.id) && transaction.is_child) {
+                  return null;
+                }
+
                 return (
                   <Item
                     key={transaction.id}
