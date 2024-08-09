@@ -42,7 +42,6 @@ const exportModel = {
 
     dashboard.widgets.forEach((widget, idx) => {
       requiredFields(`Dashboard widget #${idx}`, widget, [
-        'id',
         'type',
         'x',
         'y',
