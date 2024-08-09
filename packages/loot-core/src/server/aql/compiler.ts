@@ -720,9 +720,16 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       // eslint-disable-next-line rulesdir/typography
       return `${left} IN (` + ids.map(id => `'${id}'`).join(',') + ')';
     }
+    //like
     case '$like': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))`;
+    }
+    //like distinct
+    //This like is to make the search more distinct and not as fuzzy as the above like.
+    case '$likeDis': {
+      const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
+      return `LIKE(${getNormalisedString(right)}, NORMALISE(${left}))`;
     }
     case '$regexp': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
