@@ -17,6 +17,8 @@ import { type State } from 'loot-core/src/client/state-types';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import { ProtectedRoute } from '../auth/ProtectedRoute';
+import { Permissions } from '../auth/types';
 import { useAccounts } from '../hooks/useAccounts';
 import { useActions } from '../hooks/useActions';
 import { useNavigate } from '../hooks/useNavigate';
@@ -25,6 +27,7 @@ import { theme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
+import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common/View';
@@ -39,6 +42,7 @@ import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { ScrollProvider } from './ScrollProvider';
+import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
@@ -78,6 +82,7 @@ function RouterBehaviors() {
   const accountsLoaded = useSelector(
     (state: State) => state.queries.accountsLoaded,
   );
+
   useEffect(() => {
     // If there are no accounts, we want to redirect the user to
     // the All Accounts screen which will prompt them to add an account
@@ -97,6 +102,8 @@ function RouterBehaviors() {
 
 function FinancesAppWithoutContext() {
   const actions = useActions();
+  const multiuserEnabled = useMultiuserEnabled();
+
   useEffect(() => {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
@@ -220,6 +227,18 @@ function FinancesAppWithoutContext() {
                   }
                 />
 
+                {multiuserEnabled && (
+                  <Route
+                    path="/user-access"
+                    element={
+                      <ProtectedRoute
+                        permission={Permissions.ADMINISTRATOR}
+                        validateOwner={true}
+                        element={<UserAccessPage />}
+                      />
+                    }
+                  />
+                )}
                 {/* redirect all other traffic to the budget page */}
                 <Route path="/*" element={<Navigate to="/budget" replace />} />
               </Routes>

@@ -3,24 +3,29 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button2';
 import { Link } from '../../common/Link';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
+import { type OpenIdConfig, OpenIdForm } from './OpenIdForm';
 
 export function Bootstrap() {
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
+  const [loginMethod, setLoginMethod] = useState('password');
+  const refreshLoginMethods = useRefreshLoginMethods();
 
   const { checked } = useBootstrapped();
+  const navigate = useNavigate();
 
   function getErrorMessage(error) {
     switch (error) {
@@ -30,6 +35,12 @@ export function Bootstrap() {
         return 'Passwords do not match';
       case 'network-failure':
         return 'Unable to contact the server';
+      case 'missing-issuer':
+        return 'OpenID server cannot be empty';
+      case 'missing-client-id':
+        return 'Client ID cannot be empty';
+      case 'missing-client-secret':
+        return 'Client secret cannot be empty';
       default:
         return `An unknown error occurred: ${error}`;
     }
@@ -42,7 +53,20 @@ export function Bootstrap() {
     if (error) {
       setError(error);
     } else {
-      dispatch(loggedIn());
+      await refreshLoginMethods();
+      navigate('/login');
+    }
+  }
+
+  async function onSetOpenId(config: OpenIdConfig) {
+    setError(null);
+    const { error } = await send('subscribe-bootstrap', { openid: config });
+
+    if (error) {
+      setError(error);
+    } else {
+      await refreshLoginMethods();
+      navigate('/login');
     }
   }
 
@@ -55,7 +79,7 @@ export function Bootstrap() {
   }
 
   return (
-    <View style={{ maxWidth: 450, marginTop: -30 }}>
+    <View style={{ maxWidth: 450 }}>
       <Title text="Welcome to Actual!" />
       <Paragraph style={{ fontSize: 16, color: theme.pageTextDark }}>
         Actual is a super fast privacy-focused app for managing your finances.
@@ -84,19 +108,47 @@ export function Bootstrap() {
         </Text>
       )}
 
-      <ConfirmPasswordForm
-        buttons={
+      {loginMethod === 'password' && (
+        <>
+          <ConfirmPasswordForm
+            buttons={
+              <Button
+                variant="bare"
+                style={{
+                  fontSize: 15,
+                  color: theme.pageTextLink,
+                  marginRight: 15,
+                }}
+                onPress={onDemo}
+              >
+                Try Demo
+              </Button>
+            }
+            onSetPassword={onSetPassword}
+            onError={setError}
+          />
           <Button
-            variant="bare"
-            style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
-            onPress={onDemo}
+            style={{ fontSize: 15, color: theme.pageTextLink, marginTop: 10 }}
+            onPress={() => setLoginMethod('openid')}
+            variant="normal"
           >
-            Try Demo
+            Configure OpenID authentication instead (Advanced)
           </Button>
-        }
-        onSetPassword={onSetPassword}
-        onError={setError}
-      />
+        </>
+      )}
+
+      {loginMethod === 'openid' && (
+        <>
+          <OpenIdForm onSetOpenId={onSetOpenId} />
+          <Button
+            style={{ fontSize: 15, color: theme.pageTextLink, marginTop: 10 }}
+            variant="normal"
+            onPress={() => setLoginMethod('password')}
+          >
+            Configure password authentication instead
+          </Button>
+        </>
+      )}
     </View>
   );
 }

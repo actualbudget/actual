@@ -28,6 +28,7 @@ import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
+import { EditUserAccess } from './modals/EditAccess';
 import { EditField } from './modals/EditField';
 import { EditRule } from './modals/EditRule';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
@@ -40,6 +41,8 @@ import { LoadBackup } from './modals/LoadBackup';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
 import { NotesModal } from './modals/NotesModal';
+import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
+import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
 import { ReportBudgetMenuModal } from './modals/ReportBudgetMenuModal';
@@ -55,6 +58,7 @@ import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInputModal } from './modals/SingleInputModal';
 import { TransferModal } from './modals/TransferModal';
+import { TransferOwnership } from './modals/TransferOwnership';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
@@ -563,6 +567,24 @@ export function Modals() {
 
         case 'budget-list':
           return <BudgetListModal key={name} />;
+
+        case 'edit-access':
+          return (
+            <EditUserAccess
+              key={name}
+              defaultUserAccess={options.access}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'transfer-ownership':
+          return <TransferOwnership key={name} onSave={options.onSave} />;
+
+        case 'enable-openid':
+          return <OpenIDEnableModal key={name} onSave={options.onSave} />;
+
+        case 'enable-password-auth':
+          return <PasswordEnableModal key={name} onSave={options.onSave} />;
 
         default:
           console.error('Unknown modal:', name);

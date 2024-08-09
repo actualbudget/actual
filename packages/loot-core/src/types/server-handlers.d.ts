@@ -266,20 +266,50 @@ export interface ServerHandlers {
     { error: string } | { bootstrapped: unknown; hasServer: boolean }
   >;
 
-  'subscribe-bootstrap': (arg: { password }) => Promise<{ error?: string }>;
+  'subscribe-get-login-methods': () => Promise<{
+    methods?: { method: string; displayName: string; active: boolean }[];
+    error?: string;
+  }>;
 
-  'subscribe-get-user': () => Promise<{ offline: boolean } | null>;
+  'subscribe-bootstrap': (arg: {
+    password?: string;
+    openid?: {
+      issuer: string;
+      client_id: string;
+      client_secret: string;
+      server_hostname: string;
+    };
+  }) => Promise<{ error?: string }>;
+
+  'subscribe-get-user': () => Promise<{
+    offline: boolean;
+    userName?: string;
+    userId?: string;
+    displayName?: string;
+    permissions?: string[];
+    loginMethod?: string;
+    tokenExpired?: boolean;
+  } | null>;
 
   'subscribe-change-password': (arg: {
     password;
   }) => Promise<{ error?: string }>;
 
-  'subscribe-sign-in': (arg: {
-    password;
-    loginMethod?: string;
-  }) => Promise<{ error?: string }>;
+  'subscribe-sign-in': (
+    arg:
+      | {
+          password;
+          loginMethod?: string;
+        }
+      | {
+          return_url;
+          loginMethod?: 'openid';
+        },
+  ) => Promise<{ error?: string }>;
 
   'subscribe-sign-out': () => Promise<'ok'>;
+
+  'subscribe-set-token': (arg: { token: string }) => Promise<void>;
 
   'get-server-version': () => Promise<{ error?: string } | { version: string }>;
 
@@ -348,4 +378,15 @@ export interface ServerHandlers {
   'get-last-opened-backup': () => Promise<string | null>;
 
   'app-focused': () => Promise<void>;
+
+  'enable-openid': (arg: {
+    openId?: {
+      issuer: string;
+      client_id: string;
+      client_secret: string;
+      server_hostname: string;
+    };
+  }) => Promise<{ error?: string }>;
+
+  'enable-password': (arg: { password: string }) => Promise<{ error?: string }>;
 }

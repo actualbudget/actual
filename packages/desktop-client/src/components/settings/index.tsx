@@ -24,6 +24,7 @@ import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
+import { AuthSettings } from './AuthSettings';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
@@ -176,6 +177,7 @@ export function Settings() {
         {isElectron() && <GlobalSettings />}
         <ThemeSettings />
         <FormatSettings />
+        <AuthSettings />
         <EncryptionSettings />
         {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
         <ExportBudget />

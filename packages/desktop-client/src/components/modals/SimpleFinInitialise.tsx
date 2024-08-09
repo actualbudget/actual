@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
 
+import { getSecretsError } from 'loot-core/shared/errors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
@@ -27,6 +28,7 @@ export const SimpleFinInitialise = ({
   const [token, setToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('It is required to provide a token.');
 
   const onSubmit = async (close: () => void) => {
     if (!token) {
@@ -36,12 +38,18 @@ export const SimpleFinInitialise = ({
 
     setIsLoading(true);
 
-    await send('secret-set', {
-      name: 'simplefin_token',
-      value: token,
-    });
+    const { error, reason } =
+      (await send('secret-set', {
+        name: 'simplefin_token',
+        value: token,
+      })) || {};
 
-    onSuccess();
+    if (error) {
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+    } else {
+      onSuccess();
+    }
     setIsLoading(false);
     close();
   };
@@ -82,7 +90,7 @@ export const SimpleFinInitialise = ({
               />
             </FormField>
 
-            {!isValid && <Error>It is required to provide a token.</Error>}
+            {!isValid && <Error>{error}</Error>}
           </View>
 
           <ModalButtons>

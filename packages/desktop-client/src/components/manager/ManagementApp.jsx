@@ -2,15 +2,18 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import { ProtectedRoute } from '../../auth/ProtectedRoute';
+import { Permissions } from '../../auth/types';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { ExposeNavigate } from '../../util/router-tools';
+import { UserDirectoryPage } from '../admin/UserDirectory/UserDirectoryPage';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
-import { useServerVersion } from '../ServerContext';
+import { useMultiuserEnabled, useServerVersion } from '../ServerContext';
 
 import { BudgetList } from './BudgetList';
 import { ConfigServer } from './ConfigServer';
@@ -20,6 +23,7 @@ import { Bootstrap } from './subscribe/Bootstrap';
 import { ChangePassword } from './subscribe/ChangePassword';
 import { Error } from './subscribe/Error';
 import { Login } from './subscribe/Login';
+import { OpenIdCallback } from './subscribe/OpenIdCallback';
 import { WelcomeScreen } from './WelcomeScreen';
 
 function Version() {
@@ -50,6 +54,8 @@ function Version() {
 export function ManagementApp({ isLoading }) {
   const files = useSelector(state => state.budgets.allFiles);
   const userData = useSelector(state => state.user.data);
+  const multiuserEnabled = useMultiuserEnabled();
+
   const managerHasInitialized = useSelector(
     state => state.app.managerHasInitialized,
   );
@@ -155,6 +161,18 @@ export function ManagementApp({ isLoading }) {
                   ) : (
                     <Route path="/" element={<WelcomeScreen />} />
                   )}
+
+                  {multiuserEnabled && (
+                    <Route
+                      path="/user-directory"
+                      element={
+                        <ProtectedRoute
+                          permission={Permissions.ADMINISTRATOR}
+                          element={<UserDirectoryPage />}
+                        />
+                      }
+                    />
+                  )}
                   {/* Redirect all other pages to this route */}
                   <Route path="/*" element={<Navigate to="/" />} />
                 </Routes>
@@ -184,10 +202,23 @@ export function ManagementApp({ isLoading }) {
               </>
             ) : (
               <Routes>
-                <Route path="/login/:method?" element={<Login />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/openid-cb" element={<OpenIdCallback />} />
                 <Route path="/error" element={<Error />} />
                 <Route path="/config-server" element={<ConfigServer />} />
                 <Route path="/bootstrap" element={<Bootstrap />} />
+                {multiuserEnabled && (
+                  <Route
+                    path="/userdirectory"
+                    element={
+                      <ProtectedRoute
+                        permission={Permissions.ADMINISTRATOR}
+                        element={<UserDirectoryPage />}
+                      />
+                    }
+                  />
+                )}
+
                 {/* Redirect all other pages to this route */}
                 <Route
                   path="/*"

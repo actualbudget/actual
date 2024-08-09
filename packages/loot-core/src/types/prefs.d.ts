@@ -68,3 +68,5 @@ export type GlobalPrefs = Partial<{
   theme: Theme;
   documentDir: string; // Electron only
 }>;
+
+export type AuthMethods = 'password' | 'openid';
