@@ -27,31 +27,6 @@ export interface ServerHandlers {
 
   redo: () => Promise<void>;
 
-  'transactions-batch-update': (
-    arg: Omit<
-      Parameters<typeof batchUpdateTransactions>[0],
-      'detectOrphanPayees'
-    >,
-  ) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>>;
-
-  'transaction-add': (transaction) => Promise<EmptyObject>;
-
-  'transaction-delete': (transaction) => Promise<EmptyObject>;
-
-  'transactions-parse-file': (arg: {
-    filepath: string;
-    options;
-  }) => Promise<ParseFileResult>;
-
-  'transactions-export': (arg: {
-    transactions;
-    accounts?;
-    categoryGroups;
-    payees;
-  }) => Promise<unknown>;
-
-  'transactions-export-query': (arg: { query: QueryState }) => Promise<unknown>;
-
   'get-categories': () => Promise<{
     grouped: Array<CategoryGroupEntity>;
     list: Array<CategoryEntity>;
@@ -222,17 +197,6 @@ export interface ServerHandlers {
     newTransactions;
     matchedTransactions;
     updatedAccounts;
-  }>;
-
-  'transactions-import': (arg: {
-    accountId;
-    transactions;
-    isPreview;
-  }) => Promise<{
-    errors?: { message: string }[];
-    added;
-    updated;
-    updatedPreview;
   }>;
 
   'account-unlink': (arg: { id }) => Promise<'ok'>;
