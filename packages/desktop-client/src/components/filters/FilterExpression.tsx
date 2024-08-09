@@ -6,7 +6,7 @@ import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
 import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -42,6 +42,8 @@ export function FilterExpression<T extends RuleConditionEntity>({
   const triggerRef = useRef(null);
 
   const field = subfieldFromFilter({ field: originalField, value });
+  const displayField = mapField(field, options);
+  const displayOp = friendlyOp(op, null);
 
   return (
     <View
@@ -57,9 +59,10 @@ export function FilterExpression<T extends RuleConditionEntity>({
     >
       <Button
         ref={triggerRef}
-        type="bare"
-        disabled={customName != null}
-        onClick={() => setEditing(true)}
+        variant="bare"
+        aria-label={`${displayField} ${displayOp} ${value} filter`}
+        isDisabled={customName != null}
+        onPress={() => setEditing(true)}
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
@@ -67,9 +70,9 @@ export function FilterExpression<T extends RuleConditionEntity>({
           ) : (
             <>
               <Text style={{ color: theme.pageTextPositive }}>
-                {mapField(field, options)}
+                {displayField}
               </Text>{' '}
-              <Text>{friendlyOp(op, null)}</Text>{' '}
+              <Text>{displayOp}</Text>{' '}
               <Value
                 value={value}
                 field={field}
@@ -84,7 +87,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
           )}
         </div>
       </Button>
-      <Button type="bare" onClick={onDelete} aria-label="Delete filter">
+      <Button variant="bare" onPress={onDelete} aria-label="Delete filter">
         <SvgDelete
           style={{
             width: 8,

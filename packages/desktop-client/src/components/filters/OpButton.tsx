@@ -3,7 +3,7 @@ import React from 'react';
 import { friendlyOp } from 'loot-core/src/shared/rules';
 
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 
 type OpButtonProps = {
   op: string;
@@ -13,24 +13,30 @@ type OpButtonProps = {
 };
 
 export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
+  const displayOp = friendlyOp(op);
   return (
     <Button
-      type="bare"
-      style={{
-        backgroundColor: theme.pillBackground,
+      variant="bare"
+      aria-label={`${displayOp} op`}
+      style={({ isHovered, isPressed }) => ({
         marginBottom: 5,
         ...style,
-        ...(selected && {
-          color: theme.buttonNormalSelectedText,
-          '&,:hover,:active': {
-            backgroundColor: theme.buttonNormalSelectedBackground,
-            color: theme.buttonNormalSelectedText,
-          },
-        }),
-      }}
-      onClick={onClick}
+        ...(selected
+          ? {
+              color: theme.pillTextSelected,
+              backgroundColor: theme.pillBackgroundSelected,
+            }
+          : isHovered || isPressed
+            ? {
+                backgroundColor: theme.pillBackgroundHover,
+              }
+            : {
+                backgroundColor: theme.pillBackground,
+              }),
+      })}
+      onPress={onClick}
     >
-      {friendlyOp(op)}
+      {displayOp}
     </Button>
   );
 }

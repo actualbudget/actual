@@ -27,7 +27,7 @@ import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { TextOneLine } from '../common/TextOneLine';
 import { View } from '../common/View';
 
@@ -438,9 +438,10 @@ export function PayeeAutocomplete({
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
                 <Button
-                  type={focusTransferPayees ? 'menuSelected' : 'menu'}
+                  variant={focusTransferPayees ? 'menuSelected' : 'menu'}
+                  aria-label="Make transfer"
                   style={showManagePayees && { marginBottom: 5 }}
-                  onClick={() => {
+                  onPress={() => {
                     onUpdate?.(null, null);
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
@@ -449,7 +450,11 @@ export function PayeeAutocomplete({
                 </Button>
               )}
               {showManagePayees && (
-                <Button type="menu" onClick={() => onManagePayees()}>
+                <Button
+                  variant="menu"
+                  aria-label="Manage payees"
+                  onPress={() => onManagePayees()}
+                >
                   Manage Payees
                 </Button>
               )}
