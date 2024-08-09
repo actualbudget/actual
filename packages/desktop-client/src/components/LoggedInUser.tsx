@@ -1,8 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
-
-import { type State } from 'loot-core/src/client/state-types';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 import { useActions } from '../hooks/useActions';
 import { theme, styles, type CSSProperties } from '../style';
@@ -16,15 +13,16 @@ import { useServerURL } from './ServerContext';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
+  syncState: null | 'offline' | 'local' | 'disabled' | 'error';
   style?: CSSProperties;
   color?: string;
 };
 export function LoggedInUser({
   hideIfNoServer,
+  syncState,
   style,
   color,
 }: LoggedInUserProps) {
-  const userData = useSelector((state: State) => state.user.data);
   const { getUserData, signOut, closeBudget } = useActions();
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -62,17 +60,17 @@ export function LoggedInUser({
     }
   }
 
-  function serverMessage() {
+  const serverMessage = useMemo(() => {
     if (!serverUrl) {
       return 'No server';
     }
 
-    if (userData?.offline) {
+    if (syncState === 'offline') {
       return 'Server offline';
     }
 
     return 'Server online';
-  }
+  }, [serverUrl, syncState]);
 
   if (hideIfNoServer && !serverUrl) {
     return null;
@@ -101,7 +99,7 @@ export function LoggedInUser({
         onPress={() => setMenuOpen(true)}
         style={color && { color }}
       >
-        {serverMessage()}
+        {serverMessage}
       </Button>
 
       <Popover
@@ -113,7 +111,7 @@ export function LoggedInUser({
           onMenuSelect={onMenuSelect}
           items={[
             serverUrl &&
-              !userData?.offline && {
+              syncState === null && {
                 name: 'change-password',
                 text: 'Change password',
               },
