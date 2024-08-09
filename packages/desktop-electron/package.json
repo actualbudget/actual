@@ -29,7 +29,7 @@
       "icon": "icons/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "artifactName": "${productName}-mac.${ext}",
+      "artifactName": "${productName}-mac-${arch}.${ext}",
       "notarize": {
         "teamId": "79ANZ983YF"
       },
