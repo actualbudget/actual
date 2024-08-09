@@ -10,10 +10,10 @@ import { QueryState } from '../../../shared/query';
 
 export interface TransactionsHandler {
   'transactions-batch-update': (arg: {
-    added: Partial<TransactionEntity | NewTransactionEntity>[];
-    deleted: Partial<TransactionEntity | NewTransactionEntity>[];
-    updated: Partial<TransactionEntity | NewTransactionEntity>[];
-    learnCategories: boolean
+    added?: Partial<TransactionEntity | NewTransactionEntity>[];
+    deleted?: Partial<TransactionEntity | NewTransactionEntity>[];
+    updated?: Partial<TransactionEntity | NewTransactionEntity>[];
+    learnCategories?: boolean
   }) => Promise<object>;
 
   'transaction-add': (transaction: any) => Promise<object>;
