@@ -75,7 +75,7 @@ export function WelcomeScreen() {
           <Button onPress={() => createBudget({ testMode: true })}>
             View demo
           </Button>
-          <Button variant="primary" onPress={() => createBudget()}>
+          <Button variant="primary" autoFocus onPress={() => createBudget()}>
             Start fresh
           </Button>
         </View>

@@ -81,6 +81,7 @@ export function PostsOfflineNotification() {
             <Button onPress={close}>Decide later</Button>
             <Button
               variant="primary"
+              autoFocus
               onPress={() => {
                 onPost();
                 close();

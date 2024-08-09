@@ -140,6 +140,7 @@ export function AccountSyncCheck() {
               <Button onPress={unlink}>Unlink</Button>
               <Button
                 variant="primary"
+                autoFocus
                 onPress={reauth}
                 style={{ marginLeft: 5 }}
               >

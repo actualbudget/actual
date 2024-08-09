@@ -67,7 +67,7 @@ export function ConfirmCategoryDelete({
             {group ? (
               <Block>
                 Categories in the group <strong>{group.name}</strong> are used
-                by existing transaction
+                by existing transactions
                 {!isIncome &&
                   ' or it has a positive leftover balance currently'}
                 . <strong>Are you sure you want to delete it?</strong> If so,
@@ -115,6 +115,7 @@ export function ConfirmCategoryDelete({
                           }))
                   }
                   value={transferCategory}
+                  focused={true}
                   inputProps={{
                     placeholder: 'Select category...',
                   }}

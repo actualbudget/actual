@@ -206,6 +206,7 @@ export function GoCardlessExternalMsg({
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Button
             variant="primary"
+            autoFocus
             style={{
               padding: '10px 0',
               fontSize: 15,
@@ -272,6 +273,7 @@ export function GoCardlessExternalMsg({
             ) : success ? (
               <Button
                 variant="primary"
+                autoFocus
                 style={{
                   padding: '10px 0',
                   fontSize: 15,

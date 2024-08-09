@@ -3,6 +3,7 @@ import React from 'react';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
+import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
@@ -48,16 +49,18 @@ export function ConfirmTransactionDelete({
               >
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                style={narrowButtonStyle}
-                onPress={() => {
-                  onConfirm();
-                  close();
-                }}
-              >
-                Delete
-              </Button>
+              <InitialFocus>
+                <Button
+                  variant="primary"
+                  style={narrowButtonStyle}
+                  onPress={() => {
+                    onConfirm();
+                    close();
+                  }}
+                >
+                  Delete
+                </Button>
+              </InitialFocus>
             </View>
           </View>
         </>

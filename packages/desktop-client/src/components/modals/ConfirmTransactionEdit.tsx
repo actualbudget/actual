@@ -3,6 +3,7 @@ import React from 'react';
 
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
+import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 
@@ -88,16 +89,18 @@ export function ConfirmTransactionEdit({
                 >
                   Cancel
                 </Button>
-                <Button
-                  aria-label="Confirm"
-                  variant="primary"
-                  onPress={() => {
-                    close();
-                    onConfirm();
-                  }}
-                >
-                  Confirm
-                </Button>
+                <InitialFocus>
+                  <Button
+                    aria-label="Confirm"
+                    variant="primary"
+                    onPress={() => {
+                      close();
+                      onConfirm();
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                </InitialFocus>
               </View>
             </View>
           </View>
