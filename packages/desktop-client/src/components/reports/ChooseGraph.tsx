@@ -146,6 +146,7 @@ export function ChooseGraph({
         viewLabels={viewLabels}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showTooltip={showTooltip}
       />
     );
   }

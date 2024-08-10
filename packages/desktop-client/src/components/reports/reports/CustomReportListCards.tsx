@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
+import { addNotification } from 'loot-core/src/client/actions';
+import { calculateHasWarning } from 'loot-core/src/client/reports';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
@@ -8,56 +11,76 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayees } from '../../../hooks/usePayees';
-import { useResponsive } from '../../../ResponsiveProvider';
+import { SvgExclamationSolid } from '../../../icons/v1';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
+import { InitialFocus } from '../../common/InitialFocus';
+import { Input } from '../../common/Input';
 import { Text } from '../../common/Text';
+import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 
 import { GetCardData } from './GetCardData';
-import { ListCardsPopover } from './ListCardsPopover';
+import { MissingReportCard } from './MissingReportCard';
 
-function index(data: CustomReportEntity[]): { [key: string]: boolean }[] {
-  return data.reduce((carry, report) => {
-    const reportId: string = report.id === undefined ? '' : report.id;
-
-    return {
-      ...carry,
-      [reportId]: false,
-    };
-  }, []);
-}
+type CustomReportListCardsProps = {
+  isEditing?: boolean;
+  report?: CustomReportEntity;
+  onRemove: () => void;
+};
 
 export function CustomReportListCards({
-  reports,
-}: {
-  reports: CustomReportEntity[];
+  isEditing,
+  report,
+  onRemove,
+}: CustomReportListCardsProps) {
+  // It's possible for a dashboard to reference a non-existing
+  // custom report
+  if (!report) {
+    return (
+      <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
+        This custom report has been deleted.
+      </MissingReportCard>
+    );
+  }
+
+  return (
+    <CustomReportListCardsInner
+      isEditing={isEditing}
+      report={report}
+      onRemove={onRemove}
+    />
+  );
+}
+
+function CustomReportListCardsInner({
+  isEditing,
+  report,
+  onRemove,
+}: Omit<CustomReportListCardsProps, 'report'> & {
+  report: CustomReportEntity;
 }) {
-  const result: { [key: string]: boolean }[] = index(reports);
-  const [reportMenu, setReportMenu] = useState(result);
-  const [deleteMenuOpen, setDeleteMenuOpen] = useState(result);
-  const [nameMenuOpen, setNameMenuOpen] = useState(result);
-  const [err, setErr] = useState('');
-  const [name, setName] = useState('');
+  const dispatch = useDispatch();
+
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [earliestTransaction, setEarliestTransaction] = useState('');
 
   const payees = usePayees();
   const accounts = useAccounts();
   const categories = useCategories();
+
+  const hasWarning = calculateHasWarning(report, {
+    categories: categories.list,
+    payees,
+    accounts,
+  });
+
   const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const { isNarrowWidth } = useResponsive();
-
-  const [isCardHovered, setIsCardHovered] = useState('');
-
-  const onDelete = async (reportData: string) => {
-    setName('');
-    await send('report/delete', reportData);
-    onDeleteMenuOpen(reportData === undefined ? '' : reportData, false);
-  };
 
   useEffect(() => {
     async function run() {
@@ -67,141 +90,128 @@ export function CustomReportListCards({
     run();
   }, []);
 
-  const onAddUpdate = async ({
-    reportData,
-  }: {
-    reportData?: CustomReportEntity;
-  }) => {
-    if (!reportData) {
-      return null;
-    }
-
+  const onSaveName = async (name: string) => {
     const updatedReport = {
-      ...reportData,
+      ...report,
       name,
     };
 
     const response = await sendCatch('report/update', updatedReport);
 
     if (response.error) {
-      setErr(response.error.message);
-      onNameMenuOpen(reportData.id === undefined ? '' : reportData.id, true);
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: `Failed saving report name: ${response.error.message}`,
+        }),
+      );
+      setNameMenuOpen(true);
       return;
     }
 
-    onNameMenuOpen(reportData.id === undefined ? '' : reportData.id, false);
+    setNameMenuOpen(false);
   };
 
-  const onMenuSelect = async (item: string, report: CustomReportEntity) => {
-    if (item === 'delete') {
-      onMenuOpen(report.id, false);
-      onDeleteMenuOpen(report.id, true);
-      setErr('');
-    }
-    if (item === 'rename') {
-      onMenuOpen(report.id, false);
-      onNameMenuOpen(report.id, true);
-      setName(report.name);
-      setErr('');
-    }
-  };
-
-  const onMenuOpen = (item: string, state: boolean) => {
-    setReportMenu({ ...reportMenu, [item]: state });
-  };
-
-  const onDeleteMenuOpen = (item: string, state: boolean) => {
-    setDeleteMenuOpen({ ...deleteMenuOpen, [item]: state });
-  };
-
-  const onNameMenuOpen = (item: string, state: boolean) => {
-    setNameMenuOpen({ ...nameMenuOpen, [item]: state });
-  };
-
-  if (reports.length === 0) return null;
   return (
-    <>
-      {reports.map((report, id) => (
+    <ReportCard
+      isEditing={isEditing}
+      to="/reports/custom"
+      report={report}
+      menuItems={[
+        {
+          name: 'rename',
+          text: 'Rename',
+        },
+        {
+          name: 'remove',
+          text: 'Remove',
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+          case 'rename':
+            setNameMenuOpen(true);
+            break;
+        }
+      }}
+    >
+      <View style={{ flex: 1, padding: 10 }}>
         <View
-          key={id}
           style={{
-            flex: isNarrowWidth ? '1 1' : `0 0 calc(100% / 3 - 20px)`,
+            flexShrink: 0,
+            paddingBottom: 5,
           }}
         >
-          <ReportCard to="/reports/custom" report={report}>
-            <View
-              style={{ flex: 1, padding: 10 }}
-              onMouseEnter={() =>
-                setIsCardHovered(report.id === undefined ? '' : report.id)
-              }
-              onMouseLeave={() => {
-                setIsCardHovered('');
-                onMenuOpen(report.id === undefined ? '' : report.id, false);
-              }}
-            >
-              <View
+          <View style={{ flex: 1 }}>
+            {nameMenuOpen ? (
+              <InitialFocus>
+                <Input
+                  className={NON_DRAGGABLE_AREA_CLASS_NAME}
+                  defaultValue={report.name}
+                  onEnter={e =>
+                    onSaveName((e.target as HTMLInputElement).value)
+                  }
+                  onBlur={e => onSaveName(e.target.value)}
+                  onEscape={() => setNameMenuOpen(false)}
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 500,
+                    marginTop: -6,
+                    marginBottom: -1,
+                    marginLeft: -6,
+                    width: Math.max(20, report.name.length) + 'ch',
+                  }}
+                />
+              </InitialFocus>
+            ) : (
+              <Block
                 style={{
-                  flexShrink: 0,
-                  paddingBottom: 5,
+                  ...styles.mediumText,
+                  fontWeight: 500,
+                  marginBottom: 5,
                 }}
+                role="heading"
               >
-                <View style={{ flex: 1 }}>
-                  <Block
-                    style={{
-                      ...styles.mediumText,
-                      fontWeight: 500,
-                      marginBottom: 5,
-                    }}
-                    role="heading"
-                  >
-                    {report.name}
-                  </Block>
-                  {report.isDateStatic ? (
-                    <DateRange start={report.startDate} end={report.endDate} />
-                  ) : (
-                    <Text style={{ color: theme.pageTextSubdued }}>
-                      {report.dateRange}
-                    </Text>
-                  )}
-                </View>
-              </View>
-              <GetCardData
-                report={report}
-                payees={payees}
-                accounts={accounts}
-                categories={categories}
-                earliestTransaction={earliestTransaction}
-                firstDayOfWeekIdx={firstDayOfWeekIdx}
-              />
-            </View>
-          </ReportCard>
-          <View
-            style={{
-              textAlign: 'right',
-              position: 'absolute',
-              right: 10,
-              top: 10,
-            }}
-          >
-            <ListCardsPopover
-              report={report}
-              onMenuOpen={onMenuOpen}
-              isCardHovered={isCardHovered}
-              reportMenu={reportMenu}
-              onMenuSelect={onMenuSelect}
-              nameMenuOpen={nameMenuOpen}
-              name={name}
-              setName={setName}
-              onAddUpdate={onAddUpdate}
-              err={err}
-              onNameMenuOpen={onNameMenuOpen}
-              deleteMenuOpen={deleteMenuOpen}
-              onDeleteMenuOpen={onDeleteMenuOpen}
-              onDelete={onDelete}
-            />
+                {report.name}
+              </Block>
+            )}
+            {report.isDateStatic ? (
+              <DateRange start={report.startDate} end={report.endDate} />
+            ) : (
+              <Text style={{ color: theme.pageTextSubdued }}>
+                {report.dateRange}
+              </Text>
+            )}
           </View>
         </View>
-      ))}
-    </>
+        <GetCardData
+          report={report}
+          payees={payees}
+          accounts={accounts}
+          categories={categories}
+          earliestTransaction={earliestTransaction}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
+          showTooltip={!isEditing}
+        />
+      </View>
+      {hasWarning && (
+        <View style={{ padding: 5, position: 'absolute', bottom: 0 }}>
+          <Tooltip
+            content="The widget is configured to use a non-existing filter value (i.e. category/account/payee). Edit the filters used in this report widget to remove the warning."
+            placement="bottom start"
+            style={{ ...styles.tooltip, maxWidth: 300 }}
+          >
+            <SvgExclamationSolid
+              width={20}
+              height={20}
+              style={{ color: theme.warningText }}
+            />
+          </Tooltip>
+        </View>
+      )}
+    </ReportCard>
   );
 }

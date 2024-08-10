@@ -11,6 +11,7 @@ import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { chartTheme } from '../chart-theme';
+import { Container } from '../Container';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
@@ -67,7 +68,7 @@ function CustomLabel({
   );
 }
 
-export function CashFlowCard() {
+export function CashFlowCard({ isEditing, onRemove }) {
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
 
@@ -83,7 +84,25 @@ export function CashFlowCard() {
   const income = graphData?.income || 0;
 
   return (
-    <ReportCard to="/reports/cash-flow">
+    <ReportCard
+      isEditing={isEditing}
+      to="/reports/cash-flow"
+      menuItems={[
+        {
+          name: 'remove',
+          text: 'Remove',
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}
@@ -109,35 +128,50 @@ export function CashFlowCard() {
         </View>
 
         {data ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={[
-                {
-                  income,
-                  expenses,
-                },
-              ]}
-              margin={{
-                top: 10,
-                bottom: 0,
-              }}
-            >
-              <Bar dataKey="income" fill={chartTheme.colors.blue} barSize={14}>
-                <LabelList
-                  dataKey="income"
-                  position="left"
-                  content={<CustomLabel name="Income" />}
-                />
-              </Bar>
-              <Bar dataKey="expenses" fill={chartTheme.colors.red} barSize={14}>
-                <LabelList
-                  dataKey="expenses"
-                  position="right"
-                  content={<CustomLabel name="Expenses" />}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <Container style={{ height: 'auto', flex: 1 }}>
+            {(width, height) => (
+              <ResponsiveContainer>
+                <BarChart
+                  width={width}
+                  height={height}
+                  data={[
+                    {
+                      income,
+                      expenses,
+                    },
+                  ]}
+                  margin={{
+                    top: 10,
+                    bottom: 0,
+                  }}
+                >
+                  <Bar
+                    dataKey="income"
+                    fill={chartTheme.colors.blue}
+                    barSize={14}
+                  >
+                    <LabelList
+                      dataKey="income"
+                      position="left"
+                      content={<CustomLabel name="Income" />}
+                    />
+                  </Bar>
+
+                  <Bar
+                    dataKey="expenses"
+                    fill={chartTheme.colors.red}
+                    barSize={14}
+                  >
+                    <LabelList
+                      dataKey="expenses"
+                      position="right"
+                      content={<CustomLabel name="Expenses" />}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </Container>
         ) : (
           <LoadingIndicator />
         )}
