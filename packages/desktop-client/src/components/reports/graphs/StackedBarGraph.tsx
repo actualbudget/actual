@@ -27,7 +27,6 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -171,7 +170,6 @@ export function StackedBarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
-  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
@@ -257,7 +255,7 @@ export function StackedBarGraph({
                         }
                       }}
                       onClick={e =>
-                        !isNarrowWidth &&
+                        !showTooltip &&
                         !['Group', 'Interval'].includes(groupBy) &&
                         showActivity({
                           navigate,
