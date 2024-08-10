@@ -1976,7 +1976,7 @@ app.combine(
   filtersApp,
   reportsApp,
   rulesApp,
-  transactionsApp
+  transactionsApp,
 );
 
 function getDefaultDocumentDir() {
