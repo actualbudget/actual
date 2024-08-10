@@ -92,6 +92,9 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="iterableTopologicalSort">
               Iterable topological sort budget
             </FeatureToggle>
+            <FeatureToggle flag="dashboards">
+              Customizable reports page (dashboards)
+            </FeatureToggle>
           </View>
         ) : (
           <Link
