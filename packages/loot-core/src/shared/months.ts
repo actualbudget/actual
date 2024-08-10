@@ -216,6 +216,10 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
   return d.isAfter(_parse(month1), _parse(month2));
 }
 
+export function isCurrentMonth(month: DateLike): boolean {
+  return month === currentMonth();
+}
+
 // TODO: This doesn't really fit in this module anymore, should
 // probably live elsewhere
 export function bounds(month: DateLike): { start: number; end: number } {
