@@ -4,8 +4,6 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-import { css } from 'glamor';
-
 import {
   addNotification,
   removeNotification,
@@ -25,11 +23,9 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
 import { breakpoints } from '../../tokens';
 import { Button } from '../common/Button2';
-import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { MenuButton } from '../common/MenuButton';
 import { Popover } from '../common/Popover';
-import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
@@ -64,77 +60,6 @@ function useWidgetLayout(widgets: Widget[]): (Layout & {
     minH: isCustomReportWidget(widget) ? 1 : 2,
     meta: widget.meta,
   }));
-}
-
-function OldOverview() {
-  const { data: customReports } = useReports();
-  const { isNarrowWidth } = useResponsive();
-
-  const location = useLocation();
-  sessionStorage.setItem('url', location.pathname);
-
-  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
-
-  const accounts = useAccounts();
-  return (
-    <Page
-      header={
-        isNarrowWidth ? (
-          <MobilePageHeader title="Reports" />
-        ) : (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginRight: 15,
-            }}
-          >
-            <PageHeader title="Reports" />
-            {!isNarrowWidth && (
-              <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
-                <Button variant="primary">
-                  <Text>Create new custom report</Text>
-                </Button>
-              </Link>
-            )}
-          </View>
-        )
-      }
-      padding={0}
-      style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
-    >
-      <View
-        className={`${css({
-          flex: '0 0 auto',
-          flexDirection: isNarrowWidth ? 'column' : 'row',
-          flexWrap: isNarrowWidth ? 'nowrap' : 'wrap',
-          padding: '10',
-          '> a, > div': {
-            margin: '10',
-          },
-        })}`}
-      >
-        <NetWorthCard
-          isEditing={false}
-          accounts={accounts}
-          onRemove={() => {}}
-        />
-        <CashFlowCard isEditing={false} onRemove={() => {}} />
-        {spendingReportFeatureFlag && (
-          <SpendingCard isEditing={false} onRemove={() => {}} />
-        )}
-        {customReports.map((report, idx) => (
-          <CustomReportListCards
-            key={idx}
-            report={report}
-            onRemove={() => {
-              send('report/delete', report.id);
-            }}
-          />
-        ))}
-      </View>
-    </Page>
-  );
 }
 
 export function Overview() {
@@ -363,10 +288,6 @@ export function Overview() {
     return <LoadingIndicator message="Loading reports..." />;
   }
 
-  if (!isDashboardsFeatureEnabled) {
-    return <OldOverview />;
-  }
-
   return (
     <Page
       header={
@@ -474,59 +395,65 @@ export function Overview() {
                       >
                         Create new custom report
                       </Button>
-                      <Button
-                        isDisabled={isImporting}
-                        onPress={() => setIsEditing(true)}
-                      >
-                        Edit dashboard
-                      </Button>
+                      {isDashboardsFeatureEnabled && (
+                        <Button
+                          isDisabled={isImporting}
+                          onPress={() => setIsEditing(true)}
+                        >
+                          Edit dashboard
+                        </Button>
+                      )}
                     </>
                   )}
 
-                  <MenuButton
-                    ref={extraMenuTriggerRef}
-                    onPress={() => setExtraMenuOpen(true)}
-                  />
-                  <Popover
-                    triggerRef={extraMenuTriggerRef}
-                    isOpen={extraMenuOpen}
-                    onOpenChange={() => setExtraMenuOpen(false)}
-                  >
-                    <Menu
-                      onMenuSelect={item => {
-                        switch (item) {
-                          case 'reset':
-                            onResetDashboard();
-                            break;
-                          case 'export':
-                            onExport();
-                            break;
-                          case 'import':
-                            onImport();
-                            break;
-                        }
-                        setExtraMenuOpen(false);
-                      }}
-                      items={[
-                        {
-                          name: 'reset',
-                          text: 'Reset to default',
-                          disabled: isImporting,
-                        },
-                        Menu.line,
-                        {
-                          name: 'import',
-                          text: 'Import',
-                          disabled: isImporting,
-                        },
-                        {
-                          name: 'export',
-                          text: 'Export',
-                          disabled: isImporting,
-                        },
-                      ]}
-                    />
-                  </Popover>
+                  {isDashboardsFeatureEnabled && (
+                    <>
+                      <MenuButton
+                        ref={extraMenuTriggerRef}
+                        onPress={() => setExtraMenuOpen(true)}
+                      />
+                      <Popover
+                        triggerRef={extraMenuTriggerRef}
+                        isOpen={extraMenuOpen}
+                        onOpenChange={() => setExtraMenuOpen(false)}
+                      >
+                        <Menu
+                          onMenuSelect={item => {
+                            switch (item) {
+                              case 'reset':
+                                onResetDashboard();
+                                break;
+                              case 'export':
+                                onExport();
+                                break;
+                              case 'import':
+                                onImport();
+                                break;
+                            }
+                            setExtraMenuOpen(false);
+                          }}
+                          items={[
+                            {
+                              name: 'reset',
+                              text: 'Reset to default',
+                              disabled: isImporting,
+                            },
+                            Menu.line,
+                            {
+                              name: 'import',
+                              text: 'Import',
+                              disabled: isImporting,
+                            },
+                            {
+                              name: 'export',
+                              text: 'Export',
+                              disabled: isImporting,
+                            },
+                          ]}
+                        />
+                      </Popover>
+                    </>
+                  )}
                 </>
               )}
             </View>
