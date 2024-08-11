@@ -3,9 +3,8 @@ import { Arch, AfterPackContext } from 'electron-builder';
 
 const beforePackHook = async (context: AfterPackContext) => {
   const arch: string = Arch[context.arch];
-  const projectDir = context.packager.projectDir;
-  // const buildPath = projectDir + '/../loot-core';
-  const buildPath = projectDir;
+  const buildPath = context.packager.projectDir;
+  const projectRootPath = buildPath + '/../../';
   const electronVersion = context.packager.config.electronVersion;
   try {
     await rebuild({
@@ -13,8 +12,10 @@ const beforePackHook = async (context: AfterPackContext) => {
       buildPath,
       electronVersion,
       force: true,
-      onlyModules: ['loot-core'],
+      projectRootPath,
+      onlyModules: ['better-sqlite3'],
     });
+
     console.info(`Rebuilt better-sqlite3 with ${arch}!`);
   } catch (err) {
     console.error('beforePackHook failed', err);
