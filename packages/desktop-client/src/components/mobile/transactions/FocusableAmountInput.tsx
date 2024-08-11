@@ -14,8 +14,8 @@ import {
   currencyToAmount,
 } from 'loot-core/src/shared/util';
 
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { type CSSProperties, theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
 import { Button } from '../../common/Button';

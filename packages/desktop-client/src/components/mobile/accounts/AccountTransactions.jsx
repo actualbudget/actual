@@ -29,9 +29,9 @@ import { listen, send } from 'loot-core/platform/client/fetch';
 import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { styles, theme } from '../../../style';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';

@@ -12,8 +12,8 @@ import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';

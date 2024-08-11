@@ -1,5 +1,6 @@
-import { useLocalPref } from './useLocalPref';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+
+import { useLocalPref } from './useLocalPref';
 
 type SetSyncedPrefAction<K extends keyof SyncedPrefs> = (
   value: SyncedPrefs[K],

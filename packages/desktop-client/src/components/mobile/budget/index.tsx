@@ -27,8 +27,8 @@ import {
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';

@@ -4,8 +4,8 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { theme } from '../../../style';
 
 import { CategoryTransactions } from './CategoryTransactions';

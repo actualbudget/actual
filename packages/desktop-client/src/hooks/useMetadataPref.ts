@@ -1,5 +1,6 @@
-import { useLocalPref } from './useLocalPref';
 import { type MetadataPrefs } from 'loot-core/src/types/prefs';
+
+import { useLocalPref } from './useLocalPref';
 
 type SetMetadataPrefAction<K extends keyof MetadataPrefs> = (
   value: MetadataPrefs[K],

@@ -4,9 +4,9 @@ import { useParams } from 'react-router-dom';
 
 import { useAccount } from '../../../hooks/useAccount';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { theme, styles } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';

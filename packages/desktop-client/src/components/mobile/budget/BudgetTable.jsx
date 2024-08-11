@@ -10,8 +10,8 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgLogo } from '../../../icons/logo';
 import { SvgExpandArrow } from '../../../icons/v0';
 import {

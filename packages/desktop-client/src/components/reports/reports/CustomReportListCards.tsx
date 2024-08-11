@@ -6,8 +6,8 @@ import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { usePayees } from '../../../hooks/usePayees';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';

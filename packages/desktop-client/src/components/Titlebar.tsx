@@ -9,9 +9,9 @@ import { isDevelopmentEnvironment } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../hooks/useActions';
 import { useGlobalPref } from '../hooks/useGlobalPref';
-import { useSyncedPref } from '../hooks/useSyncedPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
+import { useSyncedPref } from '../hooks/useSyncedPref';
 import { SvgArrowLeft } from '../icons/v1';
 import {
   SvgAlertTriangle,

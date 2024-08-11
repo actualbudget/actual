@@ -6,9 +6,9 @@ import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgAdd } from '../../../icons/v1';
 import { theme, styles } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';

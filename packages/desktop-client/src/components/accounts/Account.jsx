@@ -34,7 +34,6 @@ import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { usePayees } from '../../hooks/usePayees';
 import { usePreviewTransactions } from '../../hooks/usePreviewTransactions';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
@@ -42,6 +41,7 @@ import {
   SplitsExpandedProvider,
   useSplitsExpanded,
 } from '../../hooks/useSplitsExpanded';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
