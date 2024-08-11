@@ -39,12 +39,12 @@ export function ToBudgetAmount({
   });
   const format = useFormat();
   const availableValue = sheetValue;
-  if (typeof availableValue !== 'number') {
+  if (typeof availableValue !== 'number' && availableValue !== null) {
     throw new Error(
       'Expected availableValue to be a number but got ' + availableValue,
     );
   }
-  const num = isNaN(availableValue) ? 0 : availableValue;
+  const num = availableValue ?? 0;
   const isNegative = num < 0;
 
   return (
