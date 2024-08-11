@@ -129,20 +129,21 @@ export function OpSelect({
   }, [ops, type]);
 
   return (
-    <Select
-      bare
-      options={opOptions}
-      value={value}
-      onChange={value => onChange('op', value)}
-      buttonStyle={style}
-      data-testid="op-select"
-    />
+    <View data-testid="op-select">
+      <Select
+        bare
+        options={opOptions}
+        value={value}
+        onChange={value => onChange('op', value)}
+        buttonStyle={style}
+      />
+    </View>
   );
 }
 
 function SplitAmountMethodSelect({ options, style, value, onChange }) {
   return (
-    <View style={{ color: theme.pageTextPositive, ...style }}>
+    <View style={{ color: theme.pageTextPositive, ...style }} data-testid="field-select">
       <Select
         bare
         options={options}
