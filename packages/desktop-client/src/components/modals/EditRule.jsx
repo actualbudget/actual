@@ -445,7 +445,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
       ) : null}
 
       <Stack direction="row">
-        <EditorButtons onAdd={onAdd} onDelete={op === 'set' && onDelete} />
+        <EditorButtons onAdd={onAdd} onDelete={(op === 'set' || op === 'prepend-notes' || op === 'append-notes') && onDelete} />
       </Stack>
     </Editor>
   );
