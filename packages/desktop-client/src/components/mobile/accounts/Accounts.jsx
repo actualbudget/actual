@@ -6,7 +6,7 @@ import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { SvgAdd } from '../../../icons/v1';
@@ -249,9 +249,9 @@ export function Accounts() {
   const dispatch = useDispatch();
   const accounts = useAccounts();
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  const [_numberFormat] = useLocalPref('numberFormat');
+  const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useLocalPref('hideFraction');
+  const [hideFraction = false] = useSyncedPref('hideFraction');
 
   const navigate = useNavigate();
 

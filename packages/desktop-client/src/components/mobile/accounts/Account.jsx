@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import { useAccount } from '../../../hooks/useAccount';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { theme, styles } from '../../../style';
@@ -20,9 +20,9 @@ export function Account() {
 
   const navigate = useNavigate();
 
-  const [_numberFormat] = useLocalPref('numberFormat');
+  const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useLocalPref('hideFraction');
+  const [hideFraction = false] = useSyncedPref('hideFraction');
 
   const { id: accountId } = useParams();
 

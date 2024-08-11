@@ -10,6 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { SvgLogo } from '../../../icons/logo';
 import { SvgExpandArrow } from '../../../icons/v0';
@@ -219,7 +220,7 @@ function BudgetCell({
   ...props
 }) {
   const dispatch = useDispatch();
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   const categoryBudgetMenuModal = `${budgetType}-budget-menu`;
 
@@ -341,7 +342,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const goalTemp = useSheetValue(goal);
   const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
 
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const dispatch = useDispatch();
 
   const onCarryover = carryover => {

@@ -14,7 +14,7 @@ import {
   currencyToAmount,
 } from 'loot-core/src/shared/util';
 
-import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { type CSSProperties, theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
@@ -46,7 +46,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>();
-  const [hideFraction = false] = useLocalPref('hideFraction');
+  const [hideFraction = false] = useSyncedPref('hideFraction');
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,

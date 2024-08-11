@@ -11,7 +11,7 @@ import React, {
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
@@ -63,7 +63,7 @@ export function AmountInput({
   const buttonRef = useRef();
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
-  const [hideFraction = false] = useLocalPref('hideFraction');
+  const [hideFraction = false] = useSyncedPref('hideFraction');
 
   useEffect(() => {
     if (focused) {

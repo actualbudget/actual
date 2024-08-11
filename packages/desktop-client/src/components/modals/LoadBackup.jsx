@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { loadBackup, makeBackup } from 'loot-core/client/actions';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMeatadataPref } from '../../hooks/useMeatadataPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
@@ -53,7 +53,7 @@ class BackupTable extends Component {
 export function LoadBackup({ budgetId, watchUpdates, backupDisabled }) {
   const dispatch = useDispatch();
   const [backups, setBackups] = useState([]);
-  const [prefsBudgetId] = useLocalPref('id');
+  const [prefsBudgetId] = useMeatadataPref('id');
   const budgetIdToLoad = budgetId || prefsBudgetId;
 
   useEffect(() => {
