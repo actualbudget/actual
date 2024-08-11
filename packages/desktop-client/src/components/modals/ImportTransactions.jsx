@@ -874,6 +874,9 @@ export function ImportTransactions({ options }) {
     prefs[`csv-delimiter-${accountId}`] ||
       (filename.endsWith('.tsv') ? '\t' : ','),
   );
+  const [skipLines, setSkipLines] = useState(
+    prefs[`csv-skip-lines-${accountId}`] ?? 0,
+  );
   const [hasHeaderRow, setHasHeaderRow] = useState(
     prefs[`csv-has-header-${accountId}`] ?? true,
   );
@@ -982,6 +985,7 @@ export function ImportTransactions({ options }) {
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       hasHeaderRow,
+      skipLines,
       fallbackMissingPayeeToMemo,
     });
 
@@ -1034,6 +1038,7 @@ export function ImportTransactions({ options }) {
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       hasHeaderRow,
+      skipLines,
       fallbackMissingPayeeToMemo,
     });
 
@@ -1190,6 +1195,8 @@ export function ImportTransactions({ options }) {
         [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
+      savePrefs({ [`csv-has-header-${accountId}`]: hasHeaderRow });
+      savePrefs({ [`csv-skip-lines-${accountId}`]: skipLines });
     }
 
     if (filetype === 'csv' || filetype === 'qif') {
@@ -1569,6 +1576,34 @@ export function ImportTransactions({ options }) {
                             getParseOptions('csv', {
                               delimiter: value,
                               hasHeaderRow,
+                              skipLines,
+                            }),
+                          );
+                        }}
+                        style={{ width: 50 }}
+                      />
+                    </label>
+                    <label
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: 5,
+                        alignItems: 'baseline',
+                      }}
+                    >
+                      Skip lines:
+                      <Input
+                        type="number"
+                        value={skipLines}
+                        min="0"
+                        onChangeValue={value => {
+                          setSkipLines(+value);
+                          parse(
+                            filename,
+                            getParseOptions('csv', {
+                              delimiter,
+                              hasHeaderRow,
+                              skipLines: +value,
                             }),
                           );
                         }}
@@ -1585,6 +1620,7 @@ export function ImportTransactions({ options }) {
                           getParseOptions('csv', {
                             delimiter,
                             hasHeaderRow: !hasHeaderRow,
+                            skipLines,
                           }),
                         );
                       }}
@@ -1705,8 +1741,8 @@ export function ImportTransactions({ options }) {
 
 function getParseOptions(fileType, options = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow } = options;
-    return { delimiter, hasHeaderRow };
+    const { delimiter, hasHeaderRow, skipLines } = options;
+    return { delimiter, hasHeaderRow, skipLines };
   } else if (isOfxFile(fileType)) {
     const { fallbackMissingPayeeToMemo } = options;
     return { fallbackMissingPayeeToMemo };
