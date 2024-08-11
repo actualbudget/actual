@@ -18,15 +18,9 @@
 
   **A.** That depends how you’re hosting it.
 
-  - PikaPods seems to refresh their image automatically.
+  - PikaPods seems to refresh their image automatically around a week after the release goes out.
   - Actual builds and publishes an updated docker image with each release.
   - If you’re on Fly.io we have a [guide for that too](./install/fly.md#updating-actual).
-
-- **Q.** _I have deployed actual to Fly.io but I am being charged, why is this?_
-
-  **A.** While we wouldn’t know for certain without seeing your configuration, it is likely that during
-  deployment you created a Postgres database. Actual doesn’t need this so you can just delete it and
-  charges should then stop.
 
 - **Q.** _I'm new to budgeting and learned with nYNAB. I'm not completely clear on how to handle credit
   cards. I largely charge almost everything to them for rewards and pay off in full. How do I track
@@ -52,3 +46,11 @@
   In that case, you need to keep some negative dollars from touching positive dollars by sticking them
   in a category. Actual's default assumption is that you can pay off any card in full at any time and
   not touch your budget to do it. (Credit: evequefou)
+
+- **Q.** _Does Actual Budget have an API? What are the endpoints?_
+
+  **A.** Actual does not have a REST API with endpoints that you can just call. However, we do have an API NPM package that allows programmatic access to the budget. It runs the UI in _headless_ mode and allows performing many of the same operations that you can perform by clicking around the UI.
+
+  The reason why Actual doesn't have REST-full endpoints is - Actual is a local-first product with the primary database hosted on your local device rather than in a remote server. There is an optional sync server that can be set-up (i.e. `actual-server`), but it does not have the full database (but rather an archival backup of some point-in-time as well as _messages_ with the updates applied to the backup).
+
+  Read more about the API package in the [API documentation pages](./api/index.md).

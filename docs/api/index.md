@@ -2,7 +2,13 @@
 
 import { Method, MethodBox } from './types';
 
-The API gives you full programmatic access to your data. If you are a developer, you can use this to import transactions from a custom source, export data to another app like Excel, or write anything you want on top of Actual.
+:::warning
+
+Many people mistake the term "API" for a HTTP and/or REST-full API. Actual **does not** expose HTTP endpoints that can be called. We do, however, offer a NPM package - API - that allows interacting with the product programmatically.
+
+:::
+
+The API gives you full programmatic access to your data. It allows to run the UI in _headless_ mode thus interacting with it as-if it was a user clicking around in it. If you are a developer, you can use this to import transactions from a custom source, export data to another app like Excel, or write anything you want on top of Actual.
 
 One thing to keep in mind: Actual is not like most other apps. While your data is stored on a server, the server does not have the functionality for analyzing details of or modifying your budget. As a result, the API client contains all the code necessary to query your data and will work on a local copy. Right now, the primary use case is custom importers and exporters.
 
