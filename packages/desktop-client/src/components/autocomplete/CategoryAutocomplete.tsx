@@ -388,7 +388,7 @@ function CategoryItem({
   >(balanceBinding);
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
-  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget);
+  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
 
   return (
     <div

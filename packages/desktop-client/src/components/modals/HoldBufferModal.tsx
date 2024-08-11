@@ -17,7 +17,7 @@ type HoldBufferModalProps = {
 };
 
 export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
-  const available = useRolloverSheetValue(rolloverBudget.toBudget);
+  const available = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
   const [amount, setAmount] = useState<number>(0);
 
   const _onSubmit = (newAmount: number) => {
