@@ -1284,11 +1284,7 @@ export function ImportTransactions({ options }) {
         break;
       }
       if (trans.payee == null || !(trans.payee instanceof String)) {
-        console.log(
-          `Unable to parse payee ${
-            trans.payee || '(empty)'
-          }`,
-        );
+        console.log(`Unable·to·parse·payee·${trans.payee || '(empty)'}`);
         break;
       }
 
