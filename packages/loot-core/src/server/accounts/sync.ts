@@ -208,7 +208,7 @@ async function normalizeTransactions(
     trans = rest;
 
     let payee_name = originalPayeeName;
-    if (payee_name) {
+    if (payee_name && payee_name instanceof String) {
       const trimmed = payee_name.trim();
       if (trimmed === '') {
         payee_name = null;
@@ -218,7 +218,7 @@ async function normalizeTransactions(
     }
 
     trans.imported_payee = trans.imported_payee || payee_name;
-    if (trans.imported_payee) {
+    if (trans.imported_payee && trans.imported_payee instanceof String) {
       trans.imported_payee = trans.imported_payee.trim();
     }
 

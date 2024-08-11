@@ -188,12 +188,12 @@ function getInitialMappings(transactions) {
 
   const dateField = key(
     fields.find(([name]) => name.toLowerCase().includes('date')) ||
-      fields.find(([, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
+      fields.find(([, value]) => String(value)?.match(/^\d+[-/]\d+[-/]\d+$/)),
   );
 
   const amountField = key(
     fields.find(([name]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([, value]) => value.match(/^-?[.,\d]+$/)),
+      fields.find(([, value]) => String(value)?.match(/^-?[.,\d]+$/)),
   );
 
   const categoryField = key(
@@ -1280,6 +1280,14 @@ export function ImportTransactions({ options }) {
           `Unable to parse date ${
             trans.date || '(empty)'
           } with given date format`,
+        );
+        break;
+      }
+      if (trans.payee == null || !(trans.payee instanceof String)) {
+        console.log(
+          `Unable to parse payee ${
+            trans.payee || '(empty)'
+          }`,
         );
         break;
       }
