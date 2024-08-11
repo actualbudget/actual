@@ -28,7 +28,7 @@ At the top of each month, you have a couple of choices in the user interface.
 * Clicking on the three vertical dots lets you execute the following functions on that month's budget categories:
   * Copy last month's budget.
   * Set budgets to zero.
-  * Set budgets to e months average.
+  * Set budgets to 3 months average.
 
 
 ![](/static/img/a-tour-of-actual/tour-budget-top-expanded.png)
