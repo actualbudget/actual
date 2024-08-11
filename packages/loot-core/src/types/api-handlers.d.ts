@@ -66,7 +66,7 @@ export interface ApiHandlers {
   'api/budget-hold-for-next-month': (arg: {
     month: string;
     amount: number;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
 
   'api/budget-reset-hold': (arg: { month: string }) => Promise<void>;
 
@@ -76,7 +76,11 @@ export interface ApiHandlers {
     payees;
   }) => Promise<unknown>;
 
-  'api/transactions-import': (arg: { accountId; transactions }) => Promise<{
+  'api/transactions-import': (arg: {
+    accountId;
+    transactions;
+    isPreview?;
+  }) => Promise<{
     errors?: { message: string }[];
     added;
     updated;
@@ -102,7 +106,7 @@ export interface ApiHandlers {
 
   'api/transaction-delete': (arg: {
     id;
-  }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
+  }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['deleted']>;
 
   'api/sync': () => Promise<void>;
 

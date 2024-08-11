@@ -18,13 +18,13 @@ export interface RulesHandlers {
 
   'rule-add': (
     rule: Omit<RuleEntity, 'id'>,
-  ) => Promise<{ error: ValidationError } | { id: string }>;
+  ) => Promise<{ error: ValidationError } | RuleEntity>;
 
   'rule-update': (
-    rule: Partial<RuleEntity>,
-  ) => Promise<{ error: ValidationError } | object>;
+    rule: RuleEntity,
+  ) => Promise<{ error: ValidationError } | RuleEntity>;
 
-  'rule-delete': (rule: Required<RuleEntity>) => Promise<false | void>;
+  'rule-delete': (rule: Pick<RuleEntity, 'id'>) => Promise<boolean>;
 
   'rule-delete-all': (
     ids: string[],

@@ -232,7 +232,8 @@ export async function deleteRule<T extends { id: string }>(rule: T) {
     return false;
   }
 
-  return db.delete_('rules', rule.id);
+  await db.delete_('rules', rule.id);
+  return true;
 }
 
 // Sync projections
