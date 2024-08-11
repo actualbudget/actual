@@ -5,9 +5,9 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import { type CSSProperties } from '../../../../style';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
-import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 import { CoverMenu } from '../CoverMenu';
 import { HoldMenu } from '../HoldMenu';
+import { useRolloverSheetValue } from '../RolloverComponents';
 import { TransferMenu } from '../TransferMenu';
 
 import { ToBudgetAmount } from './ToBudgetAmount';
@@ -31,11 +31,16 @@ export function ToBudget({
 }: ToBudgetProps) {
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const triggerRef = useRef(null);
-  const sheetValue = useSheetValue({
+  const sheetValue = useRolloverSheetValue({
     name: rolloverBudget.toBudget,
     value: 0,
   });
-  const availableValue = parseInt(sheetValue);
+  const availableValue = sheetValue;
+  if (typeof availableValue !== 'number') {
+    throw new Error(
+      'Expected availableValue to be a number but got ' + availableValue,
+    );
+  }
   const isMenuOpen = Boolean(menuOpen);
 
   return (
