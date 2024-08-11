@@ -92,8 +92,14 @@ export class RulesPage {
       }
 
       if (field) {
-        await row.getByTestId('field-select').getByRole('button').first().click();
-        await this.page.getByRole('button', { name: field, exact: true }).click();
+        await row
+          .getByTestId('field-select')
+          .getByRole('button')
+          .first()
+          .click();
+        await this.page
+          .getByRole('button', { name: field, exact: true })
+          .click();
       }
 
       if (op && fieldFirst) {

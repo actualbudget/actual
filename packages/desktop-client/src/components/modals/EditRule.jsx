@@ -143,7 +143,10 @@ export function OpSelect({
 
 function SplitAmountMethodSelect({ options, style, value, onChange }) {
   return (
-    <View style={{ color: theme.pageTextPositive, ...style }} data-testid="field-select">
+    <View
+      style={{ color: theme.pageTextPositive, ...style }}
+      data-testid="field-select"
+    >
       <Select
         bare
         options={options}
@@ -446,7 +449,13 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
       ) : null}
 
       <Stack direction="row">
-        <EditorButtons onAdd={onAdd} onDelete={(op === 'set' || op === 'prepend-notes' || op === 'append-notes') && onDelete} />
+        <EditorButtons
+          onAdd={onAdd}
+          onDelete={
+            (op === 'set' || op === 'prepend-notes' || op === 'append-notes') &&
+            onDelete
+          }
+        />
       </Stack>
     </Editor>
   );
