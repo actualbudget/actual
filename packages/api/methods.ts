@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import type { Handlers } from 'loot-core/src/types/handlers';
+import type { RuleEntity } from 'loot-core/types/models';
 
 import * as injected from './injected';
 
@@ -205,8 +206,8 @@ export function updateRule(rule) {
   return send('api/rule-update', { rule });
 }
 
-export function deleteRule(id) {
-  return send('api/rule-delete', { id });
+export function deleteRule(rule: Pick<RuleEntity, 'id'>) {
+  return send('api/rule-delete', rule);
 }
 
 export function holdBudgetForNextMonth(month, amount) {
