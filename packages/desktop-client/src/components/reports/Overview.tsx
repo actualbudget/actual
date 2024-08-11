@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -63,6 +64,7 @@ function useWidgetLayout(widgets: Widget[]): (Layout & {
 }
 
 export function Overview() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
 
   const triggerRef = useRef(null);
@@ -139,7 +141,9 @@ export function Overview() {
     setIsImporting(false);
 
     onDispatchSucessNotification(
-      'Dashboard has been successfully reset to default state. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+      t(
+        'Dashboard has been successfully reset to default state. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+      ),
     );
   };
 
@@ -221,7 +225,9 @@ export function Overview() {
       dispatch(
         addNotification({
           type: 'error',
-          message: 'Fatal error occurred: unable to open import file dialog.',
+          message: t(
+            'Fatal error occurred: unable to open import file dialog.',
+          ),
         }),
       );
       return;
@@ -249,7 +255,7 @@ export function Overview() {
             addNotification({
               id: 'import',
               type: 'error',
-              message: 'Failed parsing the imported JSON.',
+              message: t('Failed parsing the imported JSON.'),
             }),
           );
           break;
@@ -269,7 +275,7 @@ export function Overview() {
             addNotification({
               id: 'import',
               type: 'error',
-              message: 'Failed importing the dashboard file.',
+              message: t('Failed importing the dashboard file.'),
             }),
           );
           break;
@@ -278,21 +284,23 @@ export function Overview() {
     }
 
     onDispatchSucessNotification(
-      'Dashboard has been successfully imported. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+      t(
+        'Dashboard has been successfully imported. Don’t like what you see? You can always press [ctrl+z](#undo) to undo.',
+      ),
     );
   };
 
   const accounts = useAccounts();
 
   if (isLoading) {
-    return <LoadingIndicator message="Loading reports..." />;
+    return <LoadingIndicator message={t('Loading reports...')} />;
   }
 
   return (
     <Page
       header={
         isNarrowWidth ? (
-          <MobilePageHeader title="Reports" />
+          <MobilePageHeader title={t('Reports')} />
         ) : (
           <View
             style={{
@@ -301,7 +309,7 @@ export function Overview() {
               marginRight: 15,
             }}
           >
-            <PageHeader title="Reports" />
+            <PageHeader title={t('Reports')} />
 
             <View
               style={{
@@ -320,13 +328,13 @@ export function Overview() {
                         isDisabled={isImporting}
                         onPress={() => setMenuOpen(true)}
                       >
-                        Add new widget
+                        <Trans>Add new widget</Trans>
                       </Button>
                       <Button
                         isDisabled={isImporting}
                         onPress={() => setIsEditing(false)}
                       >
-                        Finish editing dashboard
+                        <Trans>Finish editing dashboard</Trans>
                       </Button>
 
                       <Popover
@@ -357,23 +365,23 @@ export function Overview() {
                           items={[
                             {
                               name: 'cash-flow-card' as const,
-                              text: 'Cash flow graph',
+                              text: t('Cash flow graph'),
                             },
                             {
                               name: 'net-worth-card' as const,
-                              text: 'Net worth graph',
+                              text: t('Net worth graph'),
                             },
                             ...(spendingReportFeatureFlag
                               ? [
                                   {
                                     name: 'spending-card' as const,
-                                    text: 'Spending analysis',
+                                    text: t('Spending analysis'),
                                   },
                                 ]
                               : []),
                             {
                               name: 'custom-report' as const,
-                              text: 'New custom report',
+                              text: t('New custom report'),
                             },
                             ...(customReports.length
                               ? ([Menu.line] satisfies Array<typeof Menu.line>)
@@ -393,14 +401,14 @@ export function Overview() {
                         isDisabled={isImporting}
                         onPress={() => navigate('/reports/custom')}
                       >
-                        Create new custom report
+                        <Trans>Create new custom report</Trans>
                       </Button>
                       {isDashboardsFeatureEnabled && (
                         <Button
                           isDisabled={isImporting}
                           onPress={() => setIsEditing(true)}
                         >
-                          Edit dashboard
+                          <Trans>Edit dashboard</Trans>
                         </Button>
                       )}
                     </>
@@ -435,18 +443,18 @@ export function Overview() {
                           items={[
                             {
                               name: 'reset',
-                              text: 'Reset to default',
+                              text: t('Reset to default'),
                               disabled: isImporting,
                             },
                             Menu.line,
                             {
                               name: 'import',
-                              text: 'Import',
+                              text: t('Import'),
                               disabled: isImporting,
                             },
                             {
                               name: 'export',
-                              text: 'Export',
+                              text: t('Export'),
                               disabled: isImporting,
                             },
                           ]}
@@ -464,7 +472,7 @@ export function Overview() {
       style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
     >
       {isImporting ? (
-        <LoadingIndicator message="Import is running..." />
+        <LoadingIndicator message={t('Import is running...')} />
       ) : (
         <View style={{ userSelect: 'none' }}>
           <ResponsiveGridLayout
