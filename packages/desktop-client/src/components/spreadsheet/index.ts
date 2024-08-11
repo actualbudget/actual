@@ -23,7 +23,7 @@ export type Spreadsheets = {
     'available-funds': number;
     'last-month-overspent': number;
     buffered: number;
-    'to-budget': number;
+    'to-budget': number | null;
     'from-last-month': number;
     'total-budgeted': number;
     'total-income': number;
