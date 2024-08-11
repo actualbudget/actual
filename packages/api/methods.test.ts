@@ -81,28 +81,22 @@ describe('API CRUD operations', () => {
     expect(groups).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          hidden: 0,
+          hidden: false,
           id: 'fc3825fd-b982-4b72-b768-5b30844cf832',
-          is_income: 0,
+          is_income: false,
           name: 'Usual Expenses',
-          sort_order: 16384,
-          tombstone: 0,
         }),
         expect.objectContaining({
-          hidden: 0,
+          hidden: false,
           id: 'a137772f-cf2f-4089-9432-822d2ddc1466',
-          is_income: 0,
+          is_income: false,
           name: 'Investments and Savings',
-          sort_order: 32768,
-          tombstone: 0,
         }),
         expect.objectContaining({
-          hidden: 0,
+          hidden: false,
           id: '2E1F5BDB-209B-43F9-AF2C-3CE28E380C00',
-          is_income: 1,
+          is_income: true,
           name: 'Income',
-          sort_order: 32768,
-          tombstone: 0,
         }),
       ]),
     );
