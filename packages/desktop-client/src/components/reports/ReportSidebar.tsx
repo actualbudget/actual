@@ -4,7 +4,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
-import { type LocalPrefs } from 'loot-core/types/prefs';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';
@@ -56,7 +56,7 @@ type ReportSidebarProps = {
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;
   earliestTransaction: string;
-  firstDayOfWeekIdx: LocalPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
   isComplexCategoryCondition?: boolean;
 };
 

@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -16,7 +16,7 @@ import { Setting } from './UI';
 export function EncryptionSettings() {
   const dispatch = useDispatch();
   const serverURL = useServerURL();
-  const [encryptKeyId] = useLocalPref('encryptKeyId');
+  const [encryptKeyId] = useMetadataPref('encryptKeyId');
 
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 
