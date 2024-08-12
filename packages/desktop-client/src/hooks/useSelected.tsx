@@ -246,7 +246,7 @@ export function useSelected<T extends Item>(
 }
 
 const SelectedDispatch = createContext<(action: Actions) => void>(null);
-const SelectedItems = createContext<Set<unknown>>(null);
+const SelectedItems = createContext<Set<string>>(null);
 
 export function useSelectedDispatch() {
   return useContext(SelectedDispatch);
