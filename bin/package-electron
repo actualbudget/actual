@@ -34,8 +34,6 @@ if [ "$OSTYPE" == "msys" ]; then
     fi
 fi
 
-# yarn rebuild-electron
-
 yarn workspace loot-core build:node
 
 yarn workspace @actual-app/web build --mode=desktop
