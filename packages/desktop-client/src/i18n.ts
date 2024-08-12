@@ -13,7 +13,8 @@ i18n
   .init({
     // While we mark all strings for translations, one can test
     // it by setting the language in localStorage to their choice.
-    lng: localStorage.getItem('language') || 'cimode',
+    // Set this to 'cimode' to see the exact keys without interpolation.
+    lng: localStorage.getItem('language') || 'en',
 
     // allow keys to be phrases having `:`, `.`
     nsSeparator: false,
