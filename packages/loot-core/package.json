@@ -44,7 +44,7 @@
     "@swc/helpers": "^0.5.11",
     "@swc/jest": "^0.2.36",
     "@types/adm-zip": "^0.5.0",
-    "@types/better-sqlite3": "^7.6.11",
+    "@types/better-sqlite3": "^7.6.8",
     "@types/jest": "^27.5.2",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/pegjs": "^0.10.3",

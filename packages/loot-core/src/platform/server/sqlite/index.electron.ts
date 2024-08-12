@@ -103,9 +103,7 @@ function regexp(regex: string, text: string | null) {
 }
 
 export function openDatabase(pathOrBuffer: string | Buffer) {
-  console.info('sql path or buffer', pathOrBuffer);
   const db = new SQL(pathOrBuffer);
-  console.info('We have a db now');
   // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
   // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
