@@ -10,9 +10,8 @@ import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { usePayees } from '../../../hooks/usePayees';
-import { SvgExclamationSolid } from '../../../icons/v1';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useResponsive } from '../../../ResponsiveProvider';
+import { SvgExclamationSolid } from '../../../icons/v1';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
@@ -74,7 +73,7 @@ function CustomReportListCardsInner({
   const accounts = useAccounts();
   const categories = useCategories();
 
-  const hasWarning = calculateHasWarning(report, {
+  const hasWarning = calculateHasWarning(report.conditions ?? [], {
     categories: categories.list,
     payees,
     accounts,

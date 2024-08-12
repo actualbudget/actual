@@ -1,16 +1,16 @@
 import {
   type AccountEntity,
   type CategoryEntity,
-  type CustomReportEntity,
+  type RuleConditionEntity,
   type PayeeEntity,
 } from '../types/models';
 
 /**
- * Checks if the given custom report has issues with conditions
+ * Checks if the given conditions have issues
  * (i.e. non-existing category/payee/account being used).
  */
 export function calculateHasWarning(
-  report: CustomReportEntity,
+  conditions: RuleConditionEntity[],
   {
     categories,
     accounts,
@@ -25,11 +25,11 @@ export function calculateHasWarning(
   const payeeIds = new Set(payees.map(({ id }) => id));
   const accountIds = new Set(accounts.map(({ id }) => id));
 
-  if (!report.conditions) {
+  if (!conditions) {
     return false;
   }
 
-  for (const cond of report.conditions) {
+  for (const cond of conditions) {
     const { field, value, op } = cond;
     const isMultiCondition = Array.isArray(value);
     const isSupportedSingleCondition = ['is', 'isNot'].includes(op);

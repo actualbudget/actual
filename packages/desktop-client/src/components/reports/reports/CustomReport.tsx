@@ -350,7 +350,7 @@ export function CustomReport() {
   const payees = usePayees();
   const accounts = useAccounts();
 
-  const hasWarning = calculateHasWarning(report, {
+  const hasWarning = calculateHasWarning(conditions, {
     categories: categories.list,
     payees,
     accounts,
@@ -723,6 +723,7 @@ export function CustomReport() {
                 marginRight: 5,
                 gap: 10,
                 alignItems: 'flex-start',
+                flexShrink: 0,
               }}
             >
               <View
