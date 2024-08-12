@@ -9,8 +9,9 @@ import { isDevelopmentEnvironment } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../hooks/useActions';
 import { useGlobalPref } from '../hooks/useGlobalPref';
-import { useLocalPref } from '../hooks/useLocalPref';
+import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
+import { useSyncedPref } from '../hooks/useSyncedPref';
 import { SvgArrowLeft } from '../icons/v1';
 import {
   SvgAlertTriangle,
@@ -60,7 +61,7 @@ type PrivacyButtonProps = {
 
 function PrivacyButton({ style }: PrivacyButtonProps) {
   const [isPrivacyEnabled, setPrivacyEnabledPref] =
-    useLocalPref('isPrivacyEnabled');
+    useSyncedPref('isPrivacyEnabled');
 
   const privacyIconStyle = { width: 15, height: 15 };
 
@@ -106,7 +107,7 @@ function SyncButton({
   setSyncState,
   isMobile = false,
 }: SyncButtonProps) {
-  const [cloudFileId] = useLocalPref('cloudFileId');
+  const [cloudFileId] = useMetadataPref('cloudFileId');
   const { sync } = useActions();
 
   const [syncing, setSyncing] = useState(false);

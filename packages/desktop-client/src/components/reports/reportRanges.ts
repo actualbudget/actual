@@ -1,12 +1,12 @@
 import * as monthUtils from 'loot-core/src/shared/months';
-import { type LocalPrefs } from 'loot-core/types/prefs';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 export function validateStart(
   earliest: string,
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string] {
   let addDays;
   let dateStart;
@@ -46,7 +46,7 @@ export function validateEnd(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string] {
   let subDays;
   let dateEnd;
@@ -97,7 +97,7 @@ function boundedRange(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string] {
   let latest;
   switch (interval) {
@@ -131,7 +131,7 @@ export function getSpecificRange(
   offset: number,
   addNumber: number | null,
   type?: string,
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ) {
   const currentDay = monthUtils.currentDay();
   const currentWeek = monthUtils.currentWeek(firstDayOfWeekIdx);
