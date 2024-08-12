@@ -101,9 +101,7 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
       {...props}
       onPress={e => {
         props.onPress?.(e);
-        if (!e.defaultPrevented) {
-          navigate(path);
-        }
+        navigate(path);
       }}
     />
   );
@@ -137,7 +135,8 @@ const InternalLink = ({
 type LinkProps =
   | ({
       variant: 'button';
-    } & ButtonLinkProps)
+      buttonVariant?: ButtonLinkProps['variant'];
+    } & Omit<ButtonLinkProps, 'variant'>)
   | ({ variant?: 'internal' } & InternalLinkProps)
   | ({ variant?: 'external' } & ExternalLinkProps)
   | ({ variant?: 'text' } & TextLinkProps);
@@ -151,7 +150,8 @@ export function Link({ variant = 'internal', ...props }: LinkProps) {
       return <ExternalLink {...props} />;
 
     case 'button':
-      return <ButtonLink {...props} />;
+      const { buttonVariant, ...buttonProps } = props;
+      return <ButtonLink {...buttonProps} variant={buttonVariant} />;
 
     case 'text':
       return <TextLink {...props} />;

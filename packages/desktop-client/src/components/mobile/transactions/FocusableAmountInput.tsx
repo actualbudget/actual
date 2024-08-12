@@ -8,6 +8,8 @@ import React, {
   useState,
 } from 'react';
 
+import { css } from 'glamor';
+
 import {
   amountToCurrency,
   appendDecimals,
@@ -250,13 +252,15 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
           // Defines how far touch can start away from the button
           // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
           {...buttonProps}
-          style={{
-            ...(buttonProps && buttonProps.style),
-            ...(focused && { display: 'none' }),
-            ':hover': {
-              backgroundColor: 'transparent',
-            },
-          }}
+          className={String(
+            css({
+              ...(buttonProps && buttonProps.style),
+              ...(focused && { display: 'none' }),
+              ':hover': {
+                backgroundColor: 'transparent',
+              },
+            }),
+          )}
           variant="bare"
         >
           <View

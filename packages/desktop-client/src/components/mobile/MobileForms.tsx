@@ -79,22 +79,24 @@ export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
         variant="bare"
         ref={ref}
         className={({ isDisabled }) =>
-          css({
-            display: 'block',
-            userSelect: 'none',
-            textAlign: 'left',
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: `0 ${styles.mobileEditingPadding}px`,
-            ...style,
-            ...valueStyle,
-            backgroundColor: theme.tableBackground,
-            ...(isDisabled && {
-              backgroundColor: theme.formInputTextReadOnlySelection,
+          String(
+            css({
+              display: 'block',
+              userSelect: 'none',
+              textAlign: 'left',
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: `0 ${styles.mobileEditingPadding}px`,
+              ...style,
+              ...valueStyle,
+              backgroundColor: theme.tableBackground,
+              ...(isDisabled && {
+                backgroundColor: theme.formInputTextReadOnlySelection,
+              }),
+              ':active': { opacity: 0.5, boxShadow: 'none' },
+              ':hover': { boxShadow: 'none' },
             }),
-            ':active': { opacity: 0.5, boxShadow: 'none' },
-            ':hover': { boxShadow: 'none' },
-          })
+          )
         }
         bounce={false}
         // activeOpacity={0.05}
