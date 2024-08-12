@@ -24,7 +24,6 @@ import {
 } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
-import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
