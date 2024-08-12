@@ -2486,6 +2486,7 @@ function notesTagFormatter(notes, onNotesTagClick) {
       {words.map((word, i, arr) => {
         const separator = arr.length - 1 === i ? '' : ' ';
         if (word.includes('#') && word.length > 1) {
+          let lastEmptyTag = -1;
           // Treat tags in a single word as separate tags.
           // #tag1#tag2 => (#tag1)(#tag2)
           // not-a-tag#tag2#tag3 => not-a-tag(#tag2)(#tag3)
@@ -2495,8 +2496,14 @@ function notesTagFormatter(notes, onNotesTagClick) {
             }
 
             if (!tag) {
+              lastEmptyTag = ti;
               return '#';
             }
+
+            if (lastEmptyTag === ti - 1) {
+              return `${tag} `;
+            }
+            lastEmptyTag = -1;
 
             const validTag = `#${tag}`;
             return (
