@@ -47,7 +47,7 @@ export const UserDirectoryRow = memo(
             exposed={hovered || selected}
             focused={true}
             onSelect={e => {
-              dispatchSelected({ type: 'select', id: user.id, event: e });
+              dispatchSelected({ type: 'select', id: user.id, isRangeSelect: e.shiftKey, });
             }}
             selected={selected}
           />

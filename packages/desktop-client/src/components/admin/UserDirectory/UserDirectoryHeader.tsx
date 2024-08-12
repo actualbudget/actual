@@ -16,7 +16,7 @@ export function UserDirectoryHeader() {
         exposed={true}
         focused={false}
         selected={selectedItems.size > 0}
-        onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
+        onSelect={e => dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })}
       />
       <Cell value="Username" width="flex" />
       <Cell value="Display Name" width={250} />

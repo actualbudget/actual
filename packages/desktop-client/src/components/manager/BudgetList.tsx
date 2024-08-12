@@ -25,7 +25,6 @@ import { type UserEntity } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useInitialMount } from '../../hooks/useInitialMount';
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import {
@@ -459,7 +458,7 @@ function BudgetListHeader({
 export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
   const allFiles = useSelector(state => state.budgets.allFiles || []);
-  const [id] = useLocalPref('id');
+  const [id] = useMetadataPref('id');
   const [users, setUsers] = useState<UserEntity[]>([]);
   const [currentUserId, setCurrentUserId] = useState('');
   const userData = useSelector(state => state.user.data);
