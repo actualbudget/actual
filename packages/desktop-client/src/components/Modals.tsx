@@ -341,6 +341,7 @@ export function Modals() {
               key={name}
               transactionIds={options?.transactionIds}
               getTransaction={options?.getTransaction}
+              accountName={options?.accountName}
             />
           );
 

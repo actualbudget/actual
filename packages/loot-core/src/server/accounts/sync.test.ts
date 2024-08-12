@@ -342,4 +342,161 @@ describe('Account sync', () => {
       'bakkerij-renamed',
     ]);
   });
+
+  test('reconcile does not merge transactions with different ‘imported_id’ values', async () => {
+    const { id } = await prepareDatabase();
+
+    let payees = await getAllPayees();
+    expect(payees.length).toBe(0);
+
+    // Add first transaction
+    await reconcileTransactions(id, [
+      {
+        date: '2024-04-05',
+        amount: -1239,
+        imported_payee: 'Acme Inc.',
+        payee_name: 'Acme Inc.',
+        imported_id: 'b85cdd57-5a1c-4ca5-bd54-12e5b56fa02c',
+        notes: 'TEST TRANSACTION',
+        cleared: true,
+      },
+    ]);
+
+    payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+
+    let transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+
+    // Add second transaction
+    await reconcileTransactions(id, [
+      {
+        date: '2024-04-06',
+        amount: -1239,
+        imported_payee: 'Acme Inc.',
+        payee_name: 'Acme Inc.',
+        imported_id: 'ca1589b2-7bc3-4587-a157-476170b383a7',
+        notes: 'TEST TRANSACTION',
+        cleared: true,
+      },
+    ]);
+
+    payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+
+    transactions = await getAllTransactions();
+    expect(transactions.length).toBe(2);
+
+    expect(
+      transactions.find(
+        t => t.imported_id === 'b85cdd57-5a1c-4ca5-bd54-12e5b56fa02c',
+      ).amount,
+    ).toBe(-1239);
+    expect(
+      transactions.find(
+        t => t.imported_id === 'ca1589b2-7bc3-4587-a157-476170b383a7',
+      ).amount,
+    ).toBe(-1239);
+  });
+
+  test(
+    'given an imported tx with no imported_id, ' +
+      'when using fuzzy search V2, existing transaction has an imported_id, matches amount, and is within 7 days of imported tx, ' +
+      'then imported tx should reconcile with existing transaction from fuzzy match',
+    async () => {
+      const { id } = await prepareDatabase();
+
+      let payees = await getAllPayees();
+      expect(payees.length).toBe(0);
+
+      const existingTx = {
+        date: '2024-04-05',
+        amount: -1239,
+        imported_payee: 'Acme Inc.',
+        payee_name: 'Acme Inc.',
+        imported_id: 'b85cdd57-5a1c-4ca5-bd54-12e5b56fa02c',
+        notes: 'TEST TRANSACTION',
+        cleared: true,
+      };
+
+      // Add transaction to represent existing transaction with imoprted_id
+      await reconcileTransactions(id, [existingTx]);
+
+      payees = await getAllPayees();
+      expect(payees.length).toBe(1);
+
+      let transactions = await getAllTransactions();
+      expect(transactions.length).toBe(1);
+
+      // Import transaction similar to existing but with different date and no imported_id
+      await reconcileTransactions(id, [
+        {
+          ...existingTx,
+          date: '2024-04-06',
+          imported_id: null,
+        },
+      ]);
+
+      payees = await getAllPayees();
+      expect(payees.length).toBe(1);
+
+      transactions = await getAllTransactions();
+      expect(transactions.length).toBe(1);
+
+      expect(transactions[0].amount).toBe(-1239);
+    },
+  );
+
+  test(
+    'given an imported tx has an imported_id, ' +
+      'when not using fuzzy search V2, existing transaction has an imported_id, matches amount, and is within 7 days of imported tx, ' +
+      'then imported tx should reconcile with existing transaction from fuzzy match',
+    async () => {
+      const { id } = await prepareDatabase();
+
+      let payees = await getAllPayees();
+      expect(payees.length).toBe(0);
+
+      const existingTx = {
+        date: '2024-04-05',
+        amount: -1239,
+        imported_payee: 'Acme Inc.',
+        payee_name: 'Acme Inc.',
+        imported_id: 'b85cdd57-5a1c-4ca5-bd54-12e5b56fa02c',
+        notes: 'TEST TRANSACTION',
+        cleared: true,
+      };
+
+      // Add transaction to represent existing transaction with imoprted_id
+      await reconcileTransactions(id, [existingTx]);
+
+      payees = await getAllPayees();
+      expect(payees.length).toBe(1);
+
+      let transactions = await getAllTransactions();
+      expect(transactions.length).toBe(1);
+
+      // Import transaction similar to existing but with different date and imported_id
+      await reconcileTransactions(
+        id,
+        [
+          {
+            ...existingTx,
+            date: '2024-04-06',
+            imported_id: 'something-else-entirely',
+          },
+        ],
+        false,
+        false,
+      );
+
+      payees = await getAllPayees();
+      expect(payees.length).toBe(1);
+
+      transactions = await getAllTransactions();
+      expect(transactions.length).toBe(1);
+
+      expect(transactions[0].amount).toBe(-1239);
+    },
+  );
 });

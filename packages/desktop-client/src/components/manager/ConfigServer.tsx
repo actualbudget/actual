@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   isNonProductionEnvironment,
@@ -20,6 +21,7 @@ import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   useSetThemeColor(theme.mobileConfigServerViewTheme);
+  const { t } = useTranslation();
   const { createBudget, signOut, loggedIn } = useActions();
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
@@ -34,9 +36,13 @@ export function ConfigServer() {
   function getErrorMessage(error: string) {
     switch (error) {
       case 'network-failure':
-        return 'Server is not running at this URL. Make sure you have HTTPS set up properly.';
+        return t(
+          'Server is not running at this URL. Make sure you have HTTPS set up properly.',
+        );
       default:
-        return 'Server does not look like an Actual server. Is it set up correctly?';
+        return t(
+          'Server does not look like an Actual server. Is it set up correctly?',
+        );
     }
   }
 
@@ -91,7 +97,7 @@ export function ConfigServer() {
 
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
-      <Title text="Where’s the server?" />
+      <Title text={t('Where’s the server?')} />
 
       <Text
         style={{
@@ -101,16 +107,16 @@ export function ConfigServer() {
         }}
       >
         {currentUrl ? (
-          <>
+          <Trans>
             Existing sessions will be logged out and you will log in to this
             server. We will validate that Actual is running at this URL.
-          </>
+          </Trans>
         ) : (
-          <>
+          <Trans>
             There is no server configured. After running the server, specify the
             URL here to use the app. You can always change this later. We will
             validate that Actual is running at this URL.
-          </>
+          </Trans>
         )}
       </Text>
 
@@ -130,7 +136,7 @@ export function ConfigServer() {
       <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
         <BigInput
           autoFocus={true}
-          placeholder="https://example.com"
+          placeholder={t('https://example.com')}
           value={url || ''}
           onChangeValue={setUrl}
           style={{ flex: 1, marginRight: 10 }}
@@ -142,7 +148,7 @@ export function ConfigServer() {
           style={{ fontSize: 15 }}
           onPress={onSubmit}
         >
-          OK
+          {t('OK')}
         </ButtonWithLoading>
         {currentUrl && (
           <Button
@@ -150,7 +156,7 @@ export function ConfigServer() {
             style={{ fontSize: 15, marginLeft: 10 }}
             onPress={() => navigate(-1)}
           >
-            Cancel
+            {t('Cancel')}
           </Button>
         )}
       </View>
@@ -169,7 +175,7 @@ export function ConfigServer() {
             style={{ color: theme.pageTextLight }}
             onPress={onSkip}
           >
-            Stop using a server
+            {t('Stop using a server')}
           </Button>
         ) : (
           <>
@@ -183,7 +189,7 @@ export function ConfigServer() {
                 }}
                 onPress={onSameDomain}
               >
-                Use current domain
+                {t('Use current domain')}
               </Button>
             )}
             <Button
@@ -191,7 +197,7 @@ export function ConfigServer() {
               style={{ color: theme.pageTextLight, margin: 5 }}
               onPress={onSkip}
             >
-              Don’t use a server
+              {t('Don’t use a server')}
             </Button>
 
             {isNonProductionEnvironment() && (
@@ -200,7 +206,7 @@ export function ConfigServer() {
                 style={{ marginLeft: 15 }}
                 onPress={onCreateTestFile}
               >
-                Create test file
+                {t('Create test file')}
               </Button>
             )}
           </>
