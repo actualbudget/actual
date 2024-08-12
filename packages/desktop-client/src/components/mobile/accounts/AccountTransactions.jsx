@@ -29,9 +29,9 @@ import { listen, send } from 'loot-core/platform/client/fetch';
 import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { styles, theme } from '../../../style';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -149,7 +149,7 @@ function TransactionListWithPreviews({ account }) {
   );
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [_numberFormat] = useLocalPref('numberFormat');
+  const [_numberFormat] = useSyncedPref('numberFormat');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -235,7 +235,7 @@ function TransactionListWithPreviews({ account }) {
     updateSearchQuery(text);
   };
 
-  const onSelectTransaction = transaction => {
+  const onOpenTransaction = transaction => {
     if (!isPreviewId(transaction.id)) {
       navigate(`/transactions/${transaction.id}`);
     } else {
@@ -275,7 +275,7 @@ function TransactionListWithPreviews({ account }) {
       onLoadMore={onLoadMore}
       searchPlaceholder={`Search ${account.name}`}
       onSearch={onSearch}
-      onSelectTransaction={onSelectTransaction}
+      onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
     />
   );

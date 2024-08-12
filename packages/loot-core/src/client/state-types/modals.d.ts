@@ -4,6 +4,7 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   GoCardlessToken,
+  ScheduleEntity,
   TransactionEntity,
 } from '../../types/models';
 import type { NewRuleEntity, RuleEntity } from '../../types/models/rule';
@@ -95,14 +96,17 @@ type FinanceModals = {
   };
 
   'edit-field': {
-    name: string;
-    month: string;
-    onSubmit: (name: string, value: string) => void;
-    onClose: () => void;
+    name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
+    onSubmit: (
+      name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
+      value: string | number,
+      mode?: 'prepend' | 'append' | 'replace' | null,
+    ) => void;
+    onClose?: () => void;
   };
 
   'category-autocomplete': {
-    categoryGroups: CategoryGroupEntity[];
+    categoryGroups?: CategoryGroupEntity[];
     onSelect: (categoryId: string, categoryName: string) => void;
     month?: string;
     showHiddenCategories?: boolean;
@@ -126,7 +130,14 @@ type FinanceModals = {
 
   'schedule-edit': { id: string; transaction?: TransactionEntity } | null;
 
-  'schedule-link': { transactionIds: string[] } | null;
+  'schedule-link': {
+    transactionIds: string[];
+    getTransaction: (
+      transactionId: TransactionEntity['id'],
+    ) => TransactionEntity;
+    accountName?: string;
+    onScheduleLinked?: (schedule: ScheduleEntity) => void;
+  };
 
   'schedules-discover': null;
 
@@ -258,6 +269,7 @@ type FinanceModals = {
     confirmReason: string;
   };
   'confirm-transaction-delete': {
+    message?: string;
     onConfirm: () => void;
   };
   'edit-user': {

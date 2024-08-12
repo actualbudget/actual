@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as constants from '../constants';
@@ -5,10 +6,11 @@ import type {
   AddNotificationAction,
   RemoveNotificationAction,
   Notification,
+  SetNotificationInsetAction,
 } from '../state-types/notifications';
 
 export function addNotification(
-  notification: Omit<Notification, 'id'> & { id?: string },
+  notification: Notification,
 ): AddNotificationAction {
   return {
     type: constants.ADD_NOTIFICATION,
@@ -22,9 +24,10 @@ export function addNotification(
 export function addGenericErrorNotification() {
   return addNotification({
     type: 'error',
-    message:
+    message: t(
       'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
-      'Please report this as a new issue on Github.',
+        'Please report this as a new issue on Github.',
+    ),
   });
 }
 
@@ -32,5 +35,14 @@ export function removeNotification(id: string): RemoveNotificationAction {
   return {
     type: constants.REMOVE_NOTIFICATION,
     id,
+  };
+}
+
+export function setNotificationInset(
+  inset?: SetNotificationInsetAction['inset'] | null,
+): SetNotificationInsetAction {
+  return {
+    type: constants.SET_NOTIFICATION_INSET,
+    inset: inset ? inset : {},
   };
 }

@@ -1157,6 +1157,7 @@ handlers['transactions-import'] = mutator(function ({
         accountId,
         transactions,
         false,
+        true,
         isPreview,
       );
     } catch (err) {

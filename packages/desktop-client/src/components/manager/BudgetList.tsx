@@ -25,7 +25,7 @@ import { type UserEntity } from 'loot-core/types/models';
 import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useInitialMount } from '../../hooks/useInitialMount';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import {
   SvgCloudCheck,
@@ -489,6 +489,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       }
     }
   }, [multiuserEnabled, userData?.offline, allFiles, userData?.userId]);
+  const [id] = useMetadataPref('id');
 
   // Remote files do not have the 'id' field
   function isNonRemoteFile(
