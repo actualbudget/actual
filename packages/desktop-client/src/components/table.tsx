@@ -690,7 +690,7 @@ type SheetCellValueProps<
   >['privacyFilter'];
 };
 
-type SheetCellProps<
+export type SheetCellProps<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
 > = ComponentProps<typeof Cell> & {

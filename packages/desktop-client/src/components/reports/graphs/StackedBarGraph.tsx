@@ -150,6 +150,7 @@ type StackedBarGraphProps = {
   balanceTypeOp: balanceTypeOpType;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showTooltip?: boolean;
   interval?: string;
 };
 
@@ -163,6 +164,7 @@ export function StackedBarGraph({
   balanceTypeOp,
   showHiddenCategories,
   showOffBudget,
+  showTooltip = true,
   interval,
 }: StackedBarGraphProps) {
   const navigate = useNavigate();
@@ -199,7 +201,7 @@ export function StackedBarGraph({
                 style={{ cursor: pointer }}
                 stackOffset="sign" //stacked by sign
               >
-                {(!isNarrowWidth || !compact) && (
+                {showTooltip && (
                   <Tooltip
                     content={
                       <CustomTooltip compact={compact} tooltip={tooltip} />

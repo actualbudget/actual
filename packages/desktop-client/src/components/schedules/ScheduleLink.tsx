@@ -20,12 +20,14 @@ import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 export function ScheduleLink({
   transactionIds: ids,
   getTransaction,
+  accountName,
 }: {
   transactionIds: string[];
   getTransaction: (transactionId: string) => TransactionEntity;
+  accountName: string;
 }) {
   const dispatch = useDispatch();
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState(accountName);
 
   const scheduleData = useSchedules({
     transform: useCallback((q: Query) => q.filter({ completed: false }), []),
