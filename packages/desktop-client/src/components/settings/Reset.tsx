@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { ButtonWithLoading } from '../common/Button2';
 import { Text } from '../common/Text';
 
@@ -38,7 +38,7 @@ export function ResetCache() {
 }
 
 export function ResetSync() {
-  const [groupId] = useLocalPref('groupId');
+  const [groupId] = useMetadataPref('groupId');
   const isEnabled = !!groupId;
   const { resetSync } = useActions();
 
