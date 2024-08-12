@@ -747,13 +747,13 @@ function PayeeIcons({
       ? scheduleData.schedules.find(s => s.id === scheduleId)
       : null;
 
-  const buttonStyle = useCallback(
-    ({ isHovered }) => ({
+  const buttonStyle = useMemo(
+    () => ({
       marginLeft: -5,
       marginRight: 2,
       width: 23,
       height: 23,
-      color: isHovered ? theme.tableText : theme.tableTextSubdued,
+      color: 'inherit',
     }),
     [],
   );
