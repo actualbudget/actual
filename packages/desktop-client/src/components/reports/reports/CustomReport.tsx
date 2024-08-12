@@ -21,6 +21,7 @@ import { useFilters } from '../../../hooks/useFilters';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { Warning } from '../../alerts';
@@ -103,7 +104,7 @@ function useSelectedCategories(
 export function CustomReport() {
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
-  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const [viewLegend = false, setViewLegendPref] =

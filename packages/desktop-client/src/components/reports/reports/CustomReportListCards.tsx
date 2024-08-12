@@ -9,9 +9,10 @@ import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayees } from '../../../hooks/usePayees';
 import { SvgExclamationSolid } from '../../../icons/v1';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
@@ -79,7 +80,7 @@ function CustomReportListCardsInner({
     accounts,
   });
 
-  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   useEffect(() => {

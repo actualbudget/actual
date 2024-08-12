@@ -3,7 +3,7 @@ import { type ReactNode, useState } from 'react';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
@@ -26,7 +26,7 @@ function FeatureToggle({
   children,
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
-  const [_, setFlagPref] = useLocalPref(`flags.${flagName}`);
+  const [_, setFlagPref] = useSyncedPref(`flags.${flagName}`);
 
   return (
     <label style={{ display: 'flex' }}>
@@ -57,7 +57,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (
