@@ -21,7 +21,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
@@ -375,7 +375,7 @@ function CategoryItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   const balance = useSheetValue(
     budgetType === 'rollover'

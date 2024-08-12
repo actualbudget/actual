@@ -34,7 +34,6 @@ import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
 import { usePreviewTransactions } from '../../hooks/usePreviewTransactions';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
@@ -42,6 +41,7 @@ import {
   SplitsExpandedProvider,
   useSplitsExpanded,
 } from '../../hooks/useSplitsExpanded';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
@@ -1824,12 +1824,12 @@ export function Account() {
   const payees = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [hideFraction = false] = useLocalPref('hideFraction');
-  const [expandSplits] = useLocalPref('expand-splits');
-  const [showBalances] = useLocalPref(`show-balances-${params.id}`);
-  const [hideCleared] = useLocalPref(`hide-cleared-${params.id}`);
-  const [hideReconciled] = useLocalPref(`hide-reconciled-${params.id}`);
-  const [showExtraBalances] = useLocalPref(
+  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [expandSplits] = useSyncedPref('expand-splits');
+  const [showBalances] = useSyncedPref(`show-balances-${params.id}`);
+  const [hideCleared] = useSyncedPref(`hide-cleared-${params.id}`);
+  const [hideReconciled] = useSyncedPref(`hide-reconciled-${params.id}`);
+  const [showExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
