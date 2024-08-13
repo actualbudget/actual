@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -11,13 +12,13 @@ import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
 export function SelectedTransactionsButton({
-  account,
   getTransaction,
   onShow,
   onDuplicate,
   onDelete,
   onEdit,
-  onUnlink,
+  onLinkSchedule,
+  onUnlinkSchedule,
   onCreateRule,
   onSetTransfer,
   onScheduleAction,
@@ -25,6 +26,7 @@ export function SelectedTransactionsButton({
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
 }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
@@ -40,7 +42,7 @@ export function SelectedTransactionsButton({
   const ambiguousDuplication = useMemo(() => {
     const transactions = selectedIds.map(id => getTransaction(id));
 
-    return transactions.some(t => t && t.is_child);
+    return transactions.some(tx => tx && tx.is_child);
   }, [selectedIds, getTransaction]);
 
   const linked = useMemo(() => {
@@ -78,16 +80,16 @@ export function SelectedTransactionsButton({
     const [firstTransaction] = transactions;
 
     const areAllSameDateAndAccount = transactions.every(
-      t =>
-        t &&
-        t.date === firstTransaction.date &&
-        t.account === firstTransaction.account,
+      tx =>
+        tx &&
+        tx.date === firstTransaction.date &&
+        tx.account === firstTransaction.account,
     );
     const areNoSplitTransactions = transactions.every(
-      t => t && !t.is_parent && !t.is_child,
+      tx => tx && !tx.is_parent && !tx.is_child,
     );
     const areNoReconciledTransactions = transactions.every(
-      t => t && !t.reconciled,
+      tx => tx && !tx.reconciled,
     );
 
     return (
@@ -105,23 +107,13 @@ export function SelectedTransactionsButton({
     const transactions = selectedIds.map(id => getTransaction(id));
 
     const areNoReconciledTransactions = transactions.every(
-      t => t && !t.reconciled,
+      tx => tx && !tx.reconciled,
     );
     const areAllSplitTransactions = transactions.every(
-      t => t && (t.is_parent || t.is_child),
+      tx => tx && (tx.is_parent || tx.is_child),
     );
     return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
-
-  function onLinkSchedule() {
-    dispatch(
-      pushModal('schedule-link', {
-        transactionIds: selectedIds,
-        getTransaction,
-        accountName: account?.name ?? '',
-      }),
-    );
-  }
 
   function onViewSchedule() {
     const firstId = selectedIds[0];
@@ -182,48 +174,49 @@ export function SelectedTransactionsButton({
 
   return (
     <SelectedItemsButton
-      name="transactions"
+      id="transactions"
+      name={count => t('{{count}} transactions', { count })}
       items={[
         ...(!types.trans
           ? [
-              { name: 'view-schedule', text: 'View schedule', key: 'S' },
-              { name: 'post-transaction', text: 'Post transaction' },
-              { name: 'skip', text: 'Skip scheduled date' },
+              { name: 'view-schedule', text: t('View schedule'), key: 'S' },
+              { name: 'post-transaction', text: t('Post transaction') },
+              { name: 'skip', text: t('Skip scheduled date') },
             ]
           : [
-              { name: 'show', text: 'Show', key: 'F' },
+              { name: 'show', text: t('Show'), key: 'F' },
               {
                 name: 'duplicate',
-                text: 'Duplicate',
+                text: t('Duplicate'),
                 disabled: ambiguousDuplication,
               },
-              { name: 'delete', text: 'Delete', key: 'D' },
+              { name: 'delete', text: t('Delete'), key: 'D' },
               ...(linked
                 ? [
                     {
                       name: 'view-schedule',
-                      text: 'View schedule',
+                      text: t('View schedule'),
                       key: 'S',
                       disabled: selectedIds.length > 1,
                     },
-                    { name: 'unlink-schedule', text: 'Unlink schedule' },
+                    { name: 'unlink-schedule', text: t('Unlink schedule') },
                   ]
                 : [
                     {
                       name: 'link-schedule',
-                      text: 'Link schedule',
+                      text: t('Link schedule'),
                       key: 'S',
                     },
                     {
                       name: 'create-rule',
-                      text: 'Create rule',
+                      text: t('Create rule'),
                     },
                   ]),
               ...(showMakeTransfer
                 ? [
                     {
                       name: 'set-transfer',
-                      text: 'Make transfer',
+                      text: t('Make transfer'),
                       disabled: !canBeTransfer,
                     },
                   ]
@@ -232,7 +225,7 @@ export function SelectedTransactionsButton({
                 ? [
                     {
                       name: 'make-as-split-transaction',
-                      text: 'Make as split transaction',
+                      text: t('Make as split transaction'),
                     },
                   ]
                 : []),
@@ -240,21 +233,21 @@ export function SelectedTransactionsButton({
                 ? [
                     {
                       name: 'unsplit-transactions',
-                      text:
-                        'Unsplit transaction' +
-                        (selectedIds.length > 1 ? 's' : ''),
+                      text: t('Unsplit {{count}} transactions', {
+                        count: selectedIds.length,
+                      }),
                     },
                   ]
                 : []),
               Menu.line,
-              { type: Menu.label, name: 'Edit field' },
-              { name: 'date', text: 'Date' },
-              { name: 'account', text: 'Account', key: 'A' },
-              { name: 'payee', text: 'Payee', key: 'P' },
-              { name: 'notes', text: 'Notes', key: 'N' },
-              { name: 'category', text: 'Category', key: 'C' },
-              { name: 'amount', text: 'Amount' },
-              { name: 'cleared', text: 'Cleared', key: 'L' },
+              { type: Menu.label, name: t('Edit field') },
+              { name: 'date', text: t('Date') },
+              { name: 'account', text: t('Account'), key: 'A' },
+              { name: 'payee', text: t('Payee'), key: 'P' },
+              { name: 'notes', text: t('Notes'), key: 'N' },
+              { name: 'category', text: t('Category'), key: 'C' },
+              { name: 'amount', text: t('Amount') },
+              { name: 'cleared', text: t('Cleared'), key: 'L' },
             ]),
       ]}
       onSelect={name => {
@@ -282,10 +275,10 @@ export function SelectedTransactionsButton({
             onViewSchedule();
             break;
           case 'link-schedule':
-            onLinkSchedule();
+            onLinkSchedule(selectedIds);
             break;
           case 'unlink-schedule':
-            onUnlink(selectedIds);
+            onUnlinkSchedule(selectedIds);
             break;
           case 'create-rule':
             onCreateRule(selectedIds);

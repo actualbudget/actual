@@ -3,7 +3,7 @@ import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
 import * as Platform from '../client/platform';
-import { type LocalPrefs } from '../types/prefs';
+import { type SyncedPrefs } from '../types/prefs';
 
 type DateLike = string | Date;
 type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -91,7 +91,7 @@ export function monthFromDate(date: DateLike): string {
 
 export function weekFromDate(
   date: DateLike,
-  firstDayOfWeekIdx: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'],
 ): string {
   const converted = parseInt(firstDayOfWeekIdx || '0') as Day;
   return d.format(
@@ -113,7 +113,7 @@ export function currentMonth(): string {
 }
 
 export function currentWeek(
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): string {
   if (global.IS_TESTING || Platform.isPlaywright) {
     return global.currentWeek || '2017-01-01';
@@ -257,7 +257,7 @@ export function _weekRange(
   start: DateLike,
   end: DateLike,
   inclusive = false,
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): string[] {
   const weeks: string[] = [];
   let week = weekFromDate(start, firstDayOfWeekIdx);
@@ -277,7 +277,7 @@ export function _weekRange(
 export function weekRangeInclusive(
   start: DateLike,
   end: DateLike,
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): string[] {
   return _weekRange(start, end, true, firstDayOfWeekIdx);
 }
@@ -364,7 +364,7 @@ export function getMonthEnd(day: string): string {
 
 export function getWeekEnd(
   date: DateLike,
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): string {
   const converted = parseInt(firstDayOfWeekIdx || '0') as Day;
   return d.format(

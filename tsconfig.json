@@ -7,11 +7,7 @@
   "compilerOptions": {
     // "composite": true,
     "target": "ES2022",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -23,10 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",
-    "types": [
-      "vite/client",
-      "jest"
-    ],
+    "types": ["vite/client", "jest"],
     // Check JS files too
     "allowJs": true,
     "checkJs": false,
@@ -38,33 +31,27 @@
     "noEmit": true,
     "paths": {
       // until we turn on composite/references
-      "loot-core/*": [
-        "./packages/loot-core/src/*"
-      ],
+      "loot-core/*": ["./packages/loot-core/src/*"],
     },
     "plugins": [
       {
         "name": "typescript-strict-plugin",
-        "path": [
-          "./packages"
-        ]
-      }
-    ]
+        "path": ["./packages"],
+      },
+    ],
   },
-  "include": [
-    "packages/**/*"
-  ],
+  "include": ["packages/**/*"],
   "exclude": [
     "node_modules",
     "**/node_modules/*",
     "**/build/*",
     "**/client-build/*",
     "**/dist/*",
-    "**/lib-dist/*"
+    "**/lib-dist/*",
   ],
   "ts-node": {
     "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
+      "module": "CommonJS",
+    },
+  },
 }

@@ -8,10 +8,12 @@ import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 
 type ConfirmTransactionDeleteProps = {
+  message?: string;
   onConfirm: () => void;
 };
 
 export function ConfirmTransactionDelete({
+  message = 'Are you sure you want to delete the transaction?',
   onConfirm,
 }: ConfirmTransactionDeleteProps) {
   const { isNarrowWidth } = useResponsive();
@@ -30,9 +32,7 @@ export function ConfirmTransactionDelete({
             rightContent={<ModalCloseButton onClick={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
-            <Paragraph>
-              Are you sure you want to delete the transaction?
-            </Paragraph>
+            <Paragraph>{message}</Paragraph>
             <View
               style={{
                 flexDirection: 'row',
