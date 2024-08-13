@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useContext, useMemo, useState, useEffect } from 'react';
+import React, { memo, useMemo, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -10,7 +10,6 @@ import {
   deleteCategory,
   deleteGroup,
   getCategories,
-  loadPrefs,
   moveCategory,
   moveCategoryGroup,
   pushModal,
@@ -28,19 +27,13 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import { View } from '../common/View';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
-import {
-  SWITCH_BUDGET_MESSAGE_TYPE,
-  TitlebarContext,
-  type TitlebarContextValue,
-  type TitlebarMessage,
-} from '../Titlebar';
 
 import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as report from './report/ReportComponents';
 import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/RolloverComponents';
 import { RolloverProvider } from './rollover/RolloverContext';
-import { prewarmAllMonths, prewarmMonth, switchBudgetType } from './util';
+import { prewarmAllMonths, prewarmMonth } from './util';
 
 type ReportComponents = {
   SummaryComponent: typeof report.BudgetSummary;
@@ -66,7 +59,6 @@ type BudgetInnerProps = {
   accountId?: string;
   reportComponents: ReportComponents;
   rolloverComponents: RolloverComponents;
-  titlebar: TitlebarContextValue;
 };
 
 function BudgetInner(props: BudgetInnerProps) {
@@ -95,8 +87,6 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   useEffect(() => {
-    const { titlebar } = props;
-
     async function run() {
       loadCategories();
 
@@ -132,8 +122,6 @@ function BudgetInner(props: BudgetInnerProps) {
           loadCategories();
         }
       }),
-
-      titlebar.subscribe(onTitlebarEvent),
     ];
 
     return () => {
@@ -277,7 +265,7 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onShowActivity = (categoryId, month) => {
-    const conditions = [
+    const filterConditions = [
       { field: 'category', op: 'is', value: categoryId, type: 'id' },
       {
         field: 'date',
@@ -290,7 +278,7 @@ function BudgetInner(props: BudgetInnerProps) {
     navigate('/accounts', {
       state: {
         goBack: true,
-        conditions,
+        filterConditions,
         categoryId,
       },
     });
@@ -321,24 +309,6 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onToggleCollapse = () => {
     setSummaryCollapsedPref(!summaryCollapsed);
-  };
-
-  const onTitlebarEvent = async ({ type, payload }: TitlebarMessage) => {
-    switch (type) {
-      case SWITCH_BUDGET_MESSAGE_TYPE: {
-        await switchBudgetType(
-          payload.newBudgetType,
-          spreadsheet,
-          bounds,
-          startMonth,
-          async () => {
-            dispatch(loadPrefs());
-          },
-        );
-        break;
-      }
-      default:
-    }
   };
 
   const { reportComponents, rolloverComponents } = props;
@@ -416,8 +386,6 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
 RolloverBudgetSummary.displayName = 'RolloverBudgetSummary';
 
 export function Budget() {
-  const titlebar = useContext(TitlebarContext);
-
   const reportComponents = useMemo<ReportComponents>(
     () => ({
       SummaryComponent: report.BudgetSummary,
@@ -460,7 +428,6 @@ export function Budget() {
       <BudgetInner
         reportComponents={reportComponents}
         rolloverComponents={rolloverComponents}
-        titlebar={titlebar}
       />
     </View>
   );

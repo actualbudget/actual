@@ -18,6 +18,8 @@ import { Value } from '../rules/Value';
 import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
 
+let isDatepickerClick = false;
+
 type FilterExpressionProps = {
   field: string | undefined;
   customName: string | undefined;
@@ -61,7 +63,6 @@ export function FilterExpression({
         type="bare"
         disabled={customName != null}
         onClick={() => setEditing(true)}
-        style={{ marginRight: -7 }}
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
@@ -77,7 +78,11 @@ export function FilterExpression({
                 field={field}
                 inline={true}
                 valueIsRaw={
-                  op === 'contains' || op === 'doesNotContain' || op === 'tags'
+                  
+                  op === 'contains' ||
+                  op === 'matches' ||
+                  op === 'doesNotContain' || op === 'tags'
+                
                 }
               />
             </>
@@ -89,8 +94,7 @@ export function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            margin: 5,
-            marginLeft: 3,
+            margin: 4,
           }}
         />
       </Button>
@@ -100,6 +104,21 @@ export function FilterExpression({
         placement="bottom start"
         isOpen={editing}
         onOpenChange={() => setEditing(false)}
+        shouldCloseOnInteractOutside={element => {
+          // Datepicker selections for some reason register 2x clicks
+          // We want to keep the popover open after selecting a date.
+          // So we ignore the "close" event on selection + the subsequent event.
+          if (element instanceof HTMLElement && element.dataset.pikaYear) {
+            isDatepickerClick = true;
+            return false;
+          }
+          if (isDatepickerClick) {
+            isDatepickerClick = false;
+            return false;
+          }
+
+          return true;
+        }}
         style={{ width: 275, padding: 15, color: theme.menuItemText }}
         data-testid="filters-menu-tooltip"
       >

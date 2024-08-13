@@ -32,7 +32,7 @@ export interface ServerHandlers {
       Parameters<typeof batchUpdateTransactions>[0],
       'detectOrphanPayees'
     >,
-  ) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
+  ) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>>;
 
   'transaction-add': (transaction) => Promise<EmptyObject>;
 
@@ -104,6 +104,8 @@ export interface ServerHandlers {
   'must-category-transfer': (arg: { id }) => Promise<unknown>;
 
   'payee-create': (arg: { name }) => Promise<string>;
+
+  'common-payees-get': () => Promise<PayeeEntity[]>;
 
   'payees-get': () => Promise<PayeeEntity[]>;
 
@@ -222,10 +224,15 @@ export interface ServerHandlers {
     updatedAccounts;
   }>;
 
-  'transactions-import': (arg: { accountId; transactions }) => Promise<{
+  'transactions-import': (arg: {
+    accountId;
+    transactions;
+    isPreview;
+  }) => Promise<{
     errors?: { message: string }[];
     added;
     updated;
+    updatedPreview;
   }>;
 
   'account-unlink': (arg: { id }) => Promise<'ok'>;

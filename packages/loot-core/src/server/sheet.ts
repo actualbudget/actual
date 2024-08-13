@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type Database } from 'better-sqlite3';
+import { type Database } from '@jlongster/sql.js';
 
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
@@ -217,6 +217,7 @@ export async function loadUserBudgets(db): Promise<void> {
         budget.carryover === 1 ? true : false,
       );
       sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
+      sheet.set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
     }
   }
 

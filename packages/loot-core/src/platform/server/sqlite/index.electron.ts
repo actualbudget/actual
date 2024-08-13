@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { removeFile, readFile } from '../fs';
 
+import { normalise } from './normalise';
+import { unicodeLike } from './unicodeLike';
+
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
     if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {
@@ -95,9 +98,13 @@ export async function asyncTransaction(
   }
 }
 
+function regexp(regex: string, text: string | null) {
+  return new RegExp(regex).test(text) ? 1 : 0;
+}
+
 export function openDatabase(pathOrBuffer: string | Buffer) {
   const db = new SQL(pathOrBuffer);
-  // Define Unicode-aware LOWER and UPPER implementation.
+  // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
   // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('UNICODE_LOWER', { deterministic: true }, (arg: string | null) =>
@@ -107,6 +114,12 @@ export function openDatabase(pathOrBuffer: string | Buffer) {
   db.function('UNICODE_UPPER', { deterministic: true }, (arg: string | null) =>
     arg?.toUpperCase(),
   );
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
+  db.function('UNICODE_LIKE', { deterministic: true }, unicodeLike);
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
+  db.function('REGEXP', { deterministic: true }, regexp);
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
+  db.function('NORMALISE', { deterministic: true }, normalise);
   return db;
 }
 

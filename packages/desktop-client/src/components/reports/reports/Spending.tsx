@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -6,13 +6,16 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
+import { Button } from '../../common/Button';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
+import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { FilterButton } from '../../filters/FiltersMenu';
@@ -29,26 +32,46 @@ export function Spending() {
   const categories = useCategories();
 
   const {
-    filters,
+    conditions,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
+  const [spendingReportFilter = '', setSpendingReportFilter] = useLocalPref(
+    'spendingReportFilter',
+  );
+  const [spendingReportTime = 'lastMonth', setSpendingReportTime] =
+    useLocalPref('spendingReportTime');
+
   const [dataCheck, setDataCheck] = useState(false);
-  const [mode, setMode] = useState('lastMonth');
+  const [mode, setMode] = useState(spendingReportTime);
+
+  const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
+  const filterSaved =
+    JSON.stringify(parseFilter.conditions) === JSON.stringify(conditions) &&
+    parseFilter.conditionsOp === conditionsOp &&
+    spendingReportTime === mode;
+
+  useEffect(() => {
+    const checkFilter =
+      spendingReportFilter && JSON.parse(spendingReportFilter);
+    if (checkFilter.conditions) {
+      onApplyFilter(checkFilter);
+    }
+  }, [onApplyFilter, spendingReportFilter]);
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
     return createSpendingSpreadsheet({
       categories,
-      conditions: filters,
+      conditions,
       conditionsOp,
       setDataCheck,
     });
-  }, [categories, filters, conditionsOp]);
+  }, [categories, conditions, conditionsOp]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
@@ -57,6 +80,16 @@ export function Spending() {
   if (!data) {
     return null;
   }
+
+  const saveFilter = () => {
+    setSpendingReportFilter(
+      JSON.stringify({
+        conditionsOp,
+        conditions,
+      }),
+    );
+    setSpendingReportTime(mode);
+  };
 
   const showAverage =
     Math.abs(
@@ -100,7 +133,7 @@ export function Spending() {
             flexShrink: 0,
           }}
         >
-          {filters && (
+          {conditions && (
             <View style={{ flexDirection: 'row' }}>
               <FilterButton
                 onApply={onApplyFilter}
@@ -108,6 +141,27 @@ export function Spending() {
                 hover={false}
                 exclude={['date']}
               />
+              <Tooltip
+                placement="bottom start"
+                content={<Text>Save compare and filter options</Text>}
+                style={{
+                  ...styles.tooltip,
+                  lineHeight: 1.5,
+                  padding: '6px 10px',
+                  marginLeft: 10,
+                }}
+              >
+                <Button
+                  type="primary"
+                  style={{
+                    marginLeft: 10,
+                  }}
+                  onClick={saveFilter}
+                  disabled={filterSaved ? true : false}
+                >
+                  {filterSaved ? 'Saved' : 'Save'}
+                </Button>
+              </Tooltip>
               <View style={{ flex: 1 }} />
             </View>
           )}
@@ -126,7 +180,7 @@ export function Spending() {
             flexGrow: 1,
           }}
         >
-          {filters && filters.length > 0 && (
+          {conditions && conditions.length > 0 && (
             <View
               style={{
                 marginBottom: 10,
@@ -139,11 +193,11 @@ export function Spending() {
               }}
             >
               <AppliedFilters
-                filters={filters}
+                conditions={conditions}
                 onUpdate={onUpdateFilter}
                 onDelete={onDeleteFilter}
                 conditionsOp={conditionsOp}
-                onCondOpChange={onCondOpChange}
+                onConditionsOpChange={onConditionsOpChange}
               />
             </View>
           )}
@@ -267,8 +321,8 @@ export function Spending() {
                     )}
                     {showAverage && (
                       <ModeButton
-                        selected={mode === 'Average'}
-                        onSelect={() => setMode('Average')}
+                        selected={mode === 'average'}
+                        onSelect={() => setMode('average')}
                       >
                         Average
                       </ModeButton>

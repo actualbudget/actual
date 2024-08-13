@@ -142,7 +142,7 @@ export function getSpecificRange(
       '-01',
   );
 
-  if (type === 'Weeks') {
+  if (type === 'Week') {
     dateStart = monthUtils.subWeeks(currentWeek, offset);
     dateEnd = monthUtils.getWeekEnd(
       monthUtils.addWeeks(dateStart, addNumber === null ? offset : addNumber),

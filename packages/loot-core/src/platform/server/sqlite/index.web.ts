@@ -1,6 +1,9 @@
 // @ts-strict-ignore
 import initSqlJS, { type SqlJsStatic, type Database } from '@jlongster/sql.js';
 
+import { normalise } from './normalise';
+import { unicodeLike } from './unicodeLike';
+
 let SQL: SqlJsStatic | null = null;
 
 export async function init() {
@@ -28,7 +31,7 @@ export function _getModule() {
   return SQL;
 }
 
-function verifyParamTypes(sql, arr) {
+function verifyParamTypes(sql: string, arr: (string | number)[] = []) {
   arr.forEach(val => {
     if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {
       throw new Error('Invalid field type ' + val + ' for sql ' + sql);
@@ -36,23 +39,28 @@ function verifyParamTypes(sql, arr) {
   });
 }
 
-export function prepare(db, sql) {
+export function prepare(db: Database, sql: string) {
   return db.prepare(sql);
 }
 
 export function runQuery(
-  db: unknown,
+  db: Database,
   sql: string,
   params?: (string | number)[],
   fetchAll?: false,
 ): { changes: unknown };
 export function runQuery(
-  db: unknown,
+  db: Database,
   sql: string,
   params: (string | number)[],
   fetchAll: true,
 ): unknown[];
-export function runQuery(db, sql, params = [], fetchAll = false) {
+export function runQuery(
+  db: Database,
+  sql: string,
+  params: (string | number)[] = [],
+  fetchAll = false,
+): unknown[] | { changes: unknown } {
   if (params) {
     verifyParamTypes(sql, params);
   }
@@ -89,13 +97,13 @@ export function runQuery(db, sql, params = [], fetchAll = false) {
   }
 }
 
-export function execQuery(db, sql) {
+export function execQuery(db: Database, sql: string) {
   db.exec(sql);
 }
 
 let transactionDepth = 0;
 
-export function transaction(db, fn) {
+export function transaction(db: Database, fn: () => void) {
   let before, after, undo;
   if (transactionDepth > 0) {
     before = 'SAVEPOINT __actual_sp';
@@ -111,9 +119,8 @@ export function transaction(db, fn) {
   transactionDepth++;
 
   try {
-    const result = fn();
+    fn();
     execQuery(db, after);
-    return result;
   } catch (ex) {
     execQuery(db, undo);
 
@@ -151,6 +158,10 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
   }
 }
 
+function regexp(regex: string, text: string) {
+  return new RegExp(regex).test(text) ? 1 : 0;
+}
+
 export async function openDatabase(pathOrBuffer?: string | Buffer) {
   let db = null;
   if (pathOrBuffer) {
@@ -185,7 +196,7 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
     db = new SQL.Database();
   }
 
-  // Define Unicode-aware LOWER and UPPER implementation.
+  // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because sql.js uses SQLite build without ICU support.
   //
   // Note that this function should ideally be created with a deterministic flag
@@ -193,6 +204,9 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
   // but SQL.js does not support this: https://github.com/sql-js/sql.js/issues/551
   db.create_function('UNICODE_LOWER', arg => arg?.toLowerCase());
   db.create_function('UNICODE_UPPER', arg => arg?.toUpperCase());
+  db.create_function('UNICODE_LIKE', unicodeLike);
+  db.create_function('REGEXP', regexp);
+  db.create_function('NORMALISE', normalise);
   return db;
 }
 

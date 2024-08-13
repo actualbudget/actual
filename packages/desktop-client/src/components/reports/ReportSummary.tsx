@@ -6,7 +6,10 @@ import {
   integerToCurrency,
   amountToInteger,
 } from 'loot-core/src/shared/util';
-import { type DataEntity } from 'loot-core/src/types/models/reports';
+import {
+  type balanceTypeOpType,
+  type DataEntity,
+} from 'loot-core/src/types/models/reports';
 
 import { theme, styles } from '../../style';
 import { Text } from '../common/Text';
@@ -19,7 +22,7 @@ type ReportSummaryProps = {
   startDate: string;
   endDate: string;
   data: DataEntity;
-  balanceTypeOp: 'totalDebts' | 'totalAssets' | 'totalTotals';
+  balanceTypeOp: balanceTypeOpType;
   interval: string;
   intervalsCount: number;
 };
@@ -33,9 +36,13 @@ export function ReportSummary({
   intervalsCount,
 }: ReportSummaryProps) {
   const net =
-    Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
-      ? 'PAYMENT'
-      : 'DEPOSIT';
+    balanceTypeOp === 'netAssets'
+      ? 'DEPOSIT'
+      : balanceTypeOp === 'netDebts'
+        ? 'PAYMENT'
+        : Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
+          ? 'PAYMENT'
+          : 'DEPOSIT';
   const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;
   return (
     <View

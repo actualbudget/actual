@@ -13,6 +13,7 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type NewRuleEntity } from 'loot-core/src/types/models';
@@ -125,9 +126,9 @@ function ManageRulesContent({
       (filter === ''
         ? allRules
         : allRules.filter(rule =>
-            ruleToString(rule, filterData)
-              .toLowerCase()
-              .includes(filter.toLowerCase()),
+            getNormalisedString(ruleToString(rule, filterData)).includes(
+              getNormalisedString(filter),
+            ),
           )
       ).slice(0, 100 + page * 50),
     [allRules, filter, filterData, page],

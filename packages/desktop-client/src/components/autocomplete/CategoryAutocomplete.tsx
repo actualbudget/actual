@@ -7,12 +7,14 @@ import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  useCallback,
 } from 'react';
 
 import { css } from 'glamor';
 
 import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -135,6 +137,21 @@ function CategoryList({
   );
 }
 
+function customSort(obj: CategoryAutocompleteItem, value: string): number {
+  const name = getNormalisedString(obj.name);
+  const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
+  if (obj.id === 'split') {
+    return -2;
+  }
+  if (name.includes(value)) {
+    return -1;
+  }
+  if (groupName.includes(value)) {
+    return 0;
+  }
+  return 1;
+}
+
 type CategoryAutocompleteProps = ComponentProps<
   typeof Autocomplete<CategoryAutocompleteItem>
 > & {
@@ -183,6 +200,39 @@ export function CategoryAutocomplete({
     [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
+  const filterSuggestions = useCallback(
+    (
+      suggestions: CategoryAutocompleteItem[],
+      value: string,
+    ): CategoryAutocompleteItem[] => {
+      return suggestions
+        .filter(suggestion => {
+          if (suggestion.id === 'split') {
+            return true;
+          }
+
+          if (suggestion.group) {
+            return (
+              getNormalisedString(suggestion.group.name).includes(
+                getNormalisedString(value),
+              ) ||
+              getNormalisedString(
+                suggestion.group.name + ' ' + suggestion.name,
+              ).includes(getNormalisedString(value))
+            );
+          }
+
+          return defaultFilterSuggestion(suggestion, value);
+        })
+        .sort(
+          (a, b) =>
+            customSort(a, getNormalisedString(value)) -
+            customSort(b, getNormalisedString(value)),
+        );
+    },
+    [],
+  );
+
   return (
     <Autocomplete
       strict={true}
@@ -197,14 +247,7 @@ export function CategoryAutocomplete({
         }
         return 0;
       }}
-      filterSuggestions={(suggestions, value) => {
-        return suggestions.filter(suggestion => {
-          return (
-            suggestion.id === 'split' ||
-            defaultFilterSuggestion(suggestion, value)
-          );
-        });
-      }}
+      filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { css } from 'glamor';
+
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
@@ -25,7 +27,6 @@ export function Overview() {
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
 
-  const customReportsFeatureFlag = useFeatureFlag('customReports');
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
   const accounts = useAccounts();
@@ -43,7 +44,7 @@ export function Overview() {
             }}
           >
             <PageHeader title="Reports" />
-            {customReportsFeatureFlag && !isNarrowWidth && (
+            {!isNarrowWidth && (
               <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
                 <Button type="primary">
                   <Text>Create new custom report</Text>
@@ -57,18 +58,21 @@ export function Overview() {
       style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
     >
       <View
-        style={{
-          flexDirection: isNarrowWidth ? 'column' : 'row',
+        className={`${css({
           flex: '0 0 auto',
-        }}
+          flexDirection: isNarrowWidth ? 'column' : 'row',
+          flexWrap: isNarrowWidth ? 'nowrap' : 'wrap',
+          padding: '10',
+          '> a, > div': {
+            margin: '10',
+          },
+        })}`}
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
         {spendingReportFeatureFlag && <SpendingCard />}
-      </View>
-      {customReportsFeatureFlag && (
         <CustomReportListCards reports={customReports} />
-      )}
+      </View>
     </Page>
   );
 }

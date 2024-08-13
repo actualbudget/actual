@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { theme } from '../../style';
 import { Information } from '../alerts';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -34,35 +34,39 @@ export function GlobalSettings() {
   return (
     <Setting
       primaryAction={
-        <View style={{ flexDirection: 'row' }}>
-          <Button onClick={onChooseDocumentDir}>Change location</Button>
+        <>
+          <View style={{ flexDirection: 'row', gap: '0.5rem', width: '100%' }}>
+            <Text
+              innerRef={dirScrolled}
+              title={documentDir}
+              style={{
+                backgroundColor: theme.pageBackground,
+                padding: '7px 10px',
+                borderRadius: 4,
+                overflow: 'auto',
+                whiteSpace: 'nowrap',
+                width: '100%',
+                '::-webkit-scrollbar': { display: 'none' }, // Removes the scrollbar
+              }}
+            >
+              {documentDir}
+            </Text>
+            <Button onPress={onChooseDocumentDir}>Change location</Button>
+          </View>
+
           {documentDirChanged && (
             <Information>
-              A restart is required for this change to take effect
+              <strong>Remember</strong> to copy your budget(s) into the new
+              folder. <br />A restart is required for this change to take
+              effect.
             </Information>
           )}
-        </View>
+        </>
       }
     >
       <Text>
         <strong>Actual’s files</strong> are stored in a folder on your computer.
         Currently, that’s:
-      </Text>
-      <Text
-        innerRef={dirScrolled}
-        style={{
-          backgroundColor: theme.pageBackground,
-          padding: '7px 10px',
-          borderRadius: 4,
-          overflow: 'auto',
-          whiteSpace: 'nowrap',
-          // TODO: When we update electron, we should be able to
-          // remove this. In previous versions of Chrome, once the
-          // scrollbar appears it never goes away
-          '::-webkit-scrollbar': { display: 'none' },
-        }}
-      >
-        {documentDir}
       </Text>
     </Setting>
   );

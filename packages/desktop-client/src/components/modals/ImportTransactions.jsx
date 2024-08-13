@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import * as d from 'date-fns';
 
@@ -12,13 +12,15 @@ import {
 import { useActions } from '../../hooks/useActions';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useLocalPrefs } from '../../hooks/useLocalPrefs';
+import { SvgDownAndRightArrow } from '../../icons/v2';
 import { theme, styles } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
-import { Modal } from '../common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
@@ -245,6 +247,12 @@ function applyFieldMappings(transaction, mappings) {
 
     result[field] = transaction[target || field];
   }
+  // Keep preview fields on the mapped transactions
+  result.trx_id = transaction.trx_id;
+  result.existing = transaction.existing;
+  result.ignored = transaction.ignored;
+  result.selected = transaction.selected;
+  result.selected_merge = transaction.selected_merge;
   return result;
 }
 
@@ -335,33 +343,124 @@ function Transaction({
   flipAmount,
   multiplierAmount,
   categories,
+  onCheckTransaction,
+  reconcile,
 }) {
   const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
     () =>
-      fieldMappings
+      fieldMappings && !rawTransaction.isMatchedTransaction
         ? applyFieldMappings(rawTransaction, fieldMappings)
         : rawTransaction,
     [rawTransaction, fieldMappings],
   );
 
-  const { amount, outflow, inflow } = parseAmountFields(
-    transaction,
-    splitMode,
-    inOutMode,
-    outValue,
-    flipAmount,
-    multiplierAmount,
-  );
+  let amount, outflow, inflow;
+  if (rawTransaction.isMatchedTransaction) {
+    amount = rawTransaction.amount;
+    if (splitMode) {
+      outflow = amount < 0 ? -amount : 0;
+      inflow = amount > 0 ? amount : 0;
+    }
+  } else {
+    ({ amount, outflow, inflow } = parseAmountFields(
+      transaction,
+      splitMode,
+      inOutMode,
+      outValue,
+      flipAmount,
+      multiplierAmount,
+    ));
+  }
 
   return (
     <Row
       style={{
         backgroundColor: theme.tableBackground,
+        color:
+          (transaction.isMatchedTransaction && !transaction.selected_merge) ||
+          !transaction.selected
+            ? theme.tableTextInactive
+            : theme.tableText,
       }}
     >
+      {reconcile && (
+        <Field width={31}>
+          {!transaction.isMatchedTransaction && (
+            <Tooltip
+              content={
+                !transaction.existing && !transaction.ignored
+                  ? 'New transaction. You can import it, or skip it.'
+                  : transaction.ignored
+                    ? 'Already imported transaction. You can skip it, or import it again.'
+                    : transaction.existing
+                      ? 'Updated transaction. You can update it, import it again, or skip it.'
+                      : ''
+              }
+              placement="right top"
+            >
+              <Checkbox
+                checked={transaction.selected}
+                onChange={() => onCheckTransaction(transaction.trx_id)}
+                style={
+                  transaction.selected_merge
+                    ? {
+                        ':checked': {
+                          '::after': {
+                            background:
+                              theme.checkboxBackgroundSelected +
+                              // update sign from packages/desktop-client/src/icons/v1/layer.svg
+                              // eslint-disable-next-line rulesdir/typography
+                              ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M10 1l10 6-10 6L0 7l10-6zm6.67 10L20 13l-10 6-10-6 3.33-2L10 15l6.67-4z" /></svg>\') 9px 9px',
+                          },
+                        },
+                      }
+                    : {
+                        '&': {
+                          border:
+                            '1px solid ' + theme.buttonNormalDisabledBorder,
+                          backgroundColor: theme.buttonNormalDisabledBorder,
+                          '::after': {
+                            display: 'block',
+                            background:
+                              theme.buttonNormalDisabledBorder +
+                              // minus sign adapted from packages/desktop-client/src/icons/v1/add.svg
+                              // eslint-disable-next-line rulesdir/typography
+                              ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /></svg>\') 9px 9px',
+                            width: 9,
+                            height: 9,
+                            content: ' ',
+                          },
+                        },
+                        ':checked': {
+                          border: '1px solid ' + theme.checkboxBorderSelected,
+                          backgroundColor: theme.checkboxBackgroundSelected,
+                          '::after': {
+                            background:
+                              theme.checkboxBackgroundSelected +
+                              // plus sign from packages/desktop-client/src/icons/v1/add.svg
+                              // eslint-disable-next-line rulesdir/typography
+                              ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /><path fill="white" className="path" d="M11.5,23 C10.6715729,23 10,22.3284271 10,21.5 L10,1.5 C10,0.671572875 10.6715729,1.52179594e-16 11.5,0 C12.3284271,-1.52179594e-16 13,0.671572875 13,1.5 L13,21.5 C13,22.3284271 12.3284271,23 11.5,23 Z" /></svg>\') 9px 9px',
+                          },
+                        },
+                      }
+                }
+              />
+            </Tooltip>
+          )}
+        </Field>
+      )}
       <Field width={200}>
-        {showParsed ? (
+        {transaction.isMatchedTransaction ? (
+          <View>
+            <Stack direction="row" align="flex-start">
+              <View>
+                <SvgDownAndRightArrow width={16} height={16} />
+              </View>
+              <View>{formatDate(transaction.date, dateFormat)}</View>
+            </Stack>
+          </View>
+        ) : showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
             dateFormat={dateFormat}
@@ -487,9 +586,8 @@ function SelectField({
         ]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ width: '100%' }}
-      wrapperStyle={style}
-      onChange={value => onChange(value)}
+      onChange={onChange}
+      buttonStyle={style}
     />
   );
 }
@@ -520,8 +618,7 @@ function DateFormatSelect({
           f.label.replace(/ /g, delimiter),
         ])}
         value={parseDateFormat || ''}
-        onChange={value => onChange(value)}
-        style={{ width: '100%' }}
+        onChange={onChange}
       />
     </View>
   );
@@ -627,7 +724,9 @@ function FieldMappings({
     return null;
   }
 
-  const options = Object.keys(transactions[0]);
+  const { existing, ignored, selected, selected_merge, trx_id, ...trans } =
+    transactions[0];
+  const options = Object.keys(trans);
   mappings = mappings || {};
 
   return (
@@ -737,11 +836,16 @@ function FieldMappings({
   );
 }
 
-export function ImportTransactions({ modalProps, options }) {
+export function ImportTransactions({ options }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const prefs = useLocalPrefs();
-  const { parseTransactions, importTransactions, getPayees, savePrefs } =
-    useActions();
+  const {
+    parseTransactions,
+    importTransactions,
+    importPreviewTransactions,
+    getPayees,
+    savePrefs,
+  } = useActions();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState('parsing');
@@ -756,6 +860,7 @@ export function ImportTransactions({ modalProps, options }) {
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
+  const [previewTrigger, setPreviewTrigger] = useState(0);
   const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
@@ -785,7 +890,18 @@ export function ImportTransactions({ modalProps, options }) {
     setFilename(filename);
     setFileType(filetype);
 
-    const { errors, transactions } = await parseTransactions(filename, options);
+    const { errors, transactions: parsedTransactions } =
+      await parseTransactions(filename, options);
+
+    let index = 0;
+    const transactions = parsedTransactions.map(trans => {
+      // Add a transient transaction id to match preview with imported transactions
+      trans.trx_id = index++;
+      // Select all parsed transactions before first preview run
+      trans.selected = true;
+      return trans;
+    });
+
     setLoadingState(null);
     setError(null);
 
@@ -796,8 +912,14 @@ export function ImportTransactions({ modalProps, options }) {
         message: errors[0].message || 'Internal error',
       });
     } else {
+      let flipAmount = false;
+      let fieldMappings = null;
+      let splitMode = false;
+      let parseDateFormat = null;
+
       if (filetype === 'csv' || filetype === 'qif') {
-        setFlipAmount(prefs[`flip-amount-${accountId}-${filetype}`] || false);
+        flipAmount = prefs[`flip-amount-${accountId}-${filetype}`] || false;
+        setFlipAmount(flipAmount);
       }
 
       if (filetype === 'csv') {
@@ -806,21 +928,22 @@ export function ImportTransactions({ modalProps, options }) {
           ? JSON.parse(mappings)
           : getInitialMappings(transactions);
 
+        fieldMappings = mappings;
         setFieldMappings(mappings);
 
         // Set initial split mode based on any saved mapping
-        const initialSplitMode = !!(mappings.outflow || mappings.inflow);
-        setSplitMode(initialSplitMode);
+        splitMode = !!(mappings.outflow || mappings.inflow);
+        setSplitMode(splitMode);
 
-        setParseDateFormat(
+        parseDateFormat =
           prefs[`parse-date-${accountId}-${filetype}`] ||
-            getInitialDateFormat(transactions, mappings),
-        );
+          getInitialDateFormat(transactions, mappings);
+        setParseDateFormat(parseDateFormat);
       } else if (filetype === 'qif') {
-        setParseDateFormat(
+        parseDateFormat =
           prefs[`parse-date-${accountId}-${filetype}`] ||
-            getInitialDateFormat(transactions, { date: 'date' }),
-        );
+          getInitialDateFormat(transactions, { date: 'date' });
+        setParseDateFormat(parseDateFormat);
       } else {
         setFieldMappings(null);
         setParseDateFormat(null);
@@ -829,7 +952,18 @@ export function ImportTransactions({ modalProps, options }) {
       // Reverse the transactions because it's very common for them to
       // be ordered ascending, but we show transactions descending by
       // date. This is purely cosmetic.
-      setTransactions(transactions.reverse());
+      const transactionPreview = await getImportPreview(
+        transactions.reverse(),
+        filetype,
+        flipAmount,
+        fieldMappings,
+        splitMode,
+        parseDateFormat,
+        inOutMode,
+        outValue,
+        multiplierAmount,
+      );
+      setTransactions(transactionPreview);
     }
   }
 
@@ -837,6 +971,7 @@ export function ImportTransactions({ modalProps, options }) {
     const amt = e;
     if (!amt || amt.match(/^\d{1,}(\.\d{0,4})?$/)) {
       setMultiplierAmount(amt);
+      runImportPreview();
     }
   }
 
@@ -904,16 +1039,73 @@ export function ImportTransactions({ modalProps, options }) {
   }
 
   function onUpdateFields(field, name) {
-    setFieldMappings({ ...fieldMappings, [field]: name === '' ? null : name });
+    const newFieldMappings = {
+      ...fieldMappings,
+      [field]: name === '' ? null : name,
+    };
+    setFieldMappings(newFieldMappings);
+    runImportPreview();
   }
 
-  async function onImport() {
+  function onCheckTransaction(trx_id) {
+    const newTransactions = transactions.map(trans => {
+      if (trans.trx_id === trx_id) {
+        if (trans.existing) {
+          // 3-states management for transactions with existing (merged transactions)
+          // flow of states:
+          // (selected true && selected_merge true)
+          //   => (selected true && selected_merge false)
+          //     => (selected false)
+          //       => back to (selected true && selected_merge true)
+          if (!trans.selected) {
+            return {
+              ...trans,
+              selected: true,
+              selected_merge: true,
+            };
+          } else if (trans.selected_merge) {
+            return {
+              ...trans,
+              selected: true,
+              selected_merge: false,
+            };
+          } else {
+            return {
+              ...trans,
+              selected: false,
+              selected_merge: false,
+            };
+          }
+        } else {
+          return {
+            ...trans,
+            selected: !trans.selected,
+          };
+        }
+      }
+      return trans;
+    });
+
+    setTransactions(newTransactions);
+  }
+
+  async function onImport(close) {
     setLoadingState('importing');
 
     const finalTransactions = [];
     let errorMessage;
 
     for (let trans of transactions) {
+      if (
+        trans.isMatchedTransaction ||
+        (reconcile && !trans.selected && !trans.ignored)
+      ) {
+        // skip transactions that are
+        // - matched transaction (existing transaction added to show update changes)
+        // - unselected transactions that are not ignored by the reconcilation algorithm (only when reconcilation is enabled)
+        continue;
+      }
+
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
       const date =
@@ -943,7 +1135,29 @@ export function ImportTransactions({ modalProps, options }) {
       const category_id = parseCategoryFields(trans, categories.list);
       trans.category = category_id;
 
-      const { inflow, outflow, inOut, ...finalTransaction } = trans;
+      const {
+        inflow,
+        outflow,
+        inOut,
+        existing,
+        ignored,
+        selected,
+        selected_merge,
+        trx_id,
+        ...finalTransaction
+      } = trans;
+
+      if (
+        reconcile &&
+        ((trans.ignored && trans.selected) ||
+          (trans.existing && trans.selected && !trans.selected_merge))
+      ) {
+        // in reconcile mode, force transaction add for
+        // - ignored transactions (aleardy existing) that are checked
+        // - transactions with existing (merged transactions) that are not selected_merge
+        finalTransaction.forceAddTransaction = true;
+      }
+
       finalTransactions.push({
         ...finalTransaction,
         date,
@@ -992,8 +1206,157 @@ export function ImportTransactions({ modalProps, options }) {
     if (onImported) {
       onImported(didChange);
     }
+    close();
+  }
 
-    modalProps.onClose();
+  const runImportPreviewCallback = useCallback(async () => {
+    const transactionPreview = await getImportPreview(
+      transactions,
+      filetype,
+      flipAmount,
+      fieldMappings,
+      splitMode,
+      parseDateFormat,
+      inOutMode,
+      outValue,
+      multiplierAmount,
+    );
+    setTransactions(transactionPreview);
+  }, [
+    transactions,
+    filetype,
+    flipAmount,
+    fieldMappings,
+    splitMode,
+    parseDateFormat,
+    inOutMode,
+    outValue,
+    multiplierAmount,
+  ]);
+
+  useEffect(() => {
+    runImportPreviewCallback();
+  }, [previewTrigger]);
+
+  function runImportPreview() {
+    setPreviewTrigger(value => value + 1);
+  }
+
+  async function getImportPreview(
+    transactions,
+    filetype,
+    flipAmount,
+    fieldMappings,
+    splitMode,
+    parseDateFormat,
+    inOutMode,
+    outValue,
+    multiplierAmount,
+  ) {
+    const previewTransactions = [];
+
+    for (let trans of transactions) {
+      if (trans.isMatchedTransaction) {
+        // skip transactions that are matched transaction (existing transaction added to show update changes)
+        continue;
+      }
+
+      trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
+
+      const date = isOfxFile(filetype)
+        ? trans.date
+        : parseDate(trans.date, parseDateFormat);
+      if (date == null) {
+        console.log(
+          `Unable to parse date ${
+            trans.date || '(empty)'
+          } with given date format`,
+        );
+        break;
+      }
+
+      const { amount } = parseAmountFields(
+        trans,
+        splitMode,
+        inOutMode,
+        outValue,
+        flipAmount,
+        multiplierAmount,
+      );
+      if (amount == null) {
+        console.log(`Transaction on ${trans.date} has no amount`);
+        break;
+      }
+
+      const category_id = parseCategoryFields(trans, categories.list);
+      if (category_id != null) {
+        trans.category = category_id;
+      }
+
+      const {
+        inflow,
+        outflow,
+        inOut,
+        existing,
+        ignored,
+        selected,
+        selected_merge,
+        ...finalTransaction
+      } = trans;
+      previewTransactions.push({
+        ...finalTransaction,
+        date,
+        amount: amountToInteger(amount),
+        cleared: clearOnImport,
+      });
+    }
+
+    // Retreive the transactions that would be updated (along with the existing trx)
+    const previewTrx = await importPreviewTransactions(
+      accountId,
+      previewTransactions,
+    );
+    const matchedUpdateMap = previewTrx.reduce((map, entry) => {
+      map[entry.transaction.trx_id] = entry;
+      return map;
+    }, {});
+
+    return transactions
+      .filter(trans => !trans.isMatchedTransaction)
+      .reduce((previous, current_trx) => {
+        let next = previous;
+        const entry = matchedUpdateMap[current_trx.trx_id];
+        const existing_trx = entry?.existing;
+
+        // if the transaction is matched with an existing one for update
+        current_trx.existing = !!existing_trx;
+        // if the transaction is an update that will be ignored
+        // (reconciled transactions or no change detected)
+        current_trx.ignored = entry?.ignored || false;
+
+        current_trx.selected = !current_trx.ignored;
+        current_trx.selected_merge = current_trx.existing;
+
+        next = next.concat({ ...current_trx });
+
+        if (existing_trx) {
+          // add the updated existing transaction in the list, with the
+          // isMatchedTransaction flag to identify it in display and not send it again
+          existing_trx.isMatchedTransaction = true;
+          existing_trx.category = categories.list.find(
+            cat => cat.id === existing_trx.category,
+          )?.name;
+          // add parent transaction attribute to mimic behaviour
+          existing_trx.trx_id = current_trx.trx_id;
+          existing_trx.existing = current_trx.existing;
+          existing_trx.selected = current_trx.selected;
+          existing_trx.selected_merge = current_trx.selected_merge;
+
+          next = next.concat({ ...existing_trx });
+        }
+
+        return next;
+      }, []);
   }
 
   const headers = [
@@ -1003,6 +1366,9 @@ export function ImportTransactions({ modalProps, options }) {
     { name: 'Category', width: 'flex' },
   ];
 
+  if (reconcile) {
+    headers.unshift({ name: ' ', width: 31 });
+  }
   if (inOutMode) {
     headers.push({ name: 'In/Out', width: 90, style: { textAlign: 'left' } });
   }
@@ -1015,284 +1381,322 @@ export function ImportTransactions({ modalProps, options }) {
 
   return (
     <Modal
-      title={
-        'Import transactions' + (filetype ? ` (${filetype.toUpperCase()})` : '')
-      }
-      {...modalProps}
-      loading={loadingState === 'parsing'}
-      style={{ width: 800 }}
+      name="import-transactions"
+      isLoading={loadingState === 'parsing'}
+      containerProps={{ style: { width: 800 } }}
     >
-      {error && !error.parsed && (
-        <View style={{ alignItems: 'center', marginBottom: 15 }}>
-          <Text style={{ marginRight: 10, color: theme.errorText }}>
-            <strong>Error:</strong> {error.message}
-          </Text>
-        </View>
-      )}
-      {(!error || !error.parsed) && (
-        <View
-          style={{
-            flex: 'unset',
-            height: 300,
-            border: '1px solid ' + theme.tableBorder,
-          }}
-        >
-          <TableHeader headers={headers} />
-
-          <TableWithNavigator
-            items={transactions}
-            fields={['payee', 'category', 'amount']}
-            style={{ backgroundColor: theme.tableHeaderBackground }}
-            getItemKey={index => index}
-            renderEmpty={() => {
-              return (
-                <View
-                  style={{
-                    textAlign: 'center',
-                    marginTop: 25,
-                    color: theme.tableHeaderText,
-                    fontStyle: 'italic',
-                  }}
-                >
-                  No transactions found
-                </View>
-              );
-            }}
-            renderItem={({ key, style, item }) => (
-              <View key={key} style={style}>
-                <Transaction
-                  transaction={item}
-                  showParsed={filetype === 'csv' || filetype === 'qif'}
-                  parseDateFormat={parseDateFormat}
-                  dateFormat={dateFormat}
-                  fieldMappings={fieldMappings}
-                  splitMode={splitMode}
-                  inOutMode={inOutMode}
-                  outValue={outValue}
-                  flipAmount={flipAmount}
-                  multiplierAmount={multiplierAmount}
-                  categories={categories.list}
-                />
-              </View>
-            )}
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title={
+              'Import transactions' +
+              (filetype ? ` (${filetype.toUpperCase()})` : '')
+            }
+            rightContent={<ModalCloseButton onClick={close} />}
           />
-        </View>
-      )}
-      {error && error.parsed && (
-        <View
-          style={{
-            color: theme.errorText,
-            alignItems: 'center',
-            marginTop: 10,
-          }}
-        >
-          <Text style={{ maxWidth: 450, marginBottom: 15 }}>
-            <strong>Error:</strong> {error.message}
-          </Text>
-          {error.parsed && (
-            <Button onClick={() => onNewFile()}>Select new file...</Button>
-          )}
-        </View>
-      )}
-
-      {filetype === 'csv' && (
-        <View style={{ marginTop: 25 }}>
-          <FieldMappings
-            transactions={transactions}
-            onChange={onUpdateFields}
-            mappings={fieldMappings}
-            splitMode={splitMode}
-            inOutMode={inOutMode}
-            hasHeaderRow={hasHeaderRow}
-          />
-        </View>
-      )}
-
-      {isOfxFile(filetype) && (
-        <CheckboxOption
-          id="form_fallback_missing_payee"
-          checked={fallbackMissingPayeeToMemo}
-          onChange={() => {
-            setFallbackMissingPayeeToMemo(state => !state);
-            parse(
-              filename,
-              getParseOptions('ofx', {
-                fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
-              }),
-            );
-          }}
-        >
-          Use Memo as a fallback for empty Payees
-        </CheckboxOption>
-      )}
-      {(isOfxFile(filetype) || isCamtFile(filetype)) && (
-        <CheckboxOption
-          id="form_dont_reconcile"
-          checked={reconcile}
-          onChange={() => {
-            setReconcile(state => !state);
-          }}
-        >
-          Reconcile transactions
-        </CheckboxOption>
-      )}
-
-      {/*Import Options */}
-      {(filetype === 'qif' || filetype === 'csv') && (
-        <View style={{ marginTop: 25 }}>
-          <Stack
-            direction="row"
-            align="flex-start"
-            spacing={1}
-            style={{ marginTop: 5 }}
-          >
-            {/*Date Format */}
-            <View>
-              {(filetype === 'qif' || filetype === 'csv') && (
-                <DateFormatSelect
-                  transactions={transactions}
-                  fieldMappings={fieldMappings}
-                  parseDateFormat={parseDateFormat}
-                  onChange={setParseDateFormat}
-                />
-              )}
+          {error && !error.parsed && (
+            <View style={{ alignItems: 'center', marginBottom: 15 }}>
+              <Text style={{ marginRight: 10, color: theme.errorText }}>
+                <strong>Error:</strong> {error.message}
+              </Text>
             </View>
+          )}
+          {(!error || !error.parsed) && (
+            <View
+              style={{
+                flex: 'unset',
+                height: 300,
+                border: '1px solid ' + theme.tableBorder,
+              }}
+            >
+              <TableHeader headers={headers} />
 
-            {/* CSV Options */}
-            {filetype === 'csv' && (
-              <View style={{ marginLeft: 25, gap: 5 }}>
-                <SectionLabel title="CSV OPTIONS" />
-                <label
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: 5,
-                    alignItems: 'baseline',
-                  }}
-                >
-                  Delimiter:
-                  <Select
-                    options={[
-                      [',', ','],
-                      [';', ';'],
-                      ['|', '|'],
-                      ['\t', 'tab'],
-                    ]}
-                    value={delimiter}
-                    onChange={value => {
-                      setDelimiter(value);
-                      parse(
-                        filename,
-                        getParseOptions('csv', {
-                          delimiter: value,
-                          hasHeaderRow,
-                        }),
-                      );
-                    }}
-                    style={{ width: 50 }}
-                  />
-                </label>
-                <CheckboxOption
-                  id="form_has_header"
-                  checked={hasHeaderRow}
-                  onChange={() => {
-                    setHasHeaderRow(!hasHeaderRow);
-                    parse(
-                      filename,
-                      getParseOptions('csv', {
-                        delimiter,
-                        hasHeaderRow: !hasHeaderRow,
-                      }),
-                    );
-                  }}
-                >
-                  File has header row
-                </CheckboxOption>
-                <CheckboxOption
-                  id="clear_on_import"
-                  checked={clearOnImport}
-                  onChange={() => {
-                    setClearOnImport(!clearOnImport);
-                  }}
-                >
-                  Clear transactions on import
-                </CheckboxOption>
-                <CheckboxOption
-                  id="form_dont_reconcile"
-                  checked={reconcile}
-                  onChange={() => {
-                    setReconcile(state => !state);
-                  }}
-                >
-                  Reconcile transactions
-                </CheckboxOption>
-              </View>
-            )}
-
-            <View style={{ flex: 1 }} />
-
-            <View style={{ marginRight: 25, gap: 5 }}>
-              <SectionLabel title="AMOUNT OPTIONS" />
-              <CheckboxOption
-                id="form_flip"
-                checked={flipAmount}
-                disabled={splitMode || inOutMode}
-                onChange={() => setFlipAmount(!flipAmount)}
-              >
-                Flip amount
-              </CheckboxOption>
-              {filetype === 'csv' && (
-                <>
-                  <CheckboxOption
-                    id="form_split"
-                    checked={splitMode}
-                    disabled={inOutMode || flipAmount}
-                    onChange={onSplitMode}
-                  >
-                    Split amount into separate inflow/outflow columns
-                  </CheckboxOption>
-                  <InOutOption
-                    inOutMode={inOutMode}
-                    outValue={outValue}
-                    disabled={splitMode || flipAmount}
-                    onToggle={() => setInOutMode(!inOutMode)}
-                    onChangeText={setOutValue}
-                  />
-                </>
-              )}
-              <MultiplierOption
-                multiplierEnabled={multiplierEnabled}
-                multiplierAmount={multiplierAmount}
-                onToggle={() => {
-                  setMultiplierEnabled(!multiplierEnabled);
-                  setMultiplierAmount('');
+              <TableWithNavigator
+                items={transactions.filter(
+                  trans =>
+                    !trans.isMatchedTransaction ||
+                    (trans.isMatchedTransaction && reconcile),
+                )}
+                fields={['payee', 'category', 'amount']}
+                style={{ backgroundColor: theme.tableHeaderBackground }}
+                getItemKey={index => index}
+                renderEmpty={() => {
+                  return (
+                    <View
+                      style={{
+                        textAlign: 'center',
+                        marginTop: 25,
+                        color: theme.tableHeaderText,
+                        fontStyle: 'italic',
+                      }}
+                    >
+                      No transactions found
+                    </View>
+                  );
                 }}
-                onChangeAmount={onMultiplierChange}
+                renderItem={({ key, style, item }) => (
+                  <View key={key} style={style}>
+                    <Transaction
+                      transaction={item}
+                      showParsed={filetype === 'csv' || filetype === 'qif'}
+                      parseDateFormat={parseDateFormat}
+                      dateFormat={dateFormat}
+                      fieldMappings={fieldMappings}
+                      splitMode={splitMode}
+                      inOutMode={inOutMode}
+                      outValue={outValue}
+                      flipAmount={flipAmount}
+                      multiplierAmount={multiplierAmount}
+                      categories={categories.list}
+                      onCheckTransaction={onCheckTransaction}
+                      reconcile={reconcile}
+                    />
+                  </View>
+                )}
               />
             </View>
-          </Stack>
-        </View>
-      )}
+          )}
+          {error && error.parsed && (
+            <View
+              style={{
+                color: theme.errorText,
+                alignItems: 'center',
+                marginTop: 10,
+              }}
+            >
+              <Text style={{ maxWidth: 450, marginBottom: 15 }}>
+                <strong>Error:</strong> {error.message}
+              </Text>
+              {error.parsed && (
+                <Button onPress={() => onNewFile()}>Select new file...</Button>
+              )}
+            </View>
+          )}
 
-      <View style={{ flexDirection: 'row', marginTop: 5 }}>
-        {/*Submit Button */}
-        <View
-          style={{
-            alignSelf: 'flex-end',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}
-        >
-          <ButtonWithLoading
-            type="primary"
-            disabled={transactions.length === 0}
-            loading={loadingState === 'importing'}
-            onClick={onImport}
-          >
-            Import {transactions.length} transactions
-          </ButtonWithLoading>
-        </View>
-      </View>
+          {filetype === 'csv' && (
+            <View style={{ marginTop: 10 }}>
+              <FieldMappings
+                transactions={transactions}
+                onChange={onUpdateFields}
+                mappings={fieldMappings}
+                splitMode={splitMode}
+                inOutMode={inOutMode}
+                hasHeaderRow={hasHeaderRow}
+              />
+            </View>
+          )}
+
+          {isOfxFile(filetype) && (
+            <CheckboxOption
+              id="form_fallback_missing_payee"
+              checked={fallbackMissingPayeeToMemo}
+              onChange={() => {
+                setFallbackMissingPayeeToMemo(state => !state);
+                parse(
+                  filename,
+                  getParseOptions('ofx', {
+                    fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
+                  }),
+                );
+              }}
+            >
+              Use Memo as a fallback for empty Payees
+            </CheckboxOption>
+          )}
+          {(isOfxFile(filetype) || isCamtFile(filetype)) && (
+            <CheckboxOption
+              id="form_dont_reconcile"
+              checked={reconcile}
+              onChange={() => {
+                setReconcile(!reconcile);
+              }}
+            >
+              Merge with existing transactions
+            </CheckboxOption>
+          )}
+
+          {/*Import Options */}
+          {(filetype === 'qif' || filetype === 'csv') && (
+            <View style={{ marginTop: 10 }}>
+              <Stack
+                direction="row"
+                align="flex-start"
+                spacing={1}
+                style={{ marginTop: 5 }}
+              >
+                {/*Date Format */}
+                <View>
+                  {(filetype === 'qif' || filetype === 'csv') && (
+                    <DateFormatSelect
+                      transactions={transactions}
+                      fieldMappings={fieldMappings}
+                      parseDateFormat={parseDateFormat}
+                      onChange={value => {
+                        setParseDateFormat(value);
+                        runImportPreview();
+                      }}
+                    />
+                  )}
+                </View>
+
+                {/* CSV Options */}
+                {filetype === 'csv' && (
+                  <View style={{ marginLeft: 10, gap: 5 }}>
+                    <SectionLabel title="CSV OPTIONS" />
+                    <label
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: 5,
+                        alignItems: 'baseline',
+                      }}
+                    >
+                      Delimiter:
+                      <Select
+                        options={[
+                          [',', ','],
+                          [';', ';'],
+                          ['|', '|'],
+                          ['\t', 'tab'],
+                        ]}
+                        value={delimiter}
+                        onChange={value => {
+                          setDelimiter(value);
+                          parse(
+                            filename,
+                            getParseOptions('csv', {
+                              delimiter: value,
+                              hasHeaderRow,
+                            }),
+                          );
+                        }}
+                        style={{ width: 50 }}
+                      />
+                    </label>
+                    <CheckboxOption
+                      id="form_has_header"
+                      checked={hasHeaderRow}
+                      onChange={() => {
+                        setHasHeaderRow(!hasHeaderRow);
+                        parse(
+                          filename,
+                          getParseOptions('csv', {
+                            delimiter,
+                            hasHeaderRow: !hasHeaderRow,
+                          }),
+                        );
+                      }}
+                    >
+                      File has header row
+                    </CheckboxOption>
+                    <CheckboxOption
+                      id="clear_on_import"
+                      checked={clearOnImport}
+                      onChange={() => {
+                        setClearOnImport(!clearOnImport);
+                      }}
+                    >
+                      Clear transactions on import
+                    </CheckboxOption>
+                    <CheckboxOption
+                      id="form_dont_reconcile"
+                      checked={reconcile}
+                      onChange={() => {
+                        setReconcile(!reconcile);
+                      }}
+                    >
+                      Merge with existing transactions
+                    </CheckboxOption>
+                  </View>
+                )}
+
+                <View style={{ flex: 1 }} />
+
+                <View style={{ marginRight: 10, gap: 5 }}>
+                  <SectionLabel title="AMOUNT OPTIONS" />
+                  <CheckboxOption
+                    id="form_flip"
+                    checked={flipAmount}
+                    disabled={splitMode || inOutMode}
+                    onChange={() => {
+                      setFlipAmount(!flipAmount);
+                      runImportPreview();
+                    }}
+                  >
+                    Flip amount
+                  </CheckboxOption>
+                  {filetype === 'csv' && (
+                    <>
+                      <CheckboxOption
+                        id="form_split"
+                        checked={splitMode}
+                        disabled={inOutMode || flipAmount}
+                        onChange={() => {
+                          onSplitMode();
+                          runImportPreview();
+                        }}
+                      >
+                        Split amount into separate inflow/outflow columns
+                      </CheckboxOption>
+                      <InOutOption
+                        inOutMode={inOutMode}
+                        outValue={outValue}
+                        disabled={splitMode || flipAmount}
+                        onToggle={() => {
+                          setInOutMode(!inOutMode);
+                          runImportPreview();
+                        }}
+                        onChangeText={setOutValue}
+                      />
+                    </>
+                  )}
+                  <MultiplierOption
+                    multiplierEnabled={multiplierEnabled}
+                    multiplierAmount={multiplierAmount}
+                    onToggle={() => {
+                      setMultiplierEnabled(!multiplierEnabled);
+                      setMultiplierAmount('');
+                      runImportPreview();
+                    }}
+                    onChangeAmount={onMultiplierChange}
+                  />
+                </View>
+              </Stack>
+            </View>
+          )}
+
+          <View style={{ flexDirection: 'row', marginTop: 5 }}>
+            {/*Submit Button */}
+            <View
+              style={{
+                alignSelf: 'flex-end',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: '1em',
+              }}
+            >
+              <ButtonWithLoading
+                variant="primary"
+                isDisabled={
+                  transactions?.filter(trans => !trans.isMatchedTransaction)
+                    .length === 0
+                }
+                isLoading={loadingState === 'importing'}
+                onPress={() => {
+                  onImport(close);
+                }}
+              >
+                Import{' '}
+                {
+                  transactions?.filter(trans => !trans.isMatchedTransaction)
+                    .length
+                }{' '}
+                transactions
+              </ButtonWithLoading>
+            </View>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }
