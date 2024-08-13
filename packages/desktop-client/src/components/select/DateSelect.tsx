@@ -26,7 +26,7 @@ import {
 } from 'loot-core/src/shared/months';
 import { stringToInteger } from 'loot-core/src/shared/util';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
@@ -232,7 +232,7 @@ export function DateSelect({
   const [selectedValue, setSelectedValue] = useState(value);
   const userSelectedValue = useRef(selectedValue);
 
-  const [_firstDayOfWeekIdx] = useLocalPref('firstDayOfWeekIdx');
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   useEffect(() => {

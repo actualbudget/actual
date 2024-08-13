@@ -12,13 +12,13 @@ import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
 export function SelectedTransactionsButton({
-  account,
   getTransaction,
   onShow,
   onDuplicate,
   onDelete,
   onEdit,
-  onUnlink,
+  onLinkSchedule,
+  onUnlinkSchedule,
   onCreateRule,
   onSetTransfer,
   onScheduleAction,
@@ -114,16 +114,6 @@ export function SelectedTransactionsButton({
     );
     return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
-
-  function onLinkSchedule() {
-    dispatch(
-      pushModal('schedule-link', {
-        transactionIds: selectedIds,
-        getTransaction,
-        accountName: account?.name ?? '',
-      }),
-    );
-  }
 
   function onViewSchedule() {
     const firstId = selectedIds[0];
@@ -285,10 +275,10 @@ export function SelectedTransactionsButton({
             onViewSchedule();
             break;
           case 'link-schedule':
-            onLinkSchedule();
+            onLinkSchedule(selectedIds);
             break;
           case 'unlink-schedule':
-            onUnlink(selectedIds);
+            onUnlinkSchedule(selectedIds);
             break;
           case 'create-rule':
             onCreateRule(selectedIds);
