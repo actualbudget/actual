@@ -11,11 +11,11 @@ export interface TransactionsHandler {
     learnCategories?: boolean;
   }) => Promise<object>;
 
-  'transaction-add': ( transaction: TransactionEntity, ) => Promise<object>;
+  'transaction-add': (transaction: TransactionEntity) => Promise<object>;
 
-  'transaction-update': ( transaction: TransactionEntity, ) => Promise<object>;
+  'transaction-update': (transaction: TransactionEntity) => Promise<object>;
 
-  'transaction-delete': ( transaction: TransactionEntity, ) => Promise<object>;
+  'transaction-delete': (transaction: TransactionEntity) => Promise<object>;
 
   'transactions-parse-file': (arg: {
     filepath: string;
