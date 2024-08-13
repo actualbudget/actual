@@ -21,6 +21,12 @@ type NotificationWithId = Notification & { id: string };
 
 export type NotificationsState = {
   notifications: NotificationWithId[];
+  inset?: {
+    bottom?: number;
+    top?: number;
+    right?: number;
+    left?: number;
+  };
 };
 
 type AddNotificationAction = {
@@ -33,6 +39,17 @@ type RemoveNotificationAction = {
   id: string;
 };
 
+type SetNotificationInsetAction = {
+  type: typeof constants.SET_NOTIFICATION_INSET;
+  inset: {
+    bottom?: number;
+    top?: number;
+    right?: number;
+    left?: number;
+  };
+};
+
 export type NotificationsActions =
   | AddNotificationAction
-  | RemoveNotificationAction;
+  | RemoveNotificationAction
+  | SetNotificationInsetAction;

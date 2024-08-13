@@ -74,7 +74,8 @@ export function AccountHeader({
   onBatchDelete,
   onBatchDuplicate,
   onBatchEdit,
-  onBatchUnlink,
+  onBatchLinkSchedule,
+  onBatchUnlinkSchedule,
   onCreateRule,
   onApplyFilter,
   onUpdateFilter,
@@ -343,7 +344,8 @@ export function AccountHeader({
               onDuplicate={onBatchDuplicate}
               onDelete={onBatchDelete}
               onEdit={onBatchEdit}
-              onUnlink={onBatchUnlink}
+              onLinkSchedule={onBatchLinkSchedule}
+              onUnlinkSchedule={onBatchUnlinkSchedule}
               onCreateRule={onCreateRule}
               onSetTransfer={onSetTransfer}
               onScheduleAction={onScheduleAction}

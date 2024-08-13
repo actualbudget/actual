@@ -208,7 +208,9 @@ const TransactionHeader = memo(
             borderTopWidth: 0,
             borderBottomWidth: 0,
           }}
-          onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
+          onSelect={e =>
+            dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
+          }
         />
         <HeaderCell
           value="Date"
@@ -993,7 +995,9 @@ const Transaction = memo(function Transaction({
   const account = accounts && accountId && getAccountsById(accounts)[accountId];
 
   const isChild = transaction.is_child;
-  const transferAcct = transferAccountsByTransaction[id];
+  const transferAcct = isTemporaryId(id)
+    ? getAccountsById(accounts)[payee?.transfer_acct]
+    : transferAccountsByTransaction[id];
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
@@ -1115,7 +1119,11 @@ const Transaction = memo(function Transaction({
           }}
           focused={focusedField === 'select'}
           onSelect={e => {
-            dispatchSelected({ type: 'select', id: transaction.id, event: e });
+            dispatchSelected({
+              type: 'select',
+              id: transaction.id,
+              isRangeSelect: e.shiftKey,
+            });
           }}
           onEdit={() => onEdit(id, 'select')}
           selected={selected}
@@ -1347,7 +1355,7 @@ const Transaction = memo(function Transaction({
             </View>
           </CellButton>
         </Cell>
-      ) : isBudgetTransfer || isOffBudget || isPreview ? (
+      ) : isBudgetTransfer || isOffBudget ? (
         <InputCell
           /* Category field for transfer and off-budget transactions
      (NOT preview, it is covered first) */
@@ -1355,7 +1363,7 @@ const Transaction = memo(function Transaction({
           width="flex"
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
-          onExpose={name => !isPreview && onEdit(id, name)}
+          onExpose={name => onEdit(id, name)}
           value={
             isParent
               ? 'Split'

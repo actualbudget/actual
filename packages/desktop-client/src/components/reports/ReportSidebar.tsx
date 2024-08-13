@@ -9,7 +9,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';
 import { Information } from '../alerts';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
@@ -275,7 +275,7 @@ export function ReportSidebar({
           <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }} />
           <Button
             ref={triggerRef}
-            onClick={() => {
+            onPress={() => {
               setMenuOpen(true);
             }}
             style={{
