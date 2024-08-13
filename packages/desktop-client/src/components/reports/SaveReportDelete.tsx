@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { theme } from '../../style/theme';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -33,10 +33,12 @@ export function SaveReportDelete({
         style={{ marginTop: 15 }}
       >
         <View style={{ flex: 1 }} />
-        <Button type="primary" autoFocus onClick={onDelete}>
+        <Button variant="primary" autoFocus onPress={onDelete}>
           Yes
         </Button>
-        <Button onClick={onClose}>No</Button>
+        <Button variant="primary" onPress={onClose}>
+          No
+        </Button>
       </Stack>
     </>
   );

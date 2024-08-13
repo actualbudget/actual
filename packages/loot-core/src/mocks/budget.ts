@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
+
 import { addTransactions } from '../server/accounts/sync';
 import { runQuery as aqlQuery } from '../server/aql';
 import * as budgetActions from '../server/budget/actions';
@@ -13,13 +15,13 @@ import type { Handlers } from '../types/handlers';
 import type {
   CategoryGroupEntity,
   NewCategoryGroupEntity,
-  NewPayeeEntity,
-  NewTransactionEntity,
+  PayeeEntity,
+  TransactionEntity,
 } from '../types/models';
 
 import { random } from './random';
 
-type MockPayeeEntity = NewPayeeEntity & { bill?: boolean };
+type MockPayeeEntity = Partial<PayeeEntity> & { bill?: boolean };
 
 function pickRandom<T>(list: T[]): T {
   return list[Math.floor(random() * list.length) % list.length];
@@ -119,11 +121,17 @@ async function fillPrimaryChecking(
       amount = integer(0, random() < 0.05 ? -8000 : -700);
     }
 
-    const transaction: NewTransactionEntity = {
+    const currentDate = monthUtils.subDays(
+      monthUtils.currentDay(),
+      Math.floor(i / 3),
+    );
+
+    const transaction: TransactionEntity = {
+      id: uuidv4(),
       amount,
       payee: payee.id,
       account: account.id,
-      date: monthUtils.subDays(monthUtils.currentDay(), Math.floor(i / 3)),
+      date: currentDate,
       category: category.id,
     };
     transactions.push(transaction);
@@ -135,9 +143,24 @@ async function fillPrimaryChecking(
           ? incomeGroup.categories.find(c => c.name === 'Income').id
           : pickRandom(expenseCategories).id;
       transaction.subtransactions = [
-        { amount: a, category: pick() },
-        { amount: a, category: pick() },
         {
+          id: uuidv4(),
+          date: currentDate,
+          account: account.id,
+          amount: a,
+          category: pick(),
+        },
+        {
+          id: uuidv4(),
+          date: currentDate,
+          account: account.id,
+          amount: a,
+          category: pick(),
+        },
+        {
+          id: uuidv4(),
+          date: currentDate,
+          account: account.id,
           amount: transaction.amount - a * 2,
           category: pick(),
         },
@@ -403,8 +426,9 @@ async function fillOther(handlers, account, payees, groups) {
   const numTransactions = integer(3, 6);
   const category = incomeGroup.categories.find(c => c.name === 'Income');
 
-  const transactions: NewTransactionEntity[] = [
+  const transactions: TransactionEntity[] = [
     {
+      id: uuidv4(),
       amount: integer(3250, 3700) * 100 * 100,
       payee: payees.find(p => p.name === 'Starting Balance').id,
       account: account.id,
@@ -419,6 +443,7 @@ async function fillOther(handlers, account, payees, groups) {
     const amount = integer(4, 9) * 100 * 100;
 
     transactions.push({
+      id: uuidv4(),
       amount,
       payee: payee.id,
       account: account.id,
@@ -596,7 +621,7 @@ export async function createTestBudget(handlers: Handlers) {
     }
   });
 
-  const payees: Array<MockPayeeEntity> = [
+  const newPayees: Array<MockPayeeEntity> = [
     { name: 'Starting Balance' },
     { name: 'Kroger' },
     { name: 'Publix' },
@@ -611,10 +636,17 @@ export async function createTestBudget(handlers: Handlers) {
     { name: 'T-mobile', bill: true },
   ];
 
+  const payees: PayeeEntity[] = [];
+
   await runMutator(() =>
     batchMessages(async () => {
-      for (const payee of payees) {
-        payee.id = await handlers['payee-create']({ name: payee.name });
+      for (const newPayee of newPayees) {
+        const id = await handlers['payee-create']({ name: newPayee.name });
+        payees.push({
+          id,
+          name: newPayee.name,
+          ...newPayee,
+        });
       }
     }),
   );
