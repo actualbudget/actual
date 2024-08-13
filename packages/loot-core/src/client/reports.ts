@@ -39,6 +39,11 @@ export function calculateHasWarning(
       continue;
     }
 
+    // Empty value.. we can skip
+    if (!isMultiCondition && !value) {
+      continue;
+    }
+
     switch (field) {
       case 'account':
         if (isMultiCondition) {
