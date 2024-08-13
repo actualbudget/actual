@@ -7,22 +7,22 @@ import { ParseFileResult } from '../../accounts/parse-file';
 
 export interface TransactionsHandler {
   'transactions-batch-update': (arg: {
-    added?: Partial<TransactionEntity>[];
-    deleted?: Partial<TransactionEntity>[];
-    updated?: Partial<TransactionEntity>[];
+    added?: TransactionEntity[];
+    deleted?: TransactionEntity[];
+    updated?: TransactionEntity[];
     learnCategories?: boolean;
   }) => Promise<object>;
 
   'transaction-add': (
-    transaction: Partial<TransactionEntity>,
+    transaction: TransactionEntity,
   ) => Promise<object>;
 
   'transaction-update': (
-    transaction: Partial<TransactionEntity>,
+    transaction: TransactionEntity,
   ) => Promise<object>;
 
   'transaction-delete': (
-    transaction: Partial<TransactionEntity>,
+    transaction: TransactionEntity,
   ) => Promise<object>;
 
   'transactions-parse-file': (arg: {
@@ -31,7 +31,7 @@ export interface TransactionsHandler {
   }) => Promise<ParseFileResult>;
 
   'transactions-export': (arg: {
-    transactions: Partial<TransactionEntity>[];
+    transactions: TransactionEntity[];
     accounts: unknown;
     categoryGroups: unknown;
     payees: unknown;
@@ -41,7 +41,7 @@ export interface TransactionsHandler {
 
   'transactions-import': (arg: {
     accountId: string;
-    transactions: Partial<TransactionEntity>[];
+    transactions: TransactionEntity[];
     isPreview: boolean;
   }) => Promise<object>;
 }
