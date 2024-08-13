@@ -3,7 +3,7 @@ import React, { type RefObject, useEffect } from 'react';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -66,10 +66,9 @@ export function SaveReportName({
               />
             </FormField>
             <Button
-              type="primary"
+              variant="primary"
               style={{ marginTop: 30 }}
-              onClick={e => {
-                e.preventDefault();
+              onPress={() => {
                 onAddUpdate({
                   menuChoice: menuItem ?? undefined,
                   reportData: report ?? undefined,

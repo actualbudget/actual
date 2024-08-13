@@ -42,12 +42,14 @@ export function hasFieldsChanged<T extends object>(
   return changed;
 }
 
+export type Diff<T extends { id: string }> = {
+  added: T[];
+  updated: Partial<T>[];
+  deleted: Partial<T>[];
+};
+
 export function applyChanges<T extends { id: string }>(
-  changes: {
-    added?: T[];
-    updated?: T[];
-    deleted?: T[];
-  },
+  changes: Diff<T>,
   items: T[],
 ) {
   items = [...items];
@@ -118,15 +120,18 @@ function _groupById<T extends { id: string }>(data: T[]) {
   return res;
 }
 
-export function diffItems<T extends { id: string }>(items: T[], newItems: T[]) {
+export function diffItems<T extends { id: string }>(
+  items: T[],
+  newItems: T[],
+): Diff<T> {
   const grouped = _groupById(items);
   const newGrouped = _groupById(newItems);
   const added: T[] = [];
   const updated: Partial<T>[] = [];
 
-  const deleted = items
+  const deleted: Partial<T>[] = items
     .filter(item => !newGrouped.has(item.id))
-    .map(item => ({ id: item.id }));
+    .map(item => ({ id: item.id }) as Partial<T>);
 
   newItems.forEach(newItem => {
     const item = grouped.get(newItem.id);
