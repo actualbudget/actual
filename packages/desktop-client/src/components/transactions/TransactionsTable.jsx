@@ -995,7 +995,9 @@ const Transaction = memo(function Transaction({
   const account = accounts && accountId && getAccountsById(accounts)[accountId];
 
   const isChild = transaction.is_child;
-  const transferAcct = transferAccountsByTransaction[id];
+  const transferAcct = isTemporaryId(id)
+    ? getAccountsById(accounts)[payee?.transfer_acct]
+    : transferAccountsByTransaction[id];
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
@@ -1353,7 +1355,7 @@ const Transaction = memo(function Transaction({
             </View>
           </CellButton>
         </Cell>
-      ) : isBudgetTransfer || isOffBudget || isPreview ? (
+      ) : isBudgetTransfer || isOffBudget ? (
         <InputCell
           /* Category field for transfer and off-budget transactions
      (NOT preview, it is covered first) */
@@ -1361,7 +1363,7 @@ const Transaction = memo(function Transaction({
           width="flex"
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
-          onExpose={name => !isPreview && onEdit(id, name)}
+          onExpose={name => onEdit(id, name)}
           value={
             isParent
               ? 'Split'
