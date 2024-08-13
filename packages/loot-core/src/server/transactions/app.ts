@@ -18,13 +18,12 @@ app.method(
   'transactions-batch-update',
   mutator(async function ({ added, deleted, updated, learnCategories }) {
     return withUndo(async () => {
-      const result = await batchUpdateTransactions({
+      return await batchUpdateTransactions({
         added,
         updated,
         deleted,
         learnCategories,
       });
-      return result;
     });
   }),
 );
