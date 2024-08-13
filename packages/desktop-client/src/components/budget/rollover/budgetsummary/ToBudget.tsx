@@ -36,7 +36,7 @@ export function ToBudget({
     value: 0,
   });
   const availableValue = sheetValue;
-  if (typeof availableValue !== 'number') {
+  if (typeof availableValue !== 'number' && availableValue !== null) {
     throw new Error(
       'Expected availableValue to be a number but got ' + availableValue,
     );
@@ -83,7 +83,7 @@ export function ToBudget({
         )}
         {menuOpen === 'transfer' && (
           <TransferMenu
-            initialAmount={availableValue}
+            initialAmount={availableValue ?? undefined}
             onClose={() => setMenuOpen(null)}
             onSubmit={(amount, categoryId) => {
               onBudgetAction(month, 'transfer-available', {
