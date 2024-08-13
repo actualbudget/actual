@@ -16,7 +16,9 @@ export function UserAccessHeader() {
         exposed={true}
         focused={false}
         selected={selectedItems.size > 0}
-        onSelect={e => dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })}
+        onSelect={e =>
+          dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
+        }
       />
       <Cell value="User" width="flex" />
     </TableHeader>

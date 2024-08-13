@@ -42,7 +42,8 @@ export const UserAccessRow = memo(
           exposed={hovered || selected}
           focused={true}
           onSelect={e => {
-            dispatchSelected({type: 'select',
+            dispatchSelected({
+              type: 'select',
               id: access.userId,
               isRangeSelect: e.shiftKey,
             });
