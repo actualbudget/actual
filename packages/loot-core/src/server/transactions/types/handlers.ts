@@ -1,8 +1,6 @@
 // @ts-strict-ignore
 import { QueryState } from '../../../shared/query';
-import {
-  type TransactionEntity
-} from '../../../types/models';
+import { type TransactionEntity } from '../../../types/models';
 import { ParseFileResult } from '../../accounts/parse-file';
 
 export interface TransactionsHandler {
@@ -13,17 +11,11 @@ export interface TransactionsHandler {
     learnCategories?: boolean;
   }) => Promise<object>;
 
-  'transaction-add': (
-    transaction: TransactionEntity,
-  ) => Promise<object>;
+  'transaction-add': ( transaction: TransactionEntity, ) => Promise<object>;
 
-  'transaction-update': (
-    transaction: TransactionEntity,
-  ) => Promise<object>;
+  'transaction-update': ( transaction: TransactionEntity, ) => Promise<object>;
 
-  'transaction-delete': (
-    transaction: TransactionEntity,
-  ) => Promise<object>;
+  'transaction-delete': ( transaction: TransactionEntity, ) => Promise<object>;
 
   'transactions-parse-file': (arg: {
     filepath: string;
