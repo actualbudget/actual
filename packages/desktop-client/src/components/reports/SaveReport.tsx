@@ -5,7 +5,7 @@ import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
 import { SvgExpandArrow } from '../../icons/v0';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -167,8 +167,8 @@ export function SaveReport({
     >
       <Button
         ref={triggerRef}
-        type="bare"
-        onClick={() => {
+        variant="bare"
+        onPress={() => {
           setMenuOpen(true);
         }}
       >
