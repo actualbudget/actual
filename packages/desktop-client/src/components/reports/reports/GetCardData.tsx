@@ -7,7 +7,7 @@ import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type PayeeEntity } from 'loot-core/types/models/payee';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
-import { type LocalPrefs } from 'loot-core/types/prefs';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style/styles';
@@ -74,7 +74,7 @@ export function GetCardData({
   accounts: AccountEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   earliestTransaction: string;
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   showTooltip?: boolean;
 }) {
   const { isNarrowWidth } = useResponsive();

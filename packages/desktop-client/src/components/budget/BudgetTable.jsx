@@ -9,7 +9,12 @@ import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
-import { findSortDown, findSortUp, getScrollbarWidth } from './util';
+import {
+  findSortDown,
+  findSortUp,
+  getScrollbarWidth,
+  separateGroups,
+} from './util';
 
 export function BudgetTable(props) {
   const {
@@ -86,9 +91,10 @@ export function BudgetTable(props) {
   };
 
   const _onReorderGroup = (id, dropPos, targetId) => {
+    const [expenseGroups] = separateGroups(categoryGroups); // exclude Income group from sortable groups to fix off-by-one error
     onReorderGroup({
       id,
-      ...findSortDown(categoryGroups, dropPos, targetId),
+      ...findSortDown(expenseGroups, dropPos, targetId),
     });
   };
 

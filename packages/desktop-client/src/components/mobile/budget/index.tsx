@@ -28,6 +28,7 @@ import {
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';
@@ -57,9 +58,9 @@ function BudgetInner(props: BudgetInnerProps) {
   const [initialized, setInitialized] = useState(false);
   // const [editMode, setEditMode] = useState(false);
 
-  const [_numberFormat] = useLocalPref('numberFormat');
+  const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useLocalPref('hideFraction');
+  const [hideFraction = false] = useSyncedPref('hideFraction');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -461,7 +462,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const spreadsheet = useSpreadsheet();
   useSetThemeColor(theme.mobileViewTheme);
   return (
