@@ -21,7 +21,7 @@ import {
 } from 'loot-core/types/file';
 
 import { useInitialMount } from '../../hooks/useInitialMount';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import {
   SvgCloudCheck,
@@ -354,7 +354,7 @@ function BudgetListHeader({
 export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
   const dispatch = useDispatch();
   const allFiles = useSelector(state => state.budgets.allFiles || []);
-  const [id] = useLocalPref('id');
+  const [id] = useMetadataPref('id');
 
   // Remote files do not have the 'id' field
   function isNonRemoteFile(
