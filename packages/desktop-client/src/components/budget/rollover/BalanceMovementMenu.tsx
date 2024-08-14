@@ -10,7 +10,6 @@ import { type CategoryEntity } from 'loot-core/types/models';
 import { type WithRequired } from 'loot-core/types/util';
 
 import { useCategories } from '../../../hooks/useCategories';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 import { BalanceMenu } from './BalanceMenu';
 import { CoverMenu } from './CoverMenu';
