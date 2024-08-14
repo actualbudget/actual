@@ -557,10 +557,10 @@ describe('API CRUD operations', () => {
     );
 
     // delete rules
-    await api.deleteRule(rules[1]);
+    await api.deleteRule(rules[1].id);
     expect(await api.getRules()).toHaveLength(1);
 
-    await api.deleteRule(rules[0]);
+    await api.deleteRule(rules[0].id);
     expect(await api.getRules()).toHaveLength(0);
   });
 

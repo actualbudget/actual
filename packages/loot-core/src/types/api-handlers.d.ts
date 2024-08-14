@@ -180,5 +180,5 @@ export interface ApiHandlers {
 
   'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
 
-  'api/rule-delete': (arg: { id: string }) => Promise<boolean>;
+  'api/rule-delete': (id: string) => Promise<boolean>;
 }

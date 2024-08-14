@@ -24,7 +24,7 @@ export interface RulesHandlers {
     rule: RuleEntity,
   ) => Promise<{ error: ValidationError } | RuleEntity>;
 
-  'rule-delete': (rule: Pick<RuleEntity, 'id'>) => Promise<boolean>;
+  'rule-delete': (id: string) => Promise<boolean>;
 
   'rule-delete-all': (
     ids: string[],

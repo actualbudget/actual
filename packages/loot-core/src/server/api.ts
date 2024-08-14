@@ -723,9 +723,9 @@ handlers['api/rule-update'] = withMutation(async function ({ rule }) {
   return updatedRule;
 });
 
-handlers['api/rule-delete'] = withMutation(async function ({ id }) {
+handlers['api/rule-delete'] = withMutation(async function (id) {
   checkFileOpen();
-  return handlers['rule-delete']({ id });
+  return handlers['rule-delete'](id);
 });
 
 export function installAPI(serverHandlers: ServerHandlers) {
