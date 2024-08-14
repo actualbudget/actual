@@ -272,6 +272,10 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
 
     trans.cleared = Boolean(trans.booked);
 
+    const notes =
+      trans.remittanceInformationUnstructured ||
+      (trans.remittanceInformationUnstructuredArray || []).join(', ');
+
     normalized.push({
       payee_name: trans.payeeName,
       trans: {
@@ -279,9 +283,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         payee: trans.payee,
         account: trans.account,
         date: trans.date,
-        notes:
-          trans.remittanceInformationUnstructured ||
-          (trans.remittanceInformationUnstructuredArray || []).join(', '),
+        notes: notes.trim().replace('#', '##'),
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
