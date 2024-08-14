@@ -40,12 +40,12 @@ export function CoverMenu({
   onClose,
 }: CoverMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
-  const filteredCategoryGroups = originalCategoryGroups.filter(
-    g => !g.is_income,
-  );
+  const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+
   const categoryGroups = showToBeBudgeted
-    ? addToBeBudgetedGroup(filteredCategoryGroups)
-    : filteredCategoryGroups;
+    ? addToBeBudgetedGroup(expenseGroups)
+    : expenseGroups;
+
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   const filteredCategoryGroups = useMemo(
@@ -67,7 +67,9 @@ export function CoverMenu({
         {node => (
           <CategoryAutocomplete
             categoryGroups={filteredCategoryGroups}
-            value={filteredCategoryGroups.find(g => g.id === categoryId) ?? null}
+            value={
+              filteredCategoryGroups.find(g => g.id === categoryId) ?? null
+            }
             openOnFocus={true}
             onSelect={(id: string | undefined) => setCategoryId(id || null)}
             inputProps={{
