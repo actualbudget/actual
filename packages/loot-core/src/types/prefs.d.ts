@@ -6,8 +6,7 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'spendingReport'
-  | 'simpleFinSync'
-  | 'iterableTopologicalSort';
+  | 'simpleFinSync';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
