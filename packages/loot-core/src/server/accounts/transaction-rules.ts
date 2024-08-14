@@ -223,16 +223,17 @@ export async function updateRule(rule) {
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
-export async function deleteRule<T extends { id: string }>(rule: T) {
+export async function deleteRule(id: string) {
   const schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
-    rule.id,
+    id,
   ]);
 
   if (schedule) {
     return false;
   }
 
-  return db.delete_('rules', rule.id);
+  await db.delete_('rules', id);
+  return true;
 }
 
 // Sync projections

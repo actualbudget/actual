@@ -209,7 +209,7 @@ describe('Transaction rules', () => {
     expect(transaction.payee).toBe('Kroger');
     expect(transaction.category).toBe('food');
 
-    await deleteRule({ id });
+    await deleteRule(id);
     expect(getRules().length).toBe(0);
     transaction = runRules({
       payee: 'Kroger',
