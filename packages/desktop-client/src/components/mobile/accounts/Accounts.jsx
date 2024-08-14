@@ -81,13 +81,15 @@ function AccountCard({
     >
       <Button
         onPress={() => onSelect(account.id)}
-        className={css({
-          flexDirection: 'row',
-          border: '1px solid ' + theme.pillBorder,
-          flex: 1,
-          alignItems: 'center',
-          borderRadius: 6,
-        })}
+        className={String(
+          css({
+            flexDirection: 'row',
+            border: '1px solid ' + theme.pillBorder,
+            flex: 1,
+            alignItems: 'center',
+            borderRadius: 6,
+          }),
+        )}
       >
         <View
           style={{
@@ -180,14 +182,16 @@ function AccountList({
             <Button
               variant="bare"
               aria-label="Add account"
-              className={css({
-                color: theme.mobileHeaderText,
-                margin: 10,
-                ':hover': {
+              className={String(
+                css({
                   color: theme.mobileHeaderText,
-                  background: theme.mobileHeaderTextHover,
-                },
-              })}
+                  margin: 10,
+                  ':hover': {
+                    color: theme.mobileHeaderText,
+                    background: theme.mobileHeaderTextHover,
+                  },
+                }),
+              )}
               onPress={onAddAccount}
             >
               <SvgAdd width={20} height={20} />
