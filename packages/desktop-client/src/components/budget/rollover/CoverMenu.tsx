@@ -67,9 +67,7 @@ export function CoverMenu({
         {node => (
           <CategoryAutocomplete
             categoryGroups={filteredCategoryGroups}
-            value={
-              filteredCategoryGroups.find(g => g.id === categoryId) ?? null
-            }
+            value={categoryGroups.find(g => g.id === categoryId) ?? null}
             openOnFocus={true}
             onSelect={(id: string | undefined) => setCategoryId(id || null)}
             inputProps={{
