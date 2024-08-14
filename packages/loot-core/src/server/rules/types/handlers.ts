@@ -20,9 +20,12 @@ export interface RulesHandlers {
     rule: Omit<RuleEntity, 'id'>,
   ) => Promise<{ error: ValidationError } | RuleEntity>;
 
-  'rule-update': (
-    rule: RuleEntity,
-  ) => Promise<{ error: ValidationError } | RuleEntity>;
+  'rule-update': <
+    PartialRule extends Partial<Omit<RuleEntity, 'id'>> &
+      Pick<RuleEntity, 'id'>,
+  >(
+    rule: PartialRule,
+  ) => Promise<{ error: ValidationError } | PartialRule>;
 
   'rule-delete': (id: string) => Promise<boolean>;
 
