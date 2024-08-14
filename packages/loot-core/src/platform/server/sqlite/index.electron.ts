@@ -130,7 +130,7 @@ export function closeDatabase(db: SQL.Database) {
 export async function exportDatabase(db: SQL.Database) {
   // electron does not support better-sqlite serialize since v21
   // save to file and read in the raw data.
-  const name = `backup-for-export-${uuidv4()}.db`;
+  const name = `${process.env.ACTUAL_DATA_DIR}/backup-for-export-${uuidv4()}.db`;
 
   await db.backup(name);
 
