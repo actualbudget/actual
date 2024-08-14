@@ -186,14 +186,20 @@ function getInitialMappings(transactions) {
     return entry ? entry[0] : null;
   }
 
+  function isString(value) {
+    return typeof value === 'string' || value instanceof String;
+  }
+
   const dateField = key(
     fields.find(([name]) => name.toLowerCase().includes('date')) ||
-      fields.find(([, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
+      fields.find(
+        ([, value]) => isString(value) && value.match(/^\d+[-/]\d+[-/]\d+$/),
+      ),
   );
 
   const amountField = key(
     fields.find(([name]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([, value]) => value.match(/^-?[.,\d]+$/)),
+      fields.find(([, value]) => isString(value) && value.match(/^-?[.,\d]+$/)),
   );
 
   const categoryField = key(
