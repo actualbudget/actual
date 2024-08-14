@@ -22,7 +22,8 @@ type TextLinkProps = {
   children?: ReactNode;
 };
 
-type ButtonLinkProps = ComponentProps<typeof Button> & {
+type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
+  subVariant?: ComponentProps<typeof Button>['variant'];
   to?: string;
   activeStyle?: CSSProperties;
 };
@@ -133,10 +134,7 @@ const InternalLink = ({
 };
 
 type LinkProps =
-  | ({
-      variant: 'button';
-      buttonVariant?: ButtonLinkProps['variant'];
-    } & Omit<ButtonLinkProps, 'variant'>)
+  | ({ variant: 'button' } & ButtonLinkProps)
   | ({ variant?: 'internal' } & InternalLinkProps)
   | ({ variant?: 'external' } & ExternalLinkProps)
   | ({ variant?: 'text' } & TextLinkProps);
