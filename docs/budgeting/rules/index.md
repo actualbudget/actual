@@ -26,7 +26,7 @@ While ranking works for the most part, you might want to say "this rule _always_
 
 - `is`/`is not` matches exactly
 - `contains`/`does not contain` matches a substring
-- `matches` is regex
+- `matches` is a [regular expressions](https://regextutorial.org/)
 - `one of`/`not one of` is a multi-select
 
 ### Fields
