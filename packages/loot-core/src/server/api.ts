@@ -44,12 +44,14 @@ let IMPORT_MODE = false;
 // we also need to notify the UI manually if stuff has changed (if
 // they are connecting to an already running instance, the UI should
 // update). The wrapper handles that.
-function withMutation(handler) {
-  return args => {
+function withMutation<Params extends Array<unknown>, ReturnType>(
+  handler: (...args: Params) => Promise<ReturnType>,
+) {
+  return (...args: Params) => {
     return runMutator(
       async () => {
         const latestTimestamp = getClock().timestamp.toString();
-        const result = await handler(args);
+        const result = await handler(...args);
 
         const rows = await db.all(
           'SELECT DISTINCT dataset FROM messages_crdt WHERE timestamp > ?',
@@ -464,7 +466,7 @@ handlers['api/transactions-add'] = withMutation(async function ({
     runTransfers,
     learnCategories,
   });
-  return 'ok';
+  return 'ok' as const;
 });
 
 handlers['api/transactions-get'] = async function ({
@@ -503,7 +505,7 @@ handlers['api/transaction-update'] = withMutation(async function ({
   }
 
   const { diff } = updateTransaction(transactions, { id, ...fields });
-  return handlers['transactions-batch-update'](diff);
+  return handlers['transactions-batch-update'](diff)['updated'];
 });
 
 handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
@@ -518,7 +520,7 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
   }
 
   const { diff } = deleteTransaction(transactions, id);
-  return handlers['transactions-batch-update'](diff);
+  return handlers['transactions-batch-update'](diff)['deleted'];
 });
 
 handlers['api/accounts-get'] = async function () {
@@ -590,7 +592,8 @@ handlers['api/categories-get'] = async function ({
 
 handlers['api/category-groups-get'] = async function () {
   checkFileOpen();
-  return handlers['get-category-groups']();
+  const groups = await handlers['get-category-groups']();
+  return groups.map(categoryGroupModel.toExternal);
 };
 
 handlers['api/category-group-create'] = withMutation(async function ({
@@ -711,7 +714,7 @@ handlers['api/rule-create'] = withMutation(async function ({ rule }) {
 
 handlers['api/rule-update'] = withMutation(async function ({ rule }) {
   checkFileOpen();
-  const updatedRule = handlers['rule-update'](rule);
+  const updatedRule = await handlers['rule-update'](rule);
 
   if ('error' in updatedRule) {
     throw APIError('Failed updating the rule', updatedRule.error);
@@ -720,7 +723,7 @@ handlers['api/rule-update'] = withMutation(async function ({ rule }) {
   return updatedRule;
 });
 
-handlers['api/rule-delete'] = withMutation(async function ({ id }) {
+handlers['api/rule-delete'] = withMutation(async function (id) {
   checkFileOpen();
   return handlers['rule-delete'](id);
 });

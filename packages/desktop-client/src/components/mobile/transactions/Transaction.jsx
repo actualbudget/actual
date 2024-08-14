@@ -111,7 +111,7 @@ export const Transaction = memo(function Transaction({
   );
   const specialCategory = account?.offbudget
     ? 'Off Budget'
-    : transferAcct
+    : transferAcct && !transferAcct.offbudget
       ? 'Transfer'
       : isParent
         ? 'Split'
