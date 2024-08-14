@@ -142,17 +142,25 @@ type LinkProps =
 
 export function Link(props: LinkProps) {
   switch (props.variant) {
-    case 'internal':
-      return <InternalLink {...props} />;
+    case 'internal': {
+      const { variant: _, ...internalProps } = props;
+      return <InternalLink {...internalProps} />;
+    }
 
-    case 'external':
-      return <ExternalLink {...props} />;
+    case 'external': {
+      const { variant: _, ...externalProps } = props;
+      return <ExternalLink {...externalProps} />;
+    }
 
-    case 'button':
-      return <ButtonLink {...props} />;
+    case 'button': {
+      const { variant: _, ...buttonProps } = props;
+      return <ButtonLink {...buttonProps} />;
+    }
 
-    case 'text':
-      return <TextLink {...props} />;
+    case 'text': {
+      const { variant: _, ...textProps } = props;
+      return <TextLink {...textProps} />;
+    }
 
     default:
       throw new Error(`Unrecognised link type: ${props.variant}`);
