@@ -53,21 +53,25 @@ export function SecondaryItem({
   return (
     <View style={{ flexShrink: 0, ...style }}>
       <ItemContent
-        style={{
+        style={({ isHovered, isPressed }) => ({
           ...accountNameStyle,
           color: theme.sidebarItemText,
           paddingLeft: 14 + indent,
           fontWeight: bold ? fontWeight : null,
-          ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
-        }}
+          ...(isHovered
+            ? { backgroundColor: theme.sidebarItemBackgroundHover }
+            : {}),
+          ...(isPressed
+            ? {
+                borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
+                paddingLeft: 14 - 4 + indent,
+                color: theme.sidebarItemTextSelected,
+                fontWeight: bold ? fontWeight : null,
+              }
+            : {}),
+        })}
         to={to}
         onClick={onClick}
-        activeStyle={{
-          borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
-          paddingLeft: 14 - 4 + indent,
-          color: theme.sidebarItemTextSelected,
-          fontWeight: bold ? fontWeight : null,
-        }}
       >
         {content}
       </ItemContent>
