@@ -163,6 +163,6 @@ export function Link(props: LinkProps) {
     }
 
     default:
-      throw new Error(`Unrecognised link type: ${props.variant}`);
+      throw new Error(`Unrecognised Link variant.`);
   }
 }

@@ -96,30 +96,29 @@ export function Account<FieldName extends SheetFields<'account'>>({
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
           <Link
+            variant="internal"
             to={to}
-            style={({ isPressed }) => ({
+            style={{
               ...accountNameStyle,
               ...style,
               position: 'relative',
               borderLeft: '4px solid transparent',
               ...(updated && { fontWeight: 700 }),
-              ...(isPressed
-                ? {
-                    borderColor: theme.sidebarItemAccentSelected,
-                    color: theme.sidebarItemTextSelected,
-                    // This is kind of a hack, but we don't ever want the account
-                    // that the user is looking at to be "bolded" which means it
-                    // has unread transactions. The system does mark is read and
-                    // unbolds it, but it still "flashes" bold so this just
-                    // ignores it if it's active
-                    fontWeight: (style && style.fontWeight) || 'normal',
-                    '& .dot': {
-                      backgroundColor: theme.sidebarItemAccentSelected,
-                      transform: 'translateX(-4.5px)',
-                    },
-                  }
-                : {}),
-            })}
+            }}
+            activeStyle={{
+              borderColor: theme.sidebarItemAccentSelected,
+              color: theme.sidebarItemTextSelected,
+              // This is kind of a hack, but we don't ever want the account
+              // that the user is looking at to be "bolded" which means it
+              // has unread transactions. The system does mark is read and
+              // unbolds it, but it still "flashes" bold so this just
+              // ignores it if it's active
+              fontWeight: (style && style.fontWeight) || 'normal',
+              '& .dot': {
+                backgroundColor: theme.sidebarItemAccentSelected,
+                transform: 'translateX(-4.5px)',
+              },
+            }}
           >
             <View
               style={{

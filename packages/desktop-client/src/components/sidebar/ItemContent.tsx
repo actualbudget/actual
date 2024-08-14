@@ -4,11 +4,12 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import { type CSSProperties } from '../../style';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
 
 type ItemContentProps = {
-  style: ComponentProps<typeof Link>['style'];
+  style: CSSProperties;
   to: string;
   onClick: MouseEventHandler<HTMLDivElement>;
   children: ReactNode;
@@ -36,7 +37,7 @@ export function ItemContent({
       {children}
     </View>
   ) : (
-    <Link to={to} style={style}>
+    <Link variant="internal" to={to} style={style}>
       {children}
     </Link>
   );
