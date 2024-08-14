@@ -35,9 +35,8 @@ export function FieldLabel({ title, flush, style }: FieldLabelProps) {
   );
 }
 
-const valueStyle = {
-  borderWidth: 1,
-  borderColor: theme.formInputBorder,
+const defaultStyle = {
+  border: '1px solid ' + theme.formInputBorder,
   marginLeft: 8,
   marginRight: 8,
   height: styles.mobileMinHeight,
@@ -55,7 +54,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         disabled={disabled}
         onUpdate={onUpdate}
         style={{
-          ...valueStyle,
+          ...defaultStyle,
           ...style,
           color: disabled ? theme.tableTextInactive : theme.tableText,
           backgroundColor: disabled
@@ -87,8 +86,8 @@ export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
               flexDirection: 'row',
               alignItems: 'center',
               padding: `0 ${styles.mobileEditingPadding}px`,
+              ...defaultStyle,
               ...style,
-              ...valueStyle,
               backgroundColor: theme.tableBackground,
               ...(isDisabled && {
                 backgroundColor: theme.formInputTextReadOnlySelection,
