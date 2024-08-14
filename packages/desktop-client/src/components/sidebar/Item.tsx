@@ -58,7 +58,7 @@ export function Item({
   return (
     <View style={{ flexShrink: 0, ...style }}>
       <ItemContent
-        style={({ isHovered, isPressed }) => ({
+        style={{
           ...styles.mediumText,
           paddingTop: 9,
           paddingBottom: 9,
@@ -66,15 +66,15 @@ export function Item({
           paddingRight: 10,
           textDecoration: 'none',
           color: theme.sidebarItemText,
-          ...(isHovered || forceHover ? hoverStyle : {}),
-          ...(isPressed || forceActive
-            ? {
-                borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
-                paddingLeft: 19 + indent - 4,
-                color: theme.sidebarItemTextSelected,
-              }
-            : {}),
-        })}
+          ...(forceHover ? hoverStyle : {}),
+          ':hover': hoverStyle,
+        }}
+        forceActive={forceActive}
+        activeStyle={{
+          borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
+          paddingLeft: 19 + indent - 4,
+          color: theme.sidebarItemTextSelected,
+        }}
         to={to}
         onClick={onClick}
       >

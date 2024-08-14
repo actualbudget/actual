@@ -1,8 +1,4 @@
-import React, {
-  type ComponentProps,
-  type MouseEventHandler,
-  type ReactNode,
-} from 'react';
+import React, { type MouseEventHandler, type ReactNode } from 'react';
 
 import { type CSSProperties } from '../../style';
 import { Link } from '../common/Link';
@@ -12,13 +8,17 @@ type ItemContentProps = {
   style: CSSProperties;
   to: string;
   onClick: MouseEventHandler<HTMLDivElement>;
+  activeStyle: CSSProperties;
   children: ReactNode;
+  forceActive?: boolean;
 };
 
 export function ItemContent({
   style,
   to,
   onClick,
+  activeStyle,
+  forceActive,
   children,
 }: ItemContentProps) {
   return onClick ? (
@@ -31,13 +31,14 @@ export function ItemContent({
         userSelect: 'none',
         userDrag: 'none',
         cursor: 'pointer',
+        ...(forceActive ? activeStyle : {}),
       }}
       onClick={onClick}
     >
       {children}
     </View>
   ) : (
-    <Link variant="internal" to={to} style={style}>
+    <Link variant="internal" to={to} style={style} activeStyle={activeStyle}>
       {children}
     </Link>
   );
