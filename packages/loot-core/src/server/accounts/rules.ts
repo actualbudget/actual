@@ -507,10 +507,14 @@ export class Action {
         object.schedule = this.value;
         break;
       case 'prepend-notes':
-        object[this.field] = object[this.field] ? this.value + object[this.field] : this.value;
+        object[this.field] = object[this.field]
+          ? this.value + object[this.field]
+          : this.value;
         break;
       case 'append-notes':
-        object[this.field] = object[this.field] ? object[this.field] + this.value : this.value
+        object[this.field] = object[this.field]
+          ? object[this.field] + this.value
+          : this.value;
         break;
       default:
     }
