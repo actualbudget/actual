@@ -20,6 +20,10 @@ Here are a couple of considerations to know about before making the decision to 
 
 * GoCardless
 
+:::note
+[Experimental support for SimpleFIN](../experimental/simplefin-sync.md) (North American banks) is also available.
+:::
+
 ## GoCardless Setup
 
 ### Create SECRET and KEY for Actual
