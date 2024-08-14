@@ -51,7 +51,13 @@ jobs:
           name: actual-electron-${{ matrix.os }}
           path: |
             packages/desktop-electron/dist/*.dmg
-            packages/desktop-electron/dist/*.appx
             packages/desktop-electron/dist/*.exe
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
+      - if: ${{ startsWith(matrix.os, 'windows') }}
+        - name: Upload Windows Store Build
+          uses: actions/upload-artifact@v4
+          with:
+            name: actual-electron-${{ matrix.os }}-appx
+            path: |
+              packages/desktop-electron/dist/*.appx
