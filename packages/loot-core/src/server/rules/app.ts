@@ -113,8 +113,8 @@ app.method(
 
 app.method(
   'rule-delete',
-  mutator(async function (rule) {
-    return rules.deleteRule(rule);
+  mutator(async function (id) {
+    return rules.deleteRule(id);
   }),
 );
 
@@ -125,7 +125,7 @@ app.method(
 
     await batchMessages(async () => {
       for (const id of ids) {
-        const res = await rules.deleteRule({ id });
+        const res = await rules.deleteRule(id);
         if (res === false) {
           someDeletionsFailed = true;
         }
