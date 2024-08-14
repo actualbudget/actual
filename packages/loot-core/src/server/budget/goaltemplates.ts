@@ -1,12 +1,11 @@
 // @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
-import { integerToAmount, amountToInteger } from '../../shared/util';
+import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
-import { setBudget, getSheetValue, isReflectBudget, setGoal } from './actions';
-import { parse } from './goal-template.pegjs';
+import { getSheetValue, isReflectBudget, setBudget, setGoal } from './actions';
 import { goalsAverage } from './goals/goalsAverage';
 import { goalsBy } from './goals/goalsBy';
 import { goalsPercentage } from './goals/goalsPercentage';
@@ -15,9 +14,9 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
+import { checkTemplates, storeTemplates } from './template-notes';
 
 const TEMPLATE_PREFIX = '#template';
-const GOAL_PREFIX = '#goal';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
@@ -61,9 +60,9 @@ export function runCheckTemplates() {
 async function getCategories() {
   return await db.all(
     `
-    SELECT categories.* FROM categories 
-    INNER JOIN category_groups on categories.cat_group = category_groups.id 
-    WHERE categories.tombstone = 0 AND categories.hidden = 0 
+    SELECT categories.* FROM categories
+    INNER JOIN category_groups on categories.cat_group = category_groups.id
+    WHERE categories.tombstone = 0 AND categories.hidden = 0
     AND category_groups.hidden = 0
     `,
   );
@@ -123,27 +122,6 @@ async function resetCategoryTargets(month, category) {
       });
     }
   });
-}
-
-async function storeTemplates() {
-  //stores the template definitions to the database
-  const templates = await getCategoryTemplates(null);
-  const categories = await getCategories();
-
-  for (let c = 0; c < categories.length; c++) {
-    const template = templates[categories[c].id];
-    if (template) {
-      await db.update('categories', {
-        id: categories[c].id,
-        goal_def: JSON.stringify(template),
-      });
-    } else {
-      await db.update('categories', {
-        id: categories[c].id,
-        goal_def: null,
-      });
-    }
-  }
 }
 
 async function getTemplates(category, directive: string) {
@@ -438,42 +416,6 @@ async function processGoals(goals, month, category?) {
     }
   }
 }
-async function getCategoryTemplates(category) {
-  const templates = {};
-
-  let notes = await db.all(
-    `
-    SELECT * FROM notes 
-    WHERE lower(note) like '%${TEMPLATE_PREFIX}%' 
-    OR lower(note) like '%${GOAL_PREFIX}%'
-     `,
-  );
-  if (category) notes = notes.filter(n => n.id === category.id);
-
-  for (let n = 0; n < notes.length; n++) {
-    const lines = notes[n].note.split('\n');
-    const template_lines = [];
-    for (let l = 0; l < lines.length; l++) {
-      const line = lines[l].trim();
-      if (
-        !line.toLowerCase().startsWith(TEMPLATE_PREFIX) &&
-        !line.toLowerCase().startsWith(GOAL_PREFIX)
-      ) {
-        continue;
-      }
-      try {
-        const parsed = parse(line);
-        template_lines.push(parsed);
-      } catch (e) {
-        template_lines.push({ type: 'error', line, error: e });
-      }
-    }
-    if (template_lines.length) {
-      templates[notes[n].id] = template_lines;
-    }
-  }
-  return templates;
-}
 
 async function applyCategoryTemplate(
   category,
@@ -708,55 +650,4 @@ async function applyCategoryTemplate(
   str += ' ' + template_lines.map(x => x.line).join('\n');
   console.log(str);
   return { amount: to_budget, errors };
-}
-
-async function checkTemplates(): Promise<Notification> {
-  const category_templates = await getCategoryTemplates(null);
-  const errors = [];
-
-  const categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
-  );
-  let all_schedule_names = await db.all(
-    'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
-  );
-  all_schedule_names = all_schedule_names.map(v => v.name);
-
-  // run through each line and see if its an error
-  for (let c = 0; c < categories.length; c++) {
-    const category = categories[c];
-    const template = category_templates[category.id];
-
-    if (template) {
-      for (let l = 0; l < template.length; l++) {
-        //check for basic error
-        if (template[l].type === 'error') {
-          errors.push(category.name + ': ' + template[l].line);
-        }
-        // check schedule name error
-        if (template[l].type === 'schedule') {
-          if (!all_schedule_names.includes(template[l].name)) {
-            errors.push(
-              category.name +
-                ': Schedule “' +
-                template[l].name +
-                '” does not exist',
-            );
-          }
-        }
-      }
-    }
-  }
-  if (errors.length) {
-    return {
-      sticky: true,
-      message: `There were errors interpreting some templates:`,
-      pre: errors.join('\n\n'),
-    };
-  } else {
-    return {
-      type: 'message',
-      message: 'All templates passed! 🎉',
-    };
-  }
 }

@@ -17,7 +17,7 @@ import {
 import { q, type Query } from '../shared/query';
 import { currencyToAmount, amountToInteger } from '../shared/util';
 import { type CategoryEntity, type AccountEntity } from '../types/models';
-import { type LocalPrefs } from '../types/prefs';
+import { type SyncedPrefs } from '../types/prefs';
 
 type BudgetType<SheetName extends SheetNames> = Record<
   string,
@@ -78,7 +78,7 @@ export function makeTransactionsQuery(accountId: string) {
 export function makeTransactionSearchQuery(
   currentQuery: Query,
   search: string,
-  dateFormat: LocalPrefs['dateFormat'],
+  dateFormat: SyncedPrefs['dateFormat'],
 ) {
   const amount = currencyToAmount(search);
 

@@ -4,12 +4,12 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
-import { type LocalPrefs } from 'loot-core/types/prefs';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';
 import { Information } from '../alerts';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
@@ -56,7 +56,7 @@ type ReportSidebarProps = {
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;
   earliestTransaction: string;
-  firstDayOfWeekIdx: LocalPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
   isComplexCategoryCondition?: boolean;
 };
 
@@ -275,7 +275,7 @@ export function ReportSidebar({
           <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }} />
           <Button
             ref={triggerRef}
-            onClick={() => {
+            onPress={() => {
               setMenuOpen(true);
             }}
             style={{
