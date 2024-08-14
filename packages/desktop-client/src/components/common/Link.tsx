@@ -25,6 +25,7 @@ type TextLinkProps = {
 type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
   buttonVariant?: ComponentProps<typeof Button>['variant'];
   to?: string;
+  activeStyle?: CSSProperties;
 };
 
 type InternalLinkProps = {
@@ -88,7 +89,7 @@ const TextLink = ({ style, onClick, children, ...props }: TextLinkProps) => {
   );
 };
 
-const ButtonLink = ({ to, style, ...props }: ButtonLinkProps) => {
+const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const navigate = useNavigate();
   const path = to ?? '';
   const match = useMatch({ path });
