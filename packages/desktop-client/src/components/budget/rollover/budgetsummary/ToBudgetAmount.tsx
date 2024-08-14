@@ -10,8 +10,10 @@ import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
-import { useSheetName } from '../../../spreadsheet/useSheetName';
-import { useSheetValue } from '../../../spreadsheet/useSheetValue';
+import {
+  useRolloverSheetName,
+  useRolloverSheetValue,
+} from '../RolloverComponents';
 
 import { TotalsList } from './TotalsList';
 
@@ -30,14 +32,19 @@ export function ToBudgetAmount({
   onClick,
   isTotalsListTooltipDisabled = false,
 }: ToBudgetAmountProps) {
-  const sheetName = useSheetName(rolloverBudget.toBudget);
-  const sheetValue = useSheetValue({
+  const sheetName = useRolloverSheetName(rolloverBudget.toBudget);
+  const sheetValue = useRolloverSheetValue({
     name: rolloverBudget.toBudget,
     value: 0,
   });
   const format = useFormat();
-  const availableValue = parseInt(sheetValue);
-  const num = isNaN(availableValue) ? 0 : availableValue;
+  const availableValue = sheetValue;
+  if (typeof availableValue !== 'number' && availableValue !== null) {
+    throw new Error(
+      'Expected availableValue to be a number but got ' + availableValue,
+    );
+  }
+  const num = availableValue ?? 0;
   const isNegative = num < 0;
 
   return (

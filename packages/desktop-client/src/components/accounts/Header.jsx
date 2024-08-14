@@ -74,7 +74,8 @@ export function AccountHeader({
   onBatchDelete,
   onBatchDuplicate,
   onBatchEdit,
-  onBatchUnlink,
+  onBatchLinkSchedule,
+  onBatchUnlinkSchedule,
   onCreateRule,
   onApplyFilter,
   onUpdateFilter,
@@ -337,12 +338,14 @@ export function AccountHeader({
             </View>
           ) : (
             <SelectedTransactionsButton
+              account={account}
               getTransaction={id => transactions.find(t => t.id === id)}
               onShow={onShowTransactions}
               onDuplicate={onBatchDuplicate}
               onDelete={onBatchDelete}
               onEdit={onBatchEdit}
-              onUnlink={onBatchUnlink}
+              onLinkSchedule={onBatchLinkSchedule}
+              onUnlinkSchedule={onBatchUnlinkSchedule}
               onCreateRule={onCreateRule}
               onSetTransfer={onSetTransfer}
               onScheduleAction={onScheduleAction}

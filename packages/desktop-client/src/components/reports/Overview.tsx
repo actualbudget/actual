@@ -7,10 +7,9 @@ import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useResponsive } from '../../ResponsiveProvider';
-import { Button } from '../common/Button';
-import { Link } from '../common/Link';
-import { Text } from '../common/Text';
+import { Button } from '../common/Button2';
 import { View } from '../common/View';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
@@ -21,8 +20,9 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
 
 export function Overview() {
-  const customReports = useReports();
+  const { data: customReports } = useReports();
   const { isNarrowWidth } = useResponsive();
+  const navigate = useNavigate();
 
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
@@ -45,11 +45,12 @@ export function Overview() {
           >
             <PageHeader title="Reports" />
             {!isNarrowWidth && (
-              <Link to="/reports/custom" style={{ textDecoration: 'none' }}>
-                <Button type="primary">
-                  <Text>Create new custom report</Text>
-                </Button>
-              </Link>
+              <Button
+                variant="primary"
+                onPress={() => navigate('/reports/custom')}
+              >
+                Create new custom report
+              </Button>
             )}
           </View>
         )

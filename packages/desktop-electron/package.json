@@ -24,12 +24,13 @@
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
       "build"
     ],
+    "beforePack": "./build/beforePackHook.js",
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "artifactName": "${productName}-mac.${ext}",
+      "artifactName": "${productName}-mac-${arch}.${ext}",
       "notarize": {
         "teamId": "79ANZ983YF"
       },
@@ -37,7 +38,8 @@
         {
           "target": "dmg",
           "arch": [
-            "universal"
+            "x64",
+            "arm64"
           ]
         }
       ]
@@ -58,16 +60,16 @@
         {
           "target": "appx",
           "arch": [
-            "x64",
             "ia32",
+            "x64",
             "arm64"
           ]
         },
         {
           "target": "nsis",
           "arch": [
-            "x64",
             "ia32",
+            "x64",
             "arm64"
           ]
         }
@@ -80,7 +82,8 @@
       "publisherDisplayName": "actualbudget.org",
       "displayName": "Actual Budget",
       "publisher": "CN=19454997-90E1-4473-879D-96D6A77A6056"
-    }
+    },
+    "npmRebuild": false
   },
   "dependencies": {
     "electron-is-dev": "2.0.0",

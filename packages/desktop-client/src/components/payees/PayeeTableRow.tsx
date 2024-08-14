@@ -130,7 +130,11 @@ export const PayeeTableRow = memo(
           focused={focusedField === 'select'}
           selected={selected}
           onSelect={e => {
-            dispatchSelected({ type: 'select', id: payee.id, event: e });
+            dispatchSelected({
+              type: 'select',
+              id: payee.id,
+              isRangeSelect: e.shiftKey,
+            });
           }}
         />
         <CustomCell
