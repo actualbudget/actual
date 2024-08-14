@@ -27,7 +27,7 @@ export function ModeButton({
           backgroundColor: theme.menuBackground,
           marginRight: 5,
           fontSize: 'inherit',
-         ...style,
+          ...style,
           ...(selected && {
             backgroundColor: theme.buttonPrimaryBackground,
             color: theme.buttonPrimaryText,
