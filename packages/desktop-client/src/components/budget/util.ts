@@ -4,7 +4,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type Handlers } from 'loot-core/src/types/handlers';
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
-import { type LocalPrefs } from 'loot-core/src/types/prefs';
+import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 import { type CSSProperties, styles, theme } from '../../style';
 import { type DropPosition } from '../sort';
@@ -103,7 +103,7 @@ export function findSortDown(
     }
 
     const newIdx = idx + 1;
-    if (newIdx < arr.length - 1) {
+    if (newIdx < arr.length) {
       return { targetId: arr[newIdx].id };
     } else {
       // Move to the end
@@ -141,7 +141,7 @@ export function getScrollbarWidth() {
 }
 
 export async function prewarmMonth(
-  budgetType: LocalPrefs['budgetType'],
+  budgetType: SyncedPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   month: string,
 ) {
@@ -156,7 +156,7 @@ export async function prewarmMonth(
 }
 
 export async function prewarmAllMonths(
-  budgetType: LocalPrefs['budgetType'],
+  budgetType: SyncedPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   bounds: { start: string; end: string },
   startMonth: string,
@@ -176,7 +176,7 @@ export async function prewarmAllMonths(
 }
 
 export async function switchBudgetType(
-  newBudgetType: LocalPrefs['budgetType'],
+  newBudgetType: SyncedPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   bounds: { start: string; end: string },
   startMonth: string,

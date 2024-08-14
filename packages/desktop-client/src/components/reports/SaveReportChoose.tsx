@@ -1,7 +1,7 @@
 import React, { createRef, useEffect, useState } from 'react';
 
 import { theme } from '../../style/theme';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -48,9 +48,8 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
         >
           <View style={{ flex: 1 }} />
           <Button
-            type="primary"
-            onClick={e => {
-              e.preventDefault();
+            variant="primary"
+            onPress={() => {
               if (!value) {
                 setErr('Invalid report entered');
                 return;

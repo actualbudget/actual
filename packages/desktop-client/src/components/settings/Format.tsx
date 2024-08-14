@@ -2,10 +2,10 @@
 import React, { type ReactNode } from 'react';
 
 import { numberFormats } from 'loot-core/src/shared/util';
-import { type LocalPrefs } from 'loot-core/src/types/prefs';
+import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { type CSSProperties, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Select } from '../common/Select';
@@ -18,7 +18,7 @@ import { Setting } from './UI';
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday
-const daysOfWeek: { value: LocalPrefs['firstDayOfWeekIdx']; label: string }[] =
+const daysOfWeek: { value: SyncedPrefs['firstDayOfWeekIdx']; label: string }[] =
   [
     { value: '0', label: 'Sunday' },
     { value: '1', label: 'Monday' },
@@ -29,7 +29,7 @@ const daysOfWeek: { value: LocalPrefs['firstDayOfWeekIdx']; label: string }[] =
     { value: '6', label: 'Saturday' },
   ];
 
-const dateFormats: { value: LocalPrefs['dateFormat']; label: string }[] = [
+const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
   { value: 'yyyy-MM-dd', label: 'YYYY-MM-DD' },
@@ -56,14 +56,14 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 export function FormatSettings() {
   const sidebar = useSidebar();
   const [_firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
-    useLocalPref('firstDayOfWeekIdx'); // Sunday;
+    useSyncedPref('firstDayOfWeekIdx'); // Sunday;
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [, setDateFormatPref] = useLocalPref('dateFormat');
-  const [_numberFormat, setNumberFormatPref] = useLocalPref('numberFormat');
+  const [, setDateFormatPref] = useSyncedPref('dateFormat');
+  const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction = false, setHideFractionPref] =
-    useLocalPref('hideFraction');
+    useSyncedPref('hideFraction');
 
   const selectButtonStyle: CSSProperties = {
     ':hover': {
