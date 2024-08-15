@@ -5,8 +5,8 @@ i18n
   .use(backend)
   .init({
     backend: {
-      loadPath: "../desktop-client/locale/{{lng}}/{{ns}}.json",
-      addPath: "../desktop-client/locale/{{lng}}/{{ns}}.missing.json",
+      loadPath: "../desktop-client/locale/{{lng}}.json",
+      addPath: "../desktop-client/locale/{{lng}}.missing.json",
       contextBridgeApiKey: "Actual",
     },
 
