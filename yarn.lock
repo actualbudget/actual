@@ -8663,6 +8663,7 @@ __metadata:
     "@electron/notarize": "npm:2.2.0"
     "@electron/rebuild": "npm:3.6.0"
     "@types/copyfiles": "npm:^2"
+    "@types/lodash": "npm:^4"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     electron: "npm:30.0.6"
@@ -8670,7 +8671,9 @@ __metadata:
     electron-is-dev: "npm:2.0.0"
     electron-log: "npm:4.4.8"
     i18next: "npm:^23.12.6"
+    i18next-electron-fs-backend: "npm:^3.0.2"
     i18next-resources-to-backend: "npm:^1.2.1"
+    lodash: "npm:^4.17.21"
     loot-core: "npm:*"
     node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
@@ -11273,6 +11276,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"i18next-electron-fs-backend@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "i18next-electron-fs-backend@npm:3.0.2"
+  dependencies:
+    lodash.clonedeep: "npm:^4.5.0"
+    lodash.merge: "npm:^4.6.2"
+  checksum: 10/43227421724382ba3cea544e03d0ca3d159c73dad57abc85ba216fd6ae425b7f5cd1937205123e75d405b4db2488f654fbf6214145d2970316cd43572f789cbd
+  languageName: node
+  linkType: hard
+
 "i18next-parser@npm:^9.0.0":
   version: 9.0.1
   resolution: "i18next-parser@npm:9.0.1"
@@ -13298,6 +13311,13 @@ __metadata:
   dependencies:
     p-locate: "npm:^5.0.0"
   checksum: 10/72eb661788a0368c099a184c59d2fee760b3831c9c1c33955e8a19ae4a21b4116e53fa736dc086cdeb9fce9f7cc508f2f92d2d3aae516f133e16a2bb59a39f5a
+  languageName: node
+  linkType: hard
+
+"lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.clonedeep@npm:4.5.0"
+  checksum: 10/957ed243f84ba6791d4992d5c222ffffca339a3b79dbe81d2eaf0c90504160b500641c5a0f56e27630030b18b8e971ea10b44f928a977d5ced3c8948841b555f
   languageName: node
   linkType: hard
 

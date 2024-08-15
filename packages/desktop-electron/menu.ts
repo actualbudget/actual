@@ -5,7 +5,7 @@ import {
   app,
   shell,
 } from 'electron';
-import i18next from 'i18next';
+import i18n from './i18n';
 
 export function getMenu(
   isDev: boolean,
@@ -14,10 +14,10 @@ export function getMenu(
 ) {
   const template: MenuItemConstructorOptions[] = [
     {
-      label: i18next.t('File'),
+      label: i18n.t('File'),
       submenu: [
         {
-          label: i18next.t('Load Backup...'),
+          label: i18n.t('Load Backup...'),
           enabled: false,
           click(_item, focusedWindow) {
             if (focusedWindow && budgetId) {
@@ -33,7 +33,7 @@ export function getMenu(
           type: 'separator',
         },
         {
-          label: i18next.t('Manage files...'),
+          label: i18n.t('Manage files...'),
           accelerator: 'CmdOrCtrl+O',
           click(_item, focusedWindow) {
             if (focusedWindow) {
@@ -53,10 +53,10 @@ export function getMenu(
       ],
     },
     {
-      label: i18next.t('Edit'),
+      label: i18n.t('Edit'),
       submenu: [
         {
-          label: i18next.t('Undo'),
+          label: i18n.t('Undo'),
           enabled: false,
           accelerator: 'CmdOrCtrl+Z',
           click: function (_menuItem, focusedWin) {
@@ -69,7 +69,7 @@ export function getMenu(
           },
         },
         {
-          label: i18next.t('Redo'),
+          label: i18n.t('Redo'),
           enabled: false,
           accelerator: 'Shift+CmdOrCtrl+Z',
           click: function (_menuItem, focusedWin) {
@@ -105,11 +105,11 @@ export function getMenu(
       ],
     },
     {
-      label: i18next.t('View'),
+      label: i18n.t('View'),
       submenu: [
         isDev
           ? {
-              label: i18next.t('Reload'),
+              label: i18n.t('Reload'),
               accelerator: 'CmdOrCtrl+R',
               click(_item, focusedWindow) {
                 if (focusedWindow) focusedWindow.reload();
@@ -117,7 +117,7 @@ export function getMenu(
             }
           : { label: 'hidden', visible: false },
         {
-          label: i18next.t('Toggle Developer Tools'),
+          label: i18n.t('Toggle Developer Tools'),
           accelerator:
             process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
           click(_item, focusedWindow) {
@@ -147,10 +147,10 @@ export function getMenu(
       ],
     },
     {
-      label: i18next.t('Tools'),
+      label: i18n.t('Tools'),
       submenu: [
         {
-          label: i18next.t('Find schedules'),
+          label: i18n.t('Find schedules'),
           enabled: false,
           click: function (_menuItem, focusedWin) {
             if (focusedWin) {
@@ -174,7 +174,7 @@ export function getMenu(
       role: 'help',
       submenu: [
         {
-          label: i18next.t('Keyboard Shortcuts Reference'),
+          label: i18n.t('Keyboard Shortcuts Reference'),
           accelerator: '?',
           enabled: !!budgetId,
           click: function (_menuItem, focusedWin) {
@@ -189,7 +189,7 @@ export function getMenu(
           type: 'separator',
         },
         {
-          label: i18next.t('Learn More'),
+          label: i18n.t('Learn More'),
           click() {
             shell.openExternal('https://actualbudget.org/docs/');
           },
@@ -205,7 +205,7 @@ export function getMenu(
       submenu: [
         isDev
           ? {
-              label: i18next.t('Screenshot'),
+              label: i18n.t('Screenshot'),
               click() {
                 ipcMain.emit('screenshot');
               },
@@ -239,13 +239,13 @@ export function getMenu(
       ],
     });
     // Edit menu.
-    const editIdx = template.findIndex(t => t.label === i18next.t('Edit'));
+    const editIdx = template.findIndex(t => t.label === i18n.t('Edit'));
     (template[editIdx].submenu as MenuItemConstructorOptions[]).push(
       {
         type: 'separator',
       },
       {
-        label: i18next.t('Speech'),
+        label: i18n.t('Speech'),
         submenu: [
           {
             role: 'startSpeaking',
@@ -260,24 +260,24 @@ export function getMenu(
     const windowIdx = template.findIndex(t => t.role === 'window');
     template[windowIdx].submenu = [
       {
-        label: i18next.t('Close'),
+        label: i18n.t('Close'),
         accelerator: 'CmdOrCtrl+W',
         role: 'close',
       },
       {
-        label: i18next.t('Minimize'),
+        label: i18n.t('Minimize'),
         accelerator: 'CmdOrCtrl+M',
         role: 'minimize',
       },
       {
-        label: i18next.t('Zoom'),
+        label: i18n.t('Zoom'),
         role: 'zoom',
       },
       {
         type: 'separator',
       },
       {
-        label: i18next.t('Bring All to Front'),
+        label: i18n.t('Bring All to Front'),
         role: 'front',
       },
     ];

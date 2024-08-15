@@ -26,6 +26,9 @@ import {
   get as getWindowState,
   listen as listenToWindowState,
 } from './window-state';
+const backend = require("i18next-electron-fs-backend");
+
+import i18n from './i18n';
 
 import './security';
 
@@ -113,6 +116,8 @@ async function createWindow() {
   });
   win.setBackgroundColor('#E8ECF0');
 
+  backend.mainBindings(ipcMain, win, fs);
+
   if (isDev) {
     win.webContents.openDevTools();
   }
@@ -186,23 +191,23 @@ function isExternalUrl(url: string) {
 function updateMenu(budgetId?: string) {
   const isBudgetOpen = !!budgetId;
   const menu = getMenu(isDev, createWindow, budgetId);
-  const file = menu.items.filter(item => item.label === 'File')[0];
+  const file = menu.items.filter(item => item.label === i18n.t('File'))[0];
   const fileItems = file.submenu?.items || [];
   fileItems
-    .filter(item => item.label === 'Load Backup...')
+    .filter(item => item.label === i18n.t('Load Backup...'))
     .forEach(item => {
       item.enabled = isBudgetOpen;
     });
 
-  const tools = menu.items.filter(item => item.label === 'Tools')[0];
+  const tools = menu.items.filter(item => item.label === i18n.t('Tools'))[0];
   tools.submenu?.items.forEach(item => {
     item.enabled = isBudgetOpen;
   });
 
-  const edit = menu.items.filter(item => item.label === 'Edit')[0];
+  const edit = menu.items.filter(item => item.label === i18n.t('Edit'))[0];
   const editItems = edit.submenu?.items || [];
   editItems
-    .filter(item => item.label === 'Undo' || item.label === 'Redo')
+    .filter(item => item.label === i18n.t('Undo') || item.label === i18n.t('Redo'))
     .map(item => (item.enabled = isBudgetOpen));
 
   if (process.platform === 'win32') {
@@ -267,6 +272,8 @@ app.on('window-all-closed', () => {
   // On macOS, closing all windows shouldn't exit the process
   if (process.platform !== 'darwin') {
     app.quit();
+  } else {
+    backend.clearMainBindings(ipcMain);
   }
 });
 
