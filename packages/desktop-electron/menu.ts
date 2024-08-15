@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import {
   MenuItemConstructorOptions,
   Menu,
@@ -5,7 +7,6 @@ import {
   app,
   shell,
 } from 'electron';
-import { useTranslation } from 'react-i18next';
 
 export function getMenu(
   isDev: boolean,
