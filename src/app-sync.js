@@ -13,7 +13,12 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 
 const app = express();
 app.use(errorMiddleware);
+app.use(express.json());
+app.use(express.raw({ type: 'application/actual-sync' }));
+
 export { app as handlers };
+
+const OK_RESPONSE = { status: 'ok' };
 
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
@@ -160,7 +165,7 @@ app.post('/user-create-key', (req, res) => {
     [keySalt, keyId, testContent, fileId],
   );
 
-  res.send(JSON.stringify({ status: 'ok' }));
+  res.send(OK_RESPONSE);
 });
 
 app.post('/reset-user-file', async (req, res) => {
@@ -190,7 +195,7 @@ app.post('/reset-user-file', async (req, res) => {
     }
   }
 
-  res.send(JSON.stringify({ status: 'ok' }));
+  res.send(OK_RESPONSE);
 });
 
 app.post('/upload-user-file', async (req, res) => {
@@ -333,7 +338,7 @@ app.post('/update-user-filename', (req, res) => {
 
   accountDb.mutate('UPDATE files SET name = ? WHERE id = ?', [name, fileId]);
 
-  res.send(JSON.stringify({ status: 'ok' }));
+  res.send(OK_RESPONSE);
 });
 
 app.get('/list-user-files', (req, res) => {
@@ -399,6 +404,20 @@ app.post('/delete-user-file', (req, res) => {
   let accountDb = getAccountDb();
   let { fileId } = req.body;
 
+  if (!fileId) {
+    return res.status(422).send({
+      details: 'fileId-required',
+      reason: 'unprocessable-entity',
+      status: 'error',
+    });
+  }
+
+  let rows = accountDb.all('SELECT * FROM files WHERE id = ?', [fileId]);
+
+  if (rows.length === 0) {
+    return res.status(400).send('file-not-found');
+  }
+
   accountDb.mutate('UPDATE files SET deleted = TRUE WHERE id = ?', [fileId]);
-  res.send(JSON.stringify({ status: 'ok' }));
+  res.send(OK_RESPONSE);
 });

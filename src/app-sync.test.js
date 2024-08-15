@@ -75,3 +75,65 @@ describe('/download-user-file', () => {
     });
   });
 });
+
+describe('/delete-user-file', () => {
+  it('returns 401 if the user is not authenticated', async () => {
+    const res = await request(app).post('/delete-user-file');
+
+    expect(res.statusCode).toEqual(401);
+    expect(res.body).toEqual({
+      details: 'token-not-found',
+      reason: 'unauthorized',
+      status: 'error',
+    });
+  });
+
+  // it returns 422 if the fileId is not provided
+  it('returns 422 if the fileId is not provided', async () => {
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token');
+
+    expect(res.statusCode).toEqual(422);
+    expect(res.body).toEqual({
+      details: 'fileId-required',
+      reason: 'unprocessable-entity',
+      status: 'error',
+    });
+  });
+
+  it('returns 400 if the file does not exist', async () => {
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token')
+      .send({ fileId: 'non-existing-file-id' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toEqual('file-not-found');
+  });
+
+  it('marks the file as deleted', async () => {
+    const accountDb = getAccountDb();
+    const fileId = 'existing-file-id';
+
+    // Insert a file into the database
+    accountDb.mutate(
+      'INSERT OR IGNORE INTO files (id, deleted) VALUES (?, FALSE)',
+      [fileId],
+    );
+
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({ status: 'ok' });
+
+    // Verify that the file is marked as deleted
+    const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
+      fileId,
+    ]);
+    expect(rows[0].deleted).toBe(1);
+  });
+});
