@@ -52,6 +52,7 @@ jobs:
           path: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
+            !packages/desktop-electron/dist/Actual-windows.exe
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
       - name: Upload Windows Store Build
