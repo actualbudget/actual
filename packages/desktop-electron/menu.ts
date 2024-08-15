@@ -5,18 +5,21 @@ import {
   app,
   shell,
 } from 'electron';
+import { useTranslation } from 'react-i18next';
 
 export function getMenu(
   isDev: boolean,
   createWindow: () => Promise<void>,
   budgetId: string | undefined = undefined,
 ) {
+  const { t } = useTranslation('myNamespace');
+
   const template: MenuItemConstructorOptions[] = [
     {
-      label: 'File',
+      label: t('File'),
       submenu: [
         {
-          label: 'Load Backup...',
+          label: t('Load Backup...'),
           enabled: false,
           click(_item, focusedWindow) {
             if (focusedWindow && budgetId) {
@@ -32,7 +35,7 @@ export function getMenu(
           type: 'separator',
         },
         {
-          label: 'Manage files...',
+          label: t('Manage files...'),
           accelerator: 'CmdOrCtrl+O',
           click(_item, focusedWindow) {
             if (focusedWindow) {
@@ -52,10 +55,10 @@ export function getMenu(
       ],
     },
     {
-      label: 'Edit',
+      label: t('Edit'),
       submenu: [
         {
-          label: 'Undo',
+          label: t('Undo'),
           enabled: false,
           accelerator: 'CmdOrCtrl+Z',
           click: function (_menuItem, focusedWin) {
@@ -68,7 +71,7 @@ export function getMenu(
           },
         },
         {
-          label: 'Redo',
+          label: t('Redo'),
           enabled: false,
           accelerator: 'Shift+CmdOrCtrl+Z',
           click: function (_menuItem, focusedWin) {
@@ -104,11 +107,11 @@ export function getMenu(
       ],
     },
     {
-      label: 'View',
+      label: t('View'),
       submenu: [
         isDev
           ? {
-              label: 'Reload',
+              label: t('Reload'),
               accelerator: 'CmdOrCtrl+R',
               click(_item, focusedWindow) {
                 if (focusedWindow) focusedWindow.reload();
@@ -116,7 +119,7 @@ export function getMenu(
             }
           : { label: 'hidden', visible: false },
         {
-          label: 'Toggle Developer Tools',
+          label: t('Toggle Developer Tools'),
           accelerator:
             process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
           click(_item, focusedWindow) {
@@ -146,10 +149,10 @@ export function getMenu(
       ],
     },
     {
-      label: 'Tools',
+      label: t('Tools'),
       submenu: [
         {
-          label: 'Find schedules',
+          label: t('Find schedules'),
           enabled: false,
           click: function (_menuItem, focusedWin) {
             if (focusedWin) {
@@ -173,7 +176,7 @@ export function getMenu(
       role: 'help',
       submenu: [
         {
-          label: 'Keyboard Shortcuts Reference',
+          label: t('Keyboard Shortcuts Reference'),
           accelerator: '?',
           enabled: !!budgetId,
           click: function (_menuItem, focusedWin) {
@@ -188,7 +191,7 @@ export function getMenu(
           type: 'separator',
         },
         {
-          label: 'Learn More',
+          label: t('Learn More'),
           click() {
             shell.openExternal('https://actualbudget.org/docs/');
           },
@@ -204,7 +207,7 @@ export function getMenu(
       submenu: [
         isDev
           ? {
-              label: 'Screenshot',
+              label: t('Screenshot'),
               click() {
                 ipcMain.emit('screenshot');
               },
@@ -244,7 +247,7 @@ export function getMenu(
         type: 'separator',
       },
       {
-        label: 'Speech',
+        label: t('Speech'),
         submenu: [
           {
             role: 'startSpeaking',
@@ -259,24 +262,24 @@ export function getMenu(
     const windowIdx = template.findIndex(t => t.role === 'window');
     template[windowIdx].submenu = [
       {
-        label: 'Close',
+        label: t('Close'),
         accelerator: 'CmdOrCtrl+W',
         role: 'close',
       },
       {
-        label: 'Minimize',
+        label: t('Minimize'),
         accelerator: 'CmdOrCtrl+M',
         role: 'minimize',
       },
       {
-        label: 'Zoom',
+        label: t('Zoom'),
         role: 'zoom',
       },
       {
         type: 'separator',
       },
       {
-        label: 'Bring All to Front',
+        label: t('Bring All to Front'),
         role: 'front',
       },
     ];
