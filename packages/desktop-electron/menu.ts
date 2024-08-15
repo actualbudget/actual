@@ -239,7 +239,7 @@ export function getMenu(
       ],
     });
     // Edit menu.
-    const editIdx = template.findIndex(t => t.label === 'Edit');
+    const editIdx = template.findIndex(t => t.label === i18next.t('Edit'));
     (template[editIdx].submenu as MenuItemConstructorOptions[]).push(
       {
         type: 'separator',
