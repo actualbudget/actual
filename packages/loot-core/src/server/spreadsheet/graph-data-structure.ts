@@ -1,5 +1,3 @@
-import { getPrefs } from '../prefs';
-
 // @ts-strict-ignore
 export function Graph() {
   const graph = {
@@ -81,40 +79,14 @@ export function Graph() {
   function topologicalSort(sourceNodes) {
     const visited = new Set();
     const sorted = [];
-    const prefs = getPrefs();
-    const iterableTopologicalSort =
-      prefs != null ? prefs['flags.iterableTopologicalSort'] : false;
 
     sourceNodes.forEach(name => {
       if (!visited.has(name)) {
-        if (iterableTopologicalSort) {
-          topologicalSortIterable(name, visited, sorted);
-        } else {
-          topologicalSortUntil(name, visited, sorted, 0);
-        }
+        topologicalSortIterable(name, visited, sorted);
       }
     });
 
     return sorted;
-  }
-
-  function topologicalSortUntil(name, visited, sorted, level) {
-    visited.add(name);
-    if (level > 2500) {
-      console.error('Limit of recursions reached while sorting budget: 2500');
-      return;
-    }
-
-    const iter = adjacent(name).values();
-    let cur = iter.next();
-    while (!cur.done) {
-      if (!visited.has(cur.value)) {
-        topologicalSortUntil(cur.value, visited, sorted, level + 1);
-      }
-      cur = iter.next();
-    }
-
-    sorted.unshift(name);
   }
 
   function topologicalSortIterable(name, visited, sorted) {
