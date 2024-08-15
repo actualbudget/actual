@@ -10,6 +10,7 @@ import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
 import { BudgetMenu } from '../budget/report/BudgetMenu';
+import { useReportSheetValue } from '../budget/report/ReportComponents';
 import {
   Modal,
   ModalCloseButton,
@@ -19,7 +20,6 @@ import {
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type ReportBudgetMenuModalProps = ComponentPropsWithoutRef<
   typeof BudgetMenu
@@ -42,7 +42,7 @@ export function ReportBudgetMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
-  const budgeted = useSheetValue(reportBudget.catBudgeted(categoryId));
+  const budgeted = useReportSheetValue(reportBudget.catBudgeted(categoryId));
   const category = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
 

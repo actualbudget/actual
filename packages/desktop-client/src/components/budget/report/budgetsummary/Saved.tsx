@@ -11,16 +11,17 @@ import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
-import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 import { makeAmountFullStyle } from '../../util';
+import { useReportSheetValue } from '../ReportComponents';
 
 type SavedProps = {
   projected: boolean;
   style?: CSSProperties;
 };
 export function Saved({ projected, style }: SavedProps) {
-  const budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
-  const totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
+  const budgetedSaved =
+    useReportSheetValue(reportBudget.totalBudgetedSaved) || 0;
+  const totalSaved = useReportSheetValue(reportBudget.totalSaved) || 0;
   const format = useFormat();
   const saved = projected ? budgetedSaved : totalSaved;
   const isNegative = saved < 0;

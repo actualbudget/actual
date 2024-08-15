@@ -84,6 +84,7 @@ export function ImportActual({ modalProps }: ImportProps) {
             <View style={{ alignSelf: 'center' }}>
               <ButtonWithLoading
                 variant="primary"
+                autoFocus
                 isLoading={importing}
                 onPress={onImport}
               >
