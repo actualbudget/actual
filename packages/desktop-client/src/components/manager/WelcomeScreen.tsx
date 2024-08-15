@@ -90,7 +90,7 @@ export function WelcomeScreen() {
           <Button onPress={() => createBudget({ testMode: true })}>
             {t('View demo')}
           </Button>
-          <Button variant="primary" onPress={() => createBudget()}>
+          <Button variant="primary" autoFocus onPress={() => createBudget()}>
             {t('Start fresh')}
           </Button>
         </View>

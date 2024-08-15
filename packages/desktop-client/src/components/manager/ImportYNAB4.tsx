@@ -73,6 +73,7 @@ export function ImportYNAB4({ modalProps }: ImportProps) {
             <View>
               <ButtonWithLoading
                 variant="primary"
+                autoFocus
                 isLoading={importing}
                 onPress={onImport}
               >

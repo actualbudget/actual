@@ -1719,6 +1719,7 @@ export function ImportTransactions({ options }) {
             >
               <ButtonWithLoading
                 variant="primary"
+                autoFocus
                 isDisabled={
                   transactions?.filter(trans => !trans.isMatchedTransaction)
                     .length === 0

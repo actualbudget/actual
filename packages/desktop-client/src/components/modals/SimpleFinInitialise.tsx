@@ -88,6 +88,7 @@ export const SimpleFinInitialise = ({
           <ModalButtons>
             <ButtonWithLoading
               variant="primary"
+              autoFocus
               isLoading={isLoading}
               onPress={() => {
                 onSubmit(close);

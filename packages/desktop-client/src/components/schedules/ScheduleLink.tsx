@@ -13,6 +13,7 @@ import {
 
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button2';
+import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
@@ -93,14 +94,16 @@ export function ScheduleLink({
                 : `this transaction belongs`}{' '}
               to:
             </Text>
-            <Search
-              inputRef={searchInput}
-              isInModal
-              width={300}
-              placeholder="Filter schedules…"
-              value={filter}
-              onChange={setFilter}
-            />
+            <InitialFocus>
+              <Search
+                inputRef={searchInput}
+                isInModal
+                width={300}
+                placeholder="Filter schedules…"
+                value={filter}
+                onChange={setFilter}
+              />
+            </InitialFocus>
             {ids.length === 1 && (
               <Button
                 variant="primary"
