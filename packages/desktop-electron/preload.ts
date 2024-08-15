@@ -5,7 +5,8 @@ import {
   OpenFileDialogPayload,
   SaveFileDialogPayload,
 } from './index';
-const backend = require("i18next-electron-fs-backend");
+
+const backend = require('i18next-electron-fs-backend');
 
 const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
   ipcRenderer.sendSync('get-bootstrap-data');

@@ -8672,7 +8672,6 @@ __metadata:
     electron-log: "npm:4.4.8"
     i18next: "npm:^23.12.6"
     i18next-electron-fs-backend: "npm:^3.0.2"
-    i18next-resources-to-backend: "npm:^1.2.1"
     lodash: "npm:^4.17.21"
     loot-core: "npm:*"
     node-fetch: "npm:^2.7.0"

@@ -17,6 +17,7 @@ packages/desktop-client/test-results/
 
 packages/desktop-electron/client-build/
 packages/desktop-electron/dist/
+packages/desktop-electron/build/
 
 packages/import-ynab4/**/node_modules/*
 

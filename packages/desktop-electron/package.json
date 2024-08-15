@@ -67,7 +67,6 @@
     "electron-log": "4.4.8",
     "i18next": "^23.12.6",
     "i18next-electron-fs-backend": "^3.0.2",
-    "i18next-resources-to-backend": "^1.2.1",
     "lodash": "^4.17.21",
     "loot-core": "*",
     "node-fetch": "^2.7.0",

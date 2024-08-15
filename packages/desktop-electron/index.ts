@@ -21,16 +21,15 @@ import isDev from 'electron-is-dev';
 import fetch from 'node-fetch';
 import promiseRetry from 'promise-retry';
 
+import i18n from './i18n';
 import { getMenu } from './menu';
 import {
   get as getWindowState,
   listen as listenToWindowState,
 } from './window-state';
-const backend = require("i18next-electron-fs-backend");
-
-import i18n from './i18n';
 
 import './security';
+const backend = require('i18next-electron-fs-backend');
 
 Module.globalPaths.push(__dirname + '/..');
 
@@ -207,7 +206,9 @@ function updateMenu(budgetId?: string) {
   const edit = menu.items.filter(item => item.label === i18n.t('Edit'))[0];
   const editItems = edit.submenu?.items || [];
   editItems
-    .filter(item => item.label === i18n.t('Undo') || item.label === i18n.t('Redo'))
+    .filter(
+      item => item.label === i18n.t('Undo') || item.label === i18n.t('Redo'),
+    )
     .map(item => (item.enabled = isBudgetOpen));
 
   if (process.platform === 'win32') {
