@@ -1,5 +1,3 @@
-import i18n from 'i18next';
-
 import {
   MenuItemConstructorOptions,
   Menu,
@@ -7,6 +5,7 @@ import {
   app,
   shell,
 } from 'electron';
+import i18n from 'i18next';
 
 export function getMenu(
   isDev: boolean,
