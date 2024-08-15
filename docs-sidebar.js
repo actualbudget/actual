@@ -302,6 +302,7 @@ const sidebars = {
             'contributing/project-details/advice',
           ],
         },
+        'contributing/i18n',
         'contributing/preview-builds',
         'contributing/releasing',
         'contributing/windows',
