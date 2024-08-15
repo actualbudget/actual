@@ -65,6 +65,8 @@
   "dependencies": {
     "electron-is-dev": "2.0.0",
     "electron-log": "4.4.8",
+    "i18next": "^23.12.6",
+    "i18next-resources-to-backend": "^1.2.1",
     "loot-core": "*",
     "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"

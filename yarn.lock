@@ -8669,6 +8669,8 @@ __metadata:
     electron-builder: "npm:24.13.3"
     electron-is-dev: "npm:2.0.0"
     electron-log: "npm:4.4.8"
+    i18next: "npm:^23.12.6"
+    i18next-resources-to-backend: "npm:^1.2.1"
     loot-core: "npm:*"
     node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
@@ -11313,6 +11315,15 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:^7.23.2"
   checksum: 10/d7a743c54b83acc1203315e547bfe830bfe825dddd7706646aec2a49cb74254bcda70645b568d1bed55ee3610ba5e6f6012fb3c13f03080c1dd0f99db2c45478
+  languageName: node
+  linkType: hard
+
+"i18next@npm:^23.12.6":
+  version: 23.12.6
+  resolution: "i18next@npm:23.12.6"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.2"
+  checksum: 10/6bb7faa2f1645dd7fc8d04c485707221edcf14911756d94faa8f5b7ffb5507995e00dca01f3c516ced9e986effb0073b06e9c55c2d762d400841cc557002abb1
   languageName: node
   linkType: hard
 

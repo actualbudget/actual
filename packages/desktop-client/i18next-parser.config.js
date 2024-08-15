@@ -1,5 +1,5 @@
 module.exports = {
-  input: ['src/**/*.{js,jsx,ts,tsx}', '../loot-core/src/**/*.{js,jsx,ts,tsx}'],
+  input: ['src/**/*.{js,jsx,ts,tsx}', '../loot-core/src/**/*.{js,jsx,ts,tsx}', '../desktop-electron/*.{js,ts}'],
   output: 'src/locale/$LOCALE.json',
   locales: ['en'],
   sort: true,
