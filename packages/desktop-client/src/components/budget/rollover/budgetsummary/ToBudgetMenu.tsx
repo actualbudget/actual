@@ -21,7 +21,7 @@ export function ToBudgetMenu({
   onResetHoldBuffer,
   ...props
 }: ToBudgetMenuProps) {
-  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget);
+  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
   const forNextMonth = useRolloverSheetValue(rolloverBudget.forNextMonth);
   const items = [
     ...(toBudget > 0
