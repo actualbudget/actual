@@ -17,6 +17,7 @@ export const TYPE_INFO = {
       'isNot',
       'doesNotContain',
       'notOneOf',
+      'tags',
     ],
     nullable: true,
   },
@@ -33,6 +34,7 @@ export const TYPE_INFO = {
       'isNot',
       'doesNotContain',
       'notOneOf',
+      'tags',
     ],
     nullable: true,
   },
@@ -107,6 +109,8 @@ export function friendlyOp(op, type?) {
       return 'is between';
     case 'contains':
       return 'contains';
+    case 'tags':
+      return 'has tag(s)';
     case 'matches':
       return 'matches';
     case 'doesNotContain':

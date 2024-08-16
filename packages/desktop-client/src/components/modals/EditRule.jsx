@@ -116,7 +116,7 @@ export function OpSelect({
       // TODO: Add matches op support for payees, accounts, categories.
       .filter(op =>
         type === 'id'
-          ? !['contains', 'matches', 'doesNotContain'].includes(op)
+          ? !['contains', 'matches', 'doesNotContain', 'tags'].includes(op)
           : true,
       )
       .map(op => [op, formatOp(op, type)]);
@@ -591,8 +591,7 @@ function ConditionsList({
           // clear the value
           if (
             cond.op !== 'oneOf' &&
-            cond.op !== 'notOneOf' &&
-            (op === 'oneOf' || op === 'notOneOf')
+            cond.op !== 'notOneOf'(op === 'oneOf' || op === 'notOneOf')
           ) {
             return newInput(
               makeValue(cond.value != null ? [cond.value] : [], {
