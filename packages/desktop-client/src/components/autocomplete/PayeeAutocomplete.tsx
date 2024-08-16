@@ -523,7 +523,7 @@ export function CreatePayeeButton({
           style={{ marginRight: 5, display: 'inline-block' }}
         />
       )}
-      <Trans>Create Payee “{payeeName}”</Trans>
+      <Trans>Create Payee “{{payeeName}}”</Trans>
     </View>
   );
 }
