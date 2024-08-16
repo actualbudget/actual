@@ -44,6 +44,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@types/react-color": "^2",
     "cross-env": "^7.0.3",
     "eslint": "^8.37.0",
     "eslint-config-prettier": "^9.1.0",
@@ -77,6 +78,7 @@
     "defaults"
   ],
   "dependencies": {
+    "react-color": "^2.19.3",
     "react-contenteditable": "^3.3.7"
   }
 }

@@ -116,7 +116,7 @@ export function OpSelect({
       // TODO: Add matches op support for payees, accounts, categories.
       .filter(op =>
         type === 'id'
-          ? !['contains', 'matches', 'doesNotContain'].includes(op)
+          ? !['contains', 'matches', 'doesNotContain', 'tags'].includes(op)
           : true,
       )
       .map(op => [op, formatOp(op, type)]);

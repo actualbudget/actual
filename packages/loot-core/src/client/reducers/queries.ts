@@ -24,6 +24,8 @@ const initialState: QueriesState = {
   payees: [],
   payeesLoaded: false,
   earliestTransaction: null,
+  tagsLoaded: false,
+  tags: [],
 };
 
 export function update(state = initialState, action: Action): QueriesState {
@@ -98,6 +100,12 @@ export function update(state = initialState, action: Action): QueriesState {
         payees: action.payees,
         payeesLoaded: true,
       };
+      case constants.LOAD_TAGS:
+        return {
+          ...state,
+          tags: action.tags,
+          tagsLoaded: true,
+        };      
     default:
   }
   return state;

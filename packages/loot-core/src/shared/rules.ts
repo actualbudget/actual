@@ -124,7 +124,7 @@ export function friendlyOp(op, type?) {
     case 'contains':
       return 'contains';
     case 'tags':
-      return 'has tags';
+      return 'has tag(s)';
     case 'matches':
       return 'matches';
     case 'doesNotContain':

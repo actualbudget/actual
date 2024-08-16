@@ -26,6 +26,7 @@ export function Search({
   return (
     <InputWithContent
       inputRef={inputRef}
+      inputWithTags={true}
       style={{
         width,
         flex: '',

@@ -2,14 +2,13 @@ import React, {
   type InputHTMLAttributes,
   type KeyboardEvent,
   type Ref,
-  useEffect,
-  useState,
-  useCallback,
+  useRef,
 } from 'react';
-import ContentEditable from 'react-contenteditable';
 
 import { css } from 'glamor';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
+import { useProperFocus } from '../../hooks/useProperFocus';
 import { type CSSProperties, styles, theme } from '../../style';
 
 export const defaultInputStyle = {
@@ -22,15 +21,14 @@ export const defaultInputStyle = {
   border: '1px solid ' + theme.formInputBorder,
 };
 
-type InputProps = InputHTMLAttributes<HTMLDivElement> & {
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   style?: CSSProperties;
-  inputRef?: Ref<HTMLDivElement>;
-  onEnter?: (event: KeyboardEvent<HTMLDivElement>) => void;
-  onEscape?: (event: KeyboardEvent<HTMLDivElement>) => void;
+  inputRef?: Ref<HTMLInputElement>;
+  onEnter?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  onEscape?: (event: KeyboardEvent<HTMLInputElement>) => void;
   onChangeValue?: (newValue: string) => void;
   onUpdate?: (newValue: string) => void;
   focused?: boolean;
-  value?: string;
 };
 
 export function Input({
@@ -41,43 +39,16 @@ export function Input({
   onChangeValue,
   onUpdate,
   focused,
-  value = '',
   ...nativeProps
 }: InputProps) {
-  const [content, setContent] = useState(value);
+  const ref = useRef<HTMLInputElement>(null);
+  useProperFocus(ref, focused);
 
-  const onContentChange = useCallback(
-    evt => {
-      let updatedContent = evt.currentTarget.innerText;
-      //just a hack to make it work without mega refactory. should use evt.currentTarget.innerText where needed
-      evt.currentTarget.value = updatedContent;
-
-      updatedContent = generateTags(updatedContent);
-
-      setContent(updatedContent);
-      onChangeValue?.(evt.currentTarget.innerText);
-    },
-    [onChangeValue],
-  );
-
-  const generateTags = text => {
-    return text.replace(/(#\w+)(?=\s|$)/g, (match, p1) => {
-      return `<span style="
-        background-color: #811331; 
-        border-radius: 4px; 
-        padding: 2px 4px;
-      ">${p1}</span>`;
-    });
-  };
-
-  useEffect(() => {
-    if (value !== '') {
-      setContent(generateTags(value));
-    }
-  },[value]);
+  const mergedRef = useMergedRefs<HTMLInputElement>(ref, inputRef);
 
   return (
-    <ContentEditable
+    <input
+      ref={mergedRef}
       className={`${css(
         defaultInputStyle,
         {
@@ -106,14 +77,13 @@ export function Input({
         }
       }}
       onBlur={e => {
-        onUpdate?.(e.target.innerText);
-        onContentChange(e);
+        onUpdate?.(e.target.value);
         nativeProps.onBlur?.(e);
       }}
       onChange={e => {
-        onContentChange(e);
+        onChangeValue?.(e.target.value);
+        nativeProps.onChange?.(e);
       }}
-      html={content}
     />
   );
 }

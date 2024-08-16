@@ -19,7 +19,7 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { pushModal } from 'loot-core/client/actions';
+import { pushModal, updateTags } from 'loot-core/client/actions';
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import {
   getAccountsById,
@@ -57,7 +57,7 @@ import {
   SvgCalendar,
   SvgHyperlink2,
 } from '../../icons/v2';
-import { styles, theme } from '../../style';
+import { styles, theme, useTheme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
@@ -80,7 +80,12 @@ import {
   useTableNavigator,
   Table,
   UnexposedCellContent,
+  InputCellWithTags,
 } from '../table';
+import { getColorsByTheme, TAGCOLORS, TAGREGEX } from 'loot-core/shared/tag';
+import { useTags } from '../../hooks/useTags';
+import { TwitterPicker } from 'react-color';
+import { TagAutocomplete } from '../autocomplete/TagAutocomplete';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -1188,7 +1193,7 @@ const Transaction = memo(function Transaction({
         /* Notes field for all transactions */
         <Cell name="notes" width="flex" />
       ) : (
-        <InputCell
+        <NotesCell
           width="flex"
           name="notes"
           textAlign="flex"
@@ -1196,10 +1201,10 @@ const Transaction = memo(function Transaction({
           focused={focusedField === 'notes'}
           value={notes || ''}
           valueStyle={valueStyle}
-          formatter={value => notesTagFormatter(value, onNotesTagClick)}
+          onEdit={onEdit}
+          onNotesTagClick={onNotesTagClick}
           onExpose={name => !isPreview && onEdit(id, name)}
           inputProps={{
-            value: notes || '',
             onUpdate: onUpdate.bind(null, 'notes'),
           }}
         />
@@ -2425,8 +2430,118 @@ export const TransactionTable = forwardRef((props, ref) => {
 
 TransactionTable.displayName = 'TransactionTable';
 
-function notesTagFormatter(notes, onNotesTagClick) {
+function NotesCell({
+  onEdit,
+  onNotesTagClick,
+  inputProps,
+  onUpdate,
+  onBlur,
+  textAlign,
+  ...props
+}) {
+  const [showColors, setShowColors] = useState(false);
+  const triggerRef = useRef(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
+  const dispatch = useDispatch();
+  const edit = useRef(null);
+  const [theme, switchTheme] = useTheme();
+
+  const handleContextMenu = (e, item) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedItem(item);
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPickerPosition({
+      top: rect.bottom, // Position the picker right below the selected item
+      left:
+        e.currentTarget.getBoundingClientRect().left -
+        e.currentTarget.parentElement.getBoundingClientRect().left, // Align the picker with the left side of the selected item
+    });
+
+    setShowColors(true);
+  };
+
+  return (
+    <>
+      <div ref={triggerRef}></div>
+      <Cell
+        {...props}
+        formatter={value =>
+          notesTagFormatter(value, onNotesTagClick, (e, item) =>
+            handleContextMenu(e, item),
+          )
+        }
+      >
+        {() => (
+          <InputCellWithTags
+            inputProps={inputProps}
+            onUpdate={onUpdate}
+            onBlur={onBlur}
+            textAlign={textAlign}
+            value={props.value}
+          />
+        )}
+      </Cell>
+      {showColors && selectedItem && (
+        <Popover
+          triggerRef={triggerRef}
+          isOpen={showColors}
+          placement="bottom start"
+          offset={10}
+          style={{ marginLeft: pickerPosition.left }}
+        >
+          <TwitterPicker
+            color={selectedItem.color ?? theme.noteTagBackground}
+            colors={TAGCOLORS}
+            onChange={newColor => {
+              selectedItem.color = newColor.hex;
+              dispatch(updateTags(selectedItem));
+            }}
+            onChangeComplete={color => {
+              setShowColors(false);
+              onEdit(null);
+            }}
+          />
+        </Popover>
+      )}
+    </>
+  );
+}
+function notesTagFormatter(notes, onNotesTagClick, onContextMenu) {
+  const tags = useTags();
   const words = notes.split(' ');
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
+  const dispatch = useDispatch();
+  const [tagColors, setTagColors] = useState(new Map());
+
+  useEffect(() => {
+    const map = new Map();
+    const mapTextColor = new Map();
+    notes.split(TAGREGEX).forEach(part => {
+      if (TAGREGEX.test(part)) {
+        const filteredTags = tags.filter(t => t.tag == part);
+        if (filteredTags.length > 0) {
+          map.set(part, {
+            color: filteredTags[0].color ?? theme.noteTagBackground,
+            textColor: filteredTags[0].textColor ?? theme.noteTagText,
+            hoverColor: filteredTags[0].hoverColor ?? theme.noteTagBackgroundHover
+          });
+        } else {
+          map.set(part, { 
+            color: theme.noteTagBackground,
+            textColor: theme.noteTagText,
+            hoverColor: theme.noteTagBackgroundHover
+          });
+        }
+      }
+    });
+
+    setTagColors(map);
+  }, [tags]);
+
   return (
     <>
       {words.map((word, i, arr) => {
@@ -2445,23 +2560,39 @@ function notesTagFormatter(notes, onNotesTagClick) {
             }
 
             const validTag = `#${tag}`;
+            const filteredTags = tags.filter(t => t.tag === validTag);
+
             return (
-              <span key={`${validTag}${ti}`}>
+              <span
+                key={`${validTag}${ti}`}
+                onContextMenu={e => {
+                  if (onContextMenu) {
+                    onContextMenu(e, filteredTags[0]);
+                  }
+                }}
+              >
                 <Button
+                  data-is-tag={true}
                   type="bare"
                   key={i}
+                  title={validTag}
                   style={{
-                    display: 'inline-flex',
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
                     padding: '3px 7px',
                     borderRadius: 16,
                     userSelect: 'none',
-                    backgroundColor: theme.noteTagBackground,
-                    color: theme.noteTagText,
+                    textOverflow: 'ellipsis',
+                    maxWidth: '150px',
+                    backgroundColor:
+                      tagColors.get(validTag)?.color ?? theme.noteTagBackground,
+                    color: tagColors.get(validTag)?.textColor ?? theme.noteTagText,
                     cursor: 'pointer',
                   }}
                   hoveredStyle={{
-                    backgroundColor: theme.noteTagBackgroundHover,
-                    color: theme.noteTagText,
+                    backgroundColor: tagColors.get(validTag)?.hoverColor ?? theme.noteTagBackgroundHover,
+                    color: tagColors.get(validTag)?.textColor ?? theme.noteTagText,
                   }}
                   onClick={e => {
                     e.stopPropagation();

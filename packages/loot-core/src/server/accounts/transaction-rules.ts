@@ -474,11 +474,14 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
 
       case 'tags':
         const tagValues = value
-          .split(/(\s+)/)
-          .filter(tag => tag.startsWith('#'));
-
+        .split(/(#\w[\w-]*)(?=\s|$)/g)
+        .filter(tag => tag.startsWith('#'));
+        
         return {
-          $and: tagValues.map(v => apply(field, '$like', '%' + v + '%')),
+          $and: tagValues.map(v => {
+            const regex = new RegExp(`(^|\\s)${v}(\\s|$)`);
+            return apply(field, '$regexp', regex.source);
+          }),
         };
 
       case 'notOneOf':

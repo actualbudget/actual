@@ -17,6 +17,7 @@ import {
   RuleEntity,
   PayeeEntity,
 } from './models';
+import { TagEntity } from './models/tag';
 import { GlobalPrefs, LocalPrefs } from './prefs';
 import { EmptyObject } from './util';
 
@@ -122,6 +123,10 @@ export interface ServerHandlers {
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
 
   'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
+
+  'tags-get': () => Promise<TagEntity[]>;
+
+  'tag-update': (arg: { tag: TagEntity }) => Promise<void>;
 
   'make-filters-from-conditions': (arg: {
     conditions;

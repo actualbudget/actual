@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 
 import escapeRegExp from 'lodash/escapeRegExp';
 
-import { pushModal } from 'loot-core/client/actions';
+import { getTags, pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,
@@ -103,6 +103,7 @@ export function TransactionList({
 
     await saveDiff({ added: newTransactions });
     onRefetch();
+    dispatch(getTags());
   }, []);
 
   const onSave = useCallback(async transaction => {
@@ -120,6 +121,7 @@ export function TransactionList({
         onChange(changes.newTransaction, changes.data);
         saveDiffAndApply(changes.diff, changes, onChange);
       }
+      dispatch(getTags());
     }
   }, []);
 
@@ -191,8 +193,8 @@ export function TransactionList({
   const onNotesTagClick = useCallback(tag => {
     onApplyFilter({
       field: 'notes',
-      op: 'matches',
-      value: `(^|\\s|\\w|#)${escapeRegExp(tag)}($|\\s|#)`,
+      op: 'tags',
+      value: tag,
       type: 'string',
     });
   });

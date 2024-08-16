@@ -367,3 +367,21 @@ export function redo() {
     }
   };
 }
+
+export function getTags() {
+  return async (dispatch: Dispatch) => {
+    const tags = await send('tags-get');
+    dispatch({
+      type: constants.LOAD_TAGS,
+      tags,
+    });
+    return tags;
+  };
+}
+
+export function updateTags(tag) {
+  return async (dispatch: Dispatch) => {
+    await send('tag-update', { tag });
+    dispatch(getTags());
+  };
+}

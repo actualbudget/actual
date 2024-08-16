@@ -23,6 +23,7 @@
     "@types/lodash": "^4",
     "@types/promise-retry": "^1.1.6",
     "@types/react": "^18.2.0",
+    "@types/react-color": "^2",
     "@types/react-dom": "^18.2.1",
     "@types/react-modal": "^3.16.0",
     "@types/react-redux": "^7.1.25",
@@ -89,5 +90,8 @@
     "test": "vitest",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium"
+  },
+  "dependencies": {
+    "react-color": "^2.19.3"
   }
 }
