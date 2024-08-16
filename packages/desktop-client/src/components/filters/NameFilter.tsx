@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button';
@@ -22,6 +23,7 @@ export function NameFilter({
   onAddUpdate: () => void;
   err: string | null;
 }) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function NameFilter({
           >
             <FormField style={{ flex: 1 }}>
               <FormLabel
-                title="Filter Name"
+                title={t("Filter Name")}
                 htmlFor="name-field"
                 style={{ userSelect: 'none' }}
               />
@@ -61,7 +63,7 @@ export function NameFilter({
                 onAddUpdate();
               }}
             >
-              {adding ? 'Add' : 'Update'}
+              {adding ? t('Add') : t('Update')}
             </Button>
           </Stack>
         </form>
