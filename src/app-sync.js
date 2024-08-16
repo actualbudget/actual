@@ -2,8 +2,7 @@ import fs from 'node:fs/promises';
 import { Buffer } from 'node:buffer';
 import express from 'express';
 import * as uuid from 'uuid';
-import validateUser from './util/validate-user.js';
-import errorMiddleware from './util/error-middleware.js';
+import { errorMiddleware, validateUserMiddleware } from './util/middlewares.js';
 import getAccountDb from './account-db.js';
 import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
@@ -16,6 +15,7 @@ app.use(errorMiddleware);
 app.use(express.json());
 app.use(express.raw({ type: 'application/actual-sync' }));
 
+app.use(validateUserMiddleware);
 export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
@@ -27,11 +27,6 @@ const OK_RESPONSE = { status: 'ok' };
 const SYNC_FORMAT_VERSION = 2;
 
 app.post('/sync', async (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
-
   let requestPb;
   try {
     requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(req.body);
@@ -126,11 +121,6 @@ app.post('/sync', async (req, res) => {
 });
 
 app.post('/user-get-key', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
-
   let accountDb = getAccountDb();
   let { fileId } = req.body;
 
@@ -153,10 +143,6 @@ app.post('/user-get-key', (req, res) => {
 });
 
 app.post('/user-create-key', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
   let accountDb = getAccountDb();
   let { fileId, keyId, keySalt, testContent } = req.body;
 
@@ -169,10 +155,6 @@ app.post('/user-create-key', (req, res) => {
 });
 
 app.post('/reset-user-file', async (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
   let accountDb = getAccountDb();
   let { fileId } = req.body;
 
@@ -199,11 +181,6 @@ app.post('/reset-user-file', async (req, res) => {
 });
 
 app.post('/upload-user-file', async (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
-
   let accountDb = getAccountDb();
   if (typeof req.headers['x-actual-name'] !== 'string') {
     res.status(400).send('single x-actual-name is required');
@@ -293,10 +270,6 @@ app.post('/upload-user-file', async (req, res) => {
 });
 
 app.get('/download-user-file', async (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
   let accountDb = getAccountDb();
   let fileId = req.headers['x-actual-file-id'];
   if (typeof fileId !== 'string') {
@@ -319,10 +292,6 @@ app.get('/download-user-file', async (req, res) => {
 });
 
 app.post('/update-user-filename', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
   let accountDb = getAccountDb();
   let { fileId, name } = req.body;
 
@@ -342,11 +311,6 @@ app.post('/update-user-filename', (req, res) => {
 });
 
 app.get('/list-user-files', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
-
   let accountDb = getAccountDb();
   let rows = accountDb.all('SELECT * FROM files');
 
@@ -365,10 +329,6 @@ app.get('/list-user-files', (req, res) => {
 });
 
 app.get('/get-user-file-info', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
   let accountDb = getAccountDb();
   let fileId = req.headers['x-actual-file-id'];
 
@@ -397,10 +357,6 @@ app.get('/get-user-file-info', (req, res) => {
 });
 
 app.post('/delete-user-file', (req, res) => {
-  let user = validateUser(req, res);
-  if (!user) {
-    return;
-  }
   let accountDb = getAccountDb();
   let { fileId } = req.body;
 
