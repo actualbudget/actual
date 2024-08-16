@@ -86,7 +86,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
           )}
         </div>
       </Button>
-      <Button type="bare" onClick={onDelete} aria-label={t("Delete filter")}>
+      <Button type="bare" onClick={onDelete} aria-label={t('Delete filter')}>
         <SvgDelete
           style={{
             width: 8,

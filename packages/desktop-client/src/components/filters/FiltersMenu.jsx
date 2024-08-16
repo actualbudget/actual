@@ -331,7 +331,11 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
             lineHeight: 1.5,
             padding: '6px 10px',
           }}
-          content={<Text><Trans>Filters</Trans></Text>}
+          content={
+            <Text>
+              <Trans>Filters</Trans>
+            </Text>
+          }
           placement="bottom start"
           triggerProps={{
             isDisabled: !hover,

@@ -181,7 +181,9 @@ export function SavedFilterMenuButton({
             {!filterId.id ? t('Unsaved filter') : filterId.name}&nbsp;
           </Text>
           {filterId.id && filterId.status !== 'saved' && (
-            <Text><Trans>(modified)</Trans>&nbsp;</Text>
+            <Text>
+              <Trans>(modified)</Trans>&nbsp;
+            </Text>
           )}
           <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
         </Button>
