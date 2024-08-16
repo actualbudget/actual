@@ -51,11 +51,17 @@ export function SingleActiveEditFormProvider({
     cleanupRef.current = action?.();
   };
 
+  const clearActiveEdit = () => {
+    runCleanup();
+    setEditingField(null);
+  };
+
   const onClearActiveEdit = (delayMs?: number) => {
-    setTimeout(() => {
-      runCleanup();
-      setEditingField(null);
-    }, delayMs);
+    if (delayMs === undefined) {
+      clearActiveEdit();
+    } else {
+      setTimeout(() => clearActiveEdit, delayMs);
+    }
   };
 
   const onActiveEdit = (field: string, action: ActiveEditAction) => {
@@ -74,6 +80,8 @@ export function SingleActiveEditFormProvider({
       // Already active.
       return;
     }
+    console.log('request', field)
+    console.log('currently editing', editingField)
 
     if (editingField) {
       onClearActiveEdit(options?.clearActiveEditDelayMs);
