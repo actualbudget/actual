@@ -126,8 +126,7 @@ export function AccountSyncCheck() {
           style={{ width: 14, height: 14, marginRight: 5 }}
         />{' '}
         <Trans>
-          This account is experiencing connection problems.
-          LetÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂs fix it.
+          This account is experiencing connection problems. Let’s fix it.
         </Trans>
       </Button>
 

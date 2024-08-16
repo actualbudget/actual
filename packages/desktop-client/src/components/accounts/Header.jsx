@@ -515,8 +515,7 @@ function AccountMenu({
         {
           name: 'toggle-cleared',
           text:
-            (showCleared ? t('Hide') : t('Show')) +
-            t(' Ã¢ÂÂclearedÃ¢ÂÂ checkboxes'),
+            (showCleared ? t('Hide') : t('Show')) + t(' “cleared” checkboxes'),
         },
         {
           name: 'toggle-reconciled',
