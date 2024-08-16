@@ -80,8 +80,6 @@ export function SingleActiveEditFormProvider({
       // Already active.
       return;
     }
-    console.log('request', field)
-    console.log('currently editing', editingField)
 
     if (editingField) {
       onClearActiveEdit(options?.clearActiveEditDelayMs);
