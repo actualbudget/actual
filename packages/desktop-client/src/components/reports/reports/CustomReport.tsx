@@ -153,7 +153,7 @@ export function CustomReport() {
     !!conditions.find(
       ({ field, op }) =>
         field === 'category' &&
-        ['contains', 'doesNotContain', 'matches'].includes(op),
+        ['contains', 'doesNotContain', 'matches', 'tags'].includes(op),
     ) || conditions.filter(({ field }) => field === 'category').length >= 2;
 
   const setSelectedCategories = (newCategories: CategoryEntity[]) => {

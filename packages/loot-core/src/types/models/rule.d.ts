@@ -69,7 +69,6 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
-      | 'tags'
     >
   | BaseConditionEntity<
       'category',
@@ -80,7 +79,6 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
-      | 'tags'
     >
   | BaseConditionEntity<
       'amount',
@@ -110,7 +108,6 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
-      | 'tags'
     >
   | BaseConditionEntity<
       'imported_payee',
@@ -121,7 +118,6 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
-      | 'tags'
     >
   | BaseConditionEntity<'saved', 'is'>
   | BaseConditionEntity<'cleared', 'is'>
