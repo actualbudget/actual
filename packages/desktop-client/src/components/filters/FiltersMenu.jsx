@@ -242,6 +242,7 @@ function ConfigureField({
 }
 
 export function FilterButton({ onApply, compact, hover, exclude }) {
+  const { t } = useTranslation();
   const filters = useFilters();
   const triggerRef = useRef(null);
 
