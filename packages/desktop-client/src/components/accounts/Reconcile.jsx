@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import * as queries from 'loot-core/src/client/queries';
 import { currencyToInteger } from 'loot-core/src/shared/util';
@@ -59,33 +60,42 @@ export function ReconcilingMessage({
                 marginRight: 3,
               }}
             />
-            All reconciled!
+            <Trans>All reconciled!</Trans>
           </View>
         ) : (
           <View style={{ color: theme.tableText }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
-              Your cleared balance{' '}
-              <strong>{format(cleared, 'financial')}</strong> needs{' '}
-              <strong>
-                {(targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial')}
-              </strong>{' '}
-              to match
-              <br /> your bank’s balance of{' '}
-              <Text style={{ fontWeight: 700 }}>
-                {format(targetBalance, 'financial')}
-              </Text>
+              <Trans>
+                Your cleared balance{' '}
+                <strong>
+                  {{ clearedBalance: format(cleared, 'financial') }}
+                </strong>{' '}
+                needs{' '}
+                <strong>
+                  {{
+                    difference:
+                      (targetDiff > 0 ? '+' : '') +
+                      format(targetDiff, 'financial'),
+                  }}
+                </strong>{' '}
+                to match
+                <br /> your bank&aposâs balance of{' '}
+                <Text style={{ fontWeight: 700 }}>
+                  {{ bankBalance: format(targetBalance, 'financial') }}
+                </Text>
+              </Trans>
             </Text>
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
           <Button variant="primary" onPress={onDone}>
-            Done Reconciling
+            <Trans>Done Reconciling</Trans>
           </Button>
         </View>
         {targetDiff !== 0 && (
           <View style={{ marginLeft: 15 }}>
             <Button onPress={() => onCreateTransaction(targetDiff)}>
-              Create Reconciliation Transaction
+              <Trans>Create Reconciliation Transaction</Trans>
             </Button>
           </View>
         )}
@@ -121,8 +131,10 @@ export function ReconcileMenu({ account, onReconcile, onClose }) {
   return (
     <View style={{ padding: '5px 8px' }}>
       <Text>
-        Enter the current balance of your bank account that you want to
-        reconcile with:
+        <Trans>
+          Enter the current balance of your bank account that you want to
+          reconcile with:
+        </Trans>
       </Text>
       {clearedBalance != null && (
         <InitialFocus>
@@ -136,7 +148,7 @@ export function ReconcileMenu({ account, onReconcile, onClose }) {
         </InitialFocus>
       )}
       <Button variant="primary" onPress={onSubmit}>
-        Reconcile
+        <Trans>Reconcile</Trans>
       </Button>
     </View>
   );

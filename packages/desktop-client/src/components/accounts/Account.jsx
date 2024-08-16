@@ -1,4 +1,5 @@
 import React, { PureComponent, createRef, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Navigate, useParams, useLocation } from 'react-router-dom';
 
@@ -70,9 +71,11 @@ function EmptyMessage({ onAdd }) {
         }}
       >
         <Text style={{ textAlign: 'center', lineHeight: '1.4em' }}>
-          For Actual to be useful, you need to <strong>add an account</strong>.
-          You can link an account to automatically download transactions, or
-          manage it locally yourself.
+          <Trans>
+            For Actual to be useful, you need to <strong>add an account</strong>
+            . You can link an account to automatically download transactions, or
+            manage it locally yourself.
+          </Trans>
         </Text>
 
         <Button
@@ -81,13 +84,13 @@ function EmptyMessage({ onAdd }) {
           autoFocus
           onPress={onAdd}
         >
-          Add account
+          <Trans>Add account</Trans>
         </Button>
 
         <View
           style={{ marginTop: 20, fontSize: 13, color: theme.tableTextLight }}
         >
-          In the future, you can add accounts from the sidebar.
+          <Trans>In the future, you can add accounts from the sidebar.</Trans>
         </View>
       </View>
     </View>
@@ -456,6 +459,8 @@ class AccountInternal extends PureComponent {
   };
 
   onImport = async () => {
+    const { t } = useTranslation();
+
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
     const categories = await this.props.getCategories();
@@ -464,7 +469,7 @@ class AccountInternal extends PureComponent {
       const res = await window.Actual?.openFileDialog({
         filters: [
           {
-            name: 'Financial Files',
+            name: t('Financial Files'),
             extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
           },
         ],
@@ -486,6 +491,8 @@ class AccountInternal extends PureComponent {
   };
 
   onExport = async accountName => {
+    const { t } = useTranslation();
+
     const exportedTransactions = await send('transactions-export-query', {
       query: this.currentQuery.serialize(),
     });
@@ -496,7 +503,7 @@ class AccountInternal extends PureComponent {
     window.Actual?.saveFile(
       exportedTransactions,
       filename,
-      'Export Transactions',
+      t('Export Transactions'),
     );
   };
 
@@ -668,6 +675,8 @@ class AccountInternal extends PureComponent {
   };
 
   getAccountTitle(account, id) {
+    const { t } = useTranslation();
+
     const { filterName } = this.props.location.state || {};
 
     if (filterName) {
@@ -676,13 +685,13 @@ class AccountInternal extends PureComponent {
 
     if (!account) {
       if (id === 'budgeted') {
-        return 'Budgeted Accounts';
+        return t('Budgeted Accounts');
       } else if (id === 'offbudget') {
-        return 'Off Budget Accounts';
+        return t('Off Budget Accounts');
       } else if (id === 'uncategorized') {
-        return 'Uncategorized';
+        return t('Uncategorized');
       } else if (!id) {
-        return 'All Accounts';
+        return t('All Accounts');
       }
       return null;
     }
@@ -793,6 +802,8 @@ class AccountInternal extends PureComponent {
   };
 
   onCreateReconciliationTransaction = async diff => {
+    const { t } = useTranslation();
+
     // Create a new reconciliation transaction
     const reconciliationTransactions = realizeTempTransactions([
       {
@@ -802,7 +813,7 @@ class AccountInternal extends PureComponent {
         reconciled: false,
         amount: diff,
         date: currentDay(),
-        notes: 'Reconciliation balance adjustment',
+        notes: t('Reconciliation balance adjustment'),
       },
     ]);
 
@@ -819,8 +830,10 @@ class AccountInternal extends PureComponent {
   };
 
   onShowTransactions = async ids => {
+    const { t } = useTranslation();
+
     this.onApplyFilter({
-      customName: 'Selected transactions',
+      customName: t('Selected transactions'),
       queryFilter: { id: { $oneof: ids } },
     });
   };
