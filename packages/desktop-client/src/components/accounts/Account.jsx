@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { Navigate, useParams, useLocation } from 'react-router-dom';
 
 import { debounce } from 'debounce';
+import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { validForTransfer } from 'loot-core/client/transfer';
@@ -675,8 +676,6 @@ class AccountInternal extends PureComponent {
   };
 
   getAccountTitle(account, id) {
-    const { t } = useTranslation();
-
     const { filterName } = this.props.location.state || {};
 
     if (filterName) {

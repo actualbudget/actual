@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+
+import { t } from 'i18next';
 
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
@@ -14,8 +16,6 @@ import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 
 function getErrorMessage(type, code) {
-  const { t } = useTranslation();
-
   switch (type.toUpperCase()) {
     case 'ITEM_ERROR':
       switch (code.toUpperCase()) {
@@ -126,7 +126,8 @@ export function AccountSyncCheck() {
           style={{ width: 14, height: 14, marginRight: 5 }}
         />{' '}
         <Trans>
-          This account is experiencing connection problems. LetÃ¢ÂÂs fix it.
+          This account is experiencing connection problems.
+          LetÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂs fix it.
         </Trans>
       </Button>
 
