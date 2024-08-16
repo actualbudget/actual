@@ -72,7 +72,7 @@ function CategoryList({
   showHiddenItems,
   showBalances,
 }: CategoryListProps) {
-  const { t } = useTranslation('myNamespace');
+  const { t } = useTranslation();
   let lastGroup: string | undefined | null = null;
 
   const filteredItems = useMemo(
