@@ -92,6 +92,7 @@ async function downloadGoCardlessTransactions(
   acctId,
   bankId,
   since,
+  includeBalance=true,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -106,6 +107,7 @@ async function downloadGoCardlessTransactions(
       requisitionId: bankId,
       accountId: acctId,
       startDate: since,
+      includeBalance,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -116,19 +118,30 @@ async function downloadGoCardlessTransactions(
     throw BankSyncError(res.error_type, res.error_code);
   }
 
-  const {
-    transactions: { all },
-    balances,
-    startingBalance,
-  } = res;
+  if (includeBalance) {
+    const {
+      transactions: { all },
+      balances,
+      startingBalance,
+    } = res;
 
-  console.log('Response:', res);
+    console.log('Response:', res);
 
-  return {
-    transactions: all,
-    accountBalance: balances,
-    startingBalance,
-  };
+    return {
+      transactions: all,
+      accountBalance: balances,
+      startingBalance,
+    };
+  } else {
+    const { transactions: { all } } = res;
+
+    console.log('Response:', res);
+
+    return {
+      transactions: all,
+    };
+
+  }
 }
 
 async function downloadSimpleFinTransactions(acctId, since) {
@@ -683,6 +696,7 @@ export async function syncAccount(
         acctId,
         bankId,
         startDate,
+        false
       );
     } else {
       throw new Error(
@@ -690,7 +704,7 @@ export async function syncAccount(
       );
     }
 
-    const { transactions: originalTransactions, accountBalance } = download;
+    const { transactions: originalTransactions } = download;
 
     if (originalTransactions.length === 0) {
       return { added: [], updated: [] };
@@ -708,7 +722,7 @@ export async function syncAccount(
         true,
         useStrictIdChecking,
       );
-      await updateAccountBalance(id, accountBalance);
+      //await updateAccountBalance(id, accountBalance);
       return result;
     });
   } else {
@@ -726,6 +740,7 @@ export async function syncAccount(
         acctId,
         bankId,
         startingDay,
+        true,
       );
     }
 
