@@ -5,12 +5,13 @@ function formatPayeeIban(iban) {
 }
 
 export const formatPayeeName = (trans) => {
+  const amount = trans.transactionAmount.amount;
   const nameParts = [];
 
   // get the correct name and account fields for the transaction amount
   let name;
   let account;
-  if (trans.amount > 0 || Object.is(Number(trans.amount), 0)) {
+  if (amount > 0 || Object.is(Number(amount), 0)) {
     name = trans.debtorName;
     account = trans.debtorAccount;
   } else {
