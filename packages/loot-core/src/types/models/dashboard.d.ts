@@ -14,18 +14,9 @@ type AbstractWidget<
   tombstone: boolean;
 };
 
-export type NetWorthWidget = AbstractWidget<
-  'net-worth-card',
-  { name?: string } | null
->;
-export type CashFlowWidget = AbstractWidget<
-  'cash-flow-card',
-  { name?: string } | null
->;
-export type SpendingWidget = AbstractWidget<
-  'spending-card',
-  { name?: string } | null
->;
+type NetWorthWidget = AbstractWidget<'net-worth-card'>;
+type CashFlowWidget = AbstractWidget<'cash-flow-card'>;
+type SpendingWidget = AbstractWidget<'spending-card'>;
 export type CustomReportWidget = AbstractWidget<
   'custom-report',
   { id: string }
