@@ -10,6 +10,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type ReactElement,
 } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { css } from 'glamor';
@@ -158,6 +159,8 @@ function PayeeList({
   renderPayeeItem = defaultRenderPayeeItem,
   footer,
 }: PayeeListProps) {
+  const { t } = useTranslation();
+
   let createNew = null;
   items = [...items];
 
@@ -195,11 +198,11 @@ function PayeeList({
           let title;
 
           if (itemType === 'common_payee' && lastType !== itemType) {
-            title = 'Suggested Payees';
+            title = t('Suggested Payees');
           } else if (itemType === 'payee' && lastType !== itemType) {
-            title = 'Payees';
+            title = t('Payees');
           } else if (itemType === 'account' && lastType !== itemType) {
-            title = 'Transfer To/From';
+            title = t('Transfer To/From');
           }
           const showMoreMessage =
             idx === items.length - 1 && items.length > 100;
@@ -230,7 +233,7 @@ function PayeeList({
                     textAlign: 'center',
                   }}
                 >
-                  More payees are available, search to find them
+                  <Trans>More payees are available, search to find them</Trans>
                 </div>
               )}
             </Fragment>
@@ -445,12 +448,12 @@ export function PayeeAutocomplete({
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
                 >
-                  Make Transfer
+                  <Trans>Make Transfer</Trans>
                 </Button>
               )}
               {showManagePayees && (
                 <Button type="menu" onClick={() => onManagePayees()}>
-                  Manage Payees
+                  <Trans>Manage Payees</Trans>
                 </Button>
               )}
             </AutocompleteFooter>
@@ -520,7 +523,7 @@ export function CreatePayeeButton({
           style={{ marginRight: 5, display: 'inline-block' }}
         />
       )}
-      Create Payee “{payeeName}”
+      <Trans>Create Payee “{{ payeeName }}”</Trans>
     </View>
   );
 }

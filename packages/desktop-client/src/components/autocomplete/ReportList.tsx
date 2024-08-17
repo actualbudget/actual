@@ -1,4 +1,5 @@
 import React, { Fragment, type ComponentProps } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { theme } from '../../style/theme';
 import { View } from '../common/View';
@@ -16,6 +17,7 @@ export function ReportList<T extends { id: string; name: string }>({
   highlightedIndex: number;
   embedded?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <View>
       <View
@@ -25,7 +27,7 @@ export function ReportList<T extends { id: string; name: string }>({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        <Fragment>{ItemHeader({ title: 'Saved Reports' })}</Fragment>
+        <Fragment>{ItemHeader({ title: t('Saved Reports') })}</Fragment>
         {items.map((item, idx) => {
           return [
             <div
