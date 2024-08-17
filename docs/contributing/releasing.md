@@ -58,3 +58,36 @@ Once you’ve merged and tagged the release, go to the releases page and publish
 ```markdown
 :link: [View release notes](https://actualbudget.org/blog/release-23.10.0)
 ```
+
+### Windows Store Releases
+
+The windows Store release process consists of: logging in, uploading the packages, updating the store listing, and submitting for certification.
+
+It's a relatively straight forward process - Microsoft provide a lot of [documentation for it](https://learn.microsoft.com/en-gb/windows/apps/publish/publish-your-app/msix/create-app-submission).
+
+The steps involved in releasing Actual to the Windows Store are detailed below.
+
+__Login to the Microsoft Partner Center:__
+
+1. Visit the [Microsoft Partner Center](https://partner.microsoft.com/en-us/dashboard)
+2. Log in using your Actual Budget account (if you don't have one, ask a core contributor)
+3. Navigate to "Apps and Games" and select "Actual Budget"
+
+__Upload the packages:__
+
+1. Click "Start update" to create a draft release
+2. Under "Product Update", choose "Packages"
+3. Delete all of the packages listed for the previous app version
+4. Upload the new Appx Packages and save (artifacts available on the [Release PR](#release-prs))
+
+__Update the store listing:__
+
+1. Under "Product update", select "Store listings"
+2. Choose "English" for the english listing
+3. Under "What's new in this version" briefly describe the "Notable improvements" of the release notes.
+
+__Submit to the Store__
+
+When all of the above steps are complete, select "Submit to the Store" to progress to the "Certification" stage.
+
+During the "Certification" stage the app is checked by Microsoft to ensure quality. The certification process can take up to 3 business days, once complete the app will be in the Store.
