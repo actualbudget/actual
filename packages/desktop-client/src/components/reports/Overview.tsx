@@ -46,10 +46,9 @@ function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
   return widget.type === 'custom-report';
 }
 
-function useWidgetLayout(widgets: Widget[]): (Layout & {
-  type: Widget['type'];
-  meta: Widget['meta'];
-})[] {
+type LayoutWidget = Layout & Pick<Widget, 'type' | 'meta'>;
+
+function useWidgetLayout(widgets: Widget[]): LayoutWidget[] {
   return widgets.map(widget => ({
     i: widget.id,
     type: widget.type,
@@ -290,6 +289,16 @@ export function Overview() {
     );
   };
 
+  const onMetaChange = <T extends LayoutWidget>(
+    widget: T,
+    newMeta: T['meta'],
+  ) => {
+    send('dashboard-update-widget', {
+      id: widget.i,
+      meta: newMeta,
+    });
+  };
+
   const accounts = useAccounts();
 
   if (isLoading) {
@@ -494,16 +503,22 @@ export function Overview() {
                   <NetWorthCard
                     isEditing={isEditing}
                     accounts={accounts}
+                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'cash-flow-card' ? (
                   <CashFlowCard
                     isEditing={isEditing}
+                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard
                     isEditing={isEditing}
+                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'custom-report' ? (

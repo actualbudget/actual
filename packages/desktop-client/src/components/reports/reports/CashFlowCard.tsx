@@ -1,16 +1,21 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type CashFlowWidget } from 'loot-core/src/types/models';
 
 import { theme, styles } from '../../../style';
 import { Block } from '../../common/Block';
+import { InitialFocus } from '../../common/InitialFocus';
+import { Input } from '../../common/Input';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { chartTheme } from '../chart-theme';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { Container } from '../Container';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -18,15 +23,25 @@ import { ReportCard } from '../ReportCard';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
+type CustomLabelProps = {
+  value?: number;
+  name: string;
+  position?: 'left' | 'right';
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+};
+
 function CustomLabel({
-  value,
+  value = 0,
   name,
-  position,
-  x,
-  y,
-  width: barWidth,
-  height: barHeight,
-}) {
+  position = 'left',
+  x = 0,
+  y = 0,
+  width: barWidth = 0,
+  height: barHeight = 0,
+}: CustomLabelProps) {
   const valueLengthOffset = 20;
 
   const yOffset = barHeight < 25 ? 105 : y;
@@ -68,16 +83,32 @@ function CustomLabel({
   );
 }
 
-export function CashFlowCard({ isEditing, onRemove }) {
+type CashFlowCardProps = {
+  isEditing?: boolean;
+  meta?: CashFlowWidget['meta'];
+  onMetaChange: (newMeta: CashFlowWidget['meta']) => void;
+  onRemove: () => void;
+};
+
+export function CashFlowCard({
+  isEditing,
+  meta,
+  onMetaChange,
+  onRemove,
+}: CashFlowCardProps) {
+  const { t } = useTranslation();
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
+
+  const cardName = meta?.name || t('Cash Flow');
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
   const data = useReport('cash_flow_simple', params);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const onCardHover = useCallback(() => setIsCardHovered(true));
-  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
+  const onCardHover = useCallback(() => setIsCardHovered(true), []);
+  const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
   const { graphData } = data || {};
   const expenses = -(graphData?.expense || 0);
@@ -89,12 +120,19 @@ export function CashFlowCard({ isEditing, onRemove }) {
       to="/reports/cash-flow"
       menuItems={[
         {
+          name: 'rename',
+          text: t('Rename'),
+        },
+        {
           name: 'remove',
-          text: 'Remove',
+          text: t('Remove'),
         },
       ]}
       onMenuSelect={item => {
         switch (item) {
+          case 'rename':
+            setNameMenuOpen(true);
+            break;
           case 'remove':
             onRemove();
             break;
@@ -110,12 +148,42 @@ export function CashFlowCard({ isEditing, onRemove }) {
       >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
-            <Block
-              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
-              role="heading"
-            >
-              Cash Flow
-            </Block>
+            {nameMenuOpen ? (
+              <InitialFocus>
+                <Input
+                  className={NON_DRAGGABLE_AREA_CLASS_NAME}
+                  defaultValue={cardName}
+                  onEnter={e => {
+                    onMetaChange({
+                      ...meta,
+                      name: (e.target as HTMLInputElement).value,
+                    });
+                    setNameMenuOpen(false);
+                  }}
+                  onBlur={() => setNameMenuOpen(false)}
+                  onEscape={() => setNameMenuOpen(false)}
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 500,
+                    marginTop: -6,
+                    marginBottom: -1,
+                    marginLeft: -6,
+                    width: Math.max(20, cardName.length) + 'ch',
+                  }}
+                />
+              </InitialFocus>
+            ) : (
+              <Block
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 500,
+                  marginBottom: 5,
+                }}
+                role="heading"
+              >
+                {cardName}
+              </Block>
+            )}
             <DateRange start={start} end={end} />
           </View>
           {data && (
@@ -153,7 +221,7 @@ export function CashFlowCard({ isEditing, onRemove }) {
                     <LabelList
                       dataKey="income"
                       position="left"
-                      content={<CustomLabel name="Income" />}
+                      content={<CustomLabel name={t('Income')} />}
                     />
                   </Bar>
 
@@ -165,7 +233,7 @@ export function CashFlowCard({ isEditing, onRemove }) {
                     <LabelList
                       dataKey="expenses"
                       position="right"
-                      content={<CustomLabel name="Expenses" />}
+                      content={<CustomLabel name={t('Expenses')} />}
                     />
                   </Bar>
                 </BarChart>

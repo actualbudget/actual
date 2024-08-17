@@ -1,14 +1,22 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import {
+  type AccountEntity,
+  type NetWorthWidget,
+} from 'loot-core/src/types/models';
 
 import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
+import { InitialFocus } from '../../common/InitialFocus';
+import { Input } from '../../common/Input';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { DateRange } from '../DateRange';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -16,14 +24,32 @@ import { ReportCard } from '../ReportCard';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
-export function NetWorthCard({ isEditing, accounts, onRemove }) {
+type NetWorthCardProps = {
+  isEditing?: boolean;
+  accounts: AccountEntity[];
+  meta?: NetWorthWidget['meta'];
+  onMetaChange: (newMeta: NetWorthWidget['meta']) => void;
+  onRemove: () => void;
+};
+
+export function NetWorthCard({
+  isEditing,
+  accounts,
+  meta = {},
+  onMetaChange,
+  onRemove,
+}: NetWorthCardProps) {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+
+  const cardName = meta?.name || t('Net Worth');
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const onCardHover = useCallback(() => setIsCardHovered(true));
-  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
+  const onCardHover = useCallback(() => setIsCardHovered(true), []);
+  const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
   const params = useMemo(
     () => netWorthSpreadsheet(start, end, accounts),
@@ -37,12 +63,19 @@ export function NetWorthCard({ isEditing, accounts, onRemove }) {
       to="/reports/net-worth"
       menuItems={[
         {
+          name: 'rename',
+          text: t('Rename'),
+        },
+        {
           name: 'remove',
-          text: 'Remove',
+          text: t('Remove'),
         },
       ]}
       onMenuSelect={item => {
         switch (item) {
+          case 'rename':
+            setNameMenuOpen(true);
+            break;
           case 'remove':
             onRemove();
             break;
@@ -58,12 +91,42 @@ export function NetWorthCard({ isEditing, accounts, onRemove }) {
       >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
-            <Block
-              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
-              role="heading"
-            >
-              Net Worth
-            </Block>
+            {nameMenuOpen ? (
+              <InitialFocus>
+                <Input
+                  className={NON_DRAGGABLE_AREA_CLASS_NAME}
+                  defaultValue={cardName}
+                  onEnter={e => {
+                    onMetaChange({
+                      ...meta,
+                      name: (e.target as HTMLInputElement).value,
+                    });
+                    setNameMenuOpen(false);
+                  }}
+                  onBlur={() => setNameMenuOpen(false)}
+                  onEscape={() => setNameMenuOpen(false)}
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 500,
+                    marginTop: -6,
+                    marginBottom: -1,
+                    marginLeft: -6,
+                    width: Math.max(20, cardName.length) + 'ch',
+                  }}
+                />
+              </InitialFocus>
+            ) : (
+              <Block
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 500,
+                  marginBottom: 5,
+                }}
+                role="heading"
+              >
+                {cardName}
+              </Block>
+            )}
             <DateRange start={start} end={end} />
           </View>
           {data && (
@@ -88,8 +151,6 @@ export function NetWorthCard({ isEditing, accounts, onRemove }) {
 
         {data ? (
           <NetWorthGraph
-            start={start}
-            end={end}
             graphData={data.graphData}
             compact={true}
             showTooltip={!isEditing && !isNarrowWidth}

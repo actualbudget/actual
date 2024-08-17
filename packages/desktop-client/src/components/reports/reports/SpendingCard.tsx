@@ -1,15 +1,20 @@
 import React, { useState, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
+import { type SpendingWidget } from 'loot-core/src/types/models';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
+import { InitialFocus } from '../../common/InitialFocus';
+import { Input } from '../../common/Input';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { DateRange } from '../DateRange';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -21,16 +26,28 @@ import { MissingReportCard } from './MissingReportCard';
 
 type SpendingCardProps = {
   isEditing?: boolean;
+  meta?: SpendingWidget['meta'];
+  onMetaChange: (newMeta: SpendingWidget['meta']) => void;
   onRemove: () => void;
 };
 
-export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
+export function SpendingCard({
+  isEditing,
+  meta,
+  onMetaChange,
+  onRemove,
+}: SpendingCardProps) {
+  const { t } = useTranslation();
+
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
   const [spendingReportCompare = 'thisMonth'] = useLocalPref(
     'spendingReportCompare',
   );
+
+  const cardName = meta?.name || t('Monthly Spending');
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const getGraphData = useMemo(() => {
@@ -59,7 +76,9 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
   if (!spendingReportFeatureFlag) {
     return (
       <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
-        The experimental spending report feature has not been enabled.
+        <Trans>
+          The experimental spending report feature has not been enabled.
+        </Trans>
       </MissingReportCard>
     );
   }
@@ -70,12 +89,19 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
       to="/reports/spending"
       menuItems={[
         {
+          name: 'rename',
+          text: t('Rename'),
+        },
+        {
           name: 'remove',
-          text: 'Remove',
+          text: t('Remove'),
         },
       ]}
       onMenuSelect={item => {
         switch (item) {
+          case 'rename':
+            setNameMenuOpen(true);
+            break;
           case 'remove':
             onRemove();
             break;
@@ -91,12 +117,42 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
       >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
-            <Block
-              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
-              role="heading"
-            >
-              Monthly Spending
-            </Block>
+            {nameMenuOpen ? (
+              <InitialFocus>
+                <Input
+                  className={NON_DRAGGABLE_AREA_CLASS_NAME}
+                  defaultValue={cardName}
+                  onEnter={e => {
+                    onMetaChange({
+                      ...meta,
+                      name: (e.target as HTMLInputElement).value,
+                    });
+                    setNameMenuOpen(false);
+                  }}
+                  onBlur={() => setNameMenuOpen(false)}
+                  onEscape={() => setNameMenuOpen(false)}
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 500,
+                    marginTop: -6,
+                    marginBottom: -1,
+                    marginLeft: -6,
+                    width: Math.max(20, cardName.length) + 'ch',
+                  }}
+                />
+              </InitialFocus>
+            ) : (
+              <Block
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 500,
+                  marginBottom: 5,
+                }}
+                role="heading"
+              >
+                {cardName}
+              </Block>
+            )}
             <DateRange
               start={monthUtils.currentMonth()}
               end={monthUtils.currentMonth()}
@@ -128,7 +184,7 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
         {!showLastMonth ? (
           <View style={{ padding: 5 }}>
             <p style={{ margin: 0, textAlign: 'center' }}>
-              Additional data required to generate graph
+              <Trans>Additional data required to generate graph</Trans>
             </p>
           </View>
         ) : data ? (
@@ -140,7 +196,7 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
             compare={spendingReportCompare}
           />
         ) : (
-          <LoadingIndicator message="Loading report..." />
+          <LoadingIndicator message={t('Loading report...')} />
         )}
       </View>
     </ReportCard>

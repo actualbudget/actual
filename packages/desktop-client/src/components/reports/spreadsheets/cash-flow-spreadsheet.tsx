@@ -13,8 +13,11 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
-export function simpleCashFlow(start, end) {
-  return async (spreadsheet, setData) => {
+export function simpleCashFlow(start: string, end: string) {
+  return async (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: { graphData: { income: number; expense: number } }) => void,
+  ) => {
     function makeQuery() {
       return q('transactions')
         .filter({
