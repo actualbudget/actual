@@ -54,13 +54,6 @@ function getAccountBalance(account) {
   }
 }
 
-async function updateAccountBalance(id, balance) {
-  await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    amountToInteger(balance),
-    id,
-  ]);
-}
-
 export async function getGoCardlessAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -92,7 +85,7 @@ async function downloadGoCardlessTransactions(
   acctId,
   bankId,
   since,
-  includeBalance=true,
+  includeBalance = true,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -133,14 +126,15 @@ async function downloadGoCardlessTransactions(
       startingBalance,
     };
   } else {
-    const { transactions: { all } } = res;
+    const {
+      transactions: { all },
+    } = res;
 
     console.log('Response:', res);
 
     return {
       transactions: all,
     };
-
   }
 }
 
@@ -696,7 +690,7 @@ export async function syncAccount(
         acctId,
         bankId,
         startDate,
-        false
+        false,
       );
     } else {
       throw new Error(
@@ -722,7 +716,7 @@ export async function syncAccount(
         true,
         useStrictIdChecking,
       );
-      //await updateAccountBalance(id, accountBalance);
+
       return result;
     });
   } else {
