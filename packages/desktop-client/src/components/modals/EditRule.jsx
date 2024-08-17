@@ -94,7 +94,7 @@ export function FieldSelect({ fields, style, value, onChange }) {
         bare
         options={fields}
         value={value}
-        onChange={value => onChange('field', value)}
+        onChange={value => onChange(value)}
         buttonStyle={{ color: theme.pageTextPositive }}
       />
     </View>
