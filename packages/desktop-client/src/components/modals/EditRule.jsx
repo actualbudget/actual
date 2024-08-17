@@ -838,7 +838,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
     setStage(stage);
   }
 
-  function onChangeConditionsOp(name, value) {
+  function onChangeConditionsOp(value) {
     setConditionsOp(value);
   }
 
