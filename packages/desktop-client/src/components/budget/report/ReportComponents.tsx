@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { memo, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -61,7 +62,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Budgeted</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Budgeted</Trans>
+        </Text>
         <ReportCellValue
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
@@ -72,7 +75,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Spent</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Spent</Trans>
+        </Text>
         <ReportCellValue
           binding={reportBudget.totalSpent}
           type="financial"
@@ -80,7 +85,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Balance</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Balance</Trans>
+        </Text>
         <ReportCellValue
           binding={reportBudget.totalLeftover}
           type="financial"
@@ -101,10 +108,14 @@ export function IncomeHeaderMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Budgeted</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Budgeted</Trans>
+        </Text>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Received</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Received</Trans>
+        </Text>
       </View>
     </View>
   );
