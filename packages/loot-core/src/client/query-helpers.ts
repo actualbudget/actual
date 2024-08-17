@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { t } from 'i18next';
+
 import { listen, send } from '../platform/client/fetch';
 import { once } from '../shared/async';
 import { getPrimaryOrderBy } from '../shared/query';
@@ -234,7 +236,7 @@ class PagedQuery extends LiveQuery {
 
       const orderDesc = getPrimaryOrderBy(this.query, defaultOrderBy);
       if (orderDesc == null) {
-        throw new Error(`refetchUpToRow requires a query with orderBy`);
+        throw new Error(t('refetchUpToRow requires a query with orderBy'));
       }
 
       const { field, order } = orderDesc;

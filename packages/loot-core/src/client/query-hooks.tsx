@@ -8,6 +8,8 @@ import React, {
   type DependencyList,
 } from 'react';
 
+import { t } from 'i18next';
+
 import { type Query } from '../shared/query';
 
 import { liveQuery, LiveQuery } from './query-helpers';
@@ -23,7 +25,9 @@ function makeContext(queryState, opts, QueryClass) {
     useEffect(() => {
       if (query.getNumListeners() !== 0) {
         throw new Error(
-          'Query already has listeners. You cannot use the same query context `Provider` twice',
+          t(
+            'Query already has listeners. You cannot use the same query context `Provider` twice',
+          ),
         );
       }
 
@@ -54,7 +58,9 @@ function makeContext(queryState, opts, QueryClass) {
     const queryData = useContext(Context);
     if (queryData == null) {
       throw new Error(
-        '`useQuery` tried to access a query that hasn’t been run. You need to put its `Provider` in a parent component',
+        t(
+          '`useQuery` tried to access a query that hasn’t been run. You need to put its `Provider` in a parent component',
+        ),
       );
     }
     return queryData;
