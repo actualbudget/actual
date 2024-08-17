@@ -260,7 +260,7 @@ function ConditionEditor({
 
   return (
     <Editor style={editorStyle} error={error}>
-      <FieldSelect fields={conditionFields} value={field} onChange={onChange} />
+      <FieldSelect fields={conditionFields} value={field} onChange={value => onChange('field', value)} />
       <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
       <View style={{ flex: 1 }}>{valueEditor}</View>
@@ -373,7 +373,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           <FieldSelect
             fields={options?.splitIndex ? splitActionFields : actionFields}
             value={field}
-            onChange={onChange}
+            onChange={value => onChange('field', value)}
           />
 
           <View style={{ flex: 1 }}>
