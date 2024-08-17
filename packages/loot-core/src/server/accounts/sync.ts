@@ -126,14 +126,10 @@ async function downloadGoCardlessTransactions(
       startingBalance,
     };
   } else {
-    const {
-      transactions: { all },
-    } = res;
-
     console.log('Response:', res);
 
     return {
-      transactions: all,
+      transactions: res.transactions.all,
     };
   }
 }
