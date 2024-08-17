@@ -260,7 +260,11 @@ function ConditionEditor({
 
   return (
     <Editor style={editorStyle} error={error}>
-      <FieldSelect fields={conditionFields} value={field} onChange={value => onChange('field', value)} />
+      <FieldSelect
+        fields={conditionFields}
+        value={field}
+        onChange={value => onChange('field', value)}
+      />
       <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
       <View style={{ flex: 1 }}>{valueEditor}</View>
