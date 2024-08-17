@@ -12,8 +12,8 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 
 const app = express();
 app.use(errorMiddleware);
-app.use(express.json());
 app.use(express.raw({ type: 'application/actual-sync' }));
+app.use(express.json());
 
 app.use(validateUserMiddleware);
 export { app as handlers };
@@ -31,6 +31,7 @@ app.post('/sync', async (req, res) => {
   try {
     requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(req.body);
   } catch (e) {
+    console.log('Error parsing sync request', e);
     res.status(500);
     res.send({ status: 'error', reason: 'internal-error' });
     return;
@@ -44,7 +45,11 @@ app.post('/sync', async (req, res) => {
   let messages = requestPb.getMessagesList();
 
   if (!since) {
-    throw new Error('`since` is required');
+    return res.status(422).send({
+      details: 'since-required',
+      reason: 'unprocessable-entity',
+      status: 'error',
+    });
   }
 
   let currentFiles = accountDb.all(
