@@ -1110,7 +1110,7 @@ class AccountInternal extends PureComponent {
     );
   };
 
-  onConditionsOpChange = (value) => {
+  onConditionsOpChange = value => {
     this.setState({ filterConditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
     this.applyFilters([...this.state.filterConditions]);
