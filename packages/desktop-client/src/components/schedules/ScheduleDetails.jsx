@@ -18,6 +18,7 @@ import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button2';
+import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -462,15 +463,17 @@ export function ScheduleDetails({ id, transaction }) {
           <Stack direction="row" style={{ marginTop: 10 }}>
             <FormField style={{ flex: 1 }}>
               <FormLabel title="Schedule Name" htmlFor="name-field" />
-              <GenericInput
-                field="string"
-                type="string"
-                value={state.fields.name}
-                multi={false}
-                onChange={e => {
-                  dispatch({ type: 'set-field', field: 'name', value: e });
-                }}
-              />
+              <InitialFocus>
+                <GenericInput
+                  field="string"
+                  type="string"
+                  value={state.fields.name}
+                  multi={false}
+                  onChange={e => {
+                    dispatch({ type: 'set-field', field: 'name', value: e });
+                  }}
+                />
+              </InitialFocus>
             </FormField>
           </Stack>
           <Stack direction="row" style={{ marginTop: 20 }}>

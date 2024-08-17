@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -38,6 +39,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
   onChange,
   onDelete,
 }: FilterExpressionProps<T>) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef(null);
 
@@ -84,7 +86,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
           )}
         </div>
       </Button>
-      <Button type="bare" onClick={onDelete} aria-label="Delete filter">
+      <Button type="bare" onClick={onDelete} aria-label={t('Delete filter')}>
         <SvgDelete
           style={{
             width: 8,

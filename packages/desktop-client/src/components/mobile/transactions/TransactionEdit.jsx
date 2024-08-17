@@ -460,7 +460,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const { editingField, onRequestActiveEdit, onClearActiveEdit } =
     useSingleActiveEditForm();
-  const [totalAmountFocused, setTotalAmountFocused] = useState(false);
+  const [totalAmountFocused, setTotalAmountFocused] = useState(true);
   const childTransactionElementRefMap = useRef({});
 
   const payeesById = useMemo(() => groupById(payees), [payees]);

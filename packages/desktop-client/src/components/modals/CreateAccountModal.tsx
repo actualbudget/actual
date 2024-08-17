@@ -12,6 +12,7 @@ import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
+import { InitialFocus } from '../common/InitialFocus';
 import { Link } from '../common/Link';
 import { Menu } from '../common/Menu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
@@ -186,17 +187,19 @@ export function CreateAccountModal({
           <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
             {upgradingAccountId == null && (
               <View style={{ gap: 10 }}>
-                <Button
-                  variant="primary"
-                  style={{
-                    padding: '10px 0',
-                    fontSize: 15,
-                    fontWeight: 600,
-                  }}
-                  onPress={onCreateLocalAccount}
-                >
-                  Create local account
-                </Button>
+                <InitialFocus>
+                  <Button
+                    variant="primary"
+                    style={{
+                      padding: '10px 0',
+                      fontSize: 15,
+                      fontWeight: 600,
+                    }}
+                    onPress={onCreateLocalAccount}
+                  >
+                    Create local account
+                  </Button>
+                </InitialFocus>
                 <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <Text>
                     <strong>Create a local account</strong> if you want to add

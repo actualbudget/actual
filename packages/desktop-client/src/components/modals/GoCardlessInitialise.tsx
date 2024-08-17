@@ -5,6 +5,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button2';
+import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
@@ -78,15 +79,17 @@ export const GoCardlessInitialise = ({
 
             <FormField>
               <FormLabel title="Secret ID:" htmlFor="secret-id-field" />
-              <Input
-                id="secret-id-field"
-                type="password"
-                value={secretId}
-                onChangeValue={value => {
-                  setSecretId(value);
-                  setIsValid(true);
-                }}
-              />
+              <InitialFocus>
+                <Input
+                  id="secret-id-field"
+                  type="password"
+                  value={secretId}
+                  onChangeValue={value => {
+                    setSecretId(value);
+                    setIsValid(true);
+                  }}
+                />
+              </InitialFocus>
             </FormField>
 
             <FormField>
