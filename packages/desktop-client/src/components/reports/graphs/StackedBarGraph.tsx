@@ -255,7 +255,7 @@ export function StackedBarGraph({
                         }
                       }}
                       onClick={e =>
-                        !showTooltip &&
+                        ((compact && showTooltip) || !compact) &&
                         !['Group', 'Interval'].includes(groupBy) &&
                         showActivity({
                           navigate,

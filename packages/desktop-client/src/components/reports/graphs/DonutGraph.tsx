@@ -259,7 +259,7 @@ export function DonutGraph({
                     }
                   }}
                   onClick={item =>
-                    !showTooltip &&
+                    ((compact && showTooltip) || !compact) &&
                     !['Group', 'Interval'].includes(groupBy) &&
                     showActivity({
                       navigate,

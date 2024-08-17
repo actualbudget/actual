@@ -277,7 +277,7 @@ export function BarGraph({
                     setPointer('pointer')
                   }
                   onClick={item =>
-                    !showTooltip &&
+                    ((compact && showTooltip) || !compact) &&
                     !['Group', 'Interval'].includes(groupBy) &&
                     showActivity({
                       navigate,

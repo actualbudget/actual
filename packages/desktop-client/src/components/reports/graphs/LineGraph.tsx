@@ -237,7 +237,7 @@ export function LineGraph({
                           setTooltip('');
                         },
                         onClick: (e, payload) =>
-                          !showTooltip &&
+                          ((compact && showTooltip) || !compact) &&
                           !['Group', 'Interval'].includes(groupBy) &&
                           onShowActivity(e, entry.id, payload),
                       }}
