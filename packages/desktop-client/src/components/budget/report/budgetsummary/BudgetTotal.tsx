@@ -4,6 +4,7 @@ import React, {
   type ComponentType,
   type ReactNode,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { theme, styles } from '../../../../style';
 import { Text } from '../../../common/Text';
@@ -31,6 +32,7 @@ export function BudgetTotal<
   ProgressComponent,
   style,
 }: BudgetTotalProps<CurrentField, TargetField>) {
+  const { t } = useTranslation();
   return (
     <View
       style={{
@@ -51,7 +53,8 @@ export function BudgetTotal<
         <Text>
           <CellValue binding={current} type="financial" />
           <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
-            {' of '}
+            {' '}
+            {t('of')}{' '}
             <CellValue
               binding={target}
               type="financial"
