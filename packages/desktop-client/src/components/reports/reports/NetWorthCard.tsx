@@ -40,7 +40,6 @@ export function NetWorthCard({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
-  const cardName = meta?.name || t('Net Worth');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const end = monthUtils.currentMonth();
@@ -90,7 +89,7 @@ export function NetWorthCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={cardName}
+              name={meta?.name || t('Net Worth')}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

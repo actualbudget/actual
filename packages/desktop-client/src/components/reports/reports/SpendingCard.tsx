@@ -44,7 +44,6 @@ export function SpendingCard({
     'spendingReportCompare',
   );
 
-  const cardName = meta?.name || t('Monthly Spending');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
@@ -116,7 +115,7 @@ export function SpendingCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={cardName}
+              name={meta?.name || t('Monthly Spending')}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

@@ -97,7 +97,6 @@ export function CashFlowCard({
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
 
-  const cardName = meta?.name || t('Cash Flow');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
@@ -146,7 +145,7 @@ export function CashFlowCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={cardName}
+              name={meta?.name || t('Cash Flow')}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({
