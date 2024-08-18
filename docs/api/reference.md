@@ -183,7 +183,9 @@ This method is mainly for custom importers that want to skip all the automatic s
 
 <Method name="importTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}]} returns="Promise<{ errors, added, updated }>" />
 
-Adds multiple transactions at once, but goes through the same process as importing a file or downloading transactions from a bank. You probably want to use this one. Returns an array of ids of the newly created transactions.
+Adds multiple transactions at once, while going through the same process as importing a file or downloading transactions from a bank.
+In particular, all rules are run on the specified transactions before adding them.
+Use `addTransactions` instead for adding raw transactions without post-processing.
 
 The import will "reconcile" transactions to avoid adding duplicates. Transactions with the same `imported_id` will never be added more than once. Otherwise, the system will match transactions with the same amount and with similar dates and payees and try to avoid duplicates. If not using `imported_id` you should check the results after importing.
 
