@@ -15,6 +15,7 @@ import {
   Row,
   SelectCell,
 } from '../table';
+import { useLocalPref } from '../../hooks/useLocalPref';
 
 type RuleButtonProps = {
   ruleCount: number;
@@ -101,7 +102,7 @@ export const PayeeTableRow = memo(
       ? theme.tableBorderSelected
       : theme.tableBorder;
     const backgroundFocus = hovered || focusedField === 'select';
-
+    const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
     return (
       <Row
         style={{
@@ -149,7 +150,10 @@ export const PayeeTableRow = memo(
           }}
         </CustomCell>
         <InputCell
-          value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
+          value={
+            (payee.transfer_acct ? 'Transfer: ' : '') +
+            (accountGroupDisplay ? payee.display_name : payee.name)
+          }
           valueStyle={
             (!selected &&
               payee.transfer_acct && { color: theme.pageTextSubdued }) ||

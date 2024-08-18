@@ -37,6 +37,7 @@ import {
   AutocompleteFooter,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
+import { useLocalPref } from '../../hooks/useLocalPref';
 
 type PayeeAutocompleteItem = PayeeEntity;
 
@@ -285,6 +286,7 @@ export function PayeeAutocomplete({
   if (!payees) {
     payees = retrievedPayees;
   }
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
 
   const cachedAccounts = useAccounts();
   if (!accounts) {
@@ -349,7 +351,7 @@ export function PayeeAutocomplete({
         } else if (item.id === 'new') {
           return rawPayee;
         }
-        return item.name;
+        return accountGroupDisplay && item.display_name ? item.display_name : item.name;
       }}
       focused={payeeFieldFocused}
       inputProps={{
@@ -553,6 +555,8 @@ function PayeeItem({
   ...props
 }: PayeeItemProps) {
   const { isNarrowWidth } = useResponsive();
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
+
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
@@ -617,7 +621,9 @@ function PayeeItem({
     >
       <TextOneLine>
         {itemIcon}
-        {item.name}
+        {accountGroupDisplay && item.display_name
+          ? item.display_name
+          : item.name}
       </TextOneLine>
     </div>
   );

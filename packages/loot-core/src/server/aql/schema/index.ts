@@ -73,6 +73,7 @@ export const schema = {
     account_id: f('string'),
     official_name: f('string'),
     account_sync_source: f('string'),
+    account_group_id: f('string'),
   },
   categories: {
     id: f('id'),

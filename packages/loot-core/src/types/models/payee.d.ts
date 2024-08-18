@@ -4,6 +4,7 @@ export interface NewPayeeEntity {
   transfer_acct?: string;
   favorite?: boolean;
   tombstone?: boolean;
+  display_name?: string;
 }
 
 export interface PayeeEntity extends NewPayeeEntity {

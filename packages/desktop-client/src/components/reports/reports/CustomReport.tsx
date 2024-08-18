@@ -213,6 +213,7 @@ export function CustomReport() {
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   const [includeCurrentInterval, setIncludeCurrentInterval] = useState(
     loadReport.includeCurrentInterval,
   );
@@ -361,6 +362,7 @@ export function CustomReport() {
       showUncategorized,
       balanceTypeOp,
       firstDayOfWeekIdx,
+      accountGroupDisplay:accountGroupDisplay[0]
     });
   }, [
     startDate,
@@ -397,6 +399,7 @@ export function CustomReport() {
       graphType,
       firstDayOfWeekIdx,
       setDataCheck,
+      accountGroupDisplay
     });
   }, [
     startDate,

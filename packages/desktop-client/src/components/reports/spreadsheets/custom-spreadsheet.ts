@@ -51,6 +51,7 @@ export type createCustomSpreadsheetProps = {
   accounts?: AccountEntity[];
   graphType?: string;
   firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
+  accountGroupDisplay: boolean;
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -72,13 +73,21 @@ export function createCustomSpreadsheet({
   graphType,
   firstDayOfWeekIdx,
   setDataCheck,
+  accountGroupDisplay,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
 
   const [groupByList, groupByLabel]: [
     groupByList: UncategorizedEntity[],
     groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account',
-  ] = groupBySelections(groupBy, categoryList, categoryGroup, payees, accounts);
+  ] = groupBySelections(
+    groupBy,
+    categoryList,
+    categoryGroup,
+    payees,
+    accounts,
+    accountGroupDisplay,
+  );
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,

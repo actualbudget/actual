@@ -21,6 +21,7 @@ import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 
 import { lookupName, getDescriptionPretty, Status } from './TransactionEdit';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 
 const ROW_HEIGHT = 50;
 
@@ -69,6 +70,7 @@ export const Transaction = memo(function Transaction({
   const account = useAccount(accountId);
   const transferAcct = useAccount(payee?.transfer_acct);
 
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   const isPreview = isPreviewId(id);
   let amount = originalAmount;
   if (isPreview) {
@@ -81,6 +83,7 @@ export const Transaction = memo(function Transaction({
     transaction,
     payee,
     transferAcct,
+    accountGroupDisplay
   );
   const specialCategory = account?.offbudget
     ? 'Off Budget'

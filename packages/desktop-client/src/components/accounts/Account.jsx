@@ -547,8 +547,24 @@ class AccountInternal extends PureComponent {
     this.setState({ isAdding: true });
   };
 
+  //Allow editing of group
+  onExposeGroup = flag => {
+    this.setState({editingGroup:flag});
+  };
+
   onExposeName = flag => {
     this.setState({ editingName: flag });
+  };
+
+  ///Saves the group
+  onSaveGroup = account_group_id => {
+    const accountId = this.props.accountId;
+    const account = this.props.accounts.find(
+      account => account.id === accountId,
+    );
+
+    this.props.changeAccountGroup({...account, account_group_id})
+    this.setState({editingGroup:false});
   };
 
   onSaveName = name => {
@@ -1620,6 +1636,7 @@ class AccountInternal extends PureComponent {
       reconcileAmount,
       transactionsFiltered,
       editingName,
+      editingGroup,
       showBalances,
       balances,
       showCleared,
@@ -1726,6 +1743,9 @@ class AccountInternal extends PureComponent {
                 onSetTransfer={this.onSetTransfer}
                 onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
                 onMakeAsNonSplitTransactions={this.onMakeAsNonSplitTransactions}
+                editingGroup={editingGroup}
+                onExposeGroup={this.onExposeGroup}
+                onSaveGroup={this.onSaveGroup}
               />
 
               <View style={{ flex: 1 }}>

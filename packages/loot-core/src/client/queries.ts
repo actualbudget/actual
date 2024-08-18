@@ -97,6 +97,7 @@ export function makeTransactionSearchQuery(
       notes: { $like: `%${search}%` },
       'category.name': { $like: `%${search}%` },
       'account.name': { $like: `%${search}%` },
+      'account.account_group_id': { $like: `%${search}%` },
       $or: [
         isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
         amount != null && {
@@ -150,7 +151,8 @@ export function accountBalanceUncleared(
   };
 }
 
-//Gets Accounts with the Grouping Syntex
+//Gets The total account balance of an account group
+//null to return total of accounts without a group
 export function getGroupBalance(
   groupName,
   OffBudget,
@@ -160,7 +162,7 @@ export function getGroupBalance(
       .filter({
         'account.closed': false,
         'account.offbudget': OffBudget,
-        'account.name': { $likeDis: `${'[' + groupName + ']'}%` },
+        'account.account_group_id':  groupName,
       })
       .calculate({ $sum: '$amount' }),
     name: accountParametrizedField('balance')(

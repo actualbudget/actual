@@ -18,6 +18,7 @@ import { View } from '../common/View';
 
 import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
+import { useLocalPref } from '../../hooks/useLocalPref';
 
 type AccountAutocompleteItem = AccountEntity;
 
@@ -106,6 +107,7 @@ type AccountAutocompleteProps = ComponentProps<
   closeOnBlur?: boolean;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export function AccountAutocomplete({
   embedded,
   includeClosedAccounts = true,
@@ -181,6 +183,7 @@ function AccountItem({
       }
     : {};
 
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   return (
     <div
       // List each account up to a max
@@ -224,7 +227,9 @@ function AccountItem({
       data-highlighted={highlighted || undefined}
       {...props}
     >
-      <TextOneLine>{item.name}</TextOneLine>
+      <TextOneLine>
+        {accountGroupDisplay ? item.display_name : item.name}
+      </TextOneLine>
     </div>
   );
 }

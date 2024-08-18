@@ -16,6 +16,7 @@ import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
 
 import { Account } from './Account';
+import { GroupAccount } from './GroupAccounts';
 import { SecondaryItem } from './SecondaryItem';
 
 const fontWeight = 600;
@@ -44,6 +45,7 @@ export function Accounts({
   const getAccountPath = account => `/accounts/${account.id}`;
 
   const [showClosedAccounts] = useLocalPref('ui.showClosedAccounts');
+  const [accountGroupNested] = useLocalPref('ui.accountGroupNested')
 
   function onDragChange(drag) {
     setIsDragging(drag.state === 'start');
@@ -59,28 +61,12 @@ export function Accounts({
     return null;
   };
 
-  //Returns the name Of the Account removing group name
-  function processName(name) {
-    if (getGroup(name) === '') {
-      return name;
-    }
-    return name.substring(name.indexOf(']') + 1);
-  }
-
-  //Returns the account group name if there is one, otherwise returns empty string
-  function getGroup(name) {
-    if (name[0] === '[') {
-      return name.substring(1, name.indexOf(']'));
-    }
-    return '';
-  }
-
   //Account view
-  function normalAccount(account, i) {
+  function normalAccount(account, i, nested = false) {
     return (
       <Account
         key={account.id}
-        name={processName(account.name)}
+        name={account.name}
         account={account}
         connected={!!account.bank}
         pending={syncingAccountIds.includes(account.id)}
@@ -91,64 +77,62 @@ export function Accounts({
         onDragChange={onDragChange}
         onDrop={onReorder}
         outerStyle={makeDropPadding(i)}
+        nested = {nested}
       />
     );
   }
 
   //Places a group and its associated accounts.
-  function groupPlacement(groupName, accounts, offBudget) {
-    return (
-      <div key={groupName + '-groupdiv-' + offBudget}>
-        <div
-          key={groupName + '-titleBackgounrdDiv-' + offBudget}
-          style={{
-            width: '100%',
-            position: 'absolute',
-            backgroundColor: 'rgba(255,255,255,.05',
-            height: '2.15em',
-            left: '1em',
-            margin: '0',
-            borderTopLeftRadius: '7px',
-          }}
-        />
-        <Account
-          to="/"
-          name={groupName}
-          query={queries.getGroupBalance(groupName, offBudget)}
-          onDragChange={onDragChange}
-          onDrop={onReorder}
-          outerStyle={makeDropPadding(0)}
-          grouped={true}
-          style={{ margin: '0', marginLeft: '2px' }}
-        />
-
-        <div
-          key={groupName + '-AccountBackgroundDiv-' + offBudget}
-          style={{
-            width: 'auto',
-            marginLeft: '1em',
-            marginTop: '0px',
-            marginBottom: '10px',
-            borderBottomLeftRadius: '7px',
-            background: 'rgba(255,255,255,0.05)',
-          }}
-        >
+  //if nested then group will be placed under the forbudgted/off budgted
+  //headings within a highlighted group. Otherwise accounts will be under its own title
+  //with accounts under that
+  function groupPlacement(groupName, accounts, offBudget, nested = true) {
+    //If we dont want nested
+    if (!nested) {
+      return (
+        <div key={'groupBox-' + groupName}>
+          <Account
+            name={groupName}
+            key={"groupHead-" + groupName}
+            to="/accounts/budgeted"
+            query={queries.getGroupBalance(groupName, offBudget)}
+            grouped={true}
+            style={{
+              fontWeight,
+              marginTop: 13,
+              marginBottom: 5,
+            }}
+          />
           {accounts.map((account, ii) => normalAccount(account, ii))}
         </div>
-      </div>
+      );
+    }
+    //if we are having nested
+    return (
+      <GroupAccount
+        to="/"
+        key={'group-' + groupName + '-' + offBudget}
+        accounts={accounts.map((account, ii) => normalAccount(account, ii, true))}
+        groupName={groupName}
+        query={queries.getGroupBalance(groupName, offBudget)}
+        onDragChange={onDragChange}
+        onDrop={onReorder}
+        outerStyle={makeDropPadding(0)}
+        style={{ margin: '0', marginLeft: '2px' }}
+      />
     );
   }
 
   //Goes thought the list of accounts to determine if there are grouped accounts
   //and seperates the non-grouped accounts and orgainses the grouped ones.
-  function groupOrgainser(accounts, offBudget) {
+  function groupOrgainser(accounts) {
     const ungrouped = [];
     const grouped = {};
 
     //sorting
     for (let i = 0; i < accounts.length; i++) {
-      if (getGroup(accounts[i].name).length > 0) {
-        const groupName = getGroup(accounts[i].name);
+      if (accounts[i].account_group_id) {
+        const groupName = accounts[i].account_group_id;
         if (grouped[groupName] === undefined) {
           grouped[groupName] = [accounts[i]];
         } else {
@@ -158,12 +142,62 @@ export function Accounts({
         ungrouped.push(accounts[i]);
       }
     }
-    //spiting out the accounts
+    return { grouped, ungrouped };
+  }
+
+  //This is the Sidebars UI placement for the accounts from budgeted and off budgeted
+  //depending if the setting is nested or not will determine the style it will be displayed
+  //and how off/on budget totals will be shown
+  function sideBarDesign(nested = true) {
+    const onbudget = groupOrgainser(budgetedAccounts);
+    const offbudget = groupOrgainser(offbudgetAccounts);
+
     return (
       <>
-        {ungrouped.map((account, i) => normalAccount(account, i))}
-        {Object.keys(grouped).map(nam =>
-          groupPlacement(nam, grouped[nam], offBudget),
+        {(nested ? budgetedAccounts.length : onbudget['ungrouped'].length) >
+          0 && (
+        <Account
+          name="For budget"
+          to="/accounts/budgeted"
+            query={
+              nested
+                ? queries.budgetedAccountBalance()
+                : queries.getGroupBalance(null, false)
+            }
+          style={{
+            fontWeight,
+            marginTop: 13,
+            marginBottom: 5,
+          }}
+        />
+      )}
+
+        {onbudget['ungrouped'].map((account, i) => normalAccount(account, i))}
+        {Object.keys(onbudget['grouped']).map(nam =>
+          groupPlacement(nam, onbudget['grouped'][nam], false, nested)
+        )}
+
+        {(nested ? offbudgetAccounts.length : offbudget['ungrouped'].length) >
+          0 && (
+        <Account
+          name="Off budget"
+          to="/accounts/offbudget"
+            query={
+              nested
+                ? queries.offbudgetAccountBalance()
+                : queries.getGroupBalance(null, true)
+            }
+          style={{
+            fontWeight,
+            marginTop: 13,
+            marginBottom: 5,
+          }}
+        />
+      )}
+
+        {offbudget['ungrouped'].map((account, i) => normalAccount(account, i))}
+        {Object.keys(offbudget['grouped']).map(nam =>
+          groupPlacement(nam, offbudget['grouped'][nam], true, nested)
         )}
       </>
     );
@@ -178,35 +212,7 @@ export function Accounts({
         style={{ fontWeight, marginTop: 15 }}
       />
 
-      {budgetedAccounts.length > 0 && (
-        <Account
-          name="For budget"
-          to="/accounts/budgeted"
-          query={queries.budgetedAccountBalance()}
-          style={{
-            fontWeight,
-            marginTop: 13,
-            marginBottom: 5,
-          }}
-        />
-      )}
-
-      {groupOrgainser(budgetedAccounts, false)}
-
-      {offbudgetAccounts.length > 0 && (
-        <Account
-          name="Off budget"
-          to="/accounts/offbudget"
-          query={queries.offbudgetAccountBalance()}
-          style={{
-            fontWeight,
-            marginTop: 13,
-            marginBottom: 5,
-          }}
-        />
-      )}
-
-      {groupOrgainser(offbudgetAccounts, true)}
+      {sideBarDesign(accountGroupNested? true: false)}
 
       {closedAccounts.length > 0 && (
         <SecondaryItem

@@ -266,6 +266,15 @@ export function markAccountRead(accountId): MarkAccountReadAction {
   };
 }
 
+///Change the Account group
+export function changeGroup(id, account_group_id) {
+  return async (dispatch: Dispatch) =>{
+    await send('account-changeGroup', { id, account_group_id });
+    dispatch(getAccounts());
+    dispatch(getPayees());
+  };
+}
+
 export function moveAccount(id, targetId) {
   return async (dispatch: Dispatch) => {
     await send('account-move', { id, targetId });

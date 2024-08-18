@@ -82,6 +82,7 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
+import { useLocalPref } from '../../hooks/useLocalPref';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -325,7 +326,13 @@ const TransactionHeader = memo(
 
 TransactionHeader.displayName = 'TransactionHeader';
 
-function getPayeePretty(transaction, payee, transferAcct, numHiddenPayees = 0) {
+function getPayeePretty(
+  transaction,
+  payee,
+  transferAcct,
+  numHiddenPayees = 0,
+  accountGroupDisplay,
+) {
   const formatPayeeName = payeeName =>
     numHiddenPayees > 0 ? `${payeeName} (+${numHiddenPayees} more)` : payeeName;
 
@@ -345,7 +352,9 @@ function getPayeePretty(transaction, payee, transferAcct, numHiddenPayees = 0) {
             textOverflow: 'ellipsis',
           }}
         >
-          {formatPayeeName(transferAcct.name)}
+          {formatPayeeName(
+            accountGroupDisplay ? transferAcct.display_name : transferAcct.name,
+          )}
         </div>
       </View>
     );
@@ -550,7 +559,7 @@ function PayeeCell({
   const isCreatingPayee = useRef(false);
 
   const dispatch = useDispatch();
-
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   const parentPayee = useParentPayee(
     payees,
     subtransactions,
@@ -659,7 +668,8 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-      formatter={() => getPayeePretty(transaction, payee, transferAccount)}
+
+      formatter={() => getPayeePretty(transaction, payee, transferAccount, 0 , accountGroupDisplay)}
       unexposedContent={props => {
         const payeeName = (
           <UnexposedCellContent
@@ -848,7 +858,7 @@ const Transaction = memo(function Transaction({
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
   const triggerRef = useRef(null);
-
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
   const [transaction, setTransaction] = useState(() =>
@@ -1177,7 +1187,11 @@ const Transaction = memo(function Transaction({
           formatter={acctId => {
             const acct = acctId && getAccountsById(accounts)[acctId];
             if (acct) {
-              return acct.name;
+              return (
+                <>
+                  {(accountGroupDisplay ? acct.display_name : acct.name)}
+                </>
+              );   
             }
             return '';
           }}

@@ -63,16 +63,22 @@ import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
 }
 
-export function getDescriptionPretty(transaction, payee, transferAcct) {
+export function getDescriptionPretty(
+  transaction,
+  payee,
+  transferAcct,
+  accountGroupDisplay,
+) {
   const { amount } = transaction;
 
   if (transferAcct) {
-    return `Transfer ${amount > 0 ? 'from' : 'to'} ${transferAcct.name}`;
+    return `Transfer ${amount > 0 ? 'from' : 'to'} ${accountGroupDisplay ? transferAcct.display_name : transferAcct.name}`;
   } else if (payee) {
     return payee.name;
   }
@@ -499,7 +505,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     }
     const transPayee = trans && getPayee(trans);
     const transTransferAcct = trans && getTransferAcct(trans);
-    return getDescriptionPretty(trans, transPayee, transTransferAcct);
+    return getDescriptionPretty(trans, transPayee, transTransferAcct, accountGroupDisplay);
   };
 
   const isBudgetTransfer = trans => {
@@ -697,13 +703,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
   // Child transactions should always default to the signage
   // of the parent transaction
   const childAmountSign = transaction.amount <= 0 ? '-' : '+';
-
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   const account = getAccount(transaction);
   const isOffBudget = account && !!account.offbudget;
   const title = getDescriptionPretty(
     transaction,
     getPayee(transaction),
     getTransferAcct(transaction),
+    accountGroupDisplay
   );
 
   const transactionDate = parseDate(transaction.date, dateFormat, new Date());

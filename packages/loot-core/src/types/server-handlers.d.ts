@@ -144,6 +144,9 @@ export interface ServerHandlers {
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
+  //Change account group
+  'account-changeGroup': (args: { id; account_group_id }) => Promise<unknown>;
+
   'accounts-get': () => Promise<AccountEntity[]>;
 
   'account-properties': (arg: {

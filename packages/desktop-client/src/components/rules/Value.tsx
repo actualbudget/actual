@@ -21,6 +21,7 @@ type ValueProps<T> = {
   valueIsRaw?: boolean;
   inline?: boolean;
   data?: unknown;
+  accountGroupDisplayName: boolean;
   describe?: (item: T) => string;
   style?: CSSProperties;
 };
@@ -31,8 +32,9 @@ export function Value<T>({
   valueIsRaw,
   inline = false,
   data: dataProp,
+  accountGroupDisplayName,
   // @ts-expect-error fix this later
-  describe = x => x.name,
+  describe = x => (accountGroupDisplayName && x.display_name ? x.display_name : x.name),
   style,
 }: ValueProps<T>) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';

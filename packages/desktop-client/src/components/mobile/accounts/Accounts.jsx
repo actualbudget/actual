@@ -63,6 +63,7 @@ function AccountCard({
   getBalanceQuery,
   onSelect,
 }) {
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   return (
     <View
       style={{
@@ -129,7 +130,7 @@ function AccountCard({
               }}
               data-testid="account-name"
             >
-              {account.name}
+              {accountGroupDisplay ? account.display_name : account.name}
             </TextOneLine>
           </View>
         </View>

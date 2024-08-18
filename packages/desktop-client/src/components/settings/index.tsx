@@ -34,6 +34,7 @@ import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+import { AccountGroupSettings } from './AccountGroupSettings';
 
 function About() {
   const version = useServerVersion();
@@ -175,6 +176,7 @@ export function Settings() {
         <About />
         {isElectron() && <GlobalSettings />}
         <ThemeSettings />
+        <AccountGroupSettings />
         <FormatSettings />
         <EncryptionSettings />
         {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}

@@ -579,6 +579,18 @@ handlers['account-update'] = mutator(async function ({ id, name }) {
   });
 });
 
+//Update Account group field
+handlers['account-changeGroup'] = mutator(async function ({
+  id,
+  account_group_id,
+}) {
+  account_group_id = (account_group_id ? account_group_id : null);
+  return withUndo(async () => {
+    await db.update('accounts', { id, account_group_id });
+    return {};
+  });
+});
+
 handlers['accounts-get'] = async function () {
   return db.getAccounts();
 };

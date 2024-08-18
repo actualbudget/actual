@@ -49,6 +49,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   style?: CSSProperties;
   outerStyle?: CSSProperties;
   grouped?: boolean;
+  nested?: boolean;
   onDragChange?: OnDragChangeCallback<{ id: string }>;
   onDrop?: OnDropCallback;
 };
@@ -67,6 +68,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   onDragChange,
   onDrop,
   grouped,
+  nested,
 }: AccountProps<FieldName>) {
   const type = account
     ? account.closed
@@ -93,15 +95,22 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const needsTooltip = !!account?.id;
 
   const accountRow = (
-    <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
+    <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle}}>
       <View>
         <DropHighlight pos={dropPos} />
-        <View innerRef={dragRef}>
+        <View innerRef={dragRef} >
+        <View style={{
+              ...( nested && {
+              width: 'calc(100% - 1em)',
+              height:'100%',
+              ':hover': { backgroundColor: theme.sidebarItemBackgroundHover }})
+            }}>
           <Link
             to={to}
             style={{
               ...accountNameStyle,
               ...style,
+              ...(nested && {':hover':  {backgroundColor: ''}, width:'calc(100% + 1em)' }),
               position: 'relative',
               borderLeft: '4px solid transparent',
               ...(updated && { fontWeight: 700 }),
@@ -121,6 +130,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
               },
             }}
           >
+
             <View
               style={{
                 position: 'absolute',
@@ -159,21 +169,11 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 }
               }
               left={name}
-              right={
-                <CellValue
-                  binding={query}
-                  type="financial"
-                  style={
-                    grouped === true && {
-                      background: 'rgba(0,0,0,0.2)',
-                      borderRadius: '5px',
-                      padding: '1px',
-                    }
-                  }
-                />
-              }
+              right={<CellValue binding={query} type="financial" />}
             />
+
           </Link>
+          </View>
         </View>
       </View>
     </View>

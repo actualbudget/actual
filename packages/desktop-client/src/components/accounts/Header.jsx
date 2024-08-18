@@ -5,7 +5,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { SvgAdd } from '../../icons/v1';
+import { SvgAdd, SvgBadge } from '../../icons/v1';
 import {
   SvgArrowsExpand3,
   SvgArrowsShrink3,
@@ -86,6 +86,9 @@ export function AccountHeader({
   onSetTransfer,
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
+  onSaveGroup,
+  editingGroup,
+  onExposeGroup,
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const searchInput = useRef(null);
@@ -164,6 +167,76 @@ export function AccountHeader({
         <View
           style={{ marginTop: 2, marginBottom: 10, alignItems: 'flex-start' }}
         >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 3,
+            }}
+          >
+            {editingGroup ? (
+              <InitialFocus>
+                <Input
+                  defaultValue={account?.account_group_id ? account.account_group_id : ''}
+                  onEnter={e => onSaveGroup(e.target.value)}
+                  onBlur={e => onSaveGroup(e.target.value)}
+                  onEscape={() => onExposeGroup(false)}
+                  style={{
+                    fontSize: 25,
+                    fontWeight: 500,
+                    marginTop: -3,
+                    marginBottom: 0,
+                    marginLeft: -6,
+                    paddingTop: 2,
+                    paddingBottom: 2,
+                    width: Math.max(20, accountName.length) + 'ch',
+                  }}
+                />
+              </InitialFocus>
+            ) : isNameEditable ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 3,
+                  '& .hover-visible': {
+                    opacity: 0,
+                    transition: 'opacity .25s',
+                  },
+                  '&:hover .hover-visible': {
+                    opacity: 1,
+                  },
+                }}
+              >
+                <View data-testid="">
+                  {account?.account_group_id ? (
+                    account.account_group_id
+                  ) : (
+                    <SvgBadge style={{ width: 10, height: 10 }} />
+                  )}
+                </View>
+
+                <Button
+                  variant="bare"
+                  aria-label="Edit Account Group"
+                  className="hover-visible"
+                  onPress={() => onExposeGroup(true)}
+                >
+                  <SvgPencil1
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: theme.pageTextSubdued,
+                    }}
+                  />
+                </Button>
+              </View>
+            ) : (
+              <View data-testid="account-group">
+                {account?.account_group_id ? account.account_group_id : ''}
+              </View>
+            )}
+          </View>
           <View
             style={{
               flexDirection: 'row',

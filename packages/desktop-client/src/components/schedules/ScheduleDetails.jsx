@@ -30,6 +30,7 @@ import { SelectedItemsButton } from '../table';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import { GenericInput } from '../util/GenericInput';
+import { useLocalPref } from '../../hooks/useLocalPref';
 
 function updateScheduleConditions(schedule, fields) {
   const conds = extractScheduleConds(schedule._conditions);
@@ -77,6 +78,7 @@ export function ScheduleDetails({ id, transaction }) {
   const payees = getPayeesById(usePayees());
   const globalDispatch = useDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
 
   const [state, dispatch] = useReducer(
     (state, action) => {
@@ -456,7 +458,11 @@ export function ScheduleDetails({ id, transaction }) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
+            title={
+              payee
+                ? `Schedule: ${accountGroupDisplay ? payee.display_name : payee.name}`
+                : 'Schedule'
+            }
             rightContent={<ModalCloseButton onClick={close} />}
           />
           <Stack direction="row" style={{ marginTop: 10 }}>

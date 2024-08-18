@@ -16,6 +16,7 @@ import { css } from 'glamor';
 
 import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgRemove } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
@@ -57,6 +58,7 @@ type CommonAutocompleteProps<T extends Item> = {
 type Item = {
   id?: string;
   name: string;
+  display_name?: string;
 };
 
 const inst: { lastChangeType?: StateChangeTypes } = {};
@@ -74,13 +76,19 @@ function findItem<T extends Item>(
   return value;
 }
 
-function getItemName<T extends Item>(item: T | T['name'] | null): string {
+function getItemName<T extends Item>(
+  item: T | T['name'] | null,
+  accountGroupDisplay: boolean,
+): string {
   if (item == null) {
     return '';
   } else if (typeof item === 'string') {
     return item;
   }
-  return item.name || '';
+
+  return accountGroupDisplay && item.display_name
+    ? item.display_name
+    : item.name || '';
 }
 
 function getItemId<T extends Item>(item: T | T['id']) {
@@ -94,7 +102,7 @@ export function defaultFilterSuggestion<T extends Item>(
   suggestion: T,
   value: string,
 ) {
-  const name = getItemName(suggestion);
+  const name = getItemName(suggestion, false);
   return getNormalisedString(name).includes(getNormalisedString(value));
 }
 
@@ -150,7 +158,7 @@ function defaultRenderItems<T extends Item>(
   return (
     <div>
       {items.map((item, index) => {
-        const name = getItemName(item);
+        const name = getItemName(item, false);
         return (
           <div
             {...getItemProps({ item })}
@@ -199,7 +207,7 @@ function defaultShouldSaveFromKey(e: KeyboardEvent) {
 }
 
 function defaultItemToString<T extends Item>(item?: T) {
-  return item ? getItemName(item) : '';
+  return item ? getItemName(item, false) : '';
 }
 
 type SingleAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
@@ -232,11 +240,12 @@ function SingleAutocomplete<T extends Item>({
   onClose,
   value: initialValue,
 }: SingleAutocompleteProps<T>) {
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   const [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
   );
   const [value, setValue] = useState(
-    selectedItem ? getItemName(selectedItem) : '',
+    selectedItem ? getItemName(selectedItem, accountGroupDisplay) : '',
   );
   const [isChanged, setIsChanged] = useState(false);
   const [originalItem, setOriginalItem] = useState(selectedItem);
@@ -280,7 +289,7 @@ function SingleAutocomplete<T extends Item>({
     const selectedItem = findItem<T>(strict, suggestions, val);
 
     setSelectedItem(selectedItem);
-    setValue(selectedItem ? getItemName(selectedItem) : '');
+    setValue(selectedItem ? getItemName(selectedItem, accountGroupDisplay) : '');
     setOriginalItem(selectedItem);
     setHighlightedIndex(null);
     setIsOpen(embedded);
@@ -533,7 +542,7 @@ function SingleAutocomplete<T extends Item>({
                       getItemId(originalItem),
                     );
 
-                    setValue(getItemName(originalItem));
+                    setValue(getItemName(originalItem, accountGroupDisplay));
                     setSelectedItem(
                       findItem(strict, suggestions, originalItem),
                     );
@@ -636,6 +645,7 @@ function MultiAutocomplete<T extends Item>({
   clearOnBlur = true,
   ...props
 }: MultiAutocompleteProps<T>) {
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   const [focused, setFocused] = useState(false);
   const selectedItemIds = selectedItems.map(getItemId);
 
@@ -697,7 +707,7 @@ function MultiAutocomplete<T extends Item>({
               item && (
                 <MultiItem
                   key={getItemId(item) || idx}
-                  name={getItemName(item)}
+                  name={getItemName(item, accountGroupDisplay)}
                   onRemove={() => onRemoveItem(getItemId(item))}
                 />
               )

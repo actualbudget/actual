@@ -527,9 +527,13 @@ export async function mergePayees(target: string, ids: string[]) {
   });
 }
 
+//Changes how the account group with account name looks. (display_name column)
+//the account / payee get added to this in the sql
+const display_name_seperator = `COALESCE(a.account_group_id || " - ","")`;
+
 export function getPayees() {
   return all(`
-    SELECT p.*, COALESCE(a.name, p.name) AS name FROM payees p
+    SELECT p.*, COALESCE(a.name, p.name) AS name, ${display_name_seperator} || COALESCE(a.name, p.name)  as 'display_name' FROM payees p
     LEFT JOIN accounts a ON (p.transfer_acct = a.id AND a.tombstone = 0)
     WHERE p.tombstone = 0 AND (p.transfer_acct IS NULL OR a.id IS NOT NULL)
     ORDER BY p.transfer_acct IS NULL DESC, p.name COLLATE NOCASE, a.offbudget, a.sort_order
@@ -583,7 +587,7 @@ export async function getPayeeByName(name) {
 
 export function getAccounts() {
   return all(
-    `SELECT a.*, b.name as bankName, b.id as bankId FROM accounts a
+    `SELECT a.*,(${display_name_seperator} || a.name) as 'display_name', b.name as bankName, b.id as bankId FROM accounts a
        LEFT JOIN banks b ON a.bank = b.id
        WHERE a.tombstone = 0
        ORDER BY sort_order, name`,

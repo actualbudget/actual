@@ -56,6 +56,8 @@ export type LocalPrefs = Partial<
     spendingReportTime: spendingReportTimeType;
     spendingReportCompare: spendingReportTimeType;
     sidebarWidth: number;
+    'ui.accountGroupNested': boolean;
+    'ui.accountGroupDisplayName': boolean;
     'mobile.showSpentColumn': boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;

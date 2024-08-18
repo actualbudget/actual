@@ -290,6 +290,17 @@ export function updateAccount(account: AccountEntity) {
   };
 }
 
+//change the group of an account
+export function changeAccountGroup(account: AccountEntity) {
+  return async (dispatch: Dispatch) => {
+    dispatch({ type: constants.UPDATE_ACCOUNT, account });
+    await send('account-changeGroup', {
+      id: account.id,
+      account_group_id: account.account_group_id
+    });
+  };
+}
+
 export function createAccount(name, balance, offBudget) {
   return async (dispatch: Dispatch) => {
     const id = await send('account-create', { name, balance, offBudget });

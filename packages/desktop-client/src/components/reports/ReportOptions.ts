@@ -329,6 +329,7 @@ export const groupBySelections = (
   categoryGroup: CategoryGroupEntity[],
   payees: PayeeEntity[],
   accounts: AccountEntity[],
+  accountGroupDisplay: boolean,
 ): [
   UncategorizedEntity[],
   'category' | 'categoryGroup' | 'payee' | 'account',
@@ -348,13 +349,21 @@ export const groupBySelections = (
       break;
     case 'Payee':
       groupByList = payees.map(payee => {
-        return { id: payee.id, name: payee.name, hidden: false };
+        return {
+          id: payee.id,
+          name: accountGroupDisplay ? payee.display_name : payee.name,
+          hidden: false,
+        };
       });
       groupByLabel = 'payee';
       break;
     case 'Account':
       groupByList = accounts.map(account => {
-        return { id: account.id, name: account.name, hidden: false };
+        return {
+          id: account.id,
+          name: accountGroupDisplay ? account.display_name : account.name,
+          hidden: false,
+        };
       });
       groupByLabel = 'account';
       break;

@@ -64,6 +64,7 @@ export function AccountTransactions({ account, pending, failed }) {
 
 function AccountName({ account, pending, failed }) {
   const dispatch = useDispatch();
+  const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
 
   const onSave = account => {
     dispatch(updateAccount(account));
@@ -130,7 +131,7 @@ function AccountName({ account, pending, failed }) {
         style={{ ...styles.underlinedText, ...styles.lineClamp(2) }}
         onClick={onClick}
       >
-        {`${account.closed ? 'Closed: ' : ''}${account.name}`}
+        {`${account.closed ? 'Closed: ' : ''}${accountGroupDisplay ? account.display_name : account.name}`}
       </Text>
     </View>
   );

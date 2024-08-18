@@ -5,6 +5,8 @@ export type AccountEntity = {
   closed: 0 | 1;
   sort_order: number;
   tombstone: 0 | 1;
+  account_group_id?: string;
+  display_name?: string;
 } & (_SyncFields<true> | _SyncFields<false>);
 
 type _SyncFields<T> = {
