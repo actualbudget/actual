@@ -423,7 +423,12 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return new RegExp(this.value).test(fieldValue);
+        try {
+          return new RegExp(this.value).test(fieldValue);
+        } catch (e) {
+          console.log('invalid regexp in matches condition', e);
+          return false;
+        }
       default:
     }
 

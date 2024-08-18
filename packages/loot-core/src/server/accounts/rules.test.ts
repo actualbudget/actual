@@ -240,6 +240,11 @@ describe('Condition', () => {
     expect(cond.eval({ name: 'f o o' })).toBe(false);
   });
 
+  test('matches handles invalid regex', () => {
+    const cond = new Condition('matches', 'name', 'fo**', null, fieldTypes);
+    expect(cond.eval({ name: 'foo' })).toBe(false);
+  });
+
   test('number validates value', () => {
     new Condition('isapprox', 'amount', 34, null, fieldTypes);
 
