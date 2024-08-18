@@ -7,19 +7,16 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type CashFlowWidget } from 'loot-core/src/types/models';
 
-import { theme, styles } from '../../../style';
-import { Block } from '../../common/Block';
-import { InitialFocus } from '../../common/InitialFocus';
-import { Input } from '../../common/Input';
+import { theme } from '../../../style';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { chartTheme } from '../chart-theme';
-import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { Container } from '../Container';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
+import { ReportCardName } from '../ReportCardName';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
@@ -148,42 +145,18 @@ export function CashFlowCard({
       >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
-            {nameMenuOpen ? (
-              <InitialFocus>
-                <Input
-                  className={NON_DRAGGABLE_AREA_CLASS_NAME}
-                  defaultValue={cardName}
-                  onEnter={e => {
-                    onMetaChange({
-                      ...meta,
-                      name: (e.target as HTMLInputElement).value,
-                    });
-                    setNameMenuOpen(false);
-                  }}
-                  onBlur={() => setNameMenuOpen(false)}
-                  onEscape={() => setNameMenuOpen(false)}
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 500,
-                    marginTop: -6,
-                    marginBottom: -1,
-                    marginLeft: -6,
-                    width: Math.max(20, cardName.length) + 'ch',
-                  }}
-                />
-              </InitialFocus>
-            ) : (
-              <Block
-                style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
-                }}
-                role="heading"
-              >
-                {cardName}
-              </Block>
-            )}
+            <ReportCardName
+              name={cardName}
+              isEditing={nameMenuOpen}
+              onChange={newName => {
+                onMetaChange({
+                  ...meta,
+                  name: newName,
+                });
+                setNameMenuOpen(false);
+              }}
+              onClose={() => setNameMenuOpen(false)}
+            />
             <DateRange start={start} end={end} />
           </View>
           {data && (

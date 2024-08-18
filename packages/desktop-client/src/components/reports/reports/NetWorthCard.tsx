@@ -11,16 +11,14 @@ import {
 import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
-import { InitialFocus } from '../../common/InitialFocus';
-import { Input } from '../../common/Input';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
-import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { DateRange } from '../DateRange';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
+import { ReportCardName } from '../ReportCardName';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
@@ -91,42 +89,18 @@ export function NetWorthCard({
       >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
-            {nameMenuOpen ? (
-              <InitialFocus>
-                <Input
-                  className={NON_DRAGGABLE_AREA_CLASS_NAME}
-                  defaultValue={cardName}
-                  onEnter={e => {
-                    onMetaChange({
-                      ...meta,
-                      name: (e.target as HTMLInputElement).value,
-                    });
-                    setNameMenuOpen(false);
-                  }}
-                  onBlur={() => setNameMenuOpen(false)}
-                  onEscape={() => setNameMenuOpen(false)}
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 500,
-                    marginTop: -6,
-                    marginBottom: -1,
-                    marginLeft: -6,
-                    width: Math.max(20, cardName.length) + 'ch',
-                  }}
-                />
-              </InitialFocus>
-            ) : (
-              <Block
-                style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
-                }}
-                role="heading"
-              >
-                {cardName}
-              </Block>
-            )}
+            <ReportCardName
+              name={cardName}
+              isEditing={nameMenuOpen}
+              onChange={newName => {
+                onMetaChange({
+                  ...meta,
+                  name: newName,
+                });
+                setNameMenuOpen(false);
+              }}
+              onClose={() => setNameMenuOpen(false)}
+            />
             <DateRange start={start} end={end} />
           </View>
           {data && (
