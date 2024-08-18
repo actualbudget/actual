@@ -529,7 +529,7 @@ export async function mergePayees(target: string, ids: string[]) {
 
 //Changes how the account group with account name looks. (display_name column)
 //the account / payee get added to this in the sql
-const display_name_seperator = `COALESCE(a.account_group_id || " - ","")`;
+const display_name_seperator = `COALESCE(a.account_group_id || ' - ','')`;
 
 export function getPayees() {
   return all(`

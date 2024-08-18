@@ -8,4 +8,5 @@ export interface CategoryEntity {
   sort_order?: number;
   tombstone?: boolean;
   hidden?: boolean;
+  accountGroupDisplay?: boolean,
 }

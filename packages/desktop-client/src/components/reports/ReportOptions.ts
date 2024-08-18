@@ -247,6 +247,7 @@ export type UncategorizedEntity = Pick<
   is_off_budget?: boolean;
   is_transfer?: boolean;
   has_category?: boolean;
+  accountGroupDisplay?: boolean,
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
@@ -329,7 +330,7 @@ export const groupBySelections = (
   categoryGroup: CategoryGroupEntity[],
   payees: PayeeEntity[],
   accounts: AccountEntity[],
-  accountGroupDisplay: boolean,
+  accountGroupDisplay?: boolean,
 ): [
   UncategorizedEntity[],
   'category' | 'categoryGroup' | 'payee' | 'account',
