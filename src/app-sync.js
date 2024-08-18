@@ -12,7 +12,9 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 
 const app = express();
 app.use(errorMiddleware);
+app.use(express.json());
 app.use(express.raw({ type: 'application/actual-sync' }));
+app.use(express.raw({ type: 'application/encrypted-file' }));
 app.use(express.json());
 
 app.use(validateUserMiddleware);
@@ -139,12 +141,10 @@ app.post('/user-get-key', (req, res) => {
   }
   let { encrypt_salt, encrypt_keyid, encrypt_test } = rows[0];
 
-  res.send(
-    JSON.stringify({
-      status: 'ok',
-      data: { id: encrypt_keyid, salt: encrypt_salt, test: encrypt_test },
-    }),
-  );
+  res.send({
+    status: 'ok',
+    data: { id: encrypt_keyid, salt: encrypt_salt, test: encrypt_test },
+  });
 });
 
 app.post('/user-create-key', (req, res) => {
@@ -188,11 +188,20 @@ app.post('/reset-user-file', async (req, res) => {
 app.post('/upload-user-file', async (req, res) => {
   let accountDb = getAccountDb();
   if (typeof req.headers['x-actual-name'] !== 'string') {
+    // FIXME: Not sure how this cannot be a string when the header is
+    // set.
     res.status(400).send('single x-actual-name is required');
     return;
   }
+
   let name = decodeURIComponent(req.headers['x-actual-name']);
   let fileId = req.headers['x-actual-file-id'];
+
+  if (!fileId || typeof fileId !== 'string') {
+    res.status(400).send('fileId is required');
+    return;
+  }
+
   let groupId = req.headers['x-actual-group-id'] || null;
   let encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
   let syncFormatVersion = req.headers['x-actual-format'] || null;
@@ -202,15 +211,11 @@ app.post('/upload-user-file', async (req, res) => {
       ? JSON.parse(encryptMeta).keyId
       : null;
 
-  if (!fileId || typeof fileId !== 'string') {
-    throw new Error('fileId is required');
-  }
-
   let currentFiles = accountDb.all(
     'SELECT group_id, encrypt_keyid, encrypt_meta FROM files WHERE id = ?',
     [fileId],
   );
-  if (currentFiles.length) {
+  if (currentFiles.length > 0) {
     let currentFile = currentFiles[0];
 
     // The uploading file is part of an old group, so reject
@@ -242,7 +247,8 @@ app.post('/upload-user-file', async (req, res) => {
     await fs.writeFile(getPathForUserFile(fileId), req.body);
   } catch (err) {
     console.log('Error writing file', err);
-    res.send(JSON.stringify({ status: 'error' }));
+    res.status(500).send({ status: 'error' });
+    return;
   }
 
   let rows = accountDb.all('SELECT id FROM files WHERE id = ?', [fileId]);
@@ -253,7 +259,7 @@ app.post('/upload-user-file', async (req, res) => {
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta) VALUES (?, ?, ?, ?, ?)',
       [fileId, groupId, syncFormatVersion, name, encryptMeta],
     );
-    res.send(JSON.stringify({ status: 'ok', groupId }));
+    res.send({ status: 'ok', groupId });
   } else {
     if (!groupId) {
       // sync state was reset, create new group
@@ -270,7 +276,7 @@ app.post('/upload-user-file', async (req, res) => {
       [syncFormatVersion, encryptMeta, name, fileId],
     );
 
-    res.send(JSON.stringify({ status: 'ok', groupId }));
+    res.send({ status: 'ok', groupId });
   }
 });
 
@@ -278,6 +284,8 @@ app.get('/download-user-file', async (req, res) => {
   let accountDb = getAccountDb();
   let fileId = req.headers['x-actual-file-id'];
   if (typeof fileId !== 'string') {
+    // FIXME: Not sure how this cannot be a string when the header is
+    // set.
     res.status(400).send('Single file ID is required');
     return;
   }
@@ -306,7 +314,7 @@ app.post('/update-user-filename', (req, res) => {
     [fileId],
   );
   if (rows.length === 0) {
-    res.status(500).send('User or file not found');
+    res.status(400).send('file not found');
     return;
   }
 
@@ -319,18 +327,16 @@ app.get('/list-user-files', (req, res) => {
   let accountDb = getAccountDb();
   let rows = accountDb.all('SELECT * FROM files');
 
-  res.send(
-    JSON.stringify({
-      status: 'ok',
-      data: rows.map((row) => ({
-        deleted: row.deleted,
-        fileId: row.id,
-        groupId: row.group_id,
-        name: row.name,
-        encryptKeyId: row.encrypt_keyid,
-      })),
-    }),
-  );
+  res.send({
+    status: 'ok',
+    data: rows.map((row) => ({
+      deleted: row.deleted,
+      fileId: row.id,
+      groupId: row.group_id,
+      name: row.name,
+      encryptKeyId: row.encrypt_keyid,
+    })),
+  });
 });
 
 app.get('/get-user-file-info', (req, res) => {
@@ -341,24 +347,24 @@ app.get('/get-user-file-info', (req, res) => {
     'SELECT * FROM files WHERE id = ? AND deleted = FALSE',
     [fileId],
   );
+
   if (rows.length === 0) {
-    res.send(JSON.stringify({ status: 'error' }));
+    res.status(400).send({ status: 'error', reason: 'file-not-found' });
     return;
   }
+
   let row = rows[0];
 
-  res.send(
-    JSON.stringify({
-      status: 'ok',
-      data: {
-        deleted: row.deleted,
-        fileId: row.id,
-        groupId: row.group_id,
-        name: row.name,
-        encryptMeta: row.encrypt_meta ? JSON.parse(row.encrypt_meta) : null,
-      },
-    }),
-  );
+  res.send({
+    status: 'ok',
+    data: {
+      deleted: row.deleted,
+      fileId: row.id,
+      groupId: row.group_id,
+      name: row.name,
+      encryptMeta: row.encrypt_meta ? JSON.parse(row.encrypt_meta) : null,
+    },
+  });
 });
 
 app.post('/delete-user-file', (req, res) => {
