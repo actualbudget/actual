@@ -18,7 +18,7 @@ import {
   type GroupedEntity,
   type IntervalEntity,
 } from 'loot-core/src/types/models/reports';
-import { type LocalPrefs } from 'loot-core/types/prefs';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import {
   categoryLists,
@@ -50,8 +50,8 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
-  firstDayOfWeekIdx?: LocalPrefs['firstDayOfWeekIdx'];
   accountGroupDisplay: boolean;
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   setDataCheck?: (value: boolean) => void;
 };
 

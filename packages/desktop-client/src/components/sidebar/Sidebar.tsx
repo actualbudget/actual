@@ -14,6 +14,7 @@ import * as Platform from 'loot-core/src/client/platform';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
@@ -189,7 +190,7 @@ export function Sidebar() {
 function EditableBudgetName() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [budgetName, setBudgetNamePref] = useLocalPref('budgetName');
+  const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);

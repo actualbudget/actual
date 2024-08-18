@@ -1,5 +1,12 @@
 import React, { memo } from 'react';
 
+import {
+  PressResponder,
+  usePress,
+  useLongPress,
+} from '@react-aria/interactions';
+import { mergeProps } from '@react-aria/utils';
+
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { isPreviewId } from 'loot-core/src/shared/transactions';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -47,8 +54,10 @@ ListItem.displayName = 'ListItem';
 
 export const Transaction = memo(function Transaction({
   transaction,
-  added,
-  onSelect,
+  isAdded,
+  isSelected,
+  onPress,
+  onLongPress,
   style,
 }) {
   const { list: categories } = useCategories();
@@ -72,6 +81,24 @@ export const Transaction = memo(function Transaction({
 
   const [accountGroupDisplay] = useLocalPref('ui.accountGroupDisplayName');
   const isPreview = isPreviewId(id);
+
+  const { longPressProps } = useLongPress({
+    accessibilityDescription: 'Long press to select multiple transactions',
+    onLongPress: () => {
+      if (isPreview) {
+        return;
+      }
+
+      onLongPress(transaction);
+    },
+  });
+
+  const { pressProps } = usePress({
+    onPress: () => {
+      onPress(transaction);
+    },
+  });
+
   let amount = originalAmount;
   if (isPreview) {
     amount = getScheduledAmount(amount);
@@ -102,124 +129,134 @@ export const Transaction = memo(function Transaction({
   };
 
   return (
-    <Button
-      onPress={() => {
-        onSelect(transaction);
-      }}
-      style={{
-        backgroundColor: theme.tableBackground,
-        border: 'none',
-        width: '100%',
-        height: 60,
-        ...(isPreview && {
-          backgroundColor: theme.tableRowHeaderBackground,
-        }),
-      }}
-    >
-      <ListItem
+    <PressResponder {...mergeProps(pressProps, longPressProps)}>
+      <Button
         style={{
-          flex: 1,
-          ...style,
+          backgroundColor: theme.tableBackground,
+          ...(isSelected
+            ? {
+                borderWidth: '0 0 0 4px',
+                borderColor: theme.mobileTransactionSelected,
+                borderStyle: 'solid',
+              }
+            : {
+                border: 'none',
+              }),
+          userSelect: 'none',
+          width: '100%',
+          height: 60,
+          ...(isPreview
+            ? {
+                backgroundColor: theme.tableRowHeaderBackground,
+              }
+            : {}),
         }}
       >
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {schedule && (
-              <SvgArrowsSynchronize
-                style={{
-                  width: 12,
-                  height: 12,
-                  marginRight: 5,
-                  color: textStyle.color || theme.menuItemText,
-                }}
-              />
-            )}
-            <TextOneLine
-              style={{
-                ...styles.text,
-                ...textStyle,
-                fontSize: 14,
-                fontWeight: added ? '600' : '400',
-                ...(prettyDescription === '' && {
-                  color: theme.tableTextLight,
-                  fontStyle: 'italic',
-                }),
-              }}
-            >
-              {prettyDescription || 'Empty'}
-            </TextOneLine>
-          </View>
-          {isPreview ? (
-            <Status status={notes} />
-          ) : (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: 3,
-              }}
-            >
-              {isReconciled ? (
-                <SvgLockClosed
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: theme.noticeTextLight,
-                    marginRight: 5,
-                  }}
-                />
-              ) : (
-                <SvgCheckCircle1
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: cleared
-                      ? theme.noticeTextLight
-                      : theme.pageTextSubdued,
-                    marginRight: 5,
-                  }}
-                />
-              )}
-              {(isParent || isChild) && (
-                <SvgSplit
+        <ListItem
+          style={{
+            flex: 1,
+            ...style,
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {schedule && (
+                <SvgArrowsSynchronize
                   style={{
                     width: 12,
                     height: 12,
                     marginRight: 5,
+                    color: textStyle.color || theme.menuItemText,
                   }}
                 />
               )}
               <TextOneLine
                 style={{
-                  fontSize: 11,
-                  marginTop: 1,
-                  fontWeight: '400',
-                  color: prettyCategory
-                    ? theme.tableText
-                    : theme.menuItemTextSelected,
-                  fontStyle:
-                    specialCategory || !prettyCategory ? 'italic' : undefined,
-                  textAlign: 'left',
+                  ...styles.text,
+                  ...textStyle,
+                  fontSize: 14,
+                  fontWeight: isAdded ? '600' : '400',
+                  ...(prettyDescription === '' && {
+                    color: theme.tableTextLight,
+                    fontStyle: 'italic',
+                  }),
                 }}
               >
-                {prettyCategory || 'Uncategorized'}
+                {prettyDescription || 'Empty'}
               </TextOneLine>
             </View>
-          )}
-        </View>
-        <Text
-          style={{
-            ...styles.text,
-            ...textStyle,
-            marginLeft: 25,
-            marginRight: 5,
-            fontSize: 14,
-            ...makeAmountFullStyle(amount),
-          }}
-        >
-          {integerToCurrency(amount)}
-        </Text>
-      </ListItem>
-    </Button>
+            {isPreview ? (
+              <Status status={notes} />
+            ) : (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 3,
+                }}
+              >
+                {isReconciled ? (
+                  <SvgLockClosed
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: theme.noticeTextLight,
+                      marginRight: 5,
+                    }}
+                  />
+                ) : (
+                  <SvgCheckCircle1
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: cleared
+                        ? theme.noticeTextLight
+                        : theme.pageTextSubdued,
+                      marginRight: 5,
+                    }}
+                  />
+                )}
+                {(isParent || isChild) && (
+                  <SvgSplit
+                    style={{
+                      width: 12,
+                      height: 12,
+                      marginRight: 5,
+                    }}
+                  />
+                )}
+                <TextOneLine
+                  style={{
+                    fontSize: 11,
+                    marginTop: 1,
+                    fontWeight: '400',
+                    color: prettyCategory
+                      ? theme.tableText
+                      : theme.menuItemTextSelected,
+                    fontStyle:
+                      specialCategory || !prettyCategory ? 'italic' : undefined,
+                    textAlign: 'left',
+                  }}
+                >
+                  {prettyCategory || 'Uncategorized'}
+                </TextOneLine>
+              </View>
+            )}
+          </View>
+          <Text
+            style={{
+              ...styles.text,
+              ...textStyle,
+              marginLeft: 25,
+              marginRight: 5,
+              fontSize: 14,
+              ...makeAmountFullStyle(amount),
+            }}
+          >
+            {integerToCurrency(amount)}
+          </Text>
+        </ListItem>
+      </Button>
+    </PressResponder>
   );
 });

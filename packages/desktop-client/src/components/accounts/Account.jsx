@@ -15,11 +15,9 @@ import * as queries from 'loot-core/src/client/queries';
 import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
-import * as monthUtils from 'loot-core/src/shared/months';
 import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
-  deleteTransaction,
   updateTransaction,
   realizeTempTransactions,
   ungroupTransaction,
@@ -34,7 +32,6 @@ import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
 import { usePreviewTransactions } from '../../hooks/usePreviewTransactions';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
@@ -42,6 +39,8 @@ import {
   SplitsExpandedProvider,
   useSplitsExpanded,
 } from '../../hooks/useSplitsExpanded';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
@@ -834,241 +833,26 @@ class AccountInternal extends PureComponent {
     });
   };
 
-  onBatchEdit = async (name, ids) => {
-    const { data } = await runQuery(
-      q('transactions')
-        .filter({ id: { $oneof: ids } })
-        .select('*')
-        .options({ splits: 'grouped' }),
-    );
-    const transactions = ungroupTransactions(data);
+  onBatchEdit = (name, ids) => {
+    this.props.onBatchEdit({
+      name,
+      ids,
+      onSuccess: updatedIds => {
+        this.refetchTransactions();
 
-    const onChange = async (name, value, mode) => {
-      let transactionsToChange = transactions;
-
-      const newValue = value === null ? '' : value;
-      this.setState({ workingHard: true });
-
-      const changes = { deleted: [], updated: [] };
-
-      // Cleared is a special case right now
-      if (name === 'cleared') {
-        // Clear them if any are uncleared, otherwise unclear them
-        value = !!transactionsToChange.find(t => !t.cleared);
-      }
-
-      const idSet = new Set(ids);
-
-      transactionsToChange.forEach(trans => {
-        if (name === 'cleared' && trans.reconciled) {
-          // Skip transactions that are reconciled. Don't want to set them as
-          // uncleared.
-          return;
+        if (this.table.current) {
+          this.table.current.edit(updatedIds[0], 'select', false);
         }
-
-        if (!idSet.has(trans.id)) {
-          // Skip transactions which aren't actually selected, since the query
-          // above also retrieves the siblings & parent of any selected splits.
-          return;
-        }
-
-        if (name === 'notes') {
-          if (mode === 'prepend') {
-            value =
-              trans.notes === null ? newValue : newValue + ' ' + trans.notes;
-          } else if (mode === 'append') {
-            value =
-              trans.notes === null ? newValue : trans.notes + ' ' + newValue;
-          } else if (mode === 'replace') {
-            value = newValue;
-          }
-        }
-        const transaction = {
-          ...trans,
-          [name]: value,
-        };
-
-        if (name === 'account' && trans.account !== value) {
-          transaction.reconciled = false;
-        }
-
-        const { diff } = updateTransaction(transactionsToChange, transaction);
-
-        // TODO: We need to keep an updated list of transactions so
-        // the logic in `updateTransaction`, particularly about
-        // updating split transactions, works. This isn't ideal and we
-        // should figure something else out
-        transactionsToChange = applyChanges(diff, transactionsToChange);
-
-        changes.deleted = changes.deleted
-          ? changes.deleted.concat(diff.deleted)
-          : diff.deleted;
-        changes.updated = changes.updated
-          ? changes.updated.concat(diff.updated)
-          : diff.updated;
-        changes.added = changes.added
-          ? changes.added.concat(diff.added)
-          : diff.added;
-      });
-
-      await send('transactions-batch-update', changes);
-      await this.refetchTransactions();
-
-      if (this.table.current) {
-        this.table.current.edit(transactionsToChange[0].id, 'select', false);
-      }
-    };
-
-    const pushPayeeAutocompleteModal = () => {
-      this.props.pushModal('payee-autocomplete', {
-        onSelect: payeeId => onChange(name, payeeId),
-      });
-    };
-
-    const pushAccountAutocompleteModal = () => {
-      this.props.pushModal('account-autocomplete', {
-        onSelect: accountId => onChange(name, accountId),
-      });
-    };
-
-    const pushCategoryAutocompleteModal = () => {
-      // Only show balances when all selected transaction are in the same month.
-      const transactionMonth = transactions[0]?.date
-        ? monthUtils.monthFromDate(transactions[0]?.date)
-        : null;
-      const transactionsHaveSameMonth =
-        transactionMonth &&
-        transactions.every(
-          t => monthUtils.monthFromDate(t.date) === transactionMonth,
-        );
-      this.props.pushModal('category-autocomplete', {
-        month: transactionsHaveSameMonth ? transactionMonth : undefined,
-        onSelect: categoryId => onChange(name, categoryId),
-      });
-    };
-
-    if (
-      name === 'amount' ||
-      name === 'payee' ||
-      name === 'account' ||
-      name === 'date'
-    ) {
-      const reconciledTransactions = transactions.filter(t => t.reconciled);
-      if (reconciledTransactions.length > 0) {
-        this.props.pushModal('confirm-transaction-edit', {
-          onConfirm: () => {
-            if (name === 'payee') {
-              pushPayeeAutocompleteModal();
-            } else if (name === 'account') {
-              pushAccountAutocompleteModal();
-            } else {
-              this.props.pushModal('edit-field', { name, onSubmit: onChange });
-            }
-          },
-          confirmReason: 'batchEditWithReconciled',
-        });
-        return;
-      }
-    }
-
-    if (name === 'cleared') {
-      // Cleared just toggles it on/off and it depends on the data
-      // loaded. Need to clean this up in the future.
-      onChange('cleared', null);
-    } else if (name === 'category') {
-      pushCategoryAutocompleteModal();
-    } else if (name === 'payee') {
-      pushPayeeAutocompleteModal();
-    } else if (name === 'account') {
-      pushAccountAutocompleteModal();
-    } else {
-      this.props.pushModal('edit-field', { name, onSubmit: onChange });
-    }
+      },
+    });
   };
 
-  onBatchDuplicate = async ids => {
-    const onConfirmDuplicate = async ids => {
-      this.setState({ workingHard: true });
-
-      const { data } = await runQuery(
-        q('transactions')
-          .filter({ id: { $oneof: ids } })
-          .select('*')
-          .options({ splits: 'grouped' }),
-      );
-
-      const changes = {
-        added: data
-          .reduce((newTransactions, trans) => {
-            return newTransactions.concat(
-              realizeTempTransactions(ungroupTransaction(trans)),
-            );
-          }, [])
-          .map(({ sort_order, ...trans }) => ({ ...trans })),
-      };
-
-      await send('transactions-batch-update', changes);
-
-      await this.refetchTransactions();
-    };
-
-    await this.checkForReconciledTransactions(
-      ids,
-      'batchDuplicateWithReconciled',
-      onConfirmDuplicate,
-    );
+  onBatchDuplicate = ids => {
+    this.props.onBatchDuplicate({ ids, onSuccess: this.refetchTransactions });
   };
 
-  onBatchDelete = async ids => {
-    const onConfirmDelete = async ids => {
-      this.setState({ workingHard: true });
-
-      const { data } = await runQuery(
-        q('transactions')
-          .filter({ id: { $oneof: ids } })
-          .select('*')
-          .options({ splits: 'grouped' }),
-      );
-      let transactions = ungroupTransactions(data);
-
-      const idSet = new Set(ids);
-      const changes = { deleted: [], updated: [] };
-
-      transactions.forEach(trans => {
-        const parentId = trans.parent_id;
-
-        // First, check if we're actually deleting this transaction by
-        // checking `idSet`. Then, we don't need to do anything if it's
-        // a child transaction and the parent is already being deleted
-        if (!idSet.has(trans.id) || (parentId && idSet.has(parentId))) {
-          return;
-        }
-
-        const { diff } = deleteTransaction(transactions, trans.id);
-
-        // TODO: We need to keep an updated list of transactions so
-        // the logic in `updateTransaction`, particularly about
-        // updating split transactions, works. This isn't ideal and we
-        // should figure something else out
-        transactions = applyChanges(diff, transactions);
-
-        changes.deleted = diff.deleted
-          ? changes.deleted.concat(diff.deleted)
-          : diff.deleted;
-        changes.updated = diff.updated
-          ? changes.updated.concat(diff.updated)
-          : diff.updated;
-      });
-
-      await send('transactions-batch-update', changes);
-      await this.refetchTransactions();
-    };
-
-    await this.checkForReconciledTransactions(
-      ids,
-      'batchDeleteWithReconciled',
-      onConfirmDelete,
-    );
+  onBatchDelete = ids => {
+    this.props.onBatchDelete({ ids, onSuccess: this.refetchTransactions });
   };
 
   onMakeAsSplitTransaction = async ids => {
@@ -1199,12 +983,19 @@ class AccountInternal extends PureComponent {
     }
   };
 
-  onBatchUnlink = async ids => {
-    await send('transactions-batch-update', {
-      updated: ids.map(id => ({ id, schedule: null })),
+  onBatchLinkSchedule = ids => {
+    this.props.onBatchLinkSchedule({
+      ids,
+      account: this.props.accounts.find(a => a.id === this.props.accountId),
+      onSuccess: this.refetchTransactions,
     });
+  };
 
-    await this.refetchTransactions();
+  onBatchUnlinkSchedule = ids => {
+    this.props.onBatchUnlinkSchedule({
+      ids,
+      onSuccess: this.refetchTransactions,
+    });
   };
 
   onCreateRule = async ids => {
@@ -1731,7 +1522,8 @@ class AccountInternal extends PureComponent {
                 onBatchDelete={this.onBatchDelete}
                 onBatchDuplicate={this.onBatchDuplicate}
                 onBatchEdit={this.onBatchEdit}
-                onBatchUnlink={this.onBatchUnlink}
+                onBatchLinkSchedule={this.onBatchLinkSchedule}
+                onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
                 onCreateRule={this.onCreateRule}
                 onUpdateFilter={this.onUpdateFilter}
                 onClearFilters={this.onClearFilters}
@@ -1822,10 +1614,22 @@ class AccountInternal extends PureComponent {
 
 function AccountHack(props) {
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  const {
+    onBatchEdit,
+    onBatchDuplicate,
+    onBatchLinkSchedule,
+    onBatchUnlinkSchedule,
+    onBatchDelete,
+  } = useTransactionBatchActions();
 
   return (
     <AccountInternal
       splitsExpandedDispatch={splitsExpandedDispatch}
+      onBatchEdit={onBatchEdit}
+      onBatchDuplicate={onBatchDuplicate}
+      onBatchLinkSchedule={onBatchLinkSchedule}
+      onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+      onBatchDelete={onBatchDelete}
       {...props}
     />
   );
@@ -1844,12 +1648,12 @@ export function Account() {
   const payees = usePayees();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [hideFraction = false] = useLocalPref('hideFraction');
-  const [expandSplits] = useLocalPref('expand-splits');
-  const [showBalances] = useLocalPref(`show-balances-${params.id}`);
-  const [hideCleared] = useLocalPref(`hide-cleared-${params.id}`);
-  const [hideReconciled] = useLocalPref(`hide-reconciled-${params.id}`);
-  const [showExtraBalances] = useLocalPref(
+  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [expandSplits] = useSyncedPref('expand-splits');
+  const [showBalances] = useSyncedPref(`show-balances-${params.id}`);
+  const [hideCleared] = useSyncedPref(`hide-cleared-${params.id}`);
+  const [hideReconciled] = useSyncedPref(`hide-reconciled-${params.id}`);
+  const [showExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
