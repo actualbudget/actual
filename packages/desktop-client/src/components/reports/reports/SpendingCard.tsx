@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
@@ -16,7 +17,14 @@ import { ReportCard } from '../ReportCard';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
-export function SpendingCard() {
+import { MissingReportCard } from './MissingReportCard';
+
+type SpendingCardProps = {
+  isEditing?: boolean;
+  onRemove: () => void;
+};
+
+export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
@@ -46,8 +54,36 @@ export function SpendingCard() {
       data.intervalData[todayDay][spendingReportCompare];
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
+  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
+
+  if (!spendingReportFeatureFlag) {
+    return (
+      <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
+        The experimental spending report feature has not been enabled.
+      </MissingReportCard>
+    );
+  }
+
   return (
-    <ReportCard to="/reports/spending">
+    <ReportCard
+      isEditing={isEditing}
+      to="/reports/spending"
+      menuItems={[
+        {
+          name: 'remove',
+          text: 'Remove',
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={() => setIsCardHovered(true)}
