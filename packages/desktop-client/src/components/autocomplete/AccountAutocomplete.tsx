@@ -5,6 +5,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type ReactElement,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
@@ -45,6 +46,7 @@ function AccountList({
   renderAccountItemGroupHeader = defaultRenderAccountItemGroupHeader,
   renderAccountItem = defaultRenderAccountItem,
 }: AccountListProps) {
+  const { t } = useTranslation();
   let lastItem = null;
 
   return (
@@ -64,10 +66,10 @@ function AccountList({
 
           const group = `${
             item.closed
-              ? 'Closed Accounts'
+              ? t('Closed Accounts')
               : item.offbudget
-                ? 'Off Budget'
-                : 'For Budget'
+                ? t('Off Budget')
+                : t('For Budget')
           }`;
 
           lastItem = item;

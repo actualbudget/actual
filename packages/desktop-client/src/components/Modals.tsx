@@ -511,6 +511,7 @@ export function Modals() {
               title={options.title}
               month={options.month}
               showToBeBudgeted={options.showToBeBudgeted}
+              category={options.category}
               onSubmit={options.onSubmit}
             />
           );

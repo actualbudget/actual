@@ -71,7 +71,6 @@ export const Transaction = memo(function Transaction({
     cleared,
     is_parent: isParent,
     is_child: isChild,
-    notes,
     schedule,
   } = transaction;
 
@@ -114,7 +113,7 @@ export const Transaction = memo(function Transaction({
   );
   const specialCategory = account?.offbudget
     ? 'Off Budget'
-    : transferAcct
+    : transferAcct && !transferAcct.offbudget
       ? 'Transfer'
       : isParent
         ? 'Split'
@@ -186,7 +185,7 @@ export const Transaction = memo(function Transaction({
               </TextOneLine>
             </View>
             {isPreview ? (
-              <Status status={notes} />
+              <Status status={categoryId} isSplit={isParent || isChild} />
             ) : (
               <View
                 style={{

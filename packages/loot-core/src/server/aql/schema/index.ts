@@ -171,6 +171,16 @@ export const schema = {
     goal: f('integer'),
     long_goal: f('integer'),
   },
+  dashboard: {
+    id: f('id'),
+    type: f('string', { required: true }),
+    width: f('integer', { required: true }),
+    height: f('integer', { required: true }),
+    x: f('integer', { required: true }),
+    y: f('integer', { required: true }),
+    meta: f('json'),
+    tombstone: f('boolean'),
+  },
 };
 
 export const schemaConfig: SchemaConfig = {

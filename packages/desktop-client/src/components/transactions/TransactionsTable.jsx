@@ -584,9 +584,11 @@ function PayeeCell({
           alignSelf: 'flex-start',
           borderRadius: 4,
           border: '1px solid transparent', // so it doesn't shift on hover
-          ':hover': {
-            border: '1px solid ' + theme.buttonNormalBorder,
-          },
+          ':hover': isPreview
+            ? {}
+            : {
+                border: '1px solid ' + theme.buttonNormalBorder,
+              },
         }}
         disabled={isPreview}
         onSelect={() =>
@@ -610,6 +612,12 @@ function PayeeCell({
             color: theme.pageTextSubdued,
           }}
         >
+          <PayeeIcons
+            transaction={transaction}
+            transferAccount={transferAccount}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
+          />
           <SvgSplit
             style={{
               color: 'inherit',
@@ -1127,6 +1135,8 @@ const Transaction = memo(function Transaction({
         ) : (
           <Cell width={20} />
         )
+      ) : isPreview && isChild ? (
+        <Cell width={20} />
       ) : (
         <SelectCell
           /* Checkmark field for non-child transaction */
@@ -1263,45 +1273,52 @@ const Transaction = memo(function Transaction({
         />
       ))()}
 
-      {isPreview ? (
-        /* Notes field for all transactions */
-        <Cell name="notes" width="flex" />
-      ) : (
-        <InputCell
-          width="flex"
-          name="notes"
-          textAlign="flex"
-          exposed={focusedField === 'notes'}
-          focused={focusedField === 'notes'}
-          value={notes || ''}
-          valueStyle={valueStyle}
-          formatter={value => notesTagFormatter(value, onNotesTagClick)}
-          onExpose={name => !isPreview && onEdit(id, name)}
-          inputProps={{
-            value: notes || '',
-            onUpdate: onUpdate.bind(null, 'notes'),
-          }}
-        />
-      )}
+      <InputCell
+        width="flex"
+        name="notes"
+        textAlign="flex"
+        exposed={focusedField === 'notes'}
+        focused={focusedField === 'notes'}
+        value={notes || ''}
+        valueStyle={valueStyle}
+        formatter={value => notesTagFormatter(value, onNotesTagClick)}
+        onExpose={name => !isPreview && onEdit(id, name)}
+        inputProps={{
+          value: notes || '',
+          onUpdate: onUpdate.bind(null, 'notes'),
+        }}
+      />
 
-      {isPreview ? (
-        // Category field for preview transactions
-        <Cell width="flex" style={{ alignItems: 'flex-start' }} exposed={true}>
-          {() => (
+      {(isPreview && !isChild) || isParent ? (
+        <Cell
+          /* Category field (Split button) for parent transactions */
+          name="category"
+          width="flex"
+          focused={focusedField === 'category'}
+          style={{
+            padding: 0,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            height: '100%',
+          }}
+          plain
+        >
+          {isPreview && (
             <View
               style={{
                 color:
-                  notes === 'missed'
+                  categoryId === 'missed'
                     ? theme.errorText
-                    : notes === 'due'
+                    : categoryId === 'due'
                       ? theme.warningText
                       : selected
                         ? theme.formLabelText
                         : theme.upcomingText,
                 backgroundColor:
-                  notes === 'missed'
+                  categoryId === 'missed'
                     ? theme.errorBackground
-                    : notes === 'due'
+                    : categoryId === 'due'
                       ? theme.warningBackground
                       : selected
                         ? theme.formLabelBackground
@@ -1311,23 +1328,12 @@ const Transaction = memo(function Transaction({
                 borderRadius: 4,
               }}
             >
-              {titleFirst(notes)}
+              {titleFirst(categoryId)}
             </View>
           )}
-        </Cell>
-      ) : isParent ? (
-        <Cell
-          /* Category field (Split button) for parent transactions */
-          name="category"
-          width="flex"
-          focused={focusedField === 'category'}
-          style={{ padding: 0 }}
-          plain
-        >
           <CellButton
             bare
             style={{
-              alignSelf: 'flex-start',
               borderRadius: 4,
               border: '1px solid transparent', // so it doesn't shift on hover
               ':hover': {
@@ -1335,7 +1341,7 @@ const Transaction = memo(function Transaction({
               },
             }}
             disabled={isTemporaryId(transaction.id)}
-            onEdit={() => onEdit(id, 'category')}
+            onEdit={() => !isPreview && onEdit(id, 'category')}
             onSelect={() => onToggleSplit(id)}
           >
             <View
@@ -1360,15 +1366,17 @@ const Transaction = memo(function Transaction({
                   }}
                 />
               )}
-              <Text
-                style={{
-                  fontStyle: 'italic',
-                  fontWeight: 300,
-                  userSelect: 'none',
-                }}
-              >
-                Split
-              </Text>
+              {!isPreview && (
+                <Text
+                  style={{
+                    fontStyle: 'italic',
+                    fontWeight: 300,
+                    userSelect: 'none',
+                  }}
+                >
+                  Split
+                </Text>
+              )}
             </View>
           </CellButton>
         </Cell>
@@ -1419,7 +1427,7 @@ const Transaction = memo(function Transaction({
                 : ''
           }
           exposed={focusedField === 'category'}
-          onExpose={name => onEdit(id, name)}
+          onExpose={name => !isPreview && onEdit(id, name)}
           valueStyle={
             !categoryId
               ? {
@@ -1549,7 +1557,7 @@ const Transaction = memo(function Transaction({
           isPreview={isPreview}
           status={
             isPreview
-              ? notes
+              ? categoryId
               : reconciled
                 ? 'reconciled'
                 : cleared
@@ -2511,6 +2519,7 @@ function notesTagFormatter(notes, onNotesTagClick) {
       {words.map((word, i, arr) => {
         const separator = arr.length - 1 === i ? '' : ' ';
         if (word.includes('#') && word.length > 1) {
+          let lastEmptyTag = -1;
           // Treat tags in a single word as separate tags.
           // #tag1#tag2 => (#tag1)(#tag2)
           // not-a-tag#tag2#tag3 => not-a-tag(#tag2)(#tag3)
@@ -2520,8 +2529,14 @@ function notesTagFormatter(notes, onNotesTagClick) {
             }
 
             if (!tag) {
+              lastEmptyTag = ti;
               return '#';
             }
+
+            if (lastEmptyTag === ti - 1) {
+              return `${tag} `;
+            }
+            lastEmptyTag = -1;
 
             const validTag = `#${tag}`;
             return (

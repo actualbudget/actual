@@ -26,6 +26,7 @@ type BudgetType<SheetName extends SheetNames> = Record<
 
 const accountParametrizedField = parametrizedField<'account'>();
 const rolloverParametrizedField = parametrizedField<'rollover-budget'>();
+const reportParametrizedField = parametrizedField<'report-budget'>();
 
 export function getAccountFilter(accountId: string, field = 'account') {
   if (accountId) {
@@ -315,16 +316,16 @@ export const reportBudget = {
   totalSaved: 'real-saved',
 
   totalLeftover: 'total-leftover',
-  groupSumAmount: id => `group-sum-amount-${id}`,
+  groupSumAmount: reportParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: id => `group-budget-${id}`,
-  groupBalance: id => `group-leftover-${id}`,
+  groupBudgeted: reportParametrizedField('group-budget'),
+  groupBalance: reportParametrizedField('group-leftover'),
 
-  catBudgeted: id => `budget-${id}`,
-  catSumAmount: id => `sum-amount-${id}`,
-  catBalance: id => `leftover-${id}`,
-  catCarryover: id => `carryover-${id}`,
-  catGoal: id => `goal-${id}`,
-  catLongGoal: id => `long-goal-${id}`,
-};
+  catBudgeted: reportParametrizedField('budget'),
+  catSumAmount: reportParametrizedField('sum-amount'),
+  catBalance: reportParametrizedField('leftover'),
+  catCarryover: reportParametrizedField('carryover'),
+  catGoal: reportParametrizedField('goal'),
+  catLongGoal: reportParametrizedField('long-goal'),
+} satisfies BudgetType<'report-budget'>;

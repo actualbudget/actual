@@ -1,30 +1,38 @@
 // @ts-strict-ignore
 import React, {
   type CSSProperties,
-  type ComponentProps,
   type ComponentType,
   type ReactNode,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { theme, styles } from '../../../../style';
 import { Text } from '../../../common/Text';
 import { View } from '../../../common/View';
+import { type SheetFields, type Binding } from '../../../spreadsheet';
 import { CellValue } from '../../../spreadsheet/CellValue';
 
-type BudgetTotalProps = {
+type BudgetTotalProps<
+  CurrentField extends SheetFields<'report-budget'>,
+  TargetField extends SheetFields<'report-budget'>,
+> = {
   title: ReactNode;
-  current: ComponentProps<typeof CellValue>['binding'];
-  target: ComponentProps<typeof CellValue>['binding'];
+  current: Binding<'report-budget', CurrentField>;
+  target: Binding<'report-budget', TargetField>;
   ProgressComponent: ComponentType<{ current; target }>;
   style?: CSSProperties;
 };
-export function BudgetTotal({
+export function BudgetTotal<
+  CurrentField extends SheetFields<'report-budget'>,
+  TargetField extends SheetFields<'report-budget'>,
+>({
   title,
   current,
   target,
   ProgressComponent,
   style,
-}: BudgetTotalProps) {
+}: BudgetTotalProps<CurrentField, TargetField>) {
+  const { t } = useTranslation();
   return (
     <View
       style={{
@@ -45,7 +53,8 @@ export function BudgetTotal({
         <Text>
           <CellValue binding={current} type="financial" />
           <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
-            {' of '}
+            {' '}
+            {t('of')}{' '}
             <CellValue
               binding={target}
               type="financial"

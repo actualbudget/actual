@@ -13,7 +13,6 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, type CSSProperties } from '../../../style';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
@@ -189,6 +188,7 @@ type DonutGraphProps = {
   viewLabels: boolean;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showTooltip?: boolean;
 };
 
 export function DonutGraph({
@@ -201,6 +201,7 @@ export function DonutGraph({
   viewLabels,
   showHiddenCategories,
   showOffBudget,
+  showTooltip = true,
 }: DonutGraphProps) {
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
@@ -208,7 +209,6 @@ export function DonutGraph({
   const navigate = useNavigate();
   const categories = useCategories();
   const accounts = useAccounts();
-  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
 
   const getVal = obj => {
@@ -259,7 +259,7 @@ export function DonutGraph({
                     }
                   }}
                   onClick={item =>
-                    !isNarrowWidth &&
+                    ((compact && showTooltip) || !compact) &&
                     !['Group', 'Interval'].includes(groupBy) &&
                     showActivity({
                       navigate,
