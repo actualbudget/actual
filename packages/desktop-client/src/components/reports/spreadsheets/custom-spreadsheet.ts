@@ -50,7 +50,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
-  accountGroupDisplay: boolean;
+  accountGroupDisplay?: boolean;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   setDataCheck?: (value: boolean) => void;
 };

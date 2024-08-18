@@ -21,7 +21,7 @@ type ValueProps<T> = {
   valueIsRaw?: boolean;
   inline?: boolean;
   data?: unknown;
-  accountGroupDisplayName: boolean;
+  accountGroupDisplayName?: boolean;
   describe?: (item: T) => string;
   style?: CSSProperties;
 };
