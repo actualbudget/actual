@@ -3,6 +3,7 @@ import { memo } from 'react';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
@@ -15,7 +16,6 @@ import {
   Row,
   SelectCell,
 } from '../table';
-import { useLocalPref } from '../../hooks/useLocalPref';
 
 type RuleButtonProps = {
   ruleCount: number;

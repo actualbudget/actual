@@ -95,84 +95,88 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const needsTooltip = !!account?.id;
 
   const accountRow = (
-    <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle}}>
+    <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
         <DropHighlight pos={dropPos} />
-        <View innerRef={dragRef} >
-        <View style={{
-              ...( nested && {
-              width: 'calc(100% - 1em)',
-              height:'100%',
-              ':hover': { backgroundColor: theme.sidebarItemBackgroundHover }})
-            }}>
-          <Link
-            to={to}
+        <View innerRef={dragRef}>
+          <View
             style={{
-              ...accountNameStyle,
-              ...style,
-              ...(nested && {':hover':  {backgroundColor: ''}, width:'calc(100% + 1em)' }),
-              position: 'relative',
-              borderLeft: '4px solid transparent',
-              ...(updated && { fontWeight: 700 }),
-            }}
-            activeStyle={{
-              borderColor: theme.sidebarItemAccentSelected,
-              color: theme.sidebarItemTextSelected,
-              // This is kind of a hack, but we don't ever want the account
-              // that the user is looking at to be "bolded" which means it
-              // has unread transactions. The system does mark is read and
-              // unbolds it, but it still "flashes" bold so this just
-              // ignores it if it's active
-              fontWeight: (style && style.fontWeight) || 'normal',
-              '& .dot': {
-                backgroundColor: theme.sidebarItemAccentSelected,
-                transform: 'translateX(-4.5px)',
-              },
+              ...(nested && {
+                width: 'calc(100% - 1em)',
+                height: '100%',
+                ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
+              }),
             }}
           >
-
-            <View
+            <Link
+              to={to}
               style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                flexDirection: 'row',
-                alignItems: 'center',
+                ...accountNameStyle,
+                ...style,
+                ...(nested && {
+                  ':hover': { backgroundColor: '' },
+                  width: 'calc(100% + 1em)',
+                }),
+                position: 'relative',
+                borderLeft: '4px solid transparent',
+                ...(updated && { fontWeight: 700 }),
+              }}
+              activeStyle={{
+                borderColor: theme.sidebarItemAccentSelected,
+                color: theme.sidebarItemTextSelected,
+                // This is kind of a hack, but we don't ever want the account
+                // that the user is looking at to be "bolded" which means it
+                // has unread transactions. The system does mark is read and
+                // unbolds it, but it still "flashes" bold so this just
+                // ignores it if it's active
+                fontWeight: (style && style.fontWeight) || 'normal',
+                '& .dot': {
+                  backgroundColor: theme.sidebarItemAccentSelected,
+                  transform: 'translateX(-4.5px)',
+                },
               }}
             >
-              <div
-                className={`dot ${css({
-                  marginRight: 3,
-                  width: 5,
-                  height: 5,
-                  borderRadius: 5,
-                  backgroundColor: pending
-                    ? theme.sidebarItemBackgroundPending
-                    : failed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginLeft: 2,
-                  transition: 'transform .3s',
-                  opacity: connected ? 1 : 0,
-                })}`}
-              />
-            </View>
+              <View
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  className={`dot ${css({
+                    marginRight: 3,
+                    width: 5,
+                    height: 5,
+                    borderRadius: 5,
+                    backgroundColor: pending
+                      ? theme.sidebarItemBackgroundPending
+                      : failed
+                        ? theme.sidebarItemBackgroundFailed
+                        : theme.sidebarItemBackgroundPositive,
+                    marginLeft: 2,
+                    transition: 'transform .3s',
+                    opacity: connected ? 1 : 0,
+                  })}`}
+                />
+              </View>
 
-            <AlignedText
-              style={
-                (name === 'Off budget' ||
-                  name === 'For budget' ||
-                  grouped === true) && {
-                  borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
-                  paddingBottom: '3px',
+              <AlignedText
+                style={
+                  (name === 'Off budget' ||
+                    name === 'For budget' ||
+                    grouped === true) && {
+                    borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
+                    paddingBottom: '3px',
+                  }
                 }
-              }
-              left={name}
-              right={<CellValue binding={query} type="financial" />}
-            />
-
-          </Link>
+                left={name}
+                right={<CellValue binding={query} type="financial" />}
+              />
+            </Link>
           </View>
         </View>
       </View>

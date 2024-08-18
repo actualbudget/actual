@@ -7,7 +7,7 @@ import {
   closeBudget,
   moveAccount,
   replaceModal,
-  changeGroup
+  changeGroup,
 } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 
@@ -69,7 +69,7 @@ export function Sidebar() {
     const me = accounts[accounts.findIndex(a => a.id === id)];
     const them = accounts[accounts.findIndex(a => a.id === targetId)];
 
-    if (me['account_group_id'] != them['account_group_id']) {
+    if (me['account_group_id'] !== them['account_group_id']) {
       dispatch(changeGroup(id, them['account_group_id']));
     }
     //--

@@ -363,7 +363,7 @@ export function CustomReport() {
       showUncategorized,
       balanceTypeOp,
       firstDayOfWeekIdx,
-      accountGroupDisplay:accountGroupDisplay[0]
+      accountGroupDisplay,
     });
   }, [
     startDate,
@@ -378,6 +378,7 @@ export function CustomReport() {
     showHiddenCategories,
     showUncategorized,
     firstDayOfWeekIdx,
+    accountGroupDisplay,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -400,7 +401,7 @@ export function CustomReport() {
       graphType,
       firstDayOfWeekIdx,
       setDataCheck,
-      accountGroupDisplay
+      accountGroupDisplay,
     });
   }, [
     startDate,
@@ -419,6 +420,7 @@ export function CustomReport() {
     showUncategorized,
     graphType,
     firstDayOfWeekIdx,
+    accountGroupDisplay,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);

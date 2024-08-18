@@ -46,6 +46,7 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
@@ -82,7 +83,6 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
-import { useLocalPref } from '../../hooks/useLocalPref';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -670,8 +670,15 @@ function PayeeCell({
           isCreatingPayee.current = false;
         }
       }}
-
-      formatter={() => getPayeePretty(transaction, payee, transferAccount, 0 , accountGroupDisplay)}
+      formatter={() =>
+        getPayeePretty(
+          transaction,
+          payee,
+          transferAccount,
+          0,
+          accountGroupDisplay,
+        )
+      }
       unexposedContent={props => {
         const payeeName = (
           <UnexposedCellContent
@@ -1195,11 +1202,7 @@ const Transaction = memo(function Transaction({
           formatter={acctId => {
             const acct = acctId && getAccountsById(accounts)[acctId];
             if (acct) {
-              return (
-                <>
-                  {(accountGroupDisplay ? acct.display_name : acct.name)}
-                </>
-              );   
+              return <>{accountGroupDisplay ? acct.display_name : acct.name}</>;
             }
             return '';
           }}

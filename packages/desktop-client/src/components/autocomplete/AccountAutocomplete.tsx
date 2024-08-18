@@ -11,6 +11,7 @@ import { css } from 'glamor';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
 import { TextOneLine } from '../common/TextOneLine';
@@ -18,7 +19,6 @@ import { View } from '../common/View';
 
 import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
-import { useLocalPref } from '../../hooks/useLocalPref';
 
 type AccountAutocompleteItem = AccountEntity;
 
@@ -107,7 +107,6 @@ type AccountAutocompleteProps = ComponentProps<
   closeOnBlur?: boolean;
 };
 
-// eslint-disable-next-line import/no-unused-modules
 export function AccountAutocomplete({
   embedded,
   includeClosedAccounts = true,

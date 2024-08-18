@@ -43,6 +43,7 @@ import {
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
@@ -63,7 +64,6 @@ import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -505,7 +505,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
     }
     const transPayee = trans && getPayee(trans);
     const transTransferAcct = trans && getTransferAcct(trans);
-    return getDescriptionPretty(trans, transPayee, transTransferAcct, accountGroupDisplay);
+    return getDescriptionPretty(
+      trans,
+      transPayee,
+      transTransferAcct,
+      accountGroupDisplay,
+    );
   };
 
   const isBudgetTransfer = trans => {
@@ -710,7 +715,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     transaction,
     getPayee(transaction),
     getTransferAcct(transaction),
-    accountGroupDisplay
+    accountGroupDisplay,
   );
 
   const transactionDate = parseDate(transaction.date, dateFormat, new Date());

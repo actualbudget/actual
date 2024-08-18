@@ -29,6 +29,7 @@ import { listen, send } from 'loot-core/platform/client/fetch';
 import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
@@ -39,7 +40,6 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 
 export function AccountTransactions({ account, pending, failed }) {
   const schedulesTransform = useDefaultSchedulesQueryTransform(account.id);

@@ -548,7 +548,7 @@ class AccountInternal extends PureComponent {
 
   //Allow editing of group
   onExposeGroup = flag => {
-    this.setState({editingGroup:flag});
+    this.setState({ editingGroup: flag });
   };
 
   onExposeName = flag => {
@@ -562,8 +562,8 @@ class AccountInternal extends PureComponent {
       account => account.id === accountId,
     );
 
-    this.props.changeAccountGroup({...account, account_group_id})
-    this.setState({editingGroup:false});
+    this.props.changeAccountGroup({ ...account, account_group_id });
+    this.setState({ editingGroup: false });
   };
 
   onSaveName = name => {

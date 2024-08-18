@@ -178,7 +178,9 @@ export function AccountHeader({
             {editingGroup ? (
               <InitialFocus>
                 <Input
-                  defaultValue={account?.account_group_id ? account.account_group_id : ''}
+                  defaultValue={
+                    account?.account_group_id ? account.account_group_id : ''
+                  }
                   onEnter={e => onSaveGroup(e.target.value)}
                   onBlur={e => onSaveGroup(e.target.value)}
                   onEscape={() => onExposeGroup(false)}

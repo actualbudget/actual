@@ -5,19 +5,16 @@ import { styles, theme, type CSSProperties } from '../../style';
 import { AlignedText } from '../common/AlignedText';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
-
-
 import {
-  useDraggable,
   useDroppable,
-  DropHighlight,
   type OnDragChangeCallback,
   type OnDropCallback,
 } from '../sort';
 import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
 
-export const accountNameStyle: CSSProperties = {
+
+const accountNameStyle: CSSProperties = {
   marginTop: -2,
   marginBottom: 2,
   paddingTop: 4,
@@ -26,7 +23,6 @@ export const accountNameStyle: CSSProperties = {
   paddingLeft: 10,
   textDecoration: 'none',
   color: theme.sidebarItemText,
- 
   ...styles.smallText,
 };
 
@@ -55,37 +51,29 @@ export function GroupAccount<FieldName extends SheetFields<'account'>>({
   query,
   style,
   outerStyle,
-  onDragChange,
-  onDrop,
-  grouped,
 }: AccountProps<FieldName>) {
-
-
-  const { dropRef, dropPos } = useDroppable({
-    types:  [],
-    id: '0',
-    onDrop,
-  });
   const accountRow = (
-    <View  style={{ flexShrink: 0, ...outerStyle, marginBottom:'10px'}}>
+    <View style={{ flexShrink: 0, ...outerStyle, marginBottom: '10px' }}>
       <View>
         <View>
-        <View style={{
-          position:'absolute',
-          display:'flex',
-          background:'rgba(255,255,255,0.05)',
-          borderRadius:'5px',
-          borderTopLeftRadius:'5px',
-          borderTopRightRadius:'5px',
-          borderBottomLeftRadius:'0px',
-          borderBottomRightRadius: '0px',
-          height:'100%',
-          width:'calc(100% - 1.9em)',
-          marginLeft:'1em',
-          padding:'2px',
-          border:'0px solid rgba(255,255,255,.02)',
-          boxShadow:'-1px 1px 1px 1px rgba(0,0,0,.3)'
-        }}/>
+          <View
+            style={{
+              position: 'absolute',
+              display: 'flex',
+              background: 'rgba(255,255,255,0.05)',
+              borderRadius: '5px',
+              borderTopLeftRadius: '5px',
+              borderTopRightRadius: '5px',
+              borderBottomLeftRadius: '0px',
+              borderBottomRightRadius: '0px',
+              height: '100%',
+              width: 'calc(100% - 1.9em)',
+              marginLeft: '1em',
+              padding: '2px',
+              border: '0px solid rgba(255,255,255,.02)',
+              boxShadow: '-1px 1px 1px 1px rgba(0,0,0,.3)',
+            }}
+          />
 
           <Link
             to={to}
@@ -111,54 +99,37 @@ export function GroupAccount<FieldName extends SheetFields<'account'>>({
               },
             }}
           >
-
-            <View style={{
-              position:'absolute',
-              display:'flex',
-              top:0,
-              left:0,
-              background:'rgba(255,255,255,0.06)',
-              borderTopLeftRadius:'5px',
-              borderTopRightRadius: '5px',
-              borderBottomLeftRadius: '0px',
-              borderBottomRightRadius: '0px',
-              height:'calc(100% - 2px)',
-              marginLeft:'.5em',
-              width:'calc(100% - 1.4em)',
-              borderBottom:'1px solid rgba(255,255,255,.1)',
-            }}/>
-            <AlignedText
-              style={
-                 {
-                  paddingBottom: '4px',
-                  fontWeight:'450'
-                }
-              }
-              left={groupName}
-              right={
-                <CellValue
-                  binding={query}
-                  type="financial"
-                  style={
-                    {
-                      
-                    }
-                  }
-                />
-              }
+            <View
+              style={{
+                position: 'absolute',
+                display: 'flex',
+                top: 0,
+                left: 0,
+                background: 'rgba(255,255,255,0.06)',
+                borderTopLeftRadius: '5px',
+                borderTopRightRadius: '5px',
+                borderBottomLeftRadius: '0px',
+                borderBottomRightRadius: '0px',
+                height: 'calc(100% - 2px)',
+                marginLeft: '.5em',
+                width: 'calc(100% - 1.4em)',
+                borderBottom: '1px solid rgba(255,255,255,.1)',
+              }}
             />
-
-
+            <AlignedText
+              style={{
+                paddingBottom: '4px',
+                fontWeight: '450',
+              }}
+              left={groupName}
+              right={<CellValue binding={query} type="financial" style={{}} />}
+            />
           </Link>
-          <View style={{marginLeft:'1em'}}>
-          {accounts}
-          </View>
+          <View style={{ marginLeft: '1em' }}>{accounts}</View>
         </View>
       </View>
     </View>
   );
 
- 
-    return accountRow;
-  
+  return accountRow;
 }

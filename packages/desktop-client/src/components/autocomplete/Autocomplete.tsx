@@ -289,7 +289,9 @@ function SingleAutocomplete<T extends Item>({
     const selectedItem = findItem<T>(strict, suggestions, val);
 
     setSelectedItem(selectedItem);
-    setValue(selectedItem ? getItemName(selectedItem, accountGroupDisplay) : '');
+    setValue(
+      selectedItem ? getItemName(selectedItem, accountGroupDisplay) : '',
+    );
     setOriginalItem(selectedItem);
     setHighlightedIndex(null);
     setIsOpen(embedded);

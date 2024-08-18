@@ -13,6 +13,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccount } from '../../../hooks/useAccount';
 import { useCategories } from '../../../hooks/useCategories';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { usePayee } from '../../../hooks/usePayee';
 import { SvgSplit } from '../../../icons/v0';
 import {
@@ -28,7 +29,6 @@ import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 
 import { lookupName, getDescriptionPretty, Status } from './TransactionEdit';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 
 const ROW_HEIGHT = 50;
 
@@ -110,7 +110,7 @@ export const Transaction = memo(function Transaction({
     transaction,
     payee,
     transferAcct,
-    accountGroupDisplay
+    accountGroupDisplay,
   );
   const specialCategory = account?.offbudget
     ? 'Off Budget'

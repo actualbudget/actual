@@ -162,7 +162,7 @@ export function getGroupBalance(
       .filter({
         'account.closed': false,
         'account.offbudget': OffBudget,
-        'account.account_group_id':  groupName,
+        'account.account_group_id': groupName,
       })
       .calculate({ $sum: '$amount' }),
     name: accountParametrizedField('balance')(

@@ -268,7 +268,7 @@ export function markAccountRead(accountId): MarkAccountReadAction {
 
 ///Change the Account group
 export function changeGroup(id, account_group_id) {
-  return async (dispatch: Dispatch) =>{
+  return async (dispatch: Dispatch) => {
     await send('account-changeGroup', { id, account_group_id });
     dispatch(getAccounts());
     dispatch(getPayees());

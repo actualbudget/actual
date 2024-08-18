@@ -4,11 +4,11 @@ import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
 
 import { SchedulesQuery } from './SchedulesQuery';
 import { Value } from './Value';
-import { useLocalPref } from '../../hooks/useLocalPref';
 
 type ScheduleValueProps = {
   value: ScheduleEntity;

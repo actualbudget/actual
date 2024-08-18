@@ -296,7 +296,7 @@ export function changeAccountGroup(account: AccountEntity) {
     dispatch({ type: constants.UPDATE_ACCOUNT, account });
     await send('account-changeGroup', {
       id: account.id,
-      account_group_id: account.account_group_id
+      account_group_id: account.account_group_id,
     });
   };
 }

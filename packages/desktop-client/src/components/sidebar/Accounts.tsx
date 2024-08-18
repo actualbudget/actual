@@ -45,7 +45,7 @@ export function Accounts({
   const getAccountPath = account => `/accounts/${account.id}`;
 
   const [showClosedAccounts] = useLocalPref('ui.showClosedAccounts');
-  const [accountGroupNested] = useLocalPref('ui.accountGroupNested')
+  const [accountGroupNested] = useLocalPref('ui.accountGroupNested');
 
   function onDragChange(drag) {
     setIsDragging(drag.state === 'start');
@@ -77,7 +77,7 @@ export function Accounts({
         onDragChange={onDragChange}
         onDrop={onReorder}
         outerStyle={makeDropPadding(i)}
-        nested = {nested}
+        nested={nested}
       />
     );
   }
@@ -93,7 +93,7 @@ export function Accounts({
         <div key={'groupBox-' + groupName}>
           <Account
             name={groupName}
-            key={"groupHead-" + groupName}
+            key={'groupHead-' + groupName}
             to="/accounts/budgeted"
             query={queries.getGroupBalance(groupName, offBudget)}
             grouped={true}
@@ -112,7 +112,9 @@ export function Accounts({
       <GroupAccount
         to="/"
         key={'group-' + groupName + '-' + offBudget}
-        accounts={accounts.map((account, ii) => normalAccount(account, ii, true))}
+        accounts={accounts.map((account, ii) =>
+          normalAccount(account, ii, true),
+        )}
         groupName={groupName}
         query={queries.getGroupBalance(groupName, offBudget)}
         onDragChange={onDragChange}
@@ -156,48 +158,48 @@ export function Accounts({
       <>
         {(nested ? budgetedAccounts.length : onbudget['ungrouped'].length) >
           0 && (
-        <Account
-          name="For budget"
-          to="/accounts/budgeted"
+          <Account
+            name="For budget"
+            to="/accounts/budgeted"
             query={
               nested
                 ? queries.budgetedAccountBalance()
                 : queries.getGroupBalance(null, false)
             }
-          style={{
-            fontWeight,
-            marginTop: 13,
-            marginBottom: 5,
-          }}
-        />
-      )}
+            style={{
+              fontWeight,
+              marginTop: 13,
+              marginBottom: 5,
+            }}
+          />
+        )}
 
         {onbudget['ungrouped'].map((account, i) => normalAccount(account, i))}
         {Object.keys(onbudget['grouped']).map(nam =>
-          groupPlacement(nam, onbudget['grouped'][nam], false, nested)
+          groupPlacement(nam, onbudget['grouped'][nam], false, nested),
         )}
 
         {(nested ? offbudgetAccounts.length : offbudget['ungrouped'].length) >
           0 && (
-        <Account
-          name="Off budget"
-          to="/accounts/offbudget"
+          <Account
+            name="Off budget"
+            to="/accounts/offbudget"
             query={
               nested
                 ? queries.offbudgetAccountBalance()
                 : queries.getGroupBalance(null, true)
             }
-          style={{
-            fontWeight,
-            marginTop: 13,
-            marginBottom: 5,
-          }}
-        />
-      )}
+            style={{
+              fontWeight,
+              marginTop: 13,
+              marginBottom: 5,
+            }}
+          />
+        )}
 
         {offbudget['ungrouped'].map((account, i) => normalAccount(account, i))}
         {Object.keys(offbudget['grouped']).map(nam =>
-          groupPlacement(nam, offbudget['grouped'][nam], true, nested)
+          groupPlacement(nam, offbudget['grouped'][nam], true, nested),
         )}
       </>
     );
@@ -212,7 +214,7 @@ export function Accounts({
         style={{ fontWeight, marginTop: 15 }}
       />
 
-      {sideBarDesign(accountGroupNested? true: false)}
+      {sideBarDesign(accountGroupNested ? true : false)}
 
       {closedAccounts.length > 0 && (
         <SecondaryItem

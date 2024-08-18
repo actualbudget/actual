@@ -247,7 +247,6 @@ export type UncategorizedEntity = Pick<
   is_off_budget?: boolean;
   is_transfer?: boolean;
   has_category?: boolean;
-  accountGroupDisplay?: boolean,
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
@@ -337,6 +336,13 @@ export const groupBySelections = (
 ] => {
   let groupByList: UncategorizedEntity[];
   let groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account';
+  const getName = function (obj: PayeeEntity | AccountEntity): string {
+    if (accountGroupDisplay && obj.display_name) {
+      return obj.display_name.toString();
+    }
+    return obj.name.toString();
+  };
+
   switch (groupBy) {
     case 'Category':
       groupByList = categoryList;
@@ -352,7 +358,7 @@ export const groupBySelections = (
       groupByList = payees.map(payee => {
         return {
           id: payee.id,
-          name: accountGroupDisplay ? payee.display_name : payee.name,
+          name: getName(payee),
           hidden: false,
         };
       });
@@ -362,7 +368,7 @@ export const groupBySelections = (
       groupByList = accounts.map(account => {
         return {
           id: account.id,
-          name: accountGroupDisplay ? account.display_name : account.name,
+          name: getName(account),
           hidden: false,
         };
       });

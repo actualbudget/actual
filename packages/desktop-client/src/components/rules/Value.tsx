@@ -33,8 +33,11 @@ export function Value<T>({
   inline = false,
   data: dataProp,
   accountGroupDisplayName,
-  // @ts-expect-error fix this later
-  describe = x => (accountGroupDisplayName && x.display_name ? x.display_name : x.name),
+  describe = x => {
+    return accountGroupDisplayName && x['display_name']
+      ? x['display_name']
+      : x['name'];
+  },
   style,
 }: ValueProps<T>) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';

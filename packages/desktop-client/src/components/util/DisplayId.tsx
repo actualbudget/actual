@@ -2,8 +2,8 @@
 import React from 'react';
 
 import { useAccount } from '../../hooks/useAccount';
-import { usePayee } from '../../hooks/usePayee';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { usePayee } from '../../hooks/usePayee';
 import { theme } from '../../style';
 import { Text } from '../common/Text';
 

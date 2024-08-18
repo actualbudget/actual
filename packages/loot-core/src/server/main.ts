@@ -584,7 +584,7 @@ handlers['account-changeGroup'] = mutator(async function ({
   id,
   account_group_id,
 }) {
-  account_group_id = (account_group_id ? account_group_id : null);
+  account_group_id = account_group_id ? account_group_id : null;
   return withUndo(async () => {
     await db.update('accounts', { id, account_group_id });
     return {};

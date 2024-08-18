@@ -23,6 +23,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { SvgAdd, SvgBookmark } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
@@ -37,7 +38,6 @@ import {
   AutocompleteFooter,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
-import { useLocalPref } from '../../hooks/useLocalPref';
 
 type PayeeAutocompleteItem = PayeeEntity;
 
@@ -351,7 +351,9 @@ export function PayeeAutocomplete({
         } else if (item.id === 'new') {
           return rawPayee;
         }
-        return accountGroupDisplay && item.display_name ? item.display_name : item.name;
+        return accountGroupDisplay && item.display_name
+          ? item.display_name
+          : item.name;
       }}
       focused={payeeFieldFocused}
       inputProps={{
