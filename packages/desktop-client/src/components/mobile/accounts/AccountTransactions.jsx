@@ -39,6 +39,7 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 
 export function AccountTransactions({ account, pending, failed }) {
   const schedulesTransform = useDefaultSchedulesQueryTransform(account.id);

@@ -20,6 +20,7 @@ import { MobilePageHeader, Page } from '../../Page';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 
 function AccountHeader({ name, amount, style = {} }) {
   return (
