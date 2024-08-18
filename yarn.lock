@@ -33,7 +33,7 @@ __metadata:
     jest: "npm:^27.5.1"
     node-fetch: "npm:^3.3.2"
     tsc-alias: "npm:^1.8.8"
-    typescript: "npm:^5.0.2"
+    typescript: "npm:^5.5.4"
     uuid: "npm:^9.0.1"
   languageName: unknown
   linkType: soft
@@ -50,7 +50,7 @@ __metadata:
     jest: "npm:^27.5.1"
     murmurhash: "npm:^2.0.1"
     ts-protoc-gen: "npm:^0.15.0"
-    typescript: "npm:^5.0.2"
+    typescript: "npm:^5.5.4"
     uuid: "npm:^9.0.1"
   languageName: unknown
   linkType: soft
@@ -130,6 +130,7 @@ __metadata:
     sass: "npm:^1.70.0"
     swc-loader: "npm:^0.2.6"
     terser-webpack-plugin: "npm:^5.3.10"
+    ts-pattern: "npm:^5.3.1"
     usehooks-ts: "npm:^3.0.1"
     uuid: "npm:^9.0.1"
     vite: "npm:^5.2.11"
@@ -6292,7 +6293,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     prettier: "npm:3.2.4"
     source-map-support: "npm:^0.5.21"
-    typescript: "npm:^5.0.2"
+    typescript: "npm:^5.5.4"
     typescript-strict-plugin: "npm:^2.2.2-beta.2"
   languageName: unknown
   linkType: soft
@@ -8690,7 +8691,7 @@ __metadata:
     loot-core: "npm:*"
     node-fetch: "npm:^2.7.0"
     promise-retry: "npm:^2.0.1"
-    typescript: "npm:^5.0.2"
+    typescript: "npm:^5.5.4"
   languageName: unknown
   linkType: soft
 
@@ -13442,7 +13443,7 @@ __metadata:
     terser-webpack-plugin: "npm:^5.3.10"
     throttleit: "npm:^1.0.1"
     ts-node: "npm:^10.9.2"
-    typescript: "npm:^5.0.2"
+    typescript: "npm:^5.5.4"
     uuid: "npm:^9.0.1"
     webpack: "npm:^5.90.0"
     webpack-bundle-analyzer: "npm:^4.10.1"
@@ -18548,6 +18549,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ts-pattern@npm:^5.3.1":
+  version: 5.3.1
+  resolution: "ts-pattern@npm:5.3.1"
+  checksum: 10/e20be66468abb92617d909146737c7d96a4eda55c0e6ef38fece2a266a6242805daabe98adc57c6081593a11cb970b0f026fee086e337c20d145962465c74e4c
+  languageName: node
+  linkType: hard
+
 "ts-protoc-gen@npm:^0.15.0":
   version: 0.15.0
   resolution: "ts-protoc-gen@npm:0.15.0"
@@ -18778,17 +18786,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.0.2":
-  version: 5.0.4
-  resolution: "typescript@npm:5.0.4"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/e5c3adff09a138c0e27d13b5bb2b106ca17a162ffa945d66161669c265c65436309c5817358a2af1abb69d07440d358f8c1ed7cbb63a2c8680e19b9c268fe4ef
-  languageName: node
-  linkType: hard
-
-"typescript@npm:^5.0.4":
+"typescript@npm:^5.0.4, typescript@npm:^5.5.4":
   version: 5.5.4
   resolution: "typescript@npm:5.5.4"
   bin:
@@ -18808,17 +18806,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.0.2#optional!builtin<compat/typescript>":
-  version: 5.0.4
-  resolution: "typescript@patch:typescript@npm%3A5.0.4#optional!builtin<compat/typescript>::version=5.0.4&hash=b5f058"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/b1b62606c7ec75efe9edc61e195d9e69f0440cac1bcd111dfa864f839255f0d9a7b79869f2823559c608826fc0c9894d2917ae4063e0aa06f5d0784a35170497
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@npm%3A^5.0.4#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.0.4#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.5.4#optional!builtin<compat/typescript>":
   version: 5.5.4
   resolution: "typescript@patch:typescript@npm%3A5.5.4#optional!builtin<compat/typescript>::version=5.5.4&hash=379a07"
   bin:
