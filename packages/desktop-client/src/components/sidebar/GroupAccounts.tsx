@@ -5,14 +5,9 @@ import { styles, theme, type CSSProperties } from '../../style';
 import { AlignedText } from '../common/AlignedText';
 import { Link } from '../common/Link';
 import { View } from '../common/View';
-import {
-  useDroppable,
-  type OnDragChangeCallback,
-  type OnDropCallback,
-} from '../sort';
+import { type OnDragChangeCallback, type OnDropCallback } from '../sort';
 import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
-
 
 const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -30,7 +25,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   groupName: string;
   to: string;
   query: Binding<'account', FieldName>;
-  accounts: any;
+  accounts: string;
   connected?: boolean;
   pending?: boolean;
   failed?: boolean;

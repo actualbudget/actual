@@ -1212,7 +1212,7 @@ const Transaction = memo(function Transaction({
           formatter={acctId => {
             const acct = acctId && getAccountsById(accounts)[acctId];
             if (acct) {
-              return <>{accountGroupDisplay ? acct.display_name : acct.name}</>;
+              return (accountGroupDisplay ? acct.display_name : acct.name);
             }
             return '';
           }}
