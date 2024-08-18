@@ -419,6 +419,11 @@ export class Condition {
           );
         }
         return fieldValue <= extractValue(this.value);
+      case 'matches':
+        if (fieldValue === null) {
+          return false;
+        }
+        return new RegExp(this.value).test(fieldValue);
       default:
     }
 
