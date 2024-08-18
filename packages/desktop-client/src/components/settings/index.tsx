@@ -31,6 +31,7 @@ import { ExportBudget } from './Export';
 import { FixSplits } from './FixSplits';
 import { FormatSettings } from './Format';
 import { GlobalSettings } from './Global';
+import { ReloadApp } from './ReloadApp';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
@@ -184,6 +185,7 @@ export function Settings() {
           <ResetCache />
           <ResetSync />
           <FixSplits />
+          <ReloadApp />
           <ExperimentalFeatures />
         </AdvancedToggle>
       </View>
