@@ -75,7 +75,12 @@ function EmptyMessage({ onAdd }) {
           manage it locally yourself.
         </Text>
 
-        <Button variant="primary" style={{ marginTop: 20 }} onPress={onAdd}>
+        <Button
+          variant="primary"
+          style={{ marginTop: 20 }}
+          autoFocus
+          onPress={onAdd}
+        >
           Add account
         </Button>
 
@@ -96,12 +101,15 @@ function AllTransactions({
   showBalances,
   filtered,
   children,
+  collapseTransactions,
 }) {
   const accountId = account.id;
-  const prependTransactions = usePreviewTransactions().map(trans => ({
-    ...trans,
-    _inverse: accountId ? accountId !== trans.account : false,
-  }));
+  const prependTransactions = usePreviewTransactions(collapseTransactions).map(
+    trans => ({
+      ...trans,
+      _inverse: accountId ? accountId !== trans.account : false,
+    }),
+  );
 
   transactions ??= [];
 
@@ -1465,6 +1473,9 @@ class AccountInternal extends PureComponent {
         balances={balances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
+        collapseTransactions={ids =>
+          this.props.splitsExpandedDispatch({ type: 'close-splits', ids })
+        }
       >
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems

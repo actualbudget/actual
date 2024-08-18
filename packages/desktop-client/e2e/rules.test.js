@@ -79,35 +79,34 @@ test.describe('Rules', () => {
           value: 'Ikea',
         },
       ],
-      splits: {
-        beforeSplitActions: [
+      actions: [
+        {
+          op: 'set',
+          field: 'notes',
+          value: 'food / entertainment',
+        },
+      ],
+      splits: [
+        [
           {
-            field: 'notes',
-            value: 'food / entertainment',
+            field: 'a fixed percent of the remainder',
+            value: '90',
+          },
+          {
+            field: 'category',
+            value: 'Entertainment',
           },
         ],
-        splitActions: [
-          [
-            {
-              field: 'a fixed percent of the remainder',
-              value: '90',
-            },
-            {
-              field: 'category',
-              value: 'Entertainment',
-            },
-          ],
-          [
-            {
-              field: 'an equal portion of the remainder',
-            },
-            {
-              field: 'category',
-              value: 'Food',
-            },
-          ],
+        [
+          {
+            field: 'an equal portion of the remainder',
+          },
+          {
+            field: 'category',
+            value: 'Food',
+          },
         ],
-      },
+      ],
     });
 
     const accountPage = await navigation.goToAccountPage(

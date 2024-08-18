@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
+import { calculateHasWarning } from 'loot-core/src/client/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -23,6 +24,7 @@ import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
+import { Warning } from '../../alerts';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
 import { Text } from '../../common/Text';
@@ -348,6 +350,12 @@ export function CustomReport() {
     ReportOptions.balanceTypeMap.get(balanceType) || 'totalDebts';
   const payees = usePayees();
   const accounts = useAccounts();
+
+  const hasWarning = calculateHasWarning(conditions, {
+    categories: categories.list,
+    payees,
+    accounts,
+  });
 
   const getGroupData = useMemo(() => {
     return createGroupedSpreadsheet({
@@ -715,36 +723,52 @@ export function CustomReport() {
               style={{
                 marginBottom: 10,
                 marginLeft: 5,
-                flexShrink: 0,
-                flexDirection: 'row',
+                marginRight: 5,
+                gap: 10,
                 alignItems: 'flex-start',
-                justifyContent: 'flex-start',
+                flexShrink: 0,
               }}
             >
-              <AppliedFilters
-                conditions={conditions}
-                onUpdate={(oldFilter, newFilter) => {
-                  setSessionReport(
-                    'conditions',
-                    conditions.map(f => (f === oldFilter ? newFilter : f)),
-                  );
-                  onReportChange({ type: 'modify' });
-                  onUpdateFilter(oldFilter, newFilter);
+              <View
+                style={{
+                  flexShrink: 0,
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  justifyContent: 'flex-start',
                 }}
-                onDelete={deletedFilter => {
-                  setSessionReport(
-                    'conditions',
-                    conditions.filter(f => f !== deletedFilter),
-                  );
-                  onDeleteFilter(deletedFilter);
-                  onReportChange({ type: 'modify' });
-                }}
-                conditionsOp={conditionsOp}
-                onConditionsOpChange={co => {
-                  onConditionsOpChange(co);
-                  onReportChange({ type: 'modify' });
-                }}
-              />
+              >
+                <AppliedFilters
+                  conditions={conditions}
+                  onUpdate={(oldFilter, newFilter) => {
+                    setSessionReport(
+                      'conditions',
+                      conditions.map(f => (f === oldFilter ? newFilter : f)),
+                    );
+                    onReportChange({ type: 'modify' });
+                    onUpdateFilter(oldFilter, newFilter);
+                  }}
+                  onDelete={deletedFilter => {
+                    setSessionReport(
+                      'conditions',
+                      conditions.filter(f => f !== deletedFilter),
+                    );
+                    onDeleteFilter(deletedFilter);
+                    onReportChange({ type: 'modify' });
+                  }}
+                  conditionsOp={conditionsOp}
+                  onConditionsOpChange={co => {
+                    onConditionsOpChange(co);
+                    onReportChange({ type: 'modify' });
+                  }}
+                />
+              </View>
+
+              {hasWarning && (
+                <Warning style={{ paddingTop: 5, paddingBottom: 5 }}>
+                  This report is configured to use a non-existing filter value
+                  (i.e. category/account/payee).
+                </Warning>
+              )}
             </View>
           )}
           <View

@@ -108,7 +108,7 @@ export interface ServerHandlers {
 
   'payees-get-rule-counts': () => Promise<unknown>;
 
-  'payees-merge': (arg: { targetId; mergeIds }) => Promise<unknown>;
+  'payees-merge': (arg: { targetId; mergeIds }) => Promise<void>;
 
   'payees-batch-change': (arg: {
     added?;

@@ -1,9 +1,11 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 
 import { Menu } from '../../common/Menu';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
+
+import { useReportSheetValue } from './ReportComponents';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
@@ -18,7 +20,8 @@ export function BalanceMenu({
   onCarryover,
   ...props
 }: BalanceMenuProps) {
-  const carryover = useSheetValue(reportBudget.catCarryover(categoryId));
+  const { t } = useTranslation();
+  const carryover = useReportSheetValue(reportBudget.catCarryover(categoryId));
   return (
     <Menu
       {...props}
@@ -35,8 +38,8 @@ export function BalanceMenu({
         {
           name: 'carryover',
           text: carryover
-            ? 'Remove overspending rollover'
-            : 'Rollover overspending',
+            ? t('Remove overspending rollover')
+            : t('Rollover overspending'),
         },
       ]}
     />
