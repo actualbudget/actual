@@ -591,7 +591,8 @@ function ConditionsList({
           // clear the value
           if (
             cond.op !== 'oneOf' &&
-            cond.op !== 'notOneOf'(op === 'oneOf' || op === 'notOneOf')
+            cond.op !== 'notOneOf' &&
+            (op === 'oneOf' || op === 'notOneOf')
           ) {
             return newInput(
               makeValue(cond.value != null ? [cond.value] : [], {

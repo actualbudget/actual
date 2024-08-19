@@ -38,6 +38,18 @@ export const TYPE_INFO = {
     ],
     nullable: true,
   },
+  imported_payee: {
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
+    nullable: true,
+  },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
@@ -50,7 +62,7 @@ export const TYPE_INFO = {
 
 export const FIELD_TYPES = new Map(
   Object.entries({
-    imported_payee: 'string',
+    imported_payee: 'imported_payee',
     payee: 'id',
     date: 'date',
     notes: 'string',
