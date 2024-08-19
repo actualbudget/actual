@@ -38,6 +38,7 @@ import {
 import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
 import * as cloudStorage from './cloud-storage';
+import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
@@ -2056,6 +2057,7 @@ app.handlers = handlers;
 app.combine(
   schedulesApp,
   budgetApp,
+  dashboardApp,
   notesApp,
   toolsApp,
   filtersApp,
