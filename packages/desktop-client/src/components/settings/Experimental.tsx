@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
@@ -17,11 +18,13 @@ type FeatureToggleProps = {
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;
+  feedbackLink?: string;
 };
 
 function FeatureToggle({
   flag: flagName,
   disableToggle = false,
+  feedbackLink,
   error,
   children,
 }: FeatureToggleProps) {
@@ -40,7 +43,15 @@ function FeatureToggle({
       <View
         style={{ color: disableToggle ? theme.pageTextSubdued : 'inherit' }}
       >
-        {children}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          {children}
+          {feedbackLink && (
+            <Link variant="external" to={feedbackLink}>
+              <Trans>(give feedback)</Trans>
+            </Link>
+          )}
+        </View>
+
         {disableToggle && (
           <Text
             style={{
@@ -57,6 +68,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
+  const { t } = useTranslation();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
@@ -64,9 +76,10 @@ function ReportBudgetFeature() {
     <FeatureToggle
       flag="reportBudget"
       disableToggle={blockToggleOff}
-      error="Switch to a rollover budget before turning off this feature"
+      error={t('Switch to a rollover budget before turning off this feature')}
+      feedbackLink="https://github.com/actualbudget/actual/issues/2999"
     >
-      Budget mode toggle
+      <Trans>Budget mode toggle</Trans>
     </FeatureToggle>
   );
 }
@@ -79,16 +92,30 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <FeatureToggle flag="spendingReport">
-              Monthly spending report
+            <FeatureToggle
+              flag="spendingReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/2820"
+            >
+              <Trans>Monthly spending report</Trans>
             </FeatureToggle>
 
             <ReportBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">
-              Goal templates
+              <Trans>Goal templates</Trans>
             </FeatureToggle>
-            <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
+            <FeatureToggle
+              flag="simpleFinSync"
+              feedbackLink="https://github.com/actualbudget/actual/issues/2272"
+            >
+              <Trans>SimpleFIN sync</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="dashboards"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3282"
+            >
+              <Trans>Customizable reports page (dashboards)</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link
@@ -101,16 +128,18 @@ export function ExperimentalFeatures() {
               color: theme.pageTextPositive,
             }}
           >
-            I understand the risks, show experimental features
+            <Trans>I understand the risks, show experimental features</Trans>
           </Link>
         )
       }
     >
       <Text>
-        <strong>Experimental features.</strong> These features are not fully
-        tested and may not work as expected. THEY MAY CAUSE IRRECOVERABLE DATA
-        LOSS. They may do nothing at all. Only enable them if you know what you
-        are doing.
+        <Trans>
+          <strong>Experimental features.</strong> These features are not fully
+          tested and may not work as expected. THEY MAY CAUSE IRRECOVERABLE DATA
+          LOSS. They may do nothing at all. Only enable them if you know what
+          you are doing.
+        </Trans>
       </Text>
     </Setting>
   );
