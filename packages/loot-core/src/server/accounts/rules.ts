@@ -899,7 +899,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   contains: 0,
   doesNotContain: 0,
   matches: 0,
-  tags: 0,
+  hasTags: 0,
 };
 
 function computeScore(rule) {
