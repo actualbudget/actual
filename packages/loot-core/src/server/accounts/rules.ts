@@ -185,6 +185,44 @@ const CONDITION_TYPES = {
       return value.toLowerCase();
     },
   },
+  imported_payee: {
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
+    nullable: true,
+    parse(op, value, fieldName) {
+      if (op === 'oneOf' || op === 'notOneOf') {
+        assert(
+          Array.isArray(value),
+          'no-empty-array',
+          `oneOf must have an array value (field: ${fieldName}): ${JSON.stringify(
+            value,
+          )}`,
+        );
+        return value.filter(Boolean).map(val => val.toLowerCase());
+      }
+
+      if (
+        op === 'contains' ||
+        op === 'matches' ||
+        op === 'doesNotContain'
+      ) {
+        assert(
+          typeof value === 'string' && value.length > 0,
+          'no-empty-string',
+          `contains must have non-empty string (field: ${fieldName})`,
+        );
+      }
+
+      return value.toLowerCase();
+    },
+  },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
