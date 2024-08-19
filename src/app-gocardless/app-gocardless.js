@@ -140,7 +140,6 @@ app.post(
 
     try {
       const {
-        iban,
         balances,
         institutionId,
         startingBalance,
@@ -155,7 +154,6 @@ app.post(
       res.send({
         status: 'ok',
         data: {
-          iban: iban ? await sha256String(iban) : null,
           balances,
           institutionId,
           startingBalance,

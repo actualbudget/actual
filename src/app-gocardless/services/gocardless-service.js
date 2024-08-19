@@ -185,7 +185,7 @@ export const goCardlessService = {
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{iban: string, balances: Array<import('../gocardless-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
+   * @returns {Promise<{balances: Array<import('../gocardless-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
    */
   getTransactionsWithBalance: async (
     requisitionId,
@@ -200,8 +200,7 @@ export const goCardlessService = {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
     }
 
-    const [accountMetadata, transactions, accountBalance] = await Promise.all([
-      goCardlessService.getAccountMetadata(accountId),
+    const [transactions, accountBalance] = await Promise.all([
       goCardlessService.getTransactions({
         institutionId: institution_id,
         accountId,
@@ -232,7 +231,6 @@ export const goCardlessService = {
     );
 
     return {
-      iban: accountMetadata.iban,
       balances: accountBalance.balances,
       institutionId: institution_id,
       startingBalance,

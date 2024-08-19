@@ -168,7 +168,6 @@ describe('goCardlessService', () => {
         ),
       ).toEqual(
         expect.objectContaining({
-          iban: mockAccountMetaData.iban,
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
           startingBalance: expect.any(Number),
