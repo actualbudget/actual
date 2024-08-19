@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
@@ -19,6 +20,7 @@ type SavedProps = {
   style?: CSSProperties;
 };
 export function Saved({ projected, style }: SavedProps) {
+  const { t } = useTranslation();
   const budgetedSaved =
     useReportSheetValue(reportBudget.totalBudgetedSaved) || 0;
   const totalSaved = useReportSheetValue(reportBudget.totalSaved) || 0;
@@ -30,10 +32,12 @@ export function Saved({ projected, style }: SavedProps) {
   return (
     <View style={{ alignItems: 'center', fontSize: 14, ...style }}>
       {projected ? (
-        <Text style={{ color: theme.pageTextLight }}>Projected Savings:</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Projected Savings:</Trans>
+        </Text>
       ) : (
         <View style={{ color: theme.pageTextLight }}>
-          {isNegative ? 'Overspent:' : 'Saved:'}
+          {isNegative ? t('Overspent:') : t('Saved:')}
         </View>
       )}
 
@@ -42,7 +46,7 @@ export function Saved({ projected, style }: SavedProps) {
         content={
           <>
             <AlignedText
-              left="Projected Savings:"
+              left={t('Projected Savings:')}
               right={
                 <Text
                   style={{
@@ -55,7 +59,7 @@ export function Saved({ projected, style }: SavedProps) {
               }
             />
             <AlignedText
-              left="Difference:"
+              left={t('Difference:')}
               right={
                 <Text style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}>
                   {format(diff, 'financial-with-sign')}
