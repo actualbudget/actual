@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
@@ -16,14 +18,25 @@ import { ReportCard } from '../ReportCard';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
-export function NetWorthCard({ isEditing, accounts, onRemove }) {
+type NetWorthCardProps = {
+  isEditing?: boolean;
+  accounts: AccountEntity[];
+  onRemove: () => void;
+};
+
+export function NetWorthCard({
+  isEditing,
+  accounts,
+  onRemove,
+}: NetWorthCardProps) {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const onCardHover = useCallback(() => setIsCardHovered(true));
-  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
+  const onCardHover = useCallback(() => setIsCardHovered(true), []);
+  const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
   const params = useMemo(
     () => netWorthSpreadsheet(start, end, accounts),
@@ -38,7 +51,7 @@ export function NetWorthCard({ isEditing, accounts, onRemove }) {
       menuItems={[
         {
           name: 'remove',
-          text: 'Remove',
+          text: t('Remove'),
         },
       ]}
       onMenuSelect={item => {
@@ -88,8 +101,6 @@ export function NetWorthCard({ isEditing, accounts, onRemove }) {
 
         {data ? (
           <NetWorthGraph
-            start={start}
-            end={end}
             graphData={data.graphData}
             compact={true}
             showTooltip={!isEditing && !isNarrowWidth}
