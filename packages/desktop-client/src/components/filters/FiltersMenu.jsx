@@ -204,7 +204,7 @@ function ConfigureField({
               (op === 'contains' ||
                 op === 'matches' ||
                 op === 'doesNotContain' ||
-                op === 'tags')
+                op === 'hasTags')
                 ? 'string'
                 : type
             }

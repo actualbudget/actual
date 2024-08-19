@@ -154,7 +154,7 @@ const CONDITION_TYPES = {
       'isNot',
       'doesNotContain',
       'notOneOf',
-      'tags',
+      'hasTags',
     ],
     nullable: true,
     parse(op, value, fieldName) {
@@ -173,7 +173,7 @@ const CONDITION_TYPES = {
         op === 'contains' ||
         op === 'matches' ||
         op === 'doesNotContain' ||
-        op === 'tags'
+        op === 'hasTags'
       ) {
         assert(
           typeof value === 'string' && value.length > 0,
@@ -419,7 +419,7 @@ export class Condition {
         }
         return this.value.indexOf(fieldValue) !== -1;
 
-      case 'tags':
+      case 'hasTags':
         if (fieldValue === null) {
           return false;
         }

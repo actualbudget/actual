@@ -25,7 +25,7 @@ export type RuleConditionOp =
   | 'lte'
   | 'contains'
   | 'doesNotContain'
-  | 'tags'
+  | 'hasTags'
   | 'matches';
 
 type FieldValueTypes = {
@@ -97,7 +97,7 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
-      | 'tags'
+      | 'hasTags'
     >
   | BaseConditionEntity<
       'payee',

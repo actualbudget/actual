@@ -473,7 +473,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
-      case 'tags':
+      case 'hasTags':
         const tagValues = value
           .split(/(?<!#)(#[\w\d\p{Emoji}-]+)(?=\s|$)/gu)
           .filter(tag => tag.startsWith('#'));
