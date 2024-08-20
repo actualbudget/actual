@@ -11,7 +11,7 @@ import { ReportCardName } from '../ReportCardName';
 
 type MarkdownCardProps = {
   isEditing?: boolean;
-  meta?: MarkdownWidget['meta'];
+  meta: MarkdownWidget['meta'];
   onMetaChange: (newMeta: MarkdownWidget['meta']) => void;
   onRemove: () => void;
 };

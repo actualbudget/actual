@@ -1,5 +1,4 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { match, P } from 'ts-pattern';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
@@ -14,12 +13,8 @@ import { useDashboard } from 'loot-core/src/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
-  type CashFlowWidget,
   type CustomReportWidget,
   type ExportImportDashboard,
-  type MarkdownWidget,
-  type NetWorthWidget,
-  type SpendingWidget,
   type Widget,
 } from 'loot-core/src/types/models';
 
@@ -50,37 +45,6 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
   return widget.type === 'custom-report';
-}
-
-type LayoutWidget = Layout &
-  (
-    | Pick<NetWorthWidget, 'type' | 'meta'>
-    | Pick<CashFlowWidget, 'type' | 'meta'>
-    | Pick<SpendingWidget, 'type' | 'meta'>
-    | Pick<CustomReportWidget, 'type' | 'meta'>
-    | Pick<MarkdownWidget, 'type' | 'meta'>
-  );
-
-function useWidgetLayout(
-  widgets: (
-    | NetWorthWidget
-    | CashFlowWidget
-    | SpendingWidget
-    | CustomReportWidget
-    | MarkdownWidget
-  )[],
-): LayoutWidget[] {
-  return widgets.map(widget => ({
-    i: widget.id,
-    type: widget.type,
-    x: widget.x,
-    y: widget.y,
-    w: widget.width,
-    h: widget.height,
-    minW: isCustomReportWidget(widget) ? 2 : 3,
-    minH: isCustomReportWidget(widget) ? 1 : 2,
-    meta: widget.meta,
-  }));
 }
 
 export function Overview() {
@@ -117,7 +81,14 @@ export function Overview() {
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
-  const layout = useWidgetLayout(widgets);
+  const layout = widgets.map(widget => ({
+    i: widget.id,
+    w: widget.width,
+    h: widget.height,
+    minW: isCustomReportWidget(widget) ? 2 : 3,
+    minH: isCustomReportWidget(widget) ? 1 : 2,
+    ...widget,
+  }));
 
   const closeNotifications = () => {
     dispatch(removeNotification('import'));
@@ -310,7 +281,7 @@ export function Overview() {
     );
   };
 
-  const onMetaChange = <T extends LayoutWidget>(
+  const onMetaChange = <T extends { i: string; meta: Widget['meta'] }>(
     widget: T,
     newMeta: T['meta'],
   ) => {
@@ -534,52 +505,25 @@ export function Overview() {
           >
             {layout.map(item => (
               <div key={item.i}>
-                {/*{match(item)
-                  .with({ type: 'net-worth-card' }, matchedItem => (
-                    <NetWorthCard
-                      isEditing={isEditing}
-                      accounts={accounts}
-                      meta={
-                        matchedItem.meta && 'name' in matchedItem.meta
-                          ? matchedItem.meta
-                          : {}
-                      }
-                      onMetaChange={newMeta =>
-                        onMetaChange(matchedItem, newMeta)
-                      }
-                      onRemove={() => onRemoveWidget(matchedItem.i)}
-                    />
-                  ))
-                  .with({ type: 'markdown-card' }, matchedItem => (
-                    <MarkdownCard
-                      isEditing={isEditing}
-                      meta={matchedItem.meta}
-                      onMetaChange={newMeta =>
-                        onMetaChange(matchedItem, newMeta)
-                      }
-                      onRemove={() => onRemoveWidget(matchedItem.i)}
-                    />
-                  ))
-                  .exhaustive()}*/}
                 {item.type === 'net-worth-card' ? (
                   <NetWorthCard
                     isEditing={isEditing}
                     accounts={accounts}
-                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'cash-flow-card' ? (
                   <CashFlowCard
                     isEditing={isEditing}
-                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard
                     isEditing={isEditing}
-                    meta={item.meta && 'name' in item.meta ? item.meta : {}}
+                    meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
@@ -593,11 +537,7 @@ export function Overview() {
                 ) : item.type === 'custom-report' ? (
                   <CustomReportListCards
                     isEditing={isEditing}
-                    report={
-                      item.meta && 'id' in item.meta
-                        ? customReportMap.get(item.meta.id)
-                        : undefined
-                    }
+                    report={customReportMap.get(item.meta.id)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
                 ) : null}
