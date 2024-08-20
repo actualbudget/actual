@@ -119,7 +119,7 @@ function AllTransactions({
     }
 
     return balances && transactions?.length > 0
-      ? balances[transactions[0].id]?.balance ?? 0
+      ? (balances[transactions[0].id]?.balance ?? 0)
       : 0;
   }, [showBalances, balances, transactions]);
 
