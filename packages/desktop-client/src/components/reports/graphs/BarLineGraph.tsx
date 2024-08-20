@@ -16,8 +16,7 @@ import {
 
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
-import { theme } from '../../../style';
-import { type CSSProperties } from '../../../style';
+import { theme, type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
