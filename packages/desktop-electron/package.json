@@ -31,9 +31,6 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "artifactName": "${productName}-mac-${arch}.${ext}",
-      "notarize": {
-        "teamId": "79ANZ983YF"
-      },
       "target": [
         {
           "target": "dmg",
