@@ -3,6 +3,7 @@ export async function installPolyfills(): Promise<void> {
     const module = await import(
       /* webpackChunkName: 'resize-observer-polyfill' */ '@juggle/resize-observer'
     );
+    // @ts-expect-error fix-me
     window.ResizeObserver = module.ResizeObserver;
   }
 }

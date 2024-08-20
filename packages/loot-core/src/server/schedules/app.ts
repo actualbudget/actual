@@ -374,17 +374,21 @@ async function getUpcomingDates({ config, count }) {
   const rules = recurConfigToRSchedule(config);
 
   try {
+    // @ts-expect-error fix me
     const schedule = new RSchedule({ rrules: rules });
 
-    return schedule
-      .occurrences({ start: d.startOfDay(new Date()), take: count })
-      .toArray()
-      .map(date =>
-        config.skipWeekend
-          ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
-          : date.date,
-      )
-      .map(date => dayFromDate(date));
+    return (
+      schedule
+        // @ts-expect-error fix me
+        .occurrences({ start: d.startOfDay(new Date()), take: count })
+        .toArray()
+        .map(date =>
+          config.skipWeekend
+            ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
+            : date.date,
+        )
+        .map(date => dayFromDate(date))
+    );
   } catch (err) {
     captureBreadcrumb(config);
     throw err;
