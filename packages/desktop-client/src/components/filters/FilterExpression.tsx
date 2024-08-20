@@ -77,7 +77,6 @@ export function FilterExpression<T extends RuleConditionEntity>({
                 field={field}
                 inline={true}
                 valueIsRaw={
-                  
                   op === 'contains' ||
                   op === 'matches' ||
                   op === 'doesNotContain' ||

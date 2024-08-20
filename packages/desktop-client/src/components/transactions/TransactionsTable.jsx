@@ -10,6 +10,7 @@ import React, {
   useLayoutEffect,
   useEffect,
 } from 'react';
+import { TwitterPicker } from 'react-color';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useDispatch } from 'react-redux';
 
@@ -46,10 +47,12 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
+import { TAGCOLORS, TAGREGEX } from '../../../../loot-core/src/shared/tag';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
+import { useTags } from '../../hooks/useTags';
 import { SvgLeftArrow2, SvgRightArrow2, SvgSplit } from '../../icons/v0';
 import { SvgArrowDown, SvgArrowUp, SvgCheveronDown } from '../../icons/v1';
 import {
@@ -83,10 +86,6 @@ import {
   UnexposedCellContent,
   InputCellWithTags,
 } from '../table';
-import { getColorsByTheme, TAGCOLORS, TAGREGEX } from 'loot-core/shared/tag';
-import { useTags } from '../../hooks/useTags';
-import { TwitterPicker } from 'react-color';
-import { TagAutocomplete } from '../autocomplete/TagAutocomplete';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -2514,8 +2513,7 @@ function NotesCell({
   const [selectedItem, setSelectedItem] = useState(null);
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
   const dispatch = useDispatch();
-  const edit = useRef(null);
-  const [theme, switchTheme] = useTheme();
+  const { theme } = useTheme();
 
   const handleContextMenu = (e, item) => {
     e.preventDefault();
@@ -2535,11 +2533,11 @@ function NotesCell({
 
   return (
     <>
-      <div ref={triggerRef}></div>
+      <div ref={triggerRef} />
       <Cell
         {...props}
         formatter={value =>
-          notesTagFormatter(value, onNotesTagClick, (e, item) =>
+          NotesTagFormatter(value, onNotesTagClick, (e, item) =>
             handleContextMenu(e, item),
           )
         }
@@ -2569,7 +2567,7 @@ function NotesCell({
               selectedItem.color = newColor.hex;
               dispatch(updateTags(selectedItem));
             }}
-            onChangeComplete={color => {
+            onChangeComplete={() => {
               setShowColors(false);
               onEdit(null);
             }}
@@ -2579,20 +2577,16 @@ function NotesCell({
     </>
   );
 }
-function notesTagFormatter(notes, onNotesTagClick, onContextMenu) {
+function NotesTagFormatter(notes, onNotesTagClick, onContextMenu) {
   const tags = useTags();
   const words = notes.split(' ');
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
-  const dispatch = useDispatch();
   const [tagColors, setTagColors] = useState(new Map());
 
   useEffect(() => {
     const map = new Map();
-    const mapTextColor = new Map();
     notes.split(TAGREGEX).forEach(part => {
       if (TAGREGEX.test(part)) {
-        const filteredTags = tags.filter(t => t.tag == part);
+        const filteredTags = tags.filter(t => t.tag === part);
         if (filteredTags.length > 0) {
           map.set(part, {
             color: filteredTags[0].color ?? theme.noteTagBackground,

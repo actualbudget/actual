@@ -49,7 +49,7 @@ export function Input({
 
   return (
     <input
-      ref={mergedRef}
+      ref={inputRef}
       className={`${css(
         defaultInputStyle,
         {
@@ -67,6 +67,7 @@ export function Input({
       )} ${className}`}
       {...nativeProps}
       onKeyDown={e => {
+        console.log('Input onKeyDown triggered:', e.key); // Add this log
         nativeProps.onKeyDown?.(e);
 
         if (e.key === 'Enter' && onEnter) {

@@ -5,16 +5,14 @@ import React, {
   forwardRef,
   useEffect,
   useState,
-  useRef,
-  Children,
 } from 'react';
 
 import { css } from 'glamor';
 
-import { theme, type CSSProperties } from '../../style';
-import { TAGREGEX } from 'loot-core/shared/tag';
+import { TAGREGEX } from '../../../../loot-core/src/shared/tag';
+import { type TagEntity } from '../../../../loot-core/src/types/models/tag';
 import { useTags } from '../../hooks/useTags';
-import { TagEntity } from 'loot-core/types/models/tag';
+import { theme, type CSSProperties } from '../../style';
 
 type TextProps = HTMLProps<HTMLSpanElement> & {
   innerRef?: Ref<HTMLSpanElement>;
@@ -24,7 +22,7 @@ type TextProps = HTMLProps<HTMLSpanElement> & {
   textWithTags?: boolean;
 };
 
-const processText = (text: string, tags: TagEntity[]): ReactNode => {
+const ProcessText = (text: string, tags: TagEntity[]): ReactNode => {
   const [tagColors, setTagColors] = useState<Map<string, string>>(new Map());
   const [tagTextColors, setTagTextColors] = useState(new Map());
 
@@ -34,7 +32,7 @@ const processText = (text: string, tags: TagEntity[]): ReactNode => {
 
     text.split(TAGREGEX).forEach(part => {
       if (TAGREGEX.test(part)) {
-        const filteredTags = tags.filter(t => t.tag == part);
+        const filteredTags = tags.filter(t => t.tag === part);
         if (filteredTags.length > 0) {
           map.set(part, filteredTags[0].color ?? theme.noteTagBackground);
           mapTextColor.set(
@@ -50,7 +48,7 @@ const processText = (text: string, tags: TagEntity[]): ReactNode => {
 
     setTagColors(map);
     setTagTextColors(mapTextColor);
-  }, [tags]);
+  }, [tags, text]);
 
   const processedText = text.split(TAGREGEX).map((part, index) => {
     if (TAGREGEX.test(part)) {
@@ -123,29 +121,28 @@ export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
   );
 });
 
-export const TextWithTags = forwardRef<HTMLSpanElement, TextProps>(
-  (props, ref) => {
-    const {
-      className = '',
-      style,
-      innerRef,
-      children,
-      textWithTags,
-      ...restProps
-    } = props;
+const TextWithTags = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
+  const {
+    className = '',
+    style,
+    innerRef,
+    children,
+    textWithTags,
+    ...restProps
+  } = props;
 
-    const tags = useTags();
+  const tags = useTags();
 
-    return (
-      <span
-        {...restProps}
-        ref={innerRef ?? ref}
-        className={`${className} ${css(style)}`}
-      >
-        {typeof children === 'string' ? processText(children, tags) : children}
-      </span>
-    );
-  },
-);
+  return (
+    <span
+      {...restProps}
+      ref={innerRef ?? ref}
+      className={`${className} ${css(style)}`}
+    >
+      {typeof children === 'string' ? ProcessText(children, tags) : children}
+    </span>
+  );
+});
 
 Text.displayName = 'Text';
+TextWithTags.displayName = 'TextWithTags';

@@ -1,11 +1,14 @@
-import { useTags } from '../../hooks/useTags';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { View } from '../common/View';
 import { useEffect, useState } from 'react';
-import { Button } from '../common/Button2';
-import { theme } from '../../style';
 
-export function TagAutocomplete({
+import { getNormalisedString } from 'loot-core/shared/normalisation';
+
+import { useTags } from '../../hooks/useTags';
+import { theme } from '../../style';
+import { Button } from '../common/Button2';
+import { Popover } from '../common/Popover';
+import { View } from '../common/View';
+
+function TagAutocomplete({
   onMenuSelect,
   hint,
   clickedOnIt,
@@ -14,7 +17,7 @@ export function TagAutocomplete({
 }) {
   const tags = useTags();
   const [suggestions, setSuggestions] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
   useEffect(() => {
     if (tags && tags.length > 0) {
@@ -113,5 +116,27 @@ function TagList({ items, onMenuSelect, tags, clickedOnIt, selectedIndex }) {
         </View>
       ))}
     </View>
+  );
+}
+
+export function TagPopover({
+  triggerRef, 
+  isOpen, 
+  hint, 
+  onMenuSelect, 
+  keyPressed, 
+  onKeyHandled, 
+  onClose, 
+}) {
+  return (
+    <Popover triggerRef={triggerRef} isOpen={isOpen} placement="bottom start">
+      <TagAutocomplete
+        hint={hint}
+        clickedOnIt={onClose}
+        keyPressed={keyPressed}
+        onKeyHandled={onKeyHandled}
+        onMenuSelect={onMenuSelect}
+      />
+    </Popover>
   );
 }

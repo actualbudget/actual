@@ -192,7 +192,6 @@ function ConfigureField({
           </>
         )}
       </Stack>
-
       <form action="#">
         {type !== 'boolean' && (
           <GenericInput

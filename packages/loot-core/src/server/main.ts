@@ -520,7 +520,6 @@ handlers['tag-update'] = async function ({ tag }) {
   await db.updateTag(tag);
 };
 
-
 handlers['make-filters-from-conditions'] = async function ({ conditions }) {
   return rules.conditionsToAQL(conditions);
 };

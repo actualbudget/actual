@@ -118,7 +118,11 @@ export function Value<T>({
     } else if (value.length === 1) {
       return (
         <Text>
-          [<Text textWithTags={textWithTags} style={valueStyle}>{formatValue(value[0])}</Text>]
+          [
+          <Text textWithTags={textWithTags} style={valueStyle}>
+            {formatValue(value[0])}
+          </Text>
+          ]
         </Text>
       );
     }
@@ -132,7 +136,11 @@ export function Value<T>({
       <Text style={{ color: theme.tableText }}>
         [
         {displayed.map((v, i) => {
-          const text = <Text textWithTags={textWithTags} style={valueStyle}>{formatValue(v)}</Text>;
+          const text = (
+            <Text textWithTags={textWithTags} style={valueStyle}>
+              {formatValue(v)}
+            </Text>
+          );
           let spacing;
           if (inline) {
             spacing = i !== 0 ? ' ' : '';
@@ -173,11 +181,20 @@ export function Value<T>({
     const { num1, num2 } = value;
     return (
       <Text>
-        <Text textWithTags={textWithTags} style={valueStyle}>{formatValue(num1)}</Text> and{' '}
-        <Text textWithTags={textWithTags} style={valueStyle}>{formatValue(num2)}</Text>
+        <Text textWithTags={textWithTags} style={valueStyle}>
+          {formatValue(num1)}
+        </Text>{' '}
+        and{' '}
+        <Text textWithTags={textWithTags} style={valueStyle}>
+          {formatValue(num2)}
+        </Text>
       </Text>
     );
   } else {
-    return <Text textWithTags={textWithTags} style={valueStyle}>{formatValue(value)}</Text>;
+    return (
+      <Text textWithTags={textWithTags} style={valueStyle}>
+        {formatValue(value)}
+      </Text>
+    );
   }
 }

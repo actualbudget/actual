@@ -1,10 +1,15 @@
-import { useState, type ComponentProps, type ReactNode } from 'react';
+import {
+  type ElementType,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 
 import { type CSSProperties, theme } from '../../style';
 
 import { Input, defaultInputStyle } from './Input';
-import { View } from './View';
 import { InputWithTags } from './InputWithTags';
+import { View } from './View';
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
   leftContent?: ReactNode;
@@ -26,7 +31,7 @@ export function InputWithContent({
   ...props
 }: InputWithContentProps) {
   const [focused, setFocused] = useState(props.focused ?? false);
-  const InputType: React.ElementType = inputWithTags ? InputWithTags: Input;
+  const InputType: ElementType = inputWithTags ? InputWithTags : Input;
 
   return (
     <View

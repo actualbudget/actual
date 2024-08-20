@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { TAGREGEX } from 'loot-core/shared/tag';
 import {
   currentDay,
   addDays,
@@ -12,6 +11,7 @@ import {
   sortNumbers,
   getApproxNumberThreshold,
 } from '../../shared/rules';
+import { TAGREGEX } from '../../shared/tag';
 import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';
 import {

@@ -14,6 +14,7 @@ import { FilterAutocomplete } from '../autocomplete/FilterAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '../autocomplete/ReportAutocomplete';
 import { Input } from '../common/Input';
+import { InputWithTags } from '../common/InputWithTags';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { DateSelect } from '../select/DateSelect';
@@ -21,7 +22,6 @@ import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
-import { InputWithTags } from '../common/InputWithTags';
 
 export function GenericInput({
   field,
@@ -63,8 +63,7 @@ export function GenericInput({
             inputRef={inputRef}
             defaultValue={value || ''}
             placeholder="nothing"
-            onEnter={e => onChange(e.target.value)}
-            onBlur={e => onChange(e.target.value)}
+            onChangeValue={newValue => onChange(newValue)}
           />
         );
     }
@@ -253,8 +252,7 @@ export function GenericInput({
             inputRef={inputRef}
             defaultValue={value || ''}
             placeholder="nothing"
-            onEnter={e => onChange(e.target.value)}
-            onBlur={e => onChange(e.target.value)}
+            onChangeValue={newValue => onChange(newValue)}
           />
         );
       }

@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
+import { getHoverColor, getTextColorForColor } from '../../shared/tag';
 import { groupById } from '../../shared/util';
 import {
   CategoryEntity,
@@ -35,7 +36,6 @@ import {
 import { sendMessages, batchMessages } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
-import { getHoverColor, getTextColorForColor } from '../../shared/tag';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
@@ -704,12 +704,11 @@ async function insertTags(transaction) {
   const tags = extractTagsFromNotes(notes);
 
   if (tags.length > 0) {
-    for(const tag of tags) {
-      const { id } = await first('SELECT id FROM tags where tag = ?', [
-        tag,
-      ]) || { };
+    for (const tag of tags) {
+      const { id } =
+        (await first('SELECT id FROM tags where tag = ?', [tag])) || {};
 
-      if(!id) {
+      if (!id) {
         insertWithUUID('tags', {
           tag,
           color: null,

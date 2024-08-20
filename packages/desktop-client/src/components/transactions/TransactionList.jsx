@@ -1,8 +1,6 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import escapeRegExp from 'lodash/escapeRegExp';
-
 import { getTags, pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
