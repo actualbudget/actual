@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 import {
@@ -59,6 +60,8 @@ const CustomTooltip = ({
   selection,
   compare,
 }: CustomTooltipProps) => {
+  const { t } = useTranslation();
+
   if (active && payload && payload.length) {
     const comparison =
       selection === 'average'
@@ -79,16 +82,16 @@ const CustomTooltip = ({
         <div>
           <div style={{ marginBottom: 10 }}>
             <strong>
-              Day:{' '}
+              {t('Day:') + ' '}
               {Number(payload[0].payload.day) >= 28
-                ? '28+'
+                ? t('28+')
                 : payload[0].payload.day}
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
             {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
-                left={compare === 'thisMonth' ? 'This month:' : 'Last month:'}
+                left={compare === 'thisMonth' ? t('This month:') : t('Last month:')}
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1,
                 )}
@@ -98,19 +101,19 @@ const CustomTooltip = ({
               <AlignedText
                 left={
                   selection === 'average'
-                    ? 'Average:'
+                    ? t('Average:')
                     : selection === lastYear
-                      ? 'Last year:'
+                      ? t('Last year:')
                       : compare === 'thisMonth'
-                        ? 'Last month:'
-                        : '2 months ago:'
+                        ? t('Last month:')
+                        : t('2 months ago:')
                 }
                 right={amountToCurrency(comparison)}
               />
             )}
             {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
-                left="Difference:"
+                left={t("Difference:")}
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1 -
                     comparison,

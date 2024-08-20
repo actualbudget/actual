@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 import {
@@ -34,6 +35,7 @@ export function NetWorthGraph({
   compact,
   showTooltip = true,
 }: NetWorthGraphProps) {
+  const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
 
   const tickFormatter = tick => {
@@ -98,13 +100,13 @@ export function NetWorthGraph({
               <strong>{payload[0].payload.date}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
-              <AlignedText left="Assets:" right={payload[0].payload.assets} />
-              <AlignedText left="Debt:" right={payload[0].payload.debt} />
+              <AlignedText left={t("Assets:")} right={payload[0].payload.assets} />
+              <AlignedText left={t("Debt:")} right={payload[0].payload.debt} />
               <AlignedText
-                left="Net worth:"
+                left={t("Net worth:")}
                 right={<strong>{payload[0].payload.networth}</strong>}
               />
-              <AlignedText left="Change:" right={payload[0].payload.change} />
+              <AlignedText left={t("Change:")} right={payload[0].payload.change} />
             </div>
           </div>
         </div>

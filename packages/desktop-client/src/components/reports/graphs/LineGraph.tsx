@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 import {
@@ -58,6 +59,7 @@ const CustomTooltip = ({
   active,
   payload,
 }: CustomTooltipProps) => {
+  const { t } = useTranslation();
   if (active && payload && payload.length) {
     let sumTotals = 0;
     return (
@@ -98,7 +100,7 @@ const CustomTooltip = ({
               })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
-              left="Total"
+              left={t("Total")}
               right={amountToCurrency(sumTotals)}
               style={{
                 fontWeight: 600,

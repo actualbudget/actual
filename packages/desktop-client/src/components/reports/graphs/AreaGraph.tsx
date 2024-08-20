@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 import {
@@ -52,6 +53,8 @@ const CustomTooltip = ({
   payload,
   balanceTypeOp,
 }: CustomTooltipProps) => {
+  const { t } = useTranslation();
+
   if (active && payload && payload.length) {
     return (
       <div
@@ -72,31 +75,31 @@ const CustomTooltip = ({
           <div style={{ lineHeight: 1.5 }}>
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Assets:"
+                left={t("Assets:")}
                 right={amountToCurrency(payload[0].payload.totalAssets)}
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Debts:"
+                left={t("Debts:")}
                 right={amountToCurrency(payload[0].payload.totalDebts)}
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Net Assets:"
+                left={t("Net Assets:")}
                 right={amountToCurrency(payload[0].payload.netAssets)}
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Net Debts:"
+                left={t("Net Debts:")}
                 right={amountToCurrency(payload[0].payload.netDebts)}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Net:"
+                left={t("Net:")}
                 right={
                   <strong>
                     {amountToCurrency(payload[0].payload.totalTotals)}

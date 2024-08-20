@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as d from 'date-fns';
 import { css } from 'glamor';
@@ -34,6 +35,8 @@ type CustomTooltipProps = TooltipProps<number, 'date'> & {
 };
 
 function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
+  const { t } = useTranslation();
+
   if (!active || !payload) {
     return null;
   }
@@ -58,24 +61,24 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
           </strong>
         </div>
         <div style={{ lineHeight: 1.5 }}>
-          <AlignedText left="Income:" right={amountToCurrency(data.income)} />
+          <AlignedText left={t("Income:")} right={amountToCurrency(data.income)} />
           <AlignedText
-            left="Expenses:"
+            left={t("Expenses:")}
             right={amountToCurrency(data.expenses)}
           />
           <AlignedText
-            left="Change:"
+            left={t("Change:")}
             right={
               <strong>{amountToCurrency(data.income + data.expenses)}</strong>
             }
           />
           {data.transfers !== 0 && (
             <AlignedText
-              left="Transfers:"
+              left={t("Transfers:")}
               right={amountToCurrency(data.transfers)}
             />
           )}
-          <AlignedText left="Balance:" right={amountToCurrency(data.balance)} />
+          <AlignedText left={t("Balance:")} right={amountToCurrency(data.balance)} />
         </div>
       </div>
     </div>
