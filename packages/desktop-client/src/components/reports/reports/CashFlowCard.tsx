@@ -5,9 +5,9 @@ import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type CashFlowWidget } from 'loot-core/src/types/models';
 
-import { theme, styles } from '../../../style';
-import { Block } from '../../common/Block';
+import { theme } from '../../../style';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
@@ -16,6 +16,7 @@ import { Container } from '../Container';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
+import { ReportCardName } from '../ReportCardName';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
@@ -81,13 +82,22 @@ function CustomLabel({
 
 type CashFlowCardProps = {
   isEditing?: boolean;
+  meta?: CashFlowWidget['meta'];
+  onMetaChange: (newMeta: CashFlowWidget['meta']) => void;
   onRemove: () => void;
 };
 
-export function CashFlowCard({ isEditing, onRemove }: CashFlowCardProps) {
+export function CashFlowCard({
+  isEditing,
+  meta,
+  onMetaChange,
+  onRemove,
+}: CashFlowCardProps) {
   const { t } = useTranslation();
   const end = monthUtils.currentDay();
   const start = monthUtils.currentMonth() + '-01';
+
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
   const data = useReport('cash_flow_simple', params);
@@ -106,12 +116,19 @@ export function CashFlowCard({ isEditing, onRemove }: CashFlowCardProps) {
       to="/reports/cash-flow"
       menuItems={[
         {
+          name: 'rename',
+          text: t('Rename'),
+        },
+        {
           name: 'remove',
           text: t('Remove'),
         },
       ]}
       onMenuSelect={item => {
         switch (item) {
+          case 'rename':
+            setNameMenuOpen(true);
+            break;
           case 'remove':
             onRemove();
             break;
@@ -127,12 +144,18 @@ export function CashFlowCard({ isEditing, onRemove }: CashFlowCardProps) {
       >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
-            <Block
-              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
-              role="heading"
-            >
-              Cash Flow
-            </Block>
+            <ReportCardName
+              name={meta?.name || t('Cash Flow')}
+              isEditing={nameMenuOpen}
+              onChange={newName => {
+                onMetaChange({
+                  ...meta,
+                  name: newName,
+                });
+                setNameMenuOpen(false);
+              }}
+              onClose={() => setNameMenuOpen(false)}
+            />
             <DateRange start={start} end={end} />
           </View>
           {data && (
