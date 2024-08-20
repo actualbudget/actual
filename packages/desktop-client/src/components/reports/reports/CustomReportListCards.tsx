@@ -14,15 +14,12 @@ import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgExclamationSolid } from '../../../icons/v1';
 import { styles } from '../../../style/index';
 import { theme } from '../../../style/theme';
-import { Block } from '../../common/Block';
-import { InitialFocus } from '../../common/InitialFocus';
-import { Input } from '../../common/Input';
 import { Text } from '../../common/Text';
 import { Tooltip } from '../../common/Tooltip';
 import { View } from '../../common/View';
-import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
+import { ReportCardName } from '../ReportCardName';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
@@ -146,38 +143,12 @@ function CustomReportListCardsInner({
           }}
         >
           <View style={{ flex: 1 }}>
-            {nameMenuOpen ? (
-              <InitialFocus>
-                <Input
-                  className={NON_DRAGGABLE_AREA_CLASS_NAME}
-                  defaultValue={report.name}
-                  onEnter={e =>
-                    onSaveName((e.target as HTMLInputElement).value)
-                  }
-                  onBlur={e => onSaveName(e.target.value)}
-                  onEscape={() => setNameMenuOpen(false)}
-                  style={{
-                    fontSize: 15,
-                    fontWeight: 500,
-                    marginTop: -6,
-                    marginBottom: -1,
-                    marginLeft: -6,
-                    width: Math.max(20, report.name.length) + 'ch',
-                  }}
-                />
-              </InitialFocus>
-            ) : (
-              <Block
-                style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
-                }}
-                role="heading"
-              >
-                {report.name}
-              </Block>
-            )}
+            <ReportCardName
+              name={report.name}
+              isEditing={nameMenuOpen}
+              onChange={onSaveName}
+              onClose={() => setNameMenuOpen(false)}
+            />
             {report.isDateStatic ? (
               <DateRange start={report.startDate} end={report.endDate} />
             ) : (

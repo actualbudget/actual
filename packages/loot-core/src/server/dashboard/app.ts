@@ -117,7 +117,7 @@ async function updateDashboard(
 async function updateDashboardWidget(
   widget: EverythingButIdOptional<Omit<Widget, 'tombstone'>>,
 ) {
-  await db.update('dashboard', widget);
+  await db.updateWithSchema('dashboard', widget);
 }
 
 async function resetDashboard() {
