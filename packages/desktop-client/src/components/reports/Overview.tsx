@@ -281,10 +281,7 @@ export function Overview() {
     );
   };
 
-  const onMetaChange = <T extends { i: string; meta: Widget['meta'] }>(
-    widget: T,
-    newMeta: T['meta'],
-  ) => {
+  const onMetaChange = (widget: { i: string }, newMeta: Widget['meta']) => {
     send('dashboard-update-widget', {
       id: widget.i,
       meta: newMeta,
