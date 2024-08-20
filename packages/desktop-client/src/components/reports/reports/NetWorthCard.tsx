@@ -1,8 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
@@ -15,12 +18,25 @@ import { ReportCard } from '../ReportCard';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
-export function NetWorthCard({ accounts }) {
+type NetWorthCardProps = {
+  isEditing?: boolean;
+  accounts: AccountEntity[];
+  onRemove: () => void;
+};
+
+export function NetWorthCard({
+  isEditing,
+  accounts,
+  onRemove,
+}: NetWorthCardProps) {
+  const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const onCardHover = useCallback(() => setIsCardHovered(true));
-  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
+  const onCardHover = useCallback(() => setIsCardHovered(true), []);
+  const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
   const params = useMemo(
     () => netWorthSpreadsheet(start, end, accounts),
@@ -29,7 +45,25 @@ export function NetWorthCard({ accounts }) {
   const data = useReport('net_worth', params);
 
   return (
-    <ReportCard size={2} to="/reports/net-worth">
+    <ReportCard
+      isEditing={isEditing}
+      to="/reports/net-worth"
+      menuItems={[
+        {
+          name: 'remove',
+          text: t('Remove'),
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={onCardHover}
@@ -67,10 +101,9 @@ export function NetWorthCard({ accounts }) {
 
         {data ? (
           <NetWorthGraph
-            start={start}
-            end={end}
             graphData={data.graphData}
             compact={true}
+            showTooltip={!isEditing && !isNarrowWidth}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (

@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
@@ -16,7 +18,16 @@ import { ReportCard } from '../ReportCard';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
-export function SpendingCard() {
+import { MissingReportCard } from './MissingReportCard';
+
+type SpendingCardProps = {
+  isEditing?: boolean;
+  onRemove: () => void;
+};
+
+export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
+  const { t } = useTranslation();
+
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
@@ -46,8 +57,37 @@ export function SpendingCard() {
       data.intervalData[todayDay][spendingReportCompare];
   const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
 
+  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
+
+  if (!spendingReportFeatureFlag) {
+    return (
+      <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
+        <Trans>
+          The experimental spending report feature has not been enabled.
+        </Trans>
+      </MissingReportCard>
+    );
+  }
   return (
-    <ReportCard to="/reports/spending">
+    <ReportCard
+      isEditing={isEditing}
+      to="/reports/spending"
+      menuItems={[
+        {
+          name: 'remove',
+          text: t('Remove'),
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={() => setIsCardHovered(true)}
@@ -62,8 +102,8 @@ export function SpendingCard() {
               Monthly Spending
             </Block>
             <DateRange
-              start={monthUtils.currentMonth()}
-              end={monthUtils.currentMonth()}
+              start={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
+              end={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
             />
           </View>
           {data && showLastMonth && (
@@ -92,7 +132,7 @@ export function SpendingCard() {
         {!showLastMonth ? (
           <View style={{ padding: 5 }}>
             <p style={{ margin: 0, textAlign: 'center' }}>
-              Additional data required to generate graph
+              <Trans>Additional data required to generate graph</Trans>
             </p>
           </View>
         ) : data ? (
@@ -104,7 +144,7 @@ export function SpendingCard() {
             compare={spendingReportCompare}
           />
         ) : (
-          <LoadingIndicator message="Loading report..." />
+          <LoadingIndicator message={t('Loading report...')} />
         )}
       </View>
     </ReportCard>

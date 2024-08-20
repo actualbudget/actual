@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { FocusScope } from '@react-aria/focus';
 import {
@@ -62,6 +63,7 @@ function ConfigureField({
   dispatch,
   onApply,
 }) {
+  const { t } = useTranslation();
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef();
   const prevOp = useRef(null);
@@ -91,15 +93,15 @@ function ConfigureField({
               options={
                 field === 'amount'
                   ? [
-                      ['amount', 'Amount'],
-                      ['amount-inflow', 'Amount (inflow)'],
-                      ['amount-outflow', 'Amount (outflow)'],
+                      ['amount', t('Amount')],
+                      ['amount-inflow', t('Amount (inflow)')],
+                      ['amount-outflow', t('Amount (outflow)')],
                     ]
                   : field === 'date'
                     ? [
-                        ['date', 'Date'],
-                        ['month', 'Month'],
-                        ['year', 'Year'],
+                        ['date', t('Date')],
+                        ['month', t('Month')],
+                        ['year', t('Year')],
                       ]
                     : null
               }
@@ -125,7 +127,7 @@ function ConfigureField({
           marginBottom: 10,
         }}
       >
-        {field === 'saved' && 'Existing filters will be cleared'}
+        {field === 'saved' && t('Existing filters will be cleared')}
       </View>
 
       <Stack
@@ -231,7 +233,7 @@ function ConfigureField({
               });
             }}
           >
-            Apply
+            <Trans>Apply</Trans>
           </Button>
         </Stack>
       </form>
@@ -240,6 +242,7 @@ function ConfigureField({
 }
 
 export function FilterButton({ onApply, compact, hover, exclude }) {
+  const { t } = useTranslation();
   const filters = useFilters();
   const triggerRef = useRef(null);
 
@@ -285,7 +288,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy-MM');
         } else {
-          alert('Invalid date format');
+          alert(t('Invalid date format'));
           return;
         }
       } else if (cond.options.year) {
@@ -293,7 +296,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy');
         } else {
-          alert('Invalid date format');
+          alert(t('Invalid date format'));
           return;
         }
       }
@@ -329,7 +332,11 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
             lineHeight: 1.5,
             padding: '6px 10px',
           }}
-          content={<Text>Filters</Text>}
+          content={
+            <Text>
+              <Trans>Filters</Trans>
+            </Text>
+          }
           placement="bottom start"
           triggerProps={{
             isDisabled: !hover,

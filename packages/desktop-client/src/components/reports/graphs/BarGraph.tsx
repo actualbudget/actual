@@ -29,9 +29,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { useResponsive } from '../../../ResponsiveProvider';
-import { type CSSProperties } from '../../../style';
-import { theme } from '../../../style/index';
+import { type CSSProperties, theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
@@ -178,7 +176,6 @@ export function BarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
-  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
@@ -279,7 +276,7 @@ export function BarGraph({
                     setPointer('pointer')
                   }
                   onClick={item =>
-                    !isNarrowWidth &&
+                    ((compact && showTooltip) || !compact) &&
                     !['Group', 'Interval'].includes(groupBy) &&
                     showActivity({
                       navigate,
