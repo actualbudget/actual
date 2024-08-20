@@ -85,8 +85,10 @@ export function Overview() {
     i: widget.id,
     w: widget.width,
     h: widget.height,
-    minW: isCustomReportWidget(widget) ? 2 : 3,
-    minH: isCustomReportWidget(widget) ? 1 : 2,
+    minW:
+      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
+    minH:
+      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
     ...widget,
   }));
 
