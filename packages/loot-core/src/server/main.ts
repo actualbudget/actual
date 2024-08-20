@@ -38,6 +38,7 @@ import {
 import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
 import * as cloudStorage from './cloud-storage';
+import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
@@ -1121,11 +1122,10 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
               'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
-
-          err.message = 'Failed syncing account: ' + err.message;
-
-          captureException(err);
         }
+
+        err.message = 'Failed syncing account “' + acct.name + '.”';
+        captureException(err);
       } finally {
         console.groupEnd();
       }
@@ -2056,6 +2056,7 @@ app.handlers = handlers;
 app.combine(
   schedulesApp,
   budgetApp,
+  dashboardApp,
   notesApp,
   toolsApp,
   filtersApp,

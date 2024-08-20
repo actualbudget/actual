@@ -18,6 +18,7 @@ import {
   PayeeEntity,
 } from './models';
 import { GlobalPrefs, LocalPrefs } from './prefs';
+import { Query } from './query';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -137,7 +138,7 @@ export interface ServerHandlers {
 
   'create-query': (arg: { sheetName; name; query }) => Promise<unknown>;
 
-  query: (query) => Promise<{ data; dependencies }>;
+  query: (query: Query) => Promise<{ data: unknown; dependencies }>;
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 

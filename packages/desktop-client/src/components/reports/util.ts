@@ -20,16 +20,12 @@ export async function runAll(
 
 export function indexCashFlow<
   T extends { date: string; isTransfer: boolean; amount: number },
->(data: T[], date: string, isTransfer: string) {
-  const results = {};
+>(data: T[]): Record<string, Record<'true' | 'false', number>> {
+  const results: Record<string, Record<'true' | 'false', number>> = {};
   data.forEach(item => {
-    const findExisting = results[item.date]
-      ? results[item.date][item.isTransfer]
-        ? results[item.date][item.isTransfer]
-        : 0
-      : 0;
-    const result = { [item[isTransfer]]: item.amount + findExisting };
-    results[item[date]] = { ...results[item[date]], ...result };
+    const findExisting = results?.[item.date]?.[String(item.isTransfer)] ?? 0;
+    const result = { [String(item.isTransfer)]: item.amount + findExisting };
+    results[item.date] = { ...results[item.date], ...result };
   });
   return results;
 }
