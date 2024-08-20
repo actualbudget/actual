@@ -17,6 +17,7 @@ import { TagAutocomplete } from '../autocomplete/TagAutocomplete';
 import { Popover } from './Popover';
 import { View } from './View';
 import { useTags } from '../../hooks/useTags';
+import { TAGREGEX } from 'loot-core/shared/tag';
 
 export const defaultInputStyle = {
   outline: 0,
@@ -52,7 +53,11 @@ export function InputWithTags({
 }: InputWithTagsProps) {
   const tags = useTags();
   const generateTags = text => {
-    return text.replace(/(#\w[\w-]*)(?=\s|$|\#)/g, (match, p1) => {
+    return text.replace(TAGREGEX, (match, p1) => {
+
+      if(p1.includes("##"))
+        return p1;
+      
       const filteredTags = tags.filter(t => t.tag == p1);
 
       return renderToStaticMarkup(
@@ -69,9 +74,9 @@ export function InputWithTags({
             maxWidth: '150px',
             backgroundColor:
               filteredTags.length > 0
-                ? filteredTags[0].color ?? theme.noteTagBackground
+                ? filteredTags[0]?.color ?? theme.noteTagBackground
                 : theme.noteTagBackground,
-            color: filteredTags[0].textColor ?? theme.noteTagText,
+            color: filteredTags[0]?.textColor ?? theme.noteTagText,
             cursor: 'pointer',
           }}
         >
@@ -86,6 +91,7 @@ export function InputWithTags({
       : value || '',
   );
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [keyPressed, setKeyPressed] = useState(null);
   const triggerRef = useRef(null);
   const edit = useRef(null);
   const [hint, setHint] = useState('');
@@ -107,7 +113,7 @@ export function InputWithTags({
     evt => {
       let updatedContent = evt.currentTarget.innerText;
       updatedContent = updatedContent.replace('\r\n', '').replace('\n', '');
-      //just a hack to make it work without mega refactory. should use evt.currentTarget.innerText where needed
+
       evt.currentTarget.value = updatedContent;
 
       updatedContent = generateTags(updatedContent);
@@ -125,8 +131,8 @@ export function InputWithTags({
     const range = document.createRange();
     const selection = window.getSelection();
 
-    range.selectNodeContents(el); // Select the entire content
-    range.collapse(false); // Collapse the range to the end point (cursor at the end)
+    range.selectNodeContents(el);
+    range.collapse(false);
 
     selection.removeAllRanges();
     selection.addRange(range);
@@ -184,6 +190,15 @@ export function InputWithTags({
           all: 'unset',
         }}
         onKeyDown={e => {
+          if (showAutocomplete) {
+            if (['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
+              setKeyPressed(e.key);
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
+          }
+
           nativeProps.onKeyDown?.(e);
 
           if (e.key === 'Enter' && onEnter) {
@@ -207,29 +222,38 @@ export function InputWithTags({
           }
 
           if (e.key === 'Backspace') {
-            if (!edit.current.textContent.includes('#')) {
-              setShowAutocomplete(false);
+            setShowAutocomplete(false);
+
+            const cursorPosition = getCaretPosition(edit.current);
+            const textBeforeCursor = edit.current.textContent.slice(
+              0,
+              cursorPosition,
+            );
+
+            const lastHashIndex = textBeforeCursor.lastIndexOf('#');
+            if (lastHashIndex === -1) {
+              return;
             }
-          }
 
-          if (showAutocomplete) {
-            updateHint();
-          }
+            const newContent = generateTags(
+              textBeforeCursor.slice(0, lastHashIndex) +
+                edit.current.textContent.slice(cursorPosition),
+            );
 
-          onContentChange(e);
+            setContent(newContent);
+          }
+          else {
+            onContentChange(e);            
+          }
         }}
         onBlur={e => {
           onUpdate?.(e.target.innerText);
           onContentChange(e);
           nativeProps.onBlur?.(e);
         }}
-        onInput={e => {
-          onContentChange(e);
-
-          if (showAutocomplete) {
-            updateHint(); // Update hint after the content is modified
-          }
-        }}
+        onInput={e => 
+          onContentChange(e)
+        }
         onChange={e => {
           onContentChange(e);
         }}
@@ -244,8 +268,12 @@ export function InputWithTags({
         <TagAutocomplete
           hint={hint} // Pass the dynamically updated hint
           clickedOnIt={() => setShowAutocomplete(false)}
+          keyPressed={keyPressed}
+          onKeyHandled={() => setKeyPressed(null)}
           onMenuSelect={item => {
             setShowAutocomplete(false);
+
+            if (!item) return;
             const el = edit.current;
             const cursorPosition = getCaretPosition(el);
             const textBeforeCursor = el.textContent.slice(0, cursorPosition);

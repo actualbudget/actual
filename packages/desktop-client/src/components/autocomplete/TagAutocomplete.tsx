@@ -1,16 +1,20 @@
 import { useTags } from '../../hooks/useTags';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { View } from '../common/View';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../common/Button2';
 import { theme } from '../../style';
-import { CompactPicker, SketchPicker } from 'react-color';
-import { useDispatch } from 'react-redux';
-import { updateTags } from 'loot-core/client/actions';
 
-export function TagAutocomplete({ onMenuSelect, hint, clickedOnIt }) {
+export function TagAutocomplete({
+  onMenuSelect,
+  hint,
+  clickedOnIt,
+  keyPressed,
+  onKeyHandled,
+}) {
   const tags = useTags();
   const [suggestions, setSuggestions] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     if (tags && tags.length > 0) {
@@ -31,38 +35,35 @@ export function TagAutocomplete({ onMenuSelect, hint, clickedOnIt }) {
     }
   }, [tags, hint]);
 
+  useEffect(() => {
+    if (keyPressed) {
+      if (keyPressed === 'ArrowRight') {
+        setSelectedIndex(prevIndex => (prevIndex + 1) % suggestions.length);
+      } else if (keyPressed === 'ArrowLeft') {
+        setSelectedIndex(prevIndex =>
+          prevIndex === 0 ? suggestions.length - 1 : prevIndex - 1,
+        );
+      } else if (keyPressed === 'Tab' || keyPressed === 'Enter') {
+        onMenuSelect(suggestions[selectedIndex]);
+      }
+      if (onKeyHandled) {
+        onKeyHandled();
+      }
+    }
+  }, [keyPressed, suggestions, selectedIndex, onMenuSelect, onKeyHandled]);
+
   return (
     <TagList
-      items={suggestions}
+      items={suggestions.slice(0, 10)}
       onMenuSelect={onMenuSelect}
       tags={tags}
       clickedOnIt={clickedOnIt}
+      selectedIndex={selectedIndex}
     />
   );
 }
 
-function TagList({ items, onMenuSelect, tags, clickedOnIt }) {
-  const [showColors, setShowColors] = useState(false);
-  const triggerRef = useRef(null);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
-  const dispatch = useDispatch();
-
-  const handleContextMenu = (e, item) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setSelectedItem(item);
-
-    // Calculate position of the clicked item
-    const rect = e.currentTarget.getBoundingClientRect();
-    setPickerPosition({
-      top: rect.bottom, // Position the picker right below the selected item
-      left: rect.left, // Align the picker with the left side of the selected item
-    });
-
-    setShowColors(true);
-  };
-
+function TagList({ items, onMenuSelect, tags, clickedOnIt, selectedIndex }) {
   return (
     <View
       style={{
@@ -72,6 +73,7 @@ function TagList({ items, onMenuSelect, tags, clickedOnIt }) {
         padding: '5px',
         flexWrap: 'wrap',
         overflow: 'visible',
+        alignItems: 'baseline',
       }}
     >
       {items.length === 0 && (
@@ -79,16 +81,11 @@ function TagList({ items, onMenuSelect, tags, clickedOnIt }) {
           {tags.length === 0 && (
             <span>No tags found. Tags will be added automatically</span>
           )}
-          {tags.length > 0 && <span>No tags found with this terms</span>}
+          {tags.length > 0 && <span>No tags found with these terms</span>}
         </View>
       )}
-      {items.map(item => (
-        <View
-          data-keep-editing="true"
-          key={item.id}
-          ref={triggerRef}
-          onContextMenu={e => handleContextMenu(e, item)}
-        >
+      {items.map((item, index) => (
+        <View data-keep-editing="true" key={item.id}>
           <Button
             onPress={() => onMenuSelect(item)}
             style={{
@@ -98,41 +95,23 @@ function TagList({ items, onMenuSelect, tags, clickedOnIt }) {
               display: 'inline-block',
               overflow: 'hidden',
               whiteSpace: 'nowrap',
-              padding: '3px 7px',
+              padding: '5px 11px',
               userSelect: 'none',
               textOverflow: 'ellipsis',
               maxWidth: '150px',
               backgroundColor: item.color ?? theme.noteTagBackground,
               color: item.textColor ?? theme.noteTagText,
               cursor: 'pointer',
+              transition: 'transform 0.3s ease, background-color 0.3s ease',
+              transform: index === selectedIndex ? 'scale(1)' : 'scale(0.8)',
+              textDecorationLine:
+                index === selectedIndex ? 'underline' : 'unset',
             }}
           >
             {item.tag}
           </Button>
         </View>
       ))}
-      {showColors && selectedItem && (
-        <View
-          data-keep-editing="true"
-          style={{
-            position: 'fixed', // Use fixed positioning to float above other content
-            top: pickerPosition.top,
-            left: pickerPosition.left,
-            zIndex: 1000, // Ensure it's above other elements
-          }}
-        >
-          <CompactPicker
-            color={selectedItem.color ?? theme.noteTagBackground}
-            onChange={newColor => {
-              selectedItem.color = newColor.hex;
-              dispatch(updateTags(selectedItem));
-            }}
-            onChangeComplete={color => {
-              setShowColors(false);
-            }}
-          />
-        </View>
-      )}
     </View>
   );
 }

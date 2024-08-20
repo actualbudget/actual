@@ -428,6 +428,7 @@ export function InputCellWithTags({
   const [hint, setHint] = useState('');
   const edit = useRef(null);
   const [content, setContent] = useState(props.value);
+  const [keyPressed, setKeyPressed] = useState(null); // Track key presses for TagAutocomplete
 
   useEffect(() => {
     if (content !== undefined) {
@@ -490,6 +491,15 @@ export function InputCellWithTags({
         onBlur={onBlur}
         style={{ textAlign, ...(inputProps && inputProps.style) }}
         onKeyDown={e => {
+          if (showAutocomplete) {
+            if (['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
+              setKeyPressed(e.key);
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
+          }
+
           if (e.key === '#') {
             setShowAutocomplete(true);
           }
@@ -504,8 +514,13 @@ export function InputCellWithTags({
         <TagAutocomplete
           hint={hint} // Pass the dynamically updated hint
           clickedOnIt={() => setShowAutocomplete(false)}
+          keyPressed={keyPressed}
+          onKeyHandled={() => setKeyPressed(null)}
           onMenuSelect={item => {
             setShowAutocomplete(false);
+
+            if (!item) return;
+
             const el = edit.current;
             const cursorPosition = getCaretPosition(el);
             const textBeforeCursor = el.value.slice(0, cursorPosition);

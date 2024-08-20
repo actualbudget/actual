@@ -1,6 +1,6 @@
 import Color from 'color';
 
-export const TAGREGEX = /(?<!#)(#[\w\d\p{Emoji}-]+)(?=\s|$)/gu;
+export const TAGREGEX = /(?<!\B#)(#[\w\d\p{Emoji}-]+)(?=\s|$|#)/gu
 
 export const TAGCOLORS = [
 // Red
