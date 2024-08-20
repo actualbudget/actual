@@ -36,7 +36,6 @@ export function SpendingCard() {
     data &&
     data.intervalData[todayDay].lastMonth -
       data.intervalData[todayDay].thisMonth;
-
   return (
     <ReportCard flex="1" to="/reports/spending">
       <View
@@ -53,8 +52,8 @@ export function SpendingCard() {
               Monthly Spending
             </Block>
             <DateRange
-              start={monthUtils.currentMonth()}
-              end={monthUtils.currentMonth()}
+              start={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
+              end={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
             />
           </View>
           {data && (
