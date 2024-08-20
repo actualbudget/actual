@@ -79,7 +79,6 @@ export function SpendingCard({
       </MissingReportCard>
     );
   }
-
   return (
     <ReportCard
       isEditing={isEditing}
@@ -127,8 +126,8 @@ export function SpendingCard({
               onClose={() => setNameMenuOpen(false)}
             />
             <DateRange
-              start={monthUtils.currentMonth()}
-              end={monthUtils.currentMonth()}
+              start={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
+              end={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
             />
           </View>
           {data && showLastMonth && (
