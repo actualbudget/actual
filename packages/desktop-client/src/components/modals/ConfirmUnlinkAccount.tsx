@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Button } from '../common/Button2';
+import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
@@ -44,15 +45,17 @@ export function ConfirmUnlinkAccount({
               <Button style={{ marginRight: 10 }} onPress={close}>
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                onPress={() => {
-                  onUnlink();
-                  close();
-                }}
-              >
-                Unlink
-              </Button>
+              <InitialFocus>
+                <Button
+                  variant="primary"
+                  onPress={() => {
+                    onUnlink();
+                    close();
+                  }}
+                >
+                  Unlink
+                </Button>
+              </InitialFocus>
             </View>
           </View>
         </>

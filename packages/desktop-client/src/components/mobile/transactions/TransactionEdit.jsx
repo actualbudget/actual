@@ -132,7 +132,7 @@ export function lookupName(items, id) {
   return items.find(item => item.id === id)?.name;
 }
 
-export function Status({ status }) {
+export function Status({ status, isSplit }) {
   let color;
 
   switch (status) {
@@ -157,7 +157,7 @@ export function Status({ status }) {
         textAlign: 'left',
       }}
     >
-      {titleFirst(status)}
+      {titleFirst(status) + (isSplit ? ' (Split)' : '')}
     </Text>
   );
 }
@@ -460,7 +460,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const { editingField, onRequestActiveEdit, onClearActiveEdit } =
     useSingleActiveEditForm();
-  const [totalAmountFocused, setTotalAmountFocused] = useState(false);
+  const [totalAmountFocused, setTotalAmountFocused] = useState(true);
   const childTransactionElementRefMap = useRef({});
 
   const payeesById = useMemo(() => groupById(payees), [payees]);

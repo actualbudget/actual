@@ -21,7 +21,7 @@ export function SaveReportDelete({
     <>
       <View style={{ align: 'center' }}>
         <Text style={{ color: theme.errorText, marginBottom: 5 }}>
-          Do you want to delete report:
+          Are you sure you want to delete report:
         </Text>
         <View>{name}</View>
       </View>
@@ -33,7 +33,7 @@ export function SaveReportDelete({
         style={{ marginTop: 15 }}
       >
         <View style={{ flex: 1 }} />
-        <Button variant="primary" onPress={onDelete}>
+        <Button variant="primary" autoFocus onPress={onDelete}>
           Yes
         </Button>
         <Button variant="primary" onPress={onClose}>

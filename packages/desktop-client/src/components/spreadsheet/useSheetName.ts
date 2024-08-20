@@ -3,7 +3,7 @@ import { useContext } from 'react';
 
 import { NamespaceContext } from './NamespaceContext';
 
-import { type Binding } from '.';
+import { type SheetNames, type SheetFields, type Binding } from '.';
 
 function unresolveName(name) {
   const idx = name.indexOf('!');
@@ -16,14 +16,17 @@ function unresolveName(name) {
   return { sheet: null, name };
 }
 
-export function useSheetName(binding: Binding) {
+export function useSheetName<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+>(binding: Binding<SheetName, FieldName>) {
   if (!binding) {
     throw new Error('Sheet binding is required');
   }
 
   const isStringBinding = typeof binding === 'string';
 
-  let bindingName = isStringBinding ? binding : binding.name;
+  let bindingName: string = isStringBinding ? binding : binding.name;
 
   if (global.IS_TESTING && !isStringBinding && !bindingName) {
     bindingName = binding.value.toString();
