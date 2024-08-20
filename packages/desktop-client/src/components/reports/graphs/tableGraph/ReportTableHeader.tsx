@@ -96,7 +96,7 @@ export function ReportTableHeader({
                     minWidth: compact ? 50 : 85,
                   }}
                   valueStyle={compactStyle}
-                  value={t("Deposits")}
+                  value={t('Deposits')}
                   width="flex"
                 />
                 <Cell
@@ -104,7 +104,7 @@ export function ReportTableHeader({
                     minWidth: compact ? 50 : 85,
                   }}
                   valueStyle={compactStyle}
-                  value={t("Payments")}
+                  value={t('Payments')}
                   width="flex"
                 />
               </>
@@ -114,7 +114,7 @@ export function ReportTableHeader({
             minWidth: compact ? 50 : 85,
           }}
           valueStyle={compactStyle}
-          value={t("Totals")}
+          value={t('Totals')}
           width="flex"
         />
         <Cell
@@ -122,7 +122,7 @@ export function ReportTableHeader({
             minWidth: compact ? 50 : 85,
           }}
           valueStyle={compactStyle}
-          value={t("Average")}
+          value={t('Average')}
           width="flex"
         />
       </View>

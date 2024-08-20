@@ -99,7 +99,7 @@ const CustomTooltip = ({
               })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
-              left={t("Total")}
+              left={t('Total')}
               right={amountToCurrency(sumTotals)}
               style={{
                 fontWeight: 600,

@@ -99,13 +99,19 @@ export function NetWorthGraph({
               <strong>{payload[0].payload.date}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
-              <AlignedText left={t("Assets:")} right={payload[0].payload.assets} />
-              <AlignedText left={t("Debt:")} right={payload[0].payload.debt} />
               <AlignedText
-                left={t("Net worth:")}
+                left={t('Assets:')}
+                right={payload[0].payload.assets}
+              />
+              <AlignedText left={t('Debt:')} right={payload[0].payload.debt} />
+              <AlignedText
+                left={t('Net worth:')}
                 right={<strong>{payload[0].payload.networth}</strong>}
               />
-              <AlignedText left={t("Change:")} right={payload[0].payload.change} />
+              <AlignedText
+                left={t('Change:')}
+                right={payload[0].payload.change}
+              />
             </div>
           </div>
         </div>

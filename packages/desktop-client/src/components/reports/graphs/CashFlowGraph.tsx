@@ -61,24 +61,30 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
           </strong>
         </div>
         <div style={{ lineHeight: 1.5 }}>
-          <AlignedText left={t("Income:")} right={amountToCurrency(data.income)} />
           <AlignedText
-            left={t("Expenses:")}
+            left={t('Income:')}
+            right={amountToCurrency(data.income)}
+          />
+          <AlignedText
+            left={t('Expenses:')}
             right={amountToCurrency(data.expenses)}
           />
           <AlignedText
-            left={t("Change:")}
+            left={t('Change:')}
             right={
               <strong>{amountToCurrency(data.income + data.expenses)}</strong>
             }
           />
           {data.transfers !== 0 && (
             <AlignedText
-              left={t("Transfers:")}
+              left={t('Transfers:')}
               right={amountToCurrency(data.transfers)}
             />
           )}
-          <AlignedText left={t("Balance:")} right={amountToCurrency(data.balance)} />
+          <AlignedText
+            left={t('Balance:')}
+            right={amountToCurrency(data.balance)}
+          />
         </div>
       </div>
     </div>

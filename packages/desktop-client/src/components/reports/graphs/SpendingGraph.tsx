@@ -90,7 +90,9 @@ const CustomTooltip = ({
           <div style={{ lineHeight: 1.5 }}>
             {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
-                left={compare === 'thisMonth' ? t('This month:') : t('Last month:')}
+                left={
+                  compare === 'thisMonth' ? t('This month:') : t('Last month:')
+                }
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1,
                 )}
@@ -112,7 +114,7 @@ const CustomTooltip = ({
             )}
             {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
-                left={t("Difference:")}
+                left={t('Difference:')}
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1 -
                     comparison,

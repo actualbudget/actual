@@ -59,10 +59,13 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
           </div>
           <div style={{ lineHeight: 1.5 }}>
             <PrivacyFilter>
-              <AlignedText left={t("Assets:")} right={payload[0].payload.assets} />
-              <AlignedText left={t("Debt:")} right={payload[0].payload.debt} />
               <AlignedText
-                left={t("Change:")}
+                left={t('Assets:')}
+                right={payload[0].payload.assets}
+              />
+              <AlignedText left={t('Debt:')} right={payload[0].payload.debt} />
+              <AlignedText
+                left={t('Change:')}
                 right={<strong>{payload[0].payload.change}</strong>}
               />
             </PrivacyFilter>
