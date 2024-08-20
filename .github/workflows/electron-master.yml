@@ -51,6 +51,8 @@ jobs:
       - name: Build Electron
         run: ./bin/package-electron
         env:
+          WIN_CSC_LINK : ''
+          WIN_CSC_KEY_PASSWORD: ''
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
