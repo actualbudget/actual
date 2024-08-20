@@ -35,6 +35,7 @@ import {
 import { sendMessages, batchMessages } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
+import { getHoverColor, getTextColorForColor } from '../../shared/tag';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
@@ -666,13 +667,74 @@ export async function getTransactions(accountId) {
 }
 
 export function insertTransaction(transaction) {
+  insertTags(transaction);
   return insertWithSchema('transactions', transaction);
 }
 
 export function updateTransaction(transaction) {
+  insertTags(transaction);
   return updateWithSchema('transactions', transaction);
 }
 
 export async function deleteTransaction(transaction) {
   return delete_('transactions', transaction.id);
+}
+
+export async function getTags() {
+  return await all(`
+    SELECT id, tag, color, textColor, hoverColor FROM tags
+    ORDER BY tag
+  `);
+}
+
+export function updateTag(tag) {
+  update('tags', {
+    id: tag.id,
+    tag: tag.tag,
+    color: tag.color,
+    textColor: getTextColorForColor(tag.color),
+    hoverColor: getHoverColor(tag.color),
+  });
+}
+
+async function insertTags(transaction) {
+  const notes = transaction.notes;
+  if (!notes) return;
+
+  const tags = extractTagsFromNotes(notes);
+
+  if (tags.length > 0) {
+    for(const tag of tags) {
+      const { id } = await first('SELECT id FROM tags where tag = ?', [
+        tag,
+      ]) || { };
+
+      if(!id) {
+        insertWithUUID('tags', {
+          tag,
+          color: null,
+          textColor: null,
+          hoverColor: null,
+        });
+      }
+    }
+  }
+}
+
+function extractTagsFromNotes(notes) {
+  const tags = [];
+  const words = notes.split(' ');
+
+  words.forEach(word => {
+    if (word.includes('#') && word.length > 1) {
+      const potentialTags = word.split('#');
+      potentialTags.forEach((tag, index) => {
+        if (index > 0 && tag) {
+          tags.push(`#${tag}`);
+        }
+      });
+    }
+  });
+
+  return tags;
 }

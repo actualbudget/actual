@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { TAGREGEX } from 'loot-core/shared/tag';
 import {
   currentDay,
   addDays,
@@ -472,6 +473,19 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           return { id: null };
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
+
+      case 'tags':
+        const tagValues = value
+        .split(TAGREGEX)
+        .filter(tag => tag.startsWith('#'));
+        
+        return {
+          $and: tagValues.map(v => {
+            const regex = new RegExp(`(^|\\s)${v}(\\s|$)`);
+            return apply(field, '$regexp', regex.source);
+          }),
+        };
+
       case 'notOneOf':
         const notValues = value;
         if (notValues.length === 0) {

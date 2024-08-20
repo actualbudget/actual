@@ -4,6 +4,7 @@ import { type CSSProperties, theme } from '../../style';
 
 import { Input, defaultInputStyle } from './Input';
 import { View } from './View';
+import { InputWithTags } from './InputWithTags';
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
   leftContent?: ReactNode;
@@ -12,6 +13,7 @@ type InputWithContentProps = ComponentProps<typeof Input> & {
   focusStyle?: CSSProperties;
   style?: CSSProperties;
   getStyle?: (focused: boolean) => CSSProperties;
+  inputWithTags?: boolean;
 };
 export function InputWithContent({
   leftContent,
@@ -20,9 +22,11 @@ export function InputWithContent({
   focusStyle,
   style,
   getStyle,
+  inputWithTags,
   ...props
 }: InputWithContentProps) {
   const [focused, setFocused] = useState(props.focused ?? false);
+  const InputType: React.ElementType = inputWithTags ? InputWithTags: Input;
 
   return (
     <View
@@ -40,7 +44,7 @@ export function InputWithContent({
       }}
     >
       {leftContent}
-      <Input
+      <InputType
         {...props}
         focused={focused}
         style={{

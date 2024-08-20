@@ -21,6 +21,7 @@ import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
+import { InputWithTags } from '../common/InputWithTags';
 
 export function GenericInput({
   field,
@@ -58,7 +59,7 @@ export function GenericInput({
         );
       default:
         return (
-          <Input
+          <InputWithTags
             inputRef={inputRef}
             defaultValue={value || ''}
             placeholder="nothing"
@@ -248,7 +249,7 @@ export function GenericInput({
         content = getNumberInputByFormatType(numberFormatType);
       } else {
         content = (
-          <Input
+          <InputWithTags
             inputRef={inputRef}
             defaultValue={value || ''}
             placeholder="nothing"

@@ -512,6 +512,15 @@ handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
+handlers['tags-get'] = async function () {
+  return await db.getTags();
+};
+
+handlers['tag-update'] = async function ({ tag }) {
+  await db.updateTag(tag);
+};
+
+
 handlers['make-filters-from-conditions'] = async function ({ conditions }) {
   return rules.conditionsToAQL(conditions);
 };

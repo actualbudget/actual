@@ -48,6 +48,7 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
+import { TagAutocomplete } from './autocomplete/TagAutocomplete';
 
 export const ROW_HEIGHT = 32;
 
@@ -354,6 +355,10 @@ function InputValue({
     } else if (shouldSaveFromKey(e)) {
       onUpdate?.(value);
     }
+
+    if (props.onKeyDown) {
+      props.onKeyDown(e);
+    }
   }
 
   const ops = ['+', '-', '*', '/', '^'];
@@ -412,6 +417,134 @@ export function InputCell({
         />
       )}
     </Cell>
+  );
+}
+
+export function InputCellWithTags({
+  inputProps,
+  onUpdate,
+  onBlur,
+  textAlign,
+  ...props
+}: InputCellProps) {
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [hint, setHint] = useState('');
+  const edit = useRef(null);
+  const [content, setContent] = useState(props.value);
+  const [keyPressed, setKeyPressed] = useState(null); // Track key presses for TagAutocomplete
+
+  useEffect(() => {
+    if (content !== undefined) {
+      if (onUpdate) {
+        onUpdate?.(edit.current?.value);
+      }
+      updateHint(content);
+    }
+  }, [content]);
+
+  const getCaretPosition = element => {
+    if (element) {
+      const caretPosition = element.selectionStart;
+      return caretPosition;
+    }
+
+    return 0;
+  };
+
+  const handleSetCursorPosition = () => {
+    const el = edit.current;
+    if (!el) return;
+
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    range.selectNodeContents(el); // Select the entire content
+    range.collapse(false); // Collapse the range to the end point (cursor at the end)
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+  };
+
+  const updateHint = newValue => {
+    const el = edit.current;
+    if (!el) return;
+
+    const cursorPosition = getCaretPosition(el);
+    const textBeforeCursor = el.value.slice(0, cursorPosition);
+
+    const lastHashIndex = textBeforeCursor.lastIndexOf('#');
+    if (lastHashIndex === -1) {
+      setHint('');
+      return;
+    }
+
+    const newHint = textBeforeCursor.slice(lastHashIndex + 1, cursorPosition);
+    setHint(newHint);
+  };
+
+  return (
+    <View>
+      <InputValue
+        inputRef={edit}
+        value={content}
+        onChange={newValue => {
+          updateHint(newValue);
+        }}
+        onUpdate={onUpdate}
+        onBlur={onBlur}
+        style={{ textAlign, ...(inputProps && inputProps.style) }}
+        onKeyDown={e => {
+          if (showAutocomplete) {
+            if (['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
+              setKeyPressed(e.key);
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
+          }
+
+          if (e.key === '#') {
+            setShowAutocomplete(true);
+          }
+        }}
+        {...inputProps}
+      />
+      <Popover
+        triggerRef={edit}
+        isOpen={showAutocomplete}
+        placement="bottom start"
+      >
+        <TagAutocomplete
+          hint={hint} // Pass the dynamically updated hint
+          clickedOnIt={() => setShowAutocomplete(false)}
+          keyPressed={keyPressed}
+          onKeyHandled={() => setKeyPressed(null)}
+          onMenuSelect={item => {
+            setShowAutocomplete(false);
+
+            if (!item) return;
+
+            const el = edit.current;
+            const cursorPosition = getCaretPosition(el);
+            const textBeforeCursor = el.value.slice(0, cursorPosition);
+
+            let lastHashIndex = textBeforeCursor.lastIndexOf('#');
+            if (lastHashIndex === -1) {
+              return;
+            }
+
+            const newContent =
+              textBeforeCursor.slice(0, lastHashIndex) +
+              item?.tag +
+              el.value.slice(cursorPosition) +
+              ' ';
+
+            setContent(newContent);
+            handleSetCursorPosition();
+          }}
+        />
+      </Popover>
+    </View>
   );
 }
 
@@ -1402,8 +1535,9 @@ export function useTableNavigator<T extends TableItem>(
         // input, and it will be refocused when the modal closes.
         const prevNumModals = modalStackLength.current;
         const numModals = store.getState().modals.modalStack.length;
-
+        const parentWithAttr = e.relatedTarget?.closest('[data-keep-editing]');
         if (
+          !parentWithAttr &&
           document.hasFocus() &&
           (e.relatedTarget == null ||
             !containerRef.current.contains(e.relatedTarget) ||

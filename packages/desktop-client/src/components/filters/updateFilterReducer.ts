@@ -18,7 +18,8 @@ export function updateFilterReducer(
           action.op === 'matches' ||
           action.op === 'is' ||
           action.op === 'doesNotContain' ||
-          action.op === 'isNot')
+          action.op === 'isNot' ||
+          action.op === 'tags')
       ) {
         // Clear out the value if switching between contains or
         // is/oneof for the id or string type

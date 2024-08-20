@@ -25,6 +25,7 @@ export type RuleConditionOp =
   | 'lte'
   | 'contains'
   | 'doesNotContain'
+  | 'tags'
   | 'matches';
 
 type FieldValueTypes = {
