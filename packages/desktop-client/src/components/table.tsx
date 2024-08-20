@@ -380,7 +380,10 @@ function InputValue({
     <Input
       {...props}
       value={value}
-      onChangeValue={text => setValue_(text)}
+      onChangeValue={text => {
+        setValue_(text);
+        props?.onChangeValue?.(text);
+      }}
       onBlur={onBlur_}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
@@ -431,6 +434,7 @@ export function InputCellWithTags({
   const edit = useRef();
   const {
     content,
+    setContent,
     hint,
     showAutocomplete,
     setShowAutocomplete,
@@ -446,6 +450,7 @@ export function InputCellWithTags({
         inputRef={edit}
         value={content}
         onUpdate={onUpdate}
+        onChangeValue={setContent}
         onBlur={onBlur}
         style={{ textAlign, ...(inputProps && inputProps.style) }}
         onKeyDown={handleKeyDown}

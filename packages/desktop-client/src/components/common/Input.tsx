@@ -49,7 +49,7 @@ export function Input({
 
   return (
     <input
-      ref={inputRef}
+      ref={mergedRef}
       className={`${css(
         defaultInputStyle,
         {

@@ -45,10 +45,10 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@types/react-color": "^2",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.1.0",
     "confusing-browser-globals": "^1.0.11",
-    "@types/react-color": "^2",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
