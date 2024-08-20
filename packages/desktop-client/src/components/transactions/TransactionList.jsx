@@ -193,7 +193,7 @@ export function TransactionList({
   const onNotesTagClick = useCallback(tag => {
     onApplyFilter({
       field: 'notes',
-      op: 'tags',
+      op: 'hasTags',
       value: tag,
       type: 'string',
     });

@@ -201,8 +201,10 @@ function ConfigureField({
             subfield={subfield}
             type={
               type === 'id' &&
-             
-              (op === 'contains' || op === 'matches' || op === 'doesNotContain' || op === 'tags')
+              (op === 'contains' ||
+                op === 'matches' ||
+                op === 'doesNotContain' ||
+                op === 'hasTags')
                 ? 'string'
                 : type
             }

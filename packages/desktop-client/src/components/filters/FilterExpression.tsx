@@ -80,8 +80,8 @@ export function FilterExpression<T extends RuleConditionEntity>({
                   
                   op === 'contains' ||
                   op === 'matches' ||
-                  op === 'doesNotContain' || op === 'tags'
-                
+                  op === 'doesNotContain' ||
+                  op === 'hasTags'
                 }
               />
             </>

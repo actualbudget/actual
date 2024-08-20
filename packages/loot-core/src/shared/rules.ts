@@ -10,21 +10,14 @@ export const TYPE_INFO = {
   },
   id: {
     ops: [
-      
       'is',
-     
       'contains',
-     
       'matches',
       'oneOf',
-     
       'isNot',
-     
       'doesNotContain',
-     
       'notOneOf',
-      'tags',
-    ,
+      'hasTags',
     ],
     nullable: true,
   },
@@ -34,21 +27,26 @@ export const TYPE_INFO = {
   },
   string: {
     ops: [
-      
       'is',
-     
       'contains',
-     
       'matches',
       'oneOf',
-     
       'isNot',
-     
       'doesNotContain',
-     
       'notOneOf',
-      'tags',
-    ,
+      'hasTags',
+    ],
+    nullable: true,
+  },
+  imported_payee: {
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
     ],
     nullable: true,
   },
@@ -64,7 +62,7 @@ export const TYPE_INFO = {
 
 export const FIELD_TYPES = new Map(
   Object.entries({
-    imported_payee: 'string',
+    imported_payee: 'imported_payee',
     payee: 'id',
     date: 'date',
     notes: 'string',
@@ -123,7 +121,7 @@ export function friendlyOp(op, type?) {
       return 'is between';
     case 'contains':
       return 'contains';
-    case 'tags':
+    case 'hasTags':
       return 'has tag(s)';
     case 'matches':
       return 'matches';
