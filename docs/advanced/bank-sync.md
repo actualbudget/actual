@@ -133,3 +133,19 @@ In the free tier, you can sync 50 times per month. If you sync to two different 
 For more information, see the [Bank Account Data API Usage](https://bankaccountdata.zendesk.com/hc/en-gb/articles/11528933493916-Bank-Account-Data-API-Usage-how-is-your-usage-number-calculated)
 topic in the GoCardless FAQ.
 
+**What if my bank only supports 90 days of historical data?**
+If your bank limits the amount of historical data you can fetch, you need to add your bank to the list of such banks in the Actual server code.
+
+To achieve this:
+
+1. Read the instructions about integrating with GoCardless: https://github.com/actualbudget/actual-server/blob/master/src/app-gocardless/README.md
+2. Toward the top is a link to the Google Docs containing data points for the GoCardless integration. Locate your bank's ID in the document.
+3. Fork the Actual server repository: https://github.com/actualbudget/actual-server/fork
+4. Edit the file `src/app-gocardless/bank-factory.js`.
+5. Add your bank's ID (from the Google Docs) to the `BANKS_WITH_LIMITED_HISTORY` list.
+6. Commit your changes and push to your fork.
+7. Create a pull request to the main Actual server repository.
+8. Add a release note in `upcoming-release-notes/` describing your change (see [writing good release notes](/docs/contributing/#writing-good-release-notes)).
+9. Commit your changes and push to your fork.
+
+Once reviewed, the maintainers will comment on the pull request and merge it if acceptable.  The change would then be available in the next release of the software.
