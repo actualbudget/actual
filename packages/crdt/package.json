@@ -26,6 +26,6 @@
     "@types/uuid": "^9.0.2",
     "jest": "^27.5.1",
     "ts-protoc-gen": "^0.15.0",
-    "typescript": "^5.0.2"
+    "typescript": "^5.5.4"
   }
 }

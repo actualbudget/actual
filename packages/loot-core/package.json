@@ -76,7 +76,7 @@
     "swc-loader": "^0.2.6",
     "terser-webpack-plugin": "^5.3.10",
     "ts-node": "^10.9.2",
-    "typescript": "^5.0.2",
+    "typescript": "^5.5.4",
     "webpack": "^5.90.0",
     "webpack-bundle-analyzer": "^4.10.1",
     "webpack-cli": "^5.1.4",
