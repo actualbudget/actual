@@ -7,7 +7,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
 import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
 import { theme, styles } from '../../../../style';
-import { Button } from '../../../common/Button';
+import { Button } from '../../../common/Button2';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
@@ -51,7 +51,10 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     <View
       data-testid="budget-summary"
       style={{
-        backgroundColor: theme.tableBackground,
+        backgroundColor:
+          month === currentMonth
+            ? theme.budgetCurrentMonth
+            : theme.budgetOtherMonth,
         boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
@@ -85,10 +88,10 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             }}
           >
             <Button
-              type="bare"
+              variant="bare"
               aria-label={`${collapsed ? 'Expand' : 'Collapse'} month summary`}
               className="hover-visible"
-              onClick={onToggleSummaryCollapse}
+              onPress={onToggleSummaryCollapse}
             >
               <ExpandOrCollapseIcon
                 width={13}
@@ -135,9 +138,9 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
               <Button
                 ref={triggerRef}
-                type="bare"
+                variant="bare"
                 aria-label="Menu"
-                onClick={onMenuOpen}
+                onPress={onMenuOpen}
               >
                 <SvgDotsHorizontalTriple
                   width={15}
@@ -200,6 +203,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               prevMonthName={prevMonthName}
               month={month}
               onBudgetAction={onBudgetAction}
+              isCollapsed
             />
           </View>
         ) : (

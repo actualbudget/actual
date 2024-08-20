@@ -45,7 +45,9 @@ type CustomTooltipProps = {
   payload?: PayloadItem[];
   balanceTypeOp?: string;
   thisMonth?: string;
+  lastYear?: string;
   selection?: string;
+  compare?: string;
 };
 
 const CustomTooltip = ({
@@ -53,7 +55,9 @@ const CustomTooltip = ({
   payload,
   balanceTypeOp,
   thisMonth,
+  lastYear,
   selection,
+  compare,
 }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const comparison =
@@ -82,21 +86,29 @@ const CustomTooltip = ({
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload[0].payload.months[thisMonth].cumulative && (
+            {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
-                left="This month:"
+                left={compare === 'thisMonth' ? 'This month:' : 'Last month:'}
                 right={amountToCurrency(
                   payload[0].payload.months[thisMonth].cumulative * -1,
                 )}
               />
-            )}
+            ) : null}
             {['cumulative'].includes(balanceTypeOp) && (
               <AlignedText
-                left={selection === 'average' ? 'Average' : 'Last month:'}
+                left={
+                  selection === 'average'
+                    ? 'Average:'
+                    : selection === lastYear
+                      ? 'Last year:'
+                      : compare === 'thisMonth'
+                        ? 'Last month:'
+                        : '2 months ago:'
+                }
                 right={amountToCurrency(comparison)}
               />
             )}
-            {payload[0].payload.months[thisMonth].cumulative && (
+            {payload[0].payload.months[thisMonth].cumulative ? (
               <AlignedText
                 left="Difference:"
                 right={amountToCurrency(
@@ -104,7 +116,7 @@ const CustomTooltip = ({
                     comparison,
                 )}
               />
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -117,6 +129,7 @@ type SpendingGraphProps = {
   data: SpendingEntity;
   compact?: boolean;
   mode: string;
+  compare: string;
 };
 
 export function SpendingGraph({
@@ -124,12 +137,32 @@ export function SpendingGraph({
   data,
   compact,
   mode,
+  compare,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
   const balanceTypeOp = 'cumulative';
-  const thisMonth = monthUtils.currentMonth();
-  const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
-  const selection = mode.toLowerCase() === 'average' ? 'average' : lastMonth;
+  const thisMonth = monthUtils.subMonths(
+    monthUtils.currentMonth(),
+    compare === 'thisMonth' ? 0 : 1,
+  );
+  const previousMonth = monthUtils.subMonths(
+    monthUtils.currentMonth(),
+    compare === 'thisMonth' ? 1 : 2,
+  );
+  const lastYear = monthUtils.prevYear(thisMonth);
+  let selection;
+  switch (mode) {
+    case 'average':
+      selection = 'average';
+      break;
+    case 'lastYear':
+      selection = lastYear;
+      break;
+    default:
+      selection = previousMonth;
+      break;
+  }
+
   const thisMonthMax = data.intervalData.reduce((a, b) =>
     a.months[thisMonth][balanceTypeOp] < b.months[thisMonth][balanceTypeOp]
       ? a
@@ -139,11 +172,11 @@ export function SpendingGraph({
     selection === 'average'
       ? data.intervalData[27].average
       : data.intervalData.reduce((a, b) =>
-          a.months[lastMonth][balanceTypeOp] <
-          b.months[lastMonth][balanceTypeOp]
+          a.months[selection][balanceTypeOp] <
+          b.months[selection][balanceTypeOp]
             ? a
             : b,
-        ).months[lastMonth][balanceTypeOp];
+        ).months[selection][balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(
     ...data.intervalData.map(i => i.months[thisMonth].cumulative),
@@ -194,13 +227,13 @@ export function SpendingGraph({
         data.intervalData && (
           <ResponsiveContainer>
             <div>
-              {!compact && <div style={{ marginTop: '15px' }} />}
+              {!compact && <div style={{ marginTop: '5px' }} />}
               <AreaChart
                 width={width}
                 height={height}
                 data={data.intervalData}
                 margin={{
-                  top: 10,
+                  top: 0,
                   right: 0,
                   left: 0,
                   bottom: 0,
@@ -233,7 +266,9 @@ export function SpendingGraph({
                     <CustomTooltip
                       balanceTypeOp={balanceTypeOp}
                       thisMonth={thisMonth}
+                      lastYear={lastYear}
                       selection={selection}
+                      compare={compare}
                     />
                   }
                   formatter={numberFormatterTooltip}

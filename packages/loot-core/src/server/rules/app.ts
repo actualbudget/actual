@@ -15,22 +15,22 @@ function validateRule(rule: Partial<RuleEntity>) {
   // Returns an array of errors, the array is the same link as the
   // passed-in `array`, or null if there are no errors
   function runValidation<T>(array: T[], validate: (item: T) => unknown) {
-    const result = array
-      .map(item => {
-        try {
-          validate(item);
-        } catch (e) {
-          if (e instanceof RuleError) {
-            console.warn('Invalid rule', e);
-            return e.type;
-          }
-          throw e;
+    const result = array.map(item => {
+      try {
+        validate(item);
+      } catch (e) {
+        if (e instanceof RuleError) {
+          console.warn('Invalid rule', e);
+          return e.type;
         }
-        return null;
-      })
-      .filter((res): res is string => typeof res === 'string');
+        throw e;
+      }
+      return null;
+    });
 
-    return result.length ? result : null;
+    return result.filter((res): res is string => typeof res === 'string').length
+      ? result
+      : null;
   }
 
   const conditionErrors = runValidation(
@@ -56,13 +56,15 @@ function validateRule(rule: Partial<RuleEntity>) {
         )
       : action.op === 'link-schedule'
         ? new Action(action.op, null, action.value, null, ruleFieldTypes)
-        : new Action(
-            action.op,
-            action.field,
-            action.value,
-            action.options,
-            ruleFieldTypes,
-          ),
+        : action.op === 'prepend-notes' || action.op === 'append-notes'
+          ? new Action(action.op, null, action.value, null, ruleFieldTypes)
+          : new Action(
+              action.op,
+              action.field,
+              action.value,
+              action.options,
+              ruleFieldTypes,
+            ),
   );
 
   if (conditionErrors || actionErrors) {
@@ -111,8 +113,8 @@ app.method(
 
 app.method(
   'rule-delete',
-  mutator(async function (rule) {
-    return rules.deleteRule(rule);
+  mutator(async function (id) {
+    return rules.deleteRule(id);
   }),
 );
 
@@ -123,7 +125,7 @@ app.method(
 
     await batchMessages(async () => {
       for (const id of ids) {
-        const res = await rules.deleteRule({ id });
+        const res = await rules.deleteRule(id);
         if (res === false) {
           someDeletionsFailed = true;
         }

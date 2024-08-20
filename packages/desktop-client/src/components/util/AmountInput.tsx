@@ -11,11 +11,11 @@ import React, {
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InputWithContent } from '../common/InputWithContent';
 import { View } from '../common/View';
 import { useFormat } from '../spreadsheet/useFormat';
@@ -63,7 +63,7 @@ export function AmountInput({
   const buttonRef = useRef();
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
-  const [hideFraction = false] = useLocalPref('hideFraction');
+  const [hideFraction = false] = useSyncedPref('hideFraction');
 
   useEffect(() => {
     if (focused) {
@@ -104,12 +104,11 @@ export function AmountInput({
       inputMode="decimal"
       leftContent={
         <Button
-          type="bare"
-          disabled={disabled}
+          variant="bare"
+          isDisabled={disabled}
           aria-label={`Make ${negative ? 'positive' : 'negative'}`}
           style={{ padding: '0 7px' }}
-          onPointerUp={onSwitch}
-          onPointerDown={e => e.preventDefault()}
+          onPress={onSwitch}
           ref={buttonRef}
         >
           {negative ? (

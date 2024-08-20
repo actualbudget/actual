@@ -1,21 +1,24 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, type ComponentProps } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
-import { type LocalPrefs } from 'loot-core/types/prefs';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { styles } from '../../style/styles';
 import { theme } from '../../style/theme';
-import { Button } from '../common/Button';
+import { Information } from '../alerts';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
+import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 
 import { CategorySelector } from './CategorySelector';
-import { defaultsList } from './disabledList';
+import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
 import { type dateRangeProps, ReportOptions } from './ReportOptions';
@@ -24,6 +27,7 @@ import { setSessionReport } from './setSessionReport';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;
+  selectedCategories: CategoryEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   dateRangeLine: number;
   allIntervals: { name: string; pretty: string }[];
@@ -38,6 +42,7 @@ type ReportSidebarProps = {
   setShowOffBudget: (value: boolean) => void;
   setShowHiddenCategories: (value: boolean) => void;
   setShowUncategorized: (value: boolean) => void;
+  setIncludeCurrentInterval: (value: boolean) => void;
   setSelectedCategories: (value: CategoryEntity[]) => void;
   onChangeDates: (dateStart: string, dateEnd: string) => void;
   onReportChange: ({
@@ -51,11 +56,13 @@ type ReportSidebarProps = {
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;
   earliestTransaction: string;
-  firstDayOfWeekIdx: LocalPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
+  isComplexCategoryCondition?: boolean;
 };
 
 export function ReportSidebar({
   customReportItems,
+  selectedCategories,
   categories,
   dateRangeLine,
   allIntervals,
@@ -69,6 +76,7 @@ export function ReportSidebar({
   setShowEmpty,
   setShowOffBudget,
   setShowHiddenCategories,
+  setIncludeCurrentInterval,
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
@@ -78,6 +86,7 @@ export function ReportSidebar({
   defaultModeItems,
   earliestTransaction,
   firstDayOfWeekIdx,
+  isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -86,7 +95,12 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setDateRange(cond);
     onChangeDates(
-      ...getLiveRange(cond, earliestTransaction, firstDayOfWeekIdx),
+      ...getLiveRange(
+        cond,
+        earliestTransaction,
+        customReportItems.includeCurrentInterval,
+        firstDayOfWeekIdx,
+      ),
     );
   };
 
@@ -123,6 +137,19 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
   };
+
+  const rangeOptions = useMemo(() => {
+    const options: ComponentProps<typeof Select>['options'] =
+      ReportOptions.dateRange
+        .filter(f => f[customReportItems.interval as keyof dateRangeProps])
+        .map(option => [option.description, option.description]);
+
+    // Append separator if necessary
+    if (dateRangeLine > 0) {
+      options.splice(dateRangeLine, 0, Menu.line);
+    }
+    return options;
+  }, [customReportItems, dateRangeLine]);
 
   return (
     <View
@@ -248,7 +275,7 @@ export function ReportSidebar({
           <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }} />
           <Button
             ref={triggerRef}
-            onClick={() => {
+            onPress={() => {
               setMenuOpen(true);
             }}
             style={{
@@ -269,7 +296,15 @@ export function ReportSidebar({
               onMenuSelect={type => {
                 onReportChange({ type: 'modify' });
 
-                if (type === 'show-hidden-categories') {
+                if (type === 'include-current-interval') {
+                  setSessionReport(
+                    'includeCurrentInterval',
+                    !customReportItems.includeCurrentInterval,
+                  );
+                  setIncludeCurrentInterval(
+                    !customReportItems.includeCurrentInterval,
+                  );
+                } else if (type === 'show-hidden-categories') {
                   setSessionReport(
                     'showHiddenCategories',
                     !customReportItems.showHiddenCategories,
@@ -295,6 +330,30 @@ export function ReportSidebar({
                 }
               }}
               items={[
+                {
+                  name: 'include-current-interval',
+                  text:
+                    'Include current ' +
+                    (
+                      ReportOptions.dateRangeType.get(
+                        customReportItems.dateRange,
+                      ) || ''
+                    ).toLowerCase(),
+                  tooltip:
+                    'Include current ' +
+                    (
+                      ReportOptions.dateRangeType.get(
+                        customReportItems.dateRange,
+                      ) || ''
+                    ).toLowerCase() +
+                    ' in live range',
+                  toggle: customReportItems.includeCurrentInterval,
+                  disabled:
+                    customReportItems.isDateStatic ||
+                    disabledList.currentInterval.get(
+                      customReportItems.dateRange,
+                    ),
+                },
                 {
                   name: 'show-hidden-categories',
                   text: 'Show hidden categories',
@@ -380,16 +439,24 @@ export function ReportSidebar({
             </Text>
             <Select
               value={customReportItems.dateRange}
-              onChange={e => {
-                onSelectRange(e);
-              }}
-              options={ReportOptions.dateRange
-                .filter(
-                  f => f[customReportItems.interval as keyof dateRangeProps],
-                )
-                .map(option => [option.description, option.description])}
-              line={dateRangeLine > 0 ? dateRangeLine : undefined}
+              onChange={onSelectRange}
+              options={rangeOptions}
             />
+            {!disabledList.currentInterval.get(customReportItems.dateRange) &&
+              customReportItems.includeCurrentInterval && (
+                <Tooltip
+                  placement="bottom start"
+                  content={<Text>Current month</Text>}
+                  style={{
+                    ...styles.tooltip,
+                    lineHeight: 1.5,
+                    padding: '6px 10px',
+                    marginTop: 5,
+                  }}
+                >
+                  <Text style={{ marginLeft: 10 }}>+1</Text>
+                </Tooltip>
+              )}
           </View>
         ) : (
           <>
@@ -474,19 +541,25 @@ export function ReportSidebar({
           minHeight: 200,
         }}
       >
-        <CategorySelector
-          categoryGroups={categories.grouped.filter(f => {
-            return customReportItems.showHiddenCategories || !f.hidden
-              ? true
-              : false;
-          })}
-          selectedCategories={customReportItems.selectedCategories || []}
-          setSelectedCategories={e => {
-            setSelectedCategories(e);
-            onReportChange({ type: 'modify' });
-          }}
-          showHiddenCategories={customReportItems.showHiddenCategories}
-        />
+        {isComplexCategoryCondition ? (
+          <Information>
+            Remove active category filters to show the category selector.
+          </Information>
+        ) : (
+          <CategorySelector
+            categoryGroups={categories.grouped.filter(f => {
+              return customReportItems.showHiddenCategories || !f.hidden
+                ? true
+                : false;
+            })}
+            selectedCategories={selectedCategories || []}
+            setSelectedCategories={e => {
+              setSelectedCategories(e);
+              onReportChange({ type: 'modify' });
+            }}
+            showHiddenCategories={customReportItems.showHiddenCategories}
+          />
+        )}
       </View>
     </View>
   );

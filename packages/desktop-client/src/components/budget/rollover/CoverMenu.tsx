@@ -1,23 +1,57 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/src/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
 import { addToBeBudgetedGroup } from '../util';
 
+function removeSelectedCategory(
+  categoryGroups: CategoryGroupEntity[],
+  category?: CategoryEntity['id'],
+) {
+  if (!category) return categoryGroups;
+
+  return categoryGroups
+    .map(group => ({
+      ...group,
+      categories: group.categories?.filter(cat => cat.id !== category),
+    }))
+    .filter(group => group.categories?.length);
+}
+
 type CoverMenuProps = {
+  showToBeBudgeted?: boolean;
+  category?: CategoryEntity['id'];
   onSubmit: (categoryId: string) => void;
   onClose: () => void;
 };
 
-export function CoverMenu({ onSubmit, onClose }: CoverMenuProps) {
+export function CoverMenu({
+  showToBeBudgeted = true,
+  category,
+  onSubmit,
+  onClose,
+}: CoverMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
-  const categoryGroups = addToBeBudgetedGroup(
-    originalCategoryGroups.filter(g => !g.is_income),
-  );
+  const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+
+  const categoryGroups = showToBeBudgeted
+    ? addToBeBudgetedGroup(expenseGroups)
+    : expenseGroups;
+
   const [categoryId, setCategoryId] = useState<string | null>(null);
+
+  const filteredCategoryGroups = useMemo(
+    () => removeSelectedCategory(categoryGroups, category),
+    [categoryGroups, category],
+  );
 
   function submit() {
     if (categoryId) {
@@ -32,17 +66,13 @@ export function CoverMenu({ onSubmit, onClose }: CoverMenuProps) {
       <InitialFocus>
         {node => (
           <CategoryAutocomplete
-            categoryGroups={categoryGroups}
-            value={categoryGroups.find(g => g.id === categoryId)}
+            categoryGroups={filteredCategoryGroups}
+            value={categoryGroups.find(g => g.id === categoryId) ?? null}
             openOnFocus={true}
             onSelect={(id: string | undefined) => setCategoryId(id || null)}
             inputProps={{
               inputRef: node,
-              onKeyDown: e => {
-                if (e.key === 'Enter') {
-                  submit();
-                }
-              },
+              onEnter: event => !event.defaultPrevented && submit(),
               placeholder: '(none)',
             }}
             showHiddenCategories={false}
@@ -57,12 +87,12 @@ export function CoverMenu({ onSubmit, onClose }: CoverMenuProps) {
         }}
       >
         <Button
-          type="primary"
+          variant="primary"
           style={{
             fontSize: 12,
             paddingTop: 3,
           }}
-          onClick={submit}
+          onPress={submit}
         >
           Transfer
         </Button>

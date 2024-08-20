@@ -16,22 +16,7 @@ function makeTransaction(data: Partial<TransactionEntity>): TransactionEntity {
     id: uuidv4(),
     amount: 2422,
     date: '2020-01-05',
-    account: {
-      id: 'acc-id-1',
-      name: 'account-1',
-      offbudget: 0,
-      closed: 0,
-      sort_order: 1,
-      tombstone: 0,
-      account_id: null,
-      bank: null,
-      mask: null,
-      official_name: null,
-      balance_current: null,
-      balance_available: null,
-      balance_limit: null,
-      account_sync_source: null,
-    },
+    account: 'acc-id-1',
     ...data,
   };
 }

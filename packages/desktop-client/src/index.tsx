@@ -3,10 +3,9 @@
 // environment (not electron)
 import './browser-preload';
 
-// A hack for now: this makes sure it's appended before glamor
-import '@reach/listbox/styles.css';
-
 import './fonts.scss';
+
+import './i18n';
 
 import React from 'react';
 import { Provider } from 'react-redux';

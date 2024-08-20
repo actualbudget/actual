@@ -1,67 +1,72 @@
-// @ts-strict-ignore
 import { useCallback, useMemo, useState } from 'react';
 
 import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 export function useFilters<T extends RuleConditionEntity>(
-  initialFilters: T[] = [],
+  initialConditions: T[] = [],
 ) {
-  const [filters, setFilters] = useState<T[]>(initialFilters);
+  const [conditions, setConditions] = useState<T[]>(initialConditions);
   const [conditionsOp, setConditionsOp] = useState<'and' | 'or'>('and');
-  const [saved, setSaved] = useState<T[]>(null);
+  const [saved, setSaved] = useState<T[] | null>(null);
 
   const onApply = useCallback(
-    newFilter => {
-      if (newFilter === null) {
-        setFilters([]);
+    (
+      conditionsOrSavedFilter:
+        | null
+        | { conditions: T[]; conditionsOp: 'and' | 'or'; id: T[] | null }
+        | T,
+    ) => {
+      if (conditionsOrSavedFilter === null) {
+        setConditions([]);
         setSaved(null);
-      } else if (newFilter.conditions) {
-        setFilters([...newFilter.conditions]);
-        setConditionsOp(newFilter.conditionsOp);
-        setSaved(newFilter.id);
+      } else if ('conditions' in conditionsOrSavedFilter) {
+        setConditions([...conditionsOrSavedFilter.conditions]);
+        setConditionsOp(conditionsOrSavedFilter.conditionsOp);
+        setSaved(conditionsOrSavedFilter.id);
       } else {
-        setFilters(state => [...state, newFilter]);
+        setConditions(state => [...state, conditionsOrSavedFilter]);
         setSaved(null);
       }
     },
-    [setFilters],
+    [setConditions],
   );
 
   const onUpdate = useCallback(
     (oldFilter: T, updatedFilter: T) => {
-      setFilters(state =>
+      setConditions(state =>
         state.map(f => (f === oldFilter ? updatedFilter : f)),
       );
       setSaved(null);
     },
-    [setFilters],
+    [setConditions],
   );
 
   const onDelete = useCallback(
     (deletedFilter: T) => {
-      setFilters(state => state.filter(f => f !== deletedFilter));
+      setConditions(state => state.filter(f => f !== deletedFilter));
       setSaved(null);
     },
-    [setFilters],
-  );
-
-  const onCondOpChange = useCallback(
-    condOp => {
-      setConditionsOp(condOp);
-    },
-    [setConditionsOp],
+    [setConditions],
   );
 
   return useMemo(
     () => ({
-      filters,
+      conditions,
       saved,
       conditionsOp,
       onApply,
       onUpdate,
       onDelete,
-      onCondOpChange,
+      onConditionsOpChange: setConditionsOp,
     }),
-    [filters, saved, onApply, onUpdate, onDelete, onCondOpChange, conditionsOp],
+    [
+      conditions,
+      saved,
+      onApply,
+      onUpdate,
+      onDelete,
+      setConditionsOp,
+      conditionsOp,
+    ],
   );
 }

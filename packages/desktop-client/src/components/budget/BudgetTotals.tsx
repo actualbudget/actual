@@ -2,7 +2,7 @@ import React, { type ComponentProps, memo, useRef, useState } from 'react';
 
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme, styles } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
@@ -57,11 +57,9 @@ export const BudgetTotals = memo(function BudgetTotals({
         <View style={{ flexGrow: '1' }}>Category</View>
         <Button
           ref={triggerRef}
-          type="bare"
+          variant="bare"
           aria-label="Menu"
-          onClick={() => {
-            setMenuOpen(true);
-          }}
+          onPress={() => setMenuOpen(true)}
           style={{ color: 'currentColor', padding: 3 }}
         >
           <SvgDotsHorizontalTriple

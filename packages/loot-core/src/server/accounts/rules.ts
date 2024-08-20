@@ -123,7 +123,15 @@ const CONDITION_TYPES = {
     },
   },
   id: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
     nullable: true,
     parse(op, value, fieldName) {
       if (op === 'oneOf' || op === 'notOneOf') {
@@ -138,7 +146,15 @@ const CONDITION_TYPES = {
     },
   },
   string: {
-    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
     nullable: true,
     parse(op, value, fieldName) {
       if (op === 'oneOf' || op === 'notOneOf') {
@@ -152,7 +168,7 @@ const CONDITION_TYPES = {
         return value.filter(Boolean).map(val => val.toLowerCase());
       }
 
-      if (op === 'contains' || op === 'doesNotContain') {
+      if (op === 'contains' || op === 'matches' || op === 'doesNotContain') {
         assert(
           typeof value === 'string' && value.length > 0,
           'no-empty-string',
@@ -424,7 +440,13 @@ export class Condition {
   }
 }
 
-const ACTION_OPS = ['set', 'set-split-amount', 'link-schedule'] as const;
+const ACTION_OPS = [
+  'set',
+  'set-split-amount',
+  'link-schedule',
+  'prepend-notes',
+  'append-notes',
+] as const;
 type ActionOperator = (typeof ACTION_OPS)[number];
 
 export class Action {
@@ -453,6 +475,13 @@ export class Action {
     } else if (op === 'link-schedule') {
       this.field = null;
       this.type = 'id';
+    } else if (op === 'prepend-notes' || op === 'append-notes') {
+      this.field = 'notes';
+      this.type = 'id';
+    }
+
+    if (field === 'account') {
+      assert(value, 'no-null', `Field cannot be empty: ${field}`);
     }
 
     this.op = op;
@@ -476,6 +505,16 @@ export class Action {
         break;
       case 'link-schedule':
         object.schedule = this.value;
+        break;
+      case 'prepend-notes':
+        object[this.field] = object[this.field]
+          ? this.value + object[this.field]
+          : this.value;
+        break;
+      case 'append-notes':
+        object[this.field] = object[this.field]
+          ? object[this.field] + this.value
+          : this.value;
         break;
       default:
     }
@@ -812,6 +851,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   lte: 1,
   contains: 0,
   doesNotContain: 0,
+  matches: 0,
 };
 
 function computeScore(rule) {

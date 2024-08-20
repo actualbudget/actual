@@ -8,6 +8,8 @@ describe('utility functions', () => {
     expect(looselyParseAmount('3')).toBe(3);
     expect(looselyParseAmount('3.4')).toBe(3.4);
     expect(looselyParseAmount('3.45')).toBe(3.45);
+    // cant tell if this next case should be decimal or different format
+    // so we set as full numbers
     expect(looselyParseAmount('3.456')).toBe(3456);
     expect(looselyParseAmount('3.45000')).toBe(3.45);
     expect(looselyParseAmount('3.450000')).toBe(3.45);
@@ -24,6 +26,15 @@ describe('utility functions', () => {
     expect(looselyParseAmount('3,4500000')).toBe(3.45);
     expect(looselyParseAmount('3,45000000')).toBe(3.45);
     expect(looselyParseAmount('3,450000000')).toBe(3.45);
+    expect(looselyParseAmount("3'456.78")).toBe(3456.78);
+    expect(looselyParseAmount("3'456.78000")).toBe(3456.78);
+    expect(looselyParseAmount('1,00,000.99')).toBe(100000.99);
+    expect(looselyParseAmount('1,00,000.99000')).toBe(100000.99);
+  });
+
+  test('looseParseAmount works with leading decimal characters', () => {
+    expect(looselyParseAmount('.45')).toBe(0.45);
+    expect(looselyParseAmount(',45')).toBe(0.45);
   });
 
   test('looseParseAmount works with negative numbers', () => {
@@ -42,6 +53,7 @@ describe('utility functions', () => {
     // `3_45_23` (it needs a decimal amount). This function should be
     // thought through more.
     expect(looselyParseAmount('3_45_23.10')).toBe(34523.1);
+    expect(looselyParseAmount('(1 500.99)')).toBe(-1500.99);
   });
 
   test('number formatting works with comma-dot format', () => {
@@ -85,14 +97,13 @@ describe('utility functions', () => {
     expect(formatter.format(Number('1234.56'))).toBe('1\xa0235');
   });
 
-  test('number formatting works with space-dot format', () => {
-    setNumberFormat({ format: 'space-dot', hideFraction: false });
+  test('number formatting works with apostrophe-dot format', () => {
+    setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
     let formatter = getNumberFormat().formatter;
-    // grouping separator space char is a non-breaking space, or UTF-16 \xa0
-    expect(formatter.format(Number('1234.56'))).toBe('1\xa0234.56');
+    expect(formatter.format(Number('1234.56'))).toBe('1’234.56');
 
-    setNumberFormat({ format: 'space-dot', hideFraction: true });
+    setNumberFormat({ format: 'apostrophe-dot', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe('1\xa0235');
+    expect(formatter.format(Number('1234.56'))).toBe('1’235');
   });
 });

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useResponsive } from '../../ResponsiveProvider';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
@@ -27,7 +27,7 @@ export function Header({
   onApply,
   onUpdateFilter,
   onDeleteFilter,
-  onCondOpChange,
+  onConditionsOpChange,
   headerPrefixItems,
   children,
 }) {
@@ -88,12 +88,17 @@ export function Header({
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
+              buttonStyle={{ marginRight: 10 }}
             />
+            {filters && (
+              <FilterButton
+                compact={isNarrowWidth}
+                onApply={onApply}
+                type="accounts"
+              />
+            )}
           </View>
 
-          {!isNarrowWidth && filters && (
-            <FilterButton onApply={onApply} type="accounts" />
-          )}
           <View
             style={{
               flexDirection: 'row',
@@ -104,33 +109,33 @@ export function Header({
           >
             {show1Month && (
               <Button
-                type="bare"
-                onClick={() => onChangeDates(...getLatestRange(1))}
+                variant="bare"
+                onPress={() => onChangeDates(...getLatestRange(1))}
               >
                 1 month
               </Button>
             )}
             <Button
-              type="bare"
-              onClick={() => onChangeDates(...getLatestRange(2))}
+              variant="bare"
+              onPress={() => onChangeDates(...getLatestRange(2))}
             >
               3 months
             </Button>
             <Button
-              type="bare"
-              onClick={() => onChangeDates(...getLatestRange(5))}
+              variant="bare"
+              onPress={() => onChangeDates(...getLatestRange(5))}
             >
               6 months
             </Button>
             <Button
-              type="bare"
-              onClick={() => onChangeDates(...getLatestRange(11))}
+              variant="bare"
+              onPress={() => onChangeDates(...getLatestRange(11))}
             >
               1 Year
             </Button>
             <Button
-              type="bare"
-              onClick={() =>
+              variant="bare"
+              onPress={() =>
                 onChangeDates(
                   ...getFullRange(allMonths[allMonths.length - 1].name),
                 )
@@ -151,11 +156,11 @@ export function Header({
           align="flex-start"
         >
           <AppliedFilters
-            filters={filters}
+            conditions={filters}
             onUpdate={onUpdateFilter}
             onDelete={onDeleteFilter}
             conditionsOp={conditionsOp}
-            onCondOpChange={onCondOpChange}
+            onConditionsOpChange={onConditionsOpChange}
           />
         </View>
       )}

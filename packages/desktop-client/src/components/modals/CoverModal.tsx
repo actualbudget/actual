@@ -2,38 +2,67 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useInitialMount } from '../../hooks/useInitialMount';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
-import { Button } from '../common/Button';
-import { Modal } from '../common/Modal';
+import { Button } from '../common/Button2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
-import { type CommonModalProps } from '../Modals';
+
+function removeSelectedCategory(
+  categoryGroups: CategoryGroupEntity[],
+  category?: CategoryEntity['id'],
+) {
+  if (!category) return categoryGroups;
+
+  return categoryGroups
+    .map(group => ({
+      ...group,
+      categories: group.categories?.filter(cat => cat.id !== category),
+    }))
+    .filter(group => group.categories?.length);
+}
 
 type CoverModalProps = {
-  modalProps: CommonModalProps;
-  categoryId: string;
+  title: string;
   month: string;
+  showToBeBudgeted?: boolean;
+  category?: CategoryEntity['id'];
   onSubmit: (categoryId: string) => void;
 };
 
 export function CoverModal({
-  modalProps,
-  categoryId,
+  title,
   month,
+  showToBeBudgeted = true,
+  category,
   onSubmit,
 }: CoverModalProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
-    const expenseGroups = addToBeBudgetedGroup(
-      originalCategoryGroups.filter(g => !g.is_income),
+    const filteredCategoryGroups = originalCategoryGroups.filter(
+      g => !g.is_income,
     );
+
+    const expenseGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(filteredCategoryGroups)
+      : filteredCategoryGroups;
+
     const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
-  }, [originalCategoryGroups]);
+  }, [originalCategoryGroups, showToBeBudgeted]);
+
+  const filteredCategoryGroups = useMemo(
+    () => removeSelectedCategory(categoryGroups, category),
+    [categoryGroups, category],
+  );
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
@@ -41,21 +70,19 @@ export function CoverModal({
   const onCategoryClick = useCallback(() => {
     dispatch(
       pushModal('category-autocomplete', {
-        categoryGroups,
+        categoryGroups: filteredCategoryGroups,
         month,
         onSelect: categoryId => {
           setFromCategoryId(categoryId);
         },
       }),
     );
-  }, [categoryGroups, dispatch, month]);
+  }, [filteredCategoryGroups, dispatch, month]);
 
   const _onSubmit = (categoryId: string | null) => {
     if (categoryId) {
       onSubmit?.(categoryId);
     }
-
-    modalProps.onClose();
   };
 
   const initialMount = useInitialMount();
@@ -67,43 +94,44 @@ export function CoverModal({
   }, [initialMount, onCategoryClick]);
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
-  const category = categories.find(c => c.id === categoryId);
-
-  if (!category) {
-    return null;
-  }
 
   return (
-    <Modal
-      title={category.name}
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-    >
-      <View>
-        <FieldLabel title="Cover from category:" />
-        <TapField value={fromCategory?.name} onClick={onCategoryClick} />
-      </View>
+    <Modal name="cover">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title={title}
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View>
+            <FieldLabel title="Cover from category:" />
+            <TapField value={fromCategory?.name} onClick={onCategoryClick} />
+          </View>
 
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingTop: 10,
-        }}
-      >
-        <Button
-          type="primary"
-          style={{
-            height: styles.mobileMinHeight,
-            marginLeft: styles.mobileEditingPadding,
-            marginRight: styles.mobileEditingPadding,
-          }}
-          onClick={() => _onSubmit(fromCategoryId)}
-        >
-          Transfer
-        </Button>
-      </View>
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingTop: 10,
+            }}
+          >
+            <Button
+              variant="primary"
+              style={{
+                height: styles.mobileMinHeight,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+              }}
+              onPress={() => {
+                _onSubmit(fromCategoryId);
+                close();
+              }}
+            >
+              Transfer
+            </Button>
+          </View>
+        </>
+      )}
     </Modal>
   );
 }

@@ -1,18 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import * as queries from 'loot-core/src/client/queries';
 import { currencyToInteger } from 'loot-core/src/shared/util';
 
 import { SvgCheckCircle1 } from '../../icons/v2';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-import { Tooltip } from '../tooltips';
 
 export function ReconcilingMessage({
   balanceQuery,
@@ -79,13 +78,13 @@ export function ReconcilingMessage({
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
-          <Button type="primary" onClick={onDone}>
+          <Button variant="primary" autoFocus onPress={onDone}>
             Done Reconciling
           </Button>
         </View>
         {targetDiff !== 0 && (
           <View style={{ marginLeft: 15 }}>
-            <Button onClick={() => onCreateTransaction(targetDiff)}>
+            <Button onPress={() => onCreateTransaction(targetDiff)}>
               Create Reconciliation Transaction
             </Button>
           </View>
@@ -95,7 +94,7 @@ export function ReconcilingMessage({
   );
 }
 
-export function ReconcileTooltip({ account, onReconcile, onClose }) {
+export function ReconcileMenu({ account, onReconcile, onClose }) {
   const balanceQuery = queries.accountBalance(account);
   const clearedBalance = useSheetValue({
     name: balanceQuery.name + '-cleared',
@@ -103,38 +102,42 @@ export function ReconcileTooltip({ account, onReconcile, onClose }) {
     query: balanceQuery.query.filter({ cleared: true }),
   });
   const format = useFormat();
+  const [inputValue, setInputValue] = useState(null);
+  const [inputFocused, setInputFocused] = useState(false);
 
-  function onSubmit(e) {
-    e.preventDefault();
-    const input = e.target.elements[0];
-    const amount = currencyToInteger(input.value);
-    if (amount != null) {
-      onReconcile(amount == null ? clearedBalance : amount);
-      onClose();
-    } else {
-      input.select();
+  function onSubmit() {
+    if (inputValue === '') {
+      setInputFocused(true);
+      return;
     }
+
+    const amount =
+      inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
+
+    onReconcile(amount);
+    onClose();
   }
 
   return (
-    <Tooltip position="bottom-right" width={275} onClose={onClose}>
-      <View style={{ padding: '5px 8px' }}>
-        <Text>
-          Enter the current balance of your bank account that you want to
-          reconcile with:
-        </Text>
-        <form onSubmit={onSubmit}>
-          {clearedBalance != null && (
-            <InitialFocus>
-              <Input
-                defaultValue={format(clearedBalance, 'financial')}
-                style={{ margin: '7px 0' }}
-              />
-            </InitialFocus>
-          )}
-          <Button type="primary">Reconcile</Button>
-        </form>
-      </View>
-    </Tooltip>
+    <View style={{ padding: '5px 8px' }}>
+      <Text>
+        Enter the current balance of your bank account that you want to
+        reconcile with:
+      </Text>
+      {clearedBalance != null && (
+        <InitialFocus>
+          <Input
+            defaultValue={format(clearedBalance, 'financial')}
+            onChangeValue={setInputValue}
+            style={{ margin: '7px 0' }}
+            focused={inputFocused}
+            onEnter={onSubmit}
+          />
+        </InitialFocus>
+      )}
+      <Button variant="primary" onPress={onSubmit}>
+        Reconcile
+      </Button>
+    </View>
   );
 }

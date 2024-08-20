@@ -26,13 +26,13 @@ import { fromDateRepr } from '../util';
 export function NetWorth() {
   const accounts = useAccounts();
   const {
-    filters,
+    conditions,
     saved,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
@@ -42,8 +42,8 @@ export function NetWorth() {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, filters, conditionsOp),
-    [start, end, accounts, filters, conditionsOp],
+    () => netWorthSpreadsheet(start, end, accounts, conditions, conditionsOp),
+    [start, end, accounts, conditions, conditionsOp],
   );
   const data = useReport('net_worth', params);
   useEffect(() => {
@@ -108,13 +108,13 @@ export function NetWorth() {
         start={start}
         end={end}
         onChangeDates={onChangeDates}
-        filters={filters}
+        filters={conditions}
         saved={saved}
         onApply={onApplyFilter}
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
+        onConditionsOpChange={onConditionsOpChange}
       />
 
       <View
@@ -151,6 +151,7 @@ export function NetWorth() {
           domain={{
             y: [data.lowestNetWorth * 0.99, data.highestNetWorth * 1.01],
           }}
+          showTooltip={!isNarrowWidth}
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>

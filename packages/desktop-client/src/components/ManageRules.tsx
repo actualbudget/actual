@@ -13,6 +13,7 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type NewRuleEntity } from 'loot-core/src/types/models';
@@ -23,7 +24,7 @@ import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
 import { Stack } from './common/Stack';
@@ -78,6 +79,11 @@ function ruleToString(rule, data) {
           data.payees.find(p => p.id === schedule._payee),
         ),
       ];
+    } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {
+      return [
+        friendlyOp(action.op),
+        '“' + mapValue(action.field, action.value, data) + '”',
+      ];
     } else {
       return [];
     }
@@ -125,9 +131,9 @@ function ManageRulesContent({
       (filter === ''
         ? allRules
         : allRules.filter(rule =>
-            ruleToString(rule, filterData)
-              .toLowerCase()
-              .includes(filter.toLowerCase()),
+            getNormalisedString(ruleToString(rule, filterData)).includes(
+              getNormalisedString(filter),
+            ),
           )
       ).slice(0, 100 + page * 50),
     [allRules, filter, filterData, page],
@@ -313,11 +319,11 @@ function ManageRulesContent({
         >
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
-              <Button onClick={onDeleteSelected}>
+              <Button onPress={onDeleteSelected}>
                 Delete {selectedInst.items.size} rules
               </Button>
             )}
-            <Button type="primary" onClick={onCreateRule}>
+            <Button variant="primary" onPress={onCreateRule}>
               Create new rule
             </Button>
           </Stack>

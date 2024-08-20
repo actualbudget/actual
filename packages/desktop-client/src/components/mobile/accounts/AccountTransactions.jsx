@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { useDispatch } from 'react-redux';
 
-import memoizeOne from 'memoize-one';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import {
@@ -20,16 +19,19 @@ import {
   syncAndDownload,
   updateAccount,
 } from 'loot-core/client/actions';
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
+import {
+  SchedulesProvider,
+  useDefaultSchedulesQueryTransform,
+} from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
 import { pagedQuery } from 'loot-core/client/query-helpers';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { styles, theme } from '../../../style';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -39,6 +41,7 @@ import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
 
 export function AccountTransactions({ account, pending, failed }) {
+  const schedulesTransform = useDefaultSchedulesQueryTransform(account.id);
   return (
     <Page
       header={
@@ -52,7 +55,7 @@ export function AccountTransactions({ account, pending, failed }) {
       }
       padding={0}
     >
-      <SchedulesProvider transform={getSchedulesTransform(account.id)}>
+      <SchedulesProvider transform={schedulesTransform}>
         <TransactionListWithPreviews account={account} />
       </SchedulesProvider>
     </Page>
@@ -113,6 +116,7 @@ function AccountName({ account, pending, failed }) {
             width: 8,
             height: 8,
             borderRadius: 8,
+            flexShrink: 0,
             backgroundColor: pending
               ? theme.sidebarItemBackgroundPending
               : failed
@@ -132,15 +136,6 @@ function AccountName({ account, pending, failed }) {
   );
 }
 
-const getSchedulesTransform = memoizeOne(id => {
-  const filter = queries.getAccountFilter(id, '_account');
-
-  return q => {
-    q = q.filter({ $and: [filter, { '_account.closed': false }] });
-    return q.orderBy({ next_date: 'desc' });
-  };
-});
-
 function TransactionListWithPreviews({ account }) {
   const [currentQuery, setCurrentQuery] = useState();
   const [isSearching, setIsSearching] = useState(false);
@@ -154,7 +149,7 @@ function TransactionListWithPreviews({ account }) {
   );
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [_numberFormat] = useLocalPref('numberFormat');
+  const [_numberFormat] = useSyncedPref('numberFormat');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -240,7 +235,7 @@ function TransactionListWithPreviews({ account }) {
     updateSearchQuery(text);
   };
 
-  const onSelectTransaction = transaction => {
+  const onOpenTransaction = transaction => {
     if (!isPreviewId(transaction.id)) {
       navigate(`/transactions/${transaction.id}`);
     } else {
@@ -280,7 +275,7 @@ function TransactionListWithPreviews({ account }) {
       onLoadMore={onLoadMore}
       searchPlaceholder={`Search ${account.name}`}
       onSearch={onSearch}
-      onSelectTransaction={onSelectTransaction}
+      onOpenTransaction={onOpenTransaction}
       onRefresh={onRefresh}
     />
   );

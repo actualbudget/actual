@@ -23,8 +23,8 @@ function toJS(rows: CustomReportData[]) {
       showEmpty: row.show_empty === 1,
       showOffBudget: row.show_offbudget === 1,
       showHiddenCategories: row.show_hidden === 1,
+      includeCurrentInterval: row.include_current === 1,
       showUncategorized: row.show_uncategorized === 1,
-      selectedCategories: row.selected_categories,
       graphType: row.graph_type,
       conditions: row.conditions,
       conditionsOp: row.conditions_op ?? 'and',
@@ -35,9 +35,10 @@ function toJS(rows: CustomReportData[]) {
   return reports;
 }
 
-export function useReports(): CustomReportEntity[] {
-  const reports: CustomReportEntity[] = toJS(
-    useLiveQuery(() => q('custom_reports').select('*'), []) || [],
+export function useReports() {
+  const queryData = useLiveQuery<CustomReportData[]>(
+    () => q('custom_reports').select('*'),
+    [],
   );
 
   // Sort reports by alphabetical order
@@ -51,5 +52,11 @@ export function useReports(): CustomReportEntity[] {
     );
   }
 
-  return useMemo(() => sort(reports), [reports]);
+  return useMemo(
+    () => ({
+      isLoading: queryData === null,
+      data: sort(toJS(queryData || [])),
+    }),
+    [queryData],
+  );
 }

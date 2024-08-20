@@ -2,18 +2,19 @@ import React, { type ReactNode, useEffect } from 'react';
 
 import { media } from 'glamor';
 
-import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
+import { isElectron } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
@@ -23,6 +24,7 @@ import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
+import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
@@ -92,8 +94,8 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  const [budgetId] = useLocalPref('id');
-  const [groupId] = useLocalPref('groupId');
+  const [budgetId] = useMetadataPref('id');
+  const [groupId] = useMetadataPref('groupId');
 
   return (
     <Setting>
@@ -122,7 +124,7 @@ function AdvancedAbout() {
 
 export function Settings() {
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
-  const [budgetName] = useLocalPref('budgetName');
+  const [budgetName] = useMetadataPref('budgetName');
 
   const { loadPrefs, closeBudget } = useActions();
 
@@ -167,19 +169,16 @@ export function Settings() {
                 style={{ color: theme.buttonNormalDisabledText }}
               />
             </FormField>
-            <Button onClick={closeBudget}>Close Budget</Button>
+            <Button onPress={closeBudget}>Close Budget</Button>
           </View>
         )}
-
         <About />
-
-        {!Platform.isBrowser && <GlobalSettings />}
-
+        {isElectron() && <GlobalSettings />}
         <ThemeSettings />
         <FormatSettings />
         <EncryptionSettings />
+        {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}
         <ExportBudget />
-
         <AdvancedToggle>
           <AdvancedAbout />
           <ResetCache />

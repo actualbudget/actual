@@ -6,6 +6,7 @@ import {
   type ScheduleStatuses,
 } from 'loot-core/src/client/data-hooks/schedules';
 import { format as monthUtilFormat } from 'loot-core/src/shared/months';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
@@ -16,7 +17,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -98,10 +99,9 @@ function OverflowMenu({
     <View>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         aria-label="Menu"
-        onClick={e => {
-          e.stopPropagation();
+        onPress={() => {
           setOpen(true);
         }}
       >
@@ -204,8 +204,8 @@ export function SchedulesTable({
     }
     const filterIncludes = (str: string) =>
       str
-        ? str.toLowerCase().includes(filter.toLowerCase()) ||
-          filter.toLowerCase().includes(str.toLowerCase())
+        ? getNormalisedString(str).includes(getNormalisedString(filter)) ||
+          getNormalisedString(filter).includes(getNormalisedString(str))
         : false;
 
     return schedules.filter(schedule => {
@@ -364,7 +364,6 @@ export function SchedulesTable({
         items={items as ScheduleEntity[]}
         renderItem={renderItem}
         renderEmpty={filter ? 'No matching schedules' : 'No schedules'}
-        allowPopupsEscape={items.length < 6}
       />
     </View>
   );

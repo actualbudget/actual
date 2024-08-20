@@ -58,6 +58,19 @@ describe('API CRUD operations', () => {
     await api.loadBudget(budgetName);
   });
 
+  // api: getBudgets
+  test('getBudgets', async () => {
+    const budgets = await api.getBudgets();
+    expect(budgets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'test-budget',
+          name: 'Default Test Db',
+        }),
+      ]),
+    );
+  });
+
   // apis: getCategoryGroups, createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
   test('CategoryGroups: successfully update category groups', async () => {
     const month = '2023-10';
@@ -68,28 +81,22 @@ describe('API CRUD operations', () => {
     expect(groups).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          hidden: 0,
+          hidden: false,
           id: 'fc3825fd-b982-4b72-b768-5b30844cf832',
-          is_income: 0,
+          is_income: false,
           name: 'Usual Expenses',
-          sort_order: 16384,
-          tombstone: 0,
         }),
         expect.objectContaining({
-          hidden: 0,
+          hidden: false,
           id: 'a137772f-cf2f-4089-9432-822d2ddc1466',
-          is_income: 0,
+          is_income: false,
           name: 'Investments and Savings',
-          sort_order: 32768,
-          tombstone: 0,
         }),
         expect.objectContaining({
-          hidden: 0,
+          hidden: false,
           id: '2E1F5BDB-209B-43F9-AF2C-3CE28E380C00',
-          is_income: 1,
+          is_income: true,
           name: 'Income',
-          sort_order: 32768,
-          tombstone: 0,
         }),
       ]),
     );
@@ -251,7 +258,7 @@ describe('API CRUD operations', () => {
     );
   });
 
-  //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount
+  //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount, getAccountBalance
   test('Accounts: successfully complete account operators', async () => {
     const accountId1 = await api.createAccount(
       { name: 'test-account1', offbudget: true },
@@ -271,6 +278,9 @@ describe('API CRUD operations', () => {
         expect.objectContaining({ id: accountId2, name: 'test-account2' }),
       ]),
     );
+
+    expect(await api.getAccountBalance(accountId1)).toEqual(1000);
+    expect(await api.getAccountBalance(accountId2)).toEqual(0);
 
     await api.updateAccount(accountId1, { offbudget: false });
     await api.closeAccount(accountId1, accountId2, null);
@@ -547,10 +557,10 @@ describe('API CRUD operations', () => {
     );
 
     // delete rules
-    await api.deleteRule(rules[1]);
+    await api.deleteRule(rules[1].id);
     expect(await api.getRules()).toHaveLength(1);
 
-    await api.deleteRule(rules[0]);
+    await api.deleteRule(rules[0].id);
     expect(await api.getRules()).toHaveLength(0);
   });
 
@@ -568,6 +578,11 @@ describe('API CRUD operations', () => {
       runTransfers: true,
     });
     expect(addResult).toBe('ok');
+
+    expect(await api.getAccountBalance(accountId)).toEqual(200);
+    expect(
+      await api.getAccountBalance(accountId, new Date(2023, 10, 2)),
+    ).toEqual(0);
 
     // confirm added transactions exist
     let transactions = await api.getTransactions(

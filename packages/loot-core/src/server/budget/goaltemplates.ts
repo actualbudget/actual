@@ -1,12 +1,11 @@
 // @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
-import { integerToAmount } from '../../shared/util';
+import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import { batchMessages } from '../sync';
 
-import { setBudget, getSheetValue, isReflectBudget, setGoal } from './actions';
-import { parse } from './goal-template.pegjs';
+import { getSheetValue, isReflectBudget, setBudget, setGoal } from './actions';
 import { goalsAverage } from './goals/goalsAverage';
 import { goalsBy } from './goals/goalsBy';
 import { goalsPercentage } from './goals/goalsPercentage';
@@ -15,19 +14,26 @@ import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
+import { checkTemplates, storeTemplates } from './template-notes';
+
+const TEMPLATE_PREFIX = '#template';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
-  const category_templates = await getTemplates(null);
-  await resetCategoryTargets({ month, category: null });
-  return processTemplate(month, false, category_templates);
+  const category_templates = await getTemplates(null, 'template');
+  const category_goals = await getTemplates(null, 'goal');
+  const ret = await processTemplate(month, false, category_templates);
+  await processGoals(category_goals, month);
+  return ret;
 }
 
 export async function overwriteTemplate({ month }) {
   await storeTemplates();
-  const category_templates = await getTemplates(null);
-  await resetCategoryTargets({ month, category: null });
-  return processTemplate(month, true, category_templates);
+  const category_templates = await getTemplates(null, 'template');
+  const category_goals = await getTemplates(null, 'goal');
+  const ret = await processTemplate(month, true, category_templates);
+  await processGoals(category_goals, month);
+  return ret;
 }
 
 export async function applySingleCategoryTemplate({ month, category }) {
@@ -35,9 +41,16 @@ export async function applySingleCategoryTemplate({ month, category }) {
     category,
   ]);
   await storeTemplates();
-  const category_templates = await getTemplates(categories[0]);
-  await resetCategoryTargets({ month, category: categories });
-  return processTemplate(month, true, category_templates);
+  const category_templates = await getTemplates(categories[0], 'template');
+  const category_goals = await getTemplates(categories[0], 'goal');
+  const ret = await processTemplate(
+    month,
+    true,
+    category_templates,
+    categories[0],
+  );
+  await processGoals(category_goals, month, categories[0]);
+  return ret;
 }
 
 export function runCheckTemplates() {
@@ -47,9 +60,9 @@ export function runCheckTemplates() {
 async function getCategories() {
   return await db.all(
     `
-    SELECT categories.* FROM categories 
-    INNER JOIN category_groups on categories.cat_group = category_groups.id 
-    WHERE categories.tombstone = 0 AND categories.hidden = 0 
+    SELECT categories.* FROM categories
+    INNER JOIN category_groups on categories.cat_group = category_groups.id
+    WHERE categories.tombstone = 0 AND categories.hidden = 0
     AND category_groups.hidden = 0
     `,
   );
@@ -86,51 +99,32 @@ async function setCategoryTargets({ month, idealTemplate }) {
         category: element.category,
         goal: element.amount,
         month,
+        long_goal: 0,
       });
     });
   });
 }
 
-async function resetCategoryTargets({ month, category }) {
-  let categories;
+async function resetCategoryTargets(month, category) {
+  let categories = [];
   if (category === null) {
     categories = await getCategories();
   } else {
     categories = category;
   }
   await batchMessages(async () => {
-    categories.forEach(element => {
+    for (let i = 0; i < categories.length; i++) {
       setGoal({
-        category: element.id,
+        category: categories[i].id,
         goal: null,
         month,
+        long_goal: null,
       });
-    });
+    }
   });
 }
 
-async function storeTemplates() {
-  //stores the template definitions to the database
-  const templates = await getCategoryTemplates(null);
-  const categories = await getCategories();
-
-  for (let c = 0; c < categories.length; c++) {
-    const template = templates[categories[c].id];
-    if (template) {
-      await db.update('categories', {
-        id: categories[c].id,
-        goal_def: JSON.stringify(template),
-      });
-    } else {
-      await db.update('categories', {
-        id: categories[c].id,
-        goal_def: null,
-      });
-    }
-  }
-}
-
-async function getTemplates(category) {
+async function getTemplates(category, directive: string) {
   //retrieves template definitions from the database
   const goal_def = await db.all(
     'SELECT * FROM categories WHERE goal_def IS NOT NULL',
@@ -141,13 +135,26 @@ async function getTemplates(category) {
     templates[goal_def[ll].id] = JSON.parse(goal_def[ll].goal_def);
   }
   if (category) {
-    const singleCategoryTemplate = {};
+    const singleCategoryTemplate = [];
     if (templates[category.id] !== undefined) {
-      singleCategoryTemplate[category.id] = templates[category.id];
+      singleCategoryTemplate[category.id] = templates[category.id].filter(
+        t => t.directive === directive,
+      );
+      return singleCategoryTemplate;
     }
+    singleCategoryTemplate[category.id] = undefined;
     return singleCategoryTemplate;
   } else {
-    return templates;
+    const categories = await getCategories();
+    const ret = [];
+    for (let cc = 0; cc < categories.length; cc++) {
+      const id = categories[cc].id;
+      if (templates[id]) {
+        ret[id] = templates[id];
+        ret[id] = ret[id].filter(t => t.directive === directive);
+      }
+    }
+    return ret;
   }
 }
 
@@ -155,6 +162,7 @@ async function processTemplate(
   month,
   force,
   category_templates,
+  category?,
 ): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
@@ -162,8 +170,13 @@ async function processTemplate(
   const setToZero = [];
   let priority_list = [];
 
-  const categories = await getCategories();
+  let categories = [];
   const categories_remove = [];
+  if (category) {
+    categories[0] = category;
+  } else {
+    categories = await getCategories();
+  }
 
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
@@ -187,13 +200,12 @@ async function processTemplate(
         // save index of category to remove
         categories_remove.push(c);
       } else {
-        // if we are overwritting add this category to list to zero
-        setToZero.push({
-          category: category.id,
-          amount: 0,
-          isIncome: category.is_income,
-          isTemplate: template ? true : false,
-        });
+        // add all categories with a template to the list to unset budget
+        if (template?.length > 0) {
+          setToZero.push({
+            category: category.id,
+          });
+        }
       }
     }
   }
@@ -205,11 +217,12 @@ async function processTemplate(
     categories.splice(categories_remove[i], 1);
   }
 
-  // zero out the categories that need it
+  // zero out budget and goal from categories that need it
   await setGoalBudget({
     month,
-    templateBudget: setToZero.filter(f => f.isTemplate === true),
+    templateBudget: setToZero,
   });
+  await resetCategoryTargets(month, categories);
 
   // sort and filter down to just the requested priorities
   priority_list = priority_list
@@ -354,6 +367,7 @@ async function processTemplate(
     await setGoalBudget({ month, templateBudget });
   }
   await setCategoryTargets({ month, idealTemplate });
+
   if (num_applied === 0) {
     if (errors.length) {
       return {
@@ -382,34 +396,25 @@ async function processTemplate(
   }
 }
 
-const TEMPLATE_PREFIX = '#template';
-async function getCategoryTemplates(category) {
-  const templates = {};
-
-  let notes = await db.all(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
-  );
-  if (category) notes = notes.filter(n => n.id === category.id);
-
-  for (let n = 0; n < notes.length; n++) {
-    const lines = notes[n].note.split('\n');
-    const template_lines = [];
-    for (let l = 0; l < lines.length; l++) {
-      const line = lines[l].trim();
-      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
-      const expression = line.slice(TEMPLATE_PREFIX.length);
-      try {
-        const parsed = parse(expression);
-        template_lines.push(parsed);
-      } catch (e) {
-        template_lines.push({ type: 'error', line, error: e });
-      }
-    }
-    if (template_lines.length) {
-      templates[notes[n].id] = template_lines;
+async function processGoals(goals, month, category?) {
+  let categories = [];
+  if (category) {
+    categories[0] = category;
+  } else {
+    categories = await getCategories();
+  }
+  for (let c = 0; c < categories.length; c++) {
+    const cat_id = categories[c].id;
+    const goal_lines = goals[cat_id];
+    if (goal_lines?.length > 0) {
+      await setGoal({
+        month,
+        category: cat_id,
+        goal: amountToInteger(goal_lines[0].amount),
+        long_goal: 1,
+      });
     }
   }
-  return templates;
 }
 
 async function applyCategoryTemplate(
@@ -645,55 +650,4 @@ async function applyCategoryTemplate(
   str += ' ' + template_lines.map(x => x.line).join('\n');
   console.log(str);
   return { amount: to_budget, errors };
-}
-
-async function checkTemplates(): Promise<Notification> {
-  const category_templates = await getCategoryTemplates(null);
-  const errors = [];
-
-  const categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
-  );
-  let all_schedule_names = await db.all(
-    'SELECT name from schedules WHERE name NOT NULL AND tombstone = 0',
-  );
-  all_schedule_names = all_schedule_names.map(v => v.name);
-
-  // run through each line and see if its an error
-  for (let c = 0; c < categories.length; c++) {
-    const category = categories[c];
-    const template = category_templates[category.id];
-
-    if (template) {
-      for (let l = 0; l < template.length; l++) {
-        //check for basic error
-        if (template[l].type === 'error') {
-          errors.push(category.name + ': ' + template[l].line);
-        }
-        // check schedule name error
-        if (template[l].type === 'schedule') {
-          if (!all_schedule_names.includes(template[l].name)) {
-            errors.push(
-              category.name +
-                ': Schedule “' +
-                template[l].name +
-                '” does not exist',
-            );
-          }
-        }
-      }
-    }
-  }
-  if (errors.length) {
-    return {
-      sticky: true,
-      message: `There were errors interpreting some templates:`,
-      pre: errors.join('\n\n'),
-    };
-  } else {
-    return {
-      type: 'message',
-      message: 'All templates passed! 🎉',
-    };
-  }
 }

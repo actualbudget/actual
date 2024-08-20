@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useEffect } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   isNonProductionEnvironment,
@@ -10,7 +11,7 @@ import { useActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
-import { Button, ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -20,6 +21,7 @@ import { Title } from './subscribe/common';
 
 export function ConfigServer() {
   useSetThemeColor(theme.mobileConfigServerViewTheme);
+  const { t } = useTranslation();
   const { createBudget, signOut, loggedIn } = useActions();
   const navigate = useNavigate();
   const [url, setUrl] = useState('');
@@ -34,9 +36,13 @@ export function ConfigServer() {
   function getErrorMessage(error: string) {
     switch (error) {
       case 'network-failure':
-        return 'Server is not running at this URL. Make sure you have HTTPS set up properly.';
+        return t(
+          'Server is not running at this URL. Make sure you have HTTPS set up properly.',
+        );
       default:
-        return 'Server does not look like an Actual server. Is it set up correctly?';
+        return t(
+          'Server does not look like an Actual server. Is it set up correctly?',
+        );
     }
   }
 
@@ -91,7 +97,7 @@ export function ConfigServer() {
 
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
-      <Title text="Where’s the server?" />
+      <Title text={t('Where’s the server?')} />
 
       <Text
         style={{
@@ -101,16 +107,16 @@ export function ConfigServer() {
         }}
       >
         {currentUrl ? (
-          <>
+          <Trans>
             Existing sessions will be logged out and you will log in to this
             server. We will validate that Actual is running at this URL.
-          </>
+          </Trans>
         ) : (
-          <>
+          <Trans>
             There is no server configured. After running the server, specify the
             URL here to use the app. You can always change this later. We will
             validate that Actual is running at this URL.
-          </>
+          </Trans>
         )}
       </Text>
 
@@ -127,37 +133,33 @@ export function ConfigServer() {
         </Text>
       )}
 
-      <form
-        style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
-        onSubmit={e => {
-          e.preventDefault();
-          onSubmit();
-        }}
-      >
+      <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
         <BigInput
           autoFocus={true}
-          placeholder="https://example.com"
+          placeholder={t('https://example.com')}
           value={url || ''}
           onChangeValue={setUrl}
           style={{ flex: 1, marginRight: 10 }}
+          onEnter={onSubmit}
         />
         <ButtonWithLoading
-          type="primary"
-          loading={loading}
+          variant="primary"
+          isLoading={loading}
           style={{ fontSize: 15 }}
+          onPress={onSubmit}
         >
-          OK
+          {t('OK')}
         </ButtonWithLoading>
         {currentUrl && (
           <Button
-            type="bare"
+            variant="bare"
             style={{ fontSize: 15, marginLeft: 10 }}
-            onClick={() => navigate(-1)}
+            onPress={() => navigate(-1)}
           >
-            Cancel
+            {t('Cancel')}
           </Button>
         )}
-      </form>
+      </View>
 
       <View
         style={{
@@ -169,42 +171,42 @@ export function ConfigServer() {
       >
         {currentUrl ? (
           <Button
-            type="bare"
+            variant="bare"
             style={{ color: theme.pageTextLight }}
-            onClick={onSkip}
+            onPress={onSkip}
           >
-            Stop using a server
+            {t('Stop using a server')}
           </Button>
         ) : (
           <>
             {!isElectron() && (
               <Button
-                type="bare"
+                variant="bare"
                 style={{
                   color: theme.pageTextLight,
                   margin: 5,
                   marginRight: 15,
                 }}
-                onClick={onSameDomain}
+                onPress={onSameDomain}
               >
-                Use current domain
+                {t('Use current domain')}
               </Button>
             )}
             <Button
-              type="bare"
+              variant="bare"
               style={{ color: theme.pageTextLight, margin: 5 }}
-              onClick={onSkip}
+              onPress={onSkip}
             >
-              Don’t use a server
+              {t('Don’t use a server')}
             </Button>
 
             {isNonProductionEnvironment() && (
               <Button
-                type="primary"
+                variant="primary"
                 style={{ marginLeft: 15 }}
-                onClick={onCreateTestFile}
+                onPress={onCreateTestFile}
               >
-                Create test file
+                {t('Create test file')}
               </Button>
             )}
           </>

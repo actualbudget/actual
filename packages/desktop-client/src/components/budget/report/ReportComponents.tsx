@@ -1,24 +1,48 @@
 // @ts-strict-ignore
 import React, { memo, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
+import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { CellValue } from '../../spreadsheet/CellValue';
+import { type Binding, type SheetFields } from '../../spreadsheet';
+import { CellValue, type CellValueProps } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
-import { Field, SheetCell } from '../../table';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
+import { Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
+
+export const useReportSheetValue = <
+  FieldName extends SheetFields<'report-budget'>,
+>(
+  binding: Binding<'report-budget', FieldName>,
+) => {
+  return useSheetValue(binding);
+};
+
+const ReportCellValue = <FieldName extends SheetFields<'report-budget'>>(
+  props: CellValueProps<'report-budget', FieldName>,
+) => {
+  return <CellValue {...props} />;
+};
+
+const ReportSheetCell = <FieldName extends SheetFields<'report-budget'>>(
+  props: SheetCellProps<'report-budget', FieldName>,
+) => {
+  return <SheetCell {...props} />;
+};
 
 const headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -38,8 +62,10 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Budgeted</Text>
-        <CellValue
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Budgeted</Trans>
+        </Text>
+        <ReportCellValue
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
           style={{ color: theme.pageTextLight, fontWeight: 600 }}
@@ -49,16 +75,20 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Spent</Text>
-        <CellValue
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Spent</Trans>
+        </Text>
+        <ReportCellValue
           binding={reportBudget.totalSpent}
           type="financial"
           style={{ color: theme.pageTextLight, fontWeight: 600 }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Balance</Text>
-        <CellValue
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Balance</Trans>
+        </Text>
+        <ReportCellValue
           binding={reportBudget.totalLeftover}
           type="financial"
           style={{ color: theme.pageTextLight, fontWeight: 600 }}
@@ -78,24 +108,40 @@ export function IncomeHeaderMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Budgeted</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Budgeted</Trans>
+        </Text>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Received</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Received</Trans>
+        </Text>
       </View>
     </View>
   );
 }
 
 type GroupMonthProps = {
+  month: string;
   group: { id: string; is_income: boolean };
 };
-export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
+export const GroupMonth = memo(function GroupMonth({
+  month,
+  group,
+}: GroupMonthProps) {
   const { id } = group;
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
-      <SheetCell
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetHeaderCurrentMonth
+          : theme.budgetHeaderOtherMonth,
+      }}
+    >
+      <ReportSheetCell
         name="budgeted"
         width="flex"
         textAlign="right"
@@ -105,7 +151,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           type: 'financial',
         }}
       />
-      <SheetCell
+      <ReportSheetCell
         name="spent"
         width="flex"
         textAlign="right"
@@ -116,7 +162,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
         }}
       />
       {!group.is_income && (
-        <SheetCell
+        <ReportSheetCell
           name="balance"
           width="flex"
           textAlign="right"
@@ -163,11 +209,20 @@ export const CategoryMonth = memo(function CategoryMonth({
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
 
+  const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
+    onBudgetAction(...args);
+    setBalanceMenuOpen(false);
+    setMenuOpen(false);
+  };
+
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'row',
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
         '& .hover-visible': {
           opacity: 0,
           transition: 'opacity .25s',
@@ -200,11 +255,8 @@ export const CategoryMonth = memo(function CategoryMonth({
           >
             <Button
               ref={triggerRef}
-              type="bare"
-              onClick={e => {
-                e.stopPropagation();
-                setMenuOpen(true);
-              }}
+              variant="bare"
+              onPress={() => setMenuOpen(true)}
               style={{
                 padding: 3,
               }}
@@ -225,7 +277,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
-                  onBudgetAction?.(month, 'copy-single-last', {
+                  onMenuAction(month, 'copy-single-last', {
                     category: category.id,
                   });
                 }}
@@ -238,12 +290,12 @@ export const CategoryMonth = memo(function CategoryMonth({
                     return;
                   }
 
-                  onBudgetAction?.(month, `set-single-${numberOfMonths}-avg`, {
+                  onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
                 }}
                 onApplyBudgetTemplate={() => {
-                  onBudgetAction?.(month, 'apply-single-category-template', {
+                  onMenuAction(month, 'apply-single-category-template', {
                     category: category.id,
                   });
                 }}
@@ -251,7 +303,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             </Popover>
           </View>
         )}
-        <SheetCell
+        <ReportSheetCell
           name="budget"
           exposed={editing}
           focused={editing}
@@ -301,7 +353,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.id, month)}
         >
-          <CellValue
+          <ReportCellValue
             binding={reportBudget.catSumAmount(category.id)}
             type="financial"
             getStyle={makeAmountGrey}
@@ -318,7 +370,6 @@ export const CategoryMonth = memo(function CategoryMonth({
       {!category.is_income && (
         <Field
           name="balance"
-          truncate={false}
           width="flex"
           style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
@@ -334,6 +385,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               balance={reportBudget.catBalance(category.id)}
               goal={reportBudget.catGoal(category.id)}
               budgeted={reportBudget.catBudgeted(category.id)}
+              longGoal={reportBudget.catLongGoal(category.id)}
               style={{
                 ':hover': { textDecoration: 'underline' },
               }}
@@ -349,11 +401,10 @@ export const CategoryMonth = memo(function CategoryMonth({
             <BalanceMenu
               categoryId={category.id}
               onCarryover={carryover => {
-                onBudgetAction?.(month, 'carryover', {
+                onMenuAction(month, 'carryover', {
                   category: category.id,
                   flag: carryover,
                 });
-                setBalanceMenuOpen(false);
               }}
             />
           </Popover>

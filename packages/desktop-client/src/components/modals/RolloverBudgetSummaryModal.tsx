@@ -8,13 +8,11 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/rollover/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
-import { Modal } from '../common/Modal';
-import { type CommonModalProps } from '../Modals';
+import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 type RolloverBudgetSummaryModalProps = {
-  modalProps: CommonModalProps;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   month: string;
 };
@@ -22,28 +20,44 @@ type RolloverBudgetSummaryModalProps = {
 export function RolloverBudgetSummaryModal({
   month,
   onBudgetAction,
-  modalProps,
 }: RolloverBudgetSummaryModalProps) {
   const dispatch = useDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM');
-  const sheetValue = useSheetValue({
-    name: rolloverBudget.toBudget,
-    value: 0,
-  });
+  const sheetValue =
+    useRolloverSheetValue({
+      name: rolloverBudget.toBudget,
+      value: 0,
+    }) ?? 0;
 
-  const openTransferModal = () => {
+  const openTransferAvailableModal = () => {
     dispatch(
       pushModal('transfer', {
         title: 'Transfer: To Budget',
         month,
         amount: sheetValue,
         onSubmit: (amount, toCategoryId) => {
-          onBudgetAction?.(month, 'transfer-available', {
+          onBudgetAction(month, 'transfer-available', {
             amount,
             month,
             category: toCategoryId,
           });
           dispatch(collapseModals('transfer'));
+        },
+      }),
+    );
+  };
+
+  const openCoverOverbudgetedModal = () => {
+    dispatch(
+      pushModal('cover', {
+        title: 'Cover: Overbudgeted',
+        month,
+        showToBeBudgeted: false,
+        onSubmit: categoryId => {
+          onBudgetAction(month, 'cover-overbudgeted', {
+            category: categoryId,
+          });
+          dispatch(collapseModals('cover'));
         },
       }),
     );
@@ -62,42 +76,53 @@ export function RolloverBudgetSummaryModal({
   };
 
   const onResetHoldBuffer = () => {
-    onBudgetAction?.(month, 'reset-hold');
-    modalProps.onClose();
+    onBudgetAction(month, 'reset-hold');
   };
 
-  const onClick = () => {
+  const onClick = ({ close }: { close: () => void }) => {
     dispatch(
       pushModal('rollover-summary-to-budget-menu', {
         month,
-        onTransfer: openTransferModal,
-        onResetHoldBuffer,
+        onTransfer: openTransferAvailableModal,
+        onCover: openCoverOverbudgetedModal,
+        onResetHoldBuffer: () => {
+          onResetHoldBuffer();
+          close();
+        },
         onHoldBuffer,
       }),
     );
   };
 
   return (
-    <Modal title="Budget Summary" {...modalProps}>
-      <NamespaceContext.Provider value={sheetForMonth(month)}>
-        <TotalsList
-          prevMonthName={prevMonthName}
-          style={{
-            ...styles.mediumText,
-          }}
-        />
-        <ToBudgetAmount
-          prevMonthName={prevMonthName}
-          style={{
-            ...styles.mediumText,
-            marginTop: 15,
-          }}
-          amountStyle={{
-            ...styles.underlinedText,
-          }}
-          onClick={onClick}
-        />
-      </NamespaceContext.Provider>
+    <Modal name="rollover-budget-summary">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Budget Summary"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <NamespaceContext.Provider value={sheetForMonth(month)}>
+            <TotalsList
+              prevMonthName={prevMonthName}
+              style={{
+                ...styles.mediumText,
+              }}
+            />
+            <ToBudgetAmount
+              prevMonthName={prevMonthName}
+              style={{
+                ...styles.mediumText,
+                marginTop: 15,
+              }}
+              amountStyle={{
+                ...styles.underlinedText,
+              }}
+              onClick={() => onClick({ close })}
+            />
+          </NamespaceContext.Provider>
+        </>
+      )}
     </Modal>
   );
 }

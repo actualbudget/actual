@@ -1,13 +1,18 @@
 import { type numberFormats } from '../shared/util';
 
+import { spendingReportTimeType } from './models/reports';
+
 export type FeatureFlag =
+  | 'dashboards'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'customReports'
   | 'spendingReport'
   | 'simpleFinSync';
 
-export type LocalPrefs = Partial<
+/**
+ * Cross-device preferences. These sync across devices when they are changed.
+ */
+export type SyncedPrefs = Partial<
   {
     firstDayOfWeekIdx: `${0 | 1 | 2 | 3 | 4 | 5 | 6}`;
     dateFormat:
@@ -18,50 +23,68 @@ export type LocalPrefs = Partial<
       | 'dd.MM.yyyy';
     numberFormat: (typeof numberFormats)[number]['value'];
     hideFraction: boolean;
-    hideClosedAccounts: boolean;
-    hideMobileMessage: boolean;
     isPrivacyEnabled: boolean;
-    budgetName: string;
-    'ui.showClosedAccounts': boolean;
-    'expand-splits': boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
     [key: `hide-reconciled-${string}`]: boolean;
-    'budget.collapsed': string[];
-    'budget.summaryCollapsed': boolean;
-    'budget.showHiddenCategories': boolean;
-    'budget.startMonth': string;
     // TODO: pull from src/components/modals/ImportTransactions.js
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
     [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
+    [key: `csv-skip-lines-${string}`]: number;
     [key: `csv-has-header-${string}`]: boolean;
     [key: `ofx-fallback-missing-payee-${string}`]: boolean;
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
-    'flags.updateNotificationShownForVersion': string;
-    id: string;
-    isCached: boolean;
-    lastUploaded: string;
-    cloudFileId: string;
-    groupId: string;
     budgetType: 'report' | 'rollover';
-    encryptKeyId: string;
-    lastSyncedTimestamp: string;
-    userId: string;
-    resetClock: boolean;
-    lastScheduleRun: string;
+  } & Record<`flags.${FeatureFlag}`, boolean>
+>;
+
+/**
+ * Preferences that are stored in the `metadata.json` file along with the
+ * core database.
+ */
+export type MetadataPrefs = Partial<{
+  budgetName: string;
+  id: string;
+  lastUploaded: string;
+  cloudFileId: string;
+  groupId: string;
+  encryptKeyId: string;
+  lastSyncedTimestamp: string;
+  resetClock: boolean;
+  lastScheduleRun: string;
+  userId: string; // TODO: delete this (unused)
+}>;
+
+/**
+ * Local preferences applicable to a single device. Stored in local storage.
+ * TODO: eventually `LocalPrefs` type should not use `SyncedPrefs` or `MetadataPrefs`;
+ * this is only a stop-gap solution.
+ */
+export type LocalPrefs = SyncedPrefs &
+  MetadataPrefs &
+  Partial<{
+    'ui.showClosedAccounts': boolean;
+    'expand-splits': boolean;
+    'budget.collapsed': string[];
+    'budget.summaryCollapsed': boolean;
+    'budget.showHiddenCategories': boolean;
+    'budget.startMonth': string;
+    'flags.updateNotificationShownForVersion': string;
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
+    spendingReportFilter: string;
+    spendingReportTime: spendingReportTimeType;
+    spendingReportCompare: spendingReportTimeType;
+    sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
-  } & Record<`flags.${FeatureFlag}`, boolean>
->;
+  }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
-  autoUpdate: boolean;
   keyId?: string;
   theme: Theme;
   documentDir: string; // Electron only

@@ -8,21 +8,24 @@ import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgLogo } from '../../../icons/logo';
 import { SvgExpandArrow } from '../../../icons/v0';
 import {
   SvgArrowThinLeft,
   SvgArrowThinRight,
+  SvgArrowThickRight,
   SvgCheveronRight,
 } from '../../../icons/v1';
 import { SvgViewShow } from '../../../icons/v2';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
-import { makeAmountFullStyle, makeAmountGrey } from '../../budget/util';
-import { Button } from '../../common/Button';
+import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
+import { Button } from '../../common/Button2';
 import { Card } from '../../common/Card';
 import { Label } from '../../common/Label';
 import { Text } from '../../common/Text';
@@ -51,7 +54,7 @@ function getColumnWidth({ show3Cols, isSidebar = false, offset = 0 } = {}) {
   return show3Cols ? `${35 + offset}vw` : `${45 + offset}vw`;
 }
 
-function ToBudget({ toBudget, onClick, show3Cols }) {
+function ToBudget({ toBudget, onPress, show3Cols }) {
   const amount = useSheetValue(toBudget);
   const format = useFormat();
   const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
@@ -66,9 +69,9 @@ function ToBudget({ toBudget, onClick, show3Cols }) {
       }}
     >
       <Button
-        type="bare"
+        variant="bare"
         style={{ maxWidth: sidebarColumnWidth }}
-        onClick={onClick}
+        onPress={onPress}
       >
         <View>
           <Label
@@ -116,7 +119,7 @@ function ToBudget({ toBudget, onClick, show3Cols }) {
   );
 }
 
-function Saved({ projected, onClick, show3Cols }) {
+function Saved({ projected, onPress, show3Cols }) {
   const binding = projected
     ? reportBudget.totalBudgetedSaved
     : reportBudget.totalSaved;
@@ -136,9 +139,9 @@ function Saved({ projected, onClick, show3Cols }) {
       }}
     >
       <Button
-        type="bare"
+        variant="bare"
         style={{ maxWidth: sidebarColumnWidth }}
-        onClick={onClick}
+        onPress={onPress}
       >
         <View>
           <View>
@@ -217,7 +220,7 @@ function BudgetCell({
   ...props
 }) {
   const dispatch = useDispatch();
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   const categoryBudgetMenuModal = `${budgetType}-budget-menu`;
 
@@ -265,7 +268,10 @@ function BudgetCell({
       type="financial"
       getStyle={makeAmountGrey}
       data-testid={name}
-      onClick={onOpenCategoryBudgetMenu}
+      onPointerUp={e => {
+        e.stopPropagation();
+        onOpenCategoryBudgetMenu();
+      }}
       {...props}
     />
   );
@@ -315,6 +321,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   category,
   isHidden,
   goal,
+  longGoal,
   budgeted,
   spent,
   balance,
@@ -331,7 +338,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
 }) {
   const opacity = blank ? 0 : 1;
 
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const goalTemp = useSheetValue(goal);
+  const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
+
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const dispatch = useDispatch();
 
   const onCarryover = carryover => {
@@ -347,6 +358,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
       ? rolloverBudget.catBalance(category.id)
       : reportBudget.catBalance(category.id),
   );
+  const budgetedtmp = useSheetValue(budgeted);
+  const balancetmp = useSheetValue(balance);
+  const isLongGoal = useSheetValue(longGoal) === 1;
+  const budgetedValue = isGoalTemplatesEnabled
+    ? isLongGoal
+      ? balancetmp
+      : budgetedtmp
+    : null;
 
   const onTransfer = () => {
     dispatch(
@@ -370,10 +389,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const onCover = () => {
     dispatch(
       pushModal('cover', {
-        categoryId: category.id,
+        title: category.name,
         month,
+        category: category.id,
         onSubmit: fromCategoryId => {
-          onBudgetAction(month, 'cover', {
+          onBudgetAction(month, 'cover-overspending', {
             to: category.id,
             from: fromCategoryId,
           });
@@ -424,11 +444,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
         }}
       >
         <Button
-          type="bare"
+          variant="bare"
           style={{
             maxWidth: sidebarColumnWidth,
           }}
-          onClick={() => onEdit?.(category.id)}
+          onPress={() => onEdit?.(category.id)}
         >
           <View
             style={{
@@ -480,14 +500,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
             onBudgetAction={onBudgetAction}
             formatter={value => (
               <Button
-                type="bare"
+                variant="bare"
                 style={{
                   ...PILL_STYLE,
                   maxWidth: columnWidth,
                 }}
               >
                 <AutoTextSize
-                  key={value}
+                  key={`${value}|${show3Cols}|${showBudgetedCol}`}
                   as={Text}
                   minFontSizePx={6}
                   maxFontSizePx={12}
@@ -517,17 +537,20 @@ const ExpenseCategory = memo(function ExpenseCategory({
             binding={spent}
             getStyle={makeAmountGrey}
             type="financial"
-            onClick={onShowActivity}
+            onPointerUp={e => {
+              e.stopPropagation();
+              onShowActivity();
+            }}
             formatter={value => (
               <Button
-                type="bare"
+                variant="bare"
                 style={{
                   ...PILL_STYLE,
                   maxWidth: columnWidth,
                 }}
               >
                 <AutoTextSize
-                  key={value}
+                  key={`${value}|${show3Cols}|${showBudgetedCol}`}
                   as={Text}
                   minFontSizePx={6}
                   maxFontSizePx={12}
@@ -552,15 +575,22 @@ const ExpenseCategory = memo(function ExpenseCategory({
             width: columnWidth,
           }}
         >
-          <span role="button" onClick={() => onOpenBalanceMenu?.()}>
+          <span
+            role="button"
+            onPointerUp={e => {
+              e.stopPropagation();
+              onOpenBalanceMenu();
+            }}
+          >
             <BalanceWithCarryover
               carryover={carryover}
               balance={balance}
               goal={goal}
               budgeted={budgeted}
+              longGoal={longGoal}
               formatter={value => (
                 <Button
-                  type="bare"
+                  variant="bare"
                   style={{
                     ...PILL_STYLE,
                     maxWidth: columnWidth,
@@ -574,9 +604,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     mode="oneline"
                     style={{
                       maxWidth: columnWidth,
-                      ...makeAmountFullStyle(value, {
-                        zeroColor: theme.pillTextSubdued,
-                      }),
+                      ...makeBalanceAmountStyle(
+                        value,
+                        goalValue,
+                        budgetedValue,
+                      ),
                       textAlign: 'right',
                       fontSize: 12,
                     }}
@@ -584,6 +616,23 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     {format(value, 'financial')}
                   </AutoTextSize>
                 </Button>
+              )}
+              carryoverIndicator={({ style }) => (
+                <View
+                  style={{
+                    position: 'absolute',
+                    right: '-3px',
+                    top: '-5px',
+                    borderRadius: '50%',
+                    backgroundColor: style?.color ?? theme.pillText,
+                  }}
+                >
+                  <SvgArrowThickRight
+                    width={11}
+                    height={11}
+                    style={{ color: theme.pillBackgroundLight }}
+                  />
+                </View>
               )}
             />
           </span>
@@ -671,19 +720,16 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
         }}
       >
         <Button
-          type="bare"
-          style={{
+          variant="bare"
+          style={({ isPressed, isHovered }) => ({
             flexShrink: 0,
             color: theme.pageTextSubdued,
             ...styles.noTapHighlight,
-          }}
-          activeStyle={{
-            backgroundColor: 'transparent',
-          }}
-          hoveredStyle={{
-            backgroundColor: 'transparent',
-          }}
-          onClick={() => onToggleCollapse?.(group.id)}
+            ...(isPressed || isHovered
+              ? { backgroundColor: 'transparent' }
+              : {}),
+          })}
+          onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
             width={8}
@@ -696,11 +742,11 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
           />
         </Button>
         <Button
-          type="bare"
+          variant="bare"
           style={{
             maxWidth: sidebarColumnWidth,
           }}
-          onClick={() => onEdit?.(group.id)}
+          onPress={() => onEdit?.(group.id)}
         >
           <View
             style={{
@@ -715,6 +761,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
                 width: sidebarColumnWidth,
                 textAlign: 'left',
                 ...styles.smallText,
+                fontWeight: '500',
               }}
               data-testid="group-name"
             >
@@ -834,7 +881,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       {/* {editMode && (
         <View>
           <Button
-            onClick={() => onAddCategory(group.id, group.is_income)}
+            onPointerUp={() => onAddCategory(group.id, group.is_income)}
             style={{ padding: 10 }}
           >
             <Add width={15} height={15} />
@@ -897,19 +944,16 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
         }}
       >
         <Button
-          type="bare"
-          style={{
+          variant="bare"
+          style={({ isPressed, isHovered }) => ({
             flexShrink: 0,
             color: theme.pageTextSubdued,
             ...styles.noTapHighlight,
-          }}
-          activeStyle={{
-            backgroundColor: 'transparent',
-          }}
-          hoveredStyle={{
-            backgroundColor: 'transparent',
-          }}
-          onClick={() => onToggleCollapse?.(group.id)}
+            ...(isPressed || isHovered
+              ? { backgroundColor: 'transparent' }
+              : {}),
+          })}
+          onPress={() => onToggleCollapse?.(group.id)}
         >
           <SvgExpandArrow
             width={8}
@@ -922,11 +966,11 @@ const IncomeGroupHeader = memo(function IncomeGroupHeader({
           />
         </Button>
         <Button
-          type="bare"
+          variant="bare"
           style={{
             maxWidth: sidebarColumnWidth,
           }}
-          onClick={() => onEdit?.(group.id)}
+          onPress={() => onEdit?.(group.id)}
         >
           <View
             style={{
@@ -1068,11 +1112,11 @@ const IncomeCategory = memo(function IncomeCategory({
         }}
       >
         <Button
-          type="bare"
+          variant="bare"
           style={{
             maxWidth: sidebarColumnWidth,
           }}
-          onClick={() => onEdit?.(category.id)}
+          onPress={() => onEdit?.(category.id)}
         >
           <View
             style={{
@@ -1123,7 +1167,7 @@ const IncomeCategory = memo(function IncomeCategory({
               onBudgetAction={onBudgetAction}
               formatter={value => (
                 <Button
-                  type="bare"
+                  variant="bare"
                   style={{ ...PILL_STYLE, maxWidth: columnWidth }}
                 >
                   <AutoTextSize
@@ -1197,20 +1241,20 @@ const IncomeCategory = memo(function IncomeCategory({
 //         <MathOperations emitter={emitter} />
 //         <View style={{ flex: 1 }} />
 //         <Button
-//           onClick={() => emitter.emit('moveUp')}
+//           onPointerUp={() => emitter.emit('moveUp')}
 //           style={{ marginRight: 5 }}
 //           data-testid="up"
 //         >
 //           <ArrowThinUp width={13} height={13} />
 //         </Button>
 //         <Button
-//           onClick={() => emitter.emit('moveDown')}
+//           onPointerUp={() => emitter.emit('moveDown')}
 //           style={{ marginRight: 5 }}
 //           data-testid="down"
 //         >
 //           <ArrowThinDown width={13} height={13} />
 //         </Button>
-//         <Button onClick={() => emitter.emit('done')} data-testid="done">
+//         <Button onPointerUp={() => emitter.emit('done')} data-testid="done">
 //           Done
 //         </Button>
 //       </View>
@@ -1316,6 +1360,11 @@ const ExpenseGroup = memo(function ExpenseGroup({
                 type === 'report'
                   ? reportBudget.catGoal(category.id)
                   : rolloverBudget.catGoal(category.id)
+              }
+              longGoal={
+                type === 'report'
+                  ? reportBudget.catLongGoal(category.id)
+                  : rolloverBudget.catLongGoal(category.id)
               }
               budgeted={
                 type === 'report'
@@ -1592,14 +1641,13 @@ export function BudgetTable({
           }
           leftContent={
             <Button
-              type="bare"
-              style={{
+              variant="bare"
+              style={({ isPressed, isHovered }) => ({
                 color: theme.mobileHeaderText,
                 margin: 10,
-              }}
-              hoveredStyle={noBackgroundColorStyle}
-              activeStyle={noBackgroundColorStyle}
-              onClick={() => onOpenBudgetPageMenu?.()}
+                ...(isPressed || isHovered ? noBackgroundColorStyle : {}),
+              })}
+              onPress={onOpenBudgetPageMenu}
             >
               <SvgLogo width="20" height="20" />
               <SvgCheveronRight
@@ -1695,13 +1743,13 @@ function BudgetTableHeader({
         {type === 'report' ? (
           <Saved
             projected={month >= monthUtils.currentMonth()}
-            onClick={onShowBudgetSummary}
+            onPress={onShowBudgetSummary}
             show3Cols={show3Cols}
           />
         ) : (
           <ToBudget
             toBudget={rolloverBudget.toBudget}
-            onClick={onShowBudgetSummary}
+            onPress={onShowBudgetSummary}
             show3Cols={show3Cols}
           />
         )}
@@ -1721,9 +1769,9 @@ function BudgetTableHeader({
             }}
           >
             <Button
-              type="bare"
-              disabled={show3Cols}
-              onClick={toggleSpentColumn}
+              variant="bare"
+              isDisabled={show3Cols}
+              onPress={toggleSpentColumn}
               style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
@@ -1782,9 +1830,9 @@ function BudgetTableHeader({
             }}
           >
             <Button
-              type="bare"
-              disabled={show3Cols}
-              onClick={toggleSpentColumn}
+              variant="bare"
+              isDisabled={show3Cols}
+              onPress={toggleSpentColumn()}
               style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
@@ -1897,18 +1945,24 @@ function MonthSelector({
       }}
     >
       <Button
-        type="bare"
-        onClick={prevEnabled && onPrevMonth}
-        style={{
+        variant="bare"
+        onPress={() => {
+          if (prevEnabled) {
+            onPrevMonth();
+          }
+        }}
+        style={({ isHovered }) => ({
           ...styles.noTapHighlight,
           ...arrowButtonStyle,
           opacity: prevEnabled ? 1 : 0.6,
           color: theme.mobileHeaderText,
-        }}
-        hoveredStyle={{
-          color: theme.mobileHeaderText,
-          background: theme.mobileHeaderTextHover,
-        }}
+          ...(isHovered
+            ? {
+                color: theme.mobileHeaderText,
+                background: theme.mobileHeaderTextHover,
+              }
+            : {}),
+        })}
       >
         <SvgArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
       </Button>
@@ -1921,23 +1975,32 @@ function MonthSelector({
           margin: '0 5px',
           ...styles.underlinedText,
         }}
-        onClick={() => onOpenMonthMenu?.(month)}
+        onPointerUp={e => {
+          e.stopPropagation();
+          onOpenMonthMenu?.(month);
+        }}
       >
         {monthUtils.format(month, 'MMMM ‘yy')}
       </Text>
       <Button
-        type="bare"
-        onClick={nextEnabled && onNextMonth}
-        style={{
+        variant="bare"
+        onPress={() => {
+          if (nextEnabled) {
+            onNextMonth();
+          }
+        }}
+        style={({ isHovered }) => ({
           ...styles.noTapHighlight,
           ...arrowButtonStyle,
           opacity: nextEnabled ? 1 : 0.6,
           color: theme.mobileHeaderText,
-        }}
-        hoveredStyle={{
-          color: theme.mobileHeaderText,
-          background: theme.mobileHeaderTextHover,
-        }}
+          ...(isHovered
+            ? {
+                color: theme.mobileHeaderText,
+                background: theme.mobileHeaderTextHover,
+              }
+            : {}),
+        })}
       >
         <SvgArrowThinRight width="15" height="15" style={{ margin: -5 }} />
       </Button>

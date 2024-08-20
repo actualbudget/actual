@@ -4,21 +4,25 @@ import { rolloverBudget } from 'loot-core/client/queries';
 
 import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
-import { BalanceWithCarryover } from '../budget/BalanceWithCarryover';
+import {
+  BalanceWithCarryover,
+  DefaultCarryoverIndicator,
+} from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/rollover/BalanceMenu';
-import { Modal, ModalTitle } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+  ModalTitle,
+} from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
 type RolloverBalanceMenuModalProps = ComponentPropsWithoutRef<
   typeof BalanceMenu
-> & {
-  modalProps: CommonModalProps;
-};
+>;
 
 export function RolloverBalanceMenuModal({
-  modalProps,
   categoryId,
   onCarryover,
   onTransfer,
@@ -38,47 +42,61 @@ export function RolloverBalanceMenuModal({
   }
 
   return (
-    <Modal
-      title={<ModalTitle title={category.name} shrinkOnOverflow />}
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-    >
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: 20,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 17,
-            fontWeight: 400,
-          }}
-        >
-          Balance
-        </Text>
-        <BalanceWithCarryover
-          disabled
-          style={{
-            textAlign: 'center',
-            ...styles.veryLargeText,
-          }}
-          carryoverStyle={{ right: -20, width: 15, height: 15 }}
-          carryover={rolloverBudget.catCarryover(categoryId)}
-          balance={rolloverBudget.catBalance(categoryId)}
-          goal={rolloverBudget.catGoal(categoryId)}
-          budgeted={rolloverBudget.catBudgeted(categoryId)}
-        />
-      </View>
-      <BalanceMenu
-        categoryId={categoryId}
-        getItemStyle={() => defaultMenuItemStyle}
-        onCarryover={onCarryover}
-        onTransfer={onTransfer}
-        onCover={onCover}
-      />
+    <Modal name="rollover-balance-menu">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title={<ModalTitle title={category.name} shrinkOnOverflow />}
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 17,
+                fontWeight: 400,
+              }}
+            >
+              Balance
+            </Text>
+            <BalanceWithCarryover
+              disabled
+              style={{
+                textAlign: 'center',
+                ...styles.veryLargeText,
+              }}
+              carryover={rolloverBudget.catCarryover(categoryId)}
+              balance={rolloverBudget.catBalance(categoryId)}
+              goal={rolloverBudget.catGoal(categoryId)}
+              budgeted={rolloverBudget.catBudgeted(categoryId)}
+              longGoal={rolloverBudget.catLongGoal(categoryId)}
+              carryoverIndicator={({ style }) =>
+                DefaultCarryoverIndicator({
+                  style: {
+                    width: 15,
+                    height: 15,
+                    display: 'inline-flex',
+                    position: 'relative',
+                    ...style,
+                  },
+                })
+              }
+            />
+          </View>
+          <BalanceMenu
+            categoryId={categoryId}
+            getItemStyle={() => defaultMenuItemStyle}
+            onCarryover={onCarryover}
+            onTransfer={onTransfer}
+            onCover={onCover}
+          />
+        </>
+      )}
     </Modal>
   );
 }

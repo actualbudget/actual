@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
-
 import { BalanceMenu } from './BalanceMenu';
 import { CoverMenu } from './CoverMenu';
+import { useRolloverSheetValue } from './RolloverComponents';
 import { TransferMenu } from './TransferMenu';
 
 type BalanceMovementMenuProps = {
@@ -21,7 +20,9 @@ export function BalanceMovementMenu({
   onBudgetAction,
   onClose = () => {},
 }: BalanceMovementMenuProps) {
-  const catBalance = useSheetValue(rolloverBudget.catBalance(categoryId));
+  const catBalance = useRolloverSheetValue(
+    rolloverBudget.catBalance(categoryId),
+  );
   const [menu, setMenu] = useState('menu');
 
   return (
@@ -58,9 +59,10 @@ export function BalanceMovementMenu({
 
       {menu === 'cover' && (
         <CoverMenu
+          category={categoryId}
           onClose={onClose}
           onSubmit={fromCategoryId => {
-            onBudgetAction(month, 'cover', {
+            onBudgetAction(month, 'cover-overspending', {
               to: categoryId,
               from: fromCategoryId,
             });

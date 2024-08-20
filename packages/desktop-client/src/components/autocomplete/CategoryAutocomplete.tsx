@@ -7,22 +7,26 @@ import React, {
   type ComponentType,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  useCallback,
 } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
 import { reportBudget, rolloverBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
+import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
@@ -68,6 +72,7 @@ function CategoryList({
   showHiddenItems,
   showBalances,
 }: CategoryListProps) {
+  const { t } = useTranslation();
   let lastGroup: string | undefined | null = null;
 
   const filteredItems = useMemo(
@@ -98,7 +103,7 @@ function CategoryList({
           }
 
           const showGroup = item.cat_group !== lastGroup;
-          const groupName = `${item.group?.name}${item.group?.hidden ? ' (hidden)' : ''}`;
+          const groupName = `${item.group?.name}${item.group?.hidden ? ' ' + t('(hidden)') : ''}`;
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
@@ -133,6 +138,21 @@ function CategoryList({
       {footer}
     </View>
   );
+}
+
+function customSort(obj: CategoryAutocompleteItem, value: string): number {
+  const name = getNormalisedString(obj.name);
+  const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
+  if (obj.id === 'split') {
+    return -2;
+  }
+  if (name.includes(value)) {
+    return -1;
+  }
+  if (groupName.includes(value)) {
+    return 0;
+  }
+  return 1;
 }
 
 type CategoryAutocompleteProps = ComponentProps<
@@ -183,6 +203,39 @@ export function CategoryAutocomplete({
     [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
 
+  const filterSuggestions = useCallback(
+    (
+      suggestions: CategoryAutocompleteItem[],
+      value: string,
+    ): CategoryAutocompleteItem[] => {
+      return suggestions
+        .filter(suggestion => {
+          if (suggestion.id === 'split') {
+            return true;
+          }
+
+          if (suggestion.group) {
+            return (
+              getNormalisedString(suggestion.group.name).includes(
+                getNormalisedString(value),
+              ) ||
+              getNormalisedString(
+                suggestion.group.name + ' ' + suggestion.name,
+              ).includes(getNormalisedString(value))
+            );
+          }
+
+          return defaultFilterSuggestion(suggestion, value);
+        })
+        .sort(
+          (a, b) =>
+            customSort(a, getNormalisedString(value)) -
+            customSort(b, getNormalisedString(value)),
+        );
+    },
+    [],
+  );
+
   return (
     <Autocomplete
       strict={true}
@@ -197,14 +250,7 @@ export function CategoryAutocomplete({
         }
         return 0;
       }}
-      filterSuggestions={(suggestions, value) => {
-        return suggestions.filter(suggestion => {
-          return (
-            suggestion.id === 'split' ||
-            defaultFilterSuggestion(suggestion, value)
-          );
-        });
-      }}
+      filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList
@@ -295,7 +341,7 @@ function SplitTransactionButton({
           <SvgSplit width={10} height={10} style={{ marginRight: 5 }} />
         )}
       </Text>
-      Split Transaction
+      <Trans>Split Transaction</Trans>
     </View>
   );
 }
@@ -324,6 +370,7 @@ function CategoryItem({
   showBalances,
   ...props
 }: CategoryItemProps) {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -332,16 +379,19 @@ function CategoryItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
-  const [budgetType] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
-  const balance = useSheetValue(
+  const balanceBinding =
     budgetType === 'rollover'
       ? rolloverBudget.catBalance(item.id)
-      : reportBudget.catBalance(item.id),
-  );
+      : reportBudget.catBalance(item.id);
+  const balance = useSheetValue<
+    'rollover-budget' | 'report-budget',
+    typeof balanceBinding
+  >(balanceBinding);
 
   const isToBeBudgetedItem = item.id === 'to-be-budgeted';
-  const toBudget = useSheetValue(rolloverBudget.toBudget);
+  const toBudget = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
 
   return (
     <div
@@ -369,7 +419,7 @@ function CategoryItem({
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <TextOneLine>
           {item.name}
-          {item.hidden ? ' (hidden)' : null}
+          {item.hidden ? ' ' + t('(hidden)') : null}
         </TextOneLine>
         <TextOneLine
           style={{

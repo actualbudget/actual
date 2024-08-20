@@ -1,10 +1,12 @@
 // @ts-strict-ignore
 import React from 'react';
+import { useDispatch } from 'react-redux';
 
-import { useActions } from '../../hooks/useActions';
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { pushModal } from 'loot-core/client/actions';
+
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { useServerURL } from '../ServerContext';
@@ -12,19 +14,19 @@ import { useServerURL } from '../ServerContext';
 import { Setting } from './UI';
 
 export function EncryptionSettings() {
-  const { pushModal } = useActions();
+  const dispatch = useDispatch();
   const serverURL = useServerURL();
-  const [encryptKeyId] = useLocalPref('encryptKeyId');
+  const [encryptKeyId] = useMetadataPref('encryptKeyId');
 
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 
   function onChangeKey() {
-    pushModal('create-encryption-key', { recreate: true });
+    dispatch(pushModal('create-encryption-key', { recreate: true }));
   }
 
   return encryptKeyId ? (
     <Setting
-      primaryAction={<Button onClick={onChangeKey}>Generate new key</Button>}
+      primaryAction={<Button onPress={onChangeKey}>Generate new key</Button>}
     >
       <Text>
         <Text style={{ color: theme.noticeTextLight, fontWeight: 600 }}>
@@ -43,7 +45,7 @@ export function EncryptionSettings() {
       </Text>
     </Setting>
   ) : missingCryptoAPI ? (
-    <Setting primaryAction={<Button disabled>Enable encryption…</Button>}>
+    <Setting primaryAction={<Button isDisabled>Enable encryption…</Button>}>
       <Text>
         <strong>End-to-end encryption</strong> is not available when making an
         unencrypted connection to a remote server. You’ll need to enable HTTPS
@@ -61,7 +63,7 @@ export function EncryptionSettings() {
   ) : serverURL ? (
     <Setting
       primaryAction={
-        <Button onClick={() => pushModal('create-encryption-key')}>
+        <Button onPress={() => dispatch(pushModal('create-encryption-key'))}>
           Enable encryption…
         </Button>
       }
@@ -82,7 +84,7 @@ export function EncryptionSettings() {
       </Text>
     </Setting>
   ) : (
-    <Setting primaryAction={<Button disabled>Enable encryption…</Button>}>
+    <Setting primaryAction={<Button isDisabled>Enable encryption…</Button>}>
       <Text>
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and

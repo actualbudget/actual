@@ -2,16 +2,33 @@
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
 import {
+  parametrizedField,
+  type SheetFields,
+  type Binding,
+  type SheetNames,
+} from '../../../desktop-client/src/components/spreadsheet';
+import {
   dayFromDate,
   getDayMonthRegex,
   getDayMonthFormat,
   getShortYearRegex,
   getShortYearFormat,
 } from '../shared/months';
-import { q } from '../shared/query';
+import { q, type Query } from '../shared/query';
 import { currencyToAmount, amountToInteger } from '../shared/util';
+import { type CategoryEntity, type AccountEntity } from '../types/models';
+import { type SyncedPrefs } from '../types/prefs';
 
-export function getAccountFilter(accountId, field = 'account') {
+type BudgetType<SheetName extends SheetNames> = Record<
+  string,
+  SheetFields<SheetName> | ((id: string) => SheetFields<SheetName>)
+>;
+
+const accountParametrizedField = parametrizedField<'account'>();
+const rolloverParametrizedField = parametrizedField<'rollover-budget'>();
+const reportParametrizedField = parametrizedField<'report-budget'>();
+
+export function getAccountFilter(accountId: string, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
       return {
@@ -47,7 +64,7 @@ export function getAccountFilter(accountId, field = 'account') {
   return null;
 }
 
-export function makeTransactionsQuery(accountId) {
+export function makeTransactionsQuery(accountId: string) {
   let query = q('transactions').options({ splits: 'grouped' });
 
   const filter = getAccountFilter(accountId);
@@ -58,7 +75,11 @@ export function makeTransactionsQuery(accountId) {
   return query;
 }
 
-export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
+export function makeTransactionSearchQuery(
+  currentQuery: Query,
+  search: string,
+  dateFormat: SyncedPrefs['dateFormat'],
+) {
   const amount = currencyToAmount(search);
 
   // Support various date formats
@@ -94,9 +115,11 @@ export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
   });
 }
 
-export function accountBalance(acct) {
+export function accountBalance(
+  acct: AccountEntity,
+): Binding<'account', 'balance'> {
   return {
-    name: `balance-${acct.id}`,
+    name: accountParametrizedField('balance')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id })
       .options({ splits: 'none' })
@@ -104,9 +127,11 @@ export function accountBalance(acct) {
   };
 }
 
-export function accountBalanceCleared(acct) {
+export function accountBalanceCleared(
+  acct: AccountEntity,
+): Binding<'account', 'balanceCleared'> {
   return {
-    name: `balanceCleared-${acct.id}`,
+    name: accountParametrizedField('balanceCleared')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id, cleared: true })
       .options({ splits: 'none' })
@@ -114,9 +139,11 @@ export function accountBalanceCleared(acct) {
   };
 }
 
-export function accountBalanceUncleared(acct) {
+export function accountBalanceUncleared(
+  acct: AccountEntity,
+): Binding<'account', 'balanceUncleared'> {
   return {
-    name: `balanceUncleared-${acct.id}`,
+    name: accountParametrizedField('balanceUncleared')(acct.id),
     query: q('transactions')
       .filter({ account: acct.id, cleared: false })
       .options({ splits: 'none' })
@@ -124,7 +151,7 @@ export function accountBalanceUncleared(acct) {
   };
 }
 
-export function allAccountBalance() {
+export function allAccountBalance(): Binding<'account', 'accounts-balance'> {
   return {
     query: q('transactions')
       .filter({ 'account.closed': false })
@@ -133,7 +160,10 @@ export function allAccountBalance() {
   };
 }
 
-export function budgetedAccountBalance() {
+export function budgetedAccountBalance(): Binding<
+  'account',
+  'budgeted-accounts-balance'
+> {
   return {
     name: `budgeted-accounts-balance`,
     query: q('transactions')
@@ -142,7 +172,10 @@ export function budgetedAccountBalance() {
   };
 }
 
-export function offbudgetAccountBalance() {
+export function offbudgetAccountBalance(): Binding<
+  'account',
+  'offbudget-accounts-balance'
+> {
   return {
     name: `offbudget-accounts-balance`,
     query: q('transactions')
@@ -151,7 +184,7 @@ export function offbudgetAccountBalance() {
   };
 }
 
-export function categoryBalance(category, month) {
+export function categoryBalance(category: CategoryEntity, month: string) {
   return {
     name: `balance-${category.id}`,
     query: q('transactions')
@@ -164,7 +197,10 @@ export function categoryBalance(category, month) {
   };
 }
 
-export function categoryBalanceCleared(category, month) {
+export function categoryBalanceCleared(
+  category: CategoryEntity,
+  month: string,
+) {
   return {
     name: `balanceCleared-${category.id}`,
     query: q('transactions')
@@ -178,7 +214,10 @@ export function categoryBalanceCleared(category, month) {
   };
 }
 
-export function categoryBalanceUncleared(category, month) {
+export function categoryBalanceUncleared(
+  category: CategoryEntity,
+  month: string,
+) {
   return {
     name: `balanceUncleared-${category.id}`,
     query: q('transactions')
@@ -210,7 +249,10 @@ export function uncategorizedBalance() {
   };
 }
 
-export function uncategorizedCount() {
+export function uncategorizedCount<SheetName extends SheetNames>(): Binding<
+  SheetName,
+  'uncategorized-amount'
+> {
   return {
     name: 'uncategorized-amount',
     query: uncategorizedQuery.calculate({ $count: '$id' }),
@@ -229,18 +271,19 @@ export const rolloverBudget = {
   totalSpent: 'total-spent',
   totalBalance: 'total-leftover',
 
-  groupSumAmount: id => `group-sum-amount-${id}`,
+  groupSumAmount: rolloverParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: id => `group-budget-${id}`,
-  groupBalance: id => `group-leftover-${id}`,
+  groupBudgeted: rolloverParametrizedField('group-budget'),
+  groupBalance: rolloverParametrizedField('group-leftover'),
 
-  catBudgeted: id => `budget-${id}`,
-  catSumAmount: id => `sum-amount-${id}`,
-  catBalance: id => `leftover-${id}`,
-  catCarryover: id => `carryover-${id}`,
-  catGoal: id => `goal-${id}`,
-};
+  catBudgeted: rolloverParametrizedField('budget'),
+  catSumAmount: rolloverParametrizedField('sum-amount'),
+  catBalance: rolloverParametrizedField('leftover'),
+  catCarryover: rolloverParametrizedField('carryover'),
+  catGoal: rolloverParametrizedField('goal'),
+  catLongGoal: rolloverParametrizedField('long-goal'),
+} satisfies BudgetType<'rollover-budget'>;
 
 export const reportBudget = {
   totalBudgetedExpense: 'total-budgeted',
@@ -252,15 +295,16 @@ export const reportBudget = {
   totalSaved: 'real-saved',
 
   totalLeftover: 'total-leftover',
-  groupSumAmount: id => `group-sum-amount-${id}`,
+  groupSumAmount: reportParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
-  groupBudgeted: id => `group-budget-${id}`,
-  groupBalance: id => `group-leftover-${id}`,
+  groupBudgeted: reportParametrizedField('group-budget'),
+  groupBalance: reportParametrizedField('group-leftover'),
 
-  catBudgeted: id => `budget-${id}`,
-  catSumAmount: id => `sum-amount-${id}`,
-  catBalance: id => `leftover-${id}`,
-  catCarryover: id => `carryover-${id}`,
-  catGoal: id => `goal-${id}`,
-};
+  catBudgeted: reportParametrizedField('budget'),
+  catSumAmount: reportParametrizedField('sum-amount'),
+  catBalance: reportParametrizedField('leftover'),
+  catCarryover: reportParametrizedField('carryover'),
+  catGoal: reportParametrizedField('goal'),
+  catLongGoal: reportParametrizedField('long-goal'),
+} satisfies BudgetType<'report-budget'>;

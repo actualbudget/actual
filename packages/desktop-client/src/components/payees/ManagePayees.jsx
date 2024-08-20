@@ -11,6 +11,7 @@ import {
 
 import memoizeOne from 'memoize-one';
 
+import { getNormalisedString } from 'loot-core/src/shared/normalisation';
 import { groupById } from 'loot-core/src/shared/util';
 
 import {
@@ -22,7 +23,7 @@ import {
 import { useStableCallback } from '../../hooks/useStableCallback';
 import { SvgExpandArrow } from '../../icons/v0';
 import { theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Search } from '../common/Search';
 import { View } from '../common/View';
@@ -58,7 +59,9 @@ function PayeeTableHeader() {
           exposed={true}
           focused={false}
           selected={selectedItems.size > 0}
-          onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
+          onSelect={e =>
+            dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
+          }
         />
         <Cell value="Name" width="flex" />
       </TableHeader>
@@ -111,7 +114,7 @@ export const ManagePayees = forwardRef(
       let filtered = payees;
       if (filter) {
         filtered = filtered.filter(p =>
-          p.name.toLowerCase().includes(filter.toLowerCase()),
+          getNormalisedString(p.name).includes(getNormalisedString(filter)),
         );
       }
       if (orphanedOnly) {
@@ -198,6 +201,22 @@ export const ManagePayees = forwardRef(
       selected.dispatch({ type: 'select-none' });
     }
 
+    function onFavorite() {
+      const allFavorited = [...selected.items]
+        .map(id => payeesById[id].favorite)
+        .every(f => f === 1);
+      if (allFavorited) {
+        onBatchChange({
+          updated: [...selected.items].map(id => ({ id, favorite: 0 })),
+        });
+      } else {
+        onBatchChange({
+          updated: [...selected.items].map(id => ({ id, favorite: 1 })),
+        });
+      }
+      selected.dispatch({ type: 'select-none' });
+    }
+
     async function onMerge() {
       const ids = [...selected.items];
       await props.onMerge(ids);
@@ -236,10 +255,10 @@ export const ManagePayees = forwardRef(
           <View style={{ flexShrink: 0 }}>
             <Button
               ref={triggerRef}
-              type="bare"
+              variant="bare"
               style={{ marginRight: 10 }}
-              disabled={buttonsDisabled}
-              onClick={() => setMenuOpen(true)}
+              isDisabled={buttonsDisabled}
+              onPress={() => setMenuOpen(true)}
             >
               {buttonsDisabled
                 ? 'No payees selected'
@@ -262,6 +281,7 @@ export const ManagePayees = forwardRef(
                 onClose={() => setMenuOpen(false)}
                 onDelete={onDelete}
                 onMerge={onMerge}
+                onFavorite={onFavorite}
               />
             </Popover>
           </View>
@@ -273,9 +293,9 @@ export const ManagePayees = forwardRef(
             {(orphanedOnly ||
               (orphanedPayees && orphanedPayees.length > 0)) && (
               <Button
-                type="bare"
+                variant="bare"
                 style={{ marginRight: 10 }}
-                onClick={() => {
+                onPress={() => {
                   setOrphanedOnly(!orphanedOnly);
                   applyFilter(filter);
                   tableNavigator.onEdit(null);
