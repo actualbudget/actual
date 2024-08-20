@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
@@ -8,12 +9,12 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
 import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
 import { theme, styles } from '../../../../style';
-import { Button } from '../../../common/Button';
+import { Button } from '../../../common/Button2';
+import { Popover } from '../../../common/Popover';
 import { Stack } from '../../../common/Stack';
 import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
-import { Tooltip } from '../../../tooltips';
 import { useReport } from '../ReportContext';
 
 import { BudgetMonthMenu } from './BudgetMonthMenu';
@@ -25,6 +26,7 @@ type BudgetSummaryProps = {
   month?: string;
 };
 export function BudgetSummary({ month }: BudgetSummaryProps) {
+  const { t } = useTranslation();
   const {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -33,6 +35,8 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   } = useReport();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef(null);
+
   function onMenuOpen() {
     setMenuOpen(true);
   }
@@ -48,7 +52,10 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   return (
     <View
       style={{
-        backgroundColor: theme.tableBackground,
+        backgroundColor:
+          month === currentMonth
+            ? theme.budgetCurrentMonth
+            : theme.budgetOtherMonth,
         boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
@@ -82,10 +89,14 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             }}
           >
             <Button
-              type="bare"
-              aria-label={`${collapsed ? 'Expand' : 'Collapse'} month summary`}
+              variant="bare"
+              aria-label={
+                collapsed
+                  ? t('Expand month summary')
+                  : t('Collapse month summary')
+              }
               className="hover-visible"
-              onClick={onToggleSummaryCollapse}
+              onPress={onToggleSummaryCollapse}
             >
               <ExpandOrCollapseIcon
                 width={13}
@@ -129,48 +140,51 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               />
             </View>
             <View style={{ userSelect: 'none' }}>
-              <Button type="bare" aria-label="Menu" onClick={onMenuOpen}>
+              <Button
+                ref={triggerRef}
+                variant="bare"
+                aria-label={t('Menu')}
+                onPress={onMenuOpen}
+              >
                 <SvgDotsHorizontalTriple
                   width={15}
                   height={15}
                   style={{ color: theme.pageTextLight }}
                 />
               </Button>
-              {menuOpen && (
-                <Tooltip
-                  position="bottom-right"
-                  width={200}
-                  style={{ padding: 0 }}
-                  onClose={onMenuClose}
-                >
-                  <BudgetMonthMenu
-                    onCopyLastMonthBudget={() => {
-                      onBudgetAction(month, 'copy-last');
-                      onMenuClose();
-                    }}
-                    onSetBudgetsToZero={() => {
-                      onBudgetAction(month, 'set-zero');
-                      onMenuClose();
-                    }}
-                    onSetMonthsAverage={numberOfMonths => {
-                      onBudgetAction(month, `set-${numberOfMonths}-avg`);
-                      onMenuClose();
-                    }}
-                    onCheckTemplates={() => {
-                      onBudgetAction(month, 'check-templates');
-                      onMenuClose();
-                    }}
-                    onApplyBudgetTemplates={() => {
-                      onBudgetAction(month, 'apply-goal-template');
-                      onMenuClose();
-                    }}
-                    onOverwriteWithBudgetTemplates={() => {
-                      onBudgetAction(month, 'overwrite-goal-template');
-                      onMenuClose();
-                    }}
-                  />
-                </Tooltip>
-              )}
+
+              <Popover
+                triggerRef={triggerRef}
+                isOpen={menuOpen}
+                onOpenChange={onMenuClose}
+              >
+                <BudgetMonthMenu
+                  onCopyLastMonthBudget={() => {
+                    onBudgetAction(month, 'copy-last');
+                    onMenuClose();
+                  }}
+                  onSetBudgetsToZero={() => {
+                    onBudgetAction(month, 'set-zero');
+                    onMenuClose();
+                  }}
+                  onSetMonthsAverage={numberOfMonths => {
+                    onBudgetAction(month, `set-${numberOfMonths}-avg`);
+                    onMenuClose();
+                  }}
+                  onCheckTemplates={() => {
+                    onBudgetAction(month, 'check-templates');
+                    onMenuClose();
+                  }}
+                  onApplyBudgetTemplates={() => {
+                    onBudgetAction(month, 'apply-goal-template');
+                    onMenuClose();
+                  }}
+                  onOverwriteWithBudgetTemplates={() => {
+                    onBudgetAction(month, 'overwrite-goal-template');
+                    onMenuClose();
+                  }}
+                />
+              </Popover>
             </View>
           </View>
         </View>

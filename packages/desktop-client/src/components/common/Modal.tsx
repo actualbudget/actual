@@ -12,20 +12,18 @@ import React, {
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import ReactModal from 'react-modal';
 
-import { useHover } from 'usehooks-ts';
+import { AutoTextSize } from 'auto-text-size';
 
-import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgLogo } from '../../icons/logo';
 import { SvgDelete } from '../../icons/v0';
-import { SvgClose } from '../../icons/v1';
 import { type CSSProperties, styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
 import { Button } from './Button';
 import { Input } from './Input';
 import { Text } from './Text';
-import { Tooltip } from './Tooltip';
+import { TextOneLine } from './TextOneLine';
 import { View } from './View';
 
 export type ModalProps = {
@@ -324,7 +322,8 @@ type ModalButtonsProps = {
   children: ReactNode;
 };
 
-export const ModalButtons = ({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ModalButtons = ({
   style,
   leftContent,
   focusButton = false,
@@ -369,7 +368,7 @@ type ModalTitleProps = {
   shrinkOnOverflow?: boolean;
 };
 
-export function ModalTitle({
+function ModalTitle({
   title,
   isEditable,
   getStyle,
@@ -377,39 +376,8 @@ export function ModalTitle({
   shrinkOnOverflow = false,
 }: ModalTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const tooltipTriggerRef = useRef();
 
-  // Dynamic font size to avoid ellipsis.
-  const textRef = useRef<HTMLSpanElement>();
-  const [textOverflowed, setTextOverflowed] = useState(false);
-  const [textFontSize, setTextFontSize] = useState(25);
-
-  useEffect(() => {
-    const containerWidth = textRef.current.offsetWidth;
-    const textWidth = textRef.current.scrollWidth;
-
-    if (textWidth > containerWidth) {
-      setTextOverflowed(true);
-    } else {
-      setTextOverflowed(false);
-    }
-  }, [title]);
-
-  useEffect(() => {
-    if (textOverflowed && shrinkOnOverflow) {
-      const containerWidth = textRef.current.offsetWidth;
-      const textWidth = textRef.current.scrollWidth;
-      const newFontSize = Math.floor(
-        (containerWidth / textWidth) * textFontSize,
-      );
-      setTextFontSize(newFontSize);
-    }
-  }, [title, textFontSize, shrinkOnOverflow, textOverflowed]);
-
-  const mergedTextRef = useMergedRefs(textRef, tooltipTriggerRef);
-  const isHovered = useHover(tooltipTriggerRef);
-
-  const _onEdit = () => {
+  const onTitleClick = () => {
     if (isEditable) {
       setIsEditing(true);
     }
@@ -453,42 +421,44 @@ export function ModalTitle({
       }}
     />
   ) : (
-    <Tooltip
-      content={
-        <View
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      {shrinkOnOverflow ? (
+        <AutoTextSize
+          as={Text}
+          minFontSizePx={15}
+          maxFontSizePx={25}
+          onClick={onTitleClick}
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-            maxWidth: '90vw',
+            fontSize: 25,
+            fontWeight: 700,
+            textAlign: 'center',
+            ...(isEditable && styles.underlinedText),
+            ...style,
           }}
         >
-          <SvgClose style={{ width: 10, height: 10, flexShrink: 0 }} />
-          <Text style={styles.mediumText}>{title}</Text>
-        </View>
-      }
-      placement="top"
-      triggerRef={tooltipTriggerRef}
-      isOpen={textOverflowed && isHovered}
-      offset={10}
-    >
-      <Text
-        innerRef={mergedTextRef}
-        style={{
-          fontSize: textFontSize,
-          fontWeight: 700,
-          textAlign: 'center',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          ...(isEditable && styles.underlinedText),
-          ...style,
-        }}
-        onClick={_onEdit}
-      >
-        {title}
-      </Text>
-    </Tooltip>
+          {title}
+        </AutoTextSize>
+      ) : (
+        <TextOneLine
+          onClick={onTitleClick}
+          style={{
+            fontSize: 25,
+            fontWeight: 700,
+            textAlign: 'center',
+            ...(isEditable && styles.underlinedText),
+            ...style,
+          }}
+        >
+          {title}
+        </TextOneLine>
+      )}
+    </View>
   );
 }
 
@@ -497,7 +467,7 @@ type ModalCloseButtonProps = {
   style?: CSSProperties;
 };
 
-export function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
+function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
   return (
     <Button
       type="bare"

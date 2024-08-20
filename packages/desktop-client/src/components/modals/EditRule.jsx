@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useDispatch } from 'react-redux';
 
 import { v4 as uuid } from 'uuid';
@@ -34,8 +40,9 @@ import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgInformationOutline } from '../../icons/v1';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
-import { Modal } from '../common/Modal';
+import { Button } from '../common/Button2';
+import { Menu } from '../common/Menu';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -82,12 +89,13 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={{ color: theme.pageTextPositive, ...style }}>
+    <View style={style} data-testid="field-select">
       <Select
         bare
         options={fields}
         value={value}
         onChange={value => onChange('field', value)}
+        buttonStyle={{ color: theme.pageTextPositive }}
       />
     </View>
   );
@@ -97,38 +105,48 @@ export function OpSelect({
   ops,
   type,
   style,
-  wrapperStyle,
   value,
   formatOp = friendlyOp,
   onChange,
 }) {
-  let line;
-  // We don't support the `contains` operator for the id type for
-  // rules yet
-  if (type === 'id') {
-    ops = ops.filter(op => op !== 'contains' && op !== 'doesNotContain');
-    line = ops.length / 2;
-  }
-  if (type === 'string') {
-    line = ops.length / 2;
-  }
+  const opOptions = useMemo(() => {
+    const options = ops
+      // We don't support the `contains`, `doesNotContain`, `matches` operators
+      // for the id type rules yet
+      // TODO: Add matches op support for payees, accounts, categories.
+      .filter(op =>
+        type === 'id'
+          ? !['contains', 'matches', 'doesNotContain'].includes(op)
+          : true,
+      )
+      .map(op => [op, formatOp(op, type)]);
+
+    if (type === 'string' || type === 'id') {
+      options.splice(Math.ceil(options.length / 2), 0, Menu.line);
+    }
+
+    return options;
+  }, [ops, type]);
 
   return (
-    <Select
-      bare
-      options={ops.map(op => [op, formatOp(op, type)])}
-      value={value}
-      onChange={value => onChange('op', value)}
-      line={line}
-      style={{ minHeight: '1px', ...style }}
-      wrapperStyle={wrapperStyle}
-    />
+    <View data-testid="op-select">
+      <Select
+        bare
+        options={opOptions}
+        value={value}
+        onChange={value => onChange('op', value)}
+        buttonStyle={style}
+      />
+    </View>
   );
 }
 
 function SplitAmountMethodSelect({ options, style, value, onChange }) {
   return (
-    <View style={{ color: theme.pageTextPositive, ...style }}>
+    <View
+      style={{ color: theme.pageTextPositive, ...style }}
+      data-testid="field-select"
+    >
       <Select
         bare
         options={options}
@@ -144,8 +162,8 @@ function EditorButtons({ onAdd, onDelete }) {
     <>
       {onDelete && (
         <Button
-          type="bare"
-          onClick={onDelete}
+          variant="bare"
+          onPress={onDelete}
           style={{ padding: 7 }}
           aria-label="Delete entry"
         >
@@ -154,8 +172,8 @@ function EditorButtons({ onAdd, onDelete }) {
       )}
       {onAdd && (
         <Button
-          type="bare"
-          onClick={onAdd}
+          variant="bare"
+          onPress={onAdd}
           style={{ padding: 7 }}
           aria-label="Add entry"
         >
@@ -235,6 +253,7 @@ function ConditionEditor({
         value={value}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
+        numberFormatType="currency"
       />
     );
   }
@@ -343,13 +362,13 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
 
   return (
     <Editor style={editorStyle} error={error}>
-      {/*<OpSelect ops={ops} value={op} onChange={onChange} />*/}
-
       {op === 'set' ? (
         <>
-          <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
-            {friendlyOp(op)}
-          </View>
+          <OpSelect
+            ops={['set', 'prepend-notes', 'append-notes']}
+            value={op}
+            onChange={onChange}
+          />
 
           <FieldSelect
             fields={options?.splitIndex ? splitActionFields : actionFields}
@@ -365,6 +384,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               op={op}
               value={value}
               onChange={v => onChange('value', v)}
+              numberFormatType="currency"
             />
           </View>
         </>
@@ -386,6 +406,9 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
                 key={inputKey}
                 field={field}
                 type="number"
+                numberFormatType={
+                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                }
                 value={value}
                 onChange={v => onChange('value', v)}
               />
@@ -404,10 +427,35 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           </View>
           <ScheduleDescription id={value || null} />
         </>
+      ) : op === 'prepend-notes' || op === 'append-notes' ? (
+        <>
+          <OpSelect
+            ops={['set', 'prepend-notes', 'append-notes']}
+            value={op}
+            onChange={onChange}
+          />
+
+          <View style={{ flex: 1 }}>
+            <GenericInput
+              key={inputKey}
+              field={field}
+              type="string"
+              op={op}
+              value={value}
+              onChange={v => onChange('value', v)}
+            />
+          </View>
+        </>
       ) : null}
 
       <Stack direction="row">
-        <EditorButtons onAdd={onAdd} onDelete={op === 'set' && onDelete} />
+        <EditorButtons
+          onAdd={onAdd}
+          onDelete={
+            (op === 'set' || op === 'prepend-notes' || op === 'append-notes') &&
+            onDelete
+          }
+        />
       </Stack>
     </Editor>
   );
@@ -444,7 +492,7 @@ function StageInfo() {
 function StageButton({ selected, children, style, onSelect }) {
   return (
     <Button
-      type="bare"
+      variant="bare"
       style={{
         fontSize: 'inherit',
         ...(selected && {
@@ -453,7 +501,7 @@ function StageButton({ selected, children, style, onSelect }) {
         }),
         ...style,
       }}
-      onClick={onSelect}
+      onPress={onSelect}
     >
       {children}
     </Button>
@@ -593,7 +641,7 @@ function ConditionsList({
   }
 
   return conditions.length === 0 ? (
-    <Button style={{ alignSelf: 'flex-start' }} onClick={addInitialCondition}>
+    <Button style={{ alignSelf: 'flex-start' }} onPress={addInitialCondition}>
       Add condition
     </Button>
   ) : (
@@ -653,7 +701,7 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
+export function EditRule({ defaultRule, onSave: originalOnSave }) {
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse),
   );
@@ -843,7 +891,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
     });
   }
 
-  async function onSave() {
+  async function onSave(close) {
     const rule = {
       ...defaultRule,
       stage,
@@ -861,7 +909,16 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
       }
 
       if (error.actionErrors) {
-        setActionSplits(applyErrors(actionSplits, error.actionErrors));
+        let usedErrorIdx = 0;
+        setActionSplits(
+          actionSplits.map(item => ({
+            ...item,
+            actions: item.actions.map(action => ({
+              ...action,
+              error: error.actionErrors[usedErrorIdx++] ?? null,
+            })),
+          })),
+        );
       }
     } else {
       // If adding a rule, we got back an id
@@ -870,7 +927,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
       }
 
       originalOnSave?.(rule);
-      modalProps.onClose();
+      close();
     }
   }
 
@@ -884,256 +941,263 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   const showSplitButton = actionSplits.length > 0;
 
   return (
-    <Modal
-      title="Rule"
-      {...modalProps}
-      style={{ ...modalProps.style, flex: 'inherit' }}
-    >
-      {() => (
-        <View
-          style={{
-            maxWidth: '100%',
-            width: 900,
-            height: '80vh',
-            flexGrow: 0,
-            flexShrink: 0,
-            flexBasis: 'auto',
-            overflow: 'hidden',
-            color: theme.pageTextLight,
-          }}
-        >
+    <Modal name="edit-rule">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="Rule"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
           <View
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 15,
-              padding: '0 20px',
+              maxWidth: '100%',
+              width: 900,
+              height: '80vh',
+              flexGrow: 0,
+              flexShrink: 0,
+              flexBasis: 'auto',
+              overflow: 'hidden',
+              color: theme.pageTextLight,
             }}
           >
-            <Text style={{ marginRight: 15 }}>Stage of rule:</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 15,
+                padding: '0 20px',
+              }}
+            >
+              <Text style={{ marginRight: 15 }}>Stage of rule:</Text>
 
-            <Stack direction="row" align="center" spacing={1}>
-              <StageButton
-                selected={stage === 'pre'}
-                onSelect={() => onChangeStage('pre')}
-              >
-                Pre
-              </StageButton>
-              <StageButton
-                selected={stage === null}
-                onSelect={() => onChangeStage(null)}
-              >
-                Default
-              </StageButton>
-              <StageButton
-                selected={stage === 'post'}
-                onSelect={() => onChangeStage('post')}
-              >
-                Post
-              </StageButton>
-
-              <StageInfo />
-            </Stack>
-          </View>
-
-          <View
-            innerRef={scrollableEl}
-            style={{
-              borderBottom: '1px solid ' + theme.tableBorder,
-              padding: 20,
-              overflow: 'auto',
-              maxHeight: 'calc(100% - 300px)',
-            }}
-          >
-            <View style={{ flexShrink: 0 }}>
-              <View style={{ marginBottom: 30 }}>
-                <Text style={{ marginBottom: 15 }}>
-                  If
-                  <FieldSelect
-                    data-testid="conditions-op"
-                    style={{ display: 'inline-flex' }}
-                    fields={[
-                      ['and', 'all'],
-                      ['or', 'any'],
-                    ]}
-                    value={conditionsOp}
-                    onChange={onChangeConditionsOp}
-                  />
-                  of these conditions match:
-                </Text>
-
-                <ConditionsList
-                  conditionsOp={conditionsOp}
-                  conditions={conditions}
-                  editorStyle={editorStyle}
-                  isSchedule={isSchedule}
-                  onChangeConditions={conds => setConditions(conds)}
-                />
-              </View>
-
-              <Text style={{ marginBottom: 15 }}>
-                Then apply these actions:
-              </Text>
-              <View style={{ flex: 1 }}>
-                {actionSplits.length === 0 && (
-                  <Button
-                    style={{ alignSelf: 'flex-start' }}
-                    onClick={addInitialAction}
-                  >
-                    Add action
-                  </Button>
-                )}
-                <Stack spacing={2} data-testid="action-split-list">
-                  {actionSplits.map(({ id, actions }, splitIndex) => (
-                    <View
-                      key={id}
-                      nativeStyle={
-                        actionSplits.length > 1
-                          ? {
-                              borderColor: theme.tableBorder,
-                              borderWidth: '1px',
-                              borderRadius: '5px',
-                              padding: '5px',
-                            }
-                          : {}
-                      }
-                    >
-                      {actionSplits.length > 1 && (
-                        <Stack
-                          direction="row"
-                          justify="space-between"
-                          spacing={1}
-                        >
-                          <Text
-                            style={{
-                              ...styles.verySmallText,
-                              marginBottom: '10px',
-                            }}
-                          >
-                            {splitIndex === 0
-                              ? 'Apply to all'
-                              : `Split ${splitIndex}`}
-                          </Text>
-                          {splitIndex && (
-                            <Button
-                              type="bare"
-                              onClick={() => onRemoveSplit(splitIndex)}
-                              style={{
-                                width: 20,
-                                height: 20,
-                              }}
-                              aria-label="Delete split"
-                            >
-                              <SvgDelete
-                                style={{
-                                  width: 8,
-                                  height: 8,
-                                  color: 'inherit',
-                                }}
-                              />
-                            </Button>
-                          )}
-                        </Stack>
-                      )}
-                      <Stack spacing={2} data-testid="action-list">
-                        {actions.map((action, actionIndex) => (
-                          <View key={actionIndex}>
-                            <ActionEditor
-                              ops={['set', 'link-schedule']}
-                              action={action}
-                              editorStyle={editorStyle}
-                              onChange={(name, value) => {
-                                onChangeAction(action, name, value);
-                              }}
-                              onDelete={() => onRemoveAction(action)}
-                              onAdd={() =>
-                                addActionToSplitAfterIndex(
-                                  splitIndex,
-                                  actionIndex,
-                                )
-                              }
-                            />
-                          </View>
-                        ))}
-                      </Stack>
-
-                      {actions.length === 0 && (
-                        <Button
-                          style={{ alignSelf: 'flex-start', marginTop: 5 }}
-                          onClick={() =>
-                            addActionToSplitAfterIndex(splitIndex, -1)
-                          }
-                        >
-                          Add action
-                        </Button>
-                      )}
-                    </View>
-                  ))}
-                </Stack>
-                {showSplitButton && (
-                  <Button
-                    style={{ alignSelf: 'flex-start', marginTop: 15 }}
-                    onClick={() => {
-                      addActionToSplitAfterIndex(actionSplits.length, -1);
-                    }}
-                    data-testid="add-split-transactions"
-                  >
-                    {actionSplits.length > 1
-                      ? 'Add another split'
-                      : 'Split into multiple transactions'}
-                  </Button>
-                )}
-              </View>
-            </View>
-          </View>
-
-          <SelectedProvider instance={selectedInst}>
-            <View style={{ padding: '20px', flex: 1 }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 12,
-                }}
-              >
-                <Text style={{ color: theme.pageTextLight, marginBottom: 0 }}>
-                  This rule applies to these transactions:
-                </Text>
-
-                <View style={{ flex: 1 }} />
-                <Button
-                  disabled={selectedInst.items.size === 0}
-                  onClick={onApply}
+              <Stack direction="row" align="center" spacing={1}>
+                <StageButton
+                  selected={stage === 'pre'}
+                  onSelect={() => onChangeStage('pre')}
                 >
-                  Apply actions ({selectedInst.items.size})
-                </Button>
-              </View>
+                  Pre
+                </StageButton>
+                <StageButton
+                  selected={stage === null}
+                  onSelect={() => onChangeStage(null)}
+                >
+                  Default
+                </StageButton>
+                <StageButton
+                  selected={stage === 'post'}
+                  onSelect={() => onChangeStage('post')}
+                >
+                  Post
+                </StageButton>
 
-              <SimpleTransactionsTable
-                transactions={transactions}
-                fields={getTransactionFields(
-                  conditions,
-                  getActions(actionSplits),
-                )}
-                style={{
-                  border: '1px solid ' + theme.tableBorder,
-                  borderRadius: '6px 6px 0 0',
-                }}
-              />
-
-              <Stack
-                direction="row"
-                justify="flex-end"
-                style={{ marginTop: 20 }}
-              >
-                <Button onClick={() => modalProps.onClose()}>Cancel</Button>
-                <Button type="primary" onClick={() => onSave()}>
-                  Save
-                </Button>
+                <StageInfo />
               </Stack>
             </View>
-          </SelectedProvider>
-        </View>
+
+            <View
+              innerRef={scrollableEl}
+              style={{
+                borderBottom: '1px solid ' + theme.tableBorder,
+                padding: 20,
+                overflow: 'auto',
+                maxHeight: 'calc(100% - 300px)',
+              }}
+            >
+              <View style={{ flexShrink: 0 }}>
+                <View style={{ marginBottom: 30 }}>
+                  <Text style={{ marginBottom: 15 }}>
+                    If
+                    <FieldSelect
+                      data-testid="conditions-op"
+                      style={{ display: 'inline-flex' }}
+                      fields={[
+                        ['and', 'all'],
+                        ['or', 'any'],
+                      ]}
+                      value={conditionsOp}
+                      onChange={onChangeConditionsOp}
+                    />
+                    of these conditions match:
+                  </Text>
+
+                  <ConditionsList
+                    conditionsOp={conditionsOp}
+                    conditions={conditions}
+                    editorStyle={editorStyle}
+                    isSchedule={isSchedule}
+                    onChangeConditions={conds => setConditions(conds)}
+                  />
+                </View>
+
+                <Text style={{ marginBottom: 15 }}>
+                  Then apply these actions:
+                </Text>
+                <View style={{ flex: 1 }}>
+                  {actionSplits.length === 0 && (
+                    <Button
+                      style={{ alignSelf: 'flex-start' }}
+                      onPress={addInitialAction}
+                    >
+                      Add action
+                    </Button>
+                  )}
+                  <Stack spacing={2} data-testid="action-split-list">
+                    {actionSplits.map(({ id, actions }, splitIndex) => (
+                      <View
+                        key={id}
+                        nativeStyle={
+                          actionSplits.length > 1
+                            ? {
+                                borderColor: theme.tableBorder,
+                                borderWidth: '1px',
+                                borderRadius: '5px',
+                                padding: '5px',
+                              }
+                            : {}
+                        }
+                      >
+                        {actionSplits.length > 1 && (
+                          <Stack
+                            direction="row"
+                            justify="space-between"
+                            spacing={1}
+                          >
+                            <Text
+                              style={{
+                                ...styles.smallText,
+                                marginBottom: '10px',
+                              }}
+                            >
+                              {splitIndex === 0
+                                ? 'Apply to all'
+                                : `Split ${splitIndex}`}
+                            </Text>
+                            {splitIndex && (
+                              <Button
+                                variant="bare"
+                                onPress={() => onRemoveSplit(splitIndex)}
+                                style={{
+                                  width: 20,
+                                  height: 20,
+                                }}
+                                aria-label="Delete split"
+                              >
+                                <SvgDelete
+                                  style={{
+                                    width: 8,
+                                    height: 8,
+                                    color: 'inherit',
+                                  }}
+                                />
+                              </Button>
+                            )}
+                          </Stack>
+                        )}
+                        <Stack spacing={2} data-testid="action-list">
+                          {actions.map((action, actionIndex) => (
+                            <View key={actionIndex}>
+                              <ActionEditor
+                                ops={[
+                                  'set',
+                                  'link-schedule',
+                                  'prepend-notes',
+                                  'append-notes',
+                                ]}
+                                action={action}
+                                editorStyle={editorStyle}
+                                onChange={(name, value) => {
+                                  onChangeAction(action, name, value);
+                                }}
+                                onDelete={() => onRemoveAction(action)}
+                                onAdd={() =>
+                                  addActionToSplitAfterIndex(
+                                    splitIndex,
+                                    actionIndex,
+                                  )
+                                }
+                              />
+                            </View>
+                          ))}
+                        </Stack>
+
+                        {actions.length === 0 && (
+                          <Button
+                            style={{ alignSelf: 'flex-start', marginTop: 5 }}
+                            onPress={() =>
+                              addActionToSplitAfterIndex(splitIndex, -1)
+                            }
+                          >
+                            Add action
+                          </Button>
+                        )}
+                      </View>
+                    ))}
+                  </Stack>
+                  {showSplitButton && (
+                    <Button
+                      style={{ alignSelf: 'flex-start', marginTop: 15 }}
+                      onPress={() => {
+                        addActionToSplitAfterIndex(actionSplits.length, -1);
+                      }}
+                      data-testid="add-split-transactions"
+                    >
+                      {actionSplits.length > 1
+                        ? 'Add another split'
+                        : 'Split into multiple transactions'}
+                    </Button>
+                  )}
+                </View>
+              </View>
+            </View>
+
+            <SelectedProvider instance={selectedInst}>
+              <View style={{ padding: '20px', flex: 1 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 12,
+                  }}
+                >
+                  <Text style={{ color: theme.pageTextLight, marginBottom: 0 }}>
+                    This rule applies to these transactions:
+                  </Text>
+
+                  <View style={{ flex: 1 }} />
+                  <Button
+                    isDisabled={selectedInst.items.size === 0}
+                    onPress={onApply}
+                  >
+                    Apply actions ({selectedInst.items.size})
+                  </Button>
+                </View>
+
+                <SimpleTransactionsTable
+                  transactions={transactions}
+                  fields={getTransactionFields(
+                    conditions,
+                    getActions(actionSplits),
+                  )}
+                  style={{
+                    border: '1px solid ' + theme.tableBorder,
+                    borderRadius: '6px 6px 0 0',
+                  }}
+                />
+
+                <Stack
+                  direction="row"
+                  justify="flex-end"
+                  style={{ marginTop: 20 }}
+                >
+                  <Button onClick={close}>Cancel</Button>
+                  <Button variant="primary" onPress={() => onSave(close)}>
+                    Save
+                  </Button>
+                </Stack>
+              </View>
+            </SelectedProvider>
+          </View>
+        </>
       )}
     </Modal>
   );

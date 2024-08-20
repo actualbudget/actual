@@ -5,16 +5,17 @@ import React, {
   useState,
   useEffect,
   type FocusEventHandler,
+  type KeyboardEventHandler,
 } from 'react';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/src/shared/util';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { InputWithContent } from '../common/InputWithContent';
 import { View } from '../common/View';
 import { useFormat } from '../spreadsheet/useFormat';
@@ -27,9 +28,10 @@ type AmountInputProps = {
   onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
+  onEnter?: KeyboardEventHandler<HTMLInputElement>;
   onUpdate?: (amount: number) => void;
   style?: CSSProperties;
-  textStyle?: CSSProperties;
+  inputStyle?: CSSProperties;
   focused?: boolean;
   disabled?: boolean;
   autoDecimals?: boolean;
@@ -44,8 +46,9 @@ export function AmountInput({
   onBlur,
   onChangeValue,
   onUpdate,
+  onEnter,
   style,
-  textStyle,
+  inputStyle,
   focused,
   disabled = false,
   autoDecimals = false,
@@ -60,7 +63,7 @@ export function AmountInput({
   const buttonRef = useRef();
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
-  const [hideFraction = false] = useLocalPref('hideFraction');
+  const [hideFraction = false] = useSyncedPref('hideFraction');
 
   useEffect(() => {
     if (focused) {
@@ -101,12 +104,11 @@ export function AmountInput({
       inputMode="decimal"
       leftContent={
         <Button
-          type="bare"
-          disabled={disabled}
+          variant="bare"
+          isDisabled={disabled}
           aria-label={`Make ${negative ? 'positive' : 'negative'}`}
           style={{ padding: '0 7px' }}
-          onPointerUp={onSwitch}
-          onPointerDown={e => e.preventDefault()}
+          onPress={onSwitch}
           ref={buttonRef}
         >
           {negative ? (
@@ -120,7 +122,7 @@ export function AmountInput({
       disabled={disabled}
       focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
-      inputStyle={{ paddingLeft: 0, ...textStyle }}
+      inputStyle={inputStyle}
       onKeyUp={e => {
         if (e.key === 'Enter') {
           fireUpdate(negative);
@@ -129,6 +131,7 @@ export function AmountInput({
       onChangeValue={onInputTextChange}
       onBlur={onInputAmountBlur}
       onFocus={onFocus}
+      onEnter={onEnter}
     />
   );
 }

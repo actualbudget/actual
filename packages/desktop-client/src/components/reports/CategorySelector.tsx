@@ -12,7 +12,7 @@ import {
   SvgViewHide,
   SvgViewShow,
 } from '../../icons/v2';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
@@ -72,8 +72,8 @@ export function CategorySelector({
         }}
       >
         <Button
-          type="bare"
-          onClick={() => setUncheckedHidden(state => !state)}
+          variant="bare"
+          onPress={() => setUncheckedHidden(state => !state)}
           style={{ padding: 8 }}
         >
           <View>

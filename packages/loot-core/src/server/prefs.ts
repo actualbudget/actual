@@ -2,14 +2,16 @@
 import { Timestamp } from '@actual-app/crdt';
 
 import * as fs from '../platform/server/fs';
-import type { LocalPrefs } from '../types/prefs';
+import type { MetadataPrefs, SyncedPrefs } from '../types/prefs';
 
 import { Message, sendMessages } from './sync';
+
+type LocalPrefs = MetadataPrefs & Pick<SyncedPrefs, 'budgetType'>;
 
 export const BUDGET_TYPES = ['report', 'rollover'] as const;
 export type BudgetType = (typeof BUDGET_TYPES)[number];
 
-let prefs: LocalPrefs = null;
+let prefs: MetadataPrefs = null;
 
 export async function loadPrefs(id?: string): Promise<LocalPrefs> {
   if (process.env.NODE_ENV === 'test' && !id) {
@@ -89,6 +91,6 @@ export function getPrefs(): LocalPrefs {
   return prefs;
 }
 
-export function getDefaultPrefs(id: string, budgetName: string): LocalPrefs {
+export function getDefaultPrefs(id: string, budgetName: string) {
   return { id, budgetName };
 }

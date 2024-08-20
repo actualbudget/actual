@@ -13,6 +13,7 @@ import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
+import { dayFromDate } from '../shared/months';
 import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
@@ -37,6 +38,7 @@ import {
 import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
 import * as cloudStorage from './cloud-storage';
+import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
@@ -112,8 +114,7 @@ handlers['transactions-batch-update'] = mutator(async function ({
       learnCategories,
     });
 
-    // Return all data updates to the frontend
-    return result.updated;
+    return result;
   });
 });
 
@@ -446,6 +447,10 @@ handlers['payee-create'] = mutator(async function ({ name }) {
   });
 });
 
+handlers['common-payees-get'] = async function () {
+  return db.getCommonPayees();
+};
+
 handlers['payees-get'] = async function () {
   return db.getPayees();
 };
@@ -579,6 +584,14 @@ handlers['accounts-get'] = async function () {
   return db.getAccounts();
 };
 
+handlers['account-balance'] = async function ({ id, cutoff }) {
+  const { balance } = await db.first(
+    'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
+    [id, db.toDateRepr(dayFromDate(cutoff))],
+  );
+  return balance ? balance : 0;
+};
+
 handlers['account-properties'] = async function ({ id }) {
   const { balance } = await db.first(
     'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
@@ -659,7 +672,7 @@ handlers['simplefin-accounts-link'] = async function ({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain,
+    externalAccount.orgDomain ?? externalAccount.orgId,
   );
 
   if (upgradingId) {
@@ -982,13 +995,18 @@ handlers['simplefin-accounts'] = async function () {
     return { error: 'unauthorized' };
   }
 
-  return post(
-    getServer().SIMPLEFIN_SERVER + '/accounts',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  try {
+    return await post(
+      getServer().SIMPLEFIN_SERVER + '/accounts',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      60000,
+    );
+  } catch (error) {
+    return { error_code: 'TIMED_OUT' };
+  }
 };
 
 handlers['gocardless-get-banks'] = async function (country) {
@@ -1049,7 +1067,8 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   const accounts = await db.runQuery(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}`,
+         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}
+         ORDER BY a.offbudget, a.sort_order`,
     id ? [id] : [],
     true,
   );
@@ -1071,7 +1090,6 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
           acct.account_id,
           acct.bankId,
         );
-        console.groupEnd();
 
         const { added, updated } = res;
 
@@ -1093,7 +1111,9 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
         } else if (err instanceof PostError && err.reason !== 'internal') {
           errors.push({
             accountId: acct.id,
-            message: `Account “${acct.name}” is not linked properly. Please link it again`,
+            message: err.reason
+              ? err.reason
+              : `Account “${acct.name}” is not linked properly. Please link it again.`,
           });
         } else {
           errors.push({
@@ -1107,6 +1127,8 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 
           captureException(err);
         }
+      } finally {
+        console.groupEnd();
       }
     }
   }
@@ -1124,6 +1146,7 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
 handlers['transactions-import'] = mutator(function ({
   accountId,
   transactions,
+  isPreview,
 }) {
   return withUndo(async () => {
     if (typeof accountId !== 'string') {
@@ -1131,10 +1154,21 @@ handlers['transactions-import'] = mutator(function ({
     }
 
     try {
-      return await bankSync.reconcileTransactions(accountId, transactions);
+      return await bankSync.reconcileTransactions(
+        accountId,
+        transactions,
+        false,
+        true,
+        isPreview,
+      );
     } catch (err) {
       if (err instanceof TransactionError) {
-        return { errors: [{ message: err.message }], added: [], updated: [] };
+        return {
+          errors: [{ message: err.message }],
+          added: [],
+          updated: [],
+          updatedPreview: [],
+        };
       }
 
       throw err;
@@ -1209,13 +1243,6 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('maxMonths' in prefs) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if ('autoUpdate' in prefs) {
-    await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
-    process.parentPort.postMessage({
-      type: 'shouldAutoUpdate',
-      flag: prefs.autoUpdate,
-    });
-  }
   if ('documentDir' in prefs) {
     if (await fs.exists(prefs.documentDir)) {
       await asyncStorage.setItem('document-dir', prefs.documentDir);
@@ -1234,14 +1261,12 @@ handlers['load-global-prefs'] = async function () {
   const [
     [, floatingSidebar],
     [, maxMonths],
-    [, autoUpdate],
     [, documentDir],
     [, encryptKey],
     [, theme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
-    'auto-update',
     'document-dir',
     'encrypt-key',
     'theme',
@@ -1249,7 +1274,6 @@ handlers['load-global-prefs'] = async function () {
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
-    autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
     theme:
@@ -2033,6 +2057,7 @@ app.handlers = handlers;
 app.combine(
   schedulesApp,
   budgetApp,
+  dashboardApp,
   notesApp,
   toolsApp,
   filtersApp,
@@ -2110,14 +2135,6 @@ export async function initApp(isDev, socketName) {
   setServer(url);
 
   connection.init(socketName, app.handlers);
-
-  if (!isDev && !Platform.isMobile && !Platform.isWeb) {
-    const autoUpdate = await asyncStorage.getItem('auto-update');
-    process.parentPort.postMessage({
-      type: 'shouldAutoUpdate',
-      flag: autoUpdate == null || autoUpdate === 'true',
-    });
-  }
 
   // Allow running DB queries locally
   global.$query = aqlQuery;

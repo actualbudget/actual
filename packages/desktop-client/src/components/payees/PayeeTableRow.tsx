@@ -4,10 +4,17 @@ import { memo } from 'react';
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import { SvgArrowThinRight } from '../../icons/v1';
+import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
 import { Text } from '../common/Text';
-import { Cell, CellButton, InputCell, Row, SelectCell } from '../table';
+import {
+  Cell,
+  CellButton,
+  CustomCell,
+  InputCell,
+  Row,
+  SelectCell,
+} from '../table';
 
 type RuleButtonProps = {
   ruleCount: number;
@@ -52,7 +59,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
   );
 }
 
-type EditablePayeeFields = keyof Pick<PayeeEntity, 'name'>;
+type EditablePayeeFields = keyof Pick<PayeeEntity, 'name' | 'favorite'>;
 
 type PayeeTableRowProps = {
   payee: PayeeEntity;
@@ -123,9 +130,28 @@ export const PayeeTableRow = memo(
           focused={focusedField === 'select'}
           selected={selected}
           onSelect={e => {
-            dispatchSelected({ type: 'select', id: payee.id, event: e });
+            dispatchSelected({
+              type: 'select',
+              id: payee.id,
+              isRangeSelect: e.shiftKey,
+            });
           }}
         />
+        <CustomCell
+          width={10}
+          exposed={!payee.transfer_acct}
+          onBlur={() => {}}
+          onUpdate={() => {}}
+          onClick={() => {}}
+        >
+          {() => {
+            if (payee.favorite) {
+              return <SvgBookmark />;
+            } else {
+              return;
+            }
+          }}
+        </CustomCell>
         <InputCell
           value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
           valueStyle={

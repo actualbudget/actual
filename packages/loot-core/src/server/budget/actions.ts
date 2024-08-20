@@ -114,7 +114,7 @@ export function setBudget({
   });
 }
 
-export function setGoal({ month, category, goal }): Promise<void> {
+export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   const table = getBudgetTable();
   const existing = db.firstSync(
     `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
@@ -124,6 +124,7 @@ export function setGoal({ month, category, goal }): Promise<void> {
     return db.update(table, {
       id: existing.id,
       goal,
+      long_goal,
     });
   }
   return db.insert(table, {
@@ -131,6 +132,7 @@ export function setGoal({ month, category, goal }): Promise<void> {
     month: dbMonth(month),
     category,
     goal,
+    long_goal,
   });
 }
 
@@ -258,8 +260,13 @@ export async function set3MonthAvg({
         'sum-amount-' + cat.id,
       );
 
-      const avg = Math.round((spent1 + spent2 + spent3) / 3);
-      setBudget({ category: cat.id, month, amount: -avg });
+      let avg = Math.round((spent1 + spent2 + spent3) / 3);
+
+      if (cat.is_income === 0) {
+        avg *= -1;
+      }
+
+      setBudget({ category: cat.id, month, amount: avg });
     }
   });
 }
@@ -273,6 +280,11 @@ export async function setNMonthAvg({
   N: number;
   category: string;
 }): Promise<void> {
+  const categoryFromDb = await db.first(
+    'SELECT is_income FROM v_categories WHERE id = ?',
+    [category],
+  );
+
   let prevMonth = monthUtils.prevMonth(month);
   let sumAmount = 0;
   for (let l = 0; l < N; l++) {
@@ -283,8 +295,13 @@ export async function setNMonthAvg({
     prevMonth = monthUtils.prevMonth(prevMonth);
   }
   await batchMessages(async () => {
-    const avg = Math.round(sumAmount / N);
-    setBudget({ category, month, amount: -avg });
+    let avg = Math.round(sumAmount / N);
+
+    if (categoryFromDb.is_income === 0) {
+      avg *= -1;
+    }
+
+    setBudget({ category, month, amount: avg });
   });
 }
 
@@ -371,6 +388,20 @@ export async function transferAvailable({
 
   const budgeted = await getSheetValue(sheetName, 'budget-' + category);
   await setBudget({ category, month, amount: budgeted + amount });
+}
+
+export async function coverOverbudgeted({
+  month,
+  category,
+}: {
+  month: string;
+  category: string;
+}): Promise<void> {
+  const sheetName = monthUtils.sheetForMonth(month);
+  const toBudget = await getSheetValue(sheetName, 'to-budget');
+
+  const categoryBudget = await getSheetValue(sheetName, 'budget-' + category);
+  await setBudget({ category, month, amount: categoryBudget + toBudget });
 }
 
 export async function transferCategory({

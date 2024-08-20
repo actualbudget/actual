@@ -25,7 +25,6 @@ export function createGroupedSpreadsheet({
   endDate,
   interval,
   categories,
-  selectedCategories,
   conditions = [],
   conditionsOp,
   showEmpty,
@@ -36,14 +35,6 @@ export function createGroupedSpreadsheet({
   firstDayOfWeekIdx,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
-
-  const categoryFilter = (categories.list || []).filter(
-    category =>
-      selectedCategories &&
-      selectedCategories.some(
-        selectedCategory => selectedCategory.id === category.id,
-      ),
-  );
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -67,7 +58,6 @@ export function createGroupedSpreadsheet({
           startDate,
           endDate,
           interval,
-          categoryFilter,
           conditionsOpKey,
           filters,
         ),
@@ -78,7 +68,6 @@ export function createGroupedSpreadsheet({
           startDate,
           endDate,
           interval,
-          categoryFilter,
           conditionsOpKey,
           filters,
         ),
@@ -111,11 +100,16 @@ export function createGroupedSpreadsheet({
       group => {
         let totalAssets = 0;
         let totalDebts = 0;
+        let netAssets = 0;
+        let netDebts = 0;
 
         const intervalData = intervals.reduce(
           (arr: IntervalEntity[], intervalItem) => {
             let groupedAssets = 0;
             let groupedDebts = 0;
+            let groupedNetAssets = 0;
+            let groupedNetDebts = 0;
+            let groupedTotals = 0;
 
             if (!group.categories) {
               return [];
@@ -151,16 +145,32 @@ export function createGroupedSpreadsheet({
                 )
                 .reduce((a, v) => (a = a + v.amount), 0);
               groupedDebts += intervalDebts;
+
+              const intervalTotals = intervalAssets + intervalDebts;
+
+              groupedNetAssets =
+                intervalTotals > 0
+                  ? groupedNetAssets + intervalTotals
+                  : groupedNetAssets;
+              groupedNetDebts =
+                intervalTotals < 0
+                  ? groupedNetDebts + intervalTotals
+                  : groupedNetDebts;
+              groupedTotals += intervalTotals;
             });
 
             totalAssets += groupedAssets;
             totalDebts += groupedDebts;
+            netAssets += groupedNetAssets;
+            netDebts += groupedNetDebts;
 
             arr.push({
               date: intervalItem,
               totalAssets: integerToAmount(groupedAssets),
               totalDebts: integerToAmount(groupedDebts),
-              totalTotals: integerToAmount(groupedDebts + groupedAssets),
+              netAssets: integerToAmount(groupedNetAssets),
+              netDebts: integerToAmount(groupedNetDebts),
+              totalTotals: integerToAmount(groupedTotals),
             });
 
             return arr;
@@ -191,6 +201,8 @@ export function createGroupedSpreadsheet({
           name: group.name,
           totalAssets: integerToAmount(totalAssets),
           totalDebts: integerToAmount(totalDebts),
+          netAssets: integerToAmount(netAssets),
+          netDebts: integerToAmount(netDebts),
           totalTotals: integerToAmount(totalAssets + totalDebts),
           intervalData,
           categories:

@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
-import { useCategories } from '../../../hooks/useCategories';
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { styles } from '../../../style/styles';
 import { theme } from '../../../style/theme';
 import { Block } from '../../common/Block';
@@ -16,29 +18,77 @@ import { ReportCard } from '../ReportCard';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 
-export function SpendingCard() {
-  const categories = useCategories();
+import { MissingReportCard } from './MissingReportCard';
+
+type SpendingCardProps = {
+  isEditing?: boolean;
+  onRemove: () => void;
+};
+
+export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
+  const { t } = useTranslation();
 
   const [isCardHovered, setIsCardHovered] = useState(false);
+  const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
+  const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
+  const [spendingReportCompare = 'thisMonth'] = useLocalPref(
+    'spendingReportCompare',
+  );
 
+  const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const getGraphData = useMemo(() => {
     return createSpendingSpreadsheet({
-      categories,
+      conditions: parseFilter.conditions,
+      conditionsOp: parseFilter.conditionsOp,
+      compare: spendingReportCompare,
     });
-  }, [categories]);
+  }, [parseFilter, spendingReportCompare]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
-    monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+    spendingReportCompare === 'lastMonth'
       ? 27
-      : monthUtils.getDay(monthUtils.currentDay()) - 1;
+      : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
+        ? 27
+        : monthUtils.getDay(monthUtils.currentDay()) - 1;
   const difference =
     data &&
-    data.intervalData[todayDay].lastMonth -
-      data.intervalData[todayDay].thisMonth;
+    data.intervalData[todayDay][spendingReportTime] -
+      data.intervalData[todayDay][spendingReportCompare];
+  const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
+
+  const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
+
+  if (!spendingReportFeatureFlag) {
+    return (
+      <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
+        <Trans>
+          The experimental spending report feature has not been enabled.
+        </Trans>
+      </MissingReportCard>
+    );
+  }
 
   return (
-    <ReportCard flex="1" to="/reports/spending">
+    <ReportCard
+      isEditing={isEditing}
+      to="/reports/spending"
+      menuItems={[
+        {
+          name: 'remove',
+          text: t('Remove'),
+        },
+      ]}
+      onMenuSelect={item => {
+        switch (item) {
+          case 'remove':
+            onRemove();
+            break;
+          default:
+            throw new Error(`Unrecognized selection: ${item}`);
+        }
+      }}
+    >
       <View
         style={{ flex: 1 }}
         onPointerEnter={() => setIsCardHovered(true)}
@@ -57,7 +107,7 @@ export function SpendingCard() {
               end={monthUtils.currentMonth()}
             />
           </View>
-          {data && (
+          {data && showLastMonth && (
             <View style={{ textAlign: 'right' }}>
               <Block
                 style={{
@@ -80,16 +130,22 @@ export function SpendingCard() {
             </View>
           )}
         </View>
-
-        {data ? (
+        {!showLastMonth ? (
+          <View style={{ padding: 5 }}>
+            <p style={{ margin: 0, textAlign: 'center' }}>
+              <Trans>Additional data required to generate graph</Trans>
+            </p>
+          </View>
+        ) : data ? (
           <SpendingGraph
             style={{ flex: 1 }}
             compact={true}
             data={data}
-            mode="lastMonth"
+            mode={spendingReportTime}
+            compare={spendingReportCompare}
           />
         ) : (
-          <LoadingIndicator />
+          <LoadingIndicator message={t('Loading report...')} />
         )}
       </View>
     </ReportCard>

@@ -32,6 +32,7 @@ test.describe('Rules', () => {
   });
 
   test('creates a rule and makes sure it is applied when creating a transaction', async () => {
+    await rulesPage.searchFor('Fast Internet');
     await rulesPage.createRule({
       conditions: [
         {
@@ -48,7 +49,6 @@ test.describe('Rules', () => {
       ],
     });
 
-    await rulesPage.searchFor('Fast Internet');
     const rule = rulesPage.getNthRule(0);
     await expect(rule.conditions).toHaveText(['payee is Fast Internet']);
     await expect(rule.actions).toHaveText(['set category to General']);
@@ -79,35 +79,34 @@ test.describe('Rules', () => {
           value: 'Ikea',
         },
       ],
-      splits: {
-        beforeSplitActions: [
+      actions: [
+        {
+          op: 'set',
+          field: 'notes',
+          value: 'food / entertainment',
+        },
+      ],
+      splits: [
+        [
           {
-            field: 'notes',
-            value: 'food / entertainment',
+            field: 'a fixed percent of the remainder',
+            value: '90',
+          },
+          {
+            field: 'category',
+            value: 'Entertainment',
           },
         ],
-        splitActions: [
-          [
-            {
-              field: 'a fixed percent',
-              value: '90',
-            },
-            {
-              field: 'category',
-              value: 'Entertainment',
-            },
-          ],
-          [
-            {
-              field: 'an equal portion of the remainder',
-            },
-            {
-              field: 'category',
-              value: 'Food',
-            },
-          ],
+        [
+          {
+            field: 'an equal portion of the remainder',
+          },
+          {
+            field: 'category',
+            value: 'Food',
+          },
         ],
-      },
+      ],
     });
 
     const accountPage = await navigation.goToAccountPage(

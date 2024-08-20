@@ -28,12 +28,14 @@ import { ResponsiveProvider } from '../../ResponsiveProvider';
 import { TransactionTable } from './TransactionsTable';
 
 vi.mock('loot-core/src/platform/client/fetch');
-vi.mock('../../hooks/useFeatureFlag', () => vi.fn().mockReturnValue(false));
+vi.mock('../../hooks/useFeatureFlag', () => ({
+  default: vi.fn().mockReturnValue(false),
+}));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
-  { id: 'payed-to', name: 'Payed To' },
-  { id: 'guy', name: 'This guy on the side of the road' },
+  { id: 'payed-to', favorite: true, name: 'Payed To' },
+  { id: 'guy', favorite: false, name: 'This guy on the side of the road' },
 ];
 const categoryGroups = generateCategoryGroups([
   {
@@ -130,6 +132,7 @@ function LiveTransactionTable(props) {
                 {...props}
                 transactions={transactions}
                 loadMoreTransactions={() => {}}
+                commonPayees={[]}
                 payees={payees}
                 addNotification={n => console.log(n)}
                 onSave={onSave}
@@ -468,7 +471,7 @@ describe('Transactions', () => {
     items = screen
       .getByTestId('autocomplete')
       .querySelectorAll('[data-testid$="category-item"]');
-    expect(items.length).toBe(0);
+    expect(items.length).toBe(3);
   });
 
   test('dropdown selects an item with keyboard', async () => {
@@ -816,9 +819,7 @@ describe('Transactions', () => {
     expect(getTransactions()[1].amount).toBe(0);
     expectErrorToExist(getTransactions().slice(0, 2));
 
-    const toolbars = container.querySelectorAll(
-      '[data-testid="transaction-error"]',
-    );
+    const toolbars = screen.queryAllByTestId('transaction-error');
     // Make sure the toolbar has appeared
     expect(toolbars.length).toBe(1);
     const toolbar = toolbars[0];
@@ -925,9 +926,7 @@ describe('Transactions', () => {
     expect(getTransactions().length).toBe(5);
     await userEvent.click(screen.getByTestId('split-transaction-button'));
     await waitForAutocomplete();
-    await userEvent.click(
-      container.querySelector('[data-testid="add-split-button"]'),
-    );
+    await userEvent.click(screen.getByTestId('add-split-button'));
     expect(getTransactions().length).toBe(7);
 
     // The debit field should show the zeros

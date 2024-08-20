@@ -1,5 +1,9 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
+import escapeRegExp from 'lodash/escapeRegExp';
+
+import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,
@@ -76,7 +80,6 @@ export function TransactionList({
   dateFormat,
   hideFraction,
   addNotification,
-  pushModal,
   renderEmpty,
   onSort,
   sortField,
@@ -85,7 +88,9 @@ export function TransactionList({
   onRefetch,
   onCloseAddTransaction,
   onCreatePayee,
+  onApplyFilter,
 }) {
+  const dispatch = useDispatch();
   const transactionsLatest = useRef();
   const navigate = useNavigate();
 
@@ -132,28 +137,47 @@ export function TransactionList({
     return changes.diff.added[0].id;
   }, []);
 
-  const onApplyRules = useCallback(async transaction => {
-    const afterRules = await send('rules-run', { transaction });
-    const diff = getChangedValues(transaction, afterRules);
+  const onApplyRules = useCallback(
+    async (transaction, updatedFieldName = null) => {
+      const afterRules = await send('rules-run', { transaction });
+      const diff = getChangedValues(transaction, afterRules);
 
-    const newTransaction = { ...transaction };
-    if (diff) {
-      Object.keys(diff).forEach(field => {
+      const newTransaction = { ...transaction };
+      if (diff) {
+        Object.keys(diff).forEach(field => {
+          if (
+            newTransaction[field] == null ||
+            newTransaction[field] === '' ||
+            newTransaction[field] === 0 ||
+            newTransaction[field] === false
+          ) {
+            newTransaction[field] = diff[field];
+          }
+        });
+
+        // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
         if (
-          newTransaction[field] == null ||
-          newTransaction[field] === '' ||
-          newTransaction[field] === 0 ||
-          newTransaction[field] === false
+          transaction.is_parent &&
+          diff.subtransactions !== undefined &&
+          updatedFieldName !== null
         ) {
-          newTransaction[field] = diff[field];
+          newTransaction.subtransactions = diff.subtransactions.map(
+            (st, idx) => ({
+              ...(newTransaction.subtransactions[idx] || st),
+              ...(st[updatedFieldName] != null && {
+                [updatedFieldName]: st[updatedFieldName],
+              }),
+            }),
+          );
         }
-      });
-    }
-    return newTransaction;
-  }, []);
+      }
+      return newTransaction;
+    },
+    [],
+  );
 
   const onManagePayees = useCallback(id => {
-    navigate('/payees', { selectedPayee: id });
+    navigate('/payees', { state: { selectedPayee: id } });
   });
 
   const onNavigateToTransferAccount = useCallback(accountId => {
@@ -161,13 +185,21 @@ export function TransactionList({
   });
 
   const onNavigateToSchedule = useCallback(scheduleId => {
-    pushModal('schedule-edit', { id: scheduleId });
+    dispatch(pushModal('schedule-edit', { id: scheduleId }));
+  });
+
+  const onNotesTagClick = useCallback(tag => {
+    onApplyFilter({
+      field: 'notes',
+      op: 'matches',
+      value: `(^|\\s|\\w)${escapeRegExp(tag)}($|\\s|#)`,
+      type: 'string',
+    });
   });
 
   return (
     <TransactionTable
       ref={tableRef}
-      pushModal={pushModal}
       transactions={allTransactions}
       loadMoreTransactions={loadMoreTransactions}
       accounts={accounts}
@@ -200,6 +232,7 @@ export function TransactionList({
       style={{ backgroundColor: theme.tableBackground }}
       onNavigateToTransferAccount={onNavigateToTransferAccount}
       onNavigateToSchedule={onNavigateToSchedule}
+      onNotesTagClick={onNotesTagClick}
       onSort={onSort}
       sortField={sortField}
       ascDesc={ascDesc}

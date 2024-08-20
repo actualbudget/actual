@@ -75,6 +75,7 @@ export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = colorPalette.purple400;
 export const mobileAccountShadow = cardShadow;
 export const mobileAccountText = colorPalette.blue800;
+export const mobileTransactionSelected = colorPalette.purple400;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = mobileHeaderBackground;
@@ -185,12 +186,26 @@ export const pillBorderDark = pillBorder;
 export const pillBackgroundSelected = colorPalette.purple600;
 export const pillTextSelected = colorPalette.navy150;
 export const pillBorderSelected = colorPalette.purple400;
+export const pillTextSubdued = colorPalette.navy500;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
+
+export const noteTagBackground = colorPalette.purple700;
+export const noteTagBackgroundHover = colorPalette.purple500;
+export const noteTagText = colorPalette.purple100;
+
+export const budgetOtherMonth = colorPalette.navy900;
+export const budgetCurrentMonth = tableBackground;
+export const budgetHeaderOtherMonth = colorPalette.navy800;
+export const budgetHeaderCurrentMonth = tableHeaderBackground;
+
+export const floatingActionBarBackground = colorPalette.purple800;
+export const floatingActionBarBorder = floatingActionBarBackground;
+export const floatingActionBarText = colorPalette.navy150;
 
 export const tooltipText = colorPalette.navy100;
 export const tooltipBackground = colorPalette.navy800;

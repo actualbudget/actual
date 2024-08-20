@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgSearchAlternate } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
 import { InputWithContent } from '../../common/InputWithContent';
@@ -56,6 +57,7 @@ function TransactionSearchInput({ placeholder, onSearch }) {
 }
 
 export function TransactionListWithBalances({
+  isLoading,
   transactions,
   balance,
   balanceCleared,
@@ -63,7 +65,7 @@ export function TransactionListWithBalances({
   searchPlaceholder = 'Search...',
   onSearch,
   onLoadMore,
-  onSelectTransaction,
+  onOpenTransaction,
   onRefresh,
 }) {
   const newTransactions = useSelector(state => state.queries.newTransactions);
@@ -73,9 +75,10 @@ export function TransactionListWithBalances({
   };
 
   const unclearedAmount = useSheetValue(balanceUncleared);
+  const selectedInst = useSelected('transactions', transactions);
 
   return (
-    <>
+    <SelectedProvider instance={selectedInst}>
       <View
         style={{
           flexShrink: 0,
@@ -154,12 +157,13 @@ export function TransactionListWithBalances({
       </View>
       <PullToRefresh isPullable={!!onRefresh} onRefresh={onRefresh}>
         <TransactionList
+          isLoading={isLoading}
           transactions={transactions}
-          isNew={isNewTransaction}
+          isNewTransaction={isNewTransaction}
           onLoadMore={onLoadMore}
-          onSelect={onSelectTransaction}
+          onOpenTransaction={onOpenTransaction}
         />
       </PullToRefresh>
-    </>
+    </SelectedProvider>
   );
 }

@@ -4,10 +4,10 @@ import { format } from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { theme } from '../../style';
 import { Block } from '../common/Block';
-import { ButtonWithLoading } from '../common/Button';
+import { ButtonWithLoading } from '../common/Button2';
 import { Text } from '../common/Text';
 
 import { Setting } from './UI';
@@ -15,8 +15,8 @@ import { Setting } from './UI';
 export function ExportBudget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [budgetName] = useLocalPref('budgetName');
-  const [encryptKeyId] = useLocalPref('encryptKeyId');
+  const [budgetName] = useMetadataPref('budgetName');
+  const [encryptKeyId] = useMetadataPref('encryptKeyId');
 
   async function onExport() {
     setIsLoading(true);
@@ -43,7 +43,7 @@ export function ExportBudget() {
     <Setting
       primaryAction={
         <>
-          <ButtonWithLoading onClick={onExport} loading={isLoading}>
+          <ButtonWithLoading onPress={onExport} isLoading={isLoading}>
             Export data
           </ButtonWithLoading>
           {error && (

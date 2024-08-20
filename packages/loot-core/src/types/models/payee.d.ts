@@ -1,10 +1,9 @@
-export interface NewPayeeEntity {
-  id?: string;
-  name: string;
-  transfer_acct?: string;
-  tombstone?: boolean;
-}
+import { AccountEntity } from './account';
 
-export interface PayeeEntity extends NewPayeeEntity {
+export interface PayeeEntity {
   id: string;
+  name: string;
+  transfer_acct?: AccountEntity['id'];
+  favorite?: boolean;
+  tombstone?: boolean;
 }

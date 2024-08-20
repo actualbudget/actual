@@ -6,17 +6,18 @@ import { type Query } from 'loot-core/shared/query';
 
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
-import { Modal } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+  ModalTitle,
+} from '../common/Modal2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { type CommonModalProps } from '../Modals';
 
-type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps & {
-  modalProps: CommonModalProps;
-};
+type ScheduledTransactionMenuModalProps = ScheduledTransactionMenuProps;
 
 export function ScheduledTransactionMenuModal({
-  modalProps,
   transactionId,
   onSkip,
   onPost,
@@ -41,30 +42,35 @@ export function ScheduledTransactionMenuModal({
   }
 
   return (
-    <Modal
-      title={schedule.name}
-      showHeader
-      focusAfterClose={false}
-      {...modalProps}
-    >
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: 20,
-        }}
-      >
-        <Text style={{ fontSize: 17, fontWeight: 400 }}>Scheduled date</Text>
-        <Text style={{ fontSize: 17, fontWeight: 700 }}>
-          {format(schedule.next_date, 'MMMM dd, yyyy')}
-        </Text>
-      </View>
-      <ScheduledTransactionMenu
-        transactionId={transactionId}
-        onPost={onPost}
-        onSkip={onSkip}
-        getItemStyle={() => defaultMenuItemStyle}
-      />
+    <Modal name="scheduled-transaction-menu">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title={<ModalTitle title={schedule.name || ''} shrinkOnOverflow />}
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <View
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ fontSize: 17, fontWeight: 400 }}>
+              Scheduled date
+            </Text>
+            <Text style={{ fontSize: 17, fontWeight: 700 }}>
+              {format(schedule.next_date, 'MMMM dd, yyyy')}
+            </Text>
+          </View>
+          <ScheduledTransactionMenu
+            transactionId={transactionId}
+            onPost={onPost}
+            onSkip={onSkip}
+            getItemStyle={() => defaultMenuItemStyle}
+          />
+        </>
+      )}
     </Modal>
   );
 }

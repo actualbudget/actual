@@ -13,7 +13,7 @@ import { useResponsive } from '../../../ResponsiveProvider';
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -28,12 +28,12 @@ import { useReport } from '../useReport';
 
 export function CashFlow() {
   const {
-    filters,
+    conditions,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
-    onCondOpChange,
+    onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
   const [allMonths, setAllMonths] = useState<null | Array<{
@@ -55,8 +55,8 @@ export function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, filters, conditionsOp),
-    [start, end, isConcise, filters, conditionsOp],
+    () => cashFlowByDate(start, end, isConcise, conditions, conditionsOp),
+    [start, end, isConcise, conditions, conditionsOp],
   );
   const data = useReport('cash_flow', params);
 
@@ -129,11 +129,11 @@ export function CashFlow() {
         show1Month
         onChangeDates={onChangeDates}
         onApply={onApplyFilter}
-        filters={filters}
+        filters={conditions}
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
+        onConditionsOpChange={onConditionsOpChange}
         headerPrefixItems={undefined}
       >
         <View
@@ -143,7 +143,7 @@ export function CashFlow() {
             justifyContent: 'flex-end',
           }}
         >
-          <Button onClick={() => setShowBalance(state => !state)}>
+          <Button onPress={() => setShowBalance(state => !state)}>
             {showBalance ? 'Hide balance' : 'Show balance'}
           </Button>
         </View>

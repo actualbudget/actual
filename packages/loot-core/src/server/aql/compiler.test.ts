@@ -123,6 +123,32 @@ describe('sheet language', () => {
     );
   });
 
+  it('`like` should use unicode and normalise function', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select('payee')
+        .filter({ 'payee.name': { $like: `%TEST%` } })
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch(
+      `UNICODE_LIKE('%test%', NORMALISE(payees1.name))`,
+    );
+  });
+
+  it('`notlike` should use unicode and normalise function', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select('payee')
+        .filter({ 'payee.name': { $notlike: `%TEST%` } })
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch(
+      `NOT UNICODE_LIKE('%test%', NORMALISE(payees1.name))`,
+    );
+  });
+
   it('`select` allows nested functions', () => {
     const result = generateSQLWithState(
       q('transactions')

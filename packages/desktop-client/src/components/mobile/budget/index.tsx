@@ -16,7 +16,6 @@ import {
   updateCategory,
   updateGroup,
   sync,
-  loadPrefs,
 } from 'loot-core/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -29,9 +28,10 @@ import {
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { theme } from '../../../style';
-import { prewarmMonth, switchBudgetType } from '../../budget/util';
+import { prewarmMonth } from '../../budget/util';
 import { View } from '../../common/View';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
@@ -58,9 +58,9 @@ function BudgetInner(props: BudgetInnerProps) {
   const [initialized, setInitialized] = useState(false);
   // const [editMode, setEditMode] = useState(false);
 
-  const [_numberFormat] = useLocalPref('numberFormat');
+  const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useLocalPref('hideFraction');
+  const [hideFraction = false] = useSyncedPref('hideFraction');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -170,6 +170,15 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
+  const onToggleGroupVisibility = groupId => {
+    const group = categoryGroups.find(g => g.id === groupId);
+    onSaveGroup({
+      ...group,
+      hidden: !!!group.hidden,
+    });
+    dispatch(collapseModals('category-group-menu'));
+  };
+
   const onSaveCategory = category => {
     dispatch(updateCategory(category));
   };
@@ -195,6 +204,15 @@ function BudgetInner(props: BudgetInnerProps) {
       dispatch(collapseModals('category-menu'));
       dispatch(deleteCategory(categoryId));
     }
+  };
+
+  const onToggleCategoryVisibility = categoryId => {
+    const category = categories.find(c => c.id === categoryId);
+    onSaveCategory({
+      ...category,
+      hidden: !!!category.hidden,
+    });
+    dispatch(collapseModals('category-menu'));
   };
 
   const onReorderCategory = (id, { inGroup, aroundCategory }) => {
@@ -289,23 +307,6 @@ function BudgetInner(props: BudgetInnerProps) {
   //   );
   // };
 
-  const onSwitchBudgetType = async () => {
-    setInitialized(false);
-
-    const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
-    await switchBudgetType(
-      newBudgetType,
-      spreadsheet,
-      bounds,
-      startMonth,
-      async () => {
-        dispatch(loadPrefs());
-      },
-    );
-
-    setInitialized(true);
-  };
-
   const onSaveNotes = async (id, notes) => {
     await send('notes-save', { id, note: notes });
   };
@@ -341,6 +342,7 @@ function BudgetInner(props: BudgetInnerProps) {
         onAddCategory: onOpenNewCategoryModal,
         onEditNotes: onOpenCategoryGroupNotesModal,
         onDelete: onDeleteGroup,
+        onToggleVisibility: onToggleGroupVisibility,
       }),
     );
   };
@@ -353,18 +355,8 @@ function BudgetInner(props: BudgetInnerProps) {
         onSave: onSaveCategory,
         onEditNotes: onOpenCategoryNotesModal,
         onDelete: onDeleteCategory,
+        onToggleVisibility: onToggleCategoryVisibility,
         onBudgetAction,
-      }),
-    );
-  };
-
-  const onOpenSwitchBudgetTypeModal = () => {
-    dispatch(
-      pushModal('switch-budget-type', {
-        onSwitch: () => {
-          onSwitchBudgetType();
-          dispatch(collapseModals('budget-page-menu'));
-        },
       }),
     );
   };
@@ -408,7 +400,6 @@ function BudgetInner(props: BudgetInnerProps) {
         onAddCategoryGroup: onOpenNewCategoryGroupModal,
         onToggleHiddenCategories,
         onSwitchBudgetFile,
-        onSwitchBudgetType: onOpenSwitchBudgetTypeModal,
       }),
     );
   };
@@ -471,8 +462,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [_budgetType] = useLocalPref('budgetType');
-  const budgetType = _budgetType || 'rollover';
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const spreadsheet = useSpreadsheet();
   useSetThemeColor(theme.mobileViewTheme);
   return (

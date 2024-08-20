@@ -18,6 +18,7 @@ type ParseFileOptions = {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
+  skipLines?: number;
 };
 
 export async function parseFile(
@@ -57,7 +58,12 @@ async function parseCSV(
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  const contents = await fs.readFile(filepath);
+  let contents = await fs.readFile(filepath);
+
+  if (options.skipLines > 0) {
+    const lines = contents.split(/\r?\n/);
+    contents = lines.slice(options.skipLines).join('\r\n');
+  }
 
   let data;
   try {
@@ -137,7 +143,7 @@ async function parseOFX(
     errors,
     transactions: data.transactions.map(trans => {
       return {
-        amount: Number(trans.amount),
+        amount: trans.amount,
         imported_id: trans.fitId,
         date: trans.date,
         payee_name: trans.name || (useMemoFallback ? trans.memo : null),

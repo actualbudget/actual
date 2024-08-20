@@ -223,16 +223,17 @@ export async function updateRule(rule) {
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
-export async function deleteRule<T extends { id: string }>(rule: T) {
+export async function deleteRule(id: string) {
   const schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
-    rule.id,
+    id,
   ]);
 
   if (schedule) {
     return false;
   }
 
-  return db.delete_('rules', rule.id);
+  await db.delete_('rules', id);
+  return true;
 }
 
 // Sync projections
@@ -452,6 +453,10 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           '$like',
           '%' + value + '%',
         );
+      case 'matches':
+        // Running contains with id will automatically reach into
+        // the `name` of the referenced table and do a regex match
+        return apply(type === 'id' ? field + '.name' : field, '$regexp', value);
       case 'doesNotContain':
         // Running contains with id will automatically reach into
         // the `name` of the referenced table and do a string match
@@ -514,6 +519,11 @@ export async function applyActions(
             FIELD_TYPES,
           );
         } else if (action.op === 'link-schedule') {
+          return new Action(action.op, null, action.value, null, FIELD_TYPES);
+        } else if (
+          action.op === 'prepend-notes' ||
+          action.op === 'append-notes'
+        ) {
           return new Action(action.op, null, action.value, null, FIELD_TYPES);
         }
 

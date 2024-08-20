@@ -3,6 +3,7 @@ import type {
   APIAccountEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIFileEntity,
   APIPayeeEntity,
 } from '../server/api-models';
 
@@ -22,6 +23,8 @@ export interface ApiHandlers {
     syncId: string;
     password?: string;
   }) => Promise<void>;
+
+  'api/get-budgets': () => Promise<APIFileEntity[]>;
 
   'api/start-import': (arg: { budgetName: string }) => Promise<void>;
 
@@ -60,13 +63,24 @@ export interface ApiHandlers {
     flag: boolean;
   }) => Promise<void>;
 
+  'api/budget-hold-for-next-month': (arg: {
+    month: string;
+    amount: number;
+  }) => Promise<boolean>;
+
+  'api/budget-reset-hold': (arg: { month: string }) => Promise<void>;
+
   'api/transactions-export': (arg: {
     transactions;
     categoryGroups;
     payees;
   }) => Promise<unknown>;
 
-  'api/transactions-import': (arg: { accountId; transactions }) => Promise<{
+  'api/transactions-import': (arg: {
+    accountId;
+    transactions;
+    isPreview?;
+  }) => Promise<{
     errors?: { message: string }[];
     added;
     updated;
@@ -92,7 +106,7 @@ export interface ApiHandlers {
 
   'api/transaction-delete': (arg: {
     id;
-  }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
+  }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['deleted']>;
 
   'api/sync': () => Promise<void>;
 
@@ -113,6 +127,11 @@ export interface ApiHandlers {
   'api/account-reopen': (arg: { id }) => Promise<unknown>;
 
   'api/account-delete': (arg: { id }) => Promise<unknown>;
+
+  'api/account-balance': (arg: {
+    id: string;
+    cutoff?: Date;
+  }) => Promise<number>;
 
   'api/categories-get': (arg: {
     grouped;
@@ -140,11 +159,18 @@ export interface ApiHandlers {
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
 
+  'api/common-payees-get': () => Promise<APIPayeeEntity[]>;
+
   'api/payee-create': (arg: { payee }) => Promise<string>;
 
   'api/payee-update': (arg: { id; fields }) => Promise<unknown>;
 
   'api/payee-delete': (arg: { id }) => Promise<unknown>;
+
+  'api/payees-merge': (arg: {
+    targetId: string;
+    mergeIds: string[];
+  }) => Promise<void>;
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 
@@ -154,5 +180,5 @@ export interface ApiHandlers {
 
   'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
 
-  'api/rule-delete': (arg: { id: string }) => Promise<boolean>;
+  'api/rule-delete': (id: string) => Promise<boolean>;
 }

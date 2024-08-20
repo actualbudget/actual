@@ -24,12 +24,29 @@ export type RuleConditionOp =
   | 'lt'
   | 'lte'
   | 'contains'
-  | 'doesNotContain';
+  | 'doesNotContain'
+  | 'matches';
 
-export interface RuleConditionEntity {
-  field?: string;
-  op?: RuleConditionOp;
-  value?: string | string[] | number | boolean;
+type FieldValueTypes = {
+  account: string;
+  amount: number;
+  category: string;
+  date: string;
+  notes: string;
+  payee: string;
+  imported_payee: string;
+  saved: string;
+};
+
+type BaseConditionEntity<
+  Field extends keyof FieldValueTypes,
+  Op extends RuleConditionOp,
+> = {
+  field: Field;
+  op: Op;
+  value: Op extends 'oneOf' | 'notOneOf'
+    ? Array<FieldValueTypes[Field]>
+    : FieldValueTypes[Field];
   options?: {
     inflow?: boolean;
     outflow?: boolean;
@@ -37,14 +54,79 @@ export interface RuleConditionEntity {
     year?: boolean;
   };
   conditionsOp?: string;
-  type?: string;
+  type?: 'id' | 'boolean' | 'date' | 'number';
   customName?: string;
-}
+};
+
+export type RuleConditionEntity =
+  | BaseConditionEntity<
+      'account',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<
+      'category',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<
+      'amount',
+      'is' | 'isapprox' | 'isbetween' | 'gt' | 'gte' | 'lt' | 'lte'
+    >
+  | BaseConditionEntity<
+      'date',
+      'is' | 'isapprox' | 'isbetween' | 'gt' | 'gte' | 'lt' | 'lte'
+    >
+  | BaseConditionEntity<
+      'notes',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<
+      'payee',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<
+      'imported_payee',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<'saved', 'is'>
+  | BaseConditionEntity<'cleared', 'is'>
+  | BaseConditionEntity<'reconciled', 'is'>;
 
 export type RuleActionEntity =
   | SetRuleActionEntity
   | SetSplitAmountRuleActionEntity
-  | LinkScheduleRuleActionEntity;
+  | LinkScheduleRuleActionEntity
+  | PrependNoteRuleActionEntity
+  | AppendNoteRuleActionEntity;
 
 export interface SetRuleActionEntity {
   field: string;
@@ -68,4 +150,14 @@ export interface SetSplitAmountRuleActionEntity {
 export interface LinkScheduleRuleActionEntity {
   op: 'link-schedule';
   value: ScheduleEntity;
+}
+
+export interface PrependNoteRuleActionEntity {
+  op: 'prepend-notes';
+  value: string;
+}
+
+export interface AppendNoteRuleActionEntity {
+  op: 'append-notes';
+  value: string;
 }

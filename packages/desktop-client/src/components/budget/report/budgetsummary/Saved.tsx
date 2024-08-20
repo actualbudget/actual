@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 
@@ -6,72 +7,70 @@ import { reportBudget } from 'loot-core/src/client/queries';
 
 import { theme, type CSSProperties, styles } from '../../../../style';
 import { AlignedText } from '../../../common/AlignedText';
-import { HoverTarget } from '../../../common/HoverTarget';
 import { Text } from '../../../common/Text';
+import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
-import { useSheetValue } from '../../../spreadsheet/useSheetValue';
-import { Tooltip } from '../../../tooltips';
 import { makeAmountFullStyle } from '../../util';
+import { useReportSheetValue } from '../ReportComponents';
 
 type SavedProps = {
   projected: boolean;
   style?: CSSProperties;
 };
 export function Saved({ projected, style }: SavedProps) {
-  const budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
-  const totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
+  const { t } = useTranslation();
+  const budgetedSaved =
+    useReportSheetValue(reportBudget.totalBudgetedSaved) || 0;
+  const totalSaved = useReportSheetValue(reportBudget.totalSaved) || 0;
   const format = useFormat();
   const saved = projected ? budgetedSaved : totalSaved;
   const isNegative = saved < 0;
+  const diff = totalSaved - budgetedSaved;
 
   return (
     <View style={{ alignItems: 'center', fontSize: 14, ...style }}>
       {projected ? (
-        <Text style={{ color: theme.pageTextLight }}>Projected Savings:</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Projected Savings:</Trans>
+        </Text>
       ) : (
         <View style={{ color: theme.pageTextLight }}>
-          {isNegative ? 'Overspent:' : 'Saved:'}
+          {isNegative ? t('Overspent:') : t('Saved:')}
         </View>
       )}
 
-      <HoverTarget
-        renderContent={() => {
-          if (!projected) {
-            const diff = totalSaved - budgetedSaved;
-            return (
-              <Tooltip
-                position="bottom-center"
-                style={{ padding: 10, fontSize: 14 }}
-              >
-                <AlignedText
-                  left="Projected Savings:"
-                  right={
-                    <Text
-                      style={{
-                        ...makeAmountFullStyle(budgetedSaved),
-                        ...styles.tnum,
-                      }}
-                    >
-                      {format(budgetedSaved, 'financial-with-sign')}
-                    </Text>
-                  }
-                />
-                <AlignedText
-                  left="Difference:"
-                  right={
-                    <Text
-                      style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}
-                    >
-                      {format(diff, 'financial-with-sign')}
-                    </Text>
-                  }
-                />
-              </Tooltip>
-            );
-          }
-          return null;
+      <Tooltip
+        style={{ ...styles.tooltip, fontSize: 14, padding: 10 }}
+        content={
+          <>
+            <AlignedText
+              left={t('Projected Savings:')}
+              right={
+                <Text
+                  style={{
+                    ...makeAmountFullStyle(budgetedSaved),
+                    ...styles.tnum,
+                  }}
+                >
+                  {format(budgetedSaved, 'financial-with-sign')}
+                </Text>
+              }
+            />
+            <AlignedText
+              left={t('Difference:')}
+              right={
+                <Text style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}>
+                  {format(diff, 'financial-with-sign')}
+                </Text>
+              }
+            />
+          </>
+        }
+        placement="bottom"
+        triggerProps={{
+          isDisabled: Boolean(projected),
         }}
       >
         <View
@@ -90,7 +89,7 @@ export function Saved({ projected, style }: SavedProps) {
             {format(saved, 'financial')}
           </PrivacyFilter>
         </View>
-      </HoverTarget>
+      </Tooltip>
     </View>
   );
 }

@@ -5,11 +5,10 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import { styles, type CSSProperties } from '../../../../style';
 import { AlignedText } from '../../../common/AlignedText';
 import { Block } from '../../../common/Block';
-import { HoverTarget } from '../../../common/HoverTarget';
+import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
-import { CellValue } from '../../../spreadsheet/CellValue';
 import { useFormat } from '../../../spreadsheet/useFormat';
-import { Tooltip } from '../../../tooltips';
+import { RolloverCellValue } from '../RolloverComponents';
 
 type TotalsListProps = {
   prevMonthName: string;
@@ -34,17 +33,14 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           minWidth: 50,
         }}
       >
-        <HoverTarget
-          style={{ flexShrink: 0 }}
-          renderContent={() => (
-            <Tooltip
-              width={200}
-              style={{ lineHeight: 1.5, padding: '6px 10px' }}
-            >
+        <Tooltip
+          style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
+          content={
+            <>
               <AlignedText
                 left="Income:"
                 right={
-                  <CellValue
+                  <RolloverCellValue
                     binding={rolloverBudget.totalIncome}
                     type="financial"
                     privacyFilter={false}
@@ -54,24 +50,25 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
               <AlignedText
                 left="From Last Month:"
                 right={
-                  <CellValue
+                  <RolloverCellValue
                     binding={rolloverBudget.fromLastMonth}
                     type="financial"
                     privacyFilter={false}
                   />
                 }
               />
-            </Tooltip>
-          )}
+            </>
+          }
+          placement="bottom end"
         >
-          <CellValue
+          <RolloverCellValue
             binding={rolloverBudget.incomeAvailable}
             type="financial"
             style={{ fontWeight: 600 }}
           />
-        </HoverTarget>
+        </Tooltip>
 
-        <CellValue
+        <RolloverCellValue
           binding={rolloverBudget.lastMonthOverspent}
           type="financial"
           formatter={value => {
@@ -81,7 +78,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           style={{ fontWeight: 600, ...styles.tnum }}
         />
 
-        <CellValue
+        <RolloverCellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
           formatter={value => {
@@ -91,7 +88,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           style={{ fontWeight: 600, ...styles.tnum }}
         />
 
-        <CellValue
+        <RolloverCellValue
           binding={rolloverBudget.forNextMonth}
           type="financial"
           formatter={value => {

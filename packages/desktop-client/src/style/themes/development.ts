@@ -75,6 +75,7 @@ export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
+export const mobileTransactionSelected = colorPalette.purple500;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = mobileHeaderBackground;
@@ -176,7 +177,7 @@ export const checkboxBorderSelected = colorPalette.blue500;
 export const checkboxShadowSelected = colorPalette.blue300;
 
 export const pillBackground = colorPalette.navy150;
-export const pillBackgroundLight = pillBackground;
+export const pillBackgroundLight = colorPalette.navy50;
 export const pillText = colorPalette.navy800;
 export const pillTextHighlighted = colorPalette.purple600;
 export const pillBorder = colorPalette.navy150;
@@ -184,12 +185,26 @@ export const pillBorderDark = colorPalette.navy300;
 export const pillBackgroundSelected = colorPalette.blue150;
 export const pillTextSelected = colorPalette.blue900;
 export const pillBorderSelected = colorPalette.purple500;
+export const pillTextSubdued = colorPalette.navy200;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
 export const reportsLabel = colorPalette.navy900;
 export const reportsInnerLabel = colorPalette.navy800;
+
+export const noteTagBackground = colorPalette.purple100;
+export const noteTagBackgroundHover = colorPalette.purple150;
+export const noteTagText = colorPalette.purple700;
+
+export const budgetCurrentMonth = tableBackground;
+export const budgetOtherMonth = colorPalette.gray50;
+export const budgetHeaderCurrentMonth = budgetOtherMonth;
+export const budgetHeaderOtherMonth = colorPalette.gray80;
+
+export const floatingActionBarBackground = colorPalette.purple400;
+export const floatingActionBarBorder = floatingActionBarBackground;
+export const floatingActionBarText = colorPalette.navy50;
 
 export const tooltipText = colorPalette.navy900;
 export const tooltipBackground = colorPalette.navy50;
