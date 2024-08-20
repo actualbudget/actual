@@ -134,6 +134,7 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
     node2 = node2[diffkey] || emptyTrie();
   }
 
+  // eslint-disable-next-line no-unreachable
   return null;
 }
 

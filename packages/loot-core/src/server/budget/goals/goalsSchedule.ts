@@ -42,7 +42,7 @@ async function createScheduleList(template, current_month, category) {
       sign *
       (categorySubtransactions?.length
         ? categorySubtransactions.reduce((acc, t) => acc + t.amount, 0)
-        : postRuleAmount ?? scheduleAmount);
+        : (postRuleAmount ?? scheduleAmount));
 
     const next_date_string = getNextDate(
       dateConditions,

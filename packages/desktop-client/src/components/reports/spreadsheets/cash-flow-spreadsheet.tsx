@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React from 'react';
 
 import * as d from 'date-fns';
@@ -13,8 +12,11 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
-export function simpleCashFlow(start, end) {
-  return async (spreadsheet, setData) => {
+export function simpleCashFlow(start: string, end: string) {
+  return async (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: { graphData: { income: number; expense: number } }) => void,
+  ) => {
     function makeQuery() {
       return q('transactions')
         .filter({
@@ -109,7 +111,16 @@ export function cashFlowByDate(
   };
 }
 
-function recalculate(data, start, end, isConcise) {
+function recalculate(
+  data: [
+    number,
+    Array<{ date: string; isTransfer: string | null; amount: number }>,
+    Array<{ date: string; isTransfer: string | null; amount: number }>,
+  ],
+  start: string,
+  end: string,
+  isConcise: boolean,
+) {
   const [startingBalance, income, expense] = data;
   const convIncome = income.map(t => {
     return { ...t, isTransfer: t.isTransfer !== null };
@@ -123,15 +134,25 @@ function recalculate(data, start, end, isConcise) {
         monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
-  const incomes = indexCashFlow(convIncome, 'date', 'isTransfer');
-  const expenses = indexCashFlow(convExpense, 'date', 'isTransfer');
+  const incomes = indexCashFlow(convIncome);
+  const expenses = indexCashFlow(convExpense);
 
   let balance = startingBalance;
   let totalExpenses = 0;
   let totalIncome = 0;
   let totalTransfers = 0;
 
-  const graphData = dates.reduce(
+  const graphData = dates.reduce<{
+    expenses: Array<{ x: Date; y: number }>;
+    income: Array<{ x: Date; y: number }>;
+    transfers: Array<{ x: Date; y: number }>;
+    balances: Array<{
+      x: Date;
+      y: number;
+      premadeLabel: JSX.Element;
+      amount: number;
+    }>;
+  }>(
     (res, date) => {
       let income = 0;
       let expense = 0;
