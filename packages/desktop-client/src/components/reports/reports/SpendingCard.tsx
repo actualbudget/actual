@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -25,6 +26,8 @@ type SpendingCardProps = {
 };
 
 export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
+  const { t } = useTranslation();
+
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
   const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
@@ -59,11 +62,12 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
   if (!spendingReportFeatureFlag) {
     return (
       <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
-        The experimental spending report feature has not been enabled.
+        <Trans>
+          The experimental spending report feature has not been enabled.
+        </Trans>
       </MissingReportCard>
     );
   }
-
   return (
     <ReportCard
       isEditing={isEditing}
@@ -71,7 +75,7 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
       menuItems={[
         {
           name: 'remove',
-          text: 'Remove',
+          text: t('Remove'),
         },
       ]}
       onMenuSelect={item => {
@@ -98,8 +102,8 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
               Monthly Spending
             </Block>
             <DateRange
-              start={monthUtils.currentMonth()}
-              end={monthUtils.currentMonth()}
+              start={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
+              end={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
             />
           </View>
           {data && showLastMonth && (
@@ -128,7 +132,7 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
         {!showLastMonth ? (
           <View style={{ padding: 5 }}>
             <p style={{ margin: 0, textAlign: 'center' }}>
-              Additional data required to generate graph
+              <Trans>Additional data required to generate graph</Trans>
             </p>
           </View>
         ) : data ? (
@@ -140,7 +144,7 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
             compare={spendingReportCompare}
           />
         ) : (
-          <LoadingIndicator message="Loading report..." />
+          <LoadingIndicator message={t('Loading report...')} />
         )}
       </View>
     </ReportCard>

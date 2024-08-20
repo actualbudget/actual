@@ -1122,11 +1122,10 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
               'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
-
-          err.message = 'Failed syncing account: ' + err.message;
-
-          captureException(err);
         }
+
+        err.message = 'Failed syncing account “' + acct.name + '.”';
+        captureException(err);
       } finally {
         console.groupEnd();
       }
