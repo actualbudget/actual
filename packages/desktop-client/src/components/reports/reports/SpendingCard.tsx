@@ -68,7 +68,6 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
       </MissingReportCard>
     );
   }
-
   return (
     <ReportCard
       isEditing={isEditing}
@@ -103,8 +102,8 @@ export function SpendingCard({ isEditing, onRemove }: SpendingCardProps) {
               Monthly Spending
             </Block>
             <DateRange
-              start={monthUtils.currentMonth()}
-              end={monthUtils.currentMonth()}
+              start={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
+              end={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
             />
           </View>
           {data && showLastMonth && (
