@@ -137,7 +137,7 @@ export function CustomReport() {
     ? JSON.parse(reportFromSessionStorage)
     : {};
   const combine = location.state
-    ? location.state.report ?? defaultReport
+    ? (location.state.report ?? defaultReport)
     : defaultReport;
   const loadReport = { ...combine, ...session };
 
@@ -244,8 +244,8 @@ export function CustomReport() {
     location.state
       ? location.state.report
         ? 'saved'
-        : loadReport.savedStatus ?? 'new'
-      : loadReport.savedStatus ?? 'new',
+        : (loadReport.savedStatus ?? 'new')
+      : (loadReport.savedStatus ?? 'new'),
   );
 
   useEffect(() => {
