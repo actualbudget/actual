@@ -8,6 +8,7 @@ env:
   CI: true
 
 on:
+  pull_request:
   push:
     tags:
       - v**
@@ -56,6 +57,7 @@ jobs:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: 79ANZ983YF
+          CSC_FOR_PULL_REQUEST: true
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
       - name: Build Electron
         if: ${{ ! startsWith(matrix.os, 'macos') }}
@@ -77,12 +79,12 @@ jobs:
           name: actual-electron-${{ matrix.os }}-appx
           path: |
             packages/desktop-electron/dist/*.appx
-      - name: Add to Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            packages/desktop-electron/dist/*.dmg
-            packages/desktop-electron/dist/*.exe
-            !packages/desktop-electron/dist/Actual-windows.exe
-            packages/desktop-electron/dist/*.AppImage
-            packages/desktop-electron/dist/*.flatpak
+      # - name: Add to Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     files: |
+      #       packages/desktop-electron/dist/*.dmg
+      #       packages/desktop-electron/dist/*.exe
+      #       !packages/desktop-electron/dist/Actual-windows.exe
+      #       packages/desktop-electron/dist/*.AppImage
+      #       packages/desktop-electron/dist/*.flatpak
