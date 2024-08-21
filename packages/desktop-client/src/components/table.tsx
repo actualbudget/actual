@@ -440,8 +440,10 @@ export function InputCellWithTags({
     setShowAutocomplete,
     keyPressed,
     setKeyPressed,
+    handleKeyUp,
     handleKeyDown,
     handleMenuSelect,
+    updateHint,
   } = useTagPopover(props.value, onUpdate, edit);
 
   return (
@@ -451,8 +453,10 @@ export function InputCellWithTags({
         value={content}
         onUpdate={onUpdate}
         onChangeValue={setContent}
+        onFocus={() => updateHint(content)}
         onBlur={onBlur}
         style={{ textAlign, ...(inputProps && inputProps.style) }}
+        onKeyUp={handleKeyUp}
         onKeyDown={handleKeyDown}
         {...inputProps}
       />

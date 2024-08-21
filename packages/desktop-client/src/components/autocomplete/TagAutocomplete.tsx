@@ -177,7 +177,7 @@ function TagList({
               color: theme.noteTagText,
               cursor: 'pointer',
               transition: 'transform 0.3s ease, background-color 0.3s ease',
-              transform: selectedIndex === -1 ? 'scale(1.2)' : 'scale(1)',
+              transform: selectedIndex === -1 ? 'scale(1.1)' : 'scale(1)',
               zIndex: selectedIndex === -1 ? '1000' : 'unset',
             }}
           >
@@ -223,7 +223,7 @@ function TagList({
                 color: item.textColor ?? theme.noteTagText,
                 cursor: 'pointer',
                 transition: 'transform 0.3s ease, background-color 0.3s ease',
-                transform: index === selectedIndex ? 'scale(1.2)' : 'scale(1)',
+                transform: index === selectedIndex ? 'scale(1.1)' : 'scale(1)',
                 zIndex: index === selectedIndex ? '1000' : 'unset',
                 textDecorationLine:
                   index === selectedIndex ? 'underline' : 'unset',

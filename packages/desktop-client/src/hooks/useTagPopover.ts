@@ -28,23 +28,59 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
     selection.addRange(range);
   };
 
+  const extractTagAtCursor = useCallback((text, position) => {
+    let start = position - 1;
+
+    // Traverse backwards to find the start of the current word or tag
+    while (start >= 0 && !isWordBoundary(text[start])) {
+      start--;
+    }
+
+    // Handle double `##` escape case
+    if (text[start] === '#' && text[start + 1] === '#') {
+      return '';
+    }
+
+    // Check if the word is a tag, starting with a single #
+    if (text[start] !== '#' || (start > 0 && text[start - 1] === '#')) {
+      return '';
+    }
+
+    let end = start + 1;
+
+    // Traverse forwards to find the end of the current tag
+    while (end < text.length && !isWordBoundary(text[end])) {
+      end++;
+    }
+
+    // Extract the tag
+    const tag = text.slice(start, end);
+
+    // Check if there are additional tags within the same word
+    if (tag.includes('#', 1)) {
+      const tags = tag.split('#').filter((t) => t.length > 0);
+      for (let i = 0; i < tags.length; i++) {
+        const tagStart = start + tag.indexOf(tags[i]);
+        const tagEnd = tagStart + tags[i].length + 1;
+        if (position >= tagStart && position <= tagEnd) {
+          return `#${tags[i]}`;
+        }
+      }
+    }
+
+    return tag;
+  }, []);
+
   const updateHint = useCallback(
     newValue => {
       const el = edit.current;
       if (!el) return;
 
       const cursorPosition = getCaretPosition(el);
-      const textBeforeCursor = newValue.slice(0, cursorPosition);
-
-      const lastHashIndex = textBeforeCursor.lastIndexOf('#');
-      if (lastHashIndex === -1 || textBeforeCursor.split(' ').length > 1) {
-        setHint('');
-        return;
-      }
-
-      setHint(textBeforeCursor.slice(lastHashIndex + 1, cursorPosition));
+      const tag = extractTagAtCursor(newValue, cursorPosition);
+      setHint(tag?.replace("#",""));
     },
-    [edit, getCaretPosition, setHint],
+    [edit, getCaretPosition, extractTagAtCursor]
   );
 
   useEffect(() => {
@@ -58,78 +94,81 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
 
   const handleKeyDown = e => {
     if (showAutocomplete) {
-      if (e.key === 'Escape') {
-        setShowAutocomplete(false);
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-
-      if (['ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+      if (['Escape', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
         setKeyPressed(e.key);
         e.preventDefault();
         e.stopPropagation();
         return;
       }
     }
+  };
 
-    if (e.key === '#') {
-      setShowAutocomplete(!showAutocomplete);
-    } else if (e.key === ' ') {
-      setHint('');
-    } else if (
-      !['Shift', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key)
-    ) {
-      let cursorPosition = getCaretPosition(edit.current);
-      if (cursorPosition !== 0) {
-        const textBeforeCursor = content.slice(0, cursorPosition);
-        let foundHashtag = false;
-        while (cursorPosition >= 0) {
-          if (textBeforeCursor[cursorPosition] === '#') {
-            foundHashtag = true;
-            break;
-          }
+  const handleKeyUp = e => {
+    if (['Escape', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+      return;
+    }
 
-          if (textBeforeCursor[cursorPosition] === ' ') {
-            break;
-          }
+    const el = edit.current;
+    if (!el) return;
 
-          cursorPosition--;
-        }
+    const cursorPosition = getCaretPosition(el);
+    const tag = extractTagAtCursor(content, cursorPosition);
 
-        if (foundHashtag) {
-          setShowAutocomplete(true);
-        }
-      }
+    if (tag) {
+      setShowAutocomplete(true);
+    } else {
+      setShowAutocomplete(false);
     }
   };
 
   const handleMenuSelect = item => {
     if (!item) return;
-
-    setContent('');
+    debugger;
 
     const el = edit.current;
     const cursorPosition = getCaretPosition(el);
     const textBeforeCursor = el.value.slice(0, cursorPosition);
+    const textAfterCursor = el.value.slice(cursorPosition);
 
-    const lastHashIndex = textBeforeCursor.lastIndexOf('#');
-    if (lastHashIndex === -1) {
-      setShowAutocomplete(false);
-      setHint('');
+    // Find the start of the current tag
+    let tagStart = cursorPosition - 1;
+    while (tagStart >= 0 && !isWordBoundary(textBeforeCursor[tagStart])) {
+      tagStart--;
+    }
+
+    // Ensure it's a valid tag (starting with a single # and not double ##)
+    if (
+      textBeforeCursor[tagStart] !== '#' ||
+      (tagStart > 0 && textBeforeCursor[tagStart + 1] === '#')
+    ) {
       return;
     }
 
-    const newContent =
-      textBeforeCursor.slice(0, lastHashIndex) +
-      item.tag +
-      el.value.slice(cursorPosition) +
-      ' ';
+    // Find the end of the current tag
+    let tagEnd = cursorPosition;
+    while (tagEnd < el.value.length && !isWordBoundary(textAfterCursor[tagEnd - cursorPosition])) {
+      tagEnd++;
+    }
 
+    // Replace the tag with the selected item
+    const newContent =
+      el.value.slice(0, tagStart) +
+      item.tag +
+      el.value.slice(tagEnd);
+
+    // Update the content and reset the autocomplete state
     setContent(newContent);
-    handleSetCursorPosition();
     setShowAutocomplete(false);
     setHint('');
+
+    // Reset the cursor position to the end of the newly inserted tag
+    const newCursorPosition = tagStart + item.tag.length + 1;
+    el.setSelectionRange(newCursorPosition, newCursorPosition);
+    el.focus();
+  };
+
+  const isWordBoundary = (char) => {
+    return char === ' ' || char === '#' || char === undefined;
   };
 
   return {
@@ -139,9 +178,11 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
     showAutocomplete,
     keyPressed,
     handleKeyDown,
+    handleKeyUp,
     handleMenuSelect,
     handleSetCursorPosition,
     setShowAutocomplete,
     setKeyPressed,
+    updateHint,
   };
 }

@@ -46,8 +46,10 @@ export function InputWithTags({
     setShowAutocomplete,
     keyPressed,
     setKeyPressed,
+    handleKeyUp,
     handleKeyDown,
     handleMenuSelect,
+    updateHint,
   } = useTagPopover(nativeProps.value, onUpdate, ref);
   const [inputValue, setInputValue] = useState(content);
 
@@ -88,8 +90,9 @@ export function InputWithTags({
             onEscape(e);
           }
 
-          handleKeyDown(e);
+          handleKeyDown?.(e);
         }}
+        onKeyUp={handleKeyUp}
         onBlur={e => {
           onUpdate?.(content);
           nativeProps.onBlur?.(e);
@@ -99,6 +102,7 @@ export function InputWithTags({
           onChangeValue?.(ref.current.value);
           nativeProps.onChange?.(e);
         }}
+        onFocus={() => updateHint(content)}
       />
       <TagPopover
         triggerRef={ref}
