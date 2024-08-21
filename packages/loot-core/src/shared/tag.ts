@@ -300,7 +300,7 @@ export const TAGCOLORS = [
 //   return TAGCOLORS.filter(color => Color(color).isDark() === isDark);
 // }
 
-export function getTextColorForColor(color) {
+export function getTextColorForColor(color: string): string {
   const refColor = Color(color);
 
   if (refColor.isDark()) {
@@ -310,6 +310,6 @@ export function getTextColorForColor(color) {
   return refColor.darken(0.6).hex();
 }
 
-export function getHoverColor(color) {
+export function getHoverColor(color: string): string {
   return Color(color).lighten(0.2).hex();
 }

@@ -4,6 +4,7 @@ import { installPolyfills } from './polyfills';
 
 installPolyfills();
 
+/* eslint-disable @typescript-eslint/no-this-alias */
 if (!Element.prototype.closest) {
   Element.prototype.closest = function (selector) {
     let el = this;

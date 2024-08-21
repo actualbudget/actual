@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { type RefObject, useEffect, useState } from 'react';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
@@ -8,6 +8,24 @@ import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 
+type Tag = {
+  id: string;
+  tag: string;
+  color: string;
+  textColor: string;
+  hoverColor: string;
+};
+
+type TagAutocompleteProps = {
+  onMenuSelect: (item: Tag) => void;
+  hint: string;
+  clickedOnIt: () => void;
+  keyPressed: string | null;
+  onKeyHandled: () => void;
+  element: HTMLElement | null;
+  allowCreate: boolean;
+};
+
 function TagAutocomplete({
   onMenuSelect,
   hint,
@@ -16,9 +34,9 @@ function TagAutocomplete({
   onKeyHandled,
   element,
   allowCreate,
-}) {
+}: TagAutocompleteProps) {
   const tags = useTags();
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<Tag[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
   useEffect(() => {
@@ -30,12 +48,10 @@ function TagAutocomplete({
         );
       }
       setSuggestions(
-        filteredTags.map(tag => {
-          return {
-            ...tag,
-            name: tag.tag,
-          };
-        }),
+        filteredTags.map(tag => ({
+          ...tag,
+          name: tag.tag,
+        })),
       );
     }
   }, [tags, hint]);
@@ -47,6 +63,7 @@ function TagAutocomplete({
       !suggestions.some(item => item.tag === `#${hint}`)
         ? -1
         : 0;
+
     if (keyPressed) {
       if (keyPressed === 'ArrowRight') {
         if (selectedIndex + 1 === Math.min(suggestions.length, 10)) {
@@ -93,6 +110,17 @@ function TagAutocomplete({
   );
 }
 
+type TagListProps = {
+  items: Tag[];
+  onMenuSelect: (item: Tag) => void;
+  tags: Tag[];
+  clickedOnIt: () => void;
+  selectedIndex: number;
+  hint: string;
+  element: HTMLElement | null;
+  allowCreate: boolean;
+};
+
 function TagList({
   items,
   onMenuSelect,
@@ -102,7 +130,7 @@ function TagList({
   hint,
   element,
   allowCreate,
-}) {
+}: TagListProps) {
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
@@ -253,6 +281,17 @@ function TagList({
   );
 }
 
+type TagPopoverProps = {
+  triggerRef: RefObject<HTMLElement>;
+  isOpen: boolean;
+  hint: string;
+  onMenuSelect: (item: Tag) => void;
+  keyPressed: string | null;
+  onKeyHandled: () => void;
+  onClose: () => void;
+  allowCreate?: boolean;
+};
+
 export function TagPopover({
   triggerRef,
   isOpen,
@@ -262,7 +301,7 @@ export function TagPopover({
   onKeyHandled,
   onClose,
   allowCreate = false,
-}) {
+}: TagPopoverProps) {
   return (
     <Popover triggerRef={triggerRef} isOpen={isOpen} placement="bottom start">
       <TagAutocomplete

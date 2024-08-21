@@ -53,17 +53,24 @@ export function InputWithTags({
     handleKeyDown,
     handleMenuSelect,
     updateHint,
-  } = useTagPopover(value, onUpdate, ref);
+  } = useTagPopover(value?.toString(), onUpdate, ref);
 
   useEffect(() => {
-    setContent(value);
+    debugger;
+    setContent(value?.toString());
   }, [value, setContent]);
+
+  const onChangeValueRef = useRef(onChangeValue);
+
+  useEffect(() => {
+    onChangeValueRef.current = onChangeValue;
+  }, [onChangeValue]);
 
   useEffect(() => {
     if (content) {
-      onChangeValue?.(content);
+      onChangeValueRef.current?.(content);
     }
-  }, [content, onChangeValue]);
+  }, [content]);
 
   return (
     <>
@@ -105,7 +112,6 @@ export function InputWithTags({
           nativeProps.onBlur?.(e);
         }}
         onChange={e => {
-          debugger;
           setContent(e.target.value);
           onChangeValue?.(e.target.value);
           nativeProps.onChange?.(e);

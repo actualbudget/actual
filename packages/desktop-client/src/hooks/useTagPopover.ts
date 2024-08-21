@@ -1,18 +1,31 @@
-import { useCallback, useEffect, useState } from 'react';
+import {
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useState,
+  type MutableRefObject,
+} from 'react';
 
-export function useTagPopover(initialValue, onUpdate, componentRef) {
+export function useTagPopover(
+  initialValue: string,
+  onUpdate: (value: string) => void,
+  componentRef: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | null>,
+) {
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [hint, setHint] = useState('');
-  const [content, setContent] = useState(initialValue);
-  const [keyPressed, setKeyPressed] = useState(null);
+  const [content, setContent] = useState<string>(initialValue);
+  const [keyPressed, setKeyPressed] = useState<string | null>(null);
   const edit = componentRef;
 
-  const getCaretPosition = useCallback(element => {
-    if (element) {
-      return element.selectionStart;
-    }
-    return 0;
-  }, []);
+  const getCaretPosition = useCallback(
+    (element: HTMLTextAreaElement | HTMLInputElement | null): number => {
+      if (element) {
+        return element.selectionStart || 0;
+      }
+      return 0;
+    },
+    [],
+  );
 
   const handleSetCursorPosition = () => {
     const el = edit.current;
@@ -21,6 +34,8 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
     const range = document.createRange();
     const selection = window.getSelection();
 
+    if (!selection) return; // Add a null check for selection
+
     range.selectNodeContents(el);
     range.collapse(false);
 
@@ -28,44 +43,47 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
     selection.addRange(range);
   };
 
-  const extractTagAtCursor = useCallback((text, position) => {
-    let start = position - 1;
+  const extractTagAtCursor = useCallback(
+    (text: string, position: number): string => {
+      let start = position - 1;
 
-    while (start >= 0 && !isWordBoundary(text[start])) {
-      start--;
-    }
+      while (start >= 0 && !isWordBoundary(text[start])) {
+        start--;
+      }
 
-    if (text[start] === '#' && text[start + 1] === '#') {
-      return '';
-    }
+      if (text[start] === '#' && text[start + 1] === '#') {
+        return '';
+      }
 
-    if (text[start] !== '#' || (start > 0 && text[start - 1] === '#')) {
-      return '';
-    }
+      if (text[start] !== '#' || (start > 0 && text[start - 1] === '#')) {
+        return '';
+      }
 
-    let end = start + 1;
+      let end = start + 1;
 
-    while (end < text.length && !isWordBoundary(text[end])) {
-      end++;
-    }
+      while (end < text.length && !isWordBoundary(text[end])) {
+        end++;
+      }
 
-    const tag = text.slice(start, end);
-    if (tag.includes('#', 1)) {
-      const tags = tag.split('#').filter(t => t.length > 0);
-      for (let i = 0; i < tags.length; i++) {
-        const tagStart = start + tag.indexOf(tags[i]);
-        const tagEnd = tagStart + tags[i].length + 1;
-        if (position >= tagStart && position <= tagEnd) {
-          return `#${tags[i]}`;
+      const tag = text.slice(start, end);
+      if (tag.includes('#', 1)) {
+        const tags = tag.split('#').filter(t => t.length > 0);
+        for (let i = 0; i < tags.length; i++) {
+          const tagStart = start + tag.indexOf(tags[i]);
+          const tagEnd = tagStart + tags[i].length + 1;
+          if (position >= tagStart && position <= tagEnd) {
+            return `#${tags[i]}`;
+          }
         }
       }
-    }
 
-    return tag;
-  }, []);
+      return tag;
+    },
+    [],
+  );
 
   const updateHint = useCallback(
-    newValue => {
+    (newValue: string) => {
       const el = edit.current;
       if (!el) return;
 
@@ -85,7 +103,9 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
     }
   }, [content, onUpdate, updateHint]);
 
-  const handleKeyDown = e => {
+  const handleKeyDown = (
+    e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
     if (showAutocomplete) {
       if (e.key === 'Escape') {
         setShowAutocomplete(false);
@@ -103,7 +123,9 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
     }
   };
 
-  const handleKeyUp = e => {
+  const handleKeyUp = (
+    e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
     if (['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
       return;
     }
@@ -121,7 +143,7 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
     }
   };
 
-  const handleMenuSelect = item => {
+  const handleMenuSelect = (item: { tag: string }) => {
     if (!item) return;
 
     const el = edit.current;
@@ -161,7 +183,7 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
     el.focus();
   };
 
-  const isWordBoundary = char => {
+  const isWordBoundary = (char: string | undefined) => {
     return char === ' ' || char === '#' || char === undefined;
   };
 

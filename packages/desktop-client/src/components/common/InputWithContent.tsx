@@ -3,6 +3,7 @@ import {
   useState,
   type ComponentProps,
   type ReactNode,
+  type FocusEvent,
 } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
@@ -20,6 +21,7 @@ type InputWithContentProps = ComponentProps<typeof Input> & {
   getStyle?: (focused: boolean) => CSSProperties;
   inputWithTags?: boolean;
 };
+
 export function InputWithContent({
   leftContent,
   rightContent,
@@ -63,11 +65,11 @@ export function InputWithContent({
             color: 'inherit',
           },
         }}
-        onFocus={e => {
+        onFocus={(e: FocusEvent<HTMLInputElement>) => {
           setFocused(true);
           props.onFocus?.(e);
         }}
-        onBlur={e => {
+        onBlur={(e: FocusEvent<HTMLInputElement>) => {
           setFocused(false);
           props.onBlur?.(e);
         }}
