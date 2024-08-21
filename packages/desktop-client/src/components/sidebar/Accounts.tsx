@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
 import * as queries from 'loot-core/src/client/queries';
@@ -31,6 +32,7 @@ export function Accounts({
   onToggleClosedAccounts,
   onReorder,
 }: AccountsProps) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
@@ -62,7 +64,7 @@ export function Accounts({
   return (
     <View>
       <Account
-        name="All accounts"
+        name={t('All accounts')}
         to="/accounts"
         query={queries.allAccountBalance()}
         style={{ fontWeight, marginTop: 15 }}
@@ -70,7 +72,7 @@ export function Accounts({
 
       {budgetedAccounts.length > 0 && (
         <Account
-          name="For budget"
+          name={t('For budget')}
           to="/accounts/budgeted"
           query={queries.budgetedAccountBalance()}
           style={{
@@ -100,7 +102,7 @@ export function Accounts({
 
       {offbudgetAccounts.length > 0 && (
         <Account
-          name="Off budget"
+          name={t('Off budget')}
           to="/accounts/offbudget"
           query={queries.offbudgetAccountBalance()}
           style={{
@@ -131,7 +133,9 @@ export function Accounts({
       {closedAccounts.length > 0 && (
         <SecondaryItem
           style={{ marginTop: 15 }}
-          title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
+          title={
+            showClosedAccounts ? t('Closed accounts') : t('Closed accounts...')
+          }
           onClick={onToggleClosedAccounts}
           bold
         />
@@ -157,7 +161,7 @@ export function Accounts({
         }}
         onClick={onAddAccount}
         Icon={SvgAdd}
-        title="Add account"
+        title={t('Add account')}
       />
     </View>
   );
