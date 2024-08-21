@@ -32,7 +32,7 @@ export type CustomReportWidget = AbstractWidget<
 >;
 export type MarkdownWidget = AbstractWidget<
   'markdown-card',
-  { name: string; content: string }
+  { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
 
 type SpecializedWidget =

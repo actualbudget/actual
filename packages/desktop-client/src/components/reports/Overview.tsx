@@ -15,6 +15,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import {
   type CustomReportWidget,
   type ExportImportDashboard,
+  type MarkdownWidget,
   type Widget,
 } from 'loot-core/src/types/models';
 
@@ -356,15 +357,16 @@ export function Overview() {
                             }
                             if (isExistingCustomReport(item)) {
                               const [, reportId] = item.split('custom-report-');
-                              onAddWidget('custom-report', { id: reportId });
+                              onAddWidget<CustomReportWidget>('custom-report', {
+                                id: reportId,
+                              });
                               return;
                             }
 
                             if (item === 'markdown-card') {
-                              onAddWidget(item, {
-                                name: t('Text widget'),
+                              onAddWidget<MarkdownWidget>(item, {
                                 content: t(
-                                  'Edit this widget to change the **markdown** content.',
+                                  '### Text Widget\n\nEdit this widget to change the **markdown** content.',
                                 ),
                               });
                               return;

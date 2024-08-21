@@ -3,11 +3,20 @@ import { TextArea } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
+import { css } from 'glamor';
+
 import { type MarkdownWidget } from 'loot-core/src/types/models';
 
+import { styles } from '../../../style';
+import { Menu } from '../../common/Menu';
+import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { ReportCard } from '../ReportCard';
-import { ReportCardName } from '../ReportCardName';
+
+const markdownStyles = css({
+  paddingRight: 20,
+  '& h3': styles.mediumText,
+});
 
 type MarkdownCardProps = {
   isEditing?: boolean;
@@ -24,7 +33,6 @@ export function MarkdownCard({
 }: MarkdownCardProps) {
   const { t } = useTranslation();
 
-  const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
 
   return (
@@ -32,9 +40,23 @@ export function MarkdownCard({
       isEditing={isEditing}
       menuItems={[
         {
-          name: 'rename',
-          text: t('Rename'),
+          type: Menu.label,
+          name: t('Text position:'),
+          text: '',
         },
+        {
+          name: 'text-left',
+          text: t('Left'),
+        },
+        {
+          name: 'text-center',
+          text: t('Center'),
+        },
+        {
+          name: 'text-right',
+          text: t('Right'),
+        },
+        Menu.line,
         {
           name: 'edit',
           text: t('Edit content'),
@@ -46,8 +68,23 @@ export function MarkdownCard({
       ]}
       onMenuSelect={item => {
         switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
+          case 'text-left':
+            onMetaChange({
+              ...meta,
+              text_align: 'left',
+            });
+            break;
+          case 'text-center':
+            onMetaChange({
+              ...meta,
+              text_align: 'center',
+            });
+            break;
+          case 'text-right':
+            onMetaChange({
+              ...meta,
+              text_align: 'right',
+            });
             break;
           case 'edit':
             setIsVisibleTextArea(true);
@@ -60,44 +97,40 @@ export function MarkdownCard({
         }
       }}
     >
-      <View style={{ flex: 1, paddingTop: 20, paddingLeft: 20 }}>
-        <ReportCardName
-          name={meta.name}
-          isEditing={nameMenuOpen}
-          onChange={newName => {
-            onMetaChange({
-              ...meta,
-              name: newName,
-            });
-            setNameMenuOpen(false);
-          }}
-          onClose={() => setNameMenuOpen(false)}
-        />
-
-        <View style={{ overflowY: 'auto', height: '100%' }}>
-          {isVisibleTextArea ? (
-            <TextArea
-              style={{
-                height: '100%',
-                border: 0,
-                marginTop: 11,
-                marginLeft: -2,
-                marginRight: -2,
-              }}
-              autoFocus
-              defaultValue={meta.content}
-              onBlur={event => {
-                onMetaChange({
-                  ...meta,
-                  content: event.currentTarget.value,
-                });
-                setIsVisibleTextArea(false);
-              }}
-            />
-          ) : (
+      <View
+        style={{
+          flex: 1,
+          paddingTop: 5,
+          paddingLeft: 20,
+          overflowY: 'auto',
+          height: '100%',
+          textAlign: meta.text_align,
+        }}
+      >
+        {isVisibleTextArea ? (
+          <TextArea
+            style={{
+              height: '100%',
+              border: 0,
+              marginTop: 11,
+              marginLeft: -2,
+              marginRight: -2,
+            }}
+            autoFocus
+            defaultValue={meta.content}
+            onBlur={event => {
+              onMetaChange({
+                ...meta,
+                content: event.currentTarget.value,
+              });
+              setIsVisibleTextArea(false);
+            }}
+          />
+        ) : (
+          <Text {...markdownStyles}>
             <ReactMarkdown linkTarget="_blank">{meta.content}</ReactMarkdown>
-          )}
-        </View>
+          </Text>
+        )}
       </View>
     </ReportCard>
   );
