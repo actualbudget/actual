@@ -17,7 +17,7 @@ export function getStatus(
     return 'paid';
   } else if (nextDate === today) {
     return 'due';
-  } else if (nextDate > today && nextDate <= monthUtils.addDays(today, 7)) {
+  } else if (nextDate > today && nextDate <= monthUtils.addDays(today, 7)) { //TODO: Add way to make this dynamic based on a setting
     return 'upcoming';
   } else if (nextDate < today) {
     return 'missed';
