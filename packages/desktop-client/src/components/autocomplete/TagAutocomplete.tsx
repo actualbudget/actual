@@ -15,6 +15,7 @@ function TagAutocomplete({
   keyPressed,
   onKeyHandled,
   element,
+  allowCreate,
 }) {
   const tags = useTags();
   const [suggestions, setSuggestions] = useState([]);
@@ -41,7 +42,7 @@ function TagAutocomplete({
 
   useEffect(() => {
     const minIndex =
-      hint.length > 0 && !suggestions.some(item => item.tag === `#${hint}`)
+      hint.length > 0 && allowCreate && !suggestions.some(item => item.tag === `#${hint}`)
         ? -1
         : 0;
     if (keyPressed) {
@@ -77,6 +78,7 @@ function TagAutocomplete({
       selectedIndex={selectedIndex}
       hint={hint}
       element={element}
+      allowCreate={allowCreate}
     />
   );
 }
@@ -89,6 +91,7 @@ function TagList({
   selectedIndex,
   hint,
   element,
+  allowCreate,
 }) {
   const [width, setWidth] = useState(0);
 
@@ -158,7 +161,7 @@ function TagList({
           alignItems: 'baseline',
         }}
       >
-        {hint.length > 0 && !items.some(item => item.tag === `#${hint}`) && (
+        {hint.length > 0 && allowCreate && !items.some(item => item.tag === `#${hint}`) && (
           <Button
             onPress={() => clickedOnIt()}
             style={{
@@ -246,6 +249,7 @@ export function TagPopover({
   keyPressed,
   onKeyHandled,
   onClose,
+  allowCreate = false,
 }) {
   return (
     <Popover triggerRef={triggerRef} isOpen={isOpen} placement="bottom start">
@@ -256,6 +260,7 @@ export function TagPopover({
         onKeyHandled={onKeyHandled}
         onMenuSelect={onMenuSelect}
         element={triggerRef?.current}
+        allowCreate={allowCreate}
       />
     </Popover>
   );

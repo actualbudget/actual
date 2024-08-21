@@ -59,7 +59,7 @@ export function GenericInput({
         );
       default:
         return (
-          <InputWithTags
+          <Input
             inputRef={inputRef}
             defaultValue={value || ''}
             placeholder="nothing"
@@ -248,12 +248,24 @@ export function GenericInput({
         content = getNumberInputByFormatType(numberFormatType);
       } else {
         content = (
-          <InputWithTags
-            inputRef={inputRef}
-            defaultValue={value || ''}
-            placeholder="nothing"
-            onChangeValue={newValue => onChange(newValue)}
-          />
+          <>
+            {field === 'notes' && (
+              <InputWithTags
+                inputRef={inputRef}
+                defaultValue={value || ''}
+                placeholder="nothing"
+                onChangeValue={newValue => onChange(newValue)}
+              />
+            )}
+            {field !== 'notes' && (
+              <Input
+                inputRef={inputRef}
+                defaultValue={value || ''}
+                placeholder="nothing"
+                onChangeValue={newValue => onChange(newValue)}
+              />
+            )}
+          </>
         );
       }
       break;

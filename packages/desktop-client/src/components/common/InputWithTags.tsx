@@ -14,6 +14,7 @@ import { type CSSProperties, styles, theme } from '../../style';
 import { TagPopover } from '../autocomplete/TagAutocomplete';
 
 import { defaultInputStyle } from './Input';
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 
 type InputWithTagsProps = InputHTMLAttributes<HTMLInputElement> & {
   style?: CSSProperties;
@@ -30,13 +31,16 @@ export function InputWithTags({
   inputRef,
   onEnter,
   onEscape,
+  defaultValue,
+  value = defaultValue,
   onChangeValue,
   onUpdate,
   focused,
   className,
   ...nativeProps
 }: InputWithTagsProps) {
-  const ref = useRef<HTMLInputElement>(null);
+  const ref = useRef<HTMLInputElement>();
+  const mergedRef = useMergedRefs<HTMLInputElement>(ref, inputRef);
 
   const {
     content,
@@ -50,19 +54,21 @@ export function InputWithTags({
     handleKeyDown,
     handleMenuSelect,
     updateHint,
-  } = useTagPopover(nativeProps.value, onUpdate, ref);
-  const [inputValue, setInputValue] = useState(content);
+  } = useTagPopover(value, onUpdate, ref);
 
   useEffect(() => {
-    setInputValue(content);
-    console.log(content);
+    setContent(value);
+  }, [value]);
+
+  useEffect(() => {
+    onChangeValue?.(content);
   }, [content]);
 
   return (
-    <div>
+    <>
       <input
-        value={inputValue}
-        ref={ref}
+        value={content}
+        ref={mergedRef}
         className={`${css(
           defaultInputStyle,
           {
@@ -98,8 +104,9 @@ export function InputWithTags({
           nativeProps.onBlur?.(e);
         }}
         onChange={e => {
-          setContent(ref.current.value);
-          onChangeValue?.(ref.current.value);
+          debugger;
+          setContent(e.target.value);
+          onChangeValue?.(e.target.value);
           nativeProps.onChange?.(e);
         }}
         onFocus={() => updateHint(content)}
@@ -113,6 +120,6 @@ export function InputWithTags({
         onKeyHandled={() => setKeyPressed(null)}
         onClose={() => setShowAutocomplete(false)}
       />
-    </div>
+    </>
   );
 }

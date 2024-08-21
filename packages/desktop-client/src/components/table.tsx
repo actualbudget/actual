@@ -468,6 +468,7 @@ export function InputCellWithTags({
         onMenuSelect={handleMenuSelect}
         onKeyHandled={() => setKeyPressed(null)}
         onClose={() => setShowAutocomplete(false)}
+        allowCreate={true}
       />
     </View>
   );
