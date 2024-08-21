@@ -27,7 +27,7 @@ import {
 import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Input } from '../common/Input';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
@@ -333,7 +333,7 @@ export function DateSelect({
         isOpen={open}
         isNonModal
         onOpenChange={() => setOpen(false)}
-        style={{ minWidth: 225 }}
+        style={{ ...styles.popover, minWidth: 225 }}
         data-testid="date-select-tooltip"
       >
         {content}

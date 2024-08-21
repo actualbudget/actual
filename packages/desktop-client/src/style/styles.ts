@@ -142,7 +142,6 @@ export const styles = {
     overflow: 'auto',
   },
   popover: {
-    padding: 5,
     ...shadowLarge,
     borderRadius: 4,
     backgroundColor: theme.menuBackground,
