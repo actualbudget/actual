@@ -142,12 +142,9 @@ export const styles = {
     overflow: 'auto',
   },
   popover: {
-    ...shadowLarge,
-    borderRadius: 4,
-    backgroundColor: theme.menuBackground,
     border: 'none',
+    backgroundColor: theme.menuBackground,
     color: theme.menuItemText,
-    overflow: 'auto',
   },
   // Dynamically set
   horizontalScrollbar: null as CSSProperties | null,
