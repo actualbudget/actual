@@ -37,7 +37,7 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
       const textBeforeCursor = newValue.slice(0, cursorPosition);
 
       const lastHashIndex = textBeforeCursor.lastIndexOf('#');
-      if (lastHashIndex === -1) {
+      if (lastHashIndex === -1 || textBeforeCursor.split(' ').length > 1) {
         setHint('');
         return;
       }
@@ -75,6 +75,8 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
 
     if (e.key === '#') {
       setShowAutocomplete(!showAutocomplete);
+    } else if (e.key === ' ') {
+      setHint('');
     } else if (
       !['Shift', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key)
     ) {

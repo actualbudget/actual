@@ -14,6 +14,7 @@ function TagAutocomplete({
   clickedOnIt,
   keyPressed,
   onKeyHandled,
+  element,
 }) {
   const tags = useTags();
   const [suggestions, setSuggestions] = useState([]);
@@ -39,16 +40,24 @@ function TagAutocomplete({
   }, [tags, hint]);
 
   useEffect(() => {
+    const minIndex =
+      hint.length > 0 && !suggestions.some(item => item.tag === `#${hint}`)
+        ? -1
+        : 0;
     if (keyPressed) {
       if (keyPressed === 'ArrowRight') {
-        if (selectedIndex + 1 === suggestions.length) {
-          setSelectedIndex(-1);
+        if (selectedIndex + 1 === Math.min(suggestions.length, 10)) {
+          setSelectedIndex(minIndex);
         } else {
-          setSelectedIndex(prevIndex => (prevIndex + 1) % suggestions.length);
+          setSelectedIndex(
+            prevIndex => (prevIndex + 1) % Math.min(suggestions.length, 10),
+          );
         }
       } else if (keyPressed === 'ArrowLeft') {
         setSelectedIndex(prevIndex =>
-          prevIndex === -1 ? suggestions.length - 1 : prevIndex - 1,
+          prevIndex === minIndex
+            ? Math.min(suggestions.length, 10) - 1
+            : prevIndex - 1,
         );
       } else if (keyPressed === 'Tab' || keyPressed === 'Enter') {
         onMenuSelect(suggestions[selectedIndex]);
@@ -67,6 +76,7 @@ function TagAutocomplete({
       clickedOnIt={clickedOnIt}
       selectedIndex={selectedIndex}
       hint={hint}
+      element={element}
     />
   );
 }
@@ -78,13 +88,48 @@ function TagList({
   clickedOnIt,
   selectedIndex,
   hint,
+  element,
 }) {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!element) return;
+
+    const handleResize = () => {
+      if (element) {
+        setWidth(element.offsetWidth);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (element) {
+        setWidth(element.offsetWidth);
+      }
+    });
+
+    if (element) {
+      resizeObserver.observe(element);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+
+      if (resizeObserver && element) {
+        resizeObserver.unobserve(element);
+        resizeObserver.disconnect();
+      }
+    };
+  }, [element]);
+
   return (
     <View
       style={{
         position: 'relative',
         flexDirection: 'column',
-        maxWidth: '200px',
         padding: '5px',
         flexWrap: 'wrap',
         overflow: 'visible',
@@ -96,14 +141,17 @@ function TagList({
           {tags.length === 0 && (
             <span>No tags found. Tags will be added automatically</span>
           )}
-          {tags.length > 0 && <span>No tags found with these terms</span>}
+          {tags.length > 0 && (
+            <span>No tags found with these terms ({hint})</span>
+          )}
         </View>
       )}
       <View
         style={{
           position: 'relative',
           flexDirection: 'row',
-          maxWidth: '200px',
+          maxWidth: width - 10,
+          justifyContent: 'space-around',
           padding: '5px',
           flexWrap: 'wrap',
           overflow: 'visible',
@@ -129,7 +177,8 @@ function TagList({
               color: theme.noteTagText,
               cursor: 'pointer',
               transition: 'transform 0.3s ease, background-color 0.3s ease',
-              transform: selectedIndex === -1 ? 'scale(1)' : 'scale(0.8)',
+              transform: selectedIndex === -1 ? 'scale(1.2)' : 'scale(1)',
+              zIndex: selectedIndex === -1 ? '1000' : 'unset',
             }}
           >
             <span
@@ -174,7 +223,8 @@ function TagList({
                 color: item.textColor ?? theme.noteTagText,
                 cursor: 'pointer',
                 transition: 'transform 0.3s ease, background-color 0.3s ease',
-                transform: index === selectedIndex ? 'scale(1)' : 'scale(0.8)',
+                transform: index === selectedIndex ? 'scale(1.2)' : 'scale(1)',
+                zIndex: index === selectedIndex ? '1000' : 'unset',
                 textDecorationLine:
                   index === selectedIndex ? 'underline' : 'unset',
               }}
@@ -205,6 +255,7 @@ export function TagPopover({
         keyPressed={keyPressed}
         onKeyHandled={onKeyHandled}
         onMenuSelect={onMenuSelect}
+        element={triggerRef?.current}
       />
     </Popover>
   );

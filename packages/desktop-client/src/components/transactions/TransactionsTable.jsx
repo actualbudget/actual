@@ -2513,7 +2513,7 @@ function NotesCell({
   const [selectedItem, setSelectedItem] = useState(null);
   const [pickerPosition, setPickerPosition] = useState({ top: 0, left: 0 });
   const dispatch = useDispatch();
-  const { theme } = useTheme();
+  const [theme] = useTheme();
 
   const handleContextMenu = (e, item) => {
     e.preventDefault();
