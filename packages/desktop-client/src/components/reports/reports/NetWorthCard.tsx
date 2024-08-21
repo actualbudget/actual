@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type AccountEntity } from 'loot-core/src/types/models';
+import {
+  type AccountEntity,
+  type NetWorthWidget,
+} from 'loot-core/src/types/models';
 
 import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
@@ -15,22 +18,29 @@ import { DateRange } from '../DateRange';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
+import { ReportCardName } from '../ReportCardName';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
 type NetWorthCardProps = {
   isEditing?: boolean;
   accounts: AccountEntity[];
+  meta?: NetWorthWidget['meta'];
+  onMetaChange: (newMeta: NetWorthWidget['meta']) => void;
   onRemove: () => void;
 };
 
 export function NetWorthCard({
   isEditing,
   accounts,
+  meta = {},
+  onMetaChange,
   onRemove,
 }: NetWorthCardProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
@@ -50,12 +60,19 @@ export function NetWorthCard({
       to="/reports/net-worth"
       menuItems={[
         {
+          name: 'rename',
+          text: t('Rename'),
+        },
+        {
           name: 'remove',
           text: t('Remove'),
         },
       ]}
       onMenuSelect={item => {
         switch (item) {
+          case 'rename':
+            setNameMenuOpen(true);
+            break;
           case 'remove':
             onRemove();
             break;
@@ -71,12 +88,18 @@ export function NetWorthCard({
       >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
-            <Block
-              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
-              role="heading"
-            >
-              Net Worth
-            </Block>
+            <ReportCardName
+              name={meta?.name || t('Net Worth')}
+              isEditing={nameMenuOpen}
+              onChange={newName => {
+                onMetaChange({
+                  ...meta,
+                  name: newName,
+                });
+                setNameMenuOpen(false);
+              }}
+              onClose={() => setNameMenuOpen(false)}
+            />
             <DateRange start={start} end={end} />
           </View>
           {data && (
