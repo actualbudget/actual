@@ -50,7 +50,6 @@ jobs:
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: 79ANZ983YF
           CSC_FOR_PULL_REQUEST: true
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
       - name: Build Electron
