@@ -141,6 +141,15 @@ export const styles = {
     color: theme.tooltipText,
     overflow: 'auto',
   },
+  popover: {
+    padding: 5,
+    ...shadowLarge,
+    borderRadius: 4,
+    backgroundColor: theme.menuBackground,
+    border: 'none',
+    color: theme.menuItemText,
+    overflow: 'auto',
+  },
   // Dynamically set
   horizontalScrollbar: null as CSSProperties | null,
   lightScrollbar: null as CSSProperties | null,
