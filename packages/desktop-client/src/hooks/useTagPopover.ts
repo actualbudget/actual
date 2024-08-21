@@ -34,7 +34,7 @@ export function useTagPopover(
     const range = document.createRange();
     const selection = window.getSelection();
 
-    if (!selection) return; // Add a null check for selection
+    if (!selection) return;
 
     range.selectNodeContents(el);
     range.collapse(false);
@@ -147,6 +147,8 @@ export function useTagPopover(
     if (!item) return;
 
     const el = edit.current;
+    if (!el) return;
+
     const cursorPosition = getCaretPosition(el);
     const textBeforeCursor = el.value.slice(0, cursorPosition);
     const textAfterCursor = el.value.slice(cursorPosition);

@@ -38,7 +38,7 @@ export function InputWithTags({
   className,
   ...nativeProps
 }: InputWithTagsProps) {
-  const ref = useRef<HTMLInputElement>();
+  const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(ref, inputRef);
 
   const {
@@ -53,11 +53,10 @@ export function InputWithTags({
     handleKeyDown,
     handleMenuSelect,
     updateHint,
-  } = useTagPopover(value?.toString(), onUpdate, ref);
+  } = useTagPopover(value?.toString() || '', onUpdate, ref); // Use fallback for undefined value
 
   useEffect(() => {
-    debugger;
-    setContent(value?.toString());
+    setContent(value?.toString() || ''); // Provide a default value here
   }, [value, setContent]);
 
   const onChangeValueRef = useRef(onChangeValue);
