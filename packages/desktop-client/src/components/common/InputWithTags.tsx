@@ -3,18 +3,17 @@ import React, {
   type KeyboardEvent,
   type Ref,
   useEffect,
-  useState,
   useRef,
 } from 'react';
 
 import { css } from 'glamor';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useTagPopover } from '../../hooks/useTagPopover';
 import { type CSSProperties, styles, theme } from '../../style';
 import { TagPopover } from '../autocomplete/TagAutocomplete';
 
 import { defaultInputStyle } from './Input';
-import { useMergedRefs } from '../../hooks/useMergedRefs';
 
 type InputWithTagsProps = InputHTMLAttributes<HTMLInputElement> & {
   style?: CSSProperties;
@@ -58,11 +57,13 @@ export function InputWithTags({
 
   useEffect(() => {
     setContent(value);
-  }, [value]);
+  }, [value, setContent]);
 
   useEffect(() => {
-    onChangeValue?.(content);
-  }, [content]);
+    if (content) {
+      onChangeValue?.(content);
+    }
+  }, [content, onChangeValue]);
 
   return (
     <>

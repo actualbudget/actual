@@ -42,7 +42,9 @@ function TagAutocomplete({
 
   useEffect(() => {
     const minIndex =
-      hint.length > 0 && allowCreate && !suggestions.some(item => item.tag === `#${hint}`)
+      hint.length > 0 &&
+      allowCreate &&
+      !suggestions.some(item => item.tag === `#${hint}`)
         ? -1
         : 0;
     if (keyPressed) {
@@ -67,7 +69,15 @@ function TagAutocomplete({
         onKeyHandled();
       }
     }
-  }, [keyPressed, suggestions, selectedIndex, onMenuSelect, onKeyHandled]);
+  }, [
+    keyPressed,
+    suggestions,
+    selectedIndex,
+    onMenuSelect,
+    onKeyHandled,
+    allowCreate,
+    hint,
+  ]);
 
   return (
     <TagList
@@ -161,52 +171,54 @@ function TagList({
           alignItems: 'baseline',
         }}
       >
-        {hint.length > 0 && allowCreate && !items.some(item => item.tag === `#${hint}`) && (
-          <Button
-            onPress={() => clickedOnIt()}
-            style={{
-              border: 0,
-              borderRadius: 16,
-              margin: '2px',
-              display: 'inline-block',
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              padding: '5px 11px',
-              fontSize: '10px',
-              userSelect: 'none',
-              textOverflow: 'ellipsis',
-              maxWidth: '150px',
-              backgroundColor: theme.noteTagBackground,
-              color: theme.noteTagText,
-              cursor: 'pointer',
-              transition: 'transform 0.3s ease, background-color 0.3s ease',
-              transform: selectedIndex === -1 ? 'scale(1.1)' : 'scale(1)',
-              zIndex: selectedIndex === -1 ? '1000' : 'unset',
-            }}
-          >
-            <span
+        {hint.length > 0 &&
+          allowCreate &&
+          !items.some(item => item.tag === `#${hint}`) && (
+            <Button
+              onPress={() => clickedOnIt()}
               style={{
-                color: theme.buttonPrimaryDisabledText,
+                border: 0,
+                borderRadius: 16,
+                margin: '2px',
+                display: 'inline-block',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                padding: '5px 11px',
                 fontSize: '10px',
-                borderColor: theme.buttonPrimaryDisabledBorder,
-                backgroundColor: theme.buttonPrimaryDisabledBackground,
-                opacity: 0.6,
-                padding: 2,
-                borderRadius: 4,
+                userSelect: 'none',
+                textOverflow: 'ellipsis',
+                maxWidth: '150px',
+                backgroundColor: theme.noteTagBackground,
+                color: theme.noteTagText,
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease, background-color 0.3s ease',
+                transform: selectedIndex === -1 ? 'scale(1.1)' : 'scale(1)',
+                zIndex: selectedIndex === -1 ? '1000' : 'unset',
               }}
             >
-              Create
-            </span>{' '}
-            <span
-              style={{
-                textDecorationLine:
-                  selectedIndex === -1 ? 'underline' : 'unset',
-              }}
-            >
-              #{hint}
-            </span>
-          </Button>
-        )}
+              <span
+                style={{
+                  color: theme.buttonPrimaryDisabledText,
+                  fontSize: '10px',
+                  borderColor: theme.buttonPrimaryDisabledBorder,
+                  backgroundColor: theme.buttonPrimaryDisabledBackground,
+                  opacity: 0.6,
+                  padding: 2,
+                  borderRadius: 4,
+                }}
+              >
+                Create
+              </span>{' '}
+              <span
+                style={{
+                  textDecorationLine:
+                    selectedIndex === -1 ? 'underline' : 'unset',
+                }}
+              >
+                #{hint}
+              </span>
+            </Button>
+          )}
         {items.map((item, index) => (
           <View data-keep-editing="true" key={item.id}>
             <Button

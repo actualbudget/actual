@@ -47,7 +47,7 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
-import { TAGCOLORS, TAGREGEX } from '../../../../loot-core/src/shared/tag';
+import { TAGCOLORS } from '../../../../loot-core/src/shared/tag';
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
@@ -2580,32 +2580,6 @@ function NotesCell({
 function NotesTagFormatter(notes, onNotesTagClick, onContextMenu) {
   const tags = useTags();
   const words = notes.split(' ');
-  const [tagColors, setTagColors] = useState(new Map());
-
-  useEffect(() => {
-    const map = new Map();
-    notes.split(TAGREGEX).forEach(part => {
-      if (TAGREGEX.test(part)) {
-        const filteredTags = tags.filter(t => t.tag === part);
-        if (filteredTags.length > 0) {
-          map.set(part, {
-            color: filteredTags[0].color ?? theme.noteTagBackground,
-            textColor: filteredTags[0].textColor ?? theme.noteTagText,
-            hoverColor:
-              filteredTags[0].hoverColor ?? theme.noteTagBackgroundHover,
-          });
-        } else {
-          map.set(part, {
-            color: theme.noteTagBackground,
-            textColor: theme.noteTagText,
-            hoverColor: theme.noteTagBackgroundHover,
-          });
-        }
-      }
-    });
-
-    setTagColors(map);
-  }, [tags]);
 
   return (
     <>
@@ -2658,18 +2632,16 @@ function NotesTagFormatter(notes, onNotesTagClick, onContextMenu) {
                     textOverflow: 'ellipsis',
                     maxWidth: '150px',
                     backgroundColor:
-                      tagColors.get(validTag)?.color ?? theme.noteTagBackground,
-                    color:
-                      tagColors.get(validTag)?.textColor ?? theme.noteTagText,
+                      filteredTags[0]?.color ?? theme.noteTagBackground,
+                    color: filteredTags[0]?.textColor ?? theme.noteTagText,
                     cursor: 'pointer',
                     ...(isHovered
                       ? {
                           backgroundColor:
-                            tagColors.get(validTag)?.hoverColor ??
+                            filteredTags[0]?.hoverColor ??
                             theme.noteTagBackgroundHover,
                           color:
-                            tagColors.get(validTag)?.textColor ??
-                            theme.noteTagText,
+                            filteredTags[0]?.textColor ?? theme.noteTagText,
                         }
                       : {}),
                   })}

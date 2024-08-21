@@ -87,16 +87,14 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
 
   const handleKeyDown = e => {
     if (showAutocomplete) {
-      if (e.key == 'Escape') {
+      if (e.key === 'Escape') {
         setShowAutocomplete(false);
         e.preventDefault();
         e.stopPropagation();
         return;
       }
 
-      if (
-        ['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)
-      ) {
+      if (['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
         setKeyPressed(e.key);
         e.preventDefault();
         e.stopPropagation();
@@ -106,7 +104,6 @@ export function useTagPopover(initialValue, onUpdate, componentRef) {
   };
 
   const handleKeyUp = e => {
-   
     if (['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
       return;
     }
