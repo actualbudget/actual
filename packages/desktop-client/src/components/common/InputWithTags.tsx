@@ -53,10 +53,10 @@ export function InputWithTags({
     handleKeyDown,
     handleMenuSelect,
     updateHint,
-  } = useTagPopover(value?.toString() || '', onUpdate, ref); // Use fallback for undefined value
+  } = useTagPopover(value?.toString() || '', onUpdate || (() => {}), ref);
 
   useEffect(() => {
-    setContent(value?.toString() || ''); // Provide a default value here
+    setContent(value?.toString() || '');
   }, [value, setContent]);
 
   const onChangeValueRef = useRef(onChangeValue);
