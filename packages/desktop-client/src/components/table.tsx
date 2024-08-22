@@ -380,10 +380,7 @@ function InputValue({
     <Input
       {...props}
       value={value}
-      onChangeValue={text => {
-        setValue_(text);
-        props?.onChangeValue?.(text);
-      }}
+      onChangeValue={text => setValue_(text)}
       onBlur={onBlur_}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
@@ -443,17 +440,16 @@ export function InputCellWithTags({
     handleKeyUp,
     handleKeyDown,
     handleMenuSelect,
-    updateHint,
-  } = useTagPopover(props.value, onUpdate, edit);
+  } = useTagPopover(props.value, onUpdate || (() => {}), edit);
 
   return (
-    <View>
+    <>
       <InputValue
         inputRef={edit}
+        type="text"
         value={content}
         onUpdate={onUpdate}
         onChangeValue={setContent}
-        onFocus={() => updateHint(content)}
         onBlur={onBlur}
         style={{ textAlign, ...(inputProps && inputProps.style) }}
         onKeyUp={handleKeyUp}
@@ -468,9 +464,8 @@ export function InputCellWithTags({
         onMenuSelect={handleMenuSelect}
         onKeyHandled={() => setKeyPressed(null)}
         onClose={() => setShowAutocomplete(false)}
-        allowCreate={true}
       />
-    </View>
+    </>
   );
 }
 

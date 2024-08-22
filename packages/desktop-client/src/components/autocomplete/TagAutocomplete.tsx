@@ -23,7 +23,6 @@ type TagAutocompleteProps = {
   keyPressed: string | null;
   onKeyHandled: () => void;
   element: HTMLElement | null;
-  allowCreate: boolean;
 };
 
 function TagAutocomplete({
@@ -33,11 +32,10 @@ function TagAutocomplete({
   keyPressed,
   onKeyHandled,
   element,
-  allowCreate,
 }: TagAutocompleteProps) {
   const tags = useTags();
   const [suggestions, setSuggestions] = useState<Tag[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     if (tags && tags.length > 0) {
@@ -57,12 +55,7 @@ function TagAutocomplete({
   }, [tags, hint]);
 
   useEffect(() => {
-    const minIndex =
-      hint.length > 0 &&
-      allowCreate &&
-      !suggestions.some(item => item.tag === `#${hint}`)
-        ? -1
-        : 0;
+    const minIndex = 0;
 
     if (keyPressed) {
       if (keyPressed === 'ArrowRight') {
@@ -92,7 +85,6 @@ function TagAutocomplete({
     selectedIndex,
     onMenuSelect,
     onKeyHandled,
-    allowCreate,
     hint,
   ]);
 
@@ -105,7 +97,6 @@ function TagAutocomplete({
       selectedIndex={selectedIndex}
       hint={hint}
       element={element}
-      allowCreate={allowCreate}
     />
   );
 }
@@ -118,7 +109,6 @@ type TagListProps = {
   selectedIndex: number;
   hint: string;
   element: HTMLElement | null;
-  allowCreate: boolean;
 };
 
 function TagList({
@@ -129,7 +119,6 @@ function TagList({
   selectedIndex,
   hint,
   element,
-  allowCreate,
 }: TagListProps) {
   const [width, setWidth] = useState(0);
 
@@ -199,54 +188,6 @@ function TagList({
           alignItems: 'baseline',
         }}
       >
-        {hint.length > 0 &&
-          allowCreate &&
-          !items.some(item => item.tag === `#${hint}`) && (
-            <Button
-              onPress={() => clickedOnIt()}
-              style={{
-                border: 0,
-                borderRadius: 16,
-                margin: '2px',
-                display: 'inline-block',
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                padding: '5px 11px',
-                fontSize: '10px',
-                userSelect: 'none',
-                textOverflow: 'ellipsis',
-                maxWidth: '150px',
-                backgroundColor: theme.noteTagBackground,
-                color: theme.noteTagText,
-                cursor: 'pointer',
-                transition: 'transform 0.3s ease, background-color 0.3s ease',
-                transform: selectedIndex === -1 ? 'scale(1.1)' : 'scale(1)',
-                zIndex: selectedIndex === -1 ? '1000' : 'unset',
-              }}
-            >
-              <span
-                style={{
-                  color: theme.buttonPrimaryDisabledText,
-                  fontSize: '10px',
-                  borderColor: theme.buttonPrimaryDisabledBorder,
-                  backgroundColor: theme.buttonPrimaryDisabledBackground,
-                  opacity: 0.6,
-                  padding: 2,
-                  borderRadius: 4,
-                }}
-              >
-                Create
-              </span>{' '}
-              <span
-                style={{
-                  textDecorationLine:
-                    selectedIndex === -1 ? 'underline' : 'unset',
-                }}
-              >
-                #{hint}
-              </span>
-            </Button>
-          )}
         {items.map((item, index) => (
           <View data-keep-editing="true" key={item.id}>
             <Button
@@ -289,7 +230,6 @@ type TagPopoverProps = {
   keyPressed: string | null;
   onKeyHandled: () => void;
   onClose: () => void;
-  allowCreate?: boolean;
 };
 
 export function TagPopover({
@@ -300,10 +240,20 @@ export function TagPopover({
   keyPressed,
   onKeyHandled,
   onClose,
-  allowCreate = false,
 }: TagPopoverProps) {
+  const [showPopOver, setShowPopOver] = useState(isOpen);
+
+  useEffect(() => {
+    setShowPopOver(isOpen);
+  }, [isOpen]);
+
   return (
-    <Popover triggerRef={triggerRef} isOpen={isOpen} placement="bottom start">
+    <Popover
+      triggerRef={triggerRef}
+      isOpen={showPopOver}
+      onOpenChange={isOpen => setShowPopOver(isOpen)}
+      placement="bottom start"
+    >
       <TagAutocomplete
         hint={hint}
         clickedOnIt={onClose}
@@ -311,7 +261,6 @@ export function TagPopover({
         onKeyHandled={onKeyHandled}
         onMenuSelect={onMenuSelect}
         element={triggerRef?.current}
-        allowCreate={allowCreate}
       />
     </Popover>
   );

@@ -8,7 +8,7 @@ import {
 
 export function useTagPopover(
   initialValue: string,
-  onUpdate: (value: string) => void,
+  onNewValue: (value: string) => void,
   componentRef: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | null>,
 ) {
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -45,7 +45,11 @@ export function useTagPopover(
 
   const extractTagAtCursor = useCallback(
     (text: string, position: number): string => {
-      let start = position - 1;
+      let start = position;
+
+      if (start >= text.length) {
+        start = text.length - 1;
+      }
 
       while (start >= 0 && !isWordBoundary(text[start])) {
         start--;
@@ -82,35 +86,18 @@ export function useTagPopover(
     [],
   );
 
-  const updateHint = useCallback(
-    (newValue: string) => {
-      const el = edit.current;
-      if (!el) return;
-
-      const cursorPosition = getCaretPosition(el);
-      const tag = extractTagAtCursor(newValue, cursorPosition);
-      setHint(tag?.replace('#', ''));
-    },
-    [edit, getCaretPosition, extractTagAtCursor],
-  );
-
   useEffect(() => {
     if (content !== undefined) {
-      onUpdate?.(content);
-      updateHint(content);
-    } else {
-      updateHint('');
+      onNewValue?.(content);
     }
-  }, [content, onUpdate, updateHint]);
+  }, [content, onNewValue]);
 
   const handleKeyDown = (
     e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>,
   ) => {
     if (showAutocomplete) {
-      if (e.key === 'Escape') {
+      if (isCommandKeys(e)) {
         setShowAutocomplete(false);
-        e.preventDefault();
-        e.stopPropagation();
         return;
       }
 
@@ -120,12 +107,18 @@ export function useTagPopover(
         e.stopPropagation();
         return;
       }
+    } else if (e.key === 'Escape') {
+      if (content !== initialValue) {
+        setContent(initialValue);
+      }
     }
   };
 
   const handleKeyUp = (
     e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>,
   ) => {
+    if (isCommandKeys(e)) return;
+
     if (['ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
       return;
     }
@@ -134,16 +127,70 @@ export function useTagPopover(
     if (!el) return;
 
     const cursorPosition = getCaretPosition(el);
-    const tag = extractTagAtCursor(content, cursorPosition);
+    const tag = extractTagAtCursor(el.value, cursorPosition);
 
     if (tag) {
       setShowAutocomplete(true);
+      setHint(tag?.replace('#', ''));
     } else {
       setShowAutocomplete(false);
     }
   };
 
+  const isCommandKeys = (
+    e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
+    const { key, ctrlKey, altKey, metaKey } = e;
+
+    const commandKeys = [
+      'Control',
+      'Alt',
+      'Meta',
+      'CapsLock',
+      'ArrowUp',
+      'ArrowDown',
+      'PageUp',
+      'PageDown',
+      'Home',
+      'End',
+      'Insert',
+      'Escape',
+      'Pause',
+      'PrintScreen',
+      'ScrollLock',
+      'NumLock',
+      'F1',
+      'F2',
+      'F3',
+      'F4',
+      'F5',
+      'F6',
+      'F7',
+      'F8',
+      'F9',
+      'F10',
+      'F11',
+      'F12',
+      'ContextMenu',
+    ];
+
+    const isCommandKey =
+      ctrlKey ||
+      altKey ||
+      metaKey || // Modifier keys
+      commandKeys.includes(key);
+
+    if (isCommandKey) {
+      return true;
+    }
+
+    return false;
+  };
+
   const handleMenuSelect = (item: { tag: string }) => {
+    setShowAutocomplete(false);
+    setHint('');
+
     if (!item) return;
 
     const el = edit.current;
@@ -162,6 +209,7 @@ export function useTagPopover(
       textBeforeCursor[tagStart] !== '#' ||
       (tagStart > 0 && textBeforeCursor[tagStart + 1] === '#')
     ) {
+      setHint('');
       return;
     }
 
@@ -177,8 +225,6 @@ export function useTagPopover(
       el.value.slice(0, tagStart) + item.tag + el.value.slice(tagEnd);
 
     setContent(newContent);
-    setShowAutocomplete(false);
-    setHint('');
 
     const newCursorPosition = tagStart + item.tag.length + 1;
     el.setSelectionRange(newCursorPosition, newCursorPosition);
@@ -201,6 +247,5 @@ export function useTagPopover(
     handleSetCursorPosition,
     setShowAutocomplete,
     setKeyPressed,
-    updateHint,
   };
 }

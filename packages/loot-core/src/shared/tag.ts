@@ -1,6 +1,48 @@
 import Color from 'color';
 
-export const TAGREGEX = /(?<!\B#)(#[\w\d\p{Emoji}-]+)(?=\s|$|#)/gu;
+const isWordBoundary = (char: string | undefined) => {
+  return char === ' ' || char === '#' || char === undefined;
+};
+
+export const extractAllTags = (text: string): string[] => {
+  const tags: string[] = [];
+  let start = 0;
+
+  while (start < text.length) {
+    // Find the next '#'
+    start = text.indexOf('#', start);
+    if (start === -1) break; // No more tags
+
+    // Check if the tag is escaped (##)
+    if (text[start + 1] === '#') {
+      start += 2;
+      continue;
+    }
+
+    // Find the end of the tag
+    let end = start + 1;
+    while (end < text.length && !isWordBoundary(text[end])) {
+      end++;
+    }
+
+    // Extract the tag
+    const tag = text.slice(start, end);
+
+    // Check if the tag contains multiple '#'
+    if (tag.includes('#', 1)) {
+      const subTags = tag.split('#').filter(t => t.length > 0);
+      subTags.forEach(subTag => {
+        tags.push(`#${subTag}`);
+      });
+    } else {
+      tags.push(tag);
+    }
+
+    start = end;
+  }
+
+  return tags;
+};
 
 export const TAGCOLORS = [
   // Red

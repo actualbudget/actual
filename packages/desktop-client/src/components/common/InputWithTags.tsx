@@ -52,7 +52,6 @@ export function InputWithTags({
     handleKeyUp,
     handleKeyDown,
     handleMenuSelect,
-    updateHint,
   } = useTagPopover(value?.toString() || '', onUpdate || (() => {}), ref);
 
   useEffect(() => {
@@ -115,7 +114,6 @@ export function InputWithTags({
           onChangeValue?.(e.target.value);
           nativeProps.onChange?.(e);
         }}
-        onFocus={() => updateHint(content)}
       />
       <TagPopover
         triggerRef={ref}

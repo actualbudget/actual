@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import escapeRegExp from 'lodash/escapeRegExp';
+
 import {
   currentDay,
   addDays,
@@ -11,7 +13,7 @@ import {
   sortNumbers,
   getApproxNumberThreshold,
 } from '../../shared/rules';
-import { TAGREGEX } from '../../shared/tag';
+import { extractAllTags } from '../../shared/tag';
 import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';
 import {
@@ -475,14 +477,15 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags':
-        const tagValues = value
-          .split(TAGREGEX)
-          .filter(tag => tag.startsWith('#'));
+        const tagValues = extractAllTags(value);
 
         return {
           $and: tagValues.map(v => {
-            const regex = new RegExp(`(^|\\s)${v}(\\s|$)`);
-            return apply(field, '$regexp', regex.source);
+            return apply(
+              field,
+              '$regexp',
+              `(^|\\s|\\w)${escapeRegExp(v)}(\\s|$|#)`,
+            );
           }),
         };
 
