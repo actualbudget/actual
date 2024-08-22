@@ -32,10 +32,12 @@
     "express-actuator": "1.8.4",
     "express-rate-limit": "^6.7.0",
     "express-response-size": "^0.0.3",
+    "express-winston": "^4.2.0",
     "jws": "^4.0.0",
     "migrate": "^2.0.1",
     "nordigen-node": "^1.4.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "winston": "^3.14.2"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.20.2",

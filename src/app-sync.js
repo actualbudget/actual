@@ -2,7 +2,11 @@ import fs from 'node:fs/promises';
 import { Buffer } from 'node:buffer';
 import express from 'express';
 import * as uuid from 'uuid';
-import { errorMiddleware, validateUserMiddleware } from './util/middlewares.js';
+import {
+  errorMiddleware,
+  requestLoggerMiddleware,
+  validateUserMiddleware,
+} from './util/middlewares.js';
 import getAccountDb from './account-db.js';
 import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
@@ -12,7 +16,7 @@ import { SyncProtoBuf } from '@actual-app/crdt';
 
 const app = express();
 app.use(errorMiddleware);
-app.use(express.json());
+app.use(requestLoggerMiddleware);
 app.use(express.raw({ type: 'application/actual-sync' }));
 app.use(express.raw({ type: 'application/encrypted-file' }));
 app.use(express.json());

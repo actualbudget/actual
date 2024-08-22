@@ -1,11 +1,15 @@
 import express from 'express';
 import { secretsService } from './services/secrets-service.js';
-import { validateUserMiddleware } from './util/middlewares.js';
+import {
+  requestLoggerMiddleware,
+  validateUserMiddleware,
+} from './util/middlewares.js';
 
 const app = express();
 
 export { app as handlers };
 app.use(express.json());
+app.use(requestLoggerMiddleware);
 
 app.use(validateUserMiddleware);
 

@@ -11,9 +11,14 @@ import {
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import { sha256String } from '../util/hash.js';
-import { validateUserMiddleware } from '../util/middlewares.js';
+import {
+  requestLoggerMiddleware,
+  validateUserMiddleware,
+} from '../util/middlewares.js';
 
 const app = express();
+app.use(requestLoggerMiddleware);
+
 app.get('/link', function (req, res) {
   res.sendFile('link.html', { root: path.resolve('./src/app-gocardless') });
 });

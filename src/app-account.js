@@ -1,5 +1,8 @@
 import express from 'express';
-import { errorMiddleware } from './util/middlewares.js';
+import {
+  errorMiddleware,
+  requestLoggerMiddleware,
+} from './util/middlewares.js';
 import validateUser, { validateAuthHeader } from './util/validate-user.js';
 import {
   bootstrap,
@@ -11,7 +14,7 @@ import {
 
 let app = express();
 app.use(errorMiddleware);
-
+app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 // Non-authenticated endpoints:
