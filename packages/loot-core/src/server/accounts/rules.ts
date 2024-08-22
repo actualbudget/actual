@@ -162,7 +162,7 @@ const CONDITION_TYPES = {
         assert(
           Array.isArray(value),
           'no-empty-array',
-          `oneOf must have an array value (field: ${fieldName}): ${JSON.stringify(
+          `${op} must have an array value (field: ${fieldName}): ${JSON.stringify(
             value,
           )}`,
         );
@@ -173,7 +173,7 @@ const CONDITION_TYPES = {
         assert(
           typeof value === 'string' && value.length > 0,
           'no-empty-string',
-          `contains must have non-empty string (field: ${fieldName})`,
+          `${op} must have non-empty string (field: ${fieldName})`,
         );
       }
 
@@ -420,6 +420,16 @@ export class Condition {
           );
         }
         return fieldValue <= extractValue(this.value);
+      case 'matches':
+        if (fieldValue === null) {
+          return false;
+        }
+        try {
+          return new RegExp(this.value).test(fieldValue);
+        } catch (e) {
+          console.log('invalid regexp in matches condition', e);
+          return false;
+        }
       default:
     }
 
