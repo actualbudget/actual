@@ -132,8 +132,8 @@ function TagList({
 }: TagListProps) {
   const [width, setWidth] = useState(0);
   const [showColors, setShowColors] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [uncommitedTags, setUncommitedTags] = useState([]);
+  const [selectedItem, setSelectedItem] = useState<Tag | null>(null);
+  const [uncommitedTags, setUncommitedTags] = useState<string[]>([]);
   const colorRef = useRef(null);
   const dispatch = useDispatch();
 
