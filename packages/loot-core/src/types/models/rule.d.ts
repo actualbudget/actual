@@ -133,6 +133,7 @@ export interface SetRuleActionEntity {
   op: 'set';
   value: unknown;
   options?: {
+    template?: string;
     splitIndex?: number;
   };
   type?: string;

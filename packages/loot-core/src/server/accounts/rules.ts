@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
+import * as Handlebars from 'handlebars';
 
 import {
   monthFromDate,
@@ -9,6 +10,9 @@ import {
   addDays,
   subDays,
   parseDate,
+  dayFromDate,
+  format,
+  currentDay,
 } from '../../shared/months';
 import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
@@ -22,6 +26,57 @@ import { fastSetMerge } from '../../shared/util';
 import { RuleConditionEntity } from '../../types/models';
 import { RuleError } from '../errors';
 import { Schedule as RSchedule } from '../util/rschedule';
+
+void (function registerHandlebarsHelpers() {
+  const regexTest = /^\/(.*)\/([gimuy]*)$/;
+
+  function mathHelper(fn: (a: number, b: number) => number) {
+    return (a: unknown, ...b: unknown[]) => {
+      // Last argument is the Handlebars options object
+      b.splice(-1, 1);
+      return b.map(Number).reduce(fn, Number(a));
+    };
+  }
+
+  const helpers = {
+    regex: (value: unknown, regex: unknown, replace: unknown) => {
+      if (typeof regex !== 'string' || typeof replace !== 'string') {
+        return '';
+      }
+
+      let regexp: RegExp;
+      const match = regexTest.exec(regex);
+      // Regex is in format /regex/flags
+      if (match) {
+        regexp = new RegExp(match[1], match[2]);
+      } else {
+        regexp = new RegExp(regex);
+      }
+
+      return String(value).replace(regexp, replace);
+    },
+    add: mathHelper((a, b) => a + b),
+    sub: mathHelper((a, b) => a - b),
+    div: mathHelper((a, b) => a / b),
+    mul: mathHelper((a, b) => a * b),
+    mod: mathHelper((a, b) => a % b),
+    floor: (a: unknown) => Math.floor(Number(a)),
+    ceil: (a: unknown) => Math.ceil(Number(a)),
+    round: (a: unknown) => Math.round(Number(a)),
+    abs: (a: unknown) => Math.abs(Number(a)),
+    min: mathHelper(Math.min),
+    max: mathHelper(Math.max),
+    fixed: (a: unknown, digits: unknown) => Number(a).toFixed(Number(digits)),
+    day: (date: string) => dayFromDate(parseDate(date)),
+    month: (date: string) => monthFromDate(parseDate(date)),
+    year: (date: string) => yearFromDate(parseDate(date)),
+    format: (date: string, f: string) => format(date, f),
+  };
+
+  for (const [name, fn] of Object.entries(helpers)) {
+    Handlebars.registerHelper(name, fn);
+  }
+})();
 
 function assert(test, type, msg) {
   if (!test) {
@@ -468,6 +523,8 @@ export class Action {
   type;
   value;
 
+  private handlebarsTemplate?: Handlebars.TemplateDelegate;
+
   constructor(op: ActionOperator, field, value, options, fieldTypes) {
     assert(
       ACTION_OPS.includes(op),
@@ -480,6 +537,9 @@ export class Action {
       assert(typeName, 'internal', `Invalid field for action: ${field}`);
       this.field = field;
       this.type = typeName;
+      if (options?.template) {
+        this.handlebarsTemplate = Handlebars.compile(options.template);
+      }
     } else if (op === 'set-split-amount') {
       this.field = null;
       this.type = 'number';
@@ -504,7 +564,27 @@ export class Action {
   exec(object) {
     switch (this.op) {
       case 'set':
-        object[this.field] = this.value;
+        if (this.handlebarsTemplate) {
+          object[this.field] = this.handlebarsTemplate({
+            ...object,
+            today: currentDay(),
+          });
+
+          // Handlebars always returns a string, so we need to convert
+          switch (this.type) {
+            case 'number':
+              object[this.field] = parseFloat(object[this.field]);
+              break;
+            case 'date':
+              object[this.field] = parseDate(object[this.field]);
+              break;
+            case 'boolean':
+              object[this.field] = object[this.field] === 'true';
+              break;
+          }
+        } else {
+          object[this.field] = this.value;
+        }
         break;
       case 'set-split-amount':
         switch (this.options.method) {
