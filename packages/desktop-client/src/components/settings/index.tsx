@@ -34,6 +34,7 @@ import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+import { UpcomingLengthSettings } from './Upcoming';
 
 function About() {
   const version = useServerVersion();
@@ -184,6 +185,7 @@ export function Settings() {
           <ResetCache />
           <ResetSync />
           <FixSplits />
+          <UpcomingLengthSettings />
           <ExperimentalFeatures />
         </AdvancedToggle>
       </View>
