@@ -12,11 +12,13 @@ import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
 import { type ScheduleEntity } from '../../types/models';
 import { getAccountFilter } from '../queries';
 import { liveQuery } from '../query-helpers';
+import { useSelector } from 'react-redux';
+import { State } from 'loot-core/client/state-types';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
 
-function loadStatuses(schedules: ScheduleEntity[], onData) {
+function loadStatuses(schedules: ScheduleEntity[], onData, prefs) {
   return liveQuery(getHasTransactionsQuery(schedules), onData, {
     mapper: data => {
       const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
@@ -24,7 +26,7 @@ function loadStatuses(schedules: ScheduleEntity[], onData) {
       return new Map(
         schedules.map(s => [
           s.id,
-          getStatus(s.next_date, s.completed, hasTrans.has(s.id)),
+          getStatus(s.next_date, s.completed, hasTrans.has(s.id), prefs),
         ]),
       );
     },
@@ -36,11 +38,13 @@ type UseSchedulesResult = {
   schedules: ScheduleEntity[];
   statuses: ScheduleStatuses;
 } | null;
+
 export function useSchedules({
   transform,
 }: UseSchedulesArgs = {}): UseSchedulesResult {
   const [data, setData] = useState<UseSchedulesResult>(null);
-
+  const prefs = useSelector((state: State) => state.prefs.local);
+  console.log({ prefs });
   useEffect(() => {
     const query = q('schedules').select('*');
     let statusQuery;
@@ -55,6 +59,7 @@ export function useSchedules({
 
           statusQuery = loadStatuses(schedules, (statuses: ScheduleStatuses) =>
             setData({ schedules, statuses }),
+            prefs
           );
         }
       },

@@ -3,11 +3,13 @@ import type { IRuleOptions } from '@rschedule/core';
 
 import * as monthUtils from './months';
 import { q } from './query';
+import type { PrefsState } from 'loot-core/client/state-types/prefs';
 
 export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
+  prefs: PrefsState
 ) {
   const today = monthUtils.currentDay();
 
@@ -17,7 +19,7 @@ export function getStatus(
     return 'paid';
   } else if (nextDate === today) {
     return 'due';
-  } else if (nextDate > today && nextDate <= monthUtils.addDays(today, 7)) { //TODO: Add way to make this dynamic based on a setting
+  } else if (nextDate > today && nextDate <= monthUtils.addDays(today, parseInt(prefs.local.upcomingScheduledTransactionLength))) { //TODO: Add way to make this dynamic based on a setting
     return 'upcoming';
   } else if (nextDate < today) {
     return 'missed';
