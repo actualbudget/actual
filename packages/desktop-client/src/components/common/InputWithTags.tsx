@@ -52,7 +52,7 @@ export function InputWithTags({
     handleKeyUp,
     handleKeyDown,
     handleMenuSelect,
-  } = useTagPopover(value?.toString() || '', onUpdate || (() => {}), ref);
+  } = useTagPopover(value?.toString() || '', ref);
 
   useEffect(() => {
     setContent(value?.toString() || '');

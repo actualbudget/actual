@@ -8,7 +8,6 @@ import {
 
 export function useTagPopover(
   initialValue: string,
-  onNewValue: (value: string) => void,
   componentRef: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | null>,
 ) {
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -86,18 +85,13 @@ export function useTagPopover(
     [],
   );
 
-  useEffect(() => {
-    if (content !== undefined) {
-      onNewValue?.(content);
-    }
-  }, [content, onNewValue]);
-
   const handleKeyDown = (
     e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>,
   ) => {
     if (showAutocomplete) {
       if (isCommandKeys(e)) {
         setShowAutocomplete(false);
+        e.stopPropagation();
         return;
       }
 

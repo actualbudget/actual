@@ -687,8 +687,8 @@ export async function getTags() {
   `);
 }
 
-export function updateTag(tag) {
-  update('tags', {
+export async function updateTag(tag) {
+  await update('tags', {
     id: tag.id,
     tag: tag.tag,
     color: tag.color,
@@ -709,7 +709,7 @@ async function insertTags(transaction) {
         (await first('SELECT id FROM tags where tag = ?', [tag])) || {};
 
       if (!id) {
-        insertWithUUID('tags', {
+        await insertWithUUID('tags', {
           tag,
           color: null,
           textColor: null,

@@ -342,7 +342,7 @@ function InputValue({
     }
   }
 
-  function onKeyDown(e) {
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (props.onKeyDown) {
       props.onKeyDown(e);
     }
@@ -357,7 +357,7 @@ function InputValue({
       if (value !== defaultValue) {
         setValue(defaultValue);
       }
-    } else if (shouldSaveFromKey(e)) {
+    } else if (!e.isDefaultPrevented() && shouldSaveFromKey(e)) {
       onUpdate?.(value);
     }
   }
@@ -440,7 +440,7 @@ export function InputCellWithTags({
     handleKeyUp,
     handleKeyDown,
     handleMenuSelect,
-  } = useTagPopover(props.value, onUpdate || (() => {}), edit);
+  } = useTagPopover(props.value, edit);
 
   return (
     <>

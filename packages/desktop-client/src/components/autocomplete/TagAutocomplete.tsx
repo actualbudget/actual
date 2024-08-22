@@ -58,6 +58,10 @@ function TagAutocomplete({
           name: tag.tag,
         })),
       );
+
+      if(filteredTags.length === 0) {
+        clickedOnIt();
+      }
     }
   }, [tags, hint]);
 
@@ -185,32 +189,25 @@ function TagList({
       style={{
         position: 'relative',
         maxWidth: width - 10,
+        minWidth: width - 10,
         flexDirection: 'column',
         flexWrap: 'wrap',
         overflow: 'visible',
         alignItems: 'baseline',
       }}
     >
-      {items.length === 0 && tags.length === 0 && (
+      {/* {items.length === 0 && (
         <View onClick={clickedOnIt} style={{ padding: '10px' }}>
-          {tags.length === 0 && (
             <span
               style={{
                 ...styles.verySmallText,
                 color: theme.pageTextLight,
               }}
             >
-              Tags will be added when saving the transaction.
+              Tags will be saved when saving the transaction.
             </span>
-          )}
-          {/* {tags.length > 0 && (
-            <span style={{
-              ...styles.verySmallText,
-              color: theme.pageTextLight,
-            }}>No tags created with these terms ({hint})</span>
-          )} */}
         </View>
-      )}
+      )} */}
       {items.length > 0 && (
         <View
           style={{
@@ -228,7 +225,6 @@ function TagList({
               data-keep-editing="true"
               key={item.id}
               onContextMenu={e => {
-                debugger;
                 colorRef.current = e.target;
                 setSelectedItem(item);
                 setShowColors(true);
@@ -265,7 +261,7 @@ function TagList({
           ))}
         </View>
       )}
-      {uncommitedTags.length > 0 && (
+      {/* {uncommitedTags.length > 0 && (
         <>
           <Text
             style={{
@@ -313,7 +309,7 @@ function TagList({
             ))}
           </View>
         </>
-      )}
+      )} */}
       {showColors && selectedItem && (
         <Popover
           data-keep-editing="true"
