@@ -371,7 +371,10 @@ export function TagPopover({
       <TagAutocomplete
         value={value}
         hint={hint}
-        clickedOnIt={onClose}
+        clickedOnIt={() => {
+          setShowPopOver(false);
+          onClose();
+        }}
         keyPressed={keyPressed}
         onKeyHandled={onKeyHandled}
         onMenuSelect={onMenuSelect}
