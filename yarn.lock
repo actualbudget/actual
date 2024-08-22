@@ -1570,17 +1570,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/notarize@npm:2.2.0":
-  version: 2.2.0
-  resolution: "@electron/notarize@npm:2.2.0"
-  dependencies:
-    debug: "npm:^4.1.1"
-    fs-extra: "npm:^9.0.1"
-    promise-retry: "npm:^2.0.1"
-  checksum: 10/31639c9ee54d5ff2be7882c24916716b678b3c931b90cdea359262826b643c4291853cbaba8ecfc7cfddd75331117ef120fbd9c6a7b87c7d099ad54b6a2b0427
-  languageName: node
-  linkType: hard
-
 "@electron/notarize@npm:2.2.1":
   version: 2.2.1
   resolution: "@electron/notarize@npm:2.2.1"
@@ -1589,6 +1578,17 @@ __metadata:
     fs-extra: "npm:^9.0.1"
     promise-retry: "npm:^2.0.1"
   checksum: 10/6d5bb78a0ba0af59a07daf01ace17a33869893641639c94d0f74ca060698d8cf61fca4002c61592a70f6f20e03987fc1138625853d947394749b1bd46ed2db3c
+  languageName: node
+  linkType: hard
+
+"@electron/notarize@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@electron/notarize@npm:2.4.0"
+  dependencies:
+    debug: "npm:^4.1.1"
+    fs-extra: "npm:^9.0.1"
+    promise-retry: "npm:^2.0.1"
+  checksum: 10/fe97ac96e6cc93dae2cd5095bd157f5d9cb49c1a9606f0cb06216518e1c15fcfa76923de3d541544b63c5ff985c1ae43065453197a284352df95599e635877ac
   languageName: node
   linkType: hard
 
@@ -8432,7 +8432,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop-electron@workspace:packages/desktop-electron"
   dependencies:
-    "@electron/notarize": "npm:2.2.0"
+    "@electron/notarize": "npm:2.4.0"
     "@electron/rebuild": "npm:3.6.0"
     "@types/copyfiles": "npm:^2"
     copyfiles: "npm:^2.4.1"
