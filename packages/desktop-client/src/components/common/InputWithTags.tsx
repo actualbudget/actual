@@ -116,6 +116,7 @@ export function InputWithTags({
         }}
       />
       <TagPopover
+        value={content}
         triggerRef={ref}
         isOpen={showAutocomplete}
         hint={hint}

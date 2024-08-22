@@ -343,6 +343,10 @@ function InputValue({
   }
 
   function onKeyDown(e) {
+    if (props.onKeyDown) {
+      props.onKeyDown(e);
+    }
+
     // Only enter and tab to escape (which allows the user to move
     // around)
     if (e.key !== 'Enter' && e.key !== 'Tab') {
@@ -355,10 +359,6 @@ function InputValue({
       }
     } else if (shouldSaveFromKey(e)) {
       onUpdate?.(value);
-    }
-
-    if (props.onKeyDown) {
-      props.onKeyDown(e);
     }
   }
 
@@ -428,7 +428,7 @@ export function InputCellWithTags({
   textAlign,
   ...props
 }: InputCellProps) {
-  const edit = useRef();
+  const edit = useRef<HTMLInputElement>();
   const {
     content,
     setContent,
@@ -457,6 +457,7 @@ export function InputCellWithTags({
         {...inputProps}
       />
       <TagPopover
+        value={edit.current?.value}
         triggerRef={edit}
         isOpen={showAutocomplete}
         hint={hint}

@@ -2556,6 +2556,7 @@ function NotesCell({
         <Popover
           triggerRef={triggerRef}
           isOpen={showColors}
+          onOpenChange={isOpen => setShowColors(isOpen)}
           placement="bottom start"
           offset={10}
           style={{ marginLeft: pickerPosition.left }}
