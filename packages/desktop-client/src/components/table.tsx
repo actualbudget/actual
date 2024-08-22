@@ -1399,6 +1399,17 @@ export function useTableNavigator<T extends TableItem>(
     }
   }
 
+  function closest(element: Element | null, selector: string): Element | null {
+    let el: Element | null = element;
+
+    while (el && el.nodeType === 1) {
+      if (el.matches(selector)) return el;
+      el = el.parentElement || (el.parentNode as Element);
+    }
+
+    return null;
+  }
+
   function getNavigatorProps(userProps) {
     return {
       ...userProps,
@@ -1461,7 +1472,7 @@ export function useTableNavigator<T extends TableItem>(
         // input, and it will be refocused when the modal closes.
         const prevNumModals = modalStackLength.current;
         const numModals = store.getState().modals.modalStack.length;
-        const parentWithAttr = e.relatedTarget?.closest('[data-keep-editing]');
+        const parentWithAttr = closest(e.relatedTarget, '[data-keep-editing]');
         if (
           !parentWithAttr &&
           document.hasFocus() &&
