@@ -1,3 +1,4 @@
+import { TagEntity } from 'loot-core/types/models/tag';
 import {
   type KeyboardEvent,
   useCallback,
@@ -181,7 +182,7 @@ export function useTagPopover(
     return false;
   };
 
-  const handleMenuSelect = (item: { tag: string }) => {
+  const handleMenuSelect = (item: TagEntity) => {
     setShowAutocomplete(false);
     setHint('');
 

@@ -58,25 +58,22 @@ function TagAutocomplete({
           name: tag.tag,
         })),
       );
+      setSelectedIndex(0);
 
-      if(filteredTags.length === 0) {
+      if (filteredTags.length === 0) {
         clickedOnIt();
       }
     }
-  }, [tags, hint]);
+  }, [tags, hint, setSelectedIndex]);
 
   useEffect(() => {
     const minIndex = 0;
 
     if (keyPressed) {
       if (keyPressed === 'ArrowRight') {
-        if (selectedIndex + 1 === Math.min(suggestions.length, 10)) {
-          setSelectedIndex(minIndex);
-        } else {
-          setSelectedIndex(
-            prevIndex => (prevIndex + 1) % Math.min(suggestions.length, 10),
-          );
-        }
+        setSelectedIndex(
+          prevIndex => (prevIndex + 1) % Math.min(suggestions.length, 10),
+        );
       } else if (keyPressed === 'ArrowLeft') {
         setSelectedIndex(prevIndex =>
           prevIndex === minIndex
