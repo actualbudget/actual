@@ -9,7 +9,7 @@ export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
-  prefs: PrefsState
+  prefs: PrefsState,
 ) {
   const today = monthUtils.currentDay();
 
@@ -19,7 +19,14 @@ export function getStatus(
     return 'paid';
   } else if (nextDate === today) {
     return 'due';
-  } else if (nextDate > today && nextDate <= monthUtils.addDays(today, parseInt(prefs.local.upcomingScheduledTransactionLength))) { //TODO: Add way to make this dynamic based on a setting
+  } else if (
+    nextDate > today &&
+    nextDate <=
+      monthUtils.addDays(
+        today,
+        parseInt(prefs.local.upcomingScheduledTransactionLength ?? '7'),
+      )
+  ) {
     return 'upcoming';
   } else if (nextDate < today) {
     return 'missed';
