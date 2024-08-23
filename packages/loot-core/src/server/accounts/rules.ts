@@ -66,9 +66,9 @@ void (function registerHandlebarsHelpers() {
     min: mathHelper(Math.min),
     max: mathHelper(Math.max),
     fixed: (a: unknown, digits: unknown) => Number(a).toFixed(Number(digits)),
-    day: (date: string) => format(date, "d"),
-    month: (date: string) => format(date, "M"),
-    year: (date: string) => format(date, "yyyy"),
+    day: (date: string) => format(date, 'd'),
+    month: (date: string) => format(date, 'M'),
+    year: (date: string) => format(date, 'yyyy'),
     format: (date: string, f: string) => format(date, f),
   };
 
@@ -144,7 +144,7 @@ const CONDITION_TYPES = {
   date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
-    parse(op, value, fieldName){
+    parse(op, value, fieldName) {
       const parsed =
         typeof value === 'string'
           ? parseDateString(value)
