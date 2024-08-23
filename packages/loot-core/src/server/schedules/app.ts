@@ -366,6 +366,7 @@ async function skipNextDate({ id }) {
     },
   });
 }
+
 function discoverSchedules() {
   return findSchedules();
 }
@@ -495,6 +496,7 @@ async function advanceSchedulesService(syncSuccess) {
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
+      null, //TODO: add prefs here
     );
 
     if (status === 'paid') {
