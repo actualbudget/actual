@@ -16,6 +16,7 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 
 import { TransactionTable } from './TransactionsTable';
+import { ColumnWidthProvider } from '../ColumnWidthContext';
 
 // When data changes, there are two ways to update the UI:
 //
@@ -196,44 +197,46 @@ export function TransactionList({
   });
 
   return (
-    <TransactionTable
-      ref={tableRef}
-      transactions={allTransactions}
-      loadMoreTransactions={loadMoreTransactions}
-      accounts={accounts}
-      categoryGroups={categoryGroups}
-      payees={payees}
-      showBalances={showBalances}
-      balances={balances}
-      showCleared={showCleared}
-      showAccount={showAccount}
-      showCategory={true}
-      currentAccountId={account && account.id}
-      currentCategoryId={category && category.id}
-      isAdding={isAdding}
-      isNew={isNew}
-      isMatched={isMatched}
-      isFiltered={isFiltered}
-      dateFormat={dateFormat}
-      hideFraction={hideFraction}
-      addNotification={addNotification}
-      headerContent={headerContent}
-      renderEmpty={renderEmpty}
-      onSave={onSave}
-      onApplyRules={onApplyRules}
-      onSplit={onSplit}
-      onCloseAddTransaction={onCloseAddTransaction}
-      onAdd={onAdd}
-      onAddSplit={onAddSplit}
-      onManagePayees={onManagePayees}
-      onCreatePayee={onCreatePayee}
-      style={{ backgroundColor: theme.tableBackground }}
-      onNavigateToTransferAccount={onNavigateToTransferAccount}
-      onNavigateToSchedule={onNavigateToSchedule}
-      onNotesTagClick={onNotesTagClick}
-      onSort={onSort}
-      sortField={sortField}
-      ascDesc={ascDesc}
-    />
+    <ColumnWidthProvider>
+      <TransactionTable
+        ref={tableRef}
+        transactions={allTransactions}
+        loadMoreTransactions={loadMoreTransactions}
+        accounts={accounts}
+        categoryGroups={categoryGroups}
+        payees={payees}
+        showBalances={showBalances}
+        balances={balances}
+        showCleared={showCleared}
+        showAccount={showAccount}
+        showCategory={true}
+        currentAccountId={account && account.id}
+        currentCategoryId={category && category.id}
+        isAdding={isAdding}
+        isNew={isNew}
+        isMatched={isMatched}
+        isFiltered={isFiltered}
+        dateFormat={dateFormat}
+        hideFraction={hideFraction}
+        addNotification={addNotification}
+        headerContent={headerContent}
+        renderEmpty={renderEmpty}
+        onSave={onSave}
+        onApplyRules={onApplyRules}
+        onSplit={onSplit}
+        onCloseAddTransaction={onCloseAddTransaction}
+        onAdd={onAdd}
+        onAddSplit={onAddSplit}
+        onManagePayees={onManagePayees}
+        onCreatePayee={onCreatePayee}
+        style={{ backgroundColor: theme.tableBackground }}
+        onNavigateToTransferAccount={onNavigateToTransferAccount}
+        onNavigateToSchedule={onNavigateToSchedule}
+        onNotesTagClick={onNotesTagClick}
+        onSort={onSort}
+        sortField={sortField}
+        ascDesc={ascDesc}
+      />
+    </ColumnWidthProvider>
   );
 }

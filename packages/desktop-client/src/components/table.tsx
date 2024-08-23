@@ -48,6 +48,7 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
+import { useMergedRefs } from '../hooks/useMergedRefs';
 
 export const ROW_HEIGHT = 32;
 
@@ -156,7 +157,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
 };
-export function Cell({
+export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell({
   width,
   name,
   exposed,
@@ -173,14 +174,15 @@ export function Cell({
   unexposedContent,
   privacyFilter,
   ...viewProps
-}: CellProps) {
+}: CellProps, ref) {
   const mouseCoords = useRef(null);
   const viewRef = useRef(null);
+  const mergeRef = useMergedRefs(ref, viewRef);
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
   const widthStyle: CSSProperties =
-    width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+    width ? (width === 'flex' ? { flex: 1, flexBasis: 0 } : { width }) : { width: 'auto'};
   const cellStyle: CSSProperties = {
     position: 'relative',
     textAlign: textAlign || 'left',
@@ -267,7 +269,7 @@ export function Cell({
 
   return (
     <View
-      innerRef={viewRef}
+      innerRef={ref}
       style={{ ...widthStyle, ...cellStyle, ...style }}
       {...viewProps}
       data-testid={name}
@@ -275,7 +277,7 @@ export function Cell({
       {conditionalPrivacyFilter}
     </View>
   );
-}
+});
 
 type RowProps = ComponentProps<typeof View> & {
   inset?: number;
@@ -393,15 +395,15 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   onBlur?: ComponentProps<typeof InputValue>['onBlur'];
   textAlign?: CSSProperties['textAlign'];
 };
-export function InputCell({
+export const InputCell = forwardRef<HTMLInputElement, InputCellProps>(function InputCell({
   inputProps,
   onUpdate,
   onBlur,
   textAlign,
   ...props
-}: InputCellProps) {
+}: InputCellProps, ref) {
   return (
-    <Cell textAlign={textAlign} {...props}>
+    <Cell textAlign={textAlign} {...props} ref={ref}>
       {() => (
         <InputValue
           value={props.value}
@@ -413,7 +415,7 @@ export function InputCell({
       )}
     </Cell>
   );
-}
+});
 
 function shouldSaveFromKey(e) {
   switch (e.key) {
@@ -438,13 +440,13 @@ type CustomCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   onUpdate: (value: string) => void;
   onBlur: (ev: UIEvent<unknown>) => void;
 };
-export function CustomCell({
+export const CustomCell = forwardRef<HTMLDivElement, CustomCellProps>(function CustomCell({
   value: defaultValue,
   children,
   onUpdate,
   onBlur,
   ...props
-}: CustomCellProps) {
+}: CustomCellProps, ref) {
   const [value, setValue] = useState(defaultValue);
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
 
@@ -470,7 +472,7 @@ export function CustomCell({
   }
 
   return (
-    <Cell {...props} value={defaultValue}>
+    <Cell {...props} value={defaultValue} ref={ref}>
       {() =>
         children({
           onBlur: onBlur_,
@@ -486,7 +488,7 @@ export function CustomCell({
       }
     </Cell>
   );
-}
+});
 
 type DeleteCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   onDelete?: () => void;
