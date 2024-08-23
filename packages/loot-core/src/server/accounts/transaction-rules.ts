@@ -472,6 +472,19 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           return { id: null };
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
+
+      case 'hasTags':
+        const tagValues = value
+          .split(/(?<!#)(#[\w\d\p{Emoji}-]+)(?=\s|$)/gu)
+          .filter(tag => tag.startsWith('#'));
+
+        return {
+          $and: tagValues.map(v => {
+            const regex = new RegExp(`(^|\\s)${v}(\\s|$)`);
+            return apply(field, '$regexp', regex.source);
+          }),
+        };
+
       case 'notOneOf':
         const notValues = value;
         if (notValues.length === 0) {
