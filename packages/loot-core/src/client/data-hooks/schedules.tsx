@@ -56,9 +56,10 @@ export function useSchedules({
             statusQuery.unsubscribe();
           }
 
-          statusQuery = loadStatuses(schedules, (statuses: ScheduleStatuses) =>
-            setData({ schedules, statuses }),
-            prefs
+          statusQuery = loadStatuses(
+            schedules,
+            (statuses: ScheduleStatuses) => setData({ schedules, statuses }),
+            prefs,
           );
         }
       },
