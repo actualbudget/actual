@@ -209,6 +209,46 @@ const CONDITION_TYPES = {
       'isNot',
       'doesNotContain',
       'notOneOf',
+      'hasTags',
+    ],
+    nullable: true,
+    parse(op, value, fieldName) {
+      if (op === 'oneOf' || op === 'notOneOf') {
+        assert(
+          Array.isArray(value),
+          'no-empty-array',
+          `oneOf must have an array value (field: ${fieldName}): ${JSON.stringify(
+            value,
+          )}`,
+        );
+        return value.filter(Boolean).map(val => val.toLowerCase());
+      }
+
+      if (
+        op === 'contains' ||
+        op === 'matches' ||
+        op === 'doesNotContain' ||
+        op === 'hasTags'
+      ) {
+        assert(
+          typeof value === 'string' && value.length > 0,
+          'no-empty-string',
+          `contains must have non-empty string (field: ${fieldName})`,
+        );
+      }
+
+      return value.toLowerCase();
+    },
+  },
+  imported_payee: {
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
     ],
     nullable: true,
     parse(op, value, fieldName) {
@@ -433,6 +473,13 @@ export class Condition {
           return false;
         }
         return this.value.indexOf(fieldValue) !== -1;
+
+      case 'hasTags':
+        if (fieldValue === null) {
+          return false;
+        }
+        return fieldValue.indexOf(this.value) !== -1;
+
       case 'notOneOf':
         if (fieldValue === null) {
           return false;
@@ -942,6 +989,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   contains: 0,
   doesNotContain: 0,
   matches: 0,
+  hasTags: 0,
 };
 
 function computeScore(rule) {
