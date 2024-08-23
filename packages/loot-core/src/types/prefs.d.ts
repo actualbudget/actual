@@ -36,7 +36,7 @@ export type SyncedPrefs = Partial<
     [key: `ofx-fallback-missing-payee-${string}`]: boolean;
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
     budgetType: 'report' | 'rollover';
-    upcomingScheduledTransactionLength: `${1 | 7 | 14 | 30 | 60 | 90}`;
+    upcomingScheduledTransactionLength: `${1 | 7 | 14 | 30}`;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 

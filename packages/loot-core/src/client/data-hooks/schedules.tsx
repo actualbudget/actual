@@ -43,8 +43,7 @@ export function useSchedules({
   transform,
 }: UseSchedulesArgs = {}): UseSchedulesResult {
   const [data, setData] = useState<UseSchedulesResult>(null);
-  const prefs = useSelector((state: State) => state.prefs.local);
-  console.log({ prefs });
+  const prefs = useSelector((state: State) => state.prefs);
   useEffect(() => {
     const query = q('schedules').select('*');
     let statusQuery;

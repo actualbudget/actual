@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 
 import { Column } from 'glamor/jsxstyle';
 
@@ -20,8 +20,6 @@ const options: {
   { value: '7', label: '1 Week' },
   { value: '14', label: '2 Weeks' },
   { value: '30', label: '1 Month' },
-  { value: '60', label: '2 Months' },
-  { value: '90', label: '3 Months' },
 ];
 
 export function UpcomingLengthSettings() {
