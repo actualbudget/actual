@@ -10,7 +10,6 @@ import {
   addDays,
   subDays,
   parseDate,
-  dayFromDate,
   format,
   currentDay,
 } from '../../shared/months';
@@ -67,9 +66,9 @@ void (function registerHandlebarsHelpers() {
     min: mathHelper(Math.min),
     max: mathHelper(Math.max),
     fixed: (a: unknown, digits: unknown) => Number(a).toFixed(Number(digits)),
-    day: (date: string) => dayFromDate(parseDate(date)),
-    month: (date: string) => monthFromDate(parseDate(date)),
-    year: (date: string) => yearFromDate(parseDate(date)),
+    day: (date: string) => format(date, "d"),
+    month: (date: string) => format(date, "M"),
+    year: (date: string) => format(date, "yyyy"),
     format: (date: string, f: string) => format(date, f),
   };
 
@@ -145,7 +144,7 @@ const CONDITION_TYPES = {
   date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
-    parse(op, value, fieldName) {
+    parse(op, value, fieldName){
       const parsed =
         typeof value === 'string'
           ? parseDateString(value)
