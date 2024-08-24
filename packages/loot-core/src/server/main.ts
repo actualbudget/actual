@@ -1424,7 +1424,6 @@ handlers['subscribe-needs-bootstrap'] = async function ({
   try {
     res = await get(getServer(url).SIGNUP_SERVER + '/needs-bootstrap');
   } catch (err) {
-    console.info(err);
     return { error: 'network-failure' };
   }
 
@@ -1450,7 +1449,6 @@ handlers['subscribe-bootstrap'] = async function ({ password }) {
   try {
     res = await post(getServer().SIGNUP_SERVER + '/bootstrap', { password });
   } catch (err) {
-    console.info(err);
     return { error: err.reason || 'network-failure' };
   }
 
@@ -1509,7 +1507,6 @@ handlers['subscribe-change-password'] = async function ({ password }) {
       password,
     });
   } catch (err) {
-    console.info(err);
     return { error: err.reason || 'network-failure' };
   }
 
@@ -1562,7 +1559,6 @@ handlers['get-server-version'] = async function () {
     const info = JSON.parse(res);
     version = info.build.version;
   } catch (err) {
-    console.info(err);
     return { error: 'network-failure' };
   }
 
