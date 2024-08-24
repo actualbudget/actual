@@ -67,7 +67,7 @@ export function Schedules() {
   }
 
   return (
-    <Page header="Schedules">
+    <Page header={t('Schedules')}>
       <View
         style={{
           flexDirection: 'row',

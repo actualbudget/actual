@@ -142,7 +142,7 @@ export function ScheduleAmountCell({
   const { t } = useTranslation();
 
   const num = getScheduledAmount(amount);
-  const str = integerToCurrency(Math.abs(num || 0));
+  const currencyAmount = integerToCurrency(Math.abs(num || 0));
   const isApprox = op === 'isapprox' || op === 'isbetween';
 
   return (
@@ -165,7 +165,11 @@ export function ScheduleAmountCell({
             lineHeight: '1em',
             marginRight: 10,
           }}
-          title={isApprox ? t('Approximately {{str}}', { str }) + ' ' : str}
+          title={
+            isApprox
+              ? t('Approximately {{currencyAmount}}', { currencyAmount })
+              : currencyAmount
+          }
         >
           ~
         </View>
@@ -178,9 +182,15 @@ export function ScheduleAmountCell({
           overflow: 'hidden',
           textOverflow: 'ellipsis',
         }}
-        title={isApprox ? t('Approximately {{str}}', { str }) + ' ' : str}
+        title={
+          isApprox
+            ? t('Approximately {{currencyAmount}}', { currencyAmount })
+            : currencyAmount
+        }
       >
-        <PrivacyFilter>{num > 0 ? `+${str}` : `${str}`}</PrivacyFilter>
+        <PrivacyFilter>
+          {num > 0 ? `+${currencyAmount}` : `${currencyAmount}`}
+        </PrivacyFilter>
       </Text>
     </Cell>
   );

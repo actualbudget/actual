@@ -93,8 +93,8 @@ export function ScheduleLink({
             <Text>
               {ids?.length > 1
                 ? t(
-                    `Choose the schedule these {{num}} transactions belong to:`,
-                    { num: ids.length },
+                    `Choose the schedule these {{count}} transactions belong to:`,
+                    { count: ids.length },
                   )
                 : t(`Choose the schedule this transaction belongs to:`)}
             </Text>

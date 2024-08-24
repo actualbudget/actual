@@ -2,6 +2,8 @@ import React, { useEffect, useReducer } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { getPayeesById } from 'loot-core/client/reducers/queries';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
@@ -48,11 +50,11 @@ function updateScheduleConditions(schedule, fields) {
 
   // Validate
   if (fields.date == null) {
-    return { error: 'Date is required' };
+    return { error: t('Date is required') };
   }
 
   if (fields.amount == null) {
-    return { error: 'A valid amount is required' };
+    return { error: t('A valid amount is required') };
   }
 
   return {
@@ -492,7 +494,7 @@ export function ScheduleDetails({ id, transaction }) {
               <PayeeAutocomplete
                 value={state.fields.payee}
                 labelProps={{ id: 'payee-label' }}
-                inputProps={{ id: 'payee-field', placeholder: '(none)' }}
+                inputProps={{ id: 'payee-field', placeholder: t('(none)') }}
                 onSelect={id =>
                   dispatch({ type: 'set-field', field: 'payee', value: id })
                 }
@@ -509,7 +511,7 @@ export function ScheduleDetails({ id, transaction }) {
                 includeClosedAccounts={false}
                 value={state.fields.account}
                 labelProps={{ id: 'account-label' }}
-                inputProps={{ id: 'account-field', placeholder: '(none)' }}
+                inputProps={{ id: 'account-field', placeholder: t('(none)') }}
                 onSelect={id =>
                   dispatch({ type: 'set-field', field: 'account', value: id })
                 }
@@ -605,7 +607,7 @@ export function ScheduleDetails({ id, transaction }) {
               {state.upcomingDates && (
                 <View style={{ fontSize: 13, marginTop: 20 }}>
                   <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
-                    Upcoming dates
+                    <Trans>Upcoming dates</Trans>
                   </Text>
                   <Stack
                     direction="column"
@@ -638,7 +640,7 @@ export function ScheduleDetails({ id, transaction }) {
                 }}
               />
               <label htmlFor="form_repeats" style={{ userSelect: 'none' }}>
-                Repeats
+                <Trans>Repeats</Trans>
               </label>
             </View>
 
