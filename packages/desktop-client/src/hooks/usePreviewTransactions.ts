@@ -20,8 +20,6 @@ export function usePreviewTransactions(
     TransactionEntity[]
   >([]);
 
-  console.log({ scheduleData });
-
   if (scheduleData !== previousScheduleData) {
     setPreviousScheduleData(scheduleData);
 
