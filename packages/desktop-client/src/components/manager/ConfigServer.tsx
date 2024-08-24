@@ -49,7 +49,7 @@ export function ConfigServer() {
   function getElectronErrorMessage(error: string) {
     switch (error) {
       case 'network-failure':
-        const dataDir = globalThis.window.Actual.dataDir;
+        const dataDir = globalThis.window.Actual.DATA_DIR;
         return t(
           'If the server is using a self-signed certificate, place it in this directory and then restart the app: {{dataDir}}',
           { dataDir },
