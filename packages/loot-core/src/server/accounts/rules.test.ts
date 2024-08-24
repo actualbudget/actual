@@ -47,6 +47,9 @@ describe('Condition', () => {
     let cond = new Condition('contains', 'name', 'foo', null, fieldTypes);
     expect(cond.eval({ name: null })).toBe(false);
 
+    cond = new Condition('matches', 'name', '^fo*$', null, fieldTypes);
+    expect(cond.eval({ name: null })).toBe(false);
+
     cond = new Condition('oneOf', 'name', ['foo'], null, fieldTypes);
     expect(cond.eval({ name: null })).toBe(false);
 
@@ -67,6 +70,9 @@ describe('Condition', () => {
     expect(cond.eval({ name: 'James' })).toBe(false);
 
     cond = new Condition('contains', 'name', 'foo', null, fieldTypes);
+    expect(cond.eval({ date: '2020-01-01' })).toBe(false);
+
+    cond = new Condition('matches', 'name', '^fo*$', null, fieldTypes);
     expect(cond.eval({ date: '2020-01-01' })).toBe(false);
 
     spy.mockRestore();
@@ -223,6 +229,20 @@ describe('Condition', () => {
     expect(cond.eval({ name: 'bfoo' })).toBe(true);
     expect(cond.eval({ name: 'bfo' })).toBe(false);
     expect(cond.eval({ name: 'f o o' })).toBe(false);
+
+    cond = new Condition('matches', 'name', '^fo*$', null, fieldTypes);
+    expect(cond.eval({ name: 'bar foo baz' })).toBe(false);
+    expect(cond.eval({ name: 'bar FOOb' })).toBe(false);
+    expect(cond.eval({ name: 'foo' })).toBe(true);
+    expect(cond.eval({ name: 'foob' })).toBe(false);
+    expect(cond.eval({ name: 'bfoo' })).toBe(false);
+    expect(cond.eval({ name: 'bfo' })).toBe(false);
+    expect(cond.eval({ name: 'f o o' })).toBe(false);
+  });
+
+  test('matches handles invalid regex', () => {
+    const cond = new Condition('matches', 'name', 'fo**', null, fieldTypes);
+    expect(cond.eval({ name: 'foo' })).toBe(false);
   });
 
   test('number validates value', () => {

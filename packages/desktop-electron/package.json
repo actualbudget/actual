@@ -93,7 +93,7 @@
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
-    "@electron/notarize": "2.2.0",
+    "@electron/notarize": "2.4.0",
     "@electron/rebuild": "3.6.0",
     "@types/copyfiles": "^2",
     "copyfiles": "^2.4.1",
