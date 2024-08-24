@@ -34,6 +34,8 @@ import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
 import { SchedulesHandlers } from './types/handlers';
+import { useSelector } from 'react-redux';
+import { State } from 'loot-core/client/state-types';
 
 // Utilities
 
@@ -490,13 +492,13 @@ async function advanceSchedulesService(syncSuccess) {
 
   const failedToPost = [];
   let didPost = false;
-
+  const prefs = useSelector((state: State) => state.prefs);
   for (const schedule of schedules) {
     const status = getStatus(
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
-      null, //TODO: add prefs here
+      prefs,
     );
 
     if (status === 'paid') {
