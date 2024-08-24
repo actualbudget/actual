@@ -28,6 +28,12 @@ export function PostsOfflineNotification() {
     dispatch(popModal());
   }
 
+  const payeesList = payees.map(id => (
+    <Text key={id} style={{ color: theme.pageTextPositive }}>
+      <DisplayId id={id} type="payees" />
+    </Text>
+  ));
+
   return (
     <Modal name="schedule-posts-offline-notification">
       {({ state: { close } }) => (
@@ -37,34 +43,26 @@ export function PostsOfflineNotification() {
             rightContent={<ModalCloseButton onClick={close} />}
           />
           <Paragraph>
-            {payees.length > 0 ? (
-              <Text>
-                {plural ? t('The payees') : t('The payee')}{' '}
-                {payees.map((id, idx) => (
-                  <Text key={id}>
-                    <Text style={{ color: theme.pageTextPositive }}>
-                      <DisplayId id={id} type="payees" />
-                    </Text>
-                    {idx === payees.length - 1
-                      ? ' '
-                      : idx === payees.length - 2
-                        ? ', and '
-                        : ', '}
-                  </Text>
-                ))}
-              </Text>
-            ) : (
-              <Text>
-                {plural
-                  ? t('There are payees that')
-                  : t('There is a payee that')}{' '}
-              </Text>
-            )}
-
             <Text>
-              {plural
-                ? t('have schedules that are due today.')
-                : t('has schedules that are due today.')}{' '}
+              {payees.length > 0
+                ? plural
+                  ? t(
+                      // eslint-disable-next-line rulesdir/typography
+                      `The payees {{(payeesList, list(style: 'long'; type: 'conjunction';))}} have schedules that are due today.`,
+                      { payeesList },
+                    )
+                  : t(
+                      // eslint-disable-next-line rulesdir/typography
+                      `The payee {{(payeesList, list(style: 'long'; type: 'conjunction';}} has schedules that are due today.`,
+                      { payeesList },
+                    )
+                : plural
+                  ? t(
+                      'There are payees that have schedules that are due today.',
+                    )
+                  : t(
+                      'There is a payee that has schedules that are due today.',
+                    )}{' '}
               <Trans>
                 Usually we automatically post transactions for these, but you
                 are offline or syncing failed. In order to avoid duplicate
