@@ -3,8 +3,8 @@ import { type AccountEntity } from '../../types/models';
 import type * as constants from '../constants';
 
 export type QueriesState = {
-  newTransactions: unknown[];
-  matchedTransactions: unknown[];
+  newTransactions: string[];
+  matchedTransactions: string[];
   lastTransaction: unknown | null;
   updatedAccounts: string[];
   accounts: AccountEntity[];
@@ -20,8 +20,8 @@ export type QueriesState = {
 
 type SetNewTransactionsAction = {
   type: typeof constants.SET_NEW_TRANSACTIONS;
-  newTransactions?: unknown[];
-  matchedTransactions?: unknown[];
+  newTransactions?: string[];
+  matchedTransactions?: string[];
   updatedAccounts?: string[];
 };
 

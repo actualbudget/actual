@@ -20,6 +20,7 @@
     "@swc/plugin-react-remove-properties": "^1.5.121",
     "@testing-library/react": "14.1.2",
     "@testing-library/user-event": "14.5.2",
+    "@types/debounce": "^1.2.4",
     "@types/lodash": "^4",
     "@types/promise-retry": "^1.1.6",
     "@types/react": "^18.2.0",
