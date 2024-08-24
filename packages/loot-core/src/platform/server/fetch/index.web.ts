@@ -6,11 +6,13 @@ export const fetch = async (
 ): Promise<Response> => {
   const response = await globalThis.fetch(input, options);
 
-  const originalHost = new URL(input instanceof Request ? input.url : input)
-    .host;
-
-  if (response.redirected && new URL(response.url).host !== originalHost) {
+  // Detect if the API query has been redirected to a different origin. This may indicate that the
+  // request has been intercepted by an authentication proxy
+  const originalUrl = new URL(input instanceof Request ? input.url : input);
+  const responseUrl = new URL(response.url);
+  if (response.redirected && responseUrl.host !== originalUrl.host) {
     connection.send('api-fetch-redirected');
+    throw new Error(`API request redirected to ${responseUrl.host}`);
   }
 
   return response;
