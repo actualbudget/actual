@@ -48,13 +48,17 @@ jobs:
           sudo flatpak install org.electronjs.Electron2.BaseApp/x86_64/23.08 -y
       - name: Set up environment
         uses: ./.github/actions/setup
-      - name: Build Electron
+      - name: Build Electron for Mac
+        if: ${{ startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron
         env:
-          # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          # CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      - name: Build Electron
+        if: ${{ ! startsWith(matrix.os, 'macos') }}
+        run: ./bin/package-electron
       - name: Upload Build
         uses: actions/upload-artifact@v4
         with:
