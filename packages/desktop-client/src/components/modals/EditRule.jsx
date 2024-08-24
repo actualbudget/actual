@@ -94,7 +94,7 @@ export function FieldSelect({ fields, style, value, onChange }) {
         bare
         options={fields}
         value={value}
-        onChange={value => onChange('field', value)}
+        onChange={onChange}
         buttonStyle={{ color: theme.pageTextPositive }}
       />
     </View>
@@ -260,7 +260,11 @@ function ConditionEditor({
 
   return (
     <Editor style={editorStyle} error={error}>
-      <FieldSelect fields={conditionFields} value={field} onChange={onChange} />
+      <FieldSelect
+        fields={conditionFields}
+        value={field}
+        onChange={value => onChange('field', value)}
+      />
       <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
       <View style={{ flex: 1 }}>{valueEditor}</View>
@@ -373,7 +377,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           <FieldSelect
             fields={options?.splitIndex ? splitActionFields : actionFields}
             value={field}
-            onChange={onChange}
+            onChange={value => onChange('field', value)}
           />
 
           <View style={{ flex: 1 }}>
@@ -838,7 +842,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
     setStage(stage);
   }
 
-  function onChangeConditionsOp(name, value) {
+  function onChangeConditionsOp(value) {
     setConditionsOp(value);
   }
 
