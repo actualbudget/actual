@@ -17,6 +17,7 @@ const supportSelfSignedCertificates = () => {
       fs.readFileSync(`${process.env.ACTUAL_DATA_DIR}/${filename}`),
     );
 
+    // Add the certificates to the trusted chain for all fetch calls
     https.globalAgent.options.ca = [...tls.rootCertificates, ...certFiles];
     console.info('Added the self signed certificate');
   } catch (error) {
