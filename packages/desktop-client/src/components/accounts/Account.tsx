@@ -70,9 +70,7 @@ import { TransactionList } from '../transactions/TransactionList';
 
 import { AccountHeader } from './Header';
 
-type ConditionEntity =
-  | (Partial<RuleConditionEntity> & { queryFilter?: unknown })
-  | TransactionFilterEntity;
+type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
 function isTransactionFilterEntity(
   filter: ConditionEntity,
@@ -183,6 +181,8 @@ function AllTransactions({
           (scheduledTransaction._inverse ? -1 : 1) *
           getScheduledAmount(scheduledTransaction.amount);
         return {
+          // TODO: fix me
+          // eslint-disable-next-line react-hooks/exhaustive-deps
           balance: (runningBalance += amount),
           id: scheduledTransaction.id,
         };
@@ -1408,11 +1408,10 @@ class AccountInternal extends PureComponent<
 
   applyFilters = async (conditions: ConditionEntity[]) => {
     if (conditions.length > 0) {
-      const filteredCustomQueryFilters: (Partial<RuleConditionEntity> & {
-        queryFilter?: unknown;
-      })[] = conditions.filter(
-        cond => !isTransactionFilterEntity(cond) && !!cond.customName,
-      );
+      const filteredCustomQueryFilters: Partial<RuleConditionEntity>[] =
+        conditions.filter(
+          cond => !isTransactionFilterEntity(cond) && !!cond.customName,
+        );
       const customQueryFilters = filteredCustomQueryFilters.map(
         f => f.queryFilter,
       );
