@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -14,6 +15,8 @@ import { Text } from '../common/Text';
 import { DisplayId } from '../util/DisplayId';
 
 export function PostsOfflineNotification() {
+  const { t } = useTranslation();
+
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -30,13 +33,13 @@ export function PostsOfflineNotification() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Post transactions?"
+            title={t('Post transactions?')}
             rightContent={<ModalCloseButton onClick={close} />}
           />
           <Paragraph>
             {payees.length > 0 ? (
               <Text>
-                The {plural ? 'payees ' : 'payee '}
+                {plural ? t('The payees') : t('The payee')}{' '}
                 {payees.map((id, idx) => (
                   <Text key={id}>
                     <Text style={{ color: theme.pageTextPositive }}>
@@ -51,26 +54,38 @@ export function PostsOfflineNotification() {
                 ))}
               </Text>
             ) : (
-              <Text>There {plural ? 'are payees ' : 'is a payee '} that </Text>
+              <Text>
+                {plural
+                  ? t('There are payees that')
+                  : t('There is a payee that')}{' '}
+              </Text>
             )}
 
             <Text>
-              {plural ? 'have ' : 'has '} schedules that are due today. Usually
-              we automatically post transactions for these, but you are offline
-              or syncing failed. In order to avoid duplicate transactions, we
-              let you choose whether or not to create transactions for these
-              schedules.
+              {plural
+                ? t('have schedules that are due today.')
+                : t('has schedules that are due today.')}{' '}
+              <Trans>
+                Usually we automatically post transactions for these, but you
+                are offline or syncing failed. In order to avoid duplicate
+                transactions, we let you choose whether or not to create
+                transactions for these schedules.
+              </Trans>
             </Text>
           </Paragraph>
           <Paragraph>
-            Be aware that other devices may have already created these
-            transactions. If you have multiple devices, make sure you only do
-            this on one device or you will have duplicate transactions.
+            <Trans>
+              Be aware that other devices may have already created these
+              transactions. If you have multiple devices, make sure you only do
+              this on one device or you will have duplicate transactions.
+            </Trans>
           </Paragraph>
           <Paragraph>
-            You can always manually post a transaction later for a due schedule
-            by selecting the schedule and clicking “Post transaction” in the
-            action menu.
+            <Trans>
+              You can always manually post a transaction later for a due
+              schedule by selecting the schedule and clicking “Post transaction”
+              in the action menu.
+            </Trans>
           </Paragraph>
           <Stack
             direction="row"
@@ -78,7 +93,9 @@ export function PostsOfflineNotification() {
             style={{ marginTop: 20 }}
             spacing={2}
           >
-            <Button onPress={close}>Decide later</Button>
+            <Button onPress={close}>
+              <Trans>Decide later</Trans>
+            </Button>
             <Button
               variant="primary"
               autoFocus
@@ -87,7 +104,7 @@ export function PostsOfflineNotification() {
                 close();
               }}
             >
-              Post transactions
+              <Trans>Post transactions</Trans>
             </Button>
           </Stack>
         </>
