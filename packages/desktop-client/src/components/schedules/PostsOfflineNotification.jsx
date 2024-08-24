@@ -21,7 +21,6 @@ export function PostsOfflineNotification() {
   const dispatch = useDispatch();
 
   const payees = (location.state && location.state.payees) || [];
-  const plural = payees.length > 1;
 
   async function onPost() {
     await send('schedule/force-run-service');
@@ -45,24 +44,15 @@ export function PostsOfflineNotification() {
           <Paragraph>
             <Text>
               {payees.length > 0
-                ? plural
-                  ? t(
-                      // eslint-disable-next-line rulesdir/typography
-                      `The payees {{(payeesList, list(style: 'long'; type: 'conjunction';))}} have schedules that are due today.`,
-                      { payeesList },
-                    )
-                  : t(
-                      // eslint-disable-next-line rulesdir/typography
-                      `The payee {{(payeesList, list(style: 'long'; type: 'conjunction';}} has schedules that are due today.`,
-                      { payeesList },
-                    )
-                : plural
-                  ? t(
-                      'There are payees that have schedules that are due today.',
-                    )
-                  : t(
-                      'There is a payee that has schedules that are due today.',
-                    )}{' '}
+                ? t(
+                    // eslint-disable-next-line rulesdir/typography
+                    `The payees {{(payeesList, list(style: 'long'; type: 'conjunction';))}} have schedules that are due today.`,
+                    { payeesList, count: payees.length },
+                  )
+                : t(
+                    'There are payees that have schedules that are due today.',
+                    { count: payees.length },
+                  )}{' '}
               <Trans>
                 Usually we automatically post transactions for these, but you
                 are offline or syncing failed. In order to avoid duplicate
