@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 import {
@@ -29,8 +30,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { type CSSProperties } from '../../../style';
-import { theme } from '../../../style/index';
+import { type CSSProperties, theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
@@ -74,6 +74,8 @@ const CustomTooltip = ({
   balanceTypeOp,
   yAxis,
 }: CustomTooltipProps) => {
+  const { t } = useTranslation();
+
   if (active && payload && payload.length) {
     return (
       <div
@@ -94,31 +96,31 @@ const CustomTooltip = ({
           <div style={{ lineHeight: 1.5 }}>
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Assets:"
+                left={t('Assets:')}
                 right={amountToCurrency(payload[0].payload.totalAssets)}
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Debts:"
+                left={t('Debts:')}
                 right={amountToCurrency(payload[0].payload.totalDebts)}
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Net Assets:"
+                left={t('Net Assets:')}
                 right={amountToCurrency(payload[0].payload.netAssets)}
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Net Debts:"
+                left={t('Net Debts:')}
                 right={amountToCurrency(payload[0].payload.netDebts)}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
-                left="Net:"
+                left={t('Net:')}
                 right={
                   <strong>
                     {amountToCurrency(payload[0].payload.totalTotals)}

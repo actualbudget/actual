@@ -11,7 +11,7 @@
     "requireindex": "^1.2.0"
   },
   "devDependencies": {
-    "eslint-plugin-eslint-plugin": "^5.0.0",
+    "eslint-plugin-eslint-plugin": "^5.5.1",
     "eslint-plugin-node": "^11.1.0",
     "jest": "^27.5.1",
     "npm-run-all": "^4.1.5"
