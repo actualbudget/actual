@@ -73,7 +73,7 @@ export function useSchedules({
         statusQuery.unsubscribe();
       }
     };
-  }, [transform]);
+  }, [prefs, transform]);
 
   return data;
 }
