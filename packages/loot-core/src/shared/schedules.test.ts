@@ -1,21 +1,18 @@
 import MockDate from 'mockdate';
 
 import { getRecurringDescription, getStatus } from './schedules';
-import { PrefsState } from 'loot-core/client/state-types/prefs';
 import * as monthUtils from './months';
+import { LocalPrefs } from 'loot-core/types/prefs';
 
 describe('schedules', () => {
   let today = new Date(2017, 0, 1); // Global date when testing is set to 2017-01-01 per monthUtils.currentDay()
   let dateFormat = 'yyyy-MM-dd';
   const todayString = monthUtils.format(today, dateFormat);
   describe('getStatus', () => {
-    let prefs: PrefsState;
+    let prefs: LocalPrefs;
     beforeEach(() => {
       prefs = {
-        local: {
-          upcomingScheduledTransactionLength: '7',
-        },
-        global: {},
+        upcomingScheduledTransactionLength: '7',
       };
     });
     it('returns completed if completed', () => {
@@ -33,7 +30,7 @@ describe('schedules', () => {
     it.each(['1', '7', '14', '30'])(
       'returns upcoming if within upcoming range %s',
       (upcomingLength: string) => {
-        prefs.local.upcomingScheduledTransactionLength = upcomingLength as
+        prefs.upcomingScheduledTransactionLength = upcomingLength as
           | '1'
           | '7'
           | '14'

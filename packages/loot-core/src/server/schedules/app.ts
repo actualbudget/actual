@@ -492,13 +492,13 @@ async function advanceSchedulesService(syncSuccess) {
 
   const failedToPost = [];
   let didPost = false;
-  const prefs = useSelector((state: State) => state.prefs);
+
   for (const schedule of schedules) {
     const status = getStatus(
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
-      prefs,
+      prefs.getPrefs(),
     );
 
     if (status === 'paid') {

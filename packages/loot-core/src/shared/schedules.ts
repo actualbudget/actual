@@ -3,13 +3,13 @@ import type { IRuleOptions } from '@rschedule/core';
 
 import * as monthUtils from './months';
 import { q } from './query';
-import type { PrefsState } from 'loot-core/client/state-types/prefs';
+import { LocalPrefs } from 'loot-core/types/prefs';
 
 export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
-  prefs: PrefsState,
+  prefs: LocalPrefs,
 ) {
   const today = monthUtils.currentDay();
 
@@ -24,7 +24,7 @@ export function getStatus(
     nextDate <=
       monthUtils.addDays(
         today,
-        parseInt(prefs.local.upcomingScheduledTransactionLength ?? '7'),
+        parseInt(prefs.upcomingScheduledTransactionLength ?? '7'),
       )
   ) {
     return 'upcoming';
