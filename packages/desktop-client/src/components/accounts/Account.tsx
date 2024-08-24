@@ -1409,16 +1409,16 @@ class AccountInternal extends PureComponent<
   applyFilters = async (conditions: ConditionEntity[]) => {
     if (conditions.length > 0) {
       const filteredCustomQueryFilters: Partial<RuleConditionEntity>[] =
-        conditions.filter(
-          cond => !isTransactionFilterEntity(cond) && !!cond.customName,
-        );
+        conditions.filter(cond => !isTransactionFilterEntity(cond));
       const customQueryFilters = filteredCustomQueryFilters.map(
         f => f.queryFilter,
       );
       const { filters: queryFilters } = await send(
         'make-filters-from-conditions',
         {
-          conditions: conditions.filter(isTransactionFilterEntity),
+          conditions: conditions.filter(
+            cond => isTransactionFilterEntity(cond) || !cond.customName,
+          ),
         },
       );
       const conditionsOpKey =
