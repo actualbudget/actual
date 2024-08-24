@@ -13,7 +13,10 @@ const supportSelfSignedCertificates = () => {
   if (true) {
     const cas = [...tls.rootCertificates];
     https.globalAgent.options.ca = cas;
-    https.globalAgent.options.ca.push(fs.readFileSync(`path/to/rootCA.pem`));
+    // https.globalAgent.options.ca.push(fs.readFileSync(`path/to/rootCA.pem`));
+    https.globalAgent.options.ca.push(
+      fs.readFileSync(`D:/GitWork/actual-server/selfhost.crt`),
+    );
   }
 };
 
