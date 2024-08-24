@@ -1,4 +1,5 @@
 import React, { type RefObject, type UIEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type balanceTypeOpType,
@@ -36,6 +37,7 @@ export function ReportTableHeader({
   compactStyle,
   mode,
 }: ReportTableHeaderProps) {
+  const { t } = useTranslation();
   return (
     <Row
       collapsed={true}
@@ -94,7 +96,7 @@ export function ReportTableHeader({
                     minWidth: compact ? 50 : 85,
                   }}
                   valueStyle={compactStyle}
-                  value="Deposits"
+                  value={t('Deposits')}
                   width="flex"
                 />
                 <Cell
@@ -102,7 +104,7 @@ export function ReportTableHeader({
                     minWidth: compact ? 50 : 85,
                   }}
                   valueStyle={compactStyle}
-                  value="Payments"
+                  value={t('Payments')}
                   width="flex"
                 />
               </>
@@ -112,7 +114,7 @@ export function ReportTableHeader({
             minWidth: compact ? 50 : 85,
           }}
           valueStyle={compactStyle}
-          value="Totals"
+          value={t('Totals')}
           width="flex"
         />
         <Cell
@@ -120,7 +122,7 @@ export function ReportTableHeader({
             minWidth: compact ? 50 : 85,
           }}
           valueStyle={compactStyle}
-          value="Average"
+          value={t('Average')}
           width="flex"
         />
       </View>

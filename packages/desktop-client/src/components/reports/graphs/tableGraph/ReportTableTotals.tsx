@@ -4,6 +4,7 @@ import React, {
   useState,
   type RefObject,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   type GroupedEntity,
@@ -63,6 +64,7 @@ export function ReportTableTotals({
   style,
   renderTotals,
 }: ReportTableTotalsProps) {
+  const { t } = useTranslation();
   const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 
   useLayoutEffect(() => {
@@ -81,7 +83,7 @@ export function ReportTableTotals({
 
   const metadata: GroupedEntity = {
     id: '',
-    name: 'Totals',
+    name: t('Totals'),
     intervalData: data.intervalData,
     totalAssets: data.totalAssets,
     totalDebts: data.totalDebts,
