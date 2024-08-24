@@ -1,5 +1,8 @@
 // @ts-strict-ignore
 import './polyfills';
+import https from 'https';
+import tls from 'tls';
+
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
@@ -1253,6 +1256,12 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('theme' in prefs) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
+  if ('serverSelfSignedCert' in prefs) {
+    await asyncStorage.setItem(
+      'server-self-signed-cert',
+      prefs.serverSelfSignedCert,
+    );
+  }
   return 'ok';
 };
 
@@ -2123,6 +2132,19 @@ export async function initApp(isDev, socketName) {
     } catch (e) {
       console.log('Error loading key', e);
       throw new Error('load-key-error');
+    }
+  }
+
+  const selfSignedCertPath = await asyncStorage.getItem(
+    'server-self-signed-cert',
+  );
+
+  if (selfSignedCertPath) {
+    try {
+      const selfSignedCert = await fs.readFile(selfSignedCertPath);
+      https.globalAgent.options.ca = [...tls.rootCertificates, selfSignedCert];
+    } catch (error) {
+      console.error('Unable to add the self signed certificate', error);
     }
   }
 

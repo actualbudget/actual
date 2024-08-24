@@ -8,11 +8,13 @@ import {
 } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { BigInput } from '../common/Input';
+import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
@@ -32,6 +34,9 @@ export function ConfigServer() {
   }, [currentUrl]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [_serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
+    'serverSelfSignedCert',
+  );
 
   function getErrorMessage(error: string) {
     switch (error) {
@@ -43,19 +48,6 @@ export function ConfigServer() {
         return t(
           'Server does not look like an Actual server. Is it set up correctly?',
         );
-    }
-  }
-
-  function getElectronErrorMessage(error: string) {
-    switch (error) {
-      case 'network-failure':
-        const dataDir = globalThis.window.Actual.DATA_DIR;
-        return t(
-          'If the server is using a self-signed certificate, place it in this directory and then restart the app: {{dataDir}}',
-          { dataDir },
-        );
-      default:
-        return;
     }
   }
 
@@ -94,6 +86,23 @@ export function ConfigServer() {
 
   function onSameDomain() {
     setUrl(window.location.origin);
+  }
+
+  async function onSelectSelfSignedCertificate() {
+    const selfSignedCertificateLocation = await window.Actual?.openFileDialog({
+      properties: ['openFile'],
+      filters: [
+        {
+          name: 'Self Signed Certificate',
+          extensions: ['crt', 'pem'],
+        },
+      ],
+    });
+
+    if (selfSignedCertificateLocation) {
+      setServerSelfSignedCert(selfSignedCertificateLocation[0]);
+      globalThis.window.Actual.relaunch(); // relaunch to use the certificate
+    }
   }
 
   async function onSkip() {
@@ -146,16 +155,28 @@ export function ConfigServer() {
             {getErrorMessage(error)}
           </Text>
           {isElectron() && (
-            <Text
-              style={{
-                marginTop: 10,
-                color: theme.errorText,
-                borderRadius: 4,
-                fontSize: 15,
-              }}
+            <View
+              style={{ display: 'flex', flexDirection: 'row', marginTop: 20 }}
             >
-              {getElectronErrorMessage(error)}
-            </Text>
+              <Text
+                style={{
+                  color: theme.errorText,
+                  borderRadius: 4,
+                  fontSize: 15,
+                }}
+              >
+                <Trans>
+                  If the server is using a self-signed certificate{' '}
+                  <Link
+                    variant="text"
+                    style={{ fontSize: 15 }}
+                    onClick={onSelectSelfSignedCertificate}
+                  >
+                    select it here.
+                  </Link>
+                </Trans>
+              </Text>
+            </View>
           )}
         </>
       )}
