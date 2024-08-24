@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
   ACTUAL_VERSION: VERSION,
   logToTerminal: console.log,
+  dataDir: process.env.ACTUAL_DATA_DIR,
 
   ipcConnect: (
     func: (payload: {

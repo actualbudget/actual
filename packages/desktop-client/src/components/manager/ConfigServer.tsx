@@ -46,6 +46,19 @@ export function ConfigServer() {
     }
   }
 
+  function getElectronErrorMessage(error: string) {
+    switch (error) {
+      case 'network-failure':
+        const dataDir = globalThis.window.Actual.dataDir;
+        return t(
+          'If the server is using a self-signed certificate, place it in this directory and then restart the app: {{dataDir}}',
+          { dataDir },
+        );
+      default:
+        return;
+    }
+  }
+
   async function onSubmit() {
     if (url === '' || loading) {
       return;
@@ -121,16 +134,30 @@ export function ConfigServer() {
       </Text>
 
       {error && (
-        <Text
-          style={{
-            marginTop: 20,
-            color: theme.errorText,
-            borderRadius: 4,
-            fontSize: 15,
-          }}
-        >
-          {getErrorMessage(error)}
-        </Text>
+        <>
+          <Text
+            style={{
+              marginTop: 20,
+              color: theme.errorText,
+              borderRadius: 4,
+              fontSize: 15,
+            }}
+          >
+            {getErrorMessage(error)}
+          </Text>
+          {isElectron() && (
+            <Text
+              style={{
+                marginTop: 10,
+                color: theme.errorText,
+                borderRadius: 4,
+                fontSize: 15,
+              }}
+            >
+              {getElectronErrorMessage(error)}
+            </Text>
+          )}
+        </>
       )}
 
       <View style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}>
