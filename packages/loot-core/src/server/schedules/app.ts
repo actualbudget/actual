@@ -34,8 +34,6 @@ import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
 import { SchedulesHandlers } from './types/handlers';
-import { useSelector } from 'react-redux';
-import { State } from 'loot-core/client/state-types';
 
 // Utilities
 

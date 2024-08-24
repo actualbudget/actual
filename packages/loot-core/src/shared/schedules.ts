@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 
+import { LocalPrefs } from '../types/prefs';
+
 import * as monthUtils from './months';
 import { q } from './query';
-import { LocalPrefs } from 'loot-core/types/prefs';
 
 export function getStatus(
   nextDate: string,

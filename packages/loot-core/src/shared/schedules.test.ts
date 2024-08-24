@@ -1,12 +1,13 @@
 import MockDate from 'mockdate';
 
-import { getRecurringDescription, getStatus } from './schedules';
+import { LocalPrefs } from '../types/prefs';
+
 import * as monthUtils from './months';
-import { LocalPrefs } from 'loot-core/types/prefs';
+import { getRecurringDescription, getStatus } from './schedules';
 
 describe('schedules', () => {
-  let today = new Date(2017, 0, 1); // Global date when testing is set to 2017-01-01 per monthUtils.currentDay()
-  let dateFormat = 'yyyy-MM-dd';
+  const today = new Date(2017, 0, 1); // Global date when testing is set to 2017-01-01 per monthUtils.currentDay()
+  const dateFormat = 'yyyy-MM-dd';
   const todayString = monthUtils.format(today, dateFormat);
   describe('getStatus', () => {
     let prefs: LocalPrefs;

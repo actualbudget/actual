@@ -6,14 +6,15 @@ import React, {
   useContext,
   useMemo,
 } from 'react';
+import { useSelector } from 'react-redux';
+
+import { type State } from 'loot-core/client/state-types';
 
 import { q, type Query } from '../../shared/query';
 import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
 import { type ScheduleEntity } from '../../types/models';
 import { getAccountFilter } from '../queries';
 import { liveQuery } from '../query-helpers';
-import { useSelector } from 'react-redux';
-import { State } from 'loot-core/client/state-types';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
