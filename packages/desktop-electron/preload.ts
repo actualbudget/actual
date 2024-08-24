@@ -12,7 +12,6 @@ const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
 contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
   ACTUAL_VERSION: VERSION,
-  DATA_DIR: process.env.ACTUAL_DATA_DIR,
   logToTerminal: console.log,
 
   ipcConnect: (

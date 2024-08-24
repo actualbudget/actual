@@ -5,7 +5,6 @@ declare global {
     Actual?: {
       IS_FAKE_WEB: boolean;
       ACTUAL_VERSION: string;
-      DATA_DIR: string;
       openURLInBrowser: (url: string) => void;
       saveFile: (
         contents: string | Buffer,
