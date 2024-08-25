@@ -30,7 +30,7 @@ i18n
   });
 
 const interleaveArrays = (
-  ...arrays: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
+  ...arrays: (React.ReactNode | string)[][]
 ) =>
   Array.from(
     {
@@ -39,8 +39,7 @@ const interleaveArrays = (
     (_, i) => arrays.map(array => array[i]),
   ).flat();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const i18nObjectList = (values: any[], lng: string, opt = {}) => {
+export const i18nObjectList = (values: (React.ReactNode | string)[], lng: string, opt = {}) => {
   const formatter = new Intl.ListFormat(lng, {
     style: 'long',
     type: 'conjunction',
