@@ -91,10 +91,10 @@ export function ScheduleLink({
             }}
           >
             <Text>
-              <Trans>
-                Choose the schedule these {{ count: ids?.length }} transactions
-                belong to:
-              </Trans>
+              {t(
+                'Choose the schedule these {{ count }} transactions belong to:',
+                { count: ids?.length ?? 0 },
+              )}
             </Text>
             <InitialFocus>
               <Search
