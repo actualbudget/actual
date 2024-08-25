@@ -29,13 +29,15 @@ i18n
     },
   });
 
-const interleaveArrays = (...arrays) => Array.from({ 
-    length: Math.max(...arrays.map(array => array.length)),
-  },
-  (_, i) => arrays.map(array => array[i]),
-).flat();
+const interleaveArrays = (...arrays) =>
+  Array.from(
+    {
+      length: Math.max(...arrays.map(array => array.length)),
+    },
+    (_, i) => arrays.map(array => array[i]),
+  ).flat();
 
-export const i18nObjectList = (value, lng, opt={}) => {
+export const i18nObjectList = (value, lng, opt = {}) => {
   const formatter = new Intl.ListFormat(lng, {
     style: 'long',
     type: 'conjunction',

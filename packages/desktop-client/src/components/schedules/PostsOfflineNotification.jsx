@@ -1,13 +1,12 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-import { i18nObjectList } from '../../i18n';
-
 import { popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { i18nObjectList } from '../../i18n';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
@@ -46,14 +45,16 @@ export function PostsOfflineNotification() {
           />
           <Paragraph>
             <Text>
-              {payees.length > 0
-                ? <Trans count={payees.length}>
-                    The payees <span>{payeeNamesList}</span> have schedules that are due today.
-                  </Trans>
-                : t(
-                    'There are payees that have schedules that are due today.',
-                    { count: payees.length },
-                  )}{' '}
+              {payees.length > 0 ? (
+                <Trans count={payees.length}>
+                  The payees <span>{payeeNamesList}</span> have schedules that
+                  are due today.
+                </Trans>
+              ) : (
+                t('There are payees that have schedules that are due today.', {
+                  count: payees.length,
+                })
+              )}{' '}
               <Trans>
                 Usually we automatically post transactions for these, but you
                 are offline or syncing failed. In order to avoid duplicate
