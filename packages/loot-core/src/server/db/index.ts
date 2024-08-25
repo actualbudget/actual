@@ -554,6 +554,7 @@ export function getCommonPayees() {
     FROM payees p
     LEFT JOIN v_transactions t on t.payee == p.id
     WHERE LENGTH(p.name) > 0
+    AND p.tombstone = 0
     GROUP BY p.id
     HAVING latest > ${threeMonthsAgo}
     ORDER BY c DESC ,p.transfer_acct IS NULL DESC, p.name 
