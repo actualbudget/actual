@@ -46,7 +46,7 @@ export function PostsOfflineNotification() {
               {payees.length > 0
                 ? t(
                     // eslint-disable-next-line rulesdir/typography
-                    `The payees {{(payeesList, list(style: 'long'; type: 'conjunction';))}} have schedules that are due today.`,
+                    `The payees {{payeesList, list}} have schedules that are due today.`,
                     { payeesList, count: payees.length },
                   )
                 : t(
