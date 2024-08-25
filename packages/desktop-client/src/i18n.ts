@@ -29,7 +29,9 @@ i18n
     },
   });
 
-const interleaveArrays = (...arrays) =>
+const interleaveArrays = (
+  ...arrays: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
+) =>
   Array.from(
     {
       length: Math.max(...arrays.map(array => array.length)),
@@ -37,15 +39,19 @@ const interleaveArrays = (...arrays) =>
     (_, i) => arrays.map(array => array[i]),
   ).flat();
 
-export const i18nObjectList = (value, lng, opt = {}) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const i18nObjectList = (values: any[], lng: string, opt = {}) => {
   const formatter = new Intl.ListFormat(lng, {
     style: 'long',
     type: 'conjunction',
     ...opt,
   });
 
-  const placeholders = Array.from({ length: value.length }, (_, i) => `<${i}>`);
+  const placeholders = Array.from(
+    { length: values.length },
+    (_, i) => `<${i}>`,
+  );
   const formatted = formatter.format(placeholders);
   const parts = formatted.split(/<\d+>/g);
-  return interleaveArrays(parts, value);
+  return interleaveArrays(parts, values);
 };
