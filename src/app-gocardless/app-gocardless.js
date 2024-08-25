@@ -5,9 +5,10 @@ import { inspect } from 'util';
 
 import { goCardlessService } from './services/gocardless-service.js';
 import {
-  RequisitionNotLinked,
   AccountNotLinedToRequisition,
   GenericGoCardlessError,
+  RateLimitError,
+  RequisitionNotLinked,
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import { sha256String } from '../util/hash.js';
@@ -189,6 +190,14 @@ app.post(
             error_code: 'INVALID_ACCESS_TOKEN',
             status: 'rejected',
             reason: 'Account not linked with this requisition',
+          });
+          break;
+        case error instanceof RateLimitError:
+          sendErrorResponse({
+            error_type: 'RATE_LIMIT_EXCEEDED',
+            error_code: 'NORDIGEN_ERROR',
+            status: 'rejected',
+            reason: 'Rate limit exceeded',
           });
           break;
         case error instanceof GenericGoCardlessError:

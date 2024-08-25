@@ -1,20 +1,20 @@
 import { jest } from '@jest/globals';
 import {
+  AccessDeniedError,
+  AccountNotLinedToRequisition,
+  GenericGoCardlessError,
   InvalidInputDataError,
   InvalidGoCardlessTokenError,
-  AccessDeniedError,
   NotFoundError,
-  ResourceSuspended,
   RateLimitError,
-  UnknownError,
-  ServiceError,
+  ResourceSuspended,
   RequisitionNotLinked,
-  AccountNotLinedToRequisition,
+  ServiceError,
+  UnknownError,
 } from '../../errors.js';
 
 import {
   mockedBalances,
-  mockUnknownError,
   mockTransactions,
   mockDetailedAccount,
   mockInstitution,
@@ -252,17 +252,6 @@ describe('goCardlessService', () => {
 
       expect(createRequisitionSpy).toBeCalledTimes(1);
     });
-
-    it('handle error if status_code present in the response', async () => {
-      setTokenSpy.mockResolvedValue();
-      getInstitutionSpy.mockResolvedValue(mockInstitution);
-
-      createRequisitionSpy.mockResolvedValue(mockUnknownError);
-
-      await expect(() =>
-        goCardlessService.createRequisition(params),
-      ).rejects.toThrow(UnknownError);
-    });
   });
 
   describe('#deleteRequisition', () => {
@@ -281,17 +270,6 @@ describe('goCardlessService', () => {
       expect(getRequisitionsSpy).toBeCalledTimes(1);
       expect(deleteRequisitionsSpy).toBeCalledTimes(1);
     });
-
-    it('handle error if status_code present in the response', async () => {
-      setTokenSpy.mockResolvedValue();
-
-      getRequisitionsSpy.mockResolvedValue(mockRequisition);
-      deleteRequisitionsSpy.mockReturnValue(mockUnknownError);
-
-      await expect(() =>
-        goCardlessService.deleteRequisition(requisitionId),
-      ).rejects.toThrow(UnknownError);
-    });
   });
 
   describe('#getRequisition', () => {
@@ -308,16 +286,6 @@ describe('goCardlessService', () => {
       expect(setTokenSpy).toBeCalledTimes(1);
       expect(getRequisitionsSpy).toBeCalledTimes(1);
     });
-
-    it('handle error if status_code present in the response', async () => {
-      setTokenSpy.mockResolvedValue();
-
-      getRequisitionsSpy.mockReturnValue(mockUnknownError);
-
-      await expect(() =>
-        goCardlessService.getRequisition(requisitionId),
-      ).rejects.toThrow(UnknownError);
-    });
   });
 
   describe('#getDetailedAccount', () => {
@@ -329,30 +297,6 @@ describe('goCardlessService', () => {
         ...mockAccountMetaData,
         ...mockAccountDetails.account,
       });
-      expect(getDetailsSpy).toBeCalledTimes(1);
-      expect(getMetadataSpy).toBeCalledTimes(1);
-    });
-
-    it('handle error if status_code present in the detailedAccount response', async () => {
-      getDetailsSpy.mockResolvedValue(mockUnknownError);
-      getMetadataSpy.mockResolvedValue(mockAccountMetaData);
-
-      await expect(() =>
-        goCardlessService.getDetailedAccount(accountId),
-      ).rejects.toThrow(UnknownError);
-
-      expect(getDetailsSpy).toBeCalledTimes(1);
-      expect(getMetadataSpy).toBeCalledTimes(1);
-    });
-
-    it('handle error if status_code present in the metadataAccount response', async () => {
-      getDetailsSpy.mockResolvedValue(mockAccountDetails);
-      getMetadataSpy.mockResolvedValue(mockUnknownError);
-
-      await expect(() =>
-        goCardlessService.getDetailedAccount(accountId),
-      ).rejects.toThrow(UnknownError);
-
       expect(getDetailsSpy).toBeCalledTimes(1);
       expect(getMetadataSpy).toBeCalledTimes(1);
     });
@@ -368,14 +312,6 @@ describe('goCardlessService', () => {
       ]);
       expect(getInstitutionsSpy).toBeCalledTimes(1);
     });
-
-    it('handle error if status_code present in the response', async () => {
-      getInstitutionsSpy.mockResolvedValue(mockUnknownError);
-
-      await expect(() =>
-        goCardlessService.getInstitutions({ country }),
-      ).rejects.toThrow(UnknownError);
-    });
   });
 
   describe('#getInstitution', () => {
@@ -387,14 +323,6 @@ describe('goCardlessService', () => {
         mockInstitution,
       );
       expect(getInstitutionSpy).toBeCalledTimes(1);
-    });
-
-    it('handle error if status_code present in the response', async () => {
-      getInstitutionSpy.mockResolvedValue(mockUnknownError);
-
-      await expect(() =>
-        goCardlessService.getInstitution(institutionId),
-      ).rejects.toThrow(UnknownError);
     });
   });
 
@@ -532,19 +460,6 @@ describe('goCardlessService', () => {
       `);
       expect(getTransactionsSpy).toBeCalledTimes(1);
     });
-
-    it('handle error if status_code present in the response', async () => {
-      getTransactionsSpy.mockResolvedValue(mockUnknownError);
-
-      await expect(() =>
-        goCardlessService.getTransactions({
-          institutionId: 'SANDBOXFINANCE_SFIN0000',
-          accountId,
-          startDate: '',
-          endDate: '',
-        }),
-      ).rejects.toThrow(UnknownError);
-    });
   });
 
   describe('#getBalances', () => {
@@ -556,69 +471,58 @@ describe('goCardlessService', () => {
       );
       expect(getBalancesSpy).toBeCalledTimes(1);
     });
-
-    it('handle error if status_code present in the response', async () => {
-      getBalancesSpy.mockResolvedValue(mockUnknownError);
-
-      await expect(() =>
-        goCardlessService.getBalances(accountId),
-      ).rejects.toThrow(UnknownError);
-    });
   });
 });
 
 describe('#handleGoCardlessError', () => {
   it('throws InvalidInputDataError for status code 400', () => {
-    const response = { status_code: 400 };
+    const response = { response: { status: 400 } };
     expect(() => handleGoCardlessError(response)).toThrow(
       InvalidInputDataError,
     );
   });
 
   it('throws InvalidGoCardlessTokenError for status code 401', () => {
-    const response = { status_code: 401 };
+    const response = { response: { status: 401 } };
     expect(() => handleGoCardlessError(response)).toThrow(
       InvalidGoCardlessTokenError,
     );
   });
 
   it('throws AccessDeniedError for status code 403', () => {
-    const response = { status_code: 403 };
+    const response = { response: { status: 403 } };
     expect(() => handleGoCardlessError(response)).toThrow(AccessDeniedError);
   });
 
   it('throws NotFoundError for status code 404', () => {
-    const response = { status_code: 404 };
+    const response = { response: { status: 404 } };
     expect(() => handleGoCardlessError(response)).toThrow(NotFoundError);
   });
 
   it('throws ResourceSuspended for status code 409', () => {
-    const response = { status_code: 409 };
+    const response = { response: { status: 409 } };
     expect(() => handleGoCardlessError(response)).toThrow(ResourceSuspended);
   });
 
   it('throws RateLimitError for status code 429', () => {
-    const response = { status_code: 429 };
+    const response = { response: { status: 429 } };
     expect(() => handleGoCardlessError(response)).toThrow(RateLimitError);
   });
 
   it('throws UnknownError for status code 500', () => {
-    const response = { status_code: 500 };
+    const response = { response: { status: 500 } };
     expect(() => handleGoCardlessError(response)).toThrow(UnknownError);
   });
 
   it('throws ServiceError for status code 503', () => {
-    const response = { status_code: 503 };
+    const response = { response: { status: 503 } };
     expect(() => handleGoCardlessError(response)).toThrow(ServiceError);
   });
 
-  it('does not throw an error for status code 200', () => {
-    const response = { status_code: 200 };
-    expect(() => handleGoCardlessError(response)).not.toThrow();
-  });
-
-  it('does not throw an error when status code is not present', () => {
-    const response = { foo: 'bar' };
-    expect(() => handleGoCardlessError(response)).not.toThrow();
+  it('throws a generic error when the status code is not recognised', () => {
+    const response = { response: { status: 0 } };
+    expect(() => handleGoCardlessError(response)).toThrow(
+      GenericGoCardlessError,
+    );
   });
 });
