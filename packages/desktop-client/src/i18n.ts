@@ -28,3 +28,22 @@ i18n
       transSupportBasicHtmlNodes: false,
     },
   });
+
+const interleaveArrays = (...arrays) => Array.from({ 
+    length: Math.max(...arrays.map(array => array.length)),
+  },
+  (_, i) => arrays.map(array => array[i]),
+).flat();
+
+export const i18nObjectList = (value, lng, opt={}) => {
+  const formatter = new Intl.ListFormat(lng, {
+    style: 'long',
+    type: 'conjunction',
+    ...opt,
+  });
+
+  const placeholders = Array.from({ length: value.length }, (_, i) => `<${i}>`);
+  const formatted = formatter.format(placeholders);
+  const parts = formatted.split(/<\d+>/g);
+  return interleaveArrays(parts, value);
+};

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+
+import { i18nObjectList } from '../../i18n';
 
 import { popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -32,6 +34,7 @@ export function PostsOfflineNotification() {
       <DisplayId id={id} type="payees" />
     </Text>
   ));
+  const payeeNamesList = i18nObjectList(payeesList, t.language);
 
   return (
     <Modal name="schedule-posts-offline-notification">
@@ -44,10 +47,9 @@ export function PostsOfflineNotification() {
           <Paragraph>
             <Text>
               {payees.length > 0
-                ? t(
-                    'The payees {{payeesList, list}} have schedules that are due today.',
-                    { payeesList, count: payees.length },
-                  )
+                ? <Trans count={payees.length}>
+                    The payees <span>{payeeNamesList}</span> have schedules that are due today.
+                  </Trans>
                 : t(
                     'There are payees that have schedules that are due today.',
                     { count: payees.length },
