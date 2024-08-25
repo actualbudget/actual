@@ -172,8 +172,9 @@ export function ConfigServer() {
                     style={{ fontSize: 15 }}
                     onClick={onSelectSelfSignedCertificate}
                   >
-                    select it here.
+                    select it here
                   </Link>
+                  .
                 </Trans>
               </Text>
             </View>
