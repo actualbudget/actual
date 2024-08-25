@@ -11,10 +11,9 @@ import { Database } from '@jlongster/sql.js';
 import LRU from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
-import { toDateRepr } from '../models';
-import * as monthUtils from 'loot-core/src/shared/months';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
+import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
 import {
   CategoryEntity,
@@ -29,6 +28,7 @@ import {
   convertFromSelect,
 } from '../aql';
 import {
+  toDateRepr,
   accountModel,
   categoryModel,
   categoryGroupModel,
@@ -546,7 +546,9 @@ export function getPayees() {
 }
 
 export function getCommonPayees() {
-  const twelveWeeksAgo = toDateRepr(monthUtils.subWeeks(monthUtils.currentDate(), 12));
+  const twelveWeeksAgo = toDateRepr(
+    monthUtils.subWeeks(monthUtils.currentDate(), 12),
+  );
   const limit = 10;
   return all(`
     SELECT     p.id as id, p.name as name, p.favorite as favorite,
@@ -556,6 +558,7 @@ export function getCommonPayees() {
     FROM payees p
     LEFT JOIN v_transactions_internal_alive t on t.payee == p.id
     WHERE LENGTH(p.name) > 0
+    AND p.tombstone = 0
     AND t.date > ${twelveWeeksAgo}
     GROUP BY p.id
     ORDER BY c DESC ,p.transfer_acct IS NULL DESC, p.name 
