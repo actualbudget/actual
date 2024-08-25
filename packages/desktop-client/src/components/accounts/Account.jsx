@@ -119,7 +119,7 @@ function AllTransactions({
     }
 
     return balances && transactions?.length > 0
-      ? balances[transactions[0].id]?.balance ?? 0
+      ? (balances[transactions[0].id]?.balance ?? 0)
       : 0;
   }, [showBalances, balances, transactions]);
 
@@ -1113,10 +1113,10 @@ class AccountInternal extends PureComponent {
     );
   };
 
-  onConditionsOpChange = (value, conditions) => {
+  onConditionsOpChange = value => {
     this.setState({ filterConditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
-    this.applyFilters([...conditions]);
+    this.applyFilters([...this.state.filterConditions]);
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
     }
