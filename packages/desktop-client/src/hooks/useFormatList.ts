@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 
 const interleaveArrays = (...arrays: ReactNode[][]) =>
   Array.from(
@@ -9,17 +9,24 @@ const interleaveArrays = (...arrays: ReactNode[][]) =>
   ).flat();
 
 export function useFormatList(values: ReactNode[], lng: string, opt = {}) {
-  const formatter = new Intl.ListFormat(lng, {
-    style: 'long',
-    type: 'conjunction',
-    ...opt,
-  });
-
-  const placeholders = Array.from(
-    { length: values.length },
-    (_, i) => `<${i}>`,
+  const formatter = useMemo(
+    () =>
+      new Intl.ListFormat(lng, {
+        style: 'long',
+        type: 'conjunction',
+        ...opt,
+      }),
+    [lng, opt],
   );
-  const formatted = formatter.format(placeholders);
-  const parts = formatted.split(/<\d+>/g);
+
+  const parts = useMemo(() => {
+    const placeholders = Array.from(
+      { length: values.length },
+      (_, i) => `<${i}>`,
+    );
+    const formatted = formatter.format(placeholders);
+    return formatted.split(/<\d+>/g);
+  }, [values.length, formatter]);
+
   return interleaveArrays(parts, values);
 }
