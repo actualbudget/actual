@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { popModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { i18nObjectList } from '../../i18n';
+import { useFormatList } from '../../hooks/useFormatList';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
@@ -33,7 +33,7 @@ export function PostsOfflineNotification() {
       <DisplayId id={id} type="payees" />
     </Text>
   ));
-  const payeeNamesList = i18nObjectList(payeesList, t.language);
+  const payeeNamesList = useFormatList(payeesList, t.language);
 
   return (
     <Modal name="schedule-posts-offline-notification">
