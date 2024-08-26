@@ -84,6 +84,7 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
+import { useLocalPref } from '../../hooks/useLocalPref';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -961,7 +962,7 @@ const Transaction = memo(function Transaction({
   const { columnWidths, updateColumnWidth, resetColumnWidths } =
     useColumnWidth();
 
-  const sidebar = useSidebar();
+  const sidebar = useLocalPref('sidebarWidth');
 
   const checkColumnSizes = useCallback(() => {
     setTimeout(() => {
@@ -1304,7 +1305,7 @@ const Transaction = memo(function Transaction({
             minWidth: columnWidths['account']
               ? `${columnWidths['account']}px`
               : 'auto',
-            maxWidth: `calc(25vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
+            maxWidth: `calc(25vw - 10px - ${Math.floor((445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + sidebar) / 4)}px)`,
           }}
           textAlign="flex"
           value={accountId}
@@ -1361,7 +1362,7 @@ const Transaction = memo(function Transaction({
               : null
           }
           style={{
-            maxWidth: `calc(25vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
+            maxWidth: `calc(25vw - 10px - ${Math.floor((445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + sidebar) / 4)}px)`,
           }}
           focused={focusedField === 'payee'}
           /* Filter out the account we're currently in as it is not a valid transfer */
@@ -1416,7 +1417,7 @@ const Transaction = memo(function Transaction({
             alignItems: 'center',
             justifyContent: 'flex-start',
             height: '100%',
-            maxWidth: `calc(25vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
+            maxWidth: `calc(25vw - 10px - ${Math.floor((445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + sidebar) / 4)}px)`,
           }}
           plain
         >
@@ -1524,7 +1525,7 @@ const Transaction = memo(function Transaction({
             fontStyle: 'italic',
             color: theme.pageTextSubdued,
             fontWeight: 300,
-            maxWidth: `calc(25vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
+            maxWidth: `calc(25vw - 10px - ${Math.floor((445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + sidebar) / 4)}px)`,
           }}
           inputProps={{
             readOnly: true,
@@ -1540,7 +1541,7 @@ const Transaction = memo(function Transaction({
           textAlign="flex"
           value={categoryId}
           style={{
-            maxWidth: `calc(25vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
+            maxWidth: `calc(25vw - 10px - ${Math.floor((445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + sidebar) / 4)}px)`,
           }}
           formatter={value =>
             value
