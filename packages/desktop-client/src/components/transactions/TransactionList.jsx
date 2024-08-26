@@ -14,9 +14,9 @@ import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
+import { ColumnWidthProvider } from '../ColumnWidthContext';
 
 import { TransactionTable } from './TransactionsTable';
-import { ColumnWidthProvider } from '../ColumnWidthContext';
 
 // When data changes, there are two ways to update the UI:
 //

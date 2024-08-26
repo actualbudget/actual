@@ -19,6 +19,7 @@ import React, {
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { useMergedRefs } from '../hooks/useMergedRefs';
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
@@ -48,7 +49,6 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
-import { useMergedRefs } from '../hooks/useMergedRefs';
 
 export const ROW_HEIGHT = 32;
 
@@ -157,32 +157,38 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
 };
-export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell({
-  width,
-  name,
-  exposed,
-  focused,
-  value,
-  formatter,
-  textAlign,
-  alignItems,
-  onExpose,
-  children,
-  plain,
-  style,
-  valueStyle,
-  unexposedContent,
-  privacyFilter,
-  ...viewProps
-}: CellProps, ref) {
+export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell(
+  {
+    width,
+    name,
+    exposed,
+    focused,
+    value,
+    formatter,
+    textAlign,
+    alignItems,
+    onExpose,
+    children,
+    plain,
+    style,
+    valueStyle,
+    unexposedContent,
+    privacyFilter,
+    ...viewProps
+  }: CellProps,
+  ref,
+) {
   const mouseCoords = useRef(null);
   const viewRef = useRef(null);
   const mergeRef = useMergedRefs(ref, viewRef);
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
-  const widthStyle: CSSProperties =
-    width ? (width === 'flex' ? { flex: 1, flexBasis: 0 } : { width }) : { width: 'auto'};
+  const widthStyle: CSSProperties = width
+    ? width === 'flex'
+      ? { flex: 1, flexBasis: 0 }
+      : { width }
+    : { width: 'auto' };
   const cellStyle: CSSProperties = {
     position: 'relative',
     textAlign: textAlign || 'left',
@@ -269,7 +275,7 @@ export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell({
 
   return (
     <View
-      innerRef={ref}
+      innerRef={mergeRef}
       style={{ ...widthStyle, ...cellStyle, ...style }}
       {...viewProps}
       data-testid={name}
@@ -395,27 +401,26 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   onBlur?: ComponentProps<typeof InputValue>['onBlur'];
   textAlign?: CSSProperties['textAlign'];
 };
-export const InputCell = forwardRef<HTMLInputElement, InputCellProps>(function InputCell({
-  inputProps,
-  onUpdate,
-  onBlur,
-  textAlign,
-  ...props
-}: InputCellProps, ref) {
-  return (
-    <Cell textAlign={textAlign} {...props} ref={ref}>
-      {() => (
-        <InputValue
-          value={props.value}
-          onUpdate={onUpdate}
-          onBlur={onBlur}
-          style={{ textAlign, ...(inputProps && inputProps.style) }}
-          {...inputProps}
-        />
-      )}
-    </Cell>
-  );
-});
+export const InputCell = forwardRef<HTMLInputElement, InputCellProps>(
+  function InputCell(
+    { inputProps, onUpdate, onBlur, textAlign, ...props }: InputCellProps,
+    ref,
+  ) {
+    return (
+      <Cell textAlign={textAlign} {...props} ref={ref}>
+        {() => (
+          <InputValue
+            value={props.value}
+            onUpdate={onUpdate}
+            onBlur={onBlur}
+            style={{ textAlign, ...(inputProps && inputProps.style) }}
+            {...inputProps}
+          />
+        )}
+      </Cell>
+    );
+  },
+);
 
 function shouldSaveFromKey(e) {
   switch (e.key) {
@@ -440,55 +445,60 @@ type CustomCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   onUpdate: (value: string) => void;
   onBlur: (ev: UIEvent<unknown>) => void;
 };
-export const CustomCell = forwardRef<HTMLDivElement, CustomCellProps>(function CustomCell({
-  value: defaultValue,
-  children,
-  onUpdate,
-  onBlur,
-  ...props
-}: CustomCellProps, ref) {
-  const [value, setValue] = useState(defaultValue);
-  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
+export const CustomCell = forwardRef<HTMLDivElement, CustomCellProps>(
+  function CustomCell(
+    {
+      value: defaultValue,
+      children,
+      onUpdate,
+      onBlur,
+      ...props
+    }: CustomCellProps,
+    ref,
+  ) {
+    const [value, setValue] = useState(defaultValue);
+    const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
 
-  if (prevDefaultValue !== defaultValue) {
-    setValue(defaultValue);
-    setPrevDefaultValue(defaultValue);
-  }
-
-  function onBlur_(e) {
-    // Only save on blur if the app is focused. Blur events fire when
-    // the app unfocuses, and it's unintuitive to save the value since
-    // the input will be focused again when the app regains focus
-    if (document.hasFocus()) {
-      onUpdate?.(value);
-      fireBlur(onBlur, e);
+    if (prevDefaultValue !== defaultValue) {
+      setValue(defaultValue);
+      setPrevDefaultValue(defaultValue);
     }
-  }
 
-  function onKeyDown(e) {
-    if (shouldSaveFromKey(e)) {
-      onUpdate?.(value);
-    }
-  }
-
-  return (
-    <Cell {...props} value={defaultValue} ref={ref}>
-      {() =>
-        children({
-          onBlur: onBlur_,
-          onKeyDown,
-          onUpdate: val => setValue(val),
-          onSave: val => {
-            setValue(val);
-            onUpdate?.(val);
-          },
-          shouldSaveFromKey,
-          inputStyle: inputCellStyle,
-        })
+    function onBlur_(e) {
+      // Only save on blur if the app is focused. Blur events fire when
+      // the app unfocuses, and it's unintuitive to save the value since
+      // the input will be focused again when the app regains focus
+      if (document.hasFocus()) {
+        onUpdate?.(value);
+        fireBlur(onBlur, e);
       }
-    </Cell>
-  );
-});
+    }
+
+    function onKeyDown(e) {
+      if (shouldSaveFromKey(e)) {
+        onUpdate?.(value);
+      }
+    }
+
+    return (
+      <Cell {...props} value={defaultValue} ref={ref}>
+        {() =>
+          children({
+            onBlur: onBlur_,
+            onKeyDown,
+            onUpdate: val => setValue(val),
+            onSave: val => {
+              setValue(val);
+              onUpdate?.(val);
+            },
+            shouldSaveFromKey,
+            inputStyle: inputCellStyle,
+          })
+        }
+      </Cell>
+    );
+  },
+);
 
 type DeleteCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   onDelete?: () => void;

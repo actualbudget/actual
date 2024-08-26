@@ -61,6 +61,7 @@ import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
+import { useColumnWidth } from '../ColumnWidthContext';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -68,6 +69,7 @@ import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
+import { useSidebar } from '../sidebar/SidebarProvider';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import {
   Cell,
@@ -82,7 +84,6 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
-import { useColumnWidth } from '../ColumnWidthContext';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -180,29 +181,22 @@ const TransactionHeader = memo(
     const { columnWidths, resetColumnWidths } = useColumnWidth();
 
     useEffect(() => {
+      let timeoutId;
+
       const handleResize = () => {
-        resetColumnWidths();
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          resetColumnWidths();
+        }, 200);
       };
 
       window.addEventListener('resize', handleResize);
 
-      // Cleanup
       return () => {
         window.removeEventListener('resize', handleResize);
+        clearTimeout(timeoutId);
       };
     }, [resetColumnWidths]);
-
-    // useEffect(() => {
-    //   const columns = ['account', 'payee', 'category'];
-
-    //   columns.forEach(key => {
-    //     const width = refs.current[key]?.offsetWidth || 0;
-    //     // Update only if the width has increased
-    //     if (width > (columnWidths[key] || 0)) {
-    //       updateColumnWidth(key, width);
-    //     }
-    //   });
-    // }, [showAccount, showCategory, columnWidths]);
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -480,7 +474,7 @@ function StatusCell({
   );
 }
 
-export const HeaderCell = forwardRef(function HeaderCell(
+const HeaderCell = forwardRef(function HeaderCell(
   {
     value,
     id,
@@ -597,7 +591,9 @@ const PayeeCell = forwardRef(function PayeeCell(
     onManagePayees,
     onNavigateToTransferAccount,
     onNavigateToSchedule,
+    onBlur,
     width,
+    style,
     ...props
   },
   ref,
@@ -620,7 +616,7 @@ const PayeeCell = forwardRef(function PayeeCell(
       name="payee"
       width={width}
       focused={focused}
-      style={{ padding: 0 }}
+      style={{ padding: 0, ...style }}
       plain
       {...props}
     >
@@ -714,13 +710,14 @@ const PayeeCell = forwardRef(function PayeeCell(
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        maxWidth: '150px'
+        ...style,
       }}
       textAlign="flex"
       value={payee?.id}
       valueStyle={valueStyle}
       exposed={focused}
       onExpose={name => !isPreview && onEdit(id, name)}
+      onBlur={onBlur}
       onUpdate={async value => {
         onUpdate('payee', value);
 
@@ -963,7 +960,8 @@ const Transaction = memo(function Transaction({
   const refs = useRef({});
   const { columnWidths, updateColumnWidth, resetColumnWidths } =
     useColumnWidth();
-  const timeoutRefs = useRef({});
+
+  const sidebar = useSidebar();
 
   const checkColumnSizes = useCallback(() => {
     setTimeout(() => {
@@ -989,7 +987,7 @@ const Transaction = memo(function Transaction({
 
     const observers = columns.map(key => {
       const observer = new ResizeObserver(entries => {
-        for (let entry of entries) {
+        for (const entry of entries) {
           const width = entry.contentRect.width;
           if (width > (columnWidths[key] || 0)) {
             updateColumnWidth(key, width);
@@ -1055,6 +1053,8 @@ const Transaction = memo(function Transaction({
         }),
       );
     }
+
+    checkColumnSizes();
   }
 
   function onUpdateAfterConfirm(name, value) {
@@ -1304,7 +1304,7 @@ const Transaction = memo(function Transaction({
             minWidth: columnWidths['account']
               ? `${columnWidths['account']}px`
               : 'auto',
-            maxWidth: '250px',
+            maxWidth: `calc(100vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
           }}
           textAlign="flex"
           value={accountId}
@@ -1315,6 +1315,7 @@ const Transaction = memo(function Transaction({
             }
             return '';
           }}
+          onBlur={() => resetColumnWidths('account')}
           valueStyle={valueStyle}
           exposed={focusedField === 'account'}
           onExpose={name => !isPreview && onEdit(id, name)}
@@ -1359,7 +1360,9 @@ const Transaction = memo(function Transaction({
               ? columnWidths['payee']
               : null
           }
-          style={{ maxWidth: '250px' }}
+          style={{
+            maxWidth: `calc(100vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
+          }}
           focused={focusedField === 'payee'}
           /* Filter out the account we're currently in as it is not a valid transfer */
           accounts={accounts.filter(account => account.id !== accountId)}
@@ -1372,6 +1375,7 @@ const Transaction = memo(function Transaction({
           isPreview={isPreview}
           onEdit={onEdit}
           onUpdate={onUpdate}
+          onBlur={() => resetColumnWidths('payee')}
           onCreatePayee={onCreatePayee}
           onManagePayees={onManagePayees}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
@@ -1412,7 +1416,7 @@ const Transaction = memo(function Transaction({
             alignItems: 'center',
             justifyContent: 'flex-start',
             height: '100%',
-            maxWidth: '250px',
+            maxWidth: `calc(100vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
           }}
           plain
         >
@@ -1520,7 +1524,7 @@ const Transaction = memo(function Transaction({
             fontStyle: 'italic',
             color: theme.pageTextSubdued,
             fontWeight: 300,
-            maxWidth: '250px',
+            maxWidth: `calc(100vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
           }}
           inputProps={{
             readOnly: true,
@@ -1535,6 +1539,9 @@ const Transaction = memo(function Transaction({
           width={columnWidths['category'] ? columnWidths['category'] : null}
           textAlign="flex"
           value={categoryId}
+          style={{
+            maxWidth: `calc(100vw - 10px - ${Math.floor(445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + (sidebar.floating ? 0 : 668) / 4)}px)`,
+          }}
           formatter={value =>
             value
               ? getDisplayValue(
@@ -1557,6 +1564,7 @@ const Transaction = memo(function Transaction({
                 }
               : valueStyle
           }
+          onBlur={() => resetColumnWidths('category')}
           onUpdate={async value => {
             if (value === 'split') {
               onSplit(transaction.id);
@@ -1585,7 +1593,13 @@ const Transaction = memo(function Transaction({
                 clearOnBlur={false}
                 showSplitOption={!isChild && !isParent}
                 shouldSaveFromKey={shouldSaveFromKey}
-                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                inputProps={{
+                  onBlur,
+                  onKeyDown,
+                  style: {
+                    ...inputStyle,
+                  },
+                }}
                 onUpdate={onUpdate}
                 onSelect={onSave}
                 menuPortalTarget={undefined}
