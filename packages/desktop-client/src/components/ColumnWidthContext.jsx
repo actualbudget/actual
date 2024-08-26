@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
-// Create the context
 const ColumnWidthContext = createContext();
 
-// Create a provider component
 export const ColumnWidthProvider = ({ children }) => {
   const [columnWidths, setColumnWidths] = useState({});
 
@@ -34,7 +32,6 @@ export const ColumnWidthProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use the context
 export const useColumnWidth = () => {
   return useContext(ColumnWidthContext);
 };
