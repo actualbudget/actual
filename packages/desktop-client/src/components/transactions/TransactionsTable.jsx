@@ -1123,7 +1123,7 @@ const Transaction = memo(function Transaction({
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
   
-  const maxWidthDynamic = - 10 - Math.floor((445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + sidebarWidth) / 4);
+  const maxWidthDynamic = 10 + Math.floor((445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + sidebarWidth) / 4);
 
   const runningBalance = !isTemporaryId(id)
     ? balance
@@ -1307,7 +1307,7 @@ const Transaction = memo(function Transaction({
             minWidth: columnWidths['account']
               ? `${columnWidths['account']}px`
               : 'auto',
-            maxWidth: `calc(25vw -${maxWidthDynamic}px)`,
+            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
           }}
           textAlign="flex"
           value={accountId}
@@ -1364,7 +1364,7 @@ const Transaction = memo(function Transaction({
               : null
           }
           style={{
-            maxWidth: `calc(25vw -${maxWidthDynamic}px)`,
+            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
           }}
           focused={focusedField === 'payee'}
           /* Filter out the account we're currently in as it is not a valid transfer */
@@ -1419,7 +1419,7 @@ const Transaction = memo(function Transaction({
             alignItems: 'center',
             justifyContent: 'flex-start',
             height: '100%',
-            maxWidth: `calc(25vw -${maxWidthDynamic}px)`,
+            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
           }}
           plain
         >
@@ -1527,7 +1527,7 @@ const Transaction = memo(function Transaction({
             fontStyle: 'italic',
             color: theme.pageTextSubdued,
             fontWeight: 300,
-            maxWidth: `calc(25vw -${maxWidthDynamic}px)`,
+            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
           }}
           inputProps={{
             readOnly: true,
@@ -1543,7 +1543,7 @@ const Transaction = memo(function Transaction({
           textAlign="flex"
           value={categoryId}
           style={{
-            maxWidth: `calc(25vw -${maxWidthDynamic}px)`,
+            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
           }}
           formatter={value =>
             value
