@@ -116,6 +116,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Customizable reports page (dashboards)</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="actionTemplating">
+              <Trans>Action templating</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

@@ -36,6 +36,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgAlignLeft, SvgCode, SvgInformationOutline } from '../../icons/v1';
@@ -362,6 +363,9 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
 
   const templated = options?.template !== undefined;
 
+  // Even if the feature flag is disabled, we still want to be able to turn off templating
+  const isTemplatingEnabled = useFeatureFlag('actionTemplating') || templated;
+
   return (
     <Editor style={editorStyle} error={error}>
       {op === 'set' ? (
@@ -390,26 +394,29 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             />
           </View>
           {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
-          {['payee', 'category', 'account'].indexOf(field) === -1 && (
-            <Button
-              variant="bare"
-              style={{
-                padding: 5,
-              }}
-              aria-label={
-                templated ? 'Disable templating' : 'Enable templating'
-              }
-              onPress={() => onChange('template', !templated)}
-            >
-              {templated ? (
-                <SvgCode style={{ width: 12, height: 12, color: 'inherit' }} />
-              ) : (
-                <SvgAlignLeft
-                  style={{ width: 12, height: 12, color: 'inherit' }}
-                />
-              )}
-            </Button>
-          )}
+          {isTemplatingEnabled &&
+            ['payee', 'category', 'account'].indexOf(field) === -1 && (
+              <Button
+                variant="bare"
+                style={{
+                  padding: 5,
+                }}
+                aria-label={
+                  templated ? 'Disable templating' : 'Enable templating'
+                }
+                onPress={() => onChange('template', !templated)}
+              >
+                {templated ? (
+                  <SvgCode
+                    style={{ width: 12, height: 12, color: 'inherit' }}
+                  />
+                ) : (
+                  <SvgAlignLeft
+                    style={{ width: 12, height: 12, color: 'inherit' }}
+                  />
+                )}
+              </Button>
+            )}
         </>
       ) : op === 'set-split-amount' ? (
         <>
