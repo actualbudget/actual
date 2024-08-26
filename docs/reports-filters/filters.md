@@ -61,10 +61,6 @@ In the above Example we used the **Date is greater than** and **Date is less tha
 
 ### Saving Filters
 
-Starting with update [27.7.1](https://actualbudget.org/docs/releases/), users now have the ability to save filtered searches. Filtering transactions works exactly the same as in previous updates.
-
-Before we get started, you'll have to go to the **All accounts** page and filter some transactions. See the section **How to use the Filter tool** above for more information on how this works.
-
 To save a search, simply click on the **Unsaved filter** dropdown button above the transactions table and click **Save new filter**.
 
 ![](/img/filtering/save-filter.png)
