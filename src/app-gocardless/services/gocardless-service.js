@@ -206,15 +206,70 @@ export const goCardlessService = {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
     }
 
-    const [transactions, accountBalance] = await Promise.all([
-      goCardlessService.getTransactions({
-        institutionId: institution_id,
+    const [normalizedTransactions, accountBalance] = await Promise.all([
+      goCardlessService.getNormalizedTransactions(
+        requisitionId,
         accountId,
         startDate,
         endDate,
-      }),
+      ),
       goCardlessService.getBalances(accountId),
     ]);
+
+    const transactions = normalizedTransactions.transactions;
+
+    const bank = BankFactory(institution_id);
+
+    const startingBalance = bank.calculateStartingBalance(
+      transactions.booked,
+      accountBalance.balances,
+    );
+
+    return {
+      balances: accountBalance.balances,
+      institutionId: institution_id,
+      startingBalance,
+      transactions,
+    };
+  },
+
+  /**
+   *
+   * @param requisitionId
+   * @param accountId
+   * @param startDate
+   * @param endDate
+   * @throws {AccountNotLinedToRequisition} Will throw an error if requisition not includes provided account id
+   * @throws {RequisitionNotLinked} Will throw an error if requisition is not in Linked
+   * @throws {InvalidInputDataError}
+   * @throws {InvalidGoCardlessTokenError}
+   * @throws {AccessDeniedError}
+   * @throws {NotFoundError}
+   * @throws {ResourceSuspended}
+   * @throws {RateLimitError}
+   * @throws {UnknownError}
+   * @throws {ServiceError}
+   * @returns {Promise<{institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}}>}
+   */
+  getNormalizedTransactions: async (
+    requisitionId,
+    accountId,
+    startDate,
+    endDate,
+  ) => {
+    const { institution_id, accounts: accountIds } =
+      await goCardlessService.getLinkedRequisition(requisitionId);
+
+    if (!accountIds.includes(accountId)) {
+      throw new AccountNotLinedToRequisition(accountId, requisitionId);
+    }
+
+    const transactions = await goCardlessService.getTransactions({
+      institutionId: institution_id,
+      accountId,
+      startDate,
+      endDate,
+    });
 
     const bank = BankFactory(institution_id);
     const sortedBookedTransactions = bank.sortTransactions(
@@ -231,15 +286,8 @@ export const goCardlessService = {
     );
     const sortedAllTransactions = bank.sortTransactions(allTransactions);
 
-    const startingBalance = bank.calculateStartingBalance(
-      sortedBookedTransactions,
-      accountBalance.balances,
-    );
-
     return {
-      balances: accountBalance.balances,
       institutionId: institution_id,
-      startingBalance,
       transactions: {
         booked: sortedBookedTransactions,
         pending: sortedPendingTransactions,

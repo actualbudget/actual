@@ -142,34 +142,64 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    const { requisitionId, startDate, endDate, accountId } = req.body;
+    const {
+      requisitionId,
+      startDate,
+      endDate,
+      accountId,
+      includeBalance = true,
+    } = req.body;
 
     try {
-      const {
-        balances,
-        institutionId,
-        startingBalance,
-        transactions: { booked, pending, all },
-      } = await goCardlessService.getTransactionsWithBalance(
-        requisitionId,
-        accountId,
-        startDate,
-        endDate,
-      );
-
-      res.send({
-        status: 'ok',
-        data: {
+      if (includeBalance) {
+        const {
           balances,
           institutionId,
           startingBalance,
-          transactions: {
-            booked,
-            pending,
-            all,
+          transactions: { booked, pending, all },
+        } = await goCardlessService.getTransactionsWithBalance(
+          requisitionId,
+          accountId,
+          startDate,
+          endDate,
+        );
+
+        res.send({
+          status: 'ok',
+          data: {
+            balances,
+            institutionId,
+            startingBalance,
+            transactions: {
+              booked,
+              pending,
+              all,
+            },
           },
-        },
-      });
+        });
+      } else {
+        const {
+          institutionId,
+          transactions: { booked, pending, all },
+        } = await goCardlessService.getNormalizedTransactions(
+          requisitionId,
+          accountId,
+          startDate,
+          endDate,
+        );
+
+        res.send({
+          status: 'ok',
+          data: {
+            institutionId,
+            transactions: {
+              booked,
+              pending,
+              all,
+            },
+          },
+        });
+      }
     } catch (error) {
       const sendErrorResponse = (data) =>
         res.send({ status: 'ok', data: { ...data, details: error.details } });
