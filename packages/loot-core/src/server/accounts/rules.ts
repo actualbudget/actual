@@ -585,6 +585,11 @@ export class Action {
       this.type = typeName;
       if (options?.template) {
         this.handlebarsTemplate = Handlebars.compile(options.template);
+        try {
+          this.handlebarsTemplate({});
+        } catch (e) {
+          assert(false, 'invalid-template', `Invalid Handlebars template`);
+        }
       }
     } else if (op === 'set-split-amount') {
       this.field = null;

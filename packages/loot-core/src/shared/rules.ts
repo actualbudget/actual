@@ -192,6 +192,8 @@ export function getFieldError(type) {
       return 'Value must be a number';
     case 'invalid-field':
       return 'Please choose a valid field for this type of rule';
+    case 'invalid-template':
+      return 'Invalid handlebars template';
     default:
       return 'Internal error, sorry! Please get in touch https://actualbudget.org/contact/ for support';
   }
