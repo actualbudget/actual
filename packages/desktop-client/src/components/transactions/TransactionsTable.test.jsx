@@ -34,8 +34,20 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
-  { id: 'payed-to', favorite: true, name: 'Payed To' },
-  { id: 'guy', favorite: false, name: 'This guy on the side of the road' },
+  {
+    id: 'payed-to',
+    favorite: true,
+    transfer_acct: null,
+    category: null,
+    name: 'Payed To',
+  },
+  {
+    id: 'guy',
+    favorite: false,
+    transfer_acct: null,
+    category: null,
+    name: 'This guy on the side of the road',
+  },
 ];
 const categoryGroups = generateCategoryGroups([
   {
@@ -585,6 +597,48 @@ describe('Transactions', () => {
     expect(highlighted.textContent).not.toBe(
       categories.find(c => c.id === currentCategory).name,
     );
+  });
+
+  test('dropdown payee displays on new transaction with account list column', async () => {
+    const { container, updateProps, queryByTestId } = renderTransactions({
+      currentAccountId: null,
+    });
+    updateProps({ isAdding: true });
+    expect(queryByTestId('new-transaction')).toBeTruthy();
+
+    await editNewField(container, 'payee');
+
+    const renderedPayees = screen
+      .getByTestId('autocomplete')
+      .querySelectorAll('[data-testid$="payee-item"]');
+
+    expect(
+      Array.from(renderedPayees.values()).map(p =>
+        p.getAttribute('data-testid'),
+      ),
+    ).toStrictEqual([
+      'Payed To-payee-item',
+      'This guy on the side of the road-payee-item',
+    ]);
+  });
+
+  test('dropdown payee displays on existing non-transfer transaction', async () => {
+    const { container } = renderTransactions();
+
+    await editField(container, 'payee', 2);
+
+    const renderedPayees = screen
+      .getByTestId('autocomplete')
+      .querySelectorAll('[data-testid$="payee-item"]');
+
+    expect(
+      Array.from(renderedPayees.values()).map(p =>
+        p.getAttribute('data-testid'),
+      ),
+    ).toStrictEqual([
+      'Payed To-payee-item',
+      'This guy on the side of the road-payee-item',
+    ]);
   });
 
   // TODO: fix this test
