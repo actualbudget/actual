@@ -293,6 +293,41 @@ function editField(container, name, rowIndex) {
   return _editField(field, container);
 }
 
+expect.extend({
+  payeesToHaveFavoriteStars(container, validPayeeListWithFavorite) {
+    const incorrectStarList = [];
+    const foundStarList = [];
+    validPayeeListWithFavorite.forEach(payeeItem => {
+      const shouldHaveFavorite = payeeItem != null;
+      let found = false;
+      if (container[0].querySelectorAll('svg').length === 1) {
+        found = true;
+        foundStarList.push(payeeItem);
+      }
+      if (shouldHaveFavorite !== found) {
+        incorrectStarList.push(payeeItem);
+      }
+    });
+    if (
+      foundStarList.length !== validPayeeListWithFavorite.length ||
+      incorrectStarList.length > 0
+    ) {
+      return {
+        message: () =>
+          `Expected ${validPayeeListWithFavorite.join(', ')} to have favorite stars.` +
+          `Received ${foundStarList.length} items with favorite stars. Incorrect: ${incorrectStarList.join(', ')}`,
+        pass: false,
+      };
+    } else {
+      return {
+        message: () =>
+          `Expected ${validPayeeListWithFavorite} to have favorite stars`,
+        pass: true,
+      };
+    }
+  },
+});
+
 function expectToBeEditingField(container, name, rowIndex, isNew) {
   let field;
   if (isNew) {
@@ -620,6 +655,7 @@ describe('Transactions', () => {
       'Payed To-payee-item',
       'This guy on the side of the road-payee-item',
     ]);
+    expect(renderedPayees).payeesToHaveFavoriteStars(['Payed To-payee-item']);
   });
 
   test('dropdown payee displays on existing non-transfer transaction', async () => {
