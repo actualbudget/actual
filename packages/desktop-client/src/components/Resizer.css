@@ -1,0 +1,36 @@
+.resizer-container {
+  position: relative;
+  width: 10px;
+  cursor: col-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  z-index: 1500;
+}
+
+.resizer-container::before {
+  content: '';
+  display: block;
+  width: 2px;
+  height: 80%;
+  background-color: inherit;
+  border-radius: 2px;
+  box-shadow: inset 0.5px 0.5px 1px rgba(0, 0, 0, 0.7),
+              inset -0.5px -0.5px 1px rgba(255, 255, 255, 0.7);
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.resizer-container:hover::before {
+  box-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1),
+              -0.5px -0.5px 1px rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.resizer-container.dragging::before {
+  box-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1),
+              -0.5px -0.5px 1px rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.1);
+  outline: 1px solid rgba(255, 255, 255, 0.2);
+}

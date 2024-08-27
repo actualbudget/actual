@@ -49,6 +49,7 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
+import { useColumnWidth } from './ColumnWidthContext';
 
 export const ROW_HEIGHT = 32;
 
@@ -989,6 +990,7 @@ export const Table = forwardRef(
     const scrollContainer = useRef(null);
     const initialScrollTo = useRef(null);
     const listInitialized = useRef(false);
+    const { totalSize } = useColumnWidth();
 
     useImperativeHandle(ref, () => ({
       scrollTo: (id, alignment = 'smart') => {
@@ -1194,6 +1196,7 @@ export const Table = forwardRef(
                       innerRef={listContainer}
                       outerRef={scrollContainer}
                       width={width}
+                      totalSize={totalSize()}
                       height={height}
                       renderRow={renderRow}
                       itemCount={count || items.length}

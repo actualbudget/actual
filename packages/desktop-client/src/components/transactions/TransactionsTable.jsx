@@ -61,7 +61,7 @@ import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { useColumnWidth } from '../ColumnWidthContext';
+import { ColumnWidthProvider, useColumnWidth } from '../ColumnWidthContext';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
@@ -85,6 +85,8 @@ import {
   UnexposedCellContent,
 } from '../table';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useMove } from 'react-aria';
+import { Resizer } from '../Resizer';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -179,25 +181,7 @@ const TransactionHeader = memo(
   }) => {
     const dispatchSelected = useSelectedDispatch();
     const refs = useRef({});
-    const { columnWidths, resetColumnWidths } = useColumnWidth();
-
-    useEffect(() => {
-      let timeoutId;
-
-      const handleResize = () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          resetColumnWidths();
-        }, 200);
-      };
-
-      window.addEventListener('resize', handleResize);
-
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        clearTimeout(timeoutId);
-      };
-    }, [resetColumnWidths]);
+    const { columnWidths, setFixedColumn } = useColumnWidth();
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -208,6 +192,19 @@ const TransactionHeader = memo(
       },
       [dispatchSelected],
     );
+
+    useEffect(() => {
+      setFixedColumn({
+        selected: 20,
+        date: 110,
+        payment: 100,
+        deposit: 100,
+        balance: showBalance ? 103 : 0,
+        cleared: showCleared ? 38 : 0,
+      });
+    }, [columnWidths]);
+
+    const { totalSize } = useColumnWidth();
 
     return (
       <Row
@@ -220,6 +217,7 @@ const TransactionHeader = memo(
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor: theme.tableBorder,
+          width: `${totalSize()}px`,
         }}
       >
         <SelectCell
@@ -247,22 +245,28 @@ const TransactionHeader = memo(
           }
         />
         {showAccount && (
-          <HeaderCell
-            value="Account"
-            ref={el => (refs.current['account'] = el)}
-            width={
-              columnWidths['account'] && columnWidths['account'] > 0
-                ? columnWidths['account']
-                : null
-            }
-            alignItems="flex"
-            marginLeft={-5}
-            id="account"
-            icon={field === 'account' ? ascDesc : 'clickable'}
-            onClick={() =>
-              onSort('account', selectAscDesc(field, ascDesc, 'account', 'asc'))
-            }
-          />
+          <>
+            <HeaderCell
+              value="Account"
+              ref={el => (refs.current['account'] = el)}
+              width={
+                columnWidths['account'] && columnWidths['account'] > 0
+                  ? columnWidths['account']
+                  : 200
+              }
+              alignItems="flex"
+              marginLeft={-5}
+              id="account"
+              icon={field === 'account' ? ascDesc : 'clickable'}
+              onClick={() =>
+                onSort(
+                  'account',
+                  selectAscDesc(field, ascDesc, 'account', 'asc'),
+                )
+              }
+            />
+            <Resizer columnName="account" resizeRef={refs.current['account']} />
+          </>
         )}
         <HeaderCell
           value="Payee"
@@ -270,7 +274,7 @@ const TransactionHeader = memo(
           width={
             columnWidths['payee'] && columnWidths['payee'] > 0
               ? columnWidths['payee']
-              : null
+              : 200
           }
           alignItems="flex"
           marginLeft={-5}
@@ -280,9 +284,15 @@ const TransactionHeader = memo(
             onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
           }
         />
+        <Resizer columnName="payee" resizeRef={refs.current['payee']} />
         <HeaderCell
           value="Notes"
-          width="flex"
+          ref={el => (refs.current['notes'] = el)}
+          width={
+            columnWidths['notes'] && columnWidths['notes'] > 0
+              ? columnWidths['notes']
+              : 200
+          }
           alignItems="flex"
           marginLeft={-5}
           id="notes"
@@ -291,25 +301,32 @@ const TransactionHeader = memo(
             onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
           }
         />
+        <Resizer columnName="notes" resizeRef={refs.current['notes']} />
         {showCategory && (
-          <HeaderCell
-            value="Category"
-            ref={el => (refs.current['category'] = el)}
-            width={
-              columnWidths['category'] && columnWidths['category'] > 0
-                ? columnWidths['category']
-                : null
-            }
-            marginLeft={-5}
-            id="category"
-            icon={field === 'category' ? ascDesc : 'clickable'}
-            onClick={() =>
-              onSort(
-                'category',
-                selectAscDesc(field, ascDesc, 'category', 'asc'),
-              )
-            }
-          />
+          <>
+            <HeaderCell
+              value="Category"
+              ref={el => (refs.current['category'] = el)}
+              width={
+                columnWidths['category'] && columnWidths['category'] > 0
+                  ? columnWidths['category']
+                  : 110
+              }
+              marginLeft={-5}
+              id="category"
+              icon={field === 'category' ? ascDesc : 'clickable'}
+              onClick={() =>
+                onSort(
+                  'category',
+                  selectAscDesc(field, ascDesc, 'category', 'asc'),
+                )
+              }
+            />
+            <Resizer
+              columnName="category"
+              resizeRef={refs.current['category']}
+            />
+          </>
         )}
         <HeaderCell
           value="Payment"
@@ -902,7 +919,7 @@ const Transaction = memo(function Transaction({
   balance,
   dateFormat = 'MM/dd/yyyy',
   hideFraction,
-  onSave: externalOnSave,
+  onSave,
   onEdit,
   onDelete,
   onSplit,
@@ -959,52 +976,7 @@ const Transaction = memo(function Transaction({
   } = transaction;
 
   const refs = useRef({});
-  const { columnWidths, updateColumnWidth, resetColumnWidths } =
-    useColumnWidth();
-
-  const [sidebarWidth] = useLocalPref('sidebarWidth');
-
-  const checkColumnSizes = useCallback(() => {
-    setTimeout(() => {
-      const columns = ['account', 'payee', 'category'];
-      columns.forEach(key => {
-        const width = refs.current[key]?.offsetWidth || 0;
-        if (width > (columnWidths[key] || 0)) {
-          updateColumnWidth(key, width);
-        }
-      });
-    }, 10);
-  }, [columnWidths, updateColumnWidth]);
-
-  const onSave = useCallback(
-    (deserialized, subtransactions, deserializedName) => {
-      externalOnSave(deserialized, subtransactions, deserializedName);
-      checkColumnSizes();
-    },
-  );
-
-  useEffect(() => {
-    const columns = ['account', 'payee', 'category'];
-
-    const observers = columns.map(key => {
-      const observer = new ResizeObserver(entries => {
-        for (const entry of entries) {
-          const width = entry.contentRect.width;
-          if (width > (columnWidths[key] || 0)) {
-            updateColumnWidth(key, width);
-          }
-        }
-      });
-      if (refs.current[key]) {
-        observer.observe(refs.current[key]);
-      }
-      return observer;
-    });
-
-    return () => {
-      observers.forEach(observer => observer.disconnect());
-    };
-  }, [accountId, payeeId, categoryId, notes, columnWidths, checkColumnSizes]);
+  const { columnWidths } = useColumnWidth();
 
   function onUpdate(name, value) {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1054,8 +1026,6 @@ const Transaction = memo(function Transaction({
         }),
       );
     }
-
-    checkColumnSizes();
   }
 
   function onUpdateAfterConfirm(name, value) {
@@ -1122,8 +1092,6 @@ const Transaction = memo(function Transaction({
   const valueStyle = added ? { fontWeight: 600 } : null;
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
-  
-  const maxWidthDynamic = 10 + Math.floor((445 + (showBalance ? 103 : 0) + (showCleared ? 38 : 0) + sidebarWidth) / 4);
 
   const runningBalance = !isTemporaryId(id)
     ? balance
@@ -1299,95 +1267,108 @@ const Transaction = memo(function Transaction({
       )}
 
       {!isChild && showAccount && (
-        <CustomCell
-          /* Account field for non-child transaction */
-          name="account"
-          ref={el => (refs.current['account'] = el)}
-          style={{
-            minWidth: columnWidths['account']
-              ? `${columnWidths['account']}px`
-              : 'auto',
-            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
-          }}
-          textAlign="flex"
-          value={accountId}
-          formatter={acctId => {
-            const acct = acctId && getAccountsById(accounts)[acctId];
-            if (acct) {
-              return acct.name;
+        <>
+          <CustomCell
+            /* Account field for non-child transaction */
+            name="account"
+            ref={el => (refs.current['account'] = el)}
+            width={
+              columnWidths['account'] ? `${columnWidths['account']}px` : 200
             }
-            return '';
-          }}
-          onBlur={() => resetColumnWidths('account')}
-          valueStyle={valueStyle}
-          exposed={focusedField === 'account'}
-          onExpose={name => !isPreview && onEdit(id, name)}
-          onUpdate={async value => {
-            // Only ever allow non-null values
-            if (value) {
-              onUpdate('account', value);
-            }
-          }}
-        >
-          {({
-            onBlur,
-            onKeyDown,
-            onUpdate,
-            onSave,
-            shouldSaveFromKey,
-            inputStyle,
-          }) => (
-            <AccountAutocomplete
-              includeClosedAccounts={false}
-              value={accountId}
-              accounts={accounts}
-              shouldSaveFromKey={shouldSaveFromKey}
-              clearOnBlur={false}
-              focused={true}
-              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-              onUpdate={onUpdate}
-              onSelect={onSave}
-              menuPortalTarget={undefined}
-            />
-          )}
-        </CustomCell>
+            textAlign="flex"
+            value={accountId}
+            formatter={acctId => {
+              const acct = acctId && getAccountsById(accounts)[acctId];
+              if (acct) {
+                return acct.name;
+              }
+              return '';
+            }}
+            valueStyle={valueStyle}
+            exposed={focusedField === 'account'}
+            onExpose={name => !isPreview && onEdit(id, name)}
+            onUpdate={async value => {
+              // Only ever allow non-null values
+              if (value) {
+                onUpdate('account', value);
+              }
+            }}
+          >
+            {({
+              onBlur,
+              onKeyDown,
+              onUpdate,
+              onSave,
+              shouldSaveFromKey,
+              inputStyle,
+            }) => (
+              <AccountAutocomplete
+                includeClosedAccounts={false}
+                value={accountId}
+                accounts={accounts}
+                shouldSaveFromKey={shouldSaveFromKey}
+                clearOnBlur={false}
+                focused={true}
+                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                onUpdate={onUpdate}
+                onSelect={onSave}
+                menuPortalTarget={undefined}
+              />
+            )}
+          </CustomCell>
+          <Field
+            width={10}
+            style={{
+              width: 10,
+            }}
+          />
+        </>
       )}
       {(() => (
-        <PayeeCell
-          /* Payee field for all transactions */
-          id={id}
-          payee={payee}
-          ref={el => (refs.current['payee'] = el)}
-          width={
-            columnWidths['payee'] && columnWidths['payee'] > 0
-              ? columnWidths['payee']
-              : null
-          }
-          style={{
-            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
-          }}
-          focused={focusedField === 'payee'}
-          /* Filter out the account we're currently in as it is not a valid transfer */
-          accounts={accounts.filter(account => account.id !== accountId)}
-          payees={payees.filter(payee => payee.transfer_acct !== accountId)}
-          valueStyle={valueStyle}
-          transaction={transaction}
-          subtransactions={subtransactions}
-          transferAccountsByTransaction={transferAccountsByTransaction}
-          importedPayee={importedPayee}
-          isPreview={isPreview}
-          onEdit={onEdit}
-          onUpdate={onUpdate}
-          onBlur={() => resetColumnWidths('payee')}
-          onCreatePayee={onCreatePayee}
-          onManagePayees={onManagePayees}
-          onNavigateToTransferAccount={onNavigateToTransferAccount}
-          onNavigateToSchedule={onNavigateToSchedule}
-        />
+        <>
+          <PayeeCell
+            /* Payee field for all transactions */
+            id={id}
+            payee={payee}
+            ref={el => (refs.current['payee'] = el)}
+            width={
+              columnWidths['payee'] && columnWidths['payee'] > 0
+                ? columnWidths['payee']
+                : 200
+            }
+            focused={focusedField === 'payee'}
+            /* Filter out the account we're currently in as it is not a valid transfer */
+            accounts={accounts.filter(account => account.id !== accountId)}
+            payees={payees.filter(payee => payee.transfer_acct !== accountId)}
+            valueStyle={valueStyle}
+            transaction={transaction}
+            subtransactions={subtransactions}
+            transferAccountsByTransaction={transferAccountsByTransaction}
+            importedPayee={importedPayee}
+            isPreview={isPreview}
+            onEdit={onEdit}
+            onUpdate={onUpdate}
+            onCreatePayee={onCreatePayee}
+            onManagePayees={onManagePayees}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
+          />
+          <Field
+            width={10}
+            style={{
+              width: 10,
+            }}
+          />
+        </>
       ))()}
 
       <InputCell
-        width="flex"
+        ref={el => (refs.current['notes'] = el)}
+        width={
+          columnWidths['notes'] && columnWidths['notes'] > 0
+            ? columnWidths['notes']
+            : 200
+        }
         name="notes"
         textAlign="flex"
         exposed={focusedField === 'notes'}
@@ -1401,6 +1382,12 @@ const Transaction = memo(function Transaction({
           onUpdate: onUpdate.bind(null, 'notes'),
         }}
       />
+      <Field
+        width={10}
+        style={{
+          width: 10,
+        }}
+      />
 
       {(isPreview && !isChild) || isParent ? (
         <Cell
@@ -1410,7 +1397,7 @@ const Transaction = memo(function Transaction({
           width={
             columnWidths['category'] && columnWidths['category'] > 0
               ? columnWidths['category']
-              : null
+              : 110
           }
           focused={focusedField === 'category'}
           style={{
@@ -1419,7 +1406,6 @@ const Transaction = memo(function Transaction({
             alignItems: 'center',
             justifyContent: 'flex-start',
             height: '100%',
-            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
           }}
           plain
         >
@@ -1508,7 +1494,7 @@ const Transaction = memo(function Transaction({
           width={
             columnWidths['category'] && columnWidths['category'] > 0
               ? columnWidths['category']
-              : null
+              : 110
           }
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
@@ -1527,7 +1513,6 @@ const Transaction = memo(function Transaction({
             fontStyle: 'italic',
             color: theme.pageTextSubdued,
             fontWeight: 300,
-            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
           }}
           inputProps={{
             readOnly: true,
@@ -1539,12 +1524,9 @@ const Transaction = memo(function Transaction({
           /* Category field for normal and child transactions */
           name="category"
           ref={el => (refs.current['category'] = el)}
-          width={columnWidths['category'] ? columnWidths['category'] : null}
+          width={columnWidths['category'] ? columnWidths['category'] : 110}
           textAlign="flex"
           value={categoryId}
-          style={{
-            maxWidth: `calc(25vw - ${maxWidthDynamic}px)`,
-          }}
           formatter={value =>
             value
               ? getDisplayValue(
@@ -1567,7 +1549,6 @@ const Transaction = memo(function Transaction({
                 }
               : valueStyle
           }
-          onBlur={() => resetColumnWidths('category')}
           onUpdate={async value => {
             if (value === 'split') {
               onSplit(transaction.id);
@@ -1612,6 +1593,12 @@ const Transaction = memo(function Transaction({
           )}
         </CustomCell>
       )}
+      <Field
+        width={10}
+        style={{
+          width: 10,
+        }}
+      />
 
       <InputCell
         /* Debit field for all transactions */
@@ -2056,8 +2043,10 @@ function TransactionTableInner({
     );
   };
 
+  const { totalSize } = useColumnWidth();
+
   return (
-    <View
+      <View
       innerRef={containerRef}
       style={{
         flex: 1,
@@ -2126,7 +2115,7 @@ function TransactionTableInner({
          //   the full height of the container ??? */}
 
       <View
-        style={{ flex: 1, overflow: 'hidden' }}
+        style={{ flex: 1, overflowX: 'auto', width: totalSize() }}
         data-testid="transaction-table"
       >
         <Table

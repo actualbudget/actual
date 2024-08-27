@@ -79,6 +79,7 @@ export type LocalPrefs = SyncedPrefs &
     spendingReportCompare: spendingReportTimeType;
     sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
+    'transaction-column-sizes': string;
   }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';

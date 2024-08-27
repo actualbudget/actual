@@ -153,16 +153,12 @@ let hiddenScrollbars = false;
 // darkScrollbar => secondary
 function onScrollbarChange() {
   styles.horizontalScrollbar = !hiddenScrollbars && {
-    '::-webkit-scrollbar': {
-      backgroundColor: 'inherit',
-      height: 12,
-    },
-    '::-webkit-scrollbar-thumb': {
+    '& ::-webkit-scrollbar': {
       width: 7,
-      borderRadius: 30,
-      backgroundClip: 'padding-box',
-      border: '2px solid rgba(0, 0, 0, 0)',
-      backgroundColor: '#d0d0d0',
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+    },
+    '& ::-webkit-scrollbar-thumb:vertical': {
+      backgroundColor: 'rgba(200, 200, 200, .5)',
     },
   };
 
