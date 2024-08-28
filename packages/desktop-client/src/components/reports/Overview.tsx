@@ -105,7 +105,7 @@ export function Overview() {
           ...baseLayout,
           {
             i: 'spending',
-            type: 'spending-card',
+            type: 'spending-card' as const,
             x: 0,
             y: Math.max(...baseLayout.map(({ y }) => y), 0) + 2,
             w: 4,
