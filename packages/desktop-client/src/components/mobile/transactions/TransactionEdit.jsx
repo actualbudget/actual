@@ -59,6 +59,7 @@ import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
+import { tr } from 'date-fns/locale';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -422,18 +423,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const [transaction, ...childTransactions] = transactions;
 
-  const [totalAmountFocused, setTotalAmountFocused] = useState(true);
   const childTransactionElementRefMap = useRef({});
 
   const payeesById = useMemo(() => groupById(payees), [payees]);
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
-
-  useEffect(() => {
-    if (adding) {
-      setTotalAmountFocused(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const getAccount = trans => {
     return trans?.account && accountsById?.[trans.account];
@@ -688,9 +681,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           <FocusableAmountInput
             value={transaction.amount}
             zeroSign="-"
-            focused={totalAmountFocused}
-            onFocus={() => setTotalAmountFocused(true)}
-            onBlur={() => setTotalAmountFocused(false)}
+            defaultFocused={true}
             onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',
