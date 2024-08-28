@@ -68,7 +68,6 @@ import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
@@ -455,24 +454,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const [transaction, ...childTransactions] = transactions;
 
-  const [totalAmountFocused, setTotalAmountFocused] = useState(
-    // iOS does not support automatically opening up the keyboard for the
-    // total amount field. Hence we should not focus on it on page render.
-    !Platform.isIOSAgent,
-  );
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
 
   const payeesById = useMemo(() => groupById(payees), [payees]);
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
-
-  const isInitialMount = useInitialMount();
-
-  useEffect(() => {
-    if (isInitialMount && isAdding && !Platform.isIOSAgent) {
-      setTotalAmountFocused(true);
-    }
-  }, [isAdding, isInitialMount]);
 
   const getAccount = useCallback(
     trans => {
@@ -797,9 +783,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           <FocusableAmountInput
             value={transaction.amount}
             zeroSign="-"
-            focused={totalAmountFocused}
-            onFocus={() => setTotalAmountFocused(true)}
-            onBlur={() => setTotalAmountFocused(false)}
+            defaultFocused={!Platform.isIOSAgent}
             onUpdateAmount={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',

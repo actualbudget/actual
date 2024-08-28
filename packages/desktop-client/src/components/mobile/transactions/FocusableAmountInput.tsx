@@ -165,7 +165,7 @@ const AmountInput = memo(function AmountInput({
 type FocusableAmountInputProps = Omit<AmountInputProps, 'onFocus'> & {
   sign?: '+' | '-';
   zeroSign?: '+' | '-';
-  focused?: boolean;
+  defaultFocused?: boolean;
   disabled?: boolean;
   focusedStyle?: CSSProperties;
   buttonProps?: ComponentPropsWithRef<typeof Button>;
@@ -176,17 +176,16 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   value,
   sign,
   zeroSign,
-  focused,
+  defaultFocused,
   disabled,
   textStyle,
   style,
   focusedStyle,
   buttonProps,
-  onFocus,
-  onBlur,
   ...props
 }: FocusableAmountInputProps) {
   const [isNegative, setIsNegative] = useState(true);
+  const [focused, setFocused] = useState(defaultFocused);
 
   const maybeApplyNegative = (amount: number, negative: boolean) => {
     const absValue = Math.abs(amount);
@@ -219,8 +218,8 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
       <AmountInput
         {...props}
         value={value}
-        onFocus={onFocus}
-        onBlur={onBlur}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         onUpdateAmount={amount => onUpdateAmount(amount, isNegative)}
         focused={focused && !disabled}
         style={{
@@ -252,7 +251,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
           </Button>
         )}
         <Button
-          onPress={onFocus}
+          onPress={() => setFocused(true)}
           // Defines how far touch can start away from the button
           // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
           {...buttonProps}

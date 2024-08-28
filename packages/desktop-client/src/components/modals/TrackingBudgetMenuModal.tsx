@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type CSSProperties } from 'react';
+import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -46,19 +46,10 @@ export function TrackingBudgetMenuModal({
     trackingBudget.catBudgeted(categoryId),
   );
   const category = useCategory(categoryId);
-  const [amountFocused, setAmountFocused] = useState(false);
 
   const _onUpdateBudget = (amount: number) => {
     onUpdateBudget?.(amountToInteger(amount));
   };
-
-  useEffect(() => {
-    // iOS does not support automatically opening up the keyboard for the
-    // total amount field. Hence we should not focus on it on page render.
-    if (!Platform.isIOSAgent) {
-      setAmountFocused(true);
-    }
-  }, []);
 
   if (!category) {
     return null;
@@ -89,11 +80,9 @@ export function TrackingBudgetMenuModal({
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}
-              focused={amountFocused}
-              onFocus={() => setAmountFocused(true)}
-              onBlur={() => setAmountFocused(false)}
               onEnter={close}
               zeroSign="+"
+              defaultFocused={!Platform.isIOSAgent}
               focusedStyle={{
                 width: 'auto',
                 padding: '5px',
