@@ -34,6 +34,7 @@ function LoadComponentInner<K extends string>({
     localModuleCache.get(name) ?? null,
   );
   const [failedToLoad, setFailedToLoad] = useState(false);
+  const [failedToLoadException, setFailedToLoadException] = useState(null);
 
   useEffect(() => {
     if (localModuleCache.has(name)) {
@@ -55,13 +56,14 @@ function LoadComponentInner<K extends string>({
       {
         retries: 5,
       },
-    ).catch(() => {
+    ).catch((e) => {
       setFailedToLoad(true);
+      setFailedToLoadException(e);
     });
   }, [name, importer]);
 
   if (failedToLoad) {
-    throw new LazyLoadFailedError(name);
+    throw new LazyLoadFailedError(name, failedToLoadException);
   }
 
   if (!Component) {
