@@ -60,10 +60,6 @@ import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
-function getFieldName(transactionId, field) {
-  return `${field}-${transactionId}`;
-}
-
 export function getDescriptionPretty(transaction, payee, transferAcct) {
   const { amount } = transaction;
 

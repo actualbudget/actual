@@ -1,8 +1,4 @@
-import React, {
-  useState,
-  type ComponentPropsWithoutRef,
-  useEffect,
-} from 'react';
+import React, { type ComponentPropsWithoutRef } from 'react';
 
 import { rolloverBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
