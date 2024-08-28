@@ -59,7 +59,6 @@ import { MobileBackButton } from '../MobileBackButton';
 import { FieldLabel, TapField, InputField, BooleanField } from '../MobileForms';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
-import { tr } from 'date-fns/locale';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
