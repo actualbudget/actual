@@ -234,7 +234,7 @@ export function AccountHeader({
                   data-testid="account-name"
                 >
                   {account && account.closed
-                    ? t('Closed: ') + accountName
+                    ? t('Closed: {{ accountName }}', { accountName })
                     : accountName}
                 </View>
 
@@ -265,7 +265,7 @@ export function AccountHeader({
                 data-testid="account-name"
               >
                 {account && account.closed
-                  ? t('Closed: ') + accountName
+                  ? t('Closed: {{ accountName }}', { accountName })
                   : accountName}
               </View>
             )}
@@ -510,18 +510,21 @@ function AccountMenu({
         },
         canShowBalances && {
           name: 'toggle-balance',
-          text: (showBalances ? t('Hide') : t('Show')) + t(' running balance'),
+          text: showBalances
+            ? t('Hide running balance')
+            : t('Show running balance'),
         },
         {
           name: 'toggle-cleared',
-          text:
-            (showCleared ? t('Hide') : t('Show')) + t(' “cleared” checkboxes'),
+          text: showCleared
+            ? t('Hide “cleared” checkboxes')
+            : t('Show “cleared” checkboxes'),
         },
         {
           name: 'toggle-reconciled',
-          text:
-            (showReconciled ? t('Hide') : t('Show')) +
-            t(' reconciled transactions'),
+          text: showReconciled
+            ? t('Hide reconciled transactions')
+            : t('Show reconciled transactions'),
         },
         { name: 'export', text: t('Export') },
         { name: 'reconcile', text: t('Reconcile') },

@@ -49,13 +49,13 @@ function getErrorMessage(type, code) {
 
     case 'ACCOUNT_NEEDS_ATTENTION':
       return (
-        <>
-          <Trans>The account needs your attention at</Trans>{' '}
+        <Trans>
+          The account needs your attention at{' '}
           <Link variant="external" to="https://bridge.simplefin.org/auth/login">
             SimpleFIN
           </Link>
           .
-        </>
+        </Trans>
       );
 
     default:

@@ -79,7 +79,7 @@ export function ReconcilingMessage({
                   }}
                 </strong>{' '}
                 to match
-                <br /> your bank&aposâs balance of{' '}
+                <br /> your bank&apos;s balance of{' '}
                 <Text style={{ fontWeight: 700 }}>
                   {{ bankBalance: format(targetBalance, 'financial') }}
                 </Text>
