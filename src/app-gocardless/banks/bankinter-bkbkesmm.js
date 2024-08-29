@@ -24,12 +24,15 @@ export default {
   },
 
   normalizeTransaction(transaction, _booked) {
-    transaction.debtorName = transaction.debtorName?.replaceAll(';', ' ');
-    transaction.creditorName = transaction.creditorName?.replaceAll(';', ' ');
     transaction.remittanceInformationUnstructured =
       transaction.remittanceInformationUnstructured
         .replaceAll(/\/Txt\/(\w\|)?/gi, '')
         .replaceAll(';', ' ');
+
+    transaction.debtorName = transaction.debtorName?.replaceAll(';', ' ');
+    transaction.creditorName =
+      transaction.creditorName?.replaceAll(';', ' ') ??
+      transaction.remittanceInformationUnstructured;
 
     return {
       ...transaction,
