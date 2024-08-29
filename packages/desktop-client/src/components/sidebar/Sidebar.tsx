@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { Resizable } from 're-resizable';
@@ -38,6 +39,7 @@ import { Tools } from './Tools';
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const sidebar = useSidebar();
   const accounts = useAccounts();
@@ -149,10 +151,10 @@ export function Sidebar() {
         </View>
 
         <View style={{ overflow: 'auto' }}>
-          <Item title="Budget" Icon={SvgWallet} to="/budget" />
-          <Item title="Reports" Icon={SvgReports} to="/reports" />
+          <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
+          <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
 
-          <Item title="Schedules" Icon={SvgCalendar} to="/schedules" />
+          <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
 
           <Tools />
 
@@ -177,6 +179,7 @@ export function Sidebar() {
 }
 
 function EditableBudgetName() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
@@ -205,10 +208,10 @@ function EditableBudgetName() {
   }
 
   const items = [
-    { name: 'rename', text: 'Rename budget' },
-    { name: 'settings', text: 'Settings' },
-    ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
-    { name: 'close', text: 'Close file' },
+    { name: 'rename', text: t('Rename budget') },
+    { name: 'settings', text: t('Settings') },
+    ...(Platform.isBrowser ? [{ name: 'help', text: t('Help') }] : []),
+    { name: 'close', text: t('Close file') },
   ];
 
   if (editing) {
@@ -250,7 +253,7 @@ function EditableBudgetName() {
         onPress={() => setMenuOpen(true)}
       >
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-          {budgetName || 'A budget has no name'}
+          {budgetName || t('A budget has no name')}
         </Text>
         <SvgExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
       </Button>

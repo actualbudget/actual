@@ -41,6 +41,7 @@ module.exports = {
       process: require.resolve('process/browser'),
       stream: require.resolve('stream-browserify'),
       tls: false,
+      https: false,
       // used by memfs in a check which we can ignore I think
       url: false,
       zlib: require.resolve('browserify-zlib'),
