@@ -258,7 +258,7 @@ export class FixedSizeList extends PureComponent<
         ref={this._outerRefSetter}
         style={{
           height,
-          width: totalSize > width ? totalSize : width,
+          width: width,
           overflow: 'hidden auto',
         }}
       >
@@ -268,7 +268,7 @@ export class FixedSizeList extends PureComponent<
           style={{
             position: 'relative',
             height: estimatedTotalSize,
-            width: `${totalSize}px`,
+            width: `${totalSize > width ? totalSize : width}px`,
             pointerEvents: isScrolling ? 'none' : undefined,
           }}
         >

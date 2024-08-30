@@ -18,6 +18,7 @@ export const ColumnWidthProvider = ({ children }) => {
   const [columnWidths, setColumnWidths] = useState({});
   const [fixedSizedColumns, setFixedSizedColumns] = useState({});
   const [deltaAccumulator, setDeltaAccumulator] = useState(0);
+  const refs = useRef({});
 
   useEffect(() => {
     if (columnSizePrefs) {
@@ -38,6 +39,33 @@ export const ColumnWidthProvider = ({ children }) => {
     return otherColumnsWidth + currentTotalWidth;
   });
 
+  const handleDoubleClick = useCallback((columnName) => {
+    setColumnWidths(prevWidths => ({
+      ...prevWidths,
+      [columnName]: -1,
+    }));
+
+    setTimeout(() => {
+      let maximum = -1;
+      document.querySelectorAll(`[data-resizeable-column=${columnName}]`).forEach(row => {
+        const rect = row.getBoundingClientRect();
+        const styles = getComputedStyle(row);
+        const localValue = Math.max(rect.width + parseFloat(styles.marginLeft) + parseFloat(styles.marginRight), 110);
+
+        if(localValue > maximum) {
+          maximum = localValue;
+        }
+      });
+
+      setColumnWidths(prevWidths => ({
+        ...prevWidths,
+        [columnName]: maximum,
+      }));
+
+      savePrefs();
+    }, 100);
+  });
+
   const setFixedColumn = useCallback(fixedColumns => {
     setFixedSizedColumns(fixedColumns);
   });
@@ -51,7 +79,7 @@ export const ColumnWidthProvider = ({ children }) => {
         .filter(col => col !== columnName)
         .reduce((acc, width) => acc + width, 0);
       const otherColumnsWidth = Object.values(fixedSizedColumns).reduce(
-        (acc, width) => acc + width + 10, //plus 10 cuz the divider must be counted
+        (acc, width) => acc + width + 10,
         0,
       );
 
@@ -115,7 +143,7 @@ export const ColumnWidthProvider = ({ children }) => {
 
   return (
     <ColumnWidthContext.Provider
-      value={{ columnWidths, handleMoveProps, setFixedColumn, totalSize }}
+      value={{ columnWidths, handleMoveProps, setFixedColumn, handleDoubleClick, totalSize, refs }}
     >
       {children}
     </ColumnWidthContext.Provider>

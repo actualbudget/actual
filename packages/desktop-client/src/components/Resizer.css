@@ -28,9 +28,9 @@
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-.resizer-container.dragging::before {
+/* .resizer-container.dragging::before {
   box-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1),
               -0.5px -0.5px 1px rgba(255, 255, 255, 0.1);
   background-color: rgba(0, 0, 0, 0.1);
   outline: 1px solid rgba(255, 255, 255, 0.2);
-}
+} */

@@ -87,6 +87,8 @@ import {
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMove } from 'react-aria';
 import { Resizer } from '../Resizer';
+import { useScroll } from '../ScrollProvider';
+import { HorizontalFakeScrollbar } from '../HorizontalFakeScrollbar';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -205,9 +207,28 @@ const TransactionHeader = memo(
     }, [columnWidths]);
 
     const { totalSize } = useColumnWidth();
+    const [clientWidth, setClientWidth] = useState();
+    const rowRef = useRef();
+
+    useEffect(() => {
+      if (rowRef && rowRef.current) {
+        debugger;
+        let parentNode = rowRef.current.parentNode;
+        let rect = parentNode.getBoundingClientRect();
+        while (parentNode && rect.width === 0) {
+          parentNode = parentNode.parentNode;
+          rect = parentNode.getBoundingClientRect();
+        }
+
+        if (rect.width !== 0) {
+          setClientWidth(rect.width);
+        }
+      }
+    }, [rowRef]);
 
     return (
       <Row
+        ref={rowRef}
         style={{
           fontWeight: 300,
           zIndex: 200,
@@ -217,7 +238,7 @@ const TransactionHeader = memo(
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor: theme.tableBorder,
-          width: `${totalSize()}px`,
+          width: `${totalSize() < clientWidth ? clientWidth : totalSize()}px`,
         }}
       >
         <SelectCell
@@ -249,11 +270,7 @@ const TransactionHeader = memo(
             <HeaderCell
               value="Account"
               ref={el => (refs.current['account'] = el)}
-              width={
-                columnWidths['account'] && columnWidths['account'] > 0
-                  ? columnWidths['account']
-                  : 200
-              }
+              width={columnWidths['account'] ? columnWidths['account'] : 'flex'}
               alignItems="flex"
               marginLeft={-5}
               id="account"
@@ -271,11 +288,7 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Payee"
           ref={el => (refs.current['payee'] = el)}
-          width={
-            columnWidths['payee'] && columnWidths['payee'] > 0
-              ? columnWidths['payee']
-              : 200
-          }
+          width={columnWidths['payee'] ? columnWidths['payee'] : 'flex'}
           alignItems="flex"
           marginLeft={-5}
           id="payee"
@@ -288,11 +301,7 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Notes"
           ref={el => (refs.current['notes'] = el)}
-          width={
-            columnWidths['notes'] && columnWidths['notes'] > 0
-              ? columnWidths['notes']
-              : 200
-          }
+          width={columnWidths['notes'] ? columnWidths['notes'] : 'flex'}
           alignItems="flex"
           marginLeft={-5}
           id="notes"
@@ -308,9 +317,7 @@ const TransactionHeader = memo(
               value="Category"
               ref={el => (refs.current['category'] = el)}
               width={
-                columnWidths['category'] && columnWidths['category'] > 0
-                  ? columnWidths['category']
-                  : 110
+                columnWidths['category'] ? columnWidths['category'] : 110
               }
               marginLeft={-5}
               id="category"
@@ -975,8 +982,8 @@ const Transaction = memo(function Transaction({
     _inverse = false,
   } = transaction;
 
-  const refs = useRef({});
-  const { columnWidths } = useColumnWidth();
+  //const refs = useRef({});
+  const { columnWidths, refs } = useColumnWidth();
 
   function onUpdate(name, value) {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1176,11 +1183,10 @@ const Transaction = memo(function Transaction({
 
       {isChild && showAccount && (
         <Field
+          width={columnWidths['account'] ? columnWidths['account'] : 'flex'}
+          data-resizeable-column="account"
           /* Account blank placeholder for Child transaction */
           style={{
-            minWidth: columnWidths['account']
-              ? `${columnWidths['account']}px`
-              : '0',
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0,
           }}
@@ -1272,9 +1278,8 @@ const Transaction = memo(function Transaction({
             /* Account field for non-child transaction */
             name="account"
             ref={el => (refs.current['account'] = el)}
-            width={
-              columnWidths['account'] ? `${columnWidths['account']}px` : 200
-            }
+            width={columnWidths['account'] ? columnWidths['account'] : 200}
+            data-resizeable-column="account"
             textAlign="flex"
             value={accountId}
             formatter={acctId => {
@@ -1331,11 +1336,8 @@ const Transaction = memo(function Transaction({
             id={id}
             payee={payee}
             ref={el => (refs.current['payee'] = el)}
-            width={
-              columnWidths['payee'] && columnWidths['payee'] > 0
-                ? columnWidths['payee']
-                : 200
-            }
+            width={columnWidths['payee'] ? columnWidths['payee'] : 'flex'}
+            data-resizeable-column="payee"
             focused={focusedField === 'payee'}
             /* Filter out the account we're currently in as it is not a valid transfer */
             accounts={accounts.filter(account => account.id !== accountId)}
@@ -1364,11 +1366,8 @@ const Transaction = memo(function Transaction({
 
       <InputCell
         ref={el => (refs.current['notes'] = el)}
-        width={
-          columnWidths['notes'] && columnWidths['notes'] > 0
-            ? columnWidths['notes']
-            : 200
-        }
+        width={columnWidths['notes'] ? columnWidths['notes'] : 'flex'}
+        data-resizeable-column="notes"
         name="notes"
         textAlign="flex"
         exposed={focusedField === 'notes'}
@@ -1394,11 +1393,9 @@ const Transaction = memo(function Transaction({
           /* Category field (Split button) for parent transactions */
           name="category"
           ref={el => (refs.current['category'] = el)}
-          width={
-            columnWidths['category'] && columnWidths['category'] > 0
-              ? columnWidths['category']
-              : 110
-          }
+          width={columnWidths['category'] ? columnWidths['category'] : 110}
+          
+          data-resizeable-column="category"
           focused={focusedField === 'category'}
           style={{
             padding: 0,
@@ -1491,11 +1488,8 @@ const Transaction = memo(function Transaction({
      (NOT preview, it is covered first) */
           name="category"
           ref={el => (refs.current['category'] = el)}
-          width={
-            columnWidths['category'] && columnWidths['category'] > 0
-              ? columnWidths['category']
-              : 110
-          }
+          width={columnWidths['category'] ? columnWidths['category'] : 110}
+          data-resizeable-column="category"
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
           onExpose={name => onEdit(id, name)}
@@ -1525,6 +1519,7 @@ const Transaction = memo(function Transaction({
           name="category"
           ref={el => (refs.current['category'] = el)}
           width={columnWidths['category'] ? columnWidths['category'] : 110}
+          data-resizeable-column="category"
           textAlign="flex"
           value={categoryId}
           formatter={value =>
@@ -2043,10 +2038,8 @@ function TransactionTableInner({
     );
   };
 
-  const { totalSize } = useColumnWidth();
-
   return (
-      <View
+    <View
       innerRef={containerRef}
       style={{
         flex: 1,
@@ -2054,68 +2047,15 @@ function TransactionTableInner({
         ...props.style,
       }}
     >
-      <View>
-        <TransactionHeader
-          hasSelected={props.selectedItems.size > 0}
-          showAccount={props.showAccount}
-          showCategory={props.showCategory}
-          showBalance={props.showBalances}
-          showCleared={props.showCleared}
-          scrollWidth={scrollWidth}
-          onSort={props.onSort}
-          ascDesc={props.ascDesc}
-          field={props.sortField}
-        />
-
-        {props.isAdding && (
-          <View
-            {...newNavigator.getNavigatorProps({
-              onKeyDown: e => props.onCheckNewEnter(e),
-            })}
-          >
-            <NewTransaction
-              transactions={props.newTransactions}
-              transferAccountsByTransaction={
-                props.transferAccountsByTransaction
-              }
-              editingTransaction={newNavigator.editingId}
-              focusedField={newNavigator.focusedField}
-              accounts={props.accounts}
-              categoryGroups={props.categoryGroups}
-              payees={props.payees || []}
-              showAccount={props.showAccount}
-              showCategory={props.showCategory}
-              showBalance={props.showBalances}
-              showCleared={props.showCleared}
-              dateFormat={dateFormat}
-              hideFraction={props.hideFraction}
-              onClose={props.onCloseAddTransaction}
-              onAdd={props.onAddTemporary}
-              onAddSplit={props.onAddSplit}
-              onSplit={props.onSplit}
-              onEdit={newNavigator.onEdit}
-              onSave={props.onSave}
-              onDelete={props.onDelete}
-              onManagePayees={props.onManagePayees}
-              onCreatePayee={props.onCreatePayee}
-              onNavigateToTransferAccount={onNavigateToTransferAccount}
-              onNavigateToSchedule={onNavigateToSchedule}
-              onNotesTagClick={onNotesTagClick}
-              onDistributeRemainder={props.onDistributeRemainder}
-              balance={
-                props.transactions?.length > 0
-                  ? props.balances?.[props.transactions[0]?.id]?.balance
-                  : 0
-              }
-            />
-          </View>
-        )}
-      </View>
       {/*// * On Windows, makes the scrollbar always appear
          //   the full height of the container ??? */}
 
       <View
-        style={{ flex: 1, overflowX: 'auto', width: totalSize() }}
+        style={{
+          flex: 1,
+          overflowX: 'hidden',
+          position: 'relative',
+        }}
         data-testid="transaction-table"
       >
         <Table
@@ -2130,6 +2070,65 @@ function TransactionTableInner({
           onKeyDown={e => props.onCheckEnter(e)}
           onScroll={onScroll}
           saveScrollWidth={saveScrollWidth}
+          headers={
+            <View>
+              <TransactionHeader
+                hasSelected={props.selectedItems.size > 0}
+                showAccount={props.showAccount}
+                showCategory={props.showCategory}
+                showBalance={props.showBalances}
+                showCleared={props.showCleared}
+                scrollWidth={scrollWidth}
+                onSort={props.onSort}
+                ascDesc={props.ascDesc}
+                field={props.sortField}
+              />
+
+              {props.isAdding && (
+                <View
+                  {...newNavigator.getNavigatorProps({
+                    onKeyDown: e => props.onCheckNewEnter(e),
+                  })}
+                >
+                  <NewTransaction
+                    transactions={props.newTransactions}
+                    transferAccountsByTransaction={
+                      props.transferAccountsByTransaction
+                    }
+                    editingTransaction={newNavigator.editingId}
+                    focusedField={newNavigator.focusedField}
+                    accounts={props.accounts}
+                    categoryGroups={props.categoryGroups}
+                    payees={props.payees || []}
+                    showAccount={props.showAccount}
+                    showCategory={props.showCategory}
+                    showBalance={props.showBalances}
+                    showCleared={props.showCleared}
+                    dateFormat={dateFormat}
+                    hideFraction={props.hideFraction}
+                    onClose={props.onCloseAddTransaction}
+                    onAdd={props.onAddTemporary}
+                    onAddSplit={props.onAddSplit}
+                    onSplit={props.onSplit}
+                    onEdit={newNavigator.onEdit}
+                    onSave={props.onSave}
+                    onDelete={props.onDelete}
+                    onManagePayees={props.onManagePayees}
+                    onCreatePayee={props.onCreatePayee}
+                    onNavigateToTransferAccount={onNavigateToTransferAccount}
+                    onNavigateToSchedule={onNavigateToSchedule}
+                    onNotesTagClick={onNotesTagClick}
+                    onDistributeRemainder={props.onDistributeRemainder}
+                    balance={
+                      props.transactions?.length > 0
+                        ? props.balances?.[props.transactions[0]?.id]?.balance
+                        : 0
+                    }
+                  />
+                </View>
+              )}
+            </View>
+          }
         />
 
         {props.isAdding && (

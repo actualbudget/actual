@@ -9,7 +9,7 @@ type ResizerProps = {
 };
 
 export function Resizer({ columnName, resizeRef }: ResizerProps) {
-  const { handleMoveProps } = useColumnWidth();
+  const { handleMoveProps, handleDoubleClick } = useColumnWidth();
   const resizerRef = useRef();
   let { moveProps } = useMove(handleMoveProps(columnName, resizeRef, resizerRef));
 
@@ -17,6 +17,7 @@ export function Resizer({ columnName, resizeRef }: ResizerProps) {
     <div
       {...moveProps}
       ref={resizerRef}
+      onDoubleClick={() => handleDoubleClick(columnName, resizeRef)}
       className='resizer-container'
     />
   );

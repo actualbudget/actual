@@ -50,6 +50,8 @@ import {
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 import { useColumnWidth } from './ColumnWidthContext';
+import { useScroll } from './ScrollProvider';
+import { HorizontalFakeScrollbar } from './HorizontalFakeScrollbar';
 
 export const ROW_HEIGHT = 32;
 
@@ -182,14 +184,23 @@ export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell(
   const mouseCoords = useRef(null);
   const viewRef = useRef(null);
   const mergeRef = useMergedRefs(ref, viewRef);
+  const [widthStyle, setWidthStyle] = useState({});
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
-  const widthStyle: CSSProperties = width
-    ? width === 'flex'
-      ? { flex: 1, flexBasis: 0 }
-      : { width }
-    : { width: 'auto' };
+  useEffect(() => {
+    if (width === -1) console.log('-1');
+    setWidthStyle(
+      width
+        ? width === 'flex'
+          ? { flex: 1, flexBasis: 0 }
+          : width?.toString() === '-1'
+            ? { width: 'auto' }
+            : { width: `${width}px` }
+        : { width: 'auto' },
+    );
+  }, [width]);
+
   const cellStyle: CSSProperties = {
     position: 'relative',
     textAlign: textAlign || 'left',
@@ -453,6 +464,7 @@ export const CustomCell = forwardRef<HTMLDivElement, CustomCellProps>(
       children,
       onUpdate,
       onBlur,
+      width,
       ...props
     }: CustomCellProps,
     ref,
@@ -482,7 +494,7 @@ export const CustomCell = forwardRef<HTMLDivElement, CustomCellProps>(
     }
 
     return (
-      <Cell {...props} value={defaultValue} ref={ref}>
+      <Cell {...props} value={defaultValue} ref={ref} width={width}>
         {() =>
           children({
             onBlur: onBlur_,
@@ -988,9 +1000,30 @@ export const Table = forwardRef(
     const listContainerInnerRef = useRef<HTMLDivElement>(null);
     const listContainer = listContainerRef || listContainerInnerRef;
     const scrollContainer = useRef(null);
+    const scrollContainerHeader = useRef(null);
     const initialScrollTo = useRef(null);
     const listInitialized = useRef(false);
     const { totalSize } = useColumnWidth();
+    const scrollRef = useRef<HTMLDivElement>();
+    const [scrollWidthX, setScrollWidthX] = useState(0);
+    const [clientWidthX, setClientWidthX] = useState(0);
+    const { setScrollContainers } = useScroll();
+
+    useEffect(() => {
+      if (
+        scrollRef &&
+        scrollContainer.current &&
+        scrollContainerHeader &&
+        scrollContainerHeader.current
+      ) {
+        setScrollContainers([
+          scrollContainer.current,
+          scrollContainerHeader.current,
+        ]);
+        setScrollWidthX(totalSize());
+        setClientWidthX(scrollRef.current.clientWidth);
+      }
+    }, [scrollContainer, scrollRef, totalSize]);
 
     useImperativeHandle(ref, () => ({
       scrollTo: (id, alignment = 'smart') => {
@@ -1170,7 +1203,33 @@ export const Table = forwardRef(
         {headers && (
           <TableHeader
             height={rowHeight}
-            {...(Array.isArray(headers) ? { headers } : { children: headers })}
+            {...(Array.isArray(headers)
+              ? { headers }
+              : {
+                  children: (
+                    <AutoSizer disableHeight={true}>
+                      {({ width }) => {
+                        if (width === 0) {
+                          return null;
+                        }
+
+                        return (
+                          <View
+                            ref={scrollContainerHeader}
+                            style={{
+                              width: `${width}px`,
+                              overflow: 'hidden',
+                            }}
+                          >
+                            <View style={{ width: `${totalSize()}px` }}>
+                              {headers}
+                            </View>
+                          </View>
+                        );
+                      }}
+                    </AutoSizer>
+                  ),
+                })}
           />
         )}
         <View
@@ -1189,34 +1248,42 @@ export const Table = forwardRef(
                 }
 
                 return (
-                  <AvoidRefocusScrollProvider>
-                    <FixedSizeList
-                      ref={list}
-                      header={contentHeader}
-                      innerRef={listContainer}
-                      outerRef={scrollContainer}
-                      width={width}
-                      totalSize={totalSize()}
-                      height={height}
-                      renderRow={renderRow}
-                      itemCount={count || items.length}
-                      itemSize={rowHeight - 1}
-                      itemKey={
-                        getItemKey || ((index: number) => items[index].id)
-                      }
-                      indexForKey={key =>
-                        items.findIndex(item => item.id === key)
-                      }
-                      initialScrollOffset={
-                        initialScrollTo.current
-                          ? getScrollOffset(height, initialScrollTo.current)
-                          : 0
-                      }
-                      overscanCount={5}
-                      onItemsRendered={onItemsRendered}
-                      onScroll={onScroll}
+                  <>
+                    <View ref={scrollRef} style={{ width: `${width}px` }}>
+                      <AvoidRefocusScrollProvider>
+                        <FixedSizeList
+                          ref={list}
+                          header={contentHeader}
+                          innerRef={listContainer}
+                          outerRef={scrollContainer}
+                          width={width}
+                          totalSize={totalSize()}
+                          height={height}
+                          renderRow={renderRow}
+                          itemCount={count || items.length}
+                          itemSize={rowHeight - 1}
+                          itemKey={
+                            getItemKey || ((index: number) => items[index].id)
+                          }
+                          indexForKey={key =>
+                            items.findIndex(item => item.id === key)
+                          }
+                          initialScrollOffset={
+                            initialScrollTo.current
+                              ? getScrollOffset(height, initialScrollTo.current)
+                              : 0
+                          }
+                          overscanCount={5}
+                          onItemsRendered={onItemsRendered}
+                          onScroll={onScroll}
+                        />
+                      </AvoidRefocusScrollProvider>
+                    </View>
+                    <HorizontalFakeScrollbar
+                      maxScroll={scrollWidthX}
+                      clientWidth={clientWidthX}
                     />
-                  </AvoidRefocusScrollProvider>
+                  </>
                 );
               }}
             </AutoSizer>
