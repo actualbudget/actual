@@ -47,7 +47,6 @@ export function useSchedules({
   useEffect(() => {
     const query = q('schedules').select('*');
     let statusQuery;
-
     const scheduleQuery = liveQuery(
       transform ? transform(query) : query,
       async (schedules: ScheduleEntity[]) => {
