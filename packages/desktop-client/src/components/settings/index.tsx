@@ -185,7 +185,6 @@ export function Settings() {
           <ResetCache />
           <ResetSync />
           <FixSplits />
-          <UpcomingLengthSettings />
           <ExperimentalFeatures />
         </AdvancedToggle>
       </View>
