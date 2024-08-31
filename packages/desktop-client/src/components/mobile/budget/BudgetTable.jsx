@@ -268,7 +268,7 @@ function BudgetCell({
       type="financial"
       getStyle={makeAmountGrey}
       data-testid={name}
-      onPointerUp={e => {
+      onClick={e => {
         e.stopPropagation();
         onOpenCategoryBudgetMenu();
       }}
@@ -537,7 +537,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             binding={spent}
             getStyle={makeAmountGrey}
             type="financial"
-            onPointerUp={e => {
+            onClick={e => {
               e.stopPropagation();
               onShowActivity();
             }}
@@ -577,7 +577,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         >
           <span
             role="button"
-            onPointerUp={e => {
+            onClick={e => {
               e.stopPropagation();
               onOpenBalanceMenu();
             }}
@@ -881,7 +881,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       {/* {editMode && (
         <View>
           <Button
-            onPointerUp={() => onAddCategory(group.id, group.is_income)}
+            onClick={() => onAddCategory(group.id, group.is_income)}
             style={{ padding: 10 }}
           >
             <Add width={15} height={15} />
@@ -1241,20 +1241,20 @@ const IncomeCategory = memo(function IncomeCategory({
 //         <MathOperations emitter={emitter} />
 //         <View style={{ flex: 1 }} />
 //         <Button
-//           onPointerUp={() => emitter.emit('moveUp')}
+//           onClick={() => emitter.emit('moveUp')}
 //           style={{ marginRight: 5 }}
 //           data-testid="up"
 //         >
 //           <ArrowThinUp width={13} height={13} />
 //         </Button>
 //         <Button
-//           onPointerUp={() => emitter.emit('moveDown')}
+//           onClick={() => emitter.emit('moveDown')}
 //           style={{ marginRight: 5 }}
 //           data-testid="down"
 //         >
 //           <ArrowThinDown width={13} height={13} />
 //         </Button>
-//         <Button onPointerUp={() => emitter.emit('done')} data-testid="done">
+//         <Button onClick={() => emitter.emit('done')} data-testid="done">
 //           Done
 //         </Button>
 //       </View>
@@ -1975,7 +1975,7 @@ function MonthSelector({
           margin: '0 5px',
           ...styles.underlinedText,
         }}
-        onPointerUp={e => {
+        onClick={e => {
           e.stopPropagation();
           onOpenMonthMenu?.(month);
         }}
