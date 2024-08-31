@@ -4,12 +4,13 @@ import { useDispatch } from 'react-redux';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
-import { collapseModals, pushModal } from 'loot-core/client/actions';
+import { collapseModals } from 'loot-core/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useModalDispatch } from '../../../hooks/useModalDispatch';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgLogo } from '../../../icons/logo';
@@ -219,47 +220,45 @@ function BudgetCell({
   onBudgetAction,
   ...props
 }) {
-  const dispatch = useDispatch();
+  const dispatchModal = useModalDispatch();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   const categoryBudgetMenuModal = `${budgetType}-budget-menu`;
 
   const onOpenCategoryBudgetMenu = () => {
-    dispatch(
-      pushModal(categoryBudgetMenuModal, {
-        categoryId,
-        month,
-        onUpdateBudget: amount => {
-          onBudgetAction(month, 'budget-amount', {
-            category: categoryId,
-            amount,
-          });
-        },
-        onCopyLastMonthAverage: () => {
-          onBudgetAction(month, 'copy-single-last', {
-            category: categoryId,
-          });
-        },
-        onSetMonthsAverage: numberOfMonths => {
-          if (
-            numberOfMonths !== 3 &&
-            numberOfMonths !== 6 &&
-            numberOfMonths !== 12
-          ) {
-            return;
-          }
+    dispatchModal(categoryBudgetMenuModal, {
+      categoryId,
+      month,
+      onUpdateBudget: amount => {
+        onBudgetAction(month, 'budget-amount', {
+          category: categoryId,
+          amount,
+        });
+      },
+      onCopyLastMonthAverage: () => {
+        onBudgetAction(month, 'copy-single-last', {
+          category: categoryId,
+        });
+      },
+      onSetMonthsAverage: numberOfMonths => {
+        if (
+          numberOfMonths !== 3 &&
+          numberOfMonths !== 6 &&
+          numberOfMonths !== 12
+        ) {
+          return;
+        }
 
-          onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
-            category: categoryId,
-          });
-        },
-        onApplyBudgetTemplate: () => {
-          onBudgetAction(month, 'apply-single-category-template', {
-            category: categoryId,
-          });
-        },
-      }),
-    );
+        onBudgetAction(month, `set-single-${numberOfMonths}-avg`, {
+          category: categoryId,
+        });
+      },
+      onApplyBudgetTemplate: () => {
+        onBudgetAction(month, 'apply-single-category-template', {
+          category: categoryId,
+        });
+      },
+    });
   };
 
   return (
@@ -344,6 +343,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const dispatch = useDispatch();
+  const dispatchModal = useModalDispatch();
 
   const onCarryover = carryover => {
     onBudgetAction(month, 'carryover', {
@@ -368,50 +368,44 @@ const ExpenseCategory = memo(function ExpenseCategory({
     : null;
 
   const onTransfer = () => {
-    dispatch(
-      pushModal('transfer', {
-        title: category.name,
-        month,
-        amount: catBalance,
-        onSubmit: (amount, toCategoryId) => {
-          onBudgetAction(month, 'transfer-category', {
-            amount,
-            from: category.id,
-            to: toCategoryId,
-          });
-          dispatch(collapseModals(`${budgetType}-balance-menu`));
-        },
-        showToBeBudgeted: true,
-      }),
-    );
+    dispatchModal('transfer', {
+      title: category.name,
+      month,
+      amount: catBalance,
+      onSubmit: (amount, toCategoryId) => {
+        onBudgetAction(month, 'transfer-category', {
+          amount,
+          from: category.id,
+          to: toCategoryId,
+        });
+        dispatch(collapseModals(`${budgetType}-balance-menu`));
+      },
+      showToBeBudgeted: true,
+    });
   };
 
   const onCover = () => {
-    dispatch(
-      pushModal('cover', {
-        title: category.name,
-        month,
-        category: category.id,
-        onSubmit: fromCategoryId => {
-          onBudgetAction(month, 'cover-overspending', {
-            to: category.id,
-            from: fromCategoryId,
-          });
-          dispatch(collapseModals(`${budgetType}-balance-menu`));
-        },
-      }),
-    );
+    dispatchModal('cover', {
+      title: category.name,
+      month,
+      category: category.id,
+      onSubmit: fromCategoryId => {
+        onBudgetAction(month, 'cover-overspending', {
+          to: category.id,
+          from: fromCategoryId,
+        });
+        dispatch(collapseModals(`${budgetType}-balance-menu`));
+      },
+    });
   };
 
   const onOpenBalanceMenu = () => {
-    dispatch(
-      pushModal(`${budgetType}-balance-menu`, {
-        categoryId: category.id,
-        month,
-        onCarryover,
-        ...(budgetType === 'rollover' && { onTransfer, onCover }),
-      }),
-    );
+    dispatchModal(`${budgetType}-balance-menu`, {
+      categoryId: category.id,
+      month,
+      onCarryover,
+      ...(budgetType === 'rollover' && { onTransfer, onCover }),
+    });
   };
 
   const listItemRef = useRef();

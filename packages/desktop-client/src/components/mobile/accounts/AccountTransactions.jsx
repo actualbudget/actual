@@ -14,7 +14,6 @@ import {
   getPayees,
   markAccountRead,
   openAccountCloseModal,
-  pushModal,
   reopenAccount,
   syncAndDownload,
   updateAccount,
@@ -29,6 +28,7 @@ import { listen, send } from 'loot-core/platform/client/fetch';
 import { isPreviewId } from 'loot-core/shared/transactions';
 
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import { useModalDispatch } from '../../../hooks/useModalDispatch';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
@@ -64,6 +64,7 @@ export function AccountTransactions({ account, pending, failed }) {
 
 function AccountName({ account, pending, failed }) {
   const dispatch = useDispatch();
+  const dispatchModal = useModalDispatch();
 
   const onSave = account => {
     dispatch(updateAccount(account));
@@ -74,13 +75,11 @@ function AccountName({ account, pending, failed }) {
   };
 
   const onEditNotes = id => {
-    dispatch(
-      pushModal('notes', {
-        id: `account-${id}`,
-        name: account.name,
-        onSave: onSaveNotes,
-      }),
-    );
+    dispatchModal('notes', {
+      id: `account-${id}`,
+      name: account.name,
+      onSave: onSaveNotes,
+    });
   };
 
   const onCloseAccount = () => {
@@ -92,15 +91,13 @@ function AccountName({ account, pending, failed }) {
   };
 
   const onClick = () => {
-    dispatch(
-      pushModal('account-menu', {
-        accountId: account.id,
-        onSave,
-        onEditNotes,
-        onCloseAccount,
-        onReopenAccount,
-      }),
-    );
+    dispatchModal('account-menu', {
+      accountId: account.id,
+      onSave,
+      onEditNotes,
+      onCloseAccount,
+      onReopenAccount,
+    });
   };
   return (
     <View
@@ -151,6 +148,7 @@ function TransactionListWithPreviews({ account }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [_numberFormat] = useSyncedPref('numberFormat');
   const dispatch = useDispatch();
+  const dispatchModal = useModalDispatch();
   const navigate = useNavigate();
 
   const onRefresh = async () => {
@@ -239,21 +237,19 @@ function TransactionListWithPreviews({ account }) {
     if (!isPreviewId(transaction.id)) {
       navigate(`/transactions/${transaction.id}`);
     } else {
-      dispatch(
-        pushModal('scheduled-transaction-menu', {
-          transactionId: transaction.id,
-          onPost: async transactionId => {
-            const parts = transactionId.split('/');
-            await send('schedule/post-transaction', { id: parts[1] });
-            dispatch(collapseModals('scheduled-transaction-menu'));
-          },
-          onSkip: async transactionId => {
-            const parts = transactionId.split('/');
-            await send('schedule/skip-next-date', { id: parts[1] });
-            dispatch(collapseModals('scheduled-transaction-menu'));
-          },
-        }),
-      );
+      dispatchModal('scheduled-transaction-menu', {
+        transactionId: transaction.id,
+        onPost: async transactionId => {
+          const parts = transactionId.split('/');
+          await send('schedule/post-transaction', { id: parts[1] });
+          dispatch(collapseModals('scheduled-transaction-menu'));
+        },
+        onSkip: async transactionId => {
+          const parts = transactionId.split('/');
+          await send('schedule/skip-next-date', { id: parts[1] });
+          dispatch(collapseModals('scheduled-transaction-menu'));
+        },
+      });
     }
   };
 

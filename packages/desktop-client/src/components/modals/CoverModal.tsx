@@ -105,13 +105,7 @@ export function CoverModal({
           />
           <View>
             <FieldLabel title="Cover from category:" />
-            <TapField
-              value={fromCategory?.name}
-              onPointerUp={e => {
-                e.stopPropagation();
-                onCategoryClick();
-              }}
-            />
+            <TapField value={fromCategory?.name} onClick={onCategoryClick} />
           </View>
 
           <View
