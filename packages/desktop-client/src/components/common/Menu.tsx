@@ -170,7 +170,7 @@ export function Menu<T extends MenuItem>({
             }}
             onPointerEnter={() => setHoveredIndex(idx)}
             onPointerLeave={() => setHoveredIndex(null)}
-            onClick={e => {
+            onPointerUp={e => {
               e.stopPropagation();
 
               if (!item.disabled && item.toggle === undefined) {

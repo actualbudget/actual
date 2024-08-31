@@ -217,8 +217,6 @@ function BudgetCell({
   categoryId,
   month,
   onBudgetAction,
-  formatter,
-  columnWidth,
   ...props
 }) {
   const dispatch = useDispatch();
@@ -270,15 +268,10 @@ function BudgetCell({
       type="financial"
       getStyle={makeAmountGrey}
       data-testid={name}
-      formatter={value => (
-        <Button
-          variant="bare"
-          style={{ ...PILL_STYLE, maxWidth: columnWidth }}
-          onClick={() => onOpenCategoryBudgetMenu()}
-        >
-          {formatter(value)}
-        </Button>
-      )}
+      onPointerUp={e => {
+        e.stopPropagation();
+        onOpenCategoryBudgetMenu();
+      }}
       {...props}
     />
   );
@@ -505,22 +498,29 @@ const ExpenseCategory = memo(function ExpenseCategory({
             categoryId={category.id}
             month={month}
             onBudgetAction={onBudgetAction}
-            columnWidth={columnWidth}
             formatter={value => (
-              <AutoTextSize
-                key={`${value}|${show3Cols}|${showBudgetedCol}`}
-                as={Text}
-                minFontSizePx={6}
-                maxFontSizePx={12}
-                mode="oneline"
+              <Button
+                variant="bare"
                 style={{
+                  ...PILL_STYLE,
                   maxWidth: columnWidth,
-                  textAlign: 'right',
-                  fontSize: 12,
                 }}
               >
-                {format(value, 'financial')}
-              </AutoTextSize>
+                <AutoTextSize
+                  key={`${value}|${show3Cols}|${showBudgetedCol}`}
+                  as={Text}
+                  minFontSizePx={6}
+                  maxFontSizePx={12}
+                  mode="oneline"
+                  style={{
+                    maxWidth: columnWidth,
+                    textAlign: 'right',
+                    fontSize: 12,
+                  }}
+                >
+                  {format(value, 'financial')}
+                </AutoTextSize>
+              </Button>
             )}
           />
         </View>
@@ -537,6 +537,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
             binding={spent}
             getStyle={makeAmountGrey}
             type="financial"
+            onPointerUp={e => {
+              e.stopPropagation();
+              onShowActivity();
+            }}
             formatter={value => (
               <Button
                 variant="bare"
@@ -544,7 +548,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   ...PILL_STYLE,
                   maxWidth: columnWidth,
                 }}
-                onClick={() => onShowActivity()}
               >
                 <AutoTextSize
                   key={`${value}|${show3Cols}|${showBudgetedCol}`}
@@ -572,7 +575,13 @@ const ExpenseCategory = memo(function ExpenseCategory({
             width: columnWidth,
           }}
         >
-          <span role="button">
+          <span
+            role="button"
+            onPointerUp={e => {
+              e.stopPropagation();
+              onOpenBalanceMenu();
+            }}
+          >
             <BalanceWithCarryover
               carryover={carryover}
               balance={balance}
@@ -586,7 +595,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     ...PILL_STYLE,
                     maxWidth: columnWidth,
                   }}
-                  onClick={() => onOpenBalanceMenu()}
                 >
                   <AutoTextSize
                     key={value}
@@ -873,7 +881,7 @@ const ExpenseGroupHeader = memo(function ExpenseGroupHeader({
       {/* {editMode && (
         <View>
           <Button
-            onClick={() => onAddCategory(group.id, group.is_income)}
+            onPointerUp={() => onAddCategory(group.id, group.is_income)}
             style={{ padding: 10 }}
           >
             <Add width={15} height={15} />
@@ -1157,22 +1165,26 @@ const IncomeCategory = memo(function IncomeCategory({
               categoryId={category.id}
               month={month}
               onBudgetAction={onBudgetAction}
-              columnWidth={columnWidth}
               formatter={value => (
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    maxWidth: columnWidth,
-                    textAlign: 'right',
-                    fontSize: 12,
-                  }}
+                <Button
+                  variant="bare"
+                  style={{ ...PILL_STYLE, maxWidth: columnWidth }}
                 >
-                  {format(value, 'financial')}
-                </AutoTextSize>
+                  <AutoTextSize
+                    key={value}
+                    as={Text}
+                    minFontSizePx={6}
+                    maxFontSizePx={12}
+                    mode="oneline"
+                    style={{
+                      maxWidth: columnWidth,
+                      textAlign: 'right',
+                      fontSize: 12,
+                    }}
+                  >
+                    {format(value, 'financial')}
+                  </AutoTextSize>
+                </Button>
               )}
             />
           </View>
@@ -1229,20 +1241,20 @@ const IncomeCategory = memo(function IncomeCategory({
 //         <MathOperations emitter={emitter} />
 //         <View style={{ flex: 1 }} />
 //         <Button
-//           onClick={() => emitter.emit('moveUp')}
+//           onPointerUp={() => emitter.emit('moveUp')}
 //           style={{ marginRight: 5 }}
 //           data-testid="up"
 //         >
 //           <ArrowThinUp width={13} height={13} />
 //         </Button>
 //         <Button
-//           onClick={() => emitter.emit('moveDown')}
+//           onPointerUp={() => emitter.emit('moveDown')}
 //           style={{ marginRight: 5 }}
 //           data-testid="down"
 //         >
 //           <ArrowThinDown width={13} height={13} />
 //         </Button>
-//         <Button onClick={() => emitter.emit('done')} data-testid="done">
+//         <Button onPointerUp={() => emitter.emit('done')} data-testid="done">
 //           Done
 //         </Button>
 //       </View>
@@ -1820,7 +1832,7 @@ function BudgetTableHeader({
             <Button
               variant="bare"
               isDisabled={show3Cols}
-              onPress={toggleSpentColumn}
+              onPress={toggleSpentColumn()}
               style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
@@ -1963,7 +1975,10 @@ function MonthSelector({
           margin: '0 5px',
           ...styles.underlinedText,
         }}
-        onClick={() => onOpenMonthMenu?.(month)}
+        onPointerUp={e => {
+          e.stopPropagation();
+          onOpenMonthMenu?.(month);
+        }}
       >
         {monthUtils.format(month, 'MMMM ‘yy')}
       </Text>
