@@ -268,7 +268,7 @@ function BudgetCell({
       type="financial"
       getStyle={makeAmountGrey}
       data-testid={name}
-      onClick={e => {
+      onPointerUp={e => {
         e.stopPropagation();
         onOpenCategoryBudgetMenu();
       }}
@@ -537,10 +537,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
             binding={spent}
             getStyle={makeAmountGrey}
             type="financial"
-            onClick={e => {
-              e.stopPropagation();
-              onShowActivity();
-            }}
             formatter={value => (
               <Button
                 variant="bare"
@@ -548,6 +544,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   ...PILL_STYLE,
                   maxWidth: columnWidth,
                 }}
+                onClick={() => onShowActivity()}
               >
                 <AutoTextSize
                   key={`${value}|${show3Cols}|${showBudgetedCol}`}
@@ -575,13 +572,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             width: columnWidth,
           }}
         >
-          <span
-            role="button"
-            onClick={e => {
-              e.stopPropagation();
-              onOpenBalanceMenu();
-            }}
-          >
+          <span role="button">
             <BalanceWithCarryover
               carryover={carryover}
               balance={balance}
@@ -595,6 +586,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     ...PILL_STYLE,
                     maxWidth: columnWidth,
                   }}
+                  onClick={() => onOpenBalanceMenu()}
                 >
                   <AutoTextSize
                     key={value}
@@ -1832,7 +1824,7 @@ function BudgetTableHeader({
             <Button
               variant="bare"
               isDisabled={show3Cols}
-              onPress={toggleSpentColumn()}
+              onPress={toggleSpentColumn}
               style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
@@ -1975,10 +1967,7 @@ function MonthSelector({
           margin: '0 5px',
           ...styles.underlinedText,
         }}
-        onClick={e => {
-          e.stopPropagation();
-          onOpenMonthMenu?.(month);
-        }}
+        onClick={() => onOpenMonthMenu?.(month)}
       >
         {monthUtils.format(month, 'MMMM ‘yy')}
       </Text>
