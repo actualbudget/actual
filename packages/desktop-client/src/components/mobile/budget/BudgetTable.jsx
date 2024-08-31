@@ -217,6 +217,8 @@ function BudgetCell({
   categoryId,
   month,
   onBudgetAction,
+  formatter,
+  columnWidth,
   ...props
 }) {
   const dispatch = useDispatch();
@@ -268,10 +270,15 @@ function BudgetCell({
       type="financial"
       getStyle={makeAmountGrey}
       data-testid={name}
-      onPointerUp={e => {
-        e.stopPropagation();
-        onOpenCategoryBudgetMenu();
-      }}
+      formatter={value => (
+        <Button
+          variant="bare"
+          style={{ ...PILL_STYLE, maxWidth: columnWidth }}
+          onClick={() => onOpenCategoryBudgetMenu()}
+        >
+          {formatter(value)}
+        </Button>
+      )}
       {...props}
     />
   );
@@ -498,29 +505,22 @@ const ExpenseCategory = memo(function ExpenseCategory({
             categoryId={category.id}
             month={month}
             onBudgetAction={onBudgetAction}
+            columnWidth={columnWidth}
             formatter={value => (
-              <Button
-                variant="bare"
+              <AutoTextSize
+                key={`${value}|${show3Cols}|${showBudgetedCol}`}
+                as={Text}
+                minFontSizePx={6}
+                maxFontSizePx={12}
+                mode="oneline"
                 style={{
-                  ...PILL_STYLE,
                   maxWidth: columnWidth,
+                  textAlign: 'right',
+                  fontSize: 12,
                 }}
               >
-                <AutoTextSize
-                  key={`${value}|${show3Cols}|${showBudgetedCol}`}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    maxWidth: columnWidth,
-                    textAlign: 'right',
-                    fontSize: 12,
-                  }}
-                >
-                  {format(value, 'financial')}
-                </AutoTextSize>
-              </Button>
+                {format(value, 'financial')}
+              </AutoTextSize>
             )}
           />
         </View>
@@ -1157,26 +1157,22 @@ const IncomeCategory = memo(function IncomeCategory({
               categoryId={category.id}
               month={month}
               onBudgetAction={onBudgetAction}
+              columnWidth={columnWidth}
               formatter={value => (
-                <Button
-                  variant="bare"
-                  style={{ ...PILL_STYLE, maxWidth: columnWidth }}
+                <AutoTextSize
+                  key={value}
+                  as={Text}
+                  minFontSizePx={6}
+                  maxFontSizePx={12}
+                  mode="oneline"
+                  style={{
+                    maxWidth: columnWidth,
+                    textAlign: 'right',
+                    fontSize: 12,
+                  }}
                 >
-                  <AutoTextSize
-                    key={value}
-                    as={Text}
-                    minFontSizePx={6}
-                    maxFontSizePx={12}
-                    mode="oneline"
-                    style={{
-                      maxWidth: columnWidth,
-                      textAlign: 'right',
-                      fontSize: 12,
-                    }}
-                  >
-                    {format(value, 'financial')}
-                  </AutoTextSize>
-                </Button>
+                  {format(value, 'financial')}
+                </AutoTextSize>
               )}
             />
           </View>
