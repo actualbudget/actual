@@ -8,7 +8,7 @@ import { isElectron } from 'loot-core/src/shared/environment';
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
+import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
@@ -34,7 +34,6 @@ import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
-import { UpcomingLengthSettings } from './Upcoming';
 
 function About() {
   const version = useServerVersion();
