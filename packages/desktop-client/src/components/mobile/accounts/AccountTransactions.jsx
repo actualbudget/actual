@@ -127,7 +127,11 @@ function AccountName({ account, pending, failed }) {
         />
       )}
       <Text
-        style={{ ...styles.underlinedText, ...styles.lineClamp(2) }}
+        style={{
+          userSelect: 'none',
+          ...styles.underlinedText,
+          ...styles.lineClamp(2),
+        }}
         onClick={onClick}
       >
         {`${account.closed ? 'Closed: ' : ''}${account.name}`}

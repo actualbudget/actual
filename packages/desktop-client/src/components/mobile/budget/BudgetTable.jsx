@@ -1973,6 +1973,7 @@ function MonthSelector({
           fontSize: 16,
           fontWeight: 500,
           margin: '0 5px',
+          userSelect: 'none',
           ...styles.underlinedText,
         }}
         onPointerUp={e => {
