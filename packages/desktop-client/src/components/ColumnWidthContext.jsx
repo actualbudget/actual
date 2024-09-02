@@ -39,6 +39,18 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
     setColumnSizePrefs(JSON.stringify(columnWidths));
   }, [columnWidths, setColumnSizePrefs]);
 
+  const removeColumn = useCallback(
+    columnName => {
+      setColumnWidths(prevWidths => {
+        const { [columnName]: _, ...remainingWidths } = prevWidths;
+        return remainingWidths;
+      });
+
+      savePrefs();
+    },
+    [savePrefs],
+  );
+
   const handleDoubleClick = useCallback(
     columnName => {
       setColumnWidths(
@@ -163,6 +175,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
         setFixedColumn,
         handleDoubleClick,
         totalSize,
+        removeColumn,
       }}
     >
       {children}
