@@ -5,7 +5,7 @@ import React, {
   useContext,
   useEffect,
   useCallback,
-  useRef
+  useRef,
 } from 'react';
 
 import debounce from 'debounce';
@@ -29,8 +29,12 @@ type ScrollProviderProps = {
 export function ScrollProvider({ children }: ScrollProviderProps) {
   const [scrollY, setScrollY] = useState<number | undefined>(undefined);
   const [scrollX, setScrollX] = useState<number | undefined>(undefined);
-  const [scrollHeight, setScrollHeight] = useState<number | undefined>(undefined);
-  const [clientHeight, setClientHeight] = useState<number | undefined>(undefined);
+  const [scrollHeight, setScrollHeight] = useState<number | undefined>(
+    undefined,
+  );
+  const [clientHeight, setClientHeight] = useState<number | undefined>(
+    undefined,
+  );
   const [scrollWidth, setScrollWidth] = useState<number | undefined>(undefined);
   const [clientWidth, setClientWidth] = useState<number | undefined>(undefined);
 
@@ -52,7 +56,7 @@ export function ScrollProvider({ children }: ScrollProviderProps) {
 
   const scrollToX = useCallback((position: number, smooth: boolean) => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.forEach(r =>{
+      scrollContainerRef.current.forEach(r => {
         r.scrollTo({
           left: position,
           behavior: smooth ? 'smooth' : 'instant',
@@ -84,13 +88,26 @@ export function ScrollProvider({ children }: ScrollProviderProps) {
 
     return () => {
       if (scrollContainerRef.current) {
-        scrollContainerRef.current[0].removeEventListener('scroll', listenToScroll);
+        scrollContainerRef.current[0].removeEventListener(
+          'scroll',
+          listenToScroll,
+        );
       }
     };
   }, [scrollContainerRef]);
 
   return (
-    <ScrollContext.Provider value={{ scrollY, scrollX, hasScrolledToBottom, scrollToX, scrollWidth, setScrollContainers, clientWidth }}>
+    <ScrollContext.Provider
+      value={{
+        scrollY,
+        scrollX,
+        hasScrolledToBottom,
+        scrollToX,
+        scrollWidth,
+        setScrollContainers,
+        clientWidth,
+      }}
+    >
       {children}
     </ScrollContext.Provider>
   );

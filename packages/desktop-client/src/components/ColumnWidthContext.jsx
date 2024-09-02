@@ -4,10 +4,9 @@ import React, {
   useState,
   useCallback,
   useEffect,
-  useRef,
 } from 'react';
+
 import { useLocalPref } from '../hooks/useLocalPref';
-import { useMove } from 'react-aria';
 
 const ColumnWidthContext = createContext();
 
@@ -17,8 +16,7 @@ export const ColumnWidthProvider = ({ children }) => {
   );
   const [columnWidths, setColumnWidths] = useState({});
   const [fixedSizedColumns, setFixedSizedColumns] = useState({});
-  const [deltaAccumulator, setDeltaAccumulator] = useState(0);
-  const refs = useRef({});
+  const [, setPositionAccumulator] = useState(0);
 
   useEffect(() => {
     if (columnSizePrefs) {
@@ -37,38 +35,55 @@ export const ColumnWidthProvider = ({ children }) => {
     );
 
     return otherColumnsWidth + currentTotalWidth;
-  });
+  }, [columnWidths, fixedSizedColumns]);
 
-  const handleDoubleClick = useCallback((columnName) => {
-    setColumnWidths(prevWidths => ({
-      ...prevWidths,
-      [columnName]: -1,
-    }));
+  const savePrefs = useCallback(() => {
+    setColumnSizePrefs(JSON.stringify(columnWidths));
+  }, [columnWidths, setColumnSizePrefs]);
 
-    setTimeout(() => {
-      let maximum = -1;
-      document.querySelectorAll(`[data-resizeable-column=${columnName}]`).forEach(row => {
-        const rect = row.getBoundingClientRect();
-        const styles = getComputedStyle(row);
-        const localValue = Math.max(rect.width + parseFloat(styles.marginLeft) + parseFloat(styles.marginRight), 110);
+  const handleDoubleClick = useCallback(
+    columnName => {
+      setColumnWidths(
+        prevWidths => ({
+          ...prevWidths,
+          [columnName]: -1,
+        }),
+        [],
+      );
 
-        if(localValue > maximum) {
-          maximum = localValue;
-        }
-      });
+      setTimeout(() => {
+        let maximum = -1;
+        document
+          .querySelectorAll(`[data-resizeable-column=${columnName}]`)
+          .forEach(row => {
+            const rect = row.getBoundingClientRect();
+            const styles = getComputedStyle(row);
+            const localValue = Math.max(
+              rect.width +
+                parseFloat(styles.marginLeft) +
+                parseFloat(styles.marginRight),
+              110,
+            );
 
-      setColumnWidths(prevWidths => ({
-        ...prevWidths,
-        [columnName]: maximum,
-      }));
+            if (localValue > maximum) {
+              maximum = localValue;
+            }
+          });
 
-      savePrefs();
-    }, 100);
-  });
+        setColumnWidths(prevWidths => ({
+          ...prevWidths,
+          [columnName]: maximum,
+        }));
+
+        savePrefs();
+      }, 100);
+    },
+    [savePrefs],
+  );
 
   const setFixedColumn = useCallback(fixedColumns => {
     setFixedSizedColumns(fixedColumns);
-  });
+  }, []);
 
   const getViewportWidth = () => window.innerWidth;
   const updateColumnWidth = useCallback(
@@ -97,18 +112,14 @@ export const ColumnWidthProvider = ({ children }) => {
         [columnName]: Math.max(adjustedWidth, 110),
       }));
     },
-    [columnWidths],
+    [columnWidths, fixedSizedColumns],
   );
 
-  const savePrefs = useCallback(() => {
-    setColumnSizePrefs(JSON.stringify(columnWidths));
-  }, [columnWidths, setColumnSizePrefs]);
-
   const handleMoveProps = (columnName, ref, resizerRef) => {
-    let animationFrameId = null;
+    const animationFrameId = null;
 
-    const updateLinePosition = deltaX => {
-      setDeltaAccumulator(prevDelta => {
+    const updatePosition = deltaX => {
+      setPositionAccumulator(prevDelta => {
         const newDelta = prevDelta + deltaX;
         updateColumnWidth(columnName, newDelta);
         return newDelta;
@@ -116,19 +127,24 @@ export const ColumnWidthProvider = ({ children }) => {
     };
 
     return {
-      onMoveStart(e) {
+      onMoveStart() {
         if (resizerRef.current) {
           resizerRef.current.classList.add('dragging');
-          const startWidth = columnWidths[columnName] || ref.offsetLeft || 110;
-          setDeltaAccumulator(startWidth);
+          let columnWidth = columnWidths[columnName];
+          if (!columnWidth) {
+            const rect = ref.getBoundingClientRect();
+            columnWidth = rect.width;
+          }
+          const startWidth = columnWidth;
+          setPositionAccumulator(startWidth);
         }
       },
       onMove(e) {
         if (resizerRef.current) {
-          updateLinePosition(e.deltaX);
+          updatePosition(e.deltaX);
         }
       },
-      onMoveEnd(e) {
+      onMoveEnd() {
         savePrefs();
         if (resizerRef.current) {
           resizerRef.current.classList.remove('dragging');
@@ -136,14 +152,20 @@ export const ColumnWidthProvider = ({ children }) => {
         if (animationFrameId) {
           cancelAnimationFrame(animationFrameId);
         }
-        setDeltaAccumulator(0);
+        setPositionAccumulator(0);
       },
     };
   };
 
   return (
     <ColumnWidthContext.Provider
-      value={{ columnWidths, handleMoveProps, setFixedColumn, handleDoubleClick, totalSize, refs }}
+      value={{
+        columnWidths,
+        handleMoveProps,
+        setFixedColumn,
+        handleDoubleClick,
+        totalSize,
+      }}
     >
       {children}
     </ColumnWidthContext.Provider>

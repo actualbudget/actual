@@ -61,15 +61,15 @@ import { styles, theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { ColumnWidthProvider, useColumnWidth } from '../ColumnWidthContext';
+import { useColumnWidth } from '../ColumnWidthContext';
 import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
+import { Resizer } from '../Resizer';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
-import { useSidebar } from '../sidebar/SidebarProvider';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import {
   Cell,
@@ -84,11 +84,6 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useMove } from 'react-aria';
-import { Resizer } from '../Resizer';
-import { useScroll } from '../ScrollProvider';
-import { HorizontalFakeScrollbar } from '../HorizontalFakeScrollbar';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -256,7 +251,8 @@ const TransactionHeader = memo(
         />
         <HeaderCell
           value="Date"
-          width={110}
+          ref={el => (refs.current['date'] = el)}
+          width={columnWidths['date'] ? columnWidths['date'] : 110}
           alignItems="flex"
           marginLeft={-5}
           id="date"
@@ -265,6 +261,7 @@ const TransactionHeader = memo(
             onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
           }
         />
+        <Resizer columnName="date" resizeRef={refs.current['date']} />
         {showAccount && (
           <>
             <HeaderCell
@@ -316,9 +313,7 @@ const TransactionHeader = memo(
             <HeaderCell
               value="Category"
               ref={el => (refs.current['category'] = el)}
-              width={
-                columnWidths['category'] ? columnWidths['category'] : 110
-              }
+              width={columnWidths['category'] ? columnWidths['category'] : 110}
               marginLeft={-5}
               id="category"
               icon={field === 'category' ? ascDesc : 'clickable'}
@@ -337,7 +332,8 @@ const TransactionHeader = memo(
         )}
         <HeaderCell
           value="Payment"
-          width={100}
+          ref={el => (refs.current['debit'] = el)}
+          width={columnWidths['debit'] ? columnWidths['debit'] : 100}
           alignItems="flex-end"
           marginRight={-5}
           id="payment"
@@ -346,9 +342,11 @@ const TransactionHeader = memo(
             onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc'))
           }
         />
+        <Resizer columnName="debit" resizeRef={refs.current['debit']} />
         <HeaderCell
           value="Deposit"
-          width={100}
+          ref={el => (refs.current['credit'] = el)}
+          width={columnWidths['credit'] ? columnWidths['credit'] : 100}
           alignItems="flex-end"
           marginRight={-5}
           id="deposit"
@@ -357,14 +355,19 @@ const TransactionHeader = memo(
             onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
           }
         />
+        <Resizer columnName="credit" resizeRef={refs.current['credit']} />
         {showBalance && (
-          <HeaderCell
-            value="Balance"
-            width={103}
-            alignItems="flex-end"
-            marginRight={-5}
-            id="balance"
-          />
+          <>
+            <HeaderCell
+              value="Balance"
+              ref={el => (refs.current['balance'] = el)}
+              width={columnWidths['balance'] ? columnWidths['balance'] : 103}
+              alignItems="flex-end"
+              marginRight={-5}
+              id="balance"
+            />
+            <Resizer columnName="balance" resizeRef={refs.current['balance']} />
+          </>
         )}
         {showCleared && (
           <HeaderCell
@@ -982,8 +985,8 @@ const Transaction = memo(function Transaction({
     _inverse = false,
   } = transaction;
 
-  //const refs = useRef({});
-  const { columnWidths, refs } = useColumnWidth();
+  const { columnWidths } = useColumnWidth();
+  const refs = useRef({});
 
   function onUpdate(name, value) {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1182,15 +1185,25 @@ const Transaction = memo(function Transaction({
       )}
 
       {isChild && showAccount && (
-        <Field
-          width={columnWidths['account'] ? columnWidths['account'] : 'flex'}
-          data-resizeable-column="account"
-          /* Account blank placeholder for Child transaction */
-          style={{
-            backgroundColor: theme.tableRowBackgroundHover,
-            border: 0,
-          }}
-        />
+        <>
+          <Field
+            width={columnWidths['account'] ? columnWidths['account'] : 'flex'}
+            data-resizeable-column="account"
+            /* Account blank placeholder for Child transaction */
+            style={{
+              backgroundColor: theme.tableRowBackgroundHover,
+              border: 0,
+            }}
+          />
+          <Field
+            /* Checkmark blank placeholder for Child transaction */
+            width={20}
+            style={{
+              backgroundColor: theme.tableRowBackgroundHover,
+              border: 0,
+            }}
+          />
+        </>
       )}
 
       {/* Checkmark - for Child transaction
@@ -1235,41 +1248,51 @@ const Transaction = memo(function Transaction({
         />
       )}
       {!isChild && (
-        <CustomCell
-          /* Date field for non-child transaction */
-          name="date"
-          width={110}
-          textAlign="flex"
-          exposed={focusedField === 'date'}
-          value={date}
-          valueStyle={valueStyle}
-          formatter={date =>
-            date ? formatDate(parseISO(date), dateFormat) : ''
-          }
-          onExpose={name => !isPreview && onEdit(id, name)}
-          onUpdate={value => {
-            onUpdate('date', value);
-          }}
-        >
-          {({
-            onBlur,
-            onKeyDown,
-            onUpdate,
-            onSave,
-            shouldSaveFromKey,
-            inputStyle,
-          }) => (
-            <DateSelect
-              value={date || ''}
-              dateFormat={dateFormat}
-              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-              shouldSaveFromKey={shouldSaveFromKey}
-              clearOnBlur={true}
-              onUpdate={onUpdate}
-              onSelect={onSave}
-            />
-          )}
-        </CustomCell>
+        <>
+          <CustomCell
+            /* Date field for non-child transaction */
+            name="date"
+            ref={el => (refs.current['date'] = el)}
+            width={columnWidths['date'] ? columnWidths['date'] : 110}
+            data-resizeable-column="date"
+            textAlign="flex"
+            exposed={focusedField === 'date'}
+            value={date}
+            valueStyle={valueStyle}
+            formatter={date =>
+              date ? formatDate(parseISO(date), dateFormat) : ''
+            }
+            onExpose={name => !isPreview && onEdit(id, name)}
+            onUpdate={value => {
+              onUpdate('date', value);
+            }}
+          >
+            {({
+              onBlur,
+              onKeyDown,
+              onUpdate,
+              onSave,
+              shouldSaveFromKey,
+              inputStyle,
+            }) => (
+              <DateSelect
+                value={date || ''}
+                dateFormat={dateFormat}
+                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                shouldSaveFromKey={shouldSaveFromKey}
+                clearOnBlur={true}
+                onUpdate={onUpdate}
+                onSelect={onSave}
+              />
+            )}
+          </CustomCell>
+          <Field
+            width={10}
+            style={{
+              width: 10,
+            }}
+          />
+        </>
       )}
 
       {!isChild && showAccount && (
@@ -1330,32 +1353,41 @@ const Transaction = memo(function Transaction({
         </>
       )}
       {(() => (
-        <PayeeCell
-          /* Payee field for all transactions */
-          id={id}
-          payee={payee}
-          ref={el => (refs.current['payee'] = el)}
-          width={columnWidths['payee'] ? columnWidths['payee'] : 'flex'}
-          data-resizeable-column="payee"
-          focused={focusedField === 'payee'}
-          /* Filter out the account we're currently in as it is not a valid transfer */
-          accounts={accounts.filter(account => account.id !== accountId)}
-          payees={payees.filter(
-            payee => !payee.transfer_acct || payee.transfer_acct !== accountId,
-          )}
-          valueStyle={valueStyle}
-          transaction={transaction}
-          subtransactions={subtransactions}
-          transferAccountsByTransaction={transferAccountsByTransaction}
-          importedPayee={importedPayee}
-          isPreview={isPreview}
-          onEdit={onEdit}
-          onUpdate={onUpdate}
-          onCreatePayee={onCreatePayee}
-          onManagePayees={onManagePayees}
-          onNavigateToTransferAccount={onNavigateToTransferAccount}
-          onNavigateToSchedule={onNavigateToSchedule}
-        />
+        <>
+          <PayeeCell
+            /* Payee field for all transactions */
+            id={id}
+            payee={payee}
+            ref={el => (refs.current['payee'] = el)}
+            width={columnWidths['payee'] ? columnWidths['payee'] : 'flex'}
+            data-resizeable-column="payee"
+            focused={focusedField === 'payee'}
+            /* Filter out the account we're currently in as it is not a valid transfer */
+            accounts={accounts.filter(account => account.id !== accountId)}
+            payees={payees.filter(
+              payee =>
+                !payee.transfer_acct || payee.transfer_acct !== accountId,
+            )}
+            valueStyle={valueStyle}
+            transaction={transaction}
+            subtransactions={subtransactions}
+            transferAccountsByTransaction={transferAccountsByTransaction}
+            importedPayee={importedPayee}
+            isPreview={isPreview}
+            onEdit={onEdit}
+            onUpdate={onUpdate}
+            onCreatePayee={onCreatePayee}
+            onManagePayees={onManagePayees}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
+          />
+          <Field
+            width={10}
+            style={{
+              width: 10,
+            }}
+          />
+        </>
       ))()}
 
       <InputCell
@@ -1388,7 +1420,6 @@ const Transaction = memo(function Transaction({
           name="category"
           ref={el => (refs.current['category'] = el)}
           width={columnWidths['category'] ? columnWidths['category'] : 110}
-          
           data-resizeable-column="category"
           focused={focusedField === 'category'}
           style={{
@@ -1592,7 +1623,9 @@ const Transaction = memo(function Transaction({
       <InputCell
         /* Debit field for all transactions */
         type="input"
-        width={100}
+        ref={el => (refs.current['debit'] = el)}
+        width={columnWidths['debit'] ? columnWidths['debit'] : 100}
+        data-resizeable-column="debit"
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
@@ -1614,12 +1647,20 @@ const Transaction = memo(function Transaction({
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
       />
+      <Field
+        width={10}
+        style={{
+          width: 10,
+        }}
+      />
 
       <InputCell
         /* Credit field for all transactions */
         type="input"
-        width={100}
         name="credit"
+        ref={el => (refs.current['credit'] = el)}
+        width={columnWidths['credit'] ? columnWidths['credit'] : 100}
+        data-resizeable-column="credit"
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
         value={credit}
@@ -1640,24 +1681,41 @@ const Transaction = memo(function Transaction({
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
       />
+      <Field
+        width={10}
+        style={{
+          width: 10,
+        }}
+      />
 
       {showBalance && (
-        <Cell
-          /* Balance field for all transactions */
-          name="balance"
-          value={
-            runningBalance == null || isChild
-              ? ''
-              : integerToCurrency(runningBalance)
-          }
-          valueStyle={{
-            color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
-          }}
-          style={{ ...styles.tnum, ...amountStyle }}
-          width={103}
-          textAlign="right"
-          privacyFilter
-        />
+        <>
+          <Cell
+            /* Balance field for all transactions */
+            name="balance"
+            value={
+              runningBalance == null || isChild
+                ? ''
+                : integerToCurrency(runningBalance)
+            }
+            valueStyle={{
+              color:
+                runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
+            }}
+            style={{ ...styles.tnum, ...amountStyle }}
+            ref={el => (refs.current['balance'] = el)}
+            width={columnWidths['balance'] ? columnWidths['balance'] : 103}
+            data-resizeable-column="balance"
+            textAlign="right"
+            privacyFilter
+          />
+          <Field
+            width={10}
+            style={{
+              width: 10,
+            }}
+          />
+        </>
       )}
 
       {showCleared && (

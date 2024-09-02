@@ -1,7 +1,8 @@
-import React, { DOMAttributes, MutableRefObject, useRef } from 'react';
+import React, { type MutableRefObject, useRef } from 'react';
 import { useMove } from 'react-aria';
+
 import { useColumnWidth } from './ColumnWidthContext';
-import "./Resizer.css"
+import './Resizer.css';
 
 type ResizerProps = {
   columnName: string;
@@ -11,14 +12,16 @@ type ResizerProps = {
 export function Resizer({ columnName, resizeRef }: ResizerProps) {
   const { handleMoveProps, handleDoubleClick } = useColumnWidth();
   const resizerRef = useRef();
-  let { moveProps } = useMove(handleMoveProps(columnName, resizeRef, resizerRef));
+  const { moveProps } = useMove(
+    handleMoveProps(columnName, resizeRef, resizerRef),
+  );
 
   return (
     <div
       {...moveProps}
       ref={resizerRef}
       onDoubleClick={() => handleDoubleClick(columnName, resizeRef)}
-      className='resizer-container'
+      className="resizer-container"
     />
   );
 }

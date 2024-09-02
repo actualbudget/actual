@@ -30,6 +30,7 @@ import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
 import { type CSSProperties, styles, theme } from '../style';
 
+import { useColumnWidth } from './ColumnWidthContext';
 import { Button } from './common/Button';
 import { Input } from './common/Input';
 import { Menu, type MenuItem } from './common/Menu';
@@ -37,10 +38,12 @@ import { Popover } from './common/Popover';
 import { Text } from './common/Text';
 import { View } from './common/View';
 import { FixedSizeList } from './FixedSizeList';
+import { HorizontalFakeScrollbar } from './HorizontalFakeScrollbar';
 import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
+import { useScroll } from './ScrollProvider';
 import {
   type Spreadsheets,
   type SheetFields,
@@ -49,9 +52,6 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
-import { useColumnWidth } from './ColumnWidthContext';
-import { useScroll } from './ScrollProvider';
-import { HorizontalFakeScrollbar } from './HorizontalFakeScrollbar';
 
 export const ROW_HEIGHT = 32;
 

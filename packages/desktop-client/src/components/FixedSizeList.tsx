@@ -258,7 +258,7 @@ export class FixedSizeList extends PureComponent<
         ref={this._outerRefSetter}
         style={{
           height,
-          width: width,
+          width,
           overflow: 'hidden auto',
         }}
       >
