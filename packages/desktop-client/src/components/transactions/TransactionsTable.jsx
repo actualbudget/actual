@@ -211,7 +211,9 @@ const TransactionHeader = memo(
         let rect = parentNode.getBoundingClientRect();
         while (parentNode && rect.width === 0) {
           parentNode = parentNode.parentNode;
-          rect = parentNode.getBoundingClientRect();
+          if(parentNode != null) {
+            rect = parentNode.getBoundingClientRect?.() || { width: 0 };
+          }
         }
 
         if (rect.width !== 0) {
