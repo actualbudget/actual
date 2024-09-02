@@ -533,6 +533,7 @@ const HeaderCell = forwardRef(function HeaderCell(
       width={width}
       name={id}
       alignItems={alignItems}
+      data-header="true"
       value={value}
       style={{
         borderTopWidth: 0,

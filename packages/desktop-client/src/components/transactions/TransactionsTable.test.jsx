@@ -230,7 +230,7 @@ function renderTransactions(extraProps) {
 
 function queryNewField(container, name, subSelector = '', idx = 0) {
   const field = container.querySelectorAll(
-    `[data-testid="new-transaction"] [data-testid="${name}"]`,
+    `[data-testid="new-transaction"] [data-testid="${name}"]:not([data-header])`,
   )[idx];
   if (subSelector !== '') {
     return field.querySelector(subSelector);
@@ -240,7 +240,7 @@ function queryNewField(container, name, subSelector = '', idx = 0) {
 
 function queryField(container, name, subSelector = '', idx) {
   const field = container.querySelectorAll(
-    `[data-testid="transaction-table"] [data-testid="${name}"]`,
+    `[data-testid="transaction-table"] [data-testid="${name}"]:not([data-header])`,
   )[idx];
   if (subSelector !== '') {
     return field.querySelector(subSelector);
@@ -291,6 +291,7 @@ function expectToBeEditingField(container, name, rowIndex, isNew) {
   } else {
     field = queryField(container, name, '', rowIndex);
   }
+
   const input = field.querySelector(':focus');
   expect(input).toBeTruthy();
   expect(container.ownerDocument.activeElement).toBe(input);
