@@ -24,7 +24,6 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { ResponsiveProvider } from '../../ResponsiveProvider';
-import { ColumnWidthProvider } from '../ColumnWidthContext';
 import { ScrollProvider } from '../ScrollProvider';
 
 import { TransactionTable } from './TransactionsTable';
@@ -130,23 +129,21 @@ function LiveTransactionTable(props) {
             fetchAllIds={() => transactions.map(t => t.id)}
           >
             <SplitsExpandedProvider>
-              <ColumnWidthProvider>
-                <ScrollProvider>
-                  <TransactionTable
-                    {...props}
-                    transactions={transactions}
-                    loadMoreTransactions={() => {}}
-                    commonPayees={[]}
-                    payees={payees}
-                    addNotification={n => console.log(n)}
-                    onSave={onSave}
-                    onSplit={onSplit}
-                    onAdd={onAdd}
-                    onAddSplit={onAddSplit}
-                    onCreatePayee={onCreatePayee}
-                  />
-                </ScrollProvider>
-              </ColumnWidthProvider>
+              <ScrollProvider>
+                <TransactionTable
+                  {...props}
+                  transactions={transactions}
+                  loadMoreTransactions={() => {}}
+                  commonPayees={[]}
+                  payees={payees}
+                  addNotification={n => console.log(n)}
+                  onSave={onSave}
+                  onSplit={onSplit}
+                  onAdd={onAdd}
+                  onAddSplit={onAddSplit}
+                  onCreatePayee={onCreatePayee}
+                />
+              </ScrollProvider>
             </SplitsExpandedProvider>
           </SelectedProviderWithItems>
         </SpreadsheetProvider>

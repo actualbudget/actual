@@ -19,7 +19,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowsSynchronize } from '../../icons/v2';
 import { styles, theme } from '../../style';
-import { Cell, Field, Row, SelectCell, Table } from '../table';
+import { Cell, Field, Row, SelectCell, TableResizable } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {
@@ -175,10 +175,12 @@ export function SimpleTransactionsTable({
   );
 
   return (
-    <Table
+    <TableResizable
+      prefName="simple-transactions-column-sizes"
       style={style}
       items={serializedTransactions}
       renderEmpty={renderEmpty}
+      autoSizer={false}
       headers={
         <>
           <SelectCell

@@ -81,8 +81,8 @@ import {
   CustomCell,
   CellButton,
   useTableNavigator,
-  Table,
   UnexposedCellContent,
+  TableResizable,
 } from '../table';
 
 function getDisplayValue(obj, name) {
@@ -643,6 +643,7 @@ const PayeeCell = forwardRef(function PayeeCell(
     <Cell
       ref={ref}
       name="payee"
+      data-resizeable-column="payee"
       width={width}
       focused={focused}
       style={{ padding: 0, ...style }}
@@ -734,6 +735,7 @@ const PayeeCell = forwardRef(function PayeeCell(
     <CustomCell
       ref={ref}
       name="payee"
+      data-resizeable-column="payee"
       width={width}
       style={{
         whiteSpace: 'nowrap',
@@ -2111,7 +2113,9 @@ function TransactionTableInner({
         }}
         data-testid="transaction-table"
       >
-        <Table
+        <TableResizable
+          prefName="transactions-table-column-sizes"
+          autoSizer={true}
           navigator={tableNavigator}
           ref={tableRef}
           listContainerRef={listContainerRef}

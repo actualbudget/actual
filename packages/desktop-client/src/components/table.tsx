@@ -30,7 +30,7 @@ import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
 import { type CSSProperties, styles, theme } from '../style';
 
-import { useColumnWidth } from './ColumnWidthContext';
+import { ColumnWidthProvider, useColumnWidth } from './ColumnWidthContext';
 import { Button } from './common/Button';
 import { Input } from './common/Input';
 import { Menu, type MenuItem } from './common/Menu';
@@ -854,7 +854,7 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
   onSelect,
 }: SelectedItemsButtonProps<T>) {
   const selectedItems = useSelectedItems();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(null);
   const triggerRef = useRef(null);
 
   if (selectedItems.size === 0) {
@@ -930,7 +930,13 @@ export function TableWithNavigator({
   ...props
 }: TableWithNavigatorProps) {
   const navigator = useTableNavigator(props.items, fields);
-  return <Table {...props} navigator={navigator} />;
+  return (
+    <TableResizable
+      {...props}
+      navigator={navigator}
+      prefName="import-transactions-column-sizes"
+    />
+  );
 }
 
 type TableItem = { id: number | string };
@@ -960,6 +966,7 @@ type TableProps<T extends TableItem = TableItem> = {
   onScroll?: () => void;
   isSelected?: (id: T['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
+  autoSizer?: boolean;
 };
 
 export const Table = forwardRef(
@@ -982,6 +989,7 @@ export const Table = forwardRef(
       isSelected,
       saveScrollWidth,
       listContainerRef,
+      autoSizer = false,
       ...props
     },
     ref,
@@ -1189,6 +1197,33 @@ export const Table = forwardRef(
 
     const isEmpty = (count || items.length) === 0;
 
+    let encapsulatedHeaders: ReactNode | TableHeaderProps['headers'] =
+      autoSizer && (
+        <AutoSizer disableHeight={true}>
+          {({ width }) => {
+            if (width === 0) {
+              return null;
+            }
+
+            return (
+              <View
+                ref={scrollContainerHeader}
+                style={{
+                  width: `${width}px`,
+                  overflow: 'hidden',
+                }}
+              >
+                <View style={{ width: `${totalSize()}px` }}>{headers}</View>
+              </View>
+            );
+          }}
+        </AutoSizer>
+      );
+
+    if (!autoSizer) {
+      encapsulatedHeaders = headers;
+    }
+
     return (
       <View
         style={{
@@ -1206,29 +1241,7 @@ export const Table = forwardRef(
             {...(Array.isArray(headers)
               ? { headers }
               : {
-                  children: (
-                    <AutoSizer disableHeight={true}>
-                      {({ width }) => {
-                        if (width === 0) {
-                          return null;
-                        }
-
-                        return (
-                          <View
-                            ref={scrollContainerHeader}
-                            style={{
-                              width: `${width}px`,
-                              overflow: 'hidden',
-                            }}
-                          >
-                            <View style={{ width: `${totalSize()}px` }}>
-                              {headers}
-                            </View>
-                          </View>
-                        );
-                      }}
-                    </AutoSizer>
-                  ),
+                  children: encapsulatedHeaders,
                 })}
           />
         )}
@@ -1295,6 +1308,21 @@ export const Table = forwardRef(
 ) as <T extends TableItem>(
   props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
 ) => ReactElement;
+
+export const TableResizable = forwardRef(({ prefName, ...props }, ref) => {
+  return (
+    <ColumnWidthProvider prefName={prefName}>
+      <Table {...props} ref={ref} />
+    </ColumnWidthProvider>
+  );
+}) as <T extends TableItem>(
+  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> } & {
+    prefName: string;
+  },
+) => ReactElement;
+
+// @ts-expect-error fix me
+TableResizable.displayName = 'TableResizable';
 
 // @ts-expect-error fix me
 Table.displayName = 'Table';

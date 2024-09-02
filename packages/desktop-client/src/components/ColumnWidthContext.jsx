@@ -10,10 +10,8 @@ import { useLocalPref } from '../hooks/useLocalPref';
 
 const ColumnWidthContext = createContext();
 
-export const ColumnWidthProvider = ({ children }) => {
-  const [columnSizePrefs, setColumnSizePrefs] = useLocalPref(
-    'transaction-column-sizes',
-  );
+export const ColumnWidthProvider = ({ children, prefName }) => {
+  const [columnSizePrefs, setColumnSizePrefs] = useLocalPref(prefName);
   const [columnWidths, setColumnWidths] = useState({});
   const [fixedSizedColumns, setFixedSizedColumns] = useState({});
   const [, setPositionAccumulator] = useState(0);
@@ -173,5 +171,9 @@ export const ColumnWidthProvider = ({ children }) => {
 };
 
 export const useColumnWidth = () => {
-  return useContext(ColumnWidthContext);
+  const context = useContext(ColumnWidthContext);
+  if (!context) {
+    throw new Error('useColumnWidth must be used within a ColumnWidthProvider');
+  }
+  return context;
 };
