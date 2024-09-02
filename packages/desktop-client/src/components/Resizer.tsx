@@ -11,7 +11,7 @@ type ResizerProps = {
 
 export function Resizer({ columnName, resizeRef }: ResizerProps) {
   const { handleMoveProps, handleDoubleClick } = useColumnWidth();
-  const resizerRef = useRef();
+  const resizerRef = useRef<HTMLDivElement | null>(null);
   const { moveProps } = useMove(
     handleMoveProps(columnName, resizeRef, resizerRef),
   );

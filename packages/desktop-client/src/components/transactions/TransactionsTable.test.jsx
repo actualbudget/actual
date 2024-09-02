@@ -27,6 +27,7 @@ import { ResponsiveProvider } from '../../ResponsiveProvider';
 import { ColumnWidthProvider } from '../ColumnWidthContext';
 
 import { TransactionTable } from './TransactionsTable';
+import { ScrollProvider } from '../ScrollProvider';
 
 vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
@@ -130,19 +131,21 @@ function LiveTransactionTable(props) {
           >
             <SplitsExpandedProvider>
               <ColumnWidthProvider>
-                <TransactionTable
-                  {...props}
-                  transactions={transactions}
-                  loadMoreTransactions={() => {}}
-                  commonPayees={[]}
-                  payees={payees}
-                  addNotification={n => console.log(n)}
-                  onSave={onSave}
-                  onSplit={onSplit}
-                  onAdd={onAdd}
-                  onAddSplit={onAddSplit}
-                  onCreatePayee={onCreatePayee}
-                />
+                <ScrollProvider>
+                  <TransactionTable
+                    {...props}
+                    transactions={transactions}
+                    loadMoreTransactions={() => {}}
+                    commonPayees={[]}
+                    payees={payees}
+                    addNotification={n => console.log(n)}
+                    onSave={onSave}
+                    onSplit={onSplit}
+                    onAdd={onAdd}
+                    onAddSplit={onAddSplit}
+                    onCreatePayee={onCreatePayee}
+                  />
+                </ScrollProvider>
               </ColumnWidthProvider>
             </SplitsExpandedProvider>
           </SelectedProviderWithItems>
