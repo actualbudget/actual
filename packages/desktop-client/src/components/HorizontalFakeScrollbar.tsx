@@ -60,7 +60,7 @@ export function HorizontalFakeScrollbar({
   const { moveProps } = useMove({
     onMoveStart: () => {
       if (!scrollbarRef.current) return;
-      
+
       setIsDragging(true);
       const rect = scrollbarRef.current.getBoundingClientRect();
       const currentLeft = rect.left || 0;
