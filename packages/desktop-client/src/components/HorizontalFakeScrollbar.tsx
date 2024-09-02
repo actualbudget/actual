@@ -36,6 +36,8 @@ export function HorizontalFakeScrollbar({
   };
 
   const handleContainerClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (!scrollbarRef.current) return;
+
     const container = event.currentTarget;
     const containerRect = container.getBoundingClientRect();
     const clickX = event.clientX - containerRect.left;
@@ -68,6 +70,8 @@ export function HorizontalFakeScrollbar({
       handleMouseMove(e.deltaX);
     },
     onMoveEnd: () => {
+      if (!scrollX) return;
+
       setIsDragging(false);
 
       const maxPos = clientWidth - sliderWidth;

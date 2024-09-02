@@ -207,7 +207,6 @@ const TransactionHeader = memo(
 
     useEffect(() => {
       if (rowRef && rowRef.current) {
-        debugger;
         let parentNode = rowRef.current.parentNode;
         let rect = parentNode.getBoundingClientRect();
         while (parentNode && rect.width === 0) {
