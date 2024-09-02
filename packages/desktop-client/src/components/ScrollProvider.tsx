@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from 'react';
 
-import debounce from 'debounce';
+import { debounce } from 'debounce';
 
 type IScrollContext = {
   scrollY: number | undefined;
