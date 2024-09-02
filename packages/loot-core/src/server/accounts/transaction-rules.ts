@@ -228,9 +228,15 @@ export async function deleteRule<T extends { id: string }>(rule: T) {
     rule.id,
   ]);
 
-  if (schedule) {
-    return false;
-  }
+  console.log('\n\n****SCHEDULE****');
+  console.log(schedule);
+
+  console.log('\n\n****RULE****');
+  console.log(rule);
+
+  // if (schedule) {
+  //   return false;
+  // }
 
   return db.delete_('rules', rule.id);
 }
