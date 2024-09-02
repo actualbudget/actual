@@ -767,7 +767,7 @@ const PayeeCell = forwardRef(function PayeeCell(
         );
 
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <>
             <PayeeIcons
               transaction={transaction}
               transferAccount={transferAccount}
@@ -793,7 +793,7 @@ const PayeeCell = forwardRef(function PayeeCell(
             ) : (
               payeeName
             )}
-          </div>
+          </>
         );
       }}
     >
@@ -1330,38 +1330,32 @@ const Transaction = memo(function Transaction({
         </>
       )}
       {(() => (
-        <>
-          <PayeeCell
-            /* Payee field for all transactions */
-            id={id}
-            payee={payee}
-            ref={el => (refs.current['payee'] = el)}
-            width={columnWidths['payee'] ? columnWidths['payee'] : 'flex'}
-            data-resizeable-column="payee"
-            focused={focusedField === 'payee'}
-            /* Filter out the account we're currently in as it is not a valid transfer */
-            accounts={accounts.filter(account => account.id !== accountId)}
-            payees={payees.filter(payee => payee.transfer_acct !== accountId)}
-            valueStyle={valueStyle}
-            transaction={transaction}
-            subtransactions={subtransactions}
-            transferAccountsByTransaction={transferAccountsByTransaction}
-            importedPayee={importedPayee}
-            isPreview={isPreview}
-            onEdit={onEdit}
-            onUpdate={onUpdate}
-            onCreatePayee={onCreatePayee}
-            onManagePayees={onManagePayees}
-            onNavigateToTransferAccount={onNavigateToTransferAccount}
-            onNavigateToSchedule={onNavigateToSchedule}
-          />
-          <Field
-            width={10}
-            style={{
-              width: 10,
-            }}
-          />
-        </>
+        <PayeeCell
+          /* Payee field for all transactions */
+          id={id}
+          payee={payee}
+          ref={el => (refs.current['payee'] = el)}
+          width={columnWidths['payee'] ? columnWidths['payee'] : 'flex'}
+          data-resizeable-column="payee"
+          focused={focusedField === 'payee'}
+          /* Filter out the account we're currently in as it is not a valid transfer */
+          accounts={accounts.filter(account => account.id !== accountId)}
+          payees={payees.filter(
+            payee => !payee.transfer_acct || payee.transfer_acct !== accountId,
+          )}
+          valueStyle={valueStyle}
+          transaction={transaction}
+          subtransactions={subtransactions}
+          transferAccountsByTransaction={transferAccountsByTransaction}
+          importedPayee={importedPayee}
+          isPreview={isPreview}
+          onEdit={onEdit}
+          onUpdate={onUpdate}
+          onCreatePayee={onCreatePayee}
+          onManagePayees={onManagePayees}
+          onNavigateToTransferAccount={onNavigateToTransferAccount}
+          onNavigateToSchedule={onNavigateToSchedule}
+        />
       ))()}
 
       <InputCell
