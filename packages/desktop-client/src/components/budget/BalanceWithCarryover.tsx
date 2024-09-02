@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { type ComponentPropsWithoutRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgArrowThinRight } from '../../icons/v1';
@@ -77,6 +78,7 @@ export function BalanceWithCarryover({
   carryoverIndicator = DefaultCarryoverIndicator,
   ...props
 }: BalanceWithCarryoverProps) {
+  const { t } = useTranslation();
   const carryoverValue = useSheetValue(carryover);
   const balanceValue = useSheetValue(balance);
   const goalValue = useSheetValue(goal);
@@ -135,31 +137,31 @@ export function BalanceWithCarryover({
                   <span style={{ color: theme.noticeText }}>Fully funded</span>
                 ) : differenceToGoal > 0 ? (
                   <span style={{ color: theme.noticeText }}>
-                    Overfunded ({format(differenceToGoal, 'financial')})
+                    {t('Overfunded')} ({format(differenceToGoal, 'financial')})
                   </span>
                 ) : (
                   <span style={{ color: theme.errorText }}>
-                    Underfunded ({format(differenceToGoal, 'financial')})
+                    {t('Underfunded')} ({format(differenceToGoal, 'financial')})
                   </span>
                 )}
               </span>
               <GoalTooltipRow>
-                <div>Goal Type:</div>
+                <div>{t('Goal Type:')}</div>
                 <div>{longGoalValue === 1 ? 'Long' : 'Template'}</div>
               </GoalTooltipRow>
               <GoalTooltipRow>
-                <div>Goal:</div>
+                <div>{t('Goal:')}</div>
                 <div>{format(goalValue, 'financial')}</div>
               </GoalTooltipRow>
               <GoalTooltipRow>
                 {longGoalValue !== 1 ? (
                   <>
-                    <div>Budgeted:</div>
+                    <div>{t('Budgeted:')}</div>
                     <div>{format(budgetedValue, 'financial')}</div>
                   </>
                 ) : (
                   <>
-                    <div>Balance:</div>
+                    <div>{t('Balance:')}</div>
                     <div>{format(balanceValue, 'financial')}</div>
                   </>
                 )}
