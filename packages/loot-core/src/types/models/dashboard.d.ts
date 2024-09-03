@@ -30,8 +30,16 @@ export type CustomReportWidget = AbstractWidget<
   'custom-report',
   { id: string }
 >;
+export type MarkdownWidget = AbstractWidget<
+  'markdown-card',
+  { content: string; text_align?: 'left' | 'right' | 'center' }
+>;
 
-type SpecializedWidget = NetWorthWidget | CashFlowWidget | SpendingWidget;
+type SpecializedWidget =
+  | NetWorthWidget
+  | CashFlowWidget
+  | SpendingWidget
+  | MarkdownWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
