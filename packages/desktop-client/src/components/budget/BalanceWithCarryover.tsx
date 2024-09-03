@@ -134,7 +134,7 @@ export function BalanceWithCarryover({
             <View style={{ padding: 10 }}>
               <span style={{ fontWeight: 'bold' }}>
                 {differenceToGoal === 0 ? (
-                  <span style={{ color: theme.noticeText }}>Fully funded</span>
+                  <span style={{ color: theme.noticeText }}>{t('Fully funded')}</span>
                 ) : differenceToGoal > 0 ? (
                   <span style={{ color: theme.noticeText }}>
                     {t('Overfunded')} ({format(differenceToGoal, 'financial')})
