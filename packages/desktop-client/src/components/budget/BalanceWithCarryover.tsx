@@ -134,14 +134,20 @@ export function BalanceWithCarryover({
             <View style={{ padding: 10 }}>
               <span style={{ fontWeight: 'bold' }}>
                 {differenceToGoal === 0 ? (
-                  <span style={{ color: theme.noticeText }}>{t('Fully funded')}</span>
+                  <span style={{ color: theme.noticeText }}>
+                    {t('Fully funded')}
+                  </span>
                 ) : differenceToGoal > 0 ? (
                   <span style={{ color: theme.noticeText }}>
-                    {t('Overfunded ({{amount}})', { amount: format(differenceToGoal, 'financial') })}
+                    {t('Overfunded ({{amount}})', { 
+                      amount: format(differenceToGoal, 'financial')
+                    })}
                   </span>
                 ) : (
                   <span style={{ color: theme.errorText }}>
-                    {t('Underfunded ({{amount}})', { amount: format(differenceToGoal, 'financial') })}
+                    {t('Underfunded ({{amount}})', {
+                      amount: format(differenceToGoal, 'financial')
+                    })}
                   </span>
                 )}
               </span>
