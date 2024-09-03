@@ -7,11 +7,11 @@ import { css } from 'glamor';
 
 import { type MarkdownWidget } from 'loot-core/src/types/models';
 
-import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { styles, theme } from '../../../style';
 import { Menu } from '../../common/Menu';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { ReportCard } from '../ReportCard';
 
 const markdownStyles = css({
