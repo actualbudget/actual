@@ -1832,7 +1832,7 @@ function BudgetTableHeader({
             <Button
               variant="bare"
               isDisabled={show3Cols}
-              onPress={toggleSpentColumn()}
+              onPress={toggleSpentColumn}
               style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>
