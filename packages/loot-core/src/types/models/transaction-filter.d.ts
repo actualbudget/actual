@@ -1,7 +1,9 @@
+import { type RuleConditionEntity } from './rule';
+
 export interface TransactionFilterEntity {
   id: string;
   name: string;
-  conditions_op: string;
-  conditions: unknown;
+  conditionsOp: 'and' | 'or';
+  conditions: RuleConditionEntity[];
   tombstone: boolean;
 }
