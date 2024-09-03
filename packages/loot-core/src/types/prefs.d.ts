@@ -89,4 +89,5 @@ export type GlobalPrefs = Partial<{
   keyId?: string;
   theme: Theme;
   documentDir: string; // Electron only
+  serverSelfSignedCert: string; // Electron only
 }>;
