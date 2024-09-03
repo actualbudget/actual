@@ -15,6 +15,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
   const [columnWidths, setColumnWidths] = useState({});
   const [fixedSizedColumns, setFixedSizedColumns] = useState({});
   const [, setPositionAccumulator] = useState(0);
+  const [clientWidth, setClientWidth] = useState(0);
 
   useEffect(() => {
     if (columnSizePrefs) {
@@ -22,87 +23,78 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
     }
   }, [columnSizePrefs]);
 
-  const totalSize = useCallback(() => {
+  const totalWidth = useCallback(() => {
     const currentTotalWidth = Object.values(columnWidths).reduce(
       (acc, width) => acc + width,
       0,
     );
-    const otherColumnsWidth = Object.values(fixedSizedColumns).reduce(
-      (acc, width) => acc + width + 10, //plus 10 cuz the divider must be counted
-      0,
-    );
 
-    return otherColumnsWidth + currentTotalWidth;
-  }, [columnWidths, fixedSizedColumns]);
+    const otherColumnsWidth = Object.entries(fixedSizedColumns)
+      .filter(([key]) => !(key in columnWidths))
+      .reduce((acc, [, width]) => acc + width + 10, 0);
+
+    const widthSum = otherColumnsWidth + currentTotalWidth + 20;
+    return widthSum > clientWidth ? widthSum : clientWidth;
+  }, [columnWidths, fixedSizedColumns, clientWidth]);
 
   const savePrefs = useCallback(() => {
     setColumnSizePrefs(JSON.stringify(columnWidths));
   }, [columnWidths, setColumnSizePrefs]);
 
-  const removeColumn = useCallback(
-    columnName => {
-      setColumnWidths(prevWidths => {
-        const { [columnName]: _, ...remainingWidths } = prevWidths;
-        return remainingWidths;
-      });
+  const removeColumn = columnName => {
+    const { [columnName]: _, ...newObj } = columnWidths;
+    setColumnWidths(newObj);
+    savePrefs();
+  };
+
+  const handleDoubleClick = columnName => {
+    updateColumnWidth(columnName, -1);
+
+    setTimeout(() => {
+      let maximum = -1;
+      document
+        .querySelectorAll(`[data-resizeable-column=${columnName}]`)
+        .forEach(row => {
+          const rect = row.getBoundingClientRect();
+          const styles = getComputedStyle(row);
+          const localValue = Math.max(
+            rect.width +
+              parseFloat(styles.marginLeft) +
+              parseFloat(styles.marginRight),
+            110,
+          );
+
+          maximum = Math.max(localValue, maximum);
+        });
+
+      updateColumnWidth(columnName, maximum);
 
       savePrefs();
-    },
-    [savePrefs],
-  );
-
-  const handleDoubleClick = useCallback(
-    columnName => {
-      setColumnWidths(
-        prevWidths => ({
-          ...prevWidths,
-          [columnName]: -1,
-        }),
-        [],
-      );
-
-      setTimeout(() => {
-        let maximum = -1;
-        document
-          .querySelectorAll(`[data-resizeable-column=${columnName}]`)
-          .forEach(row => {
-            const rect = row.getBoundingClientRect();
-            const styles = getComputedStyle(row);
-            const localValue = Math.max(
-              rect.width +
-                parseFloat(styles.marginLeft) +
-                parseFloat(styles.marginRight),
-              110,
-            );
-
-            if (localValue > maximum) {
-              maximum = localValue;
-            }
-          });
-
-        setColumnWidths(prevWidths => ({
-          ...prevWidths,
-          [columnName]: maximum,
-        }));
-
-        savePrefs();
-      }, 100);
-    },
-    [savePrefs],
-  );
+    }, 200);
+  };
 
   const setFixedColumn = useCallback(fixedColumns => {
     setFixedSizedColumns(fixedColumns);
   }, []);
 
-  const getViewportWidth = () => window.innerWidth;
+  const getViewportWidth = useCallback(() => clientWidth, [clientWidth]);
+
   const updateColumnWidth = useCallback(
     (columnName, accumulatedDelta) => {
       const newWidth = accumulatedDelta;
 
-      const currentTotalWidth = Object.values(columnWidths)
-        .filter(col => col !== columnName)
-        .reduce((acc, width) => acc + width, 0);
+      if (newWidth === -1) {
+        setColumnWidths(prevWidths => ({
+          ...prevWidths,
+          [columnName]: newWidth,
+        }));
+        return;
+      }
+
+      const currentTotalWidth = Object.values(columnWidths).reduce(
+        (acc, width) => acc + width,
+        0,
+      );
       const otherColumnsWidth = Object.values(fixedSizedColumns).reduce(
         (acc, width) => acc + width + 10,
         0,
@@ -122,7 +114,7 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
         [columnName]: Math.max(adjustedWidth, 110),
       }));
     },
-    [columnWidths, fixedSizedColumns],
+    [columnWidths, fixedSizedColumns, getViewportWidth],
   );
 
   const handleMoveProps = (columnName, ref, resizerRef) => {
@@ -174,8 +166,10 @@ export const ColumnWidthProvider = ({ children, prefName }) => {
         handleMoveProps,
         setFixedColumn,
         handleDoubleClick,
-        totalSize,
+        totalWidth,
         removeColumn,
+        clientWidth,
+        setClientWidth,
       }}
     >
       {children}

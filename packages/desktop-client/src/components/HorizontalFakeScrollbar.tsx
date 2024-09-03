@@ -1,34 +1,32 @@
 import React, { useState, useRef, type MouseEvent } from 'react';
 import { useMove } from 'react-aria';
 
+import { useColumnWidth } from './ColumnWidthContext';
 import { useScroll } from './ScrollProvider';
 
-type HorizontalFakeScrollbarProps = {
-  maxScroll: number;
-  clientWidth: number;
-};
-
-export function HorizontalFakeScrollbar({
-  maxScroll,
-  clientWidth,
-}: HorizontalFakeScrollbarProps) {
+export function HorizontalFakeScrollbar() {
   const { scrollX, scrollToX } = useScroll();
   const scrollbarRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [startScroll, setStartScroll] = useState(0); // State to hold the initial position of the slider
+  const [startScroll, setStartScroll] = useState(0);
+  const { totalWidth, clientWidth } = useColumnWidth();
   const [maxPosition, setMaxPosition] = useState(
-    clientWidth - (clientWidth / maxScroll) * clientWidth,
-  ); // Initialize maxPosition
+    clientWidth - (clientWidth / totalWidth()) * clientWidth,
+  );
 
-  const sliderWidth = (clientWidth / maxScroll) * clientWidth;
+  const sliderWidth =
+    (totalWidth() > clientWidth
+      ? clientWidth - (totalWidth() - clientWidth)
+      : 0) - 12;
 
   const handleMouseMove = (deltaX: number) => {
-    const newLeft = Math.min(Math.max(startScroll + deltaX, 0), maxPosition);
-
-    if (isNaN(newLeft)) return;
+    const newLeft = Math.min(
+      Math.max(startScroll + deltaX, 0),
+      maxPosition - 12,
+    );
 
     setStartScroll(newLeft);
-    scrollToX(newLeft, false); // Scroll the content
+    scrollToX(newLeft, false);
 
     if (scrollbarRef.current) {
       scrollbarRef.current.style.transform = `translateX(${newLeft}px)`;
@@ -41,7 +39,7 @@ export function HorizontalFakeScrollbar({
     const container = event.currentTarget;
     const containerRect = container.getBoundingClientRect();
     const clickX = event.clientX - containerRect.left;
-    const sliderWidth = (clientWidth / maxScroll) * clientWidth;
+    const sliderWidth = (clientWidth / totalWidth()) * clientWidth;
     const rect = scrollbarRef.current.getBoundingClientRect();
     const currentLeft = rect.left || 0;
 
@@ -77,7 +75,7 @@ export function HorizontalFakeScrollbar({
       setIsDragging(false);
 
       const maxPos = clientWidth - sliderWidth;
-      const sliderPosition = (scrollX / maxScroll) * maxPos;
+      const sliderPosition = (scrollX / totalWidth()) * maxPos;
 
       if (scrollbarRef.current) {
         scrollbarRef.current.style.transform = `translateX(${sliderPosition}px)`;
@@ -88,14 +86,14 @@ export function HorizontalFakeScrollbar({
   });
 
   return (
-    sliderWidth < clientWidth && (
+    totalWidth() > clientWidth && (
       <div
         style={{
           position: 'absolute',
           bottom: '0',
           left: '0',
-          width: '100%',
-          height: '11px',
+          width: 'calc(100% - 11px)',
+          height: '12px',
           zIndex: 5000,
           backgroundColor: 'rgba(200, 200, 200, 0.2)',
           display: 'flex',
@@ -109,9 +107,10 @@ export function HorizontalFakeScrollbar({
           ref={scrollbarRef}
           style={{
             width: `${sliderWidth}px`,
-            margin: '2px',
+            marginTop: '2px',
+            marginBottom: '2px',
             borderRadius: 10,
-            height: '100%',
+            height: '8px',
             backgroundColor: 'rgba(200, 200, 200, 1)',
             position: 'absolute',
             left: '0px',

@@ -1011,15 +1011,11 @@ export const Table = forwardRef(
     const scrollContainerHeader = useRef(null);
     const initialScrollTo = useRef(null);
     const listInitialized = useRef(false);
-    const { totalSize } = useColumnWidth();
-    const scrollRef = useRef<HTMLDivElement>();
-    const [scrollWidthX, setScrollWidthX] = useState(0);
-    const [clientWidthX, setClientWidthX] = useState(0);
+    const { totalWidth, setClientWidth } = useColumnWidth();
     const { setScrollContainers } = useScroll();
 
     useEffect(() => {
       if (
-        scrollRef &&
         scrollContainer.current &&
         scrollContainerHeader &&
         scrollContainerHeader.current
@@ -1028,10 +1024,8 @@ export const Table = forwardRef(
           scrollContainer.current,
           scrollContainerHeader.current,
         ]);
-        setScrollWidthX(totalSize());
-        setClientWidthX(scrollRef.current.clientWidth);
       }
-    }, [scrollContainer, scrollRef, totalSize]);
+    }, [scrollContainer.current, totalWidth]);
 
     useImperativeHandle(ref, () => ({
       scrollTo: (id, alignment = 'smart') => {
@@ -1213,7 +1207,7 @@ export const Table = forwardRef(
                   overflow: 'hidden',
                 }}
               >
-                <View style={{ width: `${totalSize()}px` }}>{headers}</View>
+                <View style={{ width: `${totalWidth()}px` }}>{headers}</View>
               </View>
             );
           }}
@@ -1254,7 +1248,7 @@ export const Table = forwardRef(
           {isEmpty ? (
             getEmptyContent(renderEmpty)
           ) : (
-            <AutoSizer>
+            <AutoSizer onResize={size => setClientWidth(size.width)}>
               {({ width, height }) => {
                 if (width === 0 || height === 0) {
                   return null;
@@ -1262,7 +1256,7 @@ export const Table = forwardRef(
 
                 return (
                   <>
-                    <View ref={scrollRef} style={{ width: `${width}px` }}>
+                    <View style={{ width: `${width}px` }}>
                       <AvoidRefocusScrollProvider>
                         <FixedSizeList
                           ref={list}
@@ -1270,7 +1264,7 @@ export const Table = forwardRef(
                           innerRef={listContainer}
                           outerRef={scrollContainer}
                           width={width}
-                          totalSize={totalSize()}
+                          totalWidth={totalWidth()}
                           height={height}
                           renderRow={renderRow}
                           itemCount={count || items.length}
@@ -1292,10 +1286,7 @@ export const Table = forwardRef(
                         />
                       </AvoidRefocusScrollProvider>
                     </View>
-                    <HorizontalFakeScrollbar
-                      maxScroll={scrollWidthX}
-                      clientWidth={clientWidthX}
-                    />
+                    <HorizontalFakeScrollbar />
                   </>
                 );
               }}

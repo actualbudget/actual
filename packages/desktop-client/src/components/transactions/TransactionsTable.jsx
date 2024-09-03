@@ -196,31 +196,15 @@ const TransactionHeader = memo(
         date: 110,
         payment: 100,
         deposit: 100,
+        payee: 200,
+        account: 200,
         balance: showBalance ? 103 : 0,
         cleared: showCleared ? 38 : 0,
       });
-    }, [columnWidths]);
+    }, [columnWidths, columnWidths.current]);
 
-    const { totalSize } = useColumnWidth();
-    const [clientWidth, setClientWidth] = useState();
+    const { totalWidth, clientWidth } = useColumnWidth();
     const rowRef = useRef();
-
-    useEffect(() => {
-      if (rowRef && rowRef.current) {
-        let parentNode = rowRef.current.parentNode;
-        let rect = parentNode.getBoundingClientRect();
-        while (parentNode && rect.width === 0) {
-          parentNode = parentNode.parentNode;
-          if (parentNode != null) {
-            rect = parentNode.getBoundingClientRect?.() || { width: 0 };
-          }
-        }
-
-        if (rect.width !== 0) {
-          setClientWidth(rect.width);
-        }
-      }
-    }, [rowRef]);
 
     return (
       <Row
@@ -234,7 +218,7 @@ const TransactionHeader = memo(
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor: theme.tableBorder,
-          width: `${totalSize() < clientWidth ? clientWidth : totalSize()}px`,
+          width: `${totalWidth() < clientWidth ? clientWidth : totalWidth()}px`,
         }}
       >
         <SelectCell
@@ -268,7 +252,7 @@ const TransactionHeader = memo(
             <HeaderCell
               value="Account"
               ref={el => (refs.current['account'] = el)}
-              width={columnWidths['account'] ? columnWidths['account'] : 'flex'}
+              width={columnWidths['account'] ? columnWidths['account'] : 200}
               alignItems="flex"
               marginLeft={-5}
               id="account"
@@ -286,7 +270,7 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Payee"
           ref={el => (refs.current['payee'] = el)}
-          width={columnWidths['payee'] ? columnWidths['payee'] : 'flex'}
+          width={columnWidths['payee'] ? columnWidths['payee'] : 200}
           alignItems="flex"
           marginLeft={-5}
           id="payee"
@@ -1179,9 +1163,8 @@ const Transaction = memo(function Transaction({
       {isChild && (
         <Field
           /* Checkmark blank placeholder for Child transaction */
-          width={110}
+          width={columnWidths['date'] ? columnWidths['date'] : 110}
           style={{
-            width: 110,
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
@@ -1191,7 +1174,7 @@ const Transaction = memo(function Transaction({
       {isChild && showAccount && (
         <>
           <Field
-            width={columnWidths['account'] ? columnWidths['account'] : 'flex'}
+            width={columnWidths['account'] ? columnWidths['account'] : 200}
             data-resizeable-column="account"
             /* Account blank placeholder for Child transaction */
             style={{
@@ -1363,7 +1346,7 @@ const Transaction = memo(function Transaction({
             id={id}
             payee={payee}
             ref={el => (refs.current['payee'] = el)}
-            width={columnWidths['payee'] ? columnWidths['payee'] : 'flex'}
+            width={columnWidths['payee'] ? columnWidths['payee'] : 200}
             data-resizeable-column="payee"
             focused={focusedField === 'payee'}
             /* Filter out the account we're currently in as it is not a valid transfer */
