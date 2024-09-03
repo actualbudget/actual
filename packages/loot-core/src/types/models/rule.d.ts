@@ -25,6 +25,7 @@ export type RuleConditionOp =
   | 'lte'
   | 'contains'
   | 'doesNotContain'
+  | 'hasTags'
   | 'matches';
 
 type FieldValueTypes = {
@@ -54,8 +55,9 @@ type BaseConditionEntity<
     year?: boolean;
   };
   conditionsOp?: string;
-  type?: 'id' | 'boolean' | 'date' | 'number';
+  type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
+  queryFilter?: Record<string, { $oneof: string[] }>;
 };
 
 export type RuleConditionEntity =
@@ -96,6 +98,7 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
+      | 'hasTags'
     >
   | BaseConditionEntity<
       'payee',

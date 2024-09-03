@@ -82,7 +82,7 @@ export function Overview() {
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
-  const layout = widgets.map(widget => ({
+  const baseLayout = widgets.map(widget => ({
     i: widget.id,
     w: widget.width,
     h: widget.height,
@@ -92,6 +92,26 @@ export function Overview() {
       isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
     ...widget,
   }));
+
+  const layout =
+    spendingReportFeatureFlag &&
+    !isDashboardsFeatureEnabled &&
+    !baseLayout.find(({ type }) => type === 'spending-card')
+      ? [
+          ...baseLayout,
+          {
+            i: 'spending',
+            type: 'spending-card' as const,
+            x: 0,
+            y: Math.max(...baseLayout.map(({ y }) => y), 0) + 2,
+            w: 4,
+            h: 2,
+            minW: 3,
+            minH: 2,
+            meta: null,
+          },
+        ]
+      : baseLayout;
 
   const closeNotifications = () => {
     dispatch(removeNotification('import'));

@@ -54,7 +54,7 @@ type FinanceModals = {
   'manage-rules': { payeeId?: string };
   'edit-rule': {
     rule: RuleEntity | NewRuleEntity;
-    onSave: (rule: RuleEntity) => void;
+    onSave?: (rule: RuleEntity) => void;
   };
   'merge-unused-payees': {
     payeeIds: string[];
@@ -269,6 +269,10 @@ type FinanceModals = {
   'confirm-transaction-delete': {
     message?: string;
     onConfirm: () => void;
+  };
+  'confirm-unlink-account': {
+    accountName: string;
+    onUnlink: () => void;
   };
 };
 
