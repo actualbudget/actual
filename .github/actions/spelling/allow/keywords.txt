@@ -8,6 +8,7 @@ Authelia
 autocompletes
 Blix
 bnp
+BSCHESMM
 BTC
 CAGLESMM
 Caju
@@ -25,6 +26,7 @@ commandlet
 Crd
 crdt
 creditcards
+crowdsourced
 debian
 dedupes
 deleteaccount
@@ -50,8 +52,10 @@ invokable
 iwr
 jointaccounts
 jwl
+KBC
 kcab
 keyout
+KREDBEBB
 Kroger
 kubectl
 kubernetes
@@ -70,8 +74,11 @@ monkeypatch
 Monobank
 Morrisons
 NAIAGB
+NDEADKKK
 Netflix
 netlify
+Nordea
+NORDEA
 nordigen
 NRNBGB
 nynab
@@ -94,6 +101,7 @@ Rezip
 roadmap
 RUpdate
 sankey
+SANTANDER
 screenshots
 SEB
 subfolders
@@ -111,6 +119,7 @@ useb
 usernames
 valign
 Venmo
+Weblate
 winsvg
 WSL
 Xxxxx
