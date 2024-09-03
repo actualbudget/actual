@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import * as queries from 'loot-core/src/client/queries';
+import { type Query } from 'loot-core/src/shared/query';
 import { currencyToInteger } from 'loot-core/src/shared/util';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { SvgCheckCircle1 } from '../../icons/v2';
 import { styles, theme } from '../../style';
@@ -13,8 +15,6 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-import { type Query } from 'loot-core/src/shared/query';
-import { AccountEntity } from 'loot-core/types/models';
 
 type ReconcilingMessageProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
