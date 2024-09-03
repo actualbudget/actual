@@ -6,7 +6,7 @@ import React, {
   useMemo,
   type ReactElement,
 } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Navigate, useParams, useLocation } from 'react-router-dom';
 
@@ -597,8 +597,6 @@ class AccountInternal extends PureComponent<
   };
 
   onImport = async () => {
-    const { t } = useTranslation();
-
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
     const categories = await this.props.getCategories();
@@ -629,8 +627,6 @@ class AccountInternal extends PureComponent<
   };
 
   onExport = async (accountName: string) => {
-    const { t } = useTranslation();
-
     const exportedTransactions = await send('transactions-export-query', {
       query: this.currentQuery.serialize(),
     });
@@ -951,8 +947,6 @@ class AccountInternal extends PureComponent<
   };
 
   onCreateReconciliationTransaction = async (diff: number) => {
-    const { t } = useTranslation();
-
     // Create a new reconciliation transaction
     const reconciliationTransactions = realizeTempTransactions([
       {
@@ -979,8 +973,6 @@ class AccountInternal extends PureComponent<
   };
 
   onShowTransactions = async (ids: string[]) => {
-    const { t } = useTranslation();
-
     this.onApplyFilter({
       customName: t('Selected transactions'),
       queryFilter: { id: { $oneof: ids } },
