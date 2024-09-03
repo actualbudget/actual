@@ -105,7 +105,7 @@ export function CoverModal({
           />
           <View>
             <FieldLabel title="Cover from category:" />
-            <TapField onPress={onCategoryClick}>{fromCategory?.name}</TapField>
+            <TapField onClick={onCategoryClick}>{fromCategory?.name}</TapField>
           </View>
 
           <View

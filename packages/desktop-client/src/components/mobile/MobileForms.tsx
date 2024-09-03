@@ -7,9 +7,10 @@ import React, {
 import { css } from 'glamor';
 
 import { theme, styles, type CSSProperties } from '../../style';
-import { Button } from '../common/Button2';
+import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 type FieldLabelProps = {
   title: string;
@@ -35,8 +36,9 @@ export function FieldLabel({ title, flush, style }: FieldLabelProps) {
   );
 }
 
-const defaultStyle = {
-  border: '1px solid ' + theme.formInputBorder,
+const valueStyle = {
+  borderWidth: 1,
+  borderColor: theme.formInputBorder,
   marginLeft: 8,
   marginRight: 8,
   height: styles.mobileMinHeight,
@@ -54,7 +56,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         disabled={disabled}
         onUpdate={onUpdate}
         style={{
-          ...defaultStyle,
+          ...valueStyle,
           ...style,
           color: disabled ? theme.tableTextInactive : theme.tableText,
           backgroundColor: disabled
@@ -69,38 +71,60 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
 
 InputField.displayName = 'InputField';
 
-type TapFieldProps = ComponentPropsWithRef<typeof Button>;
+type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
+  rightContent?: ReactNode;
+};
 
 export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
-  ({ style, ...props }, ref) => {
+  (
+    {
+      value,
+      children,
+      disabled,
+      rightContent,
+      style,
+      textStyle,
+      onClick,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <Button
-        variant="bare"
+        // @ts-expect-error fix this later
+        as={View}
         ref={ref}
-        className={({ isDisabled }) =>
-          String(
-            css({
-              display: 'block',
-              userSelect: 'none',
-              textAlign: 'left',
-              flexDirection: 'row',
-              alignItems: 'center',
-              padding: `0 ${styles.mobileEditingPadding}px`,
-              ...defaultStyle,
-              ...style,
-              backgroundColor: theme.tableBackground,
-              ...(isDisabled && {
-                backgroundColor: theme.formInputTextReadOnlySelection,
-              }),
-              ':active': { opacity: 0.5, boxShadow: 'none' },
-              ':hover': { boxShadow: 'none' },
-            }),
-          )
-        }
+        onClick={!disabled ? onClick : undefined}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          ...style,
+          ...valueStyle,
+          backgroundColor: theme.tableBackground,
+          ...(disabled && {
+            backgroundColor: theme.formInputTextReadOnlySelection,
+          }),
+        }}
         bounce={false}
+        activeStyle={{
+          opacity: 0.5,
+          boxShadow: 'none',
+        }}
+        hoveredStyle={{
+          boxShadow: 'none',
+        }}
         // activeOpacity={0.05}
         {...props}
-      />
+      >
+        {children ? (
+          children
+        ) : (
+          <Text style={{ flex: 1, userSelect: 'none', ...textStyle }}>
+            {value}
+          </Text>
+        )}
+        {!disabled && rightContent}
+      </Button>
     );
   },
 );
