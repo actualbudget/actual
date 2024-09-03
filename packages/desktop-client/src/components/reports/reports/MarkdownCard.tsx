@@ -7,7 +7,8 @@ import { css } from 'glamor';
 
 import { type MarkdownWidget } from 'loot-core/src/types/models';
 
-import { styles } from '../../../style';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
+import { styles, theme } from '../../../style';
 import { Menu } from '../../common/Menu';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -113,9 +114,12 @@ export function MarkdownCard({
               height: '100%',
               border: 0,
               marginTop: 11,
-              marginLeft: -2,
-              marginRight: -2,
+              marginBottom: 11,
+              marginRight: 20,
+              color: theme.formInputText,
+              backgroundColor: theme.tableBackground,
             }}
+            className={NON_DRAGGABLE_AREA_CLASS_NAME}
             autoFocus
             defaultValue={meta.content}
             onBlur={event => {
