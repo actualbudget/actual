@@ -1,8 +1,7 @@
 // @ts-strict-ignore
 import React, { memo, useMemo, useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
 import {
   addNotification,
@@ -176,7 +175,10 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(
       addNotification({
         type: 'error',
-        message: t('Category {{name}} already exists in group (May be Hidden)', { name }),
+        message: t(
+          'Category {{name}} already exists in group (May be Hidden)',
+          { name },
+        ),
       }),
     );
   };

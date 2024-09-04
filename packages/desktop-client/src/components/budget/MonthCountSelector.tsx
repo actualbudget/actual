@@ -1,7 +1,5 @@
 import React from 'react';
-
 import { useTranslation } from 'react-i18next';
-
 import { SvgCalendar } from '../../icons/v2';
 import { theme } from '../../style';
 import { View } from '../common/View';
@@ -66,7 +64,7 @@ export function MonthCountSelector({
           transform: 'scale(1.2)',
         },
       }}
-      title={t("Choose the number of months shown at a time")}
+      title={t('Choose the number of months shown at a time')}
     >
       {calendars}
     </View>

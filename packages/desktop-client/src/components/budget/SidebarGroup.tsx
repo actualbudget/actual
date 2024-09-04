@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useRef, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
-
 import { useTranslation } from 'react-i18next';
+
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
