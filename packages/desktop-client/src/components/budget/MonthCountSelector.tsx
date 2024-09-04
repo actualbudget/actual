@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { SvgCalendar } from '../../icons/v2';
 import { theme } from '../../style';
 import { View } from '../common/View';
