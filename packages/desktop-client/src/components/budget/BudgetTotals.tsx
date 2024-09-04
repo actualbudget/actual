@@ -91,15 +91,15 @@ export const BudgetTotals = memo(function BudgetTotals({
             items={[
               {
                 name: 'toggle-visibility',
-                text: {t('Toggle hidden categories')},
+                text: t('Toggle hidden categories'),
               },
               {
                 name: 'expandAllCategories',
-                text: {t('Expand all')},
+                text: t('Expand all'),
               },
               {
                 name: 'collapseAllCategories',
-                text: {t('Collapse all')},
+                text: t('Collapse all'),
               },
             ]}
           />
