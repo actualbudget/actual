@@ -642,9 +642,9 @@ function UserAccessForFile({
 
   const sortedUsersAccess = [...usersAccess].sort((a, b) => {
     const textA =
-      a.userId === currentUserId ? 'You' : a.displayName ?? a.userName;
+      a.userId === currentUserId ? 'You' : (a.displayName ?? a.userName);
     const textB =
-      b.userId === currentUserId ? 'You' : b.displayName ?? b.userName;
+      b.userId === currentUserId ? 'You' : (b.displayName ?? b.userName);
     return textA.localeCompare(textB);
   });
 
@@ -699,7 +699,7 @@ function UserAccessForFile({
                       >
                         {user.userId === currentUserId
                           ? 'You'
-                          : user.displayName ?? user.userName}
+                          : (user.displayName ?? user.userName)}
                       </View>
                     </View>
                   ))}
