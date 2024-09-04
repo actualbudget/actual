@@ -208,8 +208,8 @@ export function updateRule(rule) {
   return send('api/rule-update', { rule });
 }
 
-export function deleteRule(id) {
-  return send('api/rule-delete', { id });
+export function deleteRule(id: string) {
+  return send('api/rule-delete', id);
 }
 
 export function holdBudgetForNextMonth(month, amount) {

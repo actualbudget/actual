@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { memo, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -12,14 +13,36 @@ import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
-import { CellValue } from '../../spreadsheet/CellValue';
+import { type Binding, type SheetFields } from '../../spreadsheet';
+import { CellValue, type CellValueProps } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
-import { Field, SheetCell } from '../../table';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
+import { Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
+
+export const useReportSheetValue = <
+  FieldName extends SheetFields<'report-budget'>,
+>(
+  binding: Binding<'report-budget', FieldName>,
+) => {
+  return useSheetValue(binding);
+};
+
+const ReportCellValue = <FieldName extends SheetFields<'report-budget'>>(
+  props: CellValueProps<'report-budget', FieldName>,
+) => {
+  return <CellValue {...props} />;
+};
+
+const ReportSheetCell = <FieldName extends SheetFields<'report-budget'>>(
+  props: SheetCellProps<'report-budget', FieldName>,
+) => {
+  return <SheetCell {...props} />;
+};
 
 const headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -39,8 +62,10 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Budgeted</Text>
-        <CellValue
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Budgeted</Trans>
+        </Text>
+        <ReportCellValue
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
           style={{ color: theme.pageTextLight, fontWeight: 600 }}
@@ -50,16 +75,20 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Spent</Text>
-        <CellValue
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Spent</Trans>
+        </Text>
+        <ReportCellValue
           binding={reportBudget.totalSpent}
           type="financial"
           style={{ color: theme.pageTextLight, fontWeight: 600 }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Balance</Text>
-        <CellValue
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Balance</Trans>
+        </Text>
+        <ReportCellValue
           binding={reportBudget.totalLeftover}
           type="financial"
           style={{ color: theme.pageTextLight, fontWeight: 600 }}
@@ -79,10 +108,14 @@ export function IncomeHeaderMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Budgeted</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Budgeted</Trans>
+        </Text>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.pageTextLight }}>Received</Text>
+        <Text style={{ color: theme.pageTextLight }}>
+          <Trans>Received</Trans>
+        </Text>
       </View>
     </View>
   );
@@ -108,7 +141,7 @@ export const GroupMonth = memo(function GroupMonth({
           : theme.budgetHeaderOtherMonth,
       }}
     >
-      <SheetCell
+      <ReportSheetCell
         name="budgeted"
         width="flex"
         textAlign="right"
@@ -118,7 +151,7 @@ export const GroupMonth = memo(function GroupMonth({
           type: 'financial',
         }}
       />
-      <SheetCell
+      <ReportSheetCell
         name="spent"
         width="flex"
         textAlign="right"
@@ -129,7 +162,7 @@ export const GroupMonth = memo(function GroupMonth({
         }}
       />
       {!group.is_income && (
-        <SheetCell
+        <ReportSheetCell
           name="balance"
           width="flex"
           textAlign="right"
@@ -270,7 +303,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             </Popover>
           </View>
         )}
-        <SheetCell
+        <ReportSheetCell
           name="budget"
           exposed={editing}
           focused={editing}
@@ -320,7 +353,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.id, month)}
         >
-          <CellValue
+          <ReportCellValue
             binding={reportBudget.catSumAmount(category.id)}
             type="financial"
             getStyle={makeAmountGrey}

@@ -705,10 +705,8 @@ export type SheetCellProps<
   textAlign?: CSSProperties['textAlign'];
 };
 export function SheetCell<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  SheetName extends SheetNames = any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  FieldName extends SheetFields<SheetName> = any,
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
 >({
   valueProps,
   valueStyle,
@@ -831,7 +829,7 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
   onSelect,
 }: SelectedItemsButtonProps<T>) {
   const selectedItems = useSelectedItems();
-  const [menuOpen, setMenuOpen] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
   if (selectedItems.size === 0) {

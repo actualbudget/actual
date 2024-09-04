@@ -3,13 +3,13 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "24.8.0",
+  "version": "24.9.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
-    "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-html",
-    "copy-static-html": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build",
+    "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-assets",
+    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* appx/**/* build",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
   "main": "build/index.js",
@@ -56,9 +56,32 @@
       "baseVersion": "23.08"
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        {
+          "target": "appx",
+          "arch": [
+            "ia32",
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32",
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "icon": "icons/icon.ico",
-      "artifactName": "${productName}-windows.${ext}"
+      "artifactName": "${productName}-windows-${arch}.${ext}"
+    },
+    "appx": {
+      "identityName": "actualbudget.org.ActualBudget",
+      "publisherDisplayName": "actualbudget.org",
+      "displayName": "Actual Budget",
+      "publisher": "CN=19454997-90E1-4473-879D-96D6A77A6056"
     },
     "npmRebuild": false
   },
@@ -70,13 +93,13 @@
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
-    "@electron/notarize": "2.2.0",
+    "@electron/notarize": "2.4.0",
     "@electron/rebuild": "3.6.0",
     "@types/copyfiles": "^2",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "electron": "30.0.6",
     "electron-builder": "24.13.3",
-    "typescript": "^5.0.2"
+    "typescript": "^5.5.4"
   }
 }

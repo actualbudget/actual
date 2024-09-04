@@ -391,6 +391,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       pushModal('cover', {
         title: category.name,
         month,
+        category: category.id,
         onSubmit: fromCategoryId => {
           onBudgetAction(month, 'cover-overspending', {
             to: category.id,
@@ -1831,7 +1832,7 @@ function BudgetTableHeader({
             <Button
               variant="bare"
               isDisabled={show3Cols}
-              onPress={toggleSpentColumn()}
+              onPress={toggleSpentColumn}
               style={buttonStyle}
             >
               <View style={{ alignItems: 'flex-end' }}>

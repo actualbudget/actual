@@ -1,8 +1,6 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import escapeRegExp from 'lodash/escapeRegExp';
-
 import { pushModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
@@ -191,8 +189,8 @@ export function TransactionList({
   const onNotesTagClick = useCallback(tag => {
     onApplyFilter({
       field: 'notes',
-      op: 'matches',
-      value: `(^|\\s|\\w|#)${escapeRegExp(tag)}($|\\s|#)`,
+      op: 'hasTags',
+      value: tag,
       type: 'string',
     });
   });

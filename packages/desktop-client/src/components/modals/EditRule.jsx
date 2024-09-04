@@ -89,12 +89,12 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={style}>
+    <View style={style} data-testid="field-select">
       <Select
         bare
         options={fields}
         value={value}
-        onChange={value => onChange('field', value)}
+        onChange={onChange}
         buttonStyle={{ color: theme.pageTextPositive }}
       />
     </View>
@@ -116,7 +116,7 @@ export function OpSelect({
       // TODO: Add matches op support for payees, accounts, categories.
       .filter(op =>
         type === 'id'
-          ? !['contains', 'matches', 'doesNotContain'].includes(op)
+          ? !['contains', 'matches', 'doesNotContain', 'hasTags'].includes(op)
           : true,
       )
       .map(op => [op, formatOp(op, type)]);
@@ -129,19 +129,24 @@ export function OpSelect({
   }, [ops, type]);
 
   return (
-    <Select
-      bare
-      options={opOptions}
-      value={value}
-      onChange={value => onChange('op', value)}
-      buttonStyle={style}
-    />
+    <View data-testid="op-select">
+      <Select
+        bare
+        options={opOptions}
+        value={value}
+        onChange={value => onChange('op', value)}
+        buttonStyle={style}
+      />
+    </View>
   );
 }
 
 function SplitAmountMethodSelect({ options, style, value, onChange }) {
   return (
-    <View style={{ color: theme.pageTextPositive, ...style }}>
+    <View
+      style={{ color: theme.pageTextPositive, ...style }}
+      data-testid="field-select"
+    >
       <Select
         bare
         options={options}
@@ -255,7 +260,11 @@ function ConditionEditor({
 
   return (
     <Editor style={editorStyle} error={error}>
-      <FieldSelect fields={conditionFields} value={field} onChange={onChange} />
+      <FieldSelect
+        fields={conditionFields}
+        value={field}
+        onChange={value => onChange('field', value)}
+      />
       <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
       <View style={{ flex: 1 }}>{valueEditor}</View>
@@ -357,18 +366,18 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
 
   return (
     <Editor style={editorStyle} error={error}>
-      {/*<OpSelect ops={ops} value={op} onChange={onChange} />*/}
-
       {op === 'set' ? (
         <>
-          <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
-            {friendlyOp(op)}
-          </View>
+          <OpSelect
+            ops={['set', 'prepend-notes', 'append-notes']}
+            value={op}
+            onChange={onChange}
+          />
 
           <FieldSelect
             fields={options?.splitIndex ? splitActionFields : actionFields}
             value={field}
-            onChange={onChange}
+            onChange={value => onChange('field', value)}
           />
 
           <View style={{ flex: 1 }}>
@@ -422,10 +431,35 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           </View>
           <ScheduleDescription id={value || null} />
         </>
+      ) : op === 'prepend-notes' || op === 'append-notes' ? (
+        <>
+          <OpSelect
+            ops={['set', 'prepend-notes', 'append-notes']}
+            value={op}
+            onChange={onChange}
+          />
+
+          <View style={{ flex: 1 }}>
+            <GenericInput
+              key={inputKey}
+              field={field}
+              type="string"
+              op={op}
+              value={value}
+              onChange={v => onChange('value', v)}
+            />
+          </View>
+        </>
       ) : null}
 
       <Stack direction="row">
-        <EditorButtons onAdd={onAdd} onDelete={op === 'set' && onDelete} />
+        <EditorButtons
+          onAdd={onAdd}
+          onDelete={
+            (op === 'set' || op === 'prepend-notes' || op === 'append-notes') &&
+            onDelete
+          }
+        />
       </Stack>
     </Editor>
   );
@@ -808,7 +842,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
     setStage(stage);
   }
 
-  function onChangeConditionsOp(name, value) {
+  function onChangeConditionsOp(value) {
     setConditionsOp(value);
   }
 
@@ -1067,7 +1101,12 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
                           {actions.map((action, actionIndex) => (
                             <View key={actionIndex}>
                               <ActionEditor
-                                ops={['set', 'link-schedule']}
+                                ops={[
+                                  'set',
+                                  'link-schedule',
+                                  'prepend-notes',
+                                  'append-notes',
+                                ]}
                                 action={action}
                                 editorStyle={editorStyle}
                                 onChange={(name, value) => {

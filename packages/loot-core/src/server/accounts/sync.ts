@@ -54,13 +54,6 @@ function getAccountBalance(account) {
   }
 }
 
-async function updateAccountBalance(id, balance) {
-  await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    amountToInteger(balance),
-    id,
-  ]);
-}
-
 export async function getGoCardlessAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -92,6 +85,7 @@ async function downloadGoCardlessTransactions(
   acctId,
   bankId,
   since,
+  includeBalance = true,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -106,6 +100,7 @@ async function downloadGoCardlessTransactions(
       requisitionId: bankId,
       accountId: acctId,
       startDate: since,
+      includeBalance,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -116,19 +111,27 @@ async function downloadGoCardlessTransactions(
     throw BankSyncError(res.error_type, res.error_code);
   }
 
-  const {
-    transactions: { all },
-    balances,
-    startingBalance,
-  } = res;
+  if (includeBalance) {
+    const {
+      transactions: { all },
+      balances,
+      startingBalance,
+    } = res;
 
-  console.log('Response:', res);
+    console.log('Response:', res);
 
-  return {
-    transactions: all,
-    accountBalance: balances,
-    startingBalance,
-  };
+    return {
+      transactions: all,
+      accountBalance: balances,
+      startingBalance,
+    };
+  } else {
+    console.log('Response:', res);
+
+    return {
+      transactions: res.transactions.all,
+    };
+  }
 }
 
 async function downloadSimpleFinTransactions(acctId, since) {
@@ -272,6 +275,10 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
 
     trans.cleared = Boolean(trans.booked);
 
+    const notes =
+      trans.remittanceInformationUnstructured ||
+      (trans.remittanceInformationUnstructuredArray || []).join(', ');
+
     normalized.push({
       payee_name: trans.payeeName,
       trans: {
@@ -279,9 +286,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         payee: trans.payee,
         account: trans.account,
         date: trans.date,
-        notes:
-          trans.remittanceInformationUnstructured ||
-          (trans.remittanceInformationUnstructuredArray || []).join(', '),
+        notes: notes.trim().replace('#', '##'),
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
@@ -681,6 +686,7 @@ export async function syncAccount(
         acctId,
         bankId,
         startDate,
+        false,
       );
     } else {
       throw new Error(
@@ -688,7 +694,7 @@ export async function syncAccount(
       );
     }
 
-    const { transactions: originalTransactions, accountBalance } = download;
+    const { transactions: originalTransactions } = download;
 
     if (originalTransactions.length === 0) {
       return { added: [], updated: [] };
@@ -706,7 +712,7 @@ export async function syncAccount(
         true,
         useStrictIdChecking,
       );
-      await updateAccountBalance(id, accountBalance);
+
       return result;
     });
   } else {
@@ -724,6 +730,7 @@ export async function syncAccount(
         acctId,
         bankId,
         startingDay,
+        true,
       );
     }
 

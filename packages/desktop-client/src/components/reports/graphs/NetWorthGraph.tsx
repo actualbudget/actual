@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 import {
@@ -15,9 +16,7 @@ import {
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { useResponsive } from '../../../ResponsiveProvider';
-import { theme } from '../../../style';
-import { type CSSProperties } from '../../../style';
+import { theme, type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
@@ -26,15 +25,17 @@ type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
+  showTooltip?: boolean;
 };
 
 export function NetWorthGraph({
   style,
   graphData,
   compact,
+  showTooltip = true,
 }: NetWorthGraphProps) {
+  const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
-  const { isNarrowWidth } = useResponsive();
 
   const tickFormatter = tick => {
     const res = privacyMode
@@ -98,13 +99,19 @@ export function NetWorthGraph({
               <strong>{payload[0].payload.date}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
-              <AlignedText left="Assets:" right={payload[0].payload.assets} />
-              <AlignedText left="Debt:" right={payload[0].payload.debt} />
               <AlignedText
-                left="Net worth:"
+                left={t('Assets:')}
+                right={payload[0].payload.assets}
+              />
+              <AlignedText left={t('Debt:')} right={payload[0].payload.debt} />
+              <AlignedText
+                left={t('Net worth:')}
                 right={<strong>{payload[0].payload.networth}</strong>}
               />
-              <AlignedText left="Change:" right={payload[0].payload.change} />
+              <AlignedText
+                left={t('Change:')}
+                right={payload[0].payload.change}
+              />
             </div>
           </div>
         </div>
@@ -151,7 +158,7 @@ export function NetWorthGraph({
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
                 />
-                {(!isNarrowWidth || !compact) && (
+                {showTooltip && (
                   <Tooltip
                     content={<CustomTooltip />}
                     formatter={numberFormatterTooltip}

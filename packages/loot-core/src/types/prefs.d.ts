@@ -3,11 +3,11 @@ import { type numberFormats } from '../shared/util';
 import { spendingReportTimeType } from './models/reports';
 
 export type FeatureFlag =
+  | 'dashboards'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'spendingReport'
-  | 'simpleFinSync'
-  | 'iterableTopologicalSort';
+  | 'simpleFinSync';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -24,6 +24,7 @@ export type SyncedPrefs = Partial<
     numberFormat: (typeof numberFormats)[number]['value'];
     hideFraction: boolean;
     isPrivacyEnabled: boolean;
+    [key: `show-balances-${string}`]: boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
     [key: `hide-reconciled-${string}`]: boolean;
@@ -31,6 +32,7 @@ export type SyncedPrefs = Partial<
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
     [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
+    [key: `csv-skip-lines-${string}`]: number;
     [key: `csv-has-header-${string}`]: boolean;
     [key: `ofx-fallback-missing-payee-${string}`]: boolean;
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
@@ -87,6 +89,7 @@ export type GlobalPrefs = Partial<{
   keyId?: string;
   theme: Theme;
   documentDir: string; // Electron only
+  serverSelfSignedCert: string; // Electron only
 }>;
 
 export type AuthMethods = 'password' | 'openid';

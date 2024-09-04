@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { type TransactionFilterEntity } from 'loot-core/types/models';
@@ -15,7 +16,7 @@ import { NameFilter } from './NameFilter';
 
 export type SavedFilter = {
   conditions?: RuleConditionEntity[];
-  conditionsOp?: string;
+  conditionsOp?: 'and' | 'or';
   id?: string;
   name: string;
   status?: string;
@@ -30,12 +31,13 @@ export function SavedFilterMenuButton({
   savedFilters,
 }: {
   conditions: RuleConditionEntity[];
-  conditionsOp: string;
+  conditionsOp: 'and' | 'or';
   filterId: SavedFilter;
   onClearFilters: () => void;
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
   savedFilters: TransactionFilterEntity[];
 }) {
+  const { t } = useTranslation();
   const [nameOpen, setNameOpen] = useState(false);
   const [adding, setAdding] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -176,10 +178,12 @@ export function SavedFilterMenuButton({
               flexShrink: 0,
             }}
           >
-            {!filterId.id ? 'Unsaved filter' : filterId.name}&nbsp;
+            {!filterId.id ? t('Unsaved filter') : filterId.name}&nbsp;
           </Text>
           {filterId.id && filterId.status !== 'saved' && (
-            <Text>(modified)&nbsp;</Text>
+            <Text>
+              <Trans>(modified)</Trans>&nbsp;
+            </Text>
           )}
           <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
         </Button>

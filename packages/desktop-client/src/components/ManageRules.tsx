@@ -79,6 +79,11 @@ function ruleToString(rule, data) {
           data.payees.find(p => p.id === schedule._payee),
         ),
       ];
+    } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {
+      return [
+        friendlyOp(action.op),
+        '“' + mapValue(action.field, action.value, data) + '”',
+      ];
     } else {
       return [];
     }

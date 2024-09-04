@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "6.9.0",
+  "version": "6.10.0",
   "license": "MIT",
   "description": "An API for Actual",
   "engines": {
@@ -35,6 +35,6 @@
     "@types/uuid": "^9.0.2",
     "jest": "^27.5.1",
     "tsc-alias": "^1.8.8",
-    "typescript": "^5.0.2"
+    "typescript": "^5.5.4"
   }
 }

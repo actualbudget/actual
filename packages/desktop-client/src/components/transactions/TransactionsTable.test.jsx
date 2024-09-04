@@ -29,7 +29,9 @@ import { ResponsiveProvider } from '../../ResponsiveProvider';
 import { TransactionTable } from './TransactionsTable';
 
 vi.mock('loot-core/src/platform/client/fetch');
-vi.mock('../../hooks/useFeatureFlag', () => vi.fn().mockReturnValue(false));
+vi.mock('../../hooks/useFeatureFlag', () => ({
+  default: vi.fn().mockReturnValue(false),
+}));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [

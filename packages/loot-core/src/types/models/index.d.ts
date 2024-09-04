@@ -1,6 +1,7 @@
 export type * from './account';
 export type * from './category';
 export type * from './category-group';
+export type * from './dashboard';
 export type * from './gocardless';
 export type * from './simplefin';
 export type * from './note';

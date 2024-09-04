@@ -25,6 +25,7 @@ export type RuleConditionOp =
   | 'lte'
   | 'contains'
   | 'doesNotContain'
+  | 'hasTags'
   | 'matches';
 
 type FieldValueTypes = {
@@ -54,8 +55,9 @@ type BaseConditionEntity<
     year?: boolean;
   };
   conditionsOp?: string;
-  type?: 'id' | 'boolean' | 'date' | 'number';
+  type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
+  queryFilter?: Record<string, { $oneof: string[] }>;
 };
 
 export type RuleConditionEntity =
@@ -96,6 +98,7 @@ export type RuleConditionEntity =
       | 'contains'
       | 'doesNotContain'
       | 'matches'
+      | 'hasTags'
     >
   | BaseConditionEntity<
       'payee',
@@ -124,7 +127,9 @@ export type RuleConditionEntity =
 export type RuleActionEntity =
   | SetRuleActionEntity
   | SetSplitAmountRuleActionEntity
-  | LinkScheduleRuleActionEntity;
+  | LinkScheduleRuleActionEntity
+  | PrependNoteRuleActionEntity
+  | AppendNoteRuleActionEntity;
 
 export interface SetRuleActionEntity {
   field: string;
@@ -148,4 +153,14 @@ export interface SetSplitAmountRuleActionEntity {
 export interface LinkScheduleRuleActionEntity {
   op: 'link-schedule';
   value: ScheduleEntity;
+}
+
+export interface PrependNoteRuleActionEntity {
+  op: 'prepend-notes';
+  value: string;
+}
+
+export interface AppendNoteRuleActionEntity {
+  op: 'append-notes';
+  value: string;
 }
