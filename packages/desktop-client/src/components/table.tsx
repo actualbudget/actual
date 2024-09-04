@@ -829,7 +829,7 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
   onSelect,
 }: SelectedItemsButtonProps<T>) {
   const selectedItems = useSelectedItems();
-  const [menuOpen, setMenuOpen] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
   if (selectedItems.size === 0) {

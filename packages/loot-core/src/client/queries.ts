@@ -28,7 +28,7 @@ const accountParametrizedField = parametrizedField<'account'>();
 const rolloverParametrizedField = parametrizedField<'rollover-budget'>();
 const reportParametrizedField = parametrizedField<'report-budget'>();
 
-export function getAccountFilter(accountId: string, field = 'account') {
+export function getAccountFilter(accountId?: string, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
       return {
@@ -64,7 +64,7 @@ export function getAccountFilter(accountId: string, field = 'account') {
   return null;
 }
 
-export function makeTransactionsQuery(accountId: string) {
+export function makeTransactionsQuery(accountId?: string) {
   let query = q('transactions').options({ splits: 'grouped' });
 
   const filter = getAccountFilter(accountId);

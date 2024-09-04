@@ -683,7 +683,7 @@ function PayeeCell({
         );
 
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <>
             <PayeeIcons
               transaction={transaction}
               transferAccount={transferAccount}
@@ -709,7 +709,7 @@ function PayeeCell({
             ) : (
               payeeName
             )}
-          </div>
+          </>
         );
       }}
     >
