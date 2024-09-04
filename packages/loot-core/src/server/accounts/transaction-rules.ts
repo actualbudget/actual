@@ -567,7 +567,7 @@ export async function applyActions(
 }
 
 export function getRulesForPayee(payeeId) {
-  const rules = new Set();
+  const rules = new Set<Rule>();
   iterateIds(getRules(), 'payee', (rule, id) => {
     if (id === payeeId) {
       rules.add(rule);

@@ -2,7 +2,7 @@ import { type ScheduleEntity } from './schedule';
 
 export interface NewRuleEntity {
   stage: string;
-  conditionsOp: 'any' | 'and';
+  conditionsOp: 'or' | 'and';
   conditions: RuleConditionEntity[];
   actions: RuleActionEntity[];
   tombstone?: boolean;
