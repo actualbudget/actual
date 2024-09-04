@@ -9,7 +9,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
@@ -30,7 +29,6 @@ import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
 export function NetWorth() {
-  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const params = useParams();
   const { data: widget, isLoading } = useWidget(params.id);
 
@@ -38,9 +36,7 @@ export function NetWorth() {
     return <LoadingIndicator />;
   }
 
-  return (
-    <NetWorthInner widget={isDashboardsFeatureEnabled ? widget : undefined} />
-  );
+  return <NetWorthInner widget={widget} />;
 }
 
 function NetWorthInner({ widget }) {
