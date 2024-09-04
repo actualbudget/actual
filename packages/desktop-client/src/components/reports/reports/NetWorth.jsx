@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
+import { useWidget } from 'loot-core/src/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -11,6 +13,7 @@ import { useFilters } from '../../../hooks/useFilters';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { theme, styles } from '../../../style';
+import { Button } from '../../common/Button2';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -19,11 +22,24 @@ import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
 import { Header } from '../Header';
+import { LoadingIndicator } from '../LoadingIndicator';
+import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
 export function NetWorth() {
+  const params = useParams();
+  const { data: widget, isLoading } = useWidget(params.id);
+
+  if (isLoading) {
+    return <LoadingIndicator />;
+  }
+
+  return <NetWorthInner widget={widget} />;
+}
+
+function NetWorthInner({ widget }) {
   const accounts = useAccounts();
   const {
     conditions,
@@ -33,19 +49,23 @@ export function NetWorth() {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters();
+  } = useFilters(widget?.meta?.conditions, widget?.meta?.conditionsOp);
 
   const [allMonths, setAllMonths] = useState(null);
-  const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 5),
-  );
-  const [end, setEnd] = useState(monthUtils.currentMonth());
 
-  const params = useMemo(
+  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+    widget?.meta?.timeFrame,
+  );
+  const [isSaving, setIsSaving] = useState(false);
+  const [start, setStart] = useState(initialStart);
+  const [end, setEnd] = useState(initialEnd);
+  const [mode, setMode] = useState(initialMode);
+
+  const reportParams = useMemo(
     () => netWorthSpreadsheet(start, end, accounts, conditions, conditionsOp),
     [start, end, accounts, conditions, conditionsOp],
   );
-  const data = useReport('net_worth', params);
+  const data = useReport('net_worth', reportParams);
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
@@ -75,13 +95,34 @@ export function NetWorth() {
     run();
   }, []);
 
-  function onChangeDates(start, end) {
+  function onChangeDates(start, end, mode) {
     setStart(start);
     setEnd(end);
+    setMode(mode);
+  }
+
+  async function onSaveWidget() {
+    setIsSaving(true);
+    await send('dashboard-update-widget', {
+      id: widget?.id,
+      meta: {
+        ...(widget.meta ?? {}),
+        conditions,
+        conditionsOp,
+        timeFrame: {
+          start,
+          end,
+          mode,
+        },
+      },
+    });
+    setIsSaving(false);
   }
 
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
+
+  const title = widget?.meta?.name ?? 'Net Worth';
 
   if (!allMonths || !data) {
     return null;
@@ -92,13 +133,13 @@ export function NetWorth() {
       header={
         isNarrowWidth ? (
           <MobilePageHeader
-            title="Net Worth"
+            title={title}
             leftContent={
               <MobileBackButton onClick={() => navigate('/reports')} />
             }
           />
         ) : (
-          <PageHeader title="Net Worth" />
+          <PageHeader title={title} />
         )
       }
       padding={0}
@@ -115,7 +156,13 @@ export function NetWorth() {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
-      />
+      >
+        {widget && (
+          <Button variant="primary" isLoading={isSaving} onPress={onSaveWidget}>
+            Save widget
+          </Button>
+        )}
+      </Header>
 
       <View
         style={{

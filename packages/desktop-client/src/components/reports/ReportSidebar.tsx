@@ -3,6 +3,7 @@ import React, { useMemo, useRef, useState, type ComponentProps } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
 import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
+import { type TimeFrame } from 'loot-core/types/models/dashboard';
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
@@ -44,7 +45,11 @@ type ReportSidebarProps = {
   setShowUncategorized: (value: boolean) => void;
   setIncludeCurrentInterval: (value: boolean) => void;
   setSelectedCategories: (value: CategoryEntity[]) => void;
-  onChangeDates: (dateStart: string, dateEnd: string) => void;
+  onChangeDates: (
+    dateStart: string,
+    dateEnd: string,
+    mode: TimeFrame['mode'],
+  ) => void;
   onReportChange: ({
     savedReport,
     type,
@@ -420,6 +425,7 @@ export function ReportSidebar({
               onChangeDates(
                 customReportItems.startDate,
                 customReportItems.endDate,
+                'static',
               );
             }}
           >

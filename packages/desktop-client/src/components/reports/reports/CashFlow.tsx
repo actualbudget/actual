@@ -136,17 +136,9 @@ export function CashFlow() {
         onConditionsOpChange={onConditionsOpChange}
         headerPrefixItems={undefined}
       >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <Button onPress={() => setShowBalance(state => !state)}>
-            {showBalance ? 'Hide balance' : 'Show balance'}
-          </Button>
-        </View>
+        <Button onPress={() => setShowBalance(state => !state)}>
+          {showBalance ? 'Hide balance' : 'Show balance'}
+        </Button>
       </Header>
       <View
         style={{

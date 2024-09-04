@@ -144,7 +144,20 @@ export function Header({
               All Time
             </Button>
           </View>
-          {children || <View style={{ flex: 1 }} />}
+
+          {children ? (
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+              }}
+            >
+              {children}
+            </View>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
         </View>
       )}
       {filters && filters.length > 0 && (
