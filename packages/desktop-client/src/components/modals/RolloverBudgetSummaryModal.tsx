@@ -23,10 +23,11 @@ export function RolloverBudgetSummaryModal({
 }: RolloverBudgetSummaryModalProps) {
   const dispatch = useDispatch();
   const prevMonthName = format(prevMonth(month), 'MMM');
-  const sheetValue = useRolloverSheetValue({
-    name: rolloverBudget.toBudget,
-    value: 0,
-  });
+  const sheetValue =
+    useRolloverSheetValue({
+      name: rolloverBudget.toBudget,
+      value: 0,
+    }) ?? 0;
 
   const openTransferAvailableModal = () => {
     dispatch(

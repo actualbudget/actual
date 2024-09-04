@@ -5,13 +5,26 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 import { useSheetName } from './useSheetName';
 
-import { type Binding } from '.';
+import {
+  type Spreadsheets,
+  type SheetFields,
+  type SheetNames,
+  type Binding,
+} from '.';
 
-export function useSheetValue(binding: Binding, onChange?: (result) => void) {
+export function useSheetValue<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+>(
+  binding: Binding<SheetName, FieldName>,
+  onChange?: (result) => void,
+): Spreadsheets[SheetName][FieldName] {
   const { sheetName, fullSheetName } = useSheetName(binding);
 
   const bindingObj =
-    typeof binding === 'string' ? { name: binding, value: null } : binding;
+    typeof binding === 'string'
+      ? { name: binding, value: null, query: undefined }
+      : binding;
 
   const spreadsheet = useSpreadsheet();
   const [result, setResult] = useState({

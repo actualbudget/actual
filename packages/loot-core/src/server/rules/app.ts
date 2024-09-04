@@ -56,13 +56,15 @@ function validateRule(rule: Partial<RuleEntity>) {
         )
       : action.op === 'link-schedule'
         ? new Action(action.op, null, action.value, null, ruleFieldTypes)
-        : new Action(
-            action.op,
-            action.field,
-            action.value,
-            action.options,
-            ruleFieldTypes,
-          ),
+        : action.op === 'prepend-notes' || action.op === 'append-notes'
+          ? new Action(action.op, null, action.value, null, ruleFieldTypes)
+          : new Action(
+              action.op,
+              action.field,
+              action.value,
+              action.options,
+              ruleFieldTypes,
+            ),
   );
 
   if (conditionErrors || actionErrors) {
@@ -111,8 +113,8 @@ app.method(
 
 app.method(
   'rule-delete',
-  mutator(async function (rule) {
-    return rules.deleteRule(rule);
+  mutator(async function (id) {
+    return rules.deleteRule(id);
   }),
 );
 
@@ -123,7 +125,7 @@ app.method(
 
     await batchMessages(async () => {
       for (const id of ids) {
-        const res = await rules.deleteRule({ id });
+        const res = await rules.deleteRule(id);
         if (res === false) {
           someDeletionsFailed = true;
         }

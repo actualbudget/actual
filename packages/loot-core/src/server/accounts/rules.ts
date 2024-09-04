@@ -35,6 +35,7 @@ function parseRecurDate(desc) {
 
     return {
       type: 'recur',
+      // @ts-expect-error fix me
       schedule: new RSchedule({
         rrules: rules,
         data: {
@@ -154,6 +155,7 @@ const CONDITION_TYPES = {
       'isNot',
       'doesNotContain',
       'notOneOf',
+      'hasTags',
     ],
     nullable: true,
     parse(op, value, fieldName) {
@@ -168,11 +170,50 @@ const CONDITION_TYPES = {
         return value.filter(Boolean).map(val => val.toLowerCase());
       }
 
-      if (op === 'contains' || op === 'matches' || op === 'doesNotContain') {
+      if (
+        op === 'contains' ||
+        op === 'matches' ||
+        op === 'doesNotContain' ||
+        op === 'hasTags'
+      ) {
         assert(
           typeof value === 'string' && value.length > 0,
           'no-empty-string',
           `contains must have non-empty string (field: ${fieldName})`,
+        );
+      }
+
+      return value.toLowerCase();
+    },
+  },
+  imported_payee: {
+    ops: [
+      'is',
+      'contains',
+      'matches',
+      'oneOf',
+      'isNot',
+      'doesNotContain',
+      'notOneOf',
+    ],
+    nullable: true,
+    parse(op, value, fieldName) {
+      if (op === 'oneOf' || op === 'notOneOf') {
+        assert(
+          Array.isArray(value),
+          'no-empty-array',
+          `${op} must have an array value (field: ${fieldName}): ${JSON.stringify(
+            value,
+          )}`,
+        );
+        return value.filter(Boolean).map(val => val.toLowerCase());
+      }
+
+      if (op === 'contains' || op === 'matches' || op === 'doesNotContain') {
+        assert(
+          typeof value === 'string' && value.length > 0,
+          'no-empty-string',
+          `${op} must have non-empty string (field: ${fieldName})`,
         );
       }
 
@@ -378,6 +419,13 @@ export class Condition {
           return false;
         }
         return this.value.indexOf(fieldValue) !== -1;
+
+      case 'hasTags':
+        if (fieldValue === null) {
+          return false;
+        }
+        return fieldValue.indexOf(this.value) !== -1;
+
       case 'notOneOf':
         if (fieldValue === null) {
           return false;
@@ -419,6 +467,16 @@ export class Condition {
           );
         }
         return fieldValue <= extractValue(this.value);
+      case 'matches':
+        if (fieldValue === null) {
+          return false;
+        }
+        try {
+          return new RegExp(this.value).test(fieldValue);
+        } catch (e) {
+          console.log('invalid regexp in matches condition', e);
+          return false;
+        }
       default:
     }
 
@@ -440,7 +498,13 @@ export class Condition {
   }
 }
 
-const ACTION_OPS = ['set', 'set-split-amount', 'link-schedule'] as const;
+const ACTION_OPS = [
+  'set',
+  'set-split-amount',
+  'link-schedule',
+  'prepend-notes',
+  'append-notes',
+] as const;
 type ActionOperator = (typeof ACTION_OPS)[number];
 
 export class Action {
@@ -469,6 +533,9 @@ export class Action {
     } else if (op === 'link-schedule') {
       this.field = null;
       this.type = 'id';
+    } else if (op === 'prepend-notes' || op === 'append-notes') {
+      this.field = 'notes';
+      this.type = 'id';
     }
 
     if (field === 'account') {
@@ -496,6 +563,16 @@ export class Action {
         break;
       case 'link-schedule':
         object.schedule = this.value;
+        break;
+      case 'prepend-notes':
+        object[this.field] = object[this.field]
+          ? this.value + object[this.field]
+          : this.value;
+        break;
+      case 'append-notes':
+        object[this.field] = object[this.field]
+          ? object[this.field] + this.value
+          : this.value;
         break;
       default:
     }
@@ -833,6 +910,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   contains: 0,
   doesNotContain: 0,
   matches: 0,
+  hasTags: 0,
 };
 
 function computeScore(rule) {

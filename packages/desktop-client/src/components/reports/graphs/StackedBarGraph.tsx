@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
 import {
@@ -27,9 +28,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { useResponsive } from '../../../ResponsiveProvider';
-import { theme } from '../../../style';
-import { type CSSProperties } from '../../../style';
+import { theme, type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Container } from '../Container';
 import { getCustomTick } from '../getCustomTick';
@@ -63,6 +62,7 @@ const CustomTooltip = ({
   payload,
   label,
 }: CustomTooltipProps) => {
+  const { t } = useTranslation();
   if (active && payload && payload.length) {
     let sumTotals = 0;
     return (
@@ -105,7 +105,7 @@ const CustomTooltip = ({
               })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
-              left="Total"
+              left={t('Total')}
               right={amountToCurrency(sumTotals)}
               style={{
                 fontWeight: 600,
@@ -171,7 +171,6 @@ export function StackedBarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
-  const { isNarrowWidth } = useResponsive();
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
@@ -257,7 +256,7 @@ export function StackedBarGraph({
                         }
                       }}
                       onClick={e =>
-                        !isNarrowWidth &&
+                        ((compact && showTooltip) || !compact) &&
                         !['Group', 'Interval'].includes(groupBy) &&
                         showActivity({
                           navigate,

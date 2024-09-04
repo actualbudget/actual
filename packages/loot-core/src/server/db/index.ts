@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
+import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
 import {
   CategoryEntity,
@@ -27,6 +28,7 @@ import {
   convertFromSelect,
 } from '../aql';
 import {
+  toDateRepr,
   accountModel,
   categoryModel,
   categoryGroupModel,
@@ -239,6 +241,13 @@ export async function delete_(table, id) {
       timestamp: Timestamp.send(),
     },
   ]);
+}
+
+export async function deleteAll(table: string) {
+  const rows: Array<{ id: string }> = await all(`
+    SELECT id FROM ${table} WHERE tombstone = 0
+  `);
+  await Promise.all(rows.map(({ id }) => delete_(table, id)));
 }
 
 export async function selectWithSchema(table, sql, params) {
@@ -537,18 +546,21 @@ export function getPayees() {
 }
 
 export function getCommonPayees() {
-  const threeMonthsAgo = '20240201';
+  const twelveWeeksAgo = toDateRepr(
+    monthUtils.subWeeks(monthUtils.currentDate(), 12),
+  );
   const limit = 10;
   return all(`
-    SELECT 	p.id as id, p.name as name, p.favorite as favorite, 
+    SELECT     p.id as id, p.name as name, p.favorite as favorite,
       p.category as category, TRUE as common, NULL as transfer_acct,
     count(*) as c, 
     max(t.date) as latest
     FROM payees p
-    LEFT JOIN v_transactions t on t.payee == p.id
+    LEFT JOIN v_transactions_internal_alive t on t.payee == p.id
     WHERE LENGTH(p.name) > 0
+    AND p.tombstone = 0
+    AND t.date > ${twelveWeeksAgo}
     GROUP BY p.id
-    HAVING latest > ${threeMonthsAgo}
     ORDER BY c DESC ,p.transfer_acct IS NULL DESC, p.name 
     COLLATE NOCASE
     LIMIT ${limit}

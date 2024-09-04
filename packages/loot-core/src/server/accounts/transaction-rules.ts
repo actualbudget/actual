@@ -223,16 +223,17 @@ export async function updateRule(rule) {
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
-export async function deleteRule<T extends { id: string }>(rule: T) {
+export async function deleteRule(id: string) {
   const schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
-    rule.id,
+    id,
   ]);
 
   if (schedule) {
     return false;
   }
 
-  return db.delete_('rules', rule.id);
+  await db.delete_('rules', id);
+  return true;
 }
 
 // Sync projections
@@ -471,6 +472,19 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           return { id: null };
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
+
+      case 'hasTags':
+        const tagValues = value
+          .split(/(?<!#)(#[\w\d\p{Emoji}-]+)(?=\s|$)/gu)
+          .filter(tag => tag.startsWith('#'));
+
+        return {
+          $and: tagValues.map(v => {
+            const regex = new RegExp(`(^|\\s)${v}(\\s|$)`);
+            return apply(field, '$regexp', regex.source);
+          }),
+        };
+
       case 'notOneOf':
         const notValues = value;
         if (notValues.length === 0) {
@@ -518,6 +532,11 @@ export async function applyActions(
             FIELD_TYPES,
           );
         } else if (action.op === 'link-schedule') {
+          return new Action(action.op, null, action.value, null, FIELD_TYPES);
+        } else if (
+          action.op === 'prepend-notes' ||
+          action.op === 'append-notes'
+        ) {
           return new Action(action.op, null, action.value, null, FIELD_TYPES);
         }
 

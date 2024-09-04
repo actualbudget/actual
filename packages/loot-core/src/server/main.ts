@@ -1,5 +1,8 @@
 // @ts-strict-ignore
 import './polyfills';
+import https from 'https';
+import tls from 'tls';
+
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
@@ -39,6 +42,7 @@ import {
 import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
 import * as cloudStorage from './cloud-storage';
+import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
@@ -1121,11 +1125,10 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
               'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
             internal: err.stack,
           });
-
-          err.message = 'Failed syncing account: ' + err.message;
-
-          captureException(err);
         }
+
+        err.message = 'Failed syncing account “' + acct.name + '.”';
+        captureException(err);
       } finally {
         console.groupEnd();
       }
@@ -1252,6 +1255,12 @@ handlers['save-global-prefs'] = async function (prefs) {
   }
   if ('theme' in prefs) {
     await asyncStorage.setItem('theme', prefs.theme);
+  }
+  if ('serverSelfSignedCert' in prefs) {
+    await asyncStorage.setItem(
+      'server-self-signed-cert',
+      prefs.serverSelfSignedCert,
+    );
   }
   return 'ok';
 };
@@ -2115,6 +2124,7 @@ app.handlers = handlers;
 app.combine(
   schedulesApp,
   budgetApp,
+  dashboardApp,
   notesApp,
   toolsApp,
   filtersApp,
@@ -2182,6 +2192,23 @@ export async function initApp(isDev, socketName) {
     } catch (e) {
       console.log('Error loading key', e);
       throw new Error('load-key-error');
+    }
+  }
+
+  const selfSignedCertPath = await asyncStorage.getItem(
+    'server-self-signed-cert',
+  );
+
+  if (selfSignedCertPath) {
+    try {
+      const selfSignedCert = await fs.readFile(selfSignedCertPath);
+      https.globalAgent.options.ca = [...tls.rootCertificates, selfSignedCert];
+    } catch (error) {
+      console.error(
+        'Unable to add the self signed certificate, removing its reference',
+        error,
+      );
+      await asyncStorage.removeItem('server-self-signed-cert');
     }
   }
 

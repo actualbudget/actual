@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "24.8.0",
+  "version": "24.9.0",
   "license": "MIT",
   "files": [
     "build"
@@ -20,10 +20,12 @@
     "@swc/plugin-react-remove-properties": "^1.5.121",
     "@testing-library/react": "14.1.2",
     "@testing-library/user-event": "14.5.2",
+    "@types/debounce": "^1.2.4",
     "@types/lodash": "^4",
     "@types/promise-retry": "^1.1.6",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.1",
+    "@types/react-grid-layout": "^1",
     "@types/react-modal": "^3.16.0",
     "@types/react-redux": "^7.1.25",
     "@types/uuid": "^9.0.2",
@@ -58,6 +60,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.2.0",
     "react-error-boundary": "^4.0.12",
+    "react-grid-layout": "^1.4.4",
     "react-hotkeys-hook": "^4.5.0",
     "react-i18next": "^14.1.2",
     "react-markdown": "^8.0.7",
