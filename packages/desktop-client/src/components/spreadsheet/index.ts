@@ -8,6 +8,7 @@ export type Spreadsheets = {
 
     // Account fields
     balance: number;
+    [key: `balance-${string}-cleared`]: number | null;
     'accounts-balance': number;
     'budgeted-accounts-balance': number;
     'offbudget-accounts-balance': number;
@@ -61,6 +62,14 @@ export type Spreadsheets = {
     carryover: number;
     goal: number;
     'long-goal': number;
+  };
+  [`balance`]: {
+    // Common fields
+    'uncategorized-amount': number;
+    'uncategorized-balance': number;
+
+    // Balance fields
+    [key: `balance-query-${string}-cleared`]: number;
   };
 };
 
