@@ -229,9 +229,18 @@ function renderTransactions(extraProps) {
 }
 
 function queryNewField(container, name, subSelector = '', idx = 0) {
-  const field = container.querySelectorAll(
-    `[data-testid="new-transaction"] [data-testid="${name}"]:not([data-header])`,
-  )[idx];
+  const selectedNodes = container.querySelectorAll(
+    `[data-testid="new-transaction"] [data-testid="${name}"]`,
+  );
+
+  let i=0;
+  for(i=0;i<selectedNodes.length;i++) {
+    if(!selectedNodes[i].parentNode.querySelector('[data-header]'))
+      break;
+  }
+
+  const field = selectedNodes[idx + i];
+
   if (subSelector !== '') {
     return field.querySelector(subSelector);
   }
@@ -239,9 +248,21 @@ function queryNewField(container, name, subSelector = '', idx = 0) {
 }
 
 function queryField(container, name, subSelector = '', idx) {
-  const field = container.querySelectorAll(
-    `[data-testid="transaction-table"] [data-testid="${name}"]:not([data-header])`,
-  )[idx];
+  //why not?
+  //`[data-testid="transaction-table"] [data-testid="${name}"]:not([data-header])`
+  //when using :not, the rows gets out of order. this way we keep the order
+  const selectedNodes = container.querySelectorAll(
+    `[data-testid="transaction-table"] [data-testid="${name}"]`,
+  );
+
+  let i=0;
+  for(i=0;i<selectedNodes.length;i++) {
+    if(!selectedNodes[i].parentNode.querySelector('[data-header]'))
+      break;
+  }
+
+  const field = selectedNodes[idx + i];
+
   if (subSelector !== '') {
     return field.querySelector(subSelector);
   }
