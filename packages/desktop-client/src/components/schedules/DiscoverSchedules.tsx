@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -35,6 +36,8 @@ function DiscoverSchedulesTable({
   schedules: DiscoverScheduleEntity[];
   loading: boolean;
 }) {
+  const { t } = useTranslation();
+
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -107,13 +110,17 @@ function DiscoverSchedulesTable({
             dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
           }
         />
-        <Field width="flex">Payee</Field>
-        <Field width="flex">Account</Field>
+        <Field width="flex">
+          <Trans>Payee</Trans>
+        </Field>
+        <Field width="flex">
+          <Trans>Account</Trans>
+        </Field>
         <Field width="auto" style={{ flex: 1.5 }}>
-          When
+          <Trans>When</Trans>
         </Field>
         <Field width={100} style={{ textAlign: 'right' }}>
-          Amount
+          <Trans>Amount</Trans>
         </Field>
       </TableHeader>
       <Table
@@ -126,13 +133,15 @@ function DiscoverSchedulesTable({
         loading={loading}
         isSelected={id => selectedItems.has(String(id))}
         renderItem={renderItem}
-        renderEmpty="No schedules found"
+        renderEmpty={t('No schedules found')}
       />
     </View>
   );
 }
 
 export function DiscoverSchedules() {
+  const { t } = useTranslation();
+
   const { data, isLoading } = useSendPlatformRequest('schedule/discover');
 
   const schedules = data || [];
@@ -185,18 +194,22 @@ export function DiscoverSchedules() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Found Schedules"
+            title={t('Found Schedules')}
             rightContent={<ModalCloseButton onClick={close} />}
           />
           <Paragraph>
-            We found some possible schedules in your current transactions.
-            Select the ones you want to create.
+            <Trans>
+              We found some possible schedules in your current transactions.
+              Select the ones you want to create.
+            </Trans>
           </Paragraph>
           <Paragraph>
-            If you expected a schedule here and don’t see it, it might be
-            because the payees of the transactions don’t match. Make sure you
-            rename payees on all transactions for a schedule to be the same
-            payee.
+            <Trans>
+              If you expected a schedule here and don’t see it, it might be
+              because the payees of the transactions don’t match. Make sure you
+              rename payees on all transactions for a schedule to be the same
+              payee.
+            </Trans>
           </Paragraph>
 
           <SelectedProvider instance={selectedInst}>
@@ -221,7 +234,7 @@ export function DiscoverSchedules() {
                 close();
               }}
             >
-              Create schedules
+              <Trans>Create schedules</Trans>
             </ButtonWithLoading>
           </Stack>
         </>

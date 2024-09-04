@@ -48,7 +48,7 @@ type SelectAllAction = {
   isRangeSelect?: boolean;
 };
 
-type Actions = SelectAction | SelectNoneAction | SelectAllAction;
+export type Actions = SelectAction | SelectNoneAction | SelectAllAction;
 
 export function useSelected<T extends Item>(
   name: string,
@@ -310,7 +310,7 @@ export function SelectedProvider<T extends Item>({
 type SelectedProviderWithItemsProps<T extends Item> = {
   name: string;
   items: T[];
-  initialSelectedIds: string[];
+  initialSelectedIds?: string[];
   fetchAllIds: () => Promise<string[]>;
   registerDispatch?: (dispatch: Dispatch<Actions>) => void;
   selectAllFilter?: (item: T) => boolean;
@@ -322,7 +322,7 @@ type SelectedProviderWithItemsProps<T extends Item> = {
 export function SelectedProviderWithItems<T extends Item>({
   name,
   items,
-  initialSelectedIds,
+  initialSelectedIds = [],
   fetchAllIds,
   registerDispatch,
   selectAllFilter,
