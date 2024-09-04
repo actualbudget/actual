@@ -29,7 +29,7 @@ test.describe('Accounts', () => {
       balance: 100,
     });
 
-    const transaction = accountPage.getNthTransaction(0);
+    const transaction = accountPage.getNthTransaction(1); //jump header line
     await expect(transaction.payee).toHaveText('Starting Balance');
     await expect(transaction.notes).toHaveText('');
     await expect(transaction.category).toHaveText('Starting Balances');
@@ -86,13 +86,13 @@ test.describe('Accounts', () => {
       await accountPage.selectNthTransaction(1);
       await accountPage.clickSelectAction('Make transfer');
 
-      let transaction = accountPage.getNthTransaction(0);
+      let transaction = accountPage.getNthTransaction(1); //jump header line
       await expect(transaction.payee).toHaveText('Ally Savings');
       await expect(transaction.category).toHaveText('Transfer');
       await expect(transaction.credit).toHaveText('34.56');
       await expect(transaction.account).toHaveText('HSBC');
 
-      transaction = accountPage.getNthTransaction(1);
+      transaction = accountPage.getNthTransaction(2);
       await expect(transaction.payee).toHaveText('HSBC');
       await expect(transaction.category).toHaveText('Transfer');
       await expect(transaction.debit).toHaveText('34.56');

@@ -67,9 +67,6 @@ test.describe('Transactions', () => {
       await filterTooltip.applyButton.click();
 
       // Assert that there are only clothing transactions
-      await expect(accountPage.getNthTransaction(0).category).toHaveText(
-        'Clothing',
-      );
       await expect(accountPage.getNthTransaction(1).category).toHaveText(
         'Clothing',
       );
@@ -80,6 +77,9 @@ test.describe('Transactions', () => {
         'Clothing',
       );
       await expect(accountPage.getNthTransaction(4).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(5).category).toHaveText(
         'Clothing',
       );
       await expect(page).toMatchThemeScreenshots();
@@ -94,7 +94,7 @@ test.describe('Transactions', () => {
       debit: '12.34',
     });
 
-    const transaction = accountPage.getNthTransaction(0);
+    const transaction = accountPage.getNthTransaction(1); //jump header line
     await expect(transaction.payee).toHaveText('Home Depot');
     await expect(transaction.notes).toHaveText('Notes field');
     await expect(transaction.category).toHaveText('Food');
@@ -119,21 +119,21 @@ test.describe('Transactions', () => {
       },
     ]);
 
-    const firstTransaction = accountPage.getNthTransaction(0);
+    const firstTransaction = accountPage.getNthTransaction(1); //jump header line
     await expect(firstTransaction.payee).toHaveText('Krogger');
     await expect(firstTransaction.notes).toHaveText('Notes');
     await expect(firstTransaction.category).toHaveText('Split');
     await expect(firstTransaction.debit).toHaveText('333.33');
     await expect(firstTransaction.credit).toHaveText('');
 
-    const secondTransaction = accountPage.getNthTransaction(1);
+    const secondTransaction = accountPage.getNthTransaction(2);
     await expect(secondTransaction.payee).toHaveText('Krogger');
     await expect(secondTransaction.notes).toHaveText('');
     await expect(secondTransaction.category).toHaveText('General');
     await expect(secondTransaction.debit).toHaveText('222.22');
     await expect(secondTransaction.credit).toHaveText('');
 
-    const thirdTransaction = accountPage.getNthTransaction(2);
+    const thirdTransaction = accountPage.getNthTransaction(3);
     await expect(thirdTransaction.payee).toHaveText('Krogger');
     await expect(thirdTransaction.notes).toHaveText('');
     await expect(thirdTransaction.category).toHaveText('Categorize');
@@ -155,7 +155,7 @@ test.describe('Transactions', () => {
 
     await accountPage.addEnteredTransaction();
 
-    transaction = accountPage.getNthTransaction(0);
+    transaction = accountPage.getNthTransaction(1); //jump header line
     await expect(transaction.payee).toHaveText('Bank of America');
     await expect(transaction.notes).toHaveText('Notes field');
     await expect(transaction.category).toHaveText('Transfer');

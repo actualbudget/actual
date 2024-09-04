@@ -61,7 +61,7 @@ test.describe('Rules', () => {
       debit: '12.34',
     });
 
-    const transaction = accountPage.getNthTransaction(0);
+    const transaction = accountPage.getNthTransaction(1); //jump header line
     await expect(transaction.payee).toHaveText('Fast Internet');
     await expect(transaction.category).toHaveText('General');
     await expect(transaction.debit).toHaveText('12.34');
@@ -118,19 +118,19 @@ test.describe('Rules', () => {
       payee: 'Ikea',
     });
 
-    const transaction = accountPage.getNthTransaction(0);
+    const transaction = accountPage.getNthTransaction(1); //jump header line
     await expect(transaction.payee).toHaveText('Ikea');
     await expect(transaction.notes).toHaveText('food / entertainment');
     await expect(transaction.category).toHaveText('Split');
     await expect(transaction.debit).toHaveText('100.00');
     await expect(page).toMatchThemeScreenshots();
 
-    const firstSplitTransaction = accountPage.getNthTransaction(1);
+    const firstSplitTransaction = accountPage.getNthTransaction(2);
     await expect(firstSplitTransaction.payee).toHaveText('Ikea');
     await expect(firstSplitTransaction.debit).toHaveText('90.00');
     await expect(firstSplitTransaction.category).toHaveText('Entertainment');
 
-    const secondSplitTransaction = accountPage.getNthTransaction(2);
+    const secondSplitTransaction = accountPage.getNthTransaction(3);
     await expect(secondSplitTransaction.payee).toHaveText('Ikea');
     await expect(secondSplitTransaction.debit).toHaveText('10.00');
     await expect(secondSplitTransaction.category).toHaveText('Food');

@@ -52,7 +52,7 @@ test.describe('Schedules', () => {
 
     // Go to transactions page
     const accountPage = await navigation.goToAccountPage('HSBC');
-    const transaction = accountPage.getNthTransaction(0);
+    const transaction = accountPage.getNthTransaction(1); //jump header line
     await expect(transaction.payee).toHaveText('Home Depot');
     await expect(transaction.category).toHaveText('Categorize');
     await expect(transaction.debit).toHaveText('25.00');
