@@ -209,6 +209,7 @@ const TransactionHeader = memo(
     return (
       <Row
         ref={rowRef}
+        testId='row-header'
         style={{
           fontWeight: 300,
           zIndex: 200,

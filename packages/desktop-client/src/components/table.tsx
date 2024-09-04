@@ -300,9 +300,11 @@ export const Cell = forwardRef<HTMLDivElement, CellProps>(function Cell(
 type RowProps = ComponentProps<typeof View> & {
   inset?: number;
   collapsed?: boolean;
+  testId?: string;
 };
+
 export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
-  { inset = 0, collapsed, children, height, style, ...nativeProps },
+  { inset = 0, collapsed, children, height, style, testId, ...nativeProps },
   ref,
 ) {
   return (
@@ -316,7 +318,7 @@ export const Row = forwardRef<HTMLDivElement, RowProps>(function Row(
         ...(collapsed && { marginTop: -1 }),
         ...style,
       }}
-      data-testid="row"
+      data-testid={testId ?? "row"}
       {...nativeProps}
     >
       {inset !== 0 && <Field width={inset} />}
@@ -813,6 +815,7 @@ export function TableHeader({
     >
       <Row
         collapsed={true}
+        testId='row-header'
         {...rowProps}
         style={{
           color: theme.tableHeaderText,
