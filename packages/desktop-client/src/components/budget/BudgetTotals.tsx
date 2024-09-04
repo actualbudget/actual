@@ -60,7 +60,7 @@ export const BudgetTotals = memo(function BudgetTotals({
         <Button
           ref={triggerRef}
           variant="bare"
-          aria-label="Menu"
+          aria-label={t('Menu')}
           onPress={() => setMenuOpen(true)}
           style={{ color: 'currentColor', padding: 3 }}
         >
