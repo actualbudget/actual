@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, type Ref, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
