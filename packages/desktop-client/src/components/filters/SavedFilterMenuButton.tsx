@@ -16,7 +16,7 @@ import { NameFilter } from './NameFilter';
 
 export type SavedFilter = {
   conditions?: RuleConditionEntity[];
-  conditionsOp?: string;
+  conditionsOp?: 'and' | 'or';
   id?: string;
   name: string;
   status?: string;
@@ -31,7 +31,7 @@ export function SavedFilterMenuButton({
   savedFilters,
 }: {
   conditions: RuleConditionEntity[];
-  conditionsOp: string;
+  conditionsOp: 'and' | 'or';
   filterId: SavedFilter;
   onClearFilters: () => void;
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;

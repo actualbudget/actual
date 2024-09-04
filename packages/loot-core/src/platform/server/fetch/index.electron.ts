@@ -1,4 +1,4 @@
-// // @ts-strict-ignore
+// @ts-strict-ignore
 import nodeFetch from 'node-fetch';
 
 export const fetch = (input: RequestInfo | URL, options?: RequestInit) => {

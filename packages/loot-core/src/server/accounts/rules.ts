@@ -89,7 +89,6 @@ function parseRecurDate(desc) {
 
     return {
       type: 'recur',
-      // @ts-expect-error fix me
       schedule: new RSchedule({
         rrules: rules,
         data: {

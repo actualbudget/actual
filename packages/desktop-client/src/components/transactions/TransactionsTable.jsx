@@ -683,7 +683,7 @@ function PayeeCell({
         );
 
         return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <>
             <PayeeIcons
               transaction={transaction}
               transferAccount={transferAccount}
@@ -709,7 +709,7 @@ function PayeeCell({
             ) : (
               payeeName
             )}
-          </div>
+          </>
         );
       }}
     >
@@ -1240,7 +1240,9 @@ const Transaction = memo(function Transaction({
           focused={focusedField === 'payee'}
           /* Filter out the account we're currently in as it is not a valid transfer */
           accounts={accounts.filter(account => account.id !== accountId)}
-          payees={payees.filter(payee => payee.transfer_acct !== accountId)}
+          payees={payees.filter(
+            payee => !payee.transfer_acct || payee.transfer_acct !== accountId,
+          )}
           valueStyle={valueStyle}
           transaction={transaction}
           subtransactions={subtransactions}
