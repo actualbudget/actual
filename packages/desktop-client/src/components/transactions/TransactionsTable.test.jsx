@@ -233,10 +233,11 @@ function queryNewField(container, name, subSelector = '', idx = 0) {
     `[data-testid="new-transaction"] [data-testid="${name}"]`,
   );
 
-  let i=0;
-  for(i=0;i<selectedNodes.length;i++) {
-    if(!selectedNodes[i].parentNode.querySelector('[data-header]'))
+  let i = 0;
+  for (i = 0; i < selectedNodes.length; i++) {
+    if (!selectedNodes[i].parentNode.querySelector('[data-header]')) {
       break;
+    }
   }
 
   const field = selectedNodes[idx + i];
@@ -255,10 +256,11 @@ function queryField(container, name, subSelector = '', idx) {
     `[data-testid="transaction-table"] [data-testid="${name}"]`,
   );
 
-  let i=0;
-  for(i=0;i<selectedNodes.length;i++) {
-    if(!selectedNodes[i].parentNode.querySelector('[data-header]'))
+  let i = 0;
+  for (i = 0; i < selectedNodes.length; i++) {
+    if (!selectedNodes[i].parentNode.querySelector('[data-header]')) {
       break;
+    }
   }
 
   const field = selectedNodes[idx + i];
