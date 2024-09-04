@@ -41,6 +41,6 @@ Then you are in luck. We have guides for the following systems:
 
 There is also an external guide explaining how to install Actual on:
 
-* [Synlogoy NAS](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/) by Mariushosting.
+* [Synology NAS](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/) by Mariushosting.
 * [Home Assistant](https://github.com/sztupy/hassio-actualbudget) by Zsolt Sz. Sztupák.
 
