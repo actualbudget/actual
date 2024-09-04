@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, type Ref, useRef, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
@@ -45,6 +47,8 @@ export function SidebarCategory({
   onDelete,
   onHideNewCategory,
 }: SidebarCategoryProps) {
+  const { t } = useTranslation();
+
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -179,7 +183,7 @@ export function SidebarCategory({
         onBlur={() => onEditName(null)}
         style={{ paddingLeft: 13, ...(isLast && { borderBottomWidth: 0 }) }}
         inputProps={{
-          placeholder: temporary ? 'New Category Name' : '',
+          placeholder: temporary ? t('New Category Name') : '',
         }}
       />
     </View>
