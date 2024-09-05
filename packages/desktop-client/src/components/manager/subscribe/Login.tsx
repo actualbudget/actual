@@ -19,7 +19,6 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
-import { Bootstrap } from './Bootstrap';
 import { useBootstrapped, Title } from './common';
 import { OpenIdForm } from './OpenIdForm';
 
