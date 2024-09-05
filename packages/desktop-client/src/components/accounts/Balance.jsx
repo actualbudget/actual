@@ -15,7 +15,7 @@ import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
-import { CellValue } from '../spreadsheet/CellValue';
+import { CellValue, DefaultCellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
@@ -172,22 +172,25 @@ export function Balances({
           paddingBottom: 1,
         }}
       >
-        <CellValue
-          binding={{ ...balanceQuery, value: 0 }}
-          type="financial"
-          style={{ fontSize: 22, fontWeight: 400 }}
-          getStyle={value => ({
-            color:
-              value < 0
-                ? theme.errorText
-                : value > 0
-                  ? theme.noticeTextLight
-                  : theme.pageTextSubdued,
-          })}
-          privacyFilter={{
-            blurIntensity: 5,
-          }}
-        />
+        <CellValue binding={{ ...balanceQuery, value: 0 }} type="financial">
+          {props => (
+            <PrivacyFilter blurIntensity={5}>
+              <DefaultCellValueText
+                {...props}
+                getStyle={value => ({
+                  fontSize: 22,
+                  fontWeight: 400,
+                  color:
+                    value < 0
+                      ? theme.errorText
+                      : value > 0
+                        ? theme.noticeTextLight
+                        : theme.pageTextSubdued,
+                })}
+              />
+            </PrivacyFilter>
+          )}
+        </CellValue>
 
         <SvgArrowButtonRight1
           style={{

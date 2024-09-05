@@ -53,7 +53,7 @@ export function usePreviewTransactions(
           })),
         }));
         setPreviewTransactions(ungroupTransactions(withDefaults));
-        collapseTransactions(withDefaults.map(t => t.id));
+        collapseTransactions?.(withDefaults.map(t => t.id));
       });
     }
 

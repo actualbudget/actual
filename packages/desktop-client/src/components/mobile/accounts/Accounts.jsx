@@ -19,7 +19,7 @@ import { Text } from '../../common/Text';
 import { TextOneLine } from '../../common/TextOneLine';
 import { View } from '../../common/View';
 import { MobilePageHeader, Page } from '../../Page';
-import { CellValue } from '../../spreadsheet/CellValue';
+import { CellValue, DefaultCellValueText } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
@@ -47,11 +47,14 @@ function AccountHeader({ name, amount, style = {} }) {
           {name}
         </Text>
       </View>
-      <CellValue
-        binding={amount}
-        style={{ ...styles.text, fontSize: 14 }}
-        type="financial"
-      />
+      <CellValue binding={amount} type="financial">
+        {props => (
+          <DefaultCellValueText
+            {...props}
+            getStyle={() => ({ ...styles.text, fontSize: 14 })}
+          />
+        )}
+      </CellValue>
     </View>
   );
 }
@@ -119,13 +122,19 @@ function AccountCard({
           </TextOneLine>
         </View>
       </View>
-      <CellValue
-        binding={getBalanceQuery(account)}
-        type="financial"
-        style={{ fontSize: 16, color: 'inherit' }}
-        getStyle={makeAmountFullStyle}
-        data-testid="account-balance"
-      />
+      <CellValue binding={getBalanceQuery(account)} type="financial">
+        {props => (
+          <DefaultCellValueText
+            {...props}
+            getStyle={value => ({
+              fontSize: 16,
+              color: 'inherit',
+              ...makeAmountFullStyle(value),
+            })}
+            data-testid="account-balance"
+          />
+        )}
+      </CellValue>
     </Button>
   );
 }
