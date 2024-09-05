@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { memo, useMemo, useState, useEffect } from 'react';
-import { Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -64,6 +64,7 @@ type BudgetInnerProps = {
 };
 
 function BudgetInner(props: BudgetInnerProps) {
+  const { t } = useTranslation();
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
@@ -174,10 +175,10 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(
       addNotification({
         type: 'error',
-        message: <Trans>
-          Category {{ name }} already exists in group (May be Hidden)
-        </Trans>
-        ,
+        message: t(
+          'Category {{name}} already exists in group (May be Hidden)',
+          { name },
+        ),
       }),
     );
   };

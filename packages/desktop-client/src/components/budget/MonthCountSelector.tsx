@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { SvgCalendar } from '../../icons/v2';
 import { theme } from '../../style';
@@ -30,6 +30,8 @@ export function MonthCountSelector({
   maxMonths,
   onChange,
 }: MonthCountSelectorProps) {
+  const { t } = useTranslation();
+
   const { displayMax } = useBudgetMonthCount();
 
   // It doesn't make sense to show anything if we can only fit one
@@ -63,7 +65,7 @@ export function MonthCountSelector({
           transform: 'scale(1.2)',
         },
       }}
-      title={<Trans>Choose the number of months shown at a time</Trans>}
+      title={t('Choose the number of months shown at a time')}
     >
       {calendars}
     </View>
