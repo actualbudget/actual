@@ -92,7 +92,7 @@ export function Modals() {
     .map(({ name, options }) => {
       switch (name) {
         case 'keyboard-shortcuts':
-          return <KeyboardShortcutModal />;
+          return <KeyboardShortcutModal key={name} />;
 
         case 'import-transactions':
           return <ImportTransactions key={name} options={options} />;
