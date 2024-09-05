@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 
-import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -65,7 +64,7 @@ function PasswordLogin({ setError, dispatch }) {
   );
 }
 
-function OpenIdLogin({ setError, loginMethods }) {
+function OpenIdLogin({ setError }) {
   const [warnMasterCreation, setWarnMasterCreation] = useState(false);
 
   useEffect(() => {
@@ -90,7 +89,12 @@ function OpenIdLogin({ setError, loginMethods }) {
       <View style={{ flexDirection: 'row' }}>
         <Button
           variant="primary"
-          style={{ fontSize: 15, alignSelf: 'center', flexGrow: 1, marginTop: 5 }}
+          style={{
+            fontSize: 15,
+            alignSelf: 'center',
+            flexGrow: 1,
+            marginTop: 5,
+          }}
           onPress={onSubmitOpenId}
         >
           Sign in with OpenId
@@ -183,10 +187,6 @@ export function Login() {
     }
   }
 
-  async function onDemo() {
-    await dispatch(createBudget({ demoMode: true }));
-  }
-
   if (!checked) {
     return null;
   }
@@ -247,13 +247,9 @@ export function Login() {
         <PasswordLogin setError={setError} dispatch={dispatch} />
       )}
 
-      {method === 'openid' && (
-        <OpenIdLogin setError={setError} loginMethods={loginMethods} />
-      )}
+      {method === 'openid' && <OpenIdLogin setError={setError} />}
 
       {method === 'header' && <HeaderLogin error={error} />}
-
-      
     </View>
   );
 }

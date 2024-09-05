@@ -85,7 +85,7 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(e) {
+  async function onSubmit() {
     if (loading) {
       return;
     }
@@ -132,7 +132,11 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
         </label>
         <View style={{ flex: 1 }} />
         {buttons}
-        <ButtonWithLoading variant="primary" isLoading={loading} onPress={onSubmit}>
+        <ButtonWithLoading
+          variant="primary"
+          isLoading={loading}
+          onPress={onSubmit}
+        >
           OK
         </ButtonWithLoading>
       </View>
