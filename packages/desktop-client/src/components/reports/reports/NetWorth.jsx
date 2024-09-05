@@ -56,7 +56,6 @@ function NetWorthInner({ widget }) {
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
   );
-  const [isSaving, setIsSaving] = useState(false);
   const [start, setStart] = useState(initialStart);
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
@@ -101,9 +100,8 @@ function NetWorthInner({ widget }) {
     setMode(mode);
   }
 
-  async function onSaveWidget() {
-    setIsSaving(true);
-    await send('dashboard-update-widget', {
+  function onSaveWidget() {
+    send('dashboard-update-widget', {
       id: widget?.id,
       meta: {
         ...(widget.meta ?? {}),
@@ -116,7 +114,6 @@ function NetWorthInner({ widget }) {
         },
       },
     });
-    setIsSaving(false);
   }
 
   const navigate = useNavigate();
@@ -158,7 +155,7 @@ function NetWorthInner({ widget }) {
         onConditionsOpChange={onConditionsOpChange}
       >
         {widget && (
-          <Button variant="primary" isLoading={isSaving} onPress={onSaveWidget}>
+          <Button variant="primary" onPress={onSaveWidget}>
             Save widget
           </Button>
         )}

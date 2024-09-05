@@ -52,8 +52,15 @@ export function NetWorthCard({
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
   const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts),
-    [start, end, accounts],
+    () =>
+      netWorthSpreadsheet(
+        start,
+        end,
+        accounts,
+        meta?.conditions,
+        meta?.conditionsOp,
+      ),
+    [start, end, accounts, meta?.conditions, meta?.conditionsOp],
   );
   const data = useReport('net_worth', params);
 
