@@ -1,4 +1,5 @@
 import React, { memo, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
@@ -31,6 +32,7 @@ export const BudgetCategories = memo(
     onReorderCategory,
     onReorderGroup,
   }) => {
+    const { t } = useTranslation();
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
@@ -315,7 +317,7 @@ export const BudgetCategories = memo(
               );
               break;
             default:
-              throw new Error('Unknown item type: ' + item.type);
+              throw new Error(t('Unknown item type: ') + item.type);
           }
 
           const pos =
