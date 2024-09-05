@@ -3,8 +3,10 @@ import { useSelector } from 'react-redux';
 
 import { type State } from 'loot-core/client/state-types';
 
+import { type Permissions } from './types';
+
 type AuthContextType = {
-  hasPermission: (permission?: string) => boolean;
+  hasPermission: (permission?: Permissions) => boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,7 +18,7 @@ type AuthProviderProps = {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const userData = useSelector((state: State) => state.user.data);
 
-  const hasPermission = (permission?: string) => {
+  const hasPermission = (permission?: Permissions) => {
     if (!permission) {
       return true;
     }
