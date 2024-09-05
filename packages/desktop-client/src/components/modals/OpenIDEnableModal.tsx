@@ -74,7 +74,7 @@ export function OpenIDEnableModal({
                 ...styles.verySmallText,
                 color: theme.pageTextLight,
               }}
-              title="The first user to login will become the server master"
+              title="The first user to login will become the server owner"
             />
             <Label
               style={{

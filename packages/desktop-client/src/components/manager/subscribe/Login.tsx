@@ -5,7 +5,9 @@ import { useSearchParams } from 'react-router-dom';
 
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { styles, theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button2';
@@ -17,7 +19,9 @@ import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
+import { Bootstrap } from './Bootstrap';
 import { useBootstrapped, Title } from './common';
+import { OpenIdForm } from './OpenIdForm';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');
@@ -66,6 +70,20 @@ function PasswordLogin({ setError, dispatch }) {
 
 function OpenIdLogin({ setError }) {
   const [warnMasterCreation, setWarnMasterCreation] = useState(false);
+  const [reviewOpenIdConfiguration, setReviewOpenIdConfiguration] =
+    useState(false);
+  const navigate = useNavigate();
+
+  async function onSetOpenId(config: OpenIdConfig) {
+    setError(null);
+    const { error } = await send('subscribe-bootstrap', { openid: config });
+
+    if (error) {
+      setError(error);
+    } else {
+      navigate('/');
+    }
+  }
 
   useEffect(() => {
     send('master-created').then(created => setWarnMasterCreation(!created));
@@ -86,31 +104,60 @@ function OpenIdLogin({ setError }) {
 
   return (
     <View>
-      <View style={{ flexDirection: 'row' }}>
-        <Button
-          variant="primary"
-          style={{
-            fontSize: 15,
-            alignSelf: 'center',
-            flexGrow: 1,
-            marginTop: 5,
+      {!reviewOpenIdConfiguration && (
+        <>
+          <View style={{ flexDirection: 'row' }}>
+            <Button
+              variant="primary"
+              style={{
+                fontSize: 15,
+                alignSelf: 'center',
+                flexGrow: 1,
+                marginTop: 5,
+              }}
+              onPress={onSubmitOpenId}
+            >
+              Sign in with OpenId
+            </Button>
+          </View>
+          {warnMasterCreation && (
+            <>
+              <label style={{ color: theme.warningText, marginTop: 10 }}>
+                The first user to login with OpenId will be the{' '}
+                <Text style={{ fontWeight: 'bold' }}>server owner</Text>. This
+                can&apos;t be changed using UI.
+              </label>
+              <Button
+                variant="bare"
+                onPress={() => setReviewOpenIdConfiguration(true)}
+                style={{ marginTop: 5 }}
+              >
+                Review OpenID configuration
+              </Button>
+            </>
+          )}
+        </>
+      )}
+      {reviewOpenIdConfiguration && (
+        <OpenIdForm
+          loadData={true}
+          otherButtons={[
+            <Button
+              key="cancel"
+              variant="bare"
+              style={{ marginRight: 10 }}
+              onPress={() => setReviewOpenIdConfiguration(false)}
+            >
+              Cancel
+            </Button>,
+          ]}
+          onSetOpenId={async config => {
+            onSetOpenId(config);
           }}
-          onPress={onSubmitOpenId}
-        >
-          Sign in with OpenId
-        </Button>
-      </View>
-      {warnMasterCreation && (
-        <label style={{ color: theme.warningText, marginTop: 10 }}>
-          The first user to login with OpenId will be the{' '}
-          <Text style={{ fontWeight: 'bold' }}>server master</Text>. This
-          can&apos;t be changed using UI.
-        </label>
+        />
       )}
     </View>
   );
-
-  ///warnMasterCreation
 }
 
 function HeaderLogin({ error }) {

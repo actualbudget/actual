@@ -21,6 +21,7 @@ import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
+import { OpenIdConfig } from '../types/models/openid';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
@@ -1960,6 +1961,16 @@ handlers['enable-password'] = async function (loginConfig) {
   } catch (err) {
     return { error: err.reason || 'network-failure' };
   }
+  return {};
+};
+
+handlers['get-openid-config'] = async function () {
+  const res = await get(getServer().SIGNUP_SERVER + '/openid-config');
+
+  if (res) {
+    return JSON.parse(res) as OpenIdConfig;
+  }
+
   return {};
 };
 

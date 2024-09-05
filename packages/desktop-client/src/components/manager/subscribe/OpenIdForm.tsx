@@ -1,5 +1,8 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useLocation, type Location } from 'react-router-dom';
+
+import { send } from 'loot-core/platform/client/fetch';
+import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { theme, styles } from '../../../style';
 import { ButtonWithLoading } from '../../common/Button2';
@@ -13,13 +16,6 @@ import { View } from '../../common/View';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
 
-export type OpenIdConfig = {
-  issuer: string;
-  client_id: string;
-  client_secret: string;
-  server_hostname: string;
-};
-
 type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
 
 type OnProviderChangeCallback = (provider: OpenIdProviderOption) => void;
@@ -27,6 +23,7 @@ type OnProviderChangeCallback = (provider: OpenIdProviderOption) => void;
 type OpenIdFormProps = {
   onSetOpenId: OpenIdCallback;
   otherButtons?: ReactNode[];
+  loadData?: boolean;
 };
 
 type OpenIdProviderOption = {
@@ -43,7 +40,11 @@ type OpenIdProviderOption = {
   tip: ReactNode;
 };
 
-export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
+export function OpenIdForm({
+  onSetOpenId,
+  otherButtons,
+  loadData,
+}: OpenIdFormProps) {
   const [issuer, setIssuer] = useState('');
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -51,6 +52,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
   const [clientIdDisabled, setClientIdDisabled] = useState(false);
   const [clientSecretRequired, setClientSecretRequired] = useState(true);
   const [clientSecretDisabled, setClientSecretDisabled] = useState(false);
+  const [providerName, setProviderName] = useState('other');
   const serverUrl = useServerURL();
   const location = useLocation();
   const [tip, setTip] = useState((<Text />) as ReactNode);
@@ -58,8 +60,21 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
 
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    debugger;
+    if (loadData) {
+      send('get-openid-config').then(config => {
+        setProviderName(config?.openId?.selectedProvider ?? 'other');
+        setIssuer(config?.openId?.issuer ?? '');
+        setClientId(config?.openId?.client_id ?? '');
+        setClientSecret(config?.openId?.client_secret ?? '');
+      });
+    }
+  }, [loadData]);
+
   const handleProviderChange = (provider: OpenIdProviderOption) => {
     if (provider) {
+      setProviderName(provider.value);
       const newIssuer =
         typeof provider.issuer === 'function'
           ? provider.issuer(location, serverUrl ?? '')
@@ -99,6 +114,7 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
 
     setLoading(true);
     await onSetOpenId({
+      selectedProvider: providerName,
       issuer: issuer ?? '',
       client_id: clientId ?? '',
       client_secret: clientSecret ?? '',
@@ -109,7 +125,10 @@ export function OpenIdForm({ onSetOpenId, otherButtons }: OpenIdFormProps) {
 
   return (
     <>
-      <OpenIdProviderSelector onProviderChange={handleProviderChange} />
+      <OpenIdProviderSelector
+        onProviderChange={handleProviderChange}
+        defaultValue={providerName}
+      />
       <Stack direction="column" style={{ marginTop: 5 }}>
         <FormField style={{ flex: 1 }}>
           {!submitButtonDisabled && (
@@ -367,17 +386,17 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
 
 function OpenIdProviderSelector({
   onProviderChange,
+  defaultValue,
 }: {
   onProviderChange: OnProviderChangeCallback;
+  defaultValue: string;
 }) {
-  const [value, setValue] = useState('');
   const handleProviderChange = (newValue: string) => {
     const selectedProvider = openIdProviders.find(provider =>
       provider !== Menu.line ? provider.value === newValue : false,
     );
     if (selectedProvider && selectedProvider !== Menu.line) {
       onProviderChange(selectedProvider);
-      setValue(newValue);
     }
   };
 
@@ -389,7 +408,7 @@ function OpenIdProviderSelector({
           provider === Menu.line ? Menu.line : [provider.value, provider.label],
         )}
         defaultLabel="Select Provider"
-        value={value}
+        value={defaultValue}
         onChange={handleProviderChange}
       />
     </FormField>

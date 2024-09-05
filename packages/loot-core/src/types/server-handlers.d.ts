@@ -17,6 +17,7 @@ import {
   RuleEntity,
   PayeeEntity,
 } from './models';
+import { OpenIdConfig } from './models/openid';
 import { GlobalPrefs, LocalPrefs } from './prefs';
 import { Query } from './query';
 import { EmptyObject } from './util';
@@ -271,12 +272,7 @@ export interface ServerHandlers {
 
   'subscribe-bootstrap': (arg: {
     password?: string;
-    openid?: {
-      issuer: string;
-      client_id: string;
-      client_secret: string;
-      server_hostname: string;
-    };
+    openid?: OpenIdConfig;
   }) => Promise<{ error?: string }>;
 
   'subscribe-get-user': () => Promise<{
@@ -378,13 +374,12 @@ export interface ServerHandlers {
   'app-focused': () => Promise<void>;
 
   'enable-openid': (arg: {
-    openId?: {
-      issuer: string;
-      client_id: string;
-      client_secret: string;
-      server_hostname: string;
-    };
+    openId?: OpenIdConfig;
   }) => Promise<{ error?: string }>;
 
   'enable-password': (arg: { password: string }) => Promise<{ error?: string }>;
+
+  'get-openid-config': () => Promise<{
+    openId?: OpenIdConfig;
+  }>;
 }

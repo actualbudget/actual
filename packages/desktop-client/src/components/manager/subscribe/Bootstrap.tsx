@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
@@ -17,7 +18,7 @@ import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-import { type OpenIdConfig, OpenIdForm } from './OpenIdForm';
+import { OpenIdForm } from './OpenIdForm';
 
 export function Bootstrap() {
   const { t } = useTranslation();
@@ -136,9 +137,9 @@ export function Bootstrap() {
           <Button
             style={{ fontSize: 15, color: theme.pageTextLink, marginTop: 10 }}
             onPress={() => setLoginMethod('openid')}
-            variant="normal"
+            variant="bare"
           >
-            Configure OpenID authentication instead (Advanced)
+            Configure OpenID authentication instead
           </Button>
         </>
       )}
@@ -148,7 +149,7 @@ export function Bootstrap() {
           <OpenIdForm onSetOpenId={onSetOpenId} />
           <Button
             style={{ fontSize: 15, color: theme.pageTextLink, marginTop: 10 }}
-            variant="normal"
+            variant="bare"
             onPress={() => setLoginMethod('password')}
           >
             Configure password authentication instead
