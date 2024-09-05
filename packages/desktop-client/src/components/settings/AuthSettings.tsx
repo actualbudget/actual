@@ -8,7 +8,6 @@ import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Label } from '../common/Label';
 import { Text } from '../common/Text';
-import { View } from '../common/View';
 import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 
 import { Setting } from './UI';
@@ -20,7 +19,7 @@ export function AuthSettings() {
   const openidAuthFeatureFlag = useFeatureFlag('openidAuth');
 
   return (
-    <>
+    <div>
       {openidAuthFeatureFlag && (
         <Setting
           primaryAction={
@@ -88,6 +87,6 @@ export function AuthSettings() {
           </Text>
         </Setting>
       )}
-    </>
+    </div>
   );
 }
