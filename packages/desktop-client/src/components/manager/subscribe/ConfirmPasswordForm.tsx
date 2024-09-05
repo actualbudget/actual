@@ -86,7 +86,6 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e) {
-    e.preventDefault();
     if (loading) {
       return;
     }
@@ -101,14 +100,13 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
   }
 
   return (
-    <form
+    <View
       style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'stretch',
         marginTop: 30,
       }}
-      onSubmit={onSubmit}
     >
       <BigInput
         autoFocus={true}
@@ -134,10 +132,10 @@ export function ConfirmOldPasswordForm({ buttons, onSetPassword }) {
         </label>
         <View style={{ flex: 1 }} />
         {buttons}
-        <ButtonWithLoading variant="primary" isLoading={loading}>
+        <ButtonWithLoading variant="primary" isLoading={loading} onPress={onSubmit}>
           OK
         </ButtonWithLoading>
       </View>
-    </form>
+    </View>
   );
 }

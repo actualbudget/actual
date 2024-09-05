@@ -88,22 +88,9 @@ function OpenIdLogin({ setError, loginMethods }) {
   return (
     <View>
       <View style={{ flexDirection: 'row' }}>
-        {loginMethods.length > 1 && (
-          <BigInput
-            autoFocus={true}
-            placeholder="Password"
-            type="password"
-            disabled={true}
-            style={{
-              flex: 1,
-              marginRight: 10,
-              backgroundColor: theme.buttonBareDisabledBackground,
-            }}
-          />
-        )}
         <Button
           variant="primary"
-          style={{ fontSize: 15, alignSelf: 'center', flexGrow: 1 }}
+          style={{ fontSize: 15, alignSelf: 'center', flexGrow: 1, marginTop: 5 }}
           onPress={onSubmitOpenId}
         >
           Sign in with OpenId
@@ -266,21 +253,7 @@ export function Login() {
 
       {method === 'header' && <HeaderLogin error={error} />}
 
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          marginTop: 15,
-        }}
-      >
-        <Button
-          variant="bare"
-          style={{ fontSize: 15, color: theme.pageTextLink, marginLeft: 10 }}
-          onPress={onDemo}
-        >
-          Try Demo &rarr;
-        </Button>
-      </View>
+      
     </View>
   );
 }

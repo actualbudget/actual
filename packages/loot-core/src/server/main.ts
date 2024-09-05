@@ -1931,7 +1931,15 @@ handlers['export-budget'] = async function () {
 
 handlers['enable-openid'] = async function (loginConfig) {
   try {
-    await post(getServer().SIGNUP_SERVER + '/enable-openid', loginConfig);
+    const userToken = await asyncStorage.getItem('user-token');
+
+    if (!userToken) {
+      return { error: 'unauthorized' };
+    }
+
+    await post(getServer().SIGNUP_SERVER + '/enable-openid', loginConfig, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
   } catch (err) {
     return { error: err.reason || 'network-failure' };
   }
@@ -1940,7 +1948,15 @@ handlers['enable-openid'] = async function (loginConfig) {
 
 handlers['enable-password'] = async function (loginConfig) {
   try {
-    await post(getServer().SIGNUP_SERVER + '/enable-password', loginConfig);
+    const userToken = await asyncStorage.getItem('user-token');
+
+    if (!userToken) {
+      return { error: 'unauthorized' };
+    }
+
+    await post(getServer().SIGNUP_SERVER + '/enable-password', loginConfig, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
   } catch (err) {
     return { error: err.reason || 'network-failure' };
   }
