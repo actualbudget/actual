@@ -61,7 +61,6 @@ export function OpenIdForm({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    debugger;
     if (loadData) {
       send('get-openid-config').then((config: { openId?: OpenIdConfig }) => {
         setProviderName(config?.openId?.selectedProvider ?? 'other');
