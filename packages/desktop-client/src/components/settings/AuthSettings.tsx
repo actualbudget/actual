@@ -20,7 +20,7 @@ export function AuthSettings() {
   const openidAuthFeatureFlag = useFeatureFlag('openidAuth');
 
   return (
-    <View>
+    <>
       {openidAuthFeatureFlag && (
         <Setting
           primaryAction={
@@ -88,6 +88,6 @@ export function AuthSettings() {
           </Text>
         </Setting>
       )}
-    </View>
+    </>
   );
 }
