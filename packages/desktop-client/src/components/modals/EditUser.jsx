@@ -133,7 +133,7 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
             marginTop: 5,
           }}
         >
-          Change this username with caution; it is the master user.
+          Change this username with caution; it is the server owner.
         </label>
       )}
       <Stack direction="row" style={{ marginTop: 10 }}>
