@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
+import { addNotification } from 'loot-core/src/client/actions';
 import { useWidget } from 'loot-core/src/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -40,6 +43,9 @@ export function NetWorth() {
 }
 
 function NetWorthInner({ widget }) {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
   const accounts = useAccounts();
   const {
     conditions,
@@ -100,8 +106,8 @@ function NetWorthInner({ widget }) {
     setMode(mode);
   }
 
-  function onSaveWidget() {
-    send('dashboard-update-widget', {
+  async function onSaveWidget() {
+    await send('dashboard-update-widget', {
       id: widget?.id,
       meta: {
         ...(widget.meta ?? {}),
@@ -114,12 +120,18 @@ function NetWorthInner({ widget }) {
         },
       },
     });
+    dispatch(
+      addNotification({
+        type: 'message',
+        message: t('Dashboard widget successfully saved.'),
+      }),
+    );
   }
 
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
-  const title = widget?.meta?.name ?? 'Net Worth';
+  const title = widget?.meta?.name ?? t('Net Worth');
 
   if (!allMonths || !data) {
     return null;
@@ -156,7 +168,7 @@ function NetWorthInner({ widget }) {
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
-            Save widget
+            <Trans>Save widget</Trans>
           </Button>
         )}
       </Header>
@@ -199,16 +211,18 @@ function NetWorthInner({ widget }) {
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>
-          <Paragraph>
-            <strong>How is net worth calculated?</strong>
-          </Paragraph>
-          <Paragraph>
-            Net worth shows the balance of all accounts over time, including all
-            of your investments. Your “net worth” is considered to be the amount
-            you’d have if you sold all your assets and paid off as much debt as
-            possible. If you hover over the graph, you can also see the amount
-            of assets and debt individually.
-          </Paragraph>
+          <Trans>
+            <Paragraph>
+              <strong>How is net worth calculated?</strong>
+            </Paragraph>
+            <Paragraph>
+              Net worth shows the balance of all accounts over time, including
+              all of your investments. Your “net worth” is considered to be the
+              amount you’d have if you sold all your assets and paid off as much
+              debt as possible. If you hover over the graph, you can also see
+              the amount of assets and debt individually.
+            </Paragraph>
+          </Trans>
         </View>
       </View>
     </Page>
