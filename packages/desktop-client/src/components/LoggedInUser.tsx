@@ -52,7 +52,7 @@ export function LoggedInUser({
 
   useEffect(() => {
     if (cloudFileId) {
-      send?.('check-file-access', cloudFileId).then(
+      send('check-file-access', cloudFileId).then(
         ({ granted }: { granted: boolean }) => setIsOwner(granted),
       );
     }

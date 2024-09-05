@@ -20,26 +20,26 @@ export const ProtectedRoute = ({
   validateOwner,
 }: ProtectedRouteProps) => {
   const { hasPermission } = useAuth();
-  const [permissionGrated, setPermissionGrated] = useState(false);
+  const [permissionGranted, setPermissionGranted] = useState(false);
   const [cloudFileId] = useLocalPref('cloudFileId');
 
   useEffect(() => {
-    if (permissionGrated) {
+    if (permissionGranted) {
       return;
     }
 
-    setPermissionGrated(hasPermission(permission));
+    setPermissionGranted(hasPermission(permission));
 
-    if (!permissionGrated && validateOwner) {
+    if (!permissionGranted && validateOwner) {
       send('check-file-access', cloudFileId).then(
         ({ granted }: { granted: boolean }) => {
-          setPermissionGrated(granted);
+          setPermissionGranted(granted);
         },
       );
     }
-  }, [cloudFileId, permission, validateOwner, hasPermission, permissionGrated]);
+  }, [cloudFileId, permission, validateOwner, hasPermission, permissionGranted]);
 
-  return permissionGrated ? (
+  return permissionGranted ? (
     element
   ) : (
     <View
