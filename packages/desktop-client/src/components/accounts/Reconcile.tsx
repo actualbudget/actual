@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import * as queries from 'loot-core/src/client/queries';
+import { type Query } from 'loot-core/src/shared/query';
 import { currencyToInteger } from 'loot-core/src/shared/util';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { SvgCheckCircle1 } from '../../icons/v2';
 import { styles, theme } from '../../style';
@@ -14,19 +16,31 @@ import { View } from '../common/View';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
+type ReconcilingMessageProps = {
+  balanceQuery: { name: `balance-query-${string}`; query: Query };
+  targetBalance: number;
+  onDone: () => void;
+  onCreateTransaction: (targetDiff: number) => void;
+};
+
 export function ReconcilingMessage({
   balanceQuery,
   targetBalance,
   onDone,
   onCreateTransaction,
-}) {
-  const cleared = useSheetValue({
-    name: balanceQuery.name + '-cleared',
+}: ReconcilingMessageProps) {
+  const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
+    name: (balanceQuery.name + '-cleared') as `balance-query-${string}-cleared`,
     value: 0,
     query: balanceQuery.query.filter({ cleared: true }),
   });
   const format = useFormat();
   const targetDiff = targetBalance - cleared;
+
+  const clearedBalance = format(cleared, 'financial');
+  const bankBalance = format(targetBalance, 'financial');
+  const difference =
+    (targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial');
 
   return (
     <View
@@ -66,23 +80,10 @@ export function ReconcilingMessage({
           <View style={{ color: theme.tableText }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
               <Trans>
-                Your cleared balance{' '}
-                <strong>
-                  {{ clearedBalance: format(cleared, 'financial') }}
-                </strong>{' '}
-                needs{' '}
-                <strong>
-                  {{
-                    difference:
-                      (targetDiff > 0 ? '+' : '') +
-                      format(targetDiff, 'financial'),
-                  }}
-                </strong>{' '}
-                to match
+                Your cleared balance <strong>{clearedBalance}</strong> needs{' '}
+                <strong>{difference}</strong> to match
                 <br /> your bank&apos;s balance of{' '}
-                <Text style={{ fontWeight: 700 }}>
-                  {{ bankBalance: format(targetBalance, 'financial') }}
-                </Text>
+                <Text style={{ fontWeight: 700 }}>{bankBalance}</Text>
               </Trans>
             </Text>
           </View>
@@ -104,15 +105,25 @@ export function ReconcilingMessage({
   );
 }
 
-export function ReconcileMenu({ account, onReconcile, onClose }) {
+type ReconcileMenuProps = {
+  account: AccountEntity;
+  onReconcile: (amount: number | null) => void;
+  onClose: () => void;
+};
+
+export function ReconcileMenu({
+  account,
+  onReconcile,
+  onClose,
+}: ReconcileMenuProps) {
   const balanceQuery = queries.accountBalance(account);
-  const clearedBalance = useSheetValue({
-    name: balanceQuery.name + '-cleared',
+  const clearedBalance = useSheetValue<'account', `balance-${string}-cleared`>({
+    name: (balanceQuery.name + '-cleared') as `balance-${string}-cleared`,
     value: null,
     query: balanceQuery.query.filter({ cleared: true }),
   });
   const format = useFormat();
-  const [inputValue, setInputValue] = useState(null);
+  const [inputValue, setInputValue] = useState<string | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
 
   function onSubmit() {
