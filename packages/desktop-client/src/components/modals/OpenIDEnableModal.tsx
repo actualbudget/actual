@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
+import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useActions } from '../../hooks/useActions';
 import { theme, styles } from '../../style';
@@ -11,7 +12,7 @@ import { Button } from '../common/Button2';
 import { Label } from '../common/Label';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { View } from '../common/View';
-import { type OpenIdConfig, OpenIdForm } from '../manager/subscribe/OpenIdForm';
+import { OpenIdForm } from '../manager/subscribe/OpenIdForm';
 import { useRefreshLoginMethods } from '../ServerContext';
 
 type OpenIDEnableModalProps = {
