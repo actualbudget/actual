@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useRef, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
@@ -51,8 +51,6 @@ export function SidebarGroup({
   onHideNewGroup,
   onToggleCollapse,
 }: SidebarGroupProps) {
-  const { t } = useTranslation();
-
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -126,13 +124,13 @@ export function SidebarGroup({
                   setMenuOpen(false);
                 }}
                 items={[
-                  { name: 'add-category', text: t('Add category') },
-                  { name: 'rename', text: t('Rename') },
+                  { name: 'add-category', text: <Trans>Add category</Trans> },
+                  { name: 'rename', text: <Trans>Rename</Trans> },
                   !group.is_income && {
                     name: 'toggle-visibility',
-                    text: group.hidden ? t('Show') : t('Hide'),
+                    text: group.hidden ? <Trans>Show</Trans> : <Trans>Hide</Trans>,
                   },
-                  onDelete && { name: 'delete', text: t('Delete') },
+                  onDelete && { name: 'delete', text: <Trans>Delete</Trans> },
                 ]}
               />
             </Popover>
@@ -200,7 +198,7 @@ export function SidebarGroup({
         style={{ fontWeight: 600 }}
         inputProps={{
           style: { marginLeft: 20 },
-          placeholder: temporary ? t('New Group Name') : '',
+          placeholder: temporary ? <Trans>New Group Name</Trans> : '',
         }}
       />
     </View>
