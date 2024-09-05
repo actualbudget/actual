@@ -1,5 +1,6 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme, styles } from '../../style';
@@ -56,7 +57,7 @@ export const BudgetTotals = memo(function BudgetTotals({
           WebkitUserSelect: 'none',
         }}
       >
-        <View style={{ flexGrow: '1' }}>{t('Category')}</View>
+        <View style={{ flexGrow: '1' }}><Trans>Category</Trans></View>
         <Button
           ref={triggerRef}
           variant="bare"
