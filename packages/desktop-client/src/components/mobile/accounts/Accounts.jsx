@@ -183,6 +183,7 @@ function AccountList({
               aria-label="Add account"
               className={String(
                 css({
+                  justifyContent: 'center',
                   color: theme.mobileHeaderText,
                   margin: 10,
                   ':hover': {
