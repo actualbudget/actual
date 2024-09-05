@@ -37,7 +37,13 @@ export const ProtectedRoute = ({
         },
       );
     }
-  }, [cloudFileId, permission, validateOwner, hasPermission, permissionGranted]);
+  }, [
+    cloudFileId,
+    permission,
+    validateOwner,
+    hasPermission,
+    permissionGranted,
+  ]);
 
   return permissionGranted ? (
     element

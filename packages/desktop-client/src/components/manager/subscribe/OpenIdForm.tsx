@@ -63,7 +63,7 @@ export function OpenIdForm({
   useEffect(() => {
     debugger;
     if (loadData) {
-      send('get-openid-config').then(config => {
+      send('get-openid-config').then((config: { openId?: OpenIdConfig }) => {
         setProviderName(config?.openId?.selectedProvider ?? 'other');
         setIssuer(config?.openId?.issuer ?? '');
         setClientId(config?.openId?.client_id ?? '');
