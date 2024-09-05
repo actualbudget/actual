@@ -24,6 +24,7 @@ export type SyncedPrefs = Partial<
     numberFormat: (typeof numberFormats)[number]['value'];
     hideFraction: boolean;
     isPrivacyEnabled: boolean;
+    [key: `show-balances-${string}`]: boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
     [key: `hide-reconciled-${string}`]: boolean;

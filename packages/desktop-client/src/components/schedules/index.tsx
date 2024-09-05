@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -15,6 +16,8 @@ import { UpcomingLengthSettings } from '../settings/Upcoming';
 import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
 
 export function Schedules() {
+  const { t } = useTranslation();
+
   const { pushModal } = useActions();
   const [filter, setFilter] = useState('');
 
@@ -65,7 +68,7 @@ export function Schedules() {
   }
 
   return (
-    <Page header="Schedules">
+    <Page header={t('Schedules')}>
       <View
         style={{
           flexDirection: 'row',
@@ -81,7 +84,7 @@ export function Schedules() {
           }}
         >
           <Search
-            placeholder="Filter schedules…"
+            placeholder={t('Filter schedules…')}
             value={filter}
             onChange={setFilter}
           />
@@ -106,9 +109,11 @@ export function Schedules() {
           flexShrink: 0,
         }}
       >
-        <Button onPress={onDiscover}>Find schedules</Button>
+        <Button onPress={onDiscover}>
+          <Trans>Find schedules</Trans>
+        </Button>
         <Button variant="primary" onPress={onAdd}>
-          Add new schedule
+          <Trans>Add new schedule</Trans>
         </Button>
       </View>
       <View
