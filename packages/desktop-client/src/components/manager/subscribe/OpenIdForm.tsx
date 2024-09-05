@@ -152,6 +152,7 @@ export function OpenIdForm({
           minWidth: '150px',
           marginTop: 5,
           marginBottom: 10,
+          maxWidth: '500px',
         }}
       >
         {!submitButtonDisabled && 'The OpenID provider URL.'}{' '}
