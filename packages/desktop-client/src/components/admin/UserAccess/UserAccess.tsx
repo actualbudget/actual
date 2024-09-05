@@ -13,13 +13,10 @@ import { useDispatch } from 'react-redux';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
-import {
-  type NewUserAccessEntity,
-  type UserAccessEntity,
-} from 'loot-core/types/models/userAccess';
+import { type UserAvailable } from 'loot-core/types/models';
+import { type UserAccessEntity } from 'loot-core/types/models/userAccess';
 
 import { useLocalPref } from '../../../hooks/useLocalPref';
-import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { SvgDotsHorizontalTriple, SvgLockOpen } from '../../../icons/v1';
 import { SvgLockClosed } from '../../../icons/v2';
 import { styles, theme } from '../../../style';
@@ -28,7 +25,6 @@ import { Link } from '../../common/Link';
 import { Popover } from '../../common/Popover';
 import { Search } from '../../common/Search';
 import { SimpleTable } from '../../common/SimpleTable';
-import { Stack } from '../../common/Stack';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
@@ -66,7 +62,6 @@ function UserAccessContent({
       ).slice(0, 100 + page * 50),
     [allAccess, filter, page],
   );
-  const selectedInst = useSelected('manage-access', allAccess, []);
   const [hoveredUserAccess, setHoveredUserAccess] = useState(null);
 
   const onSearchChange = useCallback(
@@ -79,10 +74,32 @@ function UserAccessContent({
 
   const loadAccess = useCallback(async () => {
     setLoading(true);
+    const users: UserAvailable[] = await send(
+      'access-get-available-users',
+      cloudFileId,
+    );
 
-    const loadedAccess = (await send('access-get', cloudFileId)) ?? [];
+    const loadedAccess = users
+      .map(user => ({
+        ...user,
+        displayName: user.displayName ? user.displayName : user.userName,
+      }))
+      .sort((a, b) => {
+        if ((a.owner ?? 0) !== (b.owner ?? 0)) {
+          return (b.owner ?? 0) - (a.owner ?? 0);
+        }
 
+        if (a.displayName && b.displayName) {
+          return a.displayName.localeCompare(b.displayName);
+        }
+
+        if (!a.displayName) return 1;
+        if (!b.displayName) return -1;
+
+        return 0;
+      });
     setAllAccess(loadedAccess);
+
     return loadedAccess;
   }, [cloudFileId, setLoading]);
 
@@ -112,203 +129,135 @@ function UserAccessContent({
     setPage(page => page + 1);
   }
 
-  async function onDeleteSelected() {
-    setLoading(true);
-    const { someDeletionsFailed } = await send('access-delete-all', {
-      fileId: cloudFileId,
-      ids: [...selectedInst.items],
-    });
-
-    if (someDeletionsFailed) {
-      alert('Some access were not revoked');
-    }
-
-    await loadAccess();
-    selectedInst.dispatch({ type: 'select-none' });
-    setLoading(false);
-  }
-
-  function onAddAccess() {
-    const access: NewUserAccessEntity = {
-      userId: '',
-      fileId: cloudFileId,
-    };
-
-    dispatch(
-      pushModal('edit-access', {
-        access,
-        onSave: async () => {
-          await loadAccess();
-          setLoading(false);
-        },
-      }),
-    );
-  }
-
   const onHover = useCallback(id => {
     setHoveredUserAccess(id);
   }, []);
 
   return (
-    <SelectedProvider instance={selectedInst}>
-      <View>
+    <View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: isModal ? '0 13px 15px' : '0 0 15px',
+          flexShrink: 0,
+        }}
+      >
         <View
           style={{
+            color: theme.pageTextLight,
             flexDirection: 'row',
             alignItems: 'center',
-            padding: isModal ? '0 13px 15px' : '0 0 15px',
-            flexShrink: 0,
+            width: '50%',
           }}
+        >
+          <Text>
+            Determine which users can view and manage your budgets..{' '}
+            <Link
+              variant="external"
+              to="https://actualbudget.org/docs/budgeting/users-access/"
+              linkColor="muted"
+            >
+              Learn more
+            </Link>
+          </Text>
+        </View>
+        <View style={{ flex: 1 }} />
+        <Search
+          placeholder="Filter users..."
+          value={filter}
+          onChange={onSearchChange}
+        />
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          marginBottom: '5px',
+        }}
+      >
+        <Button
+          ref={triggerRef}
+          variant="bare"
+          aria-label="Menu"
+          onPress={() => setMenuOpen(true)}
+        >
+          <SvgDotsHorizontalTriple style={{ width: 16, height: 16 }} />
+        </Button>
+        <Popover
+          triggerRef={triggerRef}
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
+          style={{ padding: 10 }}
         >
           <View
             style={{
-              color: theme.pageTextLight,
               flexDirection: 'row',
               alignItems: 'center',
-              width: '50%',
+              justifyContent: 'flex-end',
             }}
-          >
-            <Text>
-              Determine which users can view and manage your budgets..{' '}
-              <Link
-                variant="external"
-                to="https://actualbudget.org/docs/budgeting/users-access/"
-                linkColor="muted"
-              >
-                Learn more
-              </Link>
-            </Text>
-          </View>
-          <View style={{ flex: 1 }} />
-          <Search
-            placeholder="Filter users..."
-            value={filter}
-            onChange={onSearchChange}
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            marginBottom: '5px',
-          }}
-        >
-          <Button
-            ref={triggerRef}
-            variant="bare"
-            aria-label="Menu"
-            onPress={() => setMenuOpen(true)}
-          >
-            <SvgDotsHorizontalTriple style={{ width: 16, height: 16 }} />
-          </Button>
-          <Popover
-            triggerRef={triggerRef}
-            isOpen={menuOpen}
-            onOpenChange={() => setMenuOpen(false)}
-            style={{ padding: 10 }}
           >
             <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
+                ...styles.altMenuHeaderText,
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+                marginRight: '5px',
               }}
             >
-              <View
-                style={{
-                  ...styles.altMenuHeaderText,
-                  ...styles.verySmallText,
-                  color: theme.pageTextLight,
-                  marginRight: '5px',
-                }}
-              >
-                Owner:
-              </View>
-              <View
-                style={{
-                  ...styles.verySmallText,
-                  color: theme.pageTextLight,
-                  marginRight: '5px',
-                }}
-              >
-                {ownerName}
-              </View>
-              <Button
-                variant="bare"
-                aria-label="Menu"
-                onPress={() =>
-                  dispatch(
-                    pushModal('transfer-ownership', {
-                      onSave: async () => {
-                        await loadAccess();
-                        setLoading(false);
-                      },
-                    }),
-                  )
-                }
-              >
-                <LockToggle style={{ width: 16, height: 16 }} />
-              </Button>
+              Owner:
             </View>
-          </Popover>
-        </View>
-        <View style={{ flex: 1 }}>
-          <UserAccessHeader />
-          <SimpleTable
-            loadMore={loadMore}
-            // Hide the last border of the item in the table
-            style={{ marginBottom: -1 }}
-          >
-            {filteredAccesses.length === 0 ? (
-              <EmptyMessage text="No users" style={{ marginTop: 15 }} />
-            ) : (
-              <UserAccessList
-                accesses={filteredAccesses}
-                selectedItems={selectedInst.items}
-                hoveredAccess={hoveredUserAccess}
-                onHover={onHover}
-              />
-            )}
-          </SimpleTable>
-        </View>
-        <View
-          style={{
-            paddingBlock: 15,
-            paddingInline: isModal ? 13 : 0,
-            borderTop: isModal && '1px solid ' + theme.pillBorder,
-            flexShrink: 0,
-          }}
-        >
-          <Stack direction="row" align="center" justify="flex-end" spacing={2}>
-            {selectedInst.items.size > 0 && (
-              <Button onPress={onDeleteSelected}>
-                Revoke access from {selectedInst.items.size} users
-              </Button>
-            )}
-            <Button variant="primary" onPress={onAddAccess}>
-              Give access
+            <View
+              style={{
+                ...styles.verySmallText,
+                color: theme.pageTextLight,
+                marginRight: '5px',
+              }}
+            >
+              {ownerName}
+            </View>
+            <Button
+              variant="bare"
+              aria-label="Menu"
+              onPress={() =>
+                dispatch(
+                  pushModal('transfer-ownership', {
+                    onSave: async () => {
+                      await loadAccess();
+                      setLoading(false);
+                    },
+                  }),
+                )
+              }
+            >
+              <LockToggle style={{ width: 16, height: 16 }} />
             </Button>
-          </Stack>
-        </View>
+          </View>
+        </Popover>
       </View>
-    </SelectedProvider>
-  );
-}
-
-function EmptyMessage({ text, style }) {
-  return (
-    <View
-      style={{
-        textAlign: 'center',
-        color: theme.pageTextSubdued,
-        fontStyle: 'italic',
-        fontSize: 13,
-        marginTop: 5,
-        style,
-      }}
-    >
-      {text}
+      <View style={{ flex: 1 }}>
+        <UserAccessHeader />
+        <SimpleTable
+          loadMore={loadMore}
+          // Hide the last border of the item in the table
+          style={{ marginBottom: -1 }}
+        >
+          <UserAccessList
+            accesses={filteredAccesses}
+            hoveredAccess={hoveredUserAccess}
+            onHover={onHover}
+          />
+        </SimpleTable>
+      </View>
+      <View
+        style={{
+          paddingBlock: 15,
+          paddingInline: isModal ? 13 : 0,
+          borderTop: isModal && '1px solid ' + theme.pillBorder,
+          flexShrink: 0,
+        }}
+      />
     </View>
   );
 }
@@ -327,14 +276,12 @@ export function UserAccess({
 
 type UsersAccessListProps = {
   accesses: UserAccessEntity[];
-  selectedItems: Set<string>;
   hoveredAccess?: string;
   onHover?: (id: string | null) => void;
 };
 
 function UserAccessList({
   accesses,
-  selectedItems,
   hoveredAccess,
   onHover,
 }: UsersAccessListProps) {
@@ -346,14 +293,12 @@ function UserAccessList({
     <View>
       {accesses.map(access => {
         const hovered = hoveredAccess === access.userId;
-        const selected = selectedItems.has(access.userId);
 
         return (
           <UserAccessRow
             key={access.userId}
             access={access}
             hovered={hovered}
-            selected={selected}
             onHover={onHover}
           />
         );

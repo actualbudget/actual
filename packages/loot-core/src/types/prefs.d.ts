@@ -7,7 +7,8 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'spendingReport'
-  | 'simpleFinSync';
+  | 'simpleFinSync'
+  | 'openidAuth';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

@@ -1,26 +1,13 @@
 import React from 'react';
 
-import {
-  useSelectedItems,
-  useSelectedDispatch,
-} from '../../../hooks/useSelected';
-import { SelectCell, Cell, TableHeader } from '../../table';
+import { Cell, TableHeader } from '../../table';
 
 export function UserAccessHeader() {
-  const selectedItems = useSelectedItems();
-  const dispatchSelected = useSelectedDispatch();
-
   return (
-    <TableHeader style={{}}>
-      <SelectCell
-        exposed={true}
-        focused={false}
-        selected={selectedItems.size > 0}
-        onSelect={e =>
-          dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
-        }
-      />
+    <TableHeader>
+      <Cell value="Access" width={100} style={{ paddingLeft: 15 }} />
       <Cell value="User" width="flex" />
+      <Cell value="Owner" width={100} />
     </TableHeader>
   );
 }

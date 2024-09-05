@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import * as asyncStorage from '../../platform/server/asyncStorage';
-import { UserEntity, UserEntityDropdown } from '../../types/models/user';
+import { UserAvailable, UserEntity } from '../../types/models/user';
 import { UserAccessEntity } from '../../types/models/userAccess';
 import { createApp } from '../app';
 import { get, patch, post } from '../post';
@@ -197,7 +197,7 @@ app.method('access-get-available-users', async function (fileId) {
 
   if (userToken) {
     const res = await get(
-      `${getServer().BASE_SERVER + '/admin/access/available-users'}?fileId=${fileId}`,
+      `${getServer().BASE_SERVER + '/admin/access/users'}?fileId=${fileId}`,
       {
         headers: {
           'X-ACTUAL-TOKEN': userToken,
@@ -206,7 +206,7 @@ app.method('access-get-available-users', async function (fileId) {
     );
 
     if (res) {
-      return JSON.parse(res) as UserEntityDropdown[];
+      return JSON.parse(res) as UserAvailable[];
     }
   }
 

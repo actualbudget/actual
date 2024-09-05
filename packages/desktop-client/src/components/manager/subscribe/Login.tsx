@@ -116,13 +116,13 @@ function OpenIdLogin({ setError }) {
               }}
               onPress={onSubmitOpenId}
             >
-              Sign in with OpenId
+              Sign in with OpenID
             </Button>
           </View>
           {warnMasterCreation && (
             <>
               <label style={{ color: theme.warningText, marginTop: 10 }}>
-                The first user to login with OpenId will be the{' '}
+                The first user to login with OpenID will be the{' '}
                 <Text style={{ fontWeight: 'bold' }}>server owner</Text>. This
                 can&apos;t be changed using UI.
               </label>

@@ -8,7 +8,10 @@ import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { ExposeNavigate } from '../../util/router-tools';
-import { UserDirectoryPage } from '../admin/UserDirectory/UserDirectoryPage';
+import {
+  BackToFileListButton,
+  UserDirectoryPage,
+} from '../admin/UserDirectory/UserDirectoryPage';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
@@ -168,7 +171,11 @@ export function ManagementApp({ isLoading }) {
                       element={
                         <ProtectedRoute
                           permission={Permissions.ADMINISTRATOR}
-                          element={<UserDirectoryPage />}
+                          element={
+                            <UserDirectoryPage
+                              bottomContent={<BackToFileListButton />}
+                            />
+                          }
                         />
                       }
                     />

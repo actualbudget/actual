@@ -16,6 +16,14 @@ export interface UserEntityDropdown {
   displayName?: string;
 }
 
+export interface UserAvailable {
+  userId: string;
+  displayName?: string;
+  userName: string;
+  haveAccess?: number;
+  owner?: number;
+}
+
 export const PossibleRoles = {
   '213733c1-5645-46ad-8784-a7b20b400f93': 'Admin',
   'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc': 'Basic',

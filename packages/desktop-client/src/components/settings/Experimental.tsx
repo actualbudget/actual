@@ -10,6 +10,7 @@ import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
+import { useLoginMethod } from '../ServerContext';
 
 import { Setting } from './UI';
 
@@ -86,6 +87,7 @@ function ReportBudgetFeature() {
 
 export function ExperimentalFeatures() {
   const [expanded, setExpanded] = useState(false);
+  const loginMethod = useLoginMethod();
 
   return (
     <Setting
@@ -115,6 +117,13 @@ export function ExperimentalFeatures() {
               feedbackLink="https://github.com/actualbudget/actual/issues/3282"
             >
               <Trans>Customizable reports page (dashboards)</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="openidAuth"
+              disableToggle={loginMethod === 'openid'}
+              feedbackLink="https://github.com/actualbudget/actual/issues/524"
+            >
+              <Trans>OpenID authentication method</Trans>
             </FeatureToggle>
           </View>
         ) : (

@@ -112,7 +112,7 @@ export const UserDirectoryRow = memo(
           plain
           style={{ padding: '0 15px', paddingLeft: 5 }}
         >
-          <Checkbox checked={user.enabled} readOnly={true} />
+          <Checkbox checked={user.enabled} disabled={true} />
         </Cell>
 
         <Cell
@@ -121,16 +121,22 @@ export const UserDirectoryRow = memo(
           plain
           style={{ padding: '0 15px', paddingLeft: 5 }}
         >
-          <Checkbox checked={user.master} readOnly={true} />
+          <Checkbox checked={user.master} disabled={true} />
         </Cell>
 
         <Cell
           name="edit"
           width={80}
           plain
-          style={{ padding: '0 15px', paddingLeft: 5 }}
+          style={{ padding: 0, paddingLeft: 5 }}
         >
-          <Button onPress={() => onEditUser(user)}>Edit</Button>
+          <Button
+            style={{ margin: 4, fontSize: 14, color: theme.pageTextLink }}
+            variant="bare"
+            onPress={() => onEditUser(user)}
+          >
+            Edit
+          </Button>
         </Cell>
       </Row>
     );

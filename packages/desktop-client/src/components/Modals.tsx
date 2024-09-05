@@ -31,6 +31,7 @@ import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
 import { EditUserAccess } from './modals/EditAccess';
 import { EditField } from './modals/EditField';
 import { EditRule } from './modals/EditRule';
+import { EditUserFinanceApp } from './modals/EditUser';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
 import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
@@ -576,6 +577,15 @@ export function Modals() {
             <EditUserAccess
               key={name}
               defaultUserAccess={options.access}
+              onSave={options.onSave}
+            />
+          );
+
+        case 'edit-user':
+          return (
+            <EditUserFinanceApp
+              key={name}
+              defaultUser={options.user}
               onSave={options.onSave}
             />
           );

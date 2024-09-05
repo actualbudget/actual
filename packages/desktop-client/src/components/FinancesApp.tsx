@@ -41,6 +41,7 @@ import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
+import { UserDirectoryPage } from './responsive/wide';
 import { ScrollProvider } from './ScrollProvider';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
@@ -226,7 +227,17 @@ function FinancesAppWithoutContext() {
                     </WideNotSupported>
                   }
                 />
-
+                {multiuserEnabled && (
+                  <Route
+                    path="/user-directory"
+                    element={
+                      <ProtectedRoute
+                        permission={Permissions.ADMINISTRATOR}
+                        element={<UserDirectoryPage />}
+                      />
+                    }
+                  />
+                )}
                 {multiuserEnabled && (
                   <Route
                     path="/user-access"

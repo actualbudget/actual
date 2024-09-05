@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux';
 
 import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { send } from 'loot-core/src/platform/client/fetch';
-import { type OpenIdConfig } from 'loot-core/types/models/openid';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
@@ -18,13 +17,11 @@ import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-import { OpenIdForm } from './OpenIdForm';
 
 export function Bootstrap() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
-  const [loginMethod, setLoginMethod] = useState('password');
   const refreshLoginMethods = useRefreshLoginMethods();
 
   const { checked } = useBootstrapped();
@@ -52,18 +49,6 @@ export function Bootstrap() {
   async function onSetPassword(password) {
     setError(null);
     const { error } = await send('subscribe-bootstrap', { password });
-
-    if (error) {
-      setError(error);
-    } else {
-      await refreshLoginMethods();
-      navigate('/login');
-    }
-  }
-
-  async function onSetOpenId(config: OpenIdConfig) {
-    setError(null);
-    const { error } = await send('subscribe-bootstrap', { openid: config });
 
     if (error) {
       setError(error);
@@ -115,47 +100,23 @@ export function Bootstrap() {
         </Text>
       )}
 
-      {loginMethod === 'password' && (
-        <>
-          <ConfirmPasswordForm
-            buttons={
-              <Button
-                variant="bare"
-                style={{
-                  fontSize: 15,
-                  color: theme.pageTextLink,
-                  marginRight: 15,
-                }}
-                onPress={onDemo}
-              >
-                {t('Try Demo')}
-              </Button>
-            }
-            onSetPassword={onSetPassword}
-            onError={setError}
-          />
+      <ConfirmPasswordForm
+        buttons={
           <Button
-            style={{ fontSize: 15, color: theme.pageTextLink, marginTop: 10 }}
-            onPress={() => setLoginMethod('openid')}
             variant="bare"
+            style={{
+              fontSize: 15,
+              color: theme.pageTextLink,
+              marginRight: 15,
+            }}
+            onPress={onDemo}
           >
-            Configure OpenID authentication instead
+            {t('Try Demo')}
           </Button>
-        </>
-      )}
-
-      {loginMethod === 'openid' && (
-        <>
-          <OpenIdForm onSetOpenId={onSetOpenId} />
-          <Button
-            style={{ fontSize: 15, color: theme.pageTextLink, marginTop: 10 }}
-            variant="bare"
-            onPress={() => setLoginMethod('password')}
-          >
-            Configure password authentication instead
-          </Button>
-        </>
-      )}
+        }
+        onSetPassword={onSetPassword}
+        onError={setError}
+      />
     </View>
   );
 }

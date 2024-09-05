@@ -8,6 +8,11 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
+import {
+  Modal as Modal2,
+  ModalCloseButton,
+  ModalHeader,
+} from '../common/Modal2';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -35,7 +40,86 @@ function getUserDirectoryErrors(reason) {
   }
 }
 
-export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
+async function saveUser(method, user, setError, actions) {
+  const { error, id: newId } = (await send(method, user)) || {};
+  if (!error) {
+    if (newId) {
+      user.id = newId;
+    }
+  } else {
+    setError(getUserDirectoryErrors(error));
+    if (error === 'token-expired') {
+      actions.addNotification({
+        type: 'error',
+        id: 'login-expired',
+        title: 'Login expired',
+        sticky: true,
+        message: getUserDirectoryErrors(error),
+        button: {
+          title: 'Go to login',
+          action: () => {
+            actions.signOut();
+          },
+        },
+      });
+    }
+
+    return false;
+  }
+
+  return true;
+}
+
+export function EditUserManagementApp({
+  modalProps,
+  defaultUser,
+  onSave: originalOnSave,
+}) {
+  return (
+    <Modal
+      title="User"
+      size="medium"
+      {...modalProps}
+      style={{ ...modalProps.style, flex: 'inherit' }}
+    >
+      <EditUser
+        defaultUser={defaultUser}
+        onSave={async (method, user, setError, actions) => {
+          if (await saveUser(method, user, setError, actions)) {
+            originalOnSave(user);
+            modalProps.onClose();
+          }
+        }}
+      />
+    </Modal>
+  );
+}
+
+export function EditUserFinanceApp({ defaultUser, onSave: originalOnSave }) {
+  return (
+    <Modal2 name="edit-user">
+      {({ state: { close } }) => (
+        <>
+          <ModalHeader
+            title="User"
+            rightContent={<ModalCloseButton onClick={close} />}
+          />
+          <EditUser
+            defaultUser={defaultUser}
+            onSave={async (method, user, setError, actions) => {
+              if (await saveUser(method, user, setError, actions)) {
+                originalOnSave(user);
+                close();
+              }
+            }}
+          />
+        </>
+      )}
+    </Modal2>
+  );
+}
+
+function EditUser({ defaultUser, onSave: originalOnSave }) {
   const actions = useActions();
   const [userName, setUserName] = useState(defaultUser.userName ?? '');
   const [displayName, setDisplayName] = useState(defaultUser.displayName ?? '');
@@ -44,8 +128,6 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
     defaultUser.role ?? 'e87fa1f1-ac8c-4913-b1b5-1096bdb1eacc',
   );
   const [error, setError] = useState('');
-
-  console.log(role);
 
   async function onSave() {
     const user = {
@@ -57,41 +139,11 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
     };
 
     const method = user.id ? 'user-update' : 'user-add';
-    const { error, id: newId } = (await send(method, user)) || {};
-    if (!error) {
-      if (newId) {
-        user.id = newId;
-      }
-
-      originalOnSave?.(user);
-      modalProps.onClose();
-    } else {
-      setError(getUserDirectoryErrors(error));
-      if (error === 'token-expired') {
-        actions.addNotification({
-          type: 'error',
-          id: 'login-expired',
-          title: 'Login expired',
-          sticky: true,
-          message: getUserDirectoryErrors(error),
-          button: {
-            title: 'Go to login',
-            action: () => {
-              actions.signOut();
-            },
-          },
-        });
-      }
-    }
+    await originalOnSave(method, user, setError, originalOnSave, actions);
   }
 
   return (
-    <Modal
-      title="User"
-      size="medium"
-      {...modalProps}
-      style={{ ...modalProps.style, flex: 'inherit' }}
-    >
+    <>
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Username" htmlFor="name-field" />
@@ -118,6 +170,9 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
             id="enabled-field"
             checked={enabled}
             disabled={defaultUser.master}
+            style={{
+              color: defaultUser.master ? theme.pageTextSubdued : 'inherit',
+            }}
             onChange={() => setEnabled(!enabled)}
           />
           <label htmlFor="enabled-field" style={{ userSelect: 'none' }}>
@@ -197,7 +252,7 @@ export function EditUser({ modalProps, defaultUser, onSave: originalOnSave }) {
           {defaultUser.id ? 'Save' : 'Add'}
         </Button>
       </Stack>
-    </Modal>
+    </>
   );
 }
 

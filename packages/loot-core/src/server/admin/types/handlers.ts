@@ -1,4 +1,4 @@
-import { UserEntity, UserEntityDropdown } from '../../../types/models/user';
+import { UserAvailable, UserEntity } from '../../../types/models/user';
 import {
   NewUserAccessEntity,
   UserAccessEntity,
@@ -39,9 +39,7 @@ export interface AdminHandlers {
 
   'access-get': (fileId: string) => Promise<UserAccessEntity[]>;
 
-  'access-get-available-users': (
-    fileId: string,
-  ) => Promise<UserEntityDropdown[]>;
+  'access-get-available-users': (fileId: string) => Promise<UserAvailable[]>;
 
   'transfer-ownership': ({
     fileId,

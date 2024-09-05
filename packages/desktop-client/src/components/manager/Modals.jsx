@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useActions } from '../../hooks/useActions';
 import { View } from '../common/View';
 import { CreateEncryptionKeyModal } from '../modals/CreateEncryptionKeyModal';
-import { EditUser } from '../modals/EditUser';
+import { EditUserManagementApp } from '../modals/EditUser';
 import { FixEncryptionKeyModal } from '../modals/FixEncryptionKeyModal';
 import { LoadBackup } from '../modals/LoadBackup';
 
@@ -89,7 +89,7 @@ export function Modals() {
 
       case 'edit-user':
         return (
-          <EditUser
+          <EditUserManagementApp
             key={name}
             modalProps={modalProps}
             defaultUser={options.user}

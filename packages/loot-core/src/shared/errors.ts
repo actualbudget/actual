@@ -119,7 +119,7 @@ export function getUserAccessErrors(reason: string) {
     case 'file-denied':
       return `You don&apos;t have permissions over this file.`;
     case 'user-already-have-access':
-      return `User already have.`;
+      return `User already have access.`;
     default:
       return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
   }

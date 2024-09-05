@@ -156,7 +156,11 @@ export function LoggedInUser({
     if (multiuserEnabled && isAdmin) {
       if (!budgetId && location.pathname !== '/') {
         adminMenu.push({ name: 'index', text: 'View file list' });
-      } else if (serverUrl && !userData?.offline && !budgetId) {
+      } else if (
+        serverUrl &&
+        !userData?.offline &&
+        location.pathname !== '/user-directory'
+      ) {
         adminMenu.push({ name: 'user-directory', text: 'User Directory' });
       }
     }
