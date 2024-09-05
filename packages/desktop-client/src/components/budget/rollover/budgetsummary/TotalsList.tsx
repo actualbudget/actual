@@ -7,6 +7,7 @@ import { AlignedText } from '../../../common/AlignedText';
 import { Block } from '../../../common/Block';
 import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
+import { DefaultCellValueText } from '../../../spreadsheet/CellValue';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { RolloverCellValue } from '../RolloverComponents';
 
@@ -43,7 +44,6 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
                   <RolloverCellValue
                     binding={rolloverBudget.totalIncome}
                     type="financial"
-                    privacyFilter={false}
                   />
                 }
               />
@@ -53,7 +53,6 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
                   <RolloverCellValue
                     binding={rolloverBudget.fromLastMonth}
                     type="financial"
-                    privacyFilter={false}
                   />
                 }
               />
@@ -64,40 +63,63 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           <RolloverCellValue
             binding={rolloverBudget.incomeAvailable}
             type="financial"
-            style={{ fontWeight: 600 }}
-          />
+          >
+            {props => (
+              <DefaultCellValueText
+                {...props}
+                getStyle={() => ({ fontWeight: 600 })}
+              />
+            )}
+          </RolloverCellValue>
         </Tooltip>
 
         <RolloverCellValue
           binding={rolloverBudget.lastMonthOverspent}
           type="financial"
-          formatter={value => {
-            const v = format(value, 'financial');
-            return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
-          }}
-          style={{ fontWeight: 600, ...styles.tnum }}
-        />
+        >
+          {props => (
+            <DefaultCellValueText
+              {...props}
+              getStyle={() => ({ fontWeight: 600, ...styles.tnum })}
+              formatter={(value, type) => {
+                const v = format(value, type);
+                return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
+              }}
+            />
+          )}
+        </RolloverCellValue>
 
         <RolloverCellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
-          formatter={value => {
-            const v = format(value, 'financial');
-            return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
-          }}
-          style={{ fontWeight: 600, ...styles.tnum }}
-        />
+        >
+          {props => (
+            <DefaultCellValueText
+              {...props}
+              getStyle={() => ({ fontWeight: 600, ...styles.tnum })}
+              formatter={(value, type) => {
+                const v = format(value, type);
+                return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
+              }}
+            />
+          )}
+        </RolloverCellValue>
 
         <RolloverCellValue
           binding={rolloverBudget.forNextMonth}
           type="financial"
-          formatter={value => {
-            const n = parseInt(value) || 0;
-            const v = format(Math.abs(n), 'financial');
-            return n >= 0 ? '-' + v : '+' + v;
-          }}
-          style={{ fontWeight: 600, ...styles.tnum }}
-        />
+        >
+          {props => (
+            <DefaultCellValueText
+              {...props}
+              getStyle={() => ({ fontWeight: 600, ...styles.tnum })}
+              formatter={(value, type) => {
+                const v = format(Math.abs(value), type);
+                return value >= 0 ? '-' + v : '+' + v;
+              }}
+            />
+          )}
+        </RolloverCellValue>
       </View>
 
       <View>
