@@ -66,82 +66,67 @@ function AccountCard({
   onSelect,
 }) {
   return (
-    <View
+    <Button
+      onPress={() => onSelect(account.id)}
       style={{
-        flex: 1,
-        flexDirection: 'row',
-        backgroundColor: theme.tableBackground,
-        boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
+        border: `1px solid ${theme.pillBorder}`,
         borderRadius: 6,
+        boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         marginTop: 10,
-        marginRight: 10,
-        width: '100%',
       }}
       data-testid="account"
     >
-      <Button
-        onPress={() => onSelect(account.id)}
-        className={String(
-          css({
-            flexDirection: 'row',
-            border: '1px solid ' + theme.pillBorder,
-            flex: 1,
-            alignItems: 'center',
-          }),
-        )}
+      <View
+        style={{
+          flex: 1,
+          margin: '10px 0',
+        }}
       >
         <View
           style={{
-            flex: 1,
-            margin: '10px 0',
+            flexDirection: 'row',
+            alignItems: 'center',
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            {account.bankId && (
-              <View
-                style={{
-                  backgroundColor: pending
-                    ? theme.sidebarItemBackgroundPending
-                    : failed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '8px',
-                  width: 8,
-                  flexShrink: 0,
-                  height: 8,
-                  borderRadius: 8,
-                  opacity: connected ? 1 : 0,
-                }}
-              />
-            )}
-            <TextOneLine
+          {account.bankId && (
+            <View
               style={{
-                ...styles.text,
-                fontSize: 17,
-                fontWeight: 600,
-                color: updated ? theme.mobileAccountText : theme.pillText,
-                paddingRight: 30,
+                backgroundColor: pending
+                  ? theme.sidebarItemBackgroundPending
+                  : failed
+                    ? theme.sidebarItemBackgroundFailed
+                    : theme.sidebarItemBackgroundPositive,
+                marginRight: '8px',
+                width: 8,
+                flexShrink: 0,
+                height: 8,
+                borderRadius: 8,
+                opacity: connected ? 1 : 0,
               }}
-              data-testid="account-name"
-            >
-              {account.name}
-            </TextOneLine>
-          </View>
+            />
+          )}
+          <TextOneLine
+            style={{
+              ...styles.text,
+              fontSize: 17,
+              fontWeight: 600,
+              color: updated ? theme.mobileAccountText : theme.pillText,
+              paddingRight: 30,
+            }}
+            data-testid="account-name"
+          >
+            {account.name}
+          </TextOneLine>
         </View>
-        <CellValue
-          binding={getBalanceQuery(account)}
-          type="financial"
-          style={{ fontSize: 16, color: 'inherit' }}
-          getStyle={makeAmountFullStyle}
-          data-testid="account-balance"
-        />
-      </Button>
-    </View>
+      </View>
+      <CellValue
+        binding={getBalanceQuery(account)}
+        type="financial"
+        style={{ fontSize: 16, color: 'inherit' }}
+        getStyle={makeAmountFullStyle}
+        data-testid="account-balance"
+      />
+    </Button>
   );
 }
 
