@@ -39,21 +39,34 @@ export function SpendingCard({
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [spendingReportFilter = ''] = useLocalPref('spendingReportFilter');
-  const [spendingReportTime = 'lastMonth'] = useLocalPref('spendingReportTime');
-  const [spendingReportCompare = 'thisMonth'] = useLocalPref(
+  const [spendingReportMode = 'singleMonth'] =
+    useLocalPref('spendingReportMode');
+  const [spendingReportCompare = monthUtils.currentMonth()] = useLocalPref(
     'spendingReportCompare',
+  );
+  const [spendingReportCompareTo = monthUtils.currentMonth()] = useLocalPref(
+    'spendingReportCompareTo',
   );
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
+  const selection =
+    spendingReportMode === 'singleMonth' ? 'compareTo' : spendingReportMode;
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
   const getGraphData = useMemo(() => {
     return createSpendingSpreadsheet({
       conditions: parseFilter.conditions,
       conditionsOp: parseFilter.conditionsOp,
       compare: spendingReportCompare,
+      compareTo: spendingReportCompareTo,
+      mode: spendingReportMode,
     });
-  }, [parseFilter, spendingReportCompare]);
+  }, [
+    parseFilter,
+    spendingReportCompare,
+    spendingReportCompareTo,
+    spendingReportMode,
+  ]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
@@ -64,9 +77,9 @@ export function SpendingCard({
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
   const difference =
     data &&
-    data.intervalData[todayDay][spendingReportTime] -
-      data.intervalData[todayDay][spendingReportCompare];
-  const showLastMonth = data && Math.abs(data.intervalData[27].lastMonth) > 0;
+    data.intervalData[todayDay][selection] -
+      data.intervalData[todayDay].compare;
+  const showLastMonth = data && Math.abs(data.intervalData[27].compareTo) > 0;
 
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
@@ -126,8 +139,9 @@ export function SpendingCard({
               onClose={() => setNameMenuOpen(false)}
             />
             <DateRange
-              start={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
-              end={monthUtils.addMonths(monthUtils.currentMonth(), 1)}
+              start={spendingReportCompare}
+              end={spendingReportCompareTo}
+              type={spendingReportMode}
             />
           </View>
           {data && showLastMonth && (
@@ -164,8 +178,9 @@ export function SpendingCard({
             style={{ flex: 1 }}
             compact={true}
             data={data}
-            mode={spendingReportTime}
+            mode={spendingReportMode}
             compare={spendingReportCompare}
+            compareTo={spendingReportCompareTo}
           />
         ) : (
           <LoadingIndicator message={t('Loading report...')} />

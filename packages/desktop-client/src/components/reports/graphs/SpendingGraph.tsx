@@ -13,7 +13,6 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import * as monthUtils from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
@@ -44,8 +43,6 @@ type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
   balanceTypeOp?: string;
-  thisMonth?: string;
-  lastYear?: string;
   selection?: string;
   compare?: string;
 };
@@ -54,18 +51,15 @@ const CustomTooltip = ({
   active,
   payload,
   balanceTypeOp,
-  thisMonth,
-  lastYear,
   selection,
   compare,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
   if (active && payload && payload.length) {
-    const comparison =
-      selection === 'average'
-        ? payload[0].payload[selection] * -1
-        : payload[0].payload.months[selection].cumulative * -1;
+    const comparison = ['average', 'budget'].includes(selection)
+      ? payload[0].payload[selection] * -1
+      : payload[0].payload.months[selection].cumulative * -1;
     return (
       <div
         className={`${css({
@@ -88,13 +82,11 @@ const CustomTooltip = ({
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload[0].payload.months[thisMonth].cumulative ? (
+            {payload[0].payload.months[compare].cumulative ? (
               <AlignedText
-                left={
-                  compare === 'thisMonth' ? t('This month:') : t('Last month:')
-                }
+                left={t('Compare:')}
                 right={amountToCurrency(
-                  payload[0].payload.months[thisMonth].cumulative * -1,
+                  payload[0].payload.months[compare].cumulative * -1,
                 )}
               />
             ) : null}
@@ -103,20 +95,18 @@ const CustomTooltip = ({
                 left={
                   selection === 'average'
                     ? t('Average:')
-                    : selection === lastYear
-                      ? t('Last year:')
-                      : compare === 'thisMonth'
-                        ? t('Last month:')
-                        : t('2 months ago:')
+                    : selection === 'budget'
+                      ? t('Budget:')
+                      : t('To:')
                 }
                 right={amountToCurrency(comparison)}
               />
             )}
-            {payload[0].payload.months[thisMonth].cumulative ? (
+            {payload[0].payload.months[compare].cumulative ? (
               <AlignedText
                 left={t('Difference:')}
                 right={amountToCurrency(
-                  payload[0].payload.months[thisMonth].cumulative * -1 -
+                  payload[0].payload.months[compare].cumulative * -1 -
                     comparison,
                 )}
               />
@@ -134,6 +124,7 @@ type SpendingGraphProps = {
   compact?: boolean;
   mode: string;
   compare: string;
+  compareTo: string;
 };
 
 export function SpendingGraph({
@@ -142,51 +133,29 @@ export function SpendingGraph({
   compact,
   mode,
   compare,
+  compareTo,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
   const balanceTypeOp = 'cumulative';
-  const thisMonth = monthUtils.subMonths(
-    monthUtils.currentMonth(),
-    compare === 'thisMonth' ? 0 : 1,
-  );
-  const previousMonth = monthUtils.subMonths(
-    monthUtils.currentMonth(),
-    compare === 'thisMonth' ? 1 : 2,
-  );
-  const lastYear = monthUtils.prevYear(thisMonth);
-  let selection;
-  switch (mode) {
-    case 'average':
-      selection = 'average';
-      break;
-    case 'lastYear':
-      selection = lastYear;
-      break;
-    default:
-      selection = previousMonth;
-      break;
-  }
+
+  const selection = mode === 'singleMonth' ? compareTo : mode;
 
   const thisMonthMax = data.intervalData.reduce((a, b) =>
-    a.months[thisMonth][balanceTypeOp] < b.months[thisMonth][balanceTypeOp]
-      ? a
-      : b,
-  ).months[thisMonth][balanceTypeOp];
-  const selectionMax =
-    selection === 'average'
-      ? data.intervalData[27].average
-      : data.intervalData.reduce((a, b) =>
-          a.months[selection][balanceTypeOp] <
-          b.months[selection][balanceTypeOp]
-            ? a
-            : b,
-        ).months[selection][balanceTypeOp];
+    a.months[compare][balanceTypeOp] < b.months[compare][balanceTypeOp] ? a : b,
+  ).months[compare][balanceTypeOp];
+  const selectionMax = ['average', 'budget'].includes(selection)
+    ? data.intervalData[27][selection]
+    : data.intervalData.reduce((a, b) =>
+        a.months[selection][balanceTypeOp] < b.months[selection][balanceTypeOp]
+          ? a
+          : b,
+      ).months[selection][balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(
-    ...data.intervalData.map(i => i.months[thisMonth].cumulative),
+    ...data.intervalData.map(i => i.months[compare].cumulative),
   );
   const dataMin = Math.min(
-    ...data.intervalData.map(i => i.months[thisMonth].cumulative),
+    ...data.intervalData.map(i => i.months[compare].cumulative),
   );
 
   const tickFormatter = tick => {
@@ -206,7 +175,7 @@ export function SpendingGraph({
   };
 
   const getVal = (obj, month) => {
-    if (month === 'average') {
+    if (['average', 'budget'].includes(month)) {
       return obj[month] && -1 * obj[month];
     } else {
       return (
@@ -255,9 +224,7 @@ export function SpendingGraph({
                 )}
                 {compact ? null : (
                   <YAxis
-                    dataKey={val =>
-                      getVal(val, maxYAxis ? thisMonth : selection)
-                    }
+                    dataKey={val => getVal(val, maxYAxis ? compare : selection)}
                     domain={[0, 'auto']}
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
@@ -269,8 +236,6 @@ export function SpendingGraph({
                   content={
                     <CustomTooltip
                       balanceTypeOp={balanceTypeOp}
-                      thisMonth={thisMonth}
-                      lastYear={lastYear}
                       selection={selection}
                       compare={compare}
                     />
@@ -316,7 +281,7 @@ export function SpendingGraph({
                     r: 10,
                   }}
                   animationDuration={0}
-                  dataKey={val => getVal(val, thisMonth)}
+                  dataKey={val => getVal(val, compare)}
                   stroke={`url(#stroke${balanceTypeOp})`}
                   strokeWidth={3}
                   fill={`url(#fill${balanceTypeOp})`}

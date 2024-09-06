@@ -10,6 +10,7 @@ import { Text } from '../common/Text';
 type DateRangeProps = {
   start: string;
   end: string;
+  type?: string;
 };
 
 function checkDate(date: string) {
@@ -21,7 +22,7 @@ function checkDate(date: string) {
   }
 }
 
-export function DateRange({ start, end }: DateRangeProps): ReactElement {
+export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
   const checkStart = checkDate(start);
   const checkEnd = checkDate(end);
 
@@ -42,13 +43,23 @@ export function DateRange({ start, end }: DateRangeProps): ReactElement {
   if (startDate.getFullYear() !== endDate.getFullYear()) {
     content = (
       <div>
-        {d.format(startDate, 'MMM yyyy')} - {d.format(endDate, 'MMM yyyy')}
+        {type && 'Compare '}
+        {d.format(startDate, 'MMM yyyy')}
+        {type ? ' to ' : ' - '}
+        {['budget', 'average'].includes(type)
+          ? type
+          : d.format(endDate, 'MMM yyyy')}
       </div>
     );
   } else if (startDate.getMonth() !== endDate.getMonth()) {
     content = (
       <div>
-        {d.format(startDate, 'MMM yyyy')} - {d.format(endDate, 'MMM yyyy')}
+        {type && 'Compare '}
+        {d.format(startDate, 'MMM yyyy')}
+        {type ? ' to ' : ' - '}
+        {['budget', 'average'].includes(type)
+          ? type
+          : d.format(endDate, 'MMM yyyy')}
       </div>
     );
   } else {
