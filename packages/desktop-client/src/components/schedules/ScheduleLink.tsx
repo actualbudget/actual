@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useCallback, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -32,6 +33,8 @@ export function ScheduleLink({
   accountName?: string;
   onScheduleLinked?: (schedule: ScheduleEntity) => void;
 }) {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const [filter, setFilter] = useState(accountName || '');
 
@@ -76,7 +79,7 @@ export function ScheduleLink({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Link Schedule"
+            title={t('Link Schedule')}
             rightContent={<ModalCloseButton onClick={close} />}
           />
           <View
@@ -88,18 +91,17 @@ export function ScheduleLink({
             }}
           >
             <Text>
-              Choose the schedule{' '}
-              {ids?.length > 1
-                ? `these ${ids.length} transactions belong`
-                : `this transaction belongs`}{' '}
-              to:
+              {t(
+                'Choose the schedule these {{ count }} transactions belong to:',
+                { count: ids?.length ?? 0 },
+              )}
             </Text>
             <InitialFocus>
               <Search
                 inputRef={searchInput}
                 isInModal
                 width={300}
-                placeholder="Filter schedules…"
+                placeholder={t('Filter schedules…')}
                 value={filter}
                 onChange={setFilter}
               />
@@ -114,7 +116,7 @@ export function ScheduleLink({
                 }}
               >
                 <SvgAdd style={{ width: '20', padding: '3' }} />
-                Create New
+                <Trans>Create New</Trans>
               </Button>
             )}
           </View>
