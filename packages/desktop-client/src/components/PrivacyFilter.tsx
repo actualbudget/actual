@@ -7,6 +7,8 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import { css } from 'glamor';
+
 import { usePrivacyMode } from '../hooks/usePrivacyMode';
 import { useResponsive } from '../ResponsiveProvider';
 
@@ -44,11 +46,9 @@ export function ConditionalPrivacyFilter({
 
 type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
   activationFilters?: (boolean | (() => boolean))[];
-  lineHeight?: number;
 };
 export function PrivacyFilter({
   activationFilters,
-  lineHeight,
   children,
   ...props
 }: PrivacyFilterProps) {
@@ -63,43 +63,58 @@ export function PrivacyFilter({
         typeof value === 'boolean' ? value : value(),
       ));
 
-  const privacyLineHeight = lineHeight != null ? lineHeight : 'inherit';
-
   return !activate ? (
     <>{Children.toArray(children)}</>
   ) : (
-    <PrivacyOverlay lineHeight={privacyLineHeight} {...props}>
-      {children}
-    </PrivacyOverlay>
+    <PrivacyOverlay {...props}>{children}</PrivacyOverlay>
   );
 }
 
-function PrivacyOverlay({ lineHeight, children, ...props }) {
+function PrivacyOverlay({ children, ...props }) {
   const [hovered, setHovered] = useState(false);
   const onHover = useCallback(() => setHovered(true), [setHovered]);
   const onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
-
-  const privacyStyle = {
-    ...(!hovered && {
-      fontFamily: 'Redacted Script',
-      lineHeight,
-    }),
-  };
 
   const { style, ...restProps } = props;
 
   return (
     <View
-      style={{
-        display: style?.display ? style.display : 'inline-flex',
-        ...privacyStyle,
-        ...style,
-      }}
+      className={`${css(
+        [
+          {
+            display: 'inline-flex',
+            position: 'relative',
+            ' > div:first-child': {
+              opacity: hovered ? 1 : 0,
+            },
+            ' > div:nth-child(2)': {
+              display: hovered ? 'none' : 'block',
+            },
+          },
+        ],
+        style,
+      )}`}
       onPointerEnter={onHover}
       onPointerLeave={onHoverEnd}
       {...restProps}
     >
-      {children}
+      <div>
+        <View>{children}</View>
+      </div>
+
+      <div
+        aria-hidden="true"
+        className={`${css({
+          fontFamily: 'Redacted Script',
+          height: '100%',
+          inset: 0,
+          pointerEvents: 'none',
+          position: 'absolute',
+          width: '100%',
+        })}`}
+      >
+        <View>{children}</View>
+      </div>
     </View>
   );
 }
