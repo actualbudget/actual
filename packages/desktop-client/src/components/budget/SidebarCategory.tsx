@@ -59,6 +59,10 @@ export function SidebarCategory({
         opacity: category.hidden || categoryGroup?.hidden ? 0.33 : undefined,
         backgroundColor: 'transparent',
       }}
+      onContextMenu={e => {
+        e.preventDefault();
+        setMenuOpen(true);
+      }}
     >
       <div
         data-testid="category-name"

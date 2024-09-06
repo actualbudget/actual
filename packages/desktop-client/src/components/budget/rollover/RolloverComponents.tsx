@@ -360,6 +360,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         <span
           ref={balanceMenuTriggerRef}
           onClick={() => setBalanceMenuOpen(true)}
+          onContextMenu={e => {
+            e.preventDefault();
+            setBalanceMenuOpen(true);
+          }}
         >
           <BalanceWithCarryover
             carryover={rolloverBudget.catCarryover(category.id)}

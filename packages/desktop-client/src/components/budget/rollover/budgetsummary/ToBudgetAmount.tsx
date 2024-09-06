@@ -67,6 +67,10 @@ export function ToBudgetAmount({
           <PrivacyFilter blurIntensity={7}>
             <Block
               onClick={onClick}
+              onContextMenu={e => {
+                e.preventDefault();
+                onClick();
+              }}
               data-cellname={sheetName}
               className={`${css([
                 styles.veryLargeText,
