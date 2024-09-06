@@ -54,8 +54,8 @@ export const Tooltip = ({
     <View
       style={{ minHeight: 'auto' }}
       ref={triggerRef}
-      onPointerEnter={handlePointerEnter}
-      onPointerLeave={handlePointerLeave}
+      onMouseEnter={handlePointerEnter}
+      onMouseLeave={handlePointerLeave}
     >
       <TooltipTrigger
         isOpen={isHovered && !triggerProps.isDisabled}

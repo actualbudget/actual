@@ -14,7 +14,7 @@ function toJS(rows) {
       tombstone: row.tombstone,
       conditionsOp: row.conditions_op,
       conditions: row.conditions,
-    };
+    } satisfies TransactionFilterEntity;
   });
   return filters;
 }
