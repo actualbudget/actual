@@ -44,11 +44,11 @@ export function ConditionalPrivacyFilter({
 
 type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
   activationFilters?: (boolean | (() => boolean))[];
-  blurIntensity?: number;
+  lineHeight?: number;
 };
 export function PrivacyFilter({
   activationFilters,
-  blurIntensity,
+  lineHeight,
   children,
   ...props
 }: PrivacyFilterProps) {
@@ -63,29 +63,26 @@ export function PrivacyFilter({
         typeof value === 'boolean' ? value : value(),
       ));
 
-  const blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
+  const privacyLineHeight = lineHeight != null ? lineHeight : 'inherit';
 
   return !activate ? (
     <>{Children.toArray(children)}</>
   ) : (
-    <BlurredOverlay blurIntensity={blurAmount} {...props}>
+    <PrivacyOverlay lineHeight={privacyLineHeight} {...props}>
       {children}
-    </BlurredOverlay>
+    </PrivacyOverlay>
   );
 }
 
-function BlurredOverlay({ blurIntensity, children, ...props }) {
+function PrivacyOverlay({ lineHeight, children, ...props }) {
   const [hovered, setHovered] = useState(false);
   const onHover = useCallback(() => setHovered(true), [setHovered]);
   const onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
 
-  const blurStyle = {
+  const privacyStyle = {
     ...(!hovered && {
-      filter: `blur(${blurIntensity})`,
-      WebkitFilter: `blur(${blurIntensity})`,
-      // To fix blur performance issue in Safari.
-      // https://graffino.com/til/CjT2jrcLHP-how-to-fix-filter-blur-performance-issue-in-safari
-      transform: `translate3d(0, 0, 0)`,
+      fontFamily: 'Redacted Script',
+      lineHeight,
     }),
   };
 
@@ -95,7 +92,7 @@ function BlurredOverlay({ blurIntensity, children, ...props }) {
     <View
       style={{
         display: style?.display ? style.display : 'inline-flex',
-        ...blurStyle,
+        ...privacyStyle,
         ...style,
       }}
       onPointerEnter={onHover}

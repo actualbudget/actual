@@ -195,9 +195,7 @@ function NetWorthInner({ widget }) {
           <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter blurIntensity={5}>
-              {integerToCurrency(data.netWorth)}
-            </PrivacyFilter>
+            <PrivacyFilter>{integerToCurrency(data.netWorth)}</PrivacyFilter>
           </View>
           <PrivacyFilter>
             <Change amount={data.totalChange} />

@@ -64,7 +64,7 @@ export function ToBudgetAmount({
           offset={3}
           triggerProps={{ isDisabled: isTotalsListTooltipDisabled }}
         >
-          <PrivacyFilter blurIntensity={7}>
+          <PrivacyFilter lineHeight={1.2}>
             <Block
               onClick={onClick}
               data-cellname={sheetName}
