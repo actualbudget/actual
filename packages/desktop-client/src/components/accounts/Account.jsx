@@ -1410,6 +1410,7 @@ class AccountInternal extends PureComponent {
       showExtraBalances,
       accountId,
       categoryId,
+      onBatchDelete,
     } = this.props;
     const {
       transactions,
@@ -1581,6 +1582,15 @@ class AccountInternal extends PureComponent {
                   sortField={this.state.sort.field}
                   ascDesc={this.state.sort.ascDesc}
                   onChange={this.onTransactionsChange}
+                  onBatchDelete={this.onBatchDelete}
+                  onBatchDuplicate={this.onBatchDuplicate}
+                  onBatchLinkSchedule={this.onBatchLinkSchedule}
+                  onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
+                  onCreateRule={this.onCreateRule}
+                  onScheduleAction={this.onScheduleAction}
+                  onMakeAsNonSplitTransactions={
+                    this.onMakeAsNonSplitTransactions
+                  }
                   onRefetch={this.refetchTransactions}
                   onRefetchUpToRow={row =>
                     this.paged.refetchUpToRow(row, {
