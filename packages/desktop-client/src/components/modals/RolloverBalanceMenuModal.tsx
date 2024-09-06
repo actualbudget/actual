@@ -6,7 +6,7 @@ import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
 import {
   BalanceWithCarryover,
-  DefaultCarryoverIndicator,
+  CarryoverIndicator,
 } from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/rollover/BalanceMenu';
 import {
@@ -17,7 +17,7 @@ import {
 } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { DefaultCellValueText } from '../spreadsheet/CellValue';
+import { CellValueText } from '../spreadsheet/CellValue';
 
 type RolloverBalanceMenuModalProps = ComponentPropsWithoutRef<
   typeof BalanceMenu
@@ -73,7 +73,7 @@ export function RolloverBalanceMenuModal({
               budgeted={rolloverBudget.catBudgeted(categoryId)}
               longGoal={rolloverBudget.catLongGoal(categoryId)}
               CarryoverIndicator={({ style }) => (
-                <DefaultCarryoverIndicator
+                <CarryoverIndicator
                   style={{
                     width: 15,
                     height: 15,
@@ -85,7 +85,7 @@ export function RolloverBalanceMenuModal({
               )}
             >
               {props => (
-                <DefaultCellValueText
+                <CellValueText
                   {...props}
                   style={{
                     textAlign: 'center',

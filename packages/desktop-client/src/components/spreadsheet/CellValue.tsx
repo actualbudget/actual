@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type ReactNode } from 'react';
+import React, { type ComponentPropsWithoutRef, type ReactNode } from 'react';
 
 import { type CSSProperties, styles } from '../../style';
 import { Text } from '../common/Text';
@@ -42,7 +42,7 @@ export function CellValue<
   return children ? (
     <>{children({ type, name: fullSheetName, value: sheetValue })}</>
   ) : (
-    <DefaultCellValueText
+    <CellValueText
       type={type}
       name={fullSheetName}
       value={sheetValue}
@@ -51,10 +51,10 @@ export function CellValue<
   );
 }
 
-type DefaultCellValueTextProps<
+type CellValueTextProps<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
-> = {
+> = Omit<ComponentPropsWithoutRef<typeof Text>, 'value'> & {
   type?: FormatType;
   name: string;
   value: Spreadsheets[SheetName][FieldName];
@@ -65,7 +65,7 @@ type DefaultCellValueTextProps<
   ) => string;
 };
 
-export function DefaultCellValueText<
+export function CellValueText<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
 >({
@@ -75,7 +75,7 @@ export function DefaultCellValueText<
   formatter,
   style,
   ...props
-}: DefaultCellValueTextProps<SheetName, FieldName>) {
+}: CellValueTextProps<SheetName, FieldName>) {
   const format = useFormat();
   return (
     <Text

@@ -13,7 +13,7 @@ import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, DefaultCellValueText } from '../../spreadsheet/CellValue';
+import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
@@ -77,13 +77,15 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={rolloverBudget.totalBudgeted}
           type="financial"
         >
-          {props => <DefaultCellValueText {...props} style={cellStyle} />}
+          {props => (
+            <CellValueText {...props} value={-props.value} style={cellStyle} />
+          )}
         </RolloverCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>Spent</Text>
         <RolloverCellValue binding={rolloverBudget.totalSpent} type="financial">
-          {props => <DefaultCellValueText {...props} style={cellStyle} />}
+          {props => <CellValueText {...props} style={cellStyle} />}
         </RolloverCellValue>
       </View>
       <View style={headerLabelStyle}>
@@ -92,7 +94,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={rolloverBudget.totalBalance}
           type="financial"
         >
-          {props => <DefaultCellValueText {...props} style={cellStyle} />}
+          {props => <CellValueText {...props} style={cellStyle} />}
         </RolloverCellValue>
       </View>
     </View>
@@ -355,7 +357,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             type="financial"
           >
             {props => (
-              <DefaultCellValueText
+              <CellValueText
                 {...props}
                 style={{
                   cursor: 'pointer',
@@ -468,7 +470,7 @@ export function IncomeCategoryMonth({
             type="financial"
           >
             {props => (
-              <DefaultCellValueText
+              <CellValueText
                 {...props}
                 style={{
                   cursor: 'pointer',

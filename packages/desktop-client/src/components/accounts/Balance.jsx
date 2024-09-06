@@ -15,7 +15,7 @@ import { Button } from '../common/Button2';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
-import { CellValue, DefaultCellValueText } from '../spreadsheet/CellValue';
+import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
@@ -175,7 +175,7 @@ export function Balances({
         <CellValue binding={{ ...balanceQuery, value: 0 }} type="financial">
           {props => (
             <PrivacyFilter blurIntensity={5}>
-              <DefaultCellValueText
+              <CellValueText
                 {...props}
                 style={{
                   fontSize: 22,

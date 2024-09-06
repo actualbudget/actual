@@ -7,7 +7,7 @@ import { AlignedText } from '../../../common/AlignedText';
 import { Block } from '../../../common/Block';
 import { Tooltip } from '../../../common/Tooltip';
 import { View } from '../../../common/View';
-import { DefaultCellValueText } from '../../../spreadsheet/CellValue';
+import { CellValueText } from '../../../spreadsheet/CellValue';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { RolloverCellValue } from '../RolloverComponents';
 
@@ -15,6 +15,7 @@ type TotalsListProps = {
   prevMonthName: string;
   style?: CSSProperties;
 };
+
 export function TotalsList({ prevMonthName, style }: TotalsListProps) {
   const format = useFormat();
   return (
@@ -64,9 +65,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
             binding={rolloverBudget.incomeAvailable}
             type="financial"
           >
-            {props => (
-              <DefaultCellValueText {...props} style={{ fontWeight: 600 }} />
-            )}
+            {props => <CellValueText {...props} style={{ fontWeight: 600 }} />}
           </RolloverCellValue>
         </Tooltip>
 
@@ -75,7 +74,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           type="financial"
         >
           {props => (
-            <DefaultCellValueText
+            <CellValueText
               {...props}
               style={{ fontWeight: 600 }}
               formatter={(value, type) => {
@@ -91,7 +90,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           type="financial"
         >
           {props => (
-            <DefaultCellValueText
+            <CellValueText
               {...props}
               style={{ fontWeight: 600 }}
               formatter={(value, type) => {
@@ -107,7 +106,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           type="financial"
         >
           {props => (
-            <DefaultCellValueText
+            <CellValueText
               {...props}
               style={{ fontWeight: 600 }}
               formatter={(value, type) => {

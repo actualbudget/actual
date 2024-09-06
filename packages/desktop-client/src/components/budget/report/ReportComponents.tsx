@@ -15,7 +15,7 @@ import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, DefaultCellValueText } from '../../spreadsheet/CellValue';
+import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
@@ -74,7 +74,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
         >
-          {props => <DefaultCellValueText {...props} style={cellStyle} />}
+          {props => <CellValueText {...props} style={cellStyle} />}
         </ReportCellValue>
       </View>
       <View style={headerLabelStyle}>
@@ -82,7 +82,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           <Trans>Spent</Trans>
         </Text>
         <ReportCellValue binding={reportBudget.totalSpent} type="financial">
-          {props => <DefaultCellValueText {...props} style={cellStyle} />}
+          {props => <CellValueText {...props} style={cellStyle} />}
         </ReportCellValue>
       </View>
       <View style={headerLabelStyle}>
@@ -90,7 +90,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           <Trans>Balance</Trans>
         </Text>
         <ReportCellValue binding={reportBudget.totalLeftover} type="financial">
-          {props => <DefaultCellValueText {...props} style={cellStyle} />}
+          {props => <CellValueText {...props} style={cellStyle} />}
         </ReportCellValue>
       </View>
     </View>
@@ -365,7 +365,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             type="financial"
           >
             {props => (
-              <DefaultCellValueText
+              <CellValueText
                 {...props}
                 style={{
                   cursor: 'pointer',

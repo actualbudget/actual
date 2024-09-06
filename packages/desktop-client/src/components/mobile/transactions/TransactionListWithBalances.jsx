@@ -7,7 +7,7 @@ import { styles, theme } from '../../../style';
 import { InputWithContent } from '../../common/InputWithContent';
 import { Label } from '../../common/Label';
 import { View } from '../../common/View';
-import { CellValue, DefaultCellValueText } from '../../spreadsheet/CellValue';
+import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { PullToRefresh } from '../PullToRefresh';
 
@@ -103,7 +103,7 @@ export function TransactionListWithBalances({
             />
             <CellValue binding={balanceCleared} type="financial">
               {props => (
-                <DefaultCellValueText
+                <CellValueText
                   {...props}
                   style={{
                     fontSize: 12,
@@ -118,7 +118,7 @@ export function TransactionListWithBalances({
             <Label title="Balance" style={{ textAlign: 'center' }} />
             <CellValue binding={balance} type="financial">
               {props => (
-                <DefaultCellValueText
+                <CellValueText
                   {...props}
                   style={{
                     fontSize: 18,
@@ -146,7 +146,7 @@ export function TransactionListWithBalances({
             />
             <CellValue binding={balanceUncleared} type="financial">
               {props => (
-                <DefaultCellValueText
+                <CellValueText
                   {...props}
                   style={{
                     fontSize: 12,

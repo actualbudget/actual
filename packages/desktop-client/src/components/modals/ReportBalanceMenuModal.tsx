@@ -6,7 +6,7 @@ import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
 import {
   BalanceWithCarryover,
-  DefaultCarryoverIndicator,
+  CarryoverIndicator,
 } from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/report/BalanceMenu';
 import {
@@ -17,7 +17,7 @@ import {
 } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { DefaultCellValueText } from '../spreadsheet/CellValue';
+import { CellValueText } from '../spreadsheet/CellValue';
 
 type ReportBalanceMenuModalProps = ComponentPropsWithoutRef<typeof BalanceMenu>;
 
@@ -69,7 +69,7 @@ export function ReportBalanceMenuModal({
               budgeted={reportBudget.catBudgeted(categoryId)}
               longGoal={reportBudget.catLongGoal(categoryId)}
               CarryoverIndicator={({ style }) => (
-                <DefaultCarryoverIndicator
+                <CarryoverIndicator
                   style={{
                     width: 15,
                     height: 15,
@@ -81,7 +81,7 @@ export function ReportBalanceMenuModal({
               )}
             >
               {props => (
-                <DefaultCellValueText
+                <CellValueText
                   {...props}
                   style={{
                     textAlign: 'center',
