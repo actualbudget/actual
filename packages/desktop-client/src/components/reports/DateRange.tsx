@@ -46,7 +46,7 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
         {type && 'Compare '}
         {d.format(startDate, 'MMM yyyy')}
         {type ? ' to ' : ' - '}
-        {['budget', 'average'].includes(type)
+        {['budget', 'average'].includes(type || '')
           ? type
           : d.format(endDate, 'MMM yyyy')}
       </div>
@@ -57,7 +57,7 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
         {type && 'Compare '}
         {d.format(startDate, 'MMM yyyy')}
         {type ? ' to ' : ' - '}
-        {['budget', 'average'].includes(type)
+        {['budget', 'average'].includes(type || '')
           ? type
           : d.format(endDate, 'MMM yyyy')}
       </div>

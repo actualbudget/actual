@@ -42,7 +42,8 @@ export function Spending() {
     onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
-  const [allIntervals, setAllIntervals] = useState(null);
+  const emptyIntervals: {name: string, pretty: string}[] = []
+  const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
   const [spendingReportFilter = '', setSpendingReportFilter] = useLocalPref(
     'spendingReportFilter',
