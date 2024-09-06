@@ -196,7 +196,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const balanceMenuTriggerRef = useRef(null);
   const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
-  const [hover, setHover] = useState(false);
 
   const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
     onBudgetAction(...args);
@@ -227,16 +226,14 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           flex: 1,
           flexDirection: 'row',
         }}
-        onMouseOverCapture={() => setHover(true)}
-        onMouseLeave={() => {
-          setHover(false);
-        }}
       >
-        {!editing && (hover || budgetMenuOpen) ? (
+        {!editing && (
           <View
             style={{
+              flexDirection: 'row',
               flexShrink: 1,
               paddingLeft: 3,
+              alignItems: 'center',
               justifyContent: 'center',
               borderTopWidth: 1,
               borderBottomWidth: 1,
@@ -302,7 +299,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               />
             </Popover>
           </View>
-        ) : null}
+        )}
         <RolloverSheetCell
           name="budget"
           exposed={editing}
