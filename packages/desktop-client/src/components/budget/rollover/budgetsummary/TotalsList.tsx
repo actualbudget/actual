@@ -65,10 +65,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
             type="financial"
           >
             {props => (
-              <DefaultCellValueText
-                {...props}
-                getStyle={() => ({ fontWeight: 600 })}
-              />
+              <DefaultCellValueText {...props} style={{ fontWeight: 600 }} />
             )}
           </RolloverCellValue>
         </Tooltip>
@@ -80,7 +77,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           {props => (
             <DefaultCellValueText
               {...props}
-              getStyle={() => ({ fontWeight: 600, ...styles.tnum })}
+              style={{ fontWeight: 600 }}
               formatter={(value, type) => {
                 const v = format(value, type);
                 return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
@@ -96,7 +93,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           {props => (
             <DefaultCellValueText
               {...props}
-              getStyle={() => ({ fontWeight: 600, ...styles.tnum })}
+              style={{ fontWeight: 600 }}
               formatter={(value, type) => {
                 const v = format(value, type);
                 return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
@@ -112,7 +109,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           {props => (
             <DefaultCellValueText
               {...props}
-              getStyle={() => ({ fontWeight: 600, ...styles.tnum })}
+              style={{ fontWeight: 600 }}
               formatter={(value, type) => {
                 const v = format(Math.abs(value), type);
                 return value >= 0 ? '-' + v : '+' + v;

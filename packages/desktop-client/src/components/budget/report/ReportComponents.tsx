@@ -49,6 +49,12 @@ const headerLabelStyle: CSSProperties = {
   padding: '0 5px',
   textAlign: 'right',
 };
+
+const cellStyle: CSSProperties = {
+  color: theme.pageTextLight,
+  fontWeight: 600,
+};
+
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
@@ -68,12 +74,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
         >
-          {props => (
-            <DefaultCellValueText
-              {...props}
-              getStyle={() => ({ color: theme.pageTextLight, fontWeight: 600 })}
-            />
-          )}
+          {props => <DefaultCellValueText {...props} style={cellStyle} />}
         </ReportCellValue>
       </View>
       <View style={headerLabelStyle}>
@@ -81,12 +82,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           <Trans>Spent</Trans>
         </Text>
         <ReportCellValue binding={reportBudget.totalSpent} type="financial">
-          {props => (
-            <DefaultCellValueText
-              {...props}
-              getStyle={() => ({ color: theme.pageTextLight, fontWeight: 600 })}
-            />
-          )}
+          {props => <DefaultCellValueText {...props} style={cellStyle} />}
         </ReportCellValue>
       </View>
       <View style={headerLabelStyle}>
@@ -94,12 +90,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           <Trans>Balance</Trans>
         </Text>
         <ReportCellValue binding={reportBudget.totalLeftover} type="financial">
-          {props => (
-            <DefaultCellValueText
-              {...props}
-              getStyle={() => ({ color: theme.pageTextLight, fontWeight: 600 })}
-            />
-          )}
+          {props => <DefaultCellValueText {...props} style={cellStyle} />}
         </ReportCellValue>
       </View>
     </View>
@@ -376,13 +367,13 @@ export const CategoryMonth = memo(function CategoryMonth({
             {props => (
               <DefaultCellValueText
                 {...props}
-                getStyle={value => ({
+                style={{
                   cursor: 'pointer',
                   ':hover': {
                     textDecoration: 'underline',
                   },
-                  ...makeAmountGrey(value),
-                })}
+                  ...makeAmountGrey(props.value),
+                }}
               />
             )}
           </ReportCellValue>

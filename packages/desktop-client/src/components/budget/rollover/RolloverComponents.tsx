@@ -55,6 +55,11 @@ const headerLabelStyle: CSSProperties = {
   textAlign: 'right',
 };
 
+const cellStyle: CSSProperties = {
+  color: theme.tableHeaderText,
+  fontWeight: 600,
+};
+
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
@@ -72,29 +77,13 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={rolloverBudget.totalBudgeted}
           type="financial"
         >
-          {props => (
-            <DefaultCellValueText
-              {...props}
-              getStyle={() => ({
-                color: theme.tableHeaderText,
-                fontWeight: 600,
-              })}
-            />
-          )}
+          {props => <DefaultCellValueText {...props} style={cellStyle} />}
         </RolloverCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>Spent</Text>
         <RolloverCellValue binding={rolloverBudget.totalSpent} type="financial">
-          {props => (
-            <DefaultCellValueText
-              {...props}
-              getStyle={() => ({
-                color: theme.tableHeaderText,
-                fontWeight: 600,
-              })}
-            />
-          )}
+          {props => <DefaultCellValueText {...props} style={cellStyle} />}
         </RolloverCellValue>
       </View>
       <View style={headerLabelStyle}>
@@ -103,15 +92,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={rolloverBudget.totalBalance}
           type="financial"
         >
-          {props => (
-            <DefaultCellValueText
-              {...props}
-              getStyle={() => ({
-                color: theme.tableHeaderText,
-                fontWeight: 600,
-              })}
-            />
-          )}
+          {props => <DefaultCellValueText {...props} style={cellStyle} />}
         </RolloverCellValue>
       </View>
     </View>
@@ -376,11 +357,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             {props => (
               <DefaultCellValueText
                 {...props}
-                getStyle={value => ({
+                style={{
                   cursor: 'pointer',
                   ':hover': { textDecoration: 'underline' },
-                  ...makeAmountGrey(value),
-                })}
+                  ...makeAmountGrey(props.value),
+                }}
               />
             )}
           </RolloverCellValue>
@@ -489,10 +470,10 @@ export function IncomeCategoryMonth({
             {props => (
               <DefaultCellValueText
                 {...props}
-                getStyle={() => ({
+                style={{
                   cursor: 'pointer',
                   ':hover': { textDecoration: 'underline' },
-                })}
+                }}
               />
             )}
           </RolloverCellValue>

@@ -177,16 +177,16 @@ export function Balances({
             <PrivacyFilter blurIntensity={5}>
               <DefaultCellValueText
                 {...props}
-                getStyle={value => ({
+                style={{
                   fontSize: 22,
                   fontWeight: 400,
                   color:
-                    value < 0
+                    props.value < 0
                       ? theme.errorText
-                      : value > 0
+                      : props.value > 0
                         ? theme.noticeTextLight
                         : theme.pageTextSubdued,
-                })}
+                }}
               />
             </PrivacyFilter>
           )}

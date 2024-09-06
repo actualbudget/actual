@@ -60,10 +60,7 @@ export function BudgetTotal<
             {t('of')}{' '}
             <CellValue binding={target} type="financial">
               {props => (
-                <DefaultCellValueText
-                  {...props}
-                  getStyle={() => styles.notFixed}
-                />
+                <DefaultCellValueText {...props} style={styles.notFixed} />
               )}
             </CellValue>
           </Text>

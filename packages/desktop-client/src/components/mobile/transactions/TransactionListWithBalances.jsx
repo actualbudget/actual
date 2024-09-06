@@ -105,11 +105,11 @@ export function TransactionListWithBalances({
               {props => (
                 <DefaultCellValueText
                   {...props}
-                  getStyle={() => ({
+                  style={{
                     fontSize: 12,
                     textAlign: 'center',
                     fontWeight: '500',
-                  })}
+                  }}
                 />
               )}
             </CellValue>
@@ -120,13 +120,15 @@ export function TransactionListWithBalances({
               {props => (
                 <DefaultCellValueText
                   {...props}
-                  getStyle={value => ({
+                  style={{
                     fontSize: 18,
                     textAlign: 'center',
                     fontWeight: '500',
                     color:
-                      value < 0 ? theme.errorText : theme.pillTextHighlighted,
-                  })}
+                      props.value < 0
+                        ? theme.errorText
+                        : theme.pillTextHighlighted,
+                  }}
                   data-testid="transactions-balance"
                 />
               )}
@@ -146,11 +148,11 @@ export function TransactionListWithBalances({
               {props => (
                 <DefaultCellValueText
                   {...props}
-                  getStyle={() => ({
+                  style={{
                     fontSize: 12,
                     textAlign: 'center',
                     fontWeight: '500',
-                  })}
+                  }}
                   data-testid="transactions-balance-uncleared"
                 />
               )}

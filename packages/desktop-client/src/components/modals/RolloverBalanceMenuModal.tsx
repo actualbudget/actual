@@ -87,10 +87,10 @@ export function RolloverBalanceMenuModal({
               {props => (
                 <DefaultCellValueText
                   {...props}
-                  getStyle={() => ({
+                  style={{
                     textAlign: 'center',
                     ...styles.veryLargeText,
-                  })}
+                  }}
                 />
               )}
             </BalanceWithCarryover>

@@ -83,10 +83,10 @@ export function ReportBalanceMenuModal({
               {props => (
                 <DefaultCellValueText
                   {...props}
-                  getStyle={() => ({
+                  style={{
                     textAlign: 'center',
                     ...styles.veryLargeText,
-                  })}
+                  }}
                 />
               )}
             </BalanceWithCarryover>

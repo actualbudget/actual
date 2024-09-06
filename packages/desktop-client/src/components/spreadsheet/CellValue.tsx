@@ -58,7 +58,7 @@ type DefaultCellValueTextProps<
   type?: FormatType;
   name: string;
   value: Spreadsheets[SheetName][FieldName];
-  getStyle?: (value: Spreadsheets[SheetName][FieldName]) => CSSProperties;
+  style?: CSSProperties;
   formatter?: (
     value: Spreadsheets[SheetName][FieldName],
     type?: FormatType,
@@ -73,7 +73,7 @@ export function DefaultCellValueText<
   name,
   value,
   formatter,
-  getStyle,
+  style,
   ...props
 }: DefaultCellValueTextProps<SheetName, FieldName>) {
   const format = useFormat();
@@ -81,7 +81,7 @@ export function DefaultCellValueText<
     <Text
       style={{
         ...(type === 'financial' && styles.tnum),
-        ...getStyle?.(value),
+        ...style,
       }}
       data-testid={name}
       data-cellname={name}

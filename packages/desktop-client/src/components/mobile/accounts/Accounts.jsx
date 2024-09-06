@@ -51,7 +51,7 @@ function AccountHeader({ name, amount, style = {} }) {
         {props => (
           <DefaultCellValueText
             {...props}
-            getStyle={() => ({ ...styles.text, fontSize: 14 })}
+            style={{ ...styles.text, fontSize: 14 }}
           />
         )}
       </CellValue>
