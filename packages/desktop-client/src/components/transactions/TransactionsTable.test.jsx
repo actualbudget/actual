@@ -35,11 +35,18 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 const accounts = [generateAccount('Bank of America')];
 const payees = [
   {
-    id: 'payed-to',
+    id: 'bob-id',
+    name: 'Bob',
     favorite: true,
     transfer_acct: null,
     category: null,
-    name: 'Payed To',
+  },
+  {
+    id: 'alice-id',
+    name: 'Alice',
+    favorite: true,
+    transfer_acct: null,
+    category: null,
   },
   {
     id: 'guy',
@@ -76,6 +83,7 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
       generateTransaction(
         {
           account: accounts[0].id,
+          payee: 'alice-id',
           category:
             i === 0
               ? null
@@ -652,10 +660,11 @@ describe('Transactions', () => {
         p.getAttribute('data-testid'),
       ),
     ).toStrictEqual([
-      'Payed To-payee-item',
+      'Alice-payee-item',
+      'Bob-payee-item',
       'This guy on the side of the road-payee-item',
     ]);
-    expect(renderedPayees).payeesToHaveFavoriteStars(['Payed To-payee-item']);
+    expect(renderedPayees).payeesToHaveFavoriteStars(['Alice-payee-item', 'Bob-payee-item']);
   });
 
   test('dropdown payee displays on existing non-transfer transaction', async () => {
@@ -672,7 +681,8 @@ describe('Transactions', () => {
         p.getAttribute('data-testid'),
       ),
     ).toStrictEqual([
-      'Payed To-payee-item',
+      'Alice-payee-item',
+      'Bob-payee-item',
       'This guy on the side of the road-payee-item',
     ]);
   });
@@ -953,7 +963,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: 0,
       },
       {
@@ -966,7 +976,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_child: true,
         parent_id: parentId,
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: -1,
         starting_balance_flag: null,
       },
@@ -980,7 +990,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_child: true,
         parent_id: parentId,
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: -2,
         starting_balance_flag: null,
       },
