@@ -42,7 +42,7 @@ export function Spending() {
     onConditionsOpChange,
   } = useFilters<RuleConditionEntity>();
 
-  const emptyIntervals: {name: string, pretty: string}[] = []
+  const emptyIntervals: { name: string; pretty: string }[] = [];
   const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
   const [spendingReportFilter = '', setSpendingReportFilter] = useLocalPref(
@@ -75,10 +75,10 @@ export function Spending() {
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
-      const currentMonth = monthUtils.currentMonth();
+
       let earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : currentMonth;
+        : monthUtils.currentMonth();
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
@@ -114,9 +114,8 @@ export function Spending() {
       setDataCheck,
       compare,
       compareTo,
-      mode,
     });
-  }, [conditions, conditionsOp, compare, compareTo, mode]);
+  }, [conditions, conditionsOp, compare, compareTo]);
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
@@ -139,20 +138,22 @@ export function Spending() {
   };
 
   const showAverage =
+    data.intervalData[27].months[monthUtils.subMonths(compare, 3)] &&
     Math.abs(
-      data.intervalData[27].months[
-        monthUtils.subMonths(monthUtils.currentDay(), 3)
-      ].cumulative,
+      data.intervalData[27].months[monthUtils.subMonths(compare, 3)].cumulative,
     ) > 0;
 
   const todayDay =
-    compare === 'lastMonth'
+    compare !== monthUtils.currentMonth()
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
         ? 27
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
-  const showPreviousMonth = Math.abs(data.intervalData[27].compareTo) > 0;
+  const showCompareTo = Math.abs(data.intervalData[27].compareTo) > 0;
+  const showCompare =
+    compare === monthUtils.currentMonth() ||
+    Math.abs(data.intervalData[27].compare) > 0;
   return (
     <Page
       header={
@@ -253,17 +254,15 @@ export function Spending() {
           >
             Budget
           </ModeButton>
-          {showAverage && (
-            <ModeButton
-              selected={mode === 'average'}
-              onSelect={() => setMode('average')}
-              style={{
-                backgroundColor: 'inherit',
-              }}
-            >
-              Average
-            </ModeButton>
-          )}
+          <ModeButton
+            selected={mode === 'average'}
+            onSelect={() => setMode('average')}
+            style={{
+              backgroundColor: 'inherit',
+            }}
+          >
+            Average
+          </ModeButton>
         </View>
         {!isNarrowWidth && (
           <View
@@ -376,11 +375,16 @@ export function Spending() {
                     color: theme.pageText,
                   }}
                 >
-                  {showPreviousMonth && (
-                    <View>
+                  <View>
+                    {showCompareTo && (
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
-                        left={<Block>Spent {compare}:</Block>}
+                        left={
+                          <Block>
+                            Spent {monthUtils.format(compare, 'MMM, yyyy')}
+                            {compare === monthUtils.currentMonth() && ' MTD'}:
+                          </Block>
+                        }
                         right={
                           <Text style={{ fontWeight: 600 }}>
                             <PrivacyFilter blurIntensity={5}>
@@ -391,9 +395,15 @@ export function Spending() {
                           </Text>
                         }
                       />
+                    )}
+                    {mode === 'singleMonth' && (
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
-                        left={<Block>Spent {compareTo}:</Block>}
+                        left={
+                          <Block>
+                            Spent {monthUtils.format(compareTo, 'MMM, yyyy')}:
+                          </Block>
+                        }
                         right={
                           <Text style={{ fontWeight: 600 }}>
                             <PrivacyFilter blurIntensity={5}>
@@ -404,14 +414,32 @@ export function Spending() {
                           </Text>
                         }
                       />
-                    </View>
-                  )}
+                    )}
+                  </View>
+                  <AlignedText
+                    style={{ marginBottom: 5, minWidth: 210 }}
+                    left={
+                      <Block>
+                        Budget{compare === monthUtils.currentMonth() && ' MTD'}:
+                      </Block>
+                    }
+                    right={
+                      <Text style={{ fontWeight: 600 }}>
+                        <PrivacyFilter blurIntensity={5}>
+                          {amountToCurrency(
+                            Math.abs(data.intervalData[todayDay].budget),
+                          )}
+                        </PrivacyFilter>
+                      </Text>
+                    }
+                  />
                   {showAverage && (
                     <AlignedText
                       style={{ marginBottom: 5, minWidth: 210 }}
                       left={
                         <Block>
-                          Spent Average{compare === 'thisMonth' && ' MTD'}:
+                          Spent Average
+                          {compare === monthUtils.currentMonth() && ' MTD'}:
                         </Block>
                       }
                       right={
@@ -427,7 +455,9 @@ export function Spending() {
                   )}
                 </View>
               </View>
-              {!showPreviousMonth ? (
+              {!showCompare ||
+              (mode === 'singleMonth' && !showCompareTo) ||
+              (mode === 'average' && !showAverage) ? (
                 <View style={{ marginTop: 20 }}>
                   <h1>Additional data required to generate graph</h1>
                   <Paragraph>

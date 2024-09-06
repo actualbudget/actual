@@ -59,14 +59,8 @@ export function SpendingCard({
       conditionsOp: parseFilter.conditionsOp,
       compare: spendingReportCompare,
       compareTo: spendingReportCompareTo,
-      mode: spendingReportMode,
     });
-  }, [
-    parseFilter,
-    spendingReportCompare,
-    spendingReportCompareTo,
-    spendingReportMode,
-  ]);
+  }, [parseFilter, spendingReportCompare, spendingReportCompareTo]);
 
   const data = useReport('default', getGraphData);
   const todayDay =

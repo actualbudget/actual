@@ -21,7 +21,6 @@ type createSpendingSpreadsheetProps = {
   setDataCheck?: (value: boolean) => void;
   compare?: string;
   compareTo?: string;
-  mode?: string;
 };
 
 export function createSpendingSpreadsheet({
@@ -30,7 +29,6 @@ export function createSpendingSpreadsheet({
   setDataCheck,
   compare,
   compareTo,
-  mode,
 }: createSpendingSpreadsheetProps) {
   const startDate = monthUtils.subMonths(compare, 3) + '-01';
   const endDate = monthUtils.getMonthEnd(compare + '-01');
@@ -106,25 +104,22 @@ export function createSpendingSpreadsheet({
     const combineDebts = [...debts, ...overlapDebts];
 
     const budgetMonth = parseInt(compare.replace('-', ''));
-    const [budgets] =
-      mode !== 'budget'
-        ? []
-        : await Promise.all([
-            runQuery(
-              q('zero_budgets')
-                .filter({
-                  $and: [{ month: { $eq: budgetMonth } }],
-                })
-                .filter({
-                  [conditionsOpKey]: filters.filter(filter => filter.category),
-                })
-                .groupBy([{ $id: '$category' }])
-                .select([
-                  { category: { $id: '$category' } },
-                  { amount: { $sum: '$amount' } },
-                ]),
-            ).then(({ data }) => data),
-          ]);
+    const [budgets] = await Promise.all([
+      runQuery(
+        q('zero_budgets')
+          .filter({
+            $and: [{ month: { $eq: budgetMonth } }],
+          })
+          .filter({
+            [conditionsOpKey]: filters.filter(filter => filter.category),
+          })
+          .groupBy([{ $id: '$category' }])
+          .select([
+            { category: { $id: '$category' } },
+            { amount: { $sum: '$amount' } },
+          ]),
+      ).then(({ data }) => data),
+    ]);
 
     const dailyBudget =
       budgets &&
@@ -201,10 +196,7 @@ export function createSpendingSpreadsheet({
               }
               return null;
             });
-            if (
-              month.month !== monthUtils.currentMonth() &&
-              month.month !== compare
-            ) {
+            if (month.month >= startDate && month.month < compare) {
               if (day === '28') {
                 if (monthUtils.getMonthEnd(intervalItem) === intervalItem) {
                   averageSum += cumulativeAssets + cumulativeDebts;
