@@ -73,9 +73,16 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows') }}
         uses: actions/upload-artifact@v4
         with:
-          name: actual-electron-${{ matrix.os }}-appx
+          name: actual-electron-${{ matrix.os }}-store
           path: |
             packages/desktop-electron/dist/*.appx
+      - name: Upload Mac Store Build
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: actual-electron-${{ matrix.os }}-store
+          path: |
+            packages/desktop-electron/dist/*.mas
       - name: Add to Release
         uses: softprops/action-gh-release@v2
         with:
