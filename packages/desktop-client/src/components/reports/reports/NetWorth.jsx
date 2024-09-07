@@ -157,6 +157,7 @@ function NetWorthInner({ widget }) {
         allMonths={allMonths}
         start={start}
         end={end}
+        mode={mode}
         onChangeDates={onChangeDates}
         filters={conditions}
         saved={saved}

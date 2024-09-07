@@ -1,4 +1,10 @@
-import React, { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import React, {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type ComponentType,
+  type ReactNode,
+  type SVGProps,
+} from 'react';
 import {
   type ButtonRenderProps as ReactAriaButtonRenderProps,
   Button as ReactAriaButton,
@@ -121,13 +127,21 @@ const _getActiveStyles = (
 type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
+  Icon?: ComponentType<SVGProps<SVGElement>>;
+  children?: ReactNode;
 };
 
 type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
-    const { children, variant = 'normal', bounce = true, ...restProps } = props;
+    const {
+      children,
+      variant = 'normal',
+      bounce = true,
+      Icon,
+      ...restProps
+    } = props;
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
@@ -161,6 +175,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ...styles.smallText,
           ...(renderProps.isDisabled ? {} : { ':hover': hoveredStyle }),
           ...(renderProps.isDisabled ? {} : { ':active': activeStyle }),
+          ...(Icon ? { paddingLeft: 0 } : {}),
         }),
       );
 
@@ -177,6 +192,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           `${renderProps.defaultClassName} ${defaultButtonClassName(renderProps)} ${buttonClassName(renderProps)}`
         }
       >
+        {Icon && (
+          <Icon style={{ height: 15, paddingLeft: 5, paddingRight: 3 }} />
+        )}
         {children}
       </ReactAriaButton>
     );
@@ -203,34 +221,30 @@ export const ButtonWithLoading = forwardRef<
         ...(typeof style === 'function' ? style(buttonRenderProps) : style),
       })}
     >
-      {renderProps => (
-        <>
-          {isLoading && (
-            <View
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <AnimatedLoading style={{ width: 20, height: 20 }} />
-            </View>
-          )}
-          <View
-            style={{
-              opacity: isLoading ? 0 : 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            {typeof children === 'function' ? children(renderProps) : children}
-          </View>
-        </>
+      {isLoading && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <AnimatedLoading style={{ width: 20, height: 20 }} />
+        </View>
       )}
+      <View
+        style={{
+          opacity: isLoading ? 0 : 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        {children}
+      </View>
     </Button>
   );
 });

@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { SvgPause, SvgPlay } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
@@ -19,6 +20,7 @@ import {
 export function Header({
   start,
   end,
+  mode,
   show1Month,
   allMonths,
   onChangeDates,
@@ -28,7 +30,6 @@ export function Header({
   onUpdateFilter,
   onDeleteFilter,
   onConditionsOpChange,
-  headerPrefixItems,
   children,
 }) {
   const location = useLocation();
@@ -52,7 +53,21 @@ export function Header({
             gap: 15,
           }}
         >
-          {headerPrefixItems}
+          {mode && (
+            <Button
+              variant={mode === 'static' ? 'normal' : 'primary'}
+              onPress={() =>
+                onChangeDates(
+                  start,
+                  end,
+                  mode === 'static' ? 'sliding-window' : 'static',
+                )
+              }
+              Icon={mode === 'static' ? SvgPause : SvgPlay}
+            >
+              {mode === 'static' ? 'Paused' : 'Live'}
+            </Button>
+          )}
 
           <View
             style={{
@@ -90,14 +105,15 @@ export function Header({
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
               buttonStyle={{ marginRight: 10 }}
             />
-            {filters && (
-              <FilterButton
-                compact={isNarrowWidth}
-                onApply={onApply}
-                type="accounts"
-              />
-            )}
           </View>
+
+          {filters && (
+            <FilterButton
+              compact={isNarrowWidth}
+              onApply={onApply}
+              type="accounts"
+            />
+          )}
 
           <View
             style={{

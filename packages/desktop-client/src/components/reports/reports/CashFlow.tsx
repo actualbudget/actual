@@ -134,7 +134,7 @@ export function CashFlow() {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
-        headerPrefixItems={undefined}
+        mode={undefined}
       >
         <Button onPress={() => setShowBalance(state => !state)}>
           {showBalance ? 'Hide balance' : 'Show balance'}
