@@ -71,7 +71,6 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
     __actionsForMenu: BoundActions & { inputFocused: typeof inputFocused };
-    // inputFocused: typeof inputFocused;
 
     $send: typeof send;
     $query: typeof runQuery;
