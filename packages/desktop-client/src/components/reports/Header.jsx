@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgPause, SvgPlay } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button2';
@@ -32,6 +33,7 @@ export function Header({
   onConditionsOpChange,
   children,
 }) {
+  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const location = useLocation();
   const path = location.pathname;
   const { isNarrowWidth } = useResponsive();
@@ -53,7 +55,7 @@ export function Header({
             gap: 15,
           }}
         >
-          {mode && (
+          {isDashboardsFeatureEnabled && mode && (
             <Button
               variant={mode === 'static' ? 'normal' : 'primary'}
               onPress={() =>
