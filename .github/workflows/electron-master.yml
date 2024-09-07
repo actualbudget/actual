@@ -82,8 +82,7 @@ jobs:
         with:
           name: actual-electron-${{ matrix.os }}-store
           path: |
-            packages/desktop-electron/dist/mas/*
-            packages/desktop-electron/dist/mas-arm64/*
+            packages/desktop-electron/dist/mas*
       - name: Add to Release
         uses: softprops/action-gh-release@v2
         with:
