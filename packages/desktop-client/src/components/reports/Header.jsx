@@ -107,15 +107,15 @@ export function Header({
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
               buttonStyle={{ marginRight: 10 }}
             />
-          </View>
 
-          {filters && (
-            <FilterButton
-              compact={isNarrowWidth}
-              onApply={onApply}
-              type="accounts"
-            />
-          )}
+            {filters && (
+              <FilterButton
+                compact={isNarrowWidth}
+                onApply={onApply}
+                type="accounts"
+              />
+            )}
+          </View>
 
           <View
             style={{
