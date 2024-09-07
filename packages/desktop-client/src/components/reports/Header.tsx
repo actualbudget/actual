@@ -134,15 +134,6 @@ export function Header({
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
               buttonStyle={{ marginRight: 10 }}
             />
-
-            {filters && (
-              <FilterButton
-                compact={isNarrowWidth}
-                onApply={onApply}
-                hover={false}
-                exclude={undefined}
-              />
-            )}
           </View>
 
           <View
@@ -189,6 +180,15 @@ export function Header({
             >
               All Time
             </Button>
+
+            {filters && (
+              <FilterButton
+                compact={isNarrowWidth}
+                onApply={onApply}
+                hover={false}
+                exclude={undefined}
+              />
+            )}
           </View>
 
           {children ? (
