@@ -1,4 +1,4 @@
-import React, { type ReactNode, type HTMLProps } from 'react';
+import React, { type ReactNode, type ComponentProps } from 'react';
 
 import { css } from 'glamor';
 
@@ -64,9 +64,7 @@ export const FormField = ({ style, children }: FormFieldProps) => {
 
 // Custom inputs
 
-type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type'> & {
-  style?: CSSProperties;
-};
+type CheckboxProps = ComponentProps<'input'>;
 
 export const Checkbox = (props: CheckboxProps) => {
   return (

@@ -17,6 +17,7 @@ function isValueOption<Value>(
 export type SelectOption<Value = string> = [Value, string] | typeof Menu.line;
 
 type SelectProps<Value> = {
+  id?: string;
   bare?: boolean;
   options: Array<readonly [Value, string] | typeof Menu.line>;
   value: Value;
@@ -41,6 +42,7 @@ type SelectProps<Value> = {
  * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
 export function Select<const Value = string>({
+  id,
   bare,
   options,
   value,
@@ -61,6 +63,7 @@ export function Select<const Value = string>({
     <>
       <Button
         ref={triggerRef}
+        id={id}
         type={bare ? 'bare' : 'normal'}
         disabled={disabled}
         onClick={() => {
