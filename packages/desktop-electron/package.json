@@ -36,6 +36,13 @@
       },
       "target": [
         {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
           "target": "mas",
           "arch": [
             "x64",
