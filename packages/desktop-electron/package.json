@@ -9,7 +9,7 @@
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
     "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-assets",
-    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* appx/**/* entitlements.mas.plist build",
+    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* appx/**/* entitlements.mas.plist entitlements.mas.inherit.plist  build",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron ."
   },
   "main": "build/index.js",
@@ -28,13 +28,14 @@
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
-      "hardenedRuntime": true,
+      "hardenedRuntime": false,
       "gatekeeperAssess": false,
       "artifactName": "${productName}-mac-${arch}.${ext}",
       "notarize": {
         "teamId": "79ANZ983YF"
       },
       "entitlements": "build/entitlements.mas.plist",
+      "entitlementsInherit": "build/entitlements.mas.inherit.plist",
       "target": [
         {
           "target": "dmg",
