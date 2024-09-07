@@ -115,7 +115,7 @@ function boundedRange(
       latest = monthUtils.currentDay();
       break;
     default:
-      latest = monthUtils.currentDay();
+      latest = monthUtils.currentMonth();
       break;
   }
 
