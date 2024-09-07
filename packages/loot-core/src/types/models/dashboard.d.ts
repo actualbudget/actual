@@ -4,7 +4,7 @@ import { type RuleConditionEntity } from './rule';
 export type TimeFrame = {
   start: string;
   end: string;
-  mode: 'sliding-window' | 'static';
+  mode: 'sliding-window' | 'static' | 'full';
 };
 
 type AbstractWidget<

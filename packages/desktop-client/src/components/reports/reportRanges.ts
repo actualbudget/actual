@@ -156,7 +156,7 @@ export function getSpecificRange(
 
 export function getFullRange(start: string) {
   const end = monthUtils.currentMonth();
-  return [start, end, 'sliding-window'];
+  return [start, end, 'full'];
 }
 
 export function getLatestRange(offset: number) {
@@ -172,9 +172,12 @@ export function calculateTimeRange(
     mode: 'sliding-window',
   },
 ) {
+  if (mode === 'full') {
+    return getFullRange(start);
+  }
   if (mode === 'sliding-window') {
     return getLatestRange(monthUtils.differenceInCalendarMonths(end, start));
   }
 
-  return [start, end];
+  return [start, end, 'static'];
 }
