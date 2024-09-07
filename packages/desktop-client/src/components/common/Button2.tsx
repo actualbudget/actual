@@ -127,7 +127,7 @@ const _getActiveStyles = (
 type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
-  Icon?: ComponentType<SVGProps<SVGElement>>;
+  Icon?: ComponentType<SVGProps<SVGSVGElement>>;
   children?: ReactNode;
 };
 

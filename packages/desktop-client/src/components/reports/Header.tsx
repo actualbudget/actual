@@ -1,6 +1,11 @@
+import { type ComponentProps, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
+import {
+  type RuleConditionEntity,
+  type TimeFrame,
+} from 'loot-core/types/models';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { SvgPause, SvgPlay } from '../../icons/v1';
@@ -18,6 +23,28 @@ import {
   validateStart,
 } from './reportRanges';
 
+type HeaderProps = {
+  start: TimeFrame['start'];
+  end: TimeFrame['end'];
+  mode?: TimeFrame['mode'];
+  show1Month?: boolean;
+  allMonths: Array<{ name: string; pretty: string }>;
+  onChangeDates: (
+    start: TimeFrame['start'],
+    end: TimeFrame['end'],
+    mode: TimeFrame['mode'],
+  ) => void;
+  filters?: RuleConditionEntity[];
+  conditionsOp: 'and' | 'or';
+  onApply?: (conditions: RuleConditionEntity) => void;
+  onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
+  onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
+  onConditionsOpChange: ComponentProps<
+    typeof AppliedFilters
+  >['onConditionsOpChange'];
+  children?: ReactNode;
+};
+
 export function Header({
   start,
   end,
@@ -32,7 +59,7 @@ export function Header({
   onDeleteFilter,
   onConditionsOpChange,
   children,
-}) {
+}: HeaderProps) {
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const location = useLocation();
   const path = location.pathname;
@@ -112,7 +139,8 @@ export function Header({
               <FilterButton
                 compact={isNarrowWidth}
                 onApply={onApply}
-                type="accounts"
+                hover={false}
+                exclude={undefined}
               />
             )}
           </View>
@@ -179,13 +207,7 @@ export function Header({
         </View>
       )}
       {filters && filters.length > 0 && (
-        <View
-          style={{ marginTop: 5 }}
-          spacing={2}
-          direction="row"
-          justify="flex-start"
-          align="flex-start"
-        >
+        <View style={{ marginTop: 5 }}>
           <AppliedFilters
             conditions={filters}
             onUpdate={onUpdateFilter}

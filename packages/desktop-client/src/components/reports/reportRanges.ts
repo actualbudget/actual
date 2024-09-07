@@ -156,13 +156,13 @@ export function getSpecificRange(
 
 export function getFullRange(start: string) {
   const end = monthUtils.currentMonth();
-  return [start, end, 'full'];
+  return [start, end, 'full'] as const;
 }
 
 export function getLatestRange(offset: number) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, offset);
-  return [start, end, 'sliding-window'];
+  return [start, end, 'sliding-window'] as const;
 }
 
 export function calculateTimeRange(
