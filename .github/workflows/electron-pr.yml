@@ -61,7 +61,8 @@ jobs:
         with:
           name: actual-electron-${{ matrix.os }}-store
           path: |
-            packages/desktop-electron/dist/mas*
+            packages/desktop-electron/dist/mas/*
+            packages/desktop-electron/dist/mas-arm64/*
       - name: Upload Windows Store Build
         if: ${{ startsWith(matrix.os, 'windows') }}
         uses: actions/upload-artifact@v4
