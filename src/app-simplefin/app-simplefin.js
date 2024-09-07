@@ -1,5 +1,4 @@
 import express from 'express';
-import { inspect } from 'util';
 import https from 'https';
 import { SecretName, secretsService } from '../services/secrets-service.js';
 import { handleError } from '../app-gocardless/util/handle-error.js';
@@ -80,140 +79,159 @@ app.post(
       return;
     }
 
+    if (Array.isArray(accountId) != Array.isArray(startDate)) {
+      console.log(accountId, startDate);
+      throw new Error(
+        'accountId and startDate must either both be arrays or both be strings',
+      );
+    }
+    if (Array.isArray(accountId) && accountId.length !== startDate.length) {
+      console.log(accountId, startDate);
+      throw new Error('accountId and startDate arrays must be the same length');
+    }
+
+    const earliestStartDate = Array.isArray(startDate)
+      ? startDate.reduce((a, b) => (a < b ? a : b))
+      : startDate;
     let results;
     try {
-      results = await getTransactions(accessKey, new Date(startDate));
+      results = await getTransactions(accessKey, new Date(earliestStartDate));
     } catch (e) {
-      serverDown(e, res);
+      if (e.message === 'Forbidden') {
+        invalidToken(res);
+      } else {
+        serverDown(e, res);
+      }
       return;
     }
 
-    try {
-      const account =
-        !results?.accounts || results.accounts.find((a) => a.id === accountId);
-      if (!account) {
-        console.log(
-          `The account "${accountId}" was not found. Here were the accounts returned:`,
-        );
-        if (results?.accounts)
-          results.accounts.forEach((a) =>
-            console.log(`${a.id} - ${a.org.name}`),
-          );
-        res.send({
-          status: 'ok',
-          data: {
-            error_type: 'ACCOUNT_MISSING',
-            error_code: 'ACCOUNT_MISSING',
-            status: 'rejected',
-            reason: `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
-          },
-        });
-        return;
+    let response = {};
+    if (Array.isArray(accountId)) {
+      for (let i = 0; i < accountId.length; i++) {
+        const id = accountId[i];
+        response[id] = getAccountResponse(results, id, new Date(startDate[i]));
       }
+    } else {
+      response = getAccountResponse(results, accountId, new Date(startDate));
+    }
 
-      const needsAttention = results.errors.find(
-        (e) => e === `Connection to ${account.org.name} may need attention`,
-      );
-      if (needsAttention) {
-        res.send({
-          status: 'ok',
-          data: {
-            error_type: 'ACCOUNT_NEEDS_ATTENTION',
-            error_code: 'ACCOUNT_NEEDS_ATTENTION',
-            status: 'rejected',
-            reason:
-              'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
-          },
-        });
-        return;
-      }
-
-      const response = {};
-
-      const balance = parseInt(account.balance.replace('.', ''));
-      const date = new Date(account['balance-date'] * 1000)
-        .toISOString()
-        .split('T')[0];
-
-      response.balances = [
-        {
-          balanceAmount: {
-            amount: account.balance,
-            currency: account.currency,
-          },
-          balanceType: 'expected',
-          referenceDate: date,
-        },
-        {
-          balanceAmount: {
-            amount: account.balance,
-            currency: account.currency,
-          },
-          balanceType: 'interimAvailable',
-          referenceDate: date,
-        },
-      ];
-      response.startingBalance = balance; // could be named differently in this use case.
-
-      const allTransactions = [];
-      const bookedTransactions = [];
-      const pendingTransactions = [];
-
-      for (const trans of account.transactions) {
-        const newTrans = {};
-
-        let dateToUse = 0;
-
-        if (trans.posted == 0) {
-          newTrans.booked = false;
-          dateToUse = trans.transacted_at;
-        } else {
-          newTrans.booked = true;
-          dateToUse = trans.posted;
-        }
-
-        newTrans.bookingDate = new Date(dateToUse * 1000)
-          .toISOString()
-          .split('T')[0];
-
-        newTrans.date = new Date(dateToUse * 1000).toISOString().split('T')[0];
-        newTrans.payeeName = trans.payee;
-        newTrans.remittanceInformationUnstructured = trans.description;
-        newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
-        newTrans.transactionId = trans.id;
-        newTrans.valueDate = new Date(dateToUse * 1000)
-          .toISOString()
-          .split('T')[0];
-
-        if (newTrans.booked) {
-          bookedTransactions.push(newTrans);
-        } else {
-          pendingTransactions.push(newTrans);
-        }
-        allTransactions.push(newTrans);
-      }
-
-      response.transactions = {
-        all: allTransactions,
-        booked: bookedTransactions,
-        pending: pendingTransactions,
-      };
-
+    if (results.hasError) {
       res.send({
         status: 'ok',
-        data: response,
+        data: !Array.isArray(accountId)
+          ? results.errors[accountId][0]
+          : {
+              ...response,
+              errors: results.errors,
+            },
       });
-    } catch (error) {
-      const sendErrorResponse = (data) =>
-        res.send({ status: 'ok', data: { ...data, details: error.details } });
-      console.log(
-        'Something went wrong',
-        inspect(error, { depth: null }),
-        sendErrorResponse,
-      );
+      return;
     }
+
+    res.send({
+      status: 'ok',
+      data: response,
+    });
   }),
 );
+
+function logAccountError(results, accountId, data) {
+  const errors = results.errors[accountId] || [];
+  errors.push(data);
+  results.errors[accountId] = errors;
+  results.hasError = true;
+}
+
+function getAccountResponse(results, accountId, startDate) {
+  const account =
+    !results?.accounts || results.accounts.find((a) => a.id === accountId);
+  if (!account) {
+    console.log(
+      `The account "${accountId}" was not found. Here were the accounts returned:`,
+    );
+    if (results?.accounts)
+      results.accounts.forEach((a) => console.log(`${a.id} - ${a.org.name}`));
+    logAccountError(results, accountId, {
+      error_type: 'ACCOUNT_MISSING',
+      error_code: 'ACCOUNT_MISSING',
+      reason: `The account "${accountId}" was not found. Try unlinking and relinking the account.`,
+    });
+    return;
+  }
+
+  const needsAttention = results.sferrors.find(
+    (e) => e === `Connection to ${account.org.name} may need attention`,
+  );
+  if (needsAttention) {
+    logAccountError(results, accountId, {
+      error_type: 'ACCOUNT_NEEDS_ATTENTION',
+      error_code: 'ACCOUNT_NEEDS_ATTENTION',
+      reason:
+        'The account needs your attention at <a href="https://bridge.simplefin.org/auth/login">SimpleFIN</a>.',
+    });
+  }
+
+  const startingBalance = parseInt(account.balance.replace('.', ''));
+  const date = getDate(new Date(account['balance-date'] * 1000));
+
+  const balances = [
+    {
+      balanceAmount: {
+        amount: account.balance,
+        currency: account.currency,
+      },
+      balanceType: 'expected',
+      referenceDate: date,
+    },
+    {
+      balanceAmount: {
+        amount: account.balance,
+        currency: account.currency,
+      },
+      balanceType: 'interimAvailable',
+      referenceDate: date,
+    },
+  ];
+
+  const all = [];
+  const booked = [];
+  const pending = [];
+
+  for (const trans of account.transactions) {
+    const newTrans = {};
+
+    let dateToUse = 0;
+
+    if (trans.posted == 0) {
+      newTrans.booked = false;
+      dateToUse = trans.transacted_at;
+    } else {
+      newTrans.booked = true;
+      dateToUse = trans.posted;
+    }
+
+    newTrans.bookingDate = getDate(new Date(dateToUse * 1000));
+    if (newTrans.bookingDate < startDate) {
+      continue;
+    }
+
+    newTrans.date = newTrans.bookingDate;
+    newTrans.payeeName = trans.payee;
+    newTrans.remittanceInformationUnstructured = trans.description;
+    newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
+    newTrans.transactionId = trans.id;
+    newTrans.valueDate = newTrans.bookingDate;
+
+    if (newTrans.booked) {
+      booked.push(newTrans);
+    } else {
+      pending.push(newTrans);
+    }
+    all.push(newTrans);
+  }
+
+  return { balances, startingBalance, transactions: { all, booked, pending } };
+}
 
 function invalidToken(res) {
   res.send({
@@ -236,7 +254,7 @@ function serverDown(e, res) {
       error_type: 'SERVER_DOWN',
       error_code: 'SERVER_DOWN',
       status: 'rejected',
-      reason: 'There was an error communciating with SimpleFIN.',
+      reason: 'There was an error communicating with SimpleFIN.',
     },
   });
 }
@@ -283,12 +301,12 @@ async function getTransactions(accessKey, startDate, endDate) {
   const now = new Date();
   startDate = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
   endDate = endDate || new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  console.log(
-    `${startDate.toISOString().split('T')[0]} - ${
-      endDate.toISOString().split('T')[0]
-    }`,
-  );
+  console.log(`${getDate(startDate)} - ${getDate(endDate)}`);
   return await getAccounts(accessKey, startDate, endDate);
+}
+
+function getDate(date) {
+  return date.toISOString().split('T')[0];
 }
 
 function normalizeDate(date) {
@@ -328,11 +346,19 @@ async function getAccounts(accessKey, startDate, endDate) {
           data += d;
         });
         res.on('end', () => {
-          try {
-            resolve(JSON.parse(data));
-          } catch (e) {
-            console.log(`Error parsing JSON response: ${data}`);
-            reject(e);
+          if (res.statusCode === 403) {
+            reject(new Error('Forbidden'));
+          } else {
+            try {
+              const results = JSON.parse(data);
+              results.sferrors = results.errors;
+              results.hasError = false;
+              results.errors = {};
+              resolve(results);
+            } catch (e) {
+              console.log(`Error parsing JSON response: ${data}`);
+              reject(e);
+            }
           }
         });
       },
