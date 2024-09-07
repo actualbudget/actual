@@ -1256,6 +1256,12 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('theme' in prefs) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
+  if ('preferredDarkTheme' in prefs) {
+    await asyncStorage.setItem(
+      'preferred-dark-theme',
+      prefs.preferredDarkTheme,
+    );
+  }
   if ('serverSelfSignedCert' in prefs) {
     await asyncStorage.setItem(
       'server-self-signed-cert',
@@ -1272,12 +1278,14 @@ handlers['load-global-prefs'] = async function () {
     [, documentDir],
     [, encryptKey],
     [, theme],
+    [, preferredDarkTheme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
     'document-dir',
     'encrypt-key',
     'theme',
+    'preferred-dark-theme',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1292,6 +1300,10 @@ handlers['load-global-prefs'] = async function () {
       theme === 'midnight'
         ? theme
         : 'auto',
+    preferredDarkTheme:
+      preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
+        ? preferredDarkTheme
+        : 'dark',
   };
 };
 
