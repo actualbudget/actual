@@ -83,11 +83,13 @@ export type LocalPrefs = SyncedPrefs &
   }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
+export type DarkTheme = 'dark' | 'midnight';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
   keyId?: string;
   theme: Theme;
+  preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
 }>;
