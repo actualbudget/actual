@@ -1,8 +1,17 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type Dispatch,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
+import { type RecurConfig, type RecurPattern } from 'loot-core/types/models';
+import { type WithRequired } from 'loot-core/types/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
@@ -28,7 +37,7 @@ const FREQUENCY_OPTIONS = [
   { id: 'weekly', name: 'Weeks' },
   { id: 'monthly', name: 'Months' },
   { id: 'yearly', name: 'Years' },
-];
+] as const;
 
 const DAY_OF_MONTH_OPTIONS = [...Array(31).keys()].map(day => day + 1);
 
@@ -40,16 +49,16 @@ const DAY_OF_WEEK_OPTIONS = [
   { id: 'TH', name: 'Thursday' },
   { id: 'FR', name: 'Friday' },
   { id: 'SA', name: 'Saturday' },
-];
+] as const;
 
-function parsePatternValue(value) {
+function parsePatternValue(value: string | number) {
   if (value === 'last') {
     return -1;
   }
   return Number(value);
 }
 
-function parseConfig(config) {
+function parseConfig(config: Partial<RecurConfig>): StateConfig {
   return {
     start: monthUtils.currentDay(),
     interval: 1,
@@ -58,13 +67,13 @@ function parseConfig(config) {
     skipWeekend: false,
     weekendSolveMode: 'before',
     endMode: 'never',
-    endOccurrences: '1',
+    endOccurrences: 1,
     endDate: monthUtils.currentDay(),
     ...config,
   };
 }
 
-function unparseConfig(parsed) {
+function unparseConfig(parsed: StateConfig): RecurConfig {
   return {
     ...parsed,
     interval: validInterval(parsed.interval),
@@ -72,14 +81,23 @@ function unparseConfig(parsed) {
   };
 }
 
-function createMonthlyRecurrence(startDate) {
+function createMonthlyRecurrence(startDate: string) {
   return {
     value: parseInt(monthUtils.format(startDate, 'd')),
-    type: 'day',
+    type: 'day' as const,
   };
 }
 
-function boundedRecurrence({ field, value, recurrence }) {
+function boundedRecurrence({
+  field,
+  value,
+  recurrence,
+}: {
+  recurrence: RecurPattern;
+} & (
+  | { field: 'type'; value: RecurPattern['type'] }
+  | { field: 'value'; value: RecurPattern['value'] }
+)) {
   if (
     (field === 'value' &&
       recurrence.type !== 'day' &&
@@ -93,7 +111,48 @@ function boundedRecurrence({ field, value, recurrence }) {
   return { [field]: value };
 }
 
-function reducer(state, action) {
+type StateConfig = Omit<
+  WithRequired<RecurConfig, 'patterns' | 'endDate' | 'weekendSolveMode'>,
+  'interval' | 'endOccurrences'
+> & {
+  interval: number | string;
+  endOccurrences: number | string;
+};
+
+type ReducerState = {
+  config: StateConfig;
+};
+
+type UpdateRecurrenceAction =
+  | {
+      type: 'update-recurrence';
+      recurrence: RecurPattern;
+      field: 'type';
+      value: RecurPattern['type'];
+    }
+  | {
+      type: 'update-recurrence';
+      recurrence: RecurPattern;
+      field: 'value';
+      value: RecurPattern['value'];
+    };
+
+type ChangeFieldAction<T extends keyof StateConfig> = {
+  type: 'change-field';
+  field: T;
+  value: StateConfig[T];
+};
+
+type ReducerAction =
+  | { type: 'replace-config'; config: StateConfig }
+  | ChangeFieldAction<keyof StateConfig>
+  | UpdateRecurrenceAction
+  | { type: 'add-recurrence' }
+  | { type: 'remove-recurrence'; recurrence: RecurPattern }
+  | { type: 'set-skip-weekend'; skipWeekend: boolean }
+  | { type: 'set-weekend-solve'; value: StateConfig['weekendSolveMode'] };
+
+function reducer(state: ReducerState, action: ReducerAction): ReducerState {
   switch (action.type) {
     case 'replace-config':
       return { ...state, config: action.config };
@@ -159,7 +218,7 @@ function reducer(state, action) {
   }
 }
 
-function SchedulePreview({ previewDates }) {
+function SchedulePreview({ previewDates }: { previewDates: Date[] }) {
   const dateFormat = (useDateFormat() || 'MM/dd/yyyy')
     .replace('MM', 'M')
     .replace('dd', 'd');
@@ -198,15 +257,18 @@ function SchedulePreview({ previewDates }) {
   );
 }
 
-function validInterval(interval) {
-  const intInterval = parseInt(interval);
+function validInterval(interval: string | number) {
+  const intInterval = Number(interval);
   return Number.isInteger(intInterval) && intInterval > 0 ? intInterval : 1;
 }
 
-function MonthlyPatterns({ config, dispatch }) {
-  const updateRecurrence = (recurrence, field, value) =>
-    dispatch({ type: 'update-recurrence', recurrence, field, value });
-
+function MonthlyPatterns({
+  config,
+  dispatch,
+}: {
+  config: StateConfig;
+  dispatch: Dispatch<ReducerAction>;
+}) {
   return (
     <Stack spacing={2} style={{ marginTop: 10 }}>
       {config.patterns.map((recurrence, idx) => (
@@ -221,24 +283,34 @@ function MonthlyPatterns({ config, dispatch }) {
             options={[
               [-1, 'Last'],
               Menu.line,
-              ...DAY_OF_MONTH_OPTIONS.map(opt => [opt, opt]),
+              ...DAY_OF_MONTH_OPTIONS.map(opt => [opt, String(opt)] as const),
             ]}
             value={recurrence.value}
             onChange={value =>
-              updateRecurrence(recurrence, 'value', parsePatternValue(value))
+              dispatch({
+                type: 'update-recurrence',
+                recurrence,
+                field: 'value',
+                value: parsePatternValue(value),
+              })
             }
-            disabledKeys={['-']}
             buttonStyle={{ flex: 1, marginRight: 10 }}
           />
           <Select
             options={[
               ['day', 'Day'],
               Menu.line,
-              ...DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name]),
+              ...DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name] as const),
             ]}
             value={recurrence.type}
-            onChange={value => updateRecurrence(recurrence, 'type', value)}
-            disabledKeys={['-']}
+            onChange={value => {
+              dispatch({
+                type: 'update-recurrence',
+                recurrence,
+                field: 'type',
+                value,
+              });
+            }}
             buttonStyle={{ flex: 1, marginRight: 10 }}
           />
           <Button
@@ -268,7 +340,15 @@ function MonthlyPatterns({ config, dispatch }) {
   );
 }
 
-function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
+function RecurringScheduleTooltip({
+  config: currentConfig,
+  onClose,
+  onSave,
+}: {
+  config: RecurConfig;
+  onClose: () => void;
+  onSave: (config: RecurConfig) => void;
+}) {
   const [previewDates, setPreviewDates] = useState(null);
 
   const [state, dispatch] = useReducer(reducer, {
@@ -289,8 +369,10 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
 
   const { config } = state;
 
-  const updateField = (field, value) =>
-    dispatch({ type: 'change-field', field, value });
+  const updateField = <Field extends keyof RecurConfig>(
+    field: Field,
+    value: StateConfig[Field],
+  ) => dispatch({ type: 'change-field', field, value });
 
   useEffect(() => {
     async function run() {
@@ -382,7 +464,6 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           <Button
             style={{
               backgroundColor: theme.tableBackground,
-              ':hover': { backgroundColor: theme.tableBackground },
             }}
             onPress={() => dispatch({ type: 'add-recurrence' })}
           >
@@ -460,12 +541,22 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   );
 }
 
-export function RecurringSchedulePicker({ value, buttonStyle, onChange }) {
+type RecurringSchedulePickerProps = {
+  value: RecurConfig;
+  buttonStyle?: CSSProperties;
+  onChange: (config: RecurConfig) => void;
+};
+
+export function RecurringSchedulePicker({
+  value,
+  buttonStyle,
+  onChange,
+}: RecurringSchedulePickerProps) {
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
-  function onSave(config) {
+  function onSave(config: RecurConfig) {
     onChange(config);
     setIsOpen(false);
   }
