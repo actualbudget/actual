@@ -196,9 +196,11 @@ export const ManagePayees = forwardRef(
       return filteredPayees.filter(p => p.transfer_acct == null).map(p => p.id);
     }, [filteredPayees]);
 
-    function onDelete() {
-      onBatchChange({ deleted: [...selected.items].map(id => ({ id })) });
-      selected.dispatch({ type: 'select-none' });
+    function onDelete(ids) {
+      onBatchChange({
+        deleted: ids ?? [...selected.items].map(id => ({ id })),
+      });
+      if (!ids) selected.dispatch({ type: 'select-none' });
     }
 
     function onFavorite() {
@@ -341,6 +343,7 @@ export const ManagePayees = forwardRef(
                 categoryGroups={categoryGroups}
                 navigator={tableNavigator}
                 onUpdate={onUpdate}
+                onDelete={id => onDelete([{ id }])}
                 onViewRules={onViewRules}
                 onCreateRule={onCreateRule}
               />

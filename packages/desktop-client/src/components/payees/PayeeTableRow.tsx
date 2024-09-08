@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { memo } from 'react';
+import { memo, useRef, useState } from 'react';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
@@ -15,6 +15,9 @@ import {
   Row,
   SelectCell,
 } from '../table';
+import { Popover } from '../common/Popover';
+import { Menu } from '../common/Menu';
+import { useTranslation } from 'react-i18next';
 
 type RuleButtonProps = {
   ruleCount: number;
@@ -75,6 +78,7 @@ type PayeeTableRowProps = {
     field: EditablePayeeFields,
     value: unknown,
   ) => void;
+  onDelete: (id: PayeeEntity['id']) => void;
   onViewRules: (id: PayeeEntity['id']) => void;
   onCreateRule: (id: PayeeEntity['id']) => void;
   style?: CSSProperties;
@@ -91,6 +95,7 @@ export const PayeeTableRow = memo(
     onViewRules,
     onCreateRule,
     onHover,
+    onDelete,
     onEdit,
     onUpdate,
     style,
@@ -102,8 +107,15 @@ export const PayeeTableRow = memo(
       : theme.tableBorder;
     const backgroundFocus = hovered || focusedField === 'select';
 
+    const { t } = useTranslation();
+
+    const triggerRef = useRef(null);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [crossOffset, setCrossOffset] = useState(0);
+
     return (
       <Row
+        ref={triggerRef}
         style={{
           alignItems: 'stretch',
           ...style,
@@ -122,7 +134,60 @@ export const PayeeTableRow = memo(
         }}
         data-focus-key={payee.id}
         onMouseEnter={() => onHover && onHover(payee.id)}
+        onContextMenu={e => {
+          e.preventDefault();
+          setMenuOpen(true);
+          setCrossOffset(
+            e.clientX - triggerRef.current.getBoundingClientRect().left,
+          );
+        }}
       >
+        <Popover
+          triggerRef={triggerRef}
+          placement="bottom start"
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
+          crossOffset={crossOffset}
+          style={{ width: 200 }}
+          isNonModal
+        >
+          <Menu
+            items={[
+              ...(payee.transfer_acct == null
+                ? [
+                    { name: 'delete', text: t('Delete') },
+                    {
+                      name: 'favorite',
+                      text: payee.favorite ? t('Unfavorite') : t('Favorite'),
+                    },
+                  ]
+                : []),
+              ...(ruleCount > 0
+                ? [{ name: 'view-rules', text: t('View rules') }]
+                : []),
+              { name: 'create-rule', text: t('Create rule') },
+            ]}
+            onMenuSelect={name => {
+              switch (name) {
+                case 'delete':
+                  onDelete(id);
+                  break;
+                case 'favorite':
+                  onUpdate(id, 'favorite', payee.favorite ? 0 : 1);
+                  break;
+                case 'view-rules':
+                  onViewRules(id);
+                  break;
+                case 'create-rule':
+                  onCreateRule(id);
+                  break;
+                default:
+                  throw new Error(`Unrecognized menu option: ${name}`);
+              }
+              setMenuOpen(false);
+            }}
+          />
+        </Popover>
         <SelectCell
           exposed={
             payee.transfer_acct == null && (hovered || selected || editing)
