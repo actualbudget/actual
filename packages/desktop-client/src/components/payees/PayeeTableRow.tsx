@@ -153,18 +153,15 @@ export const PayeeTableRow = memo(
         >
           <Menu
             items={[
-              ...(payee.transfer_acct == null
-                ? [
-                    { name: 'delete', text: t('Delete') },
-                    {
-                      name: 'favorite',
-                      text: payee.favorite ? t('Unfavorite') : t('Favorite'),
-                    },
-                  ]
-                : []),
-              ...(ruleCount > 0
-                ? [{ name: 'view-rules', text: t('View rules') }]
-                : []),
+              payee.transfer_acct == null && {
+                name: 'delete',
+                text: t('Delete'),
+              },
+              payee.transfer_acct == null && {
+                name: 'favorite',
+                text: payee.favorite ? t('Unfavorite') : t('Favorite'),
+              },
+              ruleCount > 0 && { name: 'view-rules', text: t('View rules') },
               { name: 'create-rule', text: t('Create rule') },
             ]}
             onMenuSelect={name => {

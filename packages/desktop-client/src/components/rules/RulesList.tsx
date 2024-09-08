@@ -13,6 +13,7 @@ type RulesListProps = {
   hoveredRule?: string;
   onHover?: (id: string | null) => void;
   onEditRule?: (rule: RuleEntity) => void;
+  onDeleteRule?: (rule: RuleEntity) => void;
 };
 
 export function RulesList({
@@ -21,6 +22,7 @@ export function RulesList({
   hoveredRule,
   onHover,
   onEditRule,
+  onDeleteRule,
 }: RulesListProps) {
   if (rules.length === 0) {
     return null;
@@ -40,6 +42,7 @@ export function RulesList({
             selected={selected}
             onHover={onHover}
             onEditRule={onEditRule}
+            onDeleteRule={onDeleteRule}
           />
         );
       })}

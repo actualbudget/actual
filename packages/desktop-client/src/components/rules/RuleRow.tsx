@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo } from 'react';
+import React, { memo, useRef, useState } from 'react';
 
 import { v4 as uuid } from 'uuid';
 
@@ -17,6 +17,9 @@ import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
+import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
+import { useTranslation } from 'react-i18next';
 
 type RuleRowProps = {
   rule: RuleEntity;
@@ -24,10 +27,18 @@ type RuleRowProps = {
   selected?: boolean;
   onHover?: (id: string | null) => void;
   onEditRule?: (rule: RuleEntity) => void;
+  onDeleteRule?: (rule: RuleEntity) => void;
 };
 
 export const RuleRow = memo(
-  ({ rule, hovered, selected, onHover, onEditRule }: RuleRowProps) => {
+  ({
+    rule,
+    hovered,
+    selected,
+    onHover,
+    onEditRule,
+    onDeleteRule,
+  }: RuleRowProps) => {
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
     const backgroundFocus = hovered;
@@ -43,8 +54,18 @@ export const RuleRow = memo(
     );
     const hasSplits = actionSplits.length > 1;
 
+    const hasSchedule = rule.actions.some(({ op }) => op === 'link-schedule');
+
+    const { t } = useTranslation();
+
+    const triggerRef = useRef(null);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [crossOffset, setCrossOffset] = useState(0);
+    const [offset, setOffset] = useState(0);
+
     return (
       <Row
+        ref={triggerRef}
         height="auto"
         style={{
           fontSize: 13,
@@ -59,7 +80,45 @@ export const RuleRow = memo(
         collapsed={true}
         onMouseEnter={() => onHover && onHover(rule.id)}
         onMouseLeave={() => onHover && onHover(null)}
+        onContextMenu={e => {
+          e.preventDefault();
+          setMenuOpen(true);
+          const rect = triggerRef.current.getBoundingClientRect();
+          setCrossOffset(e.clientX - rect.left);
+          setOffset(e.clientY - rect.bottom + 10);
+        }}
       >
+        <Popover
+          triggerRef={triggerRef}
+          placement="bottom start"
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
+          crossOffset={crossOffset}
+          offset={offset}
+          style={{ width: 200 }}
+          isNonModal
+        >
+          <Menu
+            items={[
+              onEditRule && { name: 'edit', text: t('Edit') },
+              onDeleteRule &&
+                !hasSchedule && { name: 'delete', text: t('Delete') },
+            ]}
+            onMenuSelect={name => {
+              switch (name) {
+                case 'delete':
+                  onDeleteRule(rule);
+                  break;
+                case 'edit':
+                  onEditRule(rule);
+                  break;
+                default:
+                  throw new Error(`Unrecognized menu option: ${name}`);
+              }
+              setMenuOpen(false);
+            }}
+          />
+        </Popover>
         <SelectCell
           exposed={hovered || selected}
           focused={true}
