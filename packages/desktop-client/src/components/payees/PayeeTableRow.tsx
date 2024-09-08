@@ -1,11 +1,14 @@
 // @ts-strict-ignore
 import { memo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgArrowThinRight, SvgBookmark } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
+import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import {
   Cell,
@@ -15,9 +18,6 @@ import {
   Row,
   SelectCell,
 } from '../table';
-import { Popover } from '../common/Popover';
-import { Menu } from '../common/Menu';
-import { useTranslation } from 'react-i18next';
 
 type RuleButtonProps = {
   ruleCount: number;

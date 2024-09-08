@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { memo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { v4 as uuid } from 'uuid';
 
@@ -10,6 +11,8 @@ import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SvgRightArrow2 } from '../../icons/v0';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
+import { Menu } from '../common/Menu';
+import { Popover } from '../common/Popover';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -17,9 +20,6 @@ import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
-import { Menu } from '../common/Menu';
-import { Popover } from '../common/Popover';
-import { useTranslation } from 'react-i18next';
 
 type RuleRowProps = {
   rule: RuleEntity;
