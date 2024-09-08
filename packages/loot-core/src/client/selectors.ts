@@ -13,6 +13,6 @@ const getLocalPrefsState = createSelector(getPrefsState, prefs => prefs.local);
 export const selectNumberFormat = createSelector(getLocalPrefsState, prefs =>
   getNumberFormat({
     format: isNumberFormat(prefs.numberFormat) ? prefs.numberFormat : undefined,
-    hideFraction: prefs.hideFraction,
+    hideFraction: String(prefs.hideFraction) === 'true',
   }),
 );

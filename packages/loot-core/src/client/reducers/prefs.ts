@@ -17,7 +17,7 @@ export function update(state = initialState, action: Action): PrefsState {
           format: isNumberFormat(action.prefs.numberFormat)
             ? action.prefs.numberFormat
             : 'comma-dot',
-          hideFraction: action.prefs.hideFraction,
+          hideFraction: String(action.prefs.hideFraction) === 'true',
         });
       }
       return { local: action.prefs, global: action.globalPrefs };
@@ -30,9 +30,11 @@ export function update(state = initialState, action: Action): PrefsState {
               ? state.local.numberFormat
               : 'comma-dot',
           hideFraction:
-            action.prefs.hideFraction != null
-              ? action.prefs.hideFraction
-              : state.local.hideFraction,
+            String(
+              action.prefs.hideFraction != null
+                ? action.prefs.hideFraction
+                : state.local.hideFraction,
+            ) === 'true',
         });
       }
 

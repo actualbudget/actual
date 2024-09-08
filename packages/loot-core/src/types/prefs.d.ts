@@ -11,26 +11,28 @@ export type FeatureFlag =
  * Cross-device preferences. These sync across devices when they are changed.
  */
 export type SyncedPrefs = Partial<
-  {
-    firstDayOfWeekIdx: string;
-    dateFormat: string;
-    numberFormat: string;
-    hideFraction: boolean;
-    isPrivacyEnabled: boolean;
-    [key: `show-balances-${string}`]: boolean;
-    [key: `show-extra-balances-${string}`]: boolean;
-    [key: `hide-cleared-${string}`]: boolean;
-    [key: `hide-reconciled-${string}`]: boolean;
+  Record<
+    | 'firstDayOfWeekIdx'
+    | 'dateFormat'
+    | 'numberFormat'
+    | 'hideFraction'
+    | 'isPrivacyEnabled'
+    | `show-balances-${string}`
+    | `show-extra-balances-${string}`
+    | `hide-cleared-${string}`
+    | `hide-reconciled-${string}`
     // TODO: pull from src/components/modals/ImportTransactions.js
-    [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
-    [key: `csv-mappings-${string}`]: string;
-    [key: `csv-delimiter-${string}`]: string;
-    [key: `csv-skip-lines-${string}`]: number;
-    [key: `csv-has-header-${string}`]: boolean;
-    [key: `ofx-fallback-missing-payee-${string}`]: boolean;
-    [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
-    budgetType: string;
-  } & Record<`flags.${FeatureFlag}`, string>
+    | `parse-date-${string}-${'csv' | 'qif'}`
+    | `csv-mappings-${string}`
+    | `csv-delimiter-${string}`
+    | `csv-skip-lines-${string}`
+    | `csv-has-header-${string}`
+    | `ofx-fallback-missing-payee-${string}`
+    | `flip-amount-${string}-${'csv' | 'qif'}`
+    | 'budgetType'
+    | `flags.${FeatureFlag}`,
+    string
+  >
 >;
 
 /**

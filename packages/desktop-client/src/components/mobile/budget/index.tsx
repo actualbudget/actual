@@ -64,7 +64,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
   const dispatch = useDispatch();
 
   useEffect(() => {
