@@ -768,11 +768,15 @@ async function _fullSync(
       ),
     );
   } else {
-    // All synced up, store the current time as a simple optimization
-    // for the next sync
-    await prefs.savePrefs({
-      lastSyncedTimestamp: getClock().timestamp.toString(),
-    });
+    // All synced up, store the current time as a simple optimization for the next sync
+    const requiresUpdate =
+      getClock().timestamp.toString() !== lastSyncedTimestamp;
+
+    if (requiresUpdate) {
+      await prefs.savePrefs({
+        lastSyncedTimestamp: getClock().timestamp.toString(),
+      });
+    }
   }
 
   return receivedMessages;
