@@ -19,9 +19,5 @@
     <true/>
     <key>com.apple.security.cs.allow-dyld-environment-variables</key>
     <true/>
-
-    <!-- For saving budget files -->
-    <key>com.apple.security.files.downloads.read-write</key>
-    <true/>
   </dict>
 </plist>
