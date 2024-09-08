@@ -22,7 +22,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
-import { Table, TableHeader, Row, Field, SelectCell } from '../table';
+import { TableHeader, Row, Field, SelectCell, TableResizable } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
@@ -123,7 +123,8 @@ function DiscoverSchedulesTable({
           <Trans>Amount</Trans>
         </Field>
       </TableHeader>
-      <Table
+      <TableResizable
+        prefName="discover-schedules-column-sizes"
         rowHeight={ROW_HEIGHT}
         style={{
           flex: 1,

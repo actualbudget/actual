@@ -53,6 +53,7 @@ type FixedSizeListProps = {
   header?: ReactNode;
   innerRef?: Ref<HTMLDivElement>;
   itemKey?: (index: number) => string | number;
+  totalWidth?: number;
 };
 
 type FixedSizeListState = {
@@ -204,6 +205,7 @@ export class FixedSizeList extends PureComponent<
       itemKey = defaultItemKey,
       useIsScrolling,
       width,
+      totalWidth,
     } = this.props;
     const { isScrolling } = this.state;
 
@@ -266,7 +268,7 @@ export class FixedSizeList extends PureComponent<
           style={{
             position: 'relative',
             height: estimatedTotalSize,
-            width: '100%',
+            width: `${totalWidth > width ? totalWidth : width}px`,
             pointerEvents: isScrolling ? 'none' : undefined,
           }}
         >

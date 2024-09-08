@@ -12,7 +12,7 @@ import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { View } from '../common/View';
-import { Table, type TableNavigator } from '../table';
+import { type Table, TableResizable, type TableNavigator } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
 
@@ -54,7 +54,8 @@ export const PayeeTable = forwardRef<
 
     return (
       <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
-        <Table
+        <TableResizable
+          prefName="payee-table-column-sizes"
           ref={ref}
           items={payees}
           navigator={navigator}
