@@ -7,7 +7,7 @@ import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
 import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -59,9 +59,9 @@ export function FilterExpression<T extends RuleConditionEntity>({
     >
       <Button
         ref={triggerRef}
-        type="bare"
-        disabled={customName != null}
-        onClick={() => setEditing(true)}
+        variant="bare"
+        isDisabled={customName != null}
+        onPress={() => setEditing(true)}
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
@@ -87,7 +87,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
           )}
         </div>
       </Button>
-      <Button type="bare" onClick={onDelete} aria-label={t('Delete filter')}>
+      <Button variant="bare" onPress={onDelete} aria-label={t('Delete filter')}>
         <SvgDelete
           style={{
             width: 8,
