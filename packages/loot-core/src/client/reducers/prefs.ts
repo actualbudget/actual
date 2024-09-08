@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { setNumberFormat } from '../../shared/util';
+import { isNumberFormat, setNumberFormat } from '../../shared/util';
 import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { PrefsState } from '../state-types/prefs';
@@ -14,7 +14,9 @@ export function update(state = initialState, action: Action): PrefsState {
     case constants.SET_PREFS:
       if (action.prefs) {
         setNumberFormat({
-          format: action.prefs.numberFormat || 'comma-dot',
+          format: isNumberFormat(action.prefs.numberFormat)
+            ? action.prefs.numberFormat
+            : 'comma-dot',
           hideFraction: action.prefs.hideFraction,
         });
       }
@@ -22,7 +24,11 @@ export function update(state = initialState, action: Action): PrefsState {
     case constants.MERGE_LOCAL_PREFS:
       if (action.prefs.numberFormat || action.prefs.hideFraction != null) {
         setNumberFormat({
-          format: action.prefs.numberFormat || state.local.numberFormat,
+          format: isNumberFormat(action.prefs.numberFormat)
+            ? action.prefs.numberFormat
+            : isNumberFormat(state.local.numberFormat)
+              ? state.local.numberFormat
+              : 'comma-dot',
           hideFraction:
             action.prefs.hideFraction != null
               ? action.prefs.hideFraction

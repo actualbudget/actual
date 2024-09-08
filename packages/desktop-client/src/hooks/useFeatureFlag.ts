@@ -17,6 +17,6 @@ export function useFeatureFlag(name: FeatureFlag): boolean {
 
     return value === undefined
       ? DEFAULT_FEATURE_FLAG_STATE[name] || false
-      : value;
+      : String(value) === 'true';
   });
 }

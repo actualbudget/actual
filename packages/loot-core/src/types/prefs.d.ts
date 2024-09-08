@@ -14,14 +14,9 @@ export type FeatureFlag =
  */
 export type SyncedPrefs = Partial<
   {
-    firstDayOfWeekIdx: `${0 | 1 | 2 | 3 | 4 | 5 | 6}`;
-    dateFormat:
-      | 'MM/dd/yyyy'
-      | 'dd/MM/yyyy'
-      | 'yyyy-MM-dd'
-      | 'MM.dd.yyyy'
-      | 'dd.MM.yyyy';
-    numberFormat: (typeof numberFormats)[number]['value'];
+    firstDayOfWeekIdx: string;
+    dateFormat: string;
+    numberFormat: string;
     hideFraction: boolean;
     isPrivacyEnabled: boolean;
     [key: `show-balances-${string}`]: boolean;
@@ -31,13 +26,13 @@ export type SyncedPrefs = Partial<
     // TODO: pull from src/components/modals/ImportTransactions.js
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
-    [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
+    [key: `csv-delimiter-${string}`]: string;
     [key: `csv-skip-lines-${string}`]: number;
     [key: `csv-has-header-${string}`]: boolean;
     [key: `ofx-fallback-missing-payee-${string}`]: boolean;
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
-    budgetType: 'report' | 'rollover';
-  } & Record<`flags.${FeatureFlag}`, boolean>
+    budgetType: string;
+  } & Record<`flags.${FeatureFlag}`, string>
 >;
 
 /**
