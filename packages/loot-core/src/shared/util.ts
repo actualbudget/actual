@@ -233,7 +233,7 @@ const NUMBER_FORMATS = [
 
 type NumberFormats = (typeof NUMBER_FORMATS)[number];
 
-export function isNumberFormat(input: string): input is NumberFormats {
+export function isNumberFormat(input: string = ''): input is NumberFormats {
   return (NUMBER_FORMATS as readonly string[]).includes(input);
 }
 
