@@ -234,6 +234,7 @@ describe('Condition', () => {
     expect(cond.eval({ name: 'bar foo baz' })).toBe(false);
     expect(cond.eval({ name: 'bar FOOb' })).toBe(false);
     expect(cond.eval({ name: 'foo' })).toBe(true);
+    expect(cond.eval({ name: 'FOOOO' })).toBe(true);
     expect(cond.eval({ name: 'foob' })).toBe(false);
     expect(cond.eval({ name: 'bfoo' })).toBe(false);
     expect(cond.eval({ name: 'bfo' })).toBe(false);
