@@ -50,14 +50,25 @@ export function Sidebar() {
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
 
-  const [_sidebarWidth, setSidebarWidth] = useLocalPref('sidebarWidth');
+  const [sidebarWidthLocalPref, setSidebarWidthLocalPref] =
+    useLocalPref('sidebarWidth');
   const DEFAULT_SIDEBAR_WIDTH = 240;
   const MAX_SIDEBAR_WIDTH = width / 3;
   const MIN_SIDEBAR_WIDTH = 200;
-  const sidebarWidth = Math.min(
-    MAX_SIDEBAR_WIDTH,
-    Math.max(MIN_SIDEBAR_WIDTH, _sidebarWidth || DEFAULT_SIDEBAR_WIDTH),
+
+  const [sidebarWidth, setSidebarWidth] = useState(
+    Math.min(
+      MAX_SIDEBAR_WIDTH,
+      Math.max(
+        MIN_SIDEBAR_WIDTH,
+        sidebarWidthLocalPref || DEFAULT_SIDEBAR_WIDTH,
+      ),
+    ),
   );
+
+  const onResizeStop = () => {
+    setSidebarWidthLocalPref(sidebarWidth);
+  };
 
   async function onReorder(
     id: string,
@@ -95,6 +106,7 @@ export function Sidebar() {
         width: sidebarWidth,
         height: '100%',
       }}
+      onResizeStop={onResizeStop}
       maxWidth={MAX_SIDEBAR_WIDTH}
       minWidth={MIN_SIDEBAR_WIDTH}
       enable={{
