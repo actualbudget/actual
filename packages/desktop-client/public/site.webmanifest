@@ -1,89 +1,89 @@
 {
-    "name": "Actual",
-    "short_name": "Actual",
-    "description": "A local-first personal finance tool",
-    "icons": [
+  "name": "Actual",
+  "short_name": "Actual",
+  "description": "A local-first personal finance tool",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Transaction",
+      "short_name": "Add Transaction",
+      "description": "Add a new transaction",
+      "url": "/transactions/new",
+      "icons": [
         {
-            "src": "/android-chrome-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/android-chrome-512x512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any"
-        },
-        {
-            "src": "/maskable-192x192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "/maskable-512x512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
+          "src": "/shortcut-transaction.svg",
+          "sizes": "150x150"
         }
-    ],
-    "shortcuts": [
+      ]
+    },
+    {
+      "name": "Accounts",
+      "short_name": "Accounts",
+      "description": "View all accounts",
+      "url": "/accounts",
+      "icons": [
         {
-            "name": "Add Transaction",
-            "short_name": "Add Transaction",
-            "description": "Add a new transaction",
-            "url": "/transactions/new",
-            "icons": [
-                {
-                    "src": "/shortcut-transaction.svg",
-                    "sizes": "150x150"
-                }
-            ]
-        },
-        {
-            "name": "Accounts",
-            "short_name": "Accounts",
-            "description": "View all accounts",
-            "url": "/accounts",
-            "icons": [
-                {
-                    "src": "/shortcut-accounts.svg",
-                    "sizes": "150x150"
-                }
-            ]
-        },
-        {
-            "name": "Reports",
-            "short_name": "Reports",
-            "description": "View reports",
-            "url": "/reports",
-            "icons": [
-                {
-                    "src": "/shortcut-reports.svg",
-                    "sizes": "150x150"
-                }
-            ]
+          "src": "/shortcut-accounts.svg",
+          "sizes": "150x150"
         }
-    ],
-    "screenshots": [
+      ]
+    },
+    {
+      "name": "Reports",
+      "short_name": "Reports",
+      "description": "View reports",
+      "url": "/reports",
+      "icons": [
         {
-            "src": "/screenshot_wide.png",
-            "form_factor": "wide",
-            "label": "Actual Budget Homepage",
-            "type": "image/png",
-            "sizes": "1280x720"
-        },
-        {
-            "src": "/screenshot_narrow.png",
-            "form_factor": "narrow",
-            "label": "Actual Budget Mobile Homepage",
-            "type": "image/png",
-            "sizes": "350x600"
+          "src": "/shortcut-reports.svg",
+          "sizes": "150x150"
         }
-    ],
-    "theme_color": "#8812E1",
-    "background_color": "#ffffff",
-    "display": "standalone",
-    "start_url": "./"
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot_wide.png",
+      "form_factor": "wide",
+      "label": "Actual Budget Homepage",
+      "type": "image/png",
+      "sizes": "1280x720"
+    },
+    {
+      "src": "/screenshot_narrow.png",
+      "form_factor": "narrow",
+      "label": "Actual Budget Mobile Homepage",
+      "type": "image/png",
+      "sizes": "350x600"
+    }
+  ],
+  "theme_color": "#8812E1",
+  "background_color": "#8812E1",
+  "display": "standalone",
+  "start_url": "./"
 }
