@@ -55,8 +55,9 @@ type BaseConditionEntity<
     year?: boolean;
   };
   conditionsOp?: string;
-  type?: 'id' | 'boolean' | 'date' | 'number';
+  type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
+  queryFilter?: Record<string, { $oneof: string[] }>;
 };
 
 export type RuleConditionEntity =

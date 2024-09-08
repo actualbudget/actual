@@ -24,6 +24,7 @@ export type SyncedPrefs = Partial<
     numberFormat: (typeof numberFormats)[number]['value'];
     hideFraction: boolean;
     isPrivacyEnabled: boolean;
+    [key: `show-balances-${string}`]: boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
     [key: `hide-reconciled-${string}`]: boolean;
@@ -82,10 +83,13 @@ export type LocalPrefs = SyncedPrefs &
   }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
+export type DarkTheme = 'dark' | 'midnight';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
   keyId?: string;
   theme: Theme;
+  preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
+  serverSelfSignedCert: string; // Electron only
 }>;

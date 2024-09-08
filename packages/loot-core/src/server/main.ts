@@ -1,5 +1,8 @@
 // @ts-strict-ignore
 import './polyfills';
+import https from 'https';
+import tls from 'tls';
+
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
@@ -1253,6 +1256,18 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('theme' in prefs) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
+  if ('preferredDarkTheme' in prefs) {
+    await asyncStorage.setItem(
+      'preferred-dark-theme',
+      prefs.preferredDarkTheme,
+    );
+  }
+  if ('serverSelfSignedCert' in prefs) {
+    await asyncStorage.setItem(
+      'server-self-signed-cert',
+      prefs.serverSelfSignedCert,
+    );
+  }
   return 'ok';
 };
 
@@ -1263,12 +1278,14 @@ handlers['load-global-prefs'] = async function () {
     [, documentDir],
     [, encryptKey],
     [, theme],
+    [, preferredDarkTheme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
     'document-dir',
     'encrypt-key',
     'theme',
+    'preferred-dark-theme',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1283,6 +1300,10 @@ handlers['load-global-prefs'] = async function () {
       theme === 'midnight'
         ? theme
         : 'auto',
+    preferredDarkTheme:
+      preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
+        ? preferredDarkTheme
+        : 'dark',
   };
 };
 
@@ -2123,6 +2144,23 @@ export async function initApp(isDev, socketName) {
     } catch (e) {
       console.log('Error loading key', e);
       throw new Error('load-key-error');
+    }
+  }
+
+  const selfSignedCertPath = await asyncStorage.getItem(
+    'server-self-signed-cert',
+  );
+
+  if (selfSignedCertPath) {
+    try {
+      const selfSignedCert = await fs.readFile(selfSignedCertPath);
+      https.globalAgent.options.ca = [...tls.rootCertificates, selfSignedCert];
+    } catch (error) {
+      console.error(
+        'Unable to add the self signed certificate, removing its reference',
+        error,
+      );
+      await asyncStorage.removeItem('server-self-signed-cert');
     }
   }
 
