@@ -59,9 +59,14 @@ export function Spending() {
     setSpendingReportCompareTo,
   ] = useLocalPref('spendingReportCompareTo');
 
+  const isDateValid = monthUtils.parseDate(spendingReportCompare);
   const [dataCheck, setDataCheck] = useState(false);
   const [mode, setMode] = useState(spendingReportMode);
-  const [compare, setCompare] = useState(spendingReportCompare);
+  const [compare, setCompare] = useState(
+    isDateValid.toString() === 'Invalid Date'
+      ? monthUtils.currentMonth()
+      : spendingReportCompare,
+  );
   const [compareTo, setCompareTo] = useState(spendingReportCompareTo);
 
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);

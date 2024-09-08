@@ -53,18 +53,27 @@ export function SpendingCard({
   const selection =
     spendingReportMode === 'singleMonth' ? 'compareTo' : spendingReportMode;
   const parseFilter = spendingReportFilter && JSON.parse(spendingReportFilter);
+  const isDateValid = monthUtils.parseDate(spendingReportCompare);
   const getGraphData = useMemo(() => {
     return createSpendingSpreadsheet({
       conditions: parseFilter.conditions,
       conditionsOp: parseFilter.conditionsOp,
-      compare: spendingReportCompare,
+      compare:
+        isDateValid.toString() === 'Invalid Date'
+          ? monthUtils.currentMonth()
+          : spendingReportCompare,
       compareTo: spendingReportCompareTo,
     });
-  }, [parseFilter, spendingReportCompare, spendingReportCompareTo]);
+  }, [
+    parseFilter,
+    spendingReportCompare,
+    spendingReportCompareTo,
+    isDateValid,
+  ]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
-    spendingReportCompare === 'lastMonth'
+    spendingReportCompare !== monthUtils.currentMonth()
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
         ? 27
@@ -73,7 +82,7 @@ export function SpendingCard({
     data &&
     data.intervalData[todayDay][selection] -
       data.intervalData[todayDay].compare;
-  const showLastMonth = data && Math.abs(data.intervalData[27].compareTo) > 0;
+  const showCompareTo = data && Math.abs(data.intervalData[27].compareTo) > 0;
 
   const spendingReportFeatureFlag = useFeatureFlag('spendingReport');
 
@@ -138,7 +147,7 @@ export function SpendingCard({
               type={spendingReportMode}
             />
           </View>
-          {data && showLastMonth && (
+          {data && showCompareTo && (
             <View style={{ textAlign: 'right' }}>
               <Block
                 style={{
@@ -161,7 +170,7 @@ export function SpendingCard({
             </View>
           )}
         </View>
-        {!showLastMonth ? (
+        {!showCompareTo || isDateValid.toString() === 'Invalid Date' ? (
           <View style={{ padding: 5 }}>
             <p style={{ margin: 0, textAlign: 'center' }}>
               <Trans>Additional data required to generate graph</Trans>
