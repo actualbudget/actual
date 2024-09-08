@@ -1084,7 +1084,6 @@ const Transaction = memo(function Transaction({
         setCrossOffset(
           e.clientX - triggerRef.current.getBoundingClientRect().left,
         );
-        setMenuOpen(false);
         setMenuOpen(true);
       }}
     >
