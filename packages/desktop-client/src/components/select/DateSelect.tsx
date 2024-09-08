@@ -172,6 +172,7 @@ function defaultShouldSaveFromKey(e) {
 }
 
 type DateSelectProps = {
+  id?: string;
   containerProps?: ComponentProps<typeof View>;
   inputProps?: ComponentProps<typeof Input>;
   value: string;
@@ -188,6 +189,7 @@ type DateSelectProps = {
 };
 
 export function DateSelect({
+  id,
   containerProps,
   inputProps,
   value: defaultValue,
@@ -344,6 +346,7 @@ export function DateSelect({
   return (
     <View {...containerProps}>
       <Input
+        id={id}
         focused={focused}
         {...inputProps}
         inputRef={inputRef}
