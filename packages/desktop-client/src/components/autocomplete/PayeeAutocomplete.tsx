@@ -308,9 +308,7 @@ export function PayeeAutocomplete({
     if (!hasPayeeInput) {
       return filteredSuggestions;
     }
-    filteredSuggestions.forEach(s => {
-      console.log(s.name + ' ' + s.id);
-    });
+
     return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
   }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
 
