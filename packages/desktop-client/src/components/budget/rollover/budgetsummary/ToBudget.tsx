@@ -61,6 +61,7 @@ export function ToBudget({
         isOpen={isMenuOpen}
         onOpenChange={() => setMenuOpen(null)}
         style={{ width: 200 }}
+        isNonModal
       >
         {menuOpen === 'actions' && (
           <ToBudgetMenu

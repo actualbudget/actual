@@ -95,6 +95,7 @@ export function SidebarCategory({
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
           style={{ width: 200 }}
+          isNonModal
         >
           <Menu
             onMenuSelect={type => {

@@ -1605,7 +1605,6 @@ class AccountInternal extends PureComponent<
       showExtraBalances,
       accountId,
       categoryId,
-      onBatchDelete,
     } = this.props;
     const {
       transactions,
