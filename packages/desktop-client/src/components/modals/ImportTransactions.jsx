@@ -11,7 +11,7 @@ import {
 
 import { useActions } from '../../hooks/useActions';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocalPrefs } from '../../hooks/useLocalPrefs';
+import { useSyncedPrefs } from '../../hooks/useSyncedPrefs';
 import { SvgDownAndRightArrow } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
@@ -840,13 +840,12 @@ function FieldMappings({
 
 export function ImportTransactions({ options }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const prefs = useLocalPrefs();
+  const [prefs, savePrefs] = useSyncedPrefs();
   const {
     parseTransactions,
     importTransactions,
     importPreviewTransactions,
     getPayees,
-    savePrefs,
   } = useActions();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
