@@ -92,7 +92,6 @@ export const readFile: T.ReadFile = (
   filepath: string,
   encoding: 'utf8' | 'binary' | null = 'utf8',
 ) => {
-  console.info('reading the file');
   if (encoding === 'binary') {
     // `binary` is not actually a valid encoding, you pass `null` into node if
     // you want a buffer
