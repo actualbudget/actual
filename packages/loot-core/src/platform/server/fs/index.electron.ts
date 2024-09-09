@@ -92,6 +92,7 @@ export const readFile: T.ReadFile = (
   filepath: string,
   encoding: 'utf8' | 'binary' | null = 'utf8',
 ) => {
+  console.info('reading the file');
   if (encoding === 'binary') {
     // `binary` is not actually a valid encoding, you pass `null` into node if
     // you want a buffer
@@ -111,11 +112,35 @@ export const readFile: T.ReadFile = (
 };
 
 export const writeFile: T.WriteFile = (filepath, contents) => {
-  return new Promise(function (resolve, reject) {
-    // @ts-expect-error contents type needs refining
-    fs.writeFile(filepath, contents, 'utf8', function (err) {
-      return err ? reject(err) : resolve(undefined);
-    });
+  const NO_OF_RETRIES = 5;
+  const INITIAL_RETRY_DELAY = 200;
+  let retryDelay = INITIAL_RETRY_DELAY;
+
+  return new Promise((resolve, reject) => {
+    const attemptWrite = (attempt: number = 1) => {
+      // @ts-expect-error contents type needs refining
+      fs.writeFile(filepath, contents, 'utf8', err => {
+        if (err) {
+          if (attempt < NO_OF_RETRIES) {
+            console.log(
+              `Failed to write to ${filepath}. Attempt ${attempt}. Retrying...`,
+            );
+
+            retryDelay = retryDelay * 2; // Exponential backoff
+            setTimeout(() => attemptWrite(attempt + 1), retryDelay); // Wait then retry
+          } else {
+            console.error(
+              `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file. Potentially a virus scanner or backup software.`,
+            );
+            reject(err);
+          }
+        } else {
+          resolve(undefined);
+        }
+      });
+    };
+
+    attemptWrite();
   });
 };
 
