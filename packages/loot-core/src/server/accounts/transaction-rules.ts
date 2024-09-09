@@ -7,9 +7,9 @@ import {
   dayFromDate,
 } from '../../shared/months';
 import {
-  FIELD_TYPES,
   sortNumbers,
   getApproxNumberThreshold,
+  FIELD_TYPES,
 } from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';

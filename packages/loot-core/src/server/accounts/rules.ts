@@ -10,7 +10,11 @@ import {
   subDays,
   parseDate,
 } from '../../shared/months';
-import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
+import {
+  sortNumbers,
+  getApproxNumberThreshold,
+  isValidOp,
+} from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import {
   addSplitTransaction,
@@ -169,6 +173,12 @@ const CONDITION_TYPES = {
         return value.filter(Boolean).map(val => val.toLowerCase());
       }
 
+      assert(
+        typeof value === 'string',
+        'not-string',
+        `Invalid string value (field: ${fieldName})`,
+      );
+
       if (
         op === 'contains' ||
         op === 'matches' ||
@@ -176,41 +186,7 @@ const CONDITION_TYPES = {
         op === 'hasTags'
       ) {
         assert(
-          typeof value === 'string' && value.length > 0,
-          'no-empty-string',
-          `contains must have non-empty string (field: ${fieldName})`,
-        );
-      }
-
-      return value.toLowerCase();
-    },
-  },
-  imported_payee: {
-    ops: [
-      'is',
-      'contains',
-      'matches',
-      'oneOf',
-      'isNot',
-      'doesNotContain',
-      'notOneOf',
-    ],
-    nullable: true,
-    parse(op, value, fieldName) {
-      if (op === 'oneOf' || op === 'notOneOf') {
-        assert(
-          Array.isArray(value),
-          'no-empty-array',
-          `${op} must have an array value (field: ${fieldName}): ${JSON.stringify(
-            value,
-          )}`,
-        );
-        return value.filter(Boolean).map(val => val.toLowerCase());
-      }
-
-      if (op === 'contains' || op === 'matches' || op === 'doesNotContain') {
-        assert(
-          typeof value === 'string' && value.length > 0,
+          value.length > 0,
           'no-empty-string',
           `${op} must have non-empty string (field: ${fieldName})`,
         );
@@ -291,7 +267,7 @@ export class Condition {
       `Invalid condition type: ${typeName} (field: ${field})`,
     );
     assert(
-      type.ops.includes(op),
+      isValidOp(field, op),
       'internal',
       `Invalid condition operator: ${op} (type: ${typeName}, field: ${field})`,
     );
