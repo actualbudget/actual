@@ -226,6 +226,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           flex: 1,
           flexDirection: 'row',
         }}
+        onContextMenu={e => {
+          if (editing) return;
+          e.preventDefault();
+          setBudgetMenuOpen(true);
+        }}
       >
         {!editing && (
           <View
@@ -262,6 +267,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               isOpen={budgetMenuOpen}
               onOpenChange={() => setBudgetMenuOpen(false)}
               style={{ width: 200 }}
+              isNonModal
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
