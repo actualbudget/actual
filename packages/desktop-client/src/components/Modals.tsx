@@ -4,14 +4,18 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 import { closeModal } from 'loot-core/client/actions';
-import { type PopModalAction } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useLocalPref } from '../hooks/useLocalPref';
 import { useModalState } from '../hooks/useModalState';
-import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 
-import { ModalTitle, ModalHeader } from './common/Modal2';
+import { ModalTitle, ModalHeader } from './common/Modal';
+import { DeleteFileModal } from './modals/manager/DeleteFileModal';
+import { ImportModal } from './modals/manager/ImportModal';
+import { ImportActualModal } from './modals/manager/ImportActualModal';
+import { ImportYNAB4Modal } from './modals/manager/ImportYNAB4Modal';
+import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetListModal } from './modals/BudgetListModal';
@@ -20,25 +24,25 @@ import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
-import { ConfirmCategoryDelete } from './modals/ConfirmCategoryDelete';
-import { ConfirmTransactionDelete } from './modals/ConfirmTransactionDelete';
-import { ConfirmTransactionEdit } from './modals/ConfirmTransactionEdit';
-import { ConfirmUnlinkAccount } from './modals/ConfirmUnlinkAccount';
+import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
+import { ConfirmTransactionDeleteModal } from './modals/ConfirmTransactionDeleteModal';
+import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
+import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
 import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
-import { EditField } from './modals/EditField';
-import { EditRule } from './modals/EditRule';
+import { EditFieldModal } from './modals/EditFieldModal';
+import { EditRuleModal } from './modals/EditRuleModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
-import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
-import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
+import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
+import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
 import { HoldBufferModal } from './modals/HoldBufferModal';
-import { ImportTransactions } from './modals/ImportTransactions';
+import { ImportTransactionsModal } from './modals/ImportTransactionsModal';
 import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
-import { LoadBackup } from './modals/LoadBackup';
+import { LoadBackupModal } from './modals/LoadBackupModal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
-import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
+import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
 import { NotesModal } from './modals/NotesModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { ReportBalanceMenuModal } from './modals/ReportBalanceMenuModal';
@@ -51,8 +55,8 @@ import { RolloverBudgetMonthMenuModal } from './modals/RolloverBudgetMonthMenuMo
 import { RolloverBudgetSummaryModal } from './modals/RolloverBudgetSummaryModal';
 import { RolloverToBudgetMenuModal } from './modals/RolloverToBudgetMenuModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
-import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
-import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
+import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
+import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { SingleInputModal } from './modals/SingleInputModal';
 import { TransferModal } from './modals/TransferModal';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
@@ -61,19 +65,11 @@ import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
-export type CommonModalProps = {
-  onClose: () => PopModalAction;
-  onBack: () => PopModalAction;
-  showBack: boolean;
-  isCurrent: boolean;
-  isHidden: boolean;
-  stackIndex: number;
-};
-
 export function Modals() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { modalStack } = useModalState();
+  const [budgetId, _] = useLocalPref('id');
 
   useEffect(() => {
     if (modalStack.length > 0) {
@@ -81,22 +77,20 @@ export function Modals() {
     }
   }, [location]);
 
-  const syncServerStatus = useSyncServerStatus();
-
   const modals = modalStack
     .map(({ name, options }) => {
       switch (name) {
         case 'keyboard-shortcuts':
-          return <KeyboardShortcutModal key={name} />;
+          // don't show the hotkey help modal when a budget is not open
+          return budgetId ? <KeyboardShortcutModal key={name} /> : null;
 
         case 'import-transactions':
-          return <ImportTransactions key={name} options={options} />;
+          return <ImportTransactionsModal key={name} options={options} />;
 
         case 'add-account':
           return (
             <CreateAccountModal
               key={name}
-              syncServerStatus={syncServerStatus}
               upgradingAccountId={options?.upgradingAccountId}
             />
           );
@@ -116,7 +110,7 @@ export function Modals() {
 
         case 'select-linked-accounts':
           return (
-            <SelectLinkedAccounts
+            <SelectLinkedAccountsModal
               key={name}
               externalAccounts={options.accounts}
               requisitionId={options.requisitionId}
@@ -126,7 +120,7 @@ export function Modals() {
 
         case 'confirm-category-delete':
           return (
-            <ConfirmCategoryDelete
+            <ConfirmCategoryDeleteModal
               key={name}
               category={options.category}
               group={options.group}
@@ -136,7 +130,7 @@ export function Modals() {
 
         case 'confirm-unlink-account':
           return (
-            <ConfirmUnlinkAccount
+            <ConfirmUnlinkAccountModal
               key={name}
               accountName={options.accountName}
               onUnlink={options.onUnlink}
@@ -145,7 +139,7 @@ export function Modals() {
 
         case 'confirm-transaction-edit':
           return (
-            <ConfirmTransactionEdit
+            <ConfirmTransactionEditModal
               key={name}
               onCancel={options.onCancel}
               onConfirm={options.onConfirm}
@@ -155,7 +149,7 @@ export function Modals() {
 
         case 'confirm-transaction-delete':
           return (
-            <ConfirmTransactionDelete
+            <ConfirmTransactionDeleteModal
               key={name}
               message={options.message}
               onConfirm={options.onConfirm}
@@ -164,7 +158,7 @@ export function Modals() {
 
         case 'load-backup':
           return (
-            <LoadBackup
+            <LoadBackupModal
               key={name}
               watchUpdates
               budgetId={options.budgetId}
@@ -177,7 +171,7 @@ export function Modals() {
 
         case 'edit-rule':
           return (
-            <EditRule
+            <EditRuleModal
               key={name}
               defaultRule={options.rule}
               onSave={options.onSave}
@@ -186,7 +180,7 @@ export function Modals() {
 
         case 'merge-unused-payees':
           return (
-            <MergeUnusedPayees
+            <MergeUnusedPayeesModal
               key={name}
               payeeIds={options.payeeIds}
               targetPayeeId={options.targetPayeeId}
@@ -195,17 +189,17 @@ export function Modals() {
 
         case 'gocardless-init':
           return (
-            <GoCardlessInitialise key={name} onSuccess={options.onSuccess} />
+            <GoCardlessInitialiseModal key={name} onSuccess={options.onSuccess} />
           );
 
         case 'simplefin-init':
           return (
-            <SimpleFinInitialise key={name} onSuccess={options.onSuccess} />
+            <SimpleFinInitialiseModal key={name} onSuccess={options.onSuccess} />
           );
 
         case 'gocardless-external-msg':
           return (
-            <GoCardlessExternalMsg
+            <GoCardlessExternalMsgModal
               key={name}
               onMoveExternal={options.onMoveExternal}
               onClose={() => {
@@ -224,7 +218,7 @@ export function Modals() {
 
         case 'edit-field':
           return (
-            <EditField
+            <EditFieldModal
               key={name}
               name={options.name}
               onSubmit={options.onSubmit}
@@ -566,6 +560,25 @@ export function Modals() {
 
         case 'budget-list':
           return <BudgetListModal key={name} />;
+        case 'delete-budget':
+          return <DeleteFileModal key={name} file={options.file} />;
+        case 'import':
+          return <ImportModal key={name} />;
+        case 'import-ynab4':
+          return <ImportYNAB4Modal key={name} />;
+        case 'import-ynab5':
+          return <ImportYNAB5Modal key={name} />;
+        case 'import-actual':
+          return <ImportActualModal key={name} />;
+        case 'manager-load-backup':
+          return (
+            <LoadBackupModal
+              key={name}
+              budgetId={options.budgetId}
+              backupDisabled={true}
+              watchUpdates={false}
+            />
+          );
 
         default:
           console.error('Unknown modal:', name);

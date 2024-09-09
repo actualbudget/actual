@@ -14,7 +14,7 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -43,7 +43,7 @@ export function ReportBalanceMenuModal({
         <>
           <ModalHeader
             title={<ModalTitle title={category.name} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{

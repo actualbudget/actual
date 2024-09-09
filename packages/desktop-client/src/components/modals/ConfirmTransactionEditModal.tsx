@@ -4,7 +4,7 @@ import React from 'react';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 
 type ConfirmTransactionEditProps = {
@@ -13,7 +13,7 @@ type ConfirmTransactionEditProps = {
   confirmReason: string;
 };
 
-export function ConfirmTransactionEdit({
+export function ConfirmTransactionEditModal({
   onCancel,
   onConfirm,
   confirmReason,
@@ -27,7 +27,7 @@ export function ConfirmTransactionEdit({
         <>
           <ModalHeader
             title="Reconciled Transaction"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             {confirmReason === 'batchDeleteWithReconciled' ? (

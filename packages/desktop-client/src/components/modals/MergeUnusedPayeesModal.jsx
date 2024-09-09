@@ -8,14 +8,14 @@ import { usePayees } from '../../hooks/usePayees';
 import { theme } from '../../style';
 import { Information } from '../alerts';
 import { Button } from '../common/Button2';
-import { Modal, ModalButtons } from '../common/Modal2';
+import { Modal, ModalButtons } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
-export function MergeUnusedPayees({ payeeIds, targetPayeeId }) {
+export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
   const allPayees = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');

@@ -5,7 +5,7 @@ import { LazyLoadFailedError } from 'loot-core/src/shared/errors';
 import { Block } from './common/Block';
 import { Button } from './common/Button2';
 import { Link } from './common/Link';
-import { Modal } from './common/Modal';
+import { Modal, ModalHeader } from './common/Modal';
 import { Paragraph } from './common/Paragraph';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
@@ -176,7 +176,8 @@ export function FatalError({ error }: FatalErrorProps) {
   const isLazyLoadError = error instanceof LazyLoadFailedError;
 
   return (
-    <Modal isCurrent title={isLazyLoadError ? 'Loading Error' : 'Fatal Error'}>
+    <Modal name="fatal-error" isDismissable={false}>
+      <ModalHeader title={isLazyLoadError ? 'Loading Error' : 'Fatal Error'} />
       <View
         style={{
           maxWidth: 500,

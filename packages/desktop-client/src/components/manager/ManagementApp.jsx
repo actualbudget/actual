@@ -1,20 +1,25 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import { useActions } from '../../hooks/useActions';
+import {
+  getUserData,
+  loadAllFiles,
+  setAppState,
+} from 'loot-core/client/actions';
+
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
 import { ExposeNavigate } from '../../util/router-tools';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
+import { Modals } from '../Modals';
 import { Notifications } from '../Notifications';
 import { useServerVersion } from '../ServerContext';
 
 import { BudgetList } from './BudgetList';
 import { ConfigServer } from './ConfigServer';
-import { Modals } from './Modals';
 import { ServerURL } from './ServerURL';
 import { Bootstrap } from './subscribe/Bootstrap';
 import { ChangePassword } from './subscribe/ChangePassword';
@@ -54,7 +59,7 @@ export function ManagementApp({ isLoading }) {
     state => state.app.managerHasInitialized,
   );
 
-  const { setAppState, getUserData, loadAllFiles } = useActions();
+  const dispatch = useDispatch();
 
   // runs on mount only
   useEffect(() => {
@@ -69,14 +74,14 @@ export function ManagementApp({ isLoading }) {
     // a cached list of files and can show them
     if (!managerHasInitialized) {
       if (!isLoading) {
-        setAppState({ loadingText: '' });
+        dispatch(setAppState({ loadingText: '' }));
       }
     }
 
     async function fetchData() {
-      const userData = await getUserData();
+      const userData = await dispatch(getUserData());
       if (userData) {
-        await loadAllFiles();
+        await dispatch(loadAllFiles());
       }
 
       // TODO: There is a race condition here. The user could perform an

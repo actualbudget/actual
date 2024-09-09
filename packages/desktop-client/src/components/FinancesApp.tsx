@@ -2,7 +2,7 @@
 import React, { type ReactElement, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Route,
   Routes,
@@ -12,13 +12,13 @@ import {
   useHref,
 } from 'react-router-dom';
 
+import { sync } from 'loot-core/client/actions';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import { type State } from 'loot-core/src/client/state-types';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useAccounts } from '../hooks/useAccounts';
-import { useActions } from '../hooks/useActions';
 import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
@@ -96,19 +96,17 @@ function RouterBehaviors() {
 }
 
 function FinancesAppWithoutContext() {
-  const actions = useActions();
+  const dispatch = useDispatch();
   useEffect(() => {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
-      await actions.sync();
+      await dispatch(sync());
 
       await checkForUpdateNotification(
-        actions.addNotification,
+        dispatch,
         getIsOutdated,
         getLatestVersion,
-        actions.loadPrefs,
-        actions.savePrefs,
       );
     }, 100);
   }, []);

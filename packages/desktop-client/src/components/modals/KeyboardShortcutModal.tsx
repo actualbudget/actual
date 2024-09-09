@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import * as Platform from 'loot-core/src/client/platform';
 
 import { type CSSProperties } from '../../style';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -159,7 +159,7 @@ export function KeyboardShortcutModal() {
         <>
           <ModalHeader
             title="Keyboard Shortcuts"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{

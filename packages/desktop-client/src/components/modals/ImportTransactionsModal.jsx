@@ -16,7 +16,7 @@ import { SvgDownAndRightArrow } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -838,7 +838,7 @@ function FieldMappings({
   );
 }
 
-export function ImportTransactions({ options }) {
+export function ImportTransactionsModal({ options }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
   const {
@@ -1409,7 +1409,7 @@ export function ImportTransactions({ options }) {
               'Import transactions' +
               (filetype ? ` (${filetype.toUpperCase()})` : '')
             }
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           {error && !error.parsed && (
             <View style={{ alignItems: 'center', marginBottom: 15 }}>

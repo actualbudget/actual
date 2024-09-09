@@ -20,7 +20,7 @@ import {
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -70,7 +70,7 @@ export function CreateEncryptionKeyModal({
         <>
           <ModalHeader
             title={isRecreating ? 'Generate new key' : 'Enable encryption'}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{
