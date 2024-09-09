@@ -20,7 +20,7 @@ import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
-import { Button } from './Button';
+import { Button } from './Button2';
 import { Input } from './Input';
 import { Text } from './Text';
 import { TextOneLine } from './TextOneLine';
@@ -202,7 +202,7 @@ export const Modal = ({
                   right: 0,
                 }}
               >
-                <CloseButtonComponent onClick={onClose} />
+                <CloseButtonComponent onPress={onClose} />
               </View>
             )}
           </View>
@@ -463,15 +463,15 @@ function ModalTitle({
 }
 
 type ModalCloseButtonProps = {
-  onClick: ComponentProps<typeof Button>['onClick'];
+  onPress: ComponentProps<typeof Button>['onPress'];
   style?: CSSProperties;
 };
 
-function ModalCloseButton({ onClick, style }: ModalCloseButtonProps) {
+function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
   return (
     <Button
-      type="bare"
-      onClick={onClick}
+      variant="bare"
+      onPress={onPress}
       style={{ padding: '10px 10px' }}
       aria-label="Close"
     >

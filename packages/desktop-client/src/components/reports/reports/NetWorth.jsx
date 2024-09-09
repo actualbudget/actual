@@ -144,7 +144,7 @@ function NetWorthInner({ widget }) {
           <MobilePageHeader
             title={title}
             leftContent={
-              <MobileBackButton onClick={() => navigate('/reports')} />
+              <MobileBackButton onPress={() => navigate('/reports')} />
             }
           />
         ) : (

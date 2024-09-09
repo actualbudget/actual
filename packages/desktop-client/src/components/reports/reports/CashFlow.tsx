@@ -113,7 +113,7 @@ export function CashFlow() {
           <MobilePageHeader
             title="Cash Flow"
             leftContent={
-              <MobileBackButton onClick={() => navigate('/reports')} />
+              <MobileBackButton onPress={() => navigate('/reports')} />
             }
           />
         ) : (
