@@ -664,7 +664,10 @@ describe('Transactions', () => {
       'Bob-payee-item',
       'This guy on the side of the road-payee-item',
     ]);
-    expect(renderedPayees).payeesToHaveFavoriteStars(['Alice-payee-item', 'Bob-payee-item']);
+    expect(renderedPayees).payeesToHaveFavoriteStars([
+      'Alice-payee-item',
+      'Bob-payee-item',
+    ]);
   });
 
   test('dropdown payee displays on existing non-transfer transaction', async () => {

@@ -47,9 +47,12 @@ function getPayeeSuggestions(
   commonPayees: PayeeAutocompleteItem[],
   payees: PayeeAutocompleteItem[],
 ): (PayeeAutocompleteItem & PayeeItemType)[] {
-  const favoritePayees = payees.filter(p => p.favorite)
-      .map(p => { return {...p, itemType: determineItemType(p, true) }})
-      .sort((a, b) => a.name.localeCompare(b.name));
+  const favoritePayees = payees
+    .filter(p => p.favorite)
+    .map(p => {
+      return { ...p, itemType: determineItemType(p, true) };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   let additionalCommonPayees: (PayeeAutocompleteItem & PayeeItemType)[] = [];
   if (commonPayees?.length > 0) {
@@ -59,7 +62,9 @@ function getPayeeSuggestions(
           p => !(p.favorite || favoritePayees.map(fp => fp.id).includes(p.id)),
         )
         .slice(0, MAX_AUTO_SUGGESTIONS - favoritePayees.length)
-        .map(p => { return {...p, itemType: determineItemType(p, true) }})
+        .map(p => {
+          return { ...p, itemType: determineItemType(p, true) };
+        })
         .sort((a, b) => a.name.localeCompare(b.name));
     }
   }
@@ -72,9 +77,7 @@ function getPayeeSuggestions(
         return { ...p, itemType: determineItemType(p, false) };
       });
 
-    return favoritePayees
-      .concat(additionalCommonPayees)
-      .concat(filteredPayees);
+    return favoritePayees.concat(additionalCommonPayees).concat(filteredPayees);
   }
 
   return payees.map(p => {
