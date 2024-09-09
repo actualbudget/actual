@@ -4,6 +4,7 @@ import debounce from 'lodash/debounce';
 
 import { send } from '../../platform/client/fetch';
 import { type Query } from '../../shared/query';
+import { getScheduledAmount } from '../../shared/schedules';
 import { ungroupTransactions } from '../../shared/transactions';
 import {
   type ScheduleEntity,
@@ -129,7 +130,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
       id: 'preview/' + schedule.id,
       payee: schedule._payee,
       account: schedule._account,
-      amount: schedule._amount,
+      amount: getScheduledAmount(schedule._amount),
       date: schedule.next_date,
       schedule: schedule.id,
     }));
