@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
@@ -32,12 +38,22 @@ export function BalanceMovementMenu({
   const catBalance = useRolloverSheetValue(
     rolloverBudget.catBalance(categoryId),
   );
-  const [menu, setMenu] = useState('menu');
+  const [menu, _setMenu] = useState('menu');
+
+  const ref = useRef<HTMLSpanElement>(null);
+  // Keep focus inside the popover on menu change
+  const setMenu = useCallback(
+    (menu: string) => {
+      ref.current?.focus();
+      _setMenu(menu);
+    },
+    [ref],
+  );
 
   const { addBudgetTransferNotes } = useBudgetTransferNotes({ month });
 
   return (
-    <>
+    <span tabIndex={-1} ref={ref}>
       {menu === 'menu' && (
         <BalanceMenu
           categoryId={categoryId}
@@ -85,7 +101,7 @@ export function BalanceMovementMenu({
           }}
         />
       )}
-    </>
+    </span>
   );
 }
 
