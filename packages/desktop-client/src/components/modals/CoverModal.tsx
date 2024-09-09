@@ -85,14 +85,6 @@ export function CoverModal({
     }
   };
 
-  const initialMount = useInitialMount();
-
-  useEffect(() => {
-    if (initialMount) {
-      onCategoryClick();
-    }
-  }, [initialMount, onCategoryClick]);
-
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   return (
@@ -105,7 +97,7 @@ export function CoverModal({
           />
           <View>
             <FieldLabel title="Cover from category:" />
-            <TapField onClick={onCategoryClick}>{fromCategory?.name}</TapField>
+            <TapField value={fromCategory?.name} onClick={onCategoryClick} />
           </View>
 
           <View
