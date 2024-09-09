@@ -146,7 +146,7 @@ export const writeFile: T.WriteFile = async (filepath, contents) => {
 
     return undefined;
   } catch (err) {
-    console.error('Unable to recover from file lock', err);
+    console.error(`unable to recover from file lock on file ${filepath}`);
     throw err;
   }
 };
