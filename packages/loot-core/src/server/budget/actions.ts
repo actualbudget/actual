@@ -481,7 +481,7 @@ export async function setCategoryCarryover({
 }
 
 function addNewLine(notes?: string) {
-  return `${notes}${notes && '\n'}`;
+  return !notes ? '' : `${notes}${notes && '\n'}`;
 }
 
 async function addMovementNotes({
@@ -501,7 +501,7 @@ async function addMovementNotes({
   const existingMonthBudgetNotes = addNewLine(
     db.firstSync(`SELECT n.note FROM notes n WHERE n.id = ?`, [
       monthBudgetNotesId,
-    ]).note,
+    ])?.note,
   );
 
   const displayDay = monthUtils.format(monthUtils.currentDate(), 'MMMM dd');
