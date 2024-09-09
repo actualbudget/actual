@@ -112,6 +112,7 @@ export const PayeeTableRow = memo(
     const triggerRef = useRef(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [crossOffset, setCrossOffset] = useState(0);
+    const [offset, setOffset] = useState(0);
 
     return (
       <Row
@@ -137,9 +138,9 @@ export const PayeeTableRow = memo(
         onContextMenu={e => {
           e.preventDefault();
           setMenuOpen(true);
-          setCrossOffset(
-            e.clientX - triggerRef.current.getBoundingClientRect().left,
-          );
+          const rect = e.currentTarget.getBoundingClientRect();
+          setCrossOffset(e.clientX - rect.left);
+          setOffset(e.clientY - rect.bottom);
         }}
       >
         <Popover
@@ -148,7 +149,8 @@ export const PayeeTableRow = memo(
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
           crossOffset={crossOffset}
-          style={{ width: 200 }}
+          offset={offset}
+          style={{ width: 200, margin: 1 }}
           isNonModal
         >
           <Menu

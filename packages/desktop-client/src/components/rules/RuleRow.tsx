@@ -85,7 +85,7 @@ export const RuleRow = memo(
           setMenuOpen(true);
           const rect = triggerRef.current.getBoundingClientRect();
           setCrossOffset(e.clientX - rect.left);
-          setOffset(e.clientY - rect.bottom + 10);
+          setOffset(e.clientY - rect.bottom);
         }}
       >
         <Popover
@@ -95,7 +95,7 @@ export const RuleRow = memo(
           onOpenChange={() => setMenuOpen(false)}
           crossOffset={crossOffset}
           offset={offset}
-          style={{ width: 200 }}
+          style={{ width: 200, margin: 1 }}
           isNonModal
         >
           <Menu

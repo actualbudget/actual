@@ -1049,6 +1049,7 @@ const Transaction = memo(function Transaction({
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
 
   return (
     <Row
@@ -1081,9 +1082,9 @@ const Transaction = memo(function Transaction({
       onContextMenu={e => {
         if (transaction.id === 'temp') return;
         e.preventDefault();
-        setCrossOffset(
-          e.clientX - triggerRef.current.getBoundingClientRect().left,
-        );
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCrossOffset(e.clientX - rect.left);
+        setOffset(e.clientY - rect.bottom);
         setMenuOpen(true);
       }}
     >
@@ -1093,7 +1094,8 @@ const Transaction = memo(function Transaction({
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
         crossOffset={crossOffset}
-        style={{ width: 200 }}
+        offset={offset}
+        style={{ width: 200, margin: 1 }}
         isNonModal
       >
         <TransactionMenu

@@ -186,6 +186,7 @@ function ScheduleRow({
   const buttonRef = useRef(null);
   const [open, setOpen] = useState<false | 'contextMenu' | 'button'>(false);
   const [crossOffset, setCrossOffset] = useState(0);
+  const [offset, setOffset] = useState(0);
 
   return (
     <Row
@@ -202,7 +203,9 @@ function ScheduleRow({
       onContextMenu={e => {
         if (minimal) return;
         e.preventDefault();
-        setCrossOffset(e.clientX - rowRef.current.getBoundingClientRect().left);
+        const rect = e.currentTarget.getBoundingClientRect();
+        setCrossOffset(e.clientX - rect.left);
+        setOffset(e.clientY - rect.bottom);
         setOpen('contextMenu');
       }}
     >
@@ -214,6 +217,8 @@ function ScheduleRow({
           isNonModal
           placement="bottom start"
           crossOffset={open === 'contextMenu' ? crossOffset : 0}
+          offset={open === 'contextMenu' ? offset : 0}
+          style={{ margin: 1 }}
         >
           <OverflowMenu
             schedule={schedule}
