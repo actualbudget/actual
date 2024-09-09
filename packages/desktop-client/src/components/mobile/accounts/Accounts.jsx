@@ -123,11 +123,11 @@ function AccountCard({
         {props => (
           <CellValueText
             {...props}
-            getStyle={value => ({
+            style={{
               fontSize: 16,
               color: 'inherit',
-              ...makeAmountFullStyle(value),
-            })}
+              ...makeAmountFullStyle(props.value),
+            }}
             data-testid="account-balance"
           />
         )}
