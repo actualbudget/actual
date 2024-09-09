@@ -2,6 +2,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import promiseRetry from 'promise-retry';
+
 import type * as T from '.';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
@@ -110,37 +112,43 @@ export const readFile: T.ReadFile = (
   });
 };
 
-export const writeFile: T.WriteFile = (filepath, contents) => {
-  const NO_OF_RETRIES = 5;
-  const INITIAL_RETRY_DELAY = 200;
-  let retryDelay = INITIAL_RETRY_DELAY;
+export const writeFile: T.WriteFile = async (filepath, contents) => {
+  try {
+    await promiseRetry(
+      (retry, attempt) => {
+        return new Promise((resolve, reject) => {
+          // @ts-expect-error contents type needs refining
+          fs.writeFile(filepath, contents, 'utf8', err => {
+            if (err) {
+              console.error(
+                `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,
+              );
+              reject(err);
+            } else {
+              if (attempt > 1) {
+                console.info(
+                  `Successfully recovered from file lock. It took ${attempt} retries`,
+                );
+              }
 
-  return new Promise((resolve, reject) => {
-    const attemptWrite = (attempt: number = 1) => {
-      // @ts-expect-error contents type needs refining
-      fs.writeFile(filepath, contents, 'utf8', err => {
-        if (err) {
-          if (attempt < NO_OF_RETRIES) {
-            console.log(
-              `Failed to write to ${filepath}. Attempt ${attempt}. Retrying...`,
-            );
+              resolve(undefined);
+            }
+          });
+        }).catch(retry);
+      },
+      {
+        retries: 20,
+        minTimeout: 100,
+        maxTimeout: 500,
+        factor: 1.5,
+      },
+    );
 
-            retryDelay = retryDelay * 2; // Exponential backoff
-            setTimeout(() => attemptWrite(attempt + 1), retryDelay); // Wait then retry
-          } else {
-            console.error(
-              `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file. Potentially a virus scanner or backup software.`,
-            );
-            reject(err);
-          }
-        } else {
-          resolve(undefined);
-        }
-      });
-    };
-
-    attemptWrite();
-  });
+    return undefined;
+  } catch (err) {
+    console.error('Unable to recover from file lock', err);
+    throw err;
+  }
 };
 
 export const removeFile = filepath => {
