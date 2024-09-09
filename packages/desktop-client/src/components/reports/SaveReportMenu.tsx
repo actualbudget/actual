@@ -1,6 +1,6 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React from 'react';
 
-import { Menu } from '../common/Menu';
+import { Menu, type MenuItem } from '../common/Menu';
 
 export function SaveReportMenu({
   onMenuSelect,
@@ -11,65 +11,55 @@ export function SaveReportMenu({
   savedStatus: string;
   listReports: number;
 }) {
-  const savedMenu: ComponentPropsWithoutRef<typeof Menu> =
+  const savedMenu: MenuItem[] =
     savedStatus === 'saved'
-      ? {
-          items: [
-            { name: 'rename-report', text: 'Rename' },
-            { name: 'delete-report', text: 'Delete' },
-            Menu.line,
-          ],
-        }
-      : {
-          items: [],
-        };
+      ? [
+          { name: 'rename-report', text: 'Rename' },
+          { name: 'delete-report', text: 'Delete' },
+          Menu.line,
+        ]
+      : [];
 
-  const modifiedMenu: ComponentPropsWithoutRef<typeof Menu> =
+  const modifiedMenu: MenuItem[] =
     savedStatus === 'modified'
-      ? {
-          items: [
-            { name: 'rename-report', text: 'Rename' },
-            {
-              name: 'update-report',
-              text: 'Update report',
-            },
-            {
-              name: 'reload-report',
-              text: 'Revert changes',
-            },
-            { name: 'delete-report', text: 'Delete' },
-            Menu.line,
-          ],
-        }
-      : {
-          items: [],
-        };
+      ? [
+          { name: 'rename-report', text: 'Rename' },
+          {
+            name: 'update-report',
+            text: 'Update report',
+          },
+          {
+            name: 'reload-report',
+            text: 'Revert changes',
+          },
+          { name: 'delete-report', text: 'Delete' },
+          Menu.line,
+        ]
+      : [];
 
-  const unsavedMenu: ComponentPropsWithoutRef<typeof Menu> = {
-    items: [
-      {
-        name: 'save-report',
-        text: 'Save new report',
-      },
-      {
-        name: 'reset-report',
-        text: 'Reset to default',
-      },
-      Menu.line,
-      {
-        name: 'choose-report',
-        text: 'Choose Report',
-        disabled: listReports > 0 ? false : true,
-      },
-    ],
-  };
+  const unsavedMenu: MenuItem[] = [
+    {
+      name: 'save-report',
+      text: 'Save new report',
+    },
+    {
+      name: 'reset-report',
+      text: 'Reset to default',
+    },
+    Menu.line,
+    {
+      name: 'choose-report',
+      text: 'Choose Report',
+      disabled: listReports > 0 ? false : true,
+    },
+  ];
 
   return (
     <Menu
       onMenuSelect={item => {
         onMenuSelect(item);
       }}
-      items={[...savedMenu.items, ...modifiedMenu.items, ...unsavedMenu.items]}
+      items={[...savedMenu, ...modifiedMenu, ...unsavedMenu]}
     />
   );
 }

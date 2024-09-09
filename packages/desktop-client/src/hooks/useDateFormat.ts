@@ -1,7 +1,6 @@
-import { useSelector } from 'react-redux';
-
-import { type State } from 'loot-core/src/client/state-types';
+import { useSyncedPref } from './useSyncedPref';
 
 export function useDateFormat() {
-  return useSelector((state: State) => state.prefs.local?.dateFormat);
+  const [dateFormat] = useSyncedPref('dateFormat');
+  return dateFormat;
 }

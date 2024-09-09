@@ -222,12 +222,20 @@ export function appendDecimals(
   return amountToCurrency(currencyToAmount(result));
 }
 
-type NumberFormats =
-  | 'comma-dot'
-  | 'dot-comma'
-  | 'space-comma'
-  | 'apostrophe-dot'
-  | 'comma-dot-in';
+const NUMBER_FORMATS = [
+  'comma-dot',
+  'dot-comma',
+  'space-comma',
+  'apostrophe-dot',
+  'comma-dot',
+  'comma-dot-in',
+] as const;
+
+type NumberFormats = (typeof NUMBER_FORMATS)[number];
+
+export function isNumberFormat(input: string = ''): input is NumberFormats {
+  return (NUMBER_FORMATS as readonly string[]).includes(input);
+}
 
 export const numberFormats: Array<{
   value: NumberFormats;

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, type ComponentProps } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models/category';
@@ -12,7 +12,7 @@ import { Information } from '../alerts';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
-import { Select } from '../common/Select';
+import { Select, type SelectOption } from '../common/Select';
 import { Text } from '../common/Text';
 import { Tooltip } from '../common/Tooltip';
 import { View } from '../common/View';
@@ -139,10 +139,9 @@ export function ReportSidebar({
   };
 
   const rangeOptions = useMemo(() => {
-    const options: ComponentProps<typeof Select>['options'] =
-      ReportOptions.dateRange
-        .filter(f => f[customReportItems.interval as keyof dateRangeProps])
-        .map(option => [option.description, option.description]);
+    const options: SelectOption[] = ReportOptions.dateRange
+      .filter(f => f[customReportItems.interval as keyof dateRangeProps])
+      .map(option => [option.description, option.description]);
 
     // Append separator if necessary
     if (dateRangeLine > 0) {
