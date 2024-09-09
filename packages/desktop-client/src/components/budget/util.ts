@@ -4,7 +4,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type Handlers } from 'loot-core/src/types/handlers';
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
-import { type SyncedPrefs } from 'loot-core/src/types/prefs';
+import { type MetadataPrefs } from 'loot-core/src/types/prefs';
 
 import { type CSSProperties, styles, theme } from '../../style';
 import { type DropPosition } from '../sort';
@@ -141,7 +141,7 @@ export function getScrollbarWidth() {
 }
 
 export async function prewarmMonth(
-  budgetType: SyncedPrefs['budgetType'],
+  budgetType: MetadataPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   month: string,
 ) {
@@ -156,7 +156,7 @@ export async function prewarmMonth(
 }
 
 export async function prewarmAllMonths(
-  budgetType: SyncedPrefs['budgetType'],
+  budgetType: MetadataPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   bounds: { start: string; end: string },
   startMonth: string,
@@ -176,7 +176,7 @@ export async function prewarmAllMonths(
 }
 
 export async function switchBudgetType(
-  newBudgetType: SyncedPrefs['budgetType'],
+  newBudgetType: MetadataPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   bounds: { start: string; end: string },
   startMonth: string,
