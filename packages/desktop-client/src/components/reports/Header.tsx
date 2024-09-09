@@ -1,7 +1,14 @@
+import { type ComponentProps, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
+import {
+  type RuleConditionEntity,
+  type TimeFrame,
+} from 'loot-core/types/models';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { SvgPause, SvgPlay } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
@@ -16,9 +23,32 @@ import {
   validateStart,
 } from './reportRanges';
 
+type HeaderProps = {
+  start: TimeFrame['start'];
+  end: TimeFrame['end'];
+  mode?: TimeFrame['mode'];
+  show1Month?: boolean;
+  allMonths: Array<{ name: string; pretty: string }>;
+  onChangeDates: (
+    start: TimeFrame['start'],
+    end: TimeFrame['end'],
+    mode: TimeFrame['mode'],
+  ) => void;
+  filters?: RuleConditionEntity[];
+  conditionsOp: 'and' | 'or';
+  onApply?: (conditions: RuleConditionEntity) => void;
+  onUpdateFilter: ComponentProps<typeof AppliedFilters>['onUpdate'];
+  onDeleteFilter: ComponentProps<typeof AppliedFilters>['onDelete'];
+  onConditionsOpChange: ComponentProps<
+    typeof AppliedFilters
+  >['onConditionsOpChange'];
+  children?: ReactNode;
+};
+
 export function Header({
   start,
   end,
+  mode,
   show1Month,
   allMonths,
   onChangeDates,
@@ -28,9 +58,9 @@ export function Header({
   onUpdateFilter,
   onDeleteFilter,
   onConditionsOpChange,
-  headerPrefixItems,
   children,
-}) {
+}: HeaderProps) {
+  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const location = useLocation();
   const path = location.pathname;
   const { isNarrowWidth } = useResponsive();
@@ -52,7 +82,21 @@ export function Header({
             gap: 15,
           }}
         >
-          {headerPrefixItems}
+          {isDashboardsFeatureEnabled && mode && (
+            <Button
+              variant={mode === 'static' ? 'normal' : 'primary'}
+              onPress={() =>
+                onChangeDates(
+                  start,
+                  end,
+                  mode === 'static' ? 'sliding-window' : 'static',
+                )
+              }
+              Icon={mode === 'static' ? SvgPause : SvgPlay}
+            >
+              {mode === 'static' ? 'Paused' : 'Live'}
+            </Button>
+          )}
 
           <View
             style={{
@@ -90,13 +134,6 @@ export function Header({
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
               buttonStyle={{ marginRight: 10 }}
             />
-            {filters && (
-              <FilterButton
-                compact={isNarrowWidth}
-                onApply={onApply}
-                type="accounts"
-              />
-            )}
           </View>
 
           <View
@@ -143,18 +180,34 @@ export function Header({
             >
               All Time
             </Button>
+
+            {filters && (
+              <FilterButton
+                compact={isNarrowWidth}
+                onApply={onApply}
+                hover={false}
+                exclude={undefined}
+              />
+            )}
           </View>
-          {children || <View style={{ flex: 1 }} />}
+
+          {children ? (
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+              }}
+            >
+              {children}
+            </View>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
         </View>
       )}
       {filters && filters.length > 0 && (
-        <View
-          style={{ marginTop: 5 }}
-          spacing={2}
-          direction="row"
-          justify="flex-start"
-          align="flex-start"
-        >
+        <View style={{ marginTop: 5 }}>
           <AppliedFilters
             conditions={filters}
             onUpdate={onUpdateFilter}
