@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -8,7 +8,6 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useInitialMount } from '../../hooks/useInitialMount';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
 import { Button } from '../common/Button2';
@@ -84,14 +83,6 @@ export function CoverModal({
       onSubmit?.(categoryId);
     }
   };
-
-  const initialMount = useInitialMount();
-
-  useEffect(() => {
-    if (initialMount) {
-      onCategoryClick();
-    }
-  }, [initialMount, onCategoryClick]);
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 

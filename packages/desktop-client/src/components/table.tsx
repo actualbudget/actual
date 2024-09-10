@@ -29,7 +29,7 @@ import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
 import { type CSSProperties, styles, theme } from '../style';
 
-import { Button } from './common/Button';
+import { Button } from './common/Button2';
 import { Input } from './common/Input';
 import { Menu, type MenuItem } from './common/Menu';
 import { Popover } from './common/Popover';
@@ -843,9 +843,9 @@ export function SelectedItemsButton<T extends MenuItem = MenuItem>({
     <View style={{ marginLeft: 10, flexShrink: 0 }}>
       <Button
         ref={triggerRef}
-        type="bare"
+        variant="bare"
         style={{ color: theme.pageTextPositive }}
-        onClick={() => setMenuOpen(true)}
+        onPress={() => setMenuOpen(true)}
         data-testid={id + '-select-button'}
       >
         <SvgExpandArrow

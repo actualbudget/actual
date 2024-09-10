@@ -31,7 +31,6 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePreviewTransactions } from '../../../hooks/usePreviewTransactions';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { styles, theme } from '../../../style';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
@@ -127,7 +126,11 @@ function AccountName({ account, pending, failed }) {
         />
       )}
       <Text
-        style={{ ...styles.underlinedText, ...styles.lineClamp(2) }}
+        style={{
+          userSelect: 'none',
+          ...styles.underlinedText,
+          ...styles.lineClamp(2),
+        }}
         onClick={onClick}
       >
         {`${account.closed ? 'Closed: ' : ''}${account.name}`}
@@ -149,7 +152,6 @@ function TransactionListWithPreviews({ account }) {
   );
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [_numberFormat] = useSyncedPref('numberFormat');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

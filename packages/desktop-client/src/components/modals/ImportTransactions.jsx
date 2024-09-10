@@ -11,7 +11,7 @@ import {
 
 import { useActions } from '../../hooks/useActions';
 import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocalPrefs } from '../../hooks/useLocalPrefs';
+import { useSyncedPrefs } from '../../hooks/useSyncedPrefs';
 import { SvgDownAndRightArrow } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
@@ -840,13 +840,12 @@ function FieldMappings({
 
 export function ImportTransactions({ options }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const prefs = useLocalPrefs();
+  const [prefs, savePrefs] = useSyncedPrefs();
   const {
     parseTransactions,
     importTransactions,
     importPreviewTransactions,
     getPayees,
-    savePrefs,
   } = useActions();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
@@ -875,13 +874,13 @@ export function ImportTransactions({ options }) {
       (filename.endsWith('.tsv') ? '\t' : ','),
   );
   const [skipLines, setSkipLines] = useState(
-    prefs[`csv-skip-lines-${accountId}`] ?? 0,
+    parseInt(prefs[`csv-skip-lines-${accountId}`], 10) || 0,
   );
   const [hasHeaderRow, setHasHeaderRow] = useState(
-    prefs[`csv-has-header-${accountId}`] ?? true,
+    String(prefs[`csv-has-header-${accountId}`]) !== 'false',
   );
   const [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
-    prefs[`ofx-fallback-missing-payee-${accountId}`] ?? true,
+    String(prefs[`ofx-fallback-missing-payee-${accountId}`]) !== 'false',
   );
 
   const [parseDateFormat, setParseDateFormat] = useState(null);
@@ -923,7 +922,8 @@ export function ImportTransactions({ options }) {
       let parseDateFormat = null;
 
       if (filetype === 'csv' || filetype === 'qif') {
-        flipAmount = prefs[`flip-amount-${accountId}-${filetype}`] || false;
+        flipAmount =
+          String(prefs[`flip-amount-${accountId}-${filetype}`]) === 'true';
         setFlipAmount(flipAmount);
       }
 
@@ -1186,7 +1186,9 @@ export function ImportTransactions({ options }) {
 
     if (isOfxFile(filetype)) {
       savePrefs({
-        [`ofx-fallback-missing-payee-${accountId}`]: fallbackMissingPayeeToMemo,
+        [`ofx-fallback-missing-payee-${accountId}`]: String(
+          fallbackMissingPayeeToMemo,
+        ),
       });
     }
 
@@ -1195,12 +1197,14 @@ export function ImportTransactions({ options }) {
         [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
-      savePrefs({ [`csv-has-header-${accountId}`]: hasHeaderRow });
-      savePrefs({ [`csv-skip-lines-${accountId}`]: skipLines });
+      savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
+      savePrefs({ [`csv-skip-lines-${accountId}`]: String(skipLines) });
     }
 
     if (filetype === 'csv' || filetype === 'qif') {
-      savePrefs({ [`flip-amount-${accountId}-${filetype}`]: flipAmount });
+      savePrefs({
+        [`flip-amount-${accountId}-${filetype}`]: String(flipAmount),
+      });
     }
 
     const didChange = await importTransactions(

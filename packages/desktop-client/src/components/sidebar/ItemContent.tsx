@@ -38,7 +38,7 @@ export function ItemContent({
       {children}
     </View>
   ) : (
-    <Link to={to} style={style} activeStyle={activeStyle}>
+    <Link variant="internal" to={to} style={style} activeStyle={activeStyle}>
       {children}
     </Link>
   );
