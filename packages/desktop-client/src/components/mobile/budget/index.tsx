@@ -27,6 +27,7 @@ import {
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
@@ -466,7 +467,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [budgetType] = useSyncedPref('budgetType');
+  const [budgetType] = useMetadataPref('budgetType');
   const spreadsheet = useSpreadsheet();
   useSetThemeColor(theme.mobileViewTheme);
   return (

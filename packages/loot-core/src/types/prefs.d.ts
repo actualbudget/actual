@@ -29,7 +29,6 @@ export type SyncedPrefs = Partial<
     | `csv-has-header-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
-    | 'budgetType'
     | `flags.${FeatureFlag}`,
     string
   >
@@ -40,6 +39,8 @@ export type SyncedPrefs = Partial<
  * core database.
  */
 export type MetadataPrefs = Partial<{
+  // TODO: move budgetType to SyncedPrefs
+  budgetType: string;
   budgetName: string;
   id: string;
   lastUploaded: string;
