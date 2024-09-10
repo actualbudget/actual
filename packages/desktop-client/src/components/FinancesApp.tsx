@@ -7,7 +7,6 @@ import {
   Route,
   Routes,
   Navigate,
-  BrowserRouter,
   useLocation,
   useHref,
 } from 'react-router-dom';
@@ -22,7 +21,6 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
-import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import { BankSyncStatus } from './BankSyncStatus';
@@ -33,7 +31,6 @@ import { ManageRulesPage } from './ManageRulesPage';
 import { Category } from './mobile/budget/Category';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
-import { Modals } from './Modals';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
@@ -112,10 +109,8 @@ function FinancesAppWithoutContext() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <>
       <RouterBehaviors />
-      <ExposeNavigate />
-
       <View style={{ height: '100%' }}>
         <GlobalKeys />
 
@@ -137,10 +132,9 @@ function FinancesAppWithoutContext() {
               width: '100%',
             }}
           >
-            <div
+            <View
               style={{
                 flex: 1,
-                display: 'flex',
                 overflow: 'auto',
                 position: 'relative',
               }}
@@ -221,9 +215,7 @@ function FinancesAppWithoutContext() {
                 {/* redirect all other traffic to the budget page */}
                 <Route path="/*" element={<Navigate to="/budget" replace />} />
               </Routes>
-
-              <Modals />
-            </div>
+            </View>
 
             <Routes>
               <Route path="/budget" element={<MobileNavTabs />} />
@@ -235,7 +227,7 @@ function FinancesAppWithoutContext() {
           </View>
         </View>
       </View>
-    </BrowserRouter>
+    </>
   );
 }
 

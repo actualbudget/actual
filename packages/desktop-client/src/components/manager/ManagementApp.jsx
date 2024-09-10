@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
 import {
   getUserData,
@@ -10,11 +10,10 @@ import {
 
 import { theme } from '../../style';
 import { tokens } from '../../tokens';
-import { ExposeNavigate } from '../../util/router-tools';
+import { AppBackground } from '../AppBackground';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { LoggedInUser } from '../LoggedInUser';
-import { Modals } from '../Modals';
 import { Notifications } from '../Notifications';
 import { useServerVersion } from '../ServerContext';
 
@@ -52,8 +51,9 @@ function Version() {
   );
 }
 
-export function ManagementApp({ isLoading }) {
+export function ManagementApp() {
   const files = useSelector(state => state.budgets.allFiles);
+  const isLoading = useSelector(state => state.app.loadingText !== null);
   const userData = useSelector(state => state.user.data);
   const managerHasInitialized = useSelector(
     state => state.app.managerHasInitialized,
@@ -72,11 +72,6 @@ export function ManagementApp({ isLoading }) {
     // redux so that it persists across renders. This will show the
     // loading spinner on first run, but never again since we'll have
     // a cached list of files and can show them
-    if (!managerHasInitialized) {
-      if (!isLoading) {
-        dispatch(setAppState({ loadingText: '' }));
-      }
-    }
 
     async function fetchData() {
       const userData = await dispatch(getUserData());
@@ -89,54 +84,43 @@ export function ManagementApp({ isLoading }) {
       // was captured and this would clear it. We really only want to
       // ever clear the initial loading screen, so we need a "loading
       // id" of some kind.
-      setAppState({
-        managerHasInitialized: true,
-        ...(!isLoading ? { loadingText: null } : null),
-      });
+      dispatch(setAppState({ managerHasInitialized: true }));
     }
 
     fetchData();
   }, []);
 
-  if (!managerHasInitialized) {
-    return null;
-  }
-
-  if (isLoading) {
-    return null;
-  }
-
   return (
-    <BrowserRouter>
-      <ExposeNavigate />
-      <View style={{ height: '100%', color: theme.pageText }}>
-        <View
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 40,
-            WebkitAppRegion: 'drag',
-          }}
-        />
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 40,
-            right: 15,
-          }}
-        >
-          <Notifications
+    <View style={{ height: '100%', color: theme.pageText }}>
+      <AppBackground />
+      {managerHasInitialized && !isLoading && (
+        <>
+          <View
             style={{
-              position: 'relative',
-              left: 'initial',
-              right: 'initial',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 40,
+              WebkitAppRegion: 'drag',
             }}
           />
-        </View>
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 40,
+              right: 15,
+            }}
+          >
+            <Notifications
+              style={{
+                position: 'relative',
+                left: 'initial',
+                right: 'initial',
+              }}
+            />
+          </View>
 
-        {managerHasInitialized && (
           <View
             style={{
               alignItems: 'center',
@@ -201,15 +185,14 @@ export function ManagementApp({ isLoading }) {
               </Routes>
             )}
           </View>
-        )}
 
-        <Routes>
-          <Route path="/config-server" element={null} />
-          <Route path="/*" element={<ServerURL />} />
-        </Routes>
-        <Version />
-      </View>
-      <Modals />
-    </BrowserRouter>
+          <Routes>
+            <Route path="/config-server" element={null} />
+            <Route path="/*" element={<ServerURL />} />
+          </Routes>
+          <Version />
+        </>
+      )}
+    </View>
   );
 }

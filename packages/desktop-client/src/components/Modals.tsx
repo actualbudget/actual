@@ -7,15 +7,10 @@ import { closeModal } from 'loot-core/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { useLocalPref } from '../hooks/useLocalPref';
+import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useModalState } from '../hooks/useModalState';
 
 import { ModalTitle, ModalHeader } from './common/Modal';
-import { DeleteFileModal } from './modals/manager/DeleteFileModal';
-import { ImportModal } from './modals/manager/ImportModal';
-import { ImportActualModal } from './modals/manager/ImportActualModal';
-import { ImportYNAB4Modal } from './modals/manager/ImportYNAB4Modal';
-import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { BudgetListModal } from './modals/BudgetListModal';
@@ -41,6 +36,11 @@ import { HoldBufferModal } from './modals/HoldBufferModal';
 import { ImportTransactionsModal } from './modals/ImportTransactionsModal';
 import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
 import { LoadBackupModal } from './modals/LoadBackupModal';
+import { DeleteFileModal } from './modals/manager/DeleteFileModal';
+import { ImportActualModal } from './modals/manager/ImportActualModal';
+import { ImportModal } from './modals/manager/ImportModal';
+import { ImportYNAB4Modal } from './modals/manager/ImportYNAB4Modal';
+import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
 import { NotesModal } from './modals/NotesModal';
@@ -69,7 +69,7 @@ export function Modals() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { modalStack } = useModalState();
-  const [budgetId, _] = useLocalPref('id');
+  const [budgetId] = useMetadataPref('id');
 
   useEffect(() => {
     if (modalStack.length > 0) {
@@ -189,12 +189,18 @@ export function Modals() {
 
         case 'gocardless-init':
           return (
-            <GoCardlessInitialiseModal key={name} onSuccess={options.onSuccess} />
+            <GoCardlessInitialiseModal
+              key={name}
+              onSuccess={options.onSuccess}
+            />
           );
 
         case 'simplefin-init':
           return (
-            <SimpleFinInitialiseModal key={name} onSuccess={options.onSuccess} />
+            <SimpleFinInitialiseModal
+              key={name}
+              onSuccess={options.onSuccess}
+            />
           );
 
         case 'gocardless-external-msg':
@@ -581,8 +587,7 @@ export function Modals() {
           );
 
         default:
-          console.error('Unknown modal:', name);
-          return null;
+          throw new Error('Unknown modal');
       }
     })
     .map((modal, idx) => (
