@@ -30,8 +30,7 @@ export const ReportCardName = ({
           onUpdate={onChange}
           onEscape={onClose}
           style={{
-            fontSize: 15,
-            fontWeight: 500,
+            ...styles.mediumText,
             marginTop: -6,
             marginBottom: -1,
             marginLeft: -6,
@@ -46,7 +45,6 @@ export const ReportCardName = ({
     <Block
       style={{
         ...styles.mediumText,
-        fontWeight: 500,
         marginBottom: 5,
       }}
       role="heading"

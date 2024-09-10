@@ -23,7 +23,7 @@ export class MobileAccountsPage {
    * Click on the n-th account to open it up
    */
   async openNthAccount(idx) {
-    await this.accounts.nth(idx).getByRole('button').click();
+    await this.accounts.nth(idx).click();
 
     return new MobileAccountPage(this.page);
   }

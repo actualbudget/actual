@@ -96,6 +96,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
           <Link
+            variant="internal"
             to={to}
             style={{
               ...accountNameStyle,

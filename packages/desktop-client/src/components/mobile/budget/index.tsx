@@ -38,6 +38,10 @@ import { SyncRefresh } from '../../SyncRefresh';
 
 import { BudgetTable } from './BudgetTable';
 
+function isBudgetType(input?: string): input is 'rollover' | 'report' {
+  return ['rollover', 'report'].includes(input);
+}
+
 type BudgetInnerProps = {
   categories: CategoryEntity[];
   categoryGroups: CategoryGroupEntity[];
@@ -60,7 +64,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -462,14 +466,14 @@ function BudgetInner(props: BudgetInnerProps) {
 
 export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType] = useSyncedPref('budgetType');
   const spreadsheet = useSpreadsheet();
   useSetThemeColor(theme.mobileViewTheme);
   return (
     <BudgetInner
       categoryGroups={categoryGroups}
       categories={categories}
-      budgetType={budgetType}
+      budgetType={isBudgetType(budgetType) ? budgetType : 'rollover'}
       spreadsheet={spreadsheet}
     />
   );

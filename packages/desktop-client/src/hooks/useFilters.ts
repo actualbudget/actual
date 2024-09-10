@@ -4,9 +4,12 @@ import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 export function useFilters<T extends RuleConditionEntity>(
   initialConditions: T[] = [],
+  initialConditionsOp: 'and' | 'or' = 'and',
 ) {
   const [conditions, setConditions] = useState<T[]>(initialConditions);
-  const [conditionsOp, setConditionsOp] = useState<'and' | 'or'>('and');
+  const [conditionsOp, setConditionsOp] = useState<'and' | 'or'>(
+    initialConditionsOp,
+  );
   const [saved, setSaved] = useState<T[] | null>(null);
 
   const onApply = useCallback(

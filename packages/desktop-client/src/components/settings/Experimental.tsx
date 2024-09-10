@@ -36,7 +36,7 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
-          setFlagPref(!enabled);
+          setFlagPref(String(!enabled));
         }}
         disabled={disableToggle}
       />

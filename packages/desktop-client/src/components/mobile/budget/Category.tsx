@@ -14,7 +14,7 @@ export function Category() {
   useSetThemeColor(theme.mobileViewTheme);
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
 
   const { id: categoryId } = useParams();
   const [searchParams] = useSearchParams();
