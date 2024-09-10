@@ -104,8 +104,8 @@ function NetWorthInner({ widget }) {
   }, []);
 
   function onChangeDates(start, end, mode) {
-    setStart(monthUtils.firstDayOfMonth(start));
-    setEnd(monthUtils.lastDayOfMonth(end));
+    setStart(start);
+    setEnd(end);
     setMode(mode);
   }
 

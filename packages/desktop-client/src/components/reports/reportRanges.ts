@@ -155,13 +155,13 @@ export function getSpecificRange(
 }
 
 export function getFullRange(start: string) {
-  const end = monthUtils.currentDay();
+  const end = monthUtils.currentMonth();
   return [start, end, 'full'] as const;
 }
 
 export function getLatestRange(offset: number) {
-  const end = monthUtils.currentDay();
-  const start = monthUtils.dayFromDate(monthUtils.subMonths(end, offset));
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.subMonths(end, offset);
   return [start, end, 'sliding-window'] as const;
 }
 
@@ -169,14 +169,12 @@ export function calculateTimeRange(
   timeFrame?: TimeFrame,
   defaultTimeFrame?: TimeFrame,
 ) {
-  const start = monthUtils.dayFromDate(
+  const start =
     timeFrame?.start ??
-      defaultTimeFrame?.start ??
-      monthUtils.subMonths(monthUtils.currentMonth(), 5),
-  );
-  const end = monthUtils.dayFromDate(
-    timeFrame?.end ?? defaultTimeFrame?.end ?? monthUtils.currentDay(),
-  );
+    defaultTimeFrame?.start ??
+    monthUtils.subMonths(monthUtils.currentMonth(), 5);
+  const end =
+    timeFrame?.end ?? defaultTimeFrame?.end ?? monthUtils.currentMonth();
   const mode = timeFrame?.mode ?? defaultTimeFrame?.mode ?? 'sliding-window';
 
   if (mode === 'full') {

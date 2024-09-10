@@ -45,7 +45,7 @@ export function createSpreadsheet(
               .filter({
                 [conditionsOpKey]: filters,
                 account: acct.id,
-                date: { $lt: start },
+                date: { $lt: monthUtils.firstDayOfMonth(start) },
               })
               .calculate({ $sum: '$amount' }),
           ).then(({ data }) => data),
@@ -57,7 +57,10 @@ export function createSpreadsheet(
               })
               .filter({
                 account: acct.id,
-                $and: [{ date: { $gte: start } }, { date: { $lte: end } }],
+                $and: [
+                  { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+                  { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+                ],
               })
               .groupBy({ $month: '$date' })
               .select([

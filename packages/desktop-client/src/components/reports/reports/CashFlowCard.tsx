@@ -6,6 +6,7 @@ import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type CashFlowWidget } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { theme } from '../../../style';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -16,10 +17,10 @@ import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
+import { calculateTimeRange } from '../reportRanges';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
-import { calculateTimeRange } from '../reportRanges';
+
 import { defaultTimeFrame } from './CashFlow';
 
 type CustomLabelProps = {

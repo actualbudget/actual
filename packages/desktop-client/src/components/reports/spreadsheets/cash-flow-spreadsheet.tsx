@@ -31,7 +31,10 @@ export function simpleCashFlow(
       return q('transactions')
         .filter({
           [conditionsOpKey]: filters,
-          $and: [{ date: { $gte: start } }, { date: { $lte: end } }],
+          $and: [
+            { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+            { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+          ],
           'account.offbudget': false,
           'payee.transfer_acct': null,
         })
@@ -56,12 +59,15 @@ export function simpleCashFlow(
 }
 
 export function cashFlowByDate(
-  start: string,
-  end: string,
+  startMonth: string,
+  endMonth: string,
   isConcise: boolean,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or',
 ) {
+  const start = monthUtils.firstDayOfMonth(startMonth);
+  const end = monthUtils.lastDayOfMonth(endMonth);
+
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof recalculate>) => void,

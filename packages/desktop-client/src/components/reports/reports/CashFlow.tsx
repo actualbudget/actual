@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
+import { addNotification } from 'loot-core/client/actions';
+import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -28,14 +32,10 @@ import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { CashFlowGraph } from '../graphs/CashFlowGraph';
 import { Header } from '../Header';
-import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
-import { useReport } from '../useReport';
-import { useParams } from 'react-router-dom';
-import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { calculateTimeRange } from '../reportRanges';
-import { addNotification } from 'loot-core/client/actions';
-import { useDispatch } from 'react-redux';
+import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
+import { useReport } from '../useReport';
 
 export const defaultTimeFrame = {
   start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -132,8 +132,8 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     );
     const isConcise = numDays > 31 * 3;
 
-    setStart(monthUtils.firstDayOfMonth(start));
-    setEnd(monthUtils.lastDayOfMonth(end));
+    setStart(start);
+    setEnd(end);
     setMode(mode);
     setIsConcise(isConcise);
   }
@@ -188,8 +188,8 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     >
       <Header
         allMonths={allMonths}
-        start={monthUtils.getMonth(start)}
-        end={monthUtils.getMonth(end)}
+        start={start}
+        end={end}
         mode={mode}
         show1Month
         onChangeDates={onChangeDates}
