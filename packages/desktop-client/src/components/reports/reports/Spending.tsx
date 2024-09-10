@@ -257,7 +257,7 @@ export function Spending() {
               backgroundColor: 'inherit',
             }}
           >
-            Budget
+            Budgeted
           </ModeButton>
           <ModeButton
             selected={mode === 'average'}
