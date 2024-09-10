@@ -12,7 +12,6 @@ import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
-import { SvgAdd } from '../../icons/v1';
 import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
 
@@ -62,7 +61,7 @@ export function Accounts({
   };
 
   return (
-    <View>
+    <View style={{ overflow: 'auto' }}>
       <Account
         name={t('All accounts')}
         to="/accounts"
@@ -154,15 +153,6 @@ export function Accounts({
           />
         ))}
 
-      <SecondaryItem
-        style={{
-          marginTop: 15,
-          marginBottom: 9,
-        }}
-        onClick={onAddAccount}
-        Icon={SvgAdd}
-        title={t('Add account')}
-      />
     </View>
   );
 }

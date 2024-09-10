@@ -32,6 +32,8 @@ import { View } from '../common/View';
 
 import { Accounts } from './Accounts';
 import { Item } from './Item';
+import { SvgAdd } from '../../icons/v1';
+import { SecondaryItem } from './SecondaryItem';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
 import { Tools } from './Tools';
@@ -162,13 +164,11 @@ export function Sidebar() {
           )}
         </View>
 
-        <View style={{ overflow: 'auto' }}>
+        <View>
           <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
           <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
 
           <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
-
-          <Tools />
 
           <View
             style={{
@@ -183,6 +183,16 @@ export function Sidebar() {
             onAddAccount={onAddAccount}
             onToggleClosedAccounts={onToggleClosedAccounts}
             onReorder={onReorder}
+          />
+
+          <SecondaryItem
+            style={{
+              marginTop: 15,
+              marginBottom: 9,
+            }}
+            onClick={onAddAccount}
+            Icon={SvgAdd}
+            title={t('Add account')}
           />
         </View>
       </View>
@@ -215,15 +225,23 @@ function EditableBudgetName() {
       case 'close':
         dispatch(closeBudget());
         break;
+      case 'payees':
+        navigate('/payees');
+        break;
+      case 'rules':
+        navigate('/rules');
+        break;
       default:
     }
   }
 
   const items = [
     { name: 'rename', text: t('Rename budget') },
-    { name: 'settings', text: t('Settings') },
-    ...(Platform.isBrowser ? [{ name: 'help', text: t('Help') }] : []),
     { name: 'close', text: t('Close file') },
+    { name: 'settings', text: t('Settings') },
+    { name: 'payees', text: t('Payees') },
+    { name: 'rules', text: t('Rules') },
+    ...(Platform.isBrowser ? [{ name: 'help', text: t('Help') }] : []),
   ];
 
   if (editing) {
