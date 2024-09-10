@@ -990,7 +990,15 @@ export function ImportTransactionsModal({ options }) {
     });
 
     parse(options.filename, parseOptions);
-  }, [parseTransactions, options.filename]);
+  }, [
+    parseTransactions,
+    options.filename,
+    delimiter,
+    hasHeaderRow,
+    skipLines,
+    fallbackMissingPayeeToMemo,
+    parse,
+  ]);
 
   function onSplitMode() {
     if (fieldMappings == null) {
@@ -1236,6 +1244,7 @@ export function ImportTransactionsModal({ options }) {
     );
     setTransactions(transactionPreview);
   }, [
+    getImportPreview,
     transactions,
     filetype,
     flipAmount,
@@ -1249,7 +1258,7 @@ export function ImportTransactionsModal({ options }) {
 
   useEffect(() => {
     runImportPreviewCallback();
-  }, [previewTrigger]);
+  }, [previewTrigger, runImportPreviewCallback]);
 
   function runImportPreview() {
     setPreviewTrigger(value => value + 1);

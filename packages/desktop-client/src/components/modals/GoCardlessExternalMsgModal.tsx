@@ -20,7 +20,6 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-
 import { COUNTRY_OPTIONS } from '../util/countries';
 
 function useAvailableBanks(country: string) {

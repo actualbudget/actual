@@ -126,7 +126,7 @@ export function OpSelect({
     }
 
     return options;
-  }, [ops, type]);
+  }, [formatOp, ops, type]);
 
   return (
     <View data-testid="op-select">
@@ -294,7 +294,7 @@ function formatAmount(amount) {
 function ScheduleDescription({ id }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const scheduleData = useSchedules({
-    transform: useCallback(q => q.filter({ id }), []),
+    transform: useCallback(q => q.filter({ id }), [id]),
   });
 
   if (scheduleData == null) {
@@ -738,7 +738,7 @@ export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
     // Disable undo while this modal is open
     setUndoEnabled(false);
     return () => setUndoEnabled(true);
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     // Flash the scrollbar

@@ -31,7 +31,7 @@ export function MergeUnusedPayeesModal({ payeeIds, targetPayeeId }) {
       el.scrollTop = top + 1;
       el.scrollTop = top;
     }
-  }, [flashRef.current, true]);
+  }, []);
 
   // We store the orphaned payees into state because when we merge it,
   // it will be deleted and this component will automatically
