@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import {
   ErrorBoundary,
   useErrorBoundary,
@@ -17,6 +19,7 @@ import {
   setAppState,
   sync,
 } from 'loot-core/client/actions';
+import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import * as Platform from 'loot-core/src/client/platform';
 import {
   init as initConnection,
@@ -30,12 +33,15 @@ import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 
 import { AppBackground } from './AppBackground';
+import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common/View';
 import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
+import { ScrollProvider } from './ScrollProvider';
+import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
 function AppInner() {
@@ -154,28 +160,43 @@ export function App() {
       <ExposeNavigate />
       <HotkeysProvider initiallyActiveScopes={['*']}>
         <ResponsiveProvider>
-          <View
-            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-          >
-            <View
-              key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-              style={{
-                flexGrow: 1,
-                overflow: 'hidden',
-                ...styles.lightScrollbar,
-              }}
-            >
-              <ErrorBoundary FallbackComponent={ErrorFallback}>
-                {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
-                  <DevelopmentTopBar />
-                )}
-                <AppInner />
-              </ErrorBoundary>
-              <ThemeStyle />
-              <Modals />
-              <UpdateNotification />
-            </View>
-          </View>
+          <SpreadsheetProvider>
+            <SidebarProvider>
+              <BudgetMonthCountProvider>
+                <DndProvider backend={HTML5Backend}>
+                  <ScrollProvider>
+                    <View
+                      style={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <View
+                        key={
+                          hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                        }
+                        style={{
+                          flexGrow: 1,
+                          overflow: 'hidden',
+                          ...styles.lightScrollbar,
+                        }}
+                      >
+                        <ErrorBoundary FallbackComponent={ErrorFallback}>
+                          {process.env.REACT_APP_REVIEW_ID &&
+                            !Platform.isPlaywright && <DevelopmentTopBar />}
+                          <AppInner />
+                        </ErrorBoundary>
+                        <ThemeStyle />
+                        <Modals />
+                        <UpdateNotification />
+                      </View>
+                    </View>
+                  </ScrollProvider>
+                </DndProvider>
+              </BudgetMonthCountProvider>
+            </SidebarProvider>
+          </SpreadsheetProvider>
         </ResponsiveProvider>
       </HotkeysProvider>
     </BrowserRouter>

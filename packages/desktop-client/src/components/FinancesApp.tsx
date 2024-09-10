@@ -1,7 +1,5 @@
 // @ts-strict-ignore
-import React, { type ReactElement, useEffect, useMemo } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
+import React, { type ReactElement, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Route,
@@ -12,7 +10,6 @@ import {
 } from 'react-router-dom';
 
 import { sync } from 'loot-core/client/actions';
-import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import { type State } from 'loot-core/src/client/state-types';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
@@ -24,7 +21,6 @@ import { theme } from '../style';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import { BankSyncStatus } from './BankSyncStatus';
-import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
@@ -35,10 +31,8 @@ import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
-import { ScrollProvider } from './ScrollProvider';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
-import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar } from './Titlebar';
 
 function NarrowNotSupported({
@@ -92,7 +86,7 @@ function RouterBehaviors() {
   return null;
 }
 
-function FinancesAppWithoutContext() {
+export function FinancesApp() {
   const dispatch = useDispatch();
   useEffect(() => {
     // Wait a little bit to make sure the sync button will get the
@@ -226,21 +220,5 @@ function FinancesAppWithoutContext() {
         </View>
       </View>
     </View>
-  );
-}
-
-export function FinancesApp() {
-  const app = useMemo(() => <FinancesAppWithoutContext />, []);
-
-  return (
-    <SpreadsheetProvider>
-      <SidebarProvider>
-        <BudgetMonthCountProvider>
-          <DndProvider backend={Backend}>
-            <ScrollProvider>{app}</ScrollProvider>
-          </DndProvider>
-        </BudgetMonthCountProvider>
-      </SidebarProvider>
-    </SpreadsheetProvider>
   );
 }
