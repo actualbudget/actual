@@ -109,125 +109,123 @@ function FinancesAppWithoutContext() {
   }, []);
 
   return (
-    <>
+    <View style={{ height: '100%' }}>
       <RouterBehaviors />
-      <View style={{ height: '100%' }}>
-        <GlobalKeys />
+      <GlobalKeys />
+
+      <View
+        style={{
+          flexDirection: 'row',
+          backgroundColor: theme.pageBackground,
+          flex: 1,
+        }}
+      >
+        <FloatableSidebar />
 
         <View
           style={{
-            flexDirection: 'row',
+            color: theme.pageText,
             backgroundColor: theme.pageBackground,
             flex: 1,
+            overflow: 'hidden',
+            width: '100%',
           }}
         >
-          <FloatableSidebar />
-
           <View
             style={{
-              color: theme.pageText,
-              backgroundColor: theme.pageBackground,
               flex: 1,
-              overflow: 'hidden',
-              width: '100%',
+              overflow: 'auto',
+              position: 'relative',
             }}
           >
-            <View
+            <Titlebar
               style={{
-                flex: 1,
-                overflow: 'auto',
-                position: 'relative',
+                WebkitAppRegion: 'drag',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1000,
               }}
-            >
-              <Titlebar
-                style={{
-                  WebkitAppRegion: 'drag',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 1000,
-                }}
-              />
-              <Notifications />
-              <BankSyncStatus />
-
-              <Routes>
-                <Route path="/" element={<Navigate to="/budget" replace />} />
-
-                <Route path="/reports/*" element={<Reports />} />
-
-                <Route
-                  path="/budget"
-                  element={<NarrowAlternate name="Budget" />}
-                />
-
-                <Route
-                  path="/schedules"
-                  element={
-                    <NarrowNotSupported>
-                      <WideComponent name="Schedules" />
-                    </NarrowNotSupported>
-                  }
-                />
-
-                <Route path="/payees" element={<ManagePayeesPage />} />
-                <Route path="/rules" element={<ManageRulesPage />} />
-                <Route path="/settings" element={<Settings />} />
-
-                <Route
-                  path="/gocardless/link"
-                  element={
-                    <NarrowNotSupported>
-                      <WideComponent name="GoCardlessLink" />
-                    </NarrowNotSupported>
-                  }
-                />
-
-                <Route
-                  path="/accounts"
-                  element={<NarrowAlternate name="Accounts" />}
-                />
-
-                <Route
-                  path="/accounts/:id"
-                  element={<NarrowAlternate name="Account" />}
-                />
-
-                <Route
-                  path="/transactions/:transactionId"
-                  element={
-                    <WideNotSupported>
-                      <TransactionEdit />
-                    </WideNotSupported>
-                  }
-                />
-
-                <Route
-                  path="/categories/:id"
-                  element={
-                    <WideNotSupported>
-                      <Category />
-                    </WideNotSupported>
-                  }
-                />
-
-                {/* redirect all other traffic to the budget page */}
-                <Route path="/*" element={<Navigate to="/budget" replace />} />
-              </Routes>
-            </View>
+            />
+            <Notifications />
+            <BankSyncStatus />
 
             <Routes>
-              <Route path="/budget" element={<MobileNavTabs />} />
-              <Route path="/accounts" element={<MobileNavTabs />} />
-              <Route path="/settings" element={<MobileNavTabs />} />
-              <Route path="/reports" element={<MobileNavTabs />} />
-              <Route path="*" element={null} />
+              <Route path="/" element={<Navigate to="/budget" replace />} />
+
+              <Route path="/reports/*" element={<Reports />} />
+
+              <Route
+                path="/budget"
+                element={<NarrowAlternate name="Budget" />}
+              />
+
+              <Route
+                path="/schedules"
+                element={
+                  <NarrowNotSupported>
+                    <WideComponent name="Schedules" />
+                  </NarrowNotSupported>
+                }
+              />
+
+              <Route path="/payees" element={<ManagePayeesPage />} />
+              <Route path="/rules" element={<ManageRulesPage />} />
+              <Route path="/settings" element={<Settings />} />
+
+              <Route
+                path="/gocardless/link"
+                element={
+                  <NarrowNotSupported>
+                    <WideComponent name="GoCardlessLink" />
+                  </NarrowNotSupported>
+                }
+              />
+
+              <Route
+                path="/accounts"
+                element={<NarrowAlternate name="Accounts" />}
+              />
+
+              <Route
+                path="/accounts/:id"
+                element={<NarrowAlternate name="Account" />}
+              />
+
+              <Route
+                path="/transactions/:transactionId"
+                element={
+                  <WideNotSupported>
+                    <TransactionEdit />
+                  </WideNotSupported>
+                }
+              />
+
+              <Route
+                path="/categories/:id"
+                element={
+                  <WideNotSupported>
+                    <Category />
+                  </WideNotSupported>
+                }
+              />
+
+              {/* redirect all other traffic to the budget page */}
+              <Route path="/*" element={<Navigate to="/budget" replace />} />
             </Routes>
           </View>
+
+          <Routes>
+            <Route path="/budget" element={<MobileNavTabs />} />
+            <Route path="/accounts" element={<MobileNavTabs />} />
+            <Route path="/settings" element={<MobileNavTabs />} />
+            <Route path="/reports" element={<MobileNavTabs />} />
+            <Route path="*" element={null} />
+          </Routes>
         </View>
       </View>
-    </>
+    </View>
   );
 }
 
