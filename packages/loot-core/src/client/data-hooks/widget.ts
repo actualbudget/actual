@@ -4,9 +4,9 @@ import { q } from '../../shared/query';
 import { type Widget } from '../../types/models';
 import { useLiveQuery } from '../query-hooks';
 
-export function useWidget(id: string) {
-  const data = useLiveQuery<Widget[]>(
-    () => q('dashboard').filter({ id }).select('*'),
+export function useWidget<W extends Widget>(id: string, type: W['type']) {
+  const data = useLiveQuery<W[]>(
+    () => q('dashboard').filter({ id, type }).select('*'),
     [id],
   );
 

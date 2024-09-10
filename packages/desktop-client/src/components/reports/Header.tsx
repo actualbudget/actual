@@ -115,7 +115,7 @@ export function Header({
                   ),
                 )
               }
-              value={start}
+              value={monthUtils.monthFromDate(start)}
               defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
             />
@@ -130,7 +130,7 @@ export function Header({
                   ),
                 )
               }
-              value={end}
+              value={monthUtils.monthFromDate(end)}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
               buttonStyle={{ marginRight: 10 }}
             />

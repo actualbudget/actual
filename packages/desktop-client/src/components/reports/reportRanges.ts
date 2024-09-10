@@ -155,23 +155,30 @@ export function getSpecificRange(
 }
 
 export function getFullRange(start: string) {
-  const end = monthUtils.currentMonth();
+  const end = monthUtils.currentDay();
   return [start, end, 'full'] as const;
 }
 
 export function getLatestRange(offset: number) {
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, offset);
+  const end = monthUtils.currentDay();
+  const start = monthUtils.dayFromDate(monthUtils.subMonths(end, offset));
   return [start, end, 'sliding-window'] as const;
 }
 
 export function calculateTimeRange(
-  { start, end, mode }: TimeFrame = {
-    start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
-    end: monthUtils.currentMonth(),
-    mode: 'sliding-window',
-  },
+  timeFrame?: TimeFrame,
+  defaultTimeFrame?: TimeFrame,
 ) {
+  const start = monthUtils.dayFromDate(
+    timeFrame?.start ??
+      defaultTimeFrame?.start ??
+      monthUtils.subMonths(monthUtils.currentMonth(), 5),
+  );
+  const end = monthUtils.dayFromDate(
+    timeFrame?.end ?? defaultTimeFrame?.end ?? monthUtils.currentDay(),
+  );
+  const mode = timeFrame?.mode ?? defaultTimeFrame?.mode ?? 'sliding-window';
+
   if (mode === 'full') {
     return getFullRange(start);
   }
@@ -179,5 +186,5 @@ export function calculateTimeRange(
     return getLatestRange(monthUtils.differenceInCalendarMonths(end, start));
   }
 
-  return [start, end, 'static'];
+  return [start, end, 'static'] as const;
 }

@@ -41,7 +41,7 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
     return null;
   }
 
-  const [{ payload: data }] = payload;
+  const [{ payload: data }] = payload ?? [{}];
 
   return (
     <div

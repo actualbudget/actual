@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
-import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type CashFlowWidget } from 'loot-core/src/types/models';
 
@@ -19,6 +18,9 @@ import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { calculateTimeRange } from '../reportRanges';
+import { defaultTimeFrame } from './CashFlow';
 
 type CustomLabelProps = {
   value?: number;
@@ -81,6 +83,7 @@ function CustomLabel({
 }
 
 type CashFlowCardProps = {
+  widgetId: string;
   isEditing?: boolean;
   meta?: CashFlowWidget['meta'];
   onMetaChange: (newMeta: CashFlowWidget['meta']) => void;
@@ -88,18 +91,22 @@ type CashFlowCardProps = {
 };
 
 export function CashFlowCard({
+  widgetId,
   isEditing,
-  meta,
+  meta = {},
   onMetaChange,
   onRemove,
 }: CashFlowCardProps) {
+  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
-  const end = monthUtils.currentDay();
-  const start = monthUtils.currentMonth() + '-01';
 
+  const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
+  const params = useMemo(
+    () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp),
+    [start, end, meta?.conditions, meta?.conditionsOp],
+  );
   const data = useReport('cash_flow_simple', params);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -113,7 +120,11 @@ export function CashFlowCard({
   return (
     <ReportCard
       isEditing={isEditing}
-      to="/reports/cash-flow"
+      to={
+        isDashboardsFeatureEnabled
+          ? `/reports/cash-flow/${widgetId}`
+          : '/reports/cash-flow'
+      }
       menuItems={[
         {
           name: 'rename',

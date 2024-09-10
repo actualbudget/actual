@@ -32,7 +32,12 @@ export type NetWorthWidget = AbstractWidget<
 >;
 export type CashFlowWidget = AbstractWidget<
   'cash-flow-card',
-  { name?: string } | null
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+  } | null
 >;
 export type SpendingWidget = AbstractWidget<
   'spending-card',
