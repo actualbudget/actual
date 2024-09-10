@@ -63,27 +63,12 @@ export function ManagementApp() {
 
   // runs on mount only
   useEffect(() => {
-    // An action may have been triggered from outside, and we don't
-    // want to override its loading message so we only show the
-    // initial loader if there isn't already a message
-
-    // Remember: this component is remounted every time the user
-    // closes a budget. That's why we keep `managerHasInitialized` in
-    // redux so that it persists across renders. This will show the
-    // loading spinner on first run, but never again since we'll have
-    // a cached list of files and can show them
-
     async function fetchData() {
       const userData = await dispatch(getUserData());
       if (userData) {
         await dispatch(loadAllFiles());
       }
 
-      // TODO: There is a race condition here. The user could perform an
-      // action that starts loading in between where `isLoading`
-      // was captured and this would clear it. We really only want to
-      // ever clear the initial loading screen, so we need a "loading
-      // id" of some kind.
       dispatch(setAppState({ managerHasInitialized: true }));
     }
 

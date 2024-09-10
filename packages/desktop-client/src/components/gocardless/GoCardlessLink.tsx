@@ -5,6 +5,7 @@ import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 
 export function GoCardlessLink() {
+  window.close();
   return (
     <Modal name="gocardless-link" isDismissable={false}>
       <ModalHeader title="Account sync" />
