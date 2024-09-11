@@ -20,6 +20,7 @@ import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
+import { SvgPencil1 } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -30,13 +31,13 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
+
+import { ActionButtons } from './ActionButtons';
 import { Accounts } from './Accounts';
+import { BottomButtons } from './BottomButtons';
 import { Item } from './Item';
-import { SvgAdd } from '../../icons/v1';
-import { SecondaryItem } from './SecondaryItem';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
-import { Tools } from './Tools';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -143,12 +144,11 @@ export function Sidebar() {
       >
         <View
           style={{
-            paddingTop: 35,
-            height: 30,
             flexDirection: 'row',
             alignItems: 'center',
-            margin: '0 8px 23px 20px',
+            margin: '25px 8px 23px 20px',
             transition: 'padding .4s',
+            flexShrink: 0,
             ...(hasWindowButtons && {
               paddingTop: 20,
               justifyContent: 'flex-start',
@@ -163,38 +163,18 @@ export function Sidebar() {
             <ToggleButton isFloating={isFloating} onFloat={onFloat} />
           )}
         </View>
-
-        <View>
-          <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
-          <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
-
-          <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
-
-          <View
-            style={{
-              height: 1,
-              backgroundColor: theme.sidebarItemBackgroundHover,
-              marginTop: 15,
-              flexShrink: 0,
-            }}
-          />
-
-          <Accounts
-            onAddAccount={onAddAccount}
-            onToggleClosedAccounts={onToggleClosedAccounts}
-            onReorder={onReorder}
-          />
-
-          <SecondaryItem
-            style={{
-              marginTop: 15,
-              marginBottom: 9,
-            }}
-            onClick={onAddAccount}
-            Icon={SvgAdd}
-            title={t('Add account')}
-          />
-        </View>
+        
+        <ActionButtons />
+          
+        <Accounts
+          onAddAccount={onAddAccount}
+          onToggleClosedAccounts={onToggleClosedAccounts}
+          onReorder={onReorder}
+        />
+          
+        <BottomButtons 
+          onAddAccount={onAddAccount}
+        />
       </View>
     </Resizable>
   );
@@ -225,22 +205,13 @@ function EditableBudgetName() {
       case 'close':
         dispatch(closeBudget());
         break;
-      case 'payees':
-        navigate('/payees');
-        break;
-      case 'rules':
-        navigate('/rules');
-        break;
       default:
     }
   }
 
   const items = [
-    { name: 'rename', text: t('Rename budget') },
     { name: 'close', text: t('Close file') },
     { name: 'settings', text: t('Settings') },
-    { name: 'payees', text: t('Payees') },
-    { name: 'rules', text: t('Rules') },
     ...(Platform.isBrowser ? [{ name: 'help', text: t('Help') }] : []),
   ];
 
@@ -296,6 +267,21 @@ function EditableBudgetName() {
       >
         <Menu onMenuSelect={onMenuSelect} items={items} />
       </Popover>
+
+      <Button
+        variant="bare"
+        aria-label={t('Edit account name')}
+        className="hover-visible"
+        onPress={() => setEditing(true)}
+      >
+        <SvgPencil1
+          style={{
+            width: 11,
+            height: 11,
+            color: theme.pageTextSubdued,
+          }}
+        />
+      </Button>
     </>
   );
 }

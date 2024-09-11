@@ -4,11 +4,11 @@ import { useLocation } from 'react-router-dom';
 
 import {
   SvgCheveronDown,
-  SvgCheveronRight,
-  SvgCog,
+  SvgCheveronUp,
   SvgStoreFront,
   SvgTuning,
 } from '../../icons/v1';
+import { SvgCalendar } from '../../icons/v2';
 import { View } from '../common/View';
 
 import { Item } from './Item';
@@ -20,7 +20,7 @@ export function Tools() {
   const onToggle = useCallback(() => setOpen(open => !open), []);
   const location = useLocation();
 
-  const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
+  const isActive = ['/payees', '/rules', '/tools'].some(route =>
     location.pathname.startsWith(route),
   );
 
@@ -31,36 +31,31 @@ export function Tools() {
   }, [location.pathname]);
 
   return (
-    <View style={{ flexShrink: 0 }}>
-      <Item
-        title="More"
-        Icon={isOpen ? SvgCheveronDown : SvgCheveronRight}
-        onClick={onToggle}
-        style={{ marginBottom: isOpen ? 8 : 0 }}
-        forceActive={!isOpen && isActive}
-      />
+    <View >
       {isOpen && (
         <>
-          <SecondaryItem
+          <Item
+            title={t('Schedules')}
+            Icon={SvgCalendar}
+            to="/schedules"
+          />
+          <Item
             title={t('Payees')}
             Icon={SvgStoreFront}
             to="/payees"
-            indent={15}
           />
-          <SecondaryItem
+          <Item
             title={t('Rules')}
             Icon={SvgTuning}
             to="/rules"
-            indent={15}
-          />
-          <SecondaryItem
-            title={t('Settings')}
-            Icon={SvgCog}
-            to="/settings"
-            indent={15}
           />
         </>
       )}
+      <SecondaryItem
+        title={t('')}
+        Icon={isOpen ? SvgCheveronUp : SvgCheveronDown}
+        onClick={onToggle}
+      />
     </View>
   );
 }

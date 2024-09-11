@@ -61,7 +61,7 @@ export function Accounts({
   };
 
   return (
-    <View style={{ overflow: 'auto' }}>
+    <View style={{ overflow: 'auto', }}>
       <Account
         name={t('All accounts')}
         to="/accounts"
