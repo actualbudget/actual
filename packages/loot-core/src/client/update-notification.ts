@@ -1,41 +1,45 @@
 import { t } from 'i18next';
 
-// @ts-strict-ignore
+import { addNotification, loadPrefs, savePrefs } from './actions';
+import { type Dispatch } from './actions/types';
+
 export async function checkForUpdateNotification(
-  addNotification,
-  getIsOutdated,
-  getLatestVersion,
-  loadPrefs,
-  savePrefs,
+  dispatch: Dispatch,
+  getIsOutdated: (latestVersion: string) => Promise<boolean>,
+  getLatestVersion: () => Promise<string>,
 ) {
   const latestVersion = await getLatestVersion();
   const isOutdated = await getIsOutdated(latestVersion);
   if (
     !isOutdated ||
-    (await loadPrefs())['flags.updateNotificationShownForVersion'] ===
+    (await dispatch(loadPrefs()))['flags.updateNotificationShownForVersion'] ===
       latestVersion
   ) {
     return;
   }
 
-  addNotification({
-    type: 'message',
-    title: t('A new version of Actual is available!'),
-    message: t('Version {{latestVersion}} of Actual was recently released.', {
-      latestVersion,
-    }),
-    sticky: true,
-    id: 'update-notification',
-    button: {
-      title: t('Open changelog'),
-      action: () => {
-        window.open('https://actualbudget.org/docs/releases');
+  dispatch(
+    addNotification({
+      type: 'message',
+      title: t('A new version of Actual is available!'),
+      message: t('Version {{latestVersion}} of Actual was recently released.', {
+        latestVersion,
+      }),
+      sticky: true,
+      id: 'update-notification',
+      button: {
+        title: t('Open changelog'),
+        action: () => {
+          window.open('https://actualbudget.org/docs/releases');
+        },
       },
-    },
-    onClose: async () => {
-      await savePrefs({
-        'flags.updateNotificationShownForVersion': latestVersion,
-      });
-    },
-  });
+      onClose: () => {
+        dispatch(
+          savePrefs({
+            'flags.updateNotificationShownForVersion': latestVersion,
+          }),
+        );
+      },
+    }),
+  );
 }

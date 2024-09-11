@@ -11,7 +11,7 @@ import {
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal2';
+} from '../common/Modal';
 
 type PayeeAutocompleteModalProps = {
   autocompleteProps: ComponentPropsWithoutRef<typeof PayeeAutocomplete>;
@@ -57,7 +57,7 @@ export function PayeeAutocompleteModal({
               }
               rightContent={
                 <ModalCloseButton
-                  onClick={close}
+                  onPress={close}
                   style={{ color: theme.menuAutoCompleteText }}
                 />
               }

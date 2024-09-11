@@ -11,7 +11,7 @@ import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal, ModalCloseButton, type ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, type ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { InputField } from '../mobile/MobileForms';
 
@@ -51,7 +51,7 @@ export function SingleInputModal({
     <Modal name={name}>
       {({ state: { close } }) => (
         <>
-          <Header rightContent={<ModalCloseButton onClick={close} />} />
+          <Header rightContent={<ModalCloseButton onPress={close} />} />
           <Form
             onSubmit={e => {
               _onSubmit(e);

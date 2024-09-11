@@ -10,7 +10,7 @@ import { SvgNotesPaper } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/rollover/budgetsummary/BudgetMonthMenu';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
 
@@ -66,7 +66,7 @@ export function RolloverBudgetMonthMenuModal({
         <>
           <ModalHeader
             title={displayMonth}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{

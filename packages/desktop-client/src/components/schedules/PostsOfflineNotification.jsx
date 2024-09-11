@@ -9,7 +9,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { useFormatList } from '../../hooks/useFormatList';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -41,7 +41,7 @@ export function PostsOfflineNotification() {
         <>
           <ModalHeader
             title={t('Post transactions?')}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <Paragraph>
             <Text>

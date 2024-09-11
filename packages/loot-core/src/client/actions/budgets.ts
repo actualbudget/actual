@@ -48,9 +48,9 @@ export function loadAllFiles() {
   };
 }
 
-export function loadBudget(id: string, loadingText = '', options = {}) {
+export function loadBudget(id: string, options = {}) {
   return async (dispatch: Dispatch) => {
-    dispatch(setAppState({ loadingText }));
+    dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
     const { error } = await send('load-budget', { id, ...options });
@@ -77,14 +77,11 @@ export function loadBudget(id: string, loadingText = '', options = {}) {
       } else {
         alert(message);
       }
+    } else {
+      dispatch(closeModal());
 
-      dispatch(setAppState({ loadingText: null }));
-      return;
+      await dispatch(loadPrefs());
     }
-
-    dispatch(closeModal());
-
-    await dispatch(loadPrefs());
 
     dispatch(setAppState({ loadingText: null }));
   };
@@ -127,7 +124,8 @@ export function createBudget({ testMode = false, demoMode = false } = {}) {
   return async (dispatch: Dispatch) => {
     dispatch(
       setAppState({
-        loadingText: testMode || demoMode ? t('Making demo...') : '',
+        loadingText:
+          testMode || demoMode ? t('Making demo...') : t('Creating budget...'),
       }),
     );
 
@@ -180,7 +178,7 @@ export function uploadBudget(id: string) {
 export function closeAndLoadBudget(fileId: string) {
   return async (dispatch: Dispatch) => {
     await dispatch(closeBudget());
-    dispatch(loadBudget(fileId, t('Loading...')));
+    await dispatch(loadBudget(fileId));
   };
 }
 
