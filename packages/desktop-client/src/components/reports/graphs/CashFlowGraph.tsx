@@ -37,11 +37,11 @@ type CustomTooltipProps = TooltipProps<number, 'date'> & {
 function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
   const { t } = useTranslation();
 
-  if (!active || !payload) {
+  if (!active || !payload || !Array.isArray(payload) || !payload[0]) {
     return null;
   }
 
-  const [{ payload: data }] = payload ?? [{}];
+  const [{ payload: data }] = payload;
 
   return (
     <div

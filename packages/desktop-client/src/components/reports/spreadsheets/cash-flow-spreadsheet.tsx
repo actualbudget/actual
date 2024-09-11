@@ -13,11 +13,14 @@ import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
 export function simpleCashFlow(
-  start: string,
-  end: string,
+  startMonth: string,
+  endMonth: string,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
 ) {
+  const start = monthUtils.firstDayOfMonth(startMonth);
+  const end = monthUtils.lastDayOfMonth(endMonth);
+
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: { graphData: { income: number; expense: number } }) => void,
@@ -32,8 +35,13 @@ export function simpleCashFlow(
         .filter({
           [conditionsOpKey]: filters,
           $and: [
-            { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-            { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+            { date: { $gte: start } },
+            {
+              date: {
+                $lte:
+                  end > monthUtils.currentDay() ? monthUtils.currentDay() : end,
+              },
+            },
           ],
           'account.offbudget': false,
           'payee.transfer_acct': null,
@@ -67,6 +75,8 @@ export function cashFlowByDate(
 ) {
   const start = monthUtils.firstDayOfMonth(startMonth);
   const end = monthUtils.lastDayOfMonth(endMonth);
+  const fixedEnd =
+    end > monthUtils.currentDay() ? monthUtils.currentDay() : end;
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -85,7 +95,7 @@ export function cashFlowByDate(
         .filter({
           $and: [
             { date: { $transform: '$month', $gte: start } },
-            { date: { $transform: '$month', $lte: end } },
+            { date: { $transform: '$month', $lte: fixedEnd } },
           ],
           'account.offbudget': false,
         });
@@ -122,7 +132,7 @@ export function cashFlowByDate(
         makeQuery().filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, end, isConcise));
+        setData(recalculate(data, start, fixedEnd, isConcise));
       },
     );
   };

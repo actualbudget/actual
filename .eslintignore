@@ -14,6 +14,7 @@ packages/desktop-client/**/node_modules/*
 packages/desktop-client/node_modules/
 packages/desktop-client/src/icons/**/*
 packages/desktop-client/test-results/
+packages/desktop-client/playwright-report/
 
 packages/desktop-electron/client-build/
 packages/desktop-electron/dist/
