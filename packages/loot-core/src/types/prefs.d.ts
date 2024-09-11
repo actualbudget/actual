@@ -1,4 +1,4 @@
-import { spendingReportTimeType } from './models/reports';
+import { spendingReportModeType } from './models/reports';
 
 export type FeatureFlag =
   | 'dashboards'
@@ -72,8 +72,9 @@ export type LocalPrefs = SyncedPrefs &
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
     spendingReportFilter: string;
-    spendingReportTime: spendingReportTimeType;
-    spendingReportCompare: spendingReportTimeType;
+    spendingReportMode: spendingReportModeType;
+    spendingReportCompare: string;
+    spendingReportCompareTo: string;
     sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
   }>;
