@@ -224,15 +224,17 @@ export function Spending() {
             disabled={mode !== 'singleMonth'}
           />
         </View>
-        <View
-          style={{
-            width: 1,
-            height: 30,
-            backgroundColor: theme.pillBorderDark,
-            marginRight: 15,
-            marginLeft: 10,
-          }}
-        />
+        {!isNarrowWidth && (
+          <View
+            style={{
+              width: 1,
+              height: 30,
+              backgroundColor: theme.pillBorderDark,
+              marginRight: 15,
+              marginLeft: 10,
+            }}
+          />
+        )}
         <View
           style={{
             flexDirection: 'row',
@@ -425,7 +427,8 @@ export function Spending() {
                     style={{ marginBottom: 5, minWidth: 210 }}
                     left={
                       <Block>
-                        Budget{compare === monthUtils.currentMonth() && ' MTD'}:
+                        Budgeted
+                        {compare === monthUtils.currentMonth() && ' MTD'}:
                       </Block>
                     }
                     right={

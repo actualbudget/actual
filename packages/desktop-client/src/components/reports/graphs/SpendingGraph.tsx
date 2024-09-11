@@ -96,7 +96,7 @@ const CustomTooltip = ({
                   selection === 'average'
                     ? t('Average:')
                     : selection === 'budget'
-                      ? t('Budget:')
+                      ? t('Budgeted:')
                       : t('To:')
                 }
                 right={amountToCurrency(comparison)}
