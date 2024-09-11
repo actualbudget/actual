@@ -1,4 +1,4 @@
-import React, { memo, useRef } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { AutoTextSize } from 'auto-text-size';
@@ -12,9 +12,9 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useNotes } from '../../../hooks/useNotes';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgLogo } from '../../../icons/logo';
 import { SvgExpandArrow } from '../../../icons/v0';
@@ -225,7 +225,7 @@ function BudgetCell({
 }) {
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
-  const [budgetType = 'rollover'] = useLocalPref('budgetType');
+  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
 
   const categoryBudgetMenuModal = `${budgetType}-budget-menu`;
   const categoryNotes = useNotes(category.id);
@@ -358,19 +358,22 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const goalTemp = useSheetValue(goal);
   const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
 
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
   const categoriesById = groupById(categories);
 
-  const onCarryover = carryover => {
-    onBudgetAction(month, 'carryover', {
-      category: category.id,
-      flag: carryover,
-    });
-    dispatch(collapseModals(`${budgetType}-balance-menu`));
-  };
+  const onCarryover = useCallback(
+    carryover => {
+      onBudgetAction(month, 'carryover', {
+        category: category.id,
+        flag: carryover,
+      });
+      dispatch(collapseModals(`${budgetType}-balance-menu`));
+    },
+    [budgetType, category.id, dispatch, month, onBudgetAction],
+  );
 
   const catBalance = useSheetValue(
     type === 'rollover'
@@ -386,7 +389,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       : budgetedtmp
     : null;
 
-  const onTransfer = () => {
+  const onTransfer = useCallback(() => {
     dispatch(
       pushModal('transfer', {
         title: category.name,
@@ -406,9 +409,19 @@ const ExpenseCategory = memo(function ExpenseCategory({
         showToBeBudgeted: true,
       }),
     );
-  };
+  }, [
+    budgetType,
+    catBalance,
+    categoriesById,
+    category.id,
+    category.name,
+    dispatch,
+    month,
+    onBudgetAction,
+    showUndoNotification,
+  ]);
 
-  const onCover = () => {
+  const onCover = useCallback(() => {
     dispatch(
       pushModal('cover', {
         title: category.name,
@@ -426,9 +439,18 @@ const ExpenseCategory = memo(function ExpenseCategory({
         },
       }),
     );
-  };
+  }, [
+    budgetType,
+    categoriesById,
+    category.id,
+    category.name,
+    dispatch,
+    month,
+    onBudgetAction,
+    showUndoNotification,
+  ]);
 
-  const onOpenBalanceMenu = () => {
+  const onOpenBalanceMenu = useCallback(() => {
     dispatch(
       pushModal(`${budgetType}-balance-menu`, {
         categoryId: category.id,
@@ -437,14 +459,22 @@ const ExpenseCategory = memo(function ExpenseCategory({
         ...(budgetType === 'rollover' && { onTransfer, onCover }),
       }),
     );
-  };
+  }, [
+    budgetType,
+    category.id,
+    dispatch,
+    month,
+    onCarryover,
+    onCover,
+    onTransfer,
+  ]);
 
   const listItemRef = useRef();
   const format = useFormat();
   const navigate = useNavigate();
-  const onShowActivity = () => {
+  const onShowActivity = useCallback(() => {
     navigate(`/categories/${category.id}?month=${month}`);
-  };
+  }, [category.id, month, navigate]);
 
   const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
   const columnWidth = getColumnWidth({ show3Cols });

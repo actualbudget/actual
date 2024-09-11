@@ -1,4 +1,5 @@
 import * as monthUtils from 'loot-core/src/shared/months';
+import { type TimeFrame } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 export function validateStart(
@@ -7,9 +8,9 @@ export function validateStart(
   end: string,
   interval?: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
-): [string, string] {
-  let addDays;
-  let dateStart;
+): [string, string, TimeFrame['mode']] {
+  let addDays: number;
+  let dateStart: string;
   switch (interval) {
     case 'Monthly':
       dateStart = start + '-01';
@@ -47,9 +48,9 @@ export function validateEnd(
   end: string,
   interval?: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
-): [string, string] {
-  let subDays;
-  let dateEnd;
+): [string, string, TimeFrame['mode']] {
+  let subDays: number;
+  let dateEnd: string;
   switch (interval) {
     case 'Monthly':
       dateEnd = monthUtils.getMonthEnd(end + '-01');
@@ -98,8 +99,8 @@ function boundedRange(
   end: string,
   interval?: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
-): [string, string] {
-  let latest;
+): [string, string, 'static'] {
+  let latest: string;
   switch (interval) {
     case 'Daily':
       latest = monthUtils.currentDay();
@@ -124,7 +125,7 @@ function boundedRange(
   if (start < earliest) {
     start = earliest;
   }
-  return [start, end];
+  return [start, end, 'static'];
 }
 
 export function getSpecificRange(
@@ -150,16 +151,33 @@ export function getSpecificRange(
     );
   }
 
-  return [dateStart, dateEnd];
+  return [dateStart, dateEnd, 'static'];
 }
 
 export function getFullRange(start: string) {
   const end = monthUtils.currentMonth();
-  return [start, end];
+  return [start, end, 'full'] as const;
 }
 
 export function getLatestRange(offset: number) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, offset);
-  return [start, end];
+  return [start, end, 'sliding-window'] as const;
+}
+
+export function calculateTimeRange(
+  { start, end, mode }: TimeFrame = {
+    start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
+    end: monthUtils.currentMonth(),
+    mode: 'sliding-window',
+  },
+) {
+  if (mode === 'full') {
+    return getFullRange(start);
+  }
+  if (mode === 'sliding-window') {
+    return getLatestRange(monthUtils.differenceInCalendarMonths(end, start));
+  }
+
+  return [start, end, 'static'];
 }

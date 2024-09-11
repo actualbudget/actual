@@ -166,7 +166,7 @@ export function Spending() {
           <MobilePageHeader
             title="Monthly Spending"
             leftContent={
-              <MobileBackButton onClick={() => navigate('/reports')} />
+              <MobileBackButton onPress={() => navigate('/reports')} />
             }
           />
         ) : (
