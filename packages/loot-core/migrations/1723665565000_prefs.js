@@ -17,11 +17,15 @@ const SYNCED_PREF_KEYS = [
 ];
 
 export default async function runMigration(db, { fs, fileId }) {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+
   await db.execQuery(`
-      CREATE TABLE preferences
-         (id TEXT PRIMARY KEY,
-          value TEXT);
-    `);
+    CREATE TABLE preferences
+       (id TEXT PRIMARY KEY,
+        value TEXT);
+  `);
 
   const budgetDir = fs.getBudgetDir(fileId);
   const fullpath = fs.join(budgetDir, 'metadata.json');

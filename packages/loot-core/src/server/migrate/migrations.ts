@@ -111,7 +111,7 @@ async function applyJavaScript(db, id) {
   const run = javascriptMigrations[id];
   return run(dbInterface, {
     fs,
-    fileId: prefs.getPrefs().id,
+    fileId: prefs.getPrefs()?.id,
   });
 }
 
