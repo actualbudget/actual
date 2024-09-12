@@ -39,7 +39,7 @@ import {
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
-type PayeeAutocompleteItem = PayeeEntity;
+export type PayeeAutocompleteItem = PayeeEntity;
 
 const MAX_AUTO_SUGGESTIONS = 5;
 
@@ -252,7 +252,7 @@ function PayeeList({
   );
 }
 
-type PayeeAutocompleteProps = ComponentProps<
+export type PayeeAutocompleteProps = ComponentProps<
   typeof Autocomplete<PayeeAutocompleteItem>
 > & {
   showMakeTransfer?: boolean;
