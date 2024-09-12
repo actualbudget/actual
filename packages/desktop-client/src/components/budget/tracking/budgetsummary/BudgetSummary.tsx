@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -108,15 +108,13 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
           </View>
 
           <div
-            className={`${css([
-              {
-                textAlign: 'center',
-                marginTop: 3,
-                fontSize: 18,
-                fontWeight: 500,
-                textDecorationSkip: 'ink',
-              },
-            ])}`}
+            className={css({
+              textAlign: 'center',
+              marginTop: 3,
+              fontSize: 18,
+              fontWeight: 500,
+              textDecorationSkip: 'ink',
+            })}
           >
             {monthUtils.format(month, 'MMMM')}
           </div>

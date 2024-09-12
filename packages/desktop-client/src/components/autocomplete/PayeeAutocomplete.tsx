@@ -13,7 +13,7 @@ import React, {
 import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
@@ -605,8 +605,9 @@ function PayeeItem({
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
       // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
       role="button"
-      className={`${className} ${css([
-        {
+      className={cx(
+        className, 
+        css({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
@@ -617,8 +618,8 @@ function PayeeItem({
           padding: 4,
           paddingLeft: paddingLeftOverFromIcon,
           ...narrowStyle,
-        },
-      ])}`}
+        }),
+      )}
       data-testid={`${item.name}-payee-item`}
       data-highlighted={highlighted || undefined}
       {...props}

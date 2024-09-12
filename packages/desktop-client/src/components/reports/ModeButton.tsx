@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -21,23 +21,21 @@ export function ModeButton({
   return (
     <Button
       variant="bare"
-      className={String(
-        css({
-          padding: '5px 10px',
-          backgroundColor: theme.menuBackground,
-          marginRight: 5,
-          fontSize: 'inherit',
-          ...style,
-          ...(selected && {
-            backgroundColor: theme.buttonPrimaryBackground,
-            color: theme.buttonPrimaryText,
-            ':hover': {
-              backgroundColor: theme.buttonPrimaryBackgroundHover,
-              color: theme.buttonPrimaryTextHover,
-            },
-          }),
+      className={css({
+        padding: '5px 10px',
+        backgroundColor: theme.menuBackground,
+        marginRight: 5,
+        fontSize: 'inherit',
+        ...style,
+        ...(selected && {
+          backgroundColor: theme.buttonPrimaryBackground,
+          color: theme.buttonPrimaryText,
+          ':hover': {
+            backgroundColor: theme.buttonPrimaryBackgroundHover,
+            color: theme.buttonPrimaryTextHover,
+          },
         }),
-      )}
+      })}
       onPress={onSelect}
     >
       {children}

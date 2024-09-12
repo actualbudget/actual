@@ -4,7 +4,7 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { theme, styles, type CSSProperties } from '../../style';
 import { Button } from '../common/Button';
@@ -150,7 +150,7 @@ export function BooleanField({
       type="checkbox"
       checked={checked}
       onChange={e => onUpdate?.(e.target.checked)}
-      className={`${css([
+      className={css([
         {
           marginInline: styles.mobileEditingPadding,
           flexShrink: 0,
@@ -174,12 +174,13 @@ export function BooleanField({
                 ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 15px 15px',
               width: 15,
               height: 15,
-              content: ' ',
+              // eslint-disable-next-line rulesdir/typography
+              content: '" "',
             },
           },
         },
         style,
-      ])}`}
+      ])}
     />
   );
 }

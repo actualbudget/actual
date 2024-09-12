@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -103,7 +103,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
           </View>
 
           <div
-            className={`${css([
+            className={css([
               {
                 textAlign: 'center',
                 marginTop: 3,
@@ -112,7 +112,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 textDecorationSkip: 'ink',
               },
               currentMonth === month && { fontWeight: 'bold' },
-            ])}`}
+            ])}
           >
             {monthUtils.format(month, 'MMMM')}
           </div>

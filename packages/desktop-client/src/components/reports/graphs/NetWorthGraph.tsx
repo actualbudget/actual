@@ -2,7 +2,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 import {
   AreaChart,
   Area,
@@ -94,7 +94,7 @@ export function NetWorthGraph({
     if (active && payload && payload.length) {
       return (
         <div
-          className={`${css(
+          className={css([
             {
               zIndex: 1000,
               pointerEvents: 'none',
@@ -105,7 +105,7 @@ export function NetWorthGraph({
               padding: 10,
             },
             style,
-          )}`}
+          ])}
         >
           <div>
             <div style={{ marginBottom: 10 }}>

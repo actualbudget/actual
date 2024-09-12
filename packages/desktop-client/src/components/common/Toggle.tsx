@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { theme, type CSSProperties } from '../../style';
 
@@ -25,18 +25,18 @@ export const Toggle = ({
         id={id}
         checked={checked}
         onChange={onToggle}
-        className={`${css({
+        className={css({
           height: 0,
           width: 0,
           visibility: 'hidden',
-        })}`}
+        })}
         type="checkbox"
       />
       <label
         style={{
           background: checked ? onColor : theme.checkboxToggleBackground,
         }}
-        className={`${css({
+        className={css({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -46,11 +46,11 @@ export const Toggle = ({
           borderRadius: '100px',
           position: 'relative',
           transition: 'background-color .2s',
-        })}`}
+        })}
         htmlFor={id}
       >
         <span
-          className={`${css(
+          className={css([
             {
               content: '',
               position: 'absolute',
@@ -67,7 +67,7 @@ export const Toggle = ({
               left: 'calc(100% - 2px)',
               transform: 'translateX(-100%)',
             },
-          )}`}
+          ])}
         />
       </label>
     </div>

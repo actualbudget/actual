@@ -9,7 +9,7 @@ import {
   Button as ReactAriaButton,
 } from 'react-aria-components';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';

@@ -14,8 +14,8 @@ import {
 } from 'react-aria-components';
 import { useHotkeysContext } from 'react-hotkeys-hook';
 
+import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
-import { css } from 'glamor';
 
 import { useModalState } from '../../hooks/useModalState';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -90,7 +90,7 @@ export const Modal = ({
         {modalProps => (
           <Dialog
             aria-label="Modal dialog"
-            className={`${css(styles.lightScrollbar)}`}
+            className={css(styles.lightScrollbar)}
             style={{
               outline: 'none', // remove focus outline
             }}

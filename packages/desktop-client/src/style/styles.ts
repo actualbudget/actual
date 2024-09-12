@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { keyframes } from 'glamor';
+import { keyframes } from '@emotion/css';
 
 import * as Platform from 'loot-core/src/client/platform';
 

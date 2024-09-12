@@ -11,7 +11,7 @@ import React, {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
 import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -374,10 +374,10 @@ function CategoryItem({
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
-        ...styles.mobileMenuItem,
-        borderRadius: 0,
-        borderTop: `1px solid ${theme.pillBorder}`,
-      }
+      ...styles.mobileMenuItem,
+      borderRadius: 0,
+      borderTop: `1px solid ${theme.pillBorder}`,
+    }
     : {};
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
@@ -398,8 +398,9 @@ function CategoryItem({
       style={style}
       // See comment above.
       role="button"
-      className={`${className} ${css([
-        {
+      className={cx(
+        className,
+        css({
           backgroundColor: highlighted
             ? theme.menuAutoCompleteBackgroundHover
             : 'transparent',
@@ -410,8 +411,8 @@ function CategoryItem({
           paddingLeft: 20,
           borderRadius: embedded ? 4 : 0,
           ...narrowStyle,
-        },
-      ])}`}
+        })
+      )}
       data-testid={`${item.name}-category-item`}
       data-highlighted={highlighted || undefined}
       {...props}

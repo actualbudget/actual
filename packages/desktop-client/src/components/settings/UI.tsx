@@ -1,7 +1,7 @@
 import React, { useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { css, media } from 'glamor';
+import { css } from '@emotion/css';
 
 import { type CSSProperties, theme } from '../../style';
 import { tokens } from '../../tokens';
@@ -17,7 +17,7 @@ type SettingProps = {
 export const Setting = ({ primaryAction, style, children }: SettingProps) => {
   return (
     <View
-      className={`${css([
+      className={css([
         {
           backgroundColor: theme.pillBackground,
           alignSelf: 'flex-start',
@@ -28,7 +28,7 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
           width: '100%',
         },
         style,
-      ])}`}
+      ])}
     >
       <View
         style={{
@@ -61,9 +61,11 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
         marginBottom: 25,
         width: '100%',
       }}
-      className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
-        width: 'auto',
-      })}`}
+      className={css({
+        [`@media (min-width: ${tokens.breakpoint_small})`]: {
+          width: 'auto',
+        },
+      })}
       innerRef={el => {
         if (el && location.hash === '#advanced') {
           el.scrollIntoView(true);

@@ -7,6 +7,7 @@
   ],
   "devDependencies": {
     "@fontsource/redacted-script": "^5.0.21",
+    "@emotion/css": "^11.13.0",
     "@juggle/resize-observer": "^3.4.0",
     "@playwright/test": "1.41.1",
     "@rollup/plugin-inject": "^5.0.5",
@@ -36,7 +37,6 @@
     "debounce": "^1.2.1",
     "downshift": "7.6.2",
     "focus-visible": "^4.1.5",
-    "glamor": "^2.20.40",
     "i18next": "^23.11.5",
     "i18next-parser": "^9.0.0",
     "i18next-resources-to-backend": "^1.2.1",

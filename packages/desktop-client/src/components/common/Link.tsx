@@ -5,7 +5,7 @@ import React, {
 } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
@@ -128,11 +128,11 @@ const InternalLink = ({
     <NavLink
       to={path}
       state={report ? { report } : {}}
-      className={`${css([
+      className={css([
         styles.smallText,
         style,
         match ? activeStyle : null,
-      ])}`}
+      ])}
     >
       {children}
     </NavLink>

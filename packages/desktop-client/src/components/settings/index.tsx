@@ -1,6 +1,6 @@
 import React, { type ReactNode, useEffect } from 'react';
 
-import { media } from 'glamor';
+import { css } from '@emotion/css';
 
 import { isElectron } from 'loot-core/shared/environment';
 import { listen } from 'loot-core/src/platform/client/fetch';
@@ -50,13 +50,15 @@ function About() {
           flexDirection: 'column',
           gap: 10,
         }}
-        className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
-          display: 'grid',
-          gridTemplateRows: '1fr 1fr',
-          gridTemplateColumns: '50% 50%',
-          columnGap: '2em',
-          gridAutoFlow: 'column',
-        })}`}
+        className={css({
+          [`@media (min-width: ${tokens.breakpoint_small})`]: {
+            display: 'grid',
+            gridTemplateRows: '1fr 1fr',
+            gridTemplateColumns: '50% 50%',
+            columnGap: '2em',
+            gridAutoFlow: 'column',
+          },
+        })}
         data-vrt-mask
       >
         <Text>Client version: v{window.Actual?.ACTUAL_VERSION}</Text>

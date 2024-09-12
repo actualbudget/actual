@@ -1,7 +1,7 @@
 import React from 'react';
 import { useListBoxSection } from 'react-aria';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { styles, theme } from '../../../style';
 
@@ -22,7 +22,7 @@ export function ListBoxSection({ section, state }) {
       {section.rendered && (
         <div
           {...headingProps}
-          className={`${css(styles.smallText, {
+          className={css(styles.smallText, {
             backgroundColor: theme.pageBackground,
             borderBottom: `1px solid ${theme.tableBorder}`,
             borderTop: `1px solid ${theme.tableBorder}`,
@@ -35,7 +35,7 @@ export function ListBoxSection({ section, state }) {
             top: '0',
             width: '100%',
             zIndex: zIndices.SECTION_HEADING,
-          })}`}
+          })}
         >
           {section.rendered}
         </div>

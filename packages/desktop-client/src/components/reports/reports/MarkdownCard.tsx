@@ -3,7 +3,7 @@ import { TextArea } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { type MarkdownWidget } from 'loot-core/src/types/models';
 
