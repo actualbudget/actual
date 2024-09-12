@@ -1,14 +1,19 @@
-import { render, screen } from '@testing-library/react';
+import { render, type Screen, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { generateAccount } from 'loot-core/src/mocks';
 import { TestProvider } from 'loot-core/src/mocks/redux';
+import type { PayeeEntity } from 'loot-core/types/models';
 
 import { useCommonPayees } from '../../hooks/usePayees';
 import { ResponsiveProvider } from '../../ResponsiveProvider';
 
-import { PayeeAutocomplete } from './PayeeAutocomplete';
+import {
+  PayeeAutocomplete,
+  type PayeeAutocompleteItem,
+  type PayeeAutocompleteProps,
+} from './PayeeAutocomplete';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';
@@ -20,23 +25,22 @@ const payees = [
 ];
 
 const defaultProps = {
-  value: '',
+  value: null,
   embedded: true,
   payees,
   accounts: [generateAccount('Bank of Montreal', false, false)],
 };
 
-function makePayee(name: string, options?: { favorite: boolean }) {
+function makePayee(name: string, options?: { favorite: boolean }): PayeeEntity {
   return {
     id: name.toLowerCase() + '-id',
     name,
     favorite: options?.favorite ?? false,
     transfer_acct: null,
-    category: null,
   };
 }
 
-function extractPayeesAndHeaderNames(screen) {
+function extractPayeesAndHeaderNames(screen: Screen) {
   return [
     ...screen
       .getByTestId('autocomplete')
@@ -46,10 +50,12 @@ function extractPayeesAndHeaderNames(screen) {
     .flatMap(id => id.split('-', 1));
 }
 
-function renderPayeeAutocomplete(props?) {
-  const autocompleteProps = {
+function renderPayeeAutocomplete(props?: Partial<PayeeAutocompleteProps>) {
+  const autocompleteProps: PayeeAutocompleteProps = {
     ...defaultProps,
     ...props,
+    onSelect: jest.fn(),
+    type: 'single',
   };
 
   render(
@@ -101,7 +107,7 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
 
   test('list with less than the maximum favorites adds common payees', async () => {
     //Note that the payees list assumes the payees are already sorted
-    const payees = [
+    const payees: PayeeAutocompleteItem[] = [
       makePayee('Alice'),
       makePayee('Bob'),
       makePayee('Eve', { favorite: true }),
@@ -130,8 +136,7 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       'Bob',
       'Carol',
     ];
-    const autocomplete = renderPayeeAutocomplete({ payees });
-    await clickAutocomplete(autocomplete);
+    await clickAutocomplete(renderPayeeAutocomplete({ payees }));
 
     expect(
       [
