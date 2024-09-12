@@ -53,6 +53,7 @@
     },
     "mas": {
       "hardenedRuntime": false,
+      "artifactName": "${productName}-mas-${arch}.${ext}",
       "entitlements": "build/entitlements.mas.plist",
       "entitlementsInherit": "build/entitlements.mas.inherit.plist"
     },
