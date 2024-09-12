@@ -31,6 +31,9 @@ vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));
+vi.mock('../../hooks/useSyncedPref', () => ({
+  useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
+}));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [

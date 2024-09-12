@@ -13,7 +13,7 @@ export function useSyncedPref<K extends keyof SyncedPrefs>(
   prefName: K,
 ): [SyncedPrefs[K], SetSyncedPrefAction<K>] {
   const { data: queryData, overrideData: setQueryData } = useQuery<
-    [{ value: string }]
+    [{ value: string | undefined }]
   >(
     () => q('preferences').filter({ id: prefName }).select('value'),
     [prefName],
