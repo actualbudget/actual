@@ -18,8 +18,6 @@ import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
-import { SvgReports, SvgWallet } from '../../icons/v1';
-import { SvgCalendar } from '../../icons/v2';
 import { SvgPencil1 } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
@@ -35,7 +33,6 @@ import { View } from '../common/View';
 import { ActionButtons } from './ActionButtons';
 import { Accounts } from './Accounts';
 import { BottomButtons } from './BottomButtons';
-import { Item } from './Item';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
 
@@ -146,7 +143,7 @@ export function Sidebar() {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            margin: '25px 8px 23px 20px',
+            margin: '20px 8px 20px 20px',
             transition: 'padding .4s',
             flexShrink: 0,
             ...(hasWindowButtons && {
@@ -167,7 +164,6 @@ export function Sidebar() {
         <ActionButtons />
           
         <Accounts
-          onAddAccount={onAddAccount}
           onToggleClosedAccounts={onToggleClosedAccounts}
           onReorder={onReorder}
         />

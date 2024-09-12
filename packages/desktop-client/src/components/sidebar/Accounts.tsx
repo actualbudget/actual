@@ -21,13 +21,11 @@ import { SecondaryItem } from './SecondaryItem';
 const fontWeight = 600;
 
 type AccountsProps = {
-  onAddAccount: () => void;
   onToggleClosedAccounts: () => void;
   onReorder: OnDropCallback;
 };
 
 export function Accounts({
-  onAddAccount,
   onToggleClosedAccounts,
   onReorder,
 }: AccountsProps) {
