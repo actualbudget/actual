@@ -28,14 +28,12 @@
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
-      "hardenedRuntime": false,
+      "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "artifactName": "${productName}-mac-${arch}.${ext}",
       "notarize": {
         "teamId": "79ANZ983YF"
       },
-      "entitlements": "build/entitlements.mas.plist",
-      "entitlementsInherit": "build/entitlements.mas.inherit.plist",
       "target": [
         {
           "target": "dmg",
@@ -52,6 +50,11 @@
           ]
         }
       ]
+    },
+    "mas": {
+      "hardenedRuntime": false,
+      "entitlements": "build/entitlements.mas.plist",
+      "entitlementsInherit": "build/entitlements.mas.inherit.plist"
     },
     "linux": {
       "target": [
