@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { reportBudget } from 'loot-core/src/client/queries';
@@ -14,12 +14,17 @@ import { Button } from '../../common/Button2';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import {
+  type barGraphBudgetCategory,
+  BarGraphVertical,
+} from '../../reports/graphs/BarGraphVertical';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, type CellValueProps } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
+import { useRolloverSheetValue } from '../rollover/RolloverComponents';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
@@ -217,11 +222,65 @@ export const CategoryMonth = memo(function CategoryMonth({
 
   const { showUndoNotification } = useUndo();
 
+  const [isHovered, setIsHover] = useState(false);
+
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const handlePointerEnter = useCallback(() => {
+    const timeout = setTimeout(() => {
+      setIsHover(true);
+    });
+
+    hoverTimeoutRef.current = timeout;
+  }, []);
+
+  const handlePointerLeave = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+
+    setIsHover(false);
+  }, []);
+
+  // Force closing the tooltip whenever the disablement state changes
+  useEffect(() => {
+    setIsHover(false);
+  }, []);
+
+  const catSumAmount = useRolloverSheetValue(
+    reportBudget.catSumAmount(category.id),
+  );
+  const catBudgeted = useRolloverSheetValue(
+    reportBudget.catBudgeted(category.id),
+  );
+  const catBalance = useRolloverSheetValue(
+    reportBudget.catBalance(category.id),
+  );
+  const data: barGraphBudgetCategory[] = [
+    {
+      name: category.name,
+      budget: catBudgeted,
+      spent:
+        Math.abs(catSumAmount) < catBudgeted
+          ? Math.abs(catSumAmount)
+          : catBudgeted,
+      remaining:
+        Math.abs(catSumAmount) < catBudgeted && catBudgeted + catSumAmount,
+      overBudget:
+        Math.abs(catSumAmount) > catBudgeted &&
+        Math.abs(catBudgeted + catSumAmount),
+      carryover: catBalance - catSumAmount - catBudgeted,
+    },
+  ];
+
   return (
     <View
+      onMouseEnter={handlePointerEnter}
+      onMouseLeave={handlePointerLeave}
       style={{
+        borderBottomWidth: 0,
+        borderColor: 'transparent',
         flex: 1,
-        flexDirection: 'row',
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetCurrentMonth
           : theme.budgetOtherMonth,
@@ -240,185 +299,211 @@ export const CategoryMonth = memo(function CategoryMonth({
           flexDirection: 'row',
         }}
       >
-        {!editing && (
-          <View
-            style={{
-              flexDirection: 'row',
-              flexShrink: 0,
-              paddingLeft: 3,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderTopWidth: 1,
-              borderBottomWidth: 1,
-              borderColor: theme.tableBorder,
-            }}
-          >
-            <Button
-              ref={triggerRef}
-              variant="bare"
-              onPress={() => setMenuOpen(true)}
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+          }}
+        >
+          {!editing && (
+            <View
               style={{
-                padding: 3,
+                flexDirection: 'row',
+                flexShrink: 0,
+                paddingLeft: 3,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderTopWidth: 1,
+                borderColor: theme.tableBorder,
               }}
             >
-              <SvgCheveronDown
-                width={14}
-                height={14}
-                className="hover-visible"
-                style={menuOpen && { opacity: 1 }}
+              <Button
+                ref={triggerRef}
+                variant="bare"
+                onPress={() => setMenuOpen(true)}
+                style={{
+                  padding: 3,
+                }}
+              >
+                <SvgCheveronDown
+                  width={14}
+                  height={14}
+                  className="hover-visible"
+                  style={menuOpen && { opacity: 1 }}
+                />
+              </Button>
+
+              <Popover
+                triggerRef={triggerRef}
+                isOpen={menuOpen}
+                onOpenChange={() => setMenuOpen(false)}
+                placement="bottom start"
+              >
+                <BudgetMenu
+                  onCopyLastMonthAverage={() => {
+                    onMenuAction(month, 'copy-single-last', {
+                      category: category.id,
+                    });
+                    showUndoNotification({
+                      message: `Budget set to last month’s budget.`,
+                    });
+                  }}
+                  onSetMonthsAverage={numberOfMonths => {
+                    if (
+                      numberOfMonths !== 3 &&
+                      numberOfMonths !== 6 &&
+                      numberOfMonths !== 12
+                    ) {
+                      return;
+                    }
+
+                    onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
+                      category: category.id,
+                    });
+                    showUndoNotification({
+                      message: `Budget set to ${numberOfMonths}-month average.`,
+                    });
+                  }}
+                  onApplyBudgetTemplate={() => {
+                    onMenuAction(month, 'apply-single-category-template', {
+                      category: category.id,
+                    });
+                    showUndoNotification({
+                      message: `Budget template applied.`,
+                    });
+                  }}
+                />
+              </Popover>
+            </View>
+          )}
+          <ReportSheetCell
+            name="budget"
+            exposed={editing}
+            focused={editing}
+            width="flex"
+            onExpose={() => onEdit(category.id, month)}
+            style={{
+              borderBottomWidth: 0,
+              ...(editing && { zIndex: 100 }),
+              ...styles.tnum,
+            }}
+            textAlign="right"
+            valueStyle={{
+              cursor: 'default',
+              margin: 1,
+              padding: '0 4px',
+              borderRadius: 4,
+              ':hover': {
+                boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
+                backgroundColor: theme.tableBackground,
+              },
+            }}
+            valueProps={{
+              binding: reportBudget.catBudgeted(category.id),
+              type: 'financial',
+              getValueStyle: makeAmountGrey,
+              formatExpr: expr => {
+                return integerToCurrency(expr);
+              },
+              unformatExpr: expr => {
+                return amountToInteger(evalArithmetic(expr, 0));
+              },
+            }}
+            inputProps={{
+              onBlur: () => {
+                onEdit(null);
+              },
+              style: {
+                backgroundColor: theme.tableBackground,
+              },
+            }}
+            onSave={amount => {
+              onBudgetAction(month, 'budget-amount', {
+                category: category.id,
+                amount,
+              });
+            }}
+          />
+        </View>
+        <Field
+          name="spent"
+          width="flex"
+          style={{ borderBottomWidth: 0, textAlign: 'right' }}
+        >
+          <span
+            data-testid="category-month-spent"
+            onClick={() => onShowActivity(category.id, month)}
+          >
+            <ReportCellValue
+              binding={reportBudget.catSumAmount(category.id)}
+              type="financial"
+              getStyle={makeAmountGrey}
+              style={{
+                cursor: 'pointer',
+                ':hover': {
+                  textDecoration: 'underline',
+                },
+              }}
+            />
+          </span>
+        </Field>
+
+        {!category.is_income && (
+          <Field
+            name="balance"
+            width="flex"
+            style={{
+              borderBottomWidth: 0,
+              paddingRight: styles.monthRightPadding,
+              textAlign: 'right',
+            }}
+          >
+            <span
+              ref={triggerBalanceMenuRef}
+              {...(category.is_income
+                ? {}
+                : { onClick: () => setBalanceMenuOpen(true) })}
+            >
+              <BalanceWithCarryover
+                disabled={category.is_income}
+                carryover={reportBudget.catCarryover(category.id)}
+                balance={reportBudget.catBalance(category.id)}
+                goal={reportBudget.catGoal(category.id)}
+                budgeted={reportBudget.catBudgeted(category.id)}
+                longGoal={reportBudget.catLongGoal(category.id)}
+                style={{
+                  ':hover': { textDecoration: 'underline' },
+                }}
               />
-            </Button>
+            </span>
 
             <Popover
-              triggerRef={triggerRef}
-              isOpen={menuOpen}
-              onOpenChange={() => setMenuOpen(false)}
-              placement="bottom start"
+              triggerRef={triggerBalanceMenuRef}
+              isOpen={balanceMenuOpen}
+              onOpenChange={() => setBalanceMenuOpen(false)}
+              placement="bottom end"
             >
-              <BudgetMenu
-                onCopyLastMonthAverage={() => {
-                  onMenuAction(month, 'copy-single-last', {
+              <BalanceMenu
+                categoryId={category.id}
+                onCarryover={carryover => {
+                  onMenuAction(month, 'carryover', {
                     category: category.id,
-                  });
-                  showUndoNotification({
-                    message: `Budget set to last month’s budget.`,
-                  });
-                }}
-                onSetMonthsAverage={numberOfMonths => {
-                  if (
-                    numberOfMonths !== 3 &&
-                    numberOfMonths !== 6 &&
-                    numberOfMonths !== 12
-                  ) {
-                    return;
-                  }
-
-                  onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
-                    category: category.id,
-                  });
-                  showUndoNotification({
-                    message: `Budget set to ${numberOfMonths}-month average.`,
-                  });
-                }}
-                onApplyBudgetTemplate={() => {
-                  onMenuAction(month, 'apply-single-category-template', {
-                    category: category.id,
-                  });
-                  showUndoNotification({
-                    message: `Budget template applied.`,
+                    flag: carryover,
                   });
                 }}
               />
             </Popover>
-          </View>
+          </Field>
         )}
-        <ReportSheetCell
-          name="budget"
-          exposed={editing}
-          focused={editing}
-          width="flex"
-          onExpose={() => onEdit(category.id, month)}
-          style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
-          textAlign="right"
-          valueStyle={{
-            cursor: 'default',
-            margin: 1,
-            padding: '0 4px',
-            borderRadius: 4,
-            ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
-              backgroundColor: theme.tableBackground,
-            },
-          }}
-          valueProps={{
-            binding: reportBudget.catBudgeted(category.id),
-            type: 'financial',
-            getValueStyle: makeAmountGrey,
-            formatExpr: expr => {
-              return integerToCurrency(expr);
-            },
-            unformatExpr: expr => {
-              return amountToInteger(evalArithmetic(expr, 0));
-            },
-          }}
-          inputProps={{
-            onBlur: () => {
-              onEdit(null);
-            },
-            style: {
-              backgroundColor: theme.tableBackground,
-            },
-          }}
-          onSave={amount => {
-            onBudgetAction(month, 'budget-amount', {
-              category: category.id,
-              amount,
-            });
-          }}
-        />
       </View>
-      <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
-        <span
-          data-testid="category-month-spent"
-          onClick={() => onShowActivity(category.id, month)}
-        >
-          <ReportCellValue
-            binding={reportBudget.catSumAmount(category.id)}
-            type="financial"
-            getStyle={makeAmountGrey}
-            style={{
-              cursor: 'pointer',
-              ':hover': {
-                textDecoration: 'underline',
-              },
-            }}
-          />
-        </span>
-      </Field>
-
-      {!category.is_income && (
-        <Field
-          name="balance"
-          width="flex"
-          style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
-        >
-          <span
-            ref={triggerBalanceMenuRef}
-            {...(category.is_income
-              ? {}
-              : { onClick: () => setBalanceMenuOpen(true) })}
-          >
-            <BalanceWithCarryover
-              disabled={category.is_income}
-              carryover={reportBudget.catCarryover(category.id)}
-              balance={reportBudget.catBalance(category.id)}
-              goal={reportBudget.catGoal(category.id)}
-              budgeted={reportBudget.catBudgeted(category.id)}
-              longGoal={reportBudget.catLongGoal(category.id)}
-              style={{
-                ':hover': { textDecoration: 'underline' },
-              }}
-            />
-          </span>
-
-          <Popover
-            triggerRef={triggerBalanceMenuRef}
-            isOpen={balanceMenuOpen}
-            onOpenChange={() => setBalanceMenuOpen(false)}
-            placement="bottom end"
-          >
-            <BalanceMenu
-              categoryId={category.id}
-              onCarryover={carryover => {
-                onMenuAction(month, 'carryover', {
-                  category: category.id,
-                  flag: carryover,
-                });
-              }}
-            />
-          </Popover>
-        </Field>
-      )}
+      <View
+        style={{
+          height: 13,
+          marginTop: -5,
+        }}
+      >
+        {isHovered && <BarGraphVertical style={{ flexGrow: 1 }} data={data} />}
+      </View>
     </View>
   );
 });

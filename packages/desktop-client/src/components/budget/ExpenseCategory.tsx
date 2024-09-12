@@ -75,6 +75,7 @@ export function ExpenseCategory({
     <Row
       innerRef={dropRef}
       collapsed={true}
+      height={44}
       style={{
         backgroundColor: theme.tableBackground,
         opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,
