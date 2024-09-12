@@ -1,7 +1,7 @@
 import { type ComponentProps } from 'react';
 import { Popover as ReactAriaPopover } from 'react-aria-components';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { styles } from '../../style';
 
@@ -16,12 +16,12 @@ export const Popover = ({
     <ReactAriaPopover
       placement="bottom end"
       offset={1}
-      className={`${css({
+      className={css({
         ...styles.tooltip,
         ...styles.lightScrollbar,
         padding: 0,
         ...style,
-      })}`}
+      })}
       shouldCloseOnInteractOutside={element => {
         if (shouldCloseOnInteractOutside) {
           return shouldCloseOnInteractOutside(element);

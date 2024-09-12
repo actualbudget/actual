@@ -1,7 +1,7 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { trackingBudget } from 'loot-core/src/client/queries';
 
@@ -74,16 +74,14 @@ export function Saved({ projected, style }: SavedProps) {
         }}
       >
         <View
-          className={`${css([
-            {
-              fontSize: 25,
-              color: projected
-                ? theme.warningText
-                : isNegative
-                  ? theme.errorTextDark
-                  : theme.upcomingText,
-            },
-          ])}`}
+          className={css({
+            fontSize: 25,
+            color: projected
+              ? theme.warningText
+              : isNegative
+                ? theme.errorTextDark
+                : theme.upcomingText,
+          })}
         >
           <PrivacyFilter>{format(saved, 'financial')}</PrivacyFilter>
         </View>

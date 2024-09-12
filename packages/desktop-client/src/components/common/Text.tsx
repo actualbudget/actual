@@ -5,7 +5,7 @@ import React, {
   forwardRef,
 } from 'react';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
 import { type CSSProperties } from '../../style';
 
@@ -22,7 +22,7 @@ export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
     <span
       {...restProps}
       ref={innerRef ?? ref}
-      className={`${className} ${css(style)}`}
+      className={cx(className, css(style))}
     />
   );
 });

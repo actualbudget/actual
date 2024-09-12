@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { type CSSProperties, theme } from '../../style';
 
@@ -30,11 +30,11 @@ export const Toggle = ({
         checked={isOn}
         disabled={isDisabled}
         onChange={e => onToggle?.(e.target.checked)}
-        className={`${css({
+        className={css({
           height: 0,
           width: 0,
           visibility: 'hidden',
-        })}`}
+        })}
         type="checkbox"
       />
       <label

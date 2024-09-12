@@ -1,6 +1,6 @@
 import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
@@ -179,8 +179,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <Component
         ref={ref}
         {...(typeof as === 'string'
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (css(buttonStyle) as any)
+          ? { className: css(buttonStyle) }
           : { style: buttonStyle })}
         disabled={disabled}
         type={isSubmit ? 'submit' : 'button'}

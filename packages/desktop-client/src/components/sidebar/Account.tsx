@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React from 'react';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
 import * as Platform from 'loot-core/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
@@ -131,20 +131,23 @@ export function Account<FieldName extends SheetFields<'account'>>({
               }}
             >
               <div
-                className={`dot ${css({
-                  marginRight: 3,
-                  width: 5,
-                  height: 5,
-                  borderRadius: 5,
-                  backgroundColor: pending
-                    ? theme.sidebarItemBackgroundPending
-                    : failed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginLeft: 2,
-                  transition: 'transform .3s',
-                  opacity: connected ? 1 : 0,
-                })}`}
+                className={cx(
+                  'dot',
+                  css({
+                    marginRight: 3,
+                    width: 5,
+                    height: 5,
+                    borderRadius: 5,
+                    backgroundColor: pending
+                      ? theme.sidebarItemBackgroundPending
+                      : failed
+                        ? theme.sidebarItemBackgroundFailed
+                        : theme.sidebarItemBackgroundPositive,
+                    marginLeft: 2,
+                    transition: 'transform .3s',
+                    opacity: connected ? 1 : 0,
+                  }),
+                )}
               />
             </View>
 

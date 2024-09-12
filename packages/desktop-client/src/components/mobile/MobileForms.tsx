@@ -5,7 +5,7 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { theme, styles, type CSSProperties } from '../../style';
 import { Button } from '../common/Button';

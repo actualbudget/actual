@@ -5,7 +5,7 @@ import React, {
   type StyleHTMLAttributes,
 } from 'react';
 
-import { css } from 'glamor';
+import { css, cx } from '@emotion/css';
 
 import { type CSSProperties } from '../../style';
 
@@ -28,7 +28,7 @@ export const View = forwardRef<HTMLDivElement, ViewProps>((props, ref) => {
       {...restProps}
       ref={innerRef ?? ref}
       style={nativeStyle}
-      className={`view ${className} ${css(style)}`}
+      className={cx('view', className, css(style))}
     />
   );
 });

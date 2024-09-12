@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import {
   amountToCurrency,
@@ -252,15 +252,14 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
           // Defines how far touch can start away from the button
           // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
           {...buttonProps}
-          className={String(
+          className={
             css({
               ...(buttonProps && buttonProps.style),
               ...(focused && { display: 'none' }),
               '&[data-pressed]': {
                 backgroundColor: 'transparent',
               },
-            }),
-          )}
+            })}
           variant="bare"
         >
           <View

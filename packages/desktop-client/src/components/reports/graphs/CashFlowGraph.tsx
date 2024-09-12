@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import * as d from 'date-fns';
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 import {
   Bar,
   CartesianGrid,
@@ -45,14 +45,14 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
 
   return (
     <div
-      className={`${css({
+      className={css({
         pointerEvents: 'none',
         borderRadius: 2,
         boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
         backgroundColor: theme.menuBackground,
         color: theme.menuItemText,
         padding: 10,
-      })}`}
+      })}
     >
       <div>
         <div style={{ marginBottom: 10 }}>

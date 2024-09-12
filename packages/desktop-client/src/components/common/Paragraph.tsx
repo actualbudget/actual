@@ -1,6 +1,6 @@
 import { type HTMLProps } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { type CSSProperties } from '../../style';
 
@@ -18,9 +18,13 @@ export function Paragraph({
   return (
     <div
       {...props}
-      className={`${css(!isLast && { marginBottom: 15 }, style, {
-        lineHeight: '1.5em',
-      })}`}
+      className={css([
+        !isLast && { marginBottom: 15 },
+        style,
+        {
+          lineHeight: '1.5em',
+        },
+      ])}
     >
       {children}
     </div>

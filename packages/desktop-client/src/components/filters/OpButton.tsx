@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { friendlyOp } from 'loot-core/src/shared/rules';
 
@@ -19,19 +19,17 @@ export function OpButton({ op, isSelected, style, onPress }: OpButtonProps) {
     <Button
       variant="bare"
       style={style}
-      className={String(
-        css({
-          backgroundColor: theme.pillBackground,
-          marginBottom: 5,
-          ...(isSelected && {
+      className={css({
+        backgroundColor: theme.pillBackground,
+        marginBottom: 5,
+        ...(isSelected && {
+          color: theme.buttonNormalSelectedText,
+          '&,:hover,:active': {
+            backgroundColor: theme.buttonNormalSelectedBackground,
             color: theme.buttonNormalSelectedText,
-            '&,:hover,:active': {
-              backgroundColor: theme.buttonNormalSelectedBackground,
-              color: theme.buttonNormalSelectedText,
-            },
-          }),
+          },
         }),
-      )}
+      })}
       onPress={onPress}
     >
       {friendlyOp(op)}

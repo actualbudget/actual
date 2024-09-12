@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React from 'react';
 
-import { keyframes } from 'glamor';
+import { keyframes } from '@emotion/css';
 
 import { SvgRefresh } from '../icons/v1';
 import { type CSSProperties } from '../style';

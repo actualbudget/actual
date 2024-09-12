@@ -1,6 +1,6 @@
 import React, { type ReactNode, type ComponentProps } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { type CSSProperties, theme } from '../style';
 
@@ -73,7 +73,7 @@ export const Checkbox = (props: CheckboxProps) => {
     <input
       type="checkbox"
       {...props}
-      className={`${css(
+      className={css(
         [
           {
             position: 'relative',
@@ -102,7 +102,7 @@ export const Checkbox = (props: CheckboxProps) => {
                   ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
                 width: 9,
                 height: 9,
-                content: ' ',
+                content: '" "',
               },
             },
             ':disabled': {
@@ -125,13 +125,13 @@ export const Checkbox = (props: CheckboxProps) => {
                 right: -5,
                 border: '2px solid ' + theme.checkboxBorderSelected,
                 borderRadius: 6,
-                content: ' ',
+                content: '" "',
               },
             },
           },
+          props.style,
         ],
-        props.style,
-      )}`}
+      )}
     />
   );
 };

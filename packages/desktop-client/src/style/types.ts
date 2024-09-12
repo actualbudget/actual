@@ -1,5 +1,3 @@
-import { type CSSProperties as ReactCSSProperties } from 'react';
+import { type CSSObject } from '@emotion/serialize';
 
-export type CSSProperties = ReactCSSProperties & {
-  [propertyName: string]: unknown;
-};
+export type CSSProperties = CSSObject;
