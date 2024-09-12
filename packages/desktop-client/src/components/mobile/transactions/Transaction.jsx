@@ -76,7 +76,6 @@ export const Transaction = memo(function Transaction({
   const payee = usePayee(payeeId);
   const account = useAccount(accountId);
   const transferAcct = useAccount(payee?.transfer_acct);
-
   const isPreview = isPreviewId(id);
 
   const { longPressProps } = useLongPress({

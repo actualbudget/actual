@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
-import type { Theme } from 'loot-core/src/types/prefs';
+import type { DarkTheme, Theme } from 'loot-core/src/types/prefs';
 
 import { useGlobalPref } from '../hooks/useGlobalPref';
 
@@ -25,13 +25,25 @@ export const themeOptions = Object.entries(themes).map(
   ([key, { name }]) => [key, name] as [Theme, string],
 );
 
+export const darkThemeOptions = Object.entries({
+  dark: themes.dark,
+  midnight: themes.midnight,
+}).map(([key, { name }]) => [key, name] as [DarkTheme, string]);
+
 export function useTheme() {
   const [theme = 'light', setThemePref] = useGlobalPref('theme');
   return [theme, setThemePref] as const;
 }
 
+export function usePreferredDarkTheme() {
+  const [darkTheme = 'dark', setDarkTheme] =
+    useGlobalPref('preferredDarkTheme');
+  return [darkTheme, setDarkTheme] as const;
+}
+
 export function ThemeStyle() {
   const [theme] = useTheme();
+  const [darkThemePreference] = usePreferredDarkTheme();
   const [themeColors, setThemeColors] = useState<
     | typeof lightTheme
     | typeof darkTheme
@@ -42,9 +54,11 @@ export function ThemeStyle() {
 
   useEffect(() => {
     if (theme === 'auto') {
+      const darkTheme = themes[darkThemePreference];
+
       function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
         if (event.matches) {
-          setThemeColors(themes['dark'].colors);
+          setThemeColors(darkTheme.colors);
         } else {
           setThemeColors(themes['light'].colors);
         }
@@ -59,7 +73,7 @@ export function ThemeStyle() {
       );
 
       if (darkThemeMediaQuery.matches) {
-        setThemeColors(themes['dark'].colors);
+        setThemeColors(darkTheme.colors);
       } else {
         setThemeColors(themes['light'].colors);
       }
@@ -73,7 +87,7 @@ export function ThemeStyle() {
     } else {
       setThemeColors(themes[theme].colors);
     }
-  }, [theme]);
+  }, [theme, darkThemePreference]);
 
   if (!themeColors) return null;
 

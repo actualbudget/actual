@@ -1,9 +1,6 @@
-import { useSelector } from 'react-redux';
-
-import { type State } from 'loot-core/src/client/state-types';
+import { useSyncedPref } from './useSyncedPref';
 
 export function usePrivacyMode() {
-  return useSelector(
-    (state: State) => state.prefs.local?.isPrivacyEnabled ?? false,
-  );
+  const [isPrivacyEnabled] = useSyncedPref('isPrivacyEnabled');
+  return String(isPrivacyEnabled) === 'true';
 }

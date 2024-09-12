@@ -528,6 +528,7 @@ export function Overview() {
               <div key={item.i}>
                 {item.type === 'net-worth-card' ? (
                   <NetWorthCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     accounts={accounts}
                     meta={item.meta}

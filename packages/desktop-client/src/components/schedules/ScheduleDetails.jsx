@@ -20,12 +20,12 @@ import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel, Checkbox } from '../forms';
-import { OpSelect } from '../modals/EditRule';
+import { OpSelect } from '../modals/EditRuleModal';
 import { DateSelect } from '../select/DateSelect';
 import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '../table';
@@ -466,7 +466,7 @@ export function ScheduleDetails({ id, transaction }) {
                 ? t(`Schedule: {{name}}`, { name: payee.name })
                 : t('Schedule')
             }
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <Stack direction="row" style={{ marginTop: 10 }}>
             <FormField style={{ flex: 1 }}>

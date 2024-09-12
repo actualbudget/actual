@@ -3,7 +3,7 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { type CSSProperties, theme, styles } from '../../style';
 import { Menu } from '../common/Menu';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
 type BudgetPageMenuModalProps = ComponentPropsWithoutRef<typeof BudgetPageMenu>;
 
@@ -25,7 +25,7 @@ export function BudgetPageMenuModal({
         <>
           <ModalHeader
             showLogo
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <BudgetPageMenu
             getItemStyle={() => defaultMenuItemStyle}

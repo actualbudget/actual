@@ -16,7 +16,7 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Popover } from '../common/Popover';
 import { View } from '../common/View';
 import { Notes } from '../Notes';
@@ -97,7 +97,7 @@ export function CategoryMenuModal({
                 onTitleUpdate={onRename}
               />
             }
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{

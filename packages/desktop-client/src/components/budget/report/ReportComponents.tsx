@@ -7,6 +7,7 @@ import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
 import { Button } from '../../common/Button2';
@@ -203,7 +204,6 @@ export const CategoryMonth = memo(function CategoryMonth({
   onShowActivity,
 }: CategoryMonthProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [hover, setHover] = useState(false);
   const triggerRef = useRef(null);
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
@@ -214,6 +214,8 @@ export const CategoryMonth = memo(function CategoryMonth({
     setBalanceMenuOpen(false);
     setMenuOpen(false);
   };
+
+  const { showUndoNotification } = useUndo();
 
   return (
     <View
@@ -237,16 +239,14 @@ export const CategoryMonth = memo(function CategoryMonth({
           flex: 1,
           flexDirection: 'row',
         }}
-        onMouseOverCapture={() => setHover(true)}
-        onMouseLeave={() => {
-          setHover(false);
-        }}
       >
-        {!editing && (hover || menuOpen) && (
+        {!editing && (
           <View
             style={{
+              flexDirection: 'row',
               flexShrink: 0,
               paddingLeft: 3,
+              alignItems: 'center',
               justifyContent: 'center',
               borderTopWidth: 1,
               borderBottomWidth: 1,
@@ -280,6 +280,9 @@ export const CategoryMonth = memo(function CategoryMonth({
                   onMenuAction(month, 'copy-single-last', {
                     category: category.id,
                   });
+                  showUndoNotification({
+                    message: `Budget set to last month’s budget.`,
+                  });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
                   if (
@@ -293,10 +296,16 @@ export const CategoryMonth = memo(function CategoryMonth({
                   onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
                     category: category.id,
                   });
+                  showUndoNotification({
+                    message: `Budget set to ${numberOfMonths}-month average.`,
+                  });
                 }}
                 onApplyBudgetTemplate={() => {
                   onMenuAction(month, 'apply-single-category-template', {
                     category: category.id,
+                  });
+                  showUndoNotification({
+                    message: `Budget template applied.`,
                   });
                 }}
               />
