@@ -43,7 +43,7 @@
           ]
         },
         {
-          "target": "mas-dev",
+          "target": "mas",
           "arch": [
             "x64",
             "arm64"
