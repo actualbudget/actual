@@ -55,11 +55,10 @@ export type MetadataPrefs = Partial<{
 
 /**
  * Local preferences applicable to a single device. Stored in local storage.
- * TODO: eventually `LocalPrefs` type should not use `SyncedPrefs` or `MetadataPrefs`;
+ * TODO: eventually `LocalPrefs` type should not use `MetadataPrefs`;
  * this is only a stop-gap solution.
  */
-export type LocalPrefs = SyncedPrefs &
-  MetadataPrefs &
+export type LocalPrefs = MetadataPrefs &
   Partial<{
     'ui.showClosedAccounts': boolean;
     'expand-splits': boolean;

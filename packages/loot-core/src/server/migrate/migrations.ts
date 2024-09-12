@@ -3,13 +3,14 @@
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
 import { Database } from '@jlongster/sql.js';
-import { v4 as uuidv4 } from 'uuid';
 
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import m1722717601000 from '../../../migrations/1722717601000_reports_move_selected_categories';
 import m1722804019000 from '../../../migrations/1722804019000_create_dashboard_table';
+import m1723665565000 from '../../../migrations/1723665565000_prefs';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
+import * as prefs from '../prefs';
 
 let MIGRATIONS_DIR = fs.migrationsPath;
 
@@ -17,6 +18,7 @@ const javascriptMigrations = {
   1632571489012: m1632571489012,
   1722717601000: m1722717601000,
   1722804019000: m1722804019000,
+  1723665565000: m1723665565000,
 };
 
 export async function withMigrationsDir(
@@ -107,7 +109,10 @@ async function applyJavaScript(db, id) {
   }
 
   const run = javascriptMigrations[id];
-  return run(dbInterface, () => uuidv4());
+  return run(dbInterface, {
+    fs,
+    fileId: prefs.getPrefs().id,
+  });
 }
 
 async function applySql(db, sql) {

@@ -1,22 +1,39 @@
-import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback, useMemo } from 'react';
 
-import { savePrefs } from 'loot-core/client/actions';
+import { useQuery } from 'loot-core/client/query-hooks';
+import { send } from 'loot-core/platform/client/fetch';
+import { q } from 'loot-core/shared/query';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
-
-import { useLocalPrefs } from './useLocalPrefs';
 
 type SetSyncedPrefsAction = (value: Partial<SyncedPrefs>) => void;
 
+/** @deprecated: please use `useSyncedPref` (singular) */
 export function useSyncedPrefs(): [SyncedPrefs, SetSyncedPrefsAction] {
-  // TODO: implement real logic (follow-up PR)
-  const dispatch = useDispatch();
-  const setPrefs = useCallback<SetSyncedPrefsAction>(
-    newPrefs => {
-      dispatch(savePrefs(newPrefs));
-    },
-    [dispatch],
+  const { data: queryData } = useQuery<{ id: string; value: string }[]>(
+    () => q('preferences').select(['id', 'value']),
+    [],
   );
 
-  return [useLocalPrefs(), setPrefs];
+  const prefs = useMemo<SyncedPrefs>(
+    () =>
+      queryData.reduce(
+        (carry, { id, value }) => ({
+          ...carry,
+          [id]: value,
+        }),
+        {},
+      ),
+    [queryData],
+  );
+
+  const setPrefs = useCallback<SetSyncedPrefsAction>(newValue => {
+    Object.entries(newValue).forEach(([id, value]) => {
+      send('preferences/save', {
+        id: id as keyof SyncedPrefs,
+        value: String(value),
+      });
+    });
+  }, []);
+
+  return [prefs, setPrefs];
 }
