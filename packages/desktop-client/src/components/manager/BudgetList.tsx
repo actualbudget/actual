@@ -1,4 +1,5 @@
 import React, { useState, useRef, type CSSProperties } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
@@ -74,7 +75,9 @@ function FileMenu({
     }
   }
 
-  const items = [{ name: 'delete', text: 'Delete' }];
+  const { t } = useTranslation();
+
+  const items = [{ name: 'delete', text: t('Delete') }];
   const { isNarrowWidth } = useResponsive();
 
   const defaultMenuItemStyle = isNarrowWidth
@@ -124,6 +127,8 @@ function FileMenuButton({ onDelete }: { onDelete: () => void }) {
 }
 
 function FileState({ file }: { file: File }) {
+  const { t } = useTranslation();
+
   let Icon;
   let status;
   let color;
@@ -131,21 +136,21 @@ function FileState({ file }: { file: File }) {
   switch (file.state) {
     case 'unknown':
       Icon = SvgCloudUnknown;
-      status = 'Network unavailable';
+      status = t('Network unavailable');
       color = theme.buttonNormalDisabledText;
       break;
     case 'remote':
       Icon = SvgCloudDownload;
-      status = 'Available for download';
+      status = t('Available for download');
       break;
     case 'local':
     case 'broken':
       Icon = SvgFileDouble;
-      status = 'Local';
+      status = t('Local');
       break;
     default:
       Icon = SvgCloudCheck;
-      status = 'Syncing';
+      status = t('Syncing');
       break;
   }
 
@@ -182,7 +187,11 @@ function FileItem({
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
 }) {
+  const { t } = useTranslation();
+
   const selecting = useRef(false);
+
+  const description = getFileDescription(file);
 
   async function _onSelect(file: File) {
     // Never allow selecting the file while uploading/downloading, and
@@ -197,7 +206,7 @@ function FileItem({
   return (
     <View
       onClick={() => _onSelect(file)}
-      title={getFileDescription(file) || ''}
+      title={description ? t(description) : ''}
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -277,7 +286,7 @@ function BudgetFiles({
             color: theme.pageTextSubdued,
           }}
         >
-          No budget files
+          <Trans>No budget files</Trans>
         </Text>
       ) : (
         files.map(file => (
@@ -343,7 +352,7 @@ function BudgetListHeader({
           ...styles.veryLargeText,
         }}
       >
-        Files
+        <Trans>Files</Trans>
       </Text>
       {!quickSwitchMode && <RefreshButton onRefresh={onRefresh} />}
     </View>
@@ -452,7 +461,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               dispatch(pushModal('import'));
             }}
           >
-            Import file
+            <Trans>Import file</Trans>
           </Button>
 
           <Button
@@ -463,7 +472,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
               marginLeft: 10,
             }}
           >
-            Create new file
+            <Trans>Create new file</Trans>
           </Button>
 
           {isNonProductionEnvironment() && (
@@ -475,7 +484,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
                 marginLeft: 10,
               }}
             >
-              Create test file
+              <Trans>Create test file</Trans>
             </Button>
           )}
         </View>
