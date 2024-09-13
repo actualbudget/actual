@@ -196,8 +196,9 @@ export async function loadUserBudgets(db): Promise<void> {
   // don't load any extra values that aren't set here
 
   const { value: budgetType = 'rollover' } =
-    (await db.first('SELECT value from preferences WHERE id = "budgetType"')) ??
-    {};
+    (await db.first('SELECT value from preferences WHERE id = ?', [
+      'budgetType',
+    ])) ?? {};
 
   const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
   const budgets = await db.all(`
