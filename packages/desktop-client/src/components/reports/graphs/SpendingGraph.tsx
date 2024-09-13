@@ -138,7 +138,7 @@ export function SpendingGraph({
   const privacyMode = usePrivacyMode();
   const balanceTypeOp = 'cumulative';
 
-  const selection = mode === 'singleMonth' ? compareTo : mode;
+  const selection = mode === 'single-month' ? compareTo : mode;
 
   const thisMonthMax = data.intervalData.reduce((a, b) =>
     a.months[compare][balanceTypeOp] < b.months[compare][balanceTypeOp] ? a : b,

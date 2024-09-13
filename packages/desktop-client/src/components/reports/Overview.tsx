@@ -545,6 +545,7 @@ export function Overview() {
                   />
                 ) : item.type === 'spending-card' ? (
                   <SpendingCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}

@@ -62,6 +62,12 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
           : d.format(endDate, 'MMM yyyy')}
       </div>
     );
+  } else if (['budget', 'average'].includes(type || '')) {
+    content = (
+      <div>
+        Compare {d.format(startDate, 'MMM yyyy')} to {type}
+      </div>
+    );
   } else {
     content = d.format(endDate, 'MMMM yyyy');
   }
