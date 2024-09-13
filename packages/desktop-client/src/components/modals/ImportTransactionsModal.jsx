@@ -16,7 +16,7 @@ import { SvgDownAndRightArrow } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button2';
 import { Input } from '../common/Input';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -838,7 +838,7 @@ function FieldMappings({
   );
 }
 
-export function ImportTransactions({ options }) {
+export function ImportTransactionsModal({ options }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [prefs, savePrefs] = useSyncedPrefs();
   const {
@@ -887,90 +887,227 @@ export function ImportTransactions({ options }) {
 
   const [clearOnImport, setClearOnImport] = useState(true);
 
-  async function parse(filename, options) {
-    setLoadingState('parsing');
+  const getImportPreview = useCallback(
+    async (
+      transactions,
+      filetype,
+      flipAmount,
+      fieldMappings,
+      splitMode,
+      parseDateFormat,
+      inOutMode,
+      outValue,
+      multiplierAmount,
+    ) => {
+      const previewTransactions = [];
 
-    const filetype = getFileType(filename);
-    setFilename(filename);
-    setFileType(filetype);
+      for (let trans of transactions) {
+        if (trans.isMatchedTransaction) {
+          // skip transactions that are matched transaction (existing transaction added to show update changes)
+          continue;
+        }
 
-    const { errors, transactions: parsedTransactions } =
-      await parseTransactions(filename, options);
+        trans = fieldMappings
+          ? applyFieldMappings(trans, fieldMappings)
+          : trans;
 
-    let index = 0;
-    const transactions = parsedTransactions.map(trans => {
-      // Add a transient transaction id to match preview with imported transactions
-      trans.trx_id = index++;
-      // Select all parsed transactions before first preview run
-      trans.selected = true;
-      return trans;
-    });
+        const date = isOfxFile(filetype)
+          ? trans.date
+          : parseDate(trans.date, parseDateFormat);
+        if (date == null) {
+          console.log(
+            `Unable to parse date ${
+              trans.date || '(empty)'
+            } with given date format`,
+          );
+          break;
+        }
+        if (trans.payee == null || !(trans.payee instanceof String)) {
+          console.log(`Unable·to·parse·payee·${trans.payee || '(empty)'}`);
+          break;
+        }
 
-    setLoadingState(null);
-    setError(null);
+        const { amount } = parseAmountFields(
+          trans,
+          splitMode,
+          inOutMode,
+          outValue,
+          flipAmount,
+          multiplierAmount,
+        );
+        if (amount == null) {
+          console.log(`Transaction on ${trans.date} has no amount`);
+          break;
+        }
 
-    /// Do fine grained reporting between the old and new OFX importers.
-    if (errors.length > 0) {
-      setError({
-        parsed: true,
-        message: errors[0].message || 'Internal error',
-      });
-    } else {
-      let flipAmount = false;
-      let fieldMappings = null;
-      let splitMode = false;
-      let parseDateFormat = null;
+        const category_id = parseCategoryFields(trans, categories.list);
+        if (category_id != null) {
+          trans.category = category_id;
+        }
 
-      if (filetype === 'csv' || filetype === 'qif') {
-        flipAmount =
-          String(prefs[`flip-amount-${accountId}-${filetype}`]) === 'true';
-        setFlipAmount(flipAmount);
+        const {
+          inflow,
+          outflow,
+          inOut,
+          existing,
+          ignored,
+          selected,
+          selected_merge,
+          ...finalTransaction
+        } = trans;
+        previewTransactions.push({
+          ...finalTransaction,
+          date,
+          amount: amountToInteger(amount),
+          cleared: clearOnImport,
+        });
       }
 
-      if (filetype === 'csv') {
-        let mappings = prefs[`csv-mappings-${accountId}`];
-        mappings = mappings
-          ? JSON.parse(mappings)
-          : getInitialMappings(transactions);
-
-        fieldMappings = mappings;
-        setFieldMappings(mappings);
-
-        // Set initial split mode based on any saved mapping
-        splitMode = !!(mappings.outflow || mappings.inflow);
-        setSplitMode(splitMode);
-
-        parseDateFormat =
-          prefs[`parse-date-${accountId}-${filetype}`] ||
-          getInitialDateFormat(transactions, mappings);
-        setParseDateFormat(parseDateFormat);
-      } else if (filetype === 'qif') {
-        parseDateFormat =
-          prefs[`parse-date-${accountId}-${filetype}`] ||
-          getInitialDateFormat(transactions, { date: 'date' });
-        setParseDateFormat(parseDateFormat);
-      } else {
-        setFieldMappings(null);
-        setParseDateFormat(null);
-      }
-
-      // Reverse the transactions because it's very common for them to
-      // be ordered ascending, but we show transactions descending by
-      // date. This is purely cosmetic.
-      const transactionPreview = await getImportPreview(
-        transactions.reverse(),
-        filetype,
-        flipAmount,
-        fieldMappings,
-        splitMode,
-        parseDateFormat,
-        inOutMode,
-        outValue,
-        multiplierAmount,
+      // Retreive the transactions that would be updated (along with the existing trx)
+      const previewTrx = await importPreviewTransactions(
+        accountId,
+        previewTransactions,
       );
-      setTransactions(transactionPreview);
-    }
-  }
+      const matchedUpdateMap = previewTrx.reduce((map, entry) => {
+        map[entry.transaction.trx_id] = entry;
+        return map;
+      }, {});
+
+      return transactions
+        .filter(trans => !trans.isMatchedTransaction)
+        .reduce((previous, current_trx) => {
+          let next = previous;
+          const entry = matchedUpdateMap[current_trx.trx_id];
+          const existing_trx = entry?.existing;
+
+          // if the transaction is matched with an existing one for update
+          current_trx.existing = !!existing_trx;
+          // if the transaction is an update that will be ignored
+          // (reconciled transactions or no change detected)
+          current_trx.ignored = entry?.ignored || false;
+
+          current_trx.selected = !current_trx.ignored;
+          current_trx.selected_merge = current_trx.existing;
+
+          next = next.concat({ ...current_trx });
+
+          if (existing_trx) {
+            // add the updated existing transaction in the list, with the
+            // isMatchedTransaction flag to identify it in display and not send it again
+            existing_trx.isMatchedTransaction = true;
+            existing_trx.category = categories.list.find(
+              cat => cat.id === existing_trx.category,
+            )?.name;
+            // add parent transaction attribute to mimic behaviour
+            existing_trx.trx_id = current_trx.trx_id;
+            existing_trx.existing = current_trx.existing;
+            existing_trx.selected = current_trx.selected;
+            existing_trx.selected_merge = current_trx.selected_merge;
+
+            next = next.concat({ ...existing_trx });
+          }
+
+          return next;
+        }, []);
+    },
+    [accountId, categories.list, clearOnImport, importPreviewTransactions],
+  );
+
+  const parse = useCallback(
+    async (filename, options) => {
+      setLoadingState('parsing');
+
+      const filetype = getFileType(filename);
+      setFilename(filename);
+      setFileType(filetype);
+
+      const { errors, transactions: parsedTransactions } =
+        await parseTransactions(filename, options);
+
+      let index = 0;
+      const transactions = parsedTransactions.map(trans => {
+        // Add a transient transaction id to match preview with imported transactions
+        trans.trx_id = index++;
+        // Select all parsed transactions before first preview run
+        trans.selected = true;
+        return trans;
+      });
+
+      setLoadingState(null);
+      setError(null);
+
+      /// Do fine grained reporting between the old and new OFX importers.
+      if (errors.length > 0) {
+        setError({
+          parsed: true,
+          message: errors[0].message || 'Internal error',
+        });
+      } else {
+        let flipAmount = false;
+        let fieldMappings = null;
+        let splitMode = false;
+        let parseDateFormat = null;
+
+        if (filetype === 'csv' || filetype === 'qif') {
+          flipAmount =
+            String(prefs[`flip-amount-${accountId}-${filetype}`]) === 'true';
+          setFlipAmount(flipAmount);
+        }
+
+        if (filetype === 'csv') {
+          let mappings = prefs[`csv-mappings-${accountId}`];
+          mappings = mappings
+            ? JSON.parse(mappings)
+            : getInitialMappings(transactions);
+
+          fieldMappings = mappings;
+          setFieldMappings(mappings);
+
+          // Set initial split mode based on any saved mapping
+          splitMode = !!(mappings.outflow || mappings.inflow);
+          setSplitMode(splitMode);
+
+          parseDateFormat =
+            prefs[`parse-date-${accountId}-${filetype}`] ||
+            getInitialDateFormat(transactions, mappings);
+          setParseDateFormat(parseDateFormat);
+        } else if (filetype === 'qif') {
+          parseDateFormat =
+            prefs[`parse-date-${accountId}-${filetype}`] ||
+            getInitialDateFormat(transactions, { date: 'date' });
+          setParseDateFormat(parseDateFormat);
+        } else {
+          setFieldMappings(null);
+          setParseDateFormat(null);
+        }
+
+        // Reverse the transactions because it's very common for them to
+        // be ordered ascending, but we show transactions descending by
+        // date. This is purely cosmetic.
+        const transactionPreview = await getImportPreview(
+          transactions.reverse(),
+          filetype,
+          flipAmount,
+          fieldMappings,
+          splitMode,
+          parseDateFormat,
+          inOutMode,
+          outValue,
+          multiplierAmount,
+        );
+        setTransactions(transactionPreview);
+      }
+    },
+    [
+      accountId,
+      getImportPreview,
+      inOutMode,
+      multiplierAmount,
+      outValue,
+      parseTransactions,
+      prefs,
+    ],
+  );
 
   function onMultiplierChange(e) {
     const amt = e;
@@ -990,7 +1127,15 @@ export function ImportTransactions({ options }) {
     });
 
     parse(options.filename, parseOptions);
-  }, [parseTransactions, options.filename]);
+  }, [
+    parseTransactions,
+    options.filename,
+    delimiter,
+    hasHeaderRow,
+    skipLines,
+    fallbackMissingPayeeToMemo,
+    parse,
+  ]);
 
   function onSplitMode() {
     if (fieldMappings == null) {
@@ -1236,6 +1381,7 @@ export function ImportTransactions({ options }) {
     );
     setTransactions(transactionPreview);
   }, [
+    getImportPreview,
     transactions,
     filetype,
     flipAmount,
@@ -1249,131 +1395,10 @@ export function ImportTransactions({ options }) {
 
   useEffect(() => {
     runImportPreviewCallback();
-  }, [previewTrigger]);
+  }, [previewTrigger, runImportPreviewCallback]);
 
   function runImportPreview() {
     setPreviewTrigger(value => value + 1);
-  }
-
-  async function getImportPreview(
-    transactions,
-    filetype,
-    flipAmount,
-    fieldMappings,
-    splitMode,
-    parseDateFormat,
-    inOutMode,
-    outValue,
-    multiplierAmount,
-  ) {
-    const previewTransactions = [];
-
-    for (let trans of transactions) {
-      if (trans.isMatchedTransaction) {
-        // skip transactions that are matched transaction (existing transaction added to show update changes)
-        continue;
-      }
-
-      trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
-
-      const date = isOfxFile(filetype)
-        ? trans.date
-        : parseDate(trans.date, parseDateFormat);
-      if (date == null) {
-        console.log(
-          `Unable to parse date ${
-            trans.date || '(empty)'
-          } with given date format`,
-        );
-        break;
-      }
-      if (trans.payee == null || !(trans.payee instanceof String)) {
-        console.log(`Unable·to·parse·payee·${trans.payee || '(empty)'}`);
-        break;
-      }
-
-      const { amount } = parseAmountFields(
-        trans,
-        splitMode,
-        inOutMode,
-        outValue,
-        flipAmount,
-        multiplierAmount,
-      );
-      if (amount == null) {
-        console.log(`Transaction on ${trans.date} has no amount`);
-        break;
-      }
-
-      const category_id = parseCategoryFields(trans, categories.list);
-      if (category_id != null) {
-        trans.category = category_id;
-      }
-
-      const {
-        inflow,
-        outflow,
-        inOut,
-        existing,
-        ignored,
-        selected,
-        selected_merge,
-        ...finalTransaction
-      } = trans;
-      previewTransactions.push({
-        ...finalTransaction,
-        date,
-        amount: amountToInteger(amount),
-        cleared: clearOnImport,
-      });
-    }
-
-    // Retreive the transactions that would be updated (along with the existing trx)
-    const previewTrx = await importPreviewTransactions(
-      accountId,
-      previewTransactions,
-    );
-    const matchedUpdateMap = previewTrx.reduce((map, entry) => {
-      map[entry.transaction.trx_id] = entry;
-      return map;
-    }, {});
-
-    return transactions
-      .filter(trans => !trans.isMatchedTransaction)
-      .reduce((previous, current_trx) => {
-        let next = previous;
-        const entry = matchedUpdateMap[current_trx.trx_id];
-        const existing_trx = entry?.existing;
-
-        // if the transaction is matched with an existing one for update
-        current_trx.existing = !!existing_trx;
-        // if the transaction is an update that will be ignored
-        // (reconciled transactions or no change detected)
-        current_trx.ignored = entry?.ignored || false;
-
-        current_trx.selected = !current_trx.ignored;
-        current_trx.selected_merge = current_trx.existing;
-
-        next = next.concat({ ...current_trx });
-
-        if (existing_trx) {
-          // add the updated existing transaction in the list, with the
-          // isMatchedTransaction flag to identify it in display and not send it again
-          existing_trx.isMatchedTransaction = true;
-          existing_trx.category = categories.list.find(
-            cat => cat.id === existing_trx.category,
-          )?.name;
-          // add parent transaction attribute to mimic behaviour
-          existing_trx.trx_id = current_trx.trx_id;
-          existing_trx.existing = current_trx.existing;
-          existing_trx.selected = current_trx.selected;
-          existing_trx.selected_merge = current_trx.selected_merge;
-
-          next = next.concat({ ...existing_trx });
-        }
-
-        return next;
-      }, []);
   }
 
   const headers = [
@@ -1409,7 +1434,7 @@ export function ImportTransactions({ options }) {
               'Import transactions' +
               (filetype ? ` (${filetype.toUpperCase()})` : '')
             }
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           {error && !error.parsed && (
             <View style={{ alignItems: 'center', marginBottom: 15 }}>

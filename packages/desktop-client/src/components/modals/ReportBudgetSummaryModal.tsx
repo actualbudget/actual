@@ -7,7 +7,7 @@ import { styles } from '../../style';
 import { ExpenseTotal } from '../budget/report/budgetsummary/ExpenseTotal';
 import { IncomeTotal } from '../budget/report/budgetsummary/IncomeTotal';
 import { Saved } from '../budget/report/budgetsummary/Saved';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Stack } from '../common/Stack';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
@@ -25,7 +25,7 @@ export function ReportBudgetSummaryModal({
         <>
           <ModalHeader
             title="Budget Summary"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <NamespaceContext.Provider value={sheetForMonth(month)}>
             <Stack

@@ -6,7 +6,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { switchBudgetType } from '../budget/util';
 import { ButtonWithLoading } from '../common/Button2';
 import { Link } from '../common/Link';
@@ -16,7 +16,7 @@ import { Setting } from './UI';
 
 export function BudgetTypeSettings() {
   const dispatch = useDispatch();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
   const [loading, setLoading] = useState(false);
 
   const currentMonth = monthUtils.currentMonth();

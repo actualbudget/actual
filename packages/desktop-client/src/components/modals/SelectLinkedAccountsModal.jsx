@@ -11,7 +11,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -23,7 +23,7 @@ const addOffBudgetAccountOption = {
   name: 'Create new account (off-budget)',
 };
 
-export function SelectLinkedAccounts({
+export function SelectLinkedAccountsModal({
   requisitionId,
   externalAccounts,
   syncSource,
@@ -119,7 +119,7 @@ export function SelectLinkedAccounts({
         <>
           <ModalHeader
             title="Link Accounts"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <Text style={{ marginBottom: 10 }}>
             We found the following accounts. Select which ones you want to add:

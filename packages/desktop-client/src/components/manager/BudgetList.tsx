@@ -389,19 +389,19 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
     refresh();
   }
 
-  const onSelect = (file: File): void => {
+  const onSelect = async (file: File): Promise<void> => {
     const isRemoteFile = file.state === 'remote';
 
     if (!id) {
       if (isRemoteFile) {
-        dispatch(downloadBudget(file.cloudFileId));
+        await dispatch(downloadBudget(file.cloudFileId));
       } else {
-        dispatch(loadBudget(file.id));
+        await dispatch(loadBudget(file.id));
       }
     } else if (!isRemoteFile && file.id !== id) {
-      dispatch(closeAndLoadBudget(file.id));
+      await dispatch(closeAndLoadBudget(file.id));
     } else if (isRemoteFile) {
-      dispatch(closeAndDownloadBudget(file.cloudFileId));
+      await dispatch(closeAndDownloadBudget(file.cloudFileId));
     }
   };
 

@@ -1,4 +1,4 @@
-import { parseDate } from './ImportTransactions';
+import { parseDate } from './ImportTransactionsModal';
 
 describe('Import transactions', function () {
   describe('date parsing', function () {

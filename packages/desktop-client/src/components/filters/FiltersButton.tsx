@@ -1,14 +1,11 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { SvgFilter } from '../../icons/v1/Filter';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 
-export function FiltersButton({ onClick }: { onClick: () => void }) {
-  const { t } = useTranslation();
-
+export function FiltersButton({ onPress }: { onPress: () => void }) {
   return (
-    <Button type="bare" onClick={onClick} title={t('Filters')}>
+    <Button variant="bare" onPress={onPress}>
       <SvgFilter style={{ width: 12, height: 12, marginRight: 5 }} /> Filter
     </Button>
   );

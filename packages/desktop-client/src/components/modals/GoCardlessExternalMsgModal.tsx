@@ -16,12 +16,11 @@ import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-
-import { COUNTRY_OPTIONS } from './countries';
+import { COUNTRY_OPTIONS } from '../util/countries';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
@@ -80,7 +79,7 @@ type GoCardlessExternalMsgProps = {
   onClose: () => void;
 };
 
-export function GoCardlessExternalMsg({
+export function GoCardlessExternalMsgModal({
   onMoveExternal,
   onSuccess,
   onClose,
@@ -233,7 +232,7 @@ export function GoCardlessExternalMsg({
         <>
           <ModalHeader
             title="Link Your Bank"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
             <Paragraph style={{ fontSize: 15 }}>
