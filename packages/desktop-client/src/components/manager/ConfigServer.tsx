@@ -34,7 +34,7 @@ export function ConfigServer() {
   }, [currentUrl]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [_serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
+  const [serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
     'serverSelfSignedCert',
   );
 
@@ -110,13 +110,13 @@ export function ConfigServer() {
     // When self signed cert has changed, restart the server
     if (isMounted.current) {
       setLoading(true);
-      globalThis.window.Actual.restartServer(); // restart the server process to use the new certificate
+      globalThis.window.Actual.restartServer();
       setError(null);
       setLoading(false);
     } else {
       isMounted.current = true;
     }
-  }, [_serverSelfSignedCert]);
+  }, [serverSelfSignedCert]);
 
   async function onSkip() {
     await setServerUrl(null);
