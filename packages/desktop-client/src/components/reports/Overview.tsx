@@ -537,6 +537,7 @@ export function Overview() {
                   />
                 ) : item.type === 'cash-flow-card' ? (
                   <CashFlowCard
+                    widgetId={item.i}
                     isEditing={isEditing}
                     meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}

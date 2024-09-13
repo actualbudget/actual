@@ -166,12 +166,17 @@ export function getLatestRange(offset: number) {
 }
 
 export function calculateTimeRange(
-  { start, end, mode }: TimeFrame = {
-    start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
-    end: monthUtils.currentMonth(),
-    mode: 'sliding-window',
-  },
+  timeFrame?: TimeFrame,
+  defaultTimeFrame?: TimeFrame,
 ) {
+  const start =
+    timeFrame?.start ??
+    defaultTimeFrame?.start ??
+    monthUtils.subMonths(monthUtils.currentMonth(), 5);
+  const end =
+    timeFrame?.end ?? defaultTimeFrame?.end ?? monthUtils.currentMonth();
+  const mode = timeFrame?.mode ?? defaultTimeFrame?.mode ?? 'sliding-window';
+
   if (mode === 'full') {
     return getFullRange(start);
   }
@@ -179,5 +184,5 @@ export function calculateTimeRange(
     return getLatestRange(monthUtils.differenceInCalendarMonths(end, start));
   }
 
-  return [start, end, 'static'];
+  return [start, end, 'static'] as const;
 }
