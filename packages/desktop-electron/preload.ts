@@ -34,6 +34,10 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.invoke('relaunch');
   },
 
+  restartServer: () => {
+    ipcRenderer.invoke('restart-server');
+  },
+
   openFileDialog: (opts: OpenFileDialogPayload) => {
     return ipcRenderer.invoke('open-file-dialog', opts);
   },

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -101,9 +101,22 @@ export function ConfigServer() {
 
     if (selfSignedCertificateLocation) {
       setServerSelfSignedCert(selfSignedCertificateLocation[0]);
-      globalThis.window.Actual.relaunch(); // relaunch to use the certificate
     }
   }
+
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    // When self signed cert has changed, restart the server
+    if (isMounted.current) {
+      setLoading(true);
+      globalThis.window.Actual.restartServer(); // restart the server process to use the new certificate
+      setError(null);
+      setLoading(false);
+    } else {
+      isMounted.current = true;
+    }
+  }, [_serverSelfSignedCert]);
 
   async function onSkip() {
     await setServerUrl(null);
