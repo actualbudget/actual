@@ -44,7 +44,7 @@ export async function savePrefs(
     // Sync whitelisted prefs
     const messages: Message[] = Object.keys(prefsToSet)
       .map(key => {
-        if (key === 'budgetType' || key === 'budgetName') {
+        if (key === 'budgetName') {
           return {
             dataset: 'prefs',
             row: key,

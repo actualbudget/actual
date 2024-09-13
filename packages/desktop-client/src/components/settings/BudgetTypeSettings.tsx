@@ -1,58 +1,27 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
 
-import { loadPrefs } from 'loot-core/src/client/actions';
-import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import * as monthUtils from 'loot-core/src/shared/months';
-
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { switchBudgetType } from '../budget/util';
-import { ButtonWithLoading } from '../common/Button2';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 
 export function BudgetTypeSettings() {
-  const dispatch = useDispatch();
-  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
-  const [loading, setLoading] = useState(false);
-
-  const currentMonth = monthUtils.currentMonth();
-  const [startMonthPref] = useLocalPref('budget.startMonth');
-  const startMonth = startMonthPref || currentMonth;
-  const spreadsheet = useSpreadsheet();
+  const [budgetType = 'rollover', setBudgetType] = useSyncedPref('budgetType');
 
   function onSwitchType() {
-    setLoading(true);
-
-    if (!loading) {
-      const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
-
-      switchBudgetType(
-        newBudgetType,
-        spreadsheet,
-        {
-          start: startMonth,
-          end: startMonth,
-        },
-        startMonth,
-        async () => {
-          dispatch(loadPrefs());
-          setLoading(false);
-        },
-      );
-    }
+    const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
+    setBudgetType(newBudgetType);
   }
 
   return (
     <Setting
       primaryAction={
-        <ButtonWithLoading isLoading={loading} onPress={onSwitchType}>
+        <Button onPress={onSwitchType}>
           Switch to {budgetType === 'report' ? 'envelope' : 'tracking'}{' '}
           budgeting
-        </ButtonWithLoading>
+        </Button>
       }
     >
       <Text>

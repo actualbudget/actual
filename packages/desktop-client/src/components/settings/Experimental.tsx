@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { theme } from '../../style';
 import { Link } from '../common/Link';
@@ -70,7 +69,7 @@ function FeatureToggle({
 
 function ReportBudgetFeature() {
   const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (

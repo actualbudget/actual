@@ -6,7 +6,6 @@ import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 
 import * as Platform from './platform';
-import * as prefs from './prefs';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
 
@@ -196,7 +195,9 @@ export async function loadUserBudgets(db): Promise<void> {
   // TODO: Clear out the cache here so make sure future loads of the app
   // don't load any extra values that aren't set here
 
-  const { budgetType } = prefs.getPrefs() || {};
+  const { value: budgetType = 'rollover' } =
+    (await db.first('SELECT value from preferences WHERE id = "budgetType"')) ??
+    {};
 
   const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
   const budgets = await db.all(`

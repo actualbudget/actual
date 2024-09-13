@@ -12,9 +12,9 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useNotes } from '../../../hooks/useNotes';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgLogo } from '../../../icons/logo';
 import { SvgExpandArrow } from '../../../icons/v0';
@@ -225,7 +225,7 @@ function BudgetCell({
 }) {
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
-  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   const categoryBudgetMenuModal = `${budgetType}-budget-menu`;
   const categoryNotes = useNotes(category.id);
@@ -358,7 +358,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const goalTemp = useSheetValue(goal);
   const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
 
-  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();

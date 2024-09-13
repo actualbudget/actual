@@ -359,6 +359,11 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
         currentMerkle = merkle.insert(currentMerkle, timestamp);
       }
+
+      // Special treatment for some synced prefs
+      if (dataset === 'preferences' && row === 'budgetType') {
+        setBudgetType(value);
+      }
     }
 
     if (checkSyncingMode('enabled')) {
@@ -384,11 +389,6 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   // Save any synced prefs
   if (Object.keys(prefsToSet).length > 0) {
     prefs.savePrefs(prefsToSet, { avoidSync: true });
-
-    if (prefsToSet.budgetType) {
-      setBudgetType(prefsToSet.budgetType);
-    }
-
     connection.send('prefs-updated');
   }
 

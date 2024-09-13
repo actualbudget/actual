@@ -2,7 +2,6 @@
 import * as monthUtils from '../../shared/months';
 import { safeNumber } from '../../shared/util';
 import * as db from '../db';
-import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
@@ -28,12 +27,14 @@ function calcBufferedAmount(
 }
 
 function getBudgetTable(): string {
-  const { budgetType } = prefs.getPrefs() || {};
-  return budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
+  return isReflectBudget() ? 'reflect_budgets' : 'zero_budgets';
 }
 
 export function isReflectBudget(): boolean {
-  const { budgetType } = prefs.getPrefs();
+  const budgetType =
+    db.firstSync(`SELECT value FROM preferences WHERE id = ?`, [
+      'budgetType',
+    ]) ?? 'rollover';
   return budgetType === 'report';
 }
 
