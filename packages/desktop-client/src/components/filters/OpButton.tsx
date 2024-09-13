@@ -1,34 +1,38 @@
 import React from 'react';
 
+import { css } from 'glamor';
+
 import { friendlyOp } from 'loot-core/src/shared/rules';
 
 import { type CSSProperties, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 
 type OpButtonProps = {
   op: string;
-  selected: boolean;
-  onClick: () => void;
+  isSelected: boolean;
+  onPress: () => void;
   style?: CSSProperties;
 };
 
-export function OpButton({ op, selected, style, onClick }: OpButtonProps) {
+export function OpButton({ op, isSelected, style, onPress }: OpButtonProps) {
   return (
     <Button
-      type="bare"
-      style={{
-        backgroundColor: theme.pillBackground,
-        marginBottom: 5,
-        ...style,
-        ...(selected && {
-          color: theme.buttonNormalSelectedText,
-          '&,:hover,:active': {
-            backgroundColor: theme.buttonNormalSelectedBackground,
+      variant="bare"
+      style={style}
+      className={String(
+        css({
+          backgroundColor: theme.pillBackground,
+          marginBottom: 5,
+          ...(isSelected && {
             color: theme.buttonNormalSelectedText,
-          },
+            '&,:hover,:active': {
+              backgroundColor: theme.buttonNormalSelectedBackground,
+              color: theme.buttonNormalSelectedText,
+            },
+          }),
         }),
-      }}
-      onClick={onClick}
+      )}
+      onPress={onPress}
     >
       {friendlyOp(op)}
     </Button>

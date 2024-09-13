@@ -25,13 +25,13 @@ export function useModalState(): ModalState {
   const lastModal = modalStack[modalStack.length - 1];
   const isActive = useCallback(
     (name: string) => {
-      if (name === lastModal?.name) {
+      if (!lastModal || name === lastModal.name) {
         return true;
       }
 
       return false;
     },
-    [lastModal?.name],
+    [lastModal],
   );
 
   return {

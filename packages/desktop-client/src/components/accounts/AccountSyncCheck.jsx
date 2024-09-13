@@ -1,13 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { t } from 'i18next';
 
+import { unlinkAccount } from 'loot-core/client/actions';
+
 import { authorizeBank } from '../../gocardless';
 import { useAccounts } from '../../hooks/useAccounts';
-import { useActions } from '../../hooks/useActions';
 import { SvgExclamationOutline } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -75,8 +76,7 @@ function getErrorMessage(type, code) {
 export function AccountSyncCheck() {
   const accounts = useAccounts();
   const failedAccounts = useSelector(state => state.account.failedAccounts);
-  const { unlinkAccount, pushModal } = useActions();
-
+  const dispatch = useDispatch();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -99,11 +99,11 @@ export function AccountSyncCheck() {
   function reauth() {
     setOpen(false);
 
-    authorizeBank(pushModal, { upgradingAccountId: account.account_id });
+    authorizeBank(dispatch, { upgradingAccountId: account.account_id });
   }
 
   async function unlink() {
-    unlinkAccount(account.id);
+    dispatch(unlinkAccount(account.id));
     setOpen(false);
   }
 

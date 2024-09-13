@@ -8,7 +8,7 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { theme, styles } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
@@ -22,7 +22,7 @@ export function Account() {
 
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
 
   const { id: accountId } = useParams();
 
@@ -45,9 +45,9 @@ export function Account() {
           There is no Mobile View at the moment
         </Text>
         <Button
-          type="normal"
+          variant="normal"
           style={{ fontSize: 15, marginLeft: 10, marginTop: 10 }}
-          onClick={() => navigate('/accounts')}
+          onPress={() => navigate('/accounts')}
         >
           Go back to Mobile Accounts
         </Button>

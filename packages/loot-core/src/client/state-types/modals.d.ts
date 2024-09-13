@@ -39,7 +39,7 @@ type FinanceModals = {
   };
   'select-linked-accounts': {
     accounts: unknown[];
-    requisitionId: string;
+    requisitionId?: string;
     upgradingAccountId?: string;
     syncSource?: AccountSyncSource;
   };

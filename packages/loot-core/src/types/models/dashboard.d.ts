@@ -1,4 +1,11 @@
 import { type CustomReportEntity } from './reports';
+import { type RuleConditionEntity } from './rule';
+
+export type TimeFrame = {
+  start: string;
+  end: string;
+  mode: 'sliding-window' | 'static' | 'full';
+};
 
 type AbstractWidget<
   T extends string,
@@ -16,7 +23,12 @@ type AbstractWidget<
 
 export type NetWorthWidget = AbstractWidget<
   'net-worth-card',
-  { name?: string } | null
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+  } | null
 >;
 export type CashFlowWidget = AbstractWidget<
   'cash-flow-card',

@@ -14,7 +14,7 @@ export function loadBackup(budgetId, backupId) {
     }
 
     await send('backup-load', { id: budgetId, backupId });
-    dispatch(loadBudget(budgetId));
+    await dispatch(loadBudget(budgetId));
   };
 }
 
