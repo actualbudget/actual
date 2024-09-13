@@ -46,7 +46,7 @@ export function BalanceMenu({
             onCover?.();
             break;
           default:
-            throw new Error(t('Unrecognized menu option: {{name}}', { name }));
+            throw new Error(`Unrecognized menu option: ${name}`);
         }
       }}
       items={[

@@ -39,7 +39,7 @@ export function BudgetMenu({
         onApplyBudgetTemplate?.();
         break;
       default:
-        throw new Error(t('Unrecognized menu item: {{name}}', { name }));
+        throw new Error(`Unrecognized menu item: ${name}`);
     }
   };
 
