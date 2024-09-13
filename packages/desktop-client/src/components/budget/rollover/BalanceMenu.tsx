@@ -1,4 +1,5 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
@@ -23,10 +24,13 @@ export function BalanceMenu({
   onCover,
   ...props
 }: BalanceMenuProps) {
+  const { t } = useTranslation();
+
   const carryover = useRolloverSheetValue(
     rolloverBudget.catCarryover(categoryId),
   );
   const balance = useRolloverSheetValue(rolloverBudget.catBalance(categoryId));
+
   return (
     <Menu
       {...props}
@@ -42,7 +46,7 @@ export function BalanceMenu({
             onCover?.();
             break;
           default:
-            throw new Error(`Unrecognized menu option: ${name}`);
+            throw new Error(t('Unrecognized menu option: {{name}}', { name }));
         }
       }}
       items={[
@@ -50,7 +54,7 @@ export function BalanceMenu({
           ? [
               {
                 name: 'transfer',
-                text: 'Transfer to another category',
+                text: t('Transfer to another category'),
               },
             ]
           : []),
@@ -58,15 +62,15 @@ export function BalanceMenu({
           ? [
               {
                 name: 'cover',
-                text: 'Cover overspending',
+                text: t('Cover overspending'),
               },
             ]
           : []),
         {
           name: 'carryover',
           text: carryover
-            ? 'Remove overspending rollover'
-            : 'Rollover overspending',
+            ? t('Remove overspending rollover')
+            : t('Rollover overspending'),
         },
       ]}
     />
