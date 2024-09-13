@@ -219,7 +219,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             <Trans>Compare</Trans>
           </Text>
           <Select
-            value={mode === 'sliding-window' ? 'current-month' : start}
+            value={
+              mode !== 'sliding-window' || reportMode === 'single-month'
+                ? start
+                : 'current-month'
+            }
             onChange={newStart => {
               if (newStart === 'current-month') {
                 setMode('sliding-window');
@@ -337,30 +341,33 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             exclude={['date']}
           />
           <View style={{ flex: 1 }} />
-          <Tooltip
-            placement="top end"
-            content={
-              <Text>
-                <Trans>Save compare and filter options</Trans>
-              </Text>
-            }
-            style={{
-              ...styles.tooltip,
-              lineHeight: 1.5,
-              padding: '6px 10px',
-              marginLeft: 10,
-            }}
-          >
-            <Button
-              variant="primary"
+
+          {widget && (
+            <Tooltip
+              placement="top end"
+              content={
+                <Text>
+                  <Trans>Save compare and filter options</Trans>
+                </Text>
+              }
               style={{
+                ...styles.tooltip,
+                lineHeight: 1.5,
+                padding: '6px 10px',
                 marginLeft: 10,
               }}
-              onPress={onSaveWidget}
             >
-              <Trans>Save</Trans>
-            </Button>
-          </Tooltip>
+              <Button
+                variant="primary"
+                style={{
+                  marginLeft: 10,
+                }}
+                onPress={onSaveWidget}
+              >
+                <Trans>Save</Trans>
+              </Button>
+            </Tooltip>
+          )}
         </View>
       </View>
       <View
