@@ -1,24 +1,29 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, {
+  type ComponentType,
+  type SVGProps,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '../common/View';
 import { SecondaryItem } from './SecondaryItem';
 
-import { SvgAdd } from '../../icons/v1';
+type BottomButtonItems = {
+  title: string;
+  Icon:
+  | ComponentType<SVGProps<SVGElement>>
+  | ComponentType<SVGProps<SVGSVGElement>>;
+  onClick: () => void;
+};
 
 type BottomButtonsProps = {
-  onAddAccount: () => void;
+  buttons: Array<BottomButtonItems>;
 };
 
 export function BottomButtons({
-  onAddAccount,
+  buttons,
 }: BottomButtonsProps) {
   const { t } = useTranslation();
-
-  const bottomButtons = [
-    { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
-  ];
 
   return (
     <View
@@ -28,7 +33,7 @@ export function BottomButtons({
         marginBottom: 9,
       }}
     >
-      {bottomButtons.map((item) => (
+      {buttons.map((item) => (
         <SecondaryItem title={item.title} Icon={item.Icon} onClick={item.onClick} />
       ))}
     </View>

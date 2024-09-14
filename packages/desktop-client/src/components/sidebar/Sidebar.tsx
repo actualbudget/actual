@@ -18,7 +18,17 @@ import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
-import { SvgPencil1 } from '../../icons/v2';
+import {
+  SvgStoreFront,
+  SvgTuning,
+  SvgReports,
+  SvgWallet,
+  SvgAdd,
+} from '../../icons/v1';
+import {
+  SvgCalendar,
+  SvgPencil1
+} from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -161,7 +171,15 @@ export function Sidebar() {
           )}
         </View>
         
-        <ActionButtons />
+        <ActionButtons
+          buttons={[
+            { title: t('Budget'), Icon: SvgWallet, to: "/budget" },
+            { title: t('Reports'), Icon: SvgReports, to: "/reports" },
+            { title: t('Schedules'), Icon: SvgCalendar, to: "/schedules", hidable: true },
+            { title: t('Payees'), Icon: SvgStoreFront, to: "/payees", hidable: true },
+            { title: t('Rules'), Icon: SvgTuning, to: "/rules", hidable: true },
+          ]}
+        />
           
         <Accounts
           onToggleClosedAccounts={onToggleClosedAccounts}
@@ -169,7 +187,9 @@ export function Sidebar() {
         />
           
         <BottomButtons 
-          onAddAccount={onAddAccount}
+          buttons={[
+            { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
+          ]}
         />
       </View>
     </Resizable>

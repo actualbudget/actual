@@ -1,5 +1,10 @@
 // @ts-strict-ignore
-import React, { useState, useCallback } from 'react';
+import React, {
+  useState,
+  useCallback,
+  type ComponentType,
+  type SVGProps,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '../common/View';
@@ -16,27 +21,30 @@ import {
 } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
 
+type ActionButtonItems = {
+  title: string;
+  Icon:
+  | ComponentType<SVGProps<SVGElement>>
+  | ComponentType<SVGProps<SVGSVGElement>>;
+  to: string;
+  hidable?: boolean;
+};
+
 type ActionButtonsProps = {
+  buttons: Array<ActionButtonItems>;
 };
 
 export function ActionButtons({
+  buttons,
 }: ActionButtonsProps) {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
   const onToggle = useCallback(() => setOpen(open => !open), []);
 
-  const actionButtons = [
-    { title: t('Budget'), Icon: SvgWallet, to: "/budget" },
-    { title: t('Reports'), Icon: SvgReports, to: "/reports" },
-    { title: t('Schedules'), Icon: SvgCalendar, to: "/schedules", secondary: true },
-    { title: t('Payees'), Icon: SvgStoreFront, to: "/payees", secondary: true },
-    { title: t('Rules'), Icon: SvgTuning, to: "/rules", secondary: true },
-  ];
-
   return (
     <View style={{ padding: '10px 0', flexShrink: 0}}>
-      {actionButtons.map((item) => (
-        (item.secondary ?
+      {buttons.map((item) => (
+        (item.hidable ?
           (isOpen && <Item title={item.title} Icon={item.Icon} to={item.to} />) :
           <Item title={item.title} Icon={item.Icon} to={item.to} />
         )
