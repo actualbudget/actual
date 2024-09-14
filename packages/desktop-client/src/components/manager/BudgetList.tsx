@@ -39,19 +39,19 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-function getFileDescription(file: File) {
+function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {
-    return (
+    return t(
       'This is a cloud-based file but its state is unknown because you ' +
-      'are offline.'
+        'are offline.',
     );
   }
 
   if (file.encryptKeyId) {
     if (file.hasKey) {
-      return 'This file is encrypted and you have key to access it.';
+      return t('This file is encrypted and you have key to access it.');
     }
-    return 'This file is encrypted and you do not have the key for it.';
+    return t('This file is encrypted and you do not have the key for it.');
   }
 
   return null;
@@ -191,8 +191,6 @@ function FileItem({
 
   const selecting = useRef(false);
 
-  const description = getFileDescription(file);
-
   async function _onSelect(file: File) {
     // Never allow selecting the file while uploading/downloading, and
     // make sure to never allow duplicate clicks
@@ -206,7 +204,7 @@ function FileItem({
   return (
     <View
       onClick={() => _onSelect(file)}
-      title={description ? t(description) : ''}
+      title={getFileDescription(file, t) || ''}
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
