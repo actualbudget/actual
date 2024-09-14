@@ -51,16 +51,7 @@ export default async function runMigration(db, { fs, fileId }) {
           key,
           String(prefs[key]),
         ]);
-
-        // remove the synced prefs from the metadata file
-        delete prefs[key];
       }),
-    );
-
-    // Update the metadata.json file
-    await fs.writeFile(
-      fs.join(budgetDir, 'metadata.json'),
-      JSON.stringify(prefs),
     );
   } catch (e) {
     // Do nothing
