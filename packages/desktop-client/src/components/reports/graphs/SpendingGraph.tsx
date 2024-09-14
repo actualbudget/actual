@@ -59,7 +59,7 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     const comparison = ['average', 'budget'].includes(selection)
       ? payload[0].payload[selection] * -1
-      : payload[0].payload.months[selection].cumulative * -1;
+      : payload[0].payload.months[selection]?.cumulative * -1;
     return (
       <div
         className={`${css({
@@ -141,15 +141,18 @@ export function SpendingGraph({
   const selection = mode === 'single-month' ? compareTo : mode;
 
   const thisMonthMax = data.intervalData.reduce((a, b) =>
-    a.months[compare][balanceTypeOp] < b.months[compare][balanceTypeOp] ? a : b,
-  ).months[compare][balanceTypeOp];
+    a.months[compare]?.[balanceTypeOp] < b.months[compare]?.[balanceTypeOp]
+      ? a
+      : b,
+  ).months[compare]?.[balanceTypeOp];
   const selectionMax = ['average', 'budget'].includes(selection)
     ? data.intervalData[27][selection]
     : data.intervalData.reduce((a, b) =>
-        a.months[selection][balanceTypeOp] < b.months[selection][balanceTypeOp]
+        a.months[selection]?.[balanceTypeOp] <
+        b.months[selection]?.[balanceTypeOp]
           ? a
           : b,
-      ).months[selection][balanceTypeOp];
+      ).months[selection]?.[balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(
     ...data.intervalData.map(i => i.months[compare].cumulative),
@@ -179,7 +182,7 @@ export function SpendingGraph({
       return obj[month] && -1 * obj[month];
     } else {
       return (
-        obj.months[month][balanceTypeOp] &&
+        obj.months[month]?.[balanceTypeOp] &&
         -1 * obj.months[month][balanceTypeOp]
       );
     }

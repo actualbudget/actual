@@ -83,7 +83,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
 
-  const [dataCheck, setDataCheck] = useState(false);
   const [reportMode, setReportMode] = useState(initialReportMode);
 
   useEffect(() => {
@@ -115,16 +114,16 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     run();
   }, []);
 
-  const getGraphData = useMemo(() => {
-    setDataCheck(false);
-    return createSpendingSpreadsheet({
-      conditions,
-      conditionsOp,
-      setDataCheck,
-      compare: start,
-      compareTo: end,
-    });
-  }, [conditions, conditionsOp, start, end]);
+  const getGraphData = useMemo(
+    () =>
+      createSpendingSpreadsheet({
+        conditions,
+        conditionsOp,
+        compare: start,
+        compareTo: end,
+      }),
+    [conditions, conditionsOp, start, end],
+  );
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
@@ -171,9 +170,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
   const showCompareTo = Math.abs(data.intervalData[27].compareTo) > 0;
-  const showCompare =
-    start === monthUtils.currentMonth() ||
-    Math.abs(data.intervalData[27].compare) > 0;
 
   const title = widget?.meta?.name ?? t('Monthly Spending');
 
@@ -513,20 +509,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   )}
                 </View>
               </View>
-              {!showCompare ||
-              (reportMode === 'single-month' && !showCompareTo) ||
-              (reportMode === 'average' && !showAverage) ? (
-                <View style={{ marginTop: 20 }}>
-                  <Trans>
-                    <h1>Additional data required to generate graph</h1>
-                    <Paragraph>
-                      Currently, there is insufficient data to display selected
-                      information regarding your spending. Please adjust
-                      selection options to enable graph visualization.
-                    </Paragraph>
-                  </Trans>
-                </View>
-              ) : dataCheck ? (
+              {data ? (
                 <SpendingGraph
                   style={{ flexGrow: 1 }}
                   compact={false}
