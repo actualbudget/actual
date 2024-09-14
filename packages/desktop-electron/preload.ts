@@ -34,7 +34,7 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.invoke('relaunch');
   },
 
-  restartServer: () => {
+  restartElectronServer: () => {
     ipcRenderer.invoke('restart-server');
   },
 

@@ -110,7 +110,7 @@ export function ConfigServer() {
     // When self signed cert has changed, restart the server
     if (isMounted.current) {
       setLoading(true);
-      globalThis.window.Actual.restartServer();
+      globalThis.window.Actual.restartElectronServer();
       setError(null);
       setLoading(false);
     } else {
