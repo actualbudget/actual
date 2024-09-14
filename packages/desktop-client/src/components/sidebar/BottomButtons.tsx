@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '../common/View';
@@ -16,17 +16,21 @@ export function BottomButtons({
 }: BottomButtonsProps) {
   const { t } = useTranslation();
 
+  const bottomButtons = [
+    { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
+  ];
+
   return (
-    <View style={{flexShrink: 0}}>
-      <SecondaryItem
-        style={{
-          marginTop: 15,
-          marginBottom: 9,
-        }}
-        onClick={onAddAccount}
-        Icon={SvgAdd}
-        title={t('Add account')}
-      />
+    <View
+      style={{
+        flexShrink: 0,
+        marginTop: 15,
+        marginBottom: 9,
+      }}
+    >
+      {bottomButtons.map((item) => (
+        <SecondaryItem title={item.title} Icon={item.Icon} onClick={item.onClick} />
+      ))}
     </View>
   );
 }
