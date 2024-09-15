@@ -13,16 +13,14 @@ export function DisplaySettings() {
   const [prefWidth = 200, setPrefWidth] = useLocalPref('category.width');
   const [tempWidth, setTempWidth] = useState(prefWidth.toString());
 
-  useEffect(() => {
-    setTempWidth(prefWidth.toString());
-  }, [prefWidth, setTempWidth]);
-
   const onBlur: HTMLProps<HTMLInputElement>['onBlur'] = event => {
     if (document.hasFocus()) {
       const value = parseInt(event.target.value);
 
       if (Number.isInteger(value)) {
-        setPrefWidth(Math.max(100, Math.min(1024, value)));
+        const clampedValue = Math.max(100, Math.min(1024, value));
+        setPrefWidth(clampedValue);
+        setTempWidth(clampedValue.toString());
       } else {
         setTempWidth(prefWidth.toString());
       }
