@@ -2,10 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
+import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { styles } from '../../style';
-import { addToBeBudgetedGroup } from '../budget/util';
+import { addToBeBudgetedGroup, removeCategoryFromGroups } from '../budget/util';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -15,14 +16,16 @@ import { AmountInput } from '../util/AmountInput';
 
 type TransferModalProps = {
   title: string;
+  categoryId?: CategoryEntity['id'];
   month: string;
   amount: number;
   showToBeBudgeted: boolean;
-  onSubmit: (amount: number, toCategoryId: string) => void;
+  onSubmit: (amount: number, toCategoryId: CategoryEntity['id']) => void;
 };
 
 export function TransferModal({
   title,
+  categoryId,
   month,
   amount: initialAmount,
   showToBeBudgeted,
@@ -30,15 +33,20 @@ export function TransferModal({
 }: TransferModalProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
-    const filteredCategoryGroups = originalCategoryGroups.filter(
-      g => !g.is_income,
+    const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+    const categoryGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(expenseGroups)
+      : expenseGroups;
+
+    const filteredCategoryGroups = removeCategoryFromGroups(
+      categoryGroups,
+      categoryId,
     );
-    const expenseGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(filteredCategoryGroups)
-      : filteredCategoryGroups;
-    const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
-    return [expenseGroups, expenseCategories];
-  }, [originalCategoryGroups, showToBeBudgeted]);
+    const filteredCategories = filteredCategoryGroups.flatMap(
+      g => g.categories || [],
+    );
+    return [filteredCategoryGroups, filteredCategories];
+  }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
 
   const [amount, setAmount] = useState<number>(0);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);

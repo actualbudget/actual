@@ -3,7 +3,10 @@ import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type Handlers } from 'loot-core/src/types/handlers';
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 import { type CSSProperties, styles, theme } from '../../style';
@@ -30,6 +33,20 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
     },
     ...groups,
   ];
+}
+
+export function removeCategoryFromGroups(
+  categoryGroups: CategoryGroupEntity[],
+  categoryId: CategoryEntity['id'],
+) {
+  if (!categoryId) return categoryGroups;
+
+  return categoryGroups
+    .map(group => ({
+      ...group,
+      categories: group.categories?.filter(cat => cat.id !== categoryId),
+    }))
+    .filter(group => group.categories?.length);
 }
 
 export function separateGroups(categoryGroups: CategoryGroupEntity[]) {

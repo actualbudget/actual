@@ -1,61 +1,42 @@
 import React, { useMemo, useState } from 'react';
 
-import {
-  type CategoryGroupEntity,
-  type CategoryEntity,
-} from 'loot-core/src/types/models';
+import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button2';
 import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
-import { addToBeBudgetedGroup } from '../util';
-
-function removeSelectedCategory(
-  categoryGroups: CategoryGroupEntity[],
-  category?: CategoryEntity['id'],
-) {
-  if (!category) return categoryGroups;
-
-  return categoryGroups
-    .map(group => ({
-      ...group,
-      categories: group.categories?.filter(cat => cat.id !== category),
-    }))
-    .filter(group => group.categories?.length);
-}
+import { addToBeBudgetedGroup, removeCategoryFromGroups } from '../util';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
-  category?: CategoryEntity['id'];
-  onSubmit: (categoryId: string) => void;
+  categoryId?: CategoryEntity['id'];
+  onSubmit: (categoryId: CategoryEntity['id']) => void;
   onClose: () => void;
 };
 
 export function CoverMenu({
   showToBeBudgeted = true,
-  category,
+  categoryId,
   onSubmit,
   onClose,
 }: CoverMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
-  const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
 
-  const categoryGroups = showToBeBudgeted
-    ? addToBeBudgetedGroup(expenseGroups)
-    : expenseGroups;
+  const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
 
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-
-  const filteredCategoryGroups = useMemo(
-    () => removeSelectedCategory(categoryGroups, category),
-    [categoryGroups, category],
-  );
+  const filteredCategoryGroups = useMemo(() => {
+    const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
+    const categoryGroups = showToBeBudgeted
+      ? addToBeBudgetedGroup(expenseGroups)
+      : expenseGroups;
+    return removeCategoryFromGroups(categoryGroups, categoryId);
+  }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
   function submit() {
-    if (categoryId) {
-      onSubmit(categoryId);
+    if (fromCategoryId) {
+      onSubmit(fromCategoryId);
     }
     onClose();
   }
@@ -67,9 +48,9 @@ export function CoverMenu({
         {node => (
           <CategoryAutocomplete
             categoryGroups={filteredCategoryGroups}
-            value={categoryGroups.find(g => g.id === categoryId) ?? null}
+            value={null}
             openOnFocus={true}
-            onSelect={(id: string | undefined) => setCategoryId(id || null)}
+            onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
             inputProps={{
               inputRef: node,
               onEnter: event => !event.defaultPrevented && submit(),
