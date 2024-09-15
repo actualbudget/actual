@@ -35,6 +35,8 @@ export function TransferModal({
   showToBeBudgeted,
   onSubmit,
 }: TransferModalProps) {
+  const { t } = useTranslation();
+
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
     const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
