@@ -1,4 +1,4 @@
-import { useEffect, useState, type HTMLProps, type ReactNode } from 'react';
+import { useState, type HTMLProps } from 'react';
 import { Trans } from 'react-i18next';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
