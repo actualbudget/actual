@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
+import { useLocalPref } from '../../../../hooks/useLocalPref';
 import { type CSSProperties } from '../../../../style';
 import { Popover } from '../../../common/Popover';
 import { View } from '../../../common/View';
@@ -29,6 +30,7 @@ export function ToBudget({
   amountStyle,
   isCollapsed = false,
 }: ToBudgetProps) {
+  const [categoryWidth = 200] = useLocalPref('category.width');
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const triggerRef = useRef(null);
   const sheetValue = useRolloverSheetValue({
@@ -60,7 +62,7 @@ export function ToBudget({
         placement="bottom"
         isOpen={isMenuOpen}
         onOpenChange={() => setMenuOpen(null)}
-        style={{ width: 200 }}
+        style={{ width: categoryWidth }}
       >
         {menuOpen === 'actions' && (
           <ToBudgetMenu

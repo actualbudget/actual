@@ -34,6 +34,7 @@ export function BudgetTable(props) {
     onBudgetAction,
   } = props;
 
+  const [categoryWidth = 200] = useLocalPref('category.width');
   const { grouped: categoryGroups } = useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
@@ -183,7 +184,7 @@ export function BudgetTable(props) {
           paddingRight: 5 + getScrollbarWidth(),
         }}
       >
-        <View style={{ width: 200 }} />
+        <View style={{ width: categoryWidth }} />
         <MonthsProvider
           startMonth={prewarmStartMonth}
           numMonths={numMonths}

@@ -67,6 +67,7 @@ export type LocalPrefs = SyncedPrefs &
     'budget.summaryCollapsed': boolean;
     'budget.showHiddenCategories': boolean;
     'budget.startMonth': string;
+    'category.width': number;
     'flags.updateNotificationShownForVersion': string;
     reportsViewLegend: boolean;
     reportsViewSummary: boolean;

@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { type ComponentProps, memo } from 'react';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { View } from '../common/View';
 
 import { MonthPicker } from './MonthPicker';
@@ -15,8 +16,10 @@ type BudgetPageHeaderProps = {
 
 export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
   ({ startMonth, onMonthSelect, numMonths, monthBounds }) => {
+    const [categoryWidth = 200] = useLocalPref('category.width');
+
     return (
-      <View style={{ marginLeft: 200 + 5, flexShrink: 0 }}>
+      <View style={{ marginLeft: categoryWidth + 5, flexShrink: 0 }}>
         <View style={{ marginRight: 5 + getScrollbarWidth() }}>
           <MonthPicker
             startMonth={startMonth}

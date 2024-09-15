@@ -6,7 +6,29 @@ import { css, media } from 'glamor';
 import { type CSSProperties, theme } from '../../style';
 import { tokens } from '../../tokens';
 import { Link } from '../common/Link';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
+
+type ColumProps = {
+  title: string;
+  children: ReactNode;
+};
+
+export function Column({ title, children }: ColumProps) {
+  return (
+    <View
+      style={{
+        alignItems: 'flex-start',
+        flexGrow: 1,
+        gap: '0.5em',
+        width: '100%',
+      }}
+    >
+      <Text style={{ fontWeight: 500 }}>{title}</Text>
+      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
+    </View>
+  );
+}
 
 type SettingProps = {
   primaryAction?: ReactNode;

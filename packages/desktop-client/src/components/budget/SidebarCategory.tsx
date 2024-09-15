@@ -7,6 +7,7 @@ import {
   type CategoryEntity,
 } from 'loot-core/src/types/models';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -47,7 +48,7 @@ export function SidebarCategory({
   onHideNewCategory,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
-
+  const [categoryWidth = 200] = useLocalPref('category.width');
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -93,7 +94,7 @@ export function SidebarCategory({
           placement="bottom start"
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 200 }}
+          style={{ width: categoryWidth }}
         >
           <Menu
             onMenuSelect={type => {
@@ -132,7 +133,7 @@ export function SidebarCategory({
     <View
       innerRef={innerRef}
       style={{
-        width: 200,
+        width: categoryWidth,
         overflow: 'hidden',
         '& .hover-visible': {
           display: 'none',

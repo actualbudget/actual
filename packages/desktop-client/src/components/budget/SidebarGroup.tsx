@@ -3,6 +3,7 @@ import React, { type CSSProperties, useRef, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
@@ -52,7 +53,7 @@ export function SidebarGroup({
   onToggleCollapse,
 }: SidebarGroupProps) {
   const { t } = useTranslation();
-
+  const [categoryWidth = 200] = useLocalPref('category.width');
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -110,7 +111,7 @@ export function SidebarGroup({
               placement="bottom start"
               isOpen={menuOpen}
               onOpenChange={() => setMenuOpen(false)}
-              style={{ width: 200 }}
+              style={{ width: categoryWidth }}
             >
               <Menu
                 onMenuSelect={type => {
@@ -155,7 +156,7 @@ export function SidebarGroup({
       innerRef={innerRef}
       style={{
         ...style,
-        width: 200,
+        width: categoryWidth,
         backgroundColor: theme.tableRowHeaderBackground,
         overflow: 'hidden',
         '& .hover-visible': {

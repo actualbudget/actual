@@ -5,6 +5,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
@@ -46,10 +47,10 @@ const DynamicBudgetTableInner = ({
   ...props
 }: DynamicBudgetTableInnerProps) => {
   const { setDisplayMax } = useBudgetMonthCount();
-
-  const numPossible = getNumPossibleMonths(width);
+  const [categoryWidth = 200] = useLocalPref('category.width');
+  const numPossible = getNumPossibleMonths(width - categoryWidth);
   const numMonths = Math.min(numPossible, maxMonths);
-  const maxWidth = 200 + 500 * numMonths;
+  const maxWidth = categoryWidth + 500 * numMonths;
 
   useEffect(() => {
     setDisplayMax(numPossible);

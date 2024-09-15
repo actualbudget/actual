@@ -5,6 +5,7 @@ import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
@@ -192,6 +193,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: ExpenseCategoryMonthProps) {
+  const [categoryWidth = 200] = useLocalPref('category.width');
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
   const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
@@ -261,7 +263,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               placement="bottom start"
               isOpen={budgetMenuOpen}
               onOpenChange={() => setBudgetMenuOpen(false)}
-              style={{ width: 200 }}
+              style={{ width: categoryWidth }}
             >
               <BudgetMenu
                 onCopyLastMonthAverage={() => {
@@ -387,7 +389,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           placement="bottom end"
           isOpen={balanceMenuOpen}
           onOpenChange={() => setBalanceMenuOpen(false)}
-          style={{ width: 200 }}
+          style={{ width: categoryWidth }}
         >
           <BalanceMovementMenu
             categoryId={category.id}

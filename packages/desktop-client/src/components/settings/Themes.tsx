@@ -15,23 +15,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
-import { Setting } from './UI';
-
-function Column({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <View
-      style={{
-        alignItems: 'flex-start',
-        flexGrow: 1,
-        gap: '0.5em',
-        width: '100%',
-      }}
-    >
-      <Text style={{ fontWeight: 500 }}>{title}</Text>
-      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
-    </View>
-  );
-}
+import { Column, Setting } from './UI';
 
 export function ThemeSettings() {
   const sidebar = useSidebar();

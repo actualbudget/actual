@@ -25,6 +25,7 @@ import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
 import { BudgetTypeSettings } from './BudgetTypeSettings';
+import { DisplaySettings } from './Display';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
@@ -175,6 +176,7 @@ export function Settings() {
         <About />
         {isElectron() && <GlobalSettings />}
         <ThemeSettings />
+        <DisplaySettings />
         <FormatSettings />
         <EncryptionSettings />
         {useFeatureFlag('reportBudget') && <BudgetTypeSettings />}

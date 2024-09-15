@@ -1,6 +1,7 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button2';
@@ -25,6 +26,7 @@ export const BudgetTotals = memo(function BudgetTotals({
   collapseAllCategories,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
+  const [categoryWidth = 200] = useLocalPref('category.width');
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -44,7 +46,7 @@ export const BudgetTotals = memo(function BudgetTotals({
     >
       <View
         style={{
-          width: 200,
+          width: categoryWidth,
           color: theme.pageTextLight,
           justifyContent: 'center',
           paddingLeft: 15,
@@ -77,7 +79,7 @@ export const BudgetTotals = memo(function BudgetTotals({
           triggerRef={triggerRef}
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 200 }}
+          style={{ width: categoryWidth }}
         >
           <Menu
             onMenuSelect={type => {
