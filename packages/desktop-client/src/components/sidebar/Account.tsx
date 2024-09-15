@@ -92,7 +92,6 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
   const accountRow = (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
-      <View>
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
           <Link
@@ -159,7 +158,6 @@ export function Account<FieldName extends SheetFields<'account'>>({
               right={<CellValue binding={query} type="financial" />}
             />
           </Link>
-        </View>
       </View>
     </View>
   );

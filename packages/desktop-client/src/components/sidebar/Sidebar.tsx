@@ -183,7 +183,7 @@ export function Sidebar() {
           
         <Accounts
           onToggleClosedAccounts={onToggleClosedAccounts}
-          onReorder={onReorder}
+//          onReorder={onReorder}
         />
           
         <BottomButtons 
