@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trans, useTranslation  } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';

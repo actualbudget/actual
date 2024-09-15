@@ -65,9 +65,9 @@ export function ImportYNAB4Modal() {
               <Paragraph>
                 <Trans>
                   To import data from YNAB4, locate where your YNAB4 data is
-                  stored. It is usually in your Documents folder under YNAB. Your
-                  data is a directory inside that with the <code>.ynab4</code>{' '}
-                  suffix.
+                  stored. It is usually in your Documents folder under YNAB.
+                  Your data is a directory inside that with the
+                  <code>.ynab4</code> suffix.
                 </Trans>
               </Paragraph>
               <Paragraph>

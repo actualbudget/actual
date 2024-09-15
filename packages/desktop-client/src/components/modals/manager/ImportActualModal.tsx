@@ -74,14 +74,16 @@ export function ImportActualModal() {
                 <Trans>
                   You can import data from another Actual account or instance.
                   First export your data from a different account, and it will
-                  give you a compressed file. This file is a simple zip file that
-                  contains the <code>db.sqlite</code> and{' '}
+                  give you a compressed file. This file is a simple zip file
+                  that contains the <code>db.sqlite</code> and{' '}
                   <code>metadata.json</code> files.
                 </Trans>
               </Paragraph>
 
               <Paragraph>
-                <Trans>Select one of these compressed files and import it here.</Trans>
+                <Trans>
+                  Select one of these compressed files and import it here.
+                </Trans>
               </Paragraph>
 
               <View style={{ alignSelf: 'center' }}>

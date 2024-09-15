@@ -51,9 +51,9 @@ export function DeleteFileModal({ file }: DeleteFileProps) {
                 <Text>
                   <Trans>
                     This is a <strong>hosted file</strong> which means it is
-                    stored on your server to make it available for download on any
-                    device. You can delete it from the server, which will also
-                    remove it from all of your devices.
+                    stored on your server to make it available for download on
+                    any device. You can delete it from the server, which will
+                    also remove it from all of your devices.
                   </Trans>
                 </Text>
 
@@ -91,8 +91,8 @@ export function DeleteFileModal({ file }: DeleteFileProps) {
                   <Text>
                     <Trans>
                       You can also delete just the local copy. This will remove
-                      all local data and the file will be listed as available for
-                      download.
+                      all local data and the file will be listed as available
+                      for download.
                     </Trans>
                   </Text>
                 ) : (

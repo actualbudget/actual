@@ -78,17 +78,17 @@ export function ImportYNAB5Modal() {
                   >
                     Read here
                   </Link>{' '}
-                  for instructions on how to migrate your data from YNAB. You need
-                  to export your data as JSON, and that page explains how to do
-                  that.
+                  for instructions on how to migrate your data from YNAB. You
+                  need to export your data as JSON, and that page explains how
+                  to do that.
                 </Trans>
               </Paragraph>
               <Paragraph>
                 <Trans>
                   Once you have exported your data, select the file and Actual
-                  will import it. Budgets may not match up exactly because things
-                  work slightly differently, but you should be able to fix up any
-                  problems.
+                  will import it. Budgets may not match up exactly because
+                  things work slightly differently, but you should be able to
+                  fix up any problems.
                 </Trans>
               </Paragraph>
               <View>

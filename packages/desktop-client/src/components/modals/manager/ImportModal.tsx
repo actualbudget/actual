@@ -87,9 +87,7 @@ export function ImportModal() {
               <span style={{ fontWeight: 700 }}>Actual</span>
               <View style={{ color: theme.pageTextLight }}>
                 <div>
-                  <Trans>
-                    Import a file exported from Actual
-                  </Trans>
+                  <Trans>Import a file exported from Actual</Trans>
                 </div>
               </View>
             </Button>
