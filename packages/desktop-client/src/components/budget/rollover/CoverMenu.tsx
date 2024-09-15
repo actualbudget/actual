@@ -7,7 +7,7 @@ import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button2';
 import { InitialFocus } from '../../common/InitialFocus';
 import { View } from '../../common/View';
-import { addToBeBudgetedGroup, removeCategoryFromGroups } from '../util';
+import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
@@ -31,7 +31,9 @@ export function CoverMenu({
     const categoryGroups = showToBeBudgeted
       ? addToBeBudgetedGroup(expenseGroups)
       : expenseGroups;
-    return removeCategoryFromGroups(categoryGroups, categoryId);
+    return categoryId
+      ? removeCategoriesFromGroups(categoryGroups, categoryId)
+      : categoryGroups;
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
   function submit() {

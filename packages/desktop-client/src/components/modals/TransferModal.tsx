@@ -6,7 +6,10 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { styles } from '../../style';
-import { addToBeBudgetedGroup, removeCategoryFromGroups } from '../budget/util';
+import {
+  addToBeBudgetedGroup,
+  removeCategoriesFromGroups,
+} from '../budget/util';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -38,10 +41,9 @@ export function TransferModal({
       ? addToBeBudgetedGroup(expenseGroups)
       : expenseGroups;
 
-    const filteredCategoryGroups = removeCategoryFromGroups(
-      categoryGroups,
-      categoryId,
-    );
+    const filteredCategoryGroups = categoryId
+      ? removeCategoriesFromGroups(categoryGroups, categoryId)
+      : categoryGroups;
     const filteredCategories = filteredCategoryGroups.flatMap(
       g => g.categories || [],
     );

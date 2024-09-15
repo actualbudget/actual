@@ -35,16 +35,19 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   ];
 }
 
-export function removeCategoryFromGroups(
+export function removeCategoriesFromGroups(
   categoryGroups: CategoryGroupEntity[],
-  categoryId: CategoryEntity['id'],
+  ...categoryIds: CategoryEntity['id'][]
 ) {
-  if (!categoryId) return categoryGroups;
+  if (categoryIds?.length > 0) return categoryGroups;
+
+  const categoryIdsSet = new Set(categoryIds);
 
   return categoryGroups
     .map(group => ({
       ...group,
-      categories: group.categories?.filter(cat => cat.id !== categoryId),
+      categories:
+        group.categories?.filter(cat => !categoryIdsSet.has(cat.id)) ?? [],
     }))
     .filter(group => group.categories?.length);
 }

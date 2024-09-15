@@ -10,7 +10,7 @@ import { Button } from '../../common/Button2';
 import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
 import { View } from '../../common/View';
-import { addToBeBudgetedGroup, removeCategoryFromGroups } from '../util';
+import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 
 type TransferMenuProps = {
   categoryId?: CategoryEntity['id'];
@@ -35,7 +35,9 @@ export function TransferMenu({
     const categoryGroups = showToBeBudgeted
       ? addToBeBudgetedGroup(expenseCategoryGroups)
       : expenseCategoryGroups;
-    return removeCategoryFromGroups(categoryGroups, categoryId);
+    return categoryId
+      ? removeCategoriesFromGroups(categoryGroups, categoryId)
+      : categoryGroups;
   }, [originalCategoryGroups, categoryId, showToBeBudgeted]);
 
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));

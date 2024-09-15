@@ -6,7 +6,10 @@ import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
 import { styles } from '../../style';
-import { addToBeBudgetedGroup, removeCategoryFromGroups } from '../budget/util';
+import {
+  addToBeBudgetedGroup,
+  removeCategoriesFromGroups,
+} from '../budget/util';
 import { Button } from '../common/Button2';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
@@ -33,10 +36,9 @@ export function CoverModal({
     const categoryGroups = showToBeBudgeted
       ? addToBeBudgetedGroup(expenseGroups)
       : expenseGroups;
-    const filteredCategoryGroups = removeCategoryFromGroups(
-      categoryGroups,
-      categoryId,
-    );
+    const filteredCategoryGroups = categoryId
+      ? removeCategoriesFromGroups(categoryGroups, categoryId)
+      : categoryGroups;
     const filteredCategoryies = filteredCategoryGroups.flatMap(
       g => g.categories || [],
     );
