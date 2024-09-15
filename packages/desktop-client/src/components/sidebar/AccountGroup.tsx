@@ -10,7 +10,9 @@ import { AccountEntity } from 'loot-core/types/models';
 
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
+import { useLocalPref } from '../../hooks/useLocalPref';
 
+import { styles, theme, type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { Account } from './Account';
 import { AccountGroupName } from './AccountGroupName';
@@ -25,6 +27,7 @@ type AccountGroupProps<FieldName extends SheetFields<'account'>> = {
   groupTo?: string;
   accountList?: AccountEntity[];
   onReorder?: OnDropCallback;
+  style?: CSSProperties;
 };
   
 export function AccountGroup<FieldName extends SheetFields<'account'>>({
@@ -33,10 +36,10 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
   groupTo,
   accountList,
   onReorder,
+  style,
 }: AccountGroupProps<FieldName>) {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
-  const [showAccounts, setShowAccounts] = useState(true);
   const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
   const syncingAccountIds = useSelector(
@@ -45,33 +48,45 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
 
   const getAccountPath = account => `/accounts/${account.id}`;
 
+  const [collapsed, setCollapsedGroupsPref] = useLocalPref(
+    'ui.collapsedAccountGroups',
+  );
+
+  if (!collapsed || !collapsed.hasOwnProperty(groupName)) {
+    let c = { ...(collapsed || {}) };
+    c[groupName] = false;
+    setCollapsedGroupsPref(c);
+  }
+
   function onDragChange(drag) {
     setIsDragging(drag.state === 'start');
   }
 
-  function toggleAccounts () {
-    setShowAccounts(!showAccounts);
+  const toggleAccounts = () => {
+    let c = {...collapsed};
+    c[groupName] = !collapsed[groupName];
+    setCollapsedGroupsPref(c);
   }
 
   const accountGroupStyle = {
-//    background:'var(--color-tableBackground)',
-//    borderRadius: '10px',
-//    padding: '10px 0',
-//    margin: '10px',
-//    border: '2px solid var(--color-tableBorder)'
+    background:'var(--color-tableBackground)',
+    borderRadius: '10px',
+    padding: '10px 0',
+    margin: '10px',
+    border: '2px solid var(--color-tableBorder)'
   };
 
   return (
-    <View style={{ flexShrink: 0, margin: '5px 0', ...accountGroupStyle}}>
+    <View style={{ flexShrink: 0, margin: '5px 0', ...style, }}>
       <AccountGroupName
         groupName={t(groupName)}
         to={groupTo}
         query={groupQuery}
         toggleAccounts={toggleAccounts}
-        showAccounts={showAccounts}
+        collapsed={collapsed[groupName]}
       />
 
-      {showAccounts && accountList && accountList.map((account, i) => (
+      {!collapsed[groupName] && accountList && accountList.map((account, i) => (
         <Account
           key={account.id}
           name={account.name}

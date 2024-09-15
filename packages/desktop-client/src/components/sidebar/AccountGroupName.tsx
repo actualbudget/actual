@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React from 'react';
 
 import { css } from 'glamor';
 import { SvgExpandArrow } from '../../icons/v0';
@@ -23,7 +23,7 @@ type AccountGroupNameProps<FieldName extends SheetFields<'account'>> = {
   style?: CSSProperties;
   outerStyle?: CSSProperties;
   toggleAccounts?: () => void;
-  showAccounts?: boolean;
+  collapsed?: boolean;
 };
   
 export function AccountGroupName<FieldName extends SheetFields<'account'>>({
@@ -37,7 +37,7 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
   style,
   outerStyle,
   toggleAccounts,
-  showAccounts,
+  collapsed,
 }: AccountGroupNameProps<FieldName>) {
   const accountNameStyle: CSSProperties = {
     paddingLeft: 5,
@@ -59,8 +59,8 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            borderBottom: showAccounts && `1.5px solid rgba(255,255,255,0.4)`,
-            paddingBottom: showAccounts && '3px',
+            borderBottom: !collapsed && `1.5px solid rgba(255,255,255,0.4)`,
+            paddingBottom: !collapsed && '3px',
             marginRight: 15,
             marginLeft: 5,
             paddingTop: 4,
@@ -74,7 +74,7 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
               onClick={toggleAccounts}
               style={{
                 transition: 'transform .1s',
-                transform: (showAccounts) ? '' : 'rotate(-90deg)',
+                transform: (collapsed) ? 'rotate(-90deg)' : '',
               }}
             />
           }
@@ -126,12 +126,6 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
             </View>
 
             <AlignedText
-              style={
-                (showAccounts) && {
-//                  borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
-//                  paddingBottom: '3px',
-                }
-              }
               left={groupName}
               right={(query && <CellValue binding={query} type="financial" />)}
             />

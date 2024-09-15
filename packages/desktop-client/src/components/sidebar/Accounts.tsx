@@ -1,9 +1,7 @@
 // @ts-strict-ignore
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  useDispatch,
-} from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import * as queries from 'loot-core/src/client/queries';
 import { moveAccount } from 'loot-core/src/client/actions';
@@ -11,20 +9,15 @@ import { moveAccount } from 'loot-core/src/client/actions';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useBudgetedAccounts } from '../../hooks/useBudgetedAccounts';
 import { useClosedAccounts } from '../../hooks/useClosedAccounts';
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
 import { View } from '../common/View';
 import { AccountGroup } from './AccountGroup';
 import { AccountGroupName } from './AccountGroupName';
 
-const fontWeight = 600;
-
 type AccountsProps = {
-  onToggleClosedAccounts: () => void;
 };
 
 export function Accounts({
-  onToggleClosedAccounts,
 }: AccountsProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -32,8 +25,6 @@ export function Accounts({
   const offbudgetAccounts = useOffBudgetAccounts();
   const budgetedAccounts = useBudgetedAccounts();
   const closedAccounts = useClosedAccounts();
-
-  const [showClosedAccounts] = useLocalPref('ui.showClosedAccounts');
 
   async function onReorder(
     id: string,
@@ -52,7 +43,7 @@ export function Accounts({
   return (
     <View>
       <AccountGroupName
-        groupName='All accounts'
+        groupName={t('All accounts')}
         query={queries.allAccountBalance()}
         to="/accounts"
         outerStyle={{ overflowY: 'scroll', margin: '5px 0', }}
@@ -62,7 +53,7 @@ export function Accounts({
       <View style={{ overflowY: 'scroll', }}>
         {budgetedAccounts.length > 0 && (
           <AccountGroup
-            groupName='For budget'
+            groupName={t('For budget')}
             groupQuery={queries.budgetedAccountBalance()}
             groupTo="/accounts/budgeted"
             accountList={budgetedAccounts}
@@ -72,7 +63,7 @@ export function Accounts({
 
         {offbudgetAccounts.length > 0 && (
           <AccountGroup
-            groupName='Off budget'
+            groupName={t('Off budget')}
             groupQuery={queries.offbudgetAccountBalance()}
             groupTo="/accounts/offbudget"
             accountList={offbudgetAccounts}
@@ -82,7 +73,7 @@ export function Accounts({
 
         {closedAccounts.length > 0 && (
           <AccountGroup
-            groupName='Closed accounts'
+            groupName={t('Closed accounts')}
             accountList={closedAccounts}
             onReorder={onReorder}
           />

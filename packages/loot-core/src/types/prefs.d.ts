@@ -60,7 +60,7 @@ export type MetadataPrefs = Partial<{
 export type LocalPrefs = SyncedPrefs &
   MetadataPrefs &
   Partial<{
-    'ui.showClosedAccounts': boolean;
+    'ui.collapsedAccountGroups': Object;
     'expand-splits': boolean;
     'budget.collapsed': string[];
     'budget.summaryCollapsed': boolean;

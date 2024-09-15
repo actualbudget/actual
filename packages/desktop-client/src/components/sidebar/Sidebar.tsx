@@ -54,9 +54,6 @@ export function Sidebar() {
   const sidebar = useSidebar();
   const accounts = useAccounts();
   const { width } = useResponsive();
-  const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
-    'ui.showClosedAccounts',
-  );
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
 
@@ -100,10 +97,6 @@ export function Sidebar() {
 
   const onAddAccount = () => {
     dispatch(replaceModal('add-account'));
-  };
-
-  const onToggleClosedAccounts = () => {
-    setShowClosedAccountsPref(!showClosedAccounts);
   };
 
   const containerRef = useResizeObserver(rect => {
@@ -181,10 +174,7 @@ export function Sidebar() {
           ]}
         />
           
-        <Accounts
-          onToggleClosedAccounts={onToggleClosedAccounts}
-//          onReorder={onReorder}
-        />
+        <Accounts />
           
         <BottomButtons 
           buttons={[
