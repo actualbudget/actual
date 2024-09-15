@@ -13,7 +13,7 @@ import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
 
 function getNumPossibleMonths(width: number) {
-  const estimatedTableWidth = width - 200;
+  const estimatedTableWidth = width;
 
   if (estimatedTableWidth < 500) {
     return 1;
