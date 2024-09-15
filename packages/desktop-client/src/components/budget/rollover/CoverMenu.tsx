@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   type CategoryGroupEntity,
@@ -39,11 +40,13 @@ export function CoverMenu({
   onSubmit,
   onClose,
 }: CoverMenuProps) {
+  const { t } = useTranslation();
+
   const { grouped: originalCategoryGroups } = useCategories();
   const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
 
   const categoryGroups = showToBeBudgeted
-    ? addToBeBudgetedGroup(expenseGroups)
+    ? addToBeBudgetedGroup(expenseGroups, t)
     : expenseGroups;
 
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -61,7 +64,9 @@ export function CoverMenu({
   }
   return (
     <View style={{ padding: 10 }}>
-      <View style={{ marginBottom: 5 }}>Cover from category:</View>
+      <View style={{ marginBottom: 5 }}>
+        <Trans>Cover from category:</Trans>
+      </View>
 
       <InitialFocus>
         {node => (
@@ -73,7 +78,7 @@ export function CoverMenu({
             inputProps={{
               inputRef: node,
               onEnter: event => !event.defaultPrevented && submit(),
-              placeholder: '(none)',
+              placeholder: t('(none)'),
             }}
             showHiddenCategories={false}
           />
@@ -94,7 +99,7 @@ export function CoverMenu({
           }}
           onPress={submit}
         >
-          Transfer
+          <Trans>Transfer</Trans>
         </Button>
       </View>
     </View>

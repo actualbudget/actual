@@ -11,19 +11,22 @@ import { type DropPosition } from '../sort';
 
 import { getValidMonthBounds } from './MonthsContext';
 
-export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
+export function addToBeBudgetedGroup(
+  groups: CategoryGroupEntity[],
+  t: (key: string) => string,
+) {
   return [
     {
       id: 'to-be-budgeted',
-      name: 'To Be Budgeted',
+      name: t('To Be Budgeted'),
       categories: [
         {
           id: 'to-be-budgeted',
-          name: 'To Be Budgeted',
+          name: t('To Be Budgeted'),
           cat_group: 'to-be-budgeted',
           group: {
             id: 'to-be-budgeted',
-            name: 'To Be Budgeted',
+            name: t('To Be Budgeted'),
           },
         },
       ],

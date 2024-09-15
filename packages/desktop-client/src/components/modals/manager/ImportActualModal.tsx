@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { importBudget } from 'loot-core/src/client/actions/budgets';
@@ -29,6 +30,8 @@ function getErrorMessage(error: string): string {
 }
 
 export function ImportActualModal() {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
@@ -56,7 +59,7 @@ export function ImportActualModal() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Import from Actual export"
+            title={t('Import from Actual export')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
@@ -68,15 +71,17 @@ export function ImportActualModal() {
 
             <View style={{ '& > div': { lineHeight: '1.7em' } }}>
               <Paragraph>
-                You can import data from another Actual account or instance.
-                First export your data from a different account, and it will
-                give you a compressed file. This file is a simple zip file that
-                contains the <code>db.sqlite</code> and{' '}
-                <code>metadata.json</code> files.
+                <Trans>
+                  You can import data from another Actual account or instance.
+                  First export your data from a different account, and it will
+                  give you a compressed file. This file is a simple zip file that
+                  contains the <code>db.sqlite</code> and{' '}
+                  <code>metadata.json</code> files.
+                </Trans>
               </Paragraph>
 
               <Paragraph>
-                Select one of these compressed files and import it here.
+                <Trans>Select one of these compressed files and import it here.</Trans>
               </Paragraph>
 
               <View style={{ alignSelf: 'center' }}>
@@ -86,7 +91,7 @@ export function ImportActualModal() {
                   isLoading={importing}
                   onPress={onImport}
                 >
-                  Select file...
+                  <Trans>Select file...</Trans>
                 </ButtonWithLoading>
               </View>
             </View>

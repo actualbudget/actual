@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -28,17 +29,19 @@ export function TransferModal({
   showToBeBudgeted,
   onSubmit,
 }: TransferModalProps) {
+  const { t } = useTranslation();
+
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
     const filteredCategoryGroups = originalCategoryGroups.filter(
       g => !g.is_income,
     );
     const expenseGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(filteredCategoryGroups)
+      ? addToBeBudgetedGroup(filteredCategoryGroups, t)
       : filteredCategoryGroups;
     const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
-  }, [originalCategoryGroups, showToBeBudgeted]);
+  }, [originalCategoryGroups, showToBeBudgeted, t]);
 
   const [amount, setAmount] = useState<number>(0);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);

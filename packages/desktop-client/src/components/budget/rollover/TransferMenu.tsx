@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Trans, useTranslation  } from 'react-i18next';
 
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
@@ -24,12 +25,14 @@ export function TransferMenu({
   onSubmit,
   onClose,
 }: TransferMenuProps) {
+  const { t } = useTranslation();
+
   const { grouped: originalCategoryGroups } = useCategories();
   const filteredCategoryGroups = originalCategoryGroups.filter(
     g => !g.is_income,
   );
   const categoryGroups = showToBeBudgeted
-    ? addToBeBudgetedGroup(filteredCategoryGroups)
+    ? addToBeBudgetedGroup(filteredCategoryGroups, t)
     : filteredCategoryGroups;
 
   const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
@@ -47,7 +50,9 @@ export function TransferMenu({
 
   return (
     <View style={{ padding: 10 }}>
-      <View style={{ marginBottom: 5 }}>Transfer this amount:</View>
+      <View style={{ marginBottom: 5 }}>
+        <Trans>Transfer this amount:</Trans>
+      </View>
       <View>
         <InitialFocus>
           <Input
@@ -67,7 +72,7 @@ export function TransferMenu({
         inputProps={{
           onEnter: event =>
             !event.defaultPrevented && _onSubmit(amount, categoryId),
-          placeholder: '(none)',
+          placeholder: t('(none)'),
         }}
         showHiddenCategories={true}
       />
@@ -87,7 +92,7 @@ export function TransferMenu({
           }}
           onPress={() => _onSubmit(amount, categoryId)}
         >
-          Transfer
+          <Trans>Transfer</Trans>
         </Button>
       </View>
     </View>

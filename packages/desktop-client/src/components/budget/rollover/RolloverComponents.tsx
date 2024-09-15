@@ -1,4 +1,5 @@
 import React, { memo, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
@@ -69,7 +70,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>Budgeted</Text>
+        <Text style={{ color: theme.tableHeaderText }}>
+          <Trans>Budgeted</Trans>
+        </Text>
         <RolloverCellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
@@ -80,7 +83,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>Spent</Text>
+        <Text style={{ color: theme.tableHeaderText }}>
+          <Trans>Spent</Trans>
+        </Text>
         <RolloverCellValue
           binding={rolloverBudget.totalSpent}
           type="financial"
@@ -88,7 +93,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>Balance</Text>
+        <Text style={{ color: theme.tableHeaderText }}>
+          <Trans>Balance</Trans>
+        </Text>
         <RolloverCellValue
           binding={rolloverBudget.totalBalance}
           type="financial"
@@ -108,7 +115,9 @@ export function IncomeHeaderMonth() {
         paddingRight: 10,
       }}
     >
-      <View style={{ flex: 1, textAlign: 'right' }}>Received</View>
+      <View style={{ flex: 1, textAlign: 'right' }}>
+        <Trans>Received</Trans>
+      </View>
     </Row>
   );
 }

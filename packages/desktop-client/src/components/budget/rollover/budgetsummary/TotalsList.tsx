@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
@@ -15,6 +16,8 @@ type TotalsListProps = {
   style?: CSSProperties;
 };
 export function TotalsList({ prevMonthName, style }: TotalsListProps) {
+  const { t } = useTranslation();
+
   const format = useFormat();
   return (
     <View
@@ -38,7 +41,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           content={
             <>
               <AlignedText
-                left="Income:"
+                left={t('Income:')}
                 right={
                   <RolloverCellValue
                     binding={rolloverBudget.totalIncome}
@@ -48,7 +51,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
                 }
               />
               <AlignedText
-                left="From Last Month:"
+                left={t('From Last Month:')}
                 right={
                   <RolloverCellValue
                     binding={rolloverBudget.fromLastMonth}
@@ -101,10 +104,18 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
       </View>
 
       <View>
-        <Block>Available Funds</Block>
-        <Block>Overspent in {prevMonthName}</Block>
-        <Block>Budgeted</Block>
-        <Block>For Next Month</Block>
+        <Block>
+          <Trans>Available Funds</Trans>
+        </Block>
+        <Block>
+          <Trans>Overspent in {prevMonthName}</Trans>
+        </Block>
+        <Block>
+          <Trans>Budgeted</Trans>
+        </Block>
+        <Block>
+          <Trans>For Next Month</Trans>
+        </Block>
       </View>
     </View>
   );

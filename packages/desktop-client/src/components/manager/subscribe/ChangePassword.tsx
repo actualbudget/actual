@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
+import { Trans, useTranslation  } from 'react-i18next';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -13,6 +14,8 @@ import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export function ChangePassword() {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [msg, setMessage] = useState(null);
@@ -30,14 +33,14 @@ export function ChangePassword() {
     }
   }
 
-  async function onSetPassword(password) {
+  async function onSetPassword(password, t: (key: string) => string) {
     setError(null);
     const { error } = await send('subscribe-change-password', { password });
 
     if (error) {
       setError(error);
     } else {
-      setMessage('Password successfully changed');
+      setMessage(t('Password successfully changed'));
       await send('subscribe-sign-in', { password });
       navigate('/');
     }
@@ -45,7 +48,7 @@ export function ChangePassword() {
 
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
-      <Title text="Change server password" />
+      <Title text={t('Change server password')} />
       <Text
         style={{
           fontSize: 16,
@@ -53,8 +56,10 @@ export function ChangePassword() {
           lineHeight: 1.4,
         }}
       >
-        This will change the password for this server instance. All existing
-        sessions will stay logged in.
+        <Trans>
+          This will change the password for this server instance. All existing
+          sessions will stay logged in.
+        </Trans>
       </Text>
 
       {error && (
@@ -90,7 +95,7 @@ export function ChangePassword() {
             style={{ fontSize: 15, marginRight: 10 }}
             onPress={() => navigate('/')}
           >
-            Cancel
+            <Trans>Cancel</Trans>
           </Button>
         }
         onSetPassword={onSetPassword}

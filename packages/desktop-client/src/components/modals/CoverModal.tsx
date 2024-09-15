@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -44,6 +45,8 @@ export function CoverModal({
   category,
   onSubmit,
 }: CoverModalProps) {
+  const { t } = useTranslation();
+
   const { grouped: originalCategoryGroups } = useCategories();
   const [categoryGroups, categories] = useMemo(() => {
     const filteredCategoryGroups = originalCategoryGroups.filter(
@@ -51,12 +54,12 @@ export function CoverModal({
     );
 
     const expenseGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(filteredCategoryGroups)
+      ? addToBeBudgetedGroup(filteredCategoryGroups, t)
       : filteredCategoryGroups;
 
     const expenseCategories = expenseGroups.flatMap(g => g.categories || []);
     return [expenseGroups, expenseCategories];
-  }, [originalCategoryGroups, showToBeBudgeted]);
+  }, [originalCategoryGroups, showToBeBudgeted, t]);
 
   const filteredCategoryGroups = useMemo(
     () => removeSelectedCategory(categoryGroups, category),
@@ -95,7 +98,7 @@ export function CoverModal({
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
-            <FieldLabel title="Cover from category:" />
+            <FieldLabel title={t('Cover from category:')} />
             <TapField value={fromCategory?.name} onClick={onCategoryClick} />
           </View>
 
@@ -118,7 +121,7 @@ export function CoverModal({
                 close();
               }}
             >
-              Transfer
+              <Trans>Transfer</Trans>
             </Button>
           </View>
         </>
