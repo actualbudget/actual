@@ -11,7 +11,7 @@ export function updateFilterReducer(
   switch (action.type) {
     case 'set-op': {
       const type = FIELD_TYPES.get(state.field);
-      let value = state.value;
+      let value: RuleConditionEntity['value'] | null = state.value;
       if (
         (type === 'id' || type === 'string') &&
         (action.op === 'contains' ||

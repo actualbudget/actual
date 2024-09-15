@@ -73,17 +73,12 @@ const FIELD_INFO = {
 
 const fieldInfo: FieldInfoConstraint = FIELD_INFO;
 
-// Exported for tests
-export function getFieldTypes(fieldInfo: Partial<FieldInfoConstraint>) {
-  return new Map<keyof FieldValueTypes, string>(
-    Object.entries(fieldInfo).map(([field, info]) => [
-      field as unknown as keyof FieldValueTypes,
-      info.type,
-    ]),
-  );
-}
-
-export const FIELD_TYPES = getFieldTypes(FIELD_INFO);
+export const FIELD_TYPES = new Map<keyof FieldValueTypes, string>(
+  Object.entries(FIELD_INFO).map(([field, info]) => [
+    field as unknown as keyof FieldValueTypes,
+    info.type,
+  ]),
+);
 
 export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
   const type = FIELD_TYPES.get(field);

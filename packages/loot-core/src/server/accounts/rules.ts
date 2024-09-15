@@ -14,6 +14,7 @@ import {
   sortNumbers,
   getApproxNumberThreshold,
   isValidOp,
+  FIELD_TYPES,
 } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import {
@@ -253,8 +254,8 @@ export class Condition {
   unparsedValue;
   value;
 
-  constructor(op, field, value, options, fieldTypes) {
-    const typeName = fieldTypes.get(field);
+  constructor(op, field, value, options) {
+    const typeName = FIELD_TYPES.get(field);
     assert(typeName, 'internal', 'Invalid condition field: ' + field);
 
     const type = CONDITION_TYPES[typeName];
@@ -490,7 +491,7 @@ export class Action {
   type;
   value;
 
-  constructor(op: ActionOperator, field, value, options, fieldTypes) {
+  constructor(op: ActionOperator, field, value, options) {
     assert(
       ACTION_OPS.includes(op),
       'internal',
@@ -498,7 +499,7 @@ export class Action {
     );
 
     if (op === 'set') {
-      const typeName = fieldTypes.get(field);
+      const typeName = FIELD_TYPES.get(field);
       assert(typeName, 'internal', `Invalid field for action: ${field}`);
       this.field = field;
       this.type = typeName;
@@ -714,23 +715,21 @@ export class Rule {
     conditionsOp,
     conditions,
     actions,
-    fieldTypes,
   }: {
     id?: string;
     stage?;
     conditionsOp;
     conditions;
     actions;
-    fieldTypes;
   }) {
     this.id = id;
     this.stage = stage;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
-      c => new Condition(c.op, c.field, c.value, c.options, fieldTypes),
+      c => new Condition(c.op, c.field, c.value, c.options),
     );
     this.actions = actions.map(
-      a => new Action(a.op, a.field, a.value, a.options, fieldTypes),
+      a => new Action(a.op, a.field, a.value, a.options),
     );
   }
 
