@@ -19,7 +19,7 @@ This sum can be **Split** by Category, Group, Payee, Account or Month.
 Note that Split by Account shows sum of transactions from For budget account, not periodic balance.
 Monthly breakdowns are provided by changing Mode from Total to Time.
 
-![](/img/reports/cr-left-menu.png)
+![Custom report left side with display and date filters](/img/reports/cr-left-menu.png)
 
 ### Date filters
 
@@ -41,19 +41,19 @@ Greyed out options in dropdown menus are not yet available for the chosen report
 
 ## Center Menu
 
-Icons in the first group of the center menu are used to select the displayed report, the second group is used to show graph legends, summary and labels. The funnel icon can be used to [filter transactions](./filters.md). Finally, the menu on the right-hand side is used to Save a Custom Report to the Reports page. 
+Icons in the first group of the center menu are used to select the displayed report, the second group is used to show graph legends, summary and labels. The funnel icon can be used to [filter transactions](/docs/transactions/filters.md). Finally, the menu on the right-hand side is used to Save a Custom Report to the Reports page. 
 
-![](/img/reports/cr-center-menu.png)
+![Custom reports center menu](/img/reports/cr-center-menu.png)
 
 ## Saving a report
 
 A custom report can be saved by using the menu on the right-hand side. If a saved report is modified it is possible to either overwrite the existing report or save the changes as a new report. The same menu can be used to reset to default if you'd like to quickly return to your saved version. Otherwise if no action is taken, the changes will be automatically discarded when leaving the current report.
 
-![](/img/reports/cr-save.png)
+![Saving custom report dialog](/img/reports/cr-save.png)
 
 Saved reports will be shown in the Report page in alphabetical order. 
 
-![](/img/reports/cr-page.png)
+![Report page with custom report](/img/reports/cr-page.png)
 
 ## Example
 
@@ -66,5 +66,5 @@ Custom Reports are really powerful and can provide unique insights. We now highl
 * Click on the Filter icon, select Payee is not "Movies"
 * Enable the legend, summary and label.
 
-![](/img/reports/cr-example.png)
+![Sample custom report](/img/reports/cr-example.png)
 

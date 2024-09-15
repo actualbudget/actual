@@ -1,7 +1,5 @@
 # Schedules
 
-[rules]: ./rules
-
 ## Creating a schedule
 
 Schedules can be used to enter anticipated transactions early. Some of the available options to tailor schedules to your needs are:
@@ -14,11 +12,11 @@ Schedules can be used to enter anticipated transactions early. Some of the avail
 
 Once a schedule is started, Actual will search the transaction history for entries that match the schedule, select the matches, and the option to link those transactions to the schedule is given. You can click to the **Find missing transactions** button to have Actual look for matches.
 
-![](/img/schedules/schedules-1.png)
+![Example of adding a schedule for a mortgage](/img/schedules/schedules-1.png)
 
-![](/img/schedules/schedules-6.png)
+!Example of schedule for a mortgage[](/img/schedules/schedules-6.png)
 
-![](/img/schedules/schedules-7.png)
+!Example of schedule for a mortgage[](/img/schedules/schedules-7.png)
 
 ## How Actual finds schedules
 
@@ -42,23 +40,23 @@ Many times it's desired to add notes to the scheduled transactions or to assign 
 
 Create a schedule.
 
-![](/img/schedules/schedules-2.png)
+![Schedules overview](/img/schedules/schedules-2.png)
 
 You can click on it and a new button has now appeared called **Edit as rule**.
 
-![](/img/schedules/schedules-3.png)
+![Example of mortgage scheduled](/img/schedules/schedules-3.png)
 
 Click on **Edit as Rule** to further customize the automatic entry.
 
-![](/img/schedules/schedules-4.png)
+![Rule associated with the mortgage schedule](/img/schedules/schedules-4.png)
 
 By clicking the **+** arrow on in the **Then apply these actions** area, you can define the category this schedule should be assigned against as well as any notes you might want to include.
 
-![](/img/schedules/schedules-5.png)
+![Rule associated with the mortgage schedule](/img/schedules/schedules-5.png)
 
 You can apply this newly made rule to any other of the linked transactions. Select all of the transactions from the rules dialog and press **Apply actions**.
 
-![](/img/schedules/schedules-8.png)
+![Rule associated with the mortgage schedule](/img/schedules/schedules-8.png)
 
 Save the rule and any time this scheduled transaction gets entered into the register it can be automatically categorized with a helpful note.
 
@@ -72,6 +70,6 @@ To create a Schedule from an existing transactions,
 6. All fields will populate from the transaction,
 7. Adjust any additional fields and click Add.
 
-![](/img/bulk-edit/link-schedule.png)
+![Linking a schedule on a given transaction](/img/bulk-edit/link-schedule.png)
 
-![](/img/bulk-edit/create-new-schedule.png)
+![Create new schedule dialog](/img/bulk-edit/create-new-schedule.png)

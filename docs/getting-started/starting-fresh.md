@@ -3,7 +3,7 @@ title: 'Starting Fresh'
 ---
 For most users it's best to start fresh with a blank file.
 This guide will walk through setting up a budget file fresh without migrating from a previous budget software export.
-Before continuing, it might be a good idea to read about the [envelope method](envelope-budgeting), or zero-sum 
+Before continuing, it might be a good idea to read about the [envelope method](/docs/getting-started/envelope-budgeting), or zero-sum 
 budgeting as it's also called.
 
 ## 1. Setting up Accounts
@@ -101,7 +101,7 @@ You may also want a category for interest and dividends.
 Actual has a nifty and useful feature where you can group your expense categories into groups. 
 This not only provides more visibility and control over your spending but also empowers you 
 to make informed financial decisions.
-When using the [envelope method](./envelope-budgeting), one will move available funds between categories when 
+When using the [envelope method](/docs/getting-started/envelope-budgeting), one will move available funds between categories when 
 needed. However, there are some categories that you should be very wary about moving funds away 
 from. By grouping, you'll get an extra visual indication that moving funds from the Electricity 
 category, for instance, may not be the wisest choice. Another reason is to have a more convenient 
@@ -279,7 +279,7 @@ Shortly this method goes like this:
 
 :::info
 
-This topic is so important on how to actually use Actual, that we have devoted a separate page on **[envelope budgeting](envelope-budgeting)**.
+This topic is so important on how to actually use Actual, that we have devoted a separate page on **[envelope budgeting](/docs/getting-started/envelope-budgeting)**.
 
 :::
 
@@ -287,9 +287,9 @@ This topic is so important on how to actually use Actual, that we have devoted a
 ## The next step in your budgeting journey
 
 A good next step is to read through the "Using Actual" section of the documentation.  This section has detailed explainers on the 
-features of Actual and how to use them. Some of the most useful features are [Rules](../budgeting/rules/index.md), 
-[Schedules](../budgeting/schedules.md), [Reconciliation](../accounts/reconciliation.md), 
-and [Reports](../reports-filters/reports.md).
+features of Actual and how to use them. Some of the most useful features are [Rules](/docs/budgeting/rules/index.md), 
+[Schedules](/docs/schedules.md), [Reconciliation](/docs/accounts/reconciliation.md), 
+and [Reports](/docs/reports/index.md).
 
 
 If you feel a bit overwhelmed, don't worry.

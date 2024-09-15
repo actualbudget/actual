@@ -48,7 +48,7 @@ _Springfield Clothes and food_ and the Category equals just _Clothing_.
 If you are filtering for the same things over and over, you can save your filter by clicking on the _Unsaved filter_ dropdown
 on the right side in the header.
 
-Consult [filtering transactions](/docs/reports-filters/filters) in the manual for more information.
+Consult [filtering transactions](/docs/transactions/filters) in the manual for more information.
 
 ![](/static/img/a-tour-of-actual/tour-account-register-filter.png)
 

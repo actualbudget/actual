@@ -11,8 +11,8 @@ The system is very flexible, and you can schedule based on various factors:
    1. A single schedule can be created for a Cell phone plan with multiple users and different payment cycles for each phone. For example, if you have three cell phones that all get paid on different days of the month, each day can be defined in a single schedule for each phone.
 4. Options to determine the frequency of payments, such as every month, every 2 months, every 2 years, etc.
 
-The manual's [Schedules](/docs/budgeting/schedules) section contains all the details surrounding scheduling in Actual Budget.
+The manual's [Schedules](/docs/schedules) section contains all the details surrounding scheduling in Actual Budget.
 
-![](/static/img/a-tour-of-actual/tour-schedules-overview.png)
+![Overvieds of the scheduldes screen](/static/img/a-tour-of-actual/tour-schedules-overview.png)
 
 
