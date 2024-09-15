@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 
 import { generateAccount } from 'loot-core/src/mocks';
 import { TestProvider } from 'loot-core/src/mocks/redux';
-import type { PayeeEntity } from 'loot-core/types/models';
+import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { useCommonPayees } from '../../hooks/usePayees';
 import { ResponsiveProvider } from '../../ResponsiveProvider';
@@ -24,11 +24,14 @@ const payees = [
   makePayee('This guy on the side of the road'),
 ];
 
+const accounts: AccountEntity[] = [
+  generateAccount('Bank of Montreal', false, false),
+];
 const defaultProps = {
   value: null,
   embedded: true,
   payees,
-  accounts: [generateAccount('Bank of Montreal', false, false)],
+  accounts,
 };
 
 function makePayee(name: string, options?: { favorite: boolean }): PayeeEntity {
@@ -36,7 +39,7 @@ function makePayee(name: string, options?: { favorite: boolean }): PayeeEntity {
     id: name.toLowerCase() + '-id',
     name,
     favorite: options?.favorite ?? false,
-    transfer_acct: null,
+    transfer_acct: undefined,
   };
 }
 
@@ -47,22 +50,28 @@ function extractPayeesAndHeaderNames(screen: Screen) {
       .querySelectorAll(`${PAYEE_SELECTOR}, ${PAYEE_SECTION_SELECTOR}`),
   ]
     .map(e => e.getAttribute('data-testid'))
-    .flatMap(id => id.split('-', 1));
+    .map(firstOrIncorrect);
 }
 
-function renderPayeeAutocomplete(props?: Partial<PayeeAutocompleteProps>) {
-  const autocompleteProps: PayeeAutocompleteProps = {
+function renderPayeeAutocomplete(
+  props?: Partial<PayeeAutocompleteProps>,
+): HTMLElement {
+  const autocompleteProps = {
     ...defaultProps,
     ...props,
-    onSelect: jest.fn(),
-    type: 'single',
   };
 
   render(
     <TestProvider>
       <ResponsiveProvider>
         <div data-testid="autocomplete-test">
-          <PayeeAutocomplete {...autocompleteProps} />
+          <PayeeAutocomplete
+            {...autocompleteProps}
+            onSelect={vi.fn()}
+            type="single"
+            value={null}
+            embedded={false}
+          />
         </div>
       </ResponsiveProvider>
     </TestProvider>,
@@ -75,8 +84,11 @@ function waitForAutocomplete() {
   return new Promise(resolve => setTimeout(resolve, 0));
 }
 
-async function clickAutocomplete(autocomplete) {
-  await userEvent.click(autocomplete.querySelector(`input`));
+async function clickAutocomplete(autocomplete: HTMLElement) {
+  const input = autocomplete.querySelector(`input`);
+  if (input != null) {
+    await userEvent.click(input);
+  }
   await waitForAutocomplete();
 }
 
@@ -84,6 +96,10 @@ vi.mock('../../hooks/usePayees', () => ({
   useCommonPayees: vi.fn(),
   usePayees: vi.fn().mockReturnValue([]),
 }));
+
+function firstOrIncorrect(id: string | null): string {
+  return id?.split('-', 1)[0] || 'incorrect';
+}
 
 describe('PayeeAutocomplete.getPayeeSuggestions', () => {
   beforeEach(() => {
@@ -145,7 +161,7 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
           .querySelectorAll(`${PAYEE_SELECTOR}, ${PAYEE_SECTION_SELECTOR}`),
       ]
         .map(e => e.getAttribute('data-testid'))
-        .flatMap(id => id.split('-', 1)),
+        .map(firstOrIncorrect),
     ).toStrictEqual(expectedPayeeOrder);
   });
 
@@ -208,7 +224,7 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
           .querySelectorAll('[data-testid][role=option]'),
       ]
         .map(e => e.getAttribute('data-testid'))
-        .flatMap(id => id.split('-', 1)),
+        .flatMap(firstOrIncorrect),
     ).toStrictEqual(expectedPayeeOrder);
     expect(
       [
@@ -217,7 +233,7 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
           .querySelectorAll('[data-testid$="-item-group"]'),
       ]
         .map(e => e.getAttribute('data-testid'))
-        .flatMap(id => id.split('-', 1)),
+        .flatMap(firstOrIncorrect),
     ).toStrictEqual(['Payees']);
   });
 });
