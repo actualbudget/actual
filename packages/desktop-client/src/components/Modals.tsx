@@ -513,7 +513,6 @@ export function Modals() {
               categoryId={options.categoryId}
               month={options.month}
               showToBeBudgeted={options.showToBeBudgeted}
-              category={options.category}
               onSubmit={options.onSubmit}
             />
           );
