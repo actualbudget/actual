@@ -29,7 +29,7 @@ const beforePackHook = async (context: AfterPackContext) => {
     console.info(`Rebuilt better-sqlite3 with ${arch}!`);
 
     if (context.packager.platform.name === 'windows') {
-      console.info(`Windows Store build - copying appx files...`);
+      console.info(`Windows build - copying appx files...`);
 
       await new Promise(resolve =>
         copyFiles(['./appx/**/*', './build'], { error: true }, resolve),
