@@ -155,7 +155,9 @@ export function Spending() {
         ? 27
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
 
-  const showCompareTo = Math.abs(data.intervalData[27].compareTo) > 0;
+  const showCompareTo =
+    compareTo === monthUtils.currentMonth() ||
+    Math.abs(data.intervalData[27].compareTo) > 0;
   const showCompare =
     compare === monthUtils.currentMonth() ||
     Math.abs(data.intervalData[27].compare) > 0;
@@ -375,6 +377,63 @@ export function Spending() {
                   flexDirection: 'row',
                 }}
               >
+                <View>
+                  <View
+                    style={{
+                      paddingBottom: 10,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <View
+                      style={{
+                        marginRight: 5,
+                        borderRadius: 1000,
+                        width: 14,
+                        height: 14,
+                        backgroundColor: theme.reportsGreen,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {monthUtils.format(compare, 'MMM, yyyy')}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      paddingBottom: 10,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <View
+                      style={{
+                        marginRight: 5,
+                        borderRadius: 1000,
+                        width: 14,
+                        height: 14,
+                        backgroundColor: theme.reportsGray,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {mode === 'singleMonth'
+                        ? monthUtils.format(compareTo, 'MMM, yyyy')
+                        : mode.charAt(0).toUpperCase() + mode.slice(1)}
+                      {mode === 'budget' && 'ed'}
+                    </Text>
+                  </View>
+                </View>
                 <View style={{ flex: 1 }} />
                 <View
                   style={{
@@ -383,7 +442,7 @@ export function Spending() {
                   }}
                 >
                   <View>
-                    {showCompareTo && (
+                    {showCompare && (
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
@@ -403,12 +462,13 @@ export function Spending() {
                         }
                       />
                     )}
-                    {mode === 'singleMonth' && (
+                    {mode === 'singleMonth' && showCompareTo && (
                       <AlignedText
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent {monthUtils.format(compareTo, 'MMM, yyyy')}:
+                            Spent {monthUtils.format(compareTo, 'MMM, yyyy')}
+                            {compare === monthUtils.currentMonth() && ' MTD'}:
                           </Block>
                         }
                         right={
@@ -423,24 +483,26 @@ export function Spending() {
                       />
                     )}
                   </View>
-                  <AlignedText
-                    style={{ marginBottom: 5, minWidth: 210 }}
-                    left={
-                      <Block>
-                        Budgeted
-                        {compare === monthUtils.currentMonth() && ' MTD'}:
-                      </Block>
-                    }
-                    right={
-                      <Text style={{ fontWeight: 600 }}>
-                        <PrivacyFilter blurIntensity={5}>
-                          {amountToCurrency(
-                            Math.abs(data.intervalData[todayDay].budget),
-                          )}
-                        </PrivacyFilter>
-                      </Text>
-                    }
-                  />
+                  {Math.abs(data.intervalData[todayDay].budget) > 0 && (
+                    <AlignedText
+                      style={{ marginBottom: 5, minWidth: 210 }}
+                      left={
+                        <Block>
+                          Budgeted
+                          {compare === monthUtils.currentMonth() && ' MTD'}:
+                        </Block>
+                      }
+                      right={
+                        <Text style={{ fontWeight: 600 }}>
+                          <PrivacyFilter blurIntensity={5}>
+                            {amountToCurrency(
+                              Math.abs(data.intervalData[todayDay].budget),
+                            )}
+                          </PrivacyFilter>
+                        </Text>
+                      }
+                    />
+                  )}
                   {showAverage && (
                     <AlignedText
                       style={{ marginBottom: 5, minWidth: 210 }}

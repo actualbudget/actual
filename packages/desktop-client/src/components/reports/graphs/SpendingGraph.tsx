@@ -293,10 +293,10 @@ export function SpendingGraph({
                   activeDot={false}
                   animationDuration={0}
                   dataKey={val => getVal(val, selection)}
-                  stroke="gray"
+                  stroke={theme.reportsGray}
                   strokeDasharray="10 10"
                   strokeWidth={3}
-                  fill="gray"
+                  fill={theme.reportsGray}
                   fillOpacity={0.2}
                 />
               </AreaChart>
