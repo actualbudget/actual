@@ -6,7 +6,7 @@ import { formatPayeeName } from '../../util/payee-name.js';
 export default {
   ...Fallback,
 
-  institutionIds: ['ABANCA_CAGLESMM'],
+  institutionIds: ['ABANCA_CAGLESMM', 'ABANCA_CAGLPTPL'],
 
   accessValidForDays: 180,
 
