@@ -153,6 +153,13 @@ export function Sidebar() {
               paddingTop: 20,
               justifyContent: 'flex-start',
             }),
+            '& .hover-visible': {
+              opacity: 0,
+              transition: 'opacity .25s',
+            },
+            '&:hover .hover-visible': {
+              opacity: 1,
+            },
           }}
         >
           <EditableBudgetName />
@@ -216,7 +223,7 @@ function EditableBudgetName() {
   }
 
   const items = [
-    { name: 'close', text: t('Close file') },
+    { name: 'close', text: t('Close budget file') },
     { name: 'settings', text: t('Settings') },
     ...(Platform.isBrowser ? [{ name: 'help', text: t('Help') }] : []),
   ];
