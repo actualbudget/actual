@@ -33,7 +33,10 @@ import { fromDateRepr } from '../util';
 
 export function NetWorth() {
   const params = useParams();
-  const { data: widget, isLoading } = useWidget(params.id ?? '');
+  const { data: widget, isLoading } = useWidget(
+    params.id ?? '',
+    'net-worth-card',
+  );
 
   if (isLoading) {
     return <LoadingIndicator />;

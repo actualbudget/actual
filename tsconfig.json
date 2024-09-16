@@ -48,7 +48,8 @@
     "**/client-build/*",
     "**/dist/*",
     "**/lib-dist/*",
-    "**/test-results/*"
+    "**/test-results/*",
+    "**/playwright-report/*"
   ],
   "ts-node": {
     "compilerOptions": {
