@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -34,8 +34,15 @@ export function ConfigServer() {
   }, [currentUrl]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
+
+  const restartElectronServer = useCallback(() => {
+    globalThis.window.Actual.restartElectronServer();
+    setError(null);
+  }, []);
+
+  const [_serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
     'serverSelfSignedCert',
+    restartElectronServer,
   );
 
   function getErrorMessage(error: string) {
@@ -103,18 +110,6 @@ export function ConfigServer() {
       setServerSelfSignedCert(selfSignedCertificateLocation[0]);
     }
   }
-
-  const isMounted = useRef(false);
-
-  useEffect(() => {
-    // When self signed cert has changed, restart the server
-    if (isMounted.current) {
-      globalThis.window.Actual.restartElectronServer();
-      setError(null);
-    } else {
-      isMounted.current = true;
-    }
-  }, [serverSelfSignedCert]);
 
   async function onSkip() {
     await setServerUrl(null);
