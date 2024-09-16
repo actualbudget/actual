@@ -22,7 +22,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme, styles } from '../../style';
@@ -379,7 +379,7 @@ function CategoryItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'rollover'] = useMetadataPref('budgetType');
 
   const balanceBinding =
     budgetType === 'rollover'

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useReducer } from 'react';
+import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -24,7 +25,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { styles, theme } from '../../style';
-import { Button } from '../common/Button';
+import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
 import { Select } from '../common/Select';
@@ -141,8 +142,8 @@ function ConfigureField({
             <OpButton
               key="true"
               op="true"
-              selected={value === true}
-              onClick={() => {
+              isSelected={value === true}
+              onPress={() => {
                 dispatch({ type: 'set-op', op: 'is' });
                 dispatch({ type: 'set-value', value: true });
               }}
@@ -150,8 +151,8 @@ function ConfigureField({
             <OpButton
               key="false"
               op="false"
-              selected={value === false}
-              onClick={() => {
+              isSelected={value === false}
+              onPress={() => {
                 dispatch({ type: 'set-op', op: 'is' });
                 dispatch({ type: 'set-value', value: false });
               }}
@@ -169,8 +170,8 @@ function ConfigureField({
                 <OpButton
                   key={currOp}
                   op={currOp}
-                  selected={currOp === op}
-                  onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  isSelected={currOp === op}
+                  onPress={() => dispatch({ type: 'set-op', op: currOp })}
                 />
               ))}
             </Stack>
@@ -184,8 +185,8 @@ function ConfigureField({
                 <OpButton
                   key={currOp}
                   op={currOp}
-                  selected={currOp === op}
-                  onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  isSelected={currOp === op}
+                  onPress={() => dispatch({ type: 'set-op', op: currOp })}
                 />
               ))}
             </Stack>
@@ -193,7 +194,17 @@ function ConfigureField({
         )}
       </Stack>
 
-      <form action="#">
+      <Form
+        onSubmit={e => {
+          e.preventDefault();
+          onApply({
+            field,
+            op,
+            value,
+            options: subfieldToOptions(field, subfield),
+          });
+        }}
+      >
         {type !== 'boolean' && (
           <GenericInput
             inputRef={inputRef}
@@ -224,22 +235,11 @@ function ConfigureField({
           style={{ marginTop: 15 }}
         >
           <View style={{ flex: 1 }} />
-          <Button
-            type="primary"
-            onClick={e => {
-              e.preventDefault();
-              onApply({
-                field,
-                op,
-                value,
-                options: subfieldToOptions(field, subfield),
-              });
-            }}
-          >
+          <Button variant="primary" type="submit">
             <Trans>Apply</Trans>
           </Button>
         </Stack>
-      </form>
+      </Form>
     </FocusScope>
   );
 }
@@ -347,10 +347,10 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
         >
           {compact ? (
             <CompactFiltersButton
-              onClick={() => dispatch({ type: 'select-field' })}
+              onPress={() => dispatch({ type: 'select-field' })}
             />
           ) : (
-            <FiltersButton onClick={() => dispatch({ type: 'select-field' })} />
+            <FiltersButton onPress={() => dispatch({ type: 'select-field' })} />
           )}
         </Tooltip>
       </View>

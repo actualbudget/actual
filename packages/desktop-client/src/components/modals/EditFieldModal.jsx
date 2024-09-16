@@ -10,12 +10,12 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Input } from '../common/Input';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 
-export function EditField({ name, onSubmit, onClose }) {
+export function EditFieldModal({ name, onSubmit, onClose }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   function onSelectNote(value, mode) {
@@ -233,7 +233,7 @@ export function EditField({ name, onSubmit, onClose }) {
           {isNarrowWidth && (
             <ModalHeader
               title={label}
-              rightContent={<ModalCloseButton onClick={close} />}
+              rightContent={<ModalCloseButton onPress={close} />}
             />
           )}
           <View>

@@ -4,7 +4,7 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 
@@ -13,7 +13,7 @@ type ConfirmTransactionDeleteProps = {
   onConfirm: () => void;
 };
 
-export function ConfirmTransactionDelete({
+export function ConfirmTransactionDeleteModal({
   message = 'Are you sure you want to delete the transaction?',
   onConfirm,
 }: ConfirmTransactionDeleteProps) {
@@ -30,7 +30,7 @@ export function ConfirmTransactionDelete({
         <>
           <ModalHeader
             title="Confirm Delete"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             <Paragraph>{message}</Paragraph>
