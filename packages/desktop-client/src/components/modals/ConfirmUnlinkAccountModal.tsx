@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 
@@ -11,7 +11,7 @@ type ConfirmUnlinkAccountProps = {
   onUnlink: () => void;
 };
 
-export function ConfirmUnlinkAccount({
+export function ConfirmUnlinkAccountModal({
   accountName,
   onUnlink,
 }: ConfirmUnlinkAccountProps) {
@@ -24,7 +24,7 @@ export function ConfirmUnlinkAccount({
         <>
           <ModalHeader
             title="Confirm Unlink"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             <Paragraph>

@@ -12,7 +12,7 @@ import {
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
@@ -21,7 +21,7 @@ type SimpleFinInitialiseProps = {
   onSuccess: () => void;
 };
 
-export const SimpleFinInitialise = ({
+export const SimpleFinInitialiseModal = ({
   onSuccess,
 }: SimpleFinInitialiseProps) => {
   const [token, setToken] = useState('');
@@ -52,7 +52,7 @@ export const SimpleFinInitialise = ({
         <>
           <ModalHeader
             title="Set-up SimpleFIN"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>

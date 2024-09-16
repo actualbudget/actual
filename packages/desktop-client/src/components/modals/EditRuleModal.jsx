@@ -42,7 +42,7 @@ import { SvgInformationOutline } from '../../icons/v1';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
@@ -126,7 +126,7 @@ export function OpSelect({
     }
 
     return options;
-  }, [ops, type]);
+  }, [formatOp, ops, type]);
 
   return (
     <View data-testid="op-select">
@@ -294,7 +294,7 @@ function formatAmount(amount) {
 function ScheduleDescription({ id }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const scheduleData = useSchedules({
-    transform: useCallback(q => q.filter({ id }), []),
+    transform: useCallback(q => q.filter({ id }), [id]),
   });
 
   if (scheduleData == null) {
@@ -705,7 +705,7 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export function EditRule({ defaultRule, onSave: originalOnSave }) {
+export function EditRuleModal({ defaultRule, onSave: originalOnSave }) {
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse),
   );
@@ -738,7 +738,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
     // Disable undo while this modal is open
     setUndoEnabled(false);
     return () => setUndoEnabled(true);
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     // Flash the scrollbar
@@ -950,7 +950,7 @@ export function EditRule({ defaultRule, onSave: originalOnSave }) {
         <>
           <ModalHeader
             title="Rule"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{

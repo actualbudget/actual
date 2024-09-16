@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useState, useRef } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
@@ -16,12 +17,11 @@ import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button2';
 import { Link } from '../common/Link';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
-
-import { COUNTRY_OPTIONS } from './countries';
+import { COUNTRY_OPTIONS } from '../util/countries';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
@@ -62,12 +62,12 @@ function useAvailableBanks(country: string) {
   };
 }
 
-function renderError(error: 'unknown' | 'timeout') {
+function renderError(error: 'unknown' | 'timeout', t: (key: string) => string) {
   return (
     <Error style={{ alignSelf: 'center' }}>
       {error === 'timeout'
-        ? 'Timed out. Please try again.'
-        : 'An error occurred while linking your account, sorry!'}
+        ? t('Timed out. Please try again.')
+        : t('An error occurred while linking your account, sorry!')}
     </Error>
   );
 }
@@ -80,11 +80,13 @@ type GoCardlessExternalMsgProps = {
   onClose: () => void;
 };
 
-export function GoCardlessExternalMsg({
+export function GoCardlessExternalMsgModal({
   onMoveExternal,
   onSuccess,
   onClose,
 }: GoCardlessExternalMsgProps) {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
 
   const [waiting, setWaiting] = useState<string | null>(null);
@@ -141,37 +143,45 @@ export function GoCardlessExternalMsg({
     return (
       <View style={{ gap: 10 }}>
         <FormField>
-          <FormLabel title="Choose your country:" htmlFor="country-field" />
+          <FormLabel
+            title={t('Choose your country:')}
+            htmlFor="country-field"
+          />
           <Autocomplete
             strict
             highlightFirst
             suggestions={COUNTRY_OPTIONS}
             onSelect={setCountry}
             value={country}
-            inputProps={{ id: 'country-field', placeholder: '(please select)' }}
+            inputProps={{
+              id: 'country-field',
+              placeholder: t('(please select)'),
+            }}
           />
         </FormField>
 
         {isBankOptionError ? (
           <Error>
-            Failed loading available banks: GoCardless access credentials might
-            be misconfigured. Please{' '}
-            <Link
-              variant="text"
-              onClick={onGoCardlessInit}
-              style={{ color: theme.formLabelText, display: 'inline' }}
-            >
-              set them up
-            </Link>{' '}
-            again.
+            <Trans>
+              Failed loading available banks: GoCardless access credentials
+              might be misconfigured. Please{' '}
+              <Link
+                variant="text"
+                onClick={onGoCardlessInit}
+                style={{ color: theme.formLabelText, display: 'inline' }}
+              >
+                set them up
+              </Link>{' '}
+              again.
+            </Trans>
           </Error>
         ) : (
           country &&
           (isBankOptionsLoading ? (
-            'Loading banks...'
+            t('Loading banks...')
           ) : (
             <FormField>
-              <FormLabel title="Choose your bank:" htmlFor="bank-field" />
+              <FormLabel title={t('Choose your bank:')} htmlFor="bank-field" />
               <Autocomplete
                 focused
                 strict
@@ -181,7 +191,7 @@ export function GoCardlessExternalMsg({
                 value={institutionId}
                 inputProps={{
                   id: 'bank-field',
-                  placeholder: '(please select)',
+                  placeholder: t('(please select)'),
                 }}
               />
             </FormField>
@@ -189,18 +199,20 @@ export function GoCardlessExternalMsg({
         )}
 
         <Warning>
-          By enabling bank-sync, you will be granting GoCardless (a third party
-          service) read-only access to your entire account’s transaction
-          history. This service is not affiliated with Actual in any way. Make
-          sure you’ve read and understand GoCardless’s{' '}
-          <Link
-            variant="external"
-            to="https://gocardless.com/privacy/"
-            linkColor="purple"
-          >
-            Privacy Policy
-          </Link>{' '}
-          before proceeding.
+          <Trans>
+            By enabling bank-sync, you will be granting GoCardless (a third
+            party service) read-only access to your entire account’s transaction
+            history. This service is not affiliated with Actual in any way. Make
+            sure you’ve read and understand GoCardless’s{' '}
+            <Link
+              variant="external"
+              to="https://gocardless.com/privacy/"
+              linkColor="purple"
+            >
+              Privacy Policy
+            </Link>{' '}
+            before proceeding.
+          </Trans>
         </Warning>
 
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
@@ -216,7 +228,7 @@ export function GoCardlessExternalMsg({
             onPress={onJump}
             isDisabled={!institutionId || !country}
           >
-            Link bank in browser &rarr;
+            <Trans>Link bank in browser &rarr;</Trans>
           </Button>
         </View>
       </View>
@@ -232,17 +244,19 @@ export function GoCardlessExternalMsg({
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Link Your Bank"
-            rightContent={<ModalCloseButton onClick={close} />}
+            title={t('Link Your Bank')}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
             <Paragraph style={{ fontSize: 15 }}>
-              To link your bank account, you will be redirected to a new page
-              where GoCardless will ask to connect to your bank. GoCardless will
-              not be able to withdraw funds from your accounts.
+              <Trans>
+                To link your bank account, you will be redirected to a new page
+                where GoCardless will ask to connect to your bank. GoCardless
+                will not be able to withdraw funds from your accounts.
+              </Trans>
             </Paragraph>
 
-            {error && renderError(error)}
+            {error && renderError(error, t)}
 
             {waiting || isConfigurationLoading ? (
               <View style={{ alignItems: 'center', marginTop: 15 }}>
@@ -252,11 +266,11 @@ export function GoCardlessExternalMsg({
                 />
                 <View style={{ marginTop: 10, color: theme.pageText }}>
                   {isConfigurationLoading
-                    ? 'Checking GoCardless configuration..'
+                    ? t('Checking GoCardless configuration..')
                     : waiting === 'browser'
-                      ? 'Waiting on GoCardless...'
+                      ? t('Waiting on GoCardless...')
                       : waiting === 'accounts'
-                        ? 'Loading accounts...'
+                        ? t('Loading accounts...')
                         : null}
                 </View>
 
@@ -266,7 +280,9 @@ export function GoCardlessExternalMsg({
                     onClick={onJump}
                     style={{ marginTop: 10 }}
                   >
-                    (Account linking not opening in a new tab? Click here)
+                    <Trans>
+                      (Account linking not opening in a new tab? Click here)
+                    </Trans>
                   </Link>
                 )}
               </View>
@@ -282,17 +298,19 @@ export function GoCardlessExternalMsg({
                 }}
                 onPress={onContinue}
               >
-                Success! Click to continue &rarr;
+                <Trans>Success! Click to continue &rarr;</Trans>
               </Button>
             ) : isConfigured || isGoCardlessSetupComplete ? (
               renderLinkButton()
             ) : (
               <>
                 <Paragraph style={{ color: theme.errorText }}>
-                  GoCardless integration has not yet been configured.
+                  <Trans>
+                    GoCardless integration has not yet been configured.
+                  </Trans>
                 </Paragraph>
                 <Button variant="primary" onPress={onGoCardlessInit}>
-                  Configure GoCardless integration
+                  <Trans>Configure GoCardless integration</Trans>
                 </Button>
               </>
             )}

@@ -6,7 +6,7 @@ import { theme } from '../../style';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
@@ -16,7 +16,7 @@ type ConfirmCategoryDeleteProps = {
   onDelete: (categoryId: string) => void;
 };
 
-export function ConfirmCategoryDelete({
+export function ConfirmCategoryDeleteModal({
   group: groupId,
   category: categoryId,
   onDelete,
@@ -61,7 +61,7 @@ export function ConfirmCategoryDelete({
         <>
           <ModalHeader
             title="Confirm Delete"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             {group ? (

@@ -13,7 +13,7 @@ import {
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
@@ -22,7 +22,7 @@ type GoCardlessInitialiseProps = {
   onSuccess: () => void;
 };
 
-export const GoCardlessInitialise = ({
+export const GoCardlessInitialiseModal = ({
   onSuccess,
 }: GoCardlessInitialiseProps) => {
   const [secretId, setSecretId] = useState('');
@@ -60,7 +60,7 @@ export const GoCardlessInitialise = ({
         <>
           <ModalHeader
             title="Set-up GoCardless"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
