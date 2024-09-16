@@ -14,10 +14,6 @@ import { SecondaryItem } from './SecondaryItem';
 import {
   SvgCheveronDown,
   SvgCheveronUp,
-  SvgStoreFront,
-  SvgTuning,
-  SvgReports,
-  SvgWallet,
 } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
 
@@ -45,8 +41,8 @@ export function ActionButtons({
     <View style={{ padding: '10px 0', flexShrink: 0}}>
       {buttons.map((item) => (
         (item.hidable ?
-          (isOpen && <Item title={item.title} Icon={item.Icon} to={item.to} />) :
-          <Item title={item.title} Icon={item.Icon} to={item.to} />
+          (isOpen && <Item key={item.title} title={item.title} Icon={item.Icon} to={item.to} />) :
+          <Item key={item.title} title={item.title} Icon={item.Icon} to={item.to} />
         )
       ))}
       <SecondaryItem

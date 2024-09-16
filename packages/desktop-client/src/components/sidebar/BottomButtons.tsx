@@ -34,7 +34,7 @@ export function BottomButtons({
       }}
     >
       {buttons.map((item) => (
-        <SecondaryItem title={item.title} Icon={item.Icon} onClick={item.onClick} />
+        <SecondaryItem key={item.title} title={item.title} Icon={item.Icon} onClick={item.onClick} />
       ))}
     </View>
   );
