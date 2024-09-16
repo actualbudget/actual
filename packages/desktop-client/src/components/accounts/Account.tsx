@@ -1357,6 +1357,18 @@ class AccountInternal extends PureComponent<
 
   onApplyFilter = async (conditionOrSavedFilter: ConditionEntity) => {
     let filterConditions = this.state.filterConditions;
+
+    if (
+      'customName' in conditionOrSavedFilter &&
+      conditionOrSavedFilter.customName
+    ) {
+      filterConditions = filterConditions.filter(
+        c =>
+          !isTransactionFilterEntity(c) &&
+          c.customName !== conditionOrSavedFilter.customName,
+      );
+    }
+
     if (isTransactionFilterEntity(conditionOrSavedFilter)) {
       // A saved filter was passed in.
       const savedFilter = conditionOrSavedFilter;
@@ -1366,12 +1378,6 @@ class AccountInternal extends PureComponent<
       this.setState({ filterConditionsOp: savedFilter.conditionsOp });
       this.applyFilters([...savedFilter.conditions]);
     } else {
-      filterConditions = filterConditions.filter(
-        c =>
-          !isTransactionFilterEntity(c) &&
-          c.customName !== conditionOrSavedFilter.customName,
-      );
-
       // A condition was passed in.
       const condition = conditionOrSavedFilter;
       this.setState({
