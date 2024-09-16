@@ -47,7 +47,6 @@ export function Accounts({
         query={queries.allAccountBalance()}
         to="/accounts"
         outerStyle={{ overflowY: 'scroll', margin: '5px 0', }}
-        style={{ paddingLeft: 0 }}
       />
 
       <View style={{ overflowY: 'scroll', }}>

@@ -40,9 +40,15 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
   collapsed,
 }: AccountGroupNameProps<FieldName>) {
   const accountNameStyle: CSSProperties = {
-    paddingLeft: 5,
+      marginTop: -2,
+      marginBottom: 2,
+      paddingTop: 4,
+      paddingBottom: 4,
+      paddingRight: 15,
+    paddingLeft: (toggleAccounts ? 25 : 10),
     textDecoration: 'none',
     color: theme.sidebarItemText,
+      ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
     ...styles.smallText,
   };
 
@@ -50,21 +56,22 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
     <View
       style={{
         flexShrink: 0,
-        paddingLeft: 5,
-        ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
-        ...outerStyle
+//        paddingLeft: 5,
+//        ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
+//        ...outerStyle
       }}
     >
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            borderBottom: !collapsed && `1.5px solid rgba(255,255,255,0.4)`,
-            paddingBottom: !collapsed && '3px',
-            marginRight: 15,
-            marginLeft: 5,
-            paddingTop: 4,
-            marginBottom: 4,
+            position: 'relative',
+//            borderBottom: !collapsed && `1.5px solid rgba(255,255,255,0.4)`,
+//            paddingBottom: !collapsed && '3px',
+//            marginRight: 15,
+//            marginLeft: 5,
+//            paddingTop: 4,
+//            marginBottom: 4,
           }}
         >
           {toggleAccounts && 
@@ -73,6 +80,14 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
               height={12}
               onClick={toggleAccounts}
               style={{
+                position: 'absolute',
+                zIndex: 99999,
+                marginTop: -2,
+                marginBottom: 5,
+                marginLeft: 7,
+                width: 18,
+                height: 18,
+                padding: 3,
                 transition: 'transform .1s',
                 transform: (collapsed) ? 'rotate(-90deg)' : '',
               }}
@@ -87,10 +102,18 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
               flex: 1,
               fontWeight: 600,
               position: 'relative',
+              borderLeft: '4px solid transparent',
               ...(updated && { fontWeight: 700 }),
             }}
             activeStyle={{
+              borderColor: theme.sidebarItemAccentSelected,
               color: theme.sidebarItemTextSelected,
+              // This is kind of a hack, but we don't ever want the account
+              // that the user is looking at to be "bolded" which means it
+              // has unread transactions. The system does mark is read and
+              // unbolds it, but it still "flashes" bold so this just
+              // ignores it if it's active
+              //fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
                 backgroundColor: theme.sidebarItemAccentSelected,
                 transform: 'translateX(-4.5px)',
@@ -126,6 +149,10 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
             </View>
 
             <AlignedText
+              style={{
+                borderBottom: !collapsed && `1.5px solid rgba(255,255,255,0.4)`,
+                paddingBottom: !collapsed && '3px',
+              }}
               left={groupName}
               right={(query && <CellValue binding={query} type="financial" />)}
             />
