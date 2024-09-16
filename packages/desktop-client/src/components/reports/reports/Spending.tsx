@@ -198,6 +198,34 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
           flexShrink: 0,
         }}
       >
+        <Button
+          variant={mode === 'static' ? 'normal' : 'primary'}
+          onPress={() => {
+            const newMode = mode === 'static' ? 'sliding-window' : 'static';
+            const [newStart, newEnd] = calculateTimeRange({
+              start,
+              end,
+              mode: newMode,
+            });
+
+            setMode(newMode);
+            setStart(newStart);
+            setEnd(newEnd);
+          }}
+        >
+          {mode === 'static' ? 'Static' : 'Live'}
+        </Button>
+
+        <View
+          style={{
+            width: 1,
+            height: 30,
+            backgroundColor: theme.pillBorderDark,
+            marginRight: 10,
+            marginLeft: 10,
+          }}
+        />
+
         <View
           style={{
             alignItems: 'center',
@@ -205,52 +233,42 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             marginRight: 5,
             marginBottom: 5,
             marginTop: 5,
+            gap: 5,
           }}
         >
-          <Text
-            style={{
-              paddingRight: 5,
-            }}
-          >
+          <Text>
             <Trans>Compare</Trans>
           </Text>
           <Select
-            value={
-              mode !== 'sliding-window' || reportMode === 'single-month'
-                ? start
-                : 'current-month'
-            }
-            onChange={newStart => {
-              if (newStart === 'current-month') {
-                setMode('sliding-window');
-                setStart(monthUtils.currentMonth());
-                return;
-              }
-              setMode('static');
-              setStart(newStart);
-            }}
-            options={[
-              ...(reportMode === 'single-month'
-                ? []
-                : [['current-month', t('Current Month')] as const]),
-              ...allIntervals.map(
-                ({ name, pretty }) => [name, pretty] as const,
-              ),
-            ]}
+            value={start}
+            onChange={setStart}
+            options={allIntervals.map(
+              ({ name, pretty }) => [name, pretty] as const,
+            )}
+            buttonStyle={{ width: 150 }}
+            popoverStyle={{ width: 150 }}
           />
-          <Text
-            style={{
-              paddingRight: 5,
-              paddingLeft: 5,
-            }}
-          >
+          <Text>
             <Trans>to</Trans>
           </Text>
           <Select
-            value={end}
+            value={reportMode === 'single-month' ? end : 'label'}
             onChange={setEnd}
-            options={allIntervals.map(({ name, pretty }) => [name, pretty])}
+            options={
+              reportMode === 'single-month'
+                ? allIntervals.map(({ name, pretty }) => [name, pretty])
+                : [
+                    [
+                      'label',
+                      reportMode === 'budget'
+                        ? t('Budgeted')
+                        : t('Average spent'),
+                    ],
+                  ]
+            }
             disabled={reportMode !== 'single-month'}
+            buttonStyle={{ width: 150 }}
+            popoverStyle={{ width: 150 }}
           />
         </View>
         {!isNarrowWidth && (
@@ -278,7 +296,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               backgroundColor: 'inherit',
             }}
             onSelect={() => {
-              setMode('static');
               setReportMode('single-month');
             }}
           >
@@ -287,7 +304,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
           <ModeButton
             selected={reportMode === 'budget'}
             onSelect={() => {
-              setMode('sliding-window');
               setStart(monthUtils.currentMonth());
               setReportMode('budget');
             }}
@@ -300,7 +316,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
           <ModeButton
             selected={reportMode === 'average'}
             onSelect={() => {
-              setMode('sliding-window');
               setStart(monthUtils.currentMonth());
               setReportMode('average');
             }}
