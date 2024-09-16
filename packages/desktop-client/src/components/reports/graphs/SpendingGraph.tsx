@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { css } from 'glamor';
@@ -32,19 +32,22 @@ type PayloadItem = {
     totalDebts: number | string;
     totalTotals: number | string;
     day: string;
-    months: {
-      date: string;
-      cumulative: number | string;
-    };
+    months: Record<
+      string,
+      {
+        date: string;
+        cumulative: number;
+      }
+    >;
   };
 };
 
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  balanceTypeOp?: string;
-  selection?: string;
-  compare?: string;
+  balanceTypeOp: 'cumulative';
+  selection: string | 'budget' | 'average';
+  compare: string;
 };
 
 const CustomTooltip = ({
@@ -82,11 +85,11 @@ const CustomTooltip = ({
             </strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload[0].payload.months[compare].cumulative ? (
+            {payload[0].payload.months[compare]?.cumulative ? (
               <AlignedText
                 left={t('Compare:')}
                 right={amountToCurrency(
-                  payload[0].payload.months[compare].cumulative * -1,
+                  payload[0].payload.months[compare]?.cumulative * -1,
                 )}
               />
             ) : null}
@@ -102,11 +105,11 @@ const CustomTooltip = ({
                 right={amountToCurrency(comparison)}
               />
             )}
-            {payload[0].payload.months[compare].cumulative ? (
+            {payload[0].payload.months[compare]?.cumulative ? (
               <AlignedText
                 left={t('Difference:')}
                 right={amountToCurrency(
-                  payload[0].payload.months[compare].cumulative * -1 -
+                  payload[0].payload.months[compare]?.cumulative * -1 -
                     comparison,
                 )}
               />
@@ -122,7 +125,7 @@ type SpendingGraphProps = {
   style?: CSSProperties;
   data: SpendingEntity;
   compact?: boolean;
-  mode: string;
+  mode: 'single-month' | 'budget' | 'average';
   compare: string;
   compareTo: string;
 };
@@ -155,13 +158,13 @@ export function SpendingGraph({
       ).months[selection]?.[balanceTypeOp];
   const maxYAxis = selectionMax > thisMonthMax;
   const dataMax = Math.max(
-    ...data.intervalData.map(i => i.months[compare].cumulative),
+    ...data.intervalData.map(i => i.months[compare]?.cumulative),
   );
   const dataMin = Math.min(
-    ...data.intervalData.map(i => i.months[compare].cumulative),
+    ...data.intervalData.map(i => i.months[compare]?.cumulative),
   );
 
-  const tickFormatter = tick => {
+  const tickFormatter: ComponentProps<typeof YAxis>['tickFormatter'] = tick => {
     if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
     return '...';
   };
