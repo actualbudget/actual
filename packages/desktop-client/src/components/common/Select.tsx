@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
 
+import { css } from 'glamor';
+
 import { SvgExpandArrow } from '../../icons/v0';
 import { type CSSProperties } from '../../style';
 
@@ -69,12 +71,14 @@ export function Select<const Value = string>({
         onPress={() => {
           setIsOpen(true);
         }}
-        style={({ isHovered }) => ({
-          ...buttonStyle,
-          ...(isHovered
-            ? { backgroundColor: bare ? 'transparent' : undefined }
-            : {}),
-        })}
+        className={String(
+          css({
+            '&[data-hovered]': {
+              backgroundColor: bare ? 'transparent' : undefined,
+            },
+            ...buttonStyle,
+          }),
+        )}
       >
         <View
           style={{
