@@ -52,9 +52,9 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
     'ui.collapsedAccountGroups',
   );
 
-  if (!collapsed || !collapsed.hasOwnProperty(groupName)) {
-    let c = { ...(collapsed || {}) };
-    c[groupName] = false;
+  if (!collapsed || !collapsed.hasOwnProperty(groupName.replace(/\s/g, ""))) {
+    let c = (collapsed ? { ...collapsed } : {});
+    c[groupName.replace(/\s/g, "")] = false;
     setCollapsedGroupsPref(c);
   }
 
@@ -64,7 +64,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
 
   const toggleAccounts = () => {
     let c = {...collapsed};
-    c[groupName] = !collapsed[groupName];
+    c[groupName.replace(/\s/g, "")] = !collapsed[groupName.replace(/\s/g, "")];
     setCollapsedGroupsPref(c);
   }
 
@@ -83,10 +83,10 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
         to={groupTo}
         query={groupQuery}
         toggleAccounts={toggleAccounts}
-        collapsed={collapsed[groupName]}
+        collapsed={collapsed && collapsed[groupName.replace(/\s/g, "")]}
       />
 
-      {!collapsed[groupName] && accountList && accountList.map((account, i) => (
+      {collapsed && !collapsed[groupName.replace(/\s/g, "")] && accountList && accountList.map((account, i) => (
         <Account
           key={account.id}
           name={account.name}
