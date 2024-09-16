@@ -54,24 +54,12 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
 
   return (
     <View
-      style={{
-        flexShrink: 0,
-//        paddingLeft: 5,
-//        ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
-//        ...outerStyle
-      }}
-    >
+      style={{ flexShrink: 0, ...outerStyle }}>
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
             position: 'relative',
-//            borderBottom: !collapsed && `1.5px solid rgba(255,255,255,0.4)`,
-//            paddingBottom: !collapsed && '3px',
-//            marginRight: 15,
-//            marginLeft: 5,
-//            paddingTop: 4,
-//            marginBottom: 4,
           }}
         >
           {toggleAccounts && 
@@ -89,13 +77,13 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
                 height: 18,
                 padding: 3,
                 transition: 'transform .1s',
-                transform: (collapsed) ? 'rotate(-90deg)' : '',
+                transform: collapsed ? 'rotate(-90deg)' : '',
               }}
             />
           }
           <Link
             variant="internal"
-            to={to || 'javascript:void()'}
+            to={to || '#'}
             style={{
               ...accountNameStyle,
               ...style,
@@ -108,12 +96,6 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
             activeStyle={{
               borderColor: theme.sidebarItemAccentSelected,
               color: theme.sidebarItemTextSelected,
-              // This is kind of a hack, but we don't ever want the account
-              // that the user is looking at to be "bolded" which means it
-              // has unread transactions. The system does mark is read and
-              // unbolds it, but it still "flashes" bold so this just
-              // ignores it if it's active
-              //fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
                 backgroundColor: theme.sidebarItemAccentSelected,
                 transform: 'translateX(-4.5px)',
@@ -149,10 +131,10 @@ export function AccountGroupName<FieldName extends SheetFields<'account'>>({
             </View>
 
             <AlignedText
-              style={{
-                borderBottom: !collapsed && `1.5px solid rgba(255,255,255,0.4)`,
-                paddingBottom: !collapsed && '3px',
-              }}
+              style={ (!collapsed && {
+                borderBottom: `1.5px solid rgba(255,255,255,0.4)`,
+                paddingBottom: '3px',
+              })}
               left={groupName}
               right={(query && <CellValue binding={query} type="financial" />)}
             />
