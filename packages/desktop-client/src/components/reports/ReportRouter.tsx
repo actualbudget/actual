@@ -12,7 +12,9 @@ export function ReportRouter() {
     <Routes>
       <Route path="/" element={<Overview />} />
       <Route path="/net-worth" element={<NetWorth />} />
+      <Route path="/net-worth/:id" element={<NetWorth />} />
       <Route path="/cash-flow" element={<CashFlow />} />
+      <Route path="/cash-flow/:id" element={<CashFlow />} />
       <Route path="/custom" element={<CustomReport />} />
       <Route path="/spending" element={<Spending />} />
     </Routes>

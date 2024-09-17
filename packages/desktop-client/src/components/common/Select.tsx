@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { SvgExpandArrow } from '../../icons/v0';
 import { type CSSProperties } from '../../style';
 
-import { Button } from './Button';
+import { Button } from './Button2';
 import { Menu } from './Menu';
 import { Popover } from './Popover';
 import { View } from './View';
@@ -64,16 +64,17 @@ export function Select<const Value = string>({
       <Button
         ref={triggerRef}
         id={id}
-        type={bare ? 'bare' : 'normal'}
-        disabled={disabled}
-        onClick={() => {
+        variant={bare ? 'bare' : 'normal'}
+        isDisabled={disabled}
+        onPress={() => {
           setIsOpen(true);
         }}
-        style={buttonStyle}
-        hoveredStyle={{
-          backgroundColor: bare ? 'transparent' : undefined,
+        style={({ isHovered }) => ({
           ...buttonStyle,
-        }}
+          ...(isHovered
+            ? { backgroundColor: bare ? 'transparent' : undefined }
+            : {}),
+        })}
       >
         <View
           style={{

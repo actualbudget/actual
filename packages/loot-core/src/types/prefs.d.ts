@@ -1,4 +1,4 @@
-import { spendingReportTimeType } from './models/reports';
+import { spendingReportModeType } from './models/reports';
 
 export type FeatureFlag =
   | 'dashboards'
@@ -29,7 +29,6 @@ export type SyncedPrefs = Partial<
     | `csv-has-header-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
-    | 'budgetType'
     | `flags.${FeatureFlag}`,
     string
   >
@@ -40,6 +39,8 @@ export type SyncedPrefs = Partial<
  * core database.
  */
 export type MetadataPrefs = Partial<{
+  // TODO: move budgetType to SyncedPrefs
+  budgetType: string;
   budgetName: string;
   id: string;
   lastUploaded: string;
@@ -54,11 +55,10 @@ export type MetadataPrefs = Partial<{
 
 /**
  * Local preferences applicable to a single device. Stored in local storage.
- * TODO: eventually `LocalPrefs` type should not use `SyncedPrefs` or `MetadataPrefs`;
+ * TODO: eventually `LocalPrefs` type should not use `MetadataPrefs`;
  * this is only a stop-gap solution.
  */
-export type LocalPrefs = SyncedPrefs &
-  MetadataPrefs &
+export type LocalPrefs = MetadataPrefs &
   Partial<{
     'ui.showClosedAccounts': boolean;
     'expand-splits': boolean;
@@ -71,8 +71,9 @@ export type LocalPrefs = SyncedPrefs &
     reportsViewSummary: boolean;
     reportsViewLabel: boolean;
     spendingReportFilter: string;
-    spendingReportTime: spendingReportTimeType;
-    spendingReportCompare: spendingReportTimeType;
+    spendingReportMode: spendingReportModeType;
+    spendingReportCompare: string;
+    spendingReportCompareTo: string;
     sidebarWidth: number;
     'mobile.showSpentColumn': boolean;
   }>;
