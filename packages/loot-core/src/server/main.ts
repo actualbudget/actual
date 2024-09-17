@@ -268,20 +268,6 @@ handlers['report-budget-month'] = async function ({ month }) {
   return values;
 };
 
-handlers['budget-set-type'] = async function ({ type }) {
-  if (!prefs.BUDGET_TYPES.includes(type)) {
-    throw new Error('Invalid budget type: ' + type);
-  }
-
-  // It's already the same; don't do anything
-  if (type === prefs.getPrefs().budgetType) {
-    return;
-  }
-
-  // Save prefs
-  return prefs.savePrefs({ budgetType: type });
-};
-
 handlers['category-create'] = mutator(async function ({
   name,
   groupId,
@@ -1991,7 +1977,11 @@ async function loadBudget(id) {
   }
 
   // This is a bit leaky, but we need to set the initial budget type
-  sheet.get().meta().budgetType = prefs.getPrefs().budgetType;
+  const { value: budgetType = 'rollover' } =
+    (await db.first('SELECT value from preferences WHERE id = ?', [
+      'budgetType',
+    ])) ?? {};
+  sheet.get().meta().budgetType = budgetType;
   await budget.createAllBudgets();
 
   // Load all the in-memory state
