@@ -54,28 +54,25 @@ export type MetadataPrefs = Partial<{
 
 /**
  * Local preferences applicable to a single device. Stored in local storage.
- * TODO: eventually `LocalPrefs` type should not use `MetadataPrefs`;
- * this is only a stop-gap solution.
  */
-export type LocalPrefs = MetadataPrefs &
-  Partial<{
-    'ui.showClosedAccounts': boolean;
-    'expand-splits': boolean;
-    'budget.collapsed': string[];
-    'budget.summaryCollapsed': boolean;
-    'budget.showHiddenCategories': boolean;
-    'budget.startMonth': string;
-    'flags.updateNotificationShownForVersion': string;
-    reportsViewLegend: boolean;
-    reportsViewSummary: boolean;
-    reportsViewLabel: boolean;
-    spendingReportFilter: string;
-    spendingReportMode: spendingReportModeType;
-    spendingReportCompare: string;
-    spendingReportCompareTo: string;
-    sidebarWidth: number;
-    'mobile.showSpentColumn': boolean;
-  }>;
+export type LocalPrefs = Partial<{
+  'ui.showClosedAccounts': boolean;
+  'expand-splits': boolean;
+  'budget.collapsed': string[];
+  'budget.summaryCollapsed': boolean;
+  'budget.showHiddenCategories': boolean;
+  'budget.startMonth': string;
+  'flags.updateNotificationShownForVersion': string;
+  reportsViewLegend: boolean;
+  reportsViewSummary: boolean;
+  reportsViewLabel: boolean;
+  spendingReportFilter: string;
+  spendingReportMode: spendingReportModeType;
+  spendingReportCompare: string;
+  spendingReportCompareTo: string;
+  sidebarWidth: number;
+  'mobile.showSpentColumn': boolean;
+}>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
 export type DarkTheme = 'dark' | 'midnight';
