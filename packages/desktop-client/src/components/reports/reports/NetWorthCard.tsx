@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
   type AccountEntity,
   type NetWorthWidget,
 } from 'loot-core/src/types/models';
 
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useResponsive } from '../../../ResponsiveProvider';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
@@ -19,10 +19,12 @@ import { NetWorthGraph } from '../graphs/NetWorthGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
+import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
 type NetWorthCardProps = {
+  widgetId: string;
   isEditing?: boolean;
   accounts: AccountEntity[];
   meta?: NetWorthWidget['meta'];
@@ -31,33 +33,45 @@ type NetWorthCardProps = {
 };
 
 export function NetWorthCard({
+  widgetId,
   isEditing,
   accounts,
   meta = {},
   onMetaChange,
   onRemove,
 }: NetWorthCardProps) {
+  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, 5);
+  const [start, end] = calculateTimeRange(meta?.timeFrame);
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
   const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts),
-    [start, end, accounts],
+    () =>
+      netWorthSpreadsheet(
+        start,
+        end,
+        accounts,
+        meta?.conditions,
+        meta?.conditionsOp,
+      ),
+    [start, end, accounts, meta?.conditions, meta?.conditionsOp],
   );
   const data = useReport('net_worth', params);
 
   return (
     <ReportCard
       isEditing={isEditing}
-      to="/reports/net-worth"
+      to={
+        isDashboardsFeatureEnabled
+          ? `/reports/net-worth/${widgetId}`
+          : '/reports/net-worth'
+      }
       menuItems={[
         {
           name: 'rename',

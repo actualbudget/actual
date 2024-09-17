@@ -6,7 +6,7 @@ import { styles } from '../../style';
 import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
@@ -32,7 +32,7 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
         <>
           <ModalHeader
             title="Hold Buffer"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
             <FieldLabel title="Hold this amount:" />

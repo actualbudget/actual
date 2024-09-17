@@ -1,4 +1,5 @@
 import * as monthUtils from 'loot-core/src/shared/months';
+import { type TimeFrame } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { ReportOptions } from './ReportOptions';
@@ -9,7 +10,7 @@ export function getLiveRange(
   earliestTransaction: string,
   includeCurrentInterval: boolean,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
-): [string, string] {
+): [string, string, TimeFrame['mode']] {
   let dateStart = earliestTransaction;
   let dateEnd = monthUtils.currentDay();
   const rangeName = ReportOptions.dateRangeMap.get(cond);
@@ -50,5 +51,5 @@ export function getLiveRange(
       }
   }
 
-  return [dateStart, dateEnd];
+  return [dateStart, dateEnd, 'sliding-window'];
 }

@@ -44,7 +44,7 @@ function UncategorizedButton() {
   return (
     <Link
       variant="button"
-      type="bare"
+      buttonVariant="bare"
       to="/accounts/uncategorized"
       style={{
         color: theme.errorText,
@@ -60,15 +60,16 @@ type PrivacyButtonProps = {
 };
 
 function PrivacyButton({ style }: PrivacyButtonProps) {
-  const [isPrivacyEnabled, setPrivacyEnabledPref] =
+  const [isPrivacyEnabledPref, setPrivacyEnabledPref] =
     useSyncedPref('isPrivacyEnabled');
+  const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
 
   const privacyIconStyle = { width: 15, height: 15 };
 
   useHotkeys(
     'shift+ctrl+p, shift+cmd+p, shift+meta+p',
     () => {
-      setPrivacyEnabledPref(!isPrivacyEnabled);
+      setPrivacyEnabledPref(String(!isPrivacyEnabled));
     },
     {
       preventDefault: true,
@@ -81,7 +82,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
     <Button
       variant="bare"
       aria-label={`${isPrivacyEnabled ? 'Disable' : 'Enable'} privacy mode`}
-      onPress={() => setPrivacyEnabledPref(!isPrivacyEnabled)}
+      onPress={() => setPrivacyEnabledPref(String(!isPrivacyEnabled))}
       style={style}
     >
       {isPrivacyEnabled ? (

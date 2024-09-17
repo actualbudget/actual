@@ -7,8 +7,12 @@ export async function runQuery(query) {
   return send('query', query.serialize());
 }
 
-export function liveQuery(query, onData?, opts?): LiveQuery {
-  const q = new LiveQuery(query, onData, opts);
+export function liveQuery<Response = unknown>(
+  query,
+  onData?: (response: Response) => void,
+  opts?,
+): LiveQuery {
+  const q = new LiveQuery<Response>(query, onData, opts);
   q.run();
   return q;
 }
@@ -20,7 +24,7 @@ export function pagedQuery(query, onData?, opts?): PagedQuery {
 }
 
 // Subscribe and refetch
-export class LiveQuery {
+export class LiveQuery<Response = unknown> {
   _unsubscribe;
   data;
   dependencies;
@@ -36,7 +40,11 @@ export class LiveQuery {
   inflightRequestId;
   restart;
 
-  constructor(query, onData?, opts: { mapper?; onlySync?: boolean } = {}) {
+  constructor(
+    query,
+    onData?: (response: Response) => void,
+    opts: { mapper?; onlySync?: boolean } = {},
+  ) {
     this.error = new Error();
     this.query = query;
     this.data = null;
