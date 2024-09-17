@@ -48,12 +48,16 @@ export function loadGlobalPrefs() {
   };
 }
 
-export function saveGlobalPrefs(prefs: prefs.GlobalPrefs) {
+export function saveGlobalPrefs(
+  prefs: prefs.GlobalPrefs,
+  onSaveGlobalPrefs?: () => void,
+) {
   return async (dispatch: Dispatch) => {
     await send('save-global-prefs', prefs);
     dispatch({
       type: constants.MERGE_GLOBAL_PREFS,
       globalPrefs: prefs,
     });
+    onSaveGlobalPrefs?.();
   };
 }
