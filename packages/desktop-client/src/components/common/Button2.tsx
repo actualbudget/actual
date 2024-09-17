@@ -139,7 +139,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       variant = 'normal',
       bounce = true,
-      // style,
       Icon,
       ...restProps
     } = props;
