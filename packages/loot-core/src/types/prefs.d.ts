@@ -12,6 +12,7 @@ export type FeatureFlag =
  */
 export type SyncedPrefs = Partial<
   Record<
+    | 'budgetType'
     | 'firstDayOfWeekIdx'
     | 'dateFormat'
     | 'numberFormat'
@@ -39,8 +40,6 @@ export type SyncedPrefs = Partial<
  * core database.
  */
 export type MetadataPrefs = Partial<{
-  // TODO: move budgetType to SyncedPrefs
-  budgetType: string;
   budgetName: string;
   id: string;
   lastUploaded: string;
