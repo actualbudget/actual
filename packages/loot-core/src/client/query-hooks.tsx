@@ -74,21 +74,42 @@ export function useLiveQuery<Response = unknown>(
   makeQuery: () => Query,
   deps: DependencyList,
 ): Response {
-  const [data, setData] = useState(null);
+  const { data } = useQuery<Response>(makeQuery, deps);
+  return data;
+}
+
+export function useQuery<Response = unknown>(
+  makeQuery: () => Query,
+  deps: DependencyList,
+): {
+  data: Response;
+  overrideData: (newData: Response) => void;
+  isLoading: boolean;
+} {
+  const [data, setData] = useState<null | Response>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const query = useMemo(makeQuery, deps);
 
   useEffect(() => {
-    let live = liveQuery(query, async data => {
+    setIsLoading(true);
+
+    let live = liveQuery<Response>(query, async data => {
       if (live) {
+        setIsLoading(false);
         setData(data);
       }
     });
 
     return () => {
+      setIsLoading(false);
       live.unsubscribe();
       live = null;
     };
   }, [query]);
 
-  return data;
+  return {
+    data,
+    overrideData: setData,
+    isLoading,
+  };
 }
