@@ -23,7 +23,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useSetThemeColor } from '../../../hooks/useSetThemeColor';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { AnimatedLoading } from '../../../icons/AnimatedLoading';
@@ -43,7 +42,7 @@ export function Budget() {
   useSetThemeColor(theme.mobileViewTheme);
 
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const [budgetTypePref] = useMetadataPref('budgetType');
+  const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'rollover';
   const spreadsheet = useSpreadsheet();
 
