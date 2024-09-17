@@ -737,7 +737,6 @@ function PayeeCell({
           onUpdate={(id, value) => onUpdate?.(value)}
           onSelect={onSave}
           onManagePayees={() => onManagePayees(payee?.id)}
-          menuPortalTarget={undefined}
         />
       )}
     </CustomCell>
