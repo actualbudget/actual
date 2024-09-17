@@ -12,7 +12,7 @@ const SYNCED_PREF_KEYS = [
   /^csv-has-header-/,
   /^ofx-fallback-missing-payee-/,
   /^flip-amount-/,
-  // 'budgetType', // TODO: uncomment when `budgetType` moves from metadata to synced prefs
+  'budgetType',
   /^flags\./,
 ];
 
