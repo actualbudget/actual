@@ -46,7 +46,7 @@ export function Accounts({
         groupName={t('All accounts')}
         query={queries.allAccountBalance()}
         to="/accounts"
-        outerStyle={{ overflowY: 'scroll', margin: '5px 0', }}
+        outerStyle={{ margin: '5px 0', marginRight: 5 }}
       />
 
       <View style={{ overflowY: 'scroll', }}>

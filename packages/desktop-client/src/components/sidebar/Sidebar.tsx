@@ -154,11 +154,10 @@ export function Sidebar() {
               justifyContent: 'flex-start',
             }),
             '& .hover-visible': {
-              opacity: 0,
-              transition: 'opacity .25s',
+              display: 'none'
             },
             '&:hover .hover-visible': {
-              opacity: 1,
+              display: 'flex'
             },
           }}
         >
