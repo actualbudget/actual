@@ -1190,7 +1190,7 @@ class AccountInternal extends PureComponent<
     } satisfies RuleConditionEntity;
 
     const rule = {
-      stage: 'default',
+      stage: null,
       conditionsOp: 'and',
       conditions: [payeeCondition, amountCondition],
       actions: [

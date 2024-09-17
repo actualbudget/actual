@@ -1,7 +1,7 @@
 import { type ScheduleEntity } from './schedule';
 
 export interface NewRuleEntity {
-  stage: string;
+  stage: 'pre' | null | 'post';
   conditionsOp: 'or' | 'and';
   conditions: RuleConditionEntity[];
   actions: RuleActionEntity[];

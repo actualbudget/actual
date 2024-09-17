@@ -730,7 +730,7 @@ export class Rule {
   conditions: Condition[];
   conditionsOp;
   id?: string;
-  stage;
+  stage: 'pre' | null | 'post';
 
   constructor({
     id,
@@ -741,14 +741,14 @@ export class Rule {
     fieldTypes,
   }: {
     id?: string;
-    stage?;
+    stage?: 'pre' | null | 'post';
     conditionsOp;
     conditions;
     actions;
     fieldTypes;
   }) {
     this.id = id;
-    this.stage = stage;
+    this.stage = stage ?? null;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
       c => new Condition(c.op, c.field, c.value, c.options, fieldTypes),
@@ -821,7 +821,7 @@ export class RuleIndexer {
     this.rules = new Map();
   }
 
-  getIndex(key: string): Set<Rule> {
+  getIndex(key: string | null): Set<Rule> {
     if (!this.rules.has(key)) {
       this.rules.set(key, new Set());
     }
@@ -1041,7 +1041,7 @@ export function migrateIds(rule: Rule, mappings: Map<string, string>): void {
 export function iterateIds(
   rules: Rule[],
   fieldName: string,
-  func: (rule: Rule, id: string) => unknown,
+  func: (rule: Rule, id: string) => void | boolean,
 ): void {
   let i;
 
