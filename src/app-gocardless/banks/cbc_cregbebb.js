@@ -5,7 +5,7 @@ import Fallback from './integration-bank.js';
 export default {
   ...Fallback,
 
-  institutionIds: ['KBC_KREDBEBB'],
+  institutionIds: ['CBC_CREGBEBB'],
 
   /**
    * For negative amounts, the only payee information we have is returned in
@@ -28,7 +28,7 @@ export default {
         transaction.creditorName ||
         extractPayeeNameFromRemittanceInfo(
           transaction.remittanceInformationUnstructured,
-          ['Betaling met', 'Domiciliëring', 'Overschrijving'],
+          ['Paiement', 'Domiciliation', 'Transfert', 'Ordre permanent'],
         ),
       date: transaction.bookingDate || transaction.valueDate,
     };
