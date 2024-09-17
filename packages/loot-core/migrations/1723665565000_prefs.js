@@ -47,20 +47,11 @@ export default async function runMigration(db, { fs, fileId }) {
         }
 
         // insert the synced prefs in the new table
-        await db.runQuery('INSERT INTO preferences SET id = ?, value = ?', [
+        await db.runQuery('INSERT INTO preferences (id, value) VALUES (?, ?)', [
           key,
           String(prefs[key]),
         ]);
-
-        // remove the synced prefs from the metadata file
-        delete prefs[key];
       }),
-    );
-
-    // Update the metadata.json file
-    await fs.writeFile(
-      fs.join(budgetDir, 'metadata.json'),
-      JSON.stringify(prefs),
     );
   } catch (e) {
     // Do nothing

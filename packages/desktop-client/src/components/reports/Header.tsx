@@ -8,7 +8,6 @@ import {
 } from 'loot-core/types/models';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { SvgPause, SvgPlay } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { Button } from '../common/Button2';
 import { Select } from '../common/Select';
@@ -17,6 +16,7 @@ import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import {
+  calculateTimeRange,
   getFullRange,
   getLatestRange,
   validateEnd,
@@ -85,16 +85,18 @@ export function Header({
           {isDashboardsFeatureEnabled && mode && (
             <Button
               variant={mode === 'static' ? 'normal' : 'primary'}
-              onPress={() =>
-                onChangeDates(
+              onPress={() => {
+                const newMode = mode === 'static' ? 'sliding-window' : 'static';
+                const [newStart, newEnd] = calculateTimeRange({
                   start,
                   end,
-                  mode === 'static' ? 'sliding-window' : 'static',
-                )
-              }
-              Icon={mode === 'static' ? SvgPause : SvgPlay}
+                  mode: newMode,
+                });
+
+                onChangeDates(newStart, newEnd, newMode);
+              }}
             >
-              {mode === 'static' ? 'Paused' : 'Live'}
+              {mode === 'static' ? 'Static' : 'Live'}
             </Button>
           )}
 
