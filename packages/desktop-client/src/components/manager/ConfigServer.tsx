@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -34,8 +34,15 @@ export function ConfigServer() {
   }, [currentUrl]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const restartElectronServer = useCallback(() => {
+    globalThis.window.Actual.restartElectronServer();
+    setError(null);
+  }, []);
+
   const [_serverSelfSignedCert, setServerSelfSignedCert] = useGlobalPref(
     'serverSelfSignedCert',
+    restartElectronServer,
   );
 
   function getErrorMessage(error: string) {
@@ -101,7 +108,6 @@ export function ConfigServer() {
 
     if (selfSignedCertificateLocation) {
       setServerSelfSignedCert(selfSignedCertificateLocation[0]);
-      globalThis.window.Actual.relaunch(); // relaunch to use the certificate
     }
   }
 

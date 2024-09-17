@@ -1,7 +1,6 @@
-import { useSelector } from 'react-redux';
-
-import { type State } from 'loot-core/src/client/state-types';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
+
+import { useSyncedPref } from './useSyncedPref';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,
@@ -13,11 +12,9 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {
-  return useSelector((state: State) => {
-    const value = state.prefs.local[`flags.${name}`];
+  const [value] = useSyncedPref(`flags.${name}`);
 
-    return value === undefined
-      ? DEFAULT_FEATURE_FLAG_STATE[name] || false
-      : value;
-  });
+  return value === undefined
+    ? DEFAULT_FEATURE_FLAG_STATE[name] || false
+    : String(value) === 'true';
 }

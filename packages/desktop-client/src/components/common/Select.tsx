@@ -3,20 +3,23 @@ import { useRef, useState } from 'react';
 import { SvgExpandArrow } from '../../icons/v0';
 import { type CSSProperties } from '../../style';
 
-import { Button } from './Button';
+import { Button } from './Button2';
 import { Menu } from './Menu';
 import { Popover } from './Popover';
 import { View } from './View';
 
-function isValueOption<Value extends string>(
-  option: [Value, string] | typeof Menu.line,
+function isValueOption<Value>(
+  option: readonly [Value, string] | typeof Menu.line,
 ): option is [Value, string] {
   return option !== Menu.line;
 }
 
-type SelectProps<Value extends string> = {
+export type SelectOption<Value = string> = [Value, string] | typeof Menu.line;
+
+type SelectProps<Value> = {
+  id?: string;
   bare?: boolean;
-  options: Array<[Value, string] | typeof Menu.line>;
+  options: Array<readonly [Value, string] | typeof Menu.line>;
   value: Value;
   defaultLabel?: string;
   onChange?: (newValue: Value) => void;
@@ -38,7 +41,8 @@ type SelectProps<Value extends string> = {
  * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="1" onChange={handleOnChange} />
  * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
-export function Select<Value extends string>({
+export function Select<const Value = string>({
+  id,
   bare,
   options,
   value,
@@ -59,16 +63,18 @@ export function Select<Value extends string>({
     <>
       <Button
         ref={triggerRef}
-        type={bare ? 'bare' : 'normal'}
-        disabled={disabled}
-        onClick={() => {
+        id={id}
+        variant={bare ? 'bare' : 'normal'}
+        isDisabled={disabled}
+        onPress={() => {
           setIsOpen(true);
         }}
-        style={buttonStyle}
-        hoveredStyle={{
-          backgroundColor: bare ? 'transparent' : undefined,
+        style={({ isHovered }) => ({
           ...buttonStyle,
-        }}
+          ...(isHovered
+            ? { backgroundColor: bare ? 'transparent' : undefined }
+            : {}),
+        })}
       >
         <View
           style={{

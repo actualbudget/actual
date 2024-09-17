@@ -53,6 +53,7 @@ import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
+import { app as preferencesApp } from './preferences/app';
 import * as prefs from './prefs';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
@@ -1256,6 +1257,12 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('theme' in prefs) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
+  if ('preferredDarkTheme' in prefs) {
+    await asyncStorage.setItem(
+      'preferred-dark-theme',
+      prefs.preferredDarkTheme,
+    );
+  }
   if ('serverSelfSignedCert' in prefs) {
     await asyncStorage.setItem(
       'server-self-signed-cert',
@@ -1272,12 +1279,14 @@ handlers['load-global-prefs'] = async function () {
     [, documentDir],
     [, encryptKey],
     [, theme],
+    [, preferredDarkTheme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
     'document-dir',
     'encrypt-key',
     'theme',
+    'preferred-dark-theme',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1292,6 +1301,10 @@ handlers['load-global-prefs'] = async function () {
       theme === 'midnight'
         ? theme
         : 'auto',
+    preferredDarkTheme:
+      preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
+        ? preferredDarkTheme
+        : 'dark',
   };
 };
 
@@ -2067,6 +2080,7 @@ app.combine(
   budgetApp,
   dashboardApp,
   notesApp,
+  preferencesApp,
   toolsApp,
   filtersApp,
   reportsApp,

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/client/actions';
@@ -8,11 +8,10 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { useInitialMount } from '../../hooks/useInitialMount';
 import { styles } from '../../style';
 import { addToBeBudgetedGroup } from '../budget/util';
 import { Button } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 
@@ -85,14 +84,6 @@ export function CoverModal({
     }
   };
 
-  const initialMount = useInitialMount();
-
-  useEffect(() => {
-    if (initialMount) {
-      onCategoryClick();
-    }
-  }, [initialMount, onCategoryClick]);
-
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   return (
@@ -101,7 +92,7 @@ export function CoverModal({
         <>
           <ModalHeader
             title={title}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
             <FieldLabel title="Cover from category:" />

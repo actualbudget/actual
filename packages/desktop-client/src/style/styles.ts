@@ -110,9 +110,7 @@ export const styles = {
     animationDelay: '0.5s',
   },
   underlinedText: {
-    textDecoration: 'underline',
-    textDecorationThickness: 2,
-    textDecorationColor: theme.pillBorder,
+    borderBottom: `2px solid`,
   },
   noTapHighlight: {
     WebkitTapHighlightColor: 'transparent',
