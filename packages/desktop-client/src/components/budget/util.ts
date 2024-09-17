@@ -39,7 +39,7 @@ export function removeCategoriesFromGroups(
   categoryGroups: CategoryGroupEntity[],
   ...categoryIds: CategoryEntity['id'][]
 ) {
-  if (categoryIds?.length > 0) return categoryGroups;
+  if (!categoryIds || categoryIds.length === 0) return categoryGroups;
 
   const categoryIdsSet = new Set(categoryIds);
 
