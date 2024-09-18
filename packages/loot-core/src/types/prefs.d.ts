@@ -4,14 +4,14 @@ export type FeatureFlag =
   | 'dashboards'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'spendingReport'
-  | 'simpleFinSync';
+  | 'spendingReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
  */
 export type SyncedPrefs = Partial<
   Record<
+    | 'budgetType'
     | 'firstDayOfWeekIdx'
     | 'dateFormat'
     | 'numberFormat'
@@ -39,8 +39,6 @@ export type SyncedPrefs = Partial<
  * core database.
  */
 export type MetadataPrefs = Partial<{
-  // TODO: move budgetType to SyncedPrefs
-  budgetType: string;
   budgetName: string;
   id: string;
   lastUploaded: string;
@@ -55,11 +53,10 @@ export type MetadataPrefs = Partial<{
 
 /**
  * Local preferences applicable to a single device. Stored in local storage.
- * TODO: eventually `LocalPrefs` type should not use `SyncedPrefs` or `MetadataPrefs`;
+ * TODO: eventually `LocalPrefs` type should not use `MetadataPrefs`;
  * this is only a stop-gap solution.
  */
-export type LocalPrefs = SyncedPrefs &
-  MetadataPrefs &
+export type LocalPrefs = MetadataPrefs &
   Partial<{
     'ui.showClosedAccounts': boolean;
     'expand-splits': boolean;

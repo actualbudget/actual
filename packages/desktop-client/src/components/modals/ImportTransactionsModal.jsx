@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 import * as d from 'date-fns';
+import deepEqual from 'deep-equal';
 
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
@@ -922,8 +923,8 @@ export function ImportTransactionsModal({ options }) {
           );
           break;
         }
-        if (trans.payee == null || !(trans.payee instanceof String)) {
-          console.log(`Unable·to·parse·payee·${trans.payee || '(empty)'}`);
+        if (trans.payee_name == null || typeof trans.payee_name !== 'string') {
+          console.log(`Unable·to·parse·payee·${trans.payee_name || '(empty)'}`);
           break;
         }
 
@@ -1379,7 +1380,10 @@ export function ImportTransactionsModal({ options }) {
       outValue,
       multiplierAmount,
     );
-    setTransactions(transactionPreview);
+
+    if (!deepEqual(transactions, transactionPreview)) {
+      setTransactions(transactionPreview);
+    }
   }, [
     getImportPreview,
     transactions,
