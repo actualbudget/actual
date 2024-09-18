@@ -6,7 +6,7 @@ import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
 import {
   BalanceWithCarryover,
-  DefaultCarryoverIndicator,
+  CarryoverIndicator,
 } from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/report/BalanceMenu';
 import {
@@ -14,9 +14,10 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { CellValueText } from '../spreadsheet/CellValue';
 
 type ReportBalanceMenuModalProps = ComponentPropsWithoutRef<typeof BalanceMenu>;
 
@@ -43,7 +44,7 @@ export function ReportBalanceMenuModal({
         <>
           <ModalHeader
             title={<ModalTitle title={category.name} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{
@@ -62,27 +63,33 @@ export function ReportBalanceMenuModal({
             </Text>
             <BalanceWithCarryover
               disabled
-              style={{
-                textAlign: 'center',
-                ...styles.veryLargeText,
-              }}
               carryover={reportBudget.catCarryover(categoryId)}
               balance={reportBudget.catBalance(categoryId)}
               goal={reportBudget.catGoal(categoryId)}
               budgeted={reportBudget.catBudgeted(categoryId)}
               longGoal={reportBudget.catLongGoal(categoryId)}
-              carryoverIndicator={({ style }) =>
-                DefaultCarryoverIndicator({
-                  style: {
+              CarryoverIndicator={({ style }) => (
+                <CarryoverIndicator
+                  style={{
                     width: 15,
                     height: 15,
                     display: 'inline-flex',
                     position: 'relative',
                     ...style,
-                  },
-                })
-              }
-            />
+                  }}
+                />
+              )}
+            >
+              {props => (
+                <CellValueText
+                  {...props}
+                  style={{
+                    textAlign: 'center',
+                    ...styles.veryLargeText,
+                  }}
+                />
+              )}
+            </BalanceWithCarryover>
           </View>
           <BalanceMenu
             categoryId={categoryId}

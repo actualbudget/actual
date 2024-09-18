@@ -2,6 +2,23 @@ import type { AccountEntity } from './account';
 import type { PayeeEntity } from './payee';
 import type { RuleEntity } from './rule';
 
+export interface RecurPattern {
+  value: number;
+  type: 'SU' | 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'day';
+}
+
+export interface RecurConfig {
+  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  interval: number;
+  patterns?: RecurPattern[];
+  skipWeekend?: boolean;
+  start: string;
+  endMode: 'never' | 'after_n_occurrences' | 'on_date';
+  endOccurrences?: number;
+  endDate?: string;
+  weekendSolveMode?: 'before' | 'after';
+}
+
 export interface ScheduleEntity {
   id: string;
   name?: string;
@@ -17,20 +34,7 @@ export interface ScheduleEntity {
   _account: AccountEntity['id'];
   _amount: unknown;
   _amountOp: string;
-  _date: {
-    interval: number;
-    patterns: {
-      value: number;
-      type: 'SU' | 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'day';
-    }[];
-    skipWeekend: boolean;
-    start: string;
-    endMode: 'never' | 'after_n_occurrences' | 'on_date';
-    endOccurrences: number;
-    endDate: string;
-    weekendSolveMode: 'before' | 'after';
-    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  };
+  _date: RecurConfig;
   _conditions: unknown;
   _actions: unknown;
 }
