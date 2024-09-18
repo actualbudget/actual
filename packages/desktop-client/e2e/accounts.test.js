@@ -102,7 +102,7 @@ test.describe('Accounts', () => {
     });
   });
 
-  test.describe.only('Import Transactions', () => {
+  test.describe('Import Transactions', () => {
     test.beforeEach(async () => {
       accountPage = await navigation.createAccount({
         name: 'CSV import',
