@@ -166,7 +166,7 @@ export function SpendingCard({
             compareTo={end}
           />
         ) : (
-          <LoadingIndicator message={t('Loading report...')} />
+          <LoadingIndicator />
         )}
       </View>
     </ReportCard>

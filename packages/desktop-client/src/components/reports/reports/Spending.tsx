@@ -33,7 +33,11 @@ import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ModeButton } from '../ModeButton';
-import { calculateTimeRange } from '../reportRanges';
+import {
+  calculateTimeRange,
+  validateEnd,
+  validateStart,
+} from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
@@ -191,195 +195,234 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     >
       <View
         style={{
-          flexDirection: isNarrowWidth ? 'column' : 'row',
-          alignItems: isNarrowWidth ? 'inherit' : 'center',
-          padding: 20,
-          paddingBottom: 0,
+          paddingLeft: 20,
+          paddingRight: 20,
+          paddingTop: 15,
+          paddingBottom: 20,
           flexShrink: 0,
         }}
       >
-        <Button
-          variant={mode === 'static' ? 'normal' : 'primary'}
-          onPress={() => {
-            const newMode = mode === 'static' ? 'sliding-window' : 'static';
-            const [newStart, newEnd] = calculateTimeRange({
-              start,
-              end,
-              mode: newMode,
-            });
-
-            setMode(newMode);
-            setStart(newStart);
-            setEnd(newEnd);
-          }}
-        >
-          {mode === 'static' ? 'Static' : 'Live'}
-        </Button>
-
-        <View
-          style={{
-            width: 1,
-            height: 30,
-            backgroundColor: theme.pillBorderDark,
-            marginRight: 10,
-            marginLeft: 10,
-          }}
-        />
-
-        <View
-          style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            marginRight: 5,
-            marginBottom: 5,
-            marginTop: 5,
-            gap: 5,
-          }}
-        >
-          <Text>
-            <Trans>Compare</Trans>
-          </Text>
-          <Select
-            value={start}
-            onChange={setStart}
-            options={allIntervals.map(
-              ({ name, pretty }) => [name, pretty] as const,
-            )}
-            buttonStyle={{ width: 150 }}
-            popoverStyle={{ width: 150 }}
-          />
-          <Text>
-            <Trans>to</Trans>
-          </Text>
-          <Select
-            value={reportMode === 'single-month' ? end : 'label'}
-            onChange={setEnd}
-            options={
-              reportMode === 'single-month'
-                ? allIntervals.map(({ name, pretty }) => [name, pretty])
-                : [
-                    [
-                      'label',
-                      reportMode === 'budget'
-                        ? t('Budgeted')
-                        : t('Average spent'),
-                    ],
-                  ]
-            }
-            disabled={reportMode !== 'single-month'}
-            buttonStyle={{ width: 150 }}
-            popoverStyle={{ width: 150 }}
-          />
-        </View>
         {!isNarrowWidth && (
           <View
             style={{
-              width: 1,
-              height: 30,
-              backgroundColor: theme.pillBorderDark,
-              marginRight: 15,
-              marginLeft: 10,
-            }}
-          />
-        )}
-        <View
-          style={{
-            flexDirection: 'row',
-            marginRight: 5,
-            marginTop: 5,
-            marginBottom: 5,
-          }}
-        >
-          <ModeButton
-            selected={reportMode === 'single-month'}
-            style={{
-              backgroundColor: 'inherit',
-            }}
-            onSelect={() => {
-              setReportMode('single-month');
+              flexDirection: 'row',
+              alignItems: 'center',
+              flexShrink: 0,
             }}
           >
-            <Trans>Single month</Trans>
-          </ModeButton>
-          <ModeButton
-            selected={reportMode === 'budget'}
-            onSelect={() => {
-              setStart(monthUtils.currentMonth());
-              setReportMode('budget');
-            }}
-            style={{
-              backgroundColor: 'inherit',
-            }}
-          >
-            <Trans>Budgeted</Trans>
-          </ModeButton>
-          <ModeButton
-            selected={reportMode === 'average'}
-            onSelect={() => {
-              setStart(monthUtils.currentMonth());
-              setReportMode('average');
-            }}
-            style={{
-              backgroundColor: 'inherit',
-            }}
-          >
-            <Trans>Average</Trans>
-          </ModeButton>
-        </View>
-        {!isNarrowWidth && (
-          <View
-            style={{
-              width: 1,
-              height: 30,
-              backgroundColor: theme.pillBorderDark,
-              marginRight: 10,
-            }}
-          />
-        )}
-        <View
-          style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            marginBottom: 5,
-            marginTop: 5,
-            flex: 1,
-          }}
-        >
-          <FilterButton
-            onApply={onApplyFilter}
-            compact={isNarrowWidth}
-            hover={false}
-            exclude={['date']}
-          />
-          <View style={{ flex: 1 }} />
+            <Button
+              variant={mode === 'static' ? 'normal' : 'primary'}
+              onPress={() => {
+                const newMode = mode === 'static' ? 'sliding-window' : 'static';
+                const [newStart, newEnd] = calculateTimeRange({
+                  start,
+                  end,
+                  mode: newMode,
+                });
 
-          {widget && (
-            <Tooltip
-              placement="top end"
-              content={
-                <Text>
-                  <Trans>Save compare and filter options</Trans>
-                </Text>
-              }
-              style={{
-                ...styles.tooltip,
-                lineHeight: 1.5,
-                padding: '6px 10px',
-                marginLeft: 10,
+                setMode(newMode);
+                setStart(newStart);
+                setEnd(newEnd);
               }}
             >
-              <Button
-                variant="primary"
-                style={{
-                  marginLeft: 10,
+              {mode === 'static' ? 'Static' : 'Live'}
+            </Button>
+
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+                marginLeft: 10,
+              }}
+            />
+
+            <View
+              style={{
+                alignItems: 'center',
+                flexDirection: 'row',
+                marginRight: 5,
+                gap: 5,
+              }}
+            >
+              <Text>
+                <Trans>Compare</Trans>
+              </Text>
+              <Select
+                value={start}
+                onChange={newValue => {
+                  const [newStart, newEnd] = validateStart(
+                    allIntervals[allIntervals.length - 1].name,
+                    newValue,
+                    end,
+                  );
+                  setStart(newStart);
+                  setEnd(newEnd);
                 }}
-                onPress={onSaveWidget}
+                options={allIntervals.map(
+                  ({ name, pretty }) => [name, pretty] as const,
+                )}
+                buttonStyle={{ width: 150 }}
+                popoverStyle={{ width: 150 }}
+              />
+              <Text>
+                <Trans>to</Trans>
+              </Text>
+              <Select
+                value={reportMode === 'single-month' ? end : 'label'}
+                onChange={newValue => {
+                  const [newStart, newEnd] = validateEnd(
+                    allIntervals[allIntervals.length - 1].name,
+                    start,
+                    newValue,
+                  );
+                  setStart(newStart);
+                  setEnd(newEnd);
+                }}
+                options={
+                  reportMode === 'single-month'
+                    ? allIntervals.map(({ name, pretty }) => [name, pretty])
+                    : [
+                        [
+                          'label',
+                          reportMode === 'budget'
+                            ? t('Budgeted')
+                            : t('Average spent'),
+                        ],
+                      ]
+                }
+                disabled={reportMode !== 'single-month'}
+                buttonStyle={{ width: 150 }}
+                popoverStyle={{ width: 150 }}
+              />
+            </View>
+
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 15,
+                marginLeft: 10,
+              }}
+            />
+
+            <View
+              style={{
+                flexDirection: 'row',
+                marginRight: 5,
+              }}
+            >
+              <ModeButton
+                selected={reportMode === 'single-month'}
+                style={{
+                  backgroundColor: 'inherit',
+                }}
+                onSelect={() => {
+                  setReportMode('single-month');
+                }}
               >
-                <Trans>Save</Trans>
-              </Button>
-            </Tooltip>
-          )}
-        </View>
+                <Trans>Single month</Trans>
+              </ModeButton>
+              <ModeButton
+                selected={reportMode === 'budget'}
+                onSelect={() => {
+                  setStart(monthUtils.currentMonth());
+                  setReportMode('budget');
+                }}
+                style={{
+                  backgroundColor: 'inherit',
+                }}
+              >
+                <Trans>Budgeted</Trans>
+              </ModeButton>
+              <ModeButton
+                selected={reportMode === 'average'}
+                onSelect={() => {
+                  setStart(monthUtils.currentMonth());
+                  setReportMode('average');
+                }}
+                style={{
+                  backgroundColor: 'inherit',
+                }}
+              >
+                <Trans>Average</Trans>
+              </ModeButton>
+            </View>
+
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+              }}
+            />
+
+            <View
+              style={{
+                alignItems: 'center',
+                flexDirection: 'row',
+                flex: 1,
+              }}
+            >
+              <FilterButton
+                onApply={onApplyFilter}
+                compact={isNarrowWidth}
+                hover={false}
+                exclude={['date']}
+              />
+              <View style={{ flex: 1 }} />
+
+              {widget && (
+                <Tooltip
+                  placement="top end"
+                  content={
+                    <Text>
+                      <Trans>Save compare and filter options</Trans>
+                    </Text>
+                  }
+                  style={{
+                    ...styles.tooltip,
+                    lineHeight: 1.5,
+                    padding: '6px 10px',
+                    marginLeft: 10,
+                  }}
+                >
+                  <Button
+                    variant="primary"
+                    style={{
+                      marginLeft: 10,
+                    }}
+                    onPress={onSaveWidget}
+                  >
+                    <Trans>Save</Trans>
+                  </Button>
+                </Tooltip>
+              )}
+            </View>
+          </View>
+        )}
+
+        {conditions && conditions.length > 0 && (
+          <View
+            style={{
+              marginTop: 5,
+              flexShrink: 0,
+              flexDirection: 'row',
+              spacing: 2,
+            }}
+          >
+            <AppliedFilters
+              conditions={conditions}
+              onUpdate={onUpdateFilter}
+              onDelete={onDeleteFilter}
+              conditionsOp={conditionsOp}
+              onConditionsOpChange={onConditionsOpChange}
+            />
+          </View>
+        )}
       </View>
       <View
         style={{
@@ -394,25 +437,6 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             flexGrow: 1,
           }}
         >
-          {conditions && conditions.length > 0 && (
-            <View
-              style={{
-                marginBottom: 10,
-                marginLeft: 20,
-                flexShrink: 0,
-                flexDirection: 'row',
-                spacing: 2,
-              }}
-            >
-              <AppliedFilters
-                conditions={conditions}
-                onUpdate={onUpdateFilter}
-                onDelete={onDeleteFilter}
-                conditionsOp={conditionsOp}
-                onConditionsOpChange={onConditionsOpChange}
-              />
-            </View>
-          )}
           <View
             style={{
               backgroundColor: theme.tableBackground,
