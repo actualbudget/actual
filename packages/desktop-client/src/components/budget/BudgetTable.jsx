@@ -41,6 +41,9 @@ export function BudgetTable(props) {
     'budget.showHiddenCategories',
   );
   const [editing, setEditing] = useState(null);
+  const [showProgress = false, setShowProgress] = useLocalPref(
+    'budget.showProgress',
+  );
 
   const onEditMonth = (id, month) => {
     setEditing(id ? { id, cell: month } : null);
@@ -141,14 +144,6 @@ export function BudgetTable(props) {
     setCollapsedGroupIdsPref(collapsedIds);
   };
 
-  const onToggleHiddenCategories = () => {
-    setShowHiddenCategoriesPef(!showHiddenCategories);
-  };
-
-  const toggleHiddenCategories = () => {
-    onToggleHiddenCategories();
-  };
-
   const expandAllCategories = () => {
     onCollapse([]);
   };
@@ -202,7 +197,10 @@ export function BudgetTable(props) {
       >
         <BudgetTotals
           MonthComponent={dataComponents.BudgetTotalsComponent}
-          toggleHiddenCategories={toggleHiddenCategories}
+          setShowHiddenCategoriesPef={setShowHiddenCategoriesPef}
+          showHiddenCategories={showHiddenCategories}
+          setShowProgress={setShowProgress}
+          showProgress={showProgress}
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
         />

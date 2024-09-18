@@ -5,6 +5,7 @@ import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
@@ -196,6 +197,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: ExpenseCategoryMonthProps) {
+  const [showProgress] = useLocalPref('budget.showProgress');
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
   const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
@@ -476,14 +478,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           </Popover>
         </Field>
       </View>
-      <View
-        style={{
-          height: 13,
-          marginTop: -5,
-        }}
-      >
-        {isHovered && <BarGraphVertical style={{ flexGrow: 1 }} data={data} />}
-      </View>
+      {showProgress && (
+        <View
+          style={{
+            height: 13,
+            marginTop: -5,
+          }}
+        >
+          {isHovered && (
+            <BarGraphVertical style={{ flexGrow: 1 }} data={data} />
+          )}
+        </View>
+      )}
     </View>
   );
 });

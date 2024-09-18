@@ -7,6 +7,7 @@ import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
@@ -208,6 +209,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
+  const [showProgress] = useLocalPref('budget.showProgress');
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -496,14 +498,18 @@ export const CategoryMonth = memo(function CategoryMonth({
           </Field>
         )}
       </View>
-      <View
-        style={{
-          height: 13,
-          marginTop: -5,
-        }}
-      >
-        {isHovered && <BarGraphVertical style={{ flexGrow: 1 }} data={data} />}
-      </View>
+      {showProgress && (
+        <View
+          style={{
+            height: 13,
+            marginTop: -5,
+          }}
+        >
+          {isHovered && (
+            <BarGraphVertical style={{ flexGrow: 1 }} data={data} />
+          )}
+        </View>
+      )}
     </View>
   );
 });

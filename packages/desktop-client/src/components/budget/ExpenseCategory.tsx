@@ -6,6 +6,7 @@ import {
   type CategoryEntity,
 } from 'loot-core/src/types/models';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
 import { View } from '../common/View';
 import {
@@ -52,6 +53,7 @@ export function ExpenseCategory({
   onDragChange,
   onReorder,
 }: ExpenseCategoryProps) {
+  const [showProgress] = useLocalPref('budget.showProgress');
   let dragging = dragState && dragState.item === cat;
 
   if (dragState && dragState.item.id === cat.cat_group) {
@@ -75,7 +77,7 @@ export function ExpenseCategory({
     <Row
       innerRef={dropRef}
       collapsed={true}
-      height={44}
+      height={showProgress && 44}
       style={{
         backgroundColor: theme.tableBackground,
         opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,

@@ -201,7 +201,7 @@ export function Menu<T extends MenuItem>({
                   id={item.name}
                   checked={item.toggle}
                   onColor={theme.pageTextPositive}
-                  style={{ marginLeft: 5 }}
+                  style={{ marginLeft: 5, paddingTop: 5 }}
                   onToggle={() =>
                     !item.disabled &&
                     item.toggle !== undefined &&

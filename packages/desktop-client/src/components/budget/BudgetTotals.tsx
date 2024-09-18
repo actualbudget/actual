@@ -13,14 +13,20 @@ import { getScrollbarWidth } from './util';
 
 type BudgetTotalsProps = {
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
-  toggleHiddenCategories: () => void;
+  setShowHiddenCategoriesPef: (value: boolean) => void;
+  showHiddenCategories: boolean;
+  setShowProgress: (value: boolean) => void;
+  showProgress: boolean;
   expandAllCategories: () => void;
   collapseAllCategories: () => void;
 };
 
 export const BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
-  toggleHiddenCategories,
+  setShowHiddenCategoriesPef,
+  showHiddenCategories,
+  setShowProgress,
+  showProgress,
   expandAllCategories,
   collapseAllCategories,
 }: BudgetTotalsProps) {
@@ -77,23 +83,32 @@ export const BudgetTotals = memo(function BudgetTotals({
           triggerRef={triggerRef}
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 200 }}
+          style={{ width: 210 }}
         >
           <Menu
             onMenuSelect={type => {
-              if (type === 'toggle-visibility') {
-                toggleHiddenCategories();
+              if (type === 'showHiddenCategories') {
+                setShowHiddenCategoriesPef(!showHiddenCategories);
+              } else if (type === 'showProgress') {
+                setShowProgress(!showProgress);
               } else if (type === 'expandAllCategories') {
                 expandAllCategories();
+                setMenuOpen(false);
               } else if (type === 'collapseAllCategories') {
                 collapseAllCategories();
+                setMenuOpen(false);
               }
-              setMenuOpen(false);
             }}
             items={[
               {
-                name: 'toggle-visibility',
-                text: t('Toggle hidden categories'),
+                name: 'showHiddenCategories',
+                text: t('Show hidden categories'),
+                toggle: showHiddenCategories,
+              },
+              {
+                name: 'showProgress',
+                text: t('Show progress bars'),
+                toggle: showProgress,
               },
               {
                 name: 'expandAllCategories',
