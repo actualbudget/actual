@@ -52,7 +52,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
     'ui.collapsedAccountGroups',
   );
 
-  if (!collapsed || !collapsed.hasOwnProperty(groupName.replace(/\s/g, ""))) {
+  if (!collapsed || !Object.hasOwn(collapsed, groupName.replace(/\s/g, ""))) {
     let c = (collapsed ? { ...collapsed } : {});
     c[groupName.replace(/\s/g, "")] = false;
     setCollapsedGroupsPref(c);
@@ -83,7 +83,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
         to={groupTo}
         query={groupQuery}
         toggleAccounts={toggleAccounts}
-        collapsed={collapsed && collapsed[groupName.replace(/\s/g, "")]}
+        collapsed={collapsed?.[groupName.replace(/\s/g, "")]}
       />
 
       {collapsed && !collapsed[groupName.replace(/\s/g, "")] && accountList && accountList.map((account, i) => (
@@ -93,8 +93,8 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
           account={account}
           connected={!!account.bank}
           pending={syncingAccountIds.includes(account.id)}
-          failed={failedAccounts && failedAccounts.has(account.id)}
-          updated={updatedAccounts && updatedAccounts.includes(account.id)}
+          failed={failedAccounts?.has(account.id)}
+          updated={updatedAccounts?.includes(account.id)}
           to={getAccountPath(account)}
           query={queries.accountBalance(account)}
           onDragChange={onDragChange}

@@ -3,7 +3,6 @@ import React, {
   type ComponentType,
   type SVGProps,
 } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { View } from '../common/View';
 import { SecondaryItem } from './SecondaryItem';
@@ -23,7 +22,6 @@ type BottomButtonsProps = {
 export function BottomButtons({
   buttons,
 }: BottomButtonsProps) {
-  const { t } = useTranslation();
 
   return (
     <View
