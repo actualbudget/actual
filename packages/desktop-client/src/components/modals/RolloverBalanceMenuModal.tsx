@@ -6,7 +6,7 @@ import { useCategory } from '../../hooks/useCategory';
 import { type CSSProperties, theme, styles } from '../../style';
 import {
   BalanceWithCarryover,
-  DefaultCarryoverIndicator,
+  CarryoverIndicator,
 } from '../budget/BalanceWithCarryover';
 import { BalanceMenu } from '../budget/rollover/BalanceMenu';
 import {
@@ -17,6 +17,7 @@ import {
 } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
+import { CellValueText } from '../spreadsheet/CellValue';
 
 type RolloverBalanceMenuModalProps = ComponentPropsWithoutRef<
   typeof BalanceMenu
@@ -66,27 +67,33 @@ export function RolloverBalanceMenuModal({
             </Text>
             <BalanceWithCarryover
               disabled
-              style={{
-                textAlign: 'center',
-                ...styles.veryLargeText,
-              }}
               carryover={rolloverBudget.catCarryover(categoryId)}
               balance={rolloverBudget.catBalance(categoryId)}
               goal={rolloverBudget.catGoal(categoryId)}
               budgeted={rolloverBudget.catBudgeted(categoryId)}
               longGoal={rolloverBudget.catLongGoal(categoryId)}
-              carryoverIndicator={({ style }) =>
-                DefaultCarryoverIndicator({
-                  style: {
+              CarryoverIndicator={({ style }) => (
+                <CarryoverIndicator
+                  style={{
                     width: 15,
                     height: 15,
                     display: 'inline-flex',
                     position: 'relative',
                     ...style,
-                  },
-                })
-              }
-            />
+                  }}
+                />
+              )}
+            >
+              {props => (
+                <CellValueText
+                  {...props}
+                  style={{
+                    textAlign: 'center',
+                    ...styles.veryLargeText,
+                  }}
+                />
+              )}
+            </BalanceWithCarryover>
           </View>
           <BalanceMenu
             categoryId={categoryId}
