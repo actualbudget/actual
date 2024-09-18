@@ -5,7 +5,6 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'spendingReport'
-  | 'simpleFinSync'
   | 'actionTemplating';
 
 /**
