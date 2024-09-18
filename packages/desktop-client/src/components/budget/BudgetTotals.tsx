@@ -1,7 +1,7 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button2';
@@ -45,7 +45,7 @@ function Legend({ title, color }: { title: string; color: string }) {
 
 type BudgetTotalsProps = {
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
-  setShowHiddenCategoriesPef: (value: boolean) => void;
+  setShowHiddenCategories: (value: boolean) => void;
   showHiddenCategories: boolean;
   setShowProgress: (value: boolean) => void;
   showProgress: boolean;
@@ -55,7 +55,7 @@ type BudgetTotalsProps = {
 
 export const BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
-  setShowHiddenCategoriesPef,
+  setShowHiddenCategories,
   showHiddenCategories,
   setShowProgress,
   showProgress,
@@ -121,7 +121,7 @@ export const BudgetTotals = memo(function BudgetTotals({
           <Menu
             onMenuSelect={type => {
               if (type === 'showHiddenCategories') {
-                setShowHiddenCategoriesPef(!showHiddenCategories);
+                setShowHiddenCategories(!showHiddenCategories);
               } else if (type === 'showProgress') {
                 setShowProgress(!showProgress);
               } else if (type === 'expandAllCategories') {
@@ -148,7 +148,7 @@ export const BudgetTotals = memo(function BudgetTotals({
                       padding: 10,
                       paddingBottom: 0,
                     }}
-                    >
+                  >
                     {budgetType === 'rollover' && (
                       <>
                         <Legend

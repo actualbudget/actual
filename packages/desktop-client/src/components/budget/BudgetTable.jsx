@@ -37,7 +37,7 @@ export function BudgetTable(props) {
   const { grouped: categoryGroups } = useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
-  const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
+  const [showHiddenCategories, setShowHiddenCategories] = useLocalPref(
     'budget.showHiddenCategories',
   );
   const [editing, setEditing] = useState(null);
@@ -197,7 +197,7 @@ export function BudgetTable(props) {
       >
         <BudgetTotals
           MonthComponent={dataComponents.BudgetTotalsComponent}
-          setShowHiddenCategoriesPef={setShowHiddenCategoriesPef}
+          setShowHiddenCategories={setShowHiddenCategories}
           showHiddenCategories={showHiddenCategories}
           setShowProgress={setShowProgress}
           showProgress={showProgress}

@@ -224,7 +224,7 @@ export function Menu<const NameType = string>({
                         flexDirection: 'row',
                       }}
                     >
-                      <Text htmlFor={String(item.name)}>{item.text}</Text>
+                      <label htmlFor={String(item.name)}>{item.text}</label>
                       <View style={{ flex: 1 }} />
                       <Toggle
                         id={String(item.name)}
@@ -246,7 +246,7 @@ export function Menu<const NameType = string>({
                       flexDirection: 'row',
                     }}
                   >
-                    <Text htmlFor={String(item.name)}>{item.text}</Text>
+                    <label htmlFor={String(item.name)}>{item.text}</label>
                     <View style={{ flex: 1 }} />
                     <Toggle
                       id={String(item.name)}
