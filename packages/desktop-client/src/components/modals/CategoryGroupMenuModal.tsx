@@ -45,7 +45,7 @@ export function CategoryGroupMenuModal({
   const notes = useNotes(group.id);
 
   const onRename = newName => {
-    if (newName !== group.name) {
+    if (newName && newName !== group.name) {
       onSave?.({
         ...group,
         name: newName,
