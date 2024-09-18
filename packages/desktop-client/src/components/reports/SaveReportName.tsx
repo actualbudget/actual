@@ -1,4 +1,5 @@
 import React, { type RefObject, useEffect } from 'react';
+import { Form } from 'react-aria-components';
 
 import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
@@ -44,7 +45,15 @@ export function SaveReportName({
   return (
     <>
       {menuItem !== 'update-report' && (
-        <form>
+        <Form
+          onSubmit={e => {
+            e.preventDefault();
+            onAddUpdate({
+              menuChoice: menuItem ?? undefined,
+              reportData: report ?? undefined,
+            });
+          }}
+        >
           <Stack
             direction="row"
             justify="flex-end"
@@ -65,20 +74,11 @@ export function SaveReportName({
                 style={{ marginTop: 10 }}
               />
             </FormField>
-            <Button
-              variant="primary"
-              style={{ marginTop: 30 }}
-              onPress={() => {
-                onAddUpdate({
-                  menuChoice: menuItem ?? undefined,
-                  reportData: report ?? undefined,
-                });
-              }}
-            >
+            <Button variant="primary" type="submit" style={{ marginTop: 30 }}>
               {menuItem === 'save-report' ? 'Add' : 'Update'}
             </Button>
           </Stack>
-        </form>
+        </Form>
       )}
       {err !== '' ? (
         <Stack direction="row" align="center" style={{ padding: 10 }}>
