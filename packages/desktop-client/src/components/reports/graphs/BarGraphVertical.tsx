@@ -3,6 +3,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 import { type CSSProperties } from '../../../style';
+import { theme } from '../../../style/theme';
 import { Container } from '../Container';
 
 export type barGraphBudgetCategory = {
@@ -146,21 +147,21 @@ export function BarGraphVertical({ style, data }: BarGraphVerticalProps) {
               <Bar
                 dataKey={val => Math.abs(val.spent)}
                 stackId="a"
-                fill="#8884d8"
+                fill={theme.reportsPurple}
                 isAnimationActive={false}
                 radius={[10, 10, 10, 10]}
               />
               <Bar
                 dataKey={val => Math.abs(val.remaining)}
                 stackId="a"
-                fill="#82ca9d"
+                fill={theme.reportsGreen}
                 isAnimationActive={false}
                 radius={[10, 10, 10, 10]}
               />
               <Bar
                 dataKey={val => Math.abs(val.overBudget)}
                 stackId="a"
-                fill="red"
+                fill={theme.reportsRed}
                 isAnimationActive={false}
                 radius={[10, 10, 10, 10]}
               />
