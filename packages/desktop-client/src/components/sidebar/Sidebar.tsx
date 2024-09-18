@@ -138,6 +138,12 @@ export function Sidebar() {
             opacity: 1,
             width: hasWindowButtons ? null : 'auto',
           },
+          '& .hover-visible': {
+            display: 'none'
+          },
+          '&:hover .hover-visible': {
+            display: 'flex'
+          },
           flex: 1,
           ...styles.darkScrollbar,
         }}
@@ -146,7 +152,10 @@ export function Sidebar() {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            margin: '20px 8px 20px 20px',
+            padding: '5px 0',
+            marginTop: 10,
+            marginLeft: 20,
+            marginRight: 8,
             transition: 'padding .4s',
             flexShrink: 0,
             ...(hasWindowButtons && {
@@ -154,10 +163,11 @@ export function Sidebar() {
               justifyContent: 'flex-start',
             }),
             '& .hover-visible': {
-              display: 'none'
+              opacity: 0,
+              transition: 'opacity .25s'
             },
             '&:hover .hover-visible': {
-              display: 'flex'
+              opacity: 1
             },
           }}
         >
@@ -174,7 +184,7 @@ export function Sidebar() {
           buttons={[
             { title: t('Budget'), Icon: SvgWallet, to: "/budget" },
             { title: t('Reports'), Icon: SvgReports, to: "/reports" },
-            { title: t('Schedules'), Icon: SvgCalendar, to: "/schedules", hidable: true },
+            { title: t('Schedules'), Icon: SvgCalendar, to: "/schedules" },
             { title: t('Payees'), Icon: SvgStoreFront, to: "/payees", hidable: true },
             { title: t('Rules'), Icon: SvgTuning, to: "/rules", hidable: true },
           ]}

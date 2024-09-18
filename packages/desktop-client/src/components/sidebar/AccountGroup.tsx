@@ -71,13 +71,12 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
   const accountGroupStyle = {
     background:'var(--color-tableBackground)',
     borderRadius: '10px',
-    padding: '10px 0',
     margin: '10px',
     border: '2px solid var(--color-tableBorder)'
   };
 
   return (
-    <View style={{ flexShrink: 0, margin: '5px 0', ...style, }}>
+    <View style={{ flexShrink: 0, padding: '5px 0', ...style, }}>
       <AccountGroupName
         groupName={t(groupName)}
         to={groupTo}

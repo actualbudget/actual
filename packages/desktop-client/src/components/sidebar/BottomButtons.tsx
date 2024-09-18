@@ -27,8 +27,7 @@ export function BottomButtons({
     <View
       style={{
         flexShrink: 0,
-        marginTop: 15,
-        marginBottom: 9,
+        padding: '5px 0',
       }}
     >
       {buttons.map((item) => (

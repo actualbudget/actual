@@ -14,6 +14,8 @@ import { View } from '../common/View';
 import { AccountGroup } from './AccountGroup';
 import { AccountGroupName } from './AccountGroupName';
 
+import { styles } from '../../style';
+
 type AccountsProps = {
 };
 
@@ -46,6 +48,7 @@ export function Accounts({
         groupName={t('All accounts')}
         query={queries.allAccountBalance()}
         to="/accounts"
+        style={{...styles.mediumText}}
         outerStyle={{ margin: '5px 0', marginRight: 5 }}
       />
 
