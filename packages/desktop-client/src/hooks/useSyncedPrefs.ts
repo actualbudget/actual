@@ -16,7 +16,7 @@ export function useSyncedPrefs(): [SyncedPrefs, SetSyncedPrefsAction] {
 
   const prefs = useMemo<SyncedPrefs>(
     () =>
-      queryData.reduce(
+      (queryData ?? []).reduce(
         (carry, { id, value }) => ({
           ...carry,
           [id]: value,
