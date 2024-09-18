@@ -1,5 +1,6 @@
 import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme, styles } from '../../style';
@@ -61,6 +62,7 @@ export const BudgetTotals = memo(function BudgetTotals({
   expandAllCategories,
   collapseAllCategories,
 }: BudgetTotalsProps) {
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -146,19 +148,23 @@ export const BudgetTotals = memo(function BudgetTotals({
                       padding: 10,
                       paddingBottom: 0,
                     }}
-                  >
-                    <Legend
-                      title="Rollover added"
-                      color={theme.reportsLightPurple}
-                    />
-                    <Legend
-                      title="Rollover spent"
-                      color={theme.reportsLightGreen}
-                    />
-                    <Legend
-                      title="Rollover overspent"
-                      color={theme.reportsLightRed}
-                    />
+                    >
+                    {budgetType === 'rollover' && (
+                      <>
+                        <Legend
+                          title="Rollover added"
+                          color={theme.reportsLightPurple}
+                        />
+                        <Legend
+                          title="Rollover spent"
+                          color={theme.reportsLightGreen}
+                        />
+                        <Legend
+                          title="Rollover overspent"
+                          color={theme.reportsLightRed}
+                        />
+                      </>
+                    )}
                     <Legend title="Budgeted" color={theme.reportsPurple} />
                     <Legend title="Spent" color={theme.reportsGreen} />
                     <Legend title="Overspent" color={theme.reportsRed} />
