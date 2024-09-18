@@ -191,9 +191,12 @@ export const pillBorderSelected = colorPalette.purple300;
 export const pillTextSubdued = colorPalette.gray500;
 
 export const reportsRed = colorPalette.red300;
+export const reportsLightRed = colorPalette.red150;
 export const reportsBlue = colorPalette.blue400;
 export const reportsGreen = colorPalette.green400;
+export const reportsLightGreen = colorPalette.green200;
 export const reportsPurple = colorPalette.purple200;
+export const reportsLightPurple = colorPalette.purple150;
 export const reportsLabel = pageText;
 export const reportsInnerLabel = colorPalette.navy800;
 

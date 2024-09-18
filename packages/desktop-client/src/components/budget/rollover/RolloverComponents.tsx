@@ -244,20 +244,43 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const catBalance = useRolloverSheetValue(
     rolloverBudget.catBalance(category.id),
   );
+  const carryover = catBalance - catSumAmount - catBudgeted;
+  const overSpent = Math.abs(catSumAmount) > catBudgeted + carryover;
   const data: barGraphBudgetCategory[] = [
     {
       name: category.name,
       budget: catBudgeted,
+      carryover,
+      carryoverSpent:
+        carryover < 0
+          ? null
+          : Math.abs(catSumAmount) < carryover
+            ? Math.abs(catSumAmount)
+            : carryover,
+      carryoverRemaining:
+        Math.abs(catSumAmount) < carryover && carryover + catSumAmount,
+      carryoverNegative: carryover < 0 && carryover,
       spent:
-        Math.abs(catSumAmount) < catBudgeted
-          ? Math.abs(catSumAmount)
-          : catBudgeted,
+        carryover < 0
+          ? Math.abs(carryover) > catBudgeted
+            ? null
+            : Math.abs(catSumAmount) < catBudgeted + carryover
+              ? Math.abs(catSumAmount)
+              : catBudgeted + carryover
+          : Math.abs(catSumAmount) < carryover
+            ? null
+            : Math.abs(catSumAmount) < catBudgeted + carryover
+              ? Math.abs(catSumAmount) - carryover
+              : catBudgeted,
       remaining:
-        Math.abs(catSumAmount) < catBudgeted && catBudgeted + catSumAmount,
-      overBudget:
-        Math.abs(catSumAmount) > catBudgeted &&
-        Math.abs(catBudgeted + catSumAmount),
-      carryover: catBalance - catSumAmount - catBudgeted,
+        carryover < 0
+          ? Math.abs(carryover) > catBudgeted
+            ? null
+            : !overSpent && catBudgeted + catSumAmount + carryover
+          : Math.abs(catSumAmount) < carryover
+            ? catBudgeted
+            : !overSpent && catBudgeted + catSumAmount + carryover,
+      overBudget: overSpent && Math.abs(catBudgeted + carryover + catSumAmount),
     },
   ];
 

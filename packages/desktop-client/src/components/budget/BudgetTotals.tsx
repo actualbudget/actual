@@ -6,10 +6,41 @@ import { theme, styles } from '../../style';
 import { Button } from '../common/Button2';
 import { Menu } from '../common/Menu';
 import { Popover } from '../common/Popover';
+import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
+
+function Legend({ title, color }: { title: string; color: string }) {
+  return (
+    <View
+      style={{
+        paddingBottom: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}
+    >
+      <View
+        style={{
+          marginRight: 5,
+          borderRadius: 1000,
+          width: 14,
+          height: 14,
+          backgroundColor: color,
+        }}
+      />
+      <Text
+        style={{
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
+        }}
+      >
+        {title}
+      </Text>
+    </View>
+  );
+}
 
 type BudgetTotalsProps = {
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
@@ -109,6 +140,30 @@ export const BudgetTotals = memo(function BudgetTotals({
                 name: 'showProgress',
                 text: t('Show progress bars'),
                 toggle: showProgress,
+                customTooltip: (
+                  <View
+                    style={{
+                      padding: 10,
+                      paddingBottom: 0,
+                    }}
+                  >
+                    <Legend
+                      title="Rollover added"
+                      color={theme.reportsLightPurple}
+                    />
+                    <Legend
+                      title="Rollover spent"
+                      color={theme.reportsLightGreen}
+                    />
+                    <Legend
+                      title="Rollover overspent"
+                      color={theme.reportsLightRed}
+                    />
+                    <Legend title="Budgeted" color={theme.reportsPurple} />
+                    <Legend title="Spent" color={theme.reportsGreen} />
+                    <Legend title="Overspent" color={theme.reportsRed} />
+                  </View>
+                ),
               },
               {
                 name: 'expandAllCategories',

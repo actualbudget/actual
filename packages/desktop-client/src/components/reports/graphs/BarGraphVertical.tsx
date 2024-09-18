@@ -9,10 +9,13 @@ import { Container } from '../Container';
 export type barGraphBudgetCategory = {
   name: string;
   budget: number;
-  spent: number;
-  remaining: number | false;
+  carryover: number | false;
+  carryoverSpent: number | null;
+  carryoverRemaining: number | false;
+  carryoverNegative: number | false;
+  spent: number | null;
+  remaining: number | false | null;
   overBudget: number | false;
-  carryover: number;
 };
 /*
 type PayloadItem = {
@@ -145,16 +148,37 @@ export function BarGraphVertical({ style, data }: BarGraphVerticalProps) {
               <XAxis hide type="number" axisLine={false} display="none" />
               <YAxis type="category" hide />
               <Bar
+                dataKey={val => Math.abs(val.carryoverNegative)}
+                stackId="a"
+                fill={theme.reportsLightRed}
+                isAnimationActive={false}
+                radius={[10, 10, 10, 10]}
+              />
+              <Bar
+                dataKey={val => Math.abs(val.carryoverSpent)}
+                stackId="a"
+                fill={theme.reportsLightGreen}
+                isAnimationActive={false}
+                radius={[10, 10, 10, 10]}
+              />
+              <Bar
+                dataKey={val => Math.abs(val.carryoverRemaining)}
+                stackId="a"
+                fill={theme.reportsLightPurple}
+                isAnimationActive={false}
+                radius={[10, 10, 10, 10]}
+              />
+              <Bar
                 dataKey={val => Math.abs(val.spent)}
                 stackId="a"
-                fill={theme.reportsPurple}
+                fill={theme.reportsGreen}
                 isAnimationActive={false}
                 radius={[10, 10, 10, 10]}
               />
               <Bar
                 dataKey={val => Math.abs(val.remaining)}
                 stackId="a"
-                fill={theme.reportsGreen}
+                fill={theme.reportsPurple}
                 isAnimationActive={false}
                 radius={[10, 10, 10, 10]}
               />
@@ -162,13 +186,6 @@ export function BarGraphVertical({ style, data }: BarGraphVerticalProps) {
                 dataKey={val => Math.abs(val.overBudget)}
                 stackId="a"
                 fill={theme.reportsRed}
-                isAnimationActive={false}
-                radius={[10, 10, 10, 10]}
-              />
-              <Bar
-                dataKey={val => Math.abs(val.carryover)}
-                stackId="a"
-                fill="black"
                 isAnimationActive={false}
                 radius={[10, 10, 10, 10]}
               />
