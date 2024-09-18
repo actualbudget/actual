@@ -10,7 +10,7 @@ import { theme, styles } from '../../../../style';
 import { Text } from '../../../common/Text';
 import { View } from '../../../common/View';
 import { type SheetFields, type Binding } from '../../../spreadsheet';
-import { CellValue } from '../../../spreadsheet/CellValue';
+import { CellValue, CellValueText } from '../../../spreadsheet/CellValue';
 
 type BudgetTotalProps<
   CurrentField extends SheetFields<'report-budget'>,
@@ -55,11 +55,9 @@ export function BudgetTotal<
           <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
             {' '}
             {t('of')}{' '}
-            <CellValue
-              binding={target}
-              type="financial"
-              style={styles.notFixed}
-            />
+            <CellValue binding={target} type="financial">
+              {props => <CellValueText {...props} style={styles.notFixed} />}
+            </CellValue>
           </Text>
         </Text>
       </View>
