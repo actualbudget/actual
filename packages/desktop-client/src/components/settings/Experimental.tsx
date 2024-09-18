@@ -105,12 +105,6 @@ export function ExperimentalFeatures() {
               <Trans>Goal templates</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="simpleFinSync"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2272"
-            >
-              <Trans>SimpleFIN sync</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="dashboards"
               feedbackLink="https://github.com/actualbudget/actual/issues/3282"
             >
