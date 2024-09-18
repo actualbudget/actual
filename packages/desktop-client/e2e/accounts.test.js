@@ -1,8 +1,9 @@
+import { join } from 'path';
+
 import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import { join } from 'path';
 
 test.describe('Accounts', () => {
   let page;
