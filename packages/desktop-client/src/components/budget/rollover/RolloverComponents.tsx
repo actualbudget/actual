@@ -14,8 +14,7 @@ import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, type CellValueProps } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
+import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
@@ -40,7 +39,7 @@ export function useRolloverSheetValue<
 export const RolloverCellValue = <
   FieldName extends SheetFields<'rollover-budget'>,
 >(
-  props: CellValueProps<'rollover-budget', FieldName>,
+  props: ComponentProps<typeof CellValue<'rollover-budget', FieldName>>,
 ) => {
   return <CellValue {...props} />;
 };
@@ -57,8 +56,12 @@ const headerLabelStyle: CSSProperties = {
   textAlign: 'right',
 };
 
+const cellStyle: CSSProperties = {
+  color: theme.tableHeaderText,
+  fontWeight: 600,
+};
+
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
-  const format = useFormat();
   return (
     <View
       style={{
@@ -76,11 +79,11 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <RolloverCellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
-          style={{ color: theme.tableHeaderText, fontWeight: 600 }}
-          formatter={value => {
-            return format(-parseFloat(value || '0'), 'financial');
-          }}
-        />
+        >
+          {props => (
+            <CellValueText {...props} value={-props.value} style={cellStyle} />
+          )}
+        </RolloverCellValue>
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
@@ -99,8 +102,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <RolloverCellValue
           binding={rolloverBudget.totalBalance}
           type="financial"
-          style={{ color: theme.tableHeaderText, fontWeight: 600 }}
-        />
+        >
+          {props => <CellValueText {...props} style={cellStyle} />}
+        </RolloverCellValue>
       </View>
     </View>
   );
@@ -362,12 +366,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           <RolloverCellValue
             binding={rolloverBudget.catSumAmount(category.id)}
             type="financial"
-            getStyle={makeAmountGrey}
-            style={{
-              cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' },
-            }}
-          />
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                style={{
+                  cursor: 'pointer',
+                  ':hover': { textDecoration: 'underline' },
+                  ...makeAmountGrey(props.value),
+                }}
+              />
+            )}
+          </RolloverCellValue>
         </span>
       </Field>
       <Field
@@ -385,9 +395,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             goal={rolloverBudget.catGoal(category.id)}
             budgeted={rolloverBudget.catBudgeted(category.id)}
             longGoal={rolloverBudget.catLongGoal(category.id)}
-            style={{
-              ':hover': { textDecoration: 'underline' },
-            }}
           />
         </span>
 
@@ -472,11 +479,17 @@ export function IncomeCategoryMonth({
           <RolloverCellValue
             binding={rolloverBudget.catSumAmount(category.id)}
             type="financial"
-            style={{
-              cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' },
-            }}
-          />
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                style={{
+                  cursor: 'pointer',
+                  ':hover': { textDecoration: 'underline' },
+                }}
+              />
+            )}
+          </RolloverCellValue>
         </span>
       </Field>
     </View>
