@@ -4,14 +4,14 @@ export type FeatureFlag =
   | 'dashboards'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'spendingReport'
-  | 'simpleFinSync';
+  | 'spendingReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
  */
 export type SyncedPrefs = Partial<
   Record<
+    | 'budgetType'
     | 'firstDayOfWeekIdx'
     | 'dateFormat'
     | 'numberFormat'
@@ -39,8 +39,6 @@ export type SyncedPrefs = Partial<
  * core database.
  */
 export type MetadataPrefs = Partial<{
-  // TODO: move budgetType to SyncedPrefs
-  budgetType: string;
   budgetName: string;
   id: string;
   lastUploaded: string;
