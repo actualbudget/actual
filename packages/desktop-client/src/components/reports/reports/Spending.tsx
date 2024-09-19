@@ -208,18 +208,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
           >
             <Button
               variant={isLive ? 'primary' : 'normal'}
-              onPress={() => {
-                const newMode = isLive ? 'static' : 'sliding-window';
-                const [newCompare, newCompareTo] = calculateTimeRange({
-                  start: compare,
-                  end: compareTo,
-                  mode: newMode,
-                });
-
-                setIsLive(state => !state);
-                setCompare(newCompare);
-                setCompareTo(newCompareTo);
-              }}
+              onPress={() => setIsLive(state => !state)}
             >
               {isLive ? 'Live' : 'Static'}
             </Button>
