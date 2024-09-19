@@ -95,10 +95,13 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const match = useMatch({ path });
   return (
     <Button
-      style={({ isPressed }) => ({
-        ...style,
-        ...(match || isPressed ? activeStyle : {}),
-      })}
+      className={String(
+        css({
+          ...style,
+          '&[data-pressed]': activeStyle,
+          ...(match ? activeStyle : {}),
+        }),
+      )}
       {...props}
       variant={props.buttonVariant}
       onPress={e => {
