@@ -175,8 +175,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ...styles.smallText,
           ...(renderProps.isDisabled
             ? {}
-            : { '&[data-hovered]': hoveredStyle }),
-          ...(renderProps.isDisabled ? {} : { '&[data-pressed]': activeStyle }),
+            : {
+                '&[data-hovered]': hoveredStyle,
+                '&[data-pressed]': activeStyle,
+              }),
           ...(Icon ? { paddingLeft: 0 } : {}),
         }),
       );

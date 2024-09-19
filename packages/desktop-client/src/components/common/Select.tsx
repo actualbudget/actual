@@ -27,7 +27,7 @@ type SelectProps<Value> = {
   onChange?: (newValue: Value) => void;
   disabled?: boolean;
   disabledKeys?: Value[];
-  buttonStyle?: CSSProperties;
+  style?: CSSProperties;
 };
 
 /**
@@ -52,7 +52,7 @@ export function Select<const Value = string>({
   onChange,
   disabled = false,
   disabledKeys = [],
-  buttonStyle = {},
+  style = {},
 }: SelectProps<Value>) {
   const targetOption = options
     .filter(isValueOption)
@@ -71,14 +71,7 @@ export function Select<const Value = string>({
         onPress={() => {
           setIsOpen(true);
         }}
-        className={String(
-          css({
-            '&[data-hovered]': {
-              backgroundColor: bare ? 'transparent' : undefined,
-            },
-            ...buttonStyle,
-          }),
-        )}
+        className={String(css(style))}
       >
         <View
           style={{
