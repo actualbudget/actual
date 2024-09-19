@@ -497,6 +497,7 @@ export function Modals() {
             <TransferModal
               key={name}
               title={options.title}
+              categoryId={options.categoryId}
               month={options.month}
               amount={options.amount}
               onSubmit={options.onSubmit}
@@ -509,9 +510,9 @@ export function Modals() {
             <CoverModal
               key={name}
               title={options.title}
+              categoryId={options.categoryId}
               month={options.month}
               showToBeBudgeted={options.showToBeBudgeted}
-              category={options.category}
               onSubmit={options.onSubmit}
             />
           );

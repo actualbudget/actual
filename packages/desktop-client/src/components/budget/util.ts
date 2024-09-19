@@ -1,9 +1,14 @@
 // @ts-strict-ignore
+import { t } from 'i18next';
+
 import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type Handlers } from 'loot-core/src/types/handlers';
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
 import { type SyncedPrefs } from 'loot-core/src/types/prefs';
 
 import { type CSSProperties, styles, theme } from '../../style';
@@ -11,10 +16,7 @@ import { type DropPosition } from '../sort';
 
 import { getValidMonthBounds } from './MonthsContext';
 
-export function addToBeBudgetedGroup(
-  groups: CategoryGroupEntity[],
-  t: (key: string) => string,
-) {
+export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
     {
       id: 'to-be-budgeted',
@@ -33,6 +35,23 @@ export function addToBeBudgetedGroup(
     },
     ...groups,
   ];
+}
+
+export function removeCategoriesFromGroups(
+  categoryGroups: CategoryGroupEntity[],
+  ...categoryIds: CategoryEntity['id'][]
+) {
+  if (!categoryIds || categoryIds.length === 0) return categoryGroups;
+
+  const categoryIdsSet = new Set(categoryIds);
+
+  return categoryGroups
+    .map(group => ({
+      ...group,
+      categories:
+        group.categories?.filter(cat => !categoryIdsSet.has(cat.id)) ?? [],
+    }))
+    .filter(group => group.categories?.length);
 }
 
 export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
