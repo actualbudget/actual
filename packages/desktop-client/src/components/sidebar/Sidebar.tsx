@@ -4,13 +4,9 @@ import { useDispatch } from 'react-redux';
 
 import { Resizable } from 're-resizable';
 
-import {
-  closeBudget,
-  replaceModal,
-} from 'loot-core/src/client/actions';
+import { closeBudget, replaceModal } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 
-import { useAccounts } from '../../hooks/useAccounts';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
@@ -24,10 +20,7 @@ import {
   SvgWallet,
   SvgAdd,
 } from '../../icons/v1';
-import {
-  SvgCalendar,
-  SvgPencil1
-} from '../../icons/v2';
+import { SvgCalendar, SvgPencil1 } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -38,9 +31,8 @@ import { Popover } from '../common/Popover';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-
-import { ActionButtons } from './ActionButtons';
 import { Accounts } from './Accounts';
+import { ActionButtons } from './ActionButtons';
 import { BottomButtons } from './BottomButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
@@ -51,7 +43,6 @@ export function Sidebar() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const sidebar = useSidebar();
-  const accounts = useAccounts();
   const { width } = useResponsive();
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
@@ -124,10 +115,10 @@ export function Sidebar() {
             width: hasWindowButtons ? null : 'auto',
           },
           '& .hover-visible': {
-            display: 'none'
+            display: 'none',
           },
           '&:hover .hover-visible': {
-            display: 'flex'
+            display: 'flex',
           },
           flex: 1,
           ...styles.darkScrollbar,
@@ -149,10 +140,10 @@ export function Sidebar() {
             }),
             '& .hover-visible': {
               opacity: 0,
-              transition: 'opacity .25s'
+              transition: 'opacity .25s',
             },
             '&:hover .hover-visible': {
-              opacity: 1
+              opacity: 1,
             },
           }}
         >
@@ -164,20 +155,20 @@ export function Sidebar() {
             <ToggleButton isFloating={isFloating} onFloat={onFloat} />
           )}
         </View>
-        
+
         <ActionButtons
           buttons={[
-            { title: t('Budget'), Icon: SvgWallet, to: "/budget" },
-            { title: t('Reports'), Icon: SvgReports, to: "/reports" },
-            { title: t('Schedules'), Icon: SvgCalendar, to: "/schedules" },
-            { title: t('Payees'), Icon: SvgStoreFront, to: "/payees", hidable: true },
-            { title: t('Rules'), Icon: SvgTuning, to: "/rules", hidable: true },
+            { title: t('Budget'), Icon: SvgWallet, to: '/budget' },
+            { title: t('Reports'), Icon: SvgReports, to: '/reports' },
+            { title: t('Schedules'), Icon: SvgCalendar, to: '/schedules' },
+            { title: t('Payees'), Icon: SvgStoreFront, to: '/payees', hidable: true },
+            { title: t('Rules'), Icon: SvgTuning, to: '/rules', hidable: true },
           ]}
         />
-          
+
         <Accounts />
-          
-        <BottomButtons 
+
+        <BottomButtons
           buttons={[
             { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
           ]}

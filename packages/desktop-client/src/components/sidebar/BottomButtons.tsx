@@ -1,17 +1,15 @@
 // @ts-strict-ignore
-import React, {
-  type ComponentType,
-  type SVGProps,
-} from 'react';
+import React, { type ComponentType, type SVGProps } from 'react';
 
 import { View } from '../common/View';
+
 import { SecondaryItem } from './SecondaryItem';
 
 type BottomButtonItems = {
   title: string;
   Icon:
-  | ComponentType<SVGProps<SVGElement>>
-  | ComponentType<SVGProps<SVGSVGElement>>;
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
   onClick: () => void;
 };
 
@@ -19,9 +17,7 @@ type BottomButtonsProps = {
   buttons: Array<BottomButtonItems>;
 };
 
-export function BottomButtons({
-  buttons,
-}: BottomButtonsProps) {
+export function BottomButtons({ buttons }: BottomButtonsProps) {
 
   return (
     <View
@@ -30,8 +26,13 @@ export function BottomButtons({
         padding: '5px 0',
       }}
     >
-      {buttons.map((item) => (
-        <SecondaryItem key={item.title} title={item.title} Icon={item.Icon} onClick={item.onClick} />
+      {buttons.map(item => (
+        <SecondaryItem
+          key={item.title}
+          title={item.title}
+          Icon={item.Icon}
+          onClick={item.onClick}
+        />
       ))}
     </View>
   );

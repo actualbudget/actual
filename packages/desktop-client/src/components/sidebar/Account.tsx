@@ -92,66 +92,66 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
   const accountRow = (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
-        <DropHighlight pos={dropPos} />
-        <View innerRef={dragRef}>
-          <Link
-            variant="internal"
-            to={to}
+      <DropHighlight pos={dropPos} />
+      <View innerRef={dragRef}>
+        <Link
+          variant="internal"
+          to={to}
+          style={{
+            ...accountNameStyle,
+            ...style,
+            position: 'relative',
+            borderLeft: '4px solid transparent',
+            ...(updated && { fontWeight: 700 }),
+          }}
+          activeStyle={{
+            borderColor: theme.sidebarItemAccentSelected,
+            color: theme.sidebarItemTextSelected,
+            // This is kind of a hack, but we don't ever want the account
+            // that the user is looking at to be "bolded" which means it
+            // has unread transactions. The system does mark is read and
+            // unbolds it, but it still "flashes" bold so this just
+            // ignores it if it's active
+            fontWeight: (style && style.fontWeight) || 'normal',
+            '& .dot': {
+              backgroundColor: theme.sidebarItemAccentSelected,
+              transform: 'translateX(-4.5px)',
+            },
+          }}
+        >
+          <View
             style={{
-              ...accountNameStyle,
-              ...style,
-              position: 'relative',
-              borderLeft: '4px solid transparent',
-              ...(updated && { fontWeight: 700 }),
-            }}
-            activeStyle={{
-              borderColor: theme.sidebarItemAccentSelected,
-              color: theme.sidebarItemTextSelected,
-              // This is kind of a hack, but we don't ever want the account
-              // that the user is looking at to be "bolded" which means it
-              // has unread transactions. The system does mark is read and
-              // unbolds it, but it still "flashes" bold so this just
-              // ignores it if it's active
-              fontWeight: (style && style.fontWeight) || 'normal',
-              '& .dot': {
-                backgroundColor: theme.sidebarItemAccentSelected,
-                transform: 'translateX(-4.5px)',
-              },
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              flexDirection: 'row',
+              alignItems: 'center',
             }}
           >
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <div
-                className={`dot ${css({
-                  marginRight: 3,
-                  width: 5,
-                  height: 5,
-                  borderRadius: 5,
-                  backgroundColor: pending
-                    ? theme.sidebarItemBackgroundPending
-                    : failed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginLeft: 2,
-                  transition: 'transform .3s',
-                  opacity: connected ? 1 : 0,
-                })}`}
-              />
-            </View>
-
-            <AlignedText
-              left={name}
-              right={<CellValue binding={query} type="financial" />}
+            <div
+              className={`dot ${css({
+                marginRight: 3,
+                width: 5,
+                height: 5,
+                borderRadius: 5,
+                backgroundColor: pending
+                  ? theme.sidebarItemBackgroundPending
+                  : failed
+                    ? theme.sidebarItemBackgroundFailed
+                    : theme.sidebarItemBackgroundPositive,
+                marginLeft: 2,
+                transition: 'transform .3s',
+                opacity: connected ? 1 : 0,
+              })}`}
             />
-          </Link>
+          </View>
+
+          <AlignedText
+            left={name}
+            right={<CellValue binding={query} type="financial" />}
+          />
+        </Link>
       </View>
     </View>
   );

@@ -5,21 +5,19 @@ import { useSelector } from 'react-redux';
 
 import * as queries from 'loot-core/src/client/queries';
 import { type State } from 'loot-core/src/client/state-types';
-
 import { AccountEntity } from 'loot-core/types/models';
 
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
+import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
+
+import { type SheetFields, type Binding } from '../spreadsheet';
+import { type OnDropCallback } from '../sort';
 
 import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { Account } from './Account';
 import { AccountGroupName } from './AccountGroupName';
-
-import { type SheetFields, type Binding } from '../spreadsheet';
-
-import { type OnDropCallback } from '../sort';
 
 type AccountGroupProps<FieldName extends SheetFields<'account'>> = {
   groupName: string;
@@ -29,7 +27,7 @@ type AccountGroupProps<FieldName extends SheetFields<'account'>> = {
   onReorder?: OnDropCallback;
   style?: CSSProperties;
 };
-  
+
 export function AccountGroup<FieldName extends SheetFields<'account'>>({
   groupName,
   groupQuery,
@@ -52,7 +50,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
     'ui.collapsedAccountGroups',
   );
 
-  if (!collapsed || !Object.hasOwn(collapsed, groupName.replace(/\s/g, ""))) {
+  if (!collapsed || !Object.hasOwn(collapsed, groupName.replace(/\s/g, ''))) {
     let c = (collapsed ? { ...collapsed } : {});
     c[groupName.replace(/\s/g, "")] = false;
     setCollapsedGroupsPref(c);
@@ -64,7 +62,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
 
   const toggleAccounts = () => {
     let c = {...collapsed};
-    c[groupName.replace(/\s/g, "")] = !collapsed[groupName.replace(/\s/g, "")];
+    c[groupName.replace(/\s/g, "")] = !collapsed[groupName.replace(/\s/g, '')];
     setCollapsedGroupsPref(c);
   }
 
