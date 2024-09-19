@@ -17,7 +17,6 @@ export function useLocalPref<K extends keyof LocalPrefs>(
     prefName,
     undefined,
     {
-      initializeWithValue: false,
       deserializer: JSON.parse,
       serializer: JSON.stringify,
     },
