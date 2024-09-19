@@ -10,11 +10,16 @@ type SetLocalPrefAction<K extends keyof LocalPrefs> = (
   value: LocalPrefs[K],
 ) => void;
 
+/**
+ * Local preferences are scoped to a specific budget file.
+ */
 export function useLocalPref<K extends keyof LocalPrefs>(
   prefName: K,
 ): [LocalPrefs[K], SetLocalPrefAction<K>] {
+  const [budgetId] = useMetadataPref('id');
+
   const [value, setValue] = useLocalStorage<LocalPrefs[K]>(
-    prefName,
+    `${budgetId}-${prefName}`,
     undefined,
     {
       deserializer: JSON.parse,
