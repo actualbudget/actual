@@ -359,6 +359,11 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
         currentMerkle = merkle.insert(currentMerkle, timestamp);
       }
+
+      // Special treatment for some synced prefs
+      if (dataset === 'preferences' && row === 'budgetType') {
+        setBudgetType(value);
+      }
     }
 
     if (checkSyncingMode('enabled')) {
@@ -384,11 +389,6 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   // Save any synced prefs
   if (Object.keys(prefsToSet).length > 0) {
     prefs.savePrefs(prefsToSet, { avoidSync: true });
-
-    if (prefsToSet.budgetType) {
-      setBudgetType(prefsToSet.budgetType);
-    }
-
     connection.send('prefs-updated');
   }
 
@@ -768,11 +768,15 @@ async function _fullSync(
       ),
     );
   } else {
-    // All synced up, store the current time as a simple optimization
-    // for the next sync
-    await prefs.savePrefs({
-      lastSyncedTimestamp: getClock().timestamp.toString(),
-    });
+    // All synced up, store the current time as a simple optimization for the next sync
+    const requiresUpdate =
+      getClock().timestamp.toString() !== lastSyncedTimestamp;
+
+    if (requiresUpdate) {
+      await prefs.savePrefs({
+        lastSyncedTimestamp: getClock().timestamp.toString(),
+      });
+    }
   }
 
   return receivedMessages;

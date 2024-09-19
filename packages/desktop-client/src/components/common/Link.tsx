@@ -13,7 +13,7 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { type CSSProperties, styles } from '../../style';
 import { theme } from '../../style/theme';
 
-import { Button } from './Button';
+import { Button } from './Button2';
 import { Text } from './Text';
 
 type TextLinkProps = {
@@ -22,7 +22,8 @@ type TextLinkProps = {
   children?: ReactNode;
 };
 
-type ButtonLinkProps = ComponentProps<typeof Button> & {
+type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
+  buttonVariant?: ComponentProps<typeof Button>['variant'];
   to?: string;
   activeStyle?: CSSProperties;
 };
@@ -94,17 +95,15 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const match = useMatch({ path });
   return (
     <Button
-      style={{
+      style={({ isPressed }) => ({
         ...style,
-        ...(match ? activeStyle : {}),
-      }}
-      activeStyle={activeStyle}
+        ...(match || isPressed ? activeStyle : {}),
+      })}
       {...props}
-      onClick={e => {
-        props.onClick?.(e);
-        if (!e.defaultPrevented) {
-          navigate(path);
-        }
+      variant={props.buttonVariant}
+      onPress={e => {
+        props.onPress?.(e);
+        navigate(path);
       }}
     />
   );
@@ -136,28 +135,34 @@ const InternalLink = ({
 };
 
 type LinkProps =
-  | ({
-      variant: 'button';
-    } & ButtonLinkProps)
-  | ({ variant?: 'internal' } & InternalLinkProps)
-  | ({ variant?: 'external' } & ExternalLinkProps)
-  | ({ variant?: 'text' } & TextLinkProps);
+  | ({ variant: 'button' } & ButtonLinkProps)
+  | ({ variant: 'internal' } & InternalLinkProps)
+  | ({ variant: 'external' } & ExternalLinkProps)
+  | ({ variant: 'text' } & TextLinkProps);
 
-export function Link({ variant = 'internal', ...props }: LinkProps) {
-  switch (variant) {
-    case 'internal':
-      return <InternalLink {...props} />;
+export function Link(props: LinkProps) {
+  switch (props.variant) {
+    case 'internal': {
+      const { variant: _, ...internalProps } = props;
+      return <InternalLink {...internalProps} />;
+    }
 
-    case 'external':
-      return <ExternalLink {...props} />;
+    case 'external': {
+      const { variant: _, ...externalProps } = props;
+      return <ExternalLink {...externalProps} />;
+    }
 
-    case 'button':
-      return <ButtonLink {...props} />;
+    case 'button': {
+      const { variant: _, ...buttonProps } = props;
+      return <ButtonLink {...buttonProps} />;
+    }
 
-    case 'text':
-      return <TextLink {...props} />;
+    case 'text': {
+      const { variant: _, ...textProps } = props;
+      return <TextLink {...textProps} />;
+    }
 
     default:
-      throw new Error(`Unrecognised link type: ${variant}`);
+      throw new Error(`Unrecognised Link variant.`);
   }
 }

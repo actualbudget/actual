@@ -297,6 +297,12 @@ ipcMain.on('get-bootstrap-data', event => {
   event.returnValue = payload;
 });
 
+ipcMain.handle('restart-server', () => {
+  serverProcess.kill();
+  serverProcess = null;
+  createBackgroundProcess();
+});
+
 ipcMain.handle('relaunch', () => {
   app.relaunch();
   app.exit();

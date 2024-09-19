@@ -3,13 +3,16 @@ import { useDispatch } from 'react-redux';
 
 import { collapseModals, pushModal } from 'loot-core/client/actions';
 import { rolloverBudget } from 'loot-core/client/queries';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
+import { useCategories } from '../../hooks/useCategories';
+import { useUndo } from '../../hooks/useUndo';
 import { styles } from '../../style';
 import { ToBudgetAmount } from '../budget/rollover/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
 import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type RolloverBudgetSummaryModalProps = {
@@ -29,6 +32,10 @@ export function RolloverBudgetSummaryModal({
       value: 0,
     }) ?? 0;
 
+  const { showUndoNotification } = useUndo();
+  const { list: categories } = useCategories();
+  const categoriesById = groupById(categories);
+
   const openTransferAvailableModal = () => {
     dispatch(
       pushModal('transfer', {
@@ -42,6 +49,9 @@ export function RolloverBudgetSummaryModal({
             category: toCategoryId,
           });
           dispatch(collapseModals('transfer'));
+          showUndoNotification({
+            message: `Transferred ${integerToCurrency(amount)} to ${categoriesById[toCategoryId].name}`,
+          });
         },
       }),
     );
@@ -58,6 +68,9 @@ export function RolloverBudgetSummaryModal({
             category: categoryId,
           });
           dispatch(collapseModals('cover'));
+          showUndoNotification({
+            message: `Covered overbudgeted from ${categoriesById[categoryId].name}`,
+          });
         },
       }),
     );
@@ -100,7 +113,7 @@ export function RolloverBudgetSummaryModal({
         <>
           <ModalHeader
             title="Budget Summary"
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <NamespaceContext.Provider value={sheetForMonth(month)}>
             <TotalsList

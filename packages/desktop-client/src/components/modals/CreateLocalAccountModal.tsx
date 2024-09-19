@@ -20,7 +20,7 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
@@ -60,7 +60,7 @@ export function CreateLocalAccountModal() {
         <>
           <ModalHeader
             title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
             <Form onSubmit={onSubmit}>

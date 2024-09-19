@@ -63,7 +63,7 @@ export function AmountInput({
   const buttonRef = useRef();
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
 
   useEffect(() => {
     if (focused) {
@@ -81,7 +81,9 @@ export function AmountInput({
   }
 
   function onInputTextChange(val) {
-    val = autoDecimals ? appendDecimals(val, hideFraction) : val;
+    val = autoDecimals
+      ? appendDecimals(val, String(hideFraction) === 'true')
+      : val;
     setValue(val ? val : '');
     onChangeValue?.(val);
   }

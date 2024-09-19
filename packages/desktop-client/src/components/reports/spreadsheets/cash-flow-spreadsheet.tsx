@@ -12,15 +12,37 @@ import { type RuleConditionEntity } from 'loot-core/types/models';
 import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
-export function simpleCashFlow(start: string, end: string) {
+export function simpleCashFlow(
+  startMonth: string,
+  endMonth: string,
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+) {
+  const start = monthUtils.firstDayOfMonth(startMonth);
+  const end = monthUtils.lastDayOfMonth(endMonth);
+
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: { graphData: { income: number; expense: number } }) => void,
   ) => {
+    const { filters } = await send('make-filters-from-conditions', {
+      conditions: conditions.filter(cond => !cond.customName),
+    });
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+
     function makeQuery() {
       return q('transactions')
         .filter({
-          $and: [{ date: { $gte: start } }, { date: { $lte: end } }],
+          [conditionsOpKey]: filters,
+          $and: [
+            { date: { $gte: start } },
+            {
+              date: {
+                $lte:
+                  end > monthUtils.currentDay() ? monthUtils.currentDay() : end,
+              },
+            },
+          ],
           'account.offbudget': false,
           'payee.transfer_acct': null,
         })
@@ -45,12 +67,17 @@ export function simpleCashFlow(start: string, end: string) {
 }
 
 export function cashFlowByDate(
-  start: string,
-  end: string,
+  startMonth: string,
+  endMonth: string,
   isConcise: boolean,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or',
 ) {
+  const start = monthUtils.firstDayOfMonth(startMonth);
+  const end = monthUtils.lastDayOfMonth(endMonth);
+  const fixedEnd =
+    end > monthUtils.currentDay() ? monthUtils.currentDay() : end;
+
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof recalculate>) => void,
@@ -68,7 +95,7 @@ export function cashFlowByDate(
         .filter({
           $and: [
             { date: { $transform: '$month', $gte: start } },
-            { date: { $transform: '$month', $lte: end } },
+            { date: { $transform: '$month', $lte: fixedEnd } },
           ],
           'account.offbudget': false,
         });
@@ -105,7 +132,7 @@ export function cashFlowByDate(
         makeQuery().filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, end, isConcise));
+        setData(recalculate(data, start, fixedEnd, isConcise));
       },
     );
   };

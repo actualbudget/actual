@@ -640,7 +640,7 @@ export function CustomReport() {
         isNarrowWidth ? (
           <MobilePageHeader
             title={`Custom Report: ${report.name || 'Unsaved report'}`}
-            leftContent={<MobileBackButton onClick={onBackClick} />}
+            leftContent={<MobileBackButton onPress={onBackClick} />}
           />
         ) : (
           <PageHeader

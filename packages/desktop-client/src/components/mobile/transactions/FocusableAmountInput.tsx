@@ -8,6 +8,8 @@ import React, {
   useState,
 } from 'react';
 
+import { css } from 'glamor';
+
 import {
   amountToCurrency,
   appendDecimals,
@@ -18,7 +20,7 @@ import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { type CSSProperties, theme } from '../../../style';
 import { makeAmountFullStyle } from '../../budget/util';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
 
@@ -46,7 +48,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>();
-  const [hideFraction = false] = useSyncedPref('hideFraction');
+  const [hideFraction] = useSyncedPref('hideFraction');
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,
@@ -107,7 +109,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
-    text = appendDecimals(text, hideFraction);
+    text = appendDecimals(text, String(hideFraction) === 'true');
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
@@ -240,24 +242,26 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
               right: 'calc(100% + 5px)',
               top: '8px',
             }}
-            onClick={toggleIsNegative}
+            onPress={toggleIsNegative}
           >
             {isNegative ? '-' : '+'}
           </Button>
         )}
         <Button
-          onClick={onFocus}
+          onPress={onFocus}
           // Defines how far touch can start away from the button
           // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
           {...buttonProps}
-          style={{
-            ...(buttonProps && buttonProps.style),
-            ...(focused && { display: 'none' }),
-            ':hover': {
-              backgroundColor: 'transparent',
-            },
-          }}
-          type="bare"
+          className={String(
+            css({
+              ...(buttonProps && buttonProps.style),
+              ...(focused && { display: 'none' }),
+              ':hover': {
+                backgroundColor: 'transparent',
+              },
+            }),
+          )}
+          variant="bare"
         >
           <View
             style={{

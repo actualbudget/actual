@@ -1,5 +1,4 @@
 import {
-  type ReactElement,
   type ReactNode,
   useEffect,
   useRef,
@@ -15,8 +14,9 @@ import { Toggle } from './Toggle';
 import { View } from './View';
 
 const MenuLine: unique symbol = Symbol('menu-line');
+const MenuLabel: unique symbol = Symbol('menu-label');
 Menu.line = MenuLine;
-Menu.label = Symbol('menu-label');
+Menu.label = MenuLabel;
 
 type KeybindingProps = {
   keyName: ReactNode;
@@ -30,9 +30,9 @@ function Keybinding({ keyName }: KeybindingProps) {
   );
 }
 
-export type MenuItem = {
-  type?: string | symbol;
-  name: string;
+type MenuItemObject<NameType, Type extends string | symbol = string> = {
+  type?: Type;
+  name: NameType;
   disabled?: boolean;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;
   iconSize?: number;
@@ -42,17 +42,28 @@ export type MenuItem = {
   tooltip?: string;
 };
 
-type MenuProps<T extends MenuItem = MenuItem> = {
+export type MenuItem<NameType = string> =
+  | MenuItemObject<NameType>
+  | MenuItemObject<string, typeof Menu.label>
+  | typeof Menu.line;
+
+function isLabel<T>(
+  item: MenuItemObject<T> | MenuItemObject<string, typeof Menu.label>,
+): item is MenuItemObject<string, typeof Menu.label> {
+  return item.type === Menu.label;
+}
+
+type MenuProps<NameType> = {
   header?: ReactNode;
   footer?: ReactNode;
-  items: Array<T | typeof Menu.line>;
-  onMenuSelect?: (itemName: T['name']) => void;
+  items: Array<MenuItem<NameType>>;
+  onMenuSelect?: (itemName: NameType) => void;
   style?: CSSProperties;
   className?: string;
-  getItemStyle?: (item: T) => CSSProperties;
+  getItemStyle?: (item: MenuItemObject<NameType>) => CSSProperties;
 };
 
-export function Menu<T extends MenuItem>({
+export function Menu<const NameType = string>({
   header,
   footer,
   items: allItems,
@@ -60,7 +71,7 @@ export function Menu<T extends MenuItem>({
   style,
   className,
   getItemStyle,
-}: MenuProps<T>) {
+}: MenuProps<NameType>) {
   const elRef = useRef<HTMLDivElement>(null);
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -99,7 +110,7 @@ export function Menu<T extends MenuItem>({
         case 'Enter':
           e.preventDefault();
           const item = items[hoveredIndex || 0];
-          if (hoveredIndex !== null && item !== Menu.line) {
+          if (hoveredIndex !== null && item !== Menu.line && !isLabel(item)) {
             onMenuSelect?.(item.name);
           }
           break;
@@ -129,7 +140,7 @@ export function Menu<T extends MenuItem>({
               <View style={{ borderTop: '1px solid ' + theme.menuBorder }} />
             </View>
           );
-        } else if (item.type === Menu.label) {
+        } else if (isLabel(item)) {
           return (
             <Text
               key={idx}
@@ -152,7 +163,7 @@ export function Menu<T extends MenuItem>({
         return (
           <View
             role="button"
-            key={item.name}
+            key={String(item.name)}
             style={{
               cursor: 'default',
               padding: 10,
@@ -166,14 +177,18 @@ export function Menu<T extends MenuItem>({
                   backgroundColor: theme.menuItemBackgroundHover,
                   color: theme.menuItemTextHover,
                 }),
-              ...getItemStyle?.(item),
+              ...(!isLabel(item) && getItemStyle?.(item)),
             }}
             onPointerEnter={() => setHoveredIndex(idx)}
             onPointerLeave={() => setHoveredIndex(null)}
             onPointerUp={e => {
               e.stopPropagation();
 
-              if (!item.disabled && item.toggle === undefined) {
+              if (
+                !item.disabled &&
+                item.toggle === undefined &&
+                !isLabel(item)
+              ) {
                 onMenuSelect?.(item.name);
               }
             }}
@@ -193,17 +208,18 @@ export function Menu<T extends MenuItem>({
               </>
             ) : (
               <>
-                <label htmlFor={item.name} title={item.tooltip}>
+                <label htmlFor={String(item.name)} title={item.tooltip}>
                   {item.text}
                 </label>
                 <View style={{ flex: 1 }} />
                 <Toggle
-                  id={item.name}
+                  id={String(item.name)}
                   checked={item.toggle}
                   onColor={theme.pageTextPositive}
                   style={{ marginLeft: 5 }}
                   onToggle={() =>
                     !item.disabled &&
+                    !isLabel(item) &&
                     item.toggle !== undefined &&
                     onMenuSelect?.(item.name)
                   }
