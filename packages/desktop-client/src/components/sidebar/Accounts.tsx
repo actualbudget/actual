@@ -16,14 +16,11 @@ import { AccountGroupName } from './AccountGroupName';
 
 import { styles } from '../../style';
 
-type AccountsProps = {
-};
-
-export function Accounts({
-}: AccountsProps) {
+export function Accounts() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const accounts = useAccounts();
+
   const offbudgetAccounts = useOffBudgetAccounts();
   const budgetedAccounts = useBudgetedAccounts();
   const closedAccounts = useClosedAccounts();
@@ -42,8 +39,30 @@ export function Accounts({
     dispatch(moveAccount(id, targetIdToMove));
   }
 
+  const groups = [
+    {
+      name: t('For budget'),
+      query: queries.budgetedAccountBalance(),
+      to: "/accounts/budgeted",
+      accountList: budgetedAccounts,
+      onReorder: onReorder,
+    },
+    {
+      name: t('Off budget'),
+      query: queries.offbudgetAccountBalance(),
+      to: "/accounts/offbudget",
+      accountList: offbudgetAccounts,
+      onReorder: onReorder,
+    },
+    {
+      name: t('Closed'),
+      accountList: closedAccounts,
+      onReorder: onReorder,
+    },
+  ];
+
   return (
-    <View>
+    <View style={{ flexGrow: 1, }}>
       <AccountGroupName
         groupName={t('All accounts')}
         query={queries.allAccountBalance()}
@@ -53,33 +72,16 @@ export function Accounts({
       />
 
       <View style={{ overflowY: 'scroll', }}>
-        {budgetedAccounts.length > 0 && (
+        {groups?.map((group, i) => (
           <AccountGroup
-            groupName={t('For budget')}
-            groupQuery={queries.budgetedAccountBalance()}
-            groupTo="/accounts/budgeted"
-            accountList={budgetedAccounts}
-            onReorder={onReorder}
-          />
-        )}
-
-        {offbudgetAccounts.length > 0 && (
-          <AccountGroup
-            groupName={t('Off budget')}
-            groupQuery={queries.offbudgetAccountBalance()}
-            groupTo="/accounts/offbudget"
-            accountList={offbudgetAccounts}
-            onReorder={onReorder}
-          />
-        )}
-
-        {closedAccounts.length > 0 && (
-          <AccountGroup
-            groupName={t('Closed accounts')}
-            accountList={closedAccounts}
-            onReorder={onReorder}
-          />
-        )}
+            key={group.name}
+            groupName={group.name}
+            groupQuery={group.query}
+            groupTo={group.to}
+            accountList={group.accountList}
+            onReorder={group.onReorder}
+          />  
+        ))}
       </View>
     </View>
   );

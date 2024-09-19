@@ -58,7 +58,7 @@ export type MetadataPrefs = Partial<{
  */
 export type LocalPrefs = MetadataPrefs &
   Partial<{
-    'ui.collapsedAccountGroups': Object;
+    'ui.collapsedAccountGroups': Record<string, boolean>;
     'ui.expandActionButtons': boolean;
     'expand-splits': boolean;
     'budget.collapsed': string[];

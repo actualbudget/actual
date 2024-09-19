@@ -12,7 +12,7 @@ import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 
-import { styles, theme, type CSSProperties } from '../../style';
+import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 import { Account } from './Account';
 import { AccountGroupName } from './AccountGroupName';
@@ -85,7 +85,7 @@ export function AccountGroup<FieldName extends SheetFields<'account'>>({
         collapsed={collapsed?.[groupName.replace(/\s/g, "")]}
       />
 
-      {collapsed && !collapsed[groupName.replace(/\s/g, "")] && accountList && accountList.map((account, i) => (
+      {!collapsed?.[groupName.replace(/\s/g, "")] && accountList?.map((account, i) => (
         <Account
           key={account.id}
           name={account.name}

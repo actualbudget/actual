@@ -6,7 +6,6 @@ import { Resizable } from 're-resizable';
 
 import {
   closeBudget,
-  moveAccount,
   replaceModal,
 } from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
@@ -76,20 +75,6 @@ export function Sidebar() {
   const onResizeStop = () => {
     setSidebarWidthLocalPref(sidebarWidth);
   };
-
-  async function onReorder(
-    id: string,
-    dropPos: 'top' | 'bottom',
-    targetId: unknown,
-  ) {
-    let targetIdToMove = targetId;
-    if (dropPos === 'bottom') {
-      const idx = accounts.findIndex(a => a.id === targetId) + 1;
-      targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
-    }
-
-    dispatch(moveAccount(id, targetIdToMove));
-  }
 
   const onFloat = () => {
     setFloatingSidebarPref(!isFloating);
