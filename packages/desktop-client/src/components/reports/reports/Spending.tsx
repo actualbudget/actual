@@ -33,11 +33,7 @@ import { PrivacyFilter } from '../../PrivacyFilter';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ModeButton } from '../ModeButton';
-import {
-  calculateTimeRange,
-  validateEnd,
-  validateStart,
-} from '../reportRanges';
+import { calculateTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
@@ -80,12 +76,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
   const initialReportMode = widget?.meta?.mode ?? 'single-month';
-  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-    widget?.meta?.timeFrame,
-  );
-  const [start, setStart] = useState(initialStart);
-  const [end, setEnd] = useState(initialEnd);
-  const [mode, setMode] = useState(initialMode);
+  const [initialCompare, initialCompareTo, initialMode] = calculateTimeRange({
+    start: widget?.meta?.compare,
+    end: widget?.meta?.compareTo,
+    mode: widget?.meta?.isLive ? 'sliding-window' : 'static',
+  });
+  const [compare, setCompare] = useState(initialCompare);
+  const [compareTo, setCompareTo] = useState(initialCompareTo);
+  const [isLive, setIsLive] = useState(initialMode === 'sliding-window');
 
   const [reportMode, setReportMode] = useState(initialReportMode);
 
@@ -123,10 +121,10 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       createSpendingSpreadsheet({
         conditions,
         conditionsOp,
-        compare: start,
-        compareTo: end,
+        compare,
+        compareTo,
       }),
-    [conditions, conditionsOp, start, end],
+    [conditions, conditionsOp, compare, compareTo],
   );
 
   const data = useReport('default', getGraphData);
@@ -140,11 +138,9 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         ...(widget.meta ?? {}),
         conditions,
         conditionsOp,
-        timeFrame: {
-          start,
-          end,
-          mode,
-        },
+        compare,
+        compareTo,
+        isLive,
         mode: reportMode,
       },
     });
@@ -161,13 +157,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   }
 
   const showAverage =
-    data.intervalData[27].months[monthUtils.subMonths(start, 3)] &&
+    data.intervalData[27].months[monthUtils.subMonths(compare, 3)] &&
     Math.abs(
-      data.intervalData[27].months[monthUtils.subMonths(start, 3)].cumulative,
+      data.intervalData[27].months[monthUtils.subMonths(compare, 3)].cumulative,
     ) > 0;
 
   const todayDay =
-    start !== monthUtils.currentMonth()
+    compare !== monthUtils.currentMonth()
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
         ? 27
@@ -211,21 +207,21 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             }}
           >
             <Button
-              variant={mode === 'static' ? 'normal' : 'primary'}
+              variant={isLive ? 'primary' : 'normal'}
               onPress={() => {
-                const newMode = mode === 'static' ? 'sliding-window' : 'static';
-                const [newStart, newEnd] = calculateTimeRange({
-                  start,
-                  end,
+                const newMode = isLive ? 'static' : 'sliding-window';
+                const [newCompare, newCompareTo] = calculateTimeRange({
+                  start: compare,
+                  end: compareTo,
                   mode: newMode,
                 });
 
-                setMode(newMode);
-                setStart(newStart);
-                setEnd(newEnd);
+                setIsLive(state => !state);
+                setCompare(newCompare);
+                setCompareTo(newCompareTo);
               }}
             >
-              {mode === 'static' ? 'Static' : 'Live'}
+              {isLive ? 'Live' : 'Static'}
             </Button>
 
             <View
@@ -250,16 +246,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 <Trans>Compare</Trans>
               </Text>
               <Select
-                value={start}
-                onChange={newValue => {
-                  const [newStart, newEnd] = validateStart(
-                    allIntervals[allIntervals.length - 1].name,
-                    newValue,
-                    end,
-                  );
-                  setStart(newStart);
-                  setEnd(newEnd);
-                }}
+                value={compare}
+                onChange={setCompare}
                 options={allIntervals.map(
                   ({ name, pretty }) => [name, pretty] as const,
                 )}
@@ -270,16 +258,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 <Trans>to</Trans>
               </Text>
               <Select
-                value={reportMode === 'single-month' ? end : 'label'}
-                onChange={newValue => {
-                  const [newStart, newEnd] = validateEnd(
-                    allIntervals[allIntervals.length - 1].name,
-                    start,
-                    newValue,
-                  );
-                  setStart(newStart);
-                  setEnd(newEnd);
-                }}
+                value={reportMode === 'single-month' ? compareTo : 'label'}
+                onChange={setCompareTo}
                 options={
                   reportMode === 'single-month'
                     ? allIntervals.map(({ name, pretty }) => [name, pretty])
@@ -328,7 +308,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               <ModeButton
                 selected={reportMode === 'budget'}
                 onSelect={() => {
-                  setStart(monthUtils.currentMonth());
+                  setCompare(monthUtils.currentMonth());
                   setReportMode('budget');
                 }}
                 style={{
@@ -340,7 +320,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               <ModeButton
                 selected={reportMode === 'average'}
                 onSelect={() => {
-                  setStart(monthUtils.currentMonth());
+                  setCompare(monthUtils.currentMonth());
                   setReportMode('average');
                 }}
                 style={{
@@ -473,8 +453,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent {monthUtils.format(start, 'MMM, yyyy')}
-                            {start === monthUtils.currentMonth() && ' MTD'}:
+                            Spent {monthUtils.format(compare, 'MMM, yyyy')}
+                            {compare === monthUtils.currentMonth() && ' MTD'}:
                           </Block>
                         }
                         right={
@@ -493,7 +473,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            Spent {monthUtils.format(end, 'MMM, yyyy')}:
+                            Spent {monthUtils.format(compareTo, 'MMM, yyyy')}:
                           </Block>
                         }
                         right={
@@ -513,7 +493,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                     left={
                       <Block>
                         Budgeted
-                        {start === monthUtils.currentMonth() && ' MTD'}:
+                        {compare === monthUtils.currentMonth() && ' MTD'}:
                       </Block>
                     }
                     right={
@@ -532,7 +512,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       left={
                         <Block>
                           Spent Average
-                          {start === monthUtils.currentMonth() && ' MTD'}:
+                          {compare === monthUtils.currentMonth() && ' MTD'}:
                         </Block>
                       }
                       right={
@@ -554,8 +534,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   compact={false}
                   data={data}
                   mode={reportMode}
-                  compare={start}
-                  compareTo={end}
+                  compare={compare}
+                  compareTo={compareTo}
                 />
               ) : (
                 <LoadingIndicator message={t('Loading report...')} />

@@ -45,7 +45,9 @@ export type SpendingWidget = AbstractWidget<
     name?: string;
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
-    timeFrame?: TimeFrame;
+    compare?: string;
+    compareTo?: string;
+    isLive?: boolean;
     mode?: 'single-month' | 'budget' | 'average';
   } | null
 >;

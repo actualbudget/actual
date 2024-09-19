@@ -40,7 +40,11 @@ export function SpendingCard({
   const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
   const { t } = useTranslation();
 
-  const [start, end] = calculateTimeRange(meta?.timeFrame);
+  const [compare, compareTo] = calculateTimeRange({
+    start: meta?.compare,
+    end: meta?.compareTo,
+    mode: meta?.isLive ? 'sliding-window' : 'static',
+  });
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const spendingReportMode = meta?.mode ?? 'single-month';
@@ -53,14 +57,14 @@ export function SpendingCard({
     return createSpendingSpreadsheet({
       conditions: meta?.conditions,
       conditionsOp: meta?.conditionsOp,
-      compare: start,
-      compareTo: end,
+      compare,
+      compareTo,
     });
-  }, [meta?.conditions, meta?.conditionsOp, start, end]);
+  }, [meta?.conditions, meta?.conditionsOp, compare, compareTo]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
-    start !== monthUtils.currentMonth()
+    compare !== monthUtils.currentMonth()
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
         ? 27
@@ -131,7 +135,11 @@ export function SpendingCard({
               }}
               onClose={() => setNameMenuOpen(false)}
             />
-            <DateRange start={start} end={end} type={spendingReportMode} />
+            <DateRange
+              start={compare}
+              end={compareTo}
+              type={spendingReportMode}
+            />
           </View>
           {data && (
             <View style={{ textAlign: 'right' }}>
@@ -162,8 +170,8 @@ export function SpendingCard({
             compact={true}
             data={data}
             mode={spendingReportMode}
-            compare={start}
-            compareTo={end}
+            compare={compare}
+            compareTo={compareTo}
           />
         ) : (
           <LoadingIndicator />

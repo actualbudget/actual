@@ -166,7 +166,7 @@ export function getLatestRange(offset: number) {
 }
 
 export function calculateTimeRange(
-  timeFrame?: TimeFrame,
+  timeFrame?: Partial<TimeFrame>,
   defaultTimeFrame?: TimeFrame,
 ) {
   const start =
@@ -181,7 +181,9 @@ export function calculateTimeRange(
     return getFullRange(start);
   }
   if (mode === 'sliding-window') {
-    return getLatestRange(monthUtils.differenceInCalendarMonths(end, start));
+    return getLatestRange(
+      Math.abs(monthUtils.differenceInCalendarMonths(end, start)),
+    );
   }
 
   return [start, end, 'static'] as const;
