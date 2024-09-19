@@ -18,7 +18,7 @@ import {
 import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button2';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
@@ -195,7 +195,7 @@ export function DiscoverSchedules() {
         <>
           <ModalHeader
             title={t('Found Schedules')}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <Paragraph>
             <Trans>

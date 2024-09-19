@@ -15,7 +15,7 @@ import {
 import { SvgAdd } from '../../icons/v0';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
@@ -80,7 +80,7 @@ export function ScheduleLink({
         <>
           <ModalHeader
             title={t('Link Schedule')}
-            rightContent={<ModalCloseButton onClick={close} />}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View
             style={{

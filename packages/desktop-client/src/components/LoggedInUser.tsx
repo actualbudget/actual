@@ -1,5 +1,9 @@
 // @ts-strict-ignore
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+import { type State } from 'loot-core/src/client/state-types';
 
 import { useActions } from '../hooks/useActions';
 import { theme, styles, type CSSProperties } from '../style';
@@ -23,6 +27,9 @@ export function LoggedInUser({
   style,
   color,
 }: LoggedInUserProps) {
+  const { t } = useTranslation();
+
+  const userData = useSelector((state: State) => state.user.data);
   const { getUserData, signOut, closeBudget } = useActions();
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -62,14 +69,14 @@ export function LoggedInUser({
 
   const serverMessage = useMemo(() => {
     if (!serverUrl) {
-      return 'No server';
+      return t('No server');
     }
 
     if (syncState === 'offline') {
-      return 'Server offline';
+      return t('Server offline');
     }
 
-    return 'Server online';
+    return t('Server online');
   }, [serverUrl, syncState]);
 
   if (hideIfNoServer && !serverUrl) {
@@ -86,7 +93,7 @@ export function LoggedInUser({
           ...style,
         }}
       >
-        Connecting...
+        <Trans>Connecting...</Trans>
       </Text>
     );
   }
@@ -113,12 +120,14 @@ export function LoggedInUser({
             serverUrl &&
               syncState === null && {
                 name: 'change-password',
-                text: 'Change password',
+                text: t('Change password'),
               },
-            serverUrl && { name: 'sign-out', text: 'Sign out' },
+            serverUrl && { name: 'sign-out', text: t('Sign out') },
             {
               name: 'config-server',
-              text: serverUrl ? 'Change server URL' : 'Start using a server',
+              text: serverUrl
+                ? t('Change server URL')
+                : t('Start using a server'),
             },
           ]}
         />

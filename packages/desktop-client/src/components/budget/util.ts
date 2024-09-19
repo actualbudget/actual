@@ -174,17 +174,3 @@ export async function prewarmAllMonths(
     months.map(month => prewarmMonth(budgetType, spreadsheet, month)),
   );
 }
-
-export async function switchBudgetType(
-  newBudgetType: SyncedPrefs['budgetType'],
-  spreadsheet: ReturnType<typeof useSpreadsheet>,
-  bounds: { start: string; end: string },
-  startMonth: string,
-  onSuccess: () => Promise<void> | undefined,
-) {
-  spreadsheet.disableObservers();
-  await send('budget-set-type', { type: newBudgetType });
-  await prewarmAllMonths(newBudgetType, spreadsheet, bounds, startMonth);
-  spreadsheet.enableObservers();
-  await onSuccess?.();
-}
