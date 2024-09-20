@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { useState, type CSSProperties } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -119,15 +119,15 @@ export function TrackingBudgetMonthMenuModal({
               <View>
                 <Button
                   variant="bare"
-                  className={String(
-                    css({
-                      ...buttonStyle,
+                  className={css([
+                    buttonStyle,
+                    {
                       '&[data-pressed], &[data-hovered]': {
                         backgroundColor: 'transparent',
                         color: buttonStyle.color,
                       },
-                    }),
-                  )}
+                    },
+                  ])}
                   onPress={onShowMore}
                 >
                   {!showMore ? (

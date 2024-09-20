@@ -1,7 +1,5 @@
 import { useRef, useState, type CSSProperties } from 'react';
 
-import { css } from 'glamor';
-
 import { SvgExpandArrow } from '../../icons/v0';
 
 import { Button } from './Button2';
@@ -28,6 +26,7 @@ type SelectProps<Value> = {
   disabledKeys?: Value[];
   style?: CSSProperties;
   popoverStyle?: CSSProperties;
+  className?: string;
 };
 
 /**
@@ -54,6 +53,7 @@ export function Select<const Value = string>({
   disabledKeys = [],
   style = {},
   popoverStyle = {},
+  className,
 }: SelectProps<Value>) {
   const targetOption = options
     .filter(isValueOption)
@@ -72,7 +72,8 @@ export function Select<const Value = string>({
         onPress={() => {
           setIsOpen(true);
         }}
-        className={String(css(style))}
+        style={style}
+        className={className}
       >
         <View
           style={{
